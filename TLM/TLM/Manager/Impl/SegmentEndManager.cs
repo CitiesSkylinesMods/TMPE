@@ -11,6 +11,8 @@ using TrafficManager.Traffic.Impl;
 using TrafficManager.TrafficLight;
 
 namespace TrafficManager.Manager.Impl {
+	using State.ConfigData;
+
 	[Obsolete("should be removed when implementing issue #240")]
 	public class SegmentEndManager : AbstractCustomManager, ISegmentEndManager {
 		public static readonly SegmentEndManager Instance = new SegmentEndManager();
@@ -54,7 +56,7 @@ namespace TrafficManager.Manager.Impl {
 				Log.Warning($"SegmentEndManager.GetOrAddSegmentEnd({segmentId}, {startNode}): Refusing to add segment end for invalid segment.");
 				return null;
 			}
-			
+
 			return SegmentEnds[GetIndex(segmentId, startNode)] = new SegmentEnd(segmentId, startNode);
 		}
 
@@ -64,7 +66,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public void RemoveSegmentEnd(ushort segmentId, bool startNode) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+			bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
 			if (debug) {
 				Log._Debug($"SegmentEndManager.RemoveSegmentEnd({segmentId}, {startNode}) called");
 			}
@@ -83,7 +85,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool UpdateSegmentEnd(ushort segmentId, bool startNode) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[13] && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+			bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
 #endif
 
 			if (! Services.NetService.IsSegmentValid(segmentId)) {
@@ -96,7 +98,7 @@ namespace TrafficManager.Manager.Impl {
 				RemoveSegmentEnds(segmentId);
 				return false;
 			}
-			
+
 			if (TrafficPriorityManager.Instance.HasSegmentPrioritySign(segmentId, startNode) ||
 				TrafficLightSimulationManager.Instance.HasTimedSimulation(Services.NetService.GetSegmentNodeId(segmentId, startNode))) {
 #if DEBUG

@@ -11,6 +11,7 @@
     using Manager.Impl;
     using RedirectionFramework.Attributes;
     using State;
+    using State.ConfigData;
     using Traffic.Data;
     using UnityEngine;
 
@@ -522,7 +523,8 @@
         [RedirectMethod]
         public void CustomCalculateSegmentPosition(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
             NetManager instance = Singleton<NetManager>.instance;
-            instance.m_lanes.m_buffer[laneID].CalculatePositionAndDirection((float)offset * Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR, out pos, out dir);
+            instance.m_lanes.m_buffer[laneID].CalculatePositionAndDirection(
+                Constants.ByteToFloat(offset), out pos, out dir);
             NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
             if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
                 float laneSpeedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit;
@@ -631,7 +633,7 @@
             }
 
 #if DEBUG
-            bool debug = GlobalConfig.Instance.Debug.Switches[21]
+            bool debug = DebugSwitch.CalculateSegmentPosition.Get()
                          && (GlobalConfig.Instance.Debug.NodeId <= 0
                              || refTargetNodeId == GlobalConfig.Instance.Debug.NodeId)
                          && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None

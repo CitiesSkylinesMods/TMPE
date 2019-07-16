@@ -184,7 +184,7 @@
     <Compile Include="Patch\_Vehicle\SpawnPatch.cs" />
     <Compile Include="PrintTransportLines.cs" />
     <Compile Include="State\ConfigData\Gameplay.cs" />
-    <Compile Include="State\ConfigData\Debug.cs" />
+    <Compile Include="State\ConfigData\DebugSettings.cs" />
     <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
     <Compile Include="State\ConfigData\Main.cs" />
     <Compile Include="State\ConfigData\ParkingAI.cs" />

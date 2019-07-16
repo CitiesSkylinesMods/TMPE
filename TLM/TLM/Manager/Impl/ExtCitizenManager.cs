@@ -16,6 +16,7 @@ using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Manager.Impl {
 	using API.Traffic.Enums;
+	using State.ConfigData;
 
 	public class ExtCitizenManager : AbstractCustomManager, ICustomDataManager<List<Configuration.ExtCitizenData>>, IExtCitizenManager {
 		public static ExtCitizenManager Instance = new ExtCitizenManager();
@@ -51,8 +52,8 @@ namespace TrafficManager.Manager.Impl {
 		public void OnArriveAtDestination(uint citizenId, ref Citizen citizenData, ref CitizenInstance instanceData) {
 #if DEBUG
 			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
-			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+			bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+			bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
 			if (fineDebug)
 				Log._Debug($"ExtCitizenManager.OnArriveAtDestination({citizenId}) called");

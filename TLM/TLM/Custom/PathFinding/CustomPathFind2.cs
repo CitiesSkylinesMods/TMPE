@@ -13,6 +13,7 @@
     using Manager.Impl;
     using RedirectionFramework.Attributes;
     using State;
+    using State.ConfigData;
     using Traffic.Data;
     using Traffic.Enums;
     using UnityEngine;
@@ -315,7 +316,7 @@
 #endif
 
 #if DEBUG
-            m_debug = m_conf.Debug.Switches[0]
+            m_debug = DebugSwitch.PathFindingLog.Get()
                       && (m_conf.Debug.ApiExtVehicleType == ExtVehicleType.None
                           || m_queueItem.vehicleType == m_conf.Debug.ApiExtVehicleType)
                       && (m_conf.Debug.StartSegmentId == 0

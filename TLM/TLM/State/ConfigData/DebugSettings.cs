@@ -1,11 +1,19 @@
 ﻿namespace TrafficManager.State.ConfigData {
     using System;
+    using JetBrains.Annotations;
     using Traffic;
     using Traffic.Enums;
 
 #if DEBUG
-    public class Debug {
-        public bool[] Switches = {
+    /// <summary>
+    /// DebugSettings is a part of GlobalConfig, enabled only in Debug mode
+    /// </summary>
+    public class DebugSettings {
+        /// <summary>
+        /// Do not use directly.
+        /// Use DebugSwitch.<EnumName>.Get() to access the switch values
+        /// </summary>
+        internal bool[] switches_ = {
             false, // 0: path-finding debug log
             false, // 1: routing basic debug log
             false, // 2: parking ai debug log (basic)
@@ -57,6 +65,47 @@
 #pragma warning restore 612
 
         public ExtPathMode ExtPathMode = ExtPathMode.None;
+    }
+
+    /// <summary>
+    /// Indexes into Debug.Switches
+    /// </summary>
+    public enum DebugSwitch {
+        PathFindingLog = 0,
+        RoutingBasicLog = 1,
+        BasicParkingAILog = 2,
+        [UsedImplicitly]
+        NoRepairStuckVehiclesCims = 3,
+        ExtendedParkingAILog = 4,
+        GeometryDebug = 5,
+        ParkingAIDistanceIssue = 6,
+        TTL = 7,
+        Routing = 8,
+        VehicleLinkingToSegmentEnd = 9,
+        NoRoutingRecalculationOnConfigReload = 10,
+        JunctionRestrictions = 11,
+        Switch12 = 12, // 12 unused? Used in CustomPathFind.cs, ExtVehicleManager.cs
+        PriorityRules = 13,
+        NoValidPathCitizensOverlay = 14,
+        [UsedImplicitly]
+        TramsNoOtherVehiclesChecking = 15,
+        TramBaseAISimulationStep = 16,
+        AlternativeLaneSelection = 17,
+        TransportLinePathfind = 18,
+        [UsedImplicitly]
+        ObligationToRHD = 19,
+        RealisticPublicTransport = 20,
+        CalculateSegmentPosition = 21,
+        VehicleParkingAILog = 22,
+        LaneConnections = 23,
+        ResourceLoading = 24,
+        TurnOnRed = 25
+    }
+
+    static class DebugSwitchExtensions {
+        public static bool Get(this DebugSwitch sw) {
+            return GlobalConfig.Instance.Debug.switches_[(int)sw];
+        }
     }
 #endif
 }

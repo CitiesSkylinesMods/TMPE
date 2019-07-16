@@ -14,6 +14,8 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager.Impl {
+	using State.ConfigData;
+
 	public class ExtSegmentEndManager : AbstractCustomManager, IExtSegmentEndManager {
 		public static ExtSegmentEndManager Instance { get; private set; } = null;
 
@@ -194,7 +196,7 @@ namespace TrafficManager.Manager.Impl {
 			bool startNode = segEnd.startNode;
 
 #if DEBUGGEO
-			bool output = GlobalConfig.Instance.Debug.Switches[5];
+			bool output = DebugSwitch.GeometryDebug.Get();
 
 			if (output)
 				Log._Debug($"ExtSegmentEndManager.Recalculate({segmentId}, {startNode}) called.");
@@ -276,7 +278,7 @@ namespace TrafficManager.Manager.Impl {
 		public bool CalculateOnlyHighways(ushort segmentId, bool startNode) {
 			ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
 #if DEBUGGEO
-			bool output = GlobalConfig.Instance.Debug.Switches[5];
+			bool output = DebugSwitch.GeometryDebug.Get();
 
 			if (output)
 				Log._Debug($"Checking if segment {segmentId} is connected to highways only at node {nodeId}.");

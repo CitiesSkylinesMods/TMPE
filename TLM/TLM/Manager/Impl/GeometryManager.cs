@@ -12,6 +12,8 @@ using TrafficManager.Traffic.Data;
 using TrafficManager.Util;
 
 namespace TrafficManager.Manager.Impl {
+	using State.ConfigData;
+
 	public class GeometryManager : AbstractCustomManager, IGeometryManager {
 		public static GeometryManager Instance { get; private set; } = new GeometryManager();
 
@@ -47,7 +49,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public void SimulationStep(bool onlyFirstPass=false) {
 #if DEBUGGEO
-			bool debug = GlobalConfig.Instance.Debug.Switches[5];
+			bool debug = DebugSwitch.GeometryDebug.Get();
 #endif
 			if (!stateUpdated) {
 				return;
@@ -157,7 +159,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public void MarkAsUpdated(ref ExtSegment seg, bool updateNodes = true) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.Debug.Switches[5])
+			if (DebugSwitch.GeometryDebug.Get())
 				Log._Debug($"GeometryManager.MarkAsUpdated(segment {seg.segmentId}): Marking segment as updated");
 #endif
 			try {
@@ -181,7 +183,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public void MarkAsUpdated(ushort nodeId, bool updateSegments = false) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.Debug.Switches[5])
+			if (DebugSwitch.GeometryDebug.Get())
 				Log._Debug($"GeometryManager.MarkAsUpdated(node {nodeId}): Marking node as updated");
 #endif
 			try {
@@ -209,7 +211,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public void OnSegmentEndReplacement(SegmentEndReplacement replacement) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.Debug.Switches[5])
+			if (DebugSwitch.GeometryDebug.Get())
 				Log._Debug($"GeometryManager.OnSegmentEndReplacement(): Detected segment replacement: {replacement.oldSegmentEndId.SegmentId} -> {replacement.newSegmentEndId.SegmentId}");
 #endif
 			try {
@@ -224,7 +226,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public IDisposable Subscribe(IObserver<GeometryUpdate> observer) {
 #if DEBUGGEO
-			if (GlobalConfig.Instance.Debug.Switches[5])
+			if (DebugSwitch.GeometryDebug.Get())
 				Log._Debug($"GeometryManager.Subscribe(): Subscribing observer {observer.GetType().Name}");
 #endif
 			return geometryUpdateObservable.Subscribe(observer);

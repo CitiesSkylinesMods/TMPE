@@ -6,11 +6,13 @@ namespace TrafficManager.Manager.Impl {
     using API.TrafficLight;
     using CSUtil.Commons;
     using State;
+    using State.ConfigData;
     using Traffic;
     using TrafficLight;
     using TrafficLight.Data;
     using TrafficLight.Impl;
     using static RoadBaseAI;
+    using TimedTrafficLights = global::TrafficManager.TrafficLight.Impl.TimedTrafficLights;
 
     public class TrafficLightSimulationManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.TimedTrafficLights>>, ITrafficLightSimulationManager {
         public static readonly TrafficLightSimulationManager Instance = new TrafficLightSimulationManager();
@@ -400,7 +402,7 @@ namespace TrafficManager.Manager.Impl {
 
         protected override void HandleValidNode(ushort nodeId, ref NetNode node) {
 #if DEBUG
-            bool debug = GlobalConfig.Instance.Debug.Switches[7] && (GlobalConfig.Instance.Debug.NodeId == 0 || GlobalConfig.Instance.Debug.NodeId == nodeId);
+            bool debug = DebugSwitch.TTL.Get() && (GlobalConfig.Instance.Debug.NodeId == 0 || GlobalConfig.Instance.Debug.NodeId == nodeId);
 #endif
 
             if (!TrafficLightSimulations[nodeId].HasSimulation()) {

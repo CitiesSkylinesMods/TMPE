@@ -13,6 +13,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using Manager;
     using Manager.Impl;
     using State;
+    using State.ConfigData;
     using Traffic;
     using Util;
 
@@ -203,7 +204,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         private void UpdateDirections(ref NetNode node) {
 #if DEBUG
-            bool debug = GlobalConfig.Instance.Debug.Switches[7] && (GlobalConfig.Instance.Debug.NodeId == 0 || GlobalConfig.Instance.Debug.NodeId == NodeId);
+            bool debug = DebugSwitch.TTL.Get() && (GlobalConfig.Instance.Debug.NodeId == 0 || GlobalConfig.Instance.Debug.NodeId == NodeId);
             if (debug)
                 Log._Debug($">>>>> TimedTrafficLights.UpdateDirections: called for node {NodeId}");
 #endif
@@ -461,7 +462,7 @@ namespace TrafficManager.TrafficLight.Impl {
             // TODO this method is currently called on each node, but should be called on the master node only
 
 #if DEBUGTTL
-            bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
+            bool debug = DebugSwitch.TTL.Get() && GlobalConfig.Instance.Debug.NodeId == NodeId;
 #endif
 
             if (!IsMasterNode() || !IsStarted()) {
@@ -804,7 +805,7 @@ namespace TrafficManager.TrafficLight.Impl {
         /// </summary>
         private void BackUpInvalidStepSegments(ref NetNode node) {
 #if DEBUGTTL
-            bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
+            bool debug = DebugSwitch.TTL.Get() && GlobalConfig.Instance.Debug.NodeId == NodeId;
 
             if (debug)
                 Log._Debug($"TimedTrafficLights.BackUpInvalidStepSegments: called for timed traffic light @ {NodeId}");
@@ -866,7 +867,7 @@ namespace TrafficManager.TrafficLight.Impl {
         /// <param name="nodeGeo"></param>
         private void HandleNewSegments(ref NetNode node) {
 #if DEBUGTTL
-            bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
+            bool debug = DebugSwitch.TTL.Get() && GlobalConfig.Instance.Debug.NodeId == NodeId;
 #endif
 
             ICustomSegmentLightsManager customTrafficLightsManager = Constants.ManagerFactory.CustomSegmentLightsManager;
@@ -953,7 +954,7 @@ namespace TrafficManager.TrafficLight.Impl {
                                     API.Traffic.Enums.ExtVehicleType vehicleType,
                                     LightMode mode) {
 #if DEBUGTTL
-            bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
+            bool debug = DebugSwitch.TTL.Get() && GlobalConfig.Instance.Debug.NodeId == NodeId;
 #endif
 
             if (! Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
@@ -1074,7 +1075,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         private void UpdateSegmentEnds(ref NetNode node) {
 #if DEBUGTTL
-            bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
+            bool debug = DebugSwitch.TTL.Get() && GlobalConfig.Instance.Debug.NodeId == NodeId;
 
             if (debug)
                 Log._Debug($"TimedTrafficLights.UpdateSegmentEnds: called for node {NodeId}");
@@ -1167,7 +1168,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         private void DestroySegmentEnds() {
 #if DEBUGTTL
-            bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId;
+            bool debug = DebugSwitch.TTL.Get() && GlobalConfig.Instance.Debug.NodeId == NodeId;
 
             if (debug)
                 Log._Debug($"TimedTrafficLights.DestroySegmentEnds: Destroying segment ends @ node {NodeId}");

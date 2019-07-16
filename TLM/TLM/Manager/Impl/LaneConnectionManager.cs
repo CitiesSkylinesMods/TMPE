@@ -5,6 +5,7 @@
     using ColossalFramework;
     using CSUtil.Commons;
     using State;
+    using State.ConfigData;
     using Traffic.Data;
     using UnityEngine;
 
@@ -168,7 +169,7 @@
         /// <returns></returns>
         internal bool RemoveLaneConnection(uint laneId1, uint laneId2, bool startNode1) {
 #if DEBUGCONN
-            bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            bool debug = DebugSwitch.LaneConnections.Get();
             if (debug)
                 Log._Debug($"LaneConnectionManager.RemoveLaneConnection({laneId1}, {laneId2}, {startNode1}) called.");
 #endif
@@ -208,7 +209,7 @@
         /// <param name="nodeId"></param>
         internal void RemoveLaneConnectionsFromNode(ushort nodeId) {
 #if DEBUGCONN
-            bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            bool debug = DebugSwitch.LaneConnections.Get();
             if (debug)
                 Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromNode({nodeId}) called.");
 #endif
@@ -225,7 +226,7 @@
         /// <param name="startNode"></param>
         internal void RemoveLaneConnectionsFromSegment(ushort segmentId, bool startNode, bool recalcAndPublish=true) {
 #if DEBUGCONN
-            bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            bool debug = DebugSwitch.LaneConnections.Get();
             if (debug)
                 Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromSegment({segmentId}, {startNode}) called.");
 #endif
@@ -255,7 +256,7 @@
         /// <param name="startNode"></param>
         internal void RemoveLaneConnections(uint laneId, bool startNode, bool recalcAndPublish=true) {
 #if DEBUGCONN
-            bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            bool debug = DebugSwitch.LaneConnections.Get();
             if (debug)
                 Log._Debug($"LaneConnectionManager.RemoveLaneConnections({laneId}, {startNode}) called.");
 #endif
@@ -311,7 +312,7 @@
             bool ret = Flags.AddLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
 
 #if DEBUGCONN
-            bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            bool debug = DebugSwitch.LaneConnections.Get();
             if (debug)
                 Log._Debug($"LaneConnectionManager.AddLaneConnection({sourceLaneId}, {targetLaneId}, {sourceStartNode}): ret={ret}");
 #endif
@@ -345,7 +346,7 @@
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
 #if DEBUGCONN
-            bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            bool debug = DebugSwitch.LaneConnections.Get();
             if (debug)
                 Log._Debug($"LaneConnectionManager.HandleInvalidSegment({seg.segmentId}): Segment has become invalid. Removing lane connections.");
 #endif
@@ -444,7 +445,7 @@
         /// <param name="nodeId"></param>
         private void RecalculateLaneArrows(uint laneId, ushort nodeId, bool startNode) {
 #if DEBUGCONN
-            bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            bool debug = DebugSwitch.LaneConnections.Get();
             if (debug)
                 Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}) called");
 #endif

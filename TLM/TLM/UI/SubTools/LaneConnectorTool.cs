@@ -9,6 +9,8 @@ using TrafficManager.Manager.Impl;
 using TrafficManager.State.Keybinds;
 
 namespace TrafficManager.UI.SubTools {
+    using State.ConfigData;
+
     public class LaneConnectorTool : SubTool {
         enum MarkerSelectionMode {
             None,
@@ -276,7 +278,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnPrimaryClickOverlay() {
 #if DEBUGCONN
-			bool debug = GlobalConfig.Instance.Debug.Switches[23];
+			bool debug = DebugSwitch.LaneConnections.Get();
 			if (debug)
 				Log._Debug($"TppLaneConnectorTool: OnPrimaryClickOverlay. SelectedNodeId={SelectedNodeId} SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId} HoveredSegmentId={HoveredSegmentId}");
 #endif
@@ -381,7 +383,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnSecondaryClickOverlay() {
 #if DEBUGCONN
-			bool debug = GlobalConfig.Instance.Debug.Switches[23];
+			bool debug = DebugSwitch.LaneConnections.Get();
 #endif
 
             if (IsCursorInPanel())
@@ -417,7 +419,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnActivate() {
 #if DEBUGCONN
-			bool debug = GlobalConfig.Instance.Debug.Switches[23];
+			bool debug = DebugSwitch.LaneConnections.Get();
 			if (debug)
 				Log._Debug("TppLaneConnectorTool: OnActivate");
 #endif

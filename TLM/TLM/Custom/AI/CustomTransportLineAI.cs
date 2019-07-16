@@ -7,6 +7,7 @@
     using Custom.PathFinding;
     using RedirectionFramework.Attributes;
     using State;
+    using State.ConfigData;
     using UnityEngine;
 
     [TargetType(typeof(TransportLineAI))]
@@ -39,7 +40,7 @@
             Vector3 position = netManager.m_nodes.m_buffer[(int)data.m_startNode].m_position;
             Vector3 position2 = netManager.m_nodes.m_buffer[(int)data.m_endNode].m_position;
 #if DEBUG
-            bool debug = GlobalConfig.Instance.Debug.Switches[18];
+            bool debug = DebugSwitch.TransportLinePathfind.Get();
             if (debug)
                 Log._Debug($"TransportLineAI.CustomStartPathFind({segmentID}, ..., {netService}, {netService2}, {vehicleType}, {skipQueue}): startNode={data.m_startNode} @ {position}, endNode={data.m_endNode} @ {position2} -- line: {netManager.m_nodes.m_buffer[(int)data.m_startNode].m_transportLine}/{netManager.m_nodes.m_buffer[(int)data.m_endNode].m_transportLine}");
 #endif

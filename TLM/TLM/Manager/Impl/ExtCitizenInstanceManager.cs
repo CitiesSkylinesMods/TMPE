@@ -8,6 +8,7 @@
     using CSUtil.Commons;
     using Custom.PathFinding;
     using State;
+    using State.ConfigData;
     using Traffic.Data;
     using Traffic.Enums;
     using UnityEngine;
@@ -337,8 +338,8 @@
                             (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
                             (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
                 ;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
             if (debug)
                 Log.Warning($"CustomCitizenAI.ExtStartPathFind({instanceID}): called for citizen {instanceData.m_citizen}, startPos={startPos}, endPos={endPos}, sourceBuilding={instanceData.m_sourceBuilding}, targetBuilding={instanceData.m_targetBuilding}, pathMode={extInstance.pathMode}, enableTransport={enableTransport}, ignoreCost={ignoreCost}");
@@ -910,8 +911,8 @@
         public void ReleaseReturnPath(ref ExtCitizenInstance extInstance) {
 #if DEBUG
             bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId(extInstance.instanceId);
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 #endif
 
             if (extInstance.returnPathId != 0) {
@@ -932,8 +933,8 @@
         public void UpdateReturnPathState(ref ExtCitizenInstance extInstance) {
 #if DEBUG
             bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId(extInstance.instanceId);
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
             if (fineDebug)
                 Log._Debug($"ExtCitizenInstance.UpdateReturnPathState() called for citizen instance {extInstance.instanceId}");
@@ -959,8 +960,8 @@
         public bool CalculateReturnPath(ref ExtCitizenInstance extInstance, Vector3 parkPos, Vector3 targetPos) {
 #if DEBUG
             bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == GetCitizenId(extInstance.instanceId);
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 #endif
 
             ReleaseReturnPath(ref extInstance);
@@ -1108,8 +1109,8 @@
                     (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extInstance.instanceId].m_sourceBuilding) &&
                     (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extInstance.instanceId].m_targetBuilding)
                 ;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
             if (debug)
                 Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({extInstance.instanceId}): called. Path: {instanceData.m_path} sourceBuilding={instanceData.m_sourceBuilding}");

@@ -11,6 +11,7 @@
     using Manager.Impl;
     using RedirectionFramework.Attributes;
     using State;
+    using State.ConfigData;
     using UnityEngine;
 
     [TargetType(typeof(TramBaseAI))]
@@ -176,7 +177,7 @@
             }
 
 #if DEBUG
-            bool debug = GlobalConfig.Instance.Debug.Switches[21]
+            bool debug = DebugSwitch.CalculateSegmentPosition.Get()
                          && (GlobalConfig.Instance.Debug.NodeId <= 0
                              || refTargetNodeId == GlobalConfig.Instance.Debug.NodeId)
                          && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
@@ -202,8 +203,10 @@
             Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
             float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
 
-            netManager.m_lanes.m_buffer[prevLaneId].CalculatePositionAndDirection((float)prevOffset * Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR, out pos, out dir);
-            Vector3 b = netManager.m_lanes.m_buffer[refLaneId].CalculatePosition((float)refOffset * Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
+            netManager.m_lanes.m_buffer[prevLaneId].CalculatePositionAndDirection(
+                Constants.ByteToFloat(prevOffset), out pos, out dir);
+            Vector3 b = netManager.m_lanes.m_buffer[refLaneId].CalculatePosition(
+                Constants.ByteToFloat(refOffset));
             Vector3 a = lastFrameData.m_position;
             Vector3 a2 = lastFrameData.m_position;
             Vector3 b2 = lastFrameData.m_rotation * new Vector3(0f, 0f, this.m_info.m_generatedInfo.m_wheelBase * 0.5f);
@@ -243,7 +246,8 @@
         [RedirectMethod]
         public void CustomCalculateSegmentPosition(ushort vehicleID, ref Vehicle vehicleData, PathUnit.Position position, uint laneID, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
             NetManager instance = Singleton<NetManager>.instance;
-            instance.m_lanes.m_buffer[laneID].CalculatePositionAndDirection((float)offset * Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR, out pos, out dir);
+            instance.m_lanes.m_buffer[laneID].CalculatePositionAndDirection(
+                Constants.ByteToFloat(offset), out pos, out dir);
             NetInfo info = instance.m_segments.m_buffer[(int)position.m_segment].Info;
             if (info.m_lanes != null && info.m_lanes.Length > (int)position.m_lane) {
                 float speedLimit = Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(position.m_segment, position.m_lane, laneID, info.m_lanes[position.m_lane]) : info.m_lanes[position.m_lane].m_speedLimit; // NON-STOCK CODE
@@ -256,7 +260,7 @@
         [RedirectMethod]
         public void CustomSimulationStep(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ushort leaderID, ref Vehicle leaderData, int lodPhysics) {
 #if DEBUG
-            bool debug = GlobalConfig.Instance.Debug.Switches[16] && GlobalConfig.Instance.Debug.NodeId == vehicleID;
+            bool debug = DebugSwitch.TramBaseAISimulationStep.Get() && GlobalConfig.Instance.Debug.NodeId == vehicleID;
 #endif
 
             ushort leadingVehicle = vehicleData.m_leadingVehicle;

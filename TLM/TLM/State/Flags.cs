@@ -6,6 +6,7 @@ namespace TrafficManager.State {
     using System.Threading;
     using API.Traffic.Enums;
     using ColossalFramework;
+    using ConfigData;
     using CSUtil.Commons;
     using Manager.Impl;
     using Traffic.Enums;
@@ -251,7 +252,7 @@ namespace TrafficManager.State {
         /// <returns></returns>
         internal static bool RemoveLaneConnection(uint lane1Id, uint lane2Id, bool startNode1) {
 #if DEBUGCONN
-            bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            bool debug = DebugSwitch.LaneConnections.Get();
             if (debug)
                 Log._Debug($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}) called.");
 #endif
@@ -301,7 +302,7 @@ namespace TrafficManager.State {
         /// <param name="startNode"></param>
         internal static void RemoveLaneConnections(uint laneId, bool? startNode=null) {
 #if DEBUGCONN
-            bool debug = GlobalConfig.Instance.Debug.Switches[23];
+            bool debug = DebugSwitch.LaneConnections.Get();
             if (debug)
                 Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}) called. laneConnections[{laneId}]={laneConnections[laneId]}");
 #endif

@@ -4,6 +4,8 @@ using TrafficManager.State;
 using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
+	using State.ConfigData;
+
 	public class TurnOnRedManager : AbstractGeometryObservingManager, ITurnOnRedManager {
 		private TurnOnRedManager() {
 			TurnOnRedSegments = new TurnOnRedSegments[2 * NetManager.MAX_SEGMENT_COUNT];
@@ -55,7 +57,7 @@ namespace TrafficManager.Manager.Impl {
 
 		protected void UpdateSegment(ref ExtSegment seg) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[25];
+			bool debug = DebugSwitch.TurnOnRed.Get();
 			if (debug) {
 				Log._Debug($"TurnOnRedManager.UpdateSegment({seg.segmentId}) called.");
 			}
@@ -77,7 +79,7 @@ namespace TrafficManager.Manager.Impl {
 
 		protected void UpdateSegmentEnd(ref ExtSegment seg, ref ExtSegmentEnd end) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[25];
+			bool debug = DebugSwitch.TurnOnRed.Get();
 			if (debug) {
 				Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}) called.");
 			}

@@ -8,6 +8,7 @@
     using Custom.AI;
     using Custom.PathFinding;
     using State;
+    using State.ConfigData;
     using Traffic.Data;
     using Traffic.Enums;
     using UI;
@@ -60,8 +61,8 @@
                             (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
                             (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
                 ;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
             if (debug)
                 Log._Debug($"CustomHumanAI.EnterParkedCar({instanceID}, ..., {parkedVehicleId}) called.");
@@ -171,8 +172,8 @@
                             (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == citizenInstance.m_sourceBuilding) &&
                             (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == citizenInstance.m_targetBuilding)
                 ;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
             if (fineDebug)
                 Log._Debug($"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., {mainPathState}) called.");
 #endif
@@ -279,8 +280,8 @@
                             (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == driverInstance.m_sourceBuilding) &&
                             (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == driverInstance.m_targetBuilding)
                 ;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
             if (fineDebug)
                 Log._Debug($"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., {mainPathState}) called.");
 #endif
@@ -425,8 +426,8 @@
                             (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
                             (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
                 ;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 #endif
 
             if ((instanceData.m_flags & CitizenInstance.Flags.WaitingPath) != CitizenInstance.Flags.None) {
@@ -495,7 +496,7 @@
                         if (debug)
                             Log.Warning($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): Citizen instance {instanceId} is currently reaching their parked car but distance increased! dist={doorSqrDist}, LastDistanceToParkedCar={extInstance.lastDistanceToParkedCar}.");
 
-                        if (GlobalConfig.Instance.Debug.Switches[6]) {
+                        if (DebugSwitch.ParkingAIDistanceIssue.Get()) {
                             Log._Debug($"AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep({instanceId}): FORCED PAUSE. Distance increased! Citizen instance {instanceId}. dist={doorSqrDist}");
                             Singleton<SimulationManager>.instance.SimulationPaused = true;
                         }
@@ -572,8 +573,8 @@
                             (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
                             (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
                 ;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 #endif
 
             if ((instanceData.m_flags & CitizenInstance.Flags.WaitingPath) != CitizenInstance.Flags.None) {
@@ -637,8 +638,8 @@
                             (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
                             (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
                 ;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
             if (debug)
                 Log._Debug($"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): Path-finding succeeded for citizen instance {instanceId}. Path: {instanceData.m_path} vehicle={citizenData.m_vehicle}");
@@ -1004,8 +1005,8 @@
                             (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
                             (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
                 ;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
             if (debug)
                 Log._Debug($"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): Path-finding failed for citizen instance {extInstance.instanceId}. CurrentPathMode={extInstance.pathMode}");
@@ -1151,8 +1152,8 @@
                             (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == driverInstanceData.m_sourceBuilding) &&
                             (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == driverInstanceData.m_targetBuilding)
                 ;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
             if (debug)
                 Log._Debug($"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): Path-finding failed for driver citizen instance {driverExtInstance.instanceId}. CurrentPathMode={driverExtInstance.pathMode}");
@@ -1242,8 +1243,8 @@
                             (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extDriverInstance.instanceId].m_sourceBuilding) &&
                             (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extDriverInstance.instanceId].m_targetBuilding)
                 ;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 #endif
 
             calculateEndPos = true;
@@ -1333,8 +1334,8 @@
         public bool TrySpawnParkedPassengerCar(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos, out ParkingUnableReason reason) {
 #if DEBUG
             bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
             if (fineDebug && homeId != 0)
                 Log._Debug($"Trying to spawn parked passenger car for citizen {citizenId}, home {homeId} @ {refPos}");
@@ -1370,8 +1371,8 @@
         public bool TrySpawnParkedPassengerCarRoadSide(uint citizenId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos, out ParkingUnableReason reason) {
 #if DEBUG
             bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
             if (debug)
                 Log._Debug($"Trying to spawn parked passenger car at road side for citizen {citizenId} @ {refPos}");
@@ -1408,8 +1409,8 @@
         public bool TrySpawnParkedPassengerCarBuilding(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos, out ParkingUnableReason reason) {
 #if DEBUG
             bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
-            bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-            bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
             if (fineDebug && homeId != 0)
                 Log._Debug($"Trying to spawn parked passenger car next to building for citizen {citizenId} @ {refPos}");
@@ -1446,7 +1447,7 @@
         public bool FindParkingSpaceInVicinity(Vector3 targetPos, Vector3 searchDir, VehicleInfo vehicleInfo, ushort homeId, ushort vehicleId, float maxDist, out ExtParkingSpaceLocation parkingSpaceLocation, out ushort parkingSpaceLocationId, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 #if DEBUG
             bool vehDebug = GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId;
-            bool debug = GlobalConfig.Instance.Debug.Switches[22] && vehDebug;
+            bool debug = DebugSwitch.VehicleParkingAILog.Get() && vehDebug;
 #endif
 
             // TODO check isElectric
@@ -1536,7 +1537,7 @@
 
         protected ushort FindParkingSpaceAtRoadSide(ushort ignoreParked, Vector3 refPos, float width, float length, float maxDistance, bool randomize, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 #if DEBUG
-            bool debug = GlobalConfig.Instance.Debug.Switches[22];
+            bool debug = DebugSwitch.VehicleParkingAILog.Get();
 #endif
 
             parkPos = Vector3.zero;
@@ -1627,7 +1628,7 @@
 
         protected ushort FindParkingSpaceBuilding(VehicleInfo vehicleInfo, ushort homeID, ushort ignoreParked, ushort segmentId, Vector3 refPos, float maxBuildingDistance, float maxParkingSpaceDistance, bool randomize, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 #if DEBUG
-            bool debug = GlobalConfig.Instance.Debug.Switches[22];
+            bool debug = DebugSwitch.VehicleParkingAILog.Get();
 #endif
 
             parkPos = Vector3.zero;
@@ -1708,7 +1709,7 @@
 
         public bool FindParkingSpacePropAtBuilding(VehicleInfo vehicleInfo, ushort homeID, ushort ignoreParked, ushort buildingID, ref Building building, ushort segmentId, Vector3 refPos, ref float maxDistance, bool randomize, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 #if DEBUG
-            bool debug = GlobalConfig.Instance.Debug.Switches[22];
+            bool debug = DebugSwitch.VehicleParkingAILog.Get();
 #endif
 
             int buildingWidth = building.Width;
@@ -1841,7 +1842,7 @@
 
         public bool FindParkingSpaceRoadSideForVehiclePos(VehicleInfo vehicleInfo, ushort ignoreParked, ushort segmentId, Vector3 refPos, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset, out uint laneId, out int laneIndex) {
 #if DEBUG
-            bool debug = GlobalConfig.Instance.Debug.Switches[22];
+            bool debug = DebugSwitch.VehicleParkingAILog.Get();
 #endif
 
             float width = vehicleInfo.m_generatedInfo.m_size.x;

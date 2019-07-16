@@ -22,6 +22,7 @@ using TrafficManager.RedirectionFramework.Attributes;
 namespace TrafficManager.Custom.AI {
 	using API.Traffic.Enums;
 	using API.TrafficLight;
+	using State.ConfigData;
 
 	[TargetType(typeof(HumanAI))]
 	public class CustomHumanAI : CitizenAI {
@@ -33,8 +34,8 @@ namespace TrafficManager.Custom.AI {
 				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
 				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
 			;
-			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+			bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+			bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 #endif
 
 			CitizenManager citizenManager = Singleton<CitizenManager>.instance;
@@ -182,8 +183,8 @@ namespace TrafficManager.Custom.AI {
 				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
 				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
 			;
-			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+			bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+			bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 #endif
 
 			// check if the citizen has reached a parked car or target
@@ -248,11 +249,11 @@ namespace TrafficManager.Custom.AI {
 			}
 			return false;
 		}
-		
+
 		[RedirectMethod]
 		public bool CustomCheckTrafficLights(ushort nodeId, ushort segmentId) {
 #if DEBUGTTL
-			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId;
+			bool debug = DebugSwitch.TTL.Get() && GlobalConfig.Instance.Debug.NodeId == nodeId;
 #endif
 
 			var netManager = Singleton<NetManager>.instance;

@@ -14,13 +14,15 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager.Impl {
+	using State.ConfigData;
+
 	public class ExtSegmentManager : AbstractCustomManager, IExtSegmentManager {
 		public static ExtSegmentManager Instance { get; private set; } = null;
 
 		static ExtSegmentManager() {
 			Instance = new ExtSegmentManager();
 		}
-		
+
 		/// <summary>
 		/// All additional data for buildings
 		/// </summary>
@@ -50,7 +52,7 @@ namespace TrafficManager.Manager.Impl {
 			ushort segmentId = extSegment.segmentId;
 
 #if DEBUGGEO
-			bool output = GlobalConfig.Instance.Debug.Switches[5];
+			bool output = DebugSwitch.GeometryDebug.Get();
 
 			if (output)
 				Log._Debug($">>> ExtSegmentManager.Recalculate({segmentId}) called.");

@@ -20,6 +20,8 @@ using static TrafficManager.Traffic.Data.ExtCitizen;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
+	using State.ConfigData;
+
 	[TargetType(typeof(ResidentAI))]
 	public class CustomResidentAI : ResidentAI {
 		[RedirectMethod]
@@ -44,8 +46,8 @@ namespace TrafficManager.Custom.AI {
 				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == citizenData.m_sourceBuilding) &&
 				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == citizenData.m_targetBuilding)
 			;
-			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+			bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+			bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 #endif
 
 			trailer = null;
@@ -53,7 +55,7 @@ namespace TrafficManager.Custom.AI {
 			if (citizenData.m_citizen == 0u) {
 				return null;
 			}
-			
+
 			// NON-STOCK CODE START
 			bool forceTaxi = false;
 			if (Options.parkingAI) {

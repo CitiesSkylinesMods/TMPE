@@ -17,6 +17,8 @@ using TrafficManager.Traffic.Enums;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Custom.AI {
+	using State.ConfigData;
+
 	[TargetType(typeof(TouristAI))]
 	public class CustomTouristAI : TouristAI {
 		[RedirectMethod]
@@ -41,8 +43,8 @@ namespace TrafficManager.Custom.AI {
 				(GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == citizenData.m_sourceBuilding) &&
 				(GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == citizenData.m_targetBuilding)
 			;
-			bool debug = GlobalConfig.Instance.Debug.Switches[2] && citDebug;
-			bool fineDebug = GlobalConfig.Instance.Debug.Switches[4] && citDebug;
+			bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
+			bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 #endif
 
 			trailer = null;
