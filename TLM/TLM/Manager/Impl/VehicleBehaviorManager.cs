@@ -44,14 +44,14 @@
 
         public bool ParkPassengerCar(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, uint driverCitizenId, ref Citizen driverCitizen, ushort driverCitizenInstanceId, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, ushort targetBuildingId, PathUnit.Position pathPos, uint nextPath, int nextPositionIndex, out byte segmentOffset) {
 #if DEBUG
-            bool citDebug = (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleID) &&
+            bool citizenDebug = (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleID) &&
                             (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == driverExtInstance.instanceId) &&
                             (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == driverInstance.m_citizen) &&
                             (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == driverInstance.m_sourceBuilding) &&
                             (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == driverInstance.m_targetBuilding)
                 ;
-            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
-            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 #endif
             IExtCitizenInstanceManager extCitizenInstanceManager = Constants.ManagerFactory.ExtCitizenInstanceManager;
             PathManager pathManager = Singleton<PathManager>.instance;
@@ -348,14 +348,14 @@
         public bool StartPassengerCarPathFind(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, ushort driverInstanceId, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget, bool isHeavyVehicle, bool hasCombustionEngine, bool ignoreBlocked) {
             IExtCitizenInstanceManager extCitizenInstanceManager = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
-            bool citDebug = (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleID) &&
+            bool citizenDebug = (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleID) &&
                             (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == driverExtInstance.instanceId) &&
                             (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == driverInstance.m_citizen) &&
                             (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == driverInstance.m_sourceBuilding) &&
                             (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == driverInstance.m_targetBuilding)
                 ;
-            bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
-            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
+            bool debug = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+            bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 
             if (debug)
                 Log.Warning($"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): called for vehicle {vehicleID}, driverInstanceId={driverInstanceId}, startPos={startPos}, endPos={endPos}, sourceBuilding={vehicleData.m_sourceBuilding}, targetBuilding={vehicleData.m_targetBuilding} pathMode={driverExtInstance.pathMode}");

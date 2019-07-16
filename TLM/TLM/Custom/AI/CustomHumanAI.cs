@@ -20,7 +20,7 @@ namespace TrafficManager.Custom.AI {
                                          ref CitizenInstance instanceData,
                                          Vector3 physicsLodRefPos) {
 #if DEBUG
-            var citDebug = (DebugSettings.CitizenInstanceId == 0
+            var citizenDebug = (DebugSettings.CitizenInstanceId == 0
                             || DebugSettings.CitizenInstanceId == instanceId)
                            && (DebugSettings.CitizenId == 0
                                || DebugSettings.CitizenId == instanceData.m_citizen)
@@ -28,8 +28,8 @@ namespace TrafficManager.Custom.AI {
                                || DebugSettings.SourceBuildingId == instanceData.m_sourceBuilding)
                            && (DebugSettings.TargetBuildingId == 0
                                || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
+            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 #endif
             var citizenManager = Singleton<CitizenManager>.instance;
             var citizenId = instanceData.m_citizen;
@@ -260,7 +260,7 @@ namespace TrafficManager.Custom.AI {
                                       Vector3 physicsLodRefPos) {
             var extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
-            var citDebug = (DebugSettings.CitizenInstanceId == 0
+            var citizenDebug = (DebugSettings.CitizenInstanceId == 0
                             || DebugSettings.CitizenInstanceId == instanceId)
                            && (DebugSettings.CitizenId == 0
                                || DebugSettings.CitizenId == instanceData.m_citizen)
@@ -268,8 +268,8 @@ namespace TrafficManager.Custom.AI {
                                || DebugSettings.SourceBuildingId == instanceData.m_sourceBuilding)
                            && (DebugSettings.TargetBuildingId == 0
                                || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
-            var logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citDebug;
-            var extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
+            var logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+            var extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 #endif
 
             switch (extInstance.pathMode) {

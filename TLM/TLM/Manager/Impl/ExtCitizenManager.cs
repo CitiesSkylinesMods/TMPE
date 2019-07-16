@@ -51,9 +51,9 @@ namespace TrafficManager.Manager.Impl {
 
 		public void OnArriveAtDestination(uint citizenId, ref Citizen citizenData, ref CitizenInstance instanceData) {
 #if DEBUG
-			bool citDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
-			bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
-			bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
+			bool citizenDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
+			bool debug = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+			bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 
 			if (fineDebug)
 				Log._Debug($"ExtCitizenManager.OnArriveAtDestination({citizenId}) called");
