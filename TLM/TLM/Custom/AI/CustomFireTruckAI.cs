@@ -2,6 +2,7 @@
     using API.Traffic.Data;
     using API.Traffic.Enums;
     using ColossalFramework;
+    using CSUtil.Commons.Benchmark;
     using Custom.PathFinding;
     using Manager.Impl;
     using RedirectionFramework.Attributes;

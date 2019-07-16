@@ -13,6 +13,7 @@ namespace TrafficManager.Custom.PathFinding {
     using CSUtil.Commons;
     using Manager;
     using Manager.Impl;
+    using RedirectionFramework.Attributes;
     using State;
     using State.ConfigData;
     using Traffic.Data;
