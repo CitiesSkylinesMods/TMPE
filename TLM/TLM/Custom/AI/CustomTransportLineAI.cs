@@ -4,71 +4,103 @@
     using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
-    using Custom.PathFinding;
+    using JetBrains.Annotations;
+    using PathFinding;
     using RedirectionFramework.Attributes;
-    using State;
     using State.ConfigData;
     using UnityEngine;
 
+    // TODO inherit from NetAI (in order to keep the correct references to `base`)
     [TargetType(typeof(TransportLineAI))]
-    public class CustomTransportLineAI : TransportLineAI { // TODO inherit from NetAI (in order to keep the correct references to `base`)
+    public class CustomTransportLineAI : TransportLineAI {
         [RedirectMethod]
-        public static bool CustomStartPathFind(ushort segmentID, ref NetSegment data, ItemClass.Service netService, ItemClass.Service netService2, VehicleInfo.VehicleType vehicleType, bool skipQueue) {
+        public static bool CustomStartPathFind(ushort segmentId,
+                                               ref NetSegment data,
+                                               ItemClass.Service netService,
+                                               ItemClass.Service netService2,
+                                               VehicleInfo.VehicleType vehicleType,
+                                               bool skipQueue) {
             if (data.m_path != 0u) {
                 Singleton<PathManager>.instance.ReleasePath(data.m_path);
                 data.m_path = 0u;
             }
 
-            NetManager netManager = Singleton<NetManager>.instance;
-            if ((netManager.m_nodes.m_buffer[(int)data.m_startNode].m_flags & NetNode.Flags.Ambiguous) != NetNode.Flags.None) {
-                for (int i = 0; i < 8; i++) {
-                    ushort segment = netManager.m_nodes.m_buffer[(int)data.m_startNode].GetSegment(i);
-                    if (segment != 0 && segment != segmentID && netManager.m_segments.m_buffer[(int)segment].m_path != 0u) {
-                        return true;
-                    }
-                }
-            }
-            if ((netManager.m_nodes.m_buffer[(int)data.m_endNode].m_flags & NetNode.Flags.Ambiguous) != NetNode.Flags.None) {
-                for (int j = 0; j < 8; j++) {
-                    ushort segment2 = netManager.m_nodes.m_buffer[(int)data.m_endNode].GetSegment(j);
-                    if (segment2 != 0 && segment2 != segmentID && netManager.m_segments.m_buffer[(int)segment2].m_path != 0u) {
+            var netManager = Singleton<NetManager>.instance;
+            if ((netManager.m_nodes.m_buffer[data.m_startNode].m_flags & NetNode.Flags.Ambiguous) != NetNode.Flags.None) {
+                for (var i = 0; i < 8; i++) {
+                    var segment = netManager.m_nodes.m_buffer[data.m_startNode].GetSegment(i);
+                    if (segment != 0 && segment != segmentId && netManager.m_segments.m_buffer[segment].m_path != 0u) {
                         return true;
                     }
                 }
             }
 
-            Vector3 position = netManager.m_nodes.m_buffer[(int)data.m_startNode].m_position;
-            Vector3 position2 = netManager.m_nodes.m_buffer[(int)data.m_endNode].m_position;
+            if ((netManager.m_nodes.m_buffer[data.m_endNode].m_flags
+                 & NetNode.Flags.Ambiguous) != NetNode.Flags.None) {
+                for (var j = 0; j < 8; j++) {
+                    var segment2 = netManager.m_nodes.m_buffer[data.m_endNode].GetSegment(j);
+                    if (segment2 != 0 && segment2 != segmentId
+                                      && netManager.m_segments.m_buffer[segment2].m_path != 0u) {
+                        return true;
+                    }
+                }
+            }
+
+            var position = netManager.m_nodes.m_buffer[data.m_startNode].m_position;
+            var position2 = netManager.m_nodes.m_buffer[data.m_endNode].m_position;
 #if DEBUG
-            bool debug = DebugSwitch.TransportLinePathfind.Get();
-            if (debug)
-                Log._Debug($"TransportLineAI.CustomStartPathFind({segmentID}, ..., {netService}, {netService2}, {vehicleType}, {skipQueue}): startNode={data.m_startNode} @ {position}, endNode={data.m_endNode} @ {position2} -- line: {netManager.m_nodes.m_buffer[(int)data.m_startNode].m_transportLine}/{netManager.m_nodes.m_buffer[(int)data.m_endNode].m_transportLine}");
+            var logPathfind = DebugSwitch.TransportLinePathfind.Get();
+            if (logPathfind) {
+                Log._Debug($"TransportLineAI.CustomStartPathFind({segmentId}, ..., {netService}, " +
+                           $"{netService2}, {vehicleType}, {skipQueue}): " +
+                           $"startNode={data.m_startNode} @ {position}, " +
+                           $"endNode={data.m_endNode} @ {position2} -- " +
+                           $"line: {netManager.m_nodes.m_buffer[data.m_startNode].m_transportLine}" +
+                           $"/{netManager.m_nodes.m_buffer[data.m_endNode].m_transportLine}");
+            }
 #endif
-
-            PathUnit.Position startPosA;
-            PathUnit.Position startPosB;
-            float startSqrDistA;
-            float startSqrDistB;
-            if (!CustomPathManager.FindPathPosition(position, netService, netService2, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, vehicleType, true, false, 32f, out startPosA, out startPosB, out startSqrDistA, out startSqrDistB)) {
-                CustomTransportLineAI.CheckSegmentProblems(segmentID, ref data);
+            if (!PathManager.FindPathPosition(
+                    position,
+                    netService,
+                    netService2,
+                    NetInfo.LaneType.Pedestrian,
+                    VehicleInfo.VehicleType.None,
+                    vehicleType,
+                    true,
+                    false,
+                    32f,
+                    out var startPosA,
+                    out var startPosB,
+                    out _,
+                    out _)) {
+                CheckSegmentProblems(segmentId, ref data);
                 return true;
             }
 
-            PathUnit.Position endPosA;
-            PathUnit.Position endPosB;
-            float endSqrDistA;
-            float endSqrDistB;
-            if (!CustomPathManager.FindPathPosition(position2, netService, netService2, NetInfo.LaneType.Pedestrian, VehicleInfo.VehicleType.None, vehicleType, true, false, 32f, out endPosA, out endPosB, out endSqrDistA, out endSqrDistB)) {
-                CustomTransportLineAI.CheckSegmentProblems(segmentID, ref data);
+            if (!PathManager.FindPathPosition(
+                    position2,
+                    netService,
+                    netService2,
+                    NetInfo.LaneType.Pedestrian,
+                    VehicleInfo.VehicleType.None,
+                    vehicleType,
+                    true,
+                    false,
+                    32f,
+                    out var endPosA,
+                    out var endPosB,
+                    out _,
+                    out _)) {
+                CheckSegmentProblems(segmentId, ref data);
                 return true;
             }
 
-            if ((netManager.m_nodes.m_buffer[(int)data.m_startNode].m_flags & NetNode.Flags.Fixed) != NetNode.Flags.None) {
-                startPosB = default(PathUnit.Position);
+            if ((netManager.m_nodes.m_buffer[data.m_startNode].m_flags & NetNode.Flags.Fixed) != NetNode.Flags.None) {
+                startPosB = default;
             }
 
-            if ((netManager.m_nodes.m_buffer[(int)data.m_endNode].m_flags & NetNode.Flags.Fixed) != NetNode.Flags.None) {
-                endPosB = default(PathUnit.Position);
+            if ((netManager.m_nodes.m_buffer[data.m_endNode].m_flags & NetNode.Flags.Fixed) != NetNode.Flags.None) {
+                endPosB = default;
             }
 
             if (vehicleType != VehicleInfo.VehicleType.None) {
@@ -83,36 +115,50 @@
                 endPosB.m_offset = (byte)Mathf.Clamp(endPosB.m_offset, 1, 254);
             }
 
-            bool stopLane = CustomTransportLineAI.GetStopLane(ref startPosA, vehicleType);
-            bool stopLane2 = CustomTransportLineAI.GetStopLane(ref startPosB, vehicleType);
-            bool stopLane3 = CustomTransportLineAI.GetStopLane(ref endPosA, vehicleType);
-            bool stopLane4 = CustomTransportLineAI.GetStopLane(ref endPosB, vehicleType);
+            var stopLane = GetStopLane(ref startPosA, vehicleType);
+            var stopLane2 = GetStopLane(ref startPosB, vehicleType);
+            var stopLane3 = GetStopLane(ref endPosA, vehicleType);
+            var stopLane4 = GetStopLane(ref endPosB, vehicleType);
 
             if ((!stopLane && !stopLane2) || (!stopLane3 && !stopLane4)) {
-                CustomTransportLineAI.CheckSegmentProblems(segmentID, ref data);
+                CheckSegmentProblems(segmentId, ref data);
                 return true;
             }
 
-            ExtVehicleType extVehicleType = ExtVehicleType.None;
-            if ((vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None)
+            var extVehicleType = ExtVehicleType.None;
+            if ((vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
                 extVehicleType = ExtVehicleType.Bus;
-            if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None)
-                extVehicleType = ExtVehicleType.PassengerTrain;
-            if ((vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None)
-                extVehicleType = ExtVehicleType.Tram;
-            if ((vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None)
-                extVehicleType = ExtVehicleType.PassengerShip;
-            if ((vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None)
-                extVehicleType = ExtVehicleType.PassengerPlane;
-            if ((vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None)
-                extVehicleType = ExtVehicleType.Ferry;
-            if ((vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None)
-                extVehicleType = ExtVehicleType.Blimp;
-            if ((vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None)
-                extVehicleType = ExtVehicleType.CableCar;
+            }
 
-            //Log._Debug($"Transport line. extVehicleType={extVehicleType}");
-            uint path;
+            if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerTrain;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Tram;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerShip;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerPlane;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Ferry;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Blimp;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.CableCar;
+            }
+
+            // Log._Debug($"Transport line. extVehicleType={extVehicleType}");
             // NON-STOCK CODE START
             PathCreationArgs args;
             args.extPathType = ExtPathType.None;
@@ -124,7 +170,7 @@
             args.startPosB = startPosB;
             args.endPosA = endPosA;
             args.endPosB = endPosB;
-            args.vehiclePosition = default(PathUnit.Position);
+            args.vehiclePosition = default;
             args.vehicleTypes = vehicleType;
             args.isHeavyVehicle = false;
             args.hasCombustionEngine = false;
@@ -139,51 +185,68 @@
                 args.laneTypes = NetInfo.LaneType.Pedestrian;
                 args.maxLength = 160000f;
             } else {
-                args.laneTypes = (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle);
+                args.laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
                 args.maxLength = 20000f;
             }
 
-            if (CustomPathManager._instance.CustomCreatePath(out path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+            if (CustomPathManager._instance.CustomCreatePath(
+                out var path,
+                ref Singleton<SimulationManager>.instance.m_randomizer,
+                args)) {
                 // NON-STOCK CODE END
                 if (startPosA.m_segment != 0 && startPosB.m_segment != 0) {
                     netManager.m_nodes.m_buffer[data.m_startNode].m_flags |= NetNode.Flags.Ambiguous;
                 } else {
                     netManager.m_nodes.m_buffer[data.m_startNode].m_flags &= ~NetNode.Flags.Ambiguous;
                 }
+
                 if (endPosA.m_segment != 0 && endPosB.m_segment != 0) {
                     netManager.m_nodes.m_buffer[data.m_endNode].m_flags |= NetNode.Flags.Ambiguous;
                 } else {
                     netManager.m_nodes.m_buffer[data.m_endNode].m_flags &= ~NetNode.Flags.Ambiguous;
                 }
+
                 data.m_path = path;
                 data.m_flags |= NetSegment.Flags.WaitingPath;
 #if DEBUG
-                if (debug)
-                    Log._Debug($"TransportLineAI.CustomStartPathFind({segmentID}, ..., {netService}, {netService2}, {vehicleType}, {skipQueue}): Started calculating path {path} for extVehicleType={extVehicleType}, startPosA=[seg={startPosA.m_segment}, lane={startPosA.m_lane}, off={startPosA.m_offset}], startPosB=[seg={startPosB.m_segment}, lane={startPosB.m_lane}, off={startPosB.m_offset}], endPosA=[seg={endPosA.m_segment}, lane={endPosA.m_lane}, off={endPosA.m_offset}], endPosB=[seg={endPosB.m_segment}, lane={endPosB.m_lane}, off={endPosB.m_offset}]");
+                if (logPathfind) {
+                    Log._Debug($"TransportLineAI.CustomStartPathFind({segmentId}, ..., {netService}, " +
+                               $"{netService2}, {vehicleType}, {skipQueue}): Started calculating " +
+                               $"path {path} for extVehicleType={extVehicleType}, " +
+                               $"startPosA=[seg={startPosA.m_segment}, lane={startPosA.m_lane}, " +
+                               $"off={startPosA.m_offset}], startPosB=[seg={startPosB.m_segment}, " +
+                               $"lane={startPosB.m_lane}, off={startPosB.m_offset}], " +
+                               $"endPosA=[seg={endPosA.m_segment}, lane={endPosA.m_lane}, " +
+                               $"off={endPosA.m_offset}], endPosB=[seg={endPosB.m_segment}, " +
+                               $"lane={endPosB.m_lane}, off={endPosB.m_offset}]");
+                }
 #endif
                 return false;
             }
 
-            CustomTransportLineAI.CheckSegmentProblems(segmentID, ref data);
+            CheckSegmentProblems(segmentId, ref data);
             return true;
         }
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
+        [UsedImplicitly]
         private static bool GetStopLane(ref PathUnit.Position pos, VehicleInfo.VehicleType vehicleType) {
-            Log.Error($"CustomTransportLineAI.GetStopLane called.");
+            Log.Error("CustomTransportLineAI.GetStopLane called.");
             return false;
         }
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void CheckSegmentProblems(ushort segmentID, ref NetSegment data) {
+        [UsedImplicitly]
+        private static void CheckSegmentProblems(ushort segmentId, ref NetSegment data) {
             Log.Error($"CustomTransportLineAI.CheckSegmentProblems called.");
         }
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void CheckNodeProblems(ushort nodeID, ref NetNode data) {
+        [UsedImplicitly]
+        private static void CheckNodeProblems(ushort nodeId, ref NetNode data) {
             Log.Error($"CustomTransportLineAI.CheckNodeProblems called.");
         }
     }
