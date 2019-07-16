@@ -53,7 +53,7 @@ namespace TrafficManager.Manager.Impl {
 
         public bool MayNodeHavePrioritySigns(ushort nodeId, out SetPrioritySignUnableReason reason) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.NodeId <= 0 || nodeId == GlobalConfig.Instance.Debug.NodeId);
+            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.NodeId <= 0 || nodeId == DebugSettings.NodeId);
 #endif
             if (!Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction, NetNode.Flags.Created | NetNode.Flags.Junction)) {
                 reason = SetPrioritySignUnableReason.NoJunction;
@@ -87,7 +87,7 @@ namespace TrafficManager.Manager.Impl {
 
         public bool MaySegmentHavePrioritySign(ushort segmentId, bool startNode, out SetPrioritySignUnableReason reason) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
 #endif
             if (! Services.NetService.IsSegmentValid(segmentId)) {
                 reason = SetPrioritySignUnableReason.InvalidSegment;
@@ -136,7 +136,7 @@ namespace TrafficManager.Manager.Impl {
 
         public bool MaySegmentHavePrioritySign(ushort segmentId, out SetPrioritySignUnableReason reason) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
 #endif
             if (!Services.NetService.IsSegmentValid(segmentId)) {
                 reason = SetPrioritySignUnableReason.InvalidSegment;
@@ -169,7 +169,7 @@ namespace TrafficManager.Manager.Impl {
 
         public bool HasNodePrioritySign(ushort nodeId) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.NodeId <= 0 || nodeId == GlobalConfig.Instance.Debug.NodeId);
+            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.NodeId <= 0 || nodeId == DebugSettings.NodeId);
 #endif
             bool ret = false;
             Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
@@ -194,7 +194,7 @@ namespace TrafficManager.Manager.Impl {
 
         public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType type, out SetPrioritySignUnableReason reason) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
 #endif
 
             bool ret = true;
@@ -236,7 +236,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void RemovePrioritySignsFromNode(ushort nodeId) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.NodeId <= 0 || nodeId == GlobalConfig.Instance.Debug.NodeId);
+            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.NodeId <= 0 || nodeId == DebugSettings.NodeId);
             if (debug) {
                 Log._Debug($"TrafficPriorityManager.RemovePrioritySignsFromNode: nodeId={nodeId}");
             }
@@ -250,7 +250,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void RemovePrioritySignsFromSegment(ushort segmentId) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
             if (debug) {
                 Log._Debug($"TrafficPriorityManager.RemovePrioritySignsFromSegment: segmentId={segmentId}");
             }
@@ -262,7 +262,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void RemovePrioritySignFromSegmentEnd(ushort segmentId, bool startNode) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
             if (debug) {
                 Log._Debug($"TrafficPriorityManager.RemovePrioritySignFromSegment: segmentId={segmentId}, startNode={startNode}");
             }
@@ -283,7 +283,7 @@ namespace TrafficManager.Manager.Impl {
 
         public byte CountPrioritySignsAtNode(ushort nodeId, PriorityType sign) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.NodeId <= 0 || nodeId == GlobalConfig.Instance.Debug.NodeId);
+            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.NodeId <= 0 || nodeId == DebugSettings.NodeId);
 #endif
 
             byte ret = 0;
@@ -322,7 +322,7 @@ namespace TrafficManager.Manager.Impl {
             ushort transitNodeId = end.NodeId;*/
 
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.NodeId <= 0 || transitNodeId == GlobalConfig.Instance.Debug.NodeId);
+            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.NodeId <= 0 || transitNodeId == DebugSettings.NodeId);
             if (debug) {
                 Log._Debug($"TrafficPriorityManager.HasPriority({vehicleId}): Checking vehicle {vehicleId} at node {transitNodeId}. Coming from seg. {curPos.m_segment}, start {startNode}, lane {curPos.m_lane}, going to seg. {nextPos.m_segment}, lane {nextPos.m_lane}");
             }

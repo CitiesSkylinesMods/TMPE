@@ -52,7 +52,7 @@ namespace TrafficManager.Custom.AI {
 #if DEBUG
 			bool debug = DebugSwitch.CalculateSegmentPosition.Get() &&
 				(GlobalConfig.Instance.Debug.ExtVehicleType == ExtVehicleType.None || GlobalConfig.Instance.Debug.ExtVehicleType == ExtVehicleType.RoadVehicle) &&
-				(GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleID);
+				(DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleID);
 
 			if (debug) {
 				Log._Debug($"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}) called.\n" +

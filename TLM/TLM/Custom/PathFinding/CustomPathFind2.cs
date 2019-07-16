@@ -317,16 +317,16 @@
 
 #if DEBUG
             m_debug = DebugSwitch.PathFindingLog.Get()
-                      && (m_conf.Debug.ApiExtVehicleType == ExtVehicleType.None
-                          || m_queueItem.vehicleType == m_conf.Debug.ApiExtVehicleType)
-                      && (m_conf.Debug.StartSegmentId == 0
-                          || data.m_position00.m_segment == m_conf.Debug.StartSegmentId
-                          || data.m_position02.m_segment == m_conf.Debug.StartSegmentId)
-                      && (m_conf.Debug.EndSegmentId == 0
-                          || data.m_position01.m_segment == m_conf.Debug.EndSegmentId
-                          || data.m_position03.m_segment == m_conf.Debug.EndSegmentId)
-                      && (m_conf.Debug.VehicleId == 0
-                          || m_queueItem.vehicleId == m_conf.Debug.VehicleId);
+                      && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
+                          || m_queueItem.vehicleType == GlobalConfig.Instance.Debug.ApiExtVehicleType)
+                      && (DebugSettings.StartSegmentId == 0
+                          || data.m_position00.m_segment == DebugSettings.StartSegmentId
+                          || data.m_position02.m_segment == DebugSettings.StartSegmentId)
+                      && (DebugSettings.EndSegmentId == 0
+                          || data.m_position01.m_segment == DebugSettings.EndSegmentId
+                          || data.m_position03.m_segment == DebugSettings.EndSegmentId)
+                      && (DebugSettings.VehicleId == 0
+                          || m_queueItem.vehicleId == DebugSettings.VehicleId);
             if (m_debug) {
                 m_debugPositions = new Dictionary<ushort, IList<ushort>>();
             }
@@ -580,7 +580,7 @@
 
                             if ((candidateItem.m_direction & direction) != NetInfo.Direction.None && (!nodesDisabled || (netManager.m_nodes.m_buffer[specialNodeId].m_flags & NetNode.Flags.Disabled) != NetNode.Flags.None)) {
 #if DEBUG
-                                if (m_debug && (m_conf.Debug.NodeId <= 0 || specialNodeId == m_conf.Debug.NodeId)) {
+                                if (m_debug && (DebugSettings.NodeId <= 0 || specialNodeId == DebugSettings.NodeId)) {
                                     Debug(unit, $"PathFindImplementation: Handling special node for path unit {unit}, type {m_queueItem.vehicleType}:\n" +
                                                 $"\tcandidateItem.m_position.m_segment={candidateItem.m_position.m_segment}\n" +
                                                 $"\tcandidateItem.m_position.m_lane={candidateItem.m_position.m_lane}\n" +
@@ -789,7 +789,7 @@
 #endif
             BufferItem item, ref NetSegment prevSegment, ref NetLane prevLane, ushort nextNodeId, ref NetNode nextNode, byte connectOffset, bool isMiddle) {
 #if DEBUG
-            bool debug = this.m_debug && (m_conf.Debug.NodeId <= 0 || nextNodeId == m_conf.Debug.NodeId);
+            bool debug = this.m_debug && (DebugSettings.NodeId <= 0 || nextNodeId == DebugSettings.NodeId);
             if (debug) {
                 if (!m_debugPositions.ContainsKey(item.m_position.m_segment)) {
                     m_debugPositions[item.m_position.m_segment] = new List<ushort>();

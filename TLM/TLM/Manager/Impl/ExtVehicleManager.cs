@@ -283,7 +283,7 @@
             extVehicle.lastPathPositionIndex = 0;
 
 #if DEBUG
-            if (DebugSwitch.Switch12.Get()) {
+            if (DebugSwitch.PedestrianPathfinding.Get()) {
                 IExtSegmentEndManager segmentEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
                 Log._Debug($"ExtVehicleManager.Unlink({extVehicle.vehicleId}) finished: Unlinked vehicle from all segment ends\nstate:{extVehicle}\nold segment end vehicle chain: {ExtSegmentEndManager.Instance.GenerateVehicleChainDebugInfo(prevSegmentId, prevStartNode)}");
             }
@@ -313,7 +313,7 @@
             end.firstVehicleId = extVehicle.vehicleId;
 
 #if DEBUG
-            if (DebugSwitch.Switch12.Get())
+            if (DebugSwitch.PedestrianPathfinding.Get())
                 Log._Debug($"ExtVehicleManager.Link({extVehicle.vehicleId}) finished: Linked vehicle to segment end: {end}\nstate:{extVehicle}\nsegment end vehicle chain: {ExtSegmentEndManager.Instance.GenerateVehicleChainDebugInfo(extVehicle.currentSegmentId, extVehicle.currentStartNode)}");
 #endif
         }

@@ -134,7 +134,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public void RequestRecalculation(ushort segmentId, bool propagate = true) {
 #if DEBUG
-			bool debug = DebugSwitch.RoutingBasicLog.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == segmentId);
+			bool debug = DebugSwitch.RoutingBasicLog.Get() && (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == segmentId);
 			if (debug) {
 				Log._Debug($"RoutingManager.RequestRecalculation({segmentId}, {propagate}) called.");
 			}
@@ -182,7 +182,7 @@ namespace TrafficManager.Manager.Impl {
 
 		protected void RecalculateSegment(ushort segmentId) {
 #if DEBUGROUTING
-			bool debug = DebugSwitch.RoutingBasicLog.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == segmentId);
+			bool debug = DebugSwitch.RoutingBasicLog.Get() && (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == segmentId);
 			if (debug)
 				Log._Debug($"RoutingManager.RecalculateSegment({segmentId}) called.");
 #endif
@@ -213,7 +213,7 @@ namespace TrafficManager.Manager.Impl {
 			});
 
 #if DEBUGROUTING
-			bool debug = DebugSwitch.RoutingBasicLog.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == segmentId);
+			bool debug = DebugSwitch.RoutingBasicLog.Get() && (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == segmentId);
 			if (debug)
 				Log._Debug($"RoutingManager.ResetRoutingData: Identify nodes connected to {segmentId}: nodeIds={nodeIds.ArrayToString()}");
 #endif
@@ -242,8 +242,8 @@ namespace TrafficManager.Manager.Impl {
 
 		protected void ResetRoutingData(ushort segmentId) {
 #if DEBUGROUTING
-			bool debugBasic = DebugSwitch.RoutingBasicLog.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == segmentId);
-			bool debugFine = DebugSwitch.Routing.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == segmentId);
+			bool debugBasic = DebugSwitch.RoutingBasicLog.Get() && (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == segmentId);
+			bool debugFine = DebugSwitch.Routing.Get() && (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == segmentId);
 			if (debugBasic)
 				Log._Debug($"RoutingManager.ResetRoutingData: called for segment {segmentId}");
 #endif
@@ -265,8 +265,8 @@ namespace TrafficManager.Manager.Impl {
 
 		protected void RecalculateSegmentRoutingData(ushort segmentId) {
 #if DEBUGROUTING
-			bool debugBasic = DebugSwitch.RoutingBasicLog.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == segmentId);
-			bool debugFine = DebugSwitch.Routing.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == segmentId);
+			bool debugBasic = DebugSwitch.RoutingBasicLog.Get() && (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == segmentId);
+			bool debugFine = DebugSwitch.Routing.Get() && (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == segmentId);
 			if (debugBasic)
 				Log._Debug($"RoutingManager.RecalculateSegmentRoutingData: called for seg. {segmentId}");
 #endif
@@ -290,8 +290,8 @@ namespace TrafficManager.Manager.Impl {
 
 		protected void RecalculateLaneEndRoutingData(ushort segmentId, int laneIndex, uint laneId, bool startNode) {
 #if DEBUGROUTING
-			bool debugBasic = DebugSwitch.RoutingBasicLog.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == segmentId);
-			bool debugFine = DebugSwitch.Routing.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == segmentId);
+			bool debugBasic = DebugSwitch.RoutingBasicLog.Get() && (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == segmentId);
+			bool debugFine = DebugSwitch.Routing.Get() && (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == segmentId);
 			if (debugBasic)
 				Log._Debug($"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, {laneId}, {startNode}) called");
 #endif
@@ -1413,7 +1413,7 @@ namespace TrafficManager.Manager.Impl {
 
 		protected override void HandleInvalidSegment(ref ExtSegment seg) {
 #if DEBUG
-			bool debug = DebugSwitch.RoutingBasicLog.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == seg.segmentId);
+			bool debug = DebugSwitch.RoutingBasicLog.Get() && (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == seg.segmentId);
 			if (debug) {
 				Log._Debug($"RoutingManager.HandleInvalidSegment({seg.segmentId}) called.");
 			}
@@ -1424,7 +1424,7 @@ namespace TrafficManager.Manager.Impl {
 
 		protected override void HandleValidSegment(ref ExtSegment seg) {
 #if DEBUG
-			bool debug = DebugSwitch.RoutingBasicLog.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || GlobalConfig.Instance.Debug.SegmentId == seg.segmentId);
+			bool debug = DebugSwitch.RoutingBasicLog.Get() && (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == seg.segmentId);
 			if (debug) {
 				Log._Debug($"RoutingManager.HandleValidSegment({seg.segmentId}) called.");
 			}

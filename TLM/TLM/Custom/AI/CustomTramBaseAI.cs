@@ -178,12 +178,12 @@
 
 #if DEBUG
             bool debug = DebugSwitch.CalculateSegmentPosition.Get()
-                         && (GlobalConfig.Instance.Debug.NodeId <= 0
-                             || refTargetNodeId == GlobalConfig.Instance.Debug.NodeId)
+                         && (DebugSettings.NodeId <= 0
+                             || refTargetNodeId == DebugSettings.NodeId)
                          && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
                              || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.Tram)
-                         && (GlobalConfig.Instance.Debug.VehicleId == 0
-                             || GlobalConfig.Instance.Debug.VehicleId == vehicleId);
+                         && (DebugSettings.VehicleId == 0
+                             || DebugSettings.VehicleId == vehicleId);
 
             if (debug) {
                 Log._Debug($"CustomTramBaseAI.CustomCalculateSegmentPosition({vehicleId}) called.\n" +
@@ -260,7 +260,7 @@
         [RedirectMethod]
         public void CustomSimulationStep(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ushort leaderID, ref Vehicle leaderData, int lodPhysics) {
 #if DEBUG
-            bool debug = DebugSwitch.TramBaseAISimulationStep.Get() && GlobalConfig.Instance.Debug.NodeId == vehicleID;
+            bool debug = DebugSwitch.TramBaseAISimulationStep.Get() && DebugSettings.NodeId == vehicleID;
 #endif
 
             ushort leadingVehicle = vehicleData.m_leadingVehicle;

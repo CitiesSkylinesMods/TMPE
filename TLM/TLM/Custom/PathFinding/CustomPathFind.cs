@@ -303,17 +303,17 @@ namespace TrafficManager.Custom.PathFinding {
             bool debug =
                 this.m_debug =
                     DebugSwitch.PathFindingLog.Get() &&
-                    ((m_conf.Debug.ApiExtVehicleType == ExtVehicleType.None
+                    ((GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
                       && queueItem.vehicleType == ExtVehicleType.None)
-                     || (queueItem.vehicleType & m_conf.Debug.ApiExtVehicleType) != ExtVehicleType.None)
-                    && (m_conf.Debug.StartSegmentId == 0
-                        || data.m_position00.m_segment == m_conf.Debug.StartSegmentId
-                        || data.m_position02.m_segment == m_conf.Debug.StartSegmentId)
-                    && (m_conf.Debug.EndSegmentId == 0
-                        || data.m_position01.m_segment == m_conf.Debug.EndSegmentId
-                        || data.m_position03.m_segment == m_conf.Debug.EndSegmentId)
-                    && (m_conf.Debug.VehicleId == 0
-                        || queueItem.vehicleId == m_conf.Debug.VehicleId);
+                     || (queueItem.vehicleType & GlobalConfig.Instance.Debug.ApiExtVehicleType) != ExtVehicleType.None)
+                    && (DebugSettings.StartSegmentId == 0
+                        || data.m_position00.m_segment == DebugSettings.StartSegmentId
+                        || data.m_position02.m_segment == DebugSettings.StartSegmentId)
+                    && (DebugSettings.EndSegmentId == 0
+                        || data.m_position01.m_segment == DebugSettings.EndSegmentId
+                        || data.m_position03.m_segment == DebugSettings.EndSegmentId)
+                    && (DebugSettings.VehicleId == 0
+                        || queueItem.vehicleId == DebugSettings.VehicleId);
             if (debug) {
                 Log._Debug($"CustomPathFind.PathFindImplementation: START calculating path unit {unit}, type {queueItem.vehicleType}");
                 m_debugPositions = new Dictionary<ushort, IList<ushort>>();
@@ -509,7 +509,7 @@ namespace TrafficManager.Custom.PathFinding {
                             }
                             if ((byte)(candidateItem.m_direction & direction) != 0 && (!nodesDisabled || (netManager.m_nodes.m_buffer[specialNodeId].m_flags & NetNode.Flags.Disabled) != NetNode.Flags.None)) {
 #if DEBUGNEWPF && DEBUG
-                                if (debug && (m_conf.Debug.NodeId <= 0 || specialNodeId == m_conf.Debug.NodeId)) {
+                                if (debug && (DebugSettings.NodeId <= 0 || specialNodeId == DebugSettings.NodeId)) {
                                     Log._Debug($"CustomPathFind.PathFindImplementation: Handling special node for path unit {unit}, type {queueItem.vehicleType}:\n" +
                                                $"\tcandidateItem.m_position.m_segment={candidateItem.m_position.m_segment}\n" +
                                                $"\tcandidateItem.m_position.m_lane={candidateItem.m_position.m_lane}\n" +
@@ -717,8 +717,8 @@ namespace TrafficManager.Custom.PathFinding {
         // 1
         private void ProcessItemMain(uint unitId, BufferItem item, ref NetSegment prevSegment, SegmentRoutingData prevSegmentRouting, LaneEndRoutingData prevLaneEndRouting, ushort nextNodeId, bool nextIsStartNode, ref NetNode nextNode, byte connectOffset, bool isMiddle) {
 #if DEBUGNEWPF && DEBUG
-            bool debug = this.m_debug && (m_conf.Debug.NodeId <= 0 || nextNodeId == m_conf.Debug.NodeId);
-            bool debugPed = debug && DebugSwitch.Switch12.Get();
+            bool debug = this.m_debug && (DebugSettings.NodeId <= 0 || nextNodeId == DebugSettings.NodeId);
+            bool debugPed = debug && DebugSwitch.PedestrianPathfinding.Get();
             if (debug) {
                 if (! m_debugPositions.ContainsKey(item.m_position.m_segment)) {
                     m_debugPositions[item.m_position.m_segment] = new List<ushort>();

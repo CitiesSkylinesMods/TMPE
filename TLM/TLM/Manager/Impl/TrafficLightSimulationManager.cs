@@ -402,7 +402,7 @@ namespace TrafficManager.Manager.Impl {
 
         protected override void HandleValidNode(ushort nodeId, ref NetNode node) {
 #if DEBUG
-            bool debug = DebugSwitch.TTL.Get() && (GlobalConfig.Instance.Debug.NodeId == 0 || GlobalConfig.Instance.Debug.NodeId == nodeId);
+            bool debug = DebugSwitch.TimedTrafficLights.Get() && (DebugSettings.NodeId == 0 || DebugSettings.NodeId == nodeId);
 #endif
 
             if (!TrafficLightSimulations[nodeId].HasSimulation()) {

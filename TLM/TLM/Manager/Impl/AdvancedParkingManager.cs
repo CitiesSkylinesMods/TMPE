@@ -56,10 +56,10 @@
 
         public bool EnterParkedCar(ushort instanceID, ref CitizenInstance instanceData, ushort parkedVehicleId, out ushort vehicleId) {
 #if DEBUG
-            bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceID) &&
-                            (GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen) &&
-                            (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
-                            (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
+            bool citDebug = (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == instanceID) &&
+                            (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == instanceData.m_citizen) &&
+                            (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == instanceData.m_sourceBuilding) &&
+                            (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding)
                 ;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
@@ -167,10 +167,10 @@
 
         public ExtSoftPathState UpdateCitizenPathState(ushort citizenInstanceId, ref CitizenInstance citizenInstance, ref ExtCitizenInstance extInstance, ref ExtCitizen extCitizen, ref Citizen citizen, ExtPathState mainPathState) {
 #if DEBUG
-            bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == citizenInstanceId) &&
-                            (GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenInstance.m_citizen) &&
-                            (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == citizenInstance.m_sourceBuilding) &&
-                            (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == citizenInstance.m_targetBuilding)
+            bool citDebug = (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == citizenInstanceId) &&
+                            (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenInstance.m_citizen) &&
+                            (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == citizenInstance.m_sourceBuilding) &&
+                            (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == citizenInstance.m_targetBuilding)
                 ;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
@@ -274,11 +274,11 @@
         public ExtSoftPathState UpdateCarPathState(ushort vehicleId, ref Vehicle vehicleData, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, ExtPathState mainPathState) {
             IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
-            bool citDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId) &&
-                            (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == driverExtInstance.instanceId) &&
-                            (GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverInstance.m_citizen) &&
-                            (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == driverInstance.m_sourceBuilding) &&
-                            (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == driverInstance.m_targetBuilding)
+            bool citDebug = (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId) &&
+                            (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == driverExtInstance.instanceId) &&
+                            (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == driverInstance.m_citizen) &&
+                            (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == driverInstance.m_sourceBuilding) &&
+                            (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == driverInstance.m_targetBuilding)
                 ;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
@@ -421,10 +421,10 @@
 
         public ParkedCarApproachState CitizenApproachingParkedCarSimulationStep(ushort instanceId, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance, Vector3 physicsLodRefPos, ref VehicleParked parkedCar) {
 #if DEBUG
-            bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
-                            (GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen) &&
-                            (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
-                            (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
+            bool citDebug = (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == instanceId) &&
+                            (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == instanceData.m_citizen) &&
+                            (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == instanceData.m_sourceBuilding) &&
+                            (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding)
                 ;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
@@ -568,10 +568,10 @@
         public bool CitizenApproachingTargetSimulationStep(ushort instanceId, ref CitizenInstance instanceData, ref ExtCitizenInstance extInstance) {
             IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
-            bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
-                            (GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen) &&
-                            (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
-                            (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
+            bool citDebug = (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == instanceId) &&
+                            (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == instanceData.m_citizen) &&
+                            (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == instanceData.m_sourceBuilding) &&
+                            (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding)
                 ;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
@@ -633,10 +633,10 @@
             IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
             IExtBuildingManager extBuildingMan = Constants.ManagerFactory.ExtBuildingManager;
 #if DEBUG
-            bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
-                            (GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen) &&
-                            (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
-                            (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
+            bool citDebug = (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == instanceId) &&
+                            (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == instanceData.m_citizen) &&
+                            (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == instanceData.m_sourceBuilding) &&
+                            (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding)
                 ;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
@@ -1000,10 +1000,10 @@
             IExtBuildingManager extBuildingMan = Constants.ManagerFactory.ExtBuildingManager;
 
 #if DEBUG
-            bool citDebug = (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == instanceId) &&
-                            (GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == instanceData.m_citizen) &&
-                            (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == instanceData.m_sourceBuilding) &&
-                            (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == instanceData.m_targetBuilding)
+            bool citDebug = (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == instanceId) &&
+                            (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == instanceData.m_citizen) &&
+                            (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == instanceData.m_sourceBuilding) &&
+                            (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding)
                 ;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
@@ -1146,11 +1146,11 @@
         protected ExtSoftPathState OnCarPathFindFailure(ushort vehicleId, ref Vehicle vehicleData, ref CitizenInstance driverInstanceData, ref ExtCitizenInstance driverExtInstance) {
             IExtCitizenInstanceManager extCitizenInstanceManager = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
-            bool citDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId) &&
-                            (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == driverExtInstance.instanceId) &&
-                            (GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverInstanceData.m_citizen) &&
-                            (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == driverInstanceData.m_sourceBuilding) &&
-                            (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == driverInstanceData.m_targetBuilding)
+            bool citDebug = (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId) &&
+                            (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == driverExtInstance.instanceId) &&
+                            (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == driverInstanceData.m_citizen) &&
+                            (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == driverInstanceData.m_sourceBuilding) &&
+                            (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == driverInstanceData.m_targetBuilding)
                 ;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
@@ -1237,11 +1237,11 @@
             IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 
 #if DEBUG
-            bool citDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId) &&
-                            (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == extDriverInstance.instanceId) &&
-                            (GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == extCitInstMan.GetCitizenId(extDriverInstance.instanceId)) &&
-                            (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extDriverInstance.instanceId].m_sourceBuilding) &&
-                            (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extDriverInstance.instanceId].m_targetBuilding)
+            bool citDebug = (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId) &&
+                            (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == extDriverInstance.instanceId) &&
+                            (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == extCitInstMan.GetCitizenId(extDriverInstance.instanceId)) &&
+                            (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extDriverInstance.instanceId].m_sourceBuilding) &&
+                            (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == Singleton<CitizenManager>.instance.m_instances.m_buffer[extDriverInstance.instanceId].m_targetBuilding)
                 ;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
@@ -1333,7 +1333,7 @@
 
         public bool TrySpawnParkedPassengerCar(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos, out ParkingUnableReason reason) {
 #if DEBUG
-            bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
+            bool citDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
@@ -1370,7 +1370,7 @@
 
         public bool TrySpawnParkedPassengerCarRoadSide(uint citizenId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos, out ParkingUnableReason reason) {
 #if DEBUG
-            bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
+            bool citDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
@@ -1408,7 +1408,7 @@
 
         public bool TrySpawnParkedPassengerCarBuilding(uint citizenId, ushort homeId, Vector3 refPos, VehicleInfo vehicleInfo, out Vector3 parkPos, out ParkingUnableReason reason) {
 #if DEBUG
-            bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
+            bool citDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 
@@ -1446,7 +1446,7 @@
 
         public bool FindParkingSpaceInVicinity(Vector3 targetPos, Vector3 searchDir, VehicleInfo vehicleInfo, ushort homeId, ushort vehicleId, float maxDist, out ExtParkingSpaceLocation parkingSpaceLocation, out ushort parkingSpaceLocationId, out Vector3 parkPos, out Quaternion parkRot, out float parkOffset) {
 #if DEBUG
-            bool vehDebug = GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleId;
+            bool vehDebug = DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId;
             bool debug = DebugSwitch.VehicleParkingAILog.Get() && vehDebug;
 #endif
 

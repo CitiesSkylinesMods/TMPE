@@ -21,7 +21,7 @@
             false, // 4: parking ai debug log (extended)
             false, // 5: geometry debug log
             false, // 6: debug parking AI distance issue
-            false, // 7: debug TTL
+            false, // 7: debug Timed Traffic Lights
             false, // 8: debug routing
             false, // 9: debug vehicle to segment end linking
             false, // 10: prevent routing recalculation on global configuration reload
@@ -42,15 +42,41 @@
             false // 25: debug turn-on-red
         };
 
-        public int NodeId = 0;
-        public int SegmentId = 0;
-        public int StartSegmentId = 0;
-        public int EndSegmentId = 0;
-        public int VehicleId = 0;
-        public int CitizenInstanceId = 0;
-        public uint CitizenId = 0;
-        public uint SourceBuildingId = 0;
-        public uint TargetBuildingId = 0;
+        private int nodeId_ = 0;
+
+        public static int NodeId => GlobalConfig.Instance.Debug.nodeId_;
+
+        private int segmentId_ = 0;
+
+        public static int SegmentId => GlobalConfig.Instance.Debug.segmentId_;
+
+        private int startSegmentId_ = 0;
+
+        public static int StartSegmentId => GlobalConfig.Instance.Debug.startSegmentId_;
+
+        private int endSegmentId_ = 0;
+
+        public static int EndSegmentId => GlobalConfig.Instance.Debug.endSegmentId_;
+
+        private int vehicleId_ = 0;
+
+        public static int VehicleId => GlobalConfig.Instance.Debug.vehicleId_;
+
+        private int citizenInstanceId_ = 0;
+
+        public static int CitizenInstanceId => GlobalConfig.Instance.Debug.citizenInstanceId_;
+
+        private uint citizenId_ = 0;
+
+        public static uint CitizenId => GlobalConfig.Instance.Debug.citizenId_;
+
+        private uint sourceBuildingId_ = 0;
+
+        public static uint SourceBuildingId => GlobalConfig.Instance.Debug.sourceBuildingId_;
+
+        private uint targetBuildingId_ = 0;
+
+        public static uint TargetBuildingId => GlobalConfig.Instance.Debug.targetBuildingId_;
 
         [Obsolete]
         public ExtVehicleType ExtVehicleType = ExtVehicleType.None;
@@ -79,12 +105,12 @@
         ExtendedParkingAILog = 4,
         GeometryDebug = 5,
         ParkingAIDistanceIssue = 6,
-        TTL = 7,
+        TimedTrafficLights = 7,
         Routing = 8,
         VehicleLinkingToSegmentEnd = 9,
         NoRoutingRecalculationOnConfigReload = 10,
         JunctionRestrictions = 11,
-        Switch12 = 12, // 12 unused? Used in CustomPathFind.cs, ExtVehicleManager.cs
+        PedestrianPathfinding = 12,
         PriorityRules = 13,
         NoValidPathCitizensOverlay = 14,
         [UsedImplicitly]

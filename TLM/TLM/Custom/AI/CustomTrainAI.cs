@@ -634,12 +634,12 @@
 
 #if DEBUG
             bool debug = DebugSwitch.CalculateSegmentPosition.Get()
-                         && (GlobalConfig.Instance.Debug.NodeId <= 0
-                             || refTargetNodeId == GlobalConfig.Instance.Debug.NodeId)
+                         && (DebugSettings.NodeId <= 0
+                             || refTargetNodeId == DebugSettings.NodeId)
                          && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
                              || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.RailVehicle)
-                         && (GlobalConfig.Instance.Debug.VehicleId == 0
-                             || GlobalConfig.Instance.Debug.VehicleId == vehicleId);
+                         && (DebugSettings.VehicleId == 0
+                             || DebugSettings.VehicleId == vehicleId);
 
             if (debug) {
                 Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}) called.\n" +

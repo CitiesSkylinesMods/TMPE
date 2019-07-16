@@ -66,7 +66,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public void RemoveSegmentEnd(ushort segmentId, bool startNode) {
 #if DEBUG
-			bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+			bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
 			if (debug) {
 				Log._Debug($"SegmentEndManager.RemoveSegmentEnd({segmentId}, {startNode}) called");
 			}
@@ -85,7 +85,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool UpdateSegmentEnd(ushort segmentId, bool startNode) {
 #if DEBUG
-			bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.SegmentId <= 0 || segmentId == GlobalConfig.Instance.Debug.SegmentId);
+			bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
 #endif
 
 			if (! Services.NetService.IsSegmentValid(segmentId)) {

@@ -362,7 +362,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public void CalculateAutoPedestrianLightState(ref NetNode node, bool propagate=true) {
 #if DEBUGTTL
-            bool debug = DebugSwitch.TTL.Get() && GlobalConfig.Instance.Debug.NodeId == NodeId;
+            bool debug = DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == NodeId;
 #endif
 
 #if DEBUGTTL
@@ -495,7 +495,7 @@ namespace TrafficManager.TrafficLight.Impl {
         // TODO improve & remove
         public void Housekeeping(bool mayDelete, bool calculateAutoPedLight) {
 #if DEBUGHK
-            bool debug = DebugSwitch.TTL.Get() && GlobalConfig.Instance.Debug.NodeId == NodeId;
+            bool debug = DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == NodeId;
 #endif
 
             // we intentionally never delete vehicle types (because we may want to retain traffic light states if a segment is upgraded or replaced)

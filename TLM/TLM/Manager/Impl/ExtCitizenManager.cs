@@ -51,7 +51,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public void OnArriveAtDestination(uint citizenId, ref Citizen citizenData, ref CitizenInstance instanceData) {
 #if DEBUG
-			bool citDebug = GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == citizenId;
+			bool citDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
 			bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
 			bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
 

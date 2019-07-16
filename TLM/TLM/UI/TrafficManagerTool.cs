@@ -904,8 +904,8 @@
             int startVehicleId = 1;
             int endVehicleId = (int) (Constants.ServiceFactory.VehicleService.MaxVehicleCount - 1);
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.VehicleId != 0) {
-                startVehicleId = endVehicleId = GlobalConfig.Instance.Debug.VehicleId;
+            if (DebugSettings.VehicleId != 0) {
+                startVehicleId = endVehicleId = DebugSettings.VehicleId;
             }
 #endif
 

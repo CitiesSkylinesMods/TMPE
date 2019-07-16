@@ -2,14 +2,12 @@
 
 namespace TrafficManager.Custom.AI {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
     using API.Traffic.Data;
     using API.Traffic.Enums;
     using ColossalFramework;
     using ColossalFramework.Math;
     using CSUtil.Commons;
-    using CSUtil.Commons.Benchmark;
     using JetBrains.Annotations;
     using Manager.Impl;
     using PathFinding;
@@ -18,6 +16,10 @@ namespace TrafficManager.Custom.AI {
     using State.ConfigData;
     using Traffic.Data;
     using UnityEngine;
+#if BENCHMARK
+    using System.Diagnostics.CodeAnalysis;
+    using CSUtil.Commons.Benchmark;
+#endif
 
     [TargetType(typeof(CarAI))]
     // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
@@ -35,8 +37,8 @@ namespace TrafficManager.Custom.AI {
                                          Vector3 physicsLodRefPos) {
 
 #if DEBUG
-            var vehDebug = GlobalConfig.Instance.Debug.VehicleId == 0
-                           || GlobalConfig.Instance.Debug.VehicleId == vehicleId;
+            var vehDebug = DebugSettings.VehicleId == 0
+                           || DebugSettings.VehicleId == vehicleId;
             var parkingAiLog = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
             var extendedParkingAiLog = DebugSwitch.ExtendedParkingAILog.Get() && vehDebug;
 #endif
@@ -279,12 +281,12 @@ namespace TrafficManager.Custom.AI {
 
 #if DEBUG
             var logCalculation = DebugSwitch.CalculateSegmentPosition.Get()
-                        && (GlobalConfig.Instance.Debug.NodeId <= 0
-                            || curTargetNodeId == GlobalConfig.Instance.Debug.NodeId)
+                        && (DebugSettings.NodeId <= 0
+                            || curTargetNodeId == DebugSettings.NodeId)
                         && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
                             || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.RoadVehicle)
-                        && (GlobalConfig.Instance.Debug.VehicleId == 0
-                            || GlobalConfig.Instance.Debug.VehicleId == vehicleId);
+                        && (DebugSettings.VehicleId == 0
+                            || DebugSettings.VehicleId == vehicleId);
 
             if (logCalculation) {
                 Log._Debug($"CustomCarAI.CustomCalculateSegmentPosition({vehicleId}) called.\n" +
@@ -443,8 +445,8 @@ namespace TrafficManager.Custom.AI {
                                         bool endBothWays,
                                         bool undergroundTarget) {
 #if DEBUG
-            var vehDebug = GlobalConfig.Instance.Debug.VehicleId == 0
-                           || GlobalConfig.Instance.Debug.VehicleId == vehicleID;
+            var vehDebug = DebugSettings.VehicleId == 0
+                           || DebugSettings.VehicleId == vehicleID;
             var logParkingAi = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
             var extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && vehDebug;
 
@@ -593,8 +595,8 @@ namespace TrafficManager.Custom.AI {
             var logLogic = DebugSwitch.ResourceLoading.Get() &&
                          (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
                           || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.RoadVehicle)
-                         && (GlobalConfig.Instance.Debug.VehicleId == 0
-                             || GlobalConfig.Instance.Debug.VehicleId == vehicleID);
+                         && (DebugSettings.VehicleId == 0
+                             || DebugSettings.VehicleId == vehicleID);
 
             if (logLogic) {
                 Log._Debug($"CustomCarAI.CustomCheckOtherVehicle({vehicleID}, {otherID}) called.");

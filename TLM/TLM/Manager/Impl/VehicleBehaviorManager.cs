@@ -44,11 +44,11 @@
 
         public bool ParkPassengerCar(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, uint driverCitizenId, ref Citizen driverCitizen, ushort driverCitizenInstanceId, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, ushort targetBuildingId, PathUnit.Position pathPos, uint nextPath, int nextPositionIndex, out byte segmentOffset) {
 #if DEBUG
-            bool citDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleID) &&
-                            (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == driverExtInstance.instanceId) &&
-                            (GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverInstance.m_citizen) &&
-                            (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == driverInstance.m_sourceBuilding) &&
-                            (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == driverInstance.m_targetBuilding)
+            bool citDebug = (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleID) &&
+                            (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == driverExtInstance.instanceId) &&
+                            (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == driverInstance.m_citizen) &&
+                            (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == driverInstance.m_sourceBuilding) &&
+                            (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == driverInstance.m_targetBuilding)
                 ;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
@@ -348,11 +348,11 @@
         public bool StartPassengerCarPathFind(ushort vehicleID, ref Vehicle vehicleData, VehicleInfo vehicleInfo, ushort driverInstanceId, ref CitizenInstance driverInstance, ref ExtCitizenInstance driverExtInstance, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget, bool isHeavyVehicle, bool hasCombustionEngine, bool ignoreBlocked) {
             IExtCitizenInstanceManager extCitizenInstanceManager = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
-            bool citDebug = (GlobalConfig.Instance.Debug.VehicleId == 0 || GlobalConfig.Instance.Debug.VehicleId == vehicleID) &&
-                            (GlobalConfig.Instance.Debug.CitizenInstanceId == 0 || GlobalConfig.Instance.Debug.CitizenInstanceId == driverExtInstance.instanceId) &&
-                            (GlobalConfig.Instance.Debug.CitizenId == 0 || GlobalConfig.Instance.Debug.CitizenId == driverInstance.m_citizen) &&
-                            (GlobalConfig.Instance.Debug.SourceBuildingId == 0 || GlobalConfig.Instance.Debug.SourceBuildingId == driverInstance.m_sourceBuilding) &&
-                            (GlobalConfig.Instance.Debug.TargetBuildingId == 0 || GlobalConfig.Instance.Debug.TargetBuildingId == driverInstance.m_targetBuilding)
+            bool citDebug = (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleID) &&
+                            (DebugSettings.CitizenInstanceId == 0 || DebugSettings.CitizenInstanceId == driverExtInstance.instanceId) &&
+                            (DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == driverInstance.m_citizen) &&
+                            (DebugSettings.SourceBuildingId == 0 || DebugSettings.SourceBuildingId == driverInstance.m_sourceBuilding) &&
+                            (DebugSettings.TargetBuildingId == 0 || DebugSettings.TargetBuildingId == driverInstance.m_targetBuilding)
                 ;
             bool debug = DebugSwitch.BasicParkingAILog.Get() && citDebug;
             bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citDebug;
@@ -676,7 +676,7 @@
         protected VehicleJunctionTransitState MayChangeSegment(ushort frontVehicleId, ref ExtVehicle extVehicle, ref Vehicle vehicleData, float sqrVelocity, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId) {
             //public bool MayChangeSegment(ushort frontVehicleId, ref VehicleState vehicleState, ref Vehicle vehicleData, float sqrVelocity, bool isRecklessDriver, ref PathUnit.Position prevPos, ref NetSegment prevSegment, ushort prevTargetNodeId, uint prevLaneID, ref PathUnit.Position position, ushort targetNodeId, ref NetNode targetNode, uint laneID, ref PathUnit.Position nextPosition, ushort nextTargetNodeId, out float maxSpeed) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (GlobalConfig.Instance.Debug.NodeId <= 0 || targetNodeId == GlobalConfig.Instance.Debug.NodeId);
+            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.NodeId <= 0 || targetNodeId == DebugSettings.NodeId);
 #endif
 
             if (prevTargetNodeId != targetNodeId
@@ -1159,7 +1159,7 @@
                 bool debug = false;
                 if (DebugSwitch.AlternativeLaneSelection.Get()) {
                     ushort nodeId = Services.NetService.GetSegmentNodeId(currentPathPos.m_segment, currentPathPos.m_offset < 128);
-                    debug = (conf.Debug.VehicleId == 0 || conf.Debug.VehicleId == vehicleId) && (conf.Debug.NodeId == 0 || conf.Debug.NodeId == nodeId);
+                    debug = (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId) && (DebugSettings.NodeId == 0 || DebugSettings.NodeId == nodeId);
                 }
 
                 if (debug) {
@@ -1886,7 +1886,7 @@
                 bool debug = false;
                 if (DebugSwitch.AlternativeLaneSelection.Get()) {
                     ushort nodeId = Services.NetService.GetSegmentNodeId(currentPathPos.m_segment, currentPathPos.m_offset < 128);
-                    debug = (conf.Debug.VehicleId == 0 || conf.Debug.VehicleId == vehicleId) && (conf.Debug.NodeId == 0 || conf.Debug.NodeId == nodeId);
+                    debug = (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId) && (DebugSettings.NodeId == 0 || DebugSettings.NodeId == nodeId);
                 }
 
                 if (debug) {
@@ -2008,7 +2008,7 @@
         public bool MayFindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref ExtVehicle vehicleState) {
             GlobalConfig conf = GlobalConfig.Instance;
 #if DEBUG
-            bool debug = false; // DebugSwitch.AlternativeLaneSelection.Get() && (conf.Debug.VehicleId == 0 || conf.Debug.VehicleId == vehicleId);
+            bool debug = false; // DebugSwitch.AlternativeLaneSelection.Get() && (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId);
             if (debug) {
                 Log._Debug($"VehicleBehaviorManager.MayFindBestLane({vehicleId}) called.");
             }
