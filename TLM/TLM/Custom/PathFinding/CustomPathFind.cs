@@ -248,7 +248,7 @@ namespace TrafficManager.Custom.PathFinding {
                     if (QueueLast == 0u) {
                         QueueLast = unit;
                     } else {
-                        CustomPathManager._instance.queueItems[unit].nextPathUnitId = QueueFirst;
+                        CustomPathManager._instance.QueueItems[unit].nextPathUnitId = QueueFirst;
                         // this.PathUnits.m_buffer[unit].m_nextPathUnit = this.QueueFirst;
                     }
 
@@ -257,7 +257,7 @@ namespace TrafficManager.Custom.PathFinding {
                     if (QueueLast == 0u) {
                         QueueFirst = unit;
                     } else {
-                        CustomPathManager._instance.queueItems[QueueLast].nextPathUnitId = unit;
+                        CustomPathManager._instance.QueueItems[QueueLast].nextPathUnitId = unit;
                         // this.PathUnits.m_buffer[this.QueueLast].m_nextPathUnit = unit;
                     }
 
@@ -3503,7 +3503,7 @@ namespace TrafficManager.Custom.PathFinding {
                     }
 
                     Calculating = QueueFirst;
-                    QueueFirst = CustomPathManager._instance.queueItems[Calculating].nextPathUnitId;
+                    QueueFirst = CustomPathManager._instance.QueueItems[Calculating].nextPathUnitId;
 
                     // QueueFirst = PathUnits.m_buffer[Calculating].m_nextPathUnit;
                     if (QueueFirst == 0u) {
@@ -3513,7 +3513,7 @@ namespace TrafficManager.Custom.PathFinding {
                         --m_queuedPathFindCount;
                     }
 
-                    CustomPathManager._instance.queueItems[Calculating].nextPathUnitId = 0u;
+                    CustomPathManager._instance.QueueItems[Calculating].nextPathUnitId = 0u;
 
                     // PathUnits.m_buffer[Calculating].m_nextPathUnit = 0u;
                     // check if path unit is created
@@ -3523,7 +3523,7 @@ namespace TrafficManager.Custom.PathFinding {
                     }*/
 
                     PathUnits.m_buffer[Calculating].m_pathFindFlags = (byte)((PathUnits.m_buffer[Calculating].m_pathFindFlags & ~PathUnit.FLAG_CREATED) | PathUnit.FLAG_CALCULATING);
-                    queueItem = CustomPathManager._instance.queueItems[Calculating];
+                    queueItem = CustomPathManager._instance.QueueItems[Calculating];
                 } catch (Exception e) {
                     Log.Error($"(PF #{m_pathFindIndex}, T#{Thread.CurrentThread.ManagedThreadId}, Id #{pfId}) CustomPathFind.PathFindThread Error for unit {Calculating}, flags={PathUnits.m_buffer[Calculating].m_pathFindFlags} (1): {e}");
                 } finally {
@@ -3566,7 +3566,7 @@ namespace TrafficManager.Custom.PathFinding {
                     // NON-STOCK CODE START
                     try {
                         Monitor.Enter(_bufferLock);
-                        CustomPathManager._instance.queueItems[Calculating].queued = false;
+                        CustomPathManager._instance.QueueItems[Calculating].queued = false;
                         CustomPathManager._instance.ReleasePath(Calculating);
                     } finally {
                         Monitor.Exit(_bufferLock);

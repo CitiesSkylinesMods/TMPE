@@ -236,7 +236,7 @@
                             m_queueLast = unit;
                         } else {
                             // NON-STOCK CODE START
-                            CustomPathManager._instance.queueItems[unit].nextPathUnitId = m_queueFirst;
+                            CustomPathManager._instance.QueueItems[unit].nextPathUnitId = m_queueFirst;
                             // NON-STOCK CODE END
                             // PathUnits.m_buffer[unit].m_nextPathUnit = QueueFirst; // stock code commented
                         }
@@ -246,7 +246,7 @@
                             m_queueFirst = unit;
                         } else {
                             // NON-STOCK CODE START
-                            CustomPathManager._instance.queueItems[m_queueLast].nextPathUnitId = unit;
+                            CustomPathManager._instance.QueueItems[m_queueLast].nextPathUnitId = unit;
                             // NON-STOCK CODE END
                             // PathUnits.m_buffer[QueueLast].m_nextPathUnit = unit; // stock code commented
                         }
@@ -3241,7 +3241,7 @@
 
                     m_calculating = m_queueFirst;
                     // NON-STOCK CODE START
-                    m_queueFirst = CustomPathManager._instance.queueItems[m_calculating].nextPathUnitId;
+                    m_queueFirst = CustomPathManager._instance.QueueItems[m_calculating].nextPathUnitId;
                     // NON-STOCK CODE END
                     // QueueFirst = PathUnits.m_buffer[Calculating].m_nextPathUnit; // stock code commented
 
@@ -3253,14 +3253,14 @@
                     }
 
                     // NON-STOCK CODE START
-                    CustomPathManager._instance.queueItems[m_calculating].nextPathUnitId = 0u;
+                    CustomPathManager._instance.QueueItems[m_calculating].nextPathUnitId = 0u;
                     // NON-STOCK CODE END
                     // PathUnits.m_buffer[Calculating].m_nextPathUnit = 0u; // stock code commented
 
                     m_pathUnits.m_buffer[m_calculating].m_pathFindFlags = (byte)((m_pathUnits.m_buffer[m_calculating].m_pathFindFlags & ~PathUnit.FLAG_CREATED) | PathUnit.FLAG_CALCULATING);
 
                     // NON-STOCK CODE START
-                    m_queueItem = CustomPathManager._instance.queueItems[m_calculating];
+                    m_queueItem = CustomPathManager._instance.QueueItems[m_calculating];
                     // NON-STOCK CODE END
                 } finally {
                     Monitor.Exit(m_queueLock);
@@ -3292,7 +3292,7 @@
                     // NON-STOCK CODE START
                     try {
                         Monitor.Enter(m_bufferLock);
-                        CustomPathManager._instance.queueItems[m_calculating].queued = false;
+                        CustomPathManager._instance.QueueItems[m_calculating].queued = false;
                         CustomPathManager._instance.ReleasePath(m_calculating);
                     } finally {
                         Monitor.Exit(m_bufferLock);

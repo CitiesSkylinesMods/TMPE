@@ -1,93 +1,84 @@
 #define QUEUEDSTATSx
 #define DEBUGPF3x
 
-using System;
-using System.Reflection;
-using System.Threading;
-using ColossalFramework;
-using ColossalFramework.Math;
-using JetBrains.Annotations;
-using UnityEngine;
-using TrafficManager.Geometry;
-using TrafficManager.State;
-using TrafficManager.Traffic;
-using TrafficManager.Util;
-using CSUtil.Commons;
-using TrafficManager.Manager.Impl;
-using static TrafficManager.Traffic.Data.ExtCitizenInstance;
-using TrafficManager.Traffic.Data;
-using static TrafficManager.Manager.Impl.ExtPathManager;
-using TrafficManager.RedirectionFramework.Attributes;
-
-// ReSharper disable InconsistentNaming
-
 namespace TrafficManager.Custom.PathFinding {
-	using API.Traffic.Data;
+    using System;
+    using System.Reflection;
+    using System.Threading;
+    using API.Traffic.Data;
+    using ColossalFramework;
+    using ColossalFramework.Math;
+    using CSUtil.Commons;
+    using JetBrains.Annotations;
+    using Manager.Impl;
+    using RedirectionFramework.Attributes;
+    using State;
+    using Traffic.Data;
+    using UnityEngine;
 
-	[TargetType(typeof(PathManager))]
-	public class CustomPathManager : PathManager {
-		/// <summary>
-		/// Holds a linked list of path units waiting to be calculated
-		/// </summary>
-		internal PathUnitQueueItem[] queueItems; // TODO move to ExtPathManager
+    [TargetType(typeof(PathManager))]
+    public class CustomPathManager : PathManager {
+        /// <summary>
+        /// Holds a linked list of path units waiting to be calculated
+        /// </summary>
+        internal PathUnitQueueItem[] QueueItems; // TODO move to ExtPathManager
 
 #if PF2
-		private CustomPathFind2[] _replacementPathFinds;
+        private CustomPathFind2[] _replacementPathFinds;
 #else
 		private CustomPathFind[] _replacementPathFinds;
 #endif
 
-		public static CustomPathManager _instance;
+        public static CustomPathManager _instance;
 
 #if QUEUEDSTATS
-		public static uint TotalQueuedPathFinds {
-			get; private set;
-		} = 0;
+        public static uint TotalQueuedPathFinds {
+            get; private set;
+        }
 #endif
 
-		public static bool InitDone {
-			get; private set;
-		} = false;
+        public static bool InitDone {
+            get; private set;
+        }
 
-		//On waking up, replace the stock pathfinders with the custom one
-		[UsedImplicitly]
-		public new virtual void Awake() {
-			_instance = this;
-		}
+        // On waking up, replace the stock pathfinders with the custom one
+        [UsedImplicitly]
+        public new virtual void Awake() {
+            _instance = this;
+        }
 
-		public void UpdateWithPathManagerValues(PathManager stockPathManager) {
-			// Needed fields come from joaofarias' csl-traffic
-			// https://github.com/joaofarias/csl-traffic
+        public void UpdateWithPathManagerValues(PathManager stockPathManager) {
+            // Needed fields come from joaofarias' csl-traffic
+            // https://github.com/joaofarias/csl-traffic
+            m_simulationProfiler = stockPathManager.m_simulationProfiler;
+            m_drawCallData = stockPathManager.m_drawCallData;
+            m_properties = stockPathManager.m_properties;
+            m_pathUnitCount = stockPathManager.m_pathUnitCount;
+            m_renderPathGizmo = stockPathManager.m_renderPathGizmo;
+            m_pathUnits = stockPathManager.m_pathUnits;
+            m_bufferLock = stockPathManager.m_bufferLock;
 
-			m_simulationProfiler = stockPathManager.m_simulationProfiler;
-			m_drawCallData = stockPathManager.m_drawCallData;
-			m_properties = stockPathManager.m_properties;
-			m_pathUnitCount = stockPathManager.m_pathUnitCount;
-			m_renderPathGizmo = stockPathManager.m_renderPathGizmo;
-			m_pathUnits = stockPathManager.m_pathUnits;
-			m_bufferLock = stockPathManager.m_bufferLock;
+            Log._Debug("Waking up CustomPathManager.");
 
-			Log._Debug("Waking up CustomPathManager.");
+            QueueItems = new PathUnitQueueItem[MAX_PATHUNIT_COUNT];
 
-			queueItems = new PathUnitQueueItem[PathManager.MAX_PATHUNIT_COUNT];
+            var stockPathFinds = GetComponents<PathFind>();
+            var numOfStockPathFinds = stockPathFinds.Length;
+            int numCustomPathFinds = numOfStockPathFinds;
 
-			var stockPathFinds = GetComponents<PathFind>();
-			var numOfStockPathFinds = stockPathFinds.Length;
-			int numCustomPathFinds = numOfStockPathFinds;
-
-			Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects.");
+            Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects.");
 #if PF2
-			_replacementPathFinds = new CustomPathFind2[numCustomPathFinds];
+            _replacementPathFinds = new CustomPathFind2[numCustomPathFinds];
 #else
 			_replacementPathFinds = new CustomPathFind[numCustomPathFinds];
 #endif
 
-			try {
-				Monitor.Enter(this.m_bufferLock);
+            try {
+                Monitor.Enter(m_bufferLock);
 
-				for (var i = 0; i < numCustomPathFinds; i++) {
+                for (var i = 0; i < numCustomPathFinds; i++) {
 #if PF2
-					_replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind2>();
+                    _replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind2>();
 #else
 					_replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();
 					_replacementPathFinds[i].pfId = i;
@@ -95,258 +86,322 @@ namespace TrafficManager.Custom.PathFinding {
 						_replacementPathFinds[i].IsMasterPathFind = true;
 					}
 #endif
-				}
+                }
 
-				Log._Debug("Setting _replacementPathFinds");
-				var fieldInfo = typeof(PathManager).GetField("m_pathfinds", BindingFlags.NonPublic | BindingFlags.Instance);
+                Log._Debug("Setting _replacementPathFinds");
+                var fieldInfo = typeof(PathManager).GetField("m_pathfinds", BindingFlags.NonPublic | BindingFlags.Instance);
 
-				Log._Debug("Setting m_pathfinds to custom collection");
-				fieldInfo?.SetValue(this, _replacementPathFinds);
+                Log._Debug("Setting m_pathfinds to custom collection");
+                fieldInfo?.SetValue(this, _replacementPathFinds);
 
-				for (var i = 0; i < numOfStockPathFinds; i++) {
+                for (var i = 0; i < numOfStockPathFinds; i++) {
 #if DEBUG
-					Log._Debug($"PF {i}: {stockPathFinds[i].m_queuedPathFindCount} queued path-finds");
+                    Log._Debug($"PF {i}: {stockPathFinds[i].m_queuedPathFindCount} queued path-finds");
 #endif
-					//stockPathFinds[i].WaitForAllPaths(); // would cause deadlock since we have a lock on m_bufferLock
-					Destroy(stockPathFinds[i]);
-				}
-			} finally {
-				Monitor.Exit(this.m_bufferLock);
-			}
+                    //stockPathFinds[i].WaitForAllPaths(); // would cause deadlock since we have a lock on m_bufferLock
+                    Destroy(stockPathFinds[i]);
+                }
+            } finally {
+                Monitor.Exit(m_bufferLock);
+            }
 
-			InitDone = true;
-		}
+            InitDone = true;
+        }
 
-		[RedirectMethod]
-		public new void ReleasePath(uint unit) {
+        [RedirectMethod]
+        public new void ReleasePath(uint unit) {
 #if DEBUGPF3
 			Log.Warning($"CustomPathManager.ReleasePath({unit}) called.");
 #endif
 
-			if (this.m_pathUnits.m_buffer[unit].m_simulationFlags == 0) {
-				return;
-			}
-			try {
-				Monitor.Enter(m_bufferLock);
+            if (m_pathUnits.m_buffer[unit].m_simulationFlags == 0) {
+                return;
+            }
+            try {
+                Monitor.Enter(m_bufferLock);
 
-				int numIters = 0;
-				while (unit != 0u) {
-					if (this.m_pathUnits.m_buffer[unit].m_referenceCount > 1) {
-						--this.m_pathUnits.m_buffer[unit].m_referenceCount;
-						break;
-					}
+                int numIters = 0;
+                while (unit != 0u) {
+                    if (m_pathUnits.m_buffer[unit].m_referenceCount > 1) {
+                        --m_pathUnits.m_buffer[unit].m_referenceCount;
+                        break;
+                    }
 
-					/*if (this.m_pathUnits.m_buffer[unit].m_pathFindFlags == PathUnit.FLAG_CREATED) {
-						Log.Error($"Will release path unit {unit} which is CREATED!");
-					}*/
+                    /*if (this.m_pathUnits.m_buffer[unit].m_pathFindFlags == PathUnit.FLAG_CREATED) {
+                            Log.Error($"Will release path unit {unit} which is CREATED!");
+                    }*/
 
-					uint nextPathUnit = this.m_pathUnits.m_buffer[unit].m_nextPathUnit;
-					this.m_pathUnits.m_buffer[unit].m_simulationFlags = 0;
-					this.m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;
-					this.m_pathUnits.m_buffer[unit].m_nextPathUnit = 0u;
-					this.m_pathUnits.m_buffer[unit].m_referenceCount = 0;
-					this.m_pathUnits.ReleaseItem(unit);
-					//queueItems[unit].Reset(); // NON-STOCK CODE
-					unit = nextPathUnit;
-					if (++numIters >= 262144) {
-						CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
-						break;
-					}
-				}
-				this.m_pathUnitCount = (int)(this.m_pathUnits.ItemCount() - 1u);
-			} finally {
-				Monitor.Exit(this.m_bufferLock);
-			}
-		}
+                    uint nextPathUnit = m_pathUnits.m_buffer[unit].m_nextPathUnit;
+                    m_pathUnits.m_buffer[unit].m_simulationFlags = 0;
+                    m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;
+                    m_pathUnits.m_buffer[unit].m_nextPathUnit = 0u;
+                    m_pathUnits.m_buffer[unit].m_referenceCount = 0;
+                    m_pathUnits.ReleaseItem(unit);
+                    //queueItems[unit].Reset(); // NON-STOCK CODE
+                    unit = nextPathUnit;
+                    if (++numIters >= 262144) {
+                        CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+                        break;
+                    }
+                }
+                m_pathUnitCount = (int)(m_pathUnits.ItemCount() - 1u);
+            } finally {
+                Monitor.Exit(m_bufferLock);
+            }
+        }
 
-		public bool CustomCreatePath(out uint unit, ref Randomizer randomizer, PathCreationArgs args) {
-			uint pathUnitId;
-			try {
-				Monitor.Enter(this.m_bufferLock);
+        public bool CustomCreatePath(out uint unit, ref Randomizer randomizer, PathCreationArgs args) {
+            uint pathUnitId;
+            try {
+                Monitor.Enter(m_bufferLock);
 
-				int numIters = 0;
-				while (true) { // NON-STOCK CODE
-					++numIters;
+                int numIters = 0;
+                while (true) {
+                    // NON-STOCK CODE
+                    ++numIters;
 
-					if (!this.m_pathUnits.CreateItem(out pathUnitId, ref randomizer)) {
-						unit = 0u;
-						return false;
-					}
+                    if (!m_pathUnits.CreateItem(out pathUnitId, ref randomizer)) {
+                        unit = 0u;
+                        return false;
+                    }
 
-					this.m_pathUnits.m_buffer[pathUnitId].m_simulationFlags = 1;
-					this.m_pathUnits.m_buffer[pathUnitId].m_referenceCount = 1;
-					this.m_pathUnits.m_buffer[pathUnitId].m_nextPathUnit = 0u;
+                    m_pathUnits.m_buffer[pathUnitId].m_simulationFlags = 1;
+                    m_pathUnits.m_buffer[pathUnitId].m_referenceCount = 1;
+                    m_pathUnits.m_buffer[pathUnitId].m_nextPathUnit = 0u;
 
-					// NON-STOCK CODE START
-					if (queueItems[pathUnitId].queued) {
-						ReleasePath(pathUnitId);
+                    // NON-STOCK CODE START
+                    if (QueueItems[pathUnitId].queued) {
+                        ReleasePath(pathUnitId);
 
-						if (numIters > 10) {
-							unit = 0u;
-							return false;
-						}
+                        if (numIters > 10) {
+                            unit = 0u;
+                            return false;
+                        }
 
-						continue;
-					}
-					break;
-				}
+                        continue;
+                    }
 
-				queueItems[pathUnitId].vehicleType = args.extVehicleType;
-				queueItems[pathUnitId].vehicleId = args.vehicleId;
-				queueItems[pathUnitId].pathType = args.extPathType;
-				queueItems[pathUnitId].spawned = args.spawned;
-				queueItems[pathUnitId].queued = true;
-				// NON-STOCK CODE END
+                    break;
+                }
 
-				this.m_pathUnitCount = (int)(this.m_pathUnits.ItemCount() - 1u);
-			} finally {
-				Monitor.Exit(this.m_bufferLock);
-			}
-			unit = pathUnitId;
+                QueueItems[pathUnitId].vehicleType = args.extVehicleType;
+                QueueItems[pathUnitId].vehicleId = args.vehicleId;
+                QueueItems[pathUnitId].pathType = args.extPathType;
+                QueueItems[pathUnitId].spawned = args.spawned;
+                QueueItems[pathUnitId].queued = true;
+                // NON-STOCK CODE END
 
-			if (args.isHeavyVehicle) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IS_HEAVY;
-			}
-			if (args.ignoreBlocked || args.ignoreFlooded) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_BLOCKED;
-			}
-			if (args.stablePath) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_STABLE_PATH;
-			}
-			if (args.randomParking) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_RANDOM_PARKING;
-			}
-			if (args.ignoreFlooded) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_FLOODED;
-			}
-			if (args.hasCombustionEngine) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_COMBUSTION;
-			}
-			if (args.ignoreCosts) {
-				this.m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_COST;
-			}
-			this.m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;
-			this.m_pathUnits.m_buffer[unit].m_buildIndex = args.buildIndex;
-			this.m_pathUnits.m_buffer[unit].m_position00 = args.startPosA;
-			this.m_pathUnits.m_buffer[unit].m_position01 = args.endPosA;
-			this.m_pathUnits.m_buffer[unit].m_position02 = args.startPosB;
-			this.m_pathUnits.m_buffer[unit].m_position03 = args.endPosB;
-			this.m_pathUnits.m_buffer[unit].m_position11 = args.vehiclePosition;
-			this.m_pathUnits.m_buffer[unit].m_laneTypes = (byte)args.laneTypes;
-			this.m_pathUnits.m_buffer[unit].m_vehicleTypes = (ushort)args.vehicleTypes;
-			this.m_pathUnits.m_buffer[unit].m_length = args.maxLength;
-			this.m_pathUnits.m_buffer[unit].m_positionCount = 20;
-			int minQueued = 10000000;
+                m_pathUnitCount = (int)(m_pathUnits.ItemCount() - 1u);
+            }
+            finally {
+                Monitor.Exit(m_bufferLock);
+            }
+
+            unit = pathUnitId;
+
+            if (args.isHeavyVehicle) {
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IS_HEAVY;
+            }
+
+            if (args.ignoreBlocked || args.ignoreFlooded) {
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_BLOCKED;
+            }
+
+            if (args.stablePath) {
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_STABLE_PATH;
+            }
+
+            if (args.randomParking) {
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_RANDOM_PARKING;
+            }
+
+            if (args.ignoreFlooded) {
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_FLOODED;
+            }
+
+            if (args.hasCombustionEngine) {
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_COMBUSTION;
+            }
+
+            if (args.ignoreCosts) {
+                m_pathUnits.m_buffer[unit].m_simulationFlags |= PathUnit.FLAG_IGNORE_COST;
+            }
+
+            m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;
+            m_pathUnits.m_buffer[unit].m_buildIndex = args.buildIndex;
+            m_pathUnits.m_buffer[unit].m_position00 = args.startPosA;
+            m_pathUnits.m_buffer[unit].m_position01 = args.endPosA;
+            m_pathUnits.m_buffer[unit].m_position02 = args.startPosB;
+            m_pathUnits.m_buffer[unit].m_position03 = args.endPosB;
+            m_pathUnits.m_buffer[unit].m_position11 = args.vehiclePosition;
+            m_pathUnits.m_buffer[unit].m_laneTypes = (byte)args.laneTypes;
+            m_pathUnits.m_buffer[unit].m_vehicleTypes = (ushort)args.vehicleTypes;
+            m_pathUnits.m_buffer[unit].m_length = args.maxLength;
+            m_pathUnits.m_buffer[unit].m_positionCount = 20;
+            int minQueued = 10000000;
 #if PF2
-			CustomPathFind2 pathFind = null;
+            CustomPathFind2 pathFind = null;
 #else
 			CustomPathFind pathFind = null;
 #endif
 
 #if QUEUEDSTATS
-			TotalQueuedPathFinds = 0;
+            TotalQueuedPathFinds = 0;
 #endif
-			for (int i = 0; i < _replacementPathFinds.Length; ++i) {
+            for (int i = 0; i < _replacementPathFinds.Length; ++i) {
 #if PF2
-				CustomPathFind2 pathFindCandidate = _replacementPathFinds[i];
+                CustomPathFind2 pathFindCandidate = _replacementPathFinds[i];
 #else
 				CustomPathFind pathFindCandidate = _replacementPathFinds[i];
 #endif
 
 #if QUEUEDSTATS
-				TotalQueuedPathFinds += (uint)pathFindCandidate.m_queuedPathFindCount;
+                TotalQueuedPathFinds += (uint)pathFindCandidate.m_queuedPathFindCount;
 #endif
-				if (pathFindCandidate.IsAvailable
-					&& pathFindCandidate.m_queuedPathFindCount < minQueued) {
-					minQueued = pathFindCandidate.m_queuedPathFindCount;
-					pathFind = pathFindCandidate;
-				}
-			}
+                if (pathFindCandidate.IsAvailable
+                    && pathFindCandidate.m_queuedPathFindCount < minQueued) {
+                    minQueued = pathFindCandidate.m_queuedPathFindCount;
+                    pathFind = pathFindCandidate;
+                }
+            }
 
 #if PF2
-			if (pathFind != null && pathFind.CalculatePath(unit, args.skipQueue)) {
-				return true;
-			}
+            if (pathFind != null && pathFind.CalculatePath(unit, args.skipQueue)) {
+                return true;
+            }
 #else
 			if (pathFind != null && pathFind.ExtCalculatePath(unit, args.skipQueue)) {
 				return true;
 			}
 #endif
 
-			// NON-STOCK CODE START
-			try {
-				Monitor.Enter(this.m_bufferLock);
+            // NON-STOCK CODE START
+            try {
+                Monitor.Enter(m_bufferLock);
 
-				queueItems[pathUnitId].queued = false;
-				// NON-STOCK CODE END
-				this.ReleasePath(unit);
+                QueueItems[pathUnitId].queued = false;
+                // NON-STOCK CODE END
+                ReleasePath(unit);
 
-				// NON-STOCK CODE START
-				this.m_pathUnitCount = (int)(this.m_pathUnits.ItemCount() - 1u);
-			} finally {
-				Monitor.Exit(this.m_bufferLock);
-			}
-			// NON-STOCK CODE END
-			return false;
-		}
+                // NON-STOCK CODE START
+                m_pathUnitCount = (int)(m_pathUnits.ItemCount() - 1u);
+            }
+            finally {
+                Monitor.Exit(m_bufferLock);
+            }
+
+            // NON-STOCK CODE END
+            return false;
+        }
 
 
 
-		/// <summary>
-		/// Finds a suitable path position for a walking citizen with the given world position.
-		/// If secondary lane constraints are given also checks whether there exists another lane that matches those constraints.
-		/// </summary>
-		/// <param name="pos">world position</param>
-		/// <param name="laneTypes">allowed lane types</param>
-		/// <param name="vehicleTypes">allowed vehicle types</param>
-		/// <param name="otherLaneTypes">allowed lane types for secondary lane</param>
-		/// <param name="otherVehicleTypes">other vehicle types for secondary lane</param>
-		/// <param name="allowTransport">public transport allowed?</param>
-		/// <param name="allowUnderground">underground position allowed?</param>
-		/// <param name="position">resulting path position</param>
-		/// <returns><code>true</code> if a position could be found, <code>false</code> otherwise</returns>
-		public static bool FindCitizenPathPosition(Vector3 pos, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, NetInfo.LaneType otherLaneTypes, VehicleInfo.VehicleType otherVehicleTypes, bool allowTransport, bool allowUnderground, out PathUnit.Position position) {
-			// TODO move to ExtPathManager after harmony upgrade
-			position = default(PathUnit.Position);
-			float minDist = 1E+10f;
-			PathUnit.Position posA;
-			PathUnit.Position posB;
-			float distA;
-			float distB;
-			if (ExtPathManager.Instance.FindPathPositionWithSpiralLoop(pos, ItemClass.Service.Road, laneTypes, vehicleTypes, otherLaneTypes, otherVehicleTypes, allowUnderground, false, Options.parkingAI ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
-				minDist = distA;
-				position = posA;
-			}
-			if (ExtPathManager.Instance.FindPathPositionWithSpiralLoop(pos, ItemClass.Service.Beautification, laneTypes, vehicleTypes, otherLaneTypes, otherVehicleTypes, allowUnderground, false, Options.parkingAI ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
-				minDist = distA;
-				position = posA;
-			}
-			if (allowTransport && ExtPathManager.Instance.FindPathPositionWithSpiralLoop(pos, ItemClass.Service.PublicTransport, laneTypes, vehicleTypes, otherLaneTypes, otherVehicleTypes, allowUnderground, false, Options.parkingAI ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance : 32f, out posA, out posB, out distA, out distB) && distA < minDist) {
-				minDist = distA;
-				position = posA;
-			}
-			return position.m_segment != 0;
-		}
+        /// <summary>
+        /// Finds a suitable path position for a walking citizen with the given world position.
+        /// If secondary lane constraints are given also checks whether there exists another lane that matches those constraints.
+        /// </summary>
+        /// <param name="pos">world position</param>
+        /// <param name="laneTypes">allowed lane types</param>
+        /// <param name="vehicleTypes">allowed vehicle types</param>
+        /// <param name="otherLaneTypes">allowed lane types for secondary lane</param>
+        /// <param name="otherVehicleTypes">other vehicle types for secondary lane</param>
+        /// <param name="allowTransport">public transport allowed?</param>
+        /// <param name="allowUnderground">underground position allowed?</param>
+        /// <param name="position">resulting path position</param>
+        /// <returns><code>true</code> if a position could be found, <code>false</code> otherwise</returns>
+        public static bool FindCitizenPathPosition(Vector3 pos,
+                                                   NetInfo.LaneType laneTypes,
+                                                   VehicleInfo.VehicleType vehicleTypes,
+                                                   NetInfo.LaneType otherLaneTypes,
+                                                   VehicleInfo.VehicleType otherVehicleTypes,
+                                                   bool allowTransport,
+                                                   bool allowUnderground,
+                                                   out PathUnit.Position position) {
+            // TODO move to ExtPathManager after harmony upgrade
+            position = default(PathUnit.Position);
+            float minDist = 1E+10f;
+            if (ExtPathManager.Instance.FindPathPositionWithSpiralLoop(
+                    pos,
+                    ItemClass.Service.Road,
+                    laneTypes,
+                    vehicleTypes,
+                    otherLaneTypes,
+                    otherVehicleTypes,
+                    allowUnderground,
+                    false,
+                    Options.parkingAI
+                        ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
+                        : 32f,
+                    out var posA,
+                    out _,
+                    out var distA,
+                    out _) && distA < minDist) {
+                minDist = distA;
+                position = posA;
+            }
 
-		/*internal void ResetQueueItem(uint unit) {
-			queueItems[unit].Reset();
-		}*/
+            if (ExtPathManager.Instance.FindPathPositionWithSpiralLoop(
+                    pos,
+                    ItemClass.Service.Beautification,
+                    laneTypes,
+                    vehicleTypes,
+                    otherLaneTypes,
+                    otherVehicleTypes,
+                    allowUnderground,
+                    false,
+                    Options.parkingAI
+                        ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
+                        : 32f,
+                    out posA,
+                    out _,
+                    out distA,
+                    out _) && distA < minDist) {
+                minDist = distA;
+                position = posA;
+            }
 
-		private void StopPathFinds() {
+            if (allowTransport && ExtPathManager.Instance.FindPathPositionWithSpiralLoop(
+                    pos,
+                    ItemClass.Service.PublicTransport,
+                    laneTypes,
+                    vehicleTypes,
+                    otherLaneTypes,
+                    otherVehicleTypes,
+                    allowUnderground,
+                    false,
+                    Options.parkingAI
+                        ? GlobalConfig
+                          .Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
+                        : 32f,
+                    out posA,
+                    out _,
+                    out distA,
+                    out _) && distA < minDist) {
+                position = posA;
+            }
+
+            return position.m_segment != 0;
+        }
+
+        /*internal void ResetQueueItem(uint unit) {
+                queueItems[unit].Reset();
+        }*/
+
+        private void StopPathFinds() {
 #if PF2
-			foreach (CustomPathFind2 pathFind in _replacementPathFinds) {
-				UnityEngine.Object.Destroy(pathFind);
-			}
+            foreach (CustomPathFind2 pathFind in _replacementPathFinds) {
+                Destroy(pathFind);
+            }
 #else
 			foreach (CustomPathFind pathFind in _replacementPathFinds) {
 				UnityEngine.Object.Destroy(pathFind);
 			}
 #endif
-		}
+        }
 
-		protected virtual void OnDestroy() {
-			Log._Debug("CustomPathManager: OnDestroy");
-			StopPathFinds();
-		}
-	}
+        protected virtual void OnDestroy() {
+            Log._Debug("CustomPathManager: OnDestroy");
+            StopPathFinds();
+        }
+    }
 }
