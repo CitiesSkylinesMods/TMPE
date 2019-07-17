@@ -73,30 +73,31 @@
                     {
                         vehManager.m_vehicles.m_buffer[curVehicleId].m_trailingVehicle = trailerVehicleId;
 
-                        var theVehicle = vehManager.m_vehicles.m_buffer[trailerVehicleId];
+                        var vehicleBuffer = vehManager.m_vehicles.m_buffer;
 
-                        theVehicle.m_leadingVehicle = curVehicleId;
-                        theVehicle.m_gateIndex = vehicleData.m_gateIndex;
+                        vehicleBuffer[trailerVehicleId].m_leadingVehicle = curVehicleId;
+                        vehicleBuffer[trailerVehicleId].m_gateIndex = vehicleData.m_gateIndex;
 
                         if (inverted) {
-                            theVehicle.m_flags |= Vehicle.Flags.Inverted;
+                            vehicleBuffer[trailerVehicleId].m_flags |= Vehicle.Flags.Inverted;
                         }
 
                         if (reversed) {
-                            theVehicle.m_flags |= Vehicle.Flags.Reversed;
+                            vehicleBuffer[trailerVehicleId].m_flags |= Vehicle.Flags.Reversed;
                         }
 
-                        theVehicle.m_frame0.m_rotation = lastFrameData.m_rotation;
-                        theVehicle.m_frame1.m_rotation = lastFrameData.m_rotation;
-                        theVehicle.m_frame2.m_rotation = lastFrameData.m_rotation;
-                        theVehicle.m_frame3.m_rotation = lastFrameData.m_rotation;
+                        vehicleBuffer[trailerVehicleId].m_frame0.m_rotation = lastFrameData.m_rotation;
+                        vehicleBuffer[trailerVehicleId].m_frame1.m_rotation = lastFrameData.m_rotation;
+                        vehicleBuffer[trailerVehicleId].m_frame2.m_rotation = lastFrameData.m_rotation;
+                        vehicleBuffer[trailerVehicleId].m_frame3.m_rotation = lastFrameData.m_rotation;
 
                         trailerInfo.m_vehicleAI.FrameDataUpdated(
                             trailerVehicleId,
-                            ref theVehicle,
-                            ref theVehicle.m_frame0);
+                            ref vehicleBuffer[trailerVehicleId],
+                            ref vehicleBuffer[trailerVehicleId].m_frame0);
 
-                        CustomVehicle.CustomSpawn(ref theVehicle, trailerVehicleId); // NON-STOCK CODE
+                        CustomVehicle.CustomSpawn(ref vehicleBuffer[trailerVehicleId],
+                                                  trailerVehicleId); // NON-STOCK CODE
                         curVehicleId = trailerVehicleId;
                     }
 
@@ -110,6 +111,7 @@
 
             // NON-STOCK CODE START
             ExtVehicleManager.Instance.OnSpawnVehicle(vehicleId, ref vehicleData);
+
             // NON-STOCK CODE END
         }
 

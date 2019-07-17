@@ -13,7 +13,7 @@
         /// Do not use directly.
         /// Use DebugSwitch.<EnumName>.Get() to access the switch values
         /// </summary>
-        internal bool[] switches_ = {
+        public bool[] Switches = {
             false, // 0: path-finding debug log
             false, // 1: routing basic debug log
             false, // 2: parking ai debug log (basic)
@@ -130,7 +130,7 @@
 
     static class DebugSwitchExtensions {
         public static bool Get(this DebugSwitch sw) {
-            return GlobalConfig.Instance.Debug.switches_[(int)sw];
+            return GlobalConfig.Instance.Debug.Switches[(int)sw];
         }
     }
 #endif

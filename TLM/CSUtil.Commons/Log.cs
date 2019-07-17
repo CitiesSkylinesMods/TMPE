@@ -31,9 +31,25 @@
             catch (Exception) { }
         }
 
+        /// <summary>
+        /// Will log only if debug mode
+        /// </summary>
+        /// <param name="s">The text</param>
         [Conditional("DEBUG")]
         public static void _Debug(string s) {
             LogToFile(s, LogLevel.Debug);
+        }
+
+        /// <summary>
+        /// Will log only if debug mode is enabled and the condition is true
+        /// </summary>
+        /// <param name="cond">The condition</param>
+        /// <param name="s">The text</param>
+        [Conditional("DEBUG")]
+        public static void _DebugIf(bool cond, string s) {
+            if (cond) {
+                LogToFile(s, LogLevel.Debug);
+            }
         }
 
         [Conditional("TRACE")]
@@ -45,9 +61,25 @@
             LogToFile(s, LogLevel.Info);
         }
 
+        /// <summary>
+        /// Will log a warning only if debug mode
+        /// </summary>
+        /// <param name="s">The text</param>
         [Conditional("DEBUG")]
         public static void _DebugOnlyWarning(string s) {
             LogToFile(s, LogLevel.Warning);
+        }
+
+        /// <summary>
+        /// Log a warning only in debug mode if cond is true
+        /// </summary>
+        /// <param name="cond">The condition</param>
+        /// <param name="s">The text</param>
+        [Conditional("DEBUG")]
+        public static void _DebugOnlyWarningIf(bool cond, string s) {
+            if (cond) {
+                LogToFile(s, LogLevel.Warning);
+            }
         }
 
         public static void Warning(string s) {
@@ -63,7 +95,13 @@
                 Monitor.Enter(LogLock_);
 
                 using (StreamWriter w = File.AppendText(LogFilename_)) {
-                    w.WriteLine($"[{level.ToString()}] @ {sw.ElapsedTicks} {log}");
+                    var secs = sw.ElapsedTicks / Stopwatch.Frequency;
+                    var fraction = sw.ElapsedTicks % Stopwatch.Frequency;
+                    w.WriteLine(
+                        $"{level.ToString()} " +
+                        $"{secs:n0}.{fraction:D7}: " +
+                        $"{log}");
+
                     if (level == LogLevel.Warning || level == LogLevel.Error) {
                         w.WriteLine((new System.Diagnostics.StackTrace()).ToString());
                         w.WriteLine();

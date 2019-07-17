@@ -4,6 +4,9 @@
 indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
+max_line_length = 100
+insert_final_newline = true
+charset = utf-8
 
 [*.cs]
 # csharp_new_line_before_open_brace = methods
