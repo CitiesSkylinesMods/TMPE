@@ -871,7 +871,7 @@ namespace TrafficManager.Custom.PathFinding {
                 }
             }
 #else
-            bool debug = false;
+            bool logLogic = false;
             bool debugPed = false;
 #endif
 #if DEBUGNEWPF && DEBUG
