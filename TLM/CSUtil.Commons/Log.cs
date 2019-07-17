@@ -86,7 +86,27 @@
             LogToFile(s, LogLevel.Warning);
         }
 
+        /// <summary>
+        /// Log a warning only if cond is true
+        /// </summary>
+        /// <param name="cond">The condition</param>
+        /// <param name="s">The text</param>
+        public static void WarningIf(bool cond, string s) {
+            if (cond) {
+                LogToFile(s, LogLevel.Warning);
+            }
+        }
+
         public static void Error(string s) {
+            LogToFile(s, LogLevel.Error);
+        }
+
+        /// <summary>
+        /// Log error only in debug mode
+        /// </summary>
+        /// <param name="s">The text</param>
+        [Conditional("DEBUG")]
+        public static void _DebugOnlyError(string s) {
             LogToFile(s, LogLevel.Error);
         }
 

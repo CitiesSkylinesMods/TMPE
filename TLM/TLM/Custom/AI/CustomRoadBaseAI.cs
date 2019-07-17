@@ -10,7 +10,8 @@ namespace TrafficManager.Custom.AI {
         public void CustomClickNodeButton(ushort nodeId, ref NetNode data, int index) {
             if ((data.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None ||
                 Singleton<InfoManager>.instance.CurrentMode != InfoManager.InfoMode.TrafficRoutes ||
-                Singleton<InfoManager>.instance.CurrentSubMode != InfoManager.SubInfoMode.WaterPower) {
+                Singleton<InfoManager>.instance.CurrentSubMode !=
+                InfoManager.SubInfoMode.WaterPower) {
                 return;
             }
 

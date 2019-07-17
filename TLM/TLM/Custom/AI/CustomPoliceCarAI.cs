@@ -33,7 +33,7 @@
             const NetInfo.LaneType LANE_MASK = NetInfo.LaneType.Vehicle
                                                | NetInfo.LaneType.TransportVehicle;
 
-            if (PathManager.FindPathPosition(
+            if (!PathManager.FindPathPosition(
                     startPos,
                     ItemClass.Service.Road,
                     LANE_MASK,
@@ -45,7 +45,7 @@
                     out var startPosB,
                     out var startDistSqrA,
                     out _)
-                && PathManager.FindPathPosition(
+                || !PathManager.FindPathPosition(
                     endPos,
                     ItemClass.Service.Road,
                     LANE_MASK,
@@ -57,54 +57,57 @@
                     out var endPosB,
                     out var endDistSqrA,
                     out _)) {
-                if (!startBothWays || startDistSqrA < 10f) {
-                    startPosB = default;
-                }
+                return false;
+            }
 
-                if (!endBothWays || endDistSqrA < 10f) {
-                    endPosB = default;
-                }
+            if (!startBothWays || startDistSqrA < 10f) {
+                startPosB = default;
+            }
 
-                // NON-STOCK CODE START
-                PathCreationArgs args;
-                args.extPathType = ExtPathType.None;
-                args.extVehicleType = vehicleType;
-                args.vehicleId = vehicleId;
-                args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
-                args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
-                args.startPosA = startPosA;
-                args.startPosB = startPosB;
-                args.endPosA = endPosA;
-                args.endPosB = endPosB;
-                args.vehiclePosition = default;
-                args.laneTypes = LANE_MASK;
-                args.vehicleTypes = info.m_vehicleType;
-                args.maxLength = 20000f;
-                args.isHeavyVehicle = IsHeavyVehicle();
-                args.hasCombustionEngine = CombustionEngine();
-                args.ignoreBlocked = IgnoreBlocked(vehicleId, ref vehicleData);
-                args.ignoreFlooded = false;
-                args.ignoreCosts = false;
-                args.randomParking = false;
-                args.stablePath = false;
-                args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
+            if (!endBothWays || endDistSqrA < 10f) {
+                endPosB = default;
+            }
 
-                if (CustomPathManager._instance.CustomCreatePath(
+            // NON-STOCK CODE START
+            PathCreationArgs args;
+            args.extPathType = ExtPathType.None;
+            args.extVehicleType = vehicleType;
+            args.vehicleId = vehicleId;
+            args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
+            args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
+            args.startPosA = startPosA;
+            args.startPosB = startPosB;
+            args.endPosA = endPosA;
+            args.endPosB = endPosB;
+            args.vehiclePosition = default;
+            args.laneTypes = LANE_MASK;
+            args.vehicleTypes = info.m_vehicleType;
+            args.maxLength = 20000f;
+            args.isHeavyVehicle = IsHeavyVehicle();
+            args.hasCombustionEngine = CombustionEngine();
+            args.ignoreBlocked = IgnoreBlocked(vehicleId, ref vehicleData);
+            args.ignoreFlooded = false;
+            args.ignoreCosts = false;
+            args.randomParking = false;
+            args.stablePath = false;
+            args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
+
+            if (!CustomPathManager._instance.CustomCreatePath(
                     out var path,
                     ref Singleton<SimulationManager>.instance.m_randomizer,
                     args)) {
-                    // NON-STOCK CODE END
-                    if (vehicleData.m_path != 0u) {
-                        Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
-                    }
-
-                    vehicleData.m_path = path;
-                    vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            // NON-STOCK CODE END
+            if (vehicleData.m_path != 0u) {
+                Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
+            }
+
+            vehicleData.m_path = path;
+            vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
+            return true;
+
         }
     }
 }

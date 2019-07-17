@@ -3,8 +3,8 @@
 
     public static class VectorUtil {
         public static void ClampRectToScreen(ref Rect rect, Vector2 resolution) {
-            Log._Debug($"ClampPosToScreen([{rect.x}, {rect.y}, {rect.xMax}, {rect.yMax}], " +
-                       $"[{resolution.x}, {resolution.y}]) called");
+            // Log._Debug($"ClampPosToScreen([{rect.x}, {rect.y}, {rect.xMax}, {rect.yMax}], " +
+            //           $"[{resolution.x}, {resolution.y}]) called");
             if (rect.x < 0) {
                 rect.x = 0;
             }
@@ -21,7 +21,7 @@
                 rect.y = resolution.y - rect.height;
             }
 
-            Log._Debug($"ClampPosToScreen() -> [{rect.x}, {rect.y}, {rect.xMax}, {rect.yMax}]");
+            // Log._Debug($"ClampPosToScreen() -> [{rect.x}, {rect.y}, {rect.xMax}, {rect.yMax}]");
         }
     }
 }

@@ -108,18 +108,21 @@
             args.stablePath = false;
             args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
-            if (CustomPathManager._instance.CustomCreatePath(out var path, ref simMan.m_randomizer, args)) {
-                // NON-STOCK CODE END
-                if (vehicleData.m_path != 0u) {
-                    Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
-                }
-
-                vehicleData.m_path = path;
-                vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
-                return true;
+            if (!CustomPathManager._instance.CustomCreatePath(
+                    out var path,
+                    ref simMan.m_randomizer,
+                    args)) {
+                return false;
             }
 
-            return false;
+            // NON-STOCK CODE END
+            if (vehicleData.m_path != 0u) {
+                Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
+            }
+
+            vehicleData.m_path = path;
+            vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
+            return true;
         }
     }
 }

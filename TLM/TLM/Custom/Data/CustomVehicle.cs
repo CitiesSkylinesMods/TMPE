@@ -55,13 +55,20 @@
                     }
 
                     var trailerInfo = vehicleInfo.m_trailers[i].m_info;
-                    var inverted = randomizer.Int32(100u) < vehicleInfo.m_trailers[i].m_invertProbability;
-                    length += !hasTrailers ? trailerInfo.m_generatedInfo.m_size.z * 0.5f : trailerInfo.m_generatedInfo.m_size.y;
-                    length -= !inverted ? trailerInfo.m_attachOffsetFront : trailerInfo.m_attachOffsetBack;
-                    var position = lastFrameData.m_position - (lastFrameData.m_rotation * new Vector3(
-                                                                   0f,
-                                                                   !hasTrailers ? 0f : length,
-                                                                   !hasTrailers ? length : 0f));
+                    var inverted = randomizer.Int32(100u) <
+                                   vehicleInfo.m_trailers[i].m_invertProbability;
+                    length += !hasTrailers
+                                  ? trailerInfo.m_generatedInfo.m_size.z * 0.5f
+                                  : trailerInfo.m_generatedInfo.m_size.y;
+                    length -= !inverted
+                                  ? trailerInfo.m_attachOffsetFront
+                                  : trailerInfo.m_attachOffsetBack;
+                    var position = lastFrameData.m_position -
+                                   (lastFrameData.m_rotation * new Vector3(
+                                        0f,
+                                        !hasTrailers ? 0f : length,
+                                        !hasTrailers ? length : 0f));
+
                     if (vehManager.CreateVehicle(
                         out var trailerVehicleId,
                         ref Singleton<SimulationManager>.instance.m_randomizer,
@@ -134,8 +141,9 @@
                     vehManager.ReleaseVehicle(curVehicleId);
                     curVehicleId = trailingVehicleId;
                     if (++numIters > 16384) {
-                        CODebugBase<LogChannel>.Error(LogChannel.Core,
-                                                      $"Invalid list detected!\n{Environment.StackTrace}");
+                        CODebugBase<LogChannel>.Error(
+                            LogChannel.Core,
+                            $"Invalid list detected!\n{Environment.StackTrace}");
                         break;
                     }
                 }

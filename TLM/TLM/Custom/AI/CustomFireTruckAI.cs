@@ -2,11 +2,12 @@
     using API.Traffic.Data;
     using API.Traffic.Enums;
     using ColossalFramework;
-    using PathFinding;
     using JetBrains.Annotations;
     using Manager.Impl;
+    using PathFinding;
     using RedirectionFramework.Attributes;
     using UnityEngine;
+
 #if BENCHMARK
     using CSUtil.Commons.Benchmark;
 #endif
@@ -15,7 +16,7 @@
     public class CustomFireTruckAI : CarAI {
         [RedirectMethod]
         [UsedImplicitly]
-        public bool CustomStartPathFind(ushort vehicleID,
+        public bool CustomStartPathFind(ushort vehicleId,
                                         ref Vehicle vehicleData,
                                         Vector3 startPos,
                                         Vector3 endPos,
@@ -26,7 +27,7 @@
             using (var bm = new Benchmark(null, "OnStartPathFind")) {
 #endif
             var vehicleType = ExtVehicleManager.Instance.OnStartPathFind(
-                vehicleID,
+                vehicleId,
                 ref vehicleData,
                 (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0
                     ? ExtVehicleType.Emergency
@@ -74,7 +75,7 @@
                 PathCreationArgs args;
                 args.extPathType = ExtPathType.None;
                 args.extVehicleType = vehicleType;
-                args.vehicleId = vehicleID;
+                args.vehicleId = vehicleId;
                 args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
                 args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
                 args.startPosA = startPosA;
@@ -87,30 +88,31 @@
                 args.maxLength = 20000f;
                 args.isHeavyVehicle = IsHeavyVehicle();
                 args.hasCombustionEngine = CombustionEngine();
-                args.ignoreBlocked = IgnoreBlocked(vehicleID, ref vehicleData);
+                args.ignoreBlocked = IgnoreBlocked(vehicleId, ref vehicleData);
                 args.ignoreFlooded = false;
                 args.ignoreCosts = false;
                 args.randomParking = false;
                 args.stablePath = false;
                 args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
-                if (CustomPathManager._instance.CustomCreatePath(
-                    out var path,
-                    ref Singleton<SimulationManager>.instance.m_randomizer,
-                    args)) {
-                    // NON-STOCK CODE END
-                    if (vehicleData.m_path != 0u) {
-                        Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
-                    }
-
-                    vehicleData.m_path = path;
-                    vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
-                    return true;
+                if (!CustomPathManager._instance.CustomCreatePath(
+                        out var path,
+                        ref Singleton<SimulationManager>.instance.m_randomizer,
+                        args)) {
+                    return false;
                 }
-            } else {
-                PathfindFailure(vehicleID, ref vehicleData);
+
+                // NON-STOCK CODE END
+                if (vehicleData.m_path != 0u) {
+                    Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);
+                }
+
+                vehicleData.m_path = path;
+                vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
+                return true;
             }
 
+            PathfindFailure(vehicleId, ref vehicleData);
             return false;
         }
     }

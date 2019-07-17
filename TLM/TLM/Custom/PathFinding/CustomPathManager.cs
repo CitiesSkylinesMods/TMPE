@@ -64,7 +64,7 @@ namespace TrafficManager.Custom.PathFinding {
 
             var stockPathFinds = GetComponents<PathFind>();
             var numOfStockPathFinds = stockPathFinds.Length;
-            int numCustomPathFinds = numOfStockPathFinds;
+            var numCustomPathFinds = numOfStockPathFinds;
 
             Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects.");
 #if PF2
@@ -89,16 +89,18 @@ namespace TrafficManager.Custom.PathFinding {
                 }
 
                 Log._Debug("Setting _replacementPathFinds");
-                var fieldInfo = typeof(PathManager).GetField("m_pathfinds", BindingFlags.NonPublic | BindingFlags.Instance);
+                var fieldInfo = typeof(PathManager).GetField(
+                    "m_pathfinds",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
 
                 Log._Debug("Setting m_pathfinds to custom collection");
                 fieldInfo?.SetValue(this, _replacementPathFinds);
 
                 for (var i = 0; i < numOfStockPathFinds; i++) {
-#if DEBUG
                     Log._Debug($"PF {i}: {stockPathFinds[i].m_queuedPathFindCount} queued path-finds");
-#endif
-                    //stockPathFinds[i].WaitForAllPaths(); // would cause deadlock since we have a lock on m_bufferLock
+
+                    // would cause deadlock since we have a lock on m_bufferLock
+                    // stockPathFinds[i].WaitForAllPaths();
                     Destroy(stockPathFinds[i]);
                 }
             } finally {
@@ -120,7 +122,7 @@ namespace TrafficManager.Custom.PathFinding {
             try {
                 Monitor.Enter(m_bufferLock);
 
-                int numIters = 0;
+                var numIters = 0;
                 while (unit != 0u) {
                     if (m_pathUnits.m_buffer[unit].m_referenceCount > 1) {
                         --m_pathUnits.m_buffer[unit].m_referenceCount;
@@ -131,7 +133,7 @@ namespace TrafficManager.Custom.PathFinding {
                             Log.Error($"Will release path unit {unit} which is CREATED!");
                     }*/
 
-                    uint nextPathUnit = m_pathUnits.m_buffer[unit].m_nextPathUnit;
+                    var nextPathUnit = m_pathUnits.m_buffer[unit].m_nextPathUnit;
                     m_pathUnits.m_buffer[unit].m_simulationFlags = 0;
                     m_pathUnits.m_buffer[unit].m_pathFindFlags = 0;
                     m_pathUnits.m_buffer[unit].m_nextPathUnit = 0u;
@@ -140,22 +142,27 @@ namespace TrafficManager.Custom.PathFinding {
                     //queueItems[unit].Reset(); // NON-STOCK CODE
                     unit = nextPathUnit;
                     if (++numIters >= 262144) {
-                        CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+                        CODebugBase<LogChannel>.Error(
+                            LogChannel.Core,
+                            "Invalid list detected!\n" + Environment.StackTrace);
                         break;
                     }
                 }
+
                 m_pathUnitCount = (int)(m_pathUnits.ItemCount() - 1u);
             } finally {
                 Monitor.Exit(m_bufferLock);
             }
         }
 
-        public bool CustomCreatePath(out uint unit, ref Randomizer randomizer, PathCreationArgs args) {
+        public bool CustomCreatePath(out uint unit,
+                                     ref Randomizer randomizer,
+                                     PathCreationArgs args) {
             uint pathUnitId;
             try {
                 Monitor.Enter(m_bufferLock);
 
-                int numIters = 0;
+                var numIters = 0;
                 while (true) {
                     // NON-STOCK CODE
                     ++numIters;
@@ -238,7 +245,7 @@ namespace TrafficManager.Custom.PathFinding {
             m_pathUnits.m_buffer[unit].m_vehicleTypes = (ushort)args.vehicleTypes;
             m_pathUnits.m_buffer[unit].m_length = args.maxLength;
             m_pathUnits.m_buffer[unit].m_positionCount = 20;
-            int minQueued = 10000000;
+            var minQueued = 10000000;
 #if PF2
             CustomPathFind2 pathFind = null;
 #else
@@ -248,9 +255,9 @@ namespace TrafficManager.Custom.PathFinding {
 #if QUEUEDSTATS
             TotalQueuedPathFinds = 0;
 #endif
-            for (int i = 0; i < _replacementPathFinds.Length; ++i) {
+            for (var i = 0; i < _replacementPathFinds.Length; ++i) {
 #if PF2
-                CustomPathFind2 pathFindCandidate = _replacementPathFinds[i];
+                var pathFindCandidate = _replacementPathFinds[i];
 #else
 				CustomPathFind pathFindCandidate = _replacementPathFinds[i];
 #endif
@@ -319,7 +326,7 @@ namespace TrafficManager.Custom.PathFinding {
                                                    out PathUnit.Position position) {
             // TODO move to ExtPathManager after harmony upgrade
             position = default(PathUnit.Position);
-            float minDist = 1E+10f;
+            var minDist = 1E+10f;
             if (ExtPathManager.Instance.FindPathPositionWithSpiralLoop(
                     pos,
                     ItemClass.Service.Road,
@@ -389,7 +396,7 @@ namespace TrafficManager.Custom.PathFinding {
 
         private void StopPathFinds() {
 #if PF2
-            foreach (CustomPathFind2 pathFind in _replacementPathFinds) {
+            foreach (var pathFind in _replacementPathFinds) {
                 Destroy(pathFind);
             }
 #else

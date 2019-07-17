@@ -60,8 +60,7 @@
 
             // NON-STOCK CODE END
             var reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
-            ushort connectedVehicleId;
-            connectedVehicleId = reversed ? vehicleData.GetLastVehicle(vehicleId) : vehicleId;
+            var connectedVehicleId = reversed ? vehicleData.GetLastVehicle(vehicleId) : vehicleId;
 
             var instance = Singleton<VehicleManager>.instance;
             var info = instance.m_vehicles.m_buffer[connectedVehicleId].Info;
@@ -147,8 +146,9 @@
                     connectedVehicleId = instance.m_vehicles.m_buffer[connectedVehicleId].m_trailingVehicle;
 
                     if (++num3 > 16384) {
-                        CODebugBase<LogChannel>.Error(LogChannel.Core,
-                                                      $"Invalid list detected!\n{Environment.StackTrace}");
+                        CODebugBase<LogChannel>.Error(
+                            LogChannel.Core,
+                              $"Invalid list detected!\n{Environment.StackTrace}");
                         break;
                     }
                 }
@@ -177,14 +177,7 @@
                                          int lodPhysics) {
             var reversed = (leaderData.m_flags & Vehicle.Flags.Reversed) != 0;
             var frontVehicleId = (!reversed) ? vehicleData.m_leadingVehicle : vehicleData.m_trailingVehicle;
-            VehicleInfo vehicleInfo;
-
-            if (leaderId != vehicleId) {
-                vehicleInfo = leaderData.Info;
-            } else {
-                vehicleInfo = m_info;
-            }
-
+            var vehicleInfo = leaderId != vehicleId ? leaderData.Info : m_info;
             var trainAi = vehicleInfo.m_vehicleAI as TrainAI;
 
             if (frontVehicleId != 0) {
@@ -376,7 +369,10 @@
                 }
 
                 beforeRotToTargetPos1Diff = curInvRot * beforeRotToTargetPos1Diff;
-                var negTotalAttachLen = -(((m_info.m_generatedInfo.m_wheelBase + frontVehInfo.m_generatedInfo.m_wheelBase) * 0.5f) + attachOffset + frontAttachOffset);
+                var negTotalAttachLen =
+                    -(((m_info.m_generatedInfo.m_wheelBase +
+                        frontVehInfo.m_generatedInfo.m_wheelBase) * 0.5f) + attachOffset +
+                      frontAttachOffset);
                 var hasPath = false;
 
                 if (vehicleData.m_path != 0u && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == 0) {
@@ -583,7 +579,9 @@
                                     } else {
                                         posBeforeWheelRot =
                                             posAfterWheelRot +
-                                            Vector3.Normalize(vehicleData.m_targetPos1 - vehicleData.m_targetPos0) *
+                                            Vector3.Normalize(
+                                                vehicleData.m_targetPos1 -
+                                                vehicleData.m_targetPos0) *
                                             m_info.m_generatedInfo.m_wheelBase;
                                         posIndex = -1;
                                         UpdatePathTargetPositions(
@@ -598,7 +596,8 @@
                                             0,
                                             0,
                                             Vector3.SqrMagnitude(
-                                                vehicleData.m_targetPos1 - vehicleData.m_targetPos0) + 1f,
+                                                vehicleData.m_targetPos1 -
+                                                vehicleData.m_targetPos0) + 1f,
                                             1f);
                                     }
                                 } else {
@@ -685,7 +684,7 @@
                         beforeRotToTargetPos1Diff = -beforeRotToTargetPos1Diff;
                     }
 
-                    var vel = Vector3.ClampMagnitude(beforeRotToTargetPos1Diff * 0.5f - curveTangent, braking);
+                    var vel = Vector3.ClampMagnitude((beforeRotToTargetPos1Diff * 0.5f) - curveTangent, braking);
                     targetMotion = curveTangent + vel;
                 }
             }
@@ -700,10 +699,16 @@
             Vector3 targetPos;
             if (reversed) {
                 frameData.m_rotation = Quaternion.LookRotation(posAfterWheelRot - posBeforeWheelRot);
-                targetPos = posBeforeWheelRot + (frameData.m_rotation * new Vector3(0f, 0f, m_info.m_generatedInfo.m_wheelBase * 0.5f));
+                targetPos = posBeforeWheelRot + (frameData.m_rotation * new Vector3(
+                                                     0f,
+                                                     0f,
+                                                     m_info.m_generatedInfo.m_wheelBase * 0.5f));
             } else {
                 frameData.m_rotation = Quaternion.LookRotation(posBeforeWheelRot - posAfterWheelRot);
-                targetPos = (posBeforeWheelRot - frameData.m_rotation * new Vector3(0f, 0f, m_info.m_generatedInfo.m_wheelBase * 0.5f));
+                targetPos = posBeforeWheelRot - (frameData.m_rotation * new Vector3(
+                                                     0f,
+                                                     0f,
+                                                     m_info.m_generatedInfo.m_wheelBase * 0.5f));
             }
 
             frameData.m_velocity = targetPos - frameData.m_position;
@@ -796,8 +801,8 @@
                 allowUnderground = true;
                 allowUnderground2 = true;
             } else {
-                allowUnderground = ((vehicleData.m_flags & (Vehicle.Flags.Underground
-                                                            | Vehicle.Flags.Transition)) != 0);
+                allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground
+                                                            | Vehicle.Flags.Transition)) != 0;
                 allowUnderground2 = false;
             }
 
@@ -1061,74 +1066,82 @@
                     return;
                 }
 
-                ExtVehicleManager.Instance.UpdateVehiclePosition(vehicleId, ref vehicleData
-                    /*, lastFrameData.m_velocity.magnitude*/
+                ExtVehicleManager.Instance.UpdateVehiclePosition(
+                        vehicleId,
+                        ref vehicleData
+                        /*, lastFrameData.m_velocity.magnitude*/
                     );
                 maxSpeed = oldMaxSpeed;
-                //} // NON-STOCK CODE
+
+                // NON-STOCK CODE
             }
         }
 
         [RedirectMethod]
         private void CustomForceTrafficLights(ushort vehicleId, ref Vehicle vehicleData, bool reserveSpace) {
             var pathUnitId = vehicleData.m_path;
-            if (pathUnitId != 0u) {
-                var netMan = Singleton<NetManager>.instance;
-                var pathMan = Singleton<PathManager>.instance;
-                var pathPosIndex = vehicleData.m_pathPositionIndex;
+            if (pathUnitId == 0u) {
+                return;
+            }
 
-                if (pathPosIndex == 255) {
-                    pathPosIndex = 0;
+            var netMan = Singleton<NetManager>.instance;
+            var pathMan = Singleton<PathManager>.instance;
+            var pathPosIndex = vehicleData.m_pathPositionIndex;
+
+            if (pathPosIndex == 255) {
+                pathPosIndex = 0;
+            }
+
+            pathPosIndex = (byte)(pathPosIndex >> 1);
+            var stopLoop = false; // NON-STOCK CODE
+            for (var i = 0; i < 6; i++) {
+                if (!pathMan.m_pathUnits.m_buffer[pathUnitId].GetPosition(pathPosIndex, out var position)) {
+                    return;
                 }
 
-                pathPosIndex = (byte)(pathPosIndex >> 1);
-                var stopLoop = false; // NON-STOCK CODE
-                for (var i = 0; i < 6; i++) {
-                    if (!pathMan.m_pathUnits.m_buffer[pathUnitId].GetPosition(pathPosIndex, out var position)) {
-                        return;
-                    }
+                // NON-STOCK CODE START
+                var transitNodeId = position.m_offset < 128
+                                        ? netMan.m_segments.m_buffer[position.m_segment].m_startNode
+                                        : netMan.m_segments.m_buffer[position.m_segment].m_endNode;
 
-                    // NON-STOCK CODE START
-                    var transitNodeId = position.m_offset < 128
-                                            ? netMan.m_segments.m_buffer[position.m_segment].m_startNode
-                                            : netMan.m_segments.m_buffer[position.m_segment].m_endNode;
-
-                    if (Options.timedLightsEnabled) {
-                        // when a TTL is active only reserve space if it shows green
-                        if (pathMan.m_pathUnits.m_buffer[pathUnitId].GetNextPosition(pathPosIndex, out var nextPos)) {
-                            if (!VehicleBehaviorManager.Instance.IsSpaceReservationAllowed(
-                                    transitNodeId,
-                                    position,
-                                    nextPos)) {
-                                stopLoop = true;
-                            }
+                if (Options.timedLightsEnabled) {
+                    // when a TTL is active only reserve space if it shows green
+                    if (pathMan.m_pathUnits.m_buffer[pathUnitId].GetNextPosition(pathPosIndex, out var nextPos)) {
+                        if (!VehicleBehaviorManager.Instance.IsSpaceReservationAllowed(
+                                transitNodeId,
+                                position,
+                                nextPos)) {
+                            stopLoop = true;
                         }
                     }
+                }
 
-                    // NON-STOCK CODE END
-                    if (reserveSpace && i >= 1 && i <= 2) {
-                        var laneId = PathManager.GetLaneID(position);
-                        if (laneId != 0u) {
-                            reserveSpace = netMan.m_lanes.m_buffer[laneId]
-                                                 .ReserveSpace(m_info.m_generatedInfo.m_size.z, vehicleId);
-                        }
+                // NON-STOCK CODE END
+                if (reserveSpace && i >= 1 && i <= 2) {
+                    var laneId = PathManager.GetLaneID(position);
+                    if (laneId != 0u) {
+                        reserveSpace = netMan.m_lanes.m_buffer[laneId]
+                                             .ReserveSpace(m_info.m_generatedInfo.m_size.z, vehicleId);
                     }
+                }
 
-                    ForceTrafficLights(transitNodeId, position); // NON-STOCK CODE
+                ForceTrafficLights(transitNodeId, position); // NON-STOCK CODE
 
-                    // NON-STOCK CODE START
-                    if (stopLoop) {
-                        return;
-                    }
+                // NON-STOCK CODE START
+                if (stopLoop) {
+                    return;
+                }
 
-                    // NON-STOCK CODE END
-                    if ((pathPosIndex += 1) >= pathMan.m_pathUnits.m_buffer[pathUnitId].m_positionCount) {
-                        pathUnitId = pathMan.m_pathUnits.m_buffer[pathUnitId].m_nextPathUnit;
-                        pathPosIndex = 0;
-                        if (pathUnitId == 0u) {
-                            return;
-                        }
-                    }
+                // NON-STOCK CODE END
+                if ((pathPosIndex += 1) <
+                    pathMan.m_pathUnits.m_buffer[pathUnitId].m_positionCount) {
+                    continue;
+                }
+
+                pathUnitId = pathMan.m_pathUnits.m_buffer[pathUnitId].m_nextPathUnit;
+                pathPosIndex = 0;
+                if (pathUnitId == 0u) {
+                    return;
                 }
             }
         }
@@ -1152,17 +1165,19 @@
                 out var vehicles,
                 out var pedestrians);
 
-            if (!vehicles && rand >= 196u) {
-                vehicles = true;
-                RoadBaseAI.SetTrafficLightState(
-                    transitNodeId,
-                    ref netMan.m_segments.m_buffer[position.m_segment],
-                    frame - simGroup,
-                    vehicleLightState,
-                    pedestrianLightState,
-                    vehicles,
-                    pedestrians);
+            if (vehicles || rand < 196u) {
+                return;
             }
+
+            vehicles = true;
+            RoadBaseAI.SetTrafficLightState(
+                transitNodeId,
+                ref netMan.m_segments.m_buffer[position.m_segment],
+                frame - simGroup,
+                vehicleLightState,
+                pedestrianLightState,
+                true,
+                pedestrians);
         }
 
         [RedirectReverse]
@@ -1172,7 +1187,7 @@
                                            ref Vehicle vehicleData,
                                            Segment3 segment,
                                            ushort ignoreVehicle) {
-            Log.Error("CustomTrainAI.CheckOverlap (1) called.");
+            Log._DebugOnlyError("CustomTrainAI.CheckOverlap (1) called.");
             return false;
         }
 
@@ -1188,7 +1203,7 @@
                                              ref bool overlap,
                                              Vector3 min,
                                              Vector3 max) {
-            Log.Error("CustomTrainAI.CheckOverlap (2) called.");
+            Log._DebugOnlyError("CustomTrainAI.CheckOverlap (2) called.");
             return 0;
         }
 
@@ -1196,7 +1211,7 @@
         [MethodImpl(MethodImplOptions.NoInlining)]
         [UsedImplicitly]
         private static void InitializePath(ushort vehicleId, ref Vehicle vehicleData) {
-            Log.Error("CustomTrainAI.InitializePath called");
+            Log._DebugOnlyError("CustomTrainAI.InitializePath called");
         }
 
         [RedirectReverse]
@@ -1214,21 +1229,21 @@
                                                      int max2,
                                                      float minSqrDistanceA,
                                                      float minSqrDistanceB) {
-            Log.Error($"CustomTrainAI.InvokeUpdatePathTargetPositions called! trainAI={trainAi}");
+            Log._DebugOnlyError($"CustomTrainAI.InvokeUpdatePathTargetPositions called! trainAI={trainAi}");
         }
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
         [UsedImplicitly]
         private static void Reverse(ushort leaderId, ref Vehicle leaderData) {
-            Log.Error("CustomTrainAI.Reverse called");
+            Log._DebugOnlyError("CustomTrainAI.Reverse called");
         }
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
         [UsedImplicitly]
         private static float GetMaxSpeed(ushort leaderId, ref Vehicle leaderData) {
-            Log.Error("CustomTrainAI.GetMaxSpeed called");
+            Log._DebugOnlyError("CustomTrainAI.GetMaxSpeed called");
             return 0f;
         }
 
@@ -1236,7 +1251,7 @@
         [MethodImpl(MethodImplOptions.NoInlining)]
         [UsedImplicitly]
         private static float CalculateMaxSpeed(float targetDist, float targetSpeed, float maxBraking) {
-            Log.Error("CustomTrainAI.CalculateMaxSpeed called");
+            Log._DebugOnlyError("CustomTrainAI.CalculateMaxSpeed called");
             return 0f;
         }
     }

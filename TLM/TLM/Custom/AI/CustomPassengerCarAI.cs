@@ -204,7 +204,7 @@ namespace TrafficManager.Custom.AI {
         [MethodImpl(MethodImplOptions.NoInlining)]
         [UsedImplicitly]
         private ushort GetDriverInstance(ushort vehicleId, ref Vehicle data) {
-            Log.Error("GetDriverInstance is not overridden!");
+            Log._DebugOnlyError("GetDriverInstance is not overridden!");
             return 0;
         }
 
@@ -219,7 +219,7 @@ namespace TrafficManager.Custom.AI {
                                                     out Vector3 parkPos,
                                                     out Quaternion parkRot,
                                                     out float parkOffset) {
-            Log.Error("FindParkingSpaceRoadSide is not overridden!");
+            Log._DebugOnlyError("FindParkingSpaceRoadSide is not overridden!");
             parkPos = Vector3.zero;
             parkRot = Quaternion.identity;
             parkOffset = 0f;
@@ -239,7 +239,7 @@ namespace TrafficManager.Custom.AI {
                                             out Vector3 parkPos,
                                             out Quaternion parkRot,
                                             out float parkOffset) {
-            Log.Error("FindParkingSpace is not overridden!");
+            Log._DebugOnlyError("FindParkingSpace is not overridden!");
             parkPos = Vector3.zero;
             parkRot = Quaternion.identity;
             parkOffset = 0f;
@@ -261,7 +261,7 @@ namespace TrafficManager.Custom.AI {
                                                 ref float maxDistance,
                                                 ref Vector3 parkPos,
                                                 ref Quaternion parkRot) {
-            Log.Error("FindParkingSpaceProp is not overridden!");
+            Log._DebugOnlyError("FindParkingSpaceProp is not overridden!");
             return false;
         }
 
@@ -274,7 +274,7 @@ namespace TrafficManager.Custom.AI {
                                         float length,
                                         out float minPos,
                                         out float maxPos) {
-            Log.Error("CheckOverlap is not overridden!");
+            Log._DebugOnlyError("CheckOverlap is not overridden!");
             minPos = 0;
             maxPos = 0;
             return false;

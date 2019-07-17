@@ -190,27 +190,28 @@ namespace TrafficManager.Custom.AI {
             args.stablePath = false;
             args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
-            if (pathMan.CustomCreatePath(out var path,
-                                         ref Singleton<SimulationManager>.instance.m_randomizer,
-                                         args)) {
-                // NON-STOCK CODE END
-                if (vehicleData.m_path != 0u) {
-                    pathMan.ReleasePath(vehicleData.m_path);
-                }
-
-                vehicleData.m_path = path;
-                vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
-                return true;
+            if (!pathMan.CustomCreatePath(
+                    out var path,
+                    ref Singleton<SimulationManager>.instance.m_randomizer,
+                    args)) {
+                return false;
             }
 
-            return false;
+            // NON-STOCK CODE END
+            if (vehicleData.m_path != 0u) {
+                pathMan.ReleasePath(vehicleData.m_path);
+            }
+
+            vehicleData.m_path = path;
+            vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         [RedirectReverse]
         [UsedImplicitly]
         private void RemoveOffers(ushort vehicleId, ref Vehicle data) {
-            Log.Error("CustomCargoTruckAI.RemoveOffers called");
+            Log._DebugOnlyError("CustomCargoTruckAI.RemoveOffers called");
         }
     }
 }

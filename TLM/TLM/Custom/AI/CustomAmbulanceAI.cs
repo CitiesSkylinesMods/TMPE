@@ -12,7 +12,7 @@
     public class CustomAmbulanceAI : CarAI {
         [RedirectMethod]
         [UsedImplicitly]
-        public bool CustomStartPathFind(ushort vehicleID,
+        public bool CustomStartPathFind(ushort vehicleId,
                                         ref Vehicle vehicleData,
                                         Vector3 startPos,
                                         Vector3 endPos,
@@ -22,7 +22,7 @@
             var emergencyVehType = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0
                                      ? ExtVehicleType.Emergency
                                      : ExtVehicleType.Service;
-            var vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, emergencyVehType);
+            var vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, emergencyVehType);
 
             var info = m_info;
             var allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
@@ -63,7 +63,7 @@
                 PathCreationArgs args;
                 args.extPathType = ExtPathType.None;
                 args.extVehicleType = vehicleType;
-                args.vehicleId = vehicleID;
+                args.vehicleId = vehicleId;
                 args.spawned = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
                 args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
                 args.startPosA = startPosA;
@@ -76,7 +76,7 @@
                 args.maxLength = 20000f;
                 args.isHeavyVehicle = IsHeavyVehicle();
                 args.hasCombustionEngine = CombustionEngine();
-                args.ignoreBlocked = IgnoreBlocked(vehicleID, ref vehicleData);
+                args.ignoreBlocked = IgnoreBlocked(vehicleId, ref vehicleData);
                 args.ignoreFlooded = false;
                 args.ignoreCosts = false;
                 args.randomParking = false;
@@ -95,7 +95,7 @@
                     return true;
                 }
             } else {
-                PathfindFailure(vehicleID, ref vehicleData);
+                PathfindFailure(vehicleId, ref vehicleData);
             }
 
             return false;

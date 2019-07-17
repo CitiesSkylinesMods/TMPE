@@ -1,5 +1,4 @@
 ﻿namespace TrafficManager.Custom.AI {
-    using System;
     using System.Runtime.CompilerServices;
     using ColossalFramework;
     using ColossalFramework.Math;
@@ -50,7 +49,8 @@
                                && (DebugSettings.TargetBuildingId == 0
                                    || DebugSettings.TargetBuildingId == citizenData.m_targetBuilding);
             var logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            var extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+#else
+            var logParkingAi = false;
 #endif
 
             trailer = null;
@@ -119,16 +119,16 @@
             VehicleInfo carInfo = null;
             if (Options.parkingAI && useCar && !useTaxi) {
                 var parkedVehicleId = Singleton<CitizenManager>
-                                      .instance.m_citizens.m_buffer[citizenData.m_citizen].m_parkedVehicle;
+                                      .instance.m_citizens.m_buffer[citizenData.m_citizen]
+                                      .m_parkedVehicle;
                 if (parkedVehicleId != 0) {
-#if DEBUG
-                    if (logParkingAi) {
-                        Log._Debug($"CustomTouristAI.CustomGetVehicleInfo({instanceId}): " +
-                                   $"Citizen instance {instanceId} owns a parked vehicle {parkedVehicleId}. " +
-                                   $"Reusing vehicle info.");
-                    }
-#endif
-                    carInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
+                    Log._DebugIf(
+                        logParkingAi,
+                        $"CustomTouristAI.CustomGetVehicleInfo({instanceId}): " +
+                        $"Citizen instance {instanceId} owns a parked vehicle {parkedVehicleId}. " +
+                        $"Reusing vehicle info.");
+                    carInfo = Singleton<VehicleManager>
+                              .instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
                 }
             }
 
@@ -181,7 +181,7 @@
         [MethodImpl(MethodImplOptions.NoInlining)]
         [UsedImplicitly]
         private int GetTaxiProbability() {
-            Log.Error("CustomTouristAI.GetTaxiProbability called!");
+            Log._DebugOnlyError("CustomTouristAI.GetTaxiProbability called!");
             return 20;
         }
 
@@ -189,7 +189,7 @@
         [MethodImpl(MethodImplOptions.NoInlining)]
         [UsedImplicitly]
         private int GetBikeProbability() {
-            Log.Error("CustomTouristAI.GetBikeProbability called!");
+            Log._DebugOnlyError("CustomTouristAI.GetBikeProbability called!");
             return 20;
         }
 
@@ -197,7 +197,7 @@
         [MethodImpl(MethodImplOptions.NoInlining)]
         [UsedImplicitly]
         private int GetCarProbability() {
-            Log.Error("CustomTouristAI.GetCarProbability called!");
+            Log._DebugOnlyError("CustomTouristAI.GetCarProbability called!");
             return 20;
         }
 
@@ -205,7 +205,7 @@
         [MethodImpl(MethodImplOptions.NoInlining)]
         [UsedImplicitly]
         private int GetElectricCarProbability(Citizen.Wealth wealth) {
-            Log.Error("CustomTouristAI.GetElectricCarProbability called!");
+            Log._DebugOnlyError("CustomTouristAI.GetElectricCarProbability called!");
             return 20;
         }
 
@@ -213,7 +213,7 @@
         [MethodImpl(MethodImplOptions.NoInlining)]
         [UsedImplicitly]
         private int GetCamperProbability(Citizen.Wealth wealth) {
-            Log.Error("CustomTouristAI.GetCamperProbability called!");
+            Log._DebugOnlyError("CustomTouristAI.GetCamperProbability called!");
             return 20;
         }
     }
