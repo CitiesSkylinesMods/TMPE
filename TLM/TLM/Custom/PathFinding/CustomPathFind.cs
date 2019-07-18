@@ -341,7 +341,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
             Log._DebugIf(
                 logLogic,
-                "CustomPathFind.PathFindImplementation: START calculating " +
+                () => "CustomPathFind.PathFindImplementation: START calculating " +
                            $"path unit {unit}, type {queueItem.vehicleType}");
 
             if ((byte)(m_laneTypes & NetInfo.LaneType.Vehicle) != 0) {
@@ -463,26 +463,27 @@ namespace TrafficManager.Custom.PathFinding {
                 m_vehicleOffset = 0;
             }
 
-            Log._DebugIf(
-                logLogic,
-                "CustomPathFind.PathFindImplementation: Preparing calculating " +
-                $"path unit {unit}, type {queueItem.vehicleType}:\n" +
-                $"\tbufferItemStartA: segment={bufferItemStartA.m_position.m_segment} " +
-                $"lane={bufferItemStartA.m_position.m_lane} " +
-                $"off={bufferItemStartA.m_position.m_offset} " +
-                $"laneId={bufferItemStartA.m_laneID}\n" +
-                $"\tbufferItemStartB: segment={bufferItemStartB.m_position.m_segment} " +
-                $"lane={bufferItemStartB.m_position.m_lane} " +
-                $"off={bufferItemStartB.m_position.m_offset} laneId={bufferItemStartB.m_laneID}\n" +
-                $"\tbufferItemEndA: segment={bufferItemEndA.m_position.m_segment} " +
-                $"lane={bufferItemEndA.m_position.m_lane} off={bufferItemEndA.m_position.m_offset} " +
-                $"laneId={bufferItemEndA.m_laneID}\n\tbufferItemEndB: " +
-                $"segment={bufferItemEndB.m_position.m_segment} " +
-                $"lane={bufferItemEndB.m_position.m_lane} off={bufferItemEndB.m_position.m_offset} " +
-                $"laneId={bufferItemEndB.m_laneID}\n\tvehicleItem: " +
-                $"segment={data.m_position11.m_segment} lane={data.m_position11.m_lane} " +
-                $"off={data.m_position11.m_offset} laneId={m_vehicleLane} " +
-                $"vehiclePosIndicator={vehiclePosIndicator}\n");
+            if (logLogic) {
+                Log._Debug(
+                    "CustomPathFind.PathFindImplementation: Preparing calculating " +
+                    $"path unit {unit}, type {queueItem.vehicleType}:\n" +
+                    $"\tbufferItemStartA: segment={bufferItemStartA.m_position.m_segment} " +
+                    $"lane={bufferItemStartA.m_position.m_lane} " +
+                    $"off={bufferItemStartA.m_position.m_offset} " +
+                    $"laneId={bufferItemStartA.m_laneID}\n" +
+                    $"\tbufferItemStartB: segment={bufferItemStartB.m_position.m_segment} " +
+                    $"lane={bufferItemStartB.m_position.m_lane} " +
+                    $"off={bufferItemStartB.m_position.m_offset} laneId={bufferItemStartB.m_laneID}\n" +
+                    $"\tbufferItemEndA: segment={bufferItemEndA.m_position.m_segment} " +
+                    $"lane={bufferItemEndA.m_position.m_lane} off={bufferItemEndA.m_position.m_offset} " +
+                    $"laneId={bufferItemEndA.m_laneID}\n\tbufferItemEndB: " +
+                    $"segment={bufferItemEndB.m_position.m_segment} " +
+                    $"lane={bufferItemEndB.m_position.m_lane} off={bufferItemEndB.m_position.m_offset} " +
+                    $"laneId={bufferItemEndB.m_laneID}\n\tvehicleItem: " +
+                    $"segment={data.m_position11.m_segment} lane={data.m_position11.m_lane} " +
+                    $"off={data.m_position11.m_offset} laneId={m_vehicleLane} " +
+                    $"vehiclePosIndicator={vehiclePosIndicator}\n");
+            }
 
             var finalBufferItem = default(BufferItem);
             byte startOffset = 0;
@@ -810,7 +811,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if DEBUGNEWPF
                     Log._DebugIf(
                         logLogic,
-                        $"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {m_pathFindIndex}: " +
+                        () => $"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {m_pathFindIndex}: " +
                         $"Path-find succeeded for unit {unit}");
 #endif
 #endif
@@ -834,7 +835,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if DEBUGNEWPF
                             Log._DebugIf(
                                 logLogic,
-                                $"THREAD #{Thread.CurrentThread.ManagedThreadId} PF " +
+                                () => $"THREAD #{Thread.CurrentThread.ManagedThreadId} PF " +
                                 $"{m_pathFindIndex}: Could not find path for unit {unit} " +
                                 "-- Could not create path unit");
 #endif
@@ -897,7 +898,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if DEBUGNEWPF
             Log._DebugIf(
                 logLogic,
-                $"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {m_pathFindIndex}: " +
+                () => $"THREAD #{Thread.CurrentThread.ManagedThreadId} PF {m_pathFindIndex}: " +
                 $"Could not find path for unit {unit} -- internal error: for loop break");
 #endif
 #endif
@@ -913,34 +914,36 @@ namespace TrafficManager.Custom.PathFinding {
         private void MemoryLog_Flush_If(bool cond,
                                         List<string> logBuf,
                                         uint unitId,
-                                        string s) {
-            if (cond) {
-                logBuf.Add(s);
+                                        Func<string> s) {
 #if DEBUGNEWPF
+            if (cond) {
+                logBuf.Add(s());
                 FlushMainLog(logBuf, unitId);
-#endif
             }
+#endif
         }
 
         [Conditional("DEBUGNEWPF")]
         private void MemoryLog_FlushCost_If(bool cond,
                                             List<string> logBuf,
-                                            string s) {
-            if (cond) {
-                logBuf.Add(s);
+                                            Func<string> s) {
 #if DEBUGNEWPF
+            if (cond) {
+                logBuf.Add(s());
                 FlushCostLog(logBuf);
-#endif
             }
+#endif
         }
 
         [Conditional("DEBUGNEWPF")]
         private void MemoryLog_NoFlush_If(bool cond,
                                          List<string> logBuf,
-                                         string s) {
+                                         Func<string> s) {
+#if DEBUGNEWPF
             if (cond) {
-                logBuf.Add(s);
+                logBuf.Add(s());
             }
+#endif
         }
 
         // be aware:
@@ -1162,7 +1165,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     debugPed,
                                     logBuf,
                                     unitId,
-                                    $"*PED* item: seg. {item.m_position.m_segment}, " +
+                                    () => $"*PED* item: seg. {item.m_position.m_segment}, " +
                                     $"lane {item.m_position.m_lane}, node {nextNodeId} " +
                                     $"({nextIsStartNode}): Exploring left segment\n" +
                                     $"\t_extPathType={queueItem.pathType}\n" +
@@ -1201,7 +1204,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     debugPed,
                                     logBuf,
                                     unitId,
-                                    $"*PED* item: seg. {item.m_position.m_segment}, " +
+                                    () => $"*PED* item: seg. {item.m_position.m_segment}, " +
                                     $"lane {item.m_position.m_lane}, node {nextNodeId} " +
                                     $"({nextIsStartNode}): Exploring right segment\n" +
                                     $"\t_extPathType={queueItem.pathType}\n" +
@@ -1246,7 +1249,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 debugPed,
                                 logBuf,
                                 unitId,
-                                $"*PED* item: seg. {item.m_position.m_segment}, " +
+                                () => $"*PED* item: seg. {item.m_position.m_segment}, " +
                                 $"lane {item.m_position.m_lane}, node {nextNodeId} " +
                                 $"({nextIsStartNode}): Exploring bicycle switch\n" +
                                 $"\t_extPathType={queueItem.pathType}\n" +
@@ -1358,7 +1361,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 debugPed,
                                 logBuf,
                                 unitId,
-                                $"*PED* item: seg. {item.m_position.m_segment}, " +
+                                () => $"*PED* item: seg. {item.m_position.m_segment}, " +
                                 $"lane {item.m_position.m_lane}, node {nextNodeId} " +
                                 $"({nextIsStartNode}): Exploring parking switch\n" +
                                 $"\t_extPathType={queueItem.pathType}\n" +
@@ -1531,7 +1534,7 @@ namespace TrafficManager.Custom.PathFinding {
                         MemoryLog_NoFlush_If(
                                 debugPed,
                                 logBuf,
-                                $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane} " +
+                                () => $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane} " +
                                 $"(id {item.m_laneID}), node {nextNodeId} ({nextIsStartNode}):\n" +
                                 $"\t_extPathType={queueItem.pathType}\n" +
                                 $"\t_vehicleTypes={m_vehicleTypes}, _laneTypes={m_laneTypes}\n" +
@@ -1561,7 +1564,7 @@ namespace TrafficManager.Custom.PathFinding {
                         MemoryLog_NoFlush_If(
                             logLogic,
                             logBuf,
-                            $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, " +
+                            () => $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, " +
                             $"node {nextNodeId} ({nextIsStartNode}):\n" +
                             $"\t_extPathType={queueItem.pathType}\n" +
                             $"\t_vehicleTypes={m_vehicleTypes}, _laneTypes={m_laneTypes}\n" +
@@ -1585,7 +1588,7 @@ namespace TrafficManager.Custom.PathFinding {
                             logLogic,
                             logBuf,
                             unitId,
-                            $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, " +
+                            () => $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, " +
                             $"node {nextNodeId}:\n\t-> using DEFAULT exploration mode\n");
 
                         /*if (performCustomVehicleUturns) {
@@ -1625,7 +1628,7 @@ namespace TrafficManager.Custom.PathFinding {
                         MemoryLog_NoFlush_If(
                             logLogic,
                             logBuf,
-                            $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, " +
+                            () => $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, " +
                             $"node {nextNodeId}:\n\t-> using CUSTOM exploration mode\n");
 
                         var canUseLane = CanUseLane(
@@ -1642,7 +1645,7 @@ namespace TrafficManager.Custom.PathFinding {
                             MemoryLog_NoFlush_If(
                                 logLogic,
                                 logBuf,
-                                $"item: seg. {item.m_position.m_segment}, " +
+                                () => $"item: seg. {item.m_position.m_segment}, " +
                                 $"lane {item.m_position.m_lane}, node {nextNodeId}:\n\tCUSTOM exploration\n");
 
                             // lane changing cost calculation mode to use
@@ -1663,7 +1666,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 MemoryLog_NoFlush_If(
                                     logLogic,
                                     logBuf,
-                                    $"item: seg. {item.m_position.m_segment}, " +
+                                    () => $"item: seg. {item.m_position.m_segment}, " +
                                     $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                     $"\tapplied vehicle restrictions for vehicle {queueItem.vehicleId}, " +
                                     $"type {queueItem.vehicleType}:\n" +
@@ -1679,7 +1682,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     MemoryLog_NoFlush_If(
                                         logLogic,
                                         logBuf,
-                                        $"item: seg. {item.m_position.m_segment}, " +
+                                        () => $"item: seg. {item.m_position.m_segment}, " +
                                         $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                         "\tAI is active, prev is car lane and we are a car\n");
                                 }
@@ -1710,7 +1713,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     MemoryLog_NoFlush_If(
                                         logLogic,
                                         logBuf,
-                                        $"item: seg. {item.m_position.m_segment}, " +
+                                        () => $"item: seg. {item.m_position.m_segment}, " +
                                         $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                         "\tapplied heavy vehicle ban / car ban ('Old Town' policy):\n" +
                                         $"\toldLaneSelectionCost={oldLaneSelectionCost}\n" +
@@ -1743,7 +1746,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         MemoryLog_NoFlush_If(
                                             logLogic,
                                             logBuf,
-                                            $"item: seg. {item.m_position.m_segment}, " +
+                                            () => $"item: seg. {item.m_position.m_segment}, " +
                                             $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                             "\tapplied bus-on-transport lane reward:\n" +
                                             $"\toldLaneSelectionCost={oldLaneSelectionCost}\n" +
@@ -1761,7 +1764,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         MemoryLog_NoFlush_If(
                                             logLogic,
                                             logBuf,
-                                                $"item: seg. {item.m_position.m_segment}, " +
+                                            () => $"item: seg. {item.m_position.m_segment}, " +
                                                 $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                                 "\tapplied car-on-transport lane penalty:\n" +
                                                 $"\toldLaneSelectionCost={oldLaneSelectionCost}\n" +
@@ -1807,7 +1810,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         MemoryLog_NoFlush_If(
                                             logLogic,
                                             logBuf,
-                                            $"item: seg. {item.m_position.m_segment}, " +
+                                            () => $"item: seg. {item.m_position.m_segment}, " +
                                             $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                             "\tapplied inner lane penalty:\n" +
                                             $"\toldLaneSelectionCost={oldLaneSelectionCost}\n" +
@@ -1840,7 +1843,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         MemoryLog_NoFlush_If(
                                             logLogic,
                                             logBuf,
-                                            $"item: seg. {item.m_position.m_segment}, " +
+                                            () => $"item: seg. {item.m_position.m_segment}, " +
                                             $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                             "\tapplied lane randomizations at junctions:\n" +
                                             $"\toldLaneSelectionCost={oldLaneSelectionCost}\n" +
@@ -1901,7 +1904,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     MemoryLog_NoFlush_If(
                                         logLogic,
                                         logBuf,
-                                        $"item: seg. {item.m_position.m_segment}, " +
+                                        () => $"item: seg. {item.m_position.m_segment}, " +
                                         $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                         "\tapplied traffic measurement costs for segment selection:\n" +
                                         $"\tsegmentTraffic={segmentTraffic}\n" +
@@ -1917,7 +1920,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         MemoryLog_NoFlush_If(
                                             logLogic,
                                             logBuf,
-                                            $"item: seg. {item.m_position.m_segment}, " +
+                                            () => $"item: seg. {item.m_position.m_segment}, " +
                                             $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                             "\tupdated item.m_trafficRand:\n" +
                                             $"\t=> item.m_trafficRand={item.m_trafficRand}\n");
@@ -1927,7 +1930,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 MemoryLog_NoFlush_If(
                                     logLogic,
                                     logBuf,
-                                    $"item: seg. {item.m_position.m_segment}, " +
+                                    () => $"item: seg. {item.m_position.m_segment}, " +
                                     $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                     "\tcalculated traffic stats:\n" +
                                     $"\t_vehicleTypes={m_vehicleTypes}, _laneTypes={m_laneTypes}\n" +
@@ -1948,11 +1951,12 @@ namespace TrafficManager.Custom.PathFinding {
                                         logLogic,
                                         logBuf,
                                         unitId,
-                                        $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
-                                        "\t" + "CUSTOM exploration\n" +
-                                        "\t" + $"transition iteration {k}:\n" +
-                                        "\t" + $"{laneTransitions[k].ToString()}\n" +
-                                        "\t" + "*** SKIPPING *** (nextSegmentId=0)\n");
+                                        () => $"item: seg. {item.m_position.m_segment}, " +
+                                              $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
+                                              "\t" + "CUSTOM exploration\n" +
+                                              "\t" + $"transition iteration {k}:\n" +
+                                              "\t" + $"{laneTransitions[k].ToString()}\n" +
+                                              "\t" + "*** SKIPPING *** (nextSegmentId=0)\n");
                                     continue;
                                 }
 
@@ -1964,7 +1968,7 @@ namespace TrafficManager.Custom.PathFinding {
                                             logLogic,
                                             logBuf,
                                             unitId,
-                                                $"item: seg. {item.m_position.m_segment}, " +
+                                            () => $"item: seg. {item.m_position.m_segment}, " +
                                                 $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                                 "\tCUSTOM exploration\n" +
                                                 $"\ttransition iteration {k}:\n" +
@@ -1979,7 +1983,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         logLogic,
                                         logBuf,
                                         unitId,
-                                        $"item: seg. {item.m_position.m_segment}, " +
+                                        () => $"item: seg. {item.m_position.m_segment}, " +
                                         $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                         "\tCUSTOM exploration\n" +
                                         $"\ttransition iteration {k}:\n" +
@@ -2004,7 +2008,7 @@ namespace TrafficManager.Custom.PathFinding {
                                         logLogic,
                                         logBuf,
                                         unitId,
-                                        $"item: seg. {item.m_position.m_segment}, " +
+                                        () => $"item: seg. {item.m_position.m_segment}, " +
                                         $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                         "\tCUSTOM exploration\n" +
                                         $"\ttransition iteration {k}:\n" +
@@ -2019,7 +2023,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     logLogic,
                                     logBuf,
                                     unitId,
-                                    $"item: seg. {item.m_position.m_segment}, " +
+                                    () => $"item: seg. {item.m_position.m_segment}, " +
                                     $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                     "\tCUSTOM exploration\n" +
                                     $"\ttransition iteration {k}:\n" +
@@ -2062,7 +2066,7 @@ namespace TrafficManager.Custom.PathFinding {
                             logLogic,
                             logBuf,
                             unitId,
-                            $"path unit {unitId}\nitem: seg. {item.m_position.m_segment}, " +
+                            () => $"path unit {unitId}\nitem: seg. {item.m_position.m_segment}, " +
                             $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                             "\t-> exploring DEFAULT u-turn\n");
 
@@ -2093,7 +2097,7 @@ namespace TrafficManager.Custom.PathFinding {
                             debugPed,
                             logBuf,
                             unitId,
-                            $"*PED* item: seg. {item.m_position.m_segment}, " +
+                            () => $"*PED* item: seg. {item.m_position.m_segment}, " +
                             $"lane {item.m_position.m_lane}, node {nextNodeId} ({nextIsStartNode}): " +
                             "Exploring vehicle switch\n" +
                             $"\t_extPathType={queueItem.pathType}\n" +
@@ -2135,11 +2139,12 @@ namespace TrafficManager.Custom.PathFinding {
                 var nextSegmentId = netManager.m_lanes.m_buffer[nextNode.m_lane].m_segment;
 
                 if (nextSegmentId != 0 && nextSegmentId != item.m_position.m_segment) {
+                    var nextNodeLane = nextNode.m_lane;
                     MemoryLog_Flush_If(
                         logLogic,
                         logBuf,
                         unitId,
-                        $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, " +
+                        () => $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, " +
                         $"node {nextNodeId} ({nextIsStartNode}): " +
                         "Exploring transport segment\n" +
                         $"\t_extPathType={queueItem.pathType}\n" +
@@ -2150,7 +2155,7 @@ namespace TrafficManager.Custom.PathFinding {
                         $"\t_stablePath={m_stablePath}\n" +
                         $"\t_isLaneConnectionObeyingEntity={m_isLaneConnectionObeyingEntity}\n" +
                         $"\t_isLaneArrowObeyingEntity={m_isLaneArrowObeyingEntity}\n\n" +
-                        $"\tnextNode.m_lane={nextNode.m_lane}\n" +
+                        $"\tnextNode.m_lane={nextNodeLane}\n" +
                         $"\tnextSegmentId={nextSegmentId}\n" +
                         $"\tnextIsStartNode={nextIsStartNode}\n");
                     ProcessItemPublicTransport(
@@ -2461,10 +2466,11 @@ namespace TrafficManager.Custom.PathFinding {
             var blocked = false;
 
             if ((nextSegment.m_flags & m_disableMask) != NetSegment.Flags.None) {
+                var nextSegFlags = nextSegment.m_flags;
                 MemoryLog_FlushCost_If(
                     logLogic,
                     logBuf,
-                    $"Segment is PathFailed or flooded: {nextSegment.m_flags}\n" +
+                    () => $"Segment is PathFailed or flooded: {nextSegFlags}\n" +
                     "-- method returns --");
                 return false;
             }
@@ -2485,7 +2491,7 @@ namespace TrafficManager.Custom.PathFinding {
             MemoryLog_NoFlush_If(
                 logLogic,
                 logBuf,
-                $"isStockLaneChangerUsed={Options.isStockLaneChangerUsed()}, " +
+                () => $"isStockLaneChangerUsed={Options.isStockLaneChangerUsed()}, " +
                 $"_extVehicleType={queueItem.vehicleType}, " +
                 $"nonBus={(queueItem.vehicleType & ExtVehicleType.RoadVehicle & ~ExtVehicleType.Bus) != ExtVehicleType.None}, " +
                 $"_stablePath={m_stablePath}, enablePedestrian={enablePedestrian}, " +
@@ -2567,7 +2573,7 @@ namespace TrafficManager.Custom.PathFinding {
                         MemoryLog_FlushCost_If(
                             logLogic,
                             logBuf,
-                            $"turningAngle < 1f! dirDotProd={dirDotProd} >= " +
+                            () => $"turningAngle < 1f! dirDotProd={dirDotProd} >= " +
                             $"turningAngle{turningAngle}!\n" +
                             "-- method returns --");
                         return blocked;
@@ -2598,7 +2604,7 @@ namespace TrafficManager.Custom.PathFinding {
             MemoryLog_NoFlush_If(
                 logLogic,
                 logBuf,
-                $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, " +
+                () => $"item: seg. {item.m_position.m_segment}, lane {item.m_position.m_lane}, " +
                 $"node {nextNodeId}:\n\tapplied traffic cost factors:\n\toldPrevCost={oldPrevCost}\n" +
                 $"\t=> prevCost={prevCost}\n");
 
@@ -2663,7 +2669,7 @@ namespace TrafficManager.Custom.PathFinding {
             MemoryLog_NoFlush_If(
                 logLogic,
                 logBuf,
-                $"allowedVehicleTypes={allowedVehicleTypes} allowedLaneTypes={allowedLaneTypes}");
+                () => $"allowedVehicleTypes={allowedVehicleTypes} allowedLaneTypes={allowedLaneTypes}");
 
             // NON-STOCK CODE START //
             var laneChangeBaseCosts = 1f;
@@ -2692,7 +2698,7 @@ namespace TrafficManager.Custom.PathFinding {
                     MemoryLog_NoFlush_If(
                         logLogic,
                         logBuf,
-                        $"forceLaneIndex break! laneIndex={laneIndex}");
+                        () => $"forceLaneIndex break! laneIndex={laneIndex}");
                     break;
                 }
 
@@ -2704,7 +2710,7 @@ namespace TrafficManager.Custom.PathFinding {
                     MemoryLog_NoFlush_If(
                         logLogic,
                         logBuf,
-                        $"Lane direction check passed: {nextLaneInfo.m_finalDirection}");
+                        () => $"Lane direction check passed: {nextLaneInfo.m_finalDirection}");
 
                     var nextLaneCheckType = nextLaneInfo.CheckType(allowedLaneTypes, allowedVehicleTypes);
                     var next1 = nextSegmentId != item.m_position.m_segment
@@ -2714,7 +2720,7 @@ namespace TrafficManager.Custom.PathFinding {
                         MemoryLog_NoFlush_If(
                             logLogic,
                             logBuf,
-                            $"vehicle type check passed: {nextLaneCheckType} && {next1}");
+                            () => $"vehicle type check passed: {nextLaneCheckType} && {next1}");
 
                         // NON-STOCK CODE START
                         var nextMaxSpeed = GetLaneSpeedLimit(nextSegmentId, (byte)laneIndex, curLaneId, nextLaneInfo);
@@ -2732,7 +2738,7 @@ namespace TrafficManager.Custom.PathFinding {
                         MemoryLog_NoFlush_If(
                             logLogic,
                             logBuf,
-                            $"costs from {nextSegmentId} (off " +
+                            () => $"costs from {nextSegmentId} (off " +
                             $"{(byte)((nextDir & NetInfo.Direction.Forward) == 0 ? 0 : 255)}) to " +
                             $"{item.m_position.m_segment} (off {item.m_position.m_offset}), " +
                             $"connectOffset={connectOffset}: transitionCost={transitionCost}");
@@ -2773,7 +2779,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 MemoryLog_NoFlush_If(
                                     logLogic,
                                     logBuf,
-                                    "applying public transport transition penalty: " +
+                                    () => "applying public transport transition penalty: " +
                                     $"{transportTransitionPenalty}");
                                 nextItem.m_comparisonValue += transportTransitionPenalty;
                             }
@@ -2788,7 +2794,7 @@ namespace TrafficManager.Custom.PathFinding {
                         MemoryLog_NoFlush_If(
                             logLogic,
                             logBuf,
-                            "checking if methodDistance is in range: " +
+                            () => "checking if methodDistance is in range: " +
                             $"{nextLaneNotPed} || {closeToWalk} ({nextItem.m_methodDistance})");
 
                         if (nextLaneNotPed || closeToWalk || m_stablePath) {
@@ -2808,7 +2814,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 MemoryLog_NoFlush_If(
                                     logLogic,
                                     logBuf,
-                                    $"Path from {nextSegmentId} (idx {laneIndex}, id {curLaneId}) " +
+                                    () => $"Path from {nextSegmentId} (idx {laneIndex}, id {curLaneId}) " +
                                     $"to {item.m_position.m_segment} (lane {prevOuterSimilarLaneIndex} " +
                                     $"from outer, idx {item.m_position.m_lane}): " +
                                     $"laneChangingCostCalculationMode={laneChangingCostCalculationMode}, " +
@@ -2833,7 +2839,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 MemoryLog_NoFlush_If(
                                     logLogic,
                                     logBuf,
-                                    "applying public transport transition penalty on non-PT path: " +
+                                    () => "applying public transport transition penalty on non-PT path: " +
                                     $"{transportTransitionPenalty}");
                                 nextItem.m_comparisonValue += transportTransitionPenalty;
                             }
@@ -2848,7 +2854,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     MemoryLog_NoFlush_If(
                                         logLogic,
                                         logBuf,
-                                        "Current lane is start lane A. goto next lane");
+                                        () => "Current lane is start lane A. goto next lane");
                                     goto CONTINUE_LANE_LOOP;
                                 }
 
@@ -2876,7 +2882,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     MemoryLog_NoFlush_If(
                                         logLogic,
                                         logBuf,
-                                        "Current lane is start lane B. goto next lane");
+                                        () => "Current lane is start lane B. goto next lane");
                                     goto CONTINUE_LANE_LOOP;
                                 }
 
@@ -2909,7 +2915,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     MemoryLog_NoFlush_If(
                                         logLogic,
                                         logBuf,
-                                        $"item: seg. {item.m_position.m_segment}, " +
+                                        () => $"item: seg. {item.m_position.m_segment}, " +
                                         $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                         "\tapplied blocked road cost factor on activated AI:\n" +
                                         $"\toldCustomDeltaCost={oldCustomDeltaCost}\n" +
@@ -2919,7 +2925,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     MemoryLog_NoFlush_If(
                                         logLogic,
                                         logBuf,
-                                        "Applying blocked road cost factor on disabled advanced AI");
+                                        () => "Applying blocked road cost factor on disabled advanced AI");
                                     nextItem.m_comparisonValue += 0.1f;
                                 }
 
@@ -2931,7 +2937,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 MemoryLog_NoFlush_If(
                                     logLogic,
                                     logBuf,
-                                    "Applying stock lane changing costs. " +
+                                    () => "Applying stock lane changing costs. " +
                                     $"obeyStockLaneArrows={obeyStockLaneArrows}");
 
                                 if (obeyStockLaneArrows) {
@@ -2958,7 +2964,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 MemoryLog_NoFlush_If(
                                     logLogic,
                                     logBuf,
-                                    "Calculating advanced AI lane changing costs");
+                                    () => "Calculating advanced AI lane changing costs");
 
                                 int laneDist; // absolute lane distance
                                 if (laneChangingCostCalculationMode ==
@@ -3039,7 +3045,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 MemoryLog_NoFlush_If(
                                     logLogic,
                                     logBuf,
-                                    $"item: seg. {item.m_position.m_segment}, " +
+                                    () => $"item: seg. {item.m_position.m_segment}, " +
                                     $"lane {item.m_position.m_lane}, node {nextNodeId}:\n" +
                                     $"-> TRANSIT to seg. {nextSegmentId}, lane {laneIndex}\n" +
                                     $"\tprevMaxSpeed={prevMaxSpeed}\n" +
@@ -3115,7 +3121,7 @@ namespace TrafficManager.Custom.PathFinding {
 
             laneIndexFromInner = newLaneIndexFromInner;
 
-            MemoryLog_FlushCost_If(logLogic, logBuf, "-- method returns --");
+            MemoryLog_FlushCost_If(logLogic, logBuf, () => "-- method returns --");
             return blocked;
         }
 

@@ -76,7 +76,7 @@
 
             Log._DebugIf(
                 logParkingAi,
-                $"CustomHumanAI.EnterParkedCar({instanceId}, ..., {parkedVehicleId}) called.");
+                () => $"CustomHumanAI.EnterParkedCar({instanceId}, ..., {parkedVehicleId}) called.");
 #else
             bool logParkingAi = false;
             bool extendedLogParkingAi = false;
@@ -92,7 +92,7 @@
             if (!CustomPathManager._instance.m_pathUnits.m_buffer[instanceData.m_path]
                                   .GetPosition(0, out var vehLanePathPos)) {
                 Log._DebugIf(logParkingAi,
-                             $"CustomHumanAI.EnterParkedCar({instanceId}): Could not get first car " +
+                             () => $"CustomHumanAI.EnterParkedCar({instanceId}): Could not get first car " +
                              $"path position of citizen instance {instanceId}!");
                 vehicleId = 0;
                 return false;
@@ -101,7 +101,7 @@
             var vehLaneId = PathManager.GetLaneID(vehLanePathPos);
             Log._DebugIf(
                 extendedLogParkingAi,
-                $"CustomHumanAI.EnterParkedCar({instanceId}): Determined vehicle " +
+                () => $"CustomHumanAI.EnterParkedCar({instanceId}): Determined vehicle " +
                 $"position for citizen instance {instanceId}: seg. {vehLanePathPos.m_segment}, " +
                 $"lane {vehLanePathPos.m_lane}, off {vehLanePathPos.m_offset} (lane id {vehLaneId})");
 
@@ -155,7 +155,7 @@
                 if (!vehicleInfo.m_vehicleAI.TrySpawn(vehicleId, ref vehManager.m_vehicles.m_buffer[vehicleId])) {
                     Log._DebugIf(
                         logParkingAi,
-                        $"CustomHumanAI.EnterParkedCar({instanceId}): Could not " +
+                        () => $"CustomHumanAI.EnterParkedCar({instanceId}): Could not " +
                         $"spawn a {vehicleInfo.m_vehicleType} for citizen instance {instanceId}!");
                     return false;
                 }
@@ -184,19 +184,20 @@
                 // unspawn citizen instance
                 instanceData.Unspawn(instanceId);
 
-                Log._DebugIf(
-                    extendedLogParkingAi,
-                    $"CustomHumanAI.EnterParkedCar({instanceId}): Citizen instance " +
-                    $"{instanceId} is now entering vehicle {vehicleId}. Set vehicle " +
-                    $"target position to {vehLanePos} (segment={vehLanePathPos.m_segment}, " +
-                    $"lane={vehLanePathPos.m_lane}, offset={vehLanePathPos.m_offset})");
+                if (extendedLogParkingAi) {
+                    Log._Debug(
+                        $"CustomHumanAI.EnterParkedCar({instanceId}): Citizen instance " +
+                        $"{instanceId} is now entering vehicle {vehicleId}. Set vehicle " +
+                        $"target position to {vehLanePos} (segment={vehLanePathPos.m_segment}, " +
+                        $"lane={vehLanePathPos.m_lane}, offset={vehLanePathPos.m_offset})");
+                }
 
                 return true;
             }
 
             // failed to find a road position
             Log._DebugIf(logParkingAi,
-                         $"CustomHumanAI.EnterParkedCar({instanceId}): Could not " +
+                         () => $"CustomHumanAI.EnterParkedCar({instanceId}): Could not " +
                          $"find a road position for citizen instance {instanceId} near " +
                          $"parked vehicle {parkedVehicleId}!");
             return false;
@@ -224,14 +225,14 @@
 #endif
             Log._DebugIf(
                 extendedLogParkingAi,
-                $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
+                () => $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
                 $"{mainPathState}) called.");
 
             if (mainPathState == ExtPathState.Calculating) {
                 // main path is still calculating, do not check return path
                 Log._DebugIf(
                     extendedLogParkingAi,
-                    $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
+                    () => $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
                     $"{mainPathState}): still calculating main path. returning CALCULATING.");
 
                 return ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
@@ -252,12 +253,13 @@
                 // main path failed or non-existing
                 Log._DebugIf(
                     logParkingAi,
-                    $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
+                    () => $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
                     $"{mainPathState}): mainPathSate is {mainPathState}.");
 
                 if (mainPathState == ExtPathState.Failed) {
                     Log._DebugIf(
-                        logParkingAi,$"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, " +
+                        logParkingAi,
+                        () => $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, " +
                         $"..., {mainPathState}): Checking if path-finding may be repeated.");
 
                     return OnCitizenPathFindFailure(
@@ -269,7 +271,7 @@
 
                 Log._DebugIf(
                     logParkingAi,
-                    $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
+                    () => $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
                     $"{mainPathState}): Resetting instance and returning FAILED.");
 
                 extCitInstMan.Reset(ref extInstance);
@@ -288,7 +290,7 @@
                     // no return path calculated: ignore
                     Log._DebugIf(
                         logParkingAi,
-                        $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
+                        () => $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
                         $"{mainPathState}): return path state is None. Ignoring and " +
                         "returning main path state.");
                     break;
@@ -298,7 +300,7 @@
                 {
                     Log._DebugIf(
                         extendedLogParkingAi,
-                        $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
+                        () => $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
                         $"{mainPathState}): return path state is still calculating.");
                     return ExtSoftPathState.Calculating;
                 }
@@ -308,7 +310,7 @@
                     // no walking path from parking position to target found. flag main path as 'failed'.
                     Log._DebugIf(
                         logParkingAi,
-                        $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
+                        () => $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
                         $"{mainPathState}): Return path FAILED.");
 
                     success = false;
@@ -319,7 +321,7 @@
                     // handle valid return path
                     Log._DebugIf(
                         extendedLogParkingAi,
-                        $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
+                        () => $"AdvancedParkingManager.UpdateCitizenPathState({citizenInstanceId}, ..., " +
                         $"{mainPathState}): Path is READY.");
                     break;
                 }
@@ -365,17 +367,20 @@
             bool extendedLogParkingAi = false;
 #endif
 
-            Log._DebugIf(
-                extendedLogParkingAi,
-                $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                $"{mainPathState}) called.");
+            if (extendedLogParkingAi) {
+                Log._Debug(
+                    $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                    $"{mainPathState}) called.");
+            }
 
             if (mainPathState == ExtPathState.Calculating) {
                 // main path is still calculating, do not check return path
-                Log._DebugIf(
-                    extendedLogParkingAi,
-                    $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                    $"{mainPathState}): still calculating main path. returning CALCULATING.");
+                if (extendedLogParkingAi) {
+                    Log._Debug(
+                        $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                        $"{mainPathState}): still calculating main path. returning CALCULATING.");
+                }
+
                 return ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
             }
 
@@ -392,20 +397,23 @@
 
             if (!extCitInstMan.IsValid(driverExtInstance.instanceId)) {
                 // no driver
-                Log._DebugIf(
-                    logParkingAi,
-                    $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                    $"{mainPathState}): no driver found!");
+                if (logParkingAi) {
+                    Log._Debug(
+                        $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                        $"{mainPathState}): no driver found!");
+                }
+
                 return ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
             }
 
             if (Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].vehicleType !=
                 ExtVehicleType.PassengerCar) {
                 // non-passenger cars are not handled
-                Log._DebugIf(
-                    logParkingAi,
-                    $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                    $"{mainPathState}): not a passenger car!");
+                if (logParkingAi) {
+                    Log._Debug(
+                        $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                        $"{mainPathState}): not a passenger car!");
+                }
 
                 extCitInstMan.Reset(ref driverExtInstance);
                 return ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
@@ -413,16 +421,18 @@
 
             if (mainPathState == ExtPathState.None || mainPathState == ExtPathState.Failed) {
                 // main path failed or non-existing: reset return path
-                Log._DebugIf(
-                    logParkingAi,
-                    $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                    $"{mainPathState}): mainPathSate is {mainPathState}.");
+                if (logParkingAi) {
+                    Log._Debug(
+                        $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                        $"{mainPathState}): mainPathSate is {mainPathState}.");
+                }
 
                 if (mainPathState == ExtPathState.Failed) {
-                    Log._DebugIf(
-                        logParkingAi,
-                        $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                        $"{mainPathState}): Checking if path-finding may be repeated.");
+                    if (logParkingAi) {
+                        Log._Debug(
+                            $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                            $"{mainPathState}): Checking if path-finding may be repeated.");
+                    }
 
                     extCitInstMan.ReleaseReturnPath(ref driverExtInstance);
                     return OnCarPathFindFailure(vehicleId,
@@ -431,10 +441,11 @@
                                                 ref driverExtInstance);
                 }
 
-                Log._DebugIf(
-                    logParkingAi,
-                    $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                    $"{mainPathState}): Resetting instance and returning FAILED.");
+                if (logParkingAi) {
+                    Log._Debug(
+                        $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                        $"{mainPathState}): Resetting instance and returning FAILED.");
+                }
 
                 extCitInstMan.Reset(ref driverExtInstance);
                 return ExtSoftPathState.FailedHard;
@@ -449,11 +460,12 @@
                 case ExtPathState.None:
                 default: {
                     // no return path calculated: ignore
-                    Log._DebugIf(
-                        logParkingAi,
-                        $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                        $"{mainPathState}): return path state is None. " +
-                        "Setting pathMode=DrivingToTarget and returning main path state.");
+                    if (logParkingAi) {
+                        Log._Debug(
+                            $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                            $"{mainPathState}): return path state is None. " +
+                            "Setting pathMode=DrivingToTarget and returning main path state.");
+                    }
 
                     driverExtInstance.pathMode = ExtPathMode.DrivingToTarget;
                     return ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
@@ -461,21 +473,23 @@
 
                 case ExtPathState.Calculating: {
                     // return path not read yet: wait for it
-                    Log._DebugIf(
-                        extendedLogParkingAi,
-                        $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                                   $"{mainPathState}): return path state is still calculating.");
+                    if (extendedLogParkingAi) {
+                        Log._Debug(
+                            $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                            $"{mainPathState}): return path state is still calculating.");
+                    }
 
                     return ExtSoftPathState.Calculating;
                 }
 
                 case ExtPathState.Failed: {
                     // no walking path from parking position to target found. flag main path as 'failed'.
-                    Log._DebugIf(
-                        logParkingAi,
-                        $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                        $"{mainPathState}): Return path {driverExtInstance.returnPathId} " +
-                        "FAILED. Forcing path-finding to fail.");
+                    if (logParkingAi) {
+                        Log._Debug(
+                            $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                            $"{mainPathState}): Return path {driverExtInstance.returnPathId} " +
+                            "FAILED. Forcing path-finding to fail.");
+                    }
 
                     extCitInstMan.Reset(ref driverExtInstance);
                     return ExtSoftPathState.FailedHard;
@@ -484,12 +498,13 @@
                 case ExtPathState.Ready: {
                     // handle valid return path
                     extCitInstMan.ReleaseReturnPath(ref driverExtInstance);
-                    Log._DebugIf(
-                        extendedLogParkingAi,
-                        $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                        $"{mainPathState}): Path is ready for vehicle {vehicleId}, " +
-                        $"citizen instance {driverExtInstance.instanceId}! " +
-                        $"CurrentPathMode={driverExtInstance.pathMode}");
+                    if (extendedLogParkingAi) {
+                        Log._Debug(
+                            $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                            $"{mainPathState}): Path is ready for vehicle {vehicleId}, " +
+                            $"citizen instance {driverExtInstance.instanceId}! " +
+                            $"CurrentPathMode={driverExtInstance.pathMode}");
+                    }
 
                     var laneTypes = CustomPathManager._instance.m_pathUnits.m_buffer[vehicleData.m_path].m_laneTypes;
                     var usesPublicTransport = (laneTypes & (byte)(NetInfo.LaneType.PublicTransport)) != 0;
@@ -506,33 +521,39 @@
                         case ExtPathMode.CalculatingCarPathToAltParkPos: {
                             driverExtInstance.pathMode = ExtPathMode.DrivingToAltParkPos;
                             driverExtInstance.parkingPathStartPosition = null;
-                            Log._DebugIf(
-                                logParkingAi,
-                                $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                                $"{mainPathState}): Path to an alternative parking position is " +
-                                $"READY for vehicle {vehicleId}! " +
-                                $"CurrentPathMode={driverExtInstance.pathMode}");
+                            if (logParkingAi) {
+                                Log._Debug(
+                                    $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                                    $"{mainPathState}): Path to an alternative parking position is " +
+                                    $"READY for vehicle {vehicleId}! " +
+                                    $"CurrentPathMode={driverExtInstance.pathMode}");
+                            }
+
                             break;
                         }
 
                         case ExtPathMode.CalculatingCarPathToTarget: {
                             driverExtInstance.pathMode = ExtPathMode.DrivingToTarget;
-                            Log._DebugIf(
-                                logParkingAi,
-                                $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                                $"{mainPathState}): Car path is READY for vehicle {vehicleId}! " +
-                                $"CurrentPathMode={driverExtInstance.pathMode}");
+                            if (logParkingAi) {
+                                Log._Debug(
+                                    $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                                    $"{mainPathState}): Car path is READY for vehicle {vehicleId}! " +
+                                    $"CurrentPathMode={driverExtInstance.pathMode}");
+                            }
+
                             break;
                         }
 
                         case ExtPathMode.CalculatingCarPathToKnownParkPos: {
                             driverExtInstance.pathMode = ExtPathMode.DrivingToKnownParkPos;
-                            Log._DebugIf(
-                                logParkingAi,
-                                $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
-                                $"{mainPathState}): Car path to known parking position is READY " +
-                                $"for vehicle {vehicleId}! " +
-                                $"CurrentPathMode={driverExtInstance.pathMode}");
+                            if (logParkingAi) {
+                                Log._Debug(
+                                    $"AdvancedParkingManager.UpdateCarPathState({vehicleId}, ..., " +
+                                    $"{mainPathState}): Car path to known parking position is READY " +
+                                    $"for vehicle {vehicleId}! " +
+                                    $"CurrentPathMode={driverExtInstance.pathMode}");
+                            }
+
                             break;
                         }
                     }
@@ -568,21 +589,25 @@
 #endif
 
             if ((instanceData.m_flags & CitizenInstance.Flags.WaitingPath) != CitizenInstance.Flags.None) {
-                Log._DebugIf(
-                    extendedLogParkingAi,
-                    $"AdvancedParkingManager.CheckCitizenReachedParkedCar({instanceId}): " +
-                    $"citizen instance {instanceId} is waiting for path-finding to complete.");
+                if (extendedLogParkingAi) {
+                    Log._Debug(
+                        $"AdvancedParkingManager.CheckCitizenReachedParkedCar({instanceId}): " +
+                        $"citizen instance {instanceId} is waiting for path-finding to complete.");
+                }
+
                 return ParkedCarApproachState.None;
             }
 
             // ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceId);
             if (extInstance.pathMode != ExtPathMode.ApproachingParkedCar &&
                 extInstance.pathMode != ExtPathMode.WalkingToParkedCar) {
-                Log._DebugIf(
-                    extendedLogParkingAi,
-                    "AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep" +
-                    $"({instanceId}): citizen instance {instanceId} is not reaching " +
-                    $"a parked car ({extInstance.pathMode})");
+                if (extendedLogParkingAi) {
+                    Log._Debug(
+                        "AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep" +
+                        $"({instanceId}): citizen instance {instanceId} is not reaching " +
+                        $"a parked car ({extInstance.pathMode})");
+                }
+
                 return ParkedCarApproachState.None;
             }
 
@@ -603,12 +628,13 @@
                     extInstance.pathMode = ExtPathMode.ApproachingParkedCar;
                     extInstance.lastDistanceToParkedCar =
                         (instanceData.GetLastFramePosition() - doorPosition).sqrMagnitude;
-                    Log._DebugIf(
-                        logParkingAi,
-                        "AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep" +
-                        $"({instanceId}): citizen instance {instanceId} was walking to " +
-                        "parked car and reached final path position. " +
-                        $"Switched PathMode to {extInstance.pathMode}.");
+                    if (logParkingAi) {
+                        Log._Debug(
+                            "AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep" +
+                            $"({instanceId}): citizen instance {instanceId} was walking to " +
+                            "parked car and reached final path position. " +
+                            $"Switched PathMode to {extInstance.pathMode}.");
+                    }
                 }
             }
 
@@ -636,13 +662,14 @@
                 if (doorSqrDist > extInstance.lastDistanceToParkedCar + 1024f) {
 
                     // distance has increased dramatically since the last time
-                    Log._DebugIf(
-                        logParkingAi,
-                        "AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep" +
-                        $"({instanceId}): Citizen instance {instanceId} is currently " +
-                        "reaching their parked car but distance increased! " +
-                        $"dist={doorSqrDist}, LastDistanceToParkedCar" +
-                        $"={extInstance.lastDistanceToParkedCar}.");
+                    if (logParkingAi) {
+                        Log._Debug(
+                            "AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep" +
+                            $"({instanceId}): Citizen instance {instanceId} is currently " +
+                            "reaching their parked car but distance increased! " +
+                            $"dist={doorSqrDist}, LastDistanceToParkedCar" +
+                            $"={extInstance.lastDistanceToParkedCar}.");
+                    }
 
 #if DEBUG
                     if (DebugSwitch.ParkingAIDistanceIssue.Get()) {
@@ -665,23 +692,26 @@
                     extInstance.lastDistanceToParkedCar = doorSqrDist;
                 }
 
-                Log._DebugIf(
-                    extendedLogParkingAi,
-                    "AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep" +
-                    $"({instanceId}): Citizen instance {instanceId} is currently " +
-                    $"reaching their parked car (dist={doorSqrDist}, " +
-                    $"LastDistanceToParkedCar={extInstance.lastDistanceToParkedCar}). " +
-                    $"CurrentDepartureMode={extInstance.pathMode}");
+                if (extendedLogParkingAi) {
+                    Log._Debug(
+                        "AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep" +
+                        $"({instanceId}): Citizen instance {instanceId} is currently " +
+                        $"reaching their parked car (dist={doorSqrDist}, " +
+                        $"LastDistanceToParkedCar={extInstance.lastDistanceToParkedCar}). " +
+                        $"CurrentDepartureMode={extInstance.pathMode}");
+                }
+
                 return ParkedCarApproachState.Approaching;
             }
 
             extInstance.pathMode = ExtPathMode.RequiresCarPath;
-            Log._DebugIf(
-                logParkingAi,
-                "AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep" +
-                $"({instanceId}): Citizen instance {instanceId} reached parking position " +
-                $"(dist={doorSqrDist}). Calculating remaining path now. " +
-                $"CurrentDepartureMode={extInstance.pathMode}");
+            if (logParkingAi) {
+                Log._Debug(
+                    "AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep" +
+                    $"({instanceId}): Citizen instance {instanceId} reached parking position " +
+                    $"(dist={doorSqrDist}). Calculating remaining path now. " +
+                    $"CurrentDepartureMode={extInstance.pathMode}");
+            }
 
             return ParkedCarApproachState.Approached;
         }
@@ -791,7 +821,7 @@
                 CitizenInstance.Flags.None) {
                 Log._DebugIf(
                     extendedLogParkingAi,
-                    $"AdvancedParkingManager.CitizenApproachingTargetSimulationStep({instanceId}): " +
+                    () => $"AdvancedParkingManager.CitizenApproachingTargetSimulationStep({instanceId}): " +
                     $"citizen instance {instanceId} is waiting for path-finding to complete.");
                 return false;
             }
@@ -799,10 +829,12 @@
             // ExtCitizenInstance extInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(instanceId);
             if (extInstance.pathMode != ExtPathMode.WalkingToTarget &&
                 extInstance.pathMode != ExtPathMode.TaxiToTarget) {
-                    Log._DebugIf(
-                        extendedLogParkingAi,
+                if (extendedLogParkingAi) {
+                    Log._Debug(
                         $"AdvancedParkingManager.CitizenApproachingTargetSimulationStep({instanceId}): " +
                         $"citizen instance {instanceId} is not reaching target ({extInstance.pathMode})");
+                }
+
                 return false;
             }
 
@@ -819,11 +851,13 @@
                                              instanceData.m_pathPositionIndex >> 1,
                                              out _))) {
                 extCitInstMan.Reset(ref extInstance);
-                Log._DebugIf(
-                    logParkingAi,
-                    $"AdvancedParkingManager.CitizenApproachingTargetSimulationStep({instanceId}): " +
-                    $"Citizen instance {instanceId} reached target. " +
-                    $"CurrentDepartureMode={extInstance.pathMode}");
+                if (logParkingAi) {
+                    Log._Debug(
+                        $"AdvancedParkingManager.CitizenApproachingTargetSimulationStep({instanceId}): " +
+                        $"Citizen instance {instanceId} reached target. " +
+                        $"CurrentDepartureMode={extInstance.pathMode}");
+                }
+
                 return true;
             }
 
@@ -864,11 +898,12 @@
             bool extendedLogParkingAi = false;
 #endif
 
-            Log._DebugIf(
-                logParkingAi,
-                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                $"Path-finding succeeded for citizen instance {instanceId}. " +
-                $"Path: {instanceData.m_path} vehicle={citizenData.m_vehicle}");
+            if (logParkingAi) {
+                Log._Debug(
+                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                    $"Path-finding succeeded for citizen instance {instanceId}. " +
+                    $"Path: {instanceData.m_path} vehicle={citizenData.m_vehicle}");
+            }
 
 //			if (!extInstance.IsValid()) {
 //#if DEBUG
@@ -883,7 +918,7 @@
                 if (extInstance.pathMode == ExtPathMode.TaxiToTarget) {
                     Log._DebugIf(
                         extendedLogParkingAi,
-                        $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                        () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                           "Citizen uses a taxi. Decreasing public transport demand and " +
                           "returning READY.");
 
@@ -942,7 +977,7 @@
                     */
                     Log._DebugIf(
                         extendedLogParkingAi,
-                        $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                        () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                         "Citizen uses their car together with public transport. " +
                         "Discarding parking space information and setting path mode to " +
                         "CalculatingCarPathToTarget.");
@@ -1017,7 +1052,7 @@
             // citizen has a vehicle assigned
             Log._DebugOnlyWarningIf(
                 logParkingAi,
-                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                 "Citizen has a vehicle assigned but this method does not handle this " +
                 "situation. Forcing path-find to fail.");
 
@@ -1033,13 +1068,14 @@
             // final walking path to target has been calculated
             extInstance.pathMode = ExtPathMode.WalkingToTarget;
 
-            Log._DebugIf(
-                logParkingAi,
-                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                $"Citizen instance {instanceId} is now travelling by foot to their final " +
-                $"target. CurrentDepartureMode={extInstance.pathMode}, " +
-                $"targetPos={instanceData.m_targetPos} " +
-                $"lastFramePos={instanceData.GetLastFramePosition()}");
+            if (logParkingAi) {
+                Log._Debug(
+                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                    $"Citizen instance {instanceId} is now travelling by foot to their final " +
+                    $"target. CurrentDepartureMode={extInstance.pathMode}, " +
+                    $"targetPos={instanceData.m_targetPos} " +
+                    $"lastFramePos={instanceData.GetLastFramePosition()}");
+            }
 
             return ExtSoftPathState.Ready;
         }
@@ -1057,7 +1093,7 @@
                 // ... but the parked vehicle has vanished
                 Log._DebugIf(
                     logParkingAi,
-                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                    () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                     $"Citizen instance {instanceId} shall walk to their parked vehicle but it " +
                     "disappeared. Retrying path-find for walking.");
 
@@ -1067,13 +1103,15 @@
             }
 
             extInstance.pathMode = ExtPathMode.WalkingToParkedCar;
-            Log._DebugIf(
-                logParkingAi,
-                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                $"Citizen instance {instanceId} is now on their way to its parked vehicle. " +
-                $"CurrentDepartureMode={extInstance.pathMode}, " +
-                $"targetPos={instanceData.m_targetPos} " +
-                $"lastFramePos={instanceData.GetLastFramePosition()}");
+            if (logParkingAi) {
+                Log._Debug(
+                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                    $"Citizen instance {instanceId} is now on their way to its parked vehicle. " +
+                    $"CurrentDepartureMode={extInstance.pathMode}, " +
+                    $"targetPos={instanceData.m_targetPos} " +
+                    $"lastFramePos={instanceData.GetLastFramePosition()}");
+            }
+
             return ExtSoftPathState.Ready;
         }
 
@@ -1093,7 +1131,7 @@
                 // parked car should be reached now
                 Log._DebugIf(
                     logParkingAi,
-                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                    () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                     $"Path for citizen instance {instanceId} contains passenger car section and " +
                     "citizen should stand in front of their car.");
 
@@ -1103,30 +1141,36 @@
                         case ExtPathMode.CalculatingCarPathToAltParkPos: {
                             extInstance.pathMode = ExtPathMode.DrivingToAltParkPos;
                             extInstance.parkingPathStartPosition = null;
-                            Log._DebugIf(
-                                logParkingAi,
-                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                                "Path to an alternative parking position is READY! " +
-                                $"CurrentPathMode={extInstance.pathMode}");
+                            if (logParkingAi) {
+                                Log._Debug(
+                                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                    "Path to an alternative parking position is READY! " +
+                                    $"CurrentPathMode={extInstance.pathMode}");
+                            }
+
                             break;
                         }
 
                         case ExtPathMode.CalculatingCarPathToTarget: {
                             extInstance.pathMode = ExtPathMode.DrivingToTarget;
-                            Log._DebugIf(
-                                logParkingAi,
-                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                                $"Car path is READY! CurrentPathMode={extInstance.pathMode}");
+                            if (logParkingAi) {
+                                Log._Debug(
+                                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                    $"Car path is READY! CurrentPathMode={extInstance.pathMode}");
+                            }
+
                             break;
                         }
 
                         case ExtPathMode.CalculatingCarPathToKnownParkPos: {
                             extInstance.pathMode = ExtPathMode.DrivingToKnownParkPos;
-                            Log._DebugIf(
-                                logParkingAi,
-                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                                "Car path to known parking position is READY! " +
-                                $"CurrentPathMode={extInstance.pathMode}");
+                            if (logParkingAi) {
+                                Log._Debug(
+                                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                    "Car path to known parking position is READY! " +
+                                    $"CurrentPathMode={extInstance.pathMode}");
+                            }
+
                             break;
                         }
                     }
@@ -1139,7 +1183,7 @@
                     // error! could not find/spawn parked car
                     Log._DebugIf(
                         logParkingAi,
-                        $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                        () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                         $"Citizen instance {instanceId} still does not have a parked vehicle! " +
                         "Retrying: Cim should walk to target");
 
@@ -1153,7 +1197,7 @@
                     // error! parked car is too far away
                     Log._DebugIf(
                         logParkingAi,
-                        $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                        () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                         $"Citizen instance {instanceId} cannot enter parked vehicle because it is " +
                         $"too far away (sqrDistToParkedVehicle={sqrDistToParkedVehicle})! " +
                         "Retrying: Cim should walk to parked car");
@@ -1175,24 +1219,27 @@
 
                     extCitizen.transportMode |= ExtTransportMode.Car;
 
-                    Log._DebugIf(
-                        extendedLogParkingAi,
-                        $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                        $"Citizen instance {instanceId} has entered their car and is now " +
-                        $"travelling by car (vehicleId={vehicleId}). " +
-                        $"CurrentDepartureMode={extInstance.pathMode}, " +
-                        $"targetPos={instanceData.m_targetPos} " +
-                        $"lastFramePos={instanceData.GetLastFramePosition()}");
+                    if (extendedLogParkingAi) {
+                        Log._Debug(
+                            $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                            $"Citizen instance {instanceId} has entered their car and is now " +
+                            $"travelling by car (vehicleId={vehicleId}). " +
+                            $"CurrentDepartureMode={extInstance.pathMode}, " +
+                            $"targetPos={instanceData.m_targetPos} " +
+                            $"lastFramePos={instanceData.GetLastFramePosition()}");
+                    }
+
                     return ExtSoftPathState.Ignore;
                 }
 
                 // error! parked car could not be entered (reached vehicle limit?): try to walk to target
-                Log._DebugIf(
-                    logParkingAi,
-                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                    $"Entering parked vehicle {parkedVehicleId} failed for citizen " +
-                    $"instance {instanceId}. Trying to walk to target. " +
-                    $"CurrentDepartureMode={extInstance.pathMode}");
+                if (logParkingAi) {
+                    Log._Debug(
+                        $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                        $"Entering parked vehicle {parkedVehicleId} failed for citizen " +
+                        $"instance {instanceId}. Trying to walk to target. " +
+                        $"CurrentDepartureMode={extInstance.pathMode}");
+                }
 
                 extCitInstMan.Reset(ref extInstance);
                 extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
@@ -1205,7 +1252,7 @@
                     // ... and the path can be reused for walking
                     Log._DebugIf(
                         logParkingAi,
-                        $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                        () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                         "A direct car path was queried that does not contain a car section. " +
                         "Switching path mode to walking.");
 
@@ -1241,7 +1288,7 @@
                     // restart path-finding for walking
                 Log._DebugIf(
                     logParkingAi,
-                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                    () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                     "A parking space car path was queried but it turned out that no car is " +
                     "needed. Retrying path-finding for walking.");
 
@@ -1262,16 +1309,17 @@
                                                                   IExtBuildingManager extBuildingMan,
                                                                   bool usesPublicTransport) {
             if (extInstance.pathMode != ExtPathMode.None) {
-                Log._DebugOnlyWarningIf(
-                    logParkingAi,
-                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                    $"Unexpected path mode {extInstance.pathMode}! {extInstance}");
+                if (logParkingAi) {
+                    Log._DebugOnlyWarning(
+                        $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                        $"Unexpected path mode {extInstance.pathMode}! {extInstance}");
+                }
             }
 
             if (usesCar) {
                 Log._DebugIf(
                     logParkingAi,
-                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                    () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                     $"Path for citizen instance {instanceId} contains passenger car " +
                     "section. Ensuring that citizen is allowed to use their car.");
 
@@ -1281,12 +1329,13 @@
                              .m_homeBuilding;
 
                 if (parkedVehicleId == 0) {
-                    Log._DebugIf(
-                        logParkingAi,
-                        $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                        $"Citizen {instanceData.m_citizen} (citizen instance {instanceId}), " +
-                        $"source building {sourceBuildingId} does not have a parked " +
-                        $"vehicle! CurrentPathMode={extInstance.pathMode}");
+                    if (logParkingAi) {
+                        Log._Debug(
+                            $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                            $"Citizen {instanceData.m_citizen} (citizen instance {instanceId}), " +
+                            $"source building {sourceBuildingId} does not have a parked " +
+                            $"vehicle! CurrentPathMode={extInstance.pathMode}");
+                    }
 
                     // try to spawn parked vehicle in the vicinity of the starting point.
                     VehicleInfo vehicleInfo = null;
@@ -1306,12 +1355,13 @@
                     }
 
                     if (vehicleInfo != null) {
-                        Log._DebugIf(
-                            logParkingAi,
-                            $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                            $"Citizen {instanceData.m_citizen} (citizen instance {instanceId}), " +
-                            $"source building {sourceBuildingId} is using their own passenger car. " +
-                            $"CurrentPathMode={extInstance.pathMode}");
+                        if (logParkingAi) {
+                            Log._Debug(
+                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                $"Citizen {instanceData.m_citizen} (citizen instance {instanceId}), " +
+                                $"source building {sourceBuildingId} is using their own passenger car. " +
+                                $"CurrentPathMode={extInstance.pathMode}");
+                        }
 
                         // determine current position vector
                         Vector3 currentPos;
@@ -1321,23 +1371,25 @@
                         if (currentBuildingId != 0) {
                             currentPos = Singleton<BuildingManager>
                                          .instance.m_buildings.m_buffer[currentBuildingId].m_position;
-                            Log._DebugIf(
-                                logParkingAi,
-                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                                $"Taking current position from current building {currentBuildingId} " +
-                                $"for citizen {instanceData.m_citizen} (citizen instance {instanceId}): " +
-                                $"{currentPos} CurrentPathMode={extInstance.pathMode}");
+                            if (logParkingAi) {
+                                Log._Debug(
+                                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                    $"Taking current position from current building {currentBuildingId} " +
+                                    $"for citizen {instanceData.m_citizen} (citizen instance {instanceId}): " +
+                                    $"{currentPos} CurrentPathMode={extInstance.pathMode}");
+                            }
                         } else {
                             currentBuildingId = sourceBuildingId;
                             currentPos = instanceData.GetLastFramePosition();
-                            Log._DebugIf(
-                                logParkingAi,
-                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                                $"Taking current position from last frame position for citizen " +
-                                $"{instanceData.m_citizen} (citizen instance {instanceId}): " +
-                                $"{currentPos}. Home {homeId} pos: " +
-                                $"{Singleton<BuildingManager>.instance.m_buildings.m_buffer[homeId].m_position} " +
-                                $"CurrentPathMode={extInstance.pathMode}");
+                            if (logParkingAi) {
+                                Log._Debug(
+                                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                    "Taking current position from last frame position for citizen " +
+                                    $"{instanceData.m_citizen} (citizen instance {instanceId}): " +
+                                    $"{currentPos}. Home {homeId} pos: " +
+                                    $"{Singleton<BuildingManager>.instance.m_buildings.m_buffer[homeId].m_position} " +
+                                    $"CurrentPathMode={extInstance.pathMode}");
+                            }
                         }
 
                         // spawn a passenger car near the current position
@@ -1353,7 +1405,7 @@
                                               .m_parkedVehicle;
                             Log._DebugIf(
                                 logParkingAi,
-                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                                 $"Parked vehicle for citizen {instanceData.m_citizen} " +
                                 $"(instance {instanceId}) is {parkedVehicleId} now (parkPos={parkPos}).");
 
@@ -1367,7 +1419,7 @@
                         } else {
                             Log._DebugIf(
                                 logParkingAi,
-                                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                                () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                                 $">> Failed to spawn parked vehicle for citizen {instanceData.m_citizen} " +
                                 $"(citizen instance {instanceId}). reason={parkReason}. homePos: " +
                                 $"{Singleton<BuildingManager>.instance.m_buildings.m_buffer[homeId].m_position}");
@@ -1383,7 +1435,7 @@
                     } else {
                         Log._DebugIf(
                             logParkingAi,
-                            $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                            () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                             $"Citizen {instanceData.m_citizen} (citizen instance {instanceId}), " +
                             $"source building {sourceBuildingId}, home {homeId} does not own a vehicle.");
                     }
@@ -1393,7 +1445,7 @@
                     // citizen has to reach their parked vehicle first
                     Log._DebugIf(
                         logParkingAi,
-                        $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                        () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                         $"Calculating path to reach parked vehicle {parkedVehicleId} for citizen " +
                         $"instance {instanceId}. targetPos={instanceData.m_targetPos} " +
                         $"lastFramePos={instanceData.GetLastFramePosition()}");
@@ -1404,9 +1456,9 @@
                 // error! could not find/spawn parked car
                 Log._DebugIf(
                     logParkingAi,
-                    $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                    () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                     $"Citizen instance {instanceId} still does not have a parked vehicle! " +
-                    $"Retrying: Cim should walk to target");
+                    "Retrying: Cim should walk to target");
 
                 extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
                 return ExtSoftPathState.FailedSoft;
@@ -1415,9 +1467,9 @@
             // path does not contain a car section: path can be reused for walking
             Log._DebugIf(
                 logParkingAi,
-                $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): A direct car " +
-                $"path OR initial path was queried that does not contain a car section. " +
-                $"Switching path mode to walking.");
+                () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): A direct car " +
+                "path OR initial path was queried that does not contain a car section. " +
+                "Switching path mode to walking.");
 
             if (usesPublicTransport) {
                 // decrease public tranport demand
@@ -1476,11 +1528,12 @@
             bool extendedLogParkingAi = false;
 #endif
 
-            Log._DebugIf(
-                logParkingAi,
-                $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): Path-finding " +
-                $"failed for citizen instance {extInstance.instanceId}. " +
-                $"CurrentPathMode={extInstance.pathMode}");
+            if (logParkingAi) {
+                Log._Debug(
+                    $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): Path-finding " +
+                    $"failed for citizen instance {extInstance.instanceId}. " +
+                    $"CurrentPathMode={extInstance.pathMode}");
+            }
 
             // update public transport demands
             switch (extInstance.pathMode) {
@@ -1491,12 +1544,13 @@
                     // could not reach target building by walking/driving/public transport: increase public transport demand
                     if ((instanceData.m_flags & CitizenInstance.Flags.CannotUseTransport) ==
                         CitizenInstance.Flags.None) {
-                        Log._DebugIf(
-                            extendedLogParkingAi,
-                            $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
-                            "Increasing public transport demand of target building " +
-                            $"{instanceData.m_targetBuilding} and source building " +
-                            $"{instanceData.m_sourceBuilding}");
+                        if (extendedLogParkingAi) {
+                            Log._Debug(
+                                $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
+                                "Increasing public transport demand of target building " +
+                                $"{instanceData.m_targetBuilding} and source building " +
+                                $"{instanceData.m_sourceBuilding}");
+                        }
 
                         if (instanceData.m_targetBuilding != 0) {
                             extBuildingMan.AddPublicTransportDemand(
@@ -1564,25 +1618,28 @@
                         var parkedPos = Singleton<VehicleManager>.instance.m_parkedVehicles
                                                                  .m_buffer[parkedVehicleId]
                                                                  .m_position;
-                        Log._DebugIf(
-                            extendedLogParkingAi,
-                            $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
-                            $"Relocated parked car {parkedVehicleId} to a closer location (old pos/distance: " +
-                            $"{oldParkedVehiclePos}/{parkedToCitizen}, new pos/distance: " +
-                            $"{parkedPos}/{(parkedPos - citizenPos).magnitude}) " +
-                            $"for citizen @ {citizenPos}. Retrying path-finding. " +
-                            $"CurrentPathMode={extInstance.pathMode}");
+                        if (extendedLogParkingAi) {
+                            Log._Debug(
+                                $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
+                                $"Relocated parked car {parkedVehicleId} to a closer location (old pos/distance: " +
+                                $"{oldParkedVehiclePos}/{parkedToCitizen}, new pos/distance: " +
+                                $"{parkedPos}/{(parkedPos - citizenPos).magnitude}) " +
+                                $"for citizen @ {citizenPos}. Retrying path-finding. " +
+                                $"CurrentPathMode={extInstance.pathMode}");
+                        }
 
                         return ExtSoftPathState.FailedSoft;
                     }
 
                     // could not move car
                     // -> despawn parked car, walk to target or use public transport
-                    Log._DebugIf(
-                        extendedLogParkingAi,
-                        $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
-                        $"Releasing unreachable parked vehicle {parkedVehicleId} for citizen " +
-                        $"instance {extInstance.instanceId}. CurrentPathMode={extInstance.pathMode}");
+                    if (extendedLogParkingAi) {
+                        Log._Debug(
+                            $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
+                            $"Releasing unreachable parked vehicle {parkedVehicleId} for citizen " +
+                            $"instance {extInstance.instanceId}. CurrentPathMode={extInstance.pathMode}");
+                    }
+
                     Singleton<VehicleManager>.instance.ReleaseParkedVehicle(parkedVehicleId);
                 }
             }
@@ -1596,7 +1653,7 @@
                     // try to walk to target
                     Log._DebugIf(
                         logParkingAi,
-                        $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
+                        () => $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
                         "Path failed but it may be retried to walk to the target.");
                     extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
                     ret = ExtSoftPathState.FailedSoft;
@@ -1606,18 +1663,19 @@
                 default: {
                     Log._DebugIf(
                         logParkingAi,
-                        $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
-                        $"Path failed and walking to target is not an option. Resetting ext. instance.");
+                        () => $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
+                        "Path failed and walking to target is not an option. Resetting ext. instance.");
                     extCitInstMan.Reset(ref extInstance);
                     break;
                 }
             }
 
-            Log._DebugIf(
-                logParkingAi,
-                $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
-                $"Setting CurrentPathMode for citizen instance {extInstance.instanceId} " +
-                $"to {extInstance.pathMode}, ret={ret}");
+            if (logParkingAi) {
+                Log._Debug(
+                    $"AdvancedParkingManager.OnCitizenPathFindFailure({instanceId}): " +
+                    $"Setting CurrentPathMode for citizen instance {extInstance.instanceId} " +
+                    $"to {extInstance.pathMode}, ret={ret}");
+            }
 
             // reset current transport mode for hard failures
             if (ret == ExtSoftPathState.FailedHard) {
@@ -1660,11 +1718,12 @@
             var extendedLogParkingAi = false;
 #endif
 
-            Log._DebugIf(
-                logParkingAi,
-                $"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): Path-finding failed " +
-                $"for driver citizen instance {driverExtInstance.instanceId}. " +
-                $"CurrentPathMode={driverExtInstance.pathMode}");
+            if (logParkingAi) {
+                Log._Debug(
+                    $"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): Path-finding failed " +
+                    $"for driver citizen instance {driverExtInstance.instanceId}. " +
+                    $"CurrentPathMode={driverExtInstance.pathMode}");
+            }
 
             // update parking demands
             switch (driverExtInstance.pathMode) {
@@ -1672,11 +1731,12 @@
                 case ExtPathMode.CalculatingCarPathToAltParkPos:
                 case ExtPathMode.CalculatingCarPathToKnownParkPos: {
                     // could not reach target building by driving: increase parking space demand
-                    Log._DebugIf(
-                        extendedLogParkingAi,
-                        $"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): " +
-                        $"Increasing parking space demand of target building " +
-                        $"{driverInstanceData.m_targetBuilding}");
+                    if (extendedLogParkingAi) {
+                        Log._Debug(
+                            $"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): " +
+                            "Increasing parking space demand of target building " +
+                            $"{driverInstanceData.m_targetBuilding}");
+                    }
 
                     if (driverInstanceData.m_targetBuilding != 0) {
                         var extBuildingManager = Constants.ManagerFactory.ExtBuildingManager;
@@ -1699,7 +1759,7 @@
                         CitizenInstance.Flags.None) {
                         Log._DebugIf(
                             logParkingAi,
-                            $"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): " +
+                            () => $"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): " +
                             "Path failed but it may be retried to drive directly to the target " +
                             "/ using public transport.");
 
@@ -1713,18 +1773,20 @@
                 default: {
                     Log._DebugIf(
                         logParkingAi,
-                        $"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): Path failed " +
-                        $"and a direct target is not an option. Resetting driver ext. instance.");
+                        () => $"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): Path failed " +
+                        "and a direct target is not an option. Resetting driver ext. instance.");
                     extCitizenInstanceManager.Reset(ref driverExtInstance);
                     break;
                 }
             }
 
-            Log._DebugIf(
-                logParkingAi,
-                $"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): Setting " +
-                $"CurrentPathMode for driver citizen instance {driverExtInstance.instanceId} " +
-                $"to {driverExtInstance.pathMode}, ret={ret}");
+            if (logParkingAi) {
+                Log._Debug(
+                    $"AdvancedParkingManager.OnCarPathFindFailure({vehicleId}): Setting " +
+                    $"CurrentPathMode for driver citizen instance {driverExtInstance.instanceId} " +
+                    $"to {driverExtInstance.pathMode}, ret={ret}");
+            }
+
             return ret;
         }
 
@@ -1813,12 +1875,13 @@
                 }
             }
 
-            Log._DebugIf(
-                extendedLogParkingAi,
-                $"Citizen instance {extDriverInstance.instanceId} " +
-                $"(CurrentPathMode={extDriverInstance.pathMode}) can still use their passenger " +
-                "car and is either not a tourist or wants to find an alternative parking spot. " +
-                "Finding a parking space before starting path-finding.");
+            if (extendedLogParkingAi) {
+                Log._Debug(
+                    $"Citizen instance {extDriverInstance.instanceId} " +
+                    $"(CurrentPathMode={extDriverInstance.pathMode}) can still use their passenger " +
+                    "car and is either not a tourist or wants to find an alternative parking spot. " +
+                    "Finding a parking space before starting path-finding.");
+            }
 
             // find a free parking space
             var success = FindParkingSpaceInVicinity(
@@ -1843,19 +1906,21 @@
                 return false;
             }
 
-            Log._DebugIf(
-                extendedLogParkingAi,
-                $"Found a parking spot for citizen instance {extDriverInstance.instanceId} " +
-                $"(CurrentPathMode={extDriverInstance.pathMode}) before starting car path: " +
-                $"{knownParkingSpaceLocation} @ {knownParkingSpaceLocationId}");
+            if (extendedLogParkingAi) {
+                Log._Debug(
+                    $"Found a parking spot for citizen instance {extDriverInstance.instanceId} " +
+                    $"(CurrentPathMode={extDriverInstance.pathMode}) before starting car path: " +
+                    $"{knownParkingSpaceLocation} @ {knownParkingSpaceLocationId}");
+            }
 
             switch (knownParkingSpaceLocation) {
                 case ExtParkingSpaceLocation.RoadSide: {
                     // found segment with parking space
-                    Log._DebugIf(
-                        logParkingAi,
-                        $"Found segment {knownParkingSpaceLocationId} for road-side parking " +
-                        $"position for citizen instance {extDriverInstance.instanceId}!");
+                    if (logParkingAi) {
+                        Log._Debug(
+                            $"Found segment {knownParkingSpaceLocationId} for road-side parking " +
+                            $"position for citizen instance {extDriverInstance.instanceId}!");
+                    }
 
                     // determine nearest sidewalk position for parking position at segment
                     if (Singleton<NetManager>
@@ -1873,21 +1938,26 @@
                         endPathPos.m_offset = (byte)(parkOffset * 255f);
                         calculateEndPos = false;
 
-                        // extDriverInstance.CurrentPathMode = successMode;// ExtCitizenInstance.PathMode.CalculatingKnownCarPath;
-                        Log._DebugIf(
-                            logParkingAi,
-                            $"Found an parking spot sidewalk position for citizen instance " +
-                            $"{extDriverInstance.instanceId} @ segment {knownParkingSpaceLocationId}, " +
-                            $"laneId {laneId}, laneIndex {laneIndex}, offset={endPathPos.m_offset}! " +
-                            $"CurrentPathMode={extDriverInstance.pathMode}");
+                        // extDriverInstance.CurrentPathMode = successMode;
+                        // ExtCitizenInstance.PathMode.CalculatingKnownCarPath;
+                        if (logParkingAi) {
+                            Log._Debug(
+                                "Found an parking spot sidewalk position for citizen instance " +
+                                $"{extDriverInstance.instanceId} @ segment {knownParkingSpaceLocationId}, " +
+                                $"laneId {laneId}, laneIndex {laneIndex}, offset={endPathPos.m_offset}! " +
+                                $"CurrentPathMode={extDriverInstance.pathMode}");
+                        }
+
                         return true;
                     }
 
-                    Log._DebugIf(
-                        logParkingAi,
-                        $"Could not find an alternative parking spot sidewalk position for " +
-                        $"citizen instance {extDriverInstance.instanceId}! " +
-                        $"CurrentPathMode={extDriverInstance.pathMode}");
+                    if (logParkingAi) {
+                        Log._Debug(
+                            "Could not find an alternative parking spot sidewalk position for " +
+                            $"citizen instance {extDriverInstance.instanceId}! " +
+                            $"CurrentPathMode={extDriverInstance.pathMode}");
+                    }
+
                     return false;
                 }
 
@@ -1908,14 +1978,16 @@
                         calculateEndPos = false;
                     }
 
-                    Log._DebugIf(
-                        logParkingAi,
-                        $"Navigating citizen instance {extDriverInstance.instanceId} to parking " +
-                        $"building {knownParkingSpaceLocationId}! segment={endPathPos.m_segment}, " +
-                        $"laneIndex={endPathPos.m_lane}, offset={endPathPos.m_offset}. " +
-                        $"CurrentPathMode={extDriverInstance.pathMode} " +
-                        $"calculateEndPos={calculateEndPos}");
-                return true;
+                    if (logParkingAi) {
+                        Log._Debug(
+                            $"Navigating citizen instance {extDriverInstance.instanceId} to parking " +
+                            $"building {knownParkingSpaceLocationId}! segment={endPathPos.m_segment}, " +
+                            $"laneIndex={endPathPos.m_lane}, offset={endPathPos.m_offset}. " +
+                            $"CurrentPathMode={extDriverInstance.pathMode} " +
+                            $"calculateEndPos={calculateEndPos}");
+                    }
+
+                    return true;
                 }
 
                 default:
@@ -1939,7 +2011,7 @@
 #endif
             Log._DebugIf(
                 extendedLogParkingAi && homeId != 0,
-                $"Trying to spawn parked passenger car for citizen {citizenId}, " +
+                () => $"Trying to spawn parked passenger car for citizen {citizenId}, " +
                 $"home {homeId} @ {refPos}");
 
             var roadParkSuccess = TrySpawnParkedPassengerCarRoadSide(
@@ -1997,7 +2069,7 @@
 
             Log._DebugIf(
                 logParkingAi,
-                $"Trying to spawn parked passenger car at road side for citizen {citizenId} @ {refPos}");
+                () => $"Trying to spawn parked passenger car at road side for citizen {citizenId} @ {refPos}");
 
             parkPos = Vector3.zero;
 
@@ -2026,10 +2098,12 @@
                     Singleton<VehicleManager>
                             .instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_flags &=
                         (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
-                Log._DebugIf(
-                    logParkingAi,
-                    $"[SUCCESS] Spawned parked passenger car at road side for citizen " +
-                    $"{citizenId}: {parkedVehicleId} @ {parkPos}");
+                    if (logParkingAi) {
+                        Log._Debug(
+                            "[SUCCESS] Spawned parked passenger car at road side for citizen " +
+                            $"{citizenId}: {parkedVehicleId} @ {parkPos}");
+                    }
+
                     reason = ParkingUnableReason.None;
                     return true;
                 }
@@ -2041,7 +2115,7 @@
 
             Log._DebugIf(
                 logParkingAi,
-                $"[FAIL] Failed to spawn parked passenger car at road side for citizen {citizenId}");
+                () => $"[FAIL] Failed to spawn parked passenger car at road side for citizen {citizenId}");
             return false;
         }
 
@@ -2062,7 +2136,7 @@
 
             Log._DebugIf(
                 extendedLogParkingAi && homeId != 0,
-                $"Trying to spawn parked passenger car next to building for citizen " +
+                () => "Trying to spawn parked passenger car next to building for citizen " +
                 $"{citizenId} @ {refPos}");
 
             parkPos = Vector3.zero;
@@ -2096,10 +2170,11 @@
                             .instance.m_parkedVehicles.m_buffer[parkedVehicleId].m_flags &=
                         (ushort)(VehicleParked.Flags.All & ~VehicleParked.Flags.Parking);
 
-                    Log._DebugIf(
-                        extendedLogParkingAi && homeId != 0,
-                        $"[SUCCESS] Spawned parked passenger car next to building for citizen " +
-                        $"{citizenId}: {parkedVehicleId} @ {parkPos}");
+                    if (extendedLogParkingAi && homeId != 0) {
+                        Log._Debug(
+                            "[SUCCESS] Spawned parked passenger car next to building for citizen " +
+                            $"{citizenId}: {parkedVehicleId} @ {parkPos}");
+                    }
 
                     reason = ParkingUnableReason.None;
                     return true;
@@ -2112,7 +2187,7 @@
 
             Log._DebugIf(
                 logParkingAi && homeId != 0,
-                $"[FAIL] Failed to spawn parked passenger car next to building " +
+                () => "[FAIL] Failed to spawn parked passenger car next to building " +
                 $"for citizen {citizenId}");
             return false;
         }
@@ -2174,7 +2249,7 @@
 
                         Log._DebugIf(
                             logParkingAi,
-                            $"Found an (alternative) road-side parking position for " +
+                            () => "Found an (alternative) road-side parking position for " +
                             $"vehicle {vehicleId} @ segment {parkingSpaceSegmentId} after comparing " +
                             $"distance with a bulding parking position @ {parkingBuildingId}!");
 
@@ -2189,7 +2264,7 @@
                     // choose building parking space
                     Log._DebugIf(
                         logParkingAi,
-                        $"Found an alternative building parking position for vehicle {vehicleId} " +
+                        () => $"Found an alternative building parking position for vehicle {vehicleId} " +
                         $"at building {parkingBuildingId} after comparing distance with a road-side " +
                         $"parking position @ {parkingSpaceSegmentId}!");
 
@@ -2204,7 +2279,7 @@
                 // road-side but no building parking space found
                 Log._DebugIf(
                     logParkingAi,
-                    $"Found an alternative road-side parking position for vehicle " +
+                    () => "Found an alternative road-side parking position for vehicle " +
                     $"{vehicleId} @ segment {parkingSpaceSegmentId}!");
 
                 parkPos = roadParkPos;
@@ -2219,7 +2294,7 @@
                 // building but no road-side parking space found
                 Log._DebugIf(
                     logParkingAi,
-                    $"Found an alternative building parking position for vehicle {vehicleId} " +
+                    () => $"Found an alternative building parking position for vehicle {vehicleId} " +
                     $"at building {parkingBuildingId}!");
 
                 parkPos = buildingParkPos;
@@ -2238,7 +2313,7 @@
             parkOffset = -1f;
             Log._DebugIf(
                 logParkingAi,
-                $"Could not find a road-side or building parking position for vehicle {vehicleId}!");
+                () => $"Could not find a road-side or building parking position for vehicle {vehicleId}!");
             return false;
         }
 
@@ -2341,7 +2416,7 @@
                                     out var innerParkOffset)) {
                                     Log._DebugIf(
                                         logParkingAi,
-                                        $"FindParkingSpaceRoadSide: Found a parking space for " +
+                                        () => "FindParkingSpaceRoadSide: Found a parking space for " +
                                         $"refPos {refPos}, segment center {segCenter} " +
                                         $"@ {innerParkPos}, laneId {laneId}, laneIndex {laneIndex}!");
 
@@ -2376,7 +2451,7 @@
             if (foundSegmentId == 0) {
                 Log._DebugIf(
                     logParkingAi,
-                    $"FindParkingSpaceRoadSide: Could not find a parking space for refPos {refPos}!");
+                    () => $"FindParkingSpaceRoadSide: Could not find a parking space for refPos {refPos}!");
                 return 0;
             }
 
@@ -2480,7 +2555,7 @@
             if (foundBuildingId == 0) {
                 Log._DebugIf(
                     logParkingAi && homeID != 0,
-                    $"FindParkingSpaceBuilding: Could not find a parking space for homeID {homeID}!");
+                    () => $"FindParkingSpaceBuilding: Could not find a parking space for homeID {homeID}!");
                 return 0;
             }
 
@@ -2520,21 +2595,21 @@
             if ((building.m_flags & Building.Flags.Created) == Building.Flags.None) {
                 Log._DebugIf(
                     logParkingAi,
-                    $"Refusing to find parking space at building {buildingId}! Building is not created.");
+                    () => $"Refusing to find parking space at building {buildingId}! Building is not created.");
                 return false;
             }
 
             if ((building.m_problems & Notification.Problem.TurnedOff) != Notification.Problem.None) {
                 Log._DebugIf(
                     logParkingAi,
-                    $"Refusing to find parking space at building {buildingId}! Building is not active.");
+                    () => $"Refusing to find parking space at building {buildingId}! Building is not active.");
                 return false;
             }
 
             if ((building.m_flags & Building.Flags.Collapsed) != Building.Flags.None) {
                 Log._DebugIf(
                     logParkingAi,
-                    $"Refusing to find parking space at building {buildingId}! Building is collapsed.");
+                    () => $"Refusing to find parking space at building {buildingId}! Building is collapsed.");
                 return false;
             }
 
@@ -2615,9 +2690,10 @@
 
             if (result && propMinDistance <= maxDistance) {
                 maxDistance = propMinDistance; // NON-STOCK CODE
-                Log._DebugIf(
-                    logParkingAi,
-                    $"Found parking space prop in range ({maxDistance}) at building {buildingId}.");
+                if (logParkingAi) {
+                    Log._Debug(
+                        $"Found parking space prop in range ({maxDistance}) at building {buildingId}.");
+                }
 
                 if (segmentId == 0) {
                     return true;
@@ -2626,7 +2702,7 @@
                 // check if building is accessible from the given segment
                 Log._DebugIf(
                     logParkingAi,
-                    $"Calculating unspawn position of building {buildingId} for segment {segmentId}.");
+                    () => $"Calculating unspawn position of building {buildingId} for segment {segmentId}.");
 
                 building.Info.m_buildingAI.CalculateUnspawnPosition(
                     buildingId,
@@ -2648,7 +2724,7 @@
                         out var laneOffset)) {
                     Log._DebugIf(
                         logParkingAi,
-                        $"Succeeded in finding unspawn position lane offset for building " +
+                        () => "Succeeded in finding unspawn position lane offset for building " +
                         $"{buildingId}, segment {segmentId}, unspawnPos={unspawnPos}! " +
                         $"lanePos={lanePos}, dist={(lanePos - unspawnPos).magnitude}, " +
                         $"laneId={laneId}, laneIndex={laneIndex}, laneOffset={laneOffset}");
@@ -2663,17 +2739,19 @@
                 } else {
                     Log._DebugIf(
                         logParkingAi,
-                        $"Could not find unspawn position lane offset for building {buildingId}, " +
+                        () => $"Could not find unspawn position lane offset for building {buildingId}, " +
                         $"segment {segmentId}, unspawnPos={unspawnPos}!");
                 }
 
                 return true;
             }
 
-            Log._DebugIf(
-                result && logParkingAi,
-                $"Could not find parking space prop in range ({maxDistance}) " +
-                $"at building {buildingId}.");
+            if (result && logParkingAi) {
+                Log._Debug(
+                    $"Could not find parking space prop in range ({maxDistance}) " +
+                    $"at building {buildingId}.");
+            }
+
             return false;
         }
 
@@ -2722,11 +2800,13 @@
                             out parkPos,
                             out parkRot,
                             out parkOffset)) {
-                            Log._DebugIf(
-                                logParkingAi,
-                                $"FindParkingSpaceRoadSideForVehiclePos: Found a parking space " +
-                                $"for refPos {refPos} @ {parkPos}, laneId {laneId}, " +
-                                $"laneIndex {laneIndex}!");
+                            if (logParkingAi) {
+                                Log._Debug(
+                                    "FindParkingSpaceRoadSideForVehiclePos: Found a parking space " +
+                                    $"for refPos {refPos} @ {parkPos}, laneId {laneId}, " +
+                                    $"laneIndex {laneIndex}!");
+                            }
+
                             return true;
                         }
                     }

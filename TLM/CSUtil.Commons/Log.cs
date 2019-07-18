@@ -42,13 +42,15 @@
 
         /// <summary>
         /// Will log only if debug mode is enabled and the condition is true
+        /// NOTE: If a lambda contains values from `out` and `ref` scope args,
+        /// then you can not use a lambda, instead use `if (cond) { Log._Debug }`
         /// </summary>
         /// <param name="cond">The condition</param>
-        /// <param name="s">The text</param>
+        /// <param name="s">The function which returns text to log</param>
         [Conditional("DEBUG")]
-        public static void _DebugIf(bool cond, string s) {
+        public static void _DebugIf(bool cond, Func<string> s) {
             if (cond) {
-                LogToFile(s, LogLevel.Debug);
+                LogToFile(s(), LogLevel.Debug);
             }
         }
 
@@ -72,13 +74,15 @@
 
         /// <summary>
         /// Log a warning only in debug mode if cond is true
+        /// NOTE: If a lambda contains values from `out` and `ref` scope args,
+        /// then you can not use a lambda, instead use `if (cond) { Log._DebugOnlyWarning }`
         /// </summary>
         /// <param name="cond">The condition</param>
-        /// <param name="s">The text</param>
+        /// <param name="s">The function which returns text to log</param>
         [Conditional("DEBUG")]
-        public static void _DebugOnlyWarningIf(bool cond, string s) {
+        public static void _DebugOnlyWarningIf(bool cond, Func<string> s) {
             if (cond) {
-                LogToFile(s, LogLevel.Warning);
+                LogToFile(s(), LogLevel.Warning);
             }
         }
 
@@ -88,12 +92,14 @@
 
         /// <summary>
         /// Log a warning only if cond is true
+        /// NOTE: If a lambda contains values from `out` and `ref` scope args,
+        /// then you can not use a lambda, instead use `if (cond) { Log.Warning }`
         /// </summary>
         /// <param name="cond">The condition</param>
-        /// <param name="s">The text</param>
-        public static void WarningIf(bool cond, string s) {
+        /// <param name="s">The function which returns text to log</param>
+        public static void WarningIf(bool cond, Func<string> s) {
             if (cond) {
-                LogToFile(s, LogLevel.Warning);
+                LogToFile(s(), LogLevel.Warning);
             }
         }
 

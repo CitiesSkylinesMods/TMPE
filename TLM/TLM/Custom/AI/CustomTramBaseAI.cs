@@ -259,7 +259,7 @@
 #endif
             Log._DebugIf(
                 logLogic,
-                $"CustomTramBaseAI.CustomCalculateSegmentPosition({vehicleId}) called.\n" +
+                () => $"CustomTramBaseAI.CustomCalculateSegmentPosition({vehicleId}) called.\n" +
                 $"\trefPosition.m_segment={refPosition.m_segment}, " +
                 $"refPosition.m_offset={refPosition.m_offset}\n" +
                 $"\tprevPosition.m_segment={prevPosition.m_segment}, " +
@@ -427,13 +427,16 @@
             var curInvRot = Quaternion.Inverse(frameData.m_rotation);
             var curveTangent = curInvRot * frameData.m_velocity;
 
+#if DEBUG
+            var logFramePos = frameData.m_position;
+            var logSwayPos = frameData.m_swayPosition;
             Log._DebugIf(
                 logLogic,
-                $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                 "================================================\n" +
                 $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
-                $"leadingVehicle={leadingVehicle} frameData.m_position={frameData.m_position} " +
-                $"frameData.m_swayPosition={frameData.m_swayPosition} " +
+                $"leadingVehicle={leadingVehicle} frameData.m_position={logFramePos} " +
+                $"frameData.m_swayPosition={logSwayPos} " +
                 $"wheelBaseRot={wheelBaseRot} posAfterWheelRot={posAfterWheelRot} " +
                 $"posBeforeWheelRot={posBeforeWheelRot} acceleration={acceleration} " +
                 $"braking={braking} curSpeed={curSpeed} " +
@@ -441,6 +444,7 @@
                 $"afterRotToTargetPos1DiffSqrMag={afterRotToTargetPos1DiffSqrMag} " +
                 $"curInvRot={curInvRot} curveTangent={curveTangent} " +
                 $"this.m_info.m_generatedInfo.m_wheelBase={m_info.m_generatedInfo.m_wheelBase}");
+#endif
 
             var forward = Vector3.forward;
             var targetMotion = Vector3.zero;
@@ -625,19 +629,23 @@
 
                     Log._DebugIf(
                         logLogic,
-                        $"CustomTramBaseAI.SimulationStep({vehicleId}): dot < 0");
+                        () => $"CustomTramBaseAI.SimulationStep({vehicleId}): dot < 0");
                 }
 
+#if DEBUG
+                var logTargetPos0 = vehicleData.m_targetPos0;
+                var logTargetPos1 = vehicleData.m_targetPos1;
                 Log._DebugIf(
                     logLogic,
-                    $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
-                    $"Leading vehicle is 0. vehicleData.m_targetPos0={vehicleData.m_targetPos0} " +
-                    $"vehicleData.m_targetPos1={vehicleData.m_targetPos1} " +
+                    () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                    $"Leading vehicle is 0. vehicleData.m_targetPos0={logTargetPos0} " +
+                    $"vehicleData.m_targetPos1={logTargetPos1} " +
                     $"posBeforeWheelRot={posBeforeWheelRot} posBeforeWheelRot={posAfterWheelRot} " +
                     $"estimatedFrameDist={estimatedFrameDist} maxSpeedAdd={maxSpeedAdd} " +
                     $"meanSpeedAdd={meanSpeedAdd} maxSpeedAddSqr={maxSpeedAddSqr} " +
                     $"meanSpeedAddSqr={meanSpeedAddSqr} " +
                     $"afterRotToTargetPos1DiffSqrMag={afterRotToTargetPos1DiffSqrMag}");
+#endif
 
                 var posIndex = 0;
                 var hasValidPathTargetPos = false;
@@ -676,7 +684,7 @@
 
                 Log._DebugIf(
                     logLogic,
-                    $"CustomTramBaseAI.SimulationStep({vehicleId}): posIndex={posIndex} " +
+                    () => $"CustomTramBaseAI.SimulationStep({vehicleId}): posIndex={posIndex} " +
                     $"hasValidPathTargetPos={hasValidPathTargetPos}");
 
                 if (leaderData.m_path != 0u
@@ -693,7 +701,7 @@
 
                     Log._DebugIf(
                         logLogic,
-                        $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                        () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                         $"leaderPathPosIndex={leaderPathPosIndex} " +
                         $"leaderLastPathOffset={leaderLastPathOffset} " +
                         $"leaderPathPosIndex={leaderPathPosIndex} leaderLen={leaderLen}");
@@ -781,7 +789,7 @@
                     maxSpeed = 0f;
                     Log._DebugIf(
                         logLogic,
-                        $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                        () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                         $"Vehicle is stopped. maxSpeed={maxSpeed}");
                 } else {
                     maxSpeed = Mathf.Min(
@@ -789,19 +797,19 @@
                         GetMaxSpeed(leaderId, ref leaderData));
                     Log._DebugIf(
                         logLogic,
-                        $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                        () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                         $"Vehicle is not stopped. maxSpeed={maxSpeed}");
                 }
 
                 Log._DebugIf(
                     logLogic,
-                    $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                    () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                     $"Start of second part. curSpeed={curSpeed} curInvRot={curInvRot}");
 
                 afterRotToTargetPos1Diff = curInvRot * afterRotToTargetPos1Diff;
                 Log._DebugIf(
                     logLogic,
-                    $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                    () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                     $"afterRotToTargetPos1Diff={afterRotToTargetPos1Diff} " +
                     $"(old afterRotToTargetPos1DiffSqrMag={afterRotToTargetPos1DiffSqrMag})");
 
@@ -812,7 +820,7 @@
                     forward = VectorUtils.NormalizeXZ(afterRotToTargetPos1Diff, out forwardLen);
                     Log._DebugIf(
                         logLogic,
-                        $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                        () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                         $"afterRotToTargetPos1DiffSqrMag > 1f. forward={forward} " +
                         $"forwardLen={forwardLen}");
 
@@ -822,7 +830,7 @@
                         maxSpeedAddSqr = maxSpeedAdd * maxSpeedAdd;
                         Log._DebugIf(
                             logLogic,
-                            $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                            () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                             $"forwardLen > 1f. fwd={fwd} maxSpeedAdd={maxSpeedAdd} maxSpeedAddSqr={maxSpeedAddSqr}");
 
                         if (afterRotToTargetPos1DiffSqrMag > maxSpeedAddSqr) {
@@ -832,7 +840,7 @@
 
                             Log._DebugIf(
                                 logLogic,
-                                $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                                () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                                 $"afterRotToTargetPos1DiffSqrMag > maxSpeedAddSqr. " +
                                 $"afterRotToTargetPos1DiffSqrMag={afterRotToTargetPos1DiffSqrMag} " +
                                 $"maxSpeedAddSqr={maxSpeedAddSqr} fwdLimiter={fwdLimiter} fwd={fwd}");
@@ -841,7 +849,7 @@
                         if (fwd.z < -1f) { // !!!
                             Log._DebugIf(
                                 logLogic,
-                                $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                                () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                                 $"fwd.z < -1f. fwd={fwd}");
 
                             if (vehicleData.m_path != 0u && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == 0) {
@@ -850,7 +858,7 @@
                                     // !!!
                                     Log._DebugIf(
                                         logLogic,
-                                        $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                                        () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                                         $"(curInvRot * targetPos0TargetPos1Diff).z < -0.01f. " +
                                         $"curInvRot={curInvRot} " +
                                         $"targetPos0TargetPos1Diff={targetPos0TargetPos1Diff}");
@@ -859,7 +867,7 @@
                                         // !!!
                                         Log._DebugIf(
                                             logLogic,
-                                            $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                                            () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                                             $"afterRotToTargetPos1Diff.z < Mathf.Abs" +
                                             $"(afterRotToTargetPos1Diff.x) * -10f. fwd={fwd} " +
                                             $"targetPos0TargetPos1Diff={targetPos0TargetPos1Diff} " +
@@ -872,7 +880,7 @@
 
                                         Log._DebugIf(
                                             logLogic,
-                                            $"CustomTramBaseAI.SimulationStep({vehicleId}): (1) " +
+                                            () => $"CustomTramBaseAI.SimulationStep({vehicleId}): (1) " +
                                               $"set maxSpeed={maxSpeed}");
                                     } else {
                                         posAfterWheelRot =
@@ -901,7 +909,7 @@
 
                                         Log._DebugIf(
                                             logLogic,
-                                            $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                                            () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                                             $"afterRotToTargetPos1Diff.z >= Mathf.Abs" +
                                             $"(afterRotToTargetPos1Diff.x) * -10f. Invoked " +
                                             $"UpdatePathTargetPositions. " +
@@ -933,9 +941,9 @@
                                     maxSpeed = 0f;
                                     Log._DebugIf(
                                         logLogic,
-                                        $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                                        () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                                         $"Vehicle is waiting for a path. posIndex={posIndex} " +
-                                        $"vehicleData.m_targetPos1={vehicleData.m_targetPos1} " +
+                                        $"vehicleData.m_targetPos1={posAfterWheelRot} " +
                                         $"fwd={fwd} afterRotToTargetPos1Diff={afterRotToTargetPos1Diff} " +
                                         $"maxSpeed={maxSpeed}");
                                 }
@@ -944,7 +952,7 @@
                             motionFactor = 0f;
                             Log._DebugIf(
                                 logLogic,
-                                $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                                () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                                 $"Reset motion factor. motionFactor={motionFactor}");
                         }
 
@@ -958,7 +966,7 @@
                         var targetDist = forwardLen;
                         Log._DebugIf(
                             logLogic,
-                            $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                            () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                             $"targetDist={targetDist} fwd={fwd} curve={curve} maxSpeed={maxSpeed}");
 
                         if (vehicleData.m_targetPos1.w < 0.1f) {
@@ -975,7 +983,7 @@
 
                         Log._DebugIf(
                             logLogic,
-                            $"CustomTramBaseAI.SimulationStep({vehicleId}): [1] maxSpeed={maxSpeed}");
+                            () => $"CustomTramBaseAI.SimulationStep({vehicleId}): [1] maxSpeed={maxSpeed}");
 
                         maxSpeed = Mathf.Min(
                             maxSpeed,
@@ -985,7 +993,7 @@
                                 braking * 0.9f));
                         Log._DebugIf(
                             logLogic,
-                            $"CustomTramBaseAI.SimulationStep({vehicleId}): [2] maxSpeed={maxSpeed}");
+                            () => $"CustomTramBaseAI.SimulationStep({vehicleId}): [2] maxSpeed={maxSpeed}");
 
                         targetDist += VectorUtils.LengthXZ(vehicleData.m_targetPos2 - vehicleData.m_targetPos1);
                         maxSpeed = Mathf.Min(
@@ -996,7 +1004,7 @@
                                 braking * 0.9f));
                         Log._DebugIf(
                             logLogic,
-                            $"CustomTramBaseAI.SimulationStep({vehicleId}): [3] maxSpeed={maxSpeed}");
+                            () => $"CustomTramBaseAI.SimulationStep({vehicleId}): [3] maxSpeed={maxSpeed}");
 
                         targetDist += VectorUtils.LengthXZ(vehicleData.m_targetPos3 - vehicleData.m_targetPos2);
                         if (vehicleData.m_targetPos3.w < 0.01f) {
@@ -1008,7 +1016,7 @@
                                                                          braking * 0.9f));
                         Log._DebugIf(
                             logLogic,
-                            $"CustomTramBaseAI.SimulationStep({vehicleId}): [4] maxSpeed={maxSpeed}");
+                            () => $"CustomTramBaseAI.SimulationStep({vehicleId}): [4] maxSpeed={maxSpeed}");
 
                         CarAI.CheckOtherVehicles(
                             vehicleId,
@@ -1022,7 +1030,7 @@
                             lodPhysics);
                         Log._DebugIf(
                             logLogic,
-                            $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                            () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                             $"CheckOtherVehicles finished. blocked={blocked}");
 
                         if (maxSpeed < curSpeed) {
@@ -1030,7 +1038,7 @@
                             targetSpeed = Mathf.Max(maxSpeed, curSpeed - brake);
                             Log._DebugIf(
                                 logLogic,
-                                $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                                () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                                 $"maxSpeed < curSpeed. maxSpeed={maxSpeed} curSpeed={curSpeed} " +
                                 $"brake={brake} targetSpeed={targetSpeed}");
                         } else {
@@ -1038,7 +1046,7 @@
                             targetSpeed = Mathf.Min(maxSpeed, curSpeed + accel);
                             Log._DebugIf(
                                 logLogic,
-                                $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                                () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                                 $"maxSpeed >= curSpeed. maxSpeed={maxSpeed} curSpeed={curSpeed} " +
                                 $"accel={accel} targetSpeed={targetSpeed}");
                         }
@@ -1054,7 +1062,7 @@
                 if ((leaderData.m_flags & Vehicle.Flags.Stopped) == 0 && maxSpeed < 0.1f) {
                     Log._DebugIf(
                         logLogic,
-                        $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
+                        () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
                         $"Vehicle is not stopped but maxSpeed < 0.1. maxSpeed={maxSpeed}");
                     blocked = true;
                 }

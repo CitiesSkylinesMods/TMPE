@@ -55,10 +55,13 @@ namespace TrafficManager.Custom.AI {
                     mainPathState = ExtPathState.Ready;
                 }
 
+#if DEBUG
+                var logVehiclePath = vehicleData.m_path;
                 Log._DebugIf(
                     logParkingAi,
-                    $"CustomCarAI.CustomSimulationStep({vehicleId}): " +
-                    $"Path: {vehicleData.m_path}, mainPathState={mainPathState}");
+                    () => $"CustomCarAI.CustomSimulationStep({vehicleId}): " +
+                    $"Path: {logVehiclePath}, mainPathState={mainPathState}");
+#endif
 
                 var extVehicleManager = Constants.ManagerFactory.ExtVehicleManager;
                 var finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
@@ -456,7 +459,7 @@ namespace TrafficManager.Custom.AI {
 #endif
             Log._DebugOnlyWarningIf(
                 logParkingAi,
-                $"CustomCarAI.CustomStartPathFind({vehicleId}): called for vehicle " +
+                () => $"CustomCarAI.CustomStartPathFind({vehicleId}): called for vehicle " +
                 $"{vehicleId}, startPos={startPos}, endPos={endPos}, " +
                 $"startBothWays={startBothWays}, endBothWays={endBothWays}, " +
                 $"undergroundTarget={undergroundTarget}");
@@ -547,7 +550,7 @@ namespace TrafficManager.Custom.AI {
 
             Log._DebugIf(
                 logParkingAi,
-                $"CustomCarAI.CustomStartPathFind({vehicleId}): " +
+                () => $"CustomCarAI.CustomStartPathFind({vehicleId}): " +
                 $"Path-finding starts for vehicle {vehicleId}, path={path}, " +
                 $"extVehicleType={vehicleType}, startPosA.segment={startPosA.m_segment}, " +
                 $"startPosA.lane={startPosA.m_lane}, info.m_vehicleType={info.m_vehicleType}, " +
@@ -605,7 +608,7 @@ namespace TrafficManager.Custom.AI {
 #endif
             Log._DebugIf(
                 logLogic,
-                $"CustomCarAI.CustomCheckOtherVehicle({vehicleId}, {otherID}) called.");
+                () => $"CustomCarAI.CustomCheckOtherVehicle({vehicleId}, {otherID}) called.");
 
             Vector3 otherSegMin;
             Vector3 otherSegMax;

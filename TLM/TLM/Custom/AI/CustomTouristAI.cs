@@ -124,7 +124,7 @@
                 if (parkedVehicleId != 0) {
                     Log._DebugIf(
                         logParkingAi,
-                        $"CustomTouristAI.CustomGetVehicleInfo({instanceId}): " +
+                        () => $"CustomTouristAI.CustomGetVehicleInfo({instanceId}): " +
                         $"Citizen instance {instanceId} owns a parked vehicle {parkedVehicleId}. " +
                         $"Reusing vehicle info.");
                     carInfo = Singleton<VehicleManager>

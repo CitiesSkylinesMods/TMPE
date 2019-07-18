@@ -14,6 +14,7 @@
     [TargetType(typeof(TransportLineAI))]
     public class CustomTransportLineAI : TransportLineAI {
         [RedirectMethod]
+        [UsedImplicitly]
         public static bool CustomStartPathFind(ushort segmentId,
                                                ref NetSegment data,
                                                ItemClass.Service netService,
@@ -50,17 +51,19 @@
             var position2 = netManager.m_nodes.m_buffer[data.m_endNode].m_position;
 #if DEBUG
             var logPathfind = DebugSwitch.TransportLinePathfind.Get();
+            var logStartNode = data.m_startNode;
+            var logEndNode = data.m_endNode;
+            Log._DebugIf(
+                logPathfind,
+                () => $"TransportLineAI.CustomStartPathFind({segmentId}, ..., {netService}, " +
+                      $"{netService2}, {vehicleType}, {skipQueue}): " +
+                      $"startNode={logStartNode} @ {position}, " +
+                      $"endNode={logEndNode} @ {position2} -- " +
+                      $"line: {netManager.m_nodes.m_buffer[logStartNode].m_transportLine}" +
+                      $"/{netManager.m_nodes.m_buffer[logEndNode].m_transportLine}");
 #else
             var logPathfind = false;
 #endif
-            Log._DebugIf(
-                logPathfind,
-                $"TransportLineAI.CustomStartPathFind({segmentId}, ..., {netService}, " +
-                $"{netService2}, {vehicleType}, {skipQueue}): " +
-                $"startNode={data.m_startNode} @ {position}, " +
-                $"endNode={data.m_endNode} @ {position2} -- " +
-                $"line: {netManager.m_nodes.m_buffer[data.m_startNode].m_transportLine}" +
-                $"/{netManager.m_nodes.m_buffer[data.m_endNode].m_transportLine}");
 
             if (!PathManager.FindPathPosition(
                     position,
@@ -217,7 +220,7 @@
                 data.m_flags |= NetSegment.Flags.WaitingPath;
                 Log._DebugIf(
                     logPathfind,
-                    $"TransportLineAI.CustomStartPathFind({segmentId}, ..., {netService}, " +
+                    () => $"TransportLineAI.CustomStartPathFind({segmentId}, ..., {netService}, " +
                     $"{netService2}, {vehicleType}, {skipQueue}): Started calculating " +
                     $"path {path} for extVehicleType={extVehicleType}, " +
                     $"startPosA=[seg={startPosA.m_segment}, lane={startPosA.m_lane}, " +

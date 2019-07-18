@@ -60,10 +60,12 @@ namespace TrafficManager.Custom.AI {
                     mainPathState = ExtPathState.Ready;
                 }
 
+#if DEBUG
                 Log._DebugIf(
                     logParkingAi,
-                    $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
+                    () => $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
                     $"Path: {instanceData.m_path}, mainPathState={mainPathState}");
+#endif
 
 #if BENCHMARK
                 using (var bm = new Benchmark(null, "ConvertPathStateToSoftPathState+UpdateCitizenPathState")) {
@@ -78,12 +80,13 @@ namespace TrafficManager.Custom.AI {
                         ref ExtCitizenManager.Instance.ExtCitizens[citizenId],
                         ref ctzBuffer[instanceData.m_citizen],
                         mainPathState);
-                    Log._DebugIf(
-                        logParkingAi,
-                        $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
-                        $"Applied Parking AI logic. Path: {instanceData.m_path}, " +
-                        $"mainPathState={mainPathState}, finalPathState={finalPathState}, " +
-                        $"extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceId]}");
+                    if (logParkingAi) {
+                        Log._Debug(
+                            $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
+                            $"Applied Parking AI logic. Path: {instanceData.m_path}, " +
+                            $"mainPathState={mainPathState}, finalPathState={finalPathState}, " +
+                            $"extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceId]}");
+                    }
                 } // if Options.parkingAi
 #if BENCHMARK
                 }
@@ -91,12 +94,13 @@ namespace TrafficManager.Custom.AI {
 
                 switch (finalPathState) {
                     case ExtSoftPathState.Ready: {
-                        Log._DebugIf(
-                            logParkingAi,
-                            $"CustomHumanAI.CustomSimulationStep({instanceId}): Path-finding " +
-                            $"succeeded for citizen instance {instanceId} " +
-                            $"(finalPathState={finalPathState}). Path: {instanceData.m_path} " +
-                            "-- calling HumanAI.PathfindSuccess");
+                        if (logParkingAi) {
+                            Log._Debug(
+                                $"CustomHumanAI.CustomSimulationStep({instanceId}): Path-finding " +
+                                $"succeeded for citizen instance {instanceId} " +
+                                $"(finalPathState={finalPathState}). Path: {instanceData.m_path} " +
+                                "-- calling HumanAI.PathfindSuccess");
+                        }
 
                         if (citizenId == 0
                             || ctzBuffer[instanceData.m_citizen].m_vehicle == 0) {
@@ -128,33 +132,38 @@ namespace TrafficManager.Custom.AI {
                     }
 
                     case ExtSoftPathState.Ignore: {
-                        Log._DebugIf(
-                            logParkingAi,
-                            $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
-                            "Path-finding result shall be ignored for citizen instance " +
-                            $"{instanceId} (finalPathState={finalPathState}). " +
-                            $"Path: {instanceData.m_path} -- ignoring");
+                        if (logParkingAi) {
+                            Log._Debug(
+                                $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
+                                "Path-finding result shall be ignored for citizen instance " +
+                                $"{instanceId} (finalPathState={finalPathState}). " +
+                                $"Path: {instanceData.m_path} -- ignoring");
+                        }
+
                         return;
                     }
 
                     case ExtSoftPathState.Calculating:
                     default: {
-                        Log._DebugIf(
-                            logParkingAi,
-                            $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
-                            $"Path-finding result undetermined for citizen instance {instanceId} " +
-                            $"(finalPathState={finalPathState}). " +
-                            $"Path: {instanceData.m_path} -- continue");
+                        if (logParkingAi) {
+                            Log._Debug(
+                                $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
+                                      $"Path-finding result undetermined for citizen instance {instanceId} " +
+                                      $"(finalPathState={finalPathState}). " +
+                                      $"Path: {instanceData.m_path} -- continue");
+                        }
+
                         break;
                     }
 
                     case ExtSoftPathState.FailedHard: {
-                        Log._DebugIf(
-                            logParkingAi,
-                            $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
-                            $"HARD path-finding failure for citizen instance {instanceId} " +
-                            $"(finalPathState={finalPathState}). Path: {instanceData.m_path} " +
-                            "-- calling HumanAI.PathfindFailure");
+                        if (logParkingAi) {
+                            Log._Debug(
+                                $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
+                                $"HARD path-finding failure for citizen instance {instanceId} " +
+                                $"(finalPathState={finalPathState}). Path: {instanceData.m_path} " +
+                                "-- calling HumanAI.PathfindFailure");
+                        }
 
                         instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
                         instanceData.m_flags &= ~(CitizenInstance.Flags.HangAround
@@ -168,12 +177,13 @@ namespace TrafficManager.Custom.AI {
                     }
 
                     case ExtSoftPathState.FailedSoft: {
-                        Log._DebugIf(
-                            logParkingAi,
-                            $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
-                            $"SOFT path-finding failure for citizen instance {instanceId} " +
-                            $"(finalPathState={finalPathState}). Path: {instanceData.m_path} " +
-                            "-- calling HumanAI.InvalidPath");
+                        if (logParkingAi) {
+                            Log._Debug(
+                                $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
+                                $"SOFT path-finding failure for citizen instance {instanceId} " +
+                                $"(finalPathState={finalPathState}). Path: {instanceData.m_path} " +
+                                "-- calling HumanAI.InvalidPath");
+                        }
 
                         // path mode has been updated, repeat path-finding
                         instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
@@ -268,6 +278,11 @@ namespace TrafficManager.Custom.AI {
             var extendedLogParkingAi = false;
 #endif
 
+#if DEBUG
+            var logPathMode = extInstance.pathMode;
+#else
+            var logPathMode = 0;
+#endif
             switch (extInstance.pathMode) {
                 // check if the citizen has reached a parked car or target
                 case ExtPathMode.WalkingToParkedCar:
@@ -279,9 +294,9 @@ namespace TrafficManager.Custom.AI {
                         // citizen is reaching their parked car but does not own a parked car
                         Log._DebugOnlyWarningIf(
                             logParkingAi,
-                            $"CustomHumanAI.ExtSimulationStep({instanceId}): " +
+                            () => $"CustomHumanAI.ExtSimulationStep({instanceId}): " +
                             $"Citizen instance {instanceId} was walking to / reaching " +
-                            $"their parked car ({extInstance.pathMode}) but parked " +
+                            $"their parked car ({logPathMode}) but parked " +
                             "car has disappeared. RESET.");
 
                         extCitInstMan.Reset(ref extInstance);
@@ -314,9 +329,9 @@ namespace TrafficManager.Custom.AI {
                             // citizen reached their parked car
                             Log._DebugIf(
                                 extendedLogParkingAi,
-                                $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
+                                () => $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
                                 $"Citizen instance {instanceId} arrived at parked car. " +
-                                $"PathMode={extInstance.pathMode}");
+                                $"PathMode={logPathMode}");
 
                             if (instanceData.m_path != 0) {
                                 Singleton<PathManager>.instance.ReleasePath(instanceData.m_path);
@@ -361,9 +376,9 @@ namespace TrafficManager.Custom.AI {
                         case ParkedCarApproachState.Failure: {
                             Log._DebugIf(
                                 logParkingAi,
-                                $"CustomHumanAI.ExtSimulationStep({instanceId}): " +
+                                () => $"CustomHumanAI.ExtSimulationStep({instanceId}): " +
                                 $"Citizen instance {instanceId} failed to arrive at " +
-                                $"parked car. PathMode={extInstance.pathMode}");
+                                $"parked car. PathMode={logPathMode}");
 
                             // repeat path-finding
                             instanceData.m_flags &= ~CitizenInstance.Flags.WaitingPath;
@@ -433,7 +448,7 @@ namespace TrafficManager.Custom.AI {
 #if DEBUGTTL
                 Log._DebugIf(
                     logTimedLights,
-                    $"CustomHumanAI.CustomCheckTrafficLights({nodeId}, " +
+                    () => $"CustomHumanAI.CustomCheckTrafficLights({nodeId}, " +
                     $"{segmentId}): No custom simulation!");
 #endif
 
@@ -473,7 +488,7 @@ namespace TrafficManager.Custom.AI {
 #if DEBUGTTL
                 Log._DebugIf(
                     logTimedLights,
-                    $"CustomHumanAI.CustomCheckTrafficLights({nodeId}, {segmentId}): " +
+                    () => $"CustomHumanAI.CustomCheckTrafficLights({nodeId}, {segmentId}): " +
                     $"Custom simulation! pedestrianLightState={pedestrianLightState}, " +
                     $"lights.InvalidPedestrianLight={lights.InvalidPedestrianLight}");
 #endif
