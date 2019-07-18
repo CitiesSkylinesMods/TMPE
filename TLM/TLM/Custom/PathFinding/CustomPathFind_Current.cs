@@ -4078,7 +4078,7 @@
         private void CalculateAdvancedAiCostFactors(
 #if DEBUG
             bool isLogEnabled,
-            uint unit,
+            uint unitId,
 #endif
             ref BufferItem item,
             ref NetSegment prevSegment,
@@ -4091,11 +4091,11 @@
         {
 #if !DEBUG
             const bool isLogEnabled = false;
-            const uint unit = 0;
+            const uint unitId = 0;
 #endif
             if (isLogEnabled) {
                 DebugLog(
-                    unit,
+                    unitId,
                     item,
                     $"CalculateAdvancedAiCostFactors called.\n" +
                     $"\tnextNodeId={nextNodeId}\n" +
@@ -4124,7 +4124,7 @@
 
                     if (isLogEnabled) {
                         DebugLog(
-                            unit,
+                            unitId,
                             item,
                             $"CalculateAdvancedAiCostFactors: Calculated randomized lane selection costs\n" +
                             $"\tlaneSelectionCost={laneSelectionCost}");
@@ -4141,7 +4141,7 @@
 
                 if (isLogEnabled) {
                     DebugLog(
-                        unit,
+                        unitId,
                         item,
                         "CalculateAdvancedAiCostFactors: Calculated junction costs\n" +
                         "\t" + $"segmentSelectionCost={segmentSelectionCost}");
@@ -4201,7 +4201,7 @@
 
                     if (isLogEnabled) {
                         DebugLog(
-                            unit,
+                            unitId,
                             item,
                             "CalculateAdvancedAiCostFactors: Calculated in-front-of-junction lane changing costs\n" +
                             "\t" + $"laneChangingCost={laneChangingCost}");
@@ -4224,7 +4224,7 @@
 
                     if (isLogEnabled) {
                         DebugLog(
-                            unit,
+                            unitId,
                             item,
                             "CalculateAdvancedAiCostFactors: Calculated base lane changing costs\n" +
                             "\t" + $"laneChangingCost={laneChangingCost}");
@@ -4234,7 +4234,7 @@
 
             if (isLogEnabled) {
                 DebugLog(
-                    unit,
+                    unitId,
                     item,
                     "CalculateAdvancedAiCostFactors: Calculated cost factors\n" +
                     "\t" + $"segmentSelectionCost={segmentSelectionCost}\n" +
