@@ -96,7 +96,15 @@ namespace TrafficManager.State {
         //public static int laneChangingRandomization = 2;
         public static bool individualDrivingStyle = true;
         public static int recklessDrivers = 3;
+
+        /// <summary>
+        /// Option: buses may ignore lane arrows
+        /// </summary>
         public static bool relaxedBusses = false;
+
+        /// <summary>
+        /// debug option: all vehicles may ignore lane arrows
+        /// </summary>
         public static bool allRelaxed = false;
         public static bool evacBussesMayIgnoreRules = false;
         public static bool prioritySignsOverlay = false;

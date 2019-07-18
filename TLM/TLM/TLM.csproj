@@ -125,7 +125,7 @@
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Custom\Data\CustomVehicle.cs" />
-    <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
+    <Compile Include="Custom\PathFinding\CustomPathFind_Old.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
@@ -155,7 +155,7 @@
     <Compile Include="RedirectionFramework\RedirectionUtil.cs" />
     <Compile Include="RedirectionFramework\Redirector.cs" />
     <Compile Include="RedirectionFramework\Tuple.cs" />
-    <Compile Include="Custom\PathFinding\CustomPathFind2.cs" />
+    <Compile Include="Custom\PathFinding\CustomPathFind_Current.cs" />
     <Compile Include="Custom\PathFinding\StockPathFind.cs" />
     <Compile Include="Manager\Impl\ExtCitizenManager.cs" />
     <Compile Include="Manager\Impl\GeometryManager.cs" />

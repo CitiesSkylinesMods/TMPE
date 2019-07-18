@@ -60,12 +60,11 @@ namespace TrafficManager.Custom.AI {
                     mainPathState = ExtPathState.Ready;
                 }
 
-#if DEBUG
-                Log._DebugIf(
-                    logParkingAi,
-                    () => $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
-                    $"Path: {instanceData.m_path}, mainPathState={mainPathState}");
-#endif
+                if (logParkingAi) {
+                    Log._Debug(
+                        $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
+                        $"Path: {instanceData.m_path}, mainPathState={mainPathState}");
+                }
 
 #if BENCHMARK
                 using (var bm = new Benchmark(null, "ConvertPathStateToSoftPathState+UpdateCitizenPathState")) {
