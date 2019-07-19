@@ -58,12 +58,9 @@ namespace TrafficManager
         }
 
         private static void CheckForIncompatibleMods()
-        {
-            if (GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup)
-            {
-                ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
-                mcc.PerformModCheck();
-            }
+        {   
+            ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
+            mcc.PerformModCheck();
         }
     }
 }
