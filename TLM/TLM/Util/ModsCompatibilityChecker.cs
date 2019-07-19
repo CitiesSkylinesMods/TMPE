@@ -75,16 +75,18 @@ namespace TrafficManager.Util {
 
             // iterate plugins
             foreach (PluginInfo mod in Singleton<PluginManager>.instance.GetPluginsInfo()) {
-                if (!mod.isBuiltin && !mod.isCameraScript && (!filterToEnabled || mod.isEnabled)) {
+                if (!mod.isBuiltin && !mod.isCameraScript) {
+
                     string modName = GetModName(mod);
                     ulong workshopID = mod.publishedFileID.AsUInt64;
 
-                    if (checkKnown && knownIncompatibleMods.ContainsKey(workshopID)) {
-                        // must be online workshop mod
+                    if (checkKnown && (!filterToEnabled || mod.isEnabled) && knownIncompatibleMods.ContainsKey(workshopID)) {
+
                         Log.Info($"Incompatible with: {workshopID} - {modName}");
                         results.Add(mod, modName);
+
                     } else if (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")) {
-                        // It's a TM:PE build - either local or workshop
+
                         string workshopIDstr = workshopID == LOCAL_MOD ? "LOCAL" : workshopID.ToString();
                         Guid currentGuid = GetModGuid(mod);
 
@@ -92,6 +94,7 @@ namespace TrafficManager.Util {
                             Log.Info($"Detected conflicting '{modName}' (Workshop ID: {workshopIDstr}, GUID: {currentGuid}) in '{mod.modPath}'");
                             results.Add(mod, $"{modName} in /{Path.GetFileName(mod.modPath)}");
                         }
+
                     }
                 }
             }
