@@ -89,15 +89,15 @@
 #if DEBUGLOAD
 			Log._Debug($"LaneFlags: {data}");
 #endif
-            var lanes = data.Split(',');
+            string[] lanes = data.Split(',');
 
             if (lanes.Length > 1) {
-                foreach (var split in lanes.Select(lane => lane.Split(':')).Where(split => split.Length > 1)) {
+                foreach (string[] split in lanes.Select(lane => lane.Split(':')).Where(split => split.Length > 1)) {
                     try {
 #if DEBUGLOAD
 						Log._Debug($"Split Data: {split[0]} , {split[1]}");
 #endif
-                        var laneId = Convert.ToUInt32(split[0]);
+                        uint laneId = Convert.ToUInt32(split[0]);
                         uint flags = Convert.ToUInt32(split[1]);
 
                         if (!Services.NetService.IsLaneValid(laneId))
@@ -133,7 +133,7 @@
             bool success = true;
             Log.Info($"Loading lane arrow data (new method)");
 
-            foreach (var laneArrowData in data) {
+            foreach (Configuration.LaneArrowData laneArrowData in data) {
                 try {
                     if (!Services.NetService.IsLaneValid(laneArrowData.laneId))
                         continue;

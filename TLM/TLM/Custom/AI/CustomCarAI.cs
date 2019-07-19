@@ -184,7 +184,7 @@ namespace TrafficManager.Custom.AI {
         public void CustomCalculateSegmentPosition(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position nextNextPosition,
                                                    PathUnit.Position nextPosition, uint nextLaneId, byte nextOffset, PathUnit.Position curPosition, uint curLaneId,
                                                    byte curOffset, int index, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
-            var netManager = Singleton<NetManager>.instance;
+            NetManager netManager = Singleton<NetManager>.instance;
             ushort nextSourceNodeId;
             ushort nextTargetNodeId;
             if (nextOffset < nextPosition.m_offset) {
@@ -227,7 +227,7 @@ namespace TrafficManager.Custom.AI {
             Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
             Vector3 lastFrameVehiclePos = lastFrameData.m_position;
             float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
-            var prevSegmentInfo = netManager.m_segments.m_buffer[nextPosition.m_segment].Info;
+            NetInfo prevSegmentInfo = netManager.m_segments.m_buffer[nextPosition.m_segment].Info;
             netManager.m_lanes.m_buffer[nextLaneId].CalculatePositionAndDirection(nextOffset * Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR, out pos, out dir);
 
             float braking = this.m_info.m_braking;
@@ -236,11 +236,11 @@ namespace TrafficManager.Custom.AI {
             }
 
             // car position on the Bezier curve of the lane
-            var refVehiclePosOnBezier = netManager.m_lanes.m_buffer[curLaneId].CalculatePosition(curOffset * Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
+            Vector3 refVehiclePosOnBezier = netManager.m_lanes.m_buffer[curLaneId].CalculatePosition(curOffset * Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR);
             //ushort currentSegmentId = netManager.m_lanes.m_buffer[prevLaneID].m_segment;
 
             // this seems to be like the required braking force in order to stop the vehicle within its half length.
-            var crazyValue = 0.5f * sqrVelocity / braking + m_info.m_generatedInfo.m_size.z * 0.5f;
+            float crazyValue = 0.5f * sqrVelocity / braking + m_info.m_generatedInfo.m_size.z * 0.5f;
             bool withinBrakingDistance = Vector3.Distance(lastFrameVehiclePos, refVehiclePosOnBezier) >= crazyValue - 1f;
 
             if (
@@ -282,8 +282,8 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectMethod]
         public void CustomCalculateSegmentPosition(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position position, uint laneId, byte offset, out Vector3 pos, out Vector3 dir, out float maxSpeed) {
-            var netManager = Singleton<NetManager>.instance;
-            var segmentInfo = netManager.m_segments.m_buffer[position.m_segment].Info;
+            NetManager netManager = Singleton<NetManager>.instance;
+            NetInfo segmentInfo = netManager.m_segments.m_buffer[position.m_segment].Info;
             netManager.m_lanes.m_buffer[laneId].CalculatePositionAndDirection(offset * Constants.BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR, out pos, out dir);
 
             if (segmentInfo.m_lanes != null && segmentInfo.m_lanes.Length > position.m_lane) {

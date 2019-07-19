@@ -88,7 +88,7 @@ namespace TrafficManager.UI.SubTools {
 
             NetManager netManager = Singleton<NetManager>.instance;
 
-            var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+            Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
             //Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
             Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -107,12 +107,12 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                var diff = NetManager.instance.m_nodes.m_buffer[nodeId].m_position - camPos;
+                Vector3 diff = NetManager.instance.m_nodes.m_buffer[nodeId].m_position - camPos;
                 if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
                     continue; // do not draw if too distant
 
                 List<NodeLaneMarker> nodeMarkers;
-                var hasMarkers = currentNodeMarkers.TryGetValue((ushort)nodeId, out nodeMarkers);
+                bool hasMarkers = currentNodeMarkers.TryGetValue((ushort)nodeId, out nodeMarkers);
 
                 if (!viewOnly && GetMarkerSelectionMode() == MarkerSelectionMode.None) {
                     MainTool.DrawNodeCircle(cameraInfo, (ushort)nodeId, DefaultNodeMarkerColor, true);
@@ -202,10 +202,10 @@ namespace TrafficManager.UI.SubTools {
                     }
                 }
 
-                var deleteAll = frameClearPressed > 0 && (Time.frameCount - frameClearPressed) < 20; // 0.33 sec
+                bool deleteAll = frameClearPressed > 0 && (Time.frameCount - frameClearPressed) < 20; // 0.33 sec
 
                 // Must press Shift+S (or another shortcut) within last 20 frames for this to work
-                var stayInLane = frameStayInLanePressed > 0
+                bool stayInLane = frameStayInLanePressed > 0
                                  && (Time.frameCount - frameStayInLanePressed) < 20 // 0.33 sec
                                  && Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId].CountSegments() == 2;
 

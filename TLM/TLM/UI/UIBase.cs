@@ -31,7 +31,7 @@ namespace TrafficManager.UI {
 
             // Get the UIView object. This seems to be the top-level object for most
             // of the UI.
-            var uiView = UIView.GetAView();
+            UIView uiView = UIView.GetAView();
 
             // Add a new button to the view.
             MainMenuButton = (UIMainMenuButton)uiView.AddUIComponent(typeof(UIMainMenuButton));
@@ -77,7 +77,7 @@ namespace TrafficManager.UI {
 #endif
             }
 
-            var uiView = UIView.GetAView();
+            UIView uiView = UIView.GetAView();
             MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
             MainMenu.gameObject.AddComponent<CustomKeyHandler>();
 #if DEBUG
@@ -92,7 +92,7 @@ namespace TrafficManager.UI {
                 Log.Error("Error on Show(): " + e);
             }
 
-            foreach (var button in GetMenu().Buttons) {
+            foreach (MenuButton button in GetMenu().Buttons) {
                 button.UpdateProperties();
             }
 
@@ -109,7 +109,7 @@ namespace TrafficManager.UI {
         }
 
         public void Close() {
-            var uiView = UIView.GetAView();
+            UIView uiView = UIView.GetAView();
             GetMenu().Hide();
 #if DEBUG
             GetDebugMenu().Hide();

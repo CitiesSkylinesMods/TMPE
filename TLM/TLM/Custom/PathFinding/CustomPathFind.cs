@@ -157,7 +157,7 @@ namespace TrafficManager.Custom.PathFinding {
             Log._Debug($"CustomPathFind.Awake called.");
 #endif
 
-            var stockPathFindType = typeof(PathFind);
+            Type stockPathFindType = typeof(PathFind);
             const BindingFlags fieldFlags = BindingFlags.NonPublic | BindingFlags.Instance;
 
             _fieldpathUnits = stockPathFindType.GetField("m_pathUnits", fieldFlags);

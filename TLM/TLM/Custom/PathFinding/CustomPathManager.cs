@@ -71,8 +71,8 @@ namespace TrafficManager.Custom.PathFinding {
 
 			queueItems = new PathUnitQueueItem[PathManager.MAX_PATHUNIT_COUNT];
 
-			var stockPathFinds = GetComponents<PathFind>();
-			var numOfStockPathFinds = stockPathFinds.Length;
+            PathFind[] stockPathFinds = GetComponents<PathFind>();
+			int numOfStockPathFinds = stockPathFinds.Length;
 			int numCustomPathFinds = numOfStockPathFinds;
 
 			Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects.");
@@ -85,7 +85,7 @@ namespace TrafficManager.Custom.PathFinding {
 			try {
 				Monitor.Enter(this.m_bufferLock);
 
-				for (var i = 0; i < numCustomPathFinds; i++) {
+				for (int i = 0; i < numCustomPathFinds; i++) {
 #if PF2
 					_replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind2>();
 #else
@@ -98,12 +98,12 @@ namespace TrafficManager.Custom.PathFinding {
 				}
 
 				Log._Debug("Setting _replacementPathFinds");
-				var fieldInfo = typeof(PathManager).GetField("m_pathfinds", BindingFlags.NonPublic | BindingFlags.Instance);
+                FieldInfo fieldInfo = typeof(PathManager).GetField("m_pathfinds", BindingFlags.NonPublic | BindingFlags.Instance);
 
 				Log._Debug("Setting m_pathfinds to custom collection");
 				fieldInfo?.SetValue(this, _replacementPathFinds);
 
-				for (var i = 0; i < numOfStockPathFinds; i++) {
+				for (int i = 0; i < numOfStockPathFinds; i++) {
 #if DEBUG
 					Log._Debug($"PF {i}: {stockPathFinds[i].m_queuedPathFindCount} queued path-finds");
 #endif

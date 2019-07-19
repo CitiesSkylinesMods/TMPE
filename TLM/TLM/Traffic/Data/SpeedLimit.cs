@@ -37,22 +37,22 @@ namespace TrafficManager.Traffic.Data {
 		private const float LOWER_SPEED = 0.1f;
 		private const float UPPER_SPEED = 2 * 10.0f; // 1000 km/h
 
-		/// <summary>
-		/// Produces list of speed limits to offer user in the palette
-		/// </summary>
-		/// <param name="unit">What kind of speed limit list is required</param>
-		/// <returns>List from smallest to largest speed with the given unit. Zero (no limit) is not added to the list.
-		/// The values are in-game speeds as float.</returns>
-		public static List<float> EnumerateSpeedLimits(SpeedUnit unit) {
+        /// <summary>
+        /// Produces list of speed limits to offer user in the palette
+        /// </summary>
+        /// <param name="unit">What kind of speed limit list is required</param>
+        /// <returns>List from smallest to largest speed with the given unit. Zero (no limit) is not added to the list.
+        /// The values are in-game speeds as float.</returns>
+        public static List<float> EnumerateSpeedLimits(SpeedUnit unit) {
 			var result = new List<float>();
 			switch (unit) {
 				case SpeedUnit.Kmph:
-					for (var km = LOWER_KMPH; km <= UPPER_KMPH; km += KMPH_STEP) {
+					for (ushort km = LOWER_KMPH; km <= UPPER_KMPH; km += KMPH_STEP) {
 						result.Add(km / SPEED_TO_KMPH);
 					}
 					break;
 				case SpeedUnit.Mph:
-					for (var mi = LOWER_MPH; mi <= UPPER_MPH; mi += MPH_STEP) {
+					for (ushort mi = LOWER_MPH; mi <= UPPER_MPH; mi += MPH_STEP) {
 						result.Add(mi / SPEED_TO_MPH);
 					}
 					break;
@@ -66,7 +66,7 @@ namespace TrafficManager.Traffic.Data {
 			return result;
 		}
 
-		public static string ToMphPreciseString(float speed) {
+        public static string ToMphPreciseString(float speed) {
 			if (IsZero(speed)) {
 				return Translation.GetString("Speed_limit_unlimited");
 			}
@@ -74,7 +74,7 @@ namespace TrafficManager.Traffic.Data {
 			return ToMphPrecise(speed) + " MPH";
 		}
 
-		public static string ToKmphPreciseString(float speed) {
+        public static string ToKmphPreciseString(float speed) {
 			if (IsZero(speed)) {
 				return Translation.GetString("Speed_limit_unlimited");
 			}
@@ -82,11 +82,11 @@ namespace TrafficManager.Traffic.Data {
 			return ToKmphPrecise(speed) + " km/h";
 		}
 
-		public static bool NearlyEqual(float a, float b) {
+        public static bool NearlyEqual(float a, float b) {
 			return Mathf.Abs(a - b) < 0.001f;
 		}
 
-		public static bool IsZero(float speed) {
+        public static bool IsZero(float speed) {
 			return speed < 0.001f;
 		}
 
@@ -94,31 +94,31 @@ namespace TrafficManager.Traffic.Data {
 			return IsZero(speed) || (speed >= LOWER_SPEED && speed <= UPPER_SPEED);
 		}
 
-		/// <summary>
-		/// Convert float game speed to mph and round to nearest STEP
-		/// </summary>
-		/// <param name="speed"></param>
-		/// <returns></returns>
-		public static ushort ToMphRounded(float speed) {
-			var mph = speed * SPEED_TO_MPH;
+        /// <summary>
+        /// Convert float game speed to mph and round to nearest STEP
+        /// </summary>
+        /// <param name="speed"></param>
+        /// <returns></returns>
+        public static ushort ToMphRounded(float speed) {
+			float mph = speed * SPEED_TO_MPH;
 			return (ushort)(Mathf.Round(mph / MPH_STEP) * MPH_STEP);
 		}
 
-		public static ushort ToMphPrecise(float speed) {
+        public static ushort ToMphPrecise(float speed) {
 			return (ushort)Mathf.Round(speed * SPEED_TO_MPH);
 		}
 
-		/// <summary>
-		/// Convert float game speed to km/h and round to nearest STEP
-		/// </summary>
-		/// <param name="speed"></param>
-		/// <returns></returns>
-		public static ushort ToKmphRounded(float speed) {
-			var kmph = speed * SPEED_TO_KMPH;
+        /// <summary>
+        /// Convert float game speed to km/h and round to nearest STEP
+        /// </summary>
+        /// <param name="speed"></param>
+        /// <returns></returns>
+        public static ushort ToKmphRounded(float speed) {
+			float kmph = speed * SPEED_TO_KMPH;
 			return (ushort)(Mathf.Round(kmph / KMPH_STEP) * KMPH_STEP);
 		}
 
-		public static ushort ToKmphPrecise(float speed) {
+        public static ushort ToKmphPrecise(float speed) {
 			return (ushort)Mathf.Round(speed * SPEED_TO_KMPH);
 		}
 
@@ -133,10 +133,10 @@ namespace TrafficManager.Traffic.Data {
 				return -1f;
 			}
 			if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph) {
-				var rounded = ToMphRounded(speed);
+				ushort rounded = ToMphRounded(speed);
 				return (rounded > LOWER_MPH ? rounded - MPH_STEP : LOWER_MPH) / SPEED_TO_MPH;
 			} else {
-				var rounded = ToKmphRounded(speed);
+				ushort rounded = ToKmphRounded(speed);
 				return (rounded > LOWER_KMPH ? rounded - KMPH_STEP : LOWER_KMPH) / SPEED_TO_KMPH;
 			}
 		}
@@ -152,11 +152,11 @@ namespace TrafficManager.Traffic.Data {
 				return -1f;
 			}
 			if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph) {
-				var rounded = ToMphRounded(speed);
+				ushort rounded = ToMphRounded(speed);
 				return (rounded < UPPER_MPH ? rounded + MPH_STEP : UPPER_MPH) / SPEED_TO_MPH;
 			}
 			else {
-				var rounded = ToKmphRounded(speed);
+				ushort rounded = ToKmphRounded(speed);
 				return (rounded < UPPER_KMPH ? rounded + KMPH_STEP : UPPER_KMPH) / SPEED_TO_KMPH;
 			}
 		}

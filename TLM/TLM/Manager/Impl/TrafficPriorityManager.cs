@@ -1093,7 +1093,7 @@ namespace TrafficManager.Manager.Impl {
         public bool LoadData(List<int[]> data) {
             bool success = true;
             Log.Info($"Loading {data.Count} priority segments (old method)");
-            foreach (var segment in data) {
+            foreach (int[] segment in data) {
                 try {
                     if (segment.Length < 3)
                         continue;
@@ -1137,7 +1137,7 @@ namespace TrafficManager.Manager.Impl {
         public bool LoadData(List<Configuration.PrioritySegment> data) {
             bool success = true;
             Log.Info($"Loading {data.Count} priority segments (new method)");
-            foreach (var prioSegData in data) {
+            foreach (Configuration.PrioritySegment prioSegData in data) {
                 try {
                     if ((PriorityType)prioSegData.priorityType == PriorityType.None) {
                         continue;

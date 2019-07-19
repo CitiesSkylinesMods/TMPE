@@ -29,7 +29,7 @@ namespace TrafficManager.UI {
             confDisposable = GlobalConfig.Instance.Subscribe(this);
 
             // Set the atlas and background/foreground
-            var spriteNames = new[] {
+            string[] spriteNames = new[] {
                                         MAIN_MENU_BUTTON_BG_BASE,
                                         MAIN_MENU_BUTTON_BG_HOVERED,
                                         MAIN_MENU_BUTTON_BG_ACTIVE,
@@ -62,7 +62,7 @@ namespace TrafficManager.UI {
             Drag.enabled = !GlobalConfig.Instance.Main.MainMenuButtonPosLocked;
 
             // Set up the tooltip
-            var uiView = GetUIView();
+            UIView uiView = GetUIView();
             if (uiView != null) {
                 m_TooltipBox = uiView.defaultTooltipBox;
             }

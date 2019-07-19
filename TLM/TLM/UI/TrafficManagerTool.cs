@@ -180,7 +180,7 @@
             Log._Debug($"SetToolMode: {mode}");
 
             bool toolModeChanged = (mode != _toolMode);
-            var oldToolMode = _toolMode;
+            ToolMode oldToolMode = _toolMode;
             SubTool oldSubTool = null;
             subTools.TryGetValue(oldToolMode, out oldSubTool);
             _toolMode = mode;
@@ -355,7 +355,7 @@
                     en.Value.ShowGUIOverlay(en.Key, en.Key != GetToolMode());
                 }
 
-                var guiColor = GUI.color;
+                Color guiColor = GUI.color;
                 guiColor.a = 1f;
                 GUI.color = guiColor;
 
@@ -374,7 +374,7 @@
         }
 
         public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo, ushort nodeId, Color color, bool alpha = false) {
-            var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_segment0];
+            NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_segment0];
 
             Vector3 pos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
             float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
@@ -539,7 +539,7 @@
             } else {
                 bool elementsHovered = determineHoveredElements();
 
-                var netTool = ToolsModifierControl.toolController.Tools.OfType<NetTool>().FirstOrDefault(nt => nt.m_prefab != null);
+                NetTool netTool = ToolsModifierControl.toolController.Tools.OfType<NetTool>().FirstOrDefault(nt => nt.m_prefab != null);
 
                 if (netTool != null && elementsHovered) {
                     ToolCursor = netTool.m_upgradeCursor;
@@ -552,7 +552,7 @@
         }
 
         private bool determineHoveredElements() {
-            var mouseRayValid = !UIView.IsInsideUI() && Cursor.visible && (activeSubTool == null || !activeSubTool.IsCursorInPanel());
+            bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible && (activeSubTool == null || !activeSubTool.IsCursorInPanel());
 
             if (mouseRayValid) {
                 ushort oldHoveredSegmentId = HoveredSegmentId;
@@ -683,12 +683,12 @@
             if (screenPos.z < 0)
                 return;
 
-            var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-            var diff = centerPos - camPos;
+            Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+            Vector3 diff = centerPos - camPos;
             if (diff.magnitude > DebugCloseLod)
                 return; // do not draw if too distant
 
-            var zoom = 1.0f / diff.magnitude * 150f;
+            float zoom = 1.0f / diff.magnitude * 150f;
 
             _counterStyle.fontSize = (int)(11f * zoom);
             _counterStyle.normal.textColor = new Color(1f, 1f, 0f);
@@ -773,7 +773,7 @@
                 if ((netManager.m_segments.m_buffer[i].m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
                     continue;
 #endif
-                var segmentInfo = netManager.m_segments.m_buffer[i].Info;
+                NetInfo segmentInfo = netManager.m_segments.m_buffer[i].Info;
 
                 Vector3 centerPos = netManager.m_segments.m_buffer[i].m_bounds.center;
                 Vector3 screenPos;
@@ -782,12 +782,12 @@
                 if (!visible)
                     continue;
 
-                var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-                var diff = centerPos - camPos;
+                Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+                Vector3 diff = centerPos - camPos;
                 if (diff.magnitude > DebugCloseLod)
                     continue; // do not draw if too distant
 
-                var zoom = 1.0f / diff.magnitude * 150f;
+                float zoom = 1.0f / diff.magnitude * 150f;
 
                 _counterStyle.fontSize = (int)(12f * zoom);
                 _counterStyle.normal.textColor = new Color(1f, 0f, 0f);
@@ -866,12 +866,12 @@
                 if (! visible)
                     continue;
 
-                var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-                var diff = pos - camPos;
+                Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+                Vector3 diff = pos - camPos;
                 if (diff.magnitude > DebugCloseLod)
                     continue; // do not draw if too distant
 
-                var zoom = 1.0f / diff.magnitude * 150f;
+                float zoom = 1.0f / diff.magnitude * 150f;
 
                 _counterStyle.fontSize = (int)(15f * zoom);
                 _counterStyle.normal.textColor = new Color(0f, 0f, 1f);
@@ -919,12 +919,12 @@
                 if (!visible)
                     continue;
 
-                var camPos = simManager.m_simulationView.m_position;
-                var diff = vehPos - camPos;
+                Vector3 camPos = simManager.m_simulationView.m_position;
+                Vector3 diff = vehPos - camPos;
                 if (diff.magnitude > DebugCloseLod)
                     continue; // do not draw if too distant
 
-                var zoom = 1.0f / diff.magnitude * 150f;
+                float zoom = 1.0f / diff.magnitude * 150f;
 
                 _counterStyle.fontSize = (int)(10f * zoom);
                 _counterStyle.normal.textColor = new Color(1f, 1f, 1f);
@@ -942,7 +942,7 @@
                     continue;
                 }
 #endif
-                var labelStr =
+                string labelStr =
                     $"V #{i} is a {(vState.recklessDriver ? "reckless " : string.Empty)}{vState.flags} " +
                     $"{vState.vehicleType} @ ~{vehSpeed:0.0} km/h (len: {vState.totalLength:0.0}, " +
                     $"{vState.junctionTransitState} @ {vState.currentSegmentId} " +
@@ -985,12 +985,12 @@
                 if (!visible)
                     continue;
 
-                var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-                var diff = pos - camPos;
+                Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+                Vector3 diff = pos - camPos;
                 if (diff.magnitude > DebugCloseLod)
                     continue; // do not draw if too distant
 
-                var zoom = 1.0f / diff.magnitude * 150f;
+                float zoom = 1.0f / diff.magnitude * 150f;
 
                 _counterStyle.fontSize = (int)(10f * zoom);
                 _counterStyle.normal.textColor = new Color(1f, 0f, 1f);
@@ -1036,12 +1036,12 @@
                 if (!visible)
                     continue;
 
-                var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-                var diff = pos - camPos;
+                Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+                Vector3 diff = pos - camPos;
                 if (diff.magnitude > DebugCloseLod)
                     continue; // do not draw if too distant
 
-                var zoom = 1.0f / diff.magnitude * 150f;
+                float zoom = 1.0f / diff.magnitude * 150f;
 
                 _counterStyle.fontSize = (int)(10f * zoom);
                 _counterStyle.normal.textColor = new Color(0f, 1f, 0f);
@@ -1064,9 +1064,9 @@
         internal static int GetSegmentNumVehicleLanes(ushort segmentId, ushort? nodeId, out int numDirections, VehicleInfo.VehicleType vehicleTypeFilter) {
             NetManager netManager = Singleton<NetManager>.instance;
 
-            var info = netManager.m_segments.m_buffer[segmentId].Info;
-            var curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
-            var laneIndex = 0;
+            NetInfo info = netManager.m_segments.m_buffer[segmentId].Info;
+            uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
+            int laneIndex = 0;
 
             NetInfo.Direction? dir = null;
             NetInfo.Direction? dir2 = null;
@@ -1081,7 +1081,7 @@
                 //dir3 = TrafficPriorityManager.IsLeftHandDrive() ? NetInfo.InvertDirection((NetInfo.Direction)dir2) : dir2;
             }
 
-            var numLanes = 0;
+            int numLanes = 0;
 
             while (laneIndex < info.m_lanes.Length && curLaneId != 0u) {
                 if (((info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
@@ -1139,7 +1139,7 @@
         public static Texture2D MakeTex(int width, int height, Color col) {
             var pix = new Color[width * height];
 
-            for (var i = 0; i < pix.Length; i++)
+            for (int i = 0; i < pix.Length; i++)
                 pix[i] = col;
 
             var result = new Texture2D(width, height);

@@ -20,7 +20,7 @@ namespace TrafficManager.Util {
 			atlas.padding = 0;
 			atlas.name = name;
 
-			var shader = Shader.Find("UI/Default UI Shader");
+            Shader shader = Shader.Find("UI/Default UI Shader");
 			if (shader != null)
 				atlas.material = new Material(shader);
 			atlas.material.mainTexture = texture;

@@ -259,11 +259,11 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            foreach (var e in sourceLights.CustomLights) {
-                var vehicleType = e.Key;
-                var targetLight = e.Value;
+            foreach (KeyValuePair<API.Traffic.Enums.ExtVehicleType, ICustomSegmentLight> e in sourceLights.CustomLights) {
+                API.Traffic.Enums.ExtVehicleType vehicleType = e.Key;
+                ICustomSegmentLight targetLight = e.Value;
 
-                if (otherLights.CustomLights.TryGetValue(vehicleType, out var sourceLight)) {
+                if (otherLights.CustomLights.TryGetValue(vehicleType, out ICustomSegmentLight sourceLight)) {
                     targetLight.CurrentMode = sourceLight.CurrentMode;
                 }
             }

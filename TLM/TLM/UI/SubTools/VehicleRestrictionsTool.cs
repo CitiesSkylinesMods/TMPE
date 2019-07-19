@@ -134,7 +134,7 @@
                     continue;
                 }
 
-                var segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
+                NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 
                 Vector3 centerPos = netManager.m_segments.m_buffer[segmentId].m_bounds.center;
                 Vector3 screenPos;
@@ -292,8 +292,8 @@
             if (!visible)
                 return false;
 
-            var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-            var diff = center - camPos;
+            Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+            Vector3 diff = center - camPos;
 
             if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
                 return false; // do not draw if too distant
@@ -320,7 +320,7 @@
                     Log._Debug($"xu: {xu.ToString()} yu: {yu.ToString()} center: {center.ToString()} zero: {zero.ToString()} numLanes: {numLanes} numDirections: {numDirections}");*/
 
             uint x = 0;
-            var guiColor = GUI.color;
+            Color guiColor = GUI.color;
             IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(segmentId, ref segment, null, VehicleRestrictionsManager.LANE_TYPES, VehicleRestrictionsManager.VEHICLE_TYPES);
             bool hovered = false;
             HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();

@@ -410,7 +410,7 @@ namespace TrafficManager.TrafficLight.Impl {
         public void MoveStep(int oldPos, int newPos) {
             // TODO currently, this method must be called for each node in the node group individually
 
-            var oldStep = Steps[oldPos];
+            TimedTrafficLightsStep oldStep = Steps[oldPos];
 
             Steps.RemoveAt(oldPos);
             Steps.Insert(newPos, oldStep);
@@ -703,7 +703,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
-            var newCurrentStep = (CurrentStep + 1) % NumSteps();
+            int newCurrentStep = (CurrentStep + 1) % NumSteps();
             foreach (ushort slaveNodeId in NodeGroup) {
                 if (!tlsMan.TrafficLightSimulations[slaveNodeId].IsTimedLight()) {
                     continue;
@@ -724,9 +724,9 @@ namespace TrafficManager.TrafficLight.Impl {
                                     bool startNode,
                                     API.Traffic.Enums.ExtVehicleType vehicleType,
                                     int lightType) {
-            var curStep = CurrentStep;
-            var nextStep = (CurrentStep + 1) % NumSteps();
-            var numFrames = Steps[CurrentStep].MaxTimeRemaining();
+            int curStep = CurrentStep;
+            int nextStep = (CurrentStep + 1) % NumSteps();
+            long numFrames = Steps[CurrentStep].MaxTimeRemaining();
 
             RoadBaseAI.TrafficLightState currentState;
             ICustomSegmentLights segmentLights = Constants.ManagerFactory.CustomSegmentLightsManager.GetSegmentLights(segmentId, startNode, false);
@@ -756,7 +756,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     break;
                 }
 
-                var light = Steps[nextStep].GetLightState(segmentId, vehicleType, lightType);
+                RoadBaseAI.TrafficLightState light = Steps[nextStep].GetLightState(segmentId, vehicleType, lightType);
 
                 if (light != currentState) {
                     break;

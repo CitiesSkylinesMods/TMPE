@@ -181,16 +181,16 @@ namespace TrafficManager.Manager.Impl {
 		[Obsolete]
 		public bool LoadData(string data) {
 			bool success = true;
-			var trafficLightDefs = data.Split(',');
+			string[] trafficLightDefs = data.Split(',');
 
 			Log.Info($"Loading junction traffic light data (old method)");
 
-			foreach (var split in trafficLightDefs.Select(def => def.Split(':')).Where(split => split.Length > 1)) {
+			foreach (string[] split in trafficLightDefs.Select(def => def.Split(':')).Where(split => split.Length > 1)) {
 				try {
 #if DEBUGLOAD
 					Log._Debug($"Traffic light split data: {split[0]} , {split[1]}");
 #endif
-					var nodeId = Convert.ToUInt16(split[0]);
+					ushort nodeId = Convert.ToUInt16(split[0]);
 					uint flag = Convert.ToUInt16(split[1]);
 
 					if (!Services.NetService.IsNodeValid(nodeId))

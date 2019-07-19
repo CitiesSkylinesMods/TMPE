@@ -63,7 +63,7 @@ namespace TrafficManager.UI.MainMenu {
         public abstract int Height { get; }
 
         public override void Start() {
-            var textureCount = Enum.GetValues(typeof(ButtonMouseState)).Length * (CanActivate() ? 2 : 1)
+            int textureCount = Enum.GetValues(typeof(ButtonMouseState)).Length * (CanActivate() ? 2 : 1)
                                + FunctionNames.Length * 2;
             string[] textureIds = new string[textureCount];
 
@@ -133,7 +133,7 @@ namespace TrafficManager.UI.MainMenu {
                 m_PressedFgSprite =
                     GetButtonForegroundTextureId(ButtonName, FunctionName, true);
 
-            var shortcutText = GetShortcutTooltip();
+            string shortcutText = GetShortcutTooltip();
             tooltip = Translation.GetString(Tooltip) + shortcutText;
 
             isVisible = Visible;

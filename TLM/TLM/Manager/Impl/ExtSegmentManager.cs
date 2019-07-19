@@ -94,15 +94,15 @@ namespace TrafficManager.Manager.Impl {
 			if (!IsValid(segmentId))
 				return false;
 
-			var instance = Singleton<NetManager>.instance;
+            NetManager instance = Singleton<NetManager>.instance;
 
-			var info = instance.m_segments.m_buffer[segmentId].Info;
+            NetInfo info = instance.m_segments.m_buffer[segmentId].Info;
 
-			var hasForward = false;
-			var hasBackward = false;
+			bool hasForward = false;
+			bool hasBackward = false;
 
-			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
-			var laneIndex = 0;
+			uint laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
+			int laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
 				bool validLane = (info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
 					(info.m_lanes[laneIndex].m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None;

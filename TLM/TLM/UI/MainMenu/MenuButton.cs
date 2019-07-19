@@ -45,7 +45,7 @@ namespace TrafficManager.UI.MainMenu {
 
         public override string[] FunctionNames {
             get {
-                var functions = Enum.GetValues(typeof(ButtonFunction));
+                Array functions = Enum.GetValues(typeof(ButtonFunction));
                 string[] ret = new string[functions.Length];
                 for (int i = 0; i < functions.Length; ++i) {
                     ret[i] = functions.GetValue(i).ToString();

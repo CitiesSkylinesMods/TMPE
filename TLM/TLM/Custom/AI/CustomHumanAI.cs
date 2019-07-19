@@ -255,11 +255,11 @@ namespace TrafficManager.Custom.AI {
 			bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId;
 #endif
 
-			var netManager = Singleton<NetManager>.instance;
+            NetManager netManager = Singleton<NetManager>.instance;
 
-			var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+			uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 			uint simGroup = (uint)nodeId >> 7;
-			var stepWaitTime = currentFrameIndex - simGroup & 255u;
+			uint stepWaitTime = currentFrameIndex - simGroup & 255u;
 
 			// NON-STOCK CODE START //
 

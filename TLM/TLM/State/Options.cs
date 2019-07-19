@@ -325,7 +325,7 @@ namespace TrafficManager.State {
 
             panelHelper = new UIHelper(currentPanel);
 
-            var keyboardGroup = panelHelper.AddGroup(Translation.GetString("Keybinds"));
+            UIHelperBase keyboardGroup = panelHelper.AddGroup(Translation.GetString("Keybinds"));
             ((UIPanel) ((UIHelper) keyboardGroup).self).gameObject.AddComponent<KeybindSettingsPage>();
         }
 
@@ -344,7 +344,7 @@ namespace TrafficManager.State {
 
             panelHelper = new UIHelper(currentPanel);
 
-            var maintenanceGroup = panelHelper.AddGroup(Translation.GetString("Maintenance"));
+            UIHelperBase maintenanceGroup = panelHelper.AddGroup(Translation.GetString("Maintenance"));
 
             resetStuckEntitiesBtn = maintenanceGroup.AddButton(Translation.GetString("Reset_stuck_cims_and_vehicles"), onClickResetStuckEntities) as UIButton;
             removeParkedVehiclesBtn = maintenanceGroup.AddButton(Translation.GetString("Remove_parked_vehicles"), onClickRemoveParkedVehicles) as UIButton;
@@ -417,7 +417,7 @@ namespace TrafficManager.State {
 
             panelHelper = new UIHelper(currentPanel);
 
-            var atJunctionsGroup = panelHelper.AddGroup(Translation.GetString("At_junctions"));
+            UIHelperBase atJunctionsGroup = panelHelper.AddGroup(Translation.GetString("At_junctions"));
 #if DEBUG
             allRelaxedToggle = atJunctionsGroup.AddCheckbox(Translation.GetString("All_vehicles_may_ignore_lane_arrows"), allRelaxed, onAllRelaxedChanged) as UICheckBox;
 #endif
@@ -431,14 +431,14 @@ namespace TrafficManager.State {
 
             Indent(allowFarTurnOnRedToggle);
 
-            var onRoadsGroup = panelHelper.AddGroup(Translation.GetString("On_roads"));
+            UIHelperBase onRoadsGroup = panelHelper.AddGroup(Translation.GetString("On_roads"));
             vehicleRestrictionsAggressionDropdown = onRoadsGroup.AddDropdown(Translation.GetString("Vehicle_restrictions_aggression") + ":", new string[] { Translation.GetString("Low"), Translation.GetString("Medium"), Translation.GetString("High"), Translation.GetString("Strict") }, (int)vehicleRestrictionsAggression, onVehicleRestrictionsAggressionChanged) as UIDropDown;
             banRegularTrafficOnBusLanesToggle = onRoadsGroup.AddCheckbox(Translation.GetString("Ban_private_cars_and_trucks_on_bus_lanes"), banRegularTrafficOnBusLanes, onBanRegularTrafficOnBusLanesChanged) as UICheckBox;
             highwayRulesToggle = onRoadsGroup.AddCheckbox(Translation.GetString("Enable_highway_specific_lane_merging/splitting_rules"), highwayRules, onHighwayRulesChanged) as UICheckBox;
             preferOuterLaneToggle = onRoadsGroup.AddCheckbox(Translation.GetString("Heavy_trucks_prefer_outer_lanes_on_highways"), preferOuterLane, onPreferOuterLaneChanged) as UICheckBox;
 
             if (SteamHelper.IsDLCOwned(SteamHelper.DLC.NaturalDisastersDLC)) {
-                var inCaseOfEmergencyGroup = panelHelper.AddGroup(Translation.GetString("In_case_of_emergency"));
+                UIHelperBase inCaseOfEmergencyGroup = panelHelper.AddGroup(Translation.GetString("In_case_of_emergency"));
                 evacBussesMayIgnoreRulesToggle = inCaseOfEmergencyGroup.AddCheckbox(Translation.GetString("Evacuation_busses_may_ignore_traffic_rules"), evacBussesMayIgnoreRules, onEvacBussesMayIgnoreRulesChanged) as UICheckBox;
             }
         }
@@ -455,7 +455,7 @@ namespace TrafficManager.State {
             currentPanel.autoLayoutPadding.left = 10;
             currentPanel.autoLayoutPadding.right = 10;
             panelHelper = new UIHelper(currentPanel);
-            var vehBehaviorGroup = panelHelper.AddGroup(Translation.GetString("Vehicle_behavior"));
+            UIHelperBase vehBehaviorGroup = panelHelper.AddGroup(Translation.GetString("Vehicle_behavior"));
             recklessDriversDropdown = vehBehaviorGroup.AddDropdown(Translation.GetString("Reckless_driving") + ":", new string[] { Translation.GetString("Path_Of_Evil_(10_%)"), Translation.GetString("Rush_Hour_(5_%)"), Translation.GetString("Minor_Complaints_(2_%)"), Translation.GetString("Holy_City_(0_%)") }, recklessDrivers, onRecklessDriversChanged) as UIDropDown;
             recklessDriversDropdown.width = 300;
             individualDrivingStyleToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Individual_driving_styles"), individualDrivingStyle, onIndividualDrivingStyleChanged) as UICheckBox;
@@ -463,13 +463,13 @@ namespace TrafficManager.State {
                 strongerRoadConditionEffectsToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Road_condition_has_a_bigger_impact_on_vehicle_speed"), strongerRoadConditionEffects, onStrongerRoadConditionEffectsChanged) as UICheckBox;
             }
             disableDespawningToggle = vehBehaviorGroup.AddCheckbox(Translation.GetString("Disable_despawning"), disableDespawning, onDisableDespawningChanged) as UICheckBox;
-            var vehAiGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI"));
+            UIHelperBase vehAiGroup = panelHelper.AddGroup(Translation.GetString("Advanced_Vehicle_AI"));
             advancedAIToggle = vehAiGroup.AddCheckbox(Translation.GetString("Enable_Advanced_Vehicle_AI"), advancedAI, onAdvancedAIChanged) as UICheckBox;
             altLaneSelectionRatioSlider = vehAiGroup.AddSlider(Translation.GetString("Dynamic_lane_section") + ":", 0, 100, 5, altLaneSelectionRatio, onAltLaneSelectionRatioChanged) as UISlider;
             altLaneSelectionRatioSlider.parent.Find<UILabel>("Label").width = 450;
-            var parkAiGroup = panelHelper.AddGroup(Translation.GetString("Parking_AI"));
+            UIHelperBase parkAiGroup = panelHelper.AddGroup(Translation.GetString("Parking_AI"));
             prohibitPocketCarsToggle = parkAiGroup.AddCheckbox(Translation.GetString("Enable_more_realistic_parking"), parkingAI, onProhibitPocketCarsChanged) as UICheckBox;
-            var ptGroup = panelHelper.AddGroup(Translation.GetString("Public_transport"));
+            UIHelperBase ptGroup = panelHelper.AddGroup(Translation.GetString("Public_transport"));
             realisticPublicTransportToggle = ptGroup.AddCheckbox(Translation.GetString("Prevent_excessive_transfers_at_public_transport_stations"), realisticPublicTransport, onRealisticPublicTransportChanged) as UICheckBox;
         }
         private static void MakeSettings_General(UITabstrip tabStrip, int tabIndex) {
@@ -483,7 +483,7 @@ namespace TrafficManager.State {
             currentPanel.autoLayoutPadding.right = 10;
             UIHelper panelHelper = new UIHelper(currentPanel);
 
-            var generalGroup = panelHelper.AddGroup(Translation.GetString("General"));
+            UIHelperBase generalGroup = panelHelper.AddGroup(Translation.GetString("General"));
 
             string[] languageLabels = new string[Translation.AVAILABLE_LANGUAGE_CODES.Count + 1];
             languageLabels[0] = Translation.GetString("Game_language");
@@ -518,7 +518,7 @@ namespace TrafficManager.State {
             setupSpeedLimitsPanel(panelHelper, generalGroup);
 
             // General: Simulation
-            var simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
+            UIHelperBase simGroup = panelHelper.AddGroup(Translation.GetString("Simulation"));
             instantEffectsToggle = simGroup.AddCheckbox(Translation.GetString("Customizations_come_into_effect_instantaneously"), instantEffects, onInstantEffectsChanged) as UICheckBox;
         }
 
@@ -527,7 +527,7 @@ namespace TrafficManager.State {
                                    Translation.GetString("Display_speed_limits_mph"),
                                    GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
                                    onDisplayMphChanged) as UICheckBox;
-            var mphThemeOptions = new[] {
+            string[] mphThemeOptions = new[] {
                                             Translation.GetString("theme_Square_US"),
                                             Translation.GetString("theme_Round_UK"),
                                             Translation.GetString("theme_Round_German"),

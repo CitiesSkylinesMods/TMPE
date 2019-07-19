@@ -237,7 +237,7 @@ namespace TrafficManager.UI.MainMenu {
         /// <summary>For given button class type, find it in the tool palette and send click</summary>
         /// <param name="t">Something like typeof(ToggleTrafficLightsButton)</param>
         void ClickToolButton(Type t) {
-            for (var i = 0; i < MENU_BUTTON_TYPES.Length; i++) {
+            for (int i = 0; i < MENU_BUTTON_TYPES.Length; i++) {
                 if (MENU_BUTTON_TYPES[i] == t) {
                     Buttons[i].SimulateClick();
                     return;

@@ -69,7 +69,7 @@ namespace TrafficManager.UI.SubTools {
 			debug = !viewOnly && GlobalConfig.Instance.Debug.Switches[11];
 #endif
 			NetManager netManager = Singleton<NetManager>.instance;
-			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+            Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
 			if (!viewOnly && SelectedNodeId != 0) {
 				currentRestrictedNodeIds.Add(SelectedNodeId);
@@ -84,7 +84,7 @@ namespace TrafficManager.UI.SubTools {
 				}
 
 				Vector3 nodePos = netManager.m_nodes.m_buffer[nodeId].m_position;
-				var diff = nodePos - camPos;
+                Vector3 diff = nodePos - camPos;
 
 				if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 					continue; // do not draw if too distant
@@ -186,8 +186,8 @@ namespace TrafficManager.UI.SubTools {
 			if (viewOnly && !Options.junctionRestrictionsOverlay && MainTool.GetToolMode() != ToolMode.JunctionRestrictions)
 				return false;
 
-			//NetManager netManager = Singleton<NetManager>.instance;
-			var guiColor = GUI.color;
+            //NetManager netManager = Singleton<NetManager>.instance;
+            Color guiColor = GUI.color;
 
 			Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
 			IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
@@ -398,8 +398,8 @@ namespace TrafficManager.UI.SubTools {
 
 			Vector3 diff = signCenter - camPos;
 
-			var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
-			var size = (small ? 0.75f : 1f) * (viewOnly ? 0.8f : 1f) * junctionRestrictionsSignSize * zoom;
+			float zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
+			float size = (small ? 0.75f : 1f) * (viewOnly ? 0.8f : 1f) * junctionRestrictionsSignSize * zoom;
 
 			var boundingBox = new Rect(signScreenPos.x - size / 2, signScreenPos.y - size / 2, size, size);
 			hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);

@@ -428,10 +428,10 @@ namespace TrafficManager.State {
                 return;
             }
 
-            var segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
+            ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
 
-            var segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-            var curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
+            NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+            uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
             uint laneIndex = 0;
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
                 if (curLaneId == laneId) {
@@ -455,14 +455,14 @@ namespace TrafficManager.State {
                  (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
                 return;
             }
-            var segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+            NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
             if (laneIndex >= segmentInfo.m_lanes.Length) {
                 return;
             }
 
             // find the lane id
-            var laneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
-            for (var i = 0; i < laneIndex; ++i) {
+            uint laneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
+            for (int i = 0; i < laneIndex; ++i) {
                 if (laneId == 0) {
                     return; // no valid lane found
                 }
@@ -482,7 +482,7 @@ namespace TrafficManager.State {
             if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
                 return;
             }
-            var segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+            NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
             if (laneIndex >= segmentInfo.m_lanes.Length) {
                 return;
             }
@@ -511,7 +511,7 @@ namespace TrafficManager.State {
                     if (laneSpeedLimitArray[segmentId] == null) {
                         laneSpeedLimitArray[segmentId] = new float?[segmentInfo.m_lanes.Length];
                     } else if (laneSpeedLimitArray[segmentId].Length < segmentInfo.m_lanes.Length) {
-                        var oldArray = laneSpeedLimitArray[segmentId];
+                        float?[] oldArray = laneSpeedLimitArray[segmentId];
                         laneSpeedLimitArray[segmentId] = new float?[segmentInfo.m_lanes.Length];
                         Array.Copy(oldArray, laneSpeedLimitArray[segmentId], oldArray.Length);
                     }
@@ -569,7 +569,7 @@ namespace TrafficManager.State {
             if (laneAllowedVehicleTypesArray[segmentId] == null) {
                 laneAllowedVehicleTypesArray[segmentId] = new ExtVehicleType?[segmentInfo.m_lanes.Length];
             } else if (laneAllowedVehicleTypesArray[segmentId].Length < segmentInfo.m_lanes.Length) {
-                var oldArray = laneAllowedVehicleTypesArray[segmentId];
+                ExtVehicleType?[] oldArray = laneAllowedVehicleTypesArray[segmentId];
                 laneAllowedVehicleTypesArray[segmentId] = new ExtVehicleType?[segmentInfo.m_lanes.Length];
                 Array.Copy(oldArray, laneAllowedVehicleTypesArray[segmentId], oldArray.Length);
             }
@@ -701,8 +701,8 @@ namespace TrafficManager.State {
 
             ushort segmentId = netManager.m_lanes.m_buffer[laneId].m_segment;
 
-            var dir = NetInfo.Direction.Forward;
-            var dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+            NetInfo.Direction dir = NetInfo.Direction.Forward;
+            NetInfo.Direction dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
 
             NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
             uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;

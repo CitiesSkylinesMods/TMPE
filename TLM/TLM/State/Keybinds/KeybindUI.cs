@@ -1,5 +1,6 @@
 namespace TrafficManager.State.Keybinds {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using System.Text.RegularExpressions;
@@ -35,7 +36,7 @@ namespace TrafficManager.State.Keybinds {
         /// <param name="root">The component where the UI is attached</param>
         /// <returns>The new scrollable panel</returns>
         public static UIComponent CreateScrollablePanel(UIComponent root) {
-            var scrollablePanel = root.AddUIComponent<UIScrollablePanel>();
+            UIScrollablePanel scrollablePanel = root.AddUIComponent<UIScrollablePanel>();
             scrollablePanel.backgroundSprite = string.Empty;
             scrollablePanel.size = root.size;
             scrollablePanel.relativePosition = Vector3.zero;
@@ -49,7 +50,7 @@ namespace TrafficManager.State.Keybinds {
             scrollablePanel.scrollWheelDirection = UIOrientation.Vertical;
             scrollablePanel.builtinKeyNavigation = true;
 
-            var verticalScroll = root.AddUIComponent<UIScrollbar>();
+            UIScrollbar verticalScroll = root.AddUIComponent<UIScrollbar>();
             verticalScroll.stepSize = 1;
             verticalScroll.relativePosition = new Vector2(root.width - 15, 0);
             verticalScroll.orientation = UIOrientation.Vertical;
@@ -59,14 +60,14 @@ namespace TrafficManager.State.Keybinds {
 
             scrollablePanel.verticalScrollbar = verticalScroll;
 
-            var track = verticalScroll.AddUIComponent<UISlicedSprite>();
+            UISlicedSprite track = verticalScroll.AddUIComponent<UISlicedSprite>();
             track.spriteName = "ScrollbarTrack";
             track.relativePosition = Vector3.zero;
             track.size = new Vector2(16, 320);
 
             verticalScroll.trackObject = track;
 
-            var thumb = track.AddUIComponent<UISlicedSprite>();
+            UISlicedSprite thumb = track.AddUIComponent<UISlicedSprite>();
             thumb.spriteName = "ScrollbarThumb";
             thumb.autoSize = true;
             thumb.relativePosition = Vector3.zero;
@@ -84,7 +85,7 @@ namespace TrafficManager.State.Keybinds {
         /// </summary>
         /// <returns>The row panel</returns>
         public UIPanel CreateRowPanel() {
-            var rowPanel = currentGroup_.AddUIComponent<UIPanel>();
+            UIPanel rowPanel = currentGroup_.AddUIComponent<UIPanel>();
             rowPanel.size = new Vector2(ROW_WIDTH, ROW_HEIGHT);
             rowPanel.autoLayoutStart = LayoutStart.TopLeft;
             rowPanel.autoLayoutDirection = LayoutDirection.Horizontal;
@@ -118,7 +119,7 @@ namespace TrafficManager.State.Keybinds {
         }
 
         public UILabel CreateLabel(UIPanel parent, string text, float widthFraction) {
-            var label = parent.AddUIComponent<UILabel>();
+            UILabel label = parent.AddUIComponent<UILabel>();
             label.wordWrap = true;
             label.autoSize = false;
             label.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
@@ -130,7 +131,7 @@ namespace TrafficManager.State.Keybinds {
 
         public void CreateKeybindButton(UIPanel parent, KeybindSetting setting, SavedInputKey editKey,
                                         float widthFraction) {
-            var btn = parent.AddUIComponent<UIButton>();
+            UIButton btn = parent.AddUIComponent<UIButton>();
             btn.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
             btn.text = Keybind.ToLocalizedString(editKey);
             btn.hoveredTextColor = new Color32(128, 128, 255, 255); // darker blue
@@ -152,7 +153,7 @@ namespace TrafficManager.State.Keybinds {
         /// <param name="editKey">The key to be cleared on click</param>
         /// <param name="alignTo">Align X button to the right of this</param>
         private static void AddXButton(UIPanel parent, SavedInputKey editKey, UIButton alignTo) {
-            var btnX = parent.AddUIComponent<UIButton>();
+            UIButton btnX = parent.AddUIComponent<UIButton>();
             btnX.autoSize = false;
             btnX.size = new Vector2(ROW_HEIGHT, ROW_HEIGHT);
             btnX.normalBgSprite = "buttonclose";
@@ -170,7 +171,7 @@ namespace TrafficManager.State.Keybinds {
         /// <param name="parent">The panel to host it</param>
         /// <param name="showKey">The key to display</param>
         public void CreateKeybindText(UIPanel parent, SavedInputKey showKey, float widthFraction) {
-            var label = parent.AddUIComponent<UILabel>();
+            UILabel label = parent.AddUIComponent<UILabel>();
             label.autoSize = false;
             label.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
             label.text = Keybind.ToLocalizedString(showKey);
@@ -199,19 +200,19 @@ namespace TrafficManager.State.Keybinds {
                 }
 
                 evParam.Use(); // Consume the event
-                var editedBinding = currentlyEditedBinding_; // will be nulled by closing modal
+                KeybindSetting.Editable? editedBinding = currentlyEditedBinding_; // will be nulled by closing modal
                 UIView.PopModal();
 
-                var keybindButton = evParam.source as UIButton;
-                var inputKey = SavedInputKey.Encode(evParam.keycode, evParam.control, evParam.shift, evParam.alt);
-                var editable = (KeybindSetting.Editable) evParam.source.objectUserData;
-                var category = editable.Target.Category;
+                UIButton keybindButton = evParam.source as UIButton;
+                InputKey inputKey = SavedInputKey.Encode(evParam.keycode, evParam.control, evParam.shift, evParam.alt);
+                KeybindSetting.Editable editable = (KeybindSetting.Editable) evParam.source.objectUserData;
+                string category = editable.Target.Category;
 
                 if (evParam.keycode != KeyCode.Escape) {
                     // Check the key conflict
-                    var maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
+                    string maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
                     if (maybeConflict != string.Empty) {
-                        var message = Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict;
+                        string message = Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict;
                         Log.Info($"Keybind conflict: {message}");
                     UIView.library
                           .ShowModal<ExceptionPanel>("ExceptionPanel")
@@ -238,17 +239,17 @@ namespace TrafficManager.State.Keybinds {
             } else if (!Keybind.IsUnbindableMouseButton(evParam.buttons)) {
                 // This will work if the user clicks while the shortcut change is in progress
                 evParam.Use();
-                var editedBinding = currentlyEditedBinding_; // will be nulled by closing modal
+                KeybindSetting.Editable? editedBinding = currentlyEditedBinding_; // will be nulled by closing modal
                 UIView.PopModal();
 
-                var inputKey = SavedInputKey.Encode(Keybind.ButtonToKeycode(evParam.buttons),
+                InputKey inputKey = SavedInputKey.Encode(Keybind.ButtonToKeycode(evParam.buttons),
                                                     Keybind.IsControlDown(),
                                                     Keybind.IsShiftDown(),
                                                     Keybind.IsAltDown());
-                var category = editable.Target.Category;
-                var maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
+                string category = editable.Target.Category;
+                string maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
                 if (maybeConflict != string.Empty) {
-                    var message = Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict;
+                    string message = Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict;
                     Log.Info($"Keybind conflict: {message}");
                     UIView.library
                           .ShowModal<ExceptionPanel>("ExceptionPanel")
@@ -309,31 +310,31 @@ namespace TrafficManager.State.Keybinds {
                 return string.Empty;
             }
 
-            var inGameSettings = FindConflictInGameSettings(sample);
+            string inGameSettings = FindConflictInGameSettings(sample);
             if (!string.IsNullOrEmpty(inGameSettings)) {
                 return inGameSettings;
             }
 
             // Saves and null 'self.editingBinding_' to allow rebinding the key to itself.
-            var saveEditingBinding = editedKeybind.TargetKey.value;
+            InputKey saveEditingBinding = editedKeybind.TargetKey.value;
             editedKeybind.TargetKey.value = SavedInputKey.Empty;
 
             // Check in TMPE settings
-            var tmpeSettingsType = typeof(KeybindSettingsBase);
-            var tmpeFields = tmpeSettingsType.GetFields(BindingFlags.Static | BindingFlags.Public);
+            Type tmpeSettingsType = typeof(KeybindSettingsBase);
+            FieldInfo[] tmpeFields = tmpeSettingsType.GetFields(BindingFlags.Static | BindingFlags.Public);
 
-            var inTmpe = FindConflictInTmpe(sample, sampleCategory, tmpeFields);
+            string inTmpe = FindConflictInTmpe(sample, sampleCategory, tmpeFields);
             editedKeybind.TargetKey.value = saveEditingBinding;
             return inTmpe;
         }
 
         private static string FindConflictInGameSettings(InputKey sample) {
-            var fieldList = typeof(Settings).GetFields(BindingFlags.Static | BindingFlags.Public);
-            foreach (var field in fieldList) {
+            FieldInfo[] fieldList = typeof(Settings).GetFields(BindingFlags.Static | BindingFlags.Public);
+            foreach (FieldInfo field in fieldList) {
                 var customAttributes =
                     field.GetCustomAttributes(typeof(RebindableKeyAttribute), false) as RebindableKeyAttribute[];
                 if (customAttributes != null && customAttributes.Length > 0) {
-                    var category = customAttributes[0].category;
+                    string category = customAttributes[0].category;
                     if (category != string.Empty && category != "Game") {
                         // Ignore other categories: MapEditor, Decoration, ThemeEditor, ScenarioEditor
                         continue;
@@ -356,12 +357,12 @@ namespace TrafficManager.State.Keybinds {
         }
 
         private static InputKey GetDefaultEntryInGameSettings(string entryName) {
-            var field = typeof(DefaultSettings).GetField(entryName, BindingFlags.Static | BindingFlags.Public);
+            FieldInfo field = typeof(DefaultSettings).GetField(entryName, BindingFlags.Static | BindingFlags.Public);
             if (field == null) {
                 return 0;
             }
 
-            var obj = field.GetValue(null);
+            object obj = field.GetValue(null);
             if (obj is InputKey) {
                 return (InputKey) obj;
             }
@@ -381,7 +382,7 @@ namespace TrafficManager.State.Keybinds {
         private static string FindConflictInTmpe(InputKey testSample,
                                                  string testSampleCategory,
                                                  FieldInfo[] fields) {
-            foreach (var field in fields) {
+            foreach (FieldInfo field in fields) {
                 // This will match inputkeys of TMPE key settings
                 if (field.FieldType != typeof(KeybindSetting)) {
                     continue;
@@ -406,7 +407,7 @@ namespace TrafficManager.State.Keybinds {
         }
 
         private static string CamelCaseSplit(string s) {
-            var words = Regex.Matches(s, @"([A-Z][a-z]+)")
+            IEnumerable<string> words = Regex.Matches(s, @"([A-Z][a-z]+)")
                              .Cast<Match>()
                              .Select(m => m.Value);
 

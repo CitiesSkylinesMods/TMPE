@@ -294,8 +294,8 @@ namespace TrafficManager.TrafficLight.Impl {
 #endif
 
                 foreach (KeyValuePair<ushort, ICustomSegmentLights> e in CustomSegmentLights) {
-                    var segmentId = e.Key;
-                    var curStepSegmentLights = e.Value;
+                    ushort segmentId = e.Key;
+                    ICustomSegmentLights curStepSegmentLights = e.Value;
 
 #if DEBUG
                     //Log._Debug($"TimedTrafficLightsStep.SetLights({noTransition})   -> segmentId={segmentId} @ NodeId={timedNode.NodeId}");
@@ -341,7 +341,7 @@ namespace TrafficManager.TrafficLight.Impl {
                         }
 #endif
 
-                    foreach (var vehicleType in curStepSegmentLights.VehicleTypes) {
+                    foreach (API.Traffic.Enums.ExtVehicleType vehicleType in curStepSegmentLights.VehicleTypes) {
 #if DEBUG
                         //Log._Debug($"TimedTrafficLightsStep.SetLights({noTransition})     -> segmentId={segmentId} @ NodeId={timedNode.NodeId} for vehicle {vehicleType}");
 #endif
@@ -420,7 +420,7 @@ namespace TrafficManager.TrafficLight.Impl {
         public void UpdateLights() {
             Log._Debug($"TimedTrafficLightsStep.UpdateLights: Updating lights of timed traffic light step @ {timedNode.NodeId}");
             foreach (KeyValuePair<ushort, ICustomSegmentLights> e in CustomSegmentLights) {
-                var segmentId = e.Key;
+                ushort segmentId = e.Key;
                 ICustomSegmentLights segLights = e.Value;
 
                 Log._Debug($"TimedTrafficLightsStep.UpdateLights: Updating lights of timed traffic light step at seg. {e.Key} @ {timedNode.NodeId}");
@@ -626,8 +626,8 @@ namespace TrafficManager.TrafficLight.Impl {
                 float curTotalNodeFlow = 0;
                 float curTotalNodeWait = 0;
                 foreach (KeyValuePair<ushort, ICustomSegmentLights> e in slaveStep.CustomSegmentLights) {
-                    var sourceSegmentId = e.Key;
-                    var segLights = e.Value;
+                    ushort sourceSegmentId = e.Key;
+                    ICustomSegmentLights segLights = e.Value;
 
                     IDictionary<ushort, ArrowDirection> directions = null;
                     if (!slaveTTL.Directions.TryGetValue(sourceSegmentId, out directions)) {
@@ -663,7 +663,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     }
                     IDictionary<ushort, uint>[] allVehiclesMetrics = sourceSegmentEnd.MeasureOutgoingVehicles(true, debug);
 
-                    var vehTypeByLaneIndex = segLights.VehicleTypeByLaneIndex;
+                    API.Traffic.Enums.ExtVehicleType?[] vehTypeByLaneIndex = segLights.VehicleTypeByLaneIndex;
 #if DEBUGTTL
                     if (debug) {
                         Log._Debug($"calcWaitFlow: Seg. {sourceSegmentId} @ {timedNodeId}, vehTypeByLaneIndex={string.Join(", ", vehTypeByLaneIndex.Select(x => x == null ? "null" : x.ToString()).ToArray())}");
@@ -675,7 +675,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     float curTotalSegWait = 0;
                     // loop over source lanes
                     for (byte laneIndex = 0; laneIndex < vehTypeByLaneIndex.Length; ++laneIndex) {
-                        var vehicleType = vehTypeByLaneIndex[laneIndex];
+                        API.Traffic.Enums.ExtVehicleType? vehicleType = vehTypeByLaneIndex[laneIndex];
                         if (vehicleType == null) {
                             continue;
                         }

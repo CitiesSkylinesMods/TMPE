@@ -117,7 +117,7 @@
                     } else {
                         if (SelectedNodeIds.Count == 0) {
                             //timedSim.housekeeping();
-                            var timedLight = tlsMan.TrafficLightSimulations[HoveredNodeId].timedLight;
+                            ITimedTrafficLights timedLight = tlsMan.TrafficLightSimulations[HoveredNodeId].timedLight;
 
                             if (timedLight != null) {
                                 SelectedNodeIds = new List<ushort>(timedLight.NodeGroup);
@@ -139,7 +139,7 @@
 
                     //bool mayEnterBlocked = Options.mayEnterBlockedJunctions;
                     ITimedTrafficLights existingTimedLight = null;
-                    foreach (var nodeId in SelectedNodeIds) {
+                    foreach (ushort nodeId in SelectedNodeIds) {
                         if (!tlsMan.HasTimedSimulation(nodeId)) {
                             continue;
                         }
@@ -248,7 +248,7 @@
 
             if (SelectedNodeIds.Count <= 0) return;
 
-            foreach (var index in SelectedNodeIds) {
+            foreach (ushort index in SelectedNodeIds) {
                 MainTool.DrawNodeCircle(cameraInfo, index, true, false);
             }
         }
@@ -275,7 +275,7 @@
                     return;
                 }
 
-                var timedNodeMain = tlsMan.TrafficLightSimulations[SelectedNodeIds[0]].timedLight;
+                ITimedTrafficLights timedNodeMain = tlsMan.TrafficLightSimulations[SelectedNodeIds[0]].timedLight;
 
                 if (Event.current.type == EventType.Layout) {
                     timedLightActive = tlsMan.HasActiveTimedSimulation(SelectedNodeIds[0]);
@@ -286,12 +286,12 @@
 
                 if (!timedLightActive && numSteps > 0 && !_timedPanelAdd && _timedEditStep < 0 && _timedViewedStep < 0) {
                     _timedViewedStep = 0;
-                    foreach (var nodeId in SelectedNodeIds) {
+                    foreach (ushort nodeId in SelectedNodeIds) {
                         tlsMan.TrafficLightSimulations[nodeId].timedLight?.GetStep(_timedViewedStep).UpdateLiveLights(true);
                     }
                 }
 
-                for (var i = 0; i < timedNodeMain.NumSteps(); i++) {
+                for (int i = 0; i < timedNodeMain.NumSteps(); i++) {
                     GUILayout.BeginHorizontal();
 
                     if (_timedEditStep != i) {
@@ -334,7 +334,7 @@
                                 GUILayout.Space(5);
                                 GUILayout.EndVertical();
                                 if (GUILayout.Button(Translation.GetString("Skip"), GUILayout.Width(80))) {
-                                    foreach (var nodeId in SelectedNodeIds) {
+                                    foreach (ushort nodeId in SelectedNodeIds) {
                                         tlsMan.TrafficLightSimulations[nodeId].timedLight?.SkipStep();
                                     }
                                 }
@@ -353,7 +353,7 @@
 
                                 if (i > 0) {
                                     if (GUILayout.Button(Translation.GetString("up"), GUILayout.Width(48))) {
-                                        foreach (var nodeId in SelectedNodeIds) {
+                                        foreach (ushort nodeId in SelectedNodeIds) {
                                             tlsMan.TrafficLightSimulations[nodeId].timedLight?.MoveStep(i, i - 1);
                                         }
                                         _timedViewedStep = i - 1;
@@ -364,7 +364,7 @@
 
                                 if (i < numSteps - 1) {
                                     if (GUILayout.Button(Translation.GetString("down"), GUILayout.Width(48))) {
-                                        foreach (var nodeId in SelectedNodeIds) {
+                                        foreach (ushort nodeId in SelectedNodeIds) {
                                             tlsMan.TrafficLightSimulations[nodeId].timedLight?.MoveStep(i, i + 1);
                                         }
                                         _timedViewedStep = i + 1;
@@ -393,7 +393,7 @@
                                     _stepMaxValueStr = _stepMaxValue.ToString();
                                     nodeSelectionLocked = true;
 
-                                    foreach (var nodeId in SelectedNodeIds) {
+                                    foreach (ushort nodeId in SelectedNodeIds) {
                                         tlsMan.TrafficLightSimulations[nodeId].timedLight?.GetStep(i).UpdateLiveLights(true);
                                     }
                                 }
@@ -402,7 +402,7 @@
                                     _timedPanelAdd = false;
                                     _timedViewedStep = i;
 
-                                    foreach (var nodeId in SelectedNodeIds) {
+                                    foreach (ushort nodeId in SelectedNodeIds) {
                                         tlsMan.TrafficLightSimulations[nodeId].timedLight?.GetStep(i).UpdateLiveLights(true);
                                     }
                                 }
@@ -434,8 +434,8 @@
                             if (_waitFlowBalance <= 0)
                                 _waitFlowBalance = GlobalConfig.Instance.TimedTrafficLights.FlowToWaitRatio;
 
-                            foreach (var nodeId in SelectedNodeIds) {
-                                var step = tlsMan.TrafficLightSimulations[nodeId].timedLight?.GetStep(_timedEditStep);
+                            foreach (ushort nodeId in SelectedNodeIds) {
+                                ITimedTrafficLightsStep step = tlsMan.TrafficLightSimulations[nodeId].timedLight?.GetStep(_timedEditStep);
 
                                 if (step != null) {
                                     step.MinTime = _stepMinValue;
@@ -495,7 +495,7 @@
                             if (_waitFlowBalance <= 0)
                                 _waitFlowBalance = 1f;
 
-                            foreach (var nodeId in SelectedNodeIds) {
+                            foreach (ushort nodeId in SelectedNodeIds) {
                                 tlsMan.TrafficLightSimulations[nodeId].timedLight?.AddStep(_stepMinValue, _stepMaxValue, _stepMetric, _waitFlowBalance);
                             }
 
@@ -534,7 +534,7 @@
                         }
 
                         if (GUILayout.Button(Translation.GetString("Stop"))) {
-                            foreach (var nodeId in SelectedNodeIds) {
+                            foreach (ushort nodeId in SelectedNodeIds) {
                                 tlsMan.TrafficLightSimulations[nodeId].timedLight?.Stop();
                             }
                         }
@@ -548,7 +548,7 @@
                         }*/
 
 
-                        var curStep = timedNodeMain.CurrentStep;
+                        int curStep = timedNodeMain.CurrentStep;
                         ITimedTrafficLightsStep currentStep = timedNodeMain.GetStep(curStep);
                         _stepMetric = currentStep.ChangeMetric;
                         if (currentStep.MaxTime > currentStep.MinTime) {
@@ -557,16 +557,16 @@
 
                         _waitFlowBalance = timedNodeMain.GetStep(curStep).WaitFlowBalance;
                         BuildFlowPolicyDisplay(inTestMode);
-                        foreach (var nodeId in SelectedNodeIds) {
-                            var step = tlsMan.TrafficLightSimulations[nodeId].timedLight?.GetStep(curStep);
+                        foreach (ushort nodeId in SelectedNodeIds) {
+                            ITimedTrafficLightsStep step = tlsMan.TrafficLightSimulations[nodeId].timedLight?.GetStep(curStep);
                             if (step != null) {
                                 step.WaitFlowBalance = _waitFlowBalance;
                             }
                         }
 
                         //var mayEnterIfBlocked = GUILayout.Toggle(timedNodeMain.vehiclesMayEnterBlockedJunctions, Translation.GetString("Vehicles_may_enter_blocked_junctions"), new GUILayoutOption[] { });
-                        var testMode = GUILayout.Toggle(inTestMode, Translation.GetString("Enable_test_mode_(stay_in_current_step)"), new GUILayoutOption[] { });
-                        foreach (var nodeId in SelectedNodeIds) {
+                        bool testMode = GUILayout.Toggle(inTestMode, Translation.GetString("Enable_test_mode_(stay_in_current_step)"), new GUILayoutOption[] { });
+                        foreach (ushort nodeId in SelectedNodeIds) {
                             tlsMan.TrafficLightSimulations[nodeId].timedLight?.SetTestMode(testMode);
                         }
                     } else {
@@ -575,7 +575,7 @@
                                 _timedPanelAdd = false;
                                 nodeSelectionLocked = false;
 
-                                foreach (var nodeId in SelectedNodeIds) {
+                                foreach (ushort nodeId in SelectedNodeIds) {
                                     tlsMan.TrafficLightSimulations[nodeId].timedLight?.Start();
                                 }
                             }
@@ -647,7 +647,7 @@
             _timedPanelAdd = false;
             _timedViewedStep = -1;
 
-            foreach (var nodeId in SelectedNodeIds) {
+            foreach (ushort nodeId in SelectedNodeIds) {
                 tlsMan.TrafficLightSimulations[nodeId].timedLight?.RemoveStep(stepIndex);
             }
         }
@@ -834,7 +834,7 @@
             if (SelectedNodeIds.Count < 1) {
                 GUILayout.Label(Translation.GetString("Select_nodes"));
             } else {
-                var txt = SelectedNodeIds.Aggregate("", (current, t) => current + (Translation.GetString("Node") + " " + t + "\n"));
+                string txt = SelectedNodeIds.Aggregate("", (current, t) => current + (Translation.GetString("Node") + " " + t + "\n"));
 
                 GUILayout.Label(txt);
 
@@ -844,7 +844,7 @@
                 if (!GUILayout.Button(Translation.GetString("Setup_timed_traffic_light"))) return;
 
                 _waitFlowBalance = GlobalConfig.Instance.TimedTrafficLights.FlowToWaitRatio;
-                foreach (var nodeId in SelectedNodeIds) {
+                foreach (ushort nodeId in SelectedNodeIds) {
                     tlsMan.SetUpTimedTrafficLight(nodeId, SelectedNodeIds);
                     RefreshCurrentTimedNodeIds(nodeId);
                 }
@@ -878,7 +878,7 @@
 
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
-            foreach (var selectedNodeId in SelectedNodeIds) {
+            foreach (ushort selectedNodeId in SelectedNodeIds) {
                 tlsMan.RemoveNodeFromSimulation(selectedNodeId, true, false);
                 RefreshCurrentTimedNodeIds(selectedNodeId);
             }
@@ -1036,7 +1036,7 @@
                 if (tlsMan.HasTimedSimulation((ushort)nodeId)) {
                     ITimedTrafficLights timedNode = tlsMan.TrafficLightSimulations[nodeId].timedLight;
 
-                    var nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+                    Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
 
                     Texture2D tex = timedNode.IsStarted() ? (timedNode.IsInTestMode() ? TextureResources.ClockTestTexture2D : TextureResources.ClockPlayTexture2D) : TextureResources.ClockPauseTexture2D;
                     MainTool.DrawGenericSquareOverlayTexture(tex, camPos, nodePos, 120f, false);
@@ -1051,16 +1051,16 @@
             IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
-            var hoveredSegment = false;
+            bool hoveredSegment = false;
 
-            foreach (var nodeId in SelectedNodeIds) {
+            foreach (ushort nodeId in SelectedNodeIds) {
                 if (!tlsMan.HasTimedSimulation(nodeId)) {
                     continue;
                 }
 
                 ITimedTrafficLights timedNode = tlsMan.TrafficLightSimulations[nodeId].timedLight;
 
-                var nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+                Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
 
                 Vector3 nodeScreenPos;
                 bool nodeVisible = MainTool.WorldToScreenPoint(nodePos, out nodeScreenPos);
@@ -1068,8 +1068,8 @@
                 if (!nodeVisible)
                     continue;
 
-                var diff = nodePos - Camera.main.transform.position;
-                var zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
+                Vector3 diff = nodePos - Camera.main.transform.position;
+                float zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
 
                 for (int i = 0; i < 8; ++i) {
                     ushort srcSegmentId = 0;
@@ -1090,12 +1090,12 @@
 
                     bool showPedLight = liveSegmentLights.PedestrianLightState != null && junctionRestrictionsManager.IsPedestrianCrossingAllowed(liveSegmentLights.SegmentId, liveSegmentLights.StartNode);
 
-                    var timedActive = timedNode.IsStarted();
+                    bool timedActive = timedNode.IsStarted();
                     if (! timedActive) {
                         liveSegmentLights.MakeRedOrGreen();
                     }
 
-                    var offset = 17f;
+                    float offset = 17f;
                     Vector3 segmentLightPos = nodePos;
 
                     if (Singleton<NetManager>.instance.m_segments.m_buffer[srcSegmentId].m_startNode == nodeId) {
@@ -1114,21 +1114,21 @@
                     if (!segmentLightVisible)
                         continue;
 
-                    var guiColor = GUI.color;
+                    Color guiColor = GUI.color;
 
-                    var manualPedestrianWidth = 36f * zoom;
-                    var manualPedestrianHeight = 35f * zoom;
+                    float manualPedestrianWidth = 36f * zoom;
+                    float manualPedestrianHeight = 35f * zoom;
 
-                    var pedestrianWidth = 36f * zoom;
-                    var pedestrianHeight = 61f * zoom;
+                    float pedestrianWidth = 36f * zoom;
+                    float pedestrianHeight = 61f * zoom;
 
                     // original / 2.5
-                    var lightWidth = 41f * zoom;
-                    var lightHeight = 97f * zoom;
+                    float lightWidth = 41f * zoom;
+                    float lightHeight = 97f * zoom;
 
                     // SWITCH MODE BUTTON
-                    var modeWidth = 41f * zoom;
-                    var modeHeight = 38f * zoom;
+                    float modeWidth = 41f * zoom;
+                    float modeHeight = 38f * zoom;
 
                     if (showPedLight) {
                         // pedestrian light
@@ -1232,8 +1232,8 @@
 
                         if (vehicleType != ExtVehicleType.None) {
                             // Info sign
-                            var infoWidth = 56.125f * zoom;
-                            var infoHeight = 51.375f * zoom;
+                            float infoWidth = 56.125f * zoom;
+                            float infoHeight = 51.375f * zoom;
 
                             int numInfos = 0;
                             for (int k = 0; k < TrafficManagerTool.InfoSignsToDisplay.Length; ++k) {
@@ -1272,9 +1272,9 @@
                         if (lightOffset == 0 && showPedLight) {
                             // PEDESTRIAN COUNTER
                             if (timedActive && _timedShowNumbers) {
-                                var counterSize = 20f * zoom;
+                                float counterSize = 20f * zoom;
 
-                                var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 3);
+                                long counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 3);
 
                                 float numOffset;
 
@@ -1340,9 +1340,9 @@
 
                                 // COUNTER
                                 if (timedActive && _timedShowNumbers) {
-                                    var counterSize = 20f * zoom;
+                                    float counterSize = 20f * zoom;
 
-                                    var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 0);
+                                    long counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 0);
 
                                     float numOffset;
 
@@ -1398,9 +1398,9 @@
 
                                     // COUNTER
                                     if (timedActive && _timedShowNumbers) {
-                                        var counterSize = 20f * zoom;
+                                        float counterSize = 20f * zoom;
 
-                                        var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 1);
+                                        long counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 1);
 
                                         float numOffset;
 
@@ -1461,8 +1461,8 @@
 
                                 // COUNTER
                                 if (timedActive && _timedShowNumbers) {
-                                    var counterSize = 20f * zoom;
-                                    var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 0);
+                                    float counterSize = 20f * zoom;
+                                    long counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 0);
 
                                     float numOffset;
                                     if (liveSegmentLight.LightMain == RoadBaseAI.TrafficLightState.Red) {
@@ -1497,7 +1497,7 @@
                                 var myRect4 = new Rect(offsetScreenPos.x - lightWidth / 2 - (_timedPanelAdd || _timedEditStep >= 0 ? lightWidth * 2 : lightWidth) - pedestrianWidth + 5f * zoom,
                                                        offsetScreenPos.y - lightHeight / 2, lightWidth, lightHeight);
 
-                                var lightType = 0;
+                                int lightType = 0;
 
                                 hasOtherLight = false;
                                 if (hasOutgoingForwardSegment && hasOutgoingLeftSegment) {
@@ -1536,9 +1536,9 @@
 
                                 // COUNTER
                                 if (timedActive && _timedShowNumbers) {
-                                    var counterSize = 20f * zoom;
+                                    float counterSize = 20f * zoom;
 
-                                    var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, lightType);
+                                    long counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, lightType);
 
                                     float numOffset;
 
@@ -1592,9 +1592,9 @@
 
                                     // COUNTER
                                     if (timedActive && _timedShowNumbers) {
-                                        var counterSize = 20f * zoom;
+                                        float counterSize = 20f * zoom;
 
-                                        var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 2);
+                                        long counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 2);
 
                                         float numOffset;
 
@@ -1634,7 +1634,7 @@
 
                                     GUI.color = guiColor;
 
-                                    var offsetLight = lightWidth;
+                                    float offsetLight = lightWidth;
 
                                     if (hasOutgoingRightSegment)
                                         offsetLight += lightWidth;
@@ -1661,9 +1661,9 @@
 
                                     // COUNTER
                                     if (timedActive && _timedShowNumbers) {
-                                        var counterSize = 20f * zoom;
+                                        float counterSize = 20f * zoom;
 
-                                        var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 1);
+                                        long counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 1);
 
                                         float numOffset;
 
@@ -1701,7 +1701,7 @@
 
                                     GUI.color = guiColor;
 
-                                    var offsetLight = lightWidth;
+                                    float offsetLight = lightWidth;
 
                                     if (hasOutgoingRightSegment)
                                         offsetLight += lightWidth;
@@ -1725,9 +1725,9 @@
 
                                     // COUNTER
                                     if (timedActive && _timedShowNumbers) {
-                                        var counterSize = 20f * zoom;
+                                        float counterSize = 20f * zoom;
 
-                                        var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 0);
+                                        long counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 0);
 
                                         float numOffset;
 
@@ -1784,9 +1784,9 @@
 
                                     // COUNTER
                                     if (timedActive && _timedShowNumbers) {
-                                        var counterSize = 20f * zoom;
+                                        float counterSize = 20f * zoom;
 
-                                        var counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 2);
+                                        long counter = timedNode.CheckNextChange(srcSegmentId, startNode, vehicleType, 2);
 
                                         float numOffset;
 

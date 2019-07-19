@@ -16,17 +16,17 @@ namespace TrafficManager.UI {
 		public void Start() {
 			buttons = new List<UIButton>();
 
-			var citizenVehicleInfoPanel = GameObject.Find("(Library) CitizenVehicleWorldInfoPanel").GetComponent<CitizenVehicleWorldInfoPanel>();
+            CitizenVehicleWorldInfoPanel citizenVehicleInfoPanel = GameObject.Find("(Library) CitizenVehicleWorldInfoPanel").GetComponent<CitizenVehicleWorldInfoPanel>();
 			if (citizenVehicleInfoPanel != null) {
 				buttons.Add(AddRemoveVehicleButton(citizenVehicleInfoPanel));
 			}
 
-			var cityServiceVehicleInfoPanel = GameObject.Find("(Library) CityServiceVehicleWorldInfoPanel").GetComponent<CityServiceVehicleWorldInfoPanel>();
+            CityServiceVehicleWorldInfoPanel cityServiceVehicleInfoPanel = GameObject.Find("(Library) CityServiceVehicleWorldInfoPanel").GetComponent<CityServiceVehicleWorldInfoPanel>();
 			if (cityServiceVehicleInfoPanel != null) {
 				buttons.Add(AddRemoveVehicleButton(cityServiceVehicleInfoPanel));
 			}
 
-			var publicTransportVehicleInfoPanel = GameObject.Find("(Library) PublicTransportVehicleWorldInfoPanel").GetComponent<PublicTransportVehicleWorldInfoPanel>();
+            PublicTransportVehicleWorldInfoPanel publicTransportVehicleInfoPanel = GameObject.Find("(Library) PublicTransportVehicleWorldInfoPanel").GetComponent<PublicTransportVehicleWorldInfoPanel>();
 			if (publicTransportVehicleInfoPanel != null) {
 				buttons.Add(AddRemoveVehicleButton(publicTransportVehicleInfoPanel));
 			}

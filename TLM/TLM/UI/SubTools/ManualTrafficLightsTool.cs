@@ -55,7 +55,7 @@
         public override void OnToolGUI(Event e) {
             IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            var hoveredSegment = false;
+            bool hoveredSegment = false;
 
             if (SelectedNodeId != 0) {
                 CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
@@ -79,8 +79,8 @@
                     }
                     bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, SelectedNodeId);
 
-                    var position = CalculateNodePositionForSegment(Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId], ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
-                    var segmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, startNode, false);
+                    Vector3 position = CalculateNodePositionForSegment(Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNodeId], ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
+                    ICustomSegmentLights segmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, startNode, false);
                     if (segmentLights == null)
                         continue;
 
@@ -92,21 +92,21 @@
                     if (!visible)
                         continue;
 
-                    var diff = position - Camera.main.transform.position;
-                    var zoom = 1.0f / diff.magnitude * 100f;
+                    Vector3 diff = position - Camera.main.transform.position;
+                    float zoom = 1.0f / diff.magnitude * 100f;
 
                     // original / 2.5
-                    var lightWidth = 41f * zoom;
-                    var lightHeight = 97f * zoom;
+                    float lightWidth = 41f * zoom;
+                    float lightHeight = 97f * zoom;
 
-                    var pedestrianWidth = 36f * zoom;
-                    var pedestrianHeight = 61f * zoom;
+                    float pedestrianWidth = 36f * zoom;
+                    float pedestrianHeight = 61f * zoom;
 
                     // SWITCH MODE BUTTON
-                    var modeWidth = 41f * zoom;
-                    var modeHeight = 38f * zoom;
+                    float modeWidth = 41f * zoom;
+                    float modeHeight = 38f * zoom;
 
-                    var guiColor = GUI.color;
+                    Color guiColor = GUI.color;
 
                     if (showPedLight) {
                         // pedestrian light
@@ -154,8 +154,8 @@
 
                         if (vehicleType != ExtVehicleType.None) {
                             // Info sign
-                            var infoWidth = 56.125f * zoom;
-                            var infoHeight = 51.375f * zoom;
+                            float infoWidth = 56.125f * zoom;
+                            float infoHeight = 51.375f * zoom;
 
                             int numInfos = 0;
                             for (int k = 0; k < TrafficManagerTool.InfoSignsToDisplay.Length; ++k) {
@@ -223,9 +223,9 @@
             if (segmentLights.PedestrianLightState == null)
                 return false;
 
-            var guiColor = GUI.color;
-            var manualPedestrianWidth = 36f * zoom;
-            var manualPedestrianHeight = 35f * zoom;
+            Color guiColor = GUI.color;
+            float manualPedestrianWidth = 36f * zoom;
+            float manualPedestrianHeight = 35f * zoom;
 
             guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == segmentId && (_hoveredButton[1] == 1 || _hoveredButton[1] == 2));
 
@@ -291,9 +291,9 @@
 
             GUI.DrawTexture(myRectCounter, TextureResources.LightCounterTexture2D);
 
-            var counterSize = 20f * zoom;
+            float counterSize = 20f * zoom;
 
-            var counter = segmentLights.LastChange();
+            uint counter = segmentLights.LastChange();
 
             var myRectCounterNum = new Rect(screenPos.x - counterSize + 15f * zoom + (counter >= 10 ? -5 * zoom : 0f),
                                             screenPos.y - counterSize + 11f * zoom, counterSize, counterSize);
@@ -474,7 +474,7 @@
                 }
             }
 
-            var guiColor = GUI.color;
+            Color guiColor = GUI.color;
             // right arrow light
             if (hasRightSegment)
                 guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == segmentId && _hoveredButton[1] == 4);
@@ -512,7 +512,7 @@
                                         ICustomSegmentLight segmentDict, bool hoveredSegment) {
             SetAlpha(segmentId, 3);
 
-            var offsetLight = lightWidth;
+            float offsetLight = lightWidth;
 
             if (hasRightSegment)
                 offsetLight += lightWidth;
@@ -553,7 +553,7 @@
                                            bool hoveredSegment) {
             SetAlpha(segmentId, 4);
 
-            var offsetLight = lightWidth;
+            float offsetLight = lightWidth;
 
             if (hasRightSegment)
                 offsetLight += lightWidth;
@@ -613,9 +613,9 @@
         }
 
         private Vector3 CalculateNodePositionForSegment(NetNode node, int segmentId) {
-            var position = node.m_position;
+            Vector3 position = node.m_position;
 
-            var segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             if (segment.m_startNode == SelectedNodeId) {
                 position.x += segment.m_startDirection.x * 10f;
                 position.y += segment.m_startDirection.y * 10f;
@@ -629,7 +629,7 @@
         }
 
         private Vector3 CalculateNodePositionForSegment(NetNode node, ref NetSegment segment) {
-            var position = node.m_position;
+            Vector3 position = node.m_position;
 
             const float offset = 25f;
 
@@ -647,7 +647,7 @@
         }
 
         private void SetAlpha(int segmentId, int buttonId) {
-            var guiColor = GUI.color;
+            Color guiColor = GUI.color;
 
             guiColor.a = MainTool.GetHandleAlpha(_hoveredButton[0] == segmentId && _hoveredButton[1] == buttonId);
 

@@ -8,7 +8,7 @@ namespace TrafficManager.State.Keybinds {
     /// </summary>
     public class Keybind {
         public static bool IsEmpty(InputKey sample) {
-            var noKey = SavedInputKey.Encode(KeyCode.None, false, false, false);
+            InputKey noKey = SavedInputKey.Encode(KeyCode.None, false, false, false);
             return sample == SavedInputKey.Empty || sample == noKey;
         }
 

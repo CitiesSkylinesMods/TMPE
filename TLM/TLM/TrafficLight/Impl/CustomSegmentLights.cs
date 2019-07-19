@@ -331,7 +331,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public void ChangeLightPedestrian() {
             if (PedestrianLightState != null) {
-                var invertedLight = PedestrianLightState == RoadBaseAI.TrafficLightState.Green
+                RoadBaseAI.TrafficLightState invertedLight = PedestrianLightState == RoadBaseAI.TrafficLightState.Green
                                         ? RoadBaseAI.TrafficLightState.Red
                                         : RoadBaseAI.TrafficLightState.Green;
 

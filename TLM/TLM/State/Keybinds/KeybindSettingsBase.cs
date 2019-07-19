@@ -85,7 +85,7 @@ namespace TrafficManager.State.Keybinds {
         /// <param name="label">Localized label</param>
         /// <param name="keybind">The setting to edit</param>
         protected void AddKeybindRowUI(string label, KeybindSetting keybind) {
-            var settingsRow = keybindUi_.CreateRowPanel();
+            UIPanel settingsRow = keybindUi_.CreateRowPanel();
             if (uiRowCount_++ % 2 == 1) {
                 settingsRow.backgroundSprite = null;
             }
@@ -103,7 +103,7 @@ namespace TrafficManager.State.Keybinds {
         /// <param name="editable2">Whether alt key binding is editable or readonly</param>
         protected void AddAlternateKeybindUI(string title, KeybindSetting keybind,
                                              bool editable1, bool editable2) {
-            var settingsRow = keybindUi_.CreateRowPanel();
+            UIPanel settingsRow = keybindUi_.CreateRowPanel();
             if (uiRowCount_ % 2 == 1) {
                 // color the panel but do not increment uiRowCount
                 settingsRow.backgroundSprite = null;
@@ -130,7 +130,7 @@ namespace TrafficManager.State.Keybinds {
         /// <param name="label">Localized label</param>
         /// <param name="keybind">The setting to edit</param>
         protected void AddReadOnlyKeybind(string label, KeybindSetting keybind) {
-            var settingsRow = keybindUi_.CreateRowPanel();
+            UIPanel settingsRow = keybindUi_.CreateRowPanel();
             if (uiRowCount_++ % 2 == 1) {
                 settingsRow.backgroundSprite = null;
             }

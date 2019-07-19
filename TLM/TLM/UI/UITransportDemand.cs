@@ -19,7 +19,7 @@ namespace TrafficManager.UI {
 		public override void Start() {
 			base.Start();
 
-            var transportInfoViewPanel = GameObject.Find("(Library) PublicTransportInfoViewPanel").GetComponent<PublicTransportInfoViewPanel>();
+            PublicTransportInfoViewPanel transportInfoViewPanel = GameObject.Find("(Library) PublicTransportInfoViewPanel").GetComponent<PublicTransportInfoViewPanel>();
             if (transportInfoViewPanel != null) {
                 Log._Debug($"Public transport info view panel found.");
                 transportInfoViewPanel.component.eventVisibilityChanged += new PropertyChangedEventHandler<bool>(this.ParentVisibilityChanged);
@@ -46,7 +46,7 @@ namespace TrafficManager.UI {
 		}
 
 		private UIButton _createButton(string text, int x, int y, MouseEventHandler eventClick) {
-			var button = AddUIComponent<UIButton>();
+            UIButton button = AddUIComponent<UIButton>();
 			button.textScale = 0.8f;
 			button.width = 150f;
 			button.height = 30;

@@ -312,7 +312,7 @@ namespace TrafficManager.UI
         /// <param name="eventClick">The event handler for when the button is clicked.</param>
         private void CreateButton(UIComponent parent, string text, int x, int y, MouseEventHandler eventClick)
         {
-            var button = parent.AddUIComponent<UIButton>();
+            UIButton button = parent.AddUIComponent<UIButton>();
             button.textScale = 0.8f;
             button.width = 150f;
             button.height = 30;

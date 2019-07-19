@@ -199,7 +199,7 @@ namespace TrafficManager.TrafficLight.Impl {
 		}
 
 		public void ChangeMainLight() {
-			var invertedLight = LightMain == RoadBaseAI.TrafficLightState.Green
+            RoadBaseAI.TrafficLightState invertedLight = LightMain == RoadBaseAI.TrafficLightState.Green
 				? RoadBaseAI.TrafficLightState.Red
 				: RoadBaseAI.TrafficLightState.Green;
 
@@ -218,7 +218,7 @@ namespace TrafficManager.TrafficLight.Impl {
 		}
 
 		public void ChangeLeftLight() {
-			var invertedLight = LightLeft == RoadBaseAI.TrafficLightState.Green
+            RoadBaseAI.TrafficLightState invertedLight = LightLeft == RoadBaseAI.TrafficLightState.Green
 				? RoadBaseAI.TrafficLightState.Red
 				: RoadBaseAI.TrafficLightState.Green;
 
@@ -229,7 +229,7 @@ namespace TrafficManager.TrafficLight.Impl {
 		}
 
 		public void ChangeRightLight() {
-			var invertedLight = LightRight == RoadBaseAI.TrafficLightState.Green
+            RoadBaseAI.TrafficLightState invertedLight = LightRight == RoadBaseAI.TrafficLightState.Green
 				? RoadBaseAI.TrafficLightState.Red
 				: RoadBaseAI.TrafficLightState.Green;
 
@@ -312,7 +312,7 @@ namespace TrafficManager.TrafficLight.Impl {
 		}
 
 		public void UpdateVisuals() {
-			var instance = Singleton<NetManager>.instance;
+            NetManager instance = Singleton<NetManager>.instance;
 
 			ushort nodeId = lights.NodeId;
 			uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;

@@ -711,7 +711,7 @@
 
             bool isRecklessDriver = extVehicle.recklessDriver;
 
-            var netManager = Singleton<NetManager>.instance;
+            NetManager netManager = Singleton<NetManager>.instance;
             IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
 
             bool hasActiveTimedSimulation = (Options.timedLightsEnabled && TrafficLightSimulationManager.Instance.HasActiveTimedSimulation(targetNodeId));
@@ -757,9 +757,9 @@
                 // entering blocked junctions
                 if (MustCheckSpace(prevPos.m_segment, isTargetStartNode, ref targetNode, isRecklessDriver)) {
                     // check if there is enough space
-                    var len = extVehicle.totalLength + 4f;
+                    float len = extVehicle.totalLength + 4f;
                     if (!netManager.m_lanes.m_buffer[laneID].CheckSpace(len)) {
-                        var sufficientSpace = false;
+                        bool sufficientSpace = false;
                         if (nextPosition.m_segment != 0 && netManager.m_lanes.m_buffer[laneID].m_length < 30f) {
                             NetNode.Flags nextTargetNodeFlags = netManager.m_nodes.m_buffer[nextTargetNodeId].m_flags;
                             if ((nextTargetNodeFlags & (NetNode.Flags.Junction | NetNode.Flags.OneWayOut | NetNode.Flags.OneWayIn)) != NetNode.Flags.Junction ||
@@ -951,7 +951,7 @@
                         Log._Debug($"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): Vehicle is arriving @ seg. {prevPos.m_segment} ({position.m_segment}, {nextPosition.m_segment}), node {targetNodeId} which is not a traffic light.");
 #endif
 
-                    var sign = prioMan.GetPrioritySign(prevPos.m_segment, isTargetStartNode);
+                    PriorityType sign = prioMan.GetPrioritySign(prevPos.m_segment, isTargetStartNode);
                     if (sign != PriorityType.None) {
 #if DEBUG
                         if (debug) {
@@ -1808,8 +1808,8 @@
                 if (bestStaySpeedDiff < 0 && bestOptSpeedDiff > bestStaySpeedDiff) {
                     // found a lane change that improves vehicle speed
                     //float improvement = 100f * ((bestOptSpeedDiff - bestStaySpeedDiff) / ((bestStayMeanSpeed + bestOptMeanSpeed) / 2f));
-                    var speedDiff = Mathf.Abs(bestOptMeanSpeed - vehicleCurSpeed);
-                    var optImprovementSpeed = SpeedLimit.ToKmphRounded(bestOptSpeedDiff - bestStaySpeedDiff);
+                    float speedDiff = Mathf.Abs(bestOptMeanSpeed - vehicleCurSpeed);
+                    ushort optImprovementSpeed = SpeedLimit.ToKmphRounded(bestOptSpeedDiff - bestStaySpeedDiff);
 #if DEBUG
                     if (debug) {
                         Log._Debug($"VehicleBehaviorManager.FindBestLane({vehicleId}): " +

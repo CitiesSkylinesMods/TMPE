@@ -256,7 +256,7 @@ namespace TrafficManager.Manager.Impl {
             if (TrafficLightSimulations[nodeId].IsTimedLight()) {
                 // remove/destroy all timed traffic lights in group
                 List<ushort> oldNodeGroup = new List<ushort>(TrafficLightSimulations[nodeId].timedLight.NodeGroup);
-                foreach (var timedNodeId in oldNodeGroup) {
+                foreach (ushort timedNodeId in oldNodeGroup) {
                     if (!TrafficLightSimulations[timedNodeId].HasSimulation()) {
                         continue;
                     }
@@ -380,7 +380,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             sim.type = TrafficLightSimulationType.None;
-            var timedLight = sim.timedLight;
+            ITimedTrafficLights timedLight = sim.timedLight;
             sim.timedLight = null;
 
             if (timedLight != null) {
@@ -551,7 +551,7 @@ namespace TrafficManager.Manager.Impl {
                             lights.PedestrianLightState = cnfLights.pedestrianLightState;
 
                             bool first = true; // v1.10.2 transitional code
-                            foreach (var e2 in cnfLights.customLights) {
+                            foreach (KeyValuePair<Traffic.ExtVehicleType, Configuration.CustomSegmentLight> e2 in cnfLights.customLights) {
 #if DEBUGLOAD
 								Log._Debug($"Loading timed step {j}, segment {e.Key}, vehicleType {e2.Key} at node {cnfTimedLights.nodeId}");
 #endif
@@ -593,7 +593,7 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.TimedTrafficLights cnfTimedLights in data) {
                 try {
-                    var timedNode = TrafficLightSimulations[cnfTimedLights.nodeId].timedLight;
+                    ITimedTrafficLights timedNode = TrafficLightSimulations[cnfTimedLights.nodeId].timedLight;
 
                     timedNode.Housekeeping();
                     if (cnfTimedLights.started) {
@@ -620,7 +620,7 @@ namespace TrafficManager.Manager.Impl {
 					Log._Debug($"Going to save timed light at node {nodeId}.");
 #endif
 
-                    var timedNode = TrafficLightSimulations[nodeId].timedLight;
+                    ITimedTrafficLights timedNode = TrafficLightSimulations[nodeId].timedLight;
                     timedNode.OnGeometryUpdate();
 
                     Configuration.TimedTrafficLights cnfTimedLights = new Configuration.TimedTrafficLights();
@@ -637,7 +637,7 @@ namespace TrafficManager.Manager.Impl {
                     cnfTimedLights.currentStep = stepIndex;
                     cnfTimedLights.timedSteps = new List<Configuration.TimedTrafficLightsStep>();
 
-                    for (var j = 0; j < timedNode.NumSteps(); j++) {
+                    for (int j = 0; j < timedNode.NumSteps(); j++) {
 #if DEBUGSAVE
 						Log._Debug($"Saving timed light step {j} at node {nodeId}.");
 #endif
@@ -676,7 +676,7 @@ namespace TrafficManager.Manager.Impl {
 							Log._Debug($"Saving pedestrian light @ seg. {e.Key}, step {j}: {cnfSegLights.pedestrianLightState} {cnfSegLights.manualPedestrianMode}");
 #endif
 
-                            foreach (var e2 in segLights.CustomLights) {
+                            foreach (KeyValuePair<API.Traffic.Enums.ExtVehicleType, ICustomSegmentLight> e2 in segLights.CustomLights) {
 #if DEBUGSAVE
 								Log._Debug($"Saving timed light step {j}, segment {e.Key}, vehicleType {e2.Key} at node {nodeId}.");
 #endif

@@ -138,17 +138,17 @@ namespace TrafficManager.UI {
 
             // Load shared speed limit signs for Kmph and Mph
             // Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no limit sign
-            for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
-                var resource = LoadDllResource($"SpeedLimits.Kmh.{speedLimit}.png", 200, 200);
+            for (int speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
+                Texture2D resource = LoadDllResource($"SpeedLimits.Kmh.{speedLimit}.png", 200, 200);
                 SpeedLimitTexturesKmph.Add(speedLimit, resource ?? SpeedLimitTexturesKmph[5]);
             }
             // Signs from 0 to 90 for MPH
-            for (var speedLimit = 0; speedLimit <= 90; speedLimit += 5) {
+            for (int speedLimit = 0; speedLimit <= 90; speedLimit += 5) {
                 // Load US textures, they are rectangular
-                var resourceUs = LoadDllResource($"SpeedLimits.Mph_US.{speedLimit}.png", 200, 250);
+                Texture2D resourceUs = LoadDllResource($"SpeedLimits.Mph_US.{speedLimit}.png", 200, 250);
                 SpeedLimitTexturesMphUS.Add(speedLimit, resourceUs ?? SpeedLimitTexturesMphUS[5]);
                 // Load UK textures, they are square
-                var resourceUk = LoadDllResource($"SpeedLimits.Mph_UK.{speedLimit}.png", 200, 200);
+                Texture2D resourceUk = LoadDllResource($"SpeedLimits.Mph_UK.{speedLimit}.png", 200, 200);
                 SpeedLimitTexturesMphUK.Add(speedLimit, resourceUk ?? SpeedLimitTexturesMphUK[5]);
             }
 
@@ -227,8 +227,8 @@ namespace TrafficManager.UI {
         /// <param name="speedLimit">Ingame speed</param>
         /// <returns>The texture, hopefully it existed</returns>
         public static Texture2D GetSpeedLimitTexture(float speedLimit) {
-            var m = GlobalConfig.Instance.Main;
-            var unit = m.DisplaySpeedLimitsMph ? SpeedUnit.Mph : SpeedUnit.Kmph;
+            State.ConfigData.Main m = GlobalConfig.Instance.Main;
+            SpeedUnit unit = m.DisplaySpeedLimitsMph ? SpeedUnit.Mph : SpeedUnit.Kmph;
             return GetSpeedLimitTexture(speedLimit, m.MphRoadSignStyle, unit);
         }
 
@@ -241,8 +241,8 @@ namespace TrafficManager.UI {
         /// <returns></returns>
         public static Texture2D GetSpeedLimitTexture(float speedLimit, MphSignStyle mphStyle, SpeedUnit unit) {
             // Select the source for the textures based on unit and the theme
-            var mph = unit == SpeedUnit.Mph;
-            var textures = SpeedLimitTexturesKmph;
+            bool mph = unit == SpeedUnit.Mph;
+            IDictionary<int, Texture2D> textures = SpeedLimitTexturesKmph;
             if (mph) {
                 switch (mphStyle) {
                     case MphSignStyle.SquareUS:
@@ -263,16 +263,16 @@ namespace TrafficManager.UI {
             }
 
             // Round to nearest 5 MPH or nearest 10 km/h
-            var index = mph ? SpeedLimit.ToMphRounded(speedLimit) : SpeedLimit.ToKmphRounded(speedLimit);
+            ushort index = mph ? SpeedLimit.ToMphRounded(speedLimit) : SpeedLimit.ToKmphRounded(speedLimit);
 
             // Trim the index since 140 km/h / 90 MPH is the max sign we have
-            var upper = mph ? SpeedLimit.UPPER_MPH : SpeedLimit.UPPER_KMPH;
+            ushort upper = mph ? SpeedLimit.UPPER_MPH : SpeedLimit.UPPER_KMPH;
 #if DEBUG
             if (index > upper) {
                 Log.Info($"Trimming speed={speedLimit} index={index} to {upper}");
             }
 #endif
-            var trimIndex = Math.Min(upper, Math.Max((ushort)0, index));
+            ushort trimIndex = Math.Min(upper, Math.Max((ushort)0, index));
             return textures[trimIndex];
         }
 
@@ -286,8 +286,8 @@ namespace TrafficManager.UI {
                 if (debug)
                     Log._Debug($"Loading DllResource {resourceName}");
 #endif
-                var myAssembly = Assembly.GetExecutingAssembly();
-                var myStream = myAssembly.GetManifestResourceStream("TrafficManager.Resources." + resourceName);
+                Assembly myAssembly = Assembly.GetExecutingAssembly();
+                Stream myStream = myAssembly.GetManifestResourceStream("TrafficManager.Resources." + resourceName);
 
                 var texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
 
@@ -302,14 +302,14 @@ namespace TrafficManager.UI {
 
         static byte[] ReadToEnd(Stream stream)
         {
-            var originalPosition = stream.Position;
+            long originalPosition = stream.Position;
             stream.Position = 0;
 
             try
             {
                 var readBuffer = new byte[4096];
 
-                var totalBytesRead = 0;
+                int totalBytesRead = 0;
                 int bytesRead;
 
                 while ((bytesRead = stream.Read(readBuffer, totalBytesRead, readBuffer.Length - totalBytesRead)) > 0)
@@ -319,7 +319,7 @@ namespace TrafficManager.UI {
                     if (totalBytesRead != readBuffer.Length)
                         continue;
 
-                    var nextByte = stream.ReadByte();
+                    int nextByte = stream.ReadByte();
                     if (nextByte == -1)
                         continue;
 
@@ -330,7 +330,7 @@ namespace TrafficManager.UI {
                     totalBytesRead++;
                 }
 
-                var buffer = readBuffer;
+                byte[] buffer = readBuffer;
                 if (readBuffer.Length == totalBytesRead)
                     return buffer;
 

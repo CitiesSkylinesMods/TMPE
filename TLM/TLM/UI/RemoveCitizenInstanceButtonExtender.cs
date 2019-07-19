@@ -16,12 +16,12 @@ namespace TrafficManager.UI {
 		public void Start() {
 			buttons = new List<UIButton>();
 
-			var citizenInfoPanel = GameObject.Find("(Library) CitizenWorldInfoPanel").GetComponent<CitizenWorldInfoPanel>();
+            CitizenWorldInfoPanel citizenInfoPanel = GameObject.Find("(Library) CitizenWorldInfoPanel").GetComponent<CitizenWorldInfoPanel>();
 			if (citizenInfoPanel != null) {
 				buttons.Add(AddRemoveCitizenInstanceButton(citizenInfoPanel));
 			}
 
-			var touristInfoPanel = GameObject.Find("(Library) TouristWorldInfoPanel").GetComponent<TouristWorldInfoPanel>();
+            TouristWorldInfoPanel touristInfoPanel = GameObject.Find("(Library) TouristWorldInfoPanel").GetComponent<TouristWorldInfoPanel>();
 			if (touristInfoPanel != null) {
 				buttons.Add(AddRemoveCitizenInstanceButton(touristInfoPanel));
 			}

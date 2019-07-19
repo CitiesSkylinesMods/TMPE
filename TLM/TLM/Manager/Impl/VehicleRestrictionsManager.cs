@@ -86,8 +86,8 @@
                 return ret;
             }
 
-            var dir = NetInfo.Direction.Forward;
-            var dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+            NetInfo.Direction dir = NetInfo.Direction.Forward;
+            NetInfo.Direction dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
 
             NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
             uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
@@ -120,7 +120,7 @@
         /// <param name="laneInfo"></param>
         /// <returns></returns>
         public ExtVehicleType GetAllowedVehicleTypes(ushort segmentId, NetInfo segmentInfo, uint laneIndex, NetInfo.Lane laneInfo, VehicleRestrictionsMode busLaneMode) {
-            var fastArray = Flags.laneAllowedVehicleTypesArray[segmentId];
+            ExtVehicleType?[] fastArray = Flags.laneAllowedVehicleTypesArray[segmentId];
             if (fastArray != null && fastArray.Length > laneIndex && fastArray[laneIndex] != null) {
                 return (ExtVehicleType)fastArray[laneIndex];
             }
@@ -543,9 +543,9 @@
                     if (!Services.NetService.IsLaneValid(laneVehicleTypes.laneId))
                         continue;
 
-                    var baseMask = GetBaseMask(laneVehicleTypes.laneId,
+                    ExtVehicleType baseMask = GetBaseMask(laneVehicleTypes.laneId,
                                                VehicleRestrictionsMode.Configured);
-                    var maskedType = laneVehicleTypes.ApiVehicleTypes & baseMask;
+                    ExtVehicleType maskedType = laneVehicleTypes.ApiVehicleTypes & baseMask;
 #if DEBUGLOAD
 					Log._Debug($"Loading lane vehicle restriction: lane {laneVehicleTypes.laneId} = {laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
 #endif

@@ -273,14 +273,14 @@ namespace TrafficManager {
 				Translation.OnLevelUnloading();
 				GlobalConfig.OnLevelUnloading();
 
-				// remove vehicle button
-				var removeVehicleButtonExtender = UIView.GetAView().gameObject.GetComponent<RemoveVehicleButtonExtender>();
+                // remove vehicle button
+                RemoveVehicleButtonExtender removeVehicleButtonExtender = UIView.GetAView().gameObject.GetComponent<RemoveVehicleButtonExtender>();
 				if (removeVehicleButtonExtender != null) {
 					Object.Destroy(removeVehicleButtonExtender, 10f);
 				}
 
-				// remove citizen instance button
-				var removeCitizenInstanceButtonExtender = UIView.GetAView().gameObject.GetComponent<RemoveCitizenInstanceButtonExtender>();
+                // remove citizen instance button
+                RemoveCitizenInstanceButtonExtender removeCitizenInstanceButtonExtender = UIView.GetAView().gameObject.GetComponent<RemoveCitizenInstanceButtonExtender>();
 				if (removeCitizenInstanceButtonExtender != null) {
 					Object.Destroy(removeCitizenInstanceButtonExtender, 10f);
 				}
@@ -349,9 +349,9 @@ namespace TrafficManager {
 			if (!IsPathManagerReplaced) {
 				try {
 					Log.Info("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
-					var pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
+                    FieldInfo pathManagerInstance = typeof(Singleton<PathManager>).GetField("sInstance", BindingFlags.Static | BindingFlags.NonPublic);
 
-					var stockPathManager = PathManager.instance;
+                    PathManager stockPathManager = PathManager.instance;
 					Log._Debug($"Got stock PathManager instance {stockPathManager.GetName()}");
 
 					CustomPathManager = stockPathManager.gameObject.AddComponent<CustomPathManager>();
@@ -401,7 +401,7 @@ namespace TrafficManager {
 
 			// Init transport demand UI
 			if (TransportDemandUI == null) {
-				var uiView = UIView.GetAView();
+                UIView uiView = UIView.GetAView();
 				TransportDemandUI = (UITransportDemand)uiView.AddUIComponent(typeof(UITransportDemand));
 			}
 
@@ -431,7 +431,7 @@ namespace TrafficManager {
 		private bool Check3rdPartyModLoaded(string namespaceStr, bool printAll=false) {
 			bool thirdPartyModLoaded = false;
 
-			var loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo loadingWrapperLoadingExtensionsField = typeof(LoadingWrapper).GetField("m_LoadingExtensions", BindingFlags.NonPublic | BindingFlags.Instance);
 			List<ILoadingExtension> loadingExtensions = null;
 			if (loadingWrapperLoadingExtensionsField != null) {
 				loadingExtensions = (List<ILoadingExtension>)loadingWrapperLoadingExtensionsField.GetValue(Singleton<LoadingManager>.instance.m_LoadingWrapper);
@@ -446,7 +446,7 @@ namespace TrafficManager {
 					if (extension.GetType().Namespace == null)
 						continue;
 
-					var nsStr = extension.GetType().Namespace.ToString();
+					string nsStr = extension.GetType().Namespace.ToString();
 					if (namespaceStr.Equals(nsStr)) {
 						Log.Info($"The mod '{namespaceStr}' has been detected.");
 						thirdPartyModLoaded = true;

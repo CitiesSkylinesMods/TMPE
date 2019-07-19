@@ -35,7 +35,7 @@ namespace TrafficManager.UI.SubTools {
 		public override void OnPrimaryClickOverlay() {
 			if (HoveredNodeId == 0 || HoveredSegmentId == 0) return;
 
-			var netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
+            NetNode.Flags netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
 
 			if ((netFlags & NetNode.Flags.Junction) == NetNode.Flags.None) return;
 
@@ -76,8 +76,8 @@ namespace TrafficManager.UI.SubTools {
 			if (!visible)
 				return;
 
-			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-			var diff = nodePos - camPos;
+            Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+            Vector3 diff = nodePos - camPos;
 
 			if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance)
 				return; // do not draw if too distant
@@ -92,7 +92,7 @@ namespace TrafficManager.UI.SubTools {
 			NetManager netManager = Singleton<NetManager>.instance;
 			//Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
 			if (!_cursorInSecondaryPanel && HoveredSegmentId != 0 && HoveredNodeId != 0 && (HoveredSegmentId != SelectedSegmentId || HoveredNodeId != SelectedNodeId)) {
-				var nodeFlags = netManager.m_nodes.m_buffer[HoveredNodeId].m_flags;
+                NetNode.Flags nodeFlags = netManager.m_nodes.m_buffer[HoveredNodeId].m_flags;
 				
 				if ((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId || netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId) && (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None) {
 					NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId], MainTool.GetToolColor(false, false),
@@ -106,7 +106,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private void _guiLaneChangeWindow(int num) {
-			var info = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
+            NetInfo info = Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].Info;
 
 			IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(SelectedSegmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId], Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId].m_startNode == SelectedNodeId, LaneArrowManager.LANE_TYPES, LaneArrowManager.VEHICLE_TYPES, true);
 
@@ -118,7 +118,7 @@ namespace TrafficManager.UI.SubTools {
 
 			GUILayout.BeginHorizontal();
 
-			for (var i = 0; i < laneList.Count; i++) {
+			for (int i = 0; i < laneList.Count; i++) {
 				var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
 
 				var style1 = new GUIStyle("button");

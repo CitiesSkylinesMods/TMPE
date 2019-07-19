@@ -228,20 +228,20 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		protected void CalculateIncomingOutgoing(ushort segmentId, ushort nodeId, out bool incoming, out bool outgoing) {
-			var instance = Singleton<NetManager>.instance;
+            NetManager instance = Singleton<NetManager>.instance;
 
-			var info = instance.m_segments.m_buffer[segmentId].Info;
+            NetInfo info = instance.m_segments.m_buffer[segmentId].Info;
 
 			var dir = NetInfo.Direction.Forward;
 			if (instance.m_segments.m_buffer[segmentId].m_startNode == nodeId)
 				dir = NetInfo.Direction.Backward;
-			var dir2 = ((instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+            NetInfo.Direction dir2 = ((instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
 
-			var hasForward = false;
-			var hasBackward = false;
+			bool hasForward = false;
+            bool hasBackward = false;
 			bool isOutgoingOneWay = true;
-			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
-			var laneIndex = 0;
+			uint laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
+			int laneIndex = 0;
 			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
 				bool validLane = (info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
 					(info.m_lanes[laneIndex].m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None;
@@ -283,7 +283,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
 			bool hasOtherSegments = false;
-			for (var s = 0; s < 8; s++) {
+			for (int s = 0; s < 8; s++) {
 				ushort otherSegmentId = 0;
 				Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
 					otherSegmentId = node.GetSegment(s);
