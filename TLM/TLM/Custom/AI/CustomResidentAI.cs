@@ -17,10 +17,10 @@
         public string CustomGetLocalizedStatus(ushort instanceId,
                                                ref CitizenInstance data,
                                                out InstanceID target) {
-            var ret = Constants.ManagerFactory.ExtCitizenInstanceManager.GetResidentLocalizedStatus(
+            string ret = Constants.ManagerFactory.ExtCitizenInstanceManager.GetResidentLocalizedStatus(
                 instanceId,
                 ref data,
-                out var addCustomStatus,
+                out bool addCustomStatus,
                 out target);
 
             // NON-STOCK CODE START
@@ -42,7 +42,7 @@
                                                 bool forceCar,
                                                 out VehicleInfo trailer) {
 #if DEBUG
-            var citizenDebug = (DebugSettings.CitizenInstanceId == 0
+            bool citizenDebug = (DebugSettings.CitizenInstanceId == 0
                             || DebugSettings.CitizenInstanceId == instanceId)
                            && (DebugSettings.CitizenId == 0
                                || DebugSettings.CitizenId == citizenData.m_citizen)
@@ -50,7 +50,7 @@
                                || DebugSettings.SourceBuildingId == citizenData.m_sourceBuilding)
                            && (DebugSettings.TargetBuildingId == 0
                                || DebugSettings.TargetBuildingId == citizenData.m_targetBuilding);
-            var logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
 #else
             var logParkingAi = false;
 #endif
@@ -61,7 +61,7 @@
             }
 
             // NON-STOCK CODE START
-            var forceTaxi = false;
+            bool forceTaxi = false;
             if (Options.parkingAI) {
                 if (ExtCitizenInstanceManager.Instance.ExtInstances[instanceId]
                                              .pathMode == ExtPathMode.TaxiToTarget) {
@@ -70,7 +70,7 @@
             }
 
             // NON-STOCK CODE END
-            var ageGroup =
+            Citizen.AgeGroup ageGroup =
                 Constants.ManagerFactory.ExtCitizenManager.GetAgeGroup(citizenData.Info.m_agePhase);
 
             int carProb;
@@ -95,22 +95,22 @@
                 taxiProb = GetTaxiProbability(instanceId, ref citizenData, ageGroup);
             }
 
-            var randomizer = new Randomizer(citizenData.m_citizen);
-            var useCar = randomizer.Int32(100u) < carProb;
-            var useBike = !useCar && randomizer.Int32(100u) < bikeProb;
-            var useTaxi = !useCar && !useBike && randomizer.Int32(100u) < taxiProb;
-            var useElectricCar = false;
+            Randomizer randomizer = new Randomizer(citizenData.m_citizen);
+            bool useCar = randomizer.Int32(100u) < carProb;
+            bool useBike = !useCar && randomizer.Int32(100u) < bikeProb;
+            bool useTaxi = !useCar && !useBike && randomizer.Int32(100u) < taxiProb;
+            bool useElectricCar = false;
 
             if (useCar) {
-                var electricProb = GetElectricCarProbability(
+                int electricProb = GetElectricCarProbability(
                     instanceId,
                     ref citizenData,
                     m_info.m_agePhase);
                 useElectricCar = randomizer.Int32(100u) < electricProb;
             }
 
-            var service = ItemClass.Service.Residential;
-            var subService = useElectricCar
+            ItemClass.Service service = ItemClass.Service.Residential;
+            ItemClass.SubService subService = useElectricCar
                                  ? ItemClass.SubService.ResidentialLowEco
                                  : ItemClass.SubService.ResidentialLow;
             if (useTaxi) {
@@ -121,7 +121,7 @@
             // NON-STOCK CODE START
             VehicleInfo carInfo = null;
             if (Options.parkingAI && useCar) {
-                var parkedVehicleId = Singleton<CitizenManager>
+                ushort parkedVehicleId = Singleton<CitizenManager>
                                       .instance.m_citizens.m_buffer[citizenData.m_citizen]
                                       .m_parkedVehicle;
 
@@ -145,10 +145,10 @@
             }
 
             if (useBike) {
-                var ageGroupLvl = ageGroup != Citizen.AgeGroup.Child
+                ItemClass.Level ageGroupLvl = ageGroup != Citizen.AgeGroup.Child
                                       ? ItemClass.Level.Level2
                                       : ItemClass.Level.Level1;
-                var bikeInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
+                VehicleInfo bikeInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
                     ref randomizer,
                     ItemClass.Service.Residential,
                     ItemClass.SubService.ResidentialHigh,

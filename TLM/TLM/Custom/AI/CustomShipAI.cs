@@ -18,7 +18,7 @@
                                         bool startBothWays,
                                         bool endBothWays) {
             // NON-STOCK CODE START
-            var vehicleType = vehicleData.Info.m_vehicleAI is PassengerShipAI
+            ExtVehicleType vehicleType = vehicleData.Info.m_vehicleAI is PassengerShipAI
                                   ? ExtVehicleType.PassengerShip
                                   : ExtVehicleType.CargoVehicle;
 
@@ -33,9 +33,9 @@
                     false,
                     false,
                     64f,
-                    out var startPosA,
-                    out var startPosB,
-                    out var startSqrDistA,
+                    out PathUnit.Position startPosA,
+                    out PathUnit.Position startPosB,
+                    out float startSqrDistA,
                     out _)
                 || !PathManager.FindPathPosition(
                     endPos,
@@ -45,9 +45,9 @@
                     false,
                     false,
                     64f,
-                    out var endPosA,
-                    out var endPosB,
-                    out var endSqrDistA,
+                    out PathUnit.Position endPosA,
+                    out PathUnit.Position endPosB,
+                    out float endSqrDistA,
                     out _)) {
                 return false;
             }
@@ -85,7 +85,7 @@
             args.skipQueue = false;
 
             if (!CustomPathManager._instance.CustomCreatePath(
-                    out var path,
+                    out uint path,
                     ref Singleton<SimulationManager>.instance.m_randomizer,
                     args)) {
                 return false;

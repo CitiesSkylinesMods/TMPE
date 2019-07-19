@@ -7,6 +7,7 @@
     using ColossalFramework.Math;
     using CSUtil.Commons;
     using JetBrains.Annotations;
+    using Manager;
     using Manager.Impl;
     using PathFinding;
     using RedirectionFramework.Attributes;
@@ -19,10 +20,10 @@
     public class CustomTrainAI : TrainAI {
         [RedirectMethod]
         public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
-            var extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
+            IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
 
             if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
-                var pathFindFlags = Singleton<PathManager>
+                byte pathFindFlags = Singleton<PathManager>
                                     .instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
 
                 if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
@@ -59,11 +60,11 @@
             }
 
             // NON-STOCK CODE END
-            var reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
-            var connectedVehicleId = reversed ? vehicleData.GetLastVehicle(vehicleId) : vehicleId;
+            bool reversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
+            ushort connectedVehicleId = reversed ? vehicleData.GetLastVehicle(vehicleId) : vehicleId;
 
-            var instance = Singleton<VehicleManager>.instance;
-            var info = instance.m_vehicles.m_buffer[connectedVehicleId].Info;
+            VehicleManager instance = Singleton<VehicleManager>.instance;
+            VehicleInfo info = instance.m_vehicles.m_buffer[connectedVehicleId].Info;
             info.m_vehicleAI.SimulationStep(
                 connectedVehicleId,
                 ref instance.m_vehicles.m_buffer[connectedVehicleId],
@@ -76,7 +77,7 @@
                 return;
             }
 
-            var newReversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
+            bool newReversed = (vehicleData.m_flags & Vehicle.Flags.Reversed) != 0;
 
             if (newReversed != reversed) {
                 reversed = newReversed;
@@ -103,7 +104,7 @@
 
             if (reversed) {
                 connectedVehicleId = instance.m_vehicles.m_buffer[connectedVehicleId].m_leadingVehicle;
-                var num2 = 0;
+                int num2 = 0;
                 while (connectedVehicleId != 0) {
                     info = instance.m_vehicles.m_buffer[connectedVehicleId].Info;
                     info.m_vehicleAI.SimulationStep(
@@ -129,7 +130,7 @@
                 }
             } else {
                 connectedVehicleId = instance.m_vehicles.m_buffer[connectedVehicleId].m_trailingVehicle;
-                var num3 = 0;
+                int num3 = 0;
                 while (connectedVehicleId != 0) {
                     info = instance.m_vehicles.m_buffer[connectedVehicleId].Info;
                     info.m_vehicleAI.SimulationStep(
@@ -175,10 +176,10 @@
                                          ushort leaderId,
                                          ref Vehicle leaderData,
                                          int lodPhysics) {
-            var reversed = (leaderData.m_flags & Vehicle.Flags.Reversed) != 0;
-            var frontVehicleId = (!reversed) ? vehicleData.m_leadingVehicle : vehicleData.m_trailingVehicle;
-            var vehicleInfo = leaderId != vehicleId ? leaderData.Info : m_info;
-            var trainAi = vehicleInfo.m_vehicleAI as TrainAI;
+            bool reversed = (leaderData.m_flags & Vehicle.Flags.Reversed) != 0;
+            ushort frontVehicleId = (!reversed) ? vehicleData.m_leadingVehicle : vehicleData.m_trailingVehicle;
+            VehicleInfo vehicleInfo = leaderId != vehicleId ? leaderData.Info : m_info;
+            TrainAI trainAi = vehicleInfo.m_vehicleAI as TrainAI;
 
             if (frontVehicleId != 0) {
                 frameData.m_position += frameData.m_velocity * 0.4f;
@@ -188,9 +189,9 @@
 
             frameData.m_swayPosition += frameData.m_swayVelocity * 0.5f;
 
-            var posBeforeWheelRot = frameData.m_position;
-            var posAfterWheelRot = frameData.m_position;
-            var wheelBaseRot = frameData.m_rotation
+            Vector3 posBeforeWheelRot = frameData.m_position;
+            Vector3 posAfterWheelRot = frameData.m_position;
+            Vector3 wheelBaseRot = frameData.m_rotation
                                * new Vector3(0f, 0f, m_info.m_generatedInfo.m_wheelBase * 0.5f);
 
             if (reversed) {
@@ -201,25 +202,25 @@
                 posAfterWheelRot -= wheelBaseRot;
             }
 
-            var acceleration = m_info.m_acceleration;
-            var braking = m_info.m_braking;
-            var curSpeed = frameData.m_velocity.magnitude;
+            float acceleration = m_info.m_acceleration;
+            float braking = m_info.m_braking;
+            float curSpeed = frameData.m_velocity.magnitude;
 
-            var beforeRotToTargetPos1Diff = (Vector3)vehicleData.m_targetPos1 - posBeforeWheelRot;
-            var beforeRotToTargetPos1DiffSqrMag = beforeRotToTargetPos1Diff.sqrMagnitude;
+            Vector3 beforeRotToTargetPos1Diff = (Vector3)vehicleData.m_targetPos1 - posBeforeWheelRot;
+            float beforeRotToTargetPos1DiffSqrMag = beforeRotToTargetPos1Diff.sqrMagnitude;
 
-            var curInvRot = Quaternion.Inverse(frameData.m_rotation);
-            var curveTangent = curInvRot * frameData.m_velocity;
+            Quaternion curInvRot = Quaternion.Inverse(frameData.m_rotation);
+            Vector3 curveTangent = curInvRot * frameData.m_velocity;
 
-            var forward = Vector3.forward;
-            var targetMotion = Vector3.zero;
-            var targetSpeed = 0f;
-            var motionFactor = 0.5f;
+            Vector3 forward = Vector3.forward;
+            Vector3 targetMotion = Vector3.zero;
+            float targetSpeed = 0f;
+            float motionFactor = 0.5f;
 
             if (frontVehicleId != 0) {
-                var vehMan = Singleton<VehicleManager>.instance;
-                var frontVehLastFrameData = vehMan.m_vehicles.m_buffer[frontVehicleId].GetLastFrameData();
-                var frontVehInfo = vehMan.m_vehicles.m_buffer[frontVehicleId].Info;
+                VehicleManager vehMan = Singleton<VehicleManager>.instance;
+                Vehicle.Frame frontVehLastFrameData = vehMan.m_vehicles.m_buffer[frontVehicleId].GetLastFrameData();
+                VehicleInfo frontVehInfo = vehMan.m_vehicles.m_buffer[frontVehicleId].Info;
                 float attachOffset;
 
                 if ((vehicleData.m_flags & Vehicle.Flags.Inverted) != 0 != reversed) {
@@ -238,14 +239,14 @@
                         (frontVehInfo.m_attachOffsetBack - (frontVehInfo.m_generatedInfo.m_size.z * 0.5f));
                 }
 
-                var posMinusAttachOffset = frameData.m_position;
+                Vector3 posMinusAttachOffset = frameData.m_position;
                 if (reversed) {
                     posMinusAttachOffset += frameData.m_rotation * new Vector3(0f, 0f, attachOffset);
                 } else {
                     posMinusAttachOffset -= frameData.m_rotation * new Vector3(0f, 0f, attachOffset);
                 }
 
-                var frontPosPlusAttachOffset = frontVehLastFrameData.m_position;
+                Vector3 frontPosPlusAttachOffset = frontVehLastFrameData.m_position;
                 if (reversed) {
                     frontPosPlusAttachOffset -= frontVehLastFrameData.m_rotation
                                                 * new Vector3(0f, 0f, frontAttachOffset);
@@ -254,7 +255,7 @@
                                                 * new Vector3(0f, 0f, frontAttachOffset);
                 }
 
-                var frontPosMinusWheelBaseRot = frontVehLastFrameData.m_position;
+                Vector3 frontPosMinusWheelBaseRot = frontVehLastFrameData.m_position;
                 wheelBaseRot = frontVehLastFrameData.m_rotation * new Vector3(
                                    0f,
                                    0f,
@@ -271,7 +272,7 @@
                     && vehicleData.m_path != 0u
                     && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == 0)
                 {
-                    var someIndex = -1;
+                    int someIndex = -1;
                     UpdatePathTargetPositions(
                         trainAi,
                         vehicleId,
@@ -288,13 +289,13 @@
                     beforeRotToTargetPos1DiffSqrMag = 0f;
                 }
 
-                var maxAttachDist = Mathf.Max(Vector3.Distance(posMinusAttachOffset,
+                float maxAttachDist = Mathf.Max(Vector3.Distance(posMinusAttachOffset,
                                                                frontPosPlusAttachOffset),
                                               2f);
                 const float ONE = 1f;
-                var maxAttachSqrDist = maxAttachDist * maxAttachDist;
+                float maxAttachSqrDist = maxAttachDist * maxAttachDist;
                 const float ONE_SQR = ONE * ONE;
-                var i = 0;
+                int i = 0;
                 if (beforeRotToTargetPos1DiffSqrMag < maxAttachSqrDist) {
                     if (vehicleData.m_path != 0u
                         && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == 0) {
@@ -323,28 +324,28 @@
                 }
 
                 if (vehicleData.m_path != 0u) {
-                    var netMan = Singleton<NetManager>.instance;
-                    var pathPosIndex = vehicleData.m_pathPositionIndex;
-                    var lastPathOffset = vehicleData.m_lastPathOffset;
+                    NetManager netMan = Singleton<NetManager>.instance;
+                    byte pathPosIndex = vehicleData.m_pathPositionIndex;
+                    byte lastPathOffset = vehicleData.m_lastPathOffset;
                     if (pathPosIndex == 255) {
                         pathPosIndex = 0;
                     }
 
-                    var pathMan = Singleton<PathManager>.instance;
+                    PathManager pathMan = Singleton<PathManager>.instance;
                     if (pathMan.m_pathUnits.m_buffer[vehicleData.m_path]
-                               .GetPosition(pathPosIndex >> 1, out var curPathPos)) {
+                               .GetPosition(pathPosIndex >> 1, out PathUnit.Position curPathPos)) {
                         netMan.m_segments.m_buffer[curPathPos.m_segment].AddTraffic(
                             Mathf.RoundToInt(m_info.m_generatedInfo.m_size.z * 3f),
                             GetNoiseLevel());
 
                         if ((pathPosIndex & 1) == 0 || lastPathOffset == 0 ||
                             (leaderData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
-                            var laneId = PathManager.GetLaneID(curPathPos);
+                            uint laneId = PathManager.GetLaneID(curPathPos);
                             if (laneId != 0u) {
                                 netMan.m_lanes.m_buffer[laneId].ReserveSpace(m_info.m_generatedInfo.m_size.z);
                             }
                         } else if (pathMan.m_pathUnits.m_buffer[vehicleData.m_path]
-                                          .GetNextPosition(pathPosIndex >> 1, out var nextPathPos)) {
+                                          .GetNextPosition(pathPosIndex >> 1, out PathUnit.Position nextPathPos)) {
                             // NON-STOCK CODE START
                             ushort transitNodeId;
 
@@ -359,7 +360,7 @@
                                 curPathPos,
                                 nextPathPos)) {
                                 // NON-STOCK CODE END
-                                var nextLaneId = PathManager.GetLaneID(nextPathPos);
+                                uint nextLaneId = PathManager.GetLaneID(nextPathPos);
                                 if (nextLaneId != 0u) {
                                     netMan.m_lanes.m_buffer[nextLaneId].ReserveSpace(m_info.m_generatedInfo.m_size.z);
                                 }
@@ -369,11 +370,11 @@
                 }
 
                 beforeRotToTargetPos1Diff = curInvRot * beforeRotToTargetPos1Diff;
-                var negTotalAttachLen =
+                float negTotalAttachLen =
                     -(((m_info.m_generatedInfo.m_wheelBase +
                         frontVehInfo.m_generatedInfo.m_wheelBase) * 0.5f) + attachOffset +
                       frontAttachOffset);
-                var hasPath = false;
+                bool hasPath = false;
 
                 if (vehicleData.m_path != 0u && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == 0) {
                     if (Line3.Intersect(
@@ -381,8 +382,8 @@
                         vehicleData.m_targetPos1,
                         frontPosMinusWheelBaseRot,
                         negTotalAttachLen,
-                        out var u1,
-                        out var u2)) {
+                        out float u1,
+                        out float u2)) {
                         targetMotion = beforeRotToTargetPos1Diff
                                        * Mathf.Clamp(Mathf.Min(u1, u2) / 0.6f, 0f, 2f);
                     } else {
@@ -404,7 +405,7 @@
                         motionFactor = 0f;
                     }
                 } else {
-                    var frontPosBeforeToAfterWheelRotDist = Vector3.Distance(
+                    float frontPosBeforeToAfterWheelRotDist = Vector3.Distance(
                         frontPosMinusWheelBaseRot,
                         posBeforeWheelRot);
                     motionFactor = 0f;
@@ -414,12 +415,12 @@
                                          / Mathf.Max(1f, frontPosBeforeToAfterWheelRotDist * 0.6f)));
                 }
             } else {
-                var estimatedFrameDist = (curSpeed + acceleration)
+                float estimatedFrameDist = (curSpeed + acceleration)
                                          * (0.5f + (0.5f * (curSpeed + acceleration) / braking));
-                var maxSpeedAdd = Mathf.Max(curSpeed + acceleration, 2f);
-                var meanSpeedAdd = Mathf.Max((estimatedFrameDist - maxSpeedAdd) / 2f, 1f);
-                var maxSpeedAddSqr = maxSpeedAdd * maxSpeedAdd;
-                var meanSpeedAddSqr = meanSpeedAdd * meanSpeedAdd;
+                float maxSpeedAdd = Mathf.Max(curSpeed + acceleration, 2f);
+                float meanSpeedAdd = Mathf.Max((estimatedFrameDist - maxSpeedAdd) / 2f, 1f);
+                float maxSpeedAddSqr = maxSpeedAdd * maxSpeedAdd;
+                float meanSpeedAddSqr = meanSpeedAdd * meanSpeedAdd;
 
                 if (Vector3.Dot(
                         vehicleData.m_targetPos1 - vehicleData.m_targetPos0,
@@ -427,7 +428,7 @@
                     && vehicleData.m_path != 0u
                     && (leaderData.m_flags & (Vehicle.Flags.WaitingPath | Vehicle.Flags.Stopped)) == 0)
                 {
-                    var someIndex = -1;
+                    int someIndex = -1;
                     UpdatePathTargetPositions(
                         trainAi,
                         vehicleId,
@@ -444,8 +445,8 @@
                     beforeRotToTargetPos1DiffSqrMag = 0f;
                 }
 
-                var posIndex = 0;
-                var flag3 = false;
+                int posIndex = 0;
+                bool flag3 = false;
                 if ((beforeRotToTargetPos1DiffSqrMag < maxSpeedAddSqr
                      || vehicleData.m_targetPos3.w < 0.01f)
                     && (leaderData.m_flags & (Vehicle.Flags.WaitingPath | Vehicle.Flags.Stopped)) == 0)
@@ -485,16 +486,16 @@
                 }
 
                 if (vehicleData.m_path != 0u) {
-                    var netMan = Singleton<NetManager>.instance;
-                    var pathPosIndex = vehicleData.m_pathPositionIndex;
-                    var lastPathOffset = vehicleData.m_lastPathOffset;
+                    NetManager netMan = Singleton<NetManager>.instance;
+                    byte pathPosIndex = vehicleData.m_pathPositionIndex;
+                    byte lastPathOffset = vehicleData.m_lastPathOffset;
                     if (pathPosIndex == 255) {
                         pathPosIndex = 0;
                     }
 
-                    var pathMan = Singleton<PathManager>.instance;
+                    PathManager pathMan = Singleton<PathManager>.instance;
                     if (pathMan.m_pathUnits.m_buffer[vehicleData.m_path]
-                               .GetPosition(pathPosIndex >> 1, out var curPathPos))
+                               .GetPosition(pathPosIndex >> 1, out PathUnit.Position curPathPos))
                     {
                         netMan.m_segments.m_buffer[curPathPos.m_segment]
                               .AddTraffic(Mathf.RoundToInt(m_info.m_generatedInfo.m_size.z * 3f),
@@ -504,12 +505,12 @@
                             || lastPathOffset == 0
                             || (leaderData.m_flags & Vehicle.Flags.WaitingPath) != 0)
                         {
-                            var laneId = PathManager.GetLaneID(curPathPos);
+                            uint laneId = PathManager.GetLaneID(curPathPos);
                             if (laneId != 0u) {
                                 netMan.m_lanes.m_buffer[laneId].ReserveSpace(m_info.m_generatedInfo.m_size.z, vehicleId);
                             }
                         } else if (pathMan.m_pathUnits.m_buffer[vehicleData.m_path]
-                                          .GetNextPosition(pathPosIndex >> 1, out var nextPathPos)) {
+                                          .GetNextPosition(pathPosIndex >> 1, out PathUnit.Position nextPathPos)) {
                             // NON-STOCK CODE START
                             ushort transitNodeId;
                             transitNodeId = curPathPos.m_offset < 128
@@ -521,7 +522,7 @@
                                 curPathPos,
                                 nextPathPos)) {
                                 // NON-STOCK CODE END
-                                var nextLaneId = PathManager.GetLaneID(nextPathPos);
+                                uint nextLaneId = PathManager.GetLaneID(nextPathPos);
                                 if (nextLaneId != 0u) {
                                     netMan.m_lanes.m_buffer[nextLaneId].ReserveSpace(
                                         m_info.m_generatedInfo.m_size.z, vehicleId);
@@ -542,18 +543,18 @@
                     beforeRotToTargetPos1Diff = -beforeRotToTargetPos1Diff;
                 }
 
-                var blocked = false;
-                var forwardLen = 0f;
+                bool blocked = false;
+                float forwardLen = 0f;
 
                 if (beforeRotToTargetPos1DiffSqrMag > 1f) {
                     forward = VectorUtils.NormalizeXZ(beforeRotToTargetPos1Diff, out forwardLen);
 
                     if (forwardLen > 1f) {
-                        var fwd = beforeRotToTargetPos1Diff;
+                        Vector3 fwd = beforeRotToTargetPos1Diff;
                         maxSpeedAdd = Mathf.Max(curSpeed, 2f);
                         maxSpeedAddSqr = maxSpeedAdd * maxSpeedAdd;
                         if (beforeRotToTargetPos1DiffSqrMag > maxSpeedAddSqr) {
-                            var num20 = maxSpeedAdd / Mathf.Sqrt(beforeRotToTargetPos1DiffSqrMag);
+                            float num20 = maxSpeedAdd / Mathf.Sqrt(beforeRotToTargetPos1DiffSqrMag);
                             fwd.x *= num20;
                             fwd.y *= num20;
                         }
@@ -627,7 +628,7 @@
                         }
 
                         forward = VectorUtils.NormalizeXZ(fwd, out forwardLen);
-                        var curve = Mathf.PI / 2f * (1f - forward.z);
+                        float curve = Mathf.PI / 2f * (1f - forward.z);
                         if (forwardLen > 1f) {
                             curve /= forwardLen;
                         }
@@ -636,7 +637,7 @@
                                              CalculateTargetSpeed(vehicleId,
                                                                   ref vehicleData,
                                                                   1000f, curve));
-                        var targetDist = forwardLen;
+                        float targetDist = forwardLen;
                         maxSpeed = Mathf.Min(maxSpeed,
                                              CalculateMaxSpeed(targetDist,
                                                                vehicleData.m_targetPos2.w, braking));
@@ -650,10 +651,10 @@
                                              CalculateMaxSpeed(targetDist, 0f, braking));
 
                         if (maxSpeed < curSpeed) {
-                            var brake = Mathf.Max(acceleration, Mathf.Min(braking, curSpeed));
+                            float brake = Mathf.Max(acceleration, Mathf.Min(braking, curSpeed));
                             targetSpeed = Mathf.Max(maxSpeed, curSpeed - brake);
                         } else {
-                            var accel = Mathf.Max(acceleration, Mathf.Min(braking, -curSpeed));
+                            float accel = Mathf.Max(acceleration, Mathf.Min(braking, -curSpeed));
                             targetSpeed = Mathf.Min(maxSpeed, curSpeed + accel);
                         }
                     }
@@ -684,14 +685,14 @@
                         beforeRotToTargetPos1Diff = -beforeRotToTargetPos1Diff;
                     }
 
-                    var vel = Vector3.ClampMagnitude((beforeRotToTargetPos1Diff * 0.5f) - curveTangent, braking);
+                    Vector3 vel = Vector3.ClampMagnitude((beforeRotToTargetPos1Diff * 0.5f) - curveTangent, braking);
                     targetMotion = curveTangent + vel;
                 }
             }
 
-            var springs = targetMotion - curveTangent;
-            var targetAfterWheelRotMotion = frameData.m_rotation * targetMotion;
-            var posAfterWheelRotToTargetDiff = Vector3.Normalize((Vector3)vehicleData.m_targetPos0 - posAfterWheelRot)
+            Vector3 springs = targetMotion - curveTangent;
+            Vector3 targetAfterWheelRotMotion = frameData.m_rotation * targetMotion;
+            Vector3 posAfterWheelRotToTargetDiff = Vector3.Normalize((Vector3)vehicleData.m_targetPos0 - posAfterWheelRot)
                                                * (targetMotion.magnitude * motionFactor);
             posBeforeWheelRot += targetAfterWheelRotMotion;
             posAfterWheelRot += posAfterWheelRotToTargetDiff;
@@ -744,15 +745,15 @@
                                                    out Vector3 pos,
                                                    out Vector3 dir,
                                                    out float maxSpeed) {
-            var instance = Singleton<NetManager>.instance;
+            NetManager instance = Singleton<NetManager>.instance;
             instance.m_lanes.m_buffer[laneId].CalculatePositionAndDirection(
                 Constants.ByteToFloat(offset),
                 out pos,
                 out dir);
-            var info = instance.m_segments.m_buffer[position.m_segment].Info;
+            NetInfo info = instance.m_segments.m_buffer[position.m_segment].Info;
 
             if (info.m_lanes != null && info.m_lanes.Length > position.m_lane) {
-                var laneSpeedLimit = Options.customSpeedLimitsEnabled
+                float laneSpeedLimit = Options.customSpeedLimitsEnabled
                                          ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
                                              position.m_segment,
                                              position.m_lane,
@@ -778,7 +779,7 @@
                                         bool startBothWays,
                                         bool endBothWays) {
             // NON-STOCK CODE START
-            var vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, null);
+            ExtVehicleType vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, null);
             if (vehicleType == ExtVehicleType.None) {
 #if DEBUG
                 Log.Warning($"CustomTrainAI.CustomStartPathFind: Vehicle {vehicleId} " +
@@ -790,7 +791,7 @@
             }
 
             // NON-STOCK CODE END
-            var info = m_info;
+            VehicleInfo info = m_info;
             if ((vehicleData.m_flags & Vehicle.Flags.Spawned) == 0 && Vector3.Distance(startPos, endPos) < 100f) {
                 startPos = endPos;
             }
@@ -816,10 +817,10 @@
                     allowUnderground,
                     false,
                     32f,
-                    out var startPosA,
-                    out var startPosB,
-                    out var startSqrDistA,
-                    out var startSqrDistB)
+                    out PathUnit.Position startPosA,
+                    out PathUnit.Position startPosB,
+                    out float startSqrDistA,
+                    out float startSqrDistB)
                 || !PathManager.FindPathPosition(
                     endPos,
                     m_transportInfo.m_netService,
@@ -830,10 +831,10 @@
                     allowUnderground2,
                     false,
                     32f,
-                    out var endPosA,
-                    out var endPosB,
-                    out var endSqrDistA,
-                    out var endSqrDistB)) {
+                    out PathUnit.Position endPosA,
+                    out PathUnit.Position endPosB,
+                    out float endSqrDistA,
+                    out float endSqrDistB)) {
                 return false;
             }
 
@@ -870,7 +871,7 @@
             args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
             if (CustomPathManager._instance.CustomCreatePath(
-                out var path,
+                out uint path,
                 ref Singleton<SimulationManager>.instance.m_randomizer,
                 args)) {
                 // NON-STOCK CODE END
@@ -897,18 +898,18 @@
                                         uint refLaneId,
                                         byte refOffset,
                                         Bezier3 bezier) {
-            var netManager = Singleton<NetManager>.instance;
+            NetManager netManager = Singleton<NetManager>.instance;
 
-            var nextSourceNodeId = nextOffset < nextPosition.m_offset
+            ushort nextSourceNodeId = nextOffset < nextPosition.m_offset
                                        ? netManager.m_segments.m_buffer[nextPosition.m_segment].m_startNode
                                        : netManager.m_segments.m_buffer[nextPosition.m_segment].m_endNode;
 
-            var refTargetNodeId = refOffset == 0
+            ushort refTargetNodeId = refOffset == 0
                                       ? netManager.m_segments.m_buffer[refPosition.m_segment].m_startNode
                                       : netManager.m_segments.m_buffer[refPosition.m_segment].m_endNode;
 
 #if DEBUG
-            var logLogic = DebugSwitch.CalculateSegmentPosition.Get()
+            bool logLogic = DebugSwitch.CalculateSegmentPosition.Get()
                            && (DebugSettings.NodeId <= 0
                                || refTargetNodeId == DebugSettings.NodeId)
                            && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
@@ -930,18 +931,18 @@
             }
 #endif
 
-            var lastFrameData = vehicleData.GetLastFrameData();
-            var sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
+            Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
+            float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
 
-            var lastPosPlusRot = lastFrameData.m_position;
-            var lastPosMinusRot = lastFrameData.m_position;
-            var rotationAdd = lastFrameData.m_rotation
+            Vector3 lastPosPlusRot = lastFrameData.m_position;
+            Vector3 lastPosMinusRot = lastFrameData.m_position;
+            Vector3 rotationAdd = lastFrameData.m_rotation
                               * new Vector3(0f, 0f, m_info.m_generatedInfo.m_wheelBase * 0.5f);
             lastPosPlusRot += rotationAdd;
             lastPosMinusRot -= rotationAdd;
-            var breakingDist = 0.5f * sqrVelocity / m_info.m_braking;
-            var distToTargetAfterRot = Vector3.Distance(lastPosPlusRot, bezier.a);
-            var distToTargetBeforeRot = Vector3.Distance(lastPosMinusRot, bezier.a);
+            float breakingDist = 0.5f * sqrVelocity / m_info.m_braking;
+            float distToTargetAfterRot = Vector3.Distance(lastPosPlusRot, bezier.a);
+            float distToTargetBeforeRot = Vector3.Distance(lastPosMinusRot, bezier.a);
 
 #if DEBUG
             if (logLogic) {
@@ -980,9 +981,9 @@
                     return;
                 }
 
-                var bezierMiddlePoint = bezier.Position(0.5f);
+                Vector3 bezierMiddlePoint = bezier.Position(0.5f);
 
-                var segment = Vector3.SqrMagnitude(vehicleData.m_segment.a - bezierMiddlePoint) <
+                Segment3 segment = Vector3.SqrMagnitude(vehicleData.m_segment.a - bezierMiddlePoint) <
                               Vector3.SqrMagnitude(bezier.a - bezierMiddlePoint)
                                   ? new Segment3(vehicleData.m_segment.a, bezierMiddlePoint)
                                   : new Segment3(bezier.a, bezierMiddlePoint);
@@ -1043,7 +1044,7 @@
                                $"Checking if vehicle is allowed to change segment.");
                 }
 #endif
-                var oldMaxSpeed = maxSpeed;
+                float oldMaxSpeed = maxSpeed;
                 if (!VehicleBehaviorManager.Instance.MayChangeSegment(
                         vehicleId,
                         ref vehicleData,
@@ -1079,34 +1080,34 @@
 
         [RedirectMethod]
         private void CustomForceTrafficLights(ushort vehicleId, ref Vehicle vehicleData, bool reserveSpace) {
-            var pathUnitId = vehicleData.m_path;
+            uint pathUnitId = vehicleData.m_path;
             if (pathUnitId == 0u) {
                 return;
             }
 
-            var netMan = Singleton<NetManager>.instance;
-            var pathMan = Singleton<PathManager>.instance;
-            var pathPosIndex = vehicleData.m_pathPositionIndex;
+            NetManager netMan = Singleton<NetManager>.instance;
+            PathManager pathMan = Singleton<PathManager>.instance;
+            byte pathPosIndex = vehicleData.m_pathPositionIndex;
 
             if (pathPosIndex == 255) {
                 pathPosIndex = 0;
             }
 
             pathPosIndex = (byte)(pathPosIndex >> 1);
-            var stopLoop = false; // NON-STOCK CODE
-            for (var i = 0; i < 6; i++) {
-                if (!pathMan.m_pathUnits.m_buffer[pathUnitId].GetPosition(pathPosIndex, out var position)) {
+            bool stopLoop = false; // NON-STOCK CODE
+            for (int i = 0; i < 6; i++) {
+                if (!pathMan.m_pathUnits.m_buffer[pathUnitId].GetPosition(pathPosIndex, out PathUnit.Position position)) {
                     return;
                 }
 
                 // NON-STOCK CODE START
-                var transitNodeId = position.m_offset < 128
+                ushort transitNodeId = position.m_offset < 128
                                         ? netMan.m_segments.m_buffer[position.m_segment].m_startNode
                                         : netMan.m_segments.m_buffer[position.m_segment].m_endNode;
 
                 if (Options.timedLightsEnabled) {
                     // when a TTL is active only reserve space if it shows green
-                    if (pathMan.m_pathUnits.m_buffer[pathUnitId].GetNextPosition(pathPosIndex, out var nextPos)) {
+                    if (pathMan.m_pathUnits.m_buffer[pathUnitId].GetNextPosition(pathPosIndex, out PathUnit.Position nextPos)) {
                         if (!VehicleBehaviorManager.Instance.IsSpaceReservationAllowed(
                                 transitNodeId,
                                 position,
@@ -1118,7 +1119,7 @@
 
                 // NON-STOCK CODE END
                 if (reserveSpace && i >= 1 && i <= 2) {
-                    var laneId = PathManager.GetLaneID(position);
+                    uint laneId = PathManager.GetLaneID(position);
                     if (laneId != 0u) {
                         reserveSpace = netMan.m_lanes.m_buffer[laneId]
                                              .ReserveSpace(m_info.m_generatedInfo.m_size.z, vehicleId);
@@ -1148,22 +1149,22 @@
 
         // slightly modified version of TrainAI.ForceTrafficLights(PathUnit.Position)
         private static void ForceTrafficLights(ushort transitNodeId, PathUnit.Position position) {
-            var netMan = Singleton<NetManager>.instance;
+            NetManager netMan = Singleton<NetManager>.instance;
             if ((netMan.m_nodes.m_buffer[transitNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
                 return;
             }
 
-            var frame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-            var simGroup = (uint)transitNodeId >> 7;
-            var rand = frame - simGroup & 255u;
+            uint frame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+            uint simGroup = (uint)transitNodeId >> 7;
+            uint rand = frame - simGroup & 255u;
             RoadBaseAI.GetTrafficLightState(
                 transitNodeId,
                 ref netMan.m_segments.m_buffer[position.m_segment],
                 frame - simGroup,
-                out var vehicleLightState,
-                out var pedestrianLightState,
-                out var vehicles,
-                out var pedestrians);
+                out RoadBaseAI.TrafficLightState vehicleLightState,
+                out RoadBaseAI.TrafficLightState pedestrianLightState,
+                out bool vehicles,
+                out bool pedestrians);
 
             if (vehicles || rand < 196u) {
                 return;

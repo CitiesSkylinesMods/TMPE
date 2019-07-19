@@ -18,11 +18,11 @@
                                         bool startBothWays,
                                         bool endBothWays,
                                         bool undergroundTarget) {
-            var instance = Singleton<CitizenManager>.instance;
-            var passengerInstanceId = Constants.ManagerFactory.ExtVehicleManager
+            CitizenManager instance = Singleton<CitizenManager>.instance;
+            ushort passengerInstanceId = Constants.ManagerFactory.ExtVehicleManager
                                                .GetDriverInstanceId(vehicleId, ref vehicleData);
 
-            var ctzInstance = instance.m_instances.m_buffer[passengerInstanceId];
+            CitizenInstance ctzInstance = instance.m_instances.m_buffer[passengerInstanceId];
             if (passengerInstanceId == 0
                 || (ctzInstance.m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None) {
                 return base.StartPathFind(
@@ -35,12 +35,12 @@
                     undergroundTarget);
             }
 
-            var info = m_info;
-            var laneTypes = NetInfo.LaneType.Vehicle
+            VehicleInfo info = m_info;
+            NetInfo.LaneType laneTypes = NetInfo.LaneType.Vehicle
                             | NetInfo.LaneType.Pedestrian
                             | NetInfo.LaneType.TransportVehicle;
-            var vehicleTypes = m_info.m_vehicleType;
-            var allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != 0;
+            VehicleInfo.VehicleType vehicleTypes = m_info.m_vehicleType;
+            bool allowUnderground = (vehicleData.m_flags & Vehicle.Flags.Underground) != 0;
 
             if (!PathManager.FindPathPosition(
                     startPos,
@@ -50,9 +50,9 @@
                     allowUnderground,
                     false,
                     32f,
-                    out var startPosA,
-                    out var startPosB,
-                    out var startSqrDistA,
+                    out PathUnit.Position startPosA,
+                    out PathUnit.Position startPosB,
+                    out float startSqrDistA,
                     out _)
                 || !Constants.ManagerFactory.ExtCitizenInstanceManager.FindPathPosition(
                     passengerInstanceId,
@@ -61,14 +61,14 @@
                     laneTypes,
                     vehicleTypes,
                     undergroundTarget,
-                    out var endPosA)) {
+                    out PathUnit.Position endPosA)) {
                 return false;
             }
 
             if ((ctzInstance.m_flags & CitizenInstance.Flags.CannotUseTransport) == CitizenInstance.Flags.None) {
                 laneTypes |= NetInfo.LaneType.PublicTransport;
 
-                var citizenId = ctzInstance.m_citizen;
+                uint citizenId = ctzInstance.m_citizen;
 
                 if (citizenId != 0u
                     && (instance.m_citizens.m_buffer[citizenId].m_flags
@@ -81,8 +81,8 @@
                 startPosB = default;
             }
 
-            var endPosB = default(PathUnit.Position);
-            var simMan = Singleton<SimulationManager>.instance;
+            PathUnit.Position endPosB = default(PathUnit.Position);
+            SimulationManager simMan = Singleton<SimulationManager>.instance;
 
             // NON-STOCK CODE START
             PathCreationArgs args;
@@ -109,7 +109,7 @@
             args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
             if (!CustomPathManager._instance.CustomCreatePath(
-                    out var path,
+                    out uint path,
                     ref simMan.m_randomizer,
                     args)) {
                 return false;

@@ -9,6 +9,7 @@ namespace TrafficManager.Custom.AI {
     using ColossalFramework.Math;
     using CSUtil.Commons;
     using JetBrains.Annotations;
+    using Manager;
     using Manager.Impl;
     using PathFinding;
     using RedirectionFramework.Attributes;
@@ -36,9 +37,9 @@ namespace TrafficManager.Custom.AI {
                                          ref Vehicle vehicleData,
                                          Vector3 physicsLodRefPos) {
 #if DEBUG
-            var vehDebug = DebugSettings.VehicleId == 0
+            bool vehDebug = DebugSettings.VehicleId == 0
                            || DebugSettings.VehicleId == vehicleId;
-            var logParkingAi = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
+            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
 #else
             var logParkingAi = false;
 #endif
@@ -56,19 +57,19 @@ namespace TrafficManager.Custom.AI {
                 }
 
 #if DEBUG
-                var logVehiclePath = vehicleData.m_path;
+                uint logVehiclePath = vehicleData.m_path;
                 Log._DebugIf(
                     logParkingAi,
                     () => $"CustomCarAI.CustomSimulationStep({vehicleId}): " +
                     $"Path: {logVehiclePath}, mainPathState={mainPathState}");
 #endif
 
-                var extVehicleManager = Constants.ManagerFactory.ExtVehicleManager;
-                var finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
+                IExtVehicleManager extVehicleManager = Constants.ManagerFactory.ExtVehicleManager;
+                ExtSoftPathState finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
                 if (Options.parkingAI
                     && extVehicleManager.ExtVehicles[vehicleId].vehicleType == ExtVehicleType.PassengerCar)
                 {
-                    var driverInstanceId = extVehicleManager.GetDriverInstanceId(vehicleId, ref vehicleData);
+                    ushort driverInstanceId = extVehicleManager.GetDriverInstanceId(vehicleId, ref vehicleData);
                     finalPathState = AdvancedParkingManager.Instance.UpdateCarPathState(
                         vehicleId,
                         ref vehicleData,
@@ -170,7 +171,7 @@ namespace TrafficManager.Custom.AI {
             }
 
             // NON-STOCK CODE START
-            var extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
+            IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
             extVehicleMan.UpdateVehiclePosition(vehicleId, ref vehicleData);
 
             if (!Options.isStockLaneChangerUsed()
@@ -179,7 +180,7 @@ namespace TrafficManager.Custom.AI {
             }
 
             // NON-STOCK CODE END
-            var lastFramePosition = vehicleData.GetLastFramePosition();
+            Vector3 lastFramePosition = vehicleData.GetLastFramePosition();
             int lodPhysics;
             if (Vector3.SqrMagnitude(physicsLodRefPos - lastFramePosition) >= 1100f * 1100f) {
                 lodPhysics = 2;
@@ -191,12 +192,12 @@ namespace TrafficManager.Custom.AI {
 
             SimulationStep(vehicleId, ref vehicleData, vehicleId, ref vehicleData, lodPhysics);
             if (vehicleData.m_leadingVehicle == 0 && vehicleData.m_trailingVehicle != 0) {
-                var vehManager = Singleton<VehicleManager>.instance;
-                var trailerId = vehicleData.m_trailingVehicle;
-                var numIters = 0;
+                VehicleManager vehManager = Singleton<VehicleManager>.instance;
+                ushort trailerId = vehicleData.m_trailingVehicle;
+                int numIters = 0;
                 while (trailerId != 0) {
-                    var trailingVehicle = vehManager.m_vehicles.m_buffer[trailerId].m_trailingVehicle;
-                    var info = vehManager.m_vehicles.m_buffer[trailerId].Info;
+                    ushort trailingVehicle = vehManager.m_vehicles.m_buffer[trailerId].m_trailingVehicle;
+                    VehicleInfo info = vehManager.m_vehicles.m_buffer[trailerId].Info;
 
                     info.m_vehicleAI.SimulationStep(
                         trailerId,
@@ -215,8 +216,8 @@ namespace TrafficManager.Custom.AI {
                 }
             }
 
-            var privateServiceIndex = ItemClass.GetPrivateServiceIndex(m_info.m_class.m_service);
-            var maxBlockCounter = (privateServiceIndex == -1) ? 150 : 100;
+            int privateServiceIndex = ItemClass.GetPrivateServiceIndex(m_info.m_class.m_service);
+            int maxBlockCounter = (privateServiceIndex == -1) ? 150 : 100;
             const Vehicle.Flags MASK = Vehicle.Flags.Spawned
                                        | Vehicle.Flags.WaitingPath
                                        | Vehicle.Flags.WaitingSpace;
@@ -264,10 +265,10 @@ namespace TrafficManager.Custom.AI {
                                                    out Vector3 pos,
                                                    out Vector3 dir,
                                                    out float maxSpeed) {
-            var netManager = Singleton<NetManager>.instance;
+            NetManager netManager = Singleton<NetManager>.instance;
             ushort nextSourceNodeId;
             ushort nextTargetNodeId;
-            var segmentsBuffer = netManager.m_segments.m_buffer;
+            NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
 
             if (nextOffset < nextPosition.m_offset) {
                 nextSourceNodeId = segmentsBuffer[nextPosition.m_segment].m_startNode;
@@ -283,7 +284,7 @@ namespace TrafficManager.Custom.AI {
                                   segmentsBuffer[curPosition.m_segment].m_endNode;
 
 #if DEBUG
-            var logCalculation = DebugSwitch.CalculateSegmentPosition.Get()
+            bool logCalculation = DebugSwitch.CalculateSegmentPosition.Get()
                         && (DebugSettings.NodeId <= 0
                             || curTargetNodeId == DebugSettings.NodeId)
                         && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
@@ -310,7 +311,7 @@ namespace TrafficManager.Custom.AI {
             Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
             Vector3 lastFrameVehiclePos = lastFrameData.m_position;
             float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
-            var prevSegmentInfo = segmentsBuffer[nextPosition.m_segment].Info;
+            NetInfo prevSegmentInfo = segmentsBuffer[nextPosition.m_segment].Info;
             netManager.m_lanes.m_buffer[nextLaneId].CalculatePositionAndDirection(
                 Constants.ByteToFloat(nextOffset), out pos, out dir);
 
@@ -320,14 +321,14 @@ namespace TrafficManager.Custom.AI {
             }
 
             // car position on the Bezier curve of the lane
-            var refVehiclePosOnBezier = netManager.m_lanes.m_buffer[curLaneId].CalculatePosition(
+            Vector3 refVehiclePosOnBezier = netManager.m_lanes.m_buffer[curLaneId].CalculatePosition(
                 Constants.ByteToFloat(curOffset));
 
             // ushort currentSegmentId = netManager.m_lanes.m_buffer[prevLaneID].m_segment;
             // this seems to be like the required braking force in order to stop the vehicle within its half length.
-            var crazyValue = (0.5f * sqrVelocity / braking) + (m_info.m_generatedInfo.m_size.z * 0.5f);
-            var d = Vector3.Distance(lastFrameVehiclePos, refVehiclePosOnBezier);
-            var withinBrakingDistance = d >= crazyValue - 1f;
+            float crazyValue = (0.5f * sqrVelocity / braking) + (m_info.m_generatedInfo.m_size.z * 0.5f);
+            float d = Vector3.Distance(lastFrameVehiclePos, refVehiclePosOnBezier);
+            bool withinBrakingDistance = d >= crazyValue - 1f;
 
             if (nextSourceNodeId == curTargetNodeId
                 && withinBrakingDistance) {
@@ -360,7 +361,7 @@ namespace TrafficManager.Custom.AI {
             if (prevSegmentInfo.m_lanes != null
                 && prevSegmentInfo.m_lanes.Length > nextPosition.m_lane) {
                 // NON-STOCK CODE START
-                var laneSpeedLimit = !Options.customSpeedLimitsEnabled
+                float laneSpeedLimit = !Options.customSpeedLimitsEnabled
                                            ? prevSegmentInfo.m_lanes[nextPosition.m_lane].m_speedLimit
                                            : Constants.ManagerFactory.SpeedLimitManager.GetLockFreeGameSpeedLimit(
                                                nextPosition.m_segment,
@@ -399,8 +400,8 @@ namespace TrafficManager.Custom.AI {
                                                    out Vector3 pos,
                                                    out Vector3 dir,
                                                    out float maxSpeed) {
-            var netManager = Singleton<NetManager>.instance;
-            var segmentInfo = netManager.m_segments.m_buffer[position.m_segment].Info;
+            NetManager netManager = Singleton<NetManager>.instance;
+            NetInfo segmentInfo = netManager.m_segments.m_buffer[position.m_segment].Info;
             netManager.m_lanes.m_buffer[laneId].CalculatePositionAndDirection(
                 Constants.ByteToFloat(offset),
                 out pos,
@@ -409,7 +410,7 @@ namespace TrafficManager.Custom.AI {
             if (segmentInfo.m_lanes != null
                 && segmentInfo.m_lanes.Length > position.m_lane) {
                 // NON-STOCK CODE START
-                var laneSpeedLimit = !Options.customSpeedLimitsEnabled
+                float laneSpeedLimit = !Options.customSpeedLimitsEnabled
                                          ? segmentInfo.m_lanes[position.m_lane].m_speedLimit
                                          : Constants.ManagerFactory.SpeedLimitManager.GetLockFreeGameSpeedLimit(
                                              position.m_segment,
@@ -451,9 +452,9 @@ namespace TrafficManager.Custom.AI {
                                         bool endBothWays,
                                         bool undergroundTarget) {
 #if DEBUG
-            var vehDebug = DebugSettings.VehicleId == 0
+            bool vehDebug = DebugSettings.VehicleId == 0
                            || DebugSettings.VehicleId == vehicleId;
-            var logParkingAi = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
+            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
 #else
             var logParkingAi = false;
 #endif
@@ -479,8 +480,8 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
             }
 #endif
-            var info = m_info;
-            var allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground
+            VehicleInfo info = m_info;
+            bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground
                                                            | Vehicle.Flags.Transition)) != 0;
 
             if (!PathManager.FindPathPosition(
@@ -491,9 +492,9 @@ namespace TrafficManager.Custom.AI {
                     allowUnderground,
                     false,
                     32f,
-                    out var startPosA,
-                    out var startPosB,
-                    out var startDistSqrA,
+                    out PathUnit.Position startPosA,
+                    out PathUnit.Position startPosB,
+                    out float startDistSqrA,
                     out _) || !PathManager.FindPathPosition(
                     endPos,
                     ItemClass.Service.Road,
@@ -502,9 +503,9 @@ namespace TrafficManager.Custom.AI {
                     undergroundTarget,
                     false,
                     32f,
-                    out var endPosA,
-                    out var endPosB,
-                    out var endDistSqrA,
+                    out PathUnit.Position endPosA,
+                    out PathUnit.Position endPosB,
+                    out float endDistSqrA,
                     out _)) {
                 return false;
             }
@@ -542,7 +543,7 @@ namespace TrafficManager.Custom.AI {
             args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
             if (!CustomPathManager._instance.CustomCreatePath(
-                    out var path,
+                    out uint path,
                     ref Singleton<SimulationManager>.instance.m_randomizer,
                     args)) {
                 return false;
@@ -586,7 +587,7 @@ namespace TrafficManager.Custom.AI {
                 return otherData.m_nextGridVehicle;
             }
 
-            var info = otherData.Info;
+            VehicleInfo info = otherData.Info;
             if (info.m_vehicleType == VehicleInfo.VehicleType.Bicycle) {
                 return otherData.m_nextGridVehicle;
             }
@@ -598,7 +599,7 @@ namespace TrafficManager.Custom.AI {
             }
 
 #if DEBUG
-            var logLogic = DebugSwitch.ResourceLoading.Get() &&
+            bool logLogic = DebugSwitch.ResourceLoading.Get() &&
                          (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
                           || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.RoadVehicle)
                          && (DebugSettings.VehicleId == 0
@@ -629,14 +630,14 @@ namespace TrafficManager.Custom.AI {
                 return otherData.m_nextGridVehicle;
             }
 
-            var otherFrameData = otherData.GetLastFrameData();
+            Vehicle.Frame otherFrameData = otherData.GetLastFrameData();
             if (lodPhysics < 2) {
-                var segSqrDist = vehicleData.m_segment.DistanceSqr(otherData.m_segment, out _, out _);
+                float segSqrDist = vehicleData.m_segment.DistanceSqr(otherData.m_segment, out _, out _);
 
                 if (segSqrDist < 4f) {
-                    var vehPos = vehicleData.m_segment.Position(0.5f);
-                    var otherPos = otherData.m_segment.Position(0.5f);
-                    var vehBounds = vehicleData.m_segment.b - vehicleData.m_segment.a;
+                    Vector3 vehPos = vehicleData.m_segment.Position(0.5f);
+                    Vector3 otherPos = otherData.m_segment.Position(0.5f);
+                    Vector3 vehBounds = vehicleData.m_segment.b - vehicleData.m_segment.a;
                     if (Vector3.Dot(vehBounds, vehPos - otherPos) < 0f) {
                         collisionPush -= vehBounds.normalized * (0.1f - (segSqrDist * 0.025f));
                     } else {
@@ -647,27 +648,27 @@ namespace TrafficManager.Custom.AI {
                 }
             }
 
-            var vehVelocity = frameData.m_velocity.magnitude + 0.01f;
-            var otherVehVelocity = otherFrameData.m_velocity.magnitude;
-            var otherBreakingDist =
+            float vehVelocity = frameData.m_velocity.magnitude + 0.01f;
+            float otherVehVelocity = otherFrameData.m_velocity.magnitude;
+            float otherBreakingDist =
                 (otherVehVelocity * (0.5f + (0.5f * otherVehVelocity / info.m_braking)))
                 + Mathf.Min(1f, otherVehVelocity);
             otherVehVelocity += 0.01f;
 
-            var prevLength = 0f;
-            var prevTargetPos = vehicleData.m_segment.b;
-            var prevBounds = vehicleData.m_segment.b - vehicleData.m_segment.a;
-            var startI = (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram) ? 1 : 0;
+            float prevLength = 0f;
+            Vector3 prevTargetPos = vehicleData.m_segment.b;
+            Vector3 prevBounds = vehicleData.m_segment.b - vehicleData.m_segment.a;
+            int startI = (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram) ? 1 : 0;
 
-            for (var i = startI; i < 4; i++) {
+            for (int i = startI; i < 4; i++) {
                 Vector3 targetPos = vehicleData.GetTargetPos(i);
-                var targetPosDiff = targetPos - prevTargetPos;
+                Vector3 targetPosDiff = targetPos - prevTargetPos;
                 if (!(Vector3.Dot(prevBounds, targetPosDiff) > 0f)) {
                     continue;
                 }
 
-                var targetPosDiffLen = targetPosDiff.magnitude;
-                var curSegment = new Segment3(prevTargetPos, targetPos);
+                float targetPosDiffLen = targetPosDiff.magnitude;
+                Segment3 curSegment = new Segment3(prevTargetPos, targetPos);
                 min = curSegment.Min();
                 max = curSegment.Max();
                 curSegment.a.y *= 0.5f;
@@ -681,17 +682,17 @@ namespace TrafficManager.Custom.AI {
                     && otherSegMin.y < max.y + 2f
                     && otherSegMin.z < max.z + 2f)
                 {
-                    var otherVehFrontPos = otherData.m_segment.a;
+                    Vector3 otherVehFrontPos = otherData.m_segment.a;
                     otherVehFrontPos.y *= 0.5f;
 
-                    if (curSegment.DistanceSqr(otherVehFrontPos, out var u) < 4f) {
-                        var otherCosAngleToTargetPosDiff =
+                    if (curSegment.DistanceSqr(otherVehFrontPos, out float u) < 4f) {
+                        float otherCosAngleToTargetPosDiff =
                             Vector3.Dot(otherFrameData.m_velocity, targetPosDiff) / targetPosDiffLen;
-                        var uDist = prevLength + (targetPosDiffLen * u);
+                        float uDist = prevLength + (targetPosDiffLen * u);
 
                         if (uDist >= 0.01f) {
                             uDist -= otherCosAngleToTargetPosDiff + 3f;
-                            var speed = Mathf.Max(
+                            float speed = Mathf.Max(
                                 0f,
                                 CalculateMaxSpeed(uDist,
                                                   otherCosAngleToTargetPosDiff,
@@ -700,10 +701,10 @@ namespace TrafficManager.Custom.AI {
                                 blocked = true;
                             }
 
-                            var normOtherDir =
+                            Vector3 normOtherDir =
                                 Vector3.Normalize((Vector3)otherData.m_targetPos0 - otherData.m_segment.a);
 
-                            var blockFactor = 1.2f - (1f / ((vehicleData.m_blockCounter * 0.02f) + 0.5f));
+                            float blockFactor = 1.2f - (1f / ((vehicleData.m_blockCounter * 0.02f) + 0.5f));
 
                             if (Vector3.Dot(targetPosDiff, normOtherDir) > blockFactor * targetPosDiffLen) {
                                 maxSpeed = Mathf.Min(maxSpeed, speed);
@@ -714,13 +715,13 @@ namespace TrafficManager.Custom.AI {
                     }
 
                     if (lodPhysics < 2) {
-                        var totalDist = 0f;
-                        var otherBreakDist = otherBreakingDist;
-                        var otherFrontPos = otherData.m_segment.b;
-                        var otherBounds = otherData.m_segment.b - otherData.m_segment.a;
-                        var startOtherTargetPosIndex = (info.m_vehicleType == VehicleInfo.VehicleType.Tram) ? 1 : 0;
-                        var exitTargetPosLoop = false;
-                        var otherTargetPosIndex = startOtherTargetPosIndex;
+                        float totalDist = 0f;
+                        float otherBreakDist = otherBreakingDist;
+                        Vector3 otherFrontPos = otherData.m_segment.b;
+                        Vector3 otherBounds = otherData.m_segment.b - otherData.m_segment.a;
+                        int startOtherTargetPosIndex = (info.m_vehicleType == VehicleInfo.VehicleType.Tram) ? 1 : 0;
+                        bool exitTargetPosLoop = false;
+                        int otherTargetPosIndex = startOtherTargetPosIndex;
 
                         while (otherTargetPosIndex < 4 && otherBreakDist > 0.1f) {
                             Vector3 otherTargetPos;
@@ -731,41 +732,41 @@ namespace TrafficManager.Custom.AI {
                                     break;
                                 }
 
-                                var vehiclesBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
+                                Vehicle[] vehiclesBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
                                 otherTargetPos = vehiclesBuffer[otherData.m_leadingVehicle].m_segment.b;
                             }
 
-                            var minBreakPos = Vector3.ClampMagnitude(otherTargetPos - otherFrontPos,
+                            Vector3 minBreakPos = Vector3.ClampMagnitude(otherTargetPos - otherFrontPos,
                                                                      otherBreakDist);
 
                             if (Vector3.Dot(otherBounds, minBreakPos) > 0f) {
                                 otherTargetPos = otherFrontPos + minBreakPos;
 
-                                var breakPosDist = minBreakPos.magnitude;
+                                float breakPosDist = minBreakPos.magnitude;
                                 otherBreakDist -= breakPosDist;
 
-                                var otherVehNextSegment = new Segment3(otherFrontPos, otherTargetPos);
+                                Segment3 otherVehNextSegment = new Segment3(otherFrontPos, otherTargetPos);
                                 otherVehNextSegment.a.y *= 0.5f;
                                 otherVehNextSegment.b.y *= 0.5f;
 
                                 if (breakPosDist > 0.01f) {
-                                    var otherVehNextSegmentDistToCurSegment
+                                    float otherVehNextSegmentDistToCurSegment
                                         = otherID >= vehicleId
                                               ? curSegment.DistanceSqr(
                                                   otherVehNextSegment,
-                                                  out var otherVehNextSegU,
-                                                  out var otherVehNextSegV)
+                                                  out float otherVehNextSegU,
+                                                  out float otherVehNextSegV)
                                               : otherVehNextSegment.DistanceSqr(
                                                   curSegment,
                                                   out otherVehNextSegV,
                                                   out otherVehNextSegU);
 
                                     if (otherVehNextSegmentDistToCurSegment < 4f) {
-                                        var uDist = prevLength + (targetPosDiffLen * otherVehNextSegU);
-                                        var vDist = totalDist + (breakPosDist * otherVehNextSegV) + 0.1f;
+                                        float uDist = prevLength + (targetPosDiffLen * otherVehNextSegU);
+                                        float vDist = totalDist + (breakPosDist * otherVehNextSegV) + 0.1f;
 
                                         if (uDist >= 0.01f && uDist * otherVehVelocity > vDist * vehVelocity) {
-                                            var otherCosAngleToTargetPosDiff =
+                                            float otherCosAngleToTargetPosDiff =
                                                 Vector3.Dot(
                                                     otherFrameData.m_velocity,
                                                     targetPosDiff) / targetPosDiffLen;
@@ -773,7 +774,7 @@ namespace TrafficManager.Custom.AI {
                                                 uDist -= otherCosAngleToTargetPosDiff
                                                          + 1f
                                                          + otherData.Info.m_generatedInfo.m_size.z;
-                                                var speed = Mathf.Max(
+                                                float speed = Mathf.Max(
                                                     0f,
                                                     CalculateMaxSpeed(uDist,
                                                                       otherCosAngleToTargetPosDiff,

@@ -26,10 +26,10 @@
                 data.m_path = 0u;
             }
 
-            var netManager = Singleton<NetManager>.instance;
+            NetManager netManager = Singleton<NetManager>.instance;
             if ((netManager.m_nodes.m_buffer[data.m_startNode].m_flags & NetNode.Flags.Ambiguous) != NetNode.Flags.None) {
-                for (var i = 0; i < 8; i++) {
-                    var segment = netManager.m_nodes.m_buffer[data.m_startNode].GetSegment(i);
+                for (int i = 0; i < 8; i++) {
+                    ushort segment = netManager.m_nodes.m_buffer[data.m_startNode].GetSegment(i);
                     if (segment != 0 && segment != segmentId && netManager.m_segments.m_buffer[segment].m_path != 0u) {
                         return true;
                     }
@@ -38,8 +38,8 @@
 
             if ((netManager.m_nodes.m_buffer[data.m_endNode].m_flags
                  & NetNode.Flags.Ambiguous) != NetNode.Flags.None) {
-                for (var j = 0; j < 8; j++) {
-                    var segment2 = netManager.m_nodes.m_buffer[data.m_endNode].GetSegment(j);
+                for (int j = 0; j < 8; j++) {
+                    ushort segment2 = netManager.m_nodes.m_buffer[data.m_endNode].GetSegment(j);
                     if (segment2 != 0 && segment2 != segmentId
                                       && netManager.m_segments.m_buffer[segment2].m_path != 0u) {
                         return true;
@@ -47,12 +47,12 @@
                 }
             }
 
-            var position = netManager.m_nodes.m_buffer[data.m_startNode].m_position;
-            var position2 = netManager.m_nodes.m_buffer[data.m_endNode].m_position;
+            Vector3 position = netManager.m_nodes.m_buffer[data.m_startNode].m_position;
+            Vector3 position2 = netManager.m_nodes.m_buffer[data.m_endNode].m_position;
 #if DEBUG
-            var logPathfind = DebugSwitch.TransportLinePathfind.Get();
-            var logStartNode = data.m_startNode;
-            var logEndNode = data.m_endNode;
+            bool logPathfind = DebugSwitch.TransportLinePathfind.Get();
+            ushort logStartNode = data.m_startNode;
+            ushort logEndNode = data.m_endNode;
             Log._DebugIf(
                 logPathfind,
                 () => $"TransportLineAI.CustomStartPathFind({segmentId}, ..., {netService}, " +
@@ -75,8 +75,8 @@
                     true,
                     false,
                     32f,
-                    out var startPosA,
-                    out var startPosB,
+                    out PathUnit.Position startPosA,
+                    out PathUnit.Position startPosB,
                     out _,
                     out _)) {
                 CheckSegmentProblems(segmentId, ref data);
@@ -93,8 +93,8 @@
                     true,
                     false,
                     32f,
-                    out var endPosA,
-                    out var endPosB,
+                    out PathUnit.Position endPosA,
+                    out PathUnit.Position endPosB,
                     out _,
                     out _)) {
                 CheckSegmentProblems(segmentId, ref data);
@@ -123,17 +123,17 @@
                 endPosB.m_offset = (byte)Mathf.Clamp(endPosB.m_offset, 1, 254);
             }
 
-            var stopLane = GetStopLane(ref startPosA, vehicleType);
-            var stopLane2 = GetStopLane(ref startPosB, vehicleType);
-            var stopLane3 = GetStopLane(ref endPosA, vehicleType);
-            var stopLane4 = GetStopLane(ref endPosB, vehicleType);
+            bool stopLane = GetStopLane(ref startPosA, vehicleType);
+            bool stopLane2 = GetStopLane(ref startPosB, vehicleType);
+            bool stopLane3 = GetStopLane(ref endPosA, vehicleType);
+            bool stopLane4 = GetStopLane(ref endPosB, vehicleType);
 
             if ((!stopLane && !stopLane2) || (!stopLane3 && !stopLane4)) {
                 CheckSegmentProblems(segmentId, ref data);
                 return true;
             }
 
-            var extVehicleType = ExtVehicleType.None;
+            ExtVehicleType extVehicleType = ExtVehicleType.None;
             if ((vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
                 extVehicleType = ExtVehicleType.Bus;
             }
@@ -200,7 +200,7 @@
             }
 
             if (CustomPathManager._instance.CustomCreatePath(
-                out var path,
+                out uint path,
                 ref Singleton<SimulationManager>.instance.m_randomizer,
                 args)) {
                 // NON-STOCK CODE END

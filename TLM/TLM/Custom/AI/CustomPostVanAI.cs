@@ -40,11 +40,11 @@
                     undergroundTarget);
             }
 
-            var allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground
+            bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground
                                                            | Vehicle.Flags.Transition)) != 0;
 
             // try to find road start position
-            var startPosFound = PathManager.FindPathPosition(
+            bool startPosFound = PathManager.FindPathPosition(
                 startPos,
                 ItemClass.Service.Road,
                 NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
@@ -52,9 +52,9 @@
                 allowUnderground,
                 false,
                 32f,
-                out var startPosA,
-                out var startPosB,
-                out var startDistSqrA,
+                out PathUnit.Position startPosA,
+                out PathUnit.Position startPosB,
+                out float startDistSqrA,
                 out _);
 
             // try to find other start position (plane, train, ship)
@@ -69,9 +69,9 @@
                 allowUnderground,
                 false,
                 32f,
-                out var altStartPosA,
-                out var altStartPosB,
-                out var altStartDistSqrA,
+                out PathUnit.Position altStartPosA,
+                out PathUnit.Position altStartPosB,
+                out float altStartDistSqrA,
                 out _)) {
                 if (!startPosFound
                     || (altStartDistSqrA < startDistSqrA
@@ -86,7 +86,7 @@
             }
 
             // try to find road end position
-            var endPosFound = PathManager.FindPathPosition(
+            bool endPosFound = PathManager.FindPathPosition(
                 endPos,
                 ItemClass.Service.Road,
                 NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
@@ -94,9 +94,9 @@
                 undergroundTarget,
                 false,
                 32f,
-                out var endPosA,
-                out var endPosB,
-                out var endDistSqrA,
+                out PathUnit.Position endPosA,
+                out PathUnit.Position endPosB,
+                out float endDistSqrA,
                 out _);
 
             // try to find other end position (plane, train, ship)
@@ -108,9 +108,9 @@
                 undergroundTarget,
                 false,
                 32f,
-                out var altEndPosA,
-                out var altEndPosB,
-                out var altEndDistSqrA,
+                out PathUnit.Position altEndPosA,
+                out PathUnit.Position altEndPosB,
+                out float altEndDistSqrA,
                 out _)) {
                 if (!endPosFound
                     || (altEndDistSqrA < endDistSqrA
@@ -128,7 +128,7 @@
                 return false;
             }
 
-            var pathManager = CustomPathManager._instance;
+            CustomPathManager pathManager = CustomPathManager._instance;
             if (!startBothWays || startDistSqrA < 10f) {
                 startPosB = default;
             }
@@ -165,7 +165,7 @@
             args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
             if (pathManager.CustomCreatePath(
-                out var path,
+                out uint path,
                 ref Singleton<SimulationManager>.instance.m_randomizer,
                 args))
             {

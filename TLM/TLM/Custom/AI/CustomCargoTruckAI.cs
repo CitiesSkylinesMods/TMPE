@@ -45,7 +45,8 @@ namespace TrafficManager.Custom.AI {
                                         bool startBothWays,
                                         bool endBothWays,
                                         bool undergroundTarget) {
-            var vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, null);
+            ExtVehicleType vehicleType =
+                ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, null);
 
             if (vehicleType == ExtVehicleType.None) {
                 Log._DebugOnlyWarning(
@@ -65,9 +66,9 @@ namespace TrafficManager.Custom.AI {
                     undergroundTarget);
             }
 
-            var allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground
+            bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground
                                                            | Vehicle.Flags.Transition)) != 0;
-            var startPosFound = PathManager.FindPathPosition(
+            bool startPosFound = PathManager.FindPathPosition(
                 startPos,
                 ItemClass.Service.Road,
                 NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
@@ -75,9 +76,9 @@ namespace TrafficManager.Custom.AI {
                 allowUnderground,
                 false,
                 32f,
-                out var startPosA,
-                out var startPosB,
-                out var startDistSqrA,
+                out PathUnit.Position startPosA,
+                out PathUnit.Position startPosB,
+                out float startDistSqrA,
                 out _);
 
             const VehicleInfo.VehicleType TRAIN_SHIP_PLANE = VehicleInfo.VehicleType.Train
@@ -91,9 +92,9 @@ namespace TrafficManager.Custom.AI {
                 allowUnderground,
                 false,
                 32f,
-                out var startAltPosA,
-                out var startAltPosB,
-                out var startAltDistSqrA,
+                out PathUnit.Position startAltPosA,
+                out PathUnit.Position startAltPosB,
+                out float startAltDistSqrA,
                 out _)) {
                 if (!startPosFound
                     || (startAltDistSqrA < startDistSqrA
@@ -108,7 +109,7 @@ namespace TrafficManager.Custom.AI {
                 startPosFound = true;
             }
 
-            var endPosFound = PathManager.FindPathPosition(
+            bool endPosFound = PathManager.FindPathPosition(
                 endPos,
                 ItemClass.Service.Road,
                 NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
@@ -116,9 +117,9 @@ namespace TrafficManager.Custom.AI {
                 undergroundTarget,
                 false,
                 32f,
-                out var endPosA,
-                out var endPosB,
-                out var endDistSqrA,
+                out PathUnit.Position endPosA,
+                out PathUnit.Position endPosB,
+                out float endDistSqrA,
                 out _);
 
             if (PathManager.FindPathPosition(
@@ -129,9 +130,9 @@ namespace TrafficManager.Custom.AI {
                 undergroundTarget,
                 false,
                 32f,
-                out var endAltPosA,
-                out var endAltPosB,
-                out var endAltDistSqrA,
+                out PathUnit.Position endAltPosA,
+                out PathUnit.Position endAltPosB,
+                out float endAltDistSqrA,
                 out _)) {
                 if (!endPosFound
                     || (endAltDistSqrA < endDistSqrA
@@ -150,7 +151,7 @@ namespace TrafficManager.Custom.AI {
                 return false;
             }
 
-            var pathMan = CustomPathManager._instance;
+            CustomPathManager pathMan = CustomPathManager._instance;
             if (!startBothWays || startDistSqrA < 10f) {
                 startPosB = default;
             }
@@ -191,7 +192,7 @@ namespace TrafficManager.Custom.AI {
             args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
             if (!pathMan.CustomCreatePath(
-                    out var path,
+                    out uint path,
                     ref Singleton<SimulationManager>.instance.m_randomizer,
                     args)) {
                 return false;

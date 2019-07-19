@@ -28,14 +28,14 @@ namespace TrafficManager.Custom.AI {
         [RedirectMethod]
         [UsedImplicitly]
         public string CustomGetLocalizedStatus(ushort vehicleId, ref Vehicle data, out InstanceID target) {
-            var citizenManager = Singleton<CitizenManager>.instance;
-            var driverInstanceId = GetDriverInstance(vehicleId, ref data);
+            CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+            ushort driverInstanceId = GetDriverInstance(vehicleId, ref data);
             ushort targetBuildingId = 0;
-            var targetIsNode = false;
+            bool targetIsNode = false;
 
             if (driverInstanceId != 0) {
                 if ((data.m_flags & Vehicle.Flags.Parking) != 0) {
-                    var citizen = citizenManager.m_instances.m_buffer[driverInstanceId].m_citizen;
+                    uint citizen = citizenManager.m_instances.m_buffer[driverInstanceId].m_citizen;
                     if (citizen != 0u
                         && citizenManager.m_citizens.m_buffer[citizen].m_parkedVehicle != 0)
                     {
@@ -55,7 +55,7 @@ namespace TrafficManager.Custom.AI {
             }
 
             string ret;
-            var leavingCity = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].m_flags
+            bool leavingCity = (Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].m_flags
                                & Building.Flags.IncomingOutgoing) != Building.Flags.None;
             if (leavingCity) {
                 target = InstanceID.Empty;
@@ -91,7 +91,7 @@ namespace TrafficManager.Custom.AI {
                                         bool startBothWays,
                                         bool endBothWays,
                                         bool undergroundTarget) {
-            var driverInstanceId = GetDriverInstance(vehicleId, ref vehicleData);
+            ushort driverInstanceId = GetDriverInstance(vehicleId, ref vehicleData);
             return driverInstanceId != 0
                    && Constants.ManagerFactory.VehicleBehaviorManager.StartPassengerCarPathFind(
                        vehicleId,
@@ -111,7 +111,7 @@ namespace TrafficManager.Custom.AI {
         }
 
         public void CustomUpdateParkedVehicle(ushort parkedId, ref VehicleParked data) {
-            var ownerCitizenId = data.m_ownerCitizen;
+            uint ownerCitizenId = data.m_ownerCitizen;
             ushort homeId = 0;
 
             if (ownerCitizenId != 0u) {
@@ -139,19 +139,19 @@ namespace TrafficManager.Custom.AI {
                                       uint nextPath,
                                       int nextPositionIndex,
                                       out byte segmentOffset) {
-            var citizenManager = Singleton<CitizenManager>.instance;
+            CitizenManager citizenManager = Singleton<CitizenManager>.instance;
 
             // TODO remove this:
-            var driverCitizenId = 0u;
+            uint driverCitizenId = 0u;
             ushort driverCitizenInstanceId = 0;
             ushort targetBuildingId = 0; // NON-STOCK CODE
-            var curCitizenUnitId = vehicleData.m_citizenUnits;
-            var numIterations = 0;
+            uint curCitizenUnitId = vehicleData.m_citizenUnits;
+            int numIterations = 0;
 
             while (curCitizenUnitId != 0u && driverCitizenId == 0u) {
-                var nextUnit = citizenManager.m_units.m_buffer[curCitizenUnitId].m_nextUnit;
-                for (var i = 0; i < 5; i++) {
-                    var citizenId = citizenManager.m_units.m_buffer[curCitizenUnitId].GetCitizen(i);
+                uint nextUnit = citizenManager.m_units.m_buffer[curCitizenUnitId].m_nextUnit;
+                for (int i = 0; i < 5; i++) {
+                    uint citizenId = citizenManager.m_units.m_buffer[curCitizenUnitId].GetCitizen(i);
                     if (citizenId == 0u) {
                         continue;
                     }

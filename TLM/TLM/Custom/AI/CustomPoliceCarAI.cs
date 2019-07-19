@@ -19,15 +19,15 @@
                                         bool startBothWays,
                                         bool endBothWays,
                                         bool undergroundTarget) {
-            var vehicleType = ExtVehicleManager.Instance.OnStartPathFind(
+            ExtVehicleType vehicleType = ExtVehicleManager.Instance.OnStartPathFind(
                 vehicleId,
                 ref vehicleData,
                 (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0
                     ? ExtVehicleType.Emergency
                     : ExtVehicleType.Service);
 
-            var info = m_info;
-            var allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground
+            VehicleInfo info = m_info;
+            bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground
                                                            | Vehicle.Flags.Transition)) != 0;
 
             const NetInfo.LaneType LANE_MASK = NetInfo.LaneType.Vehicle
@@ -41,9 +41,9 @@
                     allowUnderground,
                     false,
                     32f,
-                    out var startPosA,
-                    out var startPosB,
-                    out var startDistSqrA,
+                    out PathUnit.Position startPosA,
+                    out PathUnit.Position startPosB,
+                    out float startDistSqrA,
                     out _)
                 || !PathManager.FindPathPosition(
                     endPos,
@@ -53,9 +53,9 @@
                     undergroundTarget,
                     false,
                     32f,
-                    out var endPosA,
-                    out var endPosB,
-                    out var endDistSqrA,
+                    out PathUnit.Position endPosA,
+                    out PathUnit.Position endPosB,
+                    out float endDistSqrA,
                     out _)) {
                 return false;
             }
@@ -93,7 +93,7 @@
             args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
             if (!CustomPathManager._instance.CustomCreatePath(
-                    out var path,
+                    out uint path,
                     ref Singleton<SimulationManager>.instance.m_randomizer,
                     args)) {
                 return false;

@@ -1,5 +1,6 @@
 ﻿namespace TrafficManager.Custom.AI {
     using JetBrains.Annotations;
+    using Manager;
     using RedirectionFramework.Attributes;
     using UnityEngine;
 
@@ -14,8 +15,8 @@
                                         VehicleInfo vehicleInfo,
                                         bool enableTransport,
                                         bool ignoreCost) {
-            var extCitizenInstanceManager = Constants.ManagerFactory.ExtCitizenInstanceManager;
-            var extCitizenManager = Constants.ManagerFactory.ExtCitizenManager;
+            IExtCitizenInstanceManager extCitizenInstanceManager = Constants.ManagerFactory.ExtCitizenInstanceManager;
+            IExtCitizenManager extCitizenManager = Constants.ManagerFactory.ExtCitizenManager;
             return extCitizenInstanceManager.StartPathFind(
                 instanceId,
                 ref citizenData,

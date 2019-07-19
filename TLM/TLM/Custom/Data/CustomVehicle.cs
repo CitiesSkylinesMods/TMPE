@@ -13,22 +13,24 @@
         [RedirectMethod]
         [UsedImplicitly]
         public static void CustomSpawn(ref Vehicle vehicleData, ushort vehicleId) {
-            var vehManager = Singleton<VehicleManager>.instance;
-            var vehicleInfo = vehicleData.Info;
+            VehicleManager vehManager = Singleton<VehicleManager>.instance;
+            VehicleInfo vehicleInfo = vehicleData.Info;
             if ((vehicleData.m_flags & Vehicle.Flags.Spawned) == 0) {
                 vehicleData.m_flags |= Vehicle.Flags.Spawned;
                 vehManager.AddToGrid(vehicleId, ref vehicleData, vehicleInfo.m_isLargeVehicle);
             }
 
             if (vehicleData.m_leadingVehicle == 0 && vehicleData.m_trailingVehicle != 0) {
-                var trailingVehicle = vehicleData.m_trailingVehicle;
-                var numIter = 0;
+                ushort trailingVehicle = vehicleData.m_trailingVehicle;
+                int numIter = 0;
                 while (trailingVehicle != 0) {
                     vehManager.m_vehicles.m_buffer[trailingVehicle].Spawn(trailingVehicle);
-                    trailingVehicle = vehManager.m_vehicles.m_buffer[trailingVehicle].m_trailingVehicle;
+                    trailingVehicle =
+                        vehManager.m_vehicles.m_buffer[trailingVehicle].m_trailingVehicle;
                     if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
-                        CODebugBase<LogChannel>.Error(LogChannel.Core,
-                                                      $"Invalid list detected!\n{Environment.StackTrace}");
+                        CODebugBase<LogChannel>.Error(
+                            LogChannel.Core,
+                            $"Invalid list detected!\n{Environment.StackTrace}");
                         break;
                     }
                 }
@@ -38,24 +40,25 @@
                 && vehicleData.m_trailingVehicle == 0
                 && vehicleInfo.m_trailers != null)
             {
-                var hasTrailers = vehicleInfo.m_vehicleAI.VerticalTrailers();
-                var curVehicleId = vehicleId;
-                var reversed = (vehManager.m_vehicles.m_buffer[curVehicleId].m_flags & Vehicle.Flags.Reversed) != 0;
-                var lastFrameData = vehicleData.GetLastFrameData();
-                var length = !hasTrailers ? vehicleInfo.m_generatedInfo.m_size.z * 0.5f : 0f;
+                bool hasTrailers = vehicleInfo.m_vehicleAI.VerticalTrailers();
+                ushort curVehicleId = vehicleId;
+                bool reversed = (vehManager.m_vehicles.m_buffer[curVehicleId].m_flags &
+                                 Vehicle.Flags.Reversed) != 0;
+                Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
+                float length = !hasTrailers ? vehicleInfo.m_generatedInfo.m_size.z * 0.5f : 0f;
                 length -= (vehicleData.m_flags & Vehicle.Flags.Inverted) == (Vehicle.Flags)0
                                ? vehicleInfo.m_attachOffsetBack
                                : vehicleInfo.m_attachOffsetFront;
-                var randomizer = new Randomizer(vehicleId);
-                var trailerCount = 0;
+                Randomizer randomizer = new Randomizer(vehicleId);
+                int trailerCount = 0;
 
-                for (var i = 0; i < vehicleInfo.m_trailers.Length; i++) {
+                for (int i = 0; i < vehicleInfo.m_trailers.Length; i++) {
                     if (randomizer.Int32(100u) >= vehicleInfo.m_trailers[i].m_probability) {
                         continue;
                     }
 
-                    var trailerInfo = vehicleInfo.m_trailers[i].m_info;
-                    var inverted = randomizer.Int32(100u) <
+                    VehicleInfo trailerInfo = vehicleInfo.m_trailers[i].m_info;
+                    bool inverted = randomizer.Int32(100u) <
                                    vehicleInfo.m_trailers[i].m_invertProbability;
                     length += !hasTrailers
                                   ? trailerInfo.m_generatedInfo.m_size.z * 0.5f
@@ -63,14 +66,14 @@
                     length -= !inverted
                                   ? trailerInfo.m_attachOffsetFront
                                   : trailerInfo.m_attachOffsetBack;
-                    var position = lastFrameData.m_position -
+                    Vector3 position = lastFrameData.m_position -
                                    (lastFrameData.m_rotation * new Vector3(
                                         0f,
                                         !hasTrailers ? 0f : length,
                                         !hasTrailers ? length : 0f));
 
                     if (vehManager.CreateVehicle(
-                        out var trailerVehicleId,
+                        out ushort trailerVehicleId,
                         ref Singleton<SimulationManager>.instance.m_randomizer,
                         trailerInfo,
                         position,
@@ -80,7 +83,7 @@
                     {
                         vehManager.m_vehicles.m_buffer[curVehicleId].m_trailingVehicle = trailerVehicleId;
 
-                        var vehicleBuffer = vehManager.m_vehicles.m_buffer;
+                        Vehicle[] vehicleBuffer = vehManager.m_vehicles.m_buffer;
 
                         vehicleBuffer[trailerVehicleId].m_leadingVehicle = curVehicleId;
                         vehicleBuffer[trailerVehicleId].m_gateIndex = vehicleData.m_gateIndex;
@@ -129,13 +132,13 @@
             ExtVehicleManager.Instance.OnDespawnVehicle(vehicleId, ref vehicleData);
 
             // NON-STOCK CODE END
-            var vehManager = Singleton<VehicleManager>.instance;
+            VehicleManager vehManager = Singleton<VehicleManager>.instance;
             if (vehicleData.m_leadingVehicle == 0 && vehicleData.m_trailingVehicle != 0) {
-                var curVehicleId = vehicleData.m_trailingVehicle;
+                ushort curVehicleId = vehicleData.m_trailingVehicle;
                 vehicleData.m_trailingVehicle = 0;
-                var numIters = 0;
+                int numIters = 0;
                 while (curVehicleId != 0) {
-                    var trailingVehicleId = vehManager.m_vehicles.m_buffer[curVehicleId].m_trailingVehicle;
+                    ushort trailingVehicleId = vehManager.m_vehicles.m_buffer[curVehicleId].m_trailingVehicle;
                     vehManager.m_vehicles.m_buffer[curVehicleId].m_leadingVehicle = 0;
                     vehManager.m_vehicles.m_buffer[curVehicleId].m_trailingVehicle = 0;
                     vehManager.ReleaseVehicle(curVehicleId);
@@ -150,7 +153,7 @@
             }
 
             if ((vehicleData.m_flags & Vehicle.Flags.Spawned) != 0) {
-                var info = vehicleData.Info;
+                VehicleInfo info = vehicleData.Info;
                 if (info != null) {
                     vehManager.RemoveFromGrid(vehicleId, ref vehicleData, info.m_isLargeVehicle);
                 }

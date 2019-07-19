@@ -15,10 +15,10 @@
         [RedirectMethod]
         [UsedImplicitly]
         public string CustomGetLocalizedStatus(ushort instanceId, ref CitizenInstance data, out InstanceID target) {
-            var ret = Constants.ManagerFactory.ExtCitizenInstanceManager.GetTouristLocalizedStatus(
+            string ret = Constants.ManagerFactory.ExtCitizenInstanceManager.GetTouristLocalizedStatus(
                 instanceId,
                 ref data,
-                out var addCustomStatus,
+                out bool addCustomStatus,
                 out target);
 
             // NON-STOCK CODE START
@@ -40,7 +40,7 @@
                                                 bool forceCar,
                                                 out VehicleInfo trailer) {
 #if DEBUG
-            var citizenDebug = (DebugSettings.CitizenInstanceId == 0
+            bool citizenDebug = (DebugSettings.CitizenInstanceId == 0
                                 || DebugSettings.CitizenInstanceId == instanceId)
                                && (DebugSettings.CitizenId == 0
                                    || DebugSettings.CitizenId == citizenData.m_citizen)
@@ -48,7 +48,7 @@
                                    || DebugSettings.SourceBuildingId == citizenData.m_sourceBuilding)
                                && (DebugSettings.TargetBuildingId == 0
                                    || DebugSettings.TargetBuildingId == citizenData.m_targetBuilding);
-            var logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
 #else
             var logParkingAi = false;
 #endif
@@ -60,7 +60,7 @@
             }
 
             // NON-STOCK CODE START
-            var forceTaxi = false;
+            bool forceTaxi = false;
             if (Options.parkingAI) {
                 if (ExtCitizenInstanceManager.Instance.ExtInstances[instanceId].pathMode == ExtPathMode.TaxiToTarget) {
                     forceTaxi = true;
@@ -68,7 +68,7 @@
             }
 
             // NON-STOCK CODE END
-            var wealthLevel = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].WealthLevel;
+            Citizen.Wealth wealthLevel = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenData.m_citizen].WealthLevel;
             int carProb;
             int bikeProb;
             int taxiProb;
@@ -89,25 +89,25 @@
                 taxiProb = GetTaxiProbability();
             }
 
-            var randomizer = new Randomizer(citizenData.m_citizen);
-            var useCar = randomizer.Int32(100u) < carProb;
-            var useBike = !useCar && randomizer.Int32(100u) < bikeProb;
-            var useTaxi = !useCar && !useBike && randomizer.Int32(100u) < taxiProb;
-            var useCamper = false;
-            var useElectricCar = false;
+            Randomizer randomizer = new Randomizer(citizenData.m_citizen);
+            bool useCar = randomizer.Int32(100u) < carProb;
+            bool useBike = !useCar && randomizer.Int32(100u) < bikeProb;
+            bool useTaxi = !useCar && !useBike && randomizer.Int32(100u) < taxiProb;
+            bool useCamper = false;
+            bool useElectricCar = false;
 
             if (useCar) {
-                var camperProb = GetCamperProbability(wealthLevel);
+                int camperProb = GetCamperProbability(wealthLevel);
                 useCamper = randomizer.Int32(100u) < camperProb;
 
                 if (!useCamper) {
-                    var electricProb = GetElectricCarProbability(wealthLevel);
+                    int electricProb = GetElectricCarProbability(wealthLevel);
                     useElectricCar = randomizer.Int32(100u) < electricProb;
                 }
             }
 
-            var service = ItemClass.Service.Residential;
-            var subService = useElectricCar
+            ItemClass.Service service = ItemClass.Service.Residential;
+            ItemClass.SubService subService = useElectricCar
                                  ? ItemClass.SubService.ResidentialLowEco
                                  : ItemClass.SubService.ResidentialLow;
             if (useTaxi) {
@@ -118,7 +118,7 @@
             // NON-STOCK CODE START
             VehicleInfo carInfo = null;
             if (Options.parkingAI && useCar && !useTaxi) {
-                var parkedVehicleId = Singleton<CitizenManager>
+                ushort parkedVehicleId = Singleton<CitizenManager>
                                       .instance.m_citizens.m_buffer[citizenData.m_citizen]
                                       .m_parkedVehicle;
                 if (parkedVehicleId != 0) {
@@ -135,7 +135,7 @@
             if (carInfo == null && (useCar || useTaxi)) {
                 // NON-STOCK CODE END
                 if (useCamper) {
-                    var randomizer2 = randomizer;
+                    Randomizer randomizer2 = randomizer;
                     carInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
                         ref randomizer,
                         service,
@@ -160,7 +160,7 @@
             }
 
             if (useBike) {
-                var bikeInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
+                VehicleInfo bikeInfo = Singleton<VehicleManager>.instance.GetRandomVehicleInfo(
                     ref randomizer,
                     ItemClass.Service.Residential,
                     ItemClass.SubService.ResidentialHigh,

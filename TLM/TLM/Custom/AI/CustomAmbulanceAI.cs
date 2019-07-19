@@ -19,13 +19,13 @@
                                         bool startBothWays,
                                         bool endBothWays,
                                         bool undergroundTarget) {
-            var emergencyVehType = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0
+            ExtVehicleType emergencyVehType = (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0
                                      ? ExtVehicleType.Emergency
                                      : ExtVehicleType.Service;
-            var vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, emergencyVehType);
+            ExtVehicleType vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, emergencyVehType);
 
-            var info = m_info;
-            var allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
+            VehicleInfo info = m_info;
+            bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
 
             const NetInfo.LaneType VEHICLE_AND_TRANSPORT = NetInfo.LaneType.Vehicle
                                                            | NetInfo.LaneType.TransportVehicle;
@@ -36,9 +36,9 @@
                                              allowUnderground,
                                              false,
                                              32f,
-                                             out var startPosA,
-                                             out var startPosB,
-                                             out var startDistSqrA,
+                                             out PathUnit.Position startPosA,
+                                             out PathUnit.Position startPosB,
+                                             out float startDistSqrA,
                                              out _)
                 && PathManager.FindPathPosition(endPos,
                                                 ItemClass.Service.Road,
@@ -47,9 +47,9 @@
                                                 undergroundTarget,
                                                 false,
                                                 32f,
-                                                out var endPosA,
-                                                out var endPosB,
-                                                out var endDistSqrA,
+                                                out PathUnit.Position endPosA,
+                                                out PathUnit.Position endPosB,
+                                                out float endDistSqrA,
                                                 out _)) {
                 if (!startBothWays || startDistSqrA < 10f) {
                     startPosB = default;
@@ -84,7 +84,7 @@
                 args.skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
 
                 if (CustomPathManager._instance.CustomCreatePath(
-                    out var path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
+                    out uint path, ref Singleton<SimulationManager>.instance.m_randomizer, args)) {
                     // NON-STOCK CODE END
                     if (vehicleData.m_path != 0u) {
                         Singleton<PathManager>.instance.ReleasePath(vehicleData.m_path);

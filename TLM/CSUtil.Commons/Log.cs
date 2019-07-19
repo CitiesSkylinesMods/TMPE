@@ -121,8 +121,8 @@
                 Monitor.Enter(LogLock_);
 
                 using (StreamWriter w = File.AppendText(LogFilename_)) {
-                    var secs = sw.ElapsedTicks / Stopwatch.Frequency;
-                    var fraction = sw.ElapsedTicks % Stopwatch.Frequency;
+                    long secs = sw.ElapsedTicks / Stopwatch.Frequency;
+                    long fraction = sw.ElapsedTicks % Stopwatch.Frequency;
                     w.WriteLine(
                         $"{level.ToString()} " +
                         $"{secs:n0}.{fraction:D7}: " +

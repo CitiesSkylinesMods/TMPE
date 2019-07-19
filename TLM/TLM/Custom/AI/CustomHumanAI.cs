@@ -5,6 +5,7 @@ namespace TrafficManager.Custom.AI {
     using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
+    using Manager;
     using Manager.Impl;
     using RedirectionFramework.Attributes;
     using State;
@@ -20,7 +21,7 @@ namespace TrafficManager.Custom.AI {
                                          ref CitizenInstance instanceData,
                                          Vector3 physicsLodRefPos) {
 #if DEBUG
-            var citizenDebug = (DebugSettings.CitizenInstanceId == 0
+            bool citizenDebug = (DebugSettings.CitizenInstanceId == 0
                             || DebugSettings.CitizenInstanceId == instanceId)
                            && (DebugSettings.CitizenId == 0
                                || DebugSettings.CitizenId == instanceData.m_citizen)
@@ -32,8 +33,8 @@ namespace TrafficManager.Custom.AI {
 #else
             var logParkingAi = false;
 #endif
-            var citizenManager = Singleton<CitizenManager>.instance;
-            var citizenId = instanceData.m_citizen;
+            CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+            uint citizenId = instanceData.m_citizen;
 
             if ((instanceData.m_flags & (CitizenInstance.Flags.Blown
                                          | CitizenInstance.Flags.Floating)) != CitizenInstance.Flags.None
@@ -47,13 +48,13 @@ namespace TrafficManager.Custom.AI {
                 return;
             }
 
-            var ctzBuffer = citizenManager.m_citizens.m_buffer;
+            Citizen[] ctzBuffer = citizenManager.m_citizens.m_buffer;
             if ((instanceData.m_flags & CitizenInstance.Flags.WaitingPath) != CitizenInstance.Flags.None) {
-                var pathManager = Singleton<PathManager>.instance;
-                var pathFindFlags = pathManager.m_pathUnits.m_buffer[instanceData.m_path].m_pathFindFlags;
+                PathManager pathManager = Singleton<PathManager>.instance;
+                byte pathFindFlags = pathManager.m_pathUnits.m_buffer[instanceData.m_path].m_pathFindFlags;
 
                 // NON-STOCK CODE START
-                var mainPathState = ExtPathState.Calculating;
+                ExtPathState mainPathState = ExtPathState.Calculating;
                 if ((pathFindFlags & PathUnit.FLAG_FAILED) != 0 || instanceData.m_path == 0) {
                     mainPathState = ExtPathState.Failed;
                 } else if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
@@ -69,7 +70,7 @@ namespace TrafficManager.Custom.AI {
 #if BENCHMARK
                 using (var bm = new Benchmark(null, "ConvertPathStateToSoftPathState+UpdateCitizenPathState")) {
 #endif
-                var finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
+                ExtSoftPathState finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
 
                 if (Options.parkingAI) {
                     finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(
@@ -120,7 +121,7 @@ namespace TrafficManager.Custom.AI {
                         if (citizenId != 0
                             && (ctzBuffer[citizenId].m_flags & CTZ_MASK) == Citizen.Flags.MovingIn)
                         {
-                            var statisticBase = Singleton<StatisticsManager>
+                            StatisticBase statisticBase = Singleton<StatisticsManager>
                                                 .instance.Acquire<StatisticInt32>(StatisticType.MoveRate);
                             statisticBase.Add(1);
                         }
@@ -218,15 +219,15 @@ namespace TrafficManager.Custom.AI {
             // NON-STOCK CODE END
             base.SimulationStep(instanceId, ref instanceData, physicsLodRefPos);
 
-            var vehicleManager = Singleton<VehicleManager>.instance;
+            VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
             ushort vehicleId = 0;
             if (instanceData.m_citizen != 0u) {
                 vehicleId = ctzBuffer[instanceData.m_citizen].m_vehicle;
             }
 
             if (vehicleId != 0) {
-                var vehiclesBuffer = vehicleManager.m_vehicles.m_buffer;
-                var vehicleInfo = vehiclesBuffer[vehicleId].Info;
+                Vehicle[] vehiclesBuffer = vehicleManager.m_vehicles.m_buffer;
+                VehicleInfo vehicleInfo = vehiclesBuffer[vehicleId].Info;
 
                 if (vehicleInfo.m_vehicleType == VehicleInfo.VehicleType.Bicycle) {
                     vehicleInfo.m_vehicleAI.SimulationStep(
@@ -259,9 +260,9 @@ namespace TrafficManager.Custom.AI {
                                       ref CitizenInstance instanceData,
                                       ref ExtCitizenInstance extInstance,
                                       Vector3 physicsLodRefPos) {
-            var extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
+            IExtCitizenInstanceManager extCitInstMan = Constants.ManagerFactory.ExtCitizenInstanceManager;
 #if DEBUG
-            var citizenDebug
+            bool citizenDebug
                 = (DebugSettings.CitizenInstanceId == 0
                    || DebugSettings.CitizenInstanceId == instanceId)
                   && (DebugSettings.CitizenId == 0
@@ -270,15 +271,15 @@ namespace TrafficManager.Custom.AI {
                       || DebugSettings.SourceBuildingId == instanceData.m_sourceBuilding)
                   && (DebugSettings.TargetBuildingId == 0
                       || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
-            var logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            var extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 #else
             var logParkingAi = false;
             var extendedLogParkingAi = false;
 #endif
 
 #if DEBUG
-            var logPathMode = extInstance.pathMode;
+            ExtPathMode logPathMode = extInstance.pathMode;
 #else
             var logPathMode = 0;
 #endif
@@ -286,8 +287,8 @@ namespace TrafficManager.Custom.AI {
                 // check if the citizen has reached a parked car or target
                 case ExtPathMode.WalkingToParkedCar:
                 case ExtPathMode.ApproachingParkedCar: {
-                    var citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
-                    var parkedVehicleId = citizensBuffer[instanceData.m_citizen].m_parkedVehicle;
+                    Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
+                    ushort parkedVehicleId = citizensBuffer[instanceData.m_citizen].m_parkedVehicle;
 
                     if (parkedVehicleId == 0) {
                         // citizen is reaching their parked car but does not own a parked car
@@ -308,8 +309,8 @@ namespace TrafficManager.Custom.AI {
                         return true;
                     }
 
-                    var parkedVehicles = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
-                    var approachState =
+                    VehicleParked[] parkedVehicles = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
+                    ParkedCarApproachState approachState =
                         AdvancedParkingManager.Instance.CitizenApproachingParkedCarSimulationStep(
                             instanceId,
                             ref instanceData,
@@ -410,26 +411,26 @@ namespace TrafficManager.Custom.AI {
         [UsedImplicitly]
         public bool CustomCheckTrafficLights(ushort nodeId, ushort segmentId) {
 #if DEBUGTTL
-            var logTimedLights = DebugSwitch.TimedTrafficLights.Get()
+            bool logTimedLights = DebugSwitch.TimedTrafficLights.Get()
                                  && DebugSettings.NodeId == nodeId;
 #endif
-            var netManager = Singleton<NetManager>.instance;
-            var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
-            var simGroup = (uint)nodeId >> 7;
-            var stepWaitTime = currentFrameIndex - simGroup & 255u;
+            NetManager netManager = Singleton<NetManager>.instance;
+            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+            uint simGroup = (uint)nodeId >> 7;
+            uint stepWaitTime = currentFrameIndex - simGroup & 255u;
 
             // NON-STOCK CODE START
 #if BENCHMARK
             using (var bm = new Benchmark(null, "GetNodeSimulation")) {
 #endif
-            var customSim = Options.timedLightsEnabled &&
+            bool customSim = Options.timedLightsEnabled &&
                             TrafficLightSimulationManager.Instance.HasActiveSimulation(nodeId);
 #if BENCHMARK
             }
 #endif
             RoadBaseAI.TrafficLightState pedestrianLightState;
-            var segmentsBuffer = netManager.m_segments.m_buffer;
-            var startNode = segmentsBuffer[segmentId].m_startNode == nodeId;
+            NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
+            bool startNode = segmentsBuffer[segmentId].m_startNode == nodeId;
 
             ICustomSegmentLights lights = null;
 #if BENCHMARK
@@ -455,10 +456,10 @@ namespace TrafficManager.Custom.AI {
                     nodeId,
                     ref segmentsBuffer[segmentId],
                     currentFrameIndex - simGroup,
-                    out var vehicleLightState,
+                    out RoadBaseAI.TrafficLightState vehicleLightState,
                     out pedestrianLightState,
-                    out var vehicles,
-                    out var pedestrians);
+                    out bool vehicles,
+                    out bool pedestrians);
 
                 if (pedestrianLightState == RoadBaseAI.TrafficLightState.GreenToRed
                     || pedestrianLightState == RoadBaseAI.TrafficLightState.Red) {

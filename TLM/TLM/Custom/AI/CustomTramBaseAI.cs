@@ -7,6 +7,7 @@
     using ColossalFramework.Math;
     using CSUtil.Commons;
     using JetBrains.Annotations;
+    using Manager;
     using Manager.Impl;
     using PathFinding;
     using RedirectionFramework.Attributes;
@@ -19,10 +20,10 @@
     public class CustomTramBaseAI : TramBaseAI {
         [RedirectMethod]
         public void CustomSimulationStep(ushort vehicleId, ref Vehicle vehicleData, Vector3 physicsLodRefPos) {
-            var extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
+            IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
 
             if ((vehicleData.m_flags & Vehicle.Flags.WaitingPath) != 0) {
-                var pathFindFlags = Singleton<PathManager>
+                byte pathFindFlags = Singleton<PathManager>
                                     .instance.m_pathUnits.m_buffer[vehicleData.m_path].m_pathFindFlags;
 
                 if ((pathFindFlags & PathUnit.FLAG_READY) != 0) {
@@ -61,8 +62,8 @@
             }
 
             // NON-STOCK CODE END
-            var instance = Singleton<VehicleManager>.instance;
-            var info = instance.m_vehicles.m_buffer[vehicleId].Info;
+            VehicleManager instance = Singleton<VehicleManager>.instance;
+            VehicleInfo info = instance.m_vehicles.m_buffer[vehicleId].Info;
             info.m_vehicleAI.SimulationStep(
                 vehicleId,
                 ref instance.m_vehicles.m_buffer[vehicleId],
@@ -75,8 +76,8 @@
                 return;
             }
 
-            var trailingVehicle = instance.m_vehicles.m_buffer[vehicleId].m_trailingVehicle;
-            var num = 0;
+            ushort trailingVehicle = instance.m_vehicles.m_buffer[vehicleId].m_trailingVehicle;
+            int num = 0;
 
             while (trailingVehicle != 0) {
                 info = instance.m_vehicles.m_buffer[trailingVehicle].Info;
@@ -126,7 +127,7 @@
             ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, null);
 
             // NON-STOCK CODE
-            var info = m_info;
+            VehicleInfo info = m_info;
             bool allowUnderground;
             bool allowUnderground2;
             if (info.m_vehicleType == VehicleInfo.VehicleType.Metro) {
@@ -146,10 +147,10 @@
                     allowUnderground,
                     false,
                     32f,
-                    out var startPosA,
-                    out var startPosB,
-                    out var startSqrDistA,
-                    out var startSqrDistB)
+                    out PathUnit.Position startPosA,
+                    out PathUnit.Position startPosB,
+                    out float startSqrDistA,
+                    out float startSqrDistB)
                 || !PathManager.FindPathPosition(
                     endPos,
                     ItemClass.Service.Road,
@@ -158,10 +159,10 @@
                     allowUnderground2,
                     false,
                     32f,
-                    out var endPosA,
-                    out var endPosB,
-                    out var endSqrDistA,
-                    out var endSqrDistB)) {
+                    out PathUnit.Position endPosA,
+                    out PathUnit.Position endPosB,
+                    out float endSqrDistA,
+                    out float endSqrDistB)) {
                 return false;
             }
 
@@ -198,7 +199,7 @@
             args.skipQueue = true;
 
             if (!CustomPathManager._instance.CustomCreatePath(
-                    out var path,
+                    out uint path,
                     ref Singleton<SimulationManager>.instance.m_randomizer,
                     args)) {
                 return false;
@@ -229,10 +230,10 @@
                                                    out Vector3 pos,
                                                    out Vector3 dir,
                                                    out float maxSpeed) {
-            var netManager = Singleton<NetManager>.instance;
+            NetManager netManager = Singleton<NetManager>.instance;
             ushort prevSourceNodeId;
             ushort prevTargetNodeId;
-            var segBuffer = netManager.m_segments.m_buffer;
+            NetSegment[] segBuffer = netManager.m_segments.m_buffer;
 
             if (prevOffset < prevPosition.m_offset) {
                 prevSourceNodeId = segBuffer[prevPosition.m_segment].m_startNode;
@@ -242,12 +243,12 @@
                 prevTargetNodeId = segBuffer[prevPosition.m_segment].m_startNode;
             }
 
-            var refTargetNodeId = refOffset == 0
+            ushort refTargetNodeId = refOffset == 0
                                       ? segBuffer[refPosition.m_segment].m_startNode
                                       : segBuffer[refPosition.m_segment].m_endNode;
 
 #if DEBUG
-            var logLogic = DebugSwitch.CalculateSegmentPosition.Get()
+            bool logLogic = DebugSwitch.CalculateSegmentPosition.Get()
                            && (DebugSettings.NodeId <= 0
                                || refTargetNodeId == DebugSettings.NodeId)
                            && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
@@ -272,26 +273,26 @@
                 $"\trefTargetNodeId={refTargetNodeId}, refTargetNodeId={refTargetNodeId}\n" +
                 $"\tindex={index}");
 
-            var lastFrameData = vehicleData.GetLastFrameData();
-            var sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
+            Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
+            float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
 
             netManager.m_lanes.m_buffer[prevLaneId].CalculatePositionAndDirection(
                 Constants.ByteToFloat(prevOffset),
                 out pos,
                 out dir);
-            var b = netManager.m_lanes.m_buffer[refLaneId].CalculatePosition(
+            Vector3 b = netManager.m_lanes.m_buffer[refLaneId].CalculatePosition(
                 Constants.ByteToFloat(refOffset));
-            var a = lastFrameData.m_position;
-            var a2 = lastFrameData.m_position;
-            var b2 = lastFrameData.m_rotation * new Vector3(
+            Vector3 a = lastFrameData.m_position;
+            Vector3 a2 = lastFrameData.m_position;
+            Vector3 b2 = lastFrameData.m_rotation * new Vector3(
                          0f,
                          0f,
                          m_info.m_generatedInfo.m_wheelBase * 0.5f);
             a += b2;
             a2 -= b2;
-            var crazyValue = 0.5f * sqrVelocity / m_info.m_braking;
-            var a3 = Vector3.Distance(a, b);
-            var b3 = Vector3.Distance(a2, b);
+            float crazyValue = 0.5f * sqrVelocity / m_info.m_braking;
+            float a3 = Vector3.Distance(a, b);
+            float b3 = Vector3.Distance(a2, b);
 
             if (Mathf.Min(a3, b3) >= crazyValue - 1f) {
                 // dead stock code
@@ -329,9 +330,9 @@
                 }
             }
 
-            var info = segBuffer[prevPosition.m_segment].Info;
+            NetInfo info = segBuffer[prevPosition.m_segment].Info;
             if (info.m_lanes != null && info.m_lanes.Length > prevPosition.m_lane) {
-                var speedLimit = Options.customSpeedLimitsEnabled
+                float speedLimit = Options.customSpeedLimitsEnabled
                                      ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
                                          prevPosition.m_segment,
                                          prevPosition.m_lane,
@@ -359,17 +360,17 @@
                                                    out Vector3 pos,
                                                    out Vector3 dir,
                                                    out float maxSpeed) {
-            var instance = Singleton<NetManager>.instance;
+            NetManager instance = Singleton<NetManager>.instance;
             instance.m_lanes.m_buffer[laneId].CalculatePositionAndDirection(
                 Constants.ByteToFloat(offset),
                 out pos,
                 out dir);
-            var info = instance.m_segments.m_buffer[position.m_segment].Info;
+            NetInfo info = instance.m_segments.m_buffer[position.m_segment].Info;
 
             if (info.m_lanes != null
                 && info.m_lanes.Length > position.m_lane)
             {
-                var speedLimit = Options.customSpeedLimitsEnabled
+                float speedLimit = Options.customSpeedLimitsEnabled
                                      ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
                                          position.m_segment,
                                          position.m_lane,
@@ -394,16 +395,16 @@
                                          ref Vehicle leaderData,
                                          int lodPhysics) {
 #if DEBUG
-            var logLogic = DebugSwitch.TramBaseAISimulationStep.Get()
+            bool logLogic = DebugSwitch.TramBaseAISimulationStep.Get()
                         && DebugSettings.NodeId == vehicleId;
 #else
             var logLogic = false;
 #endif
-            var leadingVehicle = vehicleData.m_leadingVehicle;
-            var currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
+            ushort leadingVehicle = vehicleData.m_leadingVehicle;
+            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-            var leaderInfo = leaderId != vehicleId ? leaderData.Info : m_info;
-            var tramBaseAi = leaderInfo.m_vehicleAI as TramBaseAI;
+            VehicleInfo leaderInfo = leaderId != vehicleId ? leaderData.Info : m_info;
+            TramBaseAI tramBaseAi = leaderInfo.m_vehicleAI as TramBaseAI;
 
             if (leadingVehicle != 0) {
                 frameData.m_position += frameData.m_velocity * 0.4f;
@@ -412,24 +413,24 @@
             }
 
             frameData.m_swayPosition += frameData.m_swayVelocity * 0.5f;
-            var wheelBaseRot = frameData.m_rotation
+            Vector3 wheelBaseRot = frameData.m_rotation
                                * new Vector3(0f, 0f, m_info.m_generatedInfo.m_wheelBase * 0.5f);
-            var posAfterWheelRot = frameData.m_position + wheelBaseRot;
-            var posBeforeWheelRot = frameData.m_position - wheelBaseRot;
+            Vector3 posAfterWheelRot = frameData.m_position + wheelBaseRot;
+            Vector3 posBeforeWheelRot = frameData.m_position - wheelBaseRot;
 
-            var acceleration = m_info.m_acceleration;
-            var braking = m_info.m_braking;
-            var curSpeed = frameData.m_velocity.magnitude;
+            float acceleration = m_info.m_acceleration;
+            float braking = m_info.m_braking;
+            float curSpeed = frameData.m_velocity.magnitude;
 
-            var afterRotToTargetPos1Diff = (Vector3)vehicleData.m_targetPos1 - posAfterWheelRot;
-            var afterRotToTargetPos1DiffSqrMag = afterRotToTargetPos1Diff.sqrMagnitude;
+            Vector3 afterRotToTargetPos1Diff = (Vector3)vehicleData.m_targetPos1 - posAfterWheelRot;
+            float afterRotToTargetPos1DiffSqrMag = afterRotToTargetPos1Diff.sqrMagnitude;
 
-            var curInvRot = Quaternion.Inverse(frameData.m_rotation);
-            var curveTangent = curInvRot * frameData.m_velocity;
+            Quaternion curInvRot = Quaternion.Inverse(frameData.m_rotation);
+            Vector3 curveTangent = curInvRot * frameData.m_velocity;
 
 #if DEBUG
-            var logFramePos = frameData.m_position;
-            var logSwayPos = frameData.m_swayPosition;
+            Vector3 logFramePos = frameData.m_position;
+            Vector3 logSwayPos = frameData.m_swayPosition;
             Log._DebugIf(
                 logLogic,
                 () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
@@ -446,15 +447,15 @@
                 $"this.m_info.m_generatedInfo.m_wheelBase={m_info.m_generatedInfo.m_wheelBase}");
 #endif
 
-            var forward = Vector3.forward;
-            var targetMotion = Vector3.zero;
-            var targetSpeed = 0f;
-            var motionFactor = 0.5f;
-            var turnAngle = 0f;
+            Vector3 forward = Vector3.forward;
+            Vector3 targetMotion = Vector3.zero;
+            float targetSpeed = 0f;
+            float motionFactor = 0.5f;
+            float turnAngle = 0f;
             if (leadingVehicle != 0) {
-                var vehMan = Singleton<VehicleManager>.instance;
-                var leadingVehLastFrameData = vehMan.m_vehicles.m_buffer[leadingVehicle].GetLastFrameData();
-                var leadingVehInfo = vehMan.m_vehicles.m_buffer[leadingVehicle].Info;
+                VehicleManager vehMan = Singleton<VehicleManager>.instance;
+                Vehicle.Frame leadingVehLastFrameData = vehMan.m_vehicles.m_buffer[leadingVehicle].GetLastFrameData();
+                VehicleInfo leadingVehInfo = vehMan.m_vehicles.m_buffer[leadingVehicle].Info;
 
                 float attachOffset;
                 if ((vehicleData.m_flags & Vehicle.Flags.Inverted) != 0) {
@@ -472,12 +473,12 @@
                                           - (leadingVehInfo.m_generatedInfo.m_size.z * 0.5f);
                 }
 
-                var curPosMinusRotAttachOffset = frameData.m_position
+                Vector3 curPosMinusRotAttachOffset = frameData.m_position
                                                  - (frameData.m_rotation * new Vector3(
                                                         0f,
                                                         0f,
                                                         attachOffset));
-                var leadingPosPlusRotAttachOffset = leadingVehLastFrameData.m_position
+                Vector3 leadingPosPlusRotAttachOffset = leadingVehLastFrameData.m_position
                                                     + (leadingVehLastFrameData.m_rotation
                                                        * new Vector3(0f, 0f, leadingAttachOffset));
 
@@ -486,14 +487,14 @@
                                    0f,
                                    0f,
                                    leadingVehInfo.m_generatedInfo.m_wheelBase * 0.5f);
-                var leadingPosBeforeWheelRot = leadingVehLastFrameData.m_position - wheelBaseRot;
+                Vector3 leadingPosBeforeWheelRot = leadingVehLastFrameData.m_position - wheelBaseRot;
 
                 if (Vector3.Dot(
                         vehicleData.m_targetPos1 - vehicleData.m_targetPos0,
                         (Vector3)vehicleData.m_targetPos0 - posBeforeWheelRot) < 0f
                     && vehicleData.m_path != 0u
                     && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == 0) {
-                    var someIndex = -1;
+                    int someIndex = -1;
                     UpdatePathTargetPositions(
                         tramBaseAi,
                         vehicleId,
@@ -512,14 +513,14 @@
                     afterRotToTargetPos1DiffSqrMag = 0f;
                 }
 
-                var attachRotDist = Mathf.Max(
+                float attachRotDist = Mathf.Max(
                     Vector3.Distance(curPosMinusRotAttachOffset, leadingPosPlusRotAttachOffset),
                     2f);
 
                 const float ONE = 1f;
-                var attachRotSqrDist = attachRotDist * attachRotDist;
+                float attachRotSqrDist = attachRotDist * attachRotDist;
                 const float ONE_SQR = ONE * ONE;
-                var i = 0;
+                int i = 0;
                 if (afterRotToTargetPos1DiffSqrMag < attachRotSqrDist) {
                     if (vehicleData.m_path != 0u
                         && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == 0) {
@@ -549,10 +550,10 @@
 
                 afterRotToTargetPos1Diff = curInvRot * afterRotToTargetPos1Diff;
 
-                var negTotalAttachLen =
+                float negTotalAttachLen =
                     -(((m_info.m_generatedInfo.m_wheelBase + leadingVehInfo.m_generatedInfo.m_wheelBase) * 0.5f) +
                       attachOffset + leadingAttachOffset);
-                var hasPath = false;
+                bool hasPath = false;
 
                 if (vehicleData.m_path != 0u
                     && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == 0)
@@ -562,8 +563,8 @@
                         vehicleData.m_targetPos1,
                         leadingPosBeforeWheelRot,
                         negTotalAttachLen,
-                        out var u1,
-                        out var u2))
+                        out float u1,
+                        out float u2))
                     {
                         targetMotion = afterRotToTargetPos1Diff
                                        * Mathf.Clamp(Mathf.Min(u1, u2) / 0.6f, 0f, 2f);
@@ -586,7 +587,7 @@
                         motionFactor = 0f;
                     }
                 } else {
-                    var leadingPosBeforeToAfterWheelRotDist = Vector3.Distance(
+                    float leadingPosBeforeToAfterWheelRotDist = Vector3.Distance(
                         leadingPosBeforeWheelRot, posAfterWheelRot);
                     motionFactor = 0f;
                     targetMotion = curInvRot * ((leadingPosBeforeWheelRot - posAfterWheelRot) *
@@ -596,13 +597,13 @@
                                                  Mathf.Max(1f, leadingPosBeforeToAfterWheelRotDist * 0.6f)));
                 }
             } else {
-                var estimatedFrameDist =
+                float estimatedFrameDist =
                     ((curSpeed + acceleration) * (0.5f + 0.5f * (curSpeed + acceleration) / braking)) +
                     ((m_info.m_generatedInfo.m_size.z - m_info.m_generatedInfo.m_wheelBase) * 0.5f);
-                var maxSpeedAdd = Mathf.Max(curSpeed + acceleration, 2f);
-                var meanSpeedAdd = Mathf.Max((estimatedFrameDist - maxSpeedAdd) / 2f, 2f);
-                var maxSpeedAddSqr = maxSpeedAdd * maxSpeedAdd;
-                var meanSpeedAddSqr = meanSpeedAdd * meanSpeedAdd;
+                float maxSpeedAdd = Mathf.Max(curSpeed + acceleration, 2f);
+                float meanSpeedAdd = Mathf.Max((estimatedFrameDist - maxSpeedAdd) / 2f, 2f);
+                float maxSpeedAddSqr = maxSpeedAdd * maxSpeedAdd;
+                float meanSpeedAddSqr = meanSpeedAdd * meanSpeedAdd;
 
                 if (Vector3.Dot(
                         vehicleData.m_targetPos1 - vehicleData.m_targetPos0,
@@ -610,7 +611,7 @@
                     && vehicleData.m_path != 0u
                     && (leaderData.m_flags & (Vehicle.Flags.WaitingPath | Vehicle.Flags.Stopped)) == 0)
                 {
-                    var someIndex = -1;
+                    int someIndex = -1;
                     UpdatePathTargetPositions(
                         tramBaseAi,
                         vehicleId,
@@ -633,8 +634,8 @@
                 }
 
 #if DEBUG
-                var logTargetPos0 = vehicleData.m_targetPos0;
-                var logTargetPos1 = vehicleData.m_targetPos1;
+                Vector4 logTargetPos0 = vehicleData.m_targetPos0;
+                Vector4 logTargetPos1 = vehicleData.m_targetPos1;
                 Log._DebugIf(
                     logLogic,
                     () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
@@ -647,8 +648,8 @@
                     $"afterRotToTargetPos1DiffSqrMag={afterRotToTargetPos1DiffSqrMag}");
 #endif
 
-                var posIndex = 0;
-                var hasValidPathTargetPos = false;
+                int posIndex = 0;
+                bool hasValidPathTargetPos = false;
 
                 if ((afterRotToTargetPos1DiffSqrMag < maxSpeedAddSqr
                      || vehicleData.m_targetPos3.w < 0.01f)
@@ -690,14 +691,14 @@
                 if (leaderData.m_path != 0u
                     && (leaderData.m_flags & Vehicle.Flags.WaitingPath) == 0)
                 {
-                    var netMan = Singleton<NetManager>.instance;
-                    var leaderPathPosIndex = leaderData.m_pathPositionIndex;
-                    var leaderLastPathOffset = leaderData.m_lastPathOffset;
+                    NetManager netMan = Singleton<NetManager>.instance;
+                    byte leaderPathPosIndex = leaderData.m_pathPositionIndex;
+                    byte leaderLastPathOffset = leaderData.m_lastPathOffset;
                     if (leaderPathPosIndex == 255) {
                         leaderPathPosIndex = 0;
                     }
 
-                    var leaderLen = 1f + leaderData.CalculateTotalLength(leaderId, out var noise);
+                    float leaderLen = 1f + leaderData.CalculateTotalLength(leaderId, out int noise);
 
                     Log._DebugIf(
                         logLogic,
@@ -707,27 +708,27 @@
                         $"leaderPathPosIndex={leaderPathPosIndex} leaderLen={leaderLen}");
 
                     // reserve space / add traffic
-                    var pathMan = Singleton<PathManager>.instance;
+                    PathManager pathMan = Singleton<PathManager>.instance;
                     if (pathMan.m_pathUnits.m_buffer[leaderData.m_path].GetPosition(
                         leaderPathPosIndex >> 1,
-                        out var pathPos))
+                        out PathUnit.Position pathPos))
                     {
                         netMan.m_segments.m_buffer[pathPos.m_segment].AddTraffic(
                             Mathf.RoundToInt(leaderLen * 2.5f),
                             noise);
-                        var reservedSpaceOnCurrentLane = false;
+                        bool reservedSpaceOnCurrentLane = false;
 
                         if ((leaderPathPosIndex & 1) == 0 || leaderLastPathOffset == 0) {
-                            var laneId = PathManager.GetLaneID(pathPos);
+                            uint laneId = PathManager.GetLaneID(pathPos);
                             if (laneId != 0u) {
-                                var curPathOffsetPos = netMan
+                                Vector3 curPathOffsetPos = netMan
                                                        .m_lanes.m_buffer[laneId].CalculatePosition(
                                                            Constants.ByteToFloat(pathPos.m_offset));
-                                var speedAdd = 0.5f * curSpeed * curSpeed / m_info.m_braking;
-                                var afterWheelRotCurPathOffsetDist = Vector3.Distance(
+                                float speedAdd = 0.5f * curSpeed * curSpeed / m_info.m_braking;
+                                float afterWheelRotCurPathOffsetDist = Vector3.Distance(
                                     posAfterWheelRot,
                                     curPathOffsetPos);
-                                var beforeWheelRotCurPathOffsetDist = Vector3.Distance(
+                                float beforeWheelRotCurPathOffsetDist = Vector3.Distance(
                                     posBeforeWheelRot,
                                     curPathOffsetPos);
 
@@ -743,7 +744,7 @@
                         if (!reservedSpaceOnCurrentLane
                             && pathMan.m_pathUnits.m_buffer[leaderData.m_path]
                                       .GetNextPosition(leaderPathPosIndex >> 1, out pathPos)) {
-                            var nextLaneId = PathManager.GetLaneID(pathPos);
+                            uint nextLaneId = PathManager.GetLaneID(pathPos);
                             if (nextLaneId != 0u) {
                                 netMan.m_lanes.m_buffer[nextLaneId].ReserveSpace(leaderLen);
                             }
@@ -752,17 +753,17 @@
 
                     if ((currentFrameIndex >> 4 & 15u) == (ulong)(leaderId & 15)) {
                         // check if vehicle can proceed to next path position
-                        var canProceeed = false;
-                        var curLeaderPathId = leaderData.m_path;
-                        var curLeaderPathPosIndex = leaderPathPosIndex >> 1;
-                        var k = 0;
+                        bool canProceeed = false;
+                        uint curLeaderPathId = leaderData.m_path;
+                        int curLeaderPathPosIndex = leaderPathPosIndex >> 1;
+                        int k = 0;
                         while (k < 5) {
                             if (PathUnit.GetNextPosition(
                                 ref curLeaderPathId,
                                 ref curLeaderPathPosIndex,
                                 out pathPos,
-                                out var invalidPos)) {
-                                var laneId = PathManager.GetLaneID(pathPos);
+                                out bool invalidPos)) {
+                                uint laneId = PathManager.GetLaneID(pathPos);
                                 if (laneId != 0u &&
                                     !netMan.m_lanes.m_buffer[laneId].CheckSpace(leaderLen)) {
                                     k++;
@@ -813,9 +814,9 @@
                     $"afterRotToTargetPos1Diff={afterRotToTargetPos1Diff} " +
                     $"(old afterRotToTargetPos1DiffSqrMag={afterRotToTargetPos1DiffSqrMag})");
 
-                var zero = Vector3.zero;
-                var blocked = false;
-                var forwardLen = 0f;
+                Vector3 zero = Vector3.zero;
+                bool blocked = false;
+                float forwardLen = 0f;
                 if (afterRotToTargetPos1DiffSqrMag > 1f) { // TODO why is this not recalculated?
                     forward = VectorUtils.NormalizeXZ(afterRotToTargetPos1Diff, out forwardLen);
                     Log._DebugIf(
@@ -825,7 +826,7 @@
                         $"forwardLen={forwardLen}");
 
                     if (forwardLen > 1f) {
-                        var fwd = afterRotToTargetPos1Diff;
+                        Vector3 fwd = afterRotToTargetPos1Diff;
                         maxSpeedAdd = Mathf.Max(curSpeed, 2f);
                         maxSpeedAddSqr = maxSpeedAdd * maxSpeedAdd;
                         Log._DebugIf(
@@ -834,7 +835,7 @@
                             $"forwardLen > 1f. fwd={fwd} maxSpeedAdd={maxSpeedAdd} maxSpeedAddSqr={maxSpeedAddSqr}");
 
                         if (afterRotToTargetPos1DiffSqrMag > maxSpeedAddSqr) {
-                            var fwdLimiter = maxSpeedAdd / Mathf.Sqrt(afterRotToTargetPos1DiffSqrMag);
+                            float fwdLimiter = maxSpeedAdd / Mathf.Sqrt(afterRotToTargetPos1DiffSqrMag);
                             fwd.x *= fwdLimiter;
                             fwd.y *= fwdLimiter;
 
@@ -957,13 +958,13 @@
                         }
 
                         forward = VectorUtils.NormalizeXZ(fwd, out forwardLen);
-                        var curve = Mathf.PI / 2f * (1f - forward.z);
+                        float curve = Mathf.PI / 2f * (1f - forward.z);
 
                         if (forwardLen > 1f) {
                             curve /= forwardLen;
                         }
 
-                        var targetDist = forwardLen;
+                        float targetDist = forwardLen;
                         Log._DebugIf(
                             logLogic,
                             () => $"CustomTramBaseAI.SimulationStep({vehicleId}): " +
@@ -1008,7 +1009,7 @@
 
                         targetDist += VectorUtils.LengthXZ(vehicleData.m_targetPos3 - vehicleData.m_targetPos2);
                         if (vehicleData.m_targetPos3.w < 0.01f) {
-                            var lengthExtra = m_info.m_generatedInfo.m_wheelBase - m_info.m_generatedInfo.m_size.z;
+                            float lengthExtra = m_info.m_generatedInfo.m_wheelBase - m_info.m_generatedInfo.m_size.z;
                             targetDist = Mathf.Max(0f, targetDist + (lengthExtra * 0.5f));
                         }
 
@@ -1034,7 +1035,7 @@
                             $"CheckOtherVehicles finished. blocked={blocked}");
 
                         if (maxSpeed < curSpeed) {
-                            var brake = Mathf.Max(acceleration, Mathf.Min(braking, curSpeed));
+                            float brake = Mathf.Max(acceleration, Mathf.Min(braking, curSpeed));
                             targetSpeed = Mathf.Max(maxSpeed, curSpeed - brake);
                             Log._DebugIf(
                                 logLogic,
@@ -1042,7 +1043,7 @@
                                 $"maxSpeed < curSpeed. maxSpeed={maxSpeed} curSpeed={curSpeed} " +
                                 $"brake={brake} targetSpeed={targetSpeed}");
                         } else {
-                            var accel = Mathf.Max(acceleration, Mathf.Min(braking, -curSpeed));
+                            float accel = Mathf.Max(acceleration, Mathf.Min(braking, -curSpeed));
                             targetSpeed = Mathf.Min(maxSpeed, curSpeed + accel);
                             Log._DebugIf(
                                 logLogic,
@@ -1077,15 +1078,15 @@
                     turnAngle = Mathf.Asin(forward.x) * Mathf.Sign(targetSpeed);
                     targetMotion = forward * targetSpeed;
                 } else {
-                    var vel = Vector3.ClampMagnitude(afterRotToTargetPos1Diff * 0.5f - curveTangent, braking);
+                    Vector3 vel = Vector3.ClampMagnitude(afterRotToTargetPos1Diff * 0.5f - curveTangent, braking);
                     targetMotion = curveTangent + vel;
                 }
             }
 
-            var mayBlink = (currentFrameIndex + leaderId & 16u) != 0u;
-            var springs = targetMotion - curveTangent;
-            var targetAfterWheelRotMotion = frameData.m_rotation * targetMotion;
-            var targetBeforeWheelRotMotion =
+            bool mayBlink = (currentFrameIndex + leaderId & 16u) != 0u;
+            Vector3 springs = targetMotion - curveTangent;
+            Vector3 targetAfterWheelRotMotion = frameData.m_rotation * targetMotion;
+            Vector3 targetBeforeWheelRotMotion =
                 Vector3.Normalize((Vector3)vehicleData.m_targetPos0 - posBeforeWheelRot) *
                 (targetMotion.magnitude * motionFactor);
             targetBeforeWheelRotMotion -= targetAfterWheelRotMotion *
@@ -1097,7 +1098,7 @@
             posAfterWheelRot += targetAfterWheelRotMotion;
             posBeforeWheelRot += targetBeforeWheelRotMotion;
             frameData.m_rotation = Quaternion.LookRotation(posAfterWheelRot - posBeforeWheelRot);
-            var targetPos = posAfterWheelRot - (frameData.m_rotation * new Vector3(
+            Vector3 targetPos = posAfterWheelRot - (frameData.m_rotation * new Vector3(
                                                     0f,
                                                     0f,
                                                     m_info.m_generatedInfo.m_wheelBase * 0.5f));

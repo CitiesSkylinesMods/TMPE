@@ -54,13 +54,13 @@ namespace TrafficManager.Custom.AI {
                                     out Vector3 pos,
                                     out Vector3 dir,
                                     out float maxSpeed) {
-            var netManager = Singleton<NetManager>.instance;
+            NetManager netManager = Singleton<NetManager>.instance;
             netManager.m_lanes.m_buffer[laneId].CalculatePositionAndDirection(
                 Constants.ByteToFloat(offset), out pos, out dir);
-            var info = netManager.m_segments.m_buffer[position.m_segment].Info;
+            NetInfo info = netManager.m_segments.m_buffer[position.m_segment].Info;
 
             if (info.m_lanes != null && info.m_lanes.Length > position.m_lane) {
-                var laneSpeedLimit = Options.customSpeedLimitsEnabled
+                float laneSpeedLimit = Options.customSpeedLimitsEnabled
                                          ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
                                              position.m_segment,
                                              position.m_lane,
@@ -87,7 +87,7 @@ namespace TrafficManager.Custom.AI {
                                                        float minSqrDistanceA,
                                                        float minSqrDistanceB) {
 #if DEBUG
-            var logLogic = DebugSwitch.CalculateSegmentPosition.Get()
+            bool logLogic = DebugSwitch.CalculateSegmentPosition.Get()
                            && (GlobalConfig.Instance.Debug.ApiExtVehicleType == API.Traffic.Enums.ExtVehicleType.None
                                || GlobalConfig.Instance.Debug.ApiExtVehicleType == API.Traffic.Enums.ExtVehicleType.RoadVehicle)
                            && (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId);
@@ -104,16 +104,16 @@ namespace TrafficManager.Custom.AI {
                     $"\tvehicleData.m_lastPathOffset={vehicleData.m_lastPathOffset}");
             }
 
-            var pathMan = Singleton<PathManager>.instance;
-            var netManager = Singleton<NetManager>.instance;
+            PathManager pathMan = Singleton<PathManager>.instance;
+            NetManager netManager = Singleton<NetManager>.instance;
 
-            var targetPos = vehicleData.m_targetPos0;
+            Vector4 targetPos = vehicleData.m_targetPos0;
             targetPos.w = 1000f;
 
-            var minSqrDistA = minSqrDistanceA;
-            var pathId = vehicleData.m_path;
-            var finePathPosIndex = vehicleData.m_pathPositionIndex;
-            var pathOffset = vehicleData.m_lastPathOffset;
+            float minSqrDistA = minSqrDistanceA;
+            uint pathId = vehicleData.m_path;
+            byte finePathPosIndex = vehicleData.m_pathPositionIndex;
+            byte pathOffset = vehicleData.m_lastPathOffset;
 
             // initial position
             if (finePathPosIndex == 255) {
@@ -144,7 +144,7 @@ namespace TrafficManager.Custom.AI {
             // get current path position, check for errors
             if (!pathMan.m_pathUnits.m_buffer[pathId].GetPosition(
                     finePathPosIndex >> 1,
-                    out var currentPosition))
+                    out PathUnit.Position currentPosition))
             {
                 Log._DebugIf(
                     logLogic,
@@ -156,7 +156,7 @@ namespace TrafficManager.Custom.AI {
             }
 
             // get current segment info, check for errors
-            var curSegmentInfo = netManager.m_segments.m_buffer[currentPosition.m_segment].Info;
+            NetInfo curSegmentInfo = netManager.m_segments.m_buffer[currentPosition.m_segment].Info;
             if (curSegmentInfo.m_lanes.Length <= currentPosition.m_lane) {
                 Log._DebugIf(
                     logLogic,
@@ -169,15 +169,15 @@ namespace TrafficManager.Custom.AI {
             }
 
             // main loop
-            var curLaneId = PathManager.GetLaneID(currentPosition);
+            uint curLaneId = PathManager.GetLaneID(currentPosition);
             Log._DebugIf(
                 logLogic,
                 () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleId}): " +
                 $"currentPosition=[seg={currentPosition.m_segment}, lane={currentPosition.m_lane}, " +
                 $"off={currentPosition.m_offset}], targetPos={targetPos}, curLaneId={curLaneId}");
 
-            var laneInfo = curSegmentInfo.m_lanes[currentPosition.m_lane];
-            var firstIter = true; // NON-STOCK CODE
+            NetInfo.Lane laneInfo = curSegmentInfo.m_lanes[currentPosition.m_lane];
+            bool firstIter = true; // NON-STOCK CODE
 
             while (true) {
                 if ((finePathPosIndex & 1) == 0) {
@@ -195,13 +195,13 @@ namespace TrafficManager.Custom.AI {
                             $"finePathPosIndex={finePathPosIndex}, pathOffset={pathOffset}, " +
                             $"currentPosition.m_offset={currentPosition.m_offset}");
 
-                        var iter = -1;
+                        int iter = -1;
                         while (pathOffset != currentPosition.m_offset) {
                             // catch up and update target position until we get to the current segment offset
                             ++iter;
 
                             if (iter != 0) {
-                                var distDiff = Mathf.Sqrt(minSqrDistA) - Vector3.Distance(targetPos, refPos);
+                                float distDiff = Mathf.Sqrt(minSqrDistA) - Vector3.Distance(targetPos, refPos);
                                 int pathOffsetDelta;
                                 if (distDiff < 0f) {
                                     pathOffsetDelta = 4;
@@ -253,9 +253,9 @@ namespace TrafficManager.Custom.AI {
                                 currentPosition,
                                 curLaneId,
                                 pathOffset,
-                                out var curSegPos,
-                                out var curSegDir,
-                                out var maxSpeed);
+                                out Vector3 curSegPos,
+                                out Vector3 curSegDir,
+                                out float maxSpeed);
 
                             Log._DebugIf(
                                 logLogic,
@@ -277,7 +277,7 @@ namespace TrafficManager.Custom.AI {
                                 () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleId}): " +
                                 $"Calculated targetPos={targetPos}");
 
-                            var refPosSqrDist = (curSegPos - refPos).sqrMagnitude;
+                            float refPosSqrDist = (curSegPos - refPos).sqrMagnitude;
                             Log._DebugIf(
                                 logLogic,
                                 () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleId}): " +
@@ -386,8 +386,8 @@ namespace TrafficManager.Custom.AI {
                  */
 
                 // find next path unit (or abort if at path end)
-                var nextCoarsePathPosIndex = (finePathPosIndex >> 1) + 1;
-                var nextPathId = pathId;
+                int nextCoarsePathPosIndex = (finePathPosIndex >> 1) + 1;
+                uint nextPathId = pathId;
                 if (nextCoarsePathPosIndex >= pathMan.m_pathUnits.m_buffer[pathId].m_positionCount) {
                     nextCoarsePathPosIndex = 0;
                     nextPathId = pathMan.m_pathUnits.m_buffer[pathId].m_nextPathUnit;
@@ -419,7 +419,7 @@ namespace TrafficManager.Custom.AI {
 
                 // get next path position, check for errors
                 if (!pathMan.m_pathUnits.m_buffer[nextPathId]
-                            .GetPosition(nextCoarsePathPosIndex, out var nextPosition)) {
+                            .GetPosition(nextCoarsePathPosIndex, out PathUnit.Position nextPosition)) {
                     Log._DebugIf(
                         logLogic,
                         () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleId}): " +
@@ -436,7 +436,7 @@ namespace TrafficManager.Custom.AI {
                     $"lane={nextPosition.m_lane}, off={nextPosition.m_offset}]");
 
                 // check for errors
-                var nextSegmentInfo = netManager.m_segments.m_buffer[nextPosition.m_segment].Info;
+                NetInfo nextSegmentInfo = netManager.m_segments.m_buffer[nextPosition.m_segment].Info;
                 if (nextSegmentInfo.m_lanes.Length <= nextPosition.m_lane) {
                     Log._DebugIf(
                         logLogic,
@@ -501,8 +501,8 @@ namespace TrafficManager.Custom.AI {
                                     () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleId}): " +
                                     "Using DLS.");
 
-                                var next2PathId = nextPathId;
-                                var next2PathPosIndex = nextCoarsePathPosIndex;
+                                uint next2PathId = nextPathId;
+                                int next2PathPosIndex = nextCoarsePathPosIndex;
                                 NetInfo next2SegmentInfo = null;
                                 PathUnit.Position next3PathPos;
                                 NetInfo next3SegmentInfo = null;
@@ -511,13 +511,13 @@ namespace TrafficManager.Custom.AI {
                                 if (PathUnit.GetNextPosition(
                                     ref next2PathId,
                                     ref next2PathPosIndex,
-                                    out var next2PathPos,
+                                    out PathUnit.Position next2PathPos,
                                     out _))
                                 {
                                     next2SegmentInfo = netManager.m_segments.m_buffer[next2PathPos.m_segment].Info;
 
-                                    var next3PathId = next2PathId;
-                                    var next3PathPosIndex = next2PathPosIndex;
+                                    uint next3PathId = next2PathId;
+                                    int next3PathPosIndex = next2PathPosIndex;
 
                                     if (PathUnit.GetNextPosition(
                                         ref next3PathId,
@@ -527,8 +527,8 @@ namespace TrafficManager.Custom.AI {
                                     {
                                         next3SegmentInfo = netManager.m_segments.m_buffer[next3PathPos.m_segment].Info;
 
-                                        var next4PathId = next3PathId;
-                                        var next4PathPosIndex = next3PathPosIndex;
+                                        uint next4PathId = next3PathId;
+                                        int next4PathPosIndex = next3PathPosIndex;
                                         if (!PathUnit.GetNextPosition(
                                                 ref next4PathId,
                                                 ref next4PathPosIndex,
@@ -586,16 +586,16 @@ namespace TrafficManager.Custom.AI {
                 }
 
                 // check for errors
-                var nextLaneId = PathManager.GetLaneID(nextPosition);
-                var nextLaneInfo = nextSegmentInfo.m_lanes[nextPosition.m_lane];
-                var curSegStartNodeId = netManager.m_segments.m_buffer[currentPosition.m_segment].m_startNode;
-                var curSegEndNodeId = netManager.m_segments.m_buffer[currentPosition.m_segment].m_endNode;
-                var nextSegStartNodeId = netManager.m_segments.m_buffer[nextPosition.m_segment].m_startNode;
-                var nextSegEndNodeId = netManager.m_segments.m_buffer[nextPosition.m_segment].m_endNode;
+                uint nextLaneId = PathManager.GetLaneID(nextPosition);
+                NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextPosition.m_lane];
+                ushort curSegStartNodeId = netManager.m_segments.m_buffer[currentPosition.m_segment].m_startNode;
+                ushort curSegEndNodeId = netManager.m_segments.m_buffer[currentPosition.m_segment].m_endNode;
+                ushort nextSegStartNodeId = netManager.m_segments.m_buffer[nextPosition.m_segment].m_startNode;
+                ushort nextSegEndNodeId = netManager.m_segments.m_buffer[nextPosition.m_segment].m_endNode;
 
-                var flags1 = netManager.m_nodes.m_buffer[curSegStartNodeId].m_flags
+                NetNode.Flags flags1 = netManager.m_nodes.m_buffer[curSegStartNodeId].m_flags
                              | netManager.m_nodes.m_buffer[curSegEndNodeId].m_flags;
-                var flags2 = netManager.m_nodes.m_buffer[nextSegStartNodeId].m_flags
+                NetNode.Flags flags2 = netManager.m_nodes.m_buffer[nextSegStartNodeId].m_flags
                              | netManager.m_nodes.m_buffer[nextSegEndNodeId].m_flags;
 
                 if (nextSegStartNodeId != curSegStartNodeId
@@ -624,7 +624,7 @@ namespace TrafficManager.Custom.AI {
                 // park vehicle
                 if (nextLaneInfo.m_laneType == NetInfo.LaneType.Pedestrian) {
                     if (vehicleId != 0 && (vehicleData.m_flags & Vehicle.Flags.Parking) == 0) {
-                        var inOffset = currentPosition.m_offset;
+                        byte inOffset = currentPosition.m_offset;
 
                         if (ParkVehicle(
                             vehicleId,
@@ -632,7 +632,7 @@ namespace TrafficManager.Custom.AI {
                             currentPosition,
                             nextPathId,
                             nextCoarsePathPosIndex << 1,
-                            out var outOffset))
+                            out byte outOffset))
                         {
                             if (outOffset != inOffset) {
                                 if (targetPosIndex <= 0) {
@@ -691,7 +691,7 @@ namespace TrafficManager.Custom.AI {
                         nextLaneInfo.m_vehicleType,
                         ref targetPos))
                 {
-                    var targetPos0ToRefPosSqrDist = ((Vector3)targetPos - refPos).sqrMagnitude;
+                    float targetPos0ToRefPosSqrDist = ((Vector3)targetPos - refPos).sqrMagnitude;
                     if (targetPos0ToRefPosSqrDist >= minSqrDistA) {
                         vehicleData.SetTargetPos(targetPosIndex++, targetPos);
                     }
@@ -755,7 +755,7 @@ namespace TrafficManager.Custom.AI {
                            laneInfo.m_laneType != NetInfo.LaneType.CargoVehicle) {
                     PathUnit.CalculatePathPositionOffset(nextLaneId, targetPos, out nextSegOffset);
 
-                    var bezier = default(Bezier3);
+                    Bezier3 bezier = default(Bezier3);
 
                     CalculateSegmentPosition(
                         vehicleId,
@@ -764,10 +764,10 @@ namespace TrafficManager.Custom.AI {
                         curLaneId,
                         currentPosition.m_offset,
                         out bezier.a,
-                        out var curSegDir,
-                        out var maxSpeed);
+                        out Vector3 curSegDir,
+                        out float maxSpeed);
 
-                    var calculateNextNextPos = pathOffset == 0;
+                    bool calculateNextNextPos = pathOffset == 0;
                     if (calculateNextNextPos) {
                         if ((vehicleData.m_flags & Vehicle.Flags.Reversed) != 0) {
                             calculateNextNextPos = vehicleData.m_trailingVehicle == 0;
@@ -789,7 +789,7 @@ namespace TrafficManager.Custom.AI {
                     if (calculateNextNextPos) {
                         if (!pathMan.m_pathUnits.m_buffer[nextPathId].GetNextPosition(
                                 nextCoarsePathPosIndex,
-                                out var nextNextPosition)) {
+                                out PathUnit.Position nextNextPosition)) {
                             nextNextPosition = default;
                         }
 
@@ -901,7 +901,7 @@ namespace TrafficManager.Custom.AI {
                         true,
                         out bezier.b,
                         out bezier.c,
-                        out var dist);
+                        out float dist);
 
                     Log._DebugIf(
                         logLogic,
@@ -922,7 +922,7 @@ namespace TrafficManager.Custom.AI {
                             nextNodeId = 0;
                         }
 
-                        var curve = 1.57079637f * (1f + Vector3.Dot(curSegDir, nextSegDir));
+                        float curve = 1.57079637f * (1f + Vector3.Dot(curSegDir, nextSegDir));
                         if (dist > 1f) {
                             curve /= dist;
                         }
@@ -939,7 +939,7 @@ namespace TrafficManager.Custom.AI {
 
                         // update node target positions
                         while (pathOffset < 255) {
-                            var distDiff = Mathf.Sqrt(minSqrDistA) - Vector3.Distance(targetPos, refPos);
+                            float distDiff = Mathf.Sqrt(minSqrDistA) - Vector3.Distance(targetPos, refPos);
                             int pathOffsetDelta;
                             if (distDiff < 0f) {
                                 pathOffsetDelta = 8;
@@ -955,13 +955,13 @@ namespace TrafficManager.Custom.AI {
                                 $"pathOffsetDelta={pathOffsetDelta}");
 
                             pathOffset = (byte)Mathf.Min(pathOffset + pathOffsetDelta, 255);
-                            var bezierPos = bezier.Position(pathOffset * 0.003921569f);
+                            Vector3 bezierPos = bezier.Position(pathOffset * 0.003921569f);
                             targetPos.Set(
                                 bezierPos.x,
                                 bezierPos.y,
                                 bezierPos.z,
                                 Mathf.Min(targetPos.w, curMaxSpeed));
-                            var sqrMagnitude2 = (bezierPos - refPos).sqrMagnitude;
+                            float sqrMagnitude2 = (bezierPos - refPos).sqrMagnitude;
 
                             Log._DebugIf(
                                 logLogic,
@@ -1042,12 +1042,12 @@ namespace TrafficManager.Custom.AI {
                         && (netManager.m_segments.m_buffer[currentPosition.m_segment].m_flags
                             & NetSegment.Flags.Untouchable) == NetSegment.Flags.None)
                     {
-                        var ownerBuildingId = NetSegment.FindOwnerBuilding(nextPosition.m_segment, 363f);
+                        ushort ownerBuildingId = NetSegment.FindOwnerBuilding(nextPosition.m_segment, 363f);
 
                         if (ownerBuildingId != 0) {
-                            var buildingMan = Singleton<BuildingManager>.instance;
-                            var ownerBuildingInfo = buildingMan.m_buildings.m_buffer[ownerBuildingId].Info;
-                            var itemId = default(InstanceID);
+                            BuildingManager buildingMan = Singleton<BuildingManager>.instance;
+                            BuildingInfo ownerBuildingInfo = buildingMan.m_buildings.m_buffer[ownerBuildingId].Info;
+                            InstanceID itemId = default(InstanceID);
                             itemId.Vehicle = vehicleId;
                             ownerBuildingInfo.m_buildingAI.EnterBuildingSegment(
                                 ownerBuildingId,

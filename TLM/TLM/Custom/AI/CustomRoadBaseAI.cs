@@ -20,7 +20,7 @@ namespace TrafficManager.Custom.AI {
                     data.m_flags |= NetNode.Flags.CustomTrafficLights;*/
 
                 // NON-STOCK CODE START
-                var toggleTool = (ToggleTrafficLightsTool)UIBase
+                ToggleTrafficLightsTool toggleTool = (ToggleTrafficLightsTool)UIBase
                                                           .GetTrafficManagerTool(true)
                                                           .GetSubTool(ToolMode.SwitchTrafficLight);
                 toggleTool.ToggleTrafficLight(nodeId, ref data, false);
@@ -32,20 +32,20 @@ namespace TrafficManager.Custom.AI {
                        && index <= 8
                        && (data.m_flags & (NetNode.Flags.TrafficLights
                                            | NetNode.Flags.OneWayIn)) == NetNode.Flags.None) {
-                var segmentId = data.GetSegment(index - 1);
+                ushort segmentId = data.GetSegment(index - 1);
                 if (segmentId == 0) {
                     return;
                 }
 
-                var netManager = Singleton<NetManager>.instance;
-                var info = netManager.m_segments.m_buffer[segmentId].Info;
+                NetManager netManager = Singleton<NetManager>.instance;
+                NetInfo info = netManager.m_segments.m_buffer[segmentId].Info;
                 if ((info.m_vehicleTypes & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram)) ==
                     VehicleInfo.VehicleType.None) {
                     return;
                 }
 
-                var flag = netManager.m_segments.m_buffer[segmentId].m_startNode == nodeId;
-                var flags = (!flag) ? NetSegment.Flags.YieldEnd : NetSegment.Flags.YieldStart;
+                bool flag = netManager.m_segments.m_buffer[segmentId].m_startNode == nodeId;
+                NetSegment.Flags flags = (!flag) ? NetSegment.Flags.YieldEnd : NetSegment.Flags.YieldStart;
                 netManager.m_segments.m_buffer[segmentId].m_flags ^= flags;
                 netManager.m_segments.m_buffer[segmentId].UpdateLanes(segmentId, true);
                 Singleton<NetManager>.instance.m_yieldLights.Disable();

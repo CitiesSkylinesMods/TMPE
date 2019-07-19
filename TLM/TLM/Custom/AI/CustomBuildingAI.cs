@@ -28,7 +28,7 @@
                         ref data,
                         ref ExtBuildingManager.Instance.ExtBuildings[buildingId],
                         infoMode,
-                        out var color)) {
+                        out Color? color)) {
                         return (Color)color;
                     }
                 }
