@@ -25,9 +25,7 @@ namespace TrafficManager.Util {
         private readonly Dictionary<ulong, string> knownIncompatibleMods;
 
         public ModsCompatibilityChecker() {
-            if (GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup) {
-                knownIncompatibleMods = LoadListOfIncompatibleMods();
-            }
+            knownIncompatibleMods = LoadListOfIncompatibleMods();
         }
 
         /// <summary>
@@ -62,44 +60,56 @@ namespace TrafficManager.Util {
         public Dictionary<PluginInfo, string> ScanForIncompatibleMods() {
             Guid selfGuid = Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId;
 
-            Log.Info($"Scanning for incompatible mods; My GUID = {selfGuid}");
-
-            // list of installed incompatible mods
-            Dictionary<PluginInfo, string> results = new Dictionary<PluginInfo, string>();
-
             // check known incompatible mods? (incompatible_mods.txt)
             bool checkKnown = GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup;
 
             // only check enabled mods?
             bool filterToEnabled = GlobalConfig.Instance.Main.IgnoreDisabledMods;
 
+            // batch all logging in to a single log message
+            string logStr = $"TM:PE Incompatible Mod Checker ({checkKnown},{filterToEnabled}):\n\n";
+
+            // list of installed incompatible mods
+            Dictionary<PluginInfo, string> results = new Dictionary<PluginInfo, string>();
+
             // iterate plugins
             foreach (PluginInfo mod in Singleton<PluginManager>.instance.GetPluginsInfo()) {
                 if (!mod.isBuiltin && !mod.isCameraScript) {
 
-                    string modName = GetModName(mod);
+                    string strModName = GetModName(mod);
                     ulong workshopID = mod.publishedFileID.AsUInt64;
+                    bool isLocal = workshopID == LOCAL_MOD;
 
-                    if (checkKnown && (!filterToEnabled || mod.isEnabled) && knownIncompatibleMods.ContainsKey(workshopID)) {
+                    string strEnabled = mod.isEnabled ? "*" : " ";
+                    string strWorkshopId = isLocal ? "(local)" : workshopID.ToString();
+                    string strIncompatible = " ";
 
-                        Log.Info($"Incompatible with: {workshopID} - {modName}");
-                        results.Add(mod, modName);
+                    if (knownIncompatibleMods.ContainsKey(workshopID)) {
 
-                    } else if (modName.Contains("TM:PE") || modName.Contains("Traffic Manager")) {
+                        strIncompatible = "!";
+                        if (checkKnown && (!filterToEnabled || mod.isEnabled)) {
+                            Log.Warning("[TM:PE] Incompatible mod detected: " + strModName);
+                            results.Add(mod, strModName);
+                        }
 
-                        string workshopIDstr = workshopID == LOCAL_MOD ? "LOCAL" : workshopID.ToString();
-                        Guid currentGuid = GetModGuid(mod);
+                    } else if (strModName.Contains("TM:PE") || strModName.Contains("Traffic Manager")) {
 
-                        if (currentGuid != selfGuid) {
-                            Log.Info($"Detected conflicting '{modName}' (Workshop ID: {workshopIDstr}, GUID: {currentGuid}) in '{mod.modPath}'");
-                            results.Add(mod, $"{modName} in /{Path.GetFileName(mod.modPath)}");
+                        if (GetModGuid(mod) != selfGuid) {
+                            string strFolder = Path.GetFileName(mod.modPath);
+                            strIncompatible = "!";
+                            Log.Warning("[TM:PE] Duplicate instance detected: " + strModName + " in " + strFolder);
+                            results.Add(mod, strModName + " /" + strFolder);
                         }
 
                     }
+
+                    logStr += $"{strIncompatible} {strEnabled} {strWorkshopId.PadRight(12)} {strModName}\n";
+
                 }
             }
 
-            Log.Info($"Scan complete: {results.Count} incompatible mod(s) found");
+            Log.Info(logStr);
+            Log.Info("Scan complete: " + results.Count.ToString() + " incompatible mod(s) found");
 
             return results;
         }
