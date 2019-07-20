@@ -48,7 +48,7 @@ namespace TrafficManager.Custom.AI {
                 return;
             }
 
-            Citizen[] ctzBuffer = citizenManager.m_citizens.m_buffer;
+            Citizen[] citizensBuffer = citizenManager.m_citizens.m_buffer;
             if ((instanceData.m_flags & CitizenInstance.Flags.WaitingPath) != CitizenInstance.Flags.None) {
                 PathManager pathManager = Singleton<PathManager>.instance;
                 byte pathFindFlags = pathManager.m_pathUnits.m_buffer[instanceData.m_path].m_pathFindFlags;
@@ -78,7 +78,7 @@ namespace TrafficManager.Custom.AI {
                         ref instanceData,
                         ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceId],
                         ref ExtCitizenManager.Instance.ExtCitizens[citizenId],
-                        ref ctzBuffer[instanceData.m_citizen],
+                        ref citizensBuffer[instanceData.m_citizen],
                         mainPathState);
                     if (logParkingAi) {
                         Log._Debug(
@@ -103,7 +103,7 @@ namespace TrafficManager.Custom.AI {
                         }
 
                         if (citizenId == 0
-                            || ctzBuffer[instanceData.m_citizen].m_vehicle == 0) {
+                            || citizensBuffer[instanceData.m_citizen].m_vehicle == 0) {
                             Spawn(instanceId, ref instanceData);
                         }
 
@@ -119,7 +119,7 @@ namespace TrafficManager.Custom.AI {
                                                        | Citizen.Flags.MovingIn
                                                        | Citizen.Flags.DummyTraffic;
                         if (citizenId != 0
-                            && (ctzBuffer[citizenId].m_flags & CTZ_MASK) == Citizen.Flags.MovingIn)
+                            && (citizensBuffer[citizenId].m_flags & CTZ_MASK) == Citizen.Flags.MovingIn)
                         {
                             StatisticBase statisticBase = Singleton<StatisticsManager>
                                                 .instance.Acquire<StatisticInt32>(StatisticType.MoveRate);
@@ -222,7 +222,7 @@ namespace TrafficManager.Custom.AI {
             VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
             ushort vehicleId = 0;
             if (instanceData.m_citizen != 0u) {
-                vehicleId = ctzBuffer[instanceData.m_citizen].m_vehicle;
+                vehicleId = citizensBuffer[instanceData.m_citizen].m_vehicle;
             }
 
             if (vehicleId != 0) {
@@ -366,11 +366,11 @@ namespace TrafficManager.Custom.AI {
 
                             if (StartPathFind(instanceId, ref instanceData)) {
                                 return true;
+                            } else {
+                                instanceData.Unspawn(instanceId);
+                                extCitInstMan.Reset(ref extInstance);
+                                return true;
                             }
-
-                            instanceData.Unspawn(instanceId);
-                            extCitInstMan.Reset(ref extInstance);
-                            return true;
                         }
 
                         case ParkedCarApproachState.Failure: {

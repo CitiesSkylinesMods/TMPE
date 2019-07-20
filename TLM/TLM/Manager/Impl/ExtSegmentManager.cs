@@ -51,7 +51,7 @@ namespace TrafficManager.Manager.Impl {
 			IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 			ushort segmentId = extSegment.segmentId;
 
-#if DEBUGGEO
+#if DEBUG
 			bool output = DebugSwitch.GeometryDebug.Get();
 
 			if (output)
@@ -69,7 +69,7 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
-#if DEBUGGEO
+#if DEBUG
 			if (output)
 				Log.Info($"Recalculating geometries of segment {segmentId} STARTED");
 #endif
@@ -83,7 +83,7 @@ namespace TrafficManager.Manager.Impl {
 
 			extSegEndMan.Recalculate(segmentId);
 
-#if DEBUGGEO
+#if DEBUG
 			if (output) {
 				Log.Info($"Recalculated ext. segment {segmentId} (flags={Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags}): {extSegment}");
 			}

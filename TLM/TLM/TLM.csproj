@@ -38,7 +38,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FullDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;PF2;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGCONN;DEBUGHK;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;PF2;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGCONN;DEBUGHK;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
@@ -49,7 +49,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Benchmark|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Benchmark\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;BENCHMARK</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;BENCHMARK</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
@@ -60,7 +60,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'PF2_Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\PF2_Debug\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PF2;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PF2;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
@@ -155,8 +155,8 @@
     <Compile Include="RedirectionFramework\RedirectionUtil.cs" />
     <Compile Include="RedirectionFramework\Redirector.cs" />
     <Compile Include="RedirectionFramework\Tuple.cs" />
-    <Compile Include="Custom\PathFinding\CustomPathFind_Current.cs" />
-    <Compile Include="Custom\PathFinding\StockPathFind.cs" />
+    <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
+    <AdditionalFiles Include="Custom\PathFinding\StockPathFind.cs" />
     <Compile Include="Manager\Impl\ExtCitizenManager.cs" />
     <Compile Include="Manager\Impl\GeometryManager.cs" />
     <Compile Include="Manager\Impl\TurnOnRedManager.cs" />

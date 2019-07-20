@@ -6,10 +6,10 @@
     using UnityEngine;
 
     public static class Log {
-        private static readonly object LogLock_ = new object();
+        private static readonly object LogLock = new object();
 
         // TODO refactor log filename to configuration
-        private static readonly string LogFilename_
+        private static readonly string LogFilename
             = Path.Combine(Application.dataPath, "TMPE.log");
 
         private enum LogLevel {
@@ -20,12 +20,12 @@
             Error
         }
 
-        private static Stopwatch sw = Stopwatch.StartNew();
+        private static Stopwatch _sw = Stopwatch.StartNew();
 
         static Log() {
             try {
-                if (File.Exists(LogFilename_)) {
-                    File.Delete(LogFilename_);
+                if (File.Exists(LogFilename)) {
+                    File.Delete(LogFilename);
                 }
             }
             catch (Exception) { }
@@ -118,11 +118,11 @@
 
         private static void LogToFile(string log, LogLevel level) {
             try {
-                Monitor.Enter(LogLock_);
+                Monitor.Enter(LogLock);
 
-                using (StreamWriter w = File.AppendText(LogFilename_)) {
-                    long secs = sw.ElapsedTicks / Stopwatch.Frequency;
-                    long fraction = sw.ElapsedTicks % Stopwatch.Frequency;
+                using (StreamWriter w = File.AppendText(LogFilename)) {
+                    long secs = _sw.ElapsedTicks / Stopwatch.Frequency;
+                    long fraction = _sw.ElapsedTicks % Stopwatch.Frequency;
                     w.WriteLine(
                         $"{level.ToString()} " +
                         $"{secs:n0}.{fraction:D7}: " +
@@ -135,7 +135,7 @@
                 }
             }
             finally {
-                Monitor.Exit(LogLock_);
+                Monitor.Exit(LogLock);
             }
         }
     }

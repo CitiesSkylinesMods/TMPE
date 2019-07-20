@@ -16,9 +16,7 @@ namespace TrafficManager.Custom.PathFinding {
     using Traffic.Data;
     using UnityEngine;
 
-#if PF2
-    using CustomPathFind = CustomPathFind_Current;
-#else
+#if !PF2
     using CustomPathFind = CustomPathFind_Old;
 #endif
 
@@ -248,7 +246,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if QUEUEDSTATS
             TotalQueuedPathFinds = 0;
 #endif
-            foreach (CustomPathFind_Current pathFindCandidate in _replacementPathFinds) {
+            foreach (CustomPathFind pathFindCandidate in _replacementPathFinds) {
 #if QUEUEDSTATS
                 TotalQueuedPathFinds += (uint)pathFindCandidate.m_queuedPathFindCount;
 #endif
@@ -384,7 +382,7 @@ namespace TrafficManager.Custom.PathFinding {
         }*/
 
         private void StopPathFinds() {
-            foreach (CustomPathFind_Current pathFind in _replacementPathFinds) {
+            foreach (CustomPathFind pathFind in _replacementPathFinds) {
                 Destroy(pathFind);
             }
         }

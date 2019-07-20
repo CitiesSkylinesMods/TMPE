@@ -184,7 +184,9 @@ namespace TrafficManager.Custom.AI {
             int lodPhysics;
             if (Vector3.SqrMagnitude(physicsLodRefPos - lastFramePosition) >= 1100f * 1100f) {
                 lodPhysics = 2;
-            } else if (Vector3.SqrMagnitude(Singleton<SimulationManager>.instance.m_simulationView.m_position - lastFramePosition) >= 500f * 500f) {
+            } else if (Vector3.SqrMagnitude(
+                           Singleton<SimulationManager>.instance.m_simulationView.m_position -
+                           lastFramePosition) >= 500f * 500f) {
                 lodPhysics = 1;
             } else {
                 lodPhysics = 0;
@@ -218,11 +220,10 @@ namespace TrafficManager.Custom.AI {
 
             int privateServiceIndex = ItemClass.GetPrivateServiceIndex(m_info.m_class.m_service);
             int maxBlockCounter = (privateServiceIndex == -1) ? 150 : 100;
-            const Vehicle.Flags MASK = Vehicle.Flags.Spawned
-                                       | Vehicle.Flags.WaitingPath
-                                       | Vehicle.Flags.WaitingSpace;
 
-            if ((vehicleData.m_flags & MASK) == 0
+            if ((vehicleData.m_flags & (Vehicle.Flags.Spawned
+                                        | Vehicle.Flags.WaitingPath
+                                        | Vehicle.Flags.WaitingSpace)) == 0
                 && vehicleData.m_cargoParent == 0) {
                 Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
             } else if (vehicleData.m_blockCounter >= maxBlockCounter) {
@@ -371,7 +372,9 @@ namespace TrafficManager.Custom.AI {
 
                 // NON-STOCK CODE END
                 maxSpeed = CalculateTargetSpeed(
-                    vehicleId, ref vehicleData, laneSpeedLimit,
+                    vehicleId,
+                    ref vehicleData,
+                    laneSpeedLimit,
                     netManager.m_lanes.m_buffer[nextLaneId].m_curve);
             } else {
                 maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1f, 0f);
@@ -592,9 +595,9 @@ namespace TrafficManager.Custom.AI {
                 return otherData.m_nextGridVehicle;
             }
 
-            const Vehicle.Flags U = Vehicle.Flags.Underground;
             if (((vehicleData.m_flags | otherData.m_flags) & Vehicle.Flags.Transition) == 0
-                && (vehicleData.m_flags & U) != (otherData.m_flags & U)) {
+                && (vehicleData.m_flags & Vehicle.Flags.Underground) !=
+                (otherData.m_flags & Vehicle.Flags.Underground)) {
                 return otherData.m_nextGridVehicle;
             }
 
@@ -605,7 +608,7 @@ namespace TrafficManager.Custom.AI {
                          && (DebugSettings.VehicleId == 0
                              || DebugSettings.VehicleId == vehicleId);
 #else
-            var logLogic = false;
+            const bool logLogic = false;
 #endif
             Log._DebugIf(
                 logLogic,
@@ -663,7 +666,7 @@ namespace TrafficManager.Custom.AI {
             for (int i = startI; i < 4; i++) {
                 Vector3 targetPos = vehicleData.GetTargetPos(i);
                 Vector3 targetPosDiff = targetPos - prevTargetPos;
-                if (!(Vector3.Dot(prevBounds, targetPosDiff) > 0f)) {
+                if (Vector3.Dot(prevBounds, targetPosDiff) <= 0f) {
                     continue;
                 }
 

@@ -48,7 +48,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void SimulationStep(bool onlyFirstPass=false) {
-#if DEBUGGEO
+#if DEBUG
 			bool debug = DebugSwitch.GeometryDebug.Get();
 #endif
 			if (!stateUpdated) {
@@ -57,7 +57,7 @@ namespace TrafficManager.Manager.Impl {
 
 			NetManager netManager = Singleton<NetManager>.instance;
 			if (!onlyFirstPass && (netManager.m_segmentsUpdated || netManager.m_nodesUpdated)) { // TODO maybe refactor NetManager use (however this could influence performance)
-#if DEBUGGEO
+#if DEBUG
 				if (debug)
 					Log._Debug($"GeometryManager.SimulationStep(): Skipping! stateUpdated={stateUpdated}, m_segmentsUpdated={netManager.m_segmentsUpdated}, m_nodesUpdated={netManager.m_nodesUpdated}");
 #endif
@@ -82,14 +82,14 @@ namespace TrafficManager.Manager.Impl {
 									if (firstPass ^ !seg.valid) {
 										if (! firstPass) {
 											updatesMissing = true;
-#if DEBUGGEO
+#if DEBUG
 											if (debug)
 												Log.Warning($"GeometryManager.SimulationStep(): Detected invalid segment {segmentId} in second pass");
 #endif
 										}
 										continue;
 									}
-#if DEBUGGEO
+#if DEBUG
 									if (debug)
 										Log._Debug($"GeometryManager.SimulationStep(): Notifying observers about segment {segmentId}. Valid? {seg.valid} First pass? {firstPass}");
 #endif
@@ -111,14 +111,14 @@ namespace TrafficManager.Manager.Impl {
 									if (firstPass ^ !valid) {
 										if (!firstPass) {
 											updatesMissing = true;
-#if DEBUGGEO
+#if DEBUG
 											if (debug)
 												Log.Warning($"GeometryManager.SimulationStep(): Detected invalid node {nodeId} in second pass");
 #endif
 										}
 										continue;
 									}
-#if DEBUGGEO
+#if DEBUG
 									if (debug)
 										Log._Debug($"GeometryManager.SimulationStep(): Notifying observers about node {nodeId}. Valid? {valid} First pass? {firstPass}");
 #endif
@@ -133,7 +133,7 @@ namespace TrafficManager.Manager.Impl {
 				if (! updatesMissing) {
 					while (segmentReplacements.Count > 0) {
 						SegmentEndReplacement replacement = segmentReplacements.Dequeue();
-#if DEBUGGEO
+#if DEBUG
 						if (debug)
 							Log._Debug($"GeometryManager.SimulationStep(): Notifying observers about segment end replacement {replacement}");
 #endif
@@ -158,7 +158,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void MarkAsUpdated(ref ExtSegment seg, bool updateNodes = true) {
-#if DEBUGGEO
+#if DEBUG
 			if (DebugSwitch.GeometryDebug.Get())
 				Log._Debug($"GeometryManager.MarkAsUpdated(segment {seg.segmentId}): Marking segment as updated");
 #endif
@@ -182,7 +182,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void MarkAsUpdated(ushort nodeId, bool updateSegments = false) {
-#if DEBUGGEO
+#if DEBUG
 			if (DebugSwitch.GeometryDebug.Get())
 				Log._Debug($"GeometryManager.MarkAsUpdated(node {nodeId}): Marking node as updated");
 #endif
@@ -210,7 +210,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public void OnSegmentEndReplacement(SegmentEndReplacement replacement) {
-#if DEBUGGEO
+#if DEBUG
 			if (DebugSwitch.GeometryDebug.Get())
 				Log._Debug($"GeometryManager.OnSegmentEndReplacement(): Detected segment replacement: {replacement.oldSegmentEndId.SegmentId} -> {replacement.newSegmentEndId.SegmentId}");
 #endif
@@ -225,7 +225,7 @@ namespace TrafficManager.Manager.Impl {
 		}
 
 		public IDisposable Subscribe(IObserver<GeometryUpdate> observer) {
-#if DEBUGGEO
+#if DEBUG
 			if (DebugSwitch.GeometryDebug.Get())
 				Log._Debug($"GeometryManager.Subscribe(): Subscribing observer {observer.GetType().Name}");
 #endif

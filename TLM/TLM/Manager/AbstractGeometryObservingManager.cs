@@ -64,13 +64,13 @@
                 // Handle a segment update
                 ExtSegment seg = (ExtSegment)update.segment;
                 if (!seg.valid) {
-#if DEBUGGEO
+#if DEBUG
                     if (DebugSwitch.GeometryDebug.Get())
                         Log._Debug($"{this.GetType().Name}.HandleInvalidSegment({seg.segmentId})");
 #endif
                     HandleInvalidSegment(ref seg);
                 } else {
-#if DEBUGGEO
+#if DEBUG
                     if (DebugSwitch.GeometryDebug.Get())
                         Log._Debug($"{this.GetType().Name}.HandleValidSegment({seg.segmentId})");
 #endif
@@ -81,13 +81,13 @@
                 ushort nodeId = (ushort)update.nodeId;
                 Services.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
                     if ((node.m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) == NetNode.Flags.Created) {
-#if DEBUGGEO
+#if DEBUG
                         if (DebugSwitch.GeometryDebug.Get())
                             Log._Debug($"{this.GetType().Name}.HandleValidNode({nodeId})");
 #endif
                         HandleValidNode(nodeId, ref node);
                     } else {
-#if DEBUGGEO
+#if DEBUG
                         if (DebugSwitch.GeometryDebug.Get())
                             Log._Debug($"{this.GetType().Name}.HandleInvalidNode({nodeId})");
 #endif
@@ -99,7 +99,7 @@
                 // Handle a segment end replacement
                 IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
-#if DEBUGGEO
+#if DEBUG
                 if (DebugSwitch.GeometryDebug.Get())
                     Log._Debug($"{this.GetType().Name}.HandleSegmentReplacement({update.replacement.oldSegmentEndId} -> {update.replacement.newSegmentEndId})");
 #endif

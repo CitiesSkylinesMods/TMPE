@@ -81,14 +81,13 @@ namespace TrafficManager.Custom.AI {
                 out float startDistSqrA,
                 out _);
 
-            const VehicleInfo.VehicleType TRAIN_SHIP_PLANE = VehicleInfo.VehicleType.Train
-                                                             | VehicleInfo.VehicleType.Ship
-                                                             | VehicleInfo.VehicleType.Plane;
             if (PathManager.FindPathPosition(
                 startPos,
                 ItemClass.Service.PublicTransport,
                 NetInfo.LaneType.Vehicle,
-                TRAIN_SHIP_PLANE,
+                VehicleInfo.VehicleType.Train
+                | VehicleInfo.VehicleType.Ship
+                | VehicleInfo.VehicleType.Plane,
                 allowUnderground,
                 false,
                 32f,
@@ -126,7 +125,9 @@ namespace TrafficManager.Custom.AI {
                 endPos,
                 ItemClass.Service.PublicTransport,
                 NetInfo.LaneType.Vehicle,
-                TRAIN_SHIP_PLANE,
+                VehicleInfo.VehicleType.Train
+                | VehicleInfo.VehicleType.Ship
+                | VehicleInfo.VehicleType.Plane,
                 undergroundTarget,
                 false,
                 32f,

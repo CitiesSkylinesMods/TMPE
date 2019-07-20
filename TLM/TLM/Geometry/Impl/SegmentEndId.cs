@@ -34,8 +34,8 @@
         }
 
         public override int GetHashCode() {
-            var prime = 31;
-            var result = 1;
+            int prime = 31;
+            int result = 1;
             result = (prime * result) + SegmentId.GetHashCode();
             result = (prime * result) + StartNode.GetHashCode();
             return result;

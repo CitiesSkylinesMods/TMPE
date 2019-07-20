@@ -29,7 +29,7 @@
 #if PF2
     [TargetType(typeof(PathFind))]
 #endif
-    public class CustomPathFind_Current : PathFind {
+    public class CustomPathFind : PathFind {
         private const float BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR = Constants.BYTE_TO_FLOAT_SCALE;
 
         private const float TICKET_COST_CONVERSION_FACTOR =
@@ -323,7 +323,9 @@
             stablePath_ = (PathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_STABLE_PATH) != 0;
             randomParking_ = (PathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_RANDOM_PARKING) != 0;
             transportVehicle_ = (laneTypes_ & NetInfo.LaneType.TransportVehicle) != NetInfo.LaneType.None;
-            ignoreCost_ = stablePath_ || (PathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IGNORE_COST) != 0;
+            ignoreCost_ = stablePath_ ||
+                          (PathUnits.m_buffer[unit].m_simulationFlags &
+                           PathUnit.FLAG_IGNORE_COST) != 0;
             disableMask_ = NetSegment.Flags.Collapsed | NetSegment.Flags.PathFailed;
 
             if ((PathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IGNORE_FLOODED) == 0) {

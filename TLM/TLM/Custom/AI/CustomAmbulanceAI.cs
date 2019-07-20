@@ -27,30 +27,32 @@
             VehicleInfo info = m_info;
             bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground | Vehicle.Flags.Transition)) != 0;
 
-            const NetInfo.LaneType VEHICLE_AND_TRANSPORT = NetInfo.LaneType.Vehicle
-                                                           | NetInfo.LaneType.TransportVehicle;
-            if (PathManager.FindPathPosition(startPos,
-                                             ItemClass.Service.Road,
-                                             VEHICLE_AND_TRANSPORT,
-                                             info.m_vehicleType,
-                                             allowUnderground,
-                                             false,
-                                             32f,
-                                             out PathUnit.Position startPosA,
-                                             out PathUnit.Position startPosB,
-                                             out float startDistSqrA,
-                                             out _)
-                && PathManager.FindPathPosition(endPos,
-                                                ItemClass.Service.Road,
-                                                VEHICLE_AND_TRANSPORT,
-                                                info.m_vehicleType,
-                                                undergroundTarget,
-                                                false,
-                                                32f,
-                                                out PathUnit.Position endPosA,
-                                                out PathUnit.Position endPosB,
-                                                out float endDistSqrA,
-                                                out _)) {
+            if (PathManager.FindPathPosition(
+                    startPos,
+                    ItemClass.Service.Road,
+                    NetInfo.LaneType.Vehicle
+                    | NetInfo.LaneType.TransportVehicle,
+                    info.m_vehicleType,
+                    allowUnderground,
+                    false,
+                    32f,
+                    out PathUnit.Position startPosA,
+                    out PathUnit.Position startPosB,
+                    out float startDistSqrA,
+                    out _)
+                && PathManager.FindPathPosition(
+                    endPos,
+                    ItemClass.Service.Road,
+                    NetInfo.LaneType.Vehicle
+                    | NetInfo.LaneType.TransportVehicle,
+                    info.m_vehicleType,
+                    undergroundTarget,
+                    false,
+                    32f,
+                    out PathUnit.Position endPosA,
+                    out PathUnit.Position endPosB,
+                    out float endDistSqrA,
+                    out _)) {
                 if (!startBothWays || startDistSqrA < 10f) {
                     startPosB = default;
                 }
@@ -71,7 +73,8 @@
                 args.endPosA = endPosA;
                 args.endPosB = endPosB;
                 args.vehiclePosition = default;
-                args.laneTypes = VEHICLE_AND_TRANSPORT;
+                args.laneTypes = NetInfo.LaneType.Vehicle
+                                 | NetInfo.LaneType.TransportVehicle;
                 args.vehicleTypes = info.m_vehicleType;
                 args.maxLength = 20000f;
                 args.isHeavyVehicle = IsHeavyVehicle();

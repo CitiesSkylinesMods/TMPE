@@ -171,7 +171,7 @@ namespace TrafficManager.Custom.AI {
                 }
 
                 curCitizenUnitId = nextUnit;
-                if (++numIterations > CitizenManager.MAX_CITIZEN_COUNT / 2) {
+                if (++numIterations > CitizenManager.MAX_UNIT_COUNT) {
                     CODebugBase<LogChannel>.Error(LogChannel.Core,
                                                   $"Invalid list detected!\n{Environment.StackTrace}");
                     break;
