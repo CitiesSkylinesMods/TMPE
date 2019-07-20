@@ -16,7 +16,7 @@ namespace TrafficManager.Custom.PathFinding {
     using Traffic.Data;
     using UnityEngine;
 
-#if !PF2
+#if !PF_DIJKSTRA
     using CustomPathFind = CustomPathFind_Old;
 #endif
 
@@ -74,7 +74,7 @@ namespace TrafficManager.Custom.PathFinding {
 
                 for (int i = 0; i < numCustomPathFinds; i++) {
                     _replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();
-#if !PF2
+#if !PF_DIJKSTRA
 					_replacementPathFinds[i].pfId = i;
 					if (i == 0) {
 						_replacementPathFinds[i].IsMasterPathFind = true;
@@ -259,7 +259,7 @@ namespace TrafficManager.Custom.PathFinding {
                 pathFind = pathFindCandidate;
             }
 
-#if PF2
+#if PF_DIJKSTRA
             if (pathFind != null && pathFind.CalculatePath(unit, args.skipQueue)) {
                 return true;
             }
