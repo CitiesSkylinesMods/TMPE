@@ -88,7 +88,7 @@ namespace TrafficManager.Util {
 
                         strIncompatible = "!";
                         if (checkKnown && (!filterToEnabled || mod.isEnabled)) {
-                            Log.Warning("[TM:PE] Incompatible mod detected: " + strModName);
+                            Debug.Log("[TM:PE] Incompatible mod detected: " + strModName);
                             results.Add(mod, strModName);
                         }
 
@@ -97,7 +97,7 @@ namespace TrafficManager.Util {
                         if (GetModGuid(mod) != selfGuid) {
                             string strFolder = Path.GetFileName(mod.modPath);
                             strIncompatible = "!";
-                            Log.Warning("[TM:PE] Duplicate instance detected: " + strModName + " in " + strFolder);
+                            Debug.Log("[TM:PE] Duplicate instance detected: " + strModName + " in " + strFolder);
                             results.Add(mod, strModName + " /" + strFolder);
                         }
 
