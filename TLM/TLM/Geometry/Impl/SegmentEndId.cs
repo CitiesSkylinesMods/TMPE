@@ -18,19 +18,14 @@
         }
 
         public override bool Equals(object other) {
-            if (other == null) {
-                return false;
-            }
-
-            return other is ISegmentEndId && Equals((ISegmentEndId)other);
+            return other is ISegmentEndId
+                   && Equals((ISegmentEndId)other);
         }
 
         public bool Equals(ISegmentEndId otherSegEndId) {
-            if (otherSegEndId == null) {
-                return false;
-            }
-
-            return SegmentId == otherSegEndId.SegmentId && StartNode == otherSegEndId.StartNode;
+            return otherSegEndId != null
+                   && SegmentId == otherSegEndId.SegmentId
+                   && StartNode == otherSegEndId.StartNode;
         }
 
         public override int GetHashCode() {
