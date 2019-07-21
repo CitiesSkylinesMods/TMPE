@@ -104,7 +104,6 @@ namespace TrafficManager.Util {
                     }
 
                     logStr += $"{strIncompatible} {strEnabled} {strWorkshopId.PadRight(12)} {strModName}\n";
-
                 }
             }
 
@@ -155,16 +154,17 @@ namespace TrafficManager.Util {
                 }
             }
 
-            Log.Info($"{RESOURCES_PREFIX}{INCOMPATIBLE_MODS_FILE} contains {lines.Length} entries");
-
             // parse the file
             for (int i = 0; i < lines.Length; i++) {
-                ulong steamId;
-                string[] strings = lines[i].Split(';');
-                if (ulong.TryParse(strings[0], out steamId)) {
-                    results.Add(steamId, strings[1]);
+                if (!string.IsNullOrEmpty(lines[i])) {
+                    string[] strings = lines[i].Split(';');
+                    if (ulong.TryParse(strings[0], out ulong steamId)) {
+                        results.Add(steamId, strings[1]);
+                    }
                 }
             }
+
+            Log.Info($"{RESOURCES_PREFIX}{INCOMPATIBLE_MODS_FILE} contains {results.Count} entries");
 
             return results;
         }
