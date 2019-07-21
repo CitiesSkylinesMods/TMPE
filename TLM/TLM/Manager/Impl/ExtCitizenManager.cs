@@ -1,23 +1,12 @@
-﻿using ColossalFramework;
-using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using TrafficManager.Custom.AI;
-using TrafficManager.State;
-using TrafficManager.Traffic;
-using TrafficManager.Traffic.Data;
-using TrafficManager.Traffic.Enums;
-using TrafficManager.Util;
-using UnityEngine;
-using static TrafficManager.Traffic.Data.ExtCitizen;
-using static TrafficManager.Traffic.Data.ExtCitizenInstance;
-
-namespace TrafficManager.Manager.Impl {
+﻿namespace TrafficManager.Manager.Impl {
+    using System;
+    using System.Collections.Generic;
     using API.Manager;
     using API.Traffic.Enums;
-	using State.ConfigData;
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using State.ConfigData;
+    using Traffic.Data;
 
 	public class ExtCitizenManager : AbstractCustomManager, ICustomDataManager<List<Configuration.ExtCitizenData>>, IExtCitizenManager {
 		public static ExtCitizenManager Instance = new ExtCitizenManager();

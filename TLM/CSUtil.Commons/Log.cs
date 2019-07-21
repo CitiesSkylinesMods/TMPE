@@ -1,7 +1,9 @@
 ﻿namespace CSUtil.Commons {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Text;
     using System.Threading;
     using UnityEngine;
 
@@ -38,6 +40,16 @@
         [Conditional("DEBUG")]
         public static void _Debug(string s) {
             LogToFile(s, LogLevel.Debug);
+        }
+
+        /// <summary>
+        /// EXPERIMENTAL
+        /// Given a list of strings, numbers, and unknown objects, join them together into a
+        /// StringBuilder.
+        /// </summary>
+        /// <param name="fmt">List of everything to join together</param>
+        public static void _DebugFmt(params object[] fmt) {
+            LogToFile(fmt, LogLevel.Debug);
         }
 
         /// <summary>
@@ -115,6 +127,28 @@
         [Conditional("DEBUG")]
         public static void _DebugOnlyError(string s) {
             LogToFile(s, LogLevel.Error);
+        }
+
+        private static void LogToFile(IEnumerable<object> fmt, LogLevel level) {
+            StringBuilder sb = new StringBuilder(256);
+            foreach (object obj in fmt) {
+                switch (obj) {
+                    case string s:
+                        sb.Append(s);
+                        break;
+                    case int i:
+                        sb.Append(i);
+                        break;
+                    case float f:
+                        sb.Append(f);
+                        break;
+                    default:
+                        sb.Append(obj);
+                        break;
+                }
+            }
+
+            LogToFile(sb.ToString(), level);
         }
 
         private static void LogToFile(string log, LogLevel level) {
