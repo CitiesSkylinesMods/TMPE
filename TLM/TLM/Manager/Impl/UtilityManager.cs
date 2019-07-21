@@ -12,7 +12,9 @@ using UnityEngine;
 using TrafficManager.Geometry.Impl;
 
 namespace TrafficManager.Manager.Impl {
-	public class UtilityManager : AbstractCustomManager, IUtilityManager {
+    using API.Manager;
+
+    public class UtilityManager : AbstractCustomManager, IUtilityManager {
 		public static UtilityManager Instance { get; private set; } = null;
 
 		static UtilityManager() {

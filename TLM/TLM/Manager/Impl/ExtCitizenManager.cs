@@ -15,7 +15,8 @@ using static TrafficManager.Traffic.Data.ExtCitizen;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Manager.Impl {
-	using API.Traffic.Enums;
+    using API.Manager;
+    using API.Traffic.Enums;
 	using State.ConfigData;
 
 	public class ExtCitizenManager : AbstractCustomManager, ICustomDataManager<List<Configuration.ExtCitizenData>>, IExtCitizenManager {

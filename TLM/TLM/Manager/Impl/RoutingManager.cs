@@ -18,7 +18,8 @@ using TrafficManager.Util;
 using static TrafficManager.State.Flags;
 
 namespace TrafficManager.Manager.Impl {
-	using API.Traffic.Enums;
+    using API.Manager;
+    using API.Traffic.Enums;
 	using State.ConfigData;
 
 	public class RoutingManager : AbstractGeometryObservingManager, IRoutingManager {

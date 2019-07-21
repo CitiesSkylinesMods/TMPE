@@ -12,7 +12,8 @@ using TrafficManager.Traffic.Data;
 using TrafficManager.Util;
 
 namespace TrafficManager.Manager.Impl {
-	using State.ConfigData;
+    using API.Manager;
+    using State.ConfigData;
 
 	public class GeometryManager : AbstractCustomManager, IGeometryManager {
 		public static GeometryManager Instance { get; private set; } = new GeometryManager();

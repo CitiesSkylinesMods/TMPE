@@ -11,7 +11,8 @@ using TrafficManager.TrafficLight;
 using TrafficManager.Util;
 
 namespace TrafficManager.Manager.Impl {
-	using API.Traffic.Enums;
+    using API.Manager;
+    using API.Traffic.Enums;
 	using State.ConfigData;
 
 	/// <summary>

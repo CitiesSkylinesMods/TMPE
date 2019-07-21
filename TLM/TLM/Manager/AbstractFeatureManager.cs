@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 
 namespace TrafficManager.Manager {
-	/// <summary>
+    using API.Manager;
+
+    /// <summary>
 	/// Helper class to ensure that events are always handled in the simulation thread
 	/// </summary>
 	public abstract class AbstractFeatureManager : AbstractCustomManager, IFeatureManager {

@@ -11,7 +11,8 @@ using TrafficManager.Traffic.Impl;
 using TrafficManager.TrafficLight;
 
 namespace TrafficManager.Manager.Impl {
-	using State.ConfigData;
+    using API.Manager;
+    using State.ConfigData;
 
 	[Obsolete("should be removed when implementing issue #240")]
 	public class SegmentEndManager : AbstractCustomManager, ISegmentEndManager {

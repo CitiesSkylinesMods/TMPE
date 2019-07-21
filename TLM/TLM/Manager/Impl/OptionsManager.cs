@@ -7,7 +7,8 @@ using TrafficManager.State;
 using TrafficManager.Traffic.Enums;
 
 namespace TrafficManager.Manager.Impl {
-	using API.Traffic.Enums;
+    using API.Manager;
+    using API.Traffic.Enums;
 
 	public class OptionsManager : AbstractCustomManager, IOptionsManager {
 		// TODO I contain ugly code

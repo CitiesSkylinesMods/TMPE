@@ -12,7 +12,9 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager.Impl {
-	public class ExtBuildingManager : AbstractCustomManager, IExtBuildingManager {
+    using API.Manager;
+
+    public class ExtBuildingManager : AbstractCustomManager, IExtBuildingManager {
 		public static ExtBuildingManager Instance { get; private set; } = null;
 
 		static ExtBuildingManager() {

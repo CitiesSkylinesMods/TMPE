@@ -8,7 +8,9 @@ using TrafficManager.Geometry.Impl;
 using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
-	public class ParkingRestrictionsManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.ParkingRestriction>>, IParkingRestrictionsManager {
+    using API.Manager;
+
+    public class ParkingRestrictionsManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.ParkingRestriction>>, IParkingRestrictionsManager {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Parking;
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 

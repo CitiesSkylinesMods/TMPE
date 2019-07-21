@@ -16,7 +16,9 @@ using UnityEngine;
 using static TrafficManager.Traffic.Data.ExtCitizenInstance;
 
 namespace TrafficManager.Manager.Impl {
-	public class ExtPathManager : AbstractCustomManager, IExtPathManager {
+    using API.Manager;
+
+    public class ExtPathManager : AbstractCustomManager, IExtPathManager {
 		public static readonly ExtPathManager Instance = new ExtPathManager();
 
 		private ExtPathManager() {

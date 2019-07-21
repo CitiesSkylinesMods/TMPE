@@ -1,8 +1,8 @@
 ﻿namespace TrafficManager.API.TrafficLight {
     using System;
     using System.Collections.Generic;
+    using Manager;
     using Traffic.Enums;
-    using TrafficManager.Manager;
     using TrafficManager.Traffic;
     using TrafficManager.TrafficLight;
 

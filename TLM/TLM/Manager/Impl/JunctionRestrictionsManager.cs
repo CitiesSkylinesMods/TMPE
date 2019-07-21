@@ -8,7 +8,8 @@ using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
-	using State.ConfigData;
+    using API.Manager;
+    using State.ConfigData;
 
 	public class JunctionRestrictionsManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.SegmentNodeConf>>, IJunctionRestrictionsManager {
 		public static JunctionRestrictionsManager Instance { get; private set; } = new JunctionRestrictionsManager();

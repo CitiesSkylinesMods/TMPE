@@ -11,7 +11,9 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager.Impl {
-	public class SpeedLimitManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.LaneSpeedLimit>>, ICustomDataManager<Dictionary<string, float>>, ISpeedLimitManager {
+    using API.Manager;
+
+    public class SpeedLimitManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.LaneSpeedLimit>>, ICustomDataManager<Dictionary<string, float>>, ISpeedLimitManager {
 		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Monorail;
 

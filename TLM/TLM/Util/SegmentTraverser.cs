@@ -9,7 +9,9 @@ using TrafficManager.Manager;
 using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Util {
-	public class SegmentTraverser {
+    using API.Manager;
+
+    public class SegmentTraverser {
 		[Flags]
 		public enum TraverseDirection {
 			None = 0,

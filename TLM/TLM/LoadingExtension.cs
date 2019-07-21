@@ -22,7 +22,9 @@ using Harmony;
 using TrafficManager.RedirectionFramework;
 
 namespace TrafficManager {
-	public class LoadingExtension : LoadingExtensionBase {
+    using API.Manager;
+
+    public class LoadingExtension : LoadingExtensionBase {
 		private const string HARMONY_ID = "de.viathinksoft.tmpe";
 
 		public class Detour {

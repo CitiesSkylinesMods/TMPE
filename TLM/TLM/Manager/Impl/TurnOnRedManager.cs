@@ -4,7 +4,8 @@ using TrafficManager.State;
 using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
-	using State.ConfigData;
+    using API.Manager;
+    using State.ConfigData;
 
 	public class TurnOnRedManager : AbstractGeometryObservingManager, ITurnOnRedManager {
 		private TurnOnRedManager() {

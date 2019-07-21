@@ -23,7 +23,9 @@ using TrafficManager.Manager.Impl;
 using TrafficManager.Geometry.Impl;
 
 namespace TrafficManager.State {
-	public class SerializableDataExtension : SerializableDataExtensionBase {
+    using API.Manager;
+
+    public class SerializableDataExtension : SerializableDataExtensionBase {
 		private const string DataId = "TrafficManager_v1.0";
 
 		private static ISerializableData _serializableData;

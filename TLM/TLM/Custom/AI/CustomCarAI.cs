@@ -3,6 +3,7 @@
 namespace TrafficManager.Custom.AI {
     using System;
     using System.Runtime.CompilerServices;
+    using API.Manager;
     using API.Traffic.Data;
     using API.Traffic.Enums;
     using ColossalFramework;

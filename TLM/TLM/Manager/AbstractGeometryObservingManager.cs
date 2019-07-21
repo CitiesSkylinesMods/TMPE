@@ -1,5 +1,6 @@
 ﻿namespace TrafficManager.Manager {
     using System;
+    using API.Manager;
     using CSUtil.Commons;
     using Geometry;
     using State;

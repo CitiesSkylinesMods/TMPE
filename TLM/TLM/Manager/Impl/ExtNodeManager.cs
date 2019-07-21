@@ -15,7 +15,9 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager.Impl {
-	public class ExtNodeManager : AbstractCustomManager, IExtNodeManager {
+    using API.Manager;
+
+    public class ExtNodeManager : AbstractCustomManager, IExtNodeManager {
 		public static ExtNodeManager Instance { get; private set; } = null;
 
 		static ExtNodeManager() {

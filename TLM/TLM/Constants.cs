@@ -1,4 +1,5 @@
 ﻿namespace TrafficManager {
+    using API.Manager;
     using GenericGameBridge.Factory;
     using Manager;
 

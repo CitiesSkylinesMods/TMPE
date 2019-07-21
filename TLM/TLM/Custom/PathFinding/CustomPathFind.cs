@@ -3,6 +3,7 @@
     using System.Diagnostics;
     using System.Reflection;
     using System.Threading;
+    using API.Manager;
     using API.Traffic.Enums;
     using API.TrafficLight;
     using ColossalFramework;

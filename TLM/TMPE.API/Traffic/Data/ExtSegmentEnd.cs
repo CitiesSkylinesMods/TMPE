@@ -1,6 +1,5 @@
 ﻿using CSUtil.Commons;
 using System;
-using TrafficManager.Manager;
 
 namespace TrafficManager.Traffic.Data {
 	public struct ExtSegmentEnd : IEquatable<ExtSegmentEnd> {

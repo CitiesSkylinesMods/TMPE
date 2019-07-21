@@ -19,7 +19,8 @@ using TrafficManager.Geometry.Impl;
 using ColossalFramework.UI;
 
 namespace TrafficManager.UI.SubTools {
-	using State.ConfigData;
+    using API.Manager;
+    using State.ConfigData;
 
 	public class JunctionRestrictionsTool : SubTool {
 

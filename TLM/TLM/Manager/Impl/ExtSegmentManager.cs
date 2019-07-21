@@ -14,7 +14,8 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager.Impl {
-	using State.ConfigData;
+    using API.Manager;
+    using State.ConfigData;
 
 	public class ExtSegmentManager : AbstractCustomManager, IExtSegmentManager {
 		public static ExtSegmentManager Instance { get; private set; } = null;

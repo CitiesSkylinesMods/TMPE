@@ -47,6 +47,7 @@
         /// </summary>
         /// <param name="cond">The condition</param>
         /// <param name="s">The function which returns text to log</param>
+        // TODO: Add log thread and replace formatted strings with lists to perform late formatting in that thread
         [Conditional("DEBUG")]
         public static void _DebugIf(bool cond, Func<string> s) {
             if (cond) {

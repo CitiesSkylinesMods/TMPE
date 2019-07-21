@@ -1,6 +1,7 @@
 namespace TrafficManager.Manager.Impl {
     using System;
     using System.Collections.Generic;
+    using API.Manager;
     using API.Traffic.Data;
     using API.Traffic.Enums;
     using API.TrafficLight;
