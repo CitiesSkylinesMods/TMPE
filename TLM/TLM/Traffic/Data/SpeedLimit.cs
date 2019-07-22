@@ -129,16 +129,25 @@ namespace TrafficManager.Traffic.Data {
 		/// <param name="speed">Ingame speed</param>
 		/// <returns>Ingame speed decreased by the increment for MPH or KMPH</returns>
 		public static float GetPrevious(float speed) {
-			if (speed < 0f) {
-				return -1f;
-			}
-			if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph) {
-				var rounded = ToMphRounded(speed);
-				return (rounded > LOWER_MPH ? rounded - MPH_STEP : LOWER_MPH) / SPEED_TO_MPH;
-			} else {
-				var rounded = ToKmphRounded(speed);
-				return (rounded > LOWER_KMPH ? rounded - KMPH_STEP : LOWER_KMPH) / SPEED_TO_KMPH;
-			}
+            if (speed < 0f) {
+                return -1f;
+            }
+
+            if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph) {
+                ushort rounded = ToMphRounded(speed);
+                if (rounded == LOWER_MPH) {
+                    return 0;
+                }
+
+                return (rounded > LOWER_MPH ? rounded - MPH_STEP : LOWER_MPH) / SPEED_TO_MPH;
+            } else {
+                ushort rounded = ToKmphRounded(speed);
+                if (rounded == LOWER_KMPH) {
+                    return 0;
+                }
+
+                return (rounded > LOWER_KMPH ? rounded - KMPH_STEP : LOWER_KMPH) / SPEED_TO_KMPH;
+            }
 		}
 
 		/// <summary>
