@@ -241,8 +241,8 @@ namespace TrafficManager.UI {
         /// <returns></returns>
         public static Texture2D GetSpeedLimitTexture(float speedLimit, MphSignStyle mphStyle, SpeedUnit unit) {
             // Select the source for the textures based on unit and the theme
-            var mph = unit == SpeedUnit.Mph;
-            var textures = SpeedLimitTexturesKmph;
+            bool mph = unit == SpeedUnit.Mph;
+            IDictionary<int, Texture2D> textures = SpeedLimitTexturesKmph;
             if (mph) {
                 switch (mphStyle) {
                     case MphSignStyle.SquareUS:
@@ -257,22 +257,20 @@ namespace TrafficManager.UI {
                 }
             }
 
-            // Trim the range
-            if (speedLimit > SpeedLimitManager.MAX_SPEED * 0.95f) {
+            // Round to nearest 5 MPH or nearest 10 km/h
+            ushort index = mph ? SpeedLimit.ToMphRounded(speedLimit) : SpeedLimit.ToKmphRounded(speedLimit);
+
+            // Trim the index since 140 km/h / 90 MPH is the max sign we have
+            ushort upper = mph ? SpeedLimit.UPPER_MPH : SpeedLimit.UPPER_KMPH;
+
+            // Show unlimited if the speed cannot be represented by the available sign textures
+            if (index == 0 || index > upper) {
+                // Log._Debug($"Trimming speed={speedLimit} index={index} to {upper}");
                 return textures[0];
             }
 
-            // Round to nearest 5 MPH or nearest 10 km/h
-            var index = mph ? SpeedLimit.ToMphRounded(speedLimit) : SpeedLimit.ToKmphRounded(speedLimit);
-
-            // Trim the index since 140 km/h / 90 MPH is the max sign we have
-            var upper = mph ? SpeedLimit.UPPER_MPH : SpeedLimit.UPPER_KMPH;
-#if DEBUG
-            if (index > upper) {
-                Log.Info($"Trimming speed={speedLimit} index={index} to {upper}");
-            }
-#endif
-            var trimIndex = Math.Min(upper, Math.Max((ushort)0, index));
+            // Trim from below to not go below index 5 (5 kmph or 5 mph)
+            ushort trimIndex = Math.Max((ushort)5, index);
             return textures[trimIndex];
         }
 
