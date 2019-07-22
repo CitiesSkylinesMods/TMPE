@@ -122,13 +122,13 @@ namespace TrafficManager.Traffic.Data {
 			return (ushort)Mathf.Round(speed * SPEED_TO_KMPH);
 		}
 
-		/// <summary>
-		/// Based on the MPH/KMPH settings round the current speed to the nearest STEP and
-		/// then decrease by STEP.
-		/// </summary>
-		/// <param name="speed">Ingame speed</param>
-		/// <returns>Ingame speed decreased by the increment for MPH or KMPH</returns>
-		public static float GetPrevious(float speed) {
+        /// <summary>
+        /// Based on the MPH/KMPH settings round the current speed to the nearest STEP and
+        /// then decrease by STEP.
+        /// </summary>
+        /// <param name="speed">Ingame speed</param>
+        /// <returns>Ingame speed decreased by the increment for MPH or KMPH</returns>
+        public static float GetPrevious(float speed) {
             if (speed < 0f) {
                 return -1f;
             }
@@ -139,6 +139,10 @@ namespace TrafficManager.Traffic.Data {
                     return 0;
                 }
 
+                if (rounded == 0) {
+                    return UPPER_MPH / SPEED_TO_MPH;
+                }
+
                 return (rounded > LOWER_MPH ? rounded - MPH_STEP : LOWER_MPH) / SPEED_TO_MPH;
             } else {
                 ushort rounded = ToKmphRounded(speed);
@@ -146,29 +150,45 @@ namespace TrafficManager.Traffic.Data {
                     return 0;
                 }
 
+                if (rounded == 0) {
+                    return UPPER_KMPH / SPEED_TO_KMPH;
+                }
+
                 return (rounded > LOWER_KMPH ? rounded - KMPH_STEP : LOWER_KMPH) / SPEED_TO_KMPH;
             }
-		}
+        }
 
-		/// <summary>
-		/// Based on the MPH/KMPH settings round the current speed to the nearest STEP and
-		/// then increase by STEP.
-		/// </summary>
-		/// <param name="speed">Ingame speed</param>
-		/// <returns>Ingame speed increased by the increment for MPH or KMPH</returns>
-		public static float GetNext(float speed) {
-			if (speed < 0f) {
-				return -1f;
-			}
-			if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph) {
-				var rounded = ToMphRounded(speed);
-				return (rounded < UPPER_MPH ? rounded + MPH_STEP : UPPER_MPH) / SPEED_TO_MPH;
-			}
-			else {
-				var rounded = ToKmphRounded(speed);
-				return (rounded < UPPER_KMPH ? rounded + KMPH_STEP : UPPER_KMPH) / SPEED_TO_KMPH;
-			}
-		}
+        /// <summary>
+        /// Based on the MPH/KMPH settings round the current speed to the nearest STEP and
+        /// then increase by STEP.
+        /// </summary>
+        /// <param name="speed">Ingame speed</param>
+        /// <returns>Ingame speed increased by the increment for MPH or KMPH</returns>
+        public static float GetNext(float speed) {
+            if (speed < 0f) {
+                return -1f;
+            }
+
+            if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph) {
+                ushort rounded = ToMphRounded(speed);
+                rounded += MPH_STEP;
+
+                if (rounded > UPPER_MPH) {
+                    rounded = 0;
+                }
+
+                return rounded / SPEED_TO_MPH;
+            } else {
+                ushort rounded = ToKmphRounded(speed);
+                rounded += KMPH_STEP;
+
+                if (rounded > UPPER_KMPH) {
+                    rounded = 0;
+                }
+
+                return rounded / SPEED_TO_KMPH;
+            }
+        }
 
 		/// <summary>
 		/// For US signs and MPH enabled, scale textures vertically by 1.25f.
