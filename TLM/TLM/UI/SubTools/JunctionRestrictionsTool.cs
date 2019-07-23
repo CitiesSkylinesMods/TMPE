@@ -137,7 +137,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void OnActivate() {
-#if DEBUGCONN
+#if DEBUG
 			Log._Debug("TppLaneConnectorTool: OnActivate");
 #endif
 			SelectedNodeId = 0;

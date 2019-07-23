@@ -277,7 +277,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnPrimaryClickOverlay() {
-#if DEBUGCONN
+#if DEBUG
 			bool debug = DebugSwitch.LaneConnections.Get();
 			if (debug)
 				Log._Debug($"TppLaneConnectorTool: OnPrimaryClickOverlay. SelectedNodeId={SelectedNodeId} SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId} HoveredSegmentId={HoveredSegmentId}");
@@ -288,14 +288,14 @@ namespace TrafficManager.UI.SubTools {
 
             if (GetMarkerSelectionMode() == MarkerSelectionMode.None) {
                 if (HoveredNodeId != 0) {
-#if DEBUGCONN
+#if DEBUG
 					if (debug)
 						Log._Debug($"TppLaneConnectorTool: HoveredNode != 0");
 #endif
 
                     if (NetManager.instance.m_nodes.m_buffer[HoveredNodeId].CountSegments() < 2) {
                         // this node cannot be configured (dead end)
-#if DEBUGCONN
+#if DEBUG
 						if (debug)
 							Log._Debug($"TppLaneConnectorTool: Node is a dead end");
 #endif
@@ -306,7 +306,7 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     if (SelectedNodeId != HoveredNodeId) {
-#if DEBUGCONN
+#if DEBUG
 						if (debug)
 							Log._Debug($"Node {HoveredNodeId} has been selected. Creating markers.");
 #endif
@@ -323,7 +323,7 @@ namespace TrafficManager.UI.SubTools {
                         //this.allNodeMarkers[SelectedNodeId] = GetNodeMarkers(SelectedNodeId);
                     }
                 } else {
-#if DEBUGCONN
+#if DEBUG
 					if (debug)
 						Log._Debug($"TppLaneConnectorTool: Node {SelectedNodeId} has been deselected.");
 #endif
@@ -339,7 +339,7 @@ namespace TrafficManager.UI.SubTools {
             if (hoveredMarker != null) {
                 stayInLaneMode = StayInLaneMode.None;
 
-#if DEBUGCONN
+#if DEBUG
 				if (debug)
 					Log._Debug($"TppLaneConnectorTool: hoveredMarker != null. selMode={GetMarkerSelectionMode()}");
 #endif
@@ -348,7 +348,7 @@ namespace TrafficManager.UI.SubTools {
                 if (GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource) {
                     // select source marker
                     selectedMarker = hoveredMarker;
-#if DEBUGCONN
+#if DEBUG
 					if (debug)
 						Log._Debug($"TppLaneConnectorTool: set selected marker");
 #endif
@@ -357,14 +357,14 @@ namespace TrafficManager.UI.SubTools {
                     //bool success = false;
                     if (LaneConnectionManager.Instance.RemoveLaneConnection(selectedMarker.laneId, hoveredMarker.laneId, selectedMarker.startNode)) { // try to remove connection
                         selectedMarker.connectedMarkers.Remove(hoveredMarker);
-#if DEBUGCONN
+#if DEBUG
 						if (debug)
 							Log._Debug($"TppLaneConnectorTool: removed lane connection: {selectedMarker.laneId}, {hoveredMarker.laneId}");
 #endif
                         //success = true;
                     } else if (LaneConnectionManager.Instance.AddLaneConnection(selectedMarker.laneId, hoveredMarker.laneId, selectedMarker.startNode)) { // try to add connection
                         selectedMarker.connectedMarkers.Add(hoveredMarker);
-#if DEBUGCONN
+#if DEBUG
 						if (debug)
 							Log._Debug($"TppLaneConnectorTool: added lane connection: {selectedMarker.laneId}, {hoveredMarker.laneId}");
 #endif
@@ -382,7 +382,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnSecondaryClickOverlay() {
-#if DEBUGCONN
+#if DEBUG
 			bool debug = DebugSwitch.LaneConnections.Get();
 #endif
 
@@ -392,7 +392,7 @@ namespace TrafficManager.UI.SubTools {
             switch (GetMarkerSelectionMode()) {
                 case MarkerSelectionMode.None:
                 default:
-#if DEBUGCONN
+#if DEBUG
 					if (debug)
 						Log._Debug($"TppLaneConnectorTool: OnSecondaryClickOverlay: nothing to do");
 #endif
@@ -400,7 +400,7 @@ namespace TrafficManager.UI.SubTools {
                     break;
                 case MarkerSelectionMode.SelectSource:
                     // deselect node
-#if DEBUGCONN
+#if DEBUG
 					if (debug)
 						Log._Debug($"TppLaneConnectorTool: OnSecondaryClickOverlay: selected node id = 0");
 #endif
@@ -408,7 +408,7 @@ namespace TrafficManager.UI.SubTools {
                     break;
                 case MarkerSelectionMode.SelectTarget:
                     // deselect source marker
-#if DEBUGCONN
+#if DEBUG
 					if (debug)
 						Log._Debug($"TppLaneConnectorTool: OnSecondaryClickOverlay: switch to selected source mode");
 #endif
@@ -418,7 +418,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnActivate() {
-#if DEBUGCONN
+#if DEBUG
 			bool debug = DebugSwitch.LaneConnections.Get();
 			if (debug)
 				Log._Debug("TppLaneConnectorTool: OnActivate");

@@ -251,7 +251,7 @@ namespace TrafficManager.State {
         /// <param name="startNode1"></param>
         /// <returns></returns>
         internal static bool RemoveLaneConnection(uint lane1Id, uint lane2Id, bool startNode1) {
-#if DEBUGCONN
+#if DEBUG
             bool debug = DebugSwitch.LaneConnections.Get();
             if (debug)
                 Log._Debug($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}) called.");
@@ -288,7 +288,7 @@ namespace TrafficManager.State {
                     ret = true;
             }
 
-#if DEBUGCONN
+#if DEBUG
             if (debug)
                 Log._Debug($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}). ret={ret}");
 #endif
@@ -301,7 +301,7 @@ namespace TrafficManager.State {
         /// <param name="laneId"></param>
         /// <param name="startNode"></param>
         internal static void RemoveLaneConnections(uint laneId, bool? startNode=null) {
-#if DEBUGCONN
+#if DEBUG
             bool debug = DebugSwitch.LaneConnections.Get();
             if (debug)
                 Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}) called. laneConnections[{laneId}]={laneConnections[laneId]}");
@@ -311,7 +311,7 @@ namespace TrafficManager.State {
 
             bool laneValid = CheckLane(laneId);
             bool clearBothSides = startNode == null || !laneValid;
-#if DEBUGCONN
+#if DEBUG
             if (debug)
                 Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}): laneValid={laneValid}, clearBothSides={clearBothSides}");
 #endif
