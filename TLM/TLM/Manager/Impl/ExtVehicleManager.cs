@@ -106,14 +106,14 @@
             if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created ||
                 (vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnCreateVehicle({vehicleId}): unhandled vehicle! flags: {vehicleData.m_flags}, type: {vehicleData.Info.m_vehicleType}");
 #endif
                 return;
             }
 
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnCreateVehicle({vehicleId}): calling OnCreate for vehicle {vehicleId}");
 #endif
 
@@ -124,7 +124,7 @@
             if ((vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None ||
                 (vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnStartPathFind({vehicleId}, {vehicleType}): unhandled vehicle! type: {vehicleData.Info.m_vehicleType}");
 #endif
                 return ExtVehicleType.None;
@@ -141,7 +141,7 @@
                 }
 
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnStartPathFind({vehicleId}, {vehicleType}): overriding vehicle type for connected vehicle {connectedVehicleId} of vehicle {vehicleId} (trailing)");
 #endif
                 OnStartPathFind(ref ExtVehicles[connectedVehicleId], ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId], vehicleType);
@@ -154,13 +154,13 @@
             if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Spawned)) != (Vehicle.Flags.Created | Vehicle.Flags.Spawned) ||
                 (vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnSpawnVehicle({vehicleId}): unhandled vehicle! flags: {vehicleData.m_flags}, type: {vehicleData.Info.m_vehicleType}, path: {vehicleData.m_path}");
 #endif
                 return;
             }
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnSpawnVehicle({vehicleId}): calling OnSpawn for vehicle {vehicleId}");
 #endif
 
@@ -181,7 +181,7 @@
 
         protected void UpdateVehiclePosition(ref Vehicle vehicleData, ref ExtVehicle extVehicle) {
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.UpdateVehiclePosition({extVehicle.vehicleId}) called");
 #endif
 
@@ -207,7 +207,7 @@
             if ((vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None ||
                 (vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Spawned)) == 0) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnDespawnVehicle({vehicleId}): unhandled vehicle! type: {vehicleData.Info.m_vehicleType}");
 #endif
                 return;
@@ -216,7 +216,7 @@
             ushort connectedVehicleId = vehicleId;
             while (connectedVehicleId != 0) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnDespawnVehicle({vehicleId}): calling OnDespawn for connected vehicle {connectedVehicleId} of vehicle {vehicleId} (trailing)");
 #endif
                 OnDespawn(ref ExtVehicles[connectedVehicleId]);
@@ -226,20 +226,20 @@
 
         public void OnReleaseVehicle(ushort vehicleId, ref Vehicle vehicleData) {
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnReleaseVehicle({vehicleId}) called.");
 #endif
             if ((vehicleData.m_flags & (Vehicle.Flags.Created | Vehicle.Flags.Deleted)) != Vehicle.Flags.Created ||
                 (vehicleData.Info.m_vehicleType & VEHICLE_TYPES) == VehicleInfo.VehicleType.None) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnReleaseVehicle({vehicleId}): unhandled vehicle! flags: {vehicleData.m_flags}, type: {vehicleData.Info.m_vehicleType}");
 #endif
                 return;
             }
 
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnReleaseVehicle({vehicleId}): calling OnRelease for vehicle {vehicleId}");
 #endif
 
@@ -248,7 +248,7 @@
 
         public void Unlink(ref ExtVehicle extVehicle) {
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.Unlink({extVehicle.vehicleId}) called: Unlinking vehicle from all segment ends\nstate:{extVehicle}");
 
             ushort prevSegmentId = extVehicle.currentSegmentId;
@@ -283,7 +283,7 @@
             extVehicle.lastPathPositionIndex = 0;
 
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[12]) {
+            if (DebugSwitch.PedestrianPathfinding.Get()) {
                 IExtSegmentEndManager segmentEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
                 Log._Debug($"ExtVehicleManager.Unlink({extVehicle.vehicleId}) finished: Unlinked vehicle from all segment ends\nstate:{extVehicle}\nold segment end vehicle chain: {ExtSegmentEndManager.Instance.GenerateVehicleChainDebugInfo(prevSegmentId, prevStartNode)}");
             }
@@ -298,7 +298,7 @@
         /// <param name="laneIndex">lane index</param>
         private void Link(ref ExtVehicle extVehicle, ref ExtSegmentEnd end, byte laneIndex) {
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.Link({extVehicle.vehicleId}) called: Linking vehicle to segment end {end}\nstate:{extVehicle}");
 #endif
             extVehicle.currentSegmentId = end.segmentId;
@@ -313,20 +313,20 @@
             end.firstVehicleId = extVehicle.vehicleId;
 
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[12])
+            if (DebugSwitch.PedestrianPathfinding.Get())
                 Log._Debug($"ExtVehicleManager.Link({extVehicle.vehicleId}) finished: Linked vehicle to segment end: {end}\nstate:{extVehicle}\nsegment end vehicle chain: {ExtSegmentEndManager.Instance.GenerateVehicleChainDebugInfo(extVehicle.currentSegmentId, extVehicle.currentStartNode)}");
 #endif
         }
 
         public void OnCreate(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnCreate({extVehicle.vehicleId}) called: {extVehicle}");
 #endif
 
             if ((extVehicle.flags & ExtVehicleFlags.Created) != ExtVehicleFlags.None) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnCreate({extVehicle.vehicleId}): Vehicle is already created.");
 #endif
                 OnRelease(ref extVehicle, ref vehicleData);
@@ -337,7 +337,7 @@
             extVehicle.flags = ExtVehicleFlags.Created;
 
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnCreate({extVehicle.vehicleId}) finished: {extVehicle}");
 #endif
         }
@@ -347,13 +347,13 @@
             ref Vehicle vehicleData,
             API.Traffic.Enums.ExtVehicleType? vehicleType) {
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnStartPathFind({extVehicle.vehicleId}, {vehicleType}) called: {extVehicle}");
 #endif
 
             if ((extVehicle.flags & ExtVehicleFlags.Created) == ExtVehicleFlags.None) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnStartPathFind({extVehicle.vehicleId}, {vehicleType}): Vehicle has not yet been created.");
 #endif
                 OnCreate(ref extVehicle, ref vehicleData);
@@ -366,7 +366,7 @@
             extVehicle.recklessDriver = Constants.ManagerFactory.VehicleBehaviorManager.IsRecklessDriver(extVehicle.vehicleId, ref vehicleData);
 
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnStartPathFind({extVehicle.vehicleId}, {vehicleType}) finished: {extVehicle}");
 #endif
 
@@ -378,13 +378,13 @@
 
         public void OnSpawn(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnSpawn({extVehicle.vehicleId}) called: {extVehicle}");
 #endif
 
             if ((extVehicle.flags & ExtVehicleFlags.Created) == ExtVehicleFlags.None) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnSpawn({extVehicle.vehicleId}): Vehicle has not yet been created.");
 #endif
                 OnCreate(ref extVehicle, ref vehicleData);
@@ -408,7 +408,7 @@
                 ) {
                 extVehicle.totalLength = 0;
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnSpawn({extVehicle.vehicleId}): Error occurred while calculating total length: {e}\nstate: {extVehicle}");
 #endif
                 return;
@@ -417,20 +417,20 @@
             extVehicle.flags |= ExtVehicleFlags.Spawned;
 
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnSpawn({extVehicle.vehicleId}) finished: {extVehicle}");
 #endif
         }
 
         public void UpdatePosition(ref ExtVehicle extVehicle, ref Vehicle vehicleData, ref ExtSegmentEnd segEnd, ref PathUnit.Position curPos, ref PathUnit.Position nextPos) {
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}) called: {extVehicle}");
 #endif
 
             if ((extVehicle.flags & ExtVehicleFlags.Spawned) == ExtVehicleFlags.None) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}): Vehicle is not yet spawned.");
 #endif
                 OnSpawn(ref extVehicle, ref vehicleData);
@@ -446,13 +446,13 @@
 
             if (extVehicle.currentSegmentId != segEnd.segmentId || extVehicle.currentStartNode != segEnd.startNode || extVehicle.currentLaneIndex != curPos.m_lane) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}): Current segment end changed. seg. {extVehicle.currentSegmentId}, start {extVehicle.currentStartNode}, lane {extVehicle.currentLaneIndex} -> seg. {segEnd.segmentId}, start {segEnd.startNode}, lane {curPos.m_lane}");
 #endif
 
                 if (extVehicle.currentSegmentId != 0) {
 #if DEBUG
-                    if (GlobalConfig.Instance.Debug.Switches[9])
+                    if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                         Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}): Unlinking from current segment end");
 #endif
 
@@ -465,7 +465,7 @@
                 extVehicle.waitTime = 0;
 
 #if DEBUGVSTATE
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}): Linking vehicle to segment end {segEnd.segmentId} @ {segEnd.startNode} ({segEnd.nodeId}). Current position: Seg. {curPos.m_segment}, lane {curPos.m_lane}, offset {curPos.m_offset} / Next position: Seg. {nextPos.m_segment}, lane {nextPos.m_lane}, offset {nextPos.m_offset}");
 #endif
                 if (segEnd.segmentId != 0) {
@@ -474,19 +474,19 @@
                 SetJunctionTransitState(ref extVehicle, VehicleJunctionTransitState.Approach);
             }
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.UpdatePosition({extVehicle.vehicleId}) finshed: {extVehicle}");
 #endif
         }
 
         public void OnDespawn(ref ExtVehicle extVehicle) {
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnDespawn({extVehicle.vehicleId} called: {extVehicle}");
 #endif
             if ((extVehicle.flags & ExtVehicleFlags.Spawned) == ExtVehicleFlags.None) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnDespawn({extVehicle.vehicleId}): Vehicle is not spawned.");
 #endif
                 return;
@@ -504,20 +504,20 @@
             extVehicle.flags &= ExtVehicleFlags.Created;
 
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnDespawn({extVehicle.vehicleId}) finished: {extVehicle}");
 #endif
         }
 
         public void OnRelease(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnRelease({extVehicle.vehicleId}) called: {extVehicle}");
 #endif
 
             if ((extVehicle.flags & ExtVehicleFlags.Created) == ExtVehicleFlags.None) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnRelease({extVehicle.vehicleId}): Vehicle is not created.");
 #endif
                 return;
@@ -525,7 +525,7 @@
 
             if ((extVehicle.flags & ExtVehicleFlags.Spawned) != ExtVehicleFlags.None) {
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[9])
+                if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                     Log._Debug($"ExtVehicleManager.OnRelease({extVehicle.vehicleId}): Vehicle is spawned.");
 #endif
                 OnDespawn(ref extVehicle);
@@ -544,7 +544,7 @@
             extVehicle.recklessDriver = false;
 
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.OnRelease({extVehicle.vehicleId}) finished: {extVehicle}");
 #endif
         }
@@ -571,7 +571,7 @@
 
         public void UpdateDynamicLaneSelectionParameters(ref ExtVehicle extVehicle) {
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"VehicleState.UpdateDynamicLaneSelectionParameters({extVehicle.vehicleId}) called.");
 #endif
 
@@ -668,7 +668,7 @@
             }
 
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.Switches[9])
+            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get())
                 Log._Debug($"ExtVehicleManager.DetermineVehicleType({extVehicle.vehicleId}): vehicleType={extVehicle.vehicleType}, heavyVehicle={extVehicle.heavyVehicle}. Info={vehicleData.Info?.name}");
 #endif
         }

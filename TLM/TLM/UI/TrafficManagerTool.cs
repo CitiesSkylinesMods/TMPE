@@ -12,6 +12,7 @@
     using Manager;
     using Manager.Impl;
     using State;
+    using State.ConfigData;
     using Traffic.Data;
     using Traffic.Enums;
     using UI.MainMenu;
@@ -903,8 +904,8 @@
             int startVehicleId = 1;
             int endVehicleId = (int) (Constants.ServiceFactory.VehicleService.MaxVehicleCount - 1);
 #if DEBUG
-            if (GlobalConfig.Instance.Debug.VehicleId != 0) {
-                startVehicleId = endVehicleId = GlobalConfig.Instance.Debug.VehicleId;
+            if (DebugSettings.VehicleId != 0) {
+                startVehicleId = endVehicleId = DebugSettings.VehicleId;
             }
 #endif
 
@@ -969,7 +970,7 @@
                 if ((citManager.m_instances.m_buffer[i].m_flags & CitizenInstance.Flags.Character) == CitizenInstance.Flags.None)
                     continue;
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.Switches[14]) {
+                if (DebugSwitch.NoValidPathCitizensOverlay.Get()) {
 #endif
                     if (citManager.m_instances.m_buffer[i].m_path != 0) {
                         continue;

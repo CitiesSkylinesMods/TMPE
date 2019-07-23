@@ -14,6 +14,8 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager.Impl {
+	using State.ConfigData;
+
 	public class ExtSegmentEndManager : AbstractCustomManager, IExtSegmentEndManager {
 		public static ExtSegmentEndManager Instance { get; private set; } = null;
 
@@ -193,8 +195,8 @@ namespace TrafficManager.Manager.Impl {
 			ushort segmentId = segEnd.segmentId;
 			bool startNode = segEnd.startNode;
 
-#if DEBUGGEO
-			bool output = GlobalConfig.Instance.Debug.Switches[5];
+#if DEBUG
+			bool output = DebugSwitch.GeometryDebug.Get();
 
 			if (output)
 				Log._Debug($"ExtSegmentEndManager.Recalculate({segmentId}, {startNode}) called.");
@@ -220,7 +222,7 @@ namespace TrafficManager.Manager.Impl {
 
 			Constants.ManagerFactory.ExtNodeManager.AddSegment(nodeId, segmentId);
 
-#if DEBUGGEO
+#if DEBUG
 			if (output) {
 				Log.Info($"ExtSegmentEndManager.Recalculate({segmentId}, {startNode}): Recalculated ext. segment end: {segEnd}");
 			}
@@ -275,8 +277,8 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool CalculateOnlyHighways(ushort segmentId, bool startNode) {
 			ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
-#if DEBUGGEO
-			bool output = GlobalConfig.Instance.Debug.Switches[5];
+#if DEBUG
+			bool output = DebugSwitch.GeometryDebug.Get();
 
 			if (output)
 				Log._Debug($"Checking if segment {segmentId} is connected to highways only at node {nodeId}.");
@@ -301,7 +303,7 @@ namespace TrafficManager.Manager.Impl {
 				bool otherIsOneWay = otherIsIncoming ^ otherIsOutgoing;
 				bool otherIsHighway = Constants.ManagerFactory.ExtSegmentManager.CalculateIsHighway(otherSegmentId);
 
-#if DEBUGGEO
+#if DEBUG
 				if (output)
 					Log._Debug($"Segment {segmentId} is connected to segment {otherSegmentId} at node {nodeId}. otherIsOneWay={otherIsOneWay} otherIsIncoming={otherIsIncoming} otherIsOutgoing={otherIsOutgoing} otherIsHighway={otherIsHighway}");
 #endif

@@ -13,6 +13,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using Manager;
     using Manager.Impl;
     using State;
+    using State.ConfigData;
     using Traffic;
     using Util;
 
@@ -133,7 +134,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
             bool ret = endTransitionStart != null && getCurrentFrame() > endTransitionStart && stepDone; //StepDone(false);
 #if DEBUGTTL
-            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                 Log._Debug($"TimedTrafficLightsStep.isEndTransitionDone() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} endTransitionStart={endTransitionStart} stepDone={stepDone} ret={ret}");
 #endif
             return ret;
@@ -151,7 +152,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
             bool ret = endTransitionStart != null && getCurrentFrame() <= endTransitionStart && stepDone; //StepDone(false);
 #if DEBUGTTL
-            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                 Log._Debug($"TimedTrafficLightsStep.isInEndTransition() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} endTransitionStart={endTransitionStart} stepDone={stepDone} ret={ret}");
 #endif
             return ret;
@@ -165,7 +166,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
             bool ret = getCurrentFrame() == startFrame && !stepDone; //!StepDone(false);
 #if DEBUGTTL
-            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                 Log._Debug($"TimedTrafficLightsStep.isInStartTransition() called for master NodeId={timedNode.NodeId}. CurrentStep={timedNode.CurrentStep} getCurrentFrame()={getCurrentFrame()} startFrame={startFrame} stepDone={stepDone} ret={ret}");
 #endif
 
@@ -198,7 +199,7 @@ namespace TrafficManager.TrafficLight.Impl {
         /// </summary>
         public void Start(int previousStepRefIndex=-1) {
 #if DEBUGTTL
-            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                 Log._Debug($"TimedTrafficLightsStep.Start: Starting step {timedNode.CurrentStep} @ {timedNode.NodeId}");
 #endif
 
@@ -207,7 +208,7 @@ namespace TrafficManager.TrafficLight.Impl {
             PreviousStepRefIndex = previousStepRefIndex;
 
 #if DEBUG
-            /*if (GlobalConfig.Instance.Debug.Switches[2]) {
+            /*if (DebugSwitch.BasicParkingAILog.Get()) {
                     if (timedNode.NodeId == 31605) {
                             Log._Debug($"===== Step {timedNode.CurrentStep} @ node {timedNode.NodeId} =====");
                             Log._Debug($"minTime: {minTime} maxTime: {maxTime}");
@@ -304,7 +305,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     ICustomSegmentLights prevStepSegmentLights = null;
                     if (!previousStep.CustomSegmentLights.TryGetValue(segmentId, out prevStepSegmentLights)) {
 #if DEBUGTTL
-                        if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+                        if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                             Log.Warning($"TimedTrafficLightsStep: previousStep does not contain lights for segment {segmentId}!");
 #endif
                         continue;
@@ -313,7 +314,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     ICustomSegmentLights nextStepSegmentLights = null;
                     if (!nextStep.CustomSegmentLights.TryGetValue(segmentId, out nextStepSegmentLights)) {
 #if DEBUGTTL
-                        if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+                        if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                             Log.Warning($"TimedTrafficLightsStep: nextStep does not contain lights for segment {segmentId}!");
 #endif
                         continue;
@@ -334,7 +335,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     //Log.Warning($"Step @ {timedNode.NodeId}: Segment {segmentId}: Ped.: {liveSegmentLights.PedestrianLightState.ToString()} / {liveSegmentLights.AutoPedestrianLightState.ToString()}");
 
 #if DEBUGTTL
-                    if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+                    if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                         if (curStepSegmentLights.VehicleTypes == null) {
                             Log.Error($"TimedTrafficLightsStep: curStepSegmentLights.VehicleTypes is null!");
                             return;
@@ -349,7 +350,7 @@ namespace TrafficManager.TrafficLight.Impl {
                         ICustomSegmentLight liveSegmentLight = liveSegmentLights.GetCustomLight(vehicleType);
                         if (liveSegmentLight == null) {
 #if DEBUGTTL
-                            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+                            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                                 Log._Debug($"Timed step @ seg. {segmentId}, node {timedNode.NodeId} has a traffic light for {vehicleType} but the live segment does not have one.");
 #endif
                             continue;
@@ -386,7 +387,7 @@ namespace TrafficManager.TrafficLight.Impl {
                         liveSegmentLight.SetStates(mainLight, leftLight, rightLight, false);
 
 #if DEBUGTTL
-                        if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+                        if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                             Log._Debug($"TimedTrafficLightsStep.SetLights({noTransition})     -> *SETTING* LightLeft={liveSegmentLight.LightLeft} LightMain={liveSegmentLight.LightMain} LightRight={liveSegmentLight.LightRight} for segmentId={segmentId} @ NodeId={timedNode.NodeId} for vehicle {vehicleType}");
 #endif
 
@@ -459,7 +460,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public bool StepDone(bool updateValues) {
 #if DEBUGTTL
-            bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId;
+            bool debug = DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId;
             if (debug) {
                 Log._Debug($"StepDone: called for node {timedNode.NodeId} @ step {timedNode.CurrentStep}");
             }
@@ -594,7 +595,7 @@ namespace TrafficManager.TrafficLight.Impl {
             float curTotalWait = 0;
 
 #if DEBUGTTL
-            bool debug = GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId;
+            bool debug = DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId;
             if (debug) {
                 Log.Warning($"calcWaitFlow: called for node {timedNode.NodeId} @ step {stepRefIndex}");
             }
@@ -905,7 +906,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public ICustomSegmentLights RemoveSegmentLights(ushort segmentId) {
 #if DEBUGTTL
-            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                 Log._Debug($"TimedTrafficLightsStep.RemoveSegmentLights({segmentId}) called.");
 #endif
 
@@ -918,7 +919,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public ICustomSegmentLights GetSegmentLights(ushort segmentId) {
 #if DEBUGTTL
-            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                 Log._Debug($"TimedTrafficLightsStep.GetSegmentLights({segmentId}) called.");
 #endif
 
@@ -927,7 +928,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public ICustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
 #if DEBUGTTL
-            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                 Log._Debug($"TimedTrafficLightsStep.GetSegmentLights({nodeId}, {segmentId}) called.");
 #endif
 
@@ -947,7 +948,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public bool RelocateSegmentLights(ushort sourceSegmentId, ushort targetSegmentId) {
 #if DEBUGTTL
-            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                 Log._Debug($"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}) called.");
 #endif
 
@@ -983,7 +984,7 @@ namespace TrafficManager.TrafficLight.Impl {
         /// <param name="segmentId"></param>
         internal bool AddSegment(ushort segmentId, bool startNode, bool makeRed) {
 #if DEBUGTTL
-            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                 Log._Debug($"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}) called @ node {timedNode.NodeId}.");
 #endif
 
@@ -1014,7 +1015,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public bool SetSegmentLights(ushort nodeId, ushort segmentId, ICustomSegmentLights lights) {
 #if DEBUGTTL
-            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                 Log._Debug($"TimedTrafficLightsStep.SetSegmentLights({nodeId}, {segmentId}, {lights}) called.");
 #endif
 
@@ -1028,7 +1029,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public bool SetSegmentLights(ushort segmentId, ICustomSegmentLights lights) {
 #if DEBUGTTL
-            if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == timedNode.NodeId)
+            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == timedNode.NodeId)
                 Log._Debug($"TimedTrafficLightsStep.SetSegmentLights({segmentId}, {lights}) called.");
 #endif
 

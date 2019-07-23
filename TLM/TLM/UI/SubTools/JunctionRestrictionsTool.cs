@@ -19,6 +19,8 @@ using TrafficManager.Geometry.Impl;
 using ColossalFramework.UI;
 
 namespace TrafficManager.UI.SubTools {
+	using State.ConfigData;
+
 	public class JunctionRestrictionsTool : SubTool {
 
 		private HashSet<ushort> currentRestrictedNodeIds;
@@ -37,7 +39,7 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public override void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) {
-			
+
 		}
 
 		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -66,7 +68,7 @@ namespace TrafficManager.UI.SubTools {
 		private void ShowSigns(bool viewOnly) {
 			bool debug = false;
 #if DEBUG
-			debug = !viewOnly && GlobalConfig.Instance.Debug.Switches[11];
+			debug = !viewOnly && DebugSwitch.JunctionRestrictions.Get();
 #endif
 			NetManager netManager = Singleton<NetManager>.instance;
 			var camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
@@ -118,7 +120,7 @@ namespace TrafficManager.UI.SubTools {
 		public override void OnPrimaryClickOverlay() {
 			bool debug = false;
 #if DEBUG
-			debug = GlobalConfig.Instance.Debug.Switches[11];
+			debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 			if (HoveredNodeId == 0) return;
 			if (overlayHandleHovered) return;
@@ -143,7 +145,7 @@ namespace TrafficManager.UI.SubTools {
 
 		public override void Cleanup() {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 			foreach (ushort nodeId in currentRestrictedNodeIds) {
 				JunctionRestrictionsManager.Instance.RemoveJunctionRestrictionsIfNecessary(nodeId);

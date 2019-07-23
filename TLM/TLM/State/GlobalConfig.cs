@@ -56,7 +56,7 @@
         public string LanguageCode = null;
 
 #if DEBUG
-        public Debug Debug = new Debug();
+        public DebugSettings Debug = new DebugSettings();
 #endif
 
         public AdvancedVehicleAI AdvancedVehicleAI = new AdvancedVehicleAI();
@@ -134,7 +134,7 @@
                     GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
                     if (LoadingExtension.IsGameLoaded
 #if DEBUG
-                        && !conf.Debug.Switches[10]
+                        && !DebugSwitch.NoRoutingRecalculationOnConfigReload.Get()
 #endif
                         ) {
                         Constants.ManagerFactory.RoutingManager.RequestFullRecalculation();
@@ -142,7 +142,7 @@
 
 #if DEBUG
                     if (conf.Debug == null) {
-                        conf.Debug = new Debug();
+                        conf.Debug = new DebugSettings();
                     }
 #endif
 

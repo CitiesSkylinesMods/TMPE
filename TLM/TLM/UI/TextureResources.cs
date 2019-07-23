@@ -7,6 +7,7 @@ namespace TrafficManager.UI {
     using CSUtil.Commons;
     using Manager.Impl;
     using State;
+    using State.ConfigData;
     using Traffic.Data;
     using UnityEngine;
     using Util;
@@ -277,7 +278,7 @@ namespace TrafficManager.UI {
         private static Texture2D LoadDllResource(string resourceName, int width, int height)
         {
 #if DEBUG
-            bool debug = State.GlobalConfig.Instance.Debug.Switches[11];
+            bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
             try {
 #if DEBUG

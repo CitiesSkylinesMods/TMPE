@@ -12,6 +12,7 @@ using TrafficManager.Util;
 
 namespace TrafficManager.Manager.Impl {
 	using API.Traffic.Enums;
+	using State.ConfigData;
 
 	/// <summary>
 	/// Manages traffic light toggling
@@ -32,17 +33,17 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool SetTrafficLight(ushort nodeId, bool flag, ref NetNode node, out ToggleTrafficLightUnableReason reason) {
 #if DEBUGTTL
-			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+			if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId)
 				Log._Debug($"TrafficLightManager.SetTrafficLight: called for node {nodeId}, flag={flag}");
 #endif
 			if (! IsTrafficLightToggleable(nodeId, flag, ref node, out reason)) {
 #if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+				if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId)
 					Log._Debug($"TrafficLightManager.SetTrafficLight: Traffic light @ {nodeId} is not toggleable");
 #endif
 				if (reason != ToggleTrafficLightUnableReason.HasTimedLight || !flag) {
 #if DEBUGTTL
-					if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+					if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId)
 						Log._Debug($"TrafficLightManager.SetTrafficLight: ... but has timed light and we want to enable it");
 #endif
 					return false;
@@ -52,20 +53,20 @@ namespace TrafficManager.Manager.Impl {
 			NetNode.Flags flags = node.m_flags | NetNode.Flags.CustomTrafficLights;
 			if ((bool)flag) {
 #if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+				if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId)
 					Log._Debug($"Adding traffic light @ node {nodeId}");
 #endif
 				flags |= NetNode.Flags.TrafficLights;
 				TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
 			} else {
 #if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+				if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId)
 					Log._Debug($"Removing traffic light @ node {nodeId}");
 #endif
 				flags &= ~NetNode.Flags.TrafficLights;
 			}
 #if DEBUGTTL
-			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+			if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId)
 				Log._Debug($"TrafficLightManager.SetTrafficLight: Setting traffic light at node {nodeId} -- flags={flags}");
 #endif
 			node.m_flags = flags;
@@ -104,7 +105,7 @@ namespace TrafficManager.Manager.Impl {
 			if (!flag && TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
 				reason = ToggleTrafficLightUnableReason.HasTimedLight;
 #if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+				if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId)
 					Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node has a timed traffic light");
 #endif
 				return false;
@@ -113,7 +114,7 @@ namespace TrafficManager.Manager.Impl {
 			if (flag && !LogicUtil.CheckFlags((uint)node.m_flags, (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction), (uint)(NetNode.Flags.Created | NetNode.Flags.Junction))) {
 				reason = ToggleTrafficLightUnableReason.NoJunction;
 #if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+				if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId)
 					Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node is not a junction");
 #endif
 				return false;
@@ -122,7 +123,7 @@ namespace TrafficManager.Manager.Impl {
 			if (!flag && LogicUtil.CheckFlags((uint)node.m_flags, (uint)(NetNode.Flags.LevelCrossing), (uint)(NetNode.Flags.LevelCrossing))) {
 				reason = ToggleTrafficLightUnableReason.IsLevelCrossing;
 #if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+				if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId)
 					Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node is a level crossing");
 #endif
 				return false;
@@ -150,7 +151,7 @@ namespace TrafficManager.Manager.Impl {
 
 			if (numRoads >= 2 || numTrainTracks >= 2 || numMonorailTracks >= 2 || numPedSegments != 0) {
 #if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+				if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId)
 					Log._Debug($"Can toggle traffic lights at node {nodeId}: numRoads={numRoads} numTrainTracks={numTrainTracks} numMonorailTracks={numMonorailTracks} numPedSegments={numPedSegments}");
 #endif
 				reason = ToggleTrafficLightUnableReason.None;
@@ -158,7 +159,7 @@ namespace TrafficManager.Manager.Impl {
 			}
 
 #if DEBUGTTL
-			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
+			if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId)
 				Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Insufficient segments. numRoads={numRoads} numTrainTracks={numTrainTracks} numMonorailTracks={numMonorailTracks} numPedSegments={numPedSegments}");
 #endif
 			reason = ToggleTrafficLightUnableReason.InsufficientSegments;

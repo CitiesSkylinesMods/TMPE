@@ -8,6 +8,8 @@ using TrafficManager.Traffic;
 using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.Manager.Impl {
+	using State.ConfigData;
+
 	public class JunctionRestrictionsManager : AbstractGeometryObservingManager, ICustomDataManager<List<Configuration.SegmentNodeConf>>, IJunctionRestrictionsManager {
 		public static JunctionRestrictionsManager Instance { get; private set; } = new JunctionRestrictionsManager();
 
@@ -228,14 +230,14 @@ namespace TrafficManager.Manager.Impl {
 			endFlags.defaultPedestrianCrossingAllowed = GetDefaultPedestrianCrossingAllowed(segEnd.segmentId, segEnd.startNode, ref node);
 
 #if DEBUG
-			if (GlobalConfig.Instance.Debug.Switches[11])
+			if (DebugSwitch.JunctionRestrictions.Get())
 				Log._Debug($"JunctionRestrictionsManager.UpdateDefaults({segEnd.segmentId}, {segEnd.startNode}): Set defaults: defaultUturnAllowed={endFlags.defaultUturnAllowed}, defaultNearTurnOnRedAllowed={endFlags.defaultNearTurnOnRedAllowed}, defaultFarTurnOnRedAllowed={endFlags.defaultFarTurnOnRedAllowed}, defaultStraightLaneChangingAllowed={endFlags.defaultStraightLaneChangingAllowed}, defaultEnterWhenBlockedAllowed={endFlags.defaultEnterWhenBlockedAllowed}, defaultPedestrianCrossingAllowed={endFlags.defaultPedestrianCrossingAllowed}");
 #endif
 		}
 
 		public bool IsUturnAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 
 			if (!Services.NetService.IsSegmentValid(segmentId)) {
@@ -256,7 +258,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool GetDefaultUturnAllowed(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 
 			if (!Constants.ManagerFactory.JunctionRestrictionsManager.IsUturnAllowedConfigurable(segmentId, startNode, ref node)) {
@@ -296,7 +298,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool IsTurnOnRedAllowedConfigurable(bool near, ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 
 			ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
@@ -324,7 +326,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool GetDefaultTurnOnRedAllowed(bool near, ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 
 			if (!IsTurnOnRedAllowedConfigurable(near, segmentId, startNode, ref node)) {
@@ -359,7 +361,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool IsLaneChangingAllowedWhenGoingStraightConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 
 			if (!Services.NetService.IsSegmentValid(segmentId)) {
@@ -384,7 +386,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool GetDefaultLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 
 			if (!Constants.ManagerFactory.JunctionRestrictionsManager.IsLaneChangingAllowedWhenGoingStraightConfigurable(segmentId, startNode, ref node)) {
@@ -409,7 +411,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool IsEnteringBlockedJunctionAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 
 			if (!Services.NetService.IsSegmentValid(segmentId)) {
@@ -433,7 +435,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool GetDefaultEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 			if (! Services.NetService.IsSegmentValid(segmentId)) {
 				return false;
@@ -474,7 +476,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool IsPedestrianCrossingAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 
 			bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None &&
@@ -488,7 +490,7 @@ namespace TrafficManager.Manager.Impl {
 
 		public bool GetDefaultPedestrianCrossingAllowed(ushort segmentId, bool startNode, ref NetNode node) {
 #if DEBUG
-			bool debug = GlobalConfig.Instance.Debug.Switches[11];
+			bool debug = DebugSwitch.JunctionRestrictions.Get();
 #endif
 
 			if (!IsPedestrianCrossingAllowedConfigurable(segmentId, startNode, ref node)) {

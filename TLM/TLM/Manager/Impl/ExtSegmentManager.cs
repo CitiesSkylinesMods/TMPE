@@ -14,13 +14,15 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.Manager.Impl {
+	using State.ConfigData;
+
 	public class ExtSegmentManager : AbstractCustomManager, IExtSegmentManager {
 		public static ExtSegmentManager Instance { get; private set; } = null;
 
 		static ExtSegmentManager() {
 			Instance = new ExtSegmentManager();
 		}
-		
+
 		/// <summary>
 		/// All additional data for buildings
 		/// </summary>
@@ -49,8 +51,8 @@ namespace TrafficManager.Manager.Impl {
 			IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 			ushort segmentId = extSegment.segmentId;
 
-#if DEBUGGEO
-			bool output = GlobalConfig.Instance.Debug.Switches[5];
+#if DEBUG
+			bool output = DebugSwitch.GeometryDebug.Get();
 
 			if (output)
 				Log._Debug($">>> ExtSegmentManager.Recalculate({segmentId}) called.");
@@ -67,7 +69,7 @@ namespace TrafficManager.Manager.Impl {
 				return;
 			}
 
-#if DEBUGGEO
+#if DEBUG
 			if (output)
 				Log.Info($"Recalculating geometries of segment {segmentId} STARTED");
 #endif
@@ -81,7 +83,7 @@ namespace TrafficManager.Manager.Impl {
 
 			extSegEndMan.Recalculate(segmentId);
 
-#if DEBUGGEO
+#if DEBUG
 			if (output) {
 				Log.Info($"Recalculated ext. segment {segmentId} (flags={Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags}): {extSegment}");
 			}

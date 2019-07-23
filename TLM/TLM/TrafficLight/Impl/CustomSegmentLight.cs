@@ -15,6 +15,7 @@ using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.TrafficLight.Impl {
 	using API.Traffic.Enums;
+	using State.ConfigData;
 
 	/// <summary>
 	/// Represents the traffic light (left, forward, right) at a specific segment end
@@ -167,7 +168,7 @@ namespace TrafficManager.TrafficLight.Impl {
 			bool hasForwardSegment;
 			bool hasRightSegment;
 			extSegEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out hasLeftSegment, out hasForwardSegment, out hasRightSegment);
-				
+
 #if DEBUG
 			Log._Debug($"ChangeMode. segment {SegmentId} @ node {NodeId}, hasLeftSegment={hasLeftSegment}, hasForwardSegment={hasForwardSegment}, hasRightSegment={hasRightSegment}");
 #endif
@@ -391,7 +392,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 		public void MakeRedOrGreen() {
 #if DEBUGTTL
-			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId)
+			if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == NodeId)
 				Log._Debug($"CustomSegmentLight.MakeRedOrGreen: called for segment {SegmentId} @ {NodeId}");
 #endif
 
@@ -416,7 +417,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
 		public void MakeRed() {
 #if DEBUGTTL
-			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId)
+			if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == NodeId)
 				Log._Debug($"CustomSegmentLight.MakeRed: called for segment {SegmentId} @ {NodeId}");
 #endif
 
@@ -437,7 +438,7 @@ namespace TrafficManager.TrafficLight.Impl {
 				this.rightLight = (RoadBaseAI.TrafficLightState)rightLight;
 
 #if DEBUGTTL
-			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == NodeId)
+			if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == NodeId)
 				Log._Debug($"CustomSegmentLight.SetStates({mainLight}, {leftLight}, {rightLight}, {calcAutoPedLight}) for segment {SegmentId} @ {NodeId}: {this.mainLight} {this.leftLight} {this.rightLight}");
 #endif
 

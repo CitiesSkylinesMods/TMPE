@@ -3,6 +3,7 @@
     using CSUtil.Commons;
     using Geometry;
     using State;
+    using State.ConfigData;
     using Traffic.Data;
     using Util;
 
@@ -63,14 +64,14 @@
                 // Handle a segment update
                 ExtSegment seg = (ExtSegment)update.segment;
                 if (!seg.valid) {
-#if DEBUGGEO
-                    if (GlobalConfig.Instance.Debug.Switches[5])
+#if DEBUG
+                    if (DebugSwitch.GeometryDebug.Get())
                         Log._Debug($"{this.GetType().Name}.HandleInvalidSegment({seg.segmentId})");
 #endif
                     HandleInvalidSegment(ref seg);
                 } else {
-#if DEBUGGEO
-                    if (GlobalConfig.Instance.Debug.Switches[5])
+#if DEBUG
+                    if (DebugSwitch.GeometryDebug.Get())
                         Log._Debug($"{this.GetType().Name}.HandleValidSegment({seg.segmentId})");
 #endif
                     HandleValidSegment(ref seg);
@@ -80,14 +81,14 @@
                 ushort nodeId = (ushort)update.nodeId;
                 Services.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
                     if ((node.m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) == NetNode.Flags.Created) {
-#if DEBUGGEO
-                        if (GlobalConfig.Instance.Debug.Switches[5])
+#if DEBUG
+                        if (DebugSwitch.GeometryDebug.Get())
                             Log._Debug($"{this.GetType().Name}.HandleValidNode({nodeId})");
 #endif
                         HandleValidNode(nodeId, ref node);
                     } else {
-#if DEBUGGEO
-                        if (GlobalConfig.Instance.Debug.Switches[5])
+#if DEBUG
+                        if (DebugSwitch.GeometryDebug.Get())
                             Log._Debug($"{this.GetType().Name}.HandleInvalidNode({nodeId})");
 #endif
                         HandleInvalidNode(nodeId, ref node);
@@ -98,8 +99,8 @@
                 // Handle a segment end replacement
                 IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
-#if DEBUGGEO
-                if (GlobalConfig.Instance.Debug.Switches[5])
+#if DEBUG
+                if (DebugSwitch.GeometryDebug.Get())
                     Log._Debug($"{this.GetType().Name}.HandleSegmentReplacement({update.replacement.oldSegmentEndId} -> {update.replacement.newSegmentEndId})");
 #endif
                 HandleSegmentEndReplacement(update.replacement, ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(update.replacement.newSegmentEndId.SegmentId, update.replacement.newSegmentEndId.StartNode)]);
