@@ -1,4 +1,4 @@
-Switch_traffic_lights (Dés)activer les feux tricolores
+﻿Switch_traffic_lights (Dés)activer les feux tricolores
 Add_priority_signs Ajouter des signes de priorité
 Manual_traffic_lights Feux tricolores manuels
 Timed_traffic_lights Feux tricolores chronométrés
@@ -233,24 +233,24 @@ Ignore_disabled_mods Ignorer les mods désactivés
 Traffic_Manager_detected_incompatible_mods a détecté des mods incompatibles
 Notify_me_if_there_is_an_unexpected_mod_conflict Afficher un message d'erreur si un mod incompatible est détecté
 Unsubscribe Unsubscribe
-Keybind_toggle_TMPE_main_menu Toggle TM:PE Main Menu
-Keybind_toggle_traffic_lights_tool Use 'Toggle Traffic Lights' Tool
-Keybind_use_lane_arrow_tool Use 'Lane Arrow' Tool
-Keybind_use_lane_connections_tool Use 'Lane Connections' Tool
-Keybind_use_priority_signs_tool Use 'Priority Signs' Tool
-Keybind_use_junction_restrictions_tool Use 'Junction Restrictions' Tool
-Keybind_use_speed_limits_tool Use 'Speed Limits' Tool
-Keybind_lane_connector_stay_in_lane Lane connector: Stay in lane
-Keybind_lane_connector_delete Clear lane connections
+Keybind_toggle_TMPE_main_menu Bascule vers le Menu Principal de TM:PE
+Keybind_toggle_traffic_lights_tool Utiliser l'outil 'Bascule vers les Feux tricolores'
+Keybind_use_lane_arrow_tool Utiliser l'outil 'Flèchage des voies'
+Keybind_use_lane_connections_tool Utiliser l'outil 'Connections des voies'
+Keybind_use_priority_signs_tool Utilisee l'outil 'Routes prioritaires'
+Keybind_use_junction_restrictions_tool Utilisee l'outil 'Restrictions des carrefours'
+Keybind_use_speed_limits_tool Utiliser l'outil 'Limitation de vitesse'
+Keybind_lane_connector_stay_in_lane Connecteur de voie : Rester sur sa voie
+Keybind_lane_connector_delete Effacer la voie connectée
 Keybinds Keybinds
-Keybind_Exit_subtool Exit tool and close TM:PE Menu
-Keybind_conflict The key you've selected is conflicting with another shortcut key. Please choose something else.
+Keybind_Exit_subtool Sortir de l'outil et fermer le menu TM:PE
+Keybind_conflict La touche choisie est en conflit avec un autre raccourci. Merci de choisir une autre touche du clavier.
 Keybind_category_Global Global keys
 Keybind_category_LaneConnector Lane Connector Tool keys
-Display_speed_limits_mph Display speed limits as MPH instead of km/h
-Miles_per_hour Miles per Hour
-Kilometers_per_hour Kilometers per Hour
-Road_signs_theme_mph Theme for MPH road signs
-theme_Square_US US signs
-theme_Round_UK British signs
-theme_Round_German German signs
+Display_speed_limits_mph Affiche la vitesse limit en MPH à la place de km/h
+Miles_per_hour Miles par Heure
+Kilometers_per_hour Kilomètres par Heure
+Road_signs_theme_mph Thème pour les panneaux de route anglosaxon MPH
+theme_Square_US Panneaux Américain
+theme_Round_UK Panneaux Britanique
+theme_Round_German Panneaux Allemand
