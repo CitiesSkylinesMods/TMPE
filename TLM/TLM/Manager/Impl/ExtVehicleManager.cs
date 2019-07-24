@@ -645,13 +645,13 @@
 
 #if DEBUGVSTATE
                 if (logVehicleLinking) {
-                    Log._Debug(string.Format(
+                    Log._DebugFormat(
                         "ExtVehicleManager.UpdatePosition({0}): Linking vehicle to segment end {1} " +
                         "@ {2} ({3}). Current position: Seg. {4}, lane {5}, offset {6} / " +
                         "Next position: Seg. {7}, lane {8}, offset {9}",
                         extVehicle.vehicleId, segEnd.segmentId, segEnd.startNode, segEnd.nodeId,
                         curPos.m_segment, curPos.m_lane, curPos.m_offset, nextPos.m_segment,
-                        nextPos.m_lane, nextPos.m_offset));
+                        nextPos.m_lane, nextPos.m_offset);
                 }
 #endif
                 if (segEnd.segmentId != 0) {

@@ -1085,7 +1085,7 @@
                 // NON-STOCK CODE END
                 if (res) {
                     if (logParkingAi) {
-                        Log._Debug(string.Format(
+                        Log._DebugFormat(
                             "CustomCitizenAI.ExtStartPathFind({0}): Path-finding starts for citizen " +
                             "instance {1}, path={2}, extVehicleType={3}, extPathType={4}, " +
                             "startPosA.segment={5}, startPosA.lane={6}, laneType={7}, vehicleType={8}, " +
@@ -1094,7 +1094,7 @@
                             instanceID, instanceID, path, extVehicleType, extPathType, startPosA.m_segment,
                             startPosA.m_lane, laneTypes, vehicleTypes, endPosA.m_segment, endPosA.m_lane,
                             parkedVehiclePathPos.m_segment, parkedVehiclePathPos.m_lane,
-                            parkedVehiclePathPos.m_offset));
+                            parkedVehiclePathPos.m_offset);
                     }
 
                     if (instanceData.m_path != 0u) {
@@ -1110,7 +1110,7 @@
 #if DEBUG
             if (Options.parkingAI) {
                 if (logParkingAi) {
-                    Log._Debug(string.Format(
+                    Log._DebugFormat(
                         "CustomCitizenAI.ExtStartPathFind({0}): CustomCitizenAI.CustomStartPathFind: " +
                         "[PFFAIL] failed for citizen instance {1} (CurrentPathMode={2}). " +
                         "startPosA.segment={3}, startPosA.lane={4}, startPosA.offset={5}, " +
@@ -1118,7 +1118,7 @@
                         "foundStartPos={9}, foundEndPos={10}",
                         instanceID, instanceID, extInstance.pathMode, startPosA.m_segment,
                         startPosA.m_lane, startPosA.m_offset, endPosA.m_segment, endPosA.m_lane,
-                        endPosA.m_offset, foundStartPos, foundEndPos));
+                        endPosA.m_offset, foundStartPos, foundEndPos);
                 }
 
                 Reset(ref extInstance);
@@ -1350,12 +1350,12 @@
                     ref Singleton<SimulationManager>.instance.m_randomizer,
                     args)) {
                     if (logParkingAi) {
-                        Log._Debug(string.Format(
+                        Log._DebugFormat(
                             "ExtCitizenInstance.CalculateReturnPath: Path-finding starts for return " +
                             "path of citizen instance {0}, path={1}, parkPathPos.segment={2}, " +
                             "parkPathPos.lane={3}, targetPathPos.segment={4}, targetPathPos.lane={5}",
                             extInstance.instanceId, pathId, parkPathPos.m_segment, parkPathPos.m_lane,
-                            targetPathPos.m_segment, targetPathPos.m_lane));
+                            targetPathPos.m_segment, targetPathPos.m_lane);
                     }
 
                     extInstance.returnPathId = pathId;

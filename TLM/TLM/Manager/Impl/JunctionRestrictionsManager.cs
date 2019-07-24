@@ -301,7 +301,7 @@ namespace TrafficManager.Manager.Impl {
 
 #if DEBUG
             if (DebugSwitch.JunctionRestrictions.Get()) {
-                Log._Debug(string.Format(
+                Log._DebugFormat(
                     "JunctionRestrictionsManager.UpdateDefaults({0}, {1}): Set defaults: " +
                     "defaultUturnAllowed={2}, defaultNearTurnOnRedAllowed={3}, " +
                     "defaultFarTurnOnRedAllowed={4}, defaultStraightLaneChangingAllowed={5}, " +
@@ -310,7 +310,7 @@ namespace TrafficManager.Manager.Impl {
                     endFlags.defaultNearTurnOnRedAllowed, endFlags.defaultFarTurnOnRedAllowed,
                     endFlags.defaultStraightLaneChangingAllowed,
                     endFlags.defaultEnterWhenBlockedAllowed,
-                    endFlags.defaultPedestrianCrossingAllowed));
+                    endFlags.defaultPedestrianCrossingAllowed);
             }
 #endif
         }
@@ -328,11 +328,11 @@ namespace TrafficManager.Manager.Impl {
                 && !Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId].oneWay;
 #if DEBUG
             if (DebugSwitch.JunctionRestrictions.Get()) {
-                Log._Debug(string.Format(
+                Log._DebugFormat(
                     "JunctionRestrictionsManager.IsUturnAllowedConfigurable({0}, {1}): ret={2}, " +
                     "flags={3}, service={4}, seg.oneWay={5}",
                     segmentId, startNode, ret, node.m_flags, node.Info?.m_class?.m_service,
-                    Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId].oneWay));
+                    Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId].oneWay);
             }
 #endif
             return ret;
@@ -488,13 +488,13 @@ namespace TrafficManager.Manager.Impl {
                                        .outgoing) && node.CountSegments() > 2;
 #if DEBUG
             if (DebugSwitch.JunctionRestrictions.Get()) {
-                Log._Debug(string.Format(
+                Log._DebugFormat(
                     "JunctionRestrictionsManager.IsLaneChangingAllowedWhenGoingStraightConfigurable" +
                     "({0}, {1}): ret={2}, flags={3}, service={4}, outgoingOneWay={5}, " +
                     "node.CountSegments()={6}",
                     segmentId, startNode, ret, node.m_flags, node.Info?.m_class?.m_service,
                     isOneWay && segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].outgoing,
-                    node.CountSegments()));
+                    node.CountSegments());
             }
 #endif
             return ret;
@@ -555,11 +555,11 @@ namespace TrafficManager.Manager.Impl {
 
 #if DEBUG
             if (DebugSwitch.JunctionRestrictions.Get()) {
-                Log._Debug(string.Format(
+                Log._DebugFormat(
                     "JunctionRestrictionsManager.IsEnteringBlockedJunctionAllowedConfigurable" +
                     "({0}, {1}): ret={2}, flags={3}, service={4}, outgoingOneWay={5}",
                     segmentId, startNode, ret, node.m_flags, node.Info?.m_class?.m_service,
-                    isOneWay && segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].outgoing));
+                    isOneWay && segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].outgoing);
             }
 #endif
             return ret;
@@ -584,11 +584,11 @@ namespace TrafficManager.Manager.Impl {
                                      NetNode.Flags.OneWayIn)) != NetNode.Flags.Junction ||
                     node.CountSegments() == 2;
                 if (logLogic) {
-                    Log._Debug(string.Format(
+                    Log._DebugFormat(
                         "JunctionRestrictionsManager.GetDefaultEnteringBlockedJunctionAllowed" +
                         "({0}, {1}): Setting is not configurable. res={2}, flags={3}, " +
                         "node.CountSegments()={4}",
-                        segmentId, startNode, res, node.m_flags, node.CountSegments()));
+                        segmentId, startNode, res, node.m_flags, node.CountSegments());
                 }
 
                 return res;

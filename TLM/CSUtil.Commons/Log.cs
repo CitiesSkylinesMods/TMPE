@@ -43,13 +43,12 @@
         }
 
         /// <summary>
-        /// EXPERIMENTAL
-        /// Given a list of strings, numbers, and unknown objects, join them together into a
-        /// StringBuilder.
+        /// Will log only if debug mode, the string is prepared using string.Format
         /// </summary>
-        /// <param name="fmt">List of everything to join together</param>
-        public static void _DebugFmt(params object[] fmt) {
-            LogToFile(fmt, LogLevel.Debug);
+        /// <param name="format">The text</param>
+        [Conditional("DEBUG")]
+        public static void _DebugFormat(string format, params object[] args) {
+            LogToFile(string.Format(format, args), LogLevel.Debug);
         }
 
         /// <summary>
@@ -127,28 +126,6 @@
         [Conditional("DEBUG")]
         public static void _DebugOnlyError(string s) {
             LogToFile(s, LogLevel.Error);
-        }
-
-        private static void LogToFile(IEnumerable<object> fmt, LogLevel level) {
-            StringBuilder sb = new StringBuilder(256);
-            foreach (object obj in fmt) {
-                switch (obj) {
-                    case string s:
-                        sb.Append(s);
-                        break;
-                    case int i:
-                        sb.Append(i);
-                        break;
-                    case float f:
-                        sb.Append(f);
-                        break;
-                    default:
-                        sb.Append(obj);
-                        break;
-                }
-            }
-
-            LogToFile(sb.ToString(), level);
         }
 
         private static void LogToFile(string log, LogLevel level) {

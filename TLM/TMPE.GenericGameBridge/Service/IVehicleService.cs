@@ -1,24 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿namespace GenericGameBridge.Service {
+    public delegate bool VehicleHandler(ushort vehicleId, ref Vehicle vehicle);
 
-namespace GenericGameBridge.Service {
-	public delegate bool VehicleHandler(ushort vehicleId, ref Vehicle vehicle);
-	public delegate bool ParkedVehicleHandler(ushort parkedVehicleId, ref VehicleParked parkedVehicle);
+    public delegate bool ParkedVehicleHandler(ushort parkedVehicleId,
+                                              ref VehicleParked parkedVehicle);
 
-	public interface IVehicleService {
-
+    public interface IVehicleService {
         int MaxVehicleCount { get; }
 
-		bool CheckVehicleFlags(ushort vehicleId, Vehicle.Flags flagMask, Vehicle.Flags? expectedResult = default(Vehicle.Flags?));
-		bool CheckVehicleFlags2(ushort vehicleId, Vehicle.Flags2 flagMask, Vehicle.Flags2? expectedResult = default(Vehicle.Flags2?));
-		bool IsVehicleValid(ushort vehicleId);
-		void ProcessVehicle(ushort vehicleId, VehicleHandler handler);
-		void ProcessVehicle(ushort vehicleId, ref Vehicle vehicle, VehicleHandler handler);
-		void ProcessParkedVehicle(ushort parkedVehicleId, ParkedVehicleHandler handler);
-		void ProcessParkedVehicle(ushort parkedVehicleId, ref VehicleParked parkedVehicle, ParkedVehicleHandler handler);
-		void ReleaseVehicle(ushort vehicleId);
-		void ReleaseParkedVehicle(ushort parkedVehicleId);
-	}
+        bool CheckVehicleFlags(ushort vehicleId,
+                               Vehicle.Flags flagMask,
+                               Vehicle.Flags? expectedResult = default(Vehicle.Flags?));
+
+        bool CheckVehicleFlags2(ushort vehicleId,
+                                Vehicle.Flags2 flagMask,
+                                Vehicle.Flags2? expectedResult = default(Vehicle.Flags2?));
+
+        bool IsVehicleValid(ushort vehicleId);
+
+        void ProcessVehicle(ushort vehicleId, VehicleHandler handler);
+
+        void ProcessVehicle(ushort vehicleId, ref Vehicle vehicle, VehicleHandler handler);
+
+        void ProcessParkedVehicle(ushort parkedVehicleId, ParkedVehicleHandler handler);
+
+        void ProcessParkedVehicle(ushort parkedVehicleId,
+                                  ref VehicleParked parkedVehicle,
+                                  ParkedVehicleHandler handler);
+
+        void ReleaseVehicle(ushort vehicleId);
+
+        void ReleaseParkedVehicle(ushort parkedVehicleId);
+    }
 }
