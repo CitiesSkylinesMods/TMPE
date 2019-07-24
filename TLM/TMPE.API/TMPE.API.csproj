@@ -127,13 +127,13 @@
     <Compile Include="Traffic\Enums\LaneEndTransitionType.cs" />
     <Compile Include="Traffic\Enums\LightMode.cs" />
     <Compile Include="Traffic\Enums\ParkedCarApproachState.cs" />
-    <Compile Include="Traffic\Enums\ParkingUnableReason.cs" />
+    <Compile Include="Traffic\Enums\ParkingError.cs" />
     <Compile Include="Traffic\Enums\PriorityType.cs" />
     <Compile Include="Traffic\Enums\EmergencyBehavior.cs" />
-    <Compile Include="Traffic\Enums\SetLaneArrowUnableReason.cs" />
-    <Compile Include="Traffic\Enums\SetPrioritySignUnableReason.cs" />
+    <Compile Include="Traffic\Enums\SetLaneArrowError.cs" />
+    <Compile Include="Traffic\Enums\SetPrioritySignError.cs" />
     <Compile Include="Traffic\Enums\StepChangeMetric.cs" />
-    <Compile Include="Traffic\Enums\ToggleTrafficLightUnableReason.cs" />
+    <Compile Include="Traffic\Enums\ToggleTrafficLightError.cs" />
     <Compile Include="Traffic\Enums\TrafficLightSimulationType.cs" />
     <Compile Include="Traffic\Enums\VehicleJunctionTransitState.cs" />
     <Compile Include="Traffic\Enums\VehicleRestrictionsAggression.cs" />

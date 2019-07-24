@@ -48,7 +48,7 @@
         public bool ToggleLaneArrows(uint laneId,
                                      bool startNode,
                                      LaneArrows flags,
-                                     out SetLaneArrowUnableReason res) {
+                                     out SetLaneArrowError res) {
             if (Flags.toggleLaneArrowFlags(laneId, startNode, flags, out res)) {
                 OnLaneChange(laneId);
                 return true;

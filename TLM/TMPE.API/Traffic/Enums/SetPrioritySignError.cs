@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.API.Traffic.Enums {
-    public enum SetPrioritySignUnableReason {
+    public enum SetPrioritySignError {
         None,
         NoJunction,
         HasTimedLight,

@@ -33,14 +33,14 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		public void ToggleTrafficLight(ushort nodeId, ref NetNode node, bool showMessageOnError=true) {
-			ToggleTrafficLightUnableReason reason;
+			ToggleTrafficLightError reason;
 			if (!TrafficLightManager.Instance.CanToggleTrafficLight(nodeId, !TrafficLightManager.Instance.HasTrafficLight(nodeId, ref node), ref node, out reason)) {
 				if (showMessageOnError) {
 					switch (reason) {
-						case ToggleTrafficLightUnableReason.HasTimedLight:
+						case ToggleTrafficLightError.HasTimedLight:
 							MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 							break;
-						case ToggleTrafficLightUnableReason.IsLevelCrossing:
+						case ToggleTrafficLightError.IsLevelCrossing:
 							MainTool.ShowTooltip(Translation.GetString("Node_is_level_crossing"));
 							break;
 						default:

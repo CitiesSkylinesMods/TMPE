@@ -375,11 +375,11 @@ namespace TrafficManager.UI.SubTools {
 		}
 
 		private bool MayNodeHavePrioritySigns(ushort nodeId) {
-			SetPrioritySignUnableReason reason;
+			SetPrioritySignError reason;
 			//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Checking if node {nodeId} may have priority signs.");
 			if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(nodeId, out reason)) {
 				//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not allow priority signs: {reason}");
-				if (reason == SetPrioritySignUnableReason.HasTimedLight) {
+				if (reason == SetPrioritySignError.HasTimedLight) {
 					MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
 				}
 				return false;

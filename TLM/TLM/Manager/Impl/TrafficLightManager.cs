@@ -29,13 +29,13 @@
 
         // TODO: Consider replacing out error code with Result<> or VoidResult<>
         public bool SetTrafficLight(ushort nodeId, bool flag, ref NetNode node) {
-            return SetTrafficLight(nodeId, flag, ref node, out ToggleTrafficLightUnableReason _);
+            return SetTrafficLight(nodeId, flag, ref node, out ToggleTrafficLightError _);
         }
 
         public bool SetTrafficLight(ushort nodeId,
                                     bool flag,
                                     ref NetNode node,
-                                    out ToggleTrafficLightUnableReason reason) {
+                                    out ToggleTrafficLightError reason) {
 #if DEBUG
             bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
                                       && DebugSettings.NodeId == nodeId;
@@ -51,7 +51,7 @@
                     Log._Debug($"TrafficLightManager.SetTrafficLight: Traffic light @ {nodeId} is not toggleable");
                 }
 
-                if (reason != ToggleTrafficLightUnableReason.HasTimedLight || !flag) {
+                if (reason != ToggleTrafficLightError.HasTimedLight || !flag) {
                     if (logTrafficLights) {
                         Log._Debug("TrafficLightManager.SetTrafficLight: ... but has timed light " +
                                    "and we want to enable it");
@@ -88,25 +88,25 @@
         }
 
         public bool AddTrafficLight(ushort nodeId, ref NetNode node) {
-            ToggleTrafficLightUnableReason reason;
+            ToggleTrafficLightError reason;
             return AddTrafficLight(nodeId, ref node, out reason);
         }
 
         public bool AddTrafficLight(ushort nodeId,
                                     ref NetNode node,
-                                    out ToggleTrafficLightUnableReason reason) {
+                                    out ToggleTrafficLightError reason) {
             TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
             return SetTrafficLight(nodeId, true, ref node, out reason);
         }
 
         public bool RemoveTrafficLight(ushort nodeId, ref NetNode node) {
-            ToggleTrafficLightUnableReason reason;
+            ToggleTrafficLightError reason;
             return RemoveTrafficLight(nodeId, ref node, out reason);
         }
 
         public bool RemoveTrafficLight(ushort nodeId,
                                        ref NetNode node,
-                                       out ToggleTrafficLightUnableReason reason) {
+                                       out ToggleTrafficLightError reason) {
             return SetTrafficLight(nodeId, false, ref node, out reason);
         }
 
@@ -114,14 +114,14 @@
             return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node);
         }
 
-        public bool ToggleTrafficLight(ushort nodeId, ref NetNode node, out ToggleTrafficLightUnableReason reason) {
+        public bool ToggleTrafficLight(ushort nodeId, ref NetNode node, out ToggleTrafficLightError reason) {
             return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node, out reason);
         }
 
         public bool CanToggleTrafficLight(ushort nodeId,
                                           bool flag,
                                           ref NetNode node,
-                                          out ToggleTrafficLightUnableReason reason)
+                                          out ToggleTrafficLightError reason)
         {
 #if DEBUG
             bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId;
@@ -129,7 +129,7 @@
             const bool logTrafficLights = false;
 #endif
             if (!flag && TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
-                reason = ToggleTrafficLightUnableReason.HasTimedLight;
+                reason = ToggleTrafficLightError.HasTimedLight;
                 if (logTrafficLights) {
                     Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node has a timed traffic light");
                 }
@@ -141,7 +141,7 @@
                     (uint)node.m_flags,
                     (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction),
                     (uint)(NetNode.Flags.Created | NetNode.Flags.Junction))) {
-                reason = ToggleTrafficLightUnableReason.NoJunction;
+                reason = ToggleTrafficLightError.NoJunction;
 
                 if (logTrafficLights) {
                     Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node is not a junction");
@@ -154,7 +154,7 @@
                     (uint)node.m_flags,
                     (uint)NetNode.Flags.LevelCrossing,
                     (uint)NetNode.Flags.LevelCrossing)) {
-                reason = ToggleTrafficLightUnableReason.IsLevelCrossing;
+                reason = ToggleTrafficLightError.IsLevelCrossing;
 
                 if (logTrafficLights) {
                     Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node is a level crossing");
@@ -196,7 +196,7 @@
                         nodeId, numRoads, numTrainTracks, numMonorailTracks, numPedSegments);
                 }
 
-                reason = ToggleTrafficLightUnableReason.None;
+                reason = ToggleTrafficLightError.None;
                 return true;
             }
 
@@ -207,17 +207,17 @@
                     nodeId, numRoads, numTrainTracks, numMonorailTracks, numPedSegments);
             }
 
-            reason = ToggleTrafficLightUnableReason.InsufficientSegments;
+            reason = ToggleTrafficLightError.InsufficientSegments;
             return false;
         }
 
         public bool CanEnableTrafficLight(ushort nodeId,
                                           ref NetNode node,
-                                          out ToggleTrafficLightUnableReason reason) {
+                                          out ToggleTrafficLightError reason) {
             var ret = CanToggleTrafficLight(nodeId, true, ref node, out reason);
 
-            if (!ret && reason == ToggleTrafficLightUnableReason.HasTimedLight) {
-                reason = ToggleTrafficLightUnableReason.None;
+            if (!ret && reason == ToggleTrafficLightError.HasTimedLight) {
+                reason = ToggleTrafficLightError.None;
                 return true;
             }
 

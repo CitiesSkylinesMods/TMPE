@@ -48,16 +48,16 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool MayNodeHavePrioritySigns(ushort nodeId) {
-            SetPrioritySignUnableReason reason;
+            SetPrioritySignError reason;
             return MayNodeHavePrioritySigns(nodeId, out reason);
         }
 
-        public bool MayNodeHavePrioritySigns(ushort nodeId, out SetPrioritySignUnableReason reason) {
+        public bool MayNodeHavePrioritySigns(ushort nodeId, out SetPrioritySignError reason) {
 #if DEBUG
             bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.NodeId <= 0 || nodeId == DebugSettings.NodeId);
 #endif
             if (!Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction, NetNode.Flags.Created | NetNode.Flags.Junction)) {
-                reason = SetPrioritySignUnableReason.NoJunction;
+                reason = SetPrioritySignError.NoJunction;
 #if DEBUG
                 if (debug) {
                     Log._Debug($"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, result=false, reason={reason}");
@@ -67,7 +67,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
-                reason = SetPrioritySignUnableReason.HasTimedLight;
+                reason = SetPrioritySignError.HasTimedLight;
 #if DEBUG
                 if (debug) {
                     Log._Debug($"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, result=false, reason={reason}");
@@ -77,21 +77,21 @@ namespace TrafficManager.Manager.Impl {
             }
 
             //Log._Debug($"TrafficPriorityManager.MayNodeHavePrioritySigns: nodeId={nodeId}, result=true");
-            reason = SetPrioritySignUnableReason.None;
+            reason = SetPrioritySignError.None;
             return true;
         }
 
         public bool MaySegmentHavePrioritySign(ushort segmentId, bool startNode) {
-            SetPrioritySignUnableReason reason;
+            SetPrioritySignError reason;
             return MaySegmentHavePrioritySign(segmentId, startNode, out reason);
         }
 
-        public bool MaySegmentHavePrioritySign(ushort segmentId, bool startNode, out SetPrioritySignUnableReason reason) {
+        public bool MaySegmentHavePrioritySign(ushort segmentId, bool startNode, out SetPrioritySignError reason) {
 #if DEBUG
             bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
 #endif
             if (! Services.NetService.IsSegmentValid(segmentId)) {
-                reason = SetPrioritySignUnableReason.InvalidSegment;
+                reason = SetPrioritySignError.InvalidSegment;
 #if DEBUG
                 if (debug) {
                     Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=false, reason={reason}");
@@ -112,7 +112,7 @@ namespace TrafficManager.Manager.Impl {
             IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             if (segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].outgoing && segMan.ExtSegments[segmentId].oneWay) {
-                reason = SetPrioritySignUnableReason.NotIncoming;
+                reason = SetPrioritySignError.NotIncoming;
 #if DEBUG
                 if (debug) {
                     Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=false, reason={reason}");
@@ -126,21 +126,21 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, startNode={startNode}, result=true");
             }
 #endif
-            reason = SetPrioritySignUnableReason.None;
+            reason = SetPrioritySignError.None;
             return true;
         }
 
         public bool MaySegmentHavePrioritySign(ushort segmentId) {
-            SetPrioritySignUnableReason reason;
+            SetPrioritySignError reason;
             return MaySegmentHavePrioritySign(segmentId, out reason);
         }
 
-        public bool MaySegmentHavePrioritySign(ushort segmentId, out SetPrioritySignUnableReason reason) {
+        public bool MaySegmentHavePrioritySign(ushort segmentId, out SetPrioritySignError reason) {
 #if DEBUG
             bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
 #endif
             if (!Services.NetService.IsSegmentValid(segmentId)) {
-                reason = SetPrioritySignUnableReason.InvalidSegment;
+                reason = SetPrioritySignError.InvalidSegment;
 #if DEBUG
                 if (debug) {
                     Log._Debug($"TrafficPriorityManager.MaySegmentHavePrioritySign: segmentId={segmentId}, result=false, reason={reason}");
@@ -189,17 +189,17 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType type) {
-            SetPrioritySignUnableReason reason;
+            SetPrioritySignError reason;
             return SetPrioritySign(segmentId, startNode, type, out reason);
         }
 
-        public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType type, out SetPrioritySignUnableReason reason) {
+        public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType type, out SetPrioritySignError reason) {
 #if DEBUG
             bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
 #endif
 
             bool ret = true;
-            reason = SetPrioritySignUnableReason.None;
+            reason = SetPrioritySignError.None;
 
             if (type != PriorityType.None &&
                 ! MaySegmentHavePrioritySign(segmentId, startNode, out reason)) {
@@ -1074,7 +1074,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected void UpdateNode(ushort nodeId) {
-            SetPrioritySignUnableReason reason;
+            SetPrioritySignError reason;
             if (! MayNodeHavePrioritySigns(nodeId, out reason)) {
                 RemovePrioritySignsFromNode(nodeId);
                 return;

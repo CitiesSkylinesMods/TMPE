@@ -108,6 +108,10 @@
             LogToFile(s, LogLevel.Warning);
         }
 
+        public static void WarningFormat(string format, params object[] args) {
+            LogToFile(string.Format(format, args), LogLevel.Warning);
+        }
+
         /// <summary>
         /// Log a warning only if cond is true
         /// NOTE: If a lambda contains values from `out` and `ref` scope args,

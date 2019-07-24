@@ -1417,7 +1417,7 @@
                             currentPos,
                             vehicleInfo,
                             out Vector3 parkPos,
-                            out ParkingUnableReason parkReason)) {
+                            out ParkingError parkReason)) {
                             parkedVehicleId = Singleton<CitizenManager>
                                               .instance.m_citizens.m_buffer[instanceData.m_citizen]
                                               .m_parkedVehicle;
@@ -1442,7 +1442,7 @@
                                 $"(citizen instance {instanceId}). reason={parkReason}. homePos: " +
                                 $"{buildingsBuffer[homeId].m_position}");
 
-                            if (parkReason == ParkingUnableReason.NoSpaceFound &&
+                            if (parkReason == ParkingError.NoSpaceFound &&
                                 currentBuildingId != 0) {
                                 extBuildingMan.AddParkingSpaceDemand(
                                     ref extBuildingMan.ExtBuildings[currentBuildingId],
@@ -2013,7 +2013,7 @@
                                                Vector3 refPos,
                                                VehicleInfo vehicleInfo,
                                                out Vector3 parkPos,
-                                               out ParkingUnableReason reason) {
+                                               out ParkingError reason) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
             // var logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
@@ -2032,7 +2032,7 @@
                 refPos,
                 vehicleInfo,
                 out Vector3 roadParkPos,
-                out ParkingUnableReason roadParkReason);
+                out ParkingError roadParkReason);
 
             bool buildingParkSuccess = TrySpawnParkedPassengerCarBuilding(
                 citizenId,
@@ -2040,7 +2040,7 @@
                 refPos,
                 vehicleInfo,
                 out Vector3 buildingParkPos,
-                out ParkingUnableReason buildingParkReason);
+                out ParkingError buildingParkReason);
 
             if ((!roadParkSuccess && !buildingParkSuccess)
                 || (roadParkSuccess && !buildingParkSuccess)) {
@@ -2070,7 +2070,7 @@
                                                        Vector3 refPos,
                                                        VehicleInfo vehicleInfo,
                                                        out Vector3 parkPos,
-                                                       out ParkingUnableReason reason) {
+                                                       out ParkingError reason) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
@@ -2119,13 +2119,13 @@
                             $"{citizenId}: {parkedVehicleId} @ {parkPos}");
                     }
 
-                    reason = ParkingUnableReason.None;
+                    reason = ParkingError.None;
                     return true;
                 }
 
-                reason = ParkingUnableReason.LimitHit;
+                reason = ParkingError.LimitHit;
             } else {
-                reason = ParkingUnableReason.NoSpaceFound;
+                reason = ParkingError.NoSpaceFound;
             }
 
             Log._DebugIf(
@@ -2139,7 +2139,7 @@
                                                        Vector3 refPos,
                                                        VehicleInfo vehicleInfo,
                                                        out Vector3 parkPos,
-                                                       out ParkingUnableReason reason) {
+                                                       out ParkingError reason) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
@@ -2189,13 +2189,13 @@
                             $"{citizenId}: {parkedVehicleId} @ {parkPos}");
                     }
 
-                    reason = ParkingUnableReason.None;
+                    reason = ParkingError.None;
                     return true;
                 }
 
-                reason = ParkingUnableReason.LimitHit;
+                reason = ParkingError.LimitHit;
             } else {
-                reason = ParkingUnableReason.NoSpaceFound;
+                reason = ParkingError.NoSpaceFound;
             }
 
             Log._DebugIf(

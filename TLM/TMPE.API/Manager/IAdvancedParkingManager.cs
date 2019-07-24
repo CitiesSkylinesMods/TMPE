@@ -196,7 +196,7 @@
                                         Vector3 refPos,
                                         VehicleInfo vehicleInfo,
                                         out Vector3 parkPos,
-                                        out ParkingUnableReason reason);
+                                        out ParkingError reason);
 
         /// <summary>
         /// Tries to spawn a parked passenger car for the given citizen <paramref name="citizenId"/>
@@ -212,7 +212,7 @@
                                                 Vector3 refPos,
                                                 VehicleInfo vehicleInfo,
                                                 out Vector3 parkPos,
-                                                out ParkingUnableReason reason);
+                                                out ParkingError reason);
 
         /// <summary>
         /// Tries to spawn a parked passenger car for the given citizen <paramref name="citizenId"/>
@@ -230,7 +230,7 @@
                                                 Vector3 refPos,
                                                 VehicleInfo vehicleInfo,
                                                 out Vector3 parkPos,
-                                                out ParkingUnableReason reason);
+                                                out ParkingError reason);
 
         /// <summary>
         /// Tries to find a parking space in the broaded vicinity of the given position <paramref name="targetPos"/>.
