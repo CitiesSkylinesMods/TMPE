@@ -3,6 +3,7 @@
 
     public interface ITrafficLightManager {
         // TODO documentation
+
         bool AddTrafficLight(ushort nodeId, ref NetNode node);
 
         bool AddTrafficLight(ushort nodeId,
@@ -11,11 +12,11 @@
 
         bool HasTrafficLight(ushort nodeId, ref NetNode node);
 
-        bool IsTrafficLightEnablable(ushort nodeId,
+        bool CanEnableTrafficLight(ushort nodeId,
                                      ref NetNode node,
                                      out ToggleTrafficLightUnableReason reason);
 
-        bool IsTrafficLightToggleable(ushort nodeId,
+        bool CanToggleTrafficLight(ushort nodeId,
                                       bool flag,
                                       ref NetNode node,
                                       out ToggleTrafficLightUnableReason reason);

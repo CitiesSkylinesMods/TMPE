@@ -35,7 +35,7 @@
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
-            Log._Debug($"- Not implemented -");
+            Log._DebugOnlyError($"- Not implemented -");
             // TODO implement
         }
 

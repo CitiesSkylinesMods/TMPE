@@ -140,6 +140,7 @@
     <Compile Include="Traffic\Enums\VehicleRestrictionsMode.cs" />
     <Compile Include="Traffic\ISegmentEnd.cs" />
     <Compile Include="Traffic\ISegmentEndId.cs" />
+    <Compile Include="Util\Functional.cs" />
     <Compile Include="Util\IObservable.cs" />
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Util\IVisitor.cs" />
