@@ -13,16 +13,19 @@
         private ISegmentEnd[] SegmentEnds;
 
         private SegmentEndManager() {
+            // Resharper notice: Either change field to solid type, or change new type to interface array?
             SegmentEnds = new SegmentEnd[2 * NetManager.MAX_SEGMENT_COUNT];
         }
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
             Log._Debug($"Segment ends:");
+
             for (int i = 0; i < SegmentEnds.Length; ++i) {
                 if (SegmentEnds[i] == null) {
                     continue;
                 }
+
                 Log._Debug($"Segment end {i}: {SegmentEnds[i]}");
             }
         }
@@ -45,8 +48,10 @@
                 return end;
             }
 
-            if (! Services.NetService.IsSegmentValid(segmentId)) {
-                Log.Warning($"SegmentEndManager.GetOrAddSegmentEnd({segmentId}, {startNode}): Refusing to add segment end for invalid segment.");
+            if (!Services.NetService.IsSegmentValid(segmentId)) {
+                Log.Warning(
+                    $"SegmentEndManager.GetOrAddSegmentEnd({segmentId}, {startNode}): Refusing to " +
+                    "add segment end for invalid segment.");
                 return null;
             }
 
@@ -59,11 +64,17 @@
 
         public void RemoveSegmentEnd(ushort segmentId, bool startNode) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
-            if (debug) {
+            bool logPriority = DebugSwitch.PriorityRules.Get()
+                               && (DebugSettings.SegmentId <= 0
+                                   || segmentId == DebugSettings.SegmentId);
+#else
+            const bool logPriority = false;
+#endif
+
+            if (logPriority) {
                 Log._Debug($"SegmentEndManager.RemoveSegmentEnd({segmentId}, {startNode}) called");
             }
-#endif
+
             DestroySegmentEnd(GetIndex(segmentId, startNode));
         }
 
@@ -78,77 +89,88 @@
 
         public bool UpdateSegmentEnd(ushort segmentId, bool startNode) {
 #if DEBUG
-            bool debug = DebugSwitch.PriorityRules.Get() && (DebugSettings.SegmentId <= 0 || segmentId == DebugSettings.SegmentId);
+            bool logPriority = DebugSwitch.PriorityRules.Get()
+                               && (DebugSettings.SegmentId <= 0
+                                   || segmentId == DebugSettings.SegmentId);
+#else
+            const bool logPriority = false;
 #endif
 
             if (! Services.NetService.IsSegmentValid(segmentId)) {
-#if DEBUG
-                if (debug) {
-                    Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} is invalid. Removing all segment ends.");
+                if (logPriority) {
+                    Log._Debug(
+                        $"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment " +
+                        $"{segmentId} is invalid. Removing all segment ends.");
                 }
-#endif
 
                 RemoveSegmentEnds(segmentId);
                 return false;
             }
 
-            if (TrafficPriorityManager.Instance.HasSegmentPrioritySign(segmentId, startNode) ||
-                TrafficLightSimulationManager.Instance.HasTimedSimulation(Services.NetService.GetSegmentNodeId(segmentId, startNode))) {
-#if DEBUG
-                if (debug) {
-                    Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} @ {startNode} has timed light or priority sign. Adding segment end {segmentId} @ {startNode}");
+            if (TrafficPriorityManager.Instance.HasSegmentPrioritySign(segmentId, startNode)
+                || TrafficLightSimulationManager.Instance.HasTimedSimulation(
+                    Services.NetService.GetSegmentNodeId(
+                        segmentId,
+                        startNode))) {
+                if (logPriority) {
+                    Log._DebugFormat(
+                        "SegmentEndManager.UpdateSegmentEnd({0}, {1}): Segment {2} @ {3} has timed " +
+                        "light or priority sign. Adding segment end {4} @ {5}",
+                        segmentId, startNode, segmentId, startNode, segmentId, startNode);
                 }
-#endif
+
                 ISegmentEnd end = GetOrAddSegmentEnd(segmentId, startNode);
                 if (end == null) {
-                    Log.Warning($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Failed to add segment end.");
+                    Log.Warning($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): " +
+                                "Failed to add segment end.");
                     return false;
-                } else {
-#if DEBUG
-                    if (debug) {
-                        Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Added segment end. Updating now.");
-                    }
-#endif
-                    end.Update();
-#if DEBUG
-                    if (debug) {
-                        Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Update of segment end finished.");
-                    }
-#endif
-                    return true;
                 }
+
+                if (logPriority) {
+                    Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): " +
+                               "Added segment end. Updating now.");
+                }
+
+                end.Update();
+                if (logPriority) {
+                    Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): " +
+                               "Update of segment end finished.");
+                }
+
+                return true;
             } else {
-#if DEBUG
-                if (debug) {
-                    Log._Debug($"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment {segmentId} @ {startNode} neither has timed light nor priority sign. Removing segment end {segmentId} @ {startNode}");
+                if (logPriority) {
+                    Log._DebugFormat(
+                        "SegmentEndManager.UpdateSegmentEnd({0}, {1}): Segment {2} @ {3} neither has " +
+                        "timed light nor priority sign. Removing segment end {4} @ {5}",
+                        segmentId, startNode, segmentId, startNode, segmentId, startNode);
                 }
-#endif
+
                 RemoveSegmentEnd(segmentId, startNode);
                 return false;
             }
         }
 
         private int GetIndex(ushort segmentId, bool startNode) {
-            return (int)segmentId + (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT);
+            return segmentId + (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT);
         }
 
-        /*protected override void HandleInvalidSegment(SegmentGeometry geometry) {
-                RemoveSegmentEnds(geometry.SegmentId);
-        }
-
-        protected override void HandleValidSegment(SegmentGeometry geometry) {
-                RemoveSegmentEnds(geometry.SegmentId);
-        }*/
+        // protected override void HandleInvalidSegment(SegmentGeometry geometry) {
+        //    RemoveSegmentEnds(geometry.SegmentId);
+        // }
+        //
+        // protected override void HandleValidSegment(SegmentGeometry geometry) {
+        //    RemoveSegmentEnds(geometry.SegmentId);
+        // }
 
         protected void DestroySegmentEnd(int index) {
-#if DEBUG
-            //Log._Debug($"SegmentEndManager.DestroySegmentEnd({index}) called");
-#endif
+            // Log._Debug($"SegmentEndManager.DestroySegmentEnd({index}) called");
             SegmentEnds[index] = null;
         }
 
         public override void OnLevelUnloading() {
             base.OnLevelUnloading();
+
             for (int i = 0; i < SegmentEnds.Length; ++i) {
                 DestroySegmentEnd(i);
             }
