@@ -151,6 +151,8 @@ Global
 		{C911D31C-C85D-42A8-A839-7B209A715495}.PF2_Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C911D31C-C85D-42A8-A839-7B209A715495}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C911D31C-C85D-42A8-A839-7B209A715495}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.Release LABS|Any CPU.ActiveCfg = Release|Any CPU
+		{C911D31C-C85D-42A8-A839-7B209A715495}.Release LABS|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
