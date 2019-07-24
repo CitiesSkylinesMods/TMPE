@@ -7,6 +7,12 @@
     using System.Threading;
     using UnityEngine;
 
+#if !DEBUG
+    #if TRACE
+        #error TRACE is defined outside of a DEBUG build, please remove
+    #endif
+#endif
+
     public static class Log {
         private static readonly object LogLock = new object();
 
