@@ -65,13 +65,7 @@ namespace TrafficManager.UI
             title.padding = new RectOffset(10, 10, 15, 15);
             title.relativePosition = new Vector2(60, 12);
 
-#if LABS
-            title.text = "TM:PE LABS " + Translation.GetString("Traffic_Manager_detected_incompatible_mods");
-#elif DEBUG
-            title.text = "TM:PE DEBUG " + Translation.GetString("Traffic_Manager_detected_incompatible_mods");
-#else // STABLE
-            title.text = "TM:PE STABLE " + Translation.GetString("Traffic_Manager_detected_incompatible_mods");
-#endif
+            title.text = TrafficManagerMod.ModName + " " + Translation.GetString("Traffic_Manager_detected_incompatible_mods");
 
             closeButton = mainPanel.AddUIComponent<UIButton>();
             closeButton.eventClick += CloseButtonClick;
