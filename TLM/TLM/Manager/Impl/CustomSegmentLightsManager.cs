@@ -14,7 +14,8 @@ namespace TrafficManager.Manager.Impl {
     /// </summary>
     public class CustomSegmentLightsManager
         : AbstractGeometryObservingManager,
-          ICustomSegmentLightsManager {
+          ICustomSegmentLightsManager
+    {
         public static CustomSegmentLightsManager Instance { get; }
 
         static CustomSegmentLightsManager() {

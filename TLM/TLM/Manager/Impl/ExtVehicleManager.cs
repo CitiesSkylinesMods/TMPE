@@ -12,7 +12,10 @@
     using Traffic.Data;
     using UnityEngine;
 
-    public class ExtVehicleManager : AbstractCustomManager, IExtVehicleManager {
+    public class ExtVehicleManager
+        : AbstractCustomManager,
+          IExtVehicleManager
+    {
         public static readonly ExtVehicleManager Instance = new ExtVehicleManager();
 
         private const int STATE_UPDATE_SHIFT = 6;

@@ -10,9 +10,11 @@
     using Traffic.Data;
     using Traffic.Enums;
 
-    public class LaneArrowManager : AbstractGeometryObservingManager,
-                                    ICustomDataManager<List<Configuration.LaneArrowData>>,
-                                    ICustomDataManager<string>, ILaneArrowManager {
+    public class LaneArrowManager
+        : AbstractGeometryObservingManager,
+          ICustomDataManager<List<Configuration.LaneArrowData>>,
+          ICustomDataManager<string>, ILaneArrowManager
+    {
         public const NetInfo.LaneType LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 

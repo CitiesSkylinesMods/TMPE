@@ -7,7 +7,10 @@
     using Traffic.Data;
     using UnityEngine;
 
-    public class ExtBuildingManager : AbstractCustomManager, IExtBuildingManager {
+    public class ExtBuildingManager
+        : AbstractCustomManager,
+          IExtBuildingManager
+    {
         public static ExtBuildingManager Instance { get; }
 
         static ExtBuildingManager() {

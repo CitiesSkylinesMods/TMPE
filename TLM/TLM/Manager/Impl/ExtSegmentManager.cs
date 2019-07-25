@@ -5,7 +5,10 @@
     using State.ConfigData;
     using Traffic.Data;
 
-    public class ExtSegmentManager : AbstractCustomManager, IExtSegmentManager {
+    public class ExtSegmentManager
+        : AbstractCustomManager,
+          IExtSegmentManager
+    {
         public static ExtSegmentManager Instance { get; }
 
         static ExtSegmentManager() {

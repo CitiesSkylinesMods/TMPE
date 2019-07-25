@@ -12,9 +12,11 @@
     using Traffic.Data;
     using UnityEngine;
 
-    public class LaneConnectionManager : AbstractGeometryObservingManager,
-                                         ICustomDataManager<List<Configuration.LaneConnection>>,
-                                         ILaneConnectionManager {
+    public class LaneConnectionManager
+        : AbstractGeometryObservingManager,
+          ICustomDataManager<List<Configuration.LaneConnection>>,
+          ILaneConnectionManager
+    {
         public const NetInfo.LaneType LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 

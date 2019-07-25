@@ -10,7 +10,10 @@
     using Traffic.Data;
     using Util;
 
-    public class GeometryManager : AbstractCustomManager, IGeometryManager {
+    public class GeometryManager
+        : AbstractCustomManager,
+          IGeometryManager
+    {
         public static GeometryManager Instance { get; } = new GeometryManager();
 
         private class GeometryUpdateObservable : GenericObservable<GeometryUpdate> {

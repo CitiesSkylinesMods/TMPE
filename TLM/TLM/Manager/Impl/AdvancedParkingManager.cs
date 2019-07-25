@@ -17,7 +17,10 @@
     using UnityEngine;
     using Util;
 
-    public class AdvancedParkingManager : AbstractFeatureManager, IAdvancedParkingManager {
+    public class AdvancedParkingManager
+        : AbstractFeatureManager,
+          IAdvancedParkingManager
+    {
         public static AdvancedParkingManager Instance { get; }
 
         static AdvancedParkingManager() {

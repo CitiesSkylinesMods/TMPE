@@ -5,7 +5,10 @@
     using Geometry.Impl;
     using Traffic.Data;
 
-    public class ExtNodeManager : AbstractCustomManager, IExtNodeManager {
+    public class ExtNodeManager
+        : AbstractCustomManager,
+          IExtNodeManager
+    {
         public static ExtNodeManager Instance { get; }
 
         static ExtNodeManager() {

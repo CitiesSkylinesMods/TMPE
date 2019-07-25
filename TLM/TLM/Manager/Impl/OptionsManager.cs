@@ -5,7 +5,10 @@
     using CSUtil.Commons;
     using State;
 
-    public class OptionsManager : AbstractCustomManager, IOptionsManager {
+    public class OptionsManager
+        : AbstractCustomManager,
+          IOptionsManager
+    {
         // TODO I contain ugly code
         public static OptionsManager Instance = new OptionsManager();
 

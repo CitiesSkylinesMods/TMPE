@@ -8,7 +8,10 @@
     using Traffic.Data;
     using UnityEngine;
 
-    public class ExtSegmentEndManager : AbstractCustomManager, IExtSegmentEndManager {
+    public class ExtSegmentEndManager
+        : AbstractCustomManager,
+          IExtSegmentEndManager
+    {
         public static ExtSegmentEndManager Instance { get; }
 
         static ExtSegmentEndManager() {

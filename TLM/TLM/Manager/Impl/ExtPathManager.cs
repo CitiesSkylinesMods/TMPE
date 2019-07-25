@@ -5,7 +5,10 @@
     using UnityEngine;
     using Util;
 
-    public class ExtPathManager : AbstractCustomManager, IExtPathManager {
+    public class ExtPathManager
+        : AbstractCustomManager,
+          IExtPathManager
+    {
         public static readonly ExtPathManager Instance = new ExtPathManager();
 
         private ExtPathManager() {
