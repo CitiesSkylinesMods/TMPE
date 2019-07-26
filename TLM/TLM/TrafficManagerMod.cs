@@ -9,23 +9,23 @@ namespace TrafficManager
 {
     public class TrafficManagerMod : IUserMod
     {
-        public static readonly uint GameVersion = 184803856u;
-        public static readonly uint GameVersionA = 1u;
-        public static readonly uint GameVersionB = 12u;
-        public static readonly uint GameVersionC = 1u;
-        public static readonly uint GameVersionBuild = 2u;
+        public const uint GameVersion = 184803856u;
+        public const uint GameVersionA = 1u;
+        public const uint GameVersionB = 12u;
+        public const uint GameVersionC = 1u;
+        public const uint GameVersionBuild = 2u;
 
-        public static readonly string Version = "11.0-alpha3";
+        public const string Version = "11.0-alpha4";
 
 #if LABS
-        public static readonly string Branch = "LABS";
+        public const string Branch = "LABS";
 #elif DEBUG
-        public static readonly string Branch = "DEBUG";
+        public const string Branch = "DEBUG";
 #else
-        public static readonly string Branch = "STABLE";
+        public const string Branch = "STABLE";
 #endif
 
-        public static readonly string ModName = "TM:PE " + Version + " " + Branch;
+        public const string ModName = "TM:PE " + Branch + " " + Version;
 
         public string Name => ModName;
 
