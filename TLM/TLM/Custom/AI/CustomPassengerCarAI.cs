@@ -110,6 +110,8 @@ namespace TrafficManager.Custom.AI {
                        IgnoreBlocked(vehicleId, ref vehicleData));
         }
 
+        [RedirectMethod]
+        [UsedImplicitly]
         public void CustomUpdateParkedVehicle(ushort parkedId, ref VehicleParked data) {
             uint ownerCitizenId = data.m_ownerCitizen;
             ushort homeId = 0;
