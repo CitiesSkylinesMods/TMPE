@@ -6,26 +6,35 @@ namespace TrafficManager.State {
     using Manager.Impl;
     using UI;
 
-    public class OptionsMaintenanceTab {
-        private static UIButton resetStuckEntitiesBtn;
-        private static UIButton removeParkedVehiclesBtn;
-#if DEBUG
-        private static UIButton resetSpeedLimitsBtn;
-#endif
-        private static UIButton reloadGlobalConfBtn;
-        private static UIButton resetGlobalConfBtn;
-#if QUEUEDSTATS
-        private static UICheckBox showPathFindStatsToggle;
-#endif
-        private static UICheckBox enableCustomSpeedLimitsToggle;
-        private static UICheckBox enableVehicleRestrictionsToggle;
-        private static UICheckBox enableParkingRestrictionsToggle;
-        private static UICheckBox enableJunctionRestrictionsToggle;
-        private static UICheckBox turnOnRedEnabledToggle;
-        private static UICheckBox enableLaneConnectorToggle;
+    public static class OptionsMaintenanceTab {
+        [UsedImplicitly]
+        private static UIButton _resetStuckEntitiesBtn;
 
-        internal static UICheckBox enablePrioritySignsToggle;
-        internal static UICheckBox enableTimedLightsToggle;
+        [UsedImplicitly]
+        private static UIButton _removeParkedVehiclesBtn;
+#if DEBUG
+        [UsedImplicitly]
+        private static UIButton _resetSpeedLimitsBtn;
+#endif
+        [UsedImplicitly]
+        private static UIButton _reloadGlobalConfBtn;
+
+        [UsedImplicitly]
+        private static UIButton _resetGlobalConfBtn;
+
+#if QUEUEDSTATS
+        private static UICheckBox _showPathFindStatsToggle;
+#endif
+
+        private static UICheckBox _enableCustomSpeedLimitsToggle;
+        private static UICheckBox _enableVehicleRestrictionsToggle;
+        private static UICheckBox _enableParkingRestrictionsToggle;
+        private static UICheckBox _enableJunctionRestrictionsToggle;
+        private static UICheckBox _turnOnRedEnabledToggle;
+        private static UICheckBox _enableLaneConnectorToggle;
+
+        internal static UICheckBox EnablePrioritySignsToggle;
+        internal static UICheckBox EnableTimedLightsToggle;
 
         private static string T(string s) {
             return Translation.GetString(s);
@@ -45,70 +54,70 @@ namespace TrafficManager.State {
             var panelHelper = new UIHelper(currentPanel);
             UIHelperBase maintenanceGroup = panelHelper.AddGroup(T("Maintenance"));
 
-            resetStuckEntitiesBtn = maintenanceGroup.AddButton(
+            _resetStuckEntitiesBtn = maintenanceGroup.AddButton(
                                         T("Reset_stuck_cims_and_vehicles"),
                                         onClickResetStuckEntities) as UIButton;
 
-            removeParkedVehiclesBtn = maintenanceGroup.AddButton(
+            _removeParkedVehiclesBtn = maintenanceGroup.AddButton(
                                           T("Remove_parked_vehicles"),
                                           onClickRemoveParkedVehicles) as UIButton;
 #if DEBUG
-            resetSpeedLimitsBtn = maintenanceGroup.AddButton(
+            _resetSpeedLimitsBtn = maintenanceGroup.AddButton(
                                       T("Reset_custom_speed_limits"),
                                       onClickResetSpeedLimits) as UIButton;
 #endif
-            reloadGlobalConfBtn = maintenanceGroup.AddButton(
+            _reloadGlobalConfBtn = maintenanceGroup.AddButton(
                                       T("Reload_global_configuration"),
                                       onClickReloadGlobalConf) as UIButton;
-            resetGlobalConfBtn = maintenanceGroup.AddButton(
+            _resetGlobalConfBtn = maintenanceGroup.AddButton(
                                      T("Reset_global_configuration"),
                                      onClickResetGlobalConf) as UIButton;
 
 #if QUEUEDSTATS
-            showPathFindStatsToggle = maintenanceGroup.AddCheckbox(
+            _showPathFindStatsToggle = maintenanceGroup.AddCheckbox(
                                           T("Show_path-find_stats"),
                                           Options.showPathFindStats,
                                           onShowPathFindStatsChanged) as UICheckBox;
 #endif
 
             var featureGroup = panelHelper.AddGroup(T("Activated_features")) as UIHelper;
-            enablePrioritySignsToggle = featureGroup.AddCheckbox(
+            EnablePrioritySignsToggle = featureGroup.AddCheckbox(
                                             T("Priority_signs"),
                                             Options.prioritySignsEnabled,
                                             OnPrioritySignsEnabledChanged) as UICheckBox;
-            enableTimedLightsToggle = featureGroup.AddCheckbox(
+            EnableTimedLightsToggle = featureGroup.AddCheckbox(
                                           T("Timed_traffic_lights"),
                                           Options.timedLightsEnabled,
                                           OnTimedLightsEnabledChanged) as UICheckBox;
-            enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(
+            _enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(
                                                 T("Speed_limits"),
                                                 Options.customSpeedLimitsEnabled,
                                                 OnCustomSpeedLimitsEnabledChanged) as UICheckBox;
-            enableVehicleRestrictionsToggle
+            _enableVehicleRestrictionsToggle
                 = featureGroup.AddCheckbox(
                       T("Vehicle_restrictions"),
                       Options.vehicleRestrictionsEnabled,
                       OnVehicleRestrictionsEnabledChanged) as UICheckBox;
-            enableParkingRestrictionsToggle
+            _enableParkingRestrictionsToggle
                 = featureGroup.AddCheckbox(
                       T("Parking_restrictions"),
                       Options.parkingRestrictionsEnabled,
                       OnParkingRestrictionsEnabledChanged) as UICheckBox;
-            enableJunctionRestrictionsToggle
+            _enableJunctionRestrictionsToggle
                 = featureGroup.AddCheckbox(
                       T("Junction_restrictions"),
                       Options.junctionRestrictionsEnabled,
                       OnJunctionRestrictionsEnabledChanged) as UICheckBox;
-            turnOnRedEnabledToggle = featureGroup.AddCheckbox(
+            _turnOnRedEnabledToggle = featureGroup.AddCheckbox(
                                          T("Turn_on_red"),
                                          Options.turnOnRedEnabled,
                                          OnTurnOnRedEnabledChanged) as UICheckBox;
-            enableLaneConnectorToggle = featureGroup.AddCheckbox(
+            _enableLaneConnectorToggle = featureGroup.AddCheckbox(
                                             T("Lane_connector"),
                                             Options.laneConnectorEnabled,
                                             OnLaneConnectorEnabledChanged) as UICheckBox;
 
-            Options.Indent(turnOnRedEnabledToggle);
+            Options.Indent(_turnOnRedEnabledToggle);
         }
 
         private static void onClickResetStuckEntities() {
@@ -271,8 +280,8 @@ namespace TrafficManager.State {
             Options.MenuRebuildRequired = true;
             Options.customSpeedLimitsEnabled = newValue;
 
-            if (enableCustomSpeedLimitsToggle != null) {
-                enableCustomSpeedLimitsToggle.isChecked = newValue;
+            if (_enableCustomSpeedLimitsToggle != null) {
+                _enableCustomSpeedLimitsToggle.isChecked = newValue;
             }
 
             if (!newValue) {
@@ -284,8 +293,8 @@ namespace TrafficManager.State {
             Options.MenuRebuildRequired = true;
             Options.vehicleRestrictionsEnabled = newValue;
 
-            if (enableVehicleRestrictionsToggle != null) {
-                enableVehicleRestrictionsToggle.isChecked = newValue;
+            if (_enableVehicleRestrictionsToggle != null) {
+                _enableVehicleRestrictionsToggle.isChecked = newValue;
             }
 
             if (!newValue) {
@@ -297,8 +306,8 @@ namespace TrafficManager.State {
             Options.MenuRebuildRequired = true;
             Options.parkingRestrictionsEnabled = newValue;
 
-            if (enableParkingRestrictionsToggle != null) {
-                enableParkingRestrictionsToggle.isChecked = newValue;
+            if (_enableParkingRestrictionsToggle != null) {
+                _enableParkingRestrictionsToggle.isChecked = newValue;
             }
 
             if (!newValue) {
@@ -310,8 +319,8 @@ namespace TrafficManager.State {
             Options.MenuRebuildRequired = true;
             Options.junctionRestrictionsEnabled = newValue;
 
-            if (enableJunctionRestrictionsToggle != null) {
-                enableJunctionRestrictionsToggle.isChecked = newValue;
+            if (_enableJunctionRestrictionsToggle != null) {
+                _enableJunctionRestrictionsToggle.isChecked = newValue;
             }
 
             if (!newValue) {
@@ -322,8 +331,8 @@ namespace TrafficManager.State {
         public static void SetTurnOnRedEnabled(bool newValue) {
             Options.turnOnRedEnabled = newValue;
 
-            if (turnOnRedEnabledToggle != null) {
-                turnOnRedEnabledToggle.isChecked = newValue;
+            if (_turnOnRedEnabledToggle != null) {
+                _turnOnRedEnabledToggle.isChecked = newValue;
             }
 
             if (!newValue) {
@@ -336,8 +345,8 @@ namespace TrafficManager.State {
             Options.MenuRebuildRequired = true;
             Options.laneConnectorEnabled = newValue;
 
-            if (enableLaneConnectorToggle != null) {
-                enableLaneConnectorToggle.isChecked = newValue;
+            if (_enableLaneConnectorToggle != null) {
+                _enableLaneConnectorToggle.isChecked = newValue;
             }
 
             if (!newValue) {
@@ -348,8 +357,8 @@ namespace TrafficManager.State {
 #if QUEUEDSTATS
         public static void SetShowPathFindStats(bool value) {
             Options.showPathFindStats = value;
-            if (showPathFindStatsToggle != null) {
-                showPathFindStatsToggle.isChecked = value;
+            if (_showPathFindStatsToggle != null) {
+                _showPathFindStatsToggle.isChecked = value;
             }
         }
 #endif

@@ -1,22 +1,26 @@
 namespace TrafficManager.State {
     using ColossalFramework.UI;
     using CSUtil.Commons;
+    using JetBrains.Annotations;
     using UI;
 
     public static class OptionsOverlaysTab {
-        internal static UICheckBox prioritySignsOverlayToggle;
-        private static UICheckBox timedLightsOverlayToggle;
-        private static UICheckBox speedLimitsOverlayToggle;
-        private static UICheckBox vehicleRestrictionsOverlayToggle;
-        private static UICheckBox parkingRestrictionsOverlayToggle;
-        private static UICheckBox junctionRestrictionsOverlayToggle;
-        private static UICheckBox connectedLanesOverlayToggle;
-        private static UICheckBox nodesOverlayToggle;
-        private static UICheckBox vehicleOverlayToggle;
-        private static UICheckBox showLanesToggle;
+        private static UICheckBox _prioritySignsOverlayToggle;
+        private static UICheckBox _timedLightsOverlayToggle;
+        private static UICheckBox _speedLimitsOverlayToggle;
+        private static UICheckBox _vehicleRestrictionsOverlayToggle;
+        private static UICheckBox _parkingRestrictionsOverlayToggle;
+        private static UICheckBox _junctionRestrictionsOverlayToggle;
+        private static UICheckBox _connectedLanesOverlayToggle;
+        private static UICheckBox _nodesOverlayToggle;
+        private static UICheckBox _vehicleOverlayToggle;
+        private static UICheckBox _showLanesToggle;
 #if DEBUG
-        private static UICheckBox citizenOverlayToggle;
-        private static UICheckBox buildingOverlayToggle;
+        [UsedImplicitly]
+        private static UICheckBox _citizenOverlayToggle;
+
+        [UsedImplicitly]
+        private static UICheckBox _buildingOverlayToggle;
 #endif
 
         private static string T(string s) {
@@ -36,55 +40,55 @@ namespace TrafficManager.State {
 
             var panelHelper = new UIHelper(currentPanel);
 
-            prioritySignsOverlayToggle = panelHelper.AddCheckbox(
+            _prioritySignsOverlayToggle = panelHelper.AddCheckbox(
                                              T("Priority_signs"),
                                              Options.prioritySignsOverlay,
                                              OnPrioritySignsOverlayChanged) as UICheckBox;
-            timedLightsOverlayToggle = panelHelper.AddCheckbox(
+            _timedLightsOverlayToggle = panelHelper.AddCheckbox(
                                            T("Timed_traffic_lights"),
                                            Options.timedLightsOverlay,
                                            OnTimedLightsOverlayChanged) as UICheckBox;
-            speedLimitsOverlayToggle = panelHelper.AddCheckbox(
+            _speedLimitsOverlayToggle = panelHelper.AddCheckbox(
                                            T("Speed_limits"),
                                            Options.speedLimitsOverlay,
                                            OnSpeedLimitsOverlayChanged) as UICheckBox;
-            vehicleRestrictionsOverlayToggle
+            _vehicleRestrictionsOverlayToggle
                 = panelHelper.AddCheckbox(
                       T("Vehicle_restrictions"),
                       Options.vehicleRestrictionsOverlay,
                       OnVehicleRestrictionsOverlayChanged) as UICheckBox;
-            parkingRestrictionsOverlayToggle
+            _parkingRestrictionsOverlayToggle
                 = panelHelper.AddCheckbox(
                       T("Parking_restrictions"),
                       Options.parkingRestrictionsOverlay,
                       OnParkingRestrictionsOverlayChanged) as UICheckBox;
-            junctionRestrictionsOverlayToggle
+            _junctionRestrictionsOverlayToggle
                 = panelHelper.AddCheckbox(
                       T("Junction_restrictions"),
                       Options.junctionRestrictionsOverlay,
                       OnJunctionRestrictionsOverlayChanged) as UICheckBox;
-            connectedLanesOverlayToggle = panelHelper.AddCheckbox(
+            _connectedLanesOverlayToggle = panelHelper.AddCheckbox(
                                               T("Connected_lanes"),
                                               Options.connectedLanesOverlay,
                                               OnConnectedLanesOverlayChanged) as UICheckBox;
-            nodesOverlayToggle = panelHelper.AddCheckbox(
+            _nodesOverlayToggle = panelHelper.AddCheckbox(
                                      T("Nodes_and_segments"),
                                      Options.nodesOverlay,
                                      onNodesOverlayChanged) as UICheckBox;
-            showLanesToggle = panelHelper.AddCheckbox(
+            _showLanesToggle = panelHelper.AddCheckbox(
                                   T("Lanes"),
                                   Options.showLanes,
                                   onShowLanesChanged) as UICheckBox;
 #if DEBUG
-            vehicleOverlayToggle = panelHelper.AddCheckbox(
+            _vehicleOverlayToggle = panelHelper.AddCheckbox(
                                        T("Vehicles"),
                                        Options.vehicleOverlay,
                                        onVehicleOverlayChanged) as UICheckBox;
-            citizenOverlayToggle = panelHelper.AddCheckbox(
+            _citizenOverlayToggle = panelHelper.AddCheckbox(
                                        T("Citizens"),
                                        Options.citizenOverlay,
                                        onCitizenOverlayChanged) as UICheckBox;
-            buildingOverlayToggle = panelHelper.AddCheckbox(
+            _buildingOverlayToggle = panelHelper.AddCheckbox(
                                         T("Buildings"),
                                         Options.buildingOverlay,
                                         onBuildingOverlayChanged) as UICheckBox;
@@ -94,8 +98,8 @@ namespace TrafficManager.State {
         public static void SetPrioritySignsOverlay(bool newPrioritySignsOverlay) {
             Options.prioritySignsOverlay = newPrioritySignsOverlay;
 
-            if (prioritySignsOverlayToggle != null) {
-                prioritySignsOverlayToggle.isChecked = newPrioritySignsOverlay;
+            if (_prioritySignsOverlayToggle != null) {
+                _prioritySignsOverlayToggle.isChecked = newPrioritySignsOverlay;
             }
 
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
@@ -104,8 +108,8 @@ namespace TrafficManager.State {
                 public static void SetTimedLightsOverlay(bool newTimedLightsOverlay) {
             Options.timedLightsOverlay = newTimedLightsOverlay;
 
-            if (timedLightsOverlayToggle != null) {
-                timedLightsOverlayToggle.isChecked = newTimedLightsOverlay;
+            if (_timedLightsOverlayToggle != null) {
+                _timedLightsOverlayToggle.isChecked = newTimedLightsOverlay;
             }
 
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
@@ -114,8 +118,8 @@ namespace TrafficManager.State {
         public static void SetSpeedLimitsOverlay(bool newSpeedLimitsOverlay) {
             Options.speedLimitsOverlay = newSpeedLimitsOverlay;
 
-            if (speedLimitsOverlayToggle != null) {
-                speedLimitsOverlayToggle.isChecked = newSpeedLimitsOverlay;
+            if (_speedLimitsOverlayToggle != null) {
+                _speedLimitsOverlayToggle.isChecked = newSpeedLimitsOverlay;
             }
 
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
@@ -124,8 +128,8 @@ namespace TrafficManager.State {
         public static void SetVehicleRestrictionsOverlay(bool newVehicleRestrictionsOverlay) {
             Options.vehicleRestrictionsOverlay = newVehicleRestrictionsOverlay;
 
-            if (vehicleRestrictionsOverlayToggle != null) {
-                vehicleRestrictionsOverlayToggle.isChecked = newVehicleRestrictionsOverlay;
+            if (_vehicleRestrictionsOverlayToggle != null) {
+                _vehicleRestrictionsOverlayToggle.isChecked = newVehicleRestrictionsOverlay;
             }
 
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
@@ -134,8 +138,8 @@ namespace TrafficManager.State {
         public static void SetParkingRestrictionsOverlay(bool newParkingRestrictionsOverlay) {
             Options.parkingRestrictionsOverlay = newParkingRestrictionsOverlay;
 
-            if (parkingRestrictionsOverlayToggle != null) {
-                parkingRestrictionsOverlayToggle.isChecked = newParkingRestrictionsOverlay;
+            if (_parkingRestrictionsOverlayToggle != null) {
+                _parkingRestrictionsOverlayToggle.isChecked = newParkingRestrictionsOverlay;
             }
 
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
@@ -144,8 +148,8 @@ namespace TrafficManager.State {
         public static void SetJunctionRestrictionsOverlay(bool newValue) {
             Options.junctionRestrictionsOverlay = newValue;
 
-            if (junctionRestrictionsOverlayToggle != null) {
-                junctionRestrictionsOverlayToggle.isChecked = newValue;
+            if (_junctionRestrictionsOverlayToggle != null) {
+                _junctionRestrictionsOverlayToggle.isChecked = newValue;
             }
 
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
@@ -154,16 +158,16 @@ namespace TrafficManager.State {
         public static void SetConnectedLanesOverlay(bool newValue) {
             Options.connectedLanesOverlay = newValue;
 
-            if (connectedLanesOverlayToggle != null) {
-                connectedLanesOverlayToggle.isChecked = newValue;
+            if (_connectedLanesOverlayToggle != null) {
+                _connectedLanesOverlayToggle.isChecked = newValue;
             }
         }
 
         public static void SetNodesOverlay(bool newNodesOverlay) {
             Options.nodesOverlay = newNodesOverlay;
 
-            if (nodesOverlayToggle != null) {
-                nodesOverlayToggle.isChecked = newNodesOverlay;
+            if (_nodesOverlayToggle != null) {
+                _nodesOverlayToggle.isChecked = newNodesOverlay;
             }
 
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
@@ -172,8 +176,8 @@ namespace TrafficManager.State {
         public static void SetVehicleOverlay(bool newVal) {
             Options.vehicleOverlay = newVal;
 
-            if (vehicleOverlayToggle != null) {
-                vehicleOverlayToggle.isChecked = newVal;
+            if (_vehicleOverlayToggle != null) {
+                _vehicleOverlayToggle.isChecked = newVal;
             }
         }
 
@@ -299,11 +303,12 @@ namespace TrafficManager.State {
             Options.buildingOverlay = newVal;
         }
 
+        [UsedImplicitly]
         public static void SetShowLanes(bool newShowLanes) {
             Options.showLanes = newShowLanes;
 
-            if (showLanesToggle != null) {
-                showLanesToggle.isChecked = newShowLanes;
+            if (_showLanesToggle != null) {
+                _showLanesToggle.isChecked = newShowLanes;
             }
         }
 

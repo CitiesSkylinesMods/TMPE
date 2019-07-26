@@ -4,7 +4,7 @@ namespace TrafficManager.State {
     using Keybinds;
     using UI;
 
-    public class OptionsKeybindsTab {
+    public static class OptionsKeybindsTab {
         private static string T(string s) {
             return Translation.GetString(s);
         }
