@@ -9,24 +9,25 @@ namespace TrafficManager
 {
     public class TrafficManagerMod : IUserMod
     {
+#if LABS
+        public const string Branch = "LABS";
+#elif DEBUG
+        public const string Branch = "DEBUG";
+#else
+        public const string Branch = "STABLE";
+#endif
+
         public static readonly uint GameVersion = 184803856u;
         public static readonly uint GameVersionA = 1u;
         public static readonly uint GameVersionB = 12u;
         public static readonly uint GameVersionC = 1u;
         public static readonly uint GameVersionBuild = 2u;
 
-        // Note: `Version` is also used in UI/MainMenu/VersionLabel.cs
-        public static readonly string Version = "11.0-alpha";
+        public static readonly string Version = "11.0-alpha4";
 
-#if LABS
-        public string Branch => "LABS";
-#elif DEBUG
-        public string Branch => "DEBUG";
-#else
-        public string Branch => "STABLE";
-#endif
+        public static readonly string ModName = "TM:PE " + Branch + " " + Version;
 
-        public string Name => "TM:PE " + Version + " " + Branch;
+        public string Name => ModName;
 
         public string Description => "Manage your city's traffic";
 
