@@ -2,6 +2,7 @@
 namespace TrafficManager {
     using System;
     using System.Collections.Generic;
+    using JetBrains.Annotations;
     using State;
     using Traffic;
     using Traffic.Data;
@@ -27,7 +28,7 @@ namespace TrafficManager {
             /// Do not use this, for save compatibility only.
             /// </summary>
             [Obsolete]
-            public Traffic.ExtVehicleType vehicleTypes;
+            public ExtVehicleType vehicleTypes;
 
             /// <summary>
             /// Use this to access new ExtVehicleType, from TMPE.API
@@ -38,7 +39,7 @@ namespace TrafficManager {
                 => LegacyExtVehicleType.ToNew(vehicleTypes);
 #pragma warning restore 612
 
-            public LaneVehicleTypes(uint laneId, Traffic.ExtVehicleType vehicleTypes) {
+            public LaneVehicleTypes(uint laneId, ExtVehicleType vehicleTypes) {
                 this.laneId = laneId;
                 this.vehicleTypes = vehicleTypes;
             }
@@ -72,7 +73,7 @@ namespace TrafficManager {
             /// Use LegacyExtVehicleType helper class to convert between old/new
             /// </summary>
             [Obsolete]
-            public Dictionary<Traffic.ExtVehicleType, CustomSegmentLight> customLights;
+            public Dictionary<ExtVehicleType, CustomSegmentLight> customLights;
 
             public RoadBaseAI.TrafficLightState? pedestrianLightState;
             public bool manualPedestrianMode;
@@ -91,8 +92,8 @@ namespace TrafficManager {
         [Serializable]
         public class SegmentNodeConf {
             public ushort segmentId;
-            public SegmentNodeFlags startNodeFlags = null;
-            public SegmentNodeFlags endNodeFlags = null;
+            public SegmentNodeFlags startNodeFlags;
+            public SegmentNodeFlags endNodeFlags;
 
             public SegmentNodeConf(ushort segmentId) {
                 this.segmentId = segmentId;
@@ -114,27 +115,44 @@ namespace TrafficManager {
 
         [Serializable]
         public class SegmentNodeFlags {
-            public bool? uturnAllowed = null;
-            public bool? turnOnRedAllowed = null; // controls near turns // TODO fix naming when the serialization system is updated
-            public bool? farTurnOnRedAllowed = null;
-            public bool? straightLaneChangingAllowed = null;
-            public bool? enterWhenBlockedAllowed = null;
-            public bool? pedestrianCrossingAllowed = null;
+            // TODO fix naming when the serialization system is updated
+            public bool? uturnAllowed;
+            // controls near turns
+            public bool? turnOnRedAllowed;
+            public bool? farTurnOnRedAllowed;
+            public bool? straightLaneChangingAllowed;
+            public bool? enterWhenBlockedAllowed;
+            public bool? pedestrianCrossingAllowed;
 
+            [UsedImplicitly]
             public bool IsDefault() {
                 // TODO v1.11.0: check this
-                bool uturnIsDefault = uturnAllowed == null || (bool)uturnAllowed == Options.allowUTurns;
-                bool turnOnRedIsDefault = turnOnRedAllowed == null || (bool)turnOnRedAllowed;
-                bool farTurnOnRedIsDefault = farTurnOnRedAllowed == null || (bool)farTurnOnRedAllowed;
-                bool straightChangeIsDefault = straightLaneChangingAllowed == null || (bool)straightLaneChangingAllowed == Options.allowLaneChangesWhileGoingStraight;
-                bool enterWhenBlockedIsDefault = enterWhenBlockedAllowed == null || (bool)enterWhenBlockedAllowed == Options.allowEnterBlockedJunctions;
-                bool pedCrossingIsDefault = pedestrianCrossingAllowed == null || (bool)pedestrianCrossingAllowed;
+                bool uturnIsDefault =
+                    uturnAllowed == null || (bool)uturnAllowed == Options.allowUTurns;
+                bool turnOnRedIsDefault =
+                    turnOnRedAllowed == null || (bool)turnOnRedAllowed;
+                bool farTurnOnRedIsDefault =
+                    farTurnOnRedAllowed == null || (bool)farTurnOnRedAllowed;
+                bool straightChangeIsDefault
+                    = straightLaneChangingAllowed == null
+                      || (bool)straightLaneChangingAllowed == Options.allowLaneChangesWhileGoingStraight;
+                bool enterWhenBlockedIsDefault =
+                    enterWhenBlockedAllowed == null
+                    || (bool)enterWhenBlockedAllowed == Options.allowEnterBlockedJunctions;
+                bool pedCrossingIsDefault =
+                    pedestrianCrossingAllowed == null || (bool)pedestrianCrossingAllowed;
 
-                return uturnIsDefault && turnOnRedIsDefault && farTurnOnRedIsDefault && straightChangeIsDefault && enterWhenBlockedIsDefault && pedCrossingIsDefault;
+                return uturnIsDefault && turnOnRedIsDefault && farTurnOnRedIsDefault &&
+                       straightChangeIsDefault && enterWhenBlockedIsDefault && pedCrossingIsDefault;
             }
 
             public override string ToString() {
-                return $"uturnAllowed={uturnAllowed}, turnOnRedAllowed={turnOnRedAllowed}, farTurnOnRedAllowed={farTurnOnRedAllowed}, straightLaneChangingAllowed={straightLaneChangingAllowed}, enterWhenBlockedAllowed={enterWhenBlockedAllowed}, pedestrianCrossingAllowed={pedestrianCrossingAllowed}";
+                return string.Format(
+                    "uturnAllowed={0}, turnOnRedAllowed={1}, farTurnOnRedAllowed={2}, " +
+                    "straightLaneChangingAllowed={3}, enterWhenBlockedAllowed={4}, " +
+                    "pedestrianCrossingAllowed={5}",
+                    uturnAllowed, turnOnRedAllowed, farTurnOnRedAllowed, straightLaneChangingAllowed,
+                    enterWhenBlockedAllowed, pedestrianCrossingAllowed);
             }
         }
 
@@ -145,8 +163,10 @@ namespace TrafficManager {
             public bool lowerStartNode;
 
             public LaneConnection(uint lowerLaneId, uint higherLaneId, bool lowerStartNode) {
-                if (lowerLaneId >= higherLaneId)
+                if (lowerLaneId >= higherLaneId) {
                     throw new ArgumentException();
+                }
+
                 this.lowerLaneId = lowerLaneId;
                 this.higherLaneId = higherLaneId;
                 this.lowerStartNode = lowerStartNode;
@@ -289,26 +309,47 @@ namespace TrafficManager {
         public List<ParkingRestriction> ParkingRestrictions = new List<ParkingRestriction>();
 
         [Obsolete]
-        public string NodeTrafficLights = "";
+        public string NodeTrafficLights = string.Empty;
+
         [Obsolete]
-        public string NodeCrosswalk = "";
+        [UsedImplicitly]
+        // Not used
+        public string NodeCrosswalk = string.Empty;
+
         [Obsolete]
-        public string LaneFlags = "";
+        public string LaneFlags = string.Empty;
 
         [Obsolete]
         public List<int[]> PrioritySegments = new List<int[]>();
+
         [Obsolete]
+        [UsedImplicitly]
+        // Not used
         public List<int[]> NodeDictionary = new List<int[]>();
+
         [Obsolete]
+        [UsedImplicitly]
+        // Not used
         public List<int[]> ManualSegments = new List<int[]>();
 
         [Obsolete]
+        [UsedImplicitly]
+        // Not used
         public List<int[]> TimedNodes = new List<int[]>();
+
         [Obsolete]
+        [UsedImplicitly]
+        // Not used
         public List<ushort[]> TimedNodeGroups = new List<ushort[]>();
+
         [Obsolete]
+        [UsedImplicitly]
+        // Not used
         public List<int[]> TimedNodeSteps = new List<int[]>();
+
         [Obsolete]
+        [UsedImplicitly]
+        // Not used
         public List<int[]> TimedNodeStepSegments = new List<int[]>();
     }
 }

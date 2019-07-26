@@ -867,8 +867,8 @@ namespace TrafficManager.State {
 
             Log._Debug($"Highway rules changed to {newHighwayRules}");
             highwayRules = newHighwayRules;
-            Flags.clearHighwayLaneArrows();
-            Flags.applyAllFlags();
+            Flags.ClearHighwayLaneArrows();
+            Flags.ApplyAllFlags();
             RoutingManager.Instance.RequestFullRecalculation();
         }
 
@@ -1210,7 +1210,7 @@ namespace TrafficManager.State {
             if (!IsGameLoaded())
                 return;
 
-            Flags.resetSpeedLimits();
+            Flags.ResetSpeedLimits();
         }
 
         private static void onClickReloadGlobalConf() {

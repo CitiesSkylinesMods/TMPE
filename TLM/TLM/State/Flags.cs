@@ -1,4 +1,4 @@
-﻿#define DEBUGFLAGSx
+﻿#define DEBUGFLAGS
 
 namespace TrafficManager.State {
     using System;
@@ -8,6 +8,7 @@ namespace TrafficManager.State {
     using ColossalFramework;
     using ConfigData;
     using CSUtil.Commons;
+    using JetBrains.Annotations;
     using Manager.Impl;
     using Traffic.Enums;
 
@@ -18,7 +19,7 @@ namespace TrafficManager.State {
         /// <summary>
         /// For each lane: Defines the lane arrows which are set
         /// </summary>
-        private static LaneArrows?[] laneArrowFlags = null;
+        private static LaneArrows?[] laneArrowFlags;
 
         /// <summary>
         /// For each lane (by id): list of lanes that are connected with this lane by the T++ lane connector
@@ -26,19 +27,20 @@ namespace TrafficManager.State {
         /// key 2: at start node?
         /// values: target lane id
         /// </summary>
-        internal static uint[][][] laneConnections = null;
+        internal static uint[][][] laneConnections;
 
         /// <summary>
         /// For each lane: Defines the currently set speed limit
         /// </summary>
-        private static Dictionary<uint, float> laneSpeedLimit = null; // TODO remove
+        private static Dictionary<uint, float> laneSpeedLimit; // TODO remove
 
-        internal static float?[][] laneSpeedLimitArray; // for faster, lock-free access, 1st index: segment id, 2nd index: lane index
+        // for faster, lock-free access, 1st index: segment id, 2nd index: lane index
+        internal static float?[][] laneSpeedLimitArray;
 
         /// <summary>
         /// For each lane: Defines the lane arrows which are set in highway rule mode (they are not saved)
         /// </summary>
-        private static LaneArrows?[] highwayLaneArrowFlags = null;
+        private static LaneArrows?[] highwayLaneArrowFlags;
 
         /// <summary>
         /// For each lane: Defines the allowed vehicle types
@@ -125,26 +127,39 @@ namespace TrafficManager.State {
                 return false;
             }
 
-            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created) {
-                //Log._Debug($"Flags: Node {nodeId} may not have a traffic light (not created). flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}");
-                Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
+            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
+                 (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created)
+            {
+                // Log._Debug($"Flags: Node {nodeId} may not have a traffic light (not created).
+                // flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}");
+                Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags
+                    &= ~NetNode.Flags.TrafficLights;
                 return false;
             }
 
-            ItemClass connectionClass = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
-            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction) == NetNode.Flags.None &&
-                connectionClass.m_service != ItemClass.Service.PublicTransport
-                ) {
-                //Log._Debug($"Flags: Node {nodeId} may not have a traffic light (no junction or not public transport). flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags} connectionClass={connectionClass?.m_service}");
-                Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
+            ItemClass connectionClass = Singleton<NetManager>
+                                        .instance.m_nodes.m_buffer[nodeId].Info
+                                        .GetConnectionClass();
+            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
+                 NetNode.Flags.Junction) == NetNode.Flags.None &&
+                connectionClass.m_service != ItemClass.Service.PublicTransport)
+            {
+                // Log._Debug($"Flags: Node {nodeId} may not have a traffic light (no junction or
+                // not public transport). flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}
+                // connectionClass={connectionClass?.m_service}");
+                Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags
+                    &= ~NetNode.Flags.TrafficLights;
                 return false;
             }
 
             if (connectionClass == null ||
                 (connectionClass.m_service != ItemClass.Service.Road &&
-                 connectionClass.m_service != ItemClass.Service.PublicTransport)) {
-                //Log._Debug($"Flags: Node {nodeId} may not have a traffic light (no connection class). connectionClass={connectionClass?.m_service}");
-                Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &= ~NetNode.Flags.TrafficLights;
+                 connectionClass.m_service != ItemClass.Service.PublicTransport))
+            {
+                // Log._Debug($"Flags: Node {nodeId} may not have a traffic light (no connection class).
+                // connectionClass={connectionClass?.m_service}");
+                Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags
+                    &= ~NetNode.Flags.TrafficLights;
                 return false;
             }
 
@@ -153,11 +168,12 @@ namespace TrafficManager.State {
 
         [Obsolete]
         public static bool setNodeTrafficLight(ushort nodeId, bool flag) {
-            if (nodeId <= 0)
+            if (nodeId <= 0) {
                 return false;
+            }
 
 #if DEBUGFLAGS
-			Log._Debug($"Flags: Set node traffic light: {nodeId}={flag}");
+            Log._Debug($"Flags: Set node traffic light: {nodeId}={flag}");
 #endif
 
             if (!mayHaveTrafficLight(nodeId)) {
@@ -165,50 +181,65 @@ namespace TrafficManager.State {
                 return false;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
-                NetNode.Flags flags = node.m_flags | NetNode.Flags.CustomTrafficLights;
-                if ((bool)flag) {
+            Constants.ServiceFactory.NetService.ProcessNode(
+                nodeId,
+                (ushort nId, ref NetNode node) => {
+                    NetNode.Flags flags =
+                        node.m_flags | NetNode.Flags.CustomTrafficLights;
+                    if (flag) {
 #if DEBUGFLAGS
-					Log._Debug($"Adding traffic light @ node {nId}");
+                        Log._Debug($"Adding traffic light @ node {nId}");
 #endif
-                    flags |= NetNode.Flags.TrafficLights;
-                } else {
+                        flags |= NetNode.Flags.TrafficLights;
+                    } else {
 #if DEBUGFLAGS
-					Log._Debug($"Removing traffic light @ node {nId}");
+                        Log._Debug($"Removing traffic light @ node {nId}");
 #endif
-                    flags &= ~NetNode.Flags.TrafficLights;
-                }
-                node.m_flags = flags;
-                return true;
-            });
+                        flags &= ~NetNode.Flags.TrafficLights;
+                    }
+
+                    node.m_flags = flags;
+                    return true;
+                });
             return true;
         }
 
         [Obsolete]
+        [UsedImplicitly]
+        // Not used
         internal static bool isNodeTrafficLight(ushort nodeId) {
-            if (nodeId <= 0)
+            if (nodeId <= 0) {
                 return false;
+            }
 
-            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created)
+            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
+                 (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created) {
                 return false;
+            }
 
-            return (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+            return (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
+                    NetNode.Flags.TrafficLights) != NetNode.Flags.None;
         }
 
         /// <summary>
-        /// Removes lane connections that point from lane <paramref name="sourceLaneId"/> to lane <paramref name="targetLaneId"/> at node <paramref name="startNode"/>.
+        /// Removes lane connections that point from lane <paramref name="sourceLaneId"/> to lane
+        /// <paramref name="targetLaneId"/> at node <paramref name="startNode"/>.
         /// </summary>
         /// <param name="sourceLaneId"></param>
         /// <param name="targetLaneId"></param>
         /// <param name="startNode"></param>
         /// <returns></returns>
-        private static bool RemoveSingleLaneConnection(uint sourceLaneId, uint targetLaneId, bool startNode) {
+        private static bool RemoveSingleLaneConnection(uint sourceLaneId,
+                                                       uint targetLaneId,
+                                                       bool startNode) {
 #if DEBUGFLAGS
-			Log._Debug($"Flags.CleanupLaneConnections({sourceLaneId}, {targetLaneId}, {startNode}) called.");
+            Log._Debug(
+                $"Flags.CleanupLaneConnections({sourceLaneId}, {targetLaneId}, {startNode}) called.");
 #endif
             int nodeArrayIndex = startNode ? 0 : 1;
 
-            if (laneConnections[sourceLaneId] == null || laneConnections[sourceLaneId][nodeArrayIndex] == null)
+            if (laneConnections[sourceLaneId] == null ||
+                laneConnections[sourceLaneId][nodeArrayIndex] == null)
                 return false;
 
             uint[] srcLaneConnections = laneConnections[sourceLaneId][nodeArrayIndex];
@@ -240,6 +271,7 @@ namespace TrafficManager.State {
                     laneConnections[sourceLaneId][nodeArrayIndex][k++] = srcLaneConnections[i];
                 }
             }
+
             return ret;
         }
 
@@ -253,44 +285,52 @@ namespace TrafficManager.State {
         internal static bool RemoveLaneConnection(uint lane1Id, uint lane2Id, bool startNode1) {
 #if DEBUG
             bool debug = DebugSwitch.LaneConnections.Get();
-            if (debug)
+            if (debug) {
                 Log._Debug($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}) called.");
+            }
 #endif
             bool lane1Valid = CheckLane(lane1Id);
             bool lane2Valid = CheckLane(lane2Id);
 
             bool ret = false;
 
-            if (! lane1Valid) {
+            if (!lane1Valid) {
                 // remove all incoming/outgoing lane connections
                 RemoveLaneConnections(lane1Id);
                 ret = true;
             }
 
-            if (! lane2Valid) {
+            if (!lane2Valid) {
                 // remove all incoming/outgoing lane connections
                 RemoveLaneConnections(lane2Id);
                 ret = true;
             }
 
             if (lane1Valid || lane2Valid) {
-                ushort commonNodeId;
-                bool startNode2;
-
-                LaneConnectionManager.Instance.GetCommonNodeId(lane1Id, lane2Id, startNode1, out commonNodeId, out startNode2); // TODO refactor
+                LaneConnectionManager.Instance.GetCommonNodeId(
+                    lane1Id,
+                    lane2Id,
+                    startNode1,
+                    out ushort commonNodeId,
+                    out bool startNode2); // TODO refactor
                 if (commonNodeId == 0) {
-                    Log.Warning($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}): Could not identify common node between lanes {lane1Id} and {lane2Id}");
+                    Log.Warning($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}): " +
+                                $"Could not identify common node between lanes {lane1Id} and {lane2Id}");
                 }
 
-                if (RemoveSingleLaneConnection(lane1Id, lane2Id, startNode1))
+                if (RemoveSingleLaneConnection(lane1Id, lane2Id, startNode1)) {
                     ret = true;
-                if (RemoveSingleLaneConnection(lane2Id, lane1Id, startNode2))
+                }
+
+                if (RemoveSingleLaneConnection(lane2Id, lane1Id, startNode2)) {
                     ret = true;
+                }
             }
 
 #if DEBUG
-            if (debug)
+            if (debug) {
                 Log._Debug($"Flags.RemoveLaneConnection({lane1Id}, {lane2Id}, {startNode1}). ret={ret}");
+            }
 #endif
             return ret;
         }
@@ -300,20 +340,25 @@ namespace TrafficManager.State {
         /// </summary>
         /// <param name="laneId"></param>
         /// <param name="startNode"></param>
-        internal static void RemoveLaneConnections(uint laneId, bool? startNode=null) {
+        internal static void RemoveLaneConnections(uint laneId, bool? startNode = null) {
 #if DEBUG
             bool debug = DebugSwitch.LaneConnections.Get();
-            if (debug)
-                Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}) called. laneConnections[{laneId}]={laneConnections[laneId]}");
+            if (debug) {
+                Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}) called. " +
+                           $"laneConnections[{laneId}]={laneConnections[laneId]}");
+            }
 #endif
-            if (laneConnections[laneId] == null)
+            if (laneConnections[laneId] == null) {
                 return;
+            }
 
             bool laneValid = CheckLane(laneId);
             bool clearBothSides = startNode == null || !laneValid;
 #if DEBUG
-            if (debug)
-                Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}): laneValid={laneValid}, clearBothSides={clearBothSides}");
+            if (debug) {
+                Log._Debug($"Flags.RemoveLaneConnections({laneId}, {startNode}): laneValid={laneValid}, " +
+                           $"clearBothSides={clearBothSides}");
+            }
 #endif
             int? nodeArrayIndex = null;
             if (!clearBothSides) {
@@ -321,21 +366,28 @@ namespace TrafficManager.State {
             }
 
             for (int k = 0; k <= 1; ++k) {
-                if (nodeArrayIndex != null && k != (int)nodeArrayIndex)
+                if (nodeArrayIndex != null && k != (int)nodeArrayIndex) {
                     continue;
+                }
 
                 bool startNode1 = k == 0;
 
-                if (laneConnections[laneId][k] == null)
+                if (laneConnections[laneId][k] == null) {
                     continue;
+                }
 
                 for (int i = 0; i < laneConnections[laneId][k].Length; ++i) {
                     uint otherLaneId = laneConnections[laneId][k][i];
-                    ushort commonNodeId;
-                    bool startNode2;
-                    LaneConnectionManager.Instance.GetCommonNodeId(laneId, otherLaneId, startNode1, out commonNodeId, out startNode2); // TODO refactor
+                    LaneConnectionManager.Instance.GetCommonNodeId(
+                        laneId,
+                        otherLaneId,
+                        startNode1,
+                        out ushort commonNodeId,
+                        out bool startNode2); // TODO refactor
+
                     if (commonNodeId == 0) {
-                        Log.Warning($"Flags.RemoveLaneConnections({laneId}, {startNode}): Could not identify common node between lanes {laneId} and {otherLaneId}");
+                        Log.Warning($"Flags.RemoveLaneConnections({laneId}, {startNode}): Could " +
+                                    $"not identify common node between lanes {laneId} and {otherLaneId}");
                     }
 
                     RemoveSingleLaneConnection(otherLaneId, laneId, startNode2);
@@ -344,8 +396,9 @@ namespace TrafficManager.State {
                 laneConnections[laneId][k] = null;
             }
 
-            if (clearBothSides)
+            if (clearBothSides) {
                 laneConnections[laneId] = null;
+            }
         }
 
         /// <summary>
@@ -369,20 +422,25 @@ namespace TrafficManager.State {
                 RemoveLaneConnections(lane2Id);
             }
 
-            if (!lane1Valid || !lane2Valid)
+            if (!lane1Valid || !lane2Valid) {
                 return false;
+            }
 
-            ushort commonNodeId;
-            bool startNode2;
-            LaneConnectionManager.Instance.GetCommonNodeId(lane1Id, lane2Id, startNode1, out commonNodeId, out startNode2); // TODO refactor
+            LaneConnectionManager.Instance.GetCommonNodeId(
+                lane1Id,
+                lane2Id,
+                startNode1,
+                out ushort commonNodeId,
+                out bool startNode2); // TODO refactor
 
             if (commonNodeId != 0) {
                 CreateLaneConnection(lane1Id, lane2Id, startNode1);
                 CreateLaneConnection(lane2Id, lane1Id, startNode2);
 
                 return true;
-            } else
-                return false;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -392,7 +450,9 @@ namespace TrafficManager.State {
         /// <param name="sourceLaneId"></param>
         /// <param name="targetLaneId"></param>
         /// <param name="startNode"></param>
-        private static void CreateLaneConnection(uint sourceLaneId, uint targetLaneId, bool startNode) {
+        private static void CreateLaneConnection(uint sourceLaneId,
+                                                 uint targetLaneId,
+                                                 bool startNode) {
             if (laneConnections[sourceLaneId] == null) {
                 laneConnections[sourceLaneId] = new uint[2][];
             }
@@ -406,84 +466,110 @@ namespace TrafficManager.State {
 
             uint[] oldConnections = laneConnections[sourceLaneId][nodeArrayIndex];
             laneConnections[sourceLaneId][nodeArrayIndex] = new uint[oldConnections.Length + 1];
-            Array.Copy(oldConnections, laneConnections[sourceLaneId][nodeArrayIndex], oldConnections.Length);
+            Array.Copy(
+                oldConnections,
+                laneConnections[sourceLaneId][nodeArrayIndex],
+                oldConnections.Length);
             laneConnections[sourceLaneId][nodeArrayIndex][oldConnections.Length] = targetLaneId;
         }
 
-        internal static bool CheckLane(uint laneId) { // TODO refactor
-            if (laneId <= 0)
+        internal static bool CheckLane(uint laneId) {
+            // TODO refactor
+            if (laneId <= 0) {
                 return false;
-            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created)
+            }
+
+            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &
+                 (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
                 return false;
+            }
 
             ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
-            if (segmentId <= 0)
+            if (segmentId <= 0) {
                 return false;
-            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created)
-                return false;
-            return true;
+            }
+
+            return (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags &
+                    (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) == NetSegment.Flags.Created;
         }
 
-        public static void setLaneSpeedLimit(uint laneId, float? speedLimit) {
+        public static void SetLaneSpeedLimit(uint laneId, float? speedLimit) {
             if (!CheckLane(laneId)) {
                 return;
             }
 
-            var segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
-
-            var segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-            var curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
+            ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
+            NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+            uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
             uint laneIndex = 0;
+
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
                 if (curLaneId == laneId) {
-                    setLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
+                    SetLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
                     return;
                 }
+
                 laneIndex++;
                 curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
             }
         }
 
         public static void removeLaneSpeedLimit(uint laneId) {
-            setLaneSpeedLimit(laneId, null);
+            SetLaneSpeedLimit(laneId, null);
         }
 
-        public static void setLaneSpeedLimit(ushort segmentId, uint laneIndex, float speedLimit) {
-            if (segmentId <= 0 || laneIndex < 0) {
+        [UsedImplicitly]
+        // Not used
+        public static void SetLaneSpeedLimit(ushort segmentId, uint laneIndex, float speedLimit) {
+            if (segmentId <= 0) {
                 return;
             }
+
             if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags &
                  (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
                 return;
             }
-            var segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+
+            NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+
             if (laneIndex >= segmentInfo.m_lanes.Length) {
                 return;
             }
 
             // find the lane id
-            var laneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
+            uint laneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
+
             for (var i = 0; i < laneIndex; ++i) {
                 if (laneId == 0) {
                     return; // no valid lane found
                 }
+
                 laneId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_nextLane;
             }
 
-            setLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
+            SetLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
         }
 
-        public static void setLaneSpeedLimit(ushort segmentId, uint laneIndex, uint laneId, float? speedLimit) {
-            if (segmentId <= 0 || laneIndex < 0 || laneId <= 0) {
+        public static void SetLaneSpeedLimit(ushort segmentId,
+                                             uint laneIndex,
+                                             uint laneId,
+                                             float? speedLimit) {
+            if (segmentId <= 0 || laneId <= 0) {
                 return;
             }
-            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
+
+            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags &
+                 (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
                 return;
             }
-            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
+
+            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &
+                 (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
                 return;
             }
-            var segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+
+            NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+
             if (laneIndex >= segmentInfo.m_lanes.Length) {
                 return;
             }
@@ -491,18 +577,21 @@ namespace TrafficManager.State {
             try {
                 Monitor.Enter(laneSpeedLimitLock);
 #if DEBUGFLAGS
-				Log._Debug($"Flags.setLaneSpeedLimit: setting speed limit of lane index {laneIndex} @ seg. {segmentId} to {speedLimit}");
+                Log._Debug(
+                    $"Flags.setLaneSpeedLimit: setting speed limit of lane index {laneIndex} @ seg. " +
+                    $"{segmentId} to {speedLimit}");
 #endif
-
                 if (speedLimit == null) {
                     laneSpeedLimit.Remove(laneId);
 
                     if (laneSpeedLimitArray[segmentId] == null) {
                         return;
                     }
+
                     if (laneIndex >= laneSpeedLimitArray[segmentId].Length) {
                         return;
                     }
+
                     laneSpeedLimitArray[segmentId][laneIndex] = null;
                 } else {
                     laneSpeedLimit[laneId] = speedLimit.Value;
@@ -512,96 +601,130 @@ namespace TrafficManager.State {
                     if (laneSpeedLimitArray[segmentId] == null) {
                         laneSpeedLimitArray[segmentId] = new float?[segmentInfo.m_lanes.Length];
                     } else if (laneSpeedLimitArray[segmentId].Length < segmentInfo.m_lanes.Length) {
-                        var oldArray = laneSpeedLimitArray[segmentId];
+                        float?[] oldArray = laneSpeedLimitArray[segmentId];
                         laneSpeedLimitArray[segmentId] = new float?[segmentInfo.m_lanes.Length];
                         Array.Copy(oldArray, laneSpeedLimitArray[segmentId], oldArray.Length);
                     }
+
                     // (2) insert the custom speed limit
                     laneSpeedLimitArray[segmentId][laneIndex] = speedLimit;
                 }
-            } finally {
+            }
+            finally {
                 Monitor.Exit(laneSpeedLimitLock);
             }
         }
 
         public static void setLaneAllowedVehicleTypes(uint laneId, ExtVehicleType vehicleTypes) {
-            if (laneId <= 0)
+            if (laneId <= 0) {
                 return;
-            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created)
+            }
+
+            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &
+                 (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
                 return;
+            }
 
             ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
-            if (segmentId <= 0)
-                return;
-            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created)
-                return;
 
-            NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+            if (segmentId <= 0) {
+                return;
+            }
+
+            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags &
+                 (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
+                return;
+            }
+
+            NetInfo segmentInfo =
+                Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
             uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
             uint laneIndex = 0;
+
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
                 if (curLaneId == laneId) {
                     setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, vehicleTypes);
                     return;
                 }
+
                 laneIndex++;
                 curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
             }
         }
 
-        public static void setLaneAllowedVehicleTypes(ushort segmentId, uint laneIndex, uint laneId, API.Traffic.Enums.ExtVehicleType vehicleTypes) {
-            if (segmentId <= 0 || laneIndex < 0 || laneId <= 0)
+        public static void setLaneAllowedVehicleTypes(ushort segmentId,
+                                                      uint laneIndex,
+                                                      uint laneId,
+                                                      ExtVehicleType vehicleTypes)
+        {
+            if (segmentId <= 0 || laneId <= 0) {
                 return;
-            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created)
+            }
+
+            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags &
+                 (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
                 return;
-            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created)
+            }
+
+            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &
+                 (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
                 return;
+            }
+
             NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+
             if (laneIndex >= segmentInfo.m_lanes.Length) {
                 return;
             }
 
 #if DEBUGFLAGS
-			Log._Debug($"Flags.setLaneAllowedVehicleTypes: setting allowed vehicles of lane index {laneIndex} @ seg. {segmentId} to {vehicleTypes.ToString()}");
+            Log._Debug("Flags.setLaneAllowedVehicleTypes: setting allowed vehicles of lane index " +
+                       $"{laneIndex} @ seg. {segmentId} to {vehicleTypes.ToString()}");
 #endif
 
             // save allowed vehicle types into the fast-access array.
             // (1) ensure that the array is defined and large enough
             if (laneAllowedVehicleTypesArray[segmentId] == null) {
                 laneAllowedVehicleTypesArray[segmentId] = new ExtVehicleType?[segmentInfo.m_lanes.Length];
-            } else if (laneAllowedVehicleTypesArray[segmentId].Length < segmentInfo.m_lanes.Length) {
-                var oldArray = laneAllowedVehicleTypesArray[segmentId];
+            } else if (laneAllowedVehicleTypesArray[segmentId].Length <
+                       segmentInfo.m_lanes.Length) {
+                ExtVehicleType?[] oldArray = laneAllowedVehicleTypesArray[segmentId];
                 laneAllowedVehicleTypesArray[segmentId] = new ExtVehicleType?[segmentInfo.m_lanes.Length];
                 Array.Copy(oldArray, laneAllowedVehicleTypesArray[segmentId], oldArray.Length);
             }
+
             // (2) insert the custom speed limit
             laneAllowedVehicleTypesArray[segmentId][laneIndex] = vehicleTypes;
         }
 
         public static void resetSegmentVehicleRestrictions(ushort segmentId) {
-            if (segmentId <= 0)
+            if (segmentId <= 0) {
                 return;
+            }
 #if DEBUGFLAGS
-			Log._Debug($"Flags.resetSegmentVehicleRestrictions: Resetting vehicle restrictions of segment {segmentId}.");
+            Log._Debug("Flags.resetSegmentVehicleRestrictions: Resetting vehicle restrictions " +
+                       $"of segment {segmentId}.");
 #endif
             laneAllowedVehicleTypesArray[segmentId] = null;
         }
 
         public static void resetSegmentArrowFlags(ushort segmentId) {
-            if (segmentId <= 0)
+            if (segmentId <= 0) {
                 return;
+            }
 #if DEBUGFLAGS
-			Log._Debug($"Flags.resetSegmentArrowFlags: Resetting lane arrows of segment {segmentId}.");
+            Log._Debug($"Flags.resetSegmentArrowFlags: Resetting lane arrows of segment {segmentId}.");
 #endif
             NetManager netManager = Singleton<NetManager>.instance;
             NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
-
             uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
             int numLanes = segmentInfo.m_lanes.Length;
             int laneIndex = 0;
+
             while (laneIndex < numLanes && curLaneId != 0u) {
 #if DEBUGFLAGS
-				Log._Debug($"Flags.resetSegmentArrowFlags: Resetting lane arrows of segment {segmentId}: Resetting lane {curLaneId}.");
+                Log._Debug($"Flags.resetSegmentArrowFlags: Resetting lane arrows of segment {segmentId}: " +
+                           $"Resetting lane {curLaneId}.");
 #endif
                 laneArrowFlags[curLaneId] = null;
 
@@ -610,56 +733,66 @@ namespace TrafficManager.State {
             }
         }
 
-        public static bool setLaneArrowFlags(uint laneId, LaneArrows flags, bool overrideHighwayArrows=false) {
+        public static bool setLaneArrowFlags(uint laneId,
+                                             LaneArrows flags,
+                                             bool overrideHighwayArrows = false) {
 #if DEBUGFLAGS
-			Log._Debug($"Flags.setLaneArrowFlags({laneId}, {flags}, {overrideHighwayArrows}) called");
+            Log._Debug($"Flags.setLaneArrowFlags({laneId}, {flags}, {overrideHighwayArrows}) called");
 #endif
 
-            if (!mayHaveLaneArrows(laneId)) {
+            if (!CanHaveLaneArrows(laneId)) {
 #if DEBUGFLAGS
-				Log._Debug($"Flags.setLaneArrowFlags({laneId}, {flags}, {overrideHighwayArrows}): lane must not have lane arrows");
+                Log._Debug($"Flags.setLaneArrowFlags({laneId}, {flags}, {overrideHighwayArrows}): " +
+                           $"lane must not have lane arrows");
 #endif
-                removeLaneArrowFlags(laneId);
+                RemoveLaneArrowFlags(laneId);
                 return false;
             }
 
             if (!overrideHighwayArrows && highwayLaneArrowFlags[laneId] != null) {
 #if DEBUGFLAGS
-				Log._Debug($"Flags.setLaneArrowFlags({laneId}, {flags}, {overrideHighwayArrows}): highway arrows may not be overridden");
+                Log._Debug($"Flags.setLaneArrowFlags({laneId}, {flags}, {overrideHighwayArrows}): " +
+                           "highway arrows may not be overridden");
 #endif
                 return false; // disallow custom lane arrows in highway rule mode
             }
 
             if (overrideHighwayArrows) {
 #if DEBUGFLAGS
-				Log._Debug($"Flags.setLaneArrowFlags({laneId}, {flags}, {overrideHighwayArrows}): overriding highway arrows");
+                Log._Debug($"Flags.setLaneArrowFlags({laneId}, {flags}, {overrideHighwayArrows}): " +
+                           $"overriding highway arrows");
 #endif
                 highwayLaneArrowFlags[laneId] = null;
             }
 
 #if DEBUGFLAGS
-			Log._Debug($"Flags.setLaneArrowFlags({laneId}, {flags}, {overrideHighwayArrows}): setting flags");
+            Log._Debug($"Flags.setLaneArrowFlags({laneId}, {flags}, {overrideHighwayArrows}): setting flags");
 #endif
             laneArrowFlags[laneId] = flags;
-            return applyLaneArrowFlags(laneId, false);
+            return ApplyLaneArrowFlags(laneId, false);
         }
 
-        public static void setHighwayLaneArrowFlags(uint laneId, LaneArrows flags, bool check=true) {
-            if (check && !mayHaveLaneArrows(laneId)) {
-                removeLaneArrowFlags(laneId);
+        public static void SetHighwayLaneArrowFlags(uint laneId,
+                                                    LaneArrows flags,
+                                                    bool check = true) {
+            if (check && !CanHaveLaneArrows(laneId)) {
+                RemoveLaneArrowFlags(laneId);
                 return;
             }
 
             highwayLaneArrowFlags[laneId] = flags;
 #if DEBUGFLAGS
-			Log._Debug($"Flags.setHighwayLaneArrowFlags: Setting highway arrows of lane {laneId} to {flags}");
+            Log._Debug($"Flags.setHighwayLaneArrowFlags: Setting highway arrows of lane {laneId} to {flags}");
 #endif
-            applyLaneArrowFlags(laneId, false);
+            ApplyLaneArrowFlags(laneId, false);
         }
 
-        public static bool toggleLaneArrowFlags(uint laneId, bool startNode, LaneArrows flags, out SetLaneArrowError res) {
-            if (!mayHaveLaneArrows(laneId)) {
-                removeLaneArrowFlags(laneId);
+        public static bool ToggleLaneArrowFlags(uint laneId,
+                                                bool startNode,
+                                                LaneArrows flags,
+                                                out SetLaneArrowError res) {
+            if (!CanHaveLaneArrows(laneId)) {
+                RemoveLaneArrowFlags(laneId);
                 res = SetLaneArrowError.Invalid;
                 return false;
             }
@@ -669,7 +802,8 @@ namespace TrafficManager.State {
                 return false; // disallow custom lane arrows in highway rule mode
             }
 
-            if (LaneConnectionManager.Instance.HasConnections(laneId, startNode)) { // TODO refactor
+            if (LaneConnectionManager.Instance.HasConnections(laneId, startNode)) {
+                // TODO refactor
                 res = SetLaneArrowError.LaneConnection;
                 return false; // custom lane connection present
             }
@@ -677,39 +811,49 @@ namespace TrafficManager.State {
             LaneArrows? arrows = laneArrowFlags[laneId];
             if (arrows == null) {
                 // read currently defined arrows
-                uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
+                uint laneFlags = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
                 laneFlags &= lfr; // filter arrows
                 arrows = (LaneArrows)laneFlags;
             }
 
             arrows ^= flags;
             laneArrowFlags[laneId] = arrows;
-            if (applyLaneArrowFlags(laneId, false)) {
+            if (ApplyLaneArrowFlags(laneId, false)) {
                 res = SetLaneArrowError.Success;
                 return true;
-            } else {
-                res = SetLaneArrowError.Invalid;
-                return false;
             }
+
+            res = SetLaneArrowError.Invalid;
+            return false;
         }
 
-        internal static bool mayHaveLaneArrows(uint laneId, bool? startNode=null) {
-            if (laneId <= 0)
+        internal static bool CanHaveLaneArrows(uint laneId, bool? startNode = null) {
+            if (laneId <= 0) {
                 return false;
+            }
+
             NetManager netManager = Singleton<NetManager>.instance;
-            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created)
+
+            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &
+                 (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
                 return false;
+            }
 
             ushort segmentId = netManager.m_lanes.m_buffer[laneId].m_segment;
 
-            var dir = NetInfo.Direction.Forward;
-            var dir2 = ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+            const NetInfo.Direction DIR = NetInfo.Direction.Forward;
+            NetInfo.Direction dir2 =
+                ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) ==
+                 NetSegment.Flags.None)
+                    ? DIR
+                    : NetInfo.InvertDirection(DIR);
 
             NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
             uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
             int numLanes = segmentInfo.m_lanes.Length;
             int laneIndex = 0;
             int wIter = 0;
+
             while (laneIndex < numLanes && curLaneId != 0u) {
                 ++wIter;
                 if (wIter >= 100) {
@@ -720,125 +864,154 @@ namespace TrafficManager.State {
                 if (curLaneId == laneId) {
                     NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
                     bool isStartNode = (laneInfo.m_finalDirection & dir2) == NetInfo.Direction.None;
-                    if (startNode != null && isStartNode != startNode)
+                    if (startNode != null && isStartNode != startNode) {
                         return false;
-                    ushort nodeId = isStartNode ? netManager.m_segments.m_buffer[segmentId].m_startNode : netManager.m_segments.m_buffer[segmentId].m_endNode;
+                    }
 
-                    if ((netManager.m_nodes.m_buffer[nodeId].m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created)
-                        return false;
-                    return (netManager.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+                    ushort nodeId = isStartNode
+                                        ? netManager.m_segments.m_buffer[segmentId].m_startNode
+                                        : netManager.m_segments.m_buffer[segmentId].m_endNode;
+
+                    return (netManager.m_nodes.m_buffer[nodeId].m_flags &
+                            (NetNode.Flags.Created | NetNode.Flags.Deleted)) == NetNode.Flags.Created
+                           && (netManager.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction)
+                           != NetNode.Flags.None;
                 }
+
                 curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
                 ++laneIndex;
             }
+
             return false;
         }
 
-        public static float? getLaneSpeedLimit(uint laneId) {
+        public static float? GetLaneSpeedLimit(uint laneId) {
             try {
                 Monitor.Enter(laneSpeedLimitLock);
 
-                float speedLimit;
-                if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out speedLimit)) {
+                if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out float speedLimit)) {
                     return null;
                 }
 
                 return speedLimit;
-            } finally {
+            }
+            finally {
                 Monitor.Exit(laneSpeedLimitLock);
             }
         }
 
-        internal static IDictionary<uint, float> getAllLaneSpeedLimits() {
+        internal static IDictionary<uint, float> GetAllLaneSpeedLimits() {
             IDictionary<uint, float> ret = new Dictionary<uint, float>();
             try {
                 Monitor.Enter(laneSpeedLimitLock);
 
                 ret = new Dictionary<uint, float>(laneSpeedLimit);
-            } finally {
+            }
+            finally {
                 Monitor.Exit(laneSpeedLimitLock);
             }
+
             return ret;
         }
 
-        internal static IDictionary<uint, ExtVehicleType> getAllLaneAllowedVehicleTypes() {
+        internal static IDictionary<uint, ExtVehicleType> GetAllLaneAllowedVehicleTypes() {
             IDictionary<uint, ExtVehicleType> ret = new Dictionary<uint, ExtVehicleType>();
 
             for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                Constants.ServiceFactory.NetService.ProcessSegment((ushort)segmentId, delegate (ushort segId, ref NetSegment segment) {
-                    if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created)
+                // Begin local function
+                bool ForEachLane(ushort segId, ref NetSegment segment) {
+                    if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) !=
+                        NetSegment.Flags.Created) {
                         return true;
+                    }
 
                     ExtVehicleType?[] allowedTypes = laneAllowedVehicleTypesArray[segId];
                     if (allowedTypes == null) {
                         return true;
                     }
 
-                    Constants.ServiceFactory.NetService.IterateSegmentLanes(segId, ref segment, delegate (uint laneId, ref NetLane lane, NetInfo.Lane laneInfo, ushort sId, ref NetSegment seg, byte laneIndex) {
-                        if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
+                    Constants.ServiceFactory.NetService.IterateSegmentLanes(
+                        segId,
+                        ref segment,
+                        (uint laneId,
+                         ref NetLane lane,
+                         NetInfo.Lane laneInfo,
+                         ushort sId,
+                         ref NetSegment seg,
+                         byte laneIndex) =>
+                        {
+                            if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
+                                return true;
+                            }
+
+                            if (laneIndex >= allowedTypes.Length) {
+                                return true;
+                            }
+
+                            ExtVehicleType? allowedType = allowedTypes[laneIndex];
+
+                            if (allowedType == null) {
+                                return true;
+                            }
+
+                            ret.Add(laneId, (ExtVehicleType)allowedType);
                             return true;
-                        }
-
-                        if (laneIndex >= allowedTypes.Length) {
-                            return true;
-                        }
-
-                        ExtVehicleType? allowedType = allowedTypes[laneIndex];
-
-                        if (allowedType == null) {
-                            return true;
-                        }
-
-                        ret.Add(laneId, (ExtVehicleType)allowedType);
-                        return true;
-                    });
+                        });
                     return true;
-                });
+                }
+
+                // ↑↑↑
+                // end local function
+                Constants.ServiceFactory.NetService.ProcessSegment(
+                    (ushort)segmentId,
+                    ForEachLane);
             }
 
             return ret;
         }
 
-        public static LaneArrows? getLaneArrowFlags(uint laneId) {
+        public static LaneArrows? GetLaneArrowFlags(uint laneId) {
             return laneArrowFlags[laneId];
         }
 
-        public static LaneArrows? getHighwayLaneArrowFlags(uint laneId) {
+        public static LaneArrows? GetHighwayLaneArrowFlags(uint laneId) {
             return highwayLaneArrowFlags[laneId];
         }
 
-        public static void removeHighwayLaneArrowFlags(uint laneId) {
+        public static void RemoveHighwayLaneArrowFlags(uint laneId) {
 #if DEBUGFLAGS
-			Log._Debug($"Flags.removeHighwayLaneArrowFlags: Removing highway arrows of lane {laneId}");
+            Log._Debug(
+                $"Flags.removeHighwayLaneArrowFlags: Removing highway arrows of lane {laneId}");
 #endif
             if (highwayLaneArrowFlags[laneId] != null) {
                 highwayLaneArrowFlags[laneId] = null;
-                applyLaneArrowFlags(laneId, false);
+                ApplyLaneArrowFlags(laneId, false);
             }
         }
 
-        public static void applyAllFlags() {
+        public static void ApplyAllFlags() {
             for (uint i = 0; i < laneArrowFlags.Length; ++i) {
-                applyLaneArrowFlags(i);
+                ApplyLaneArrowFlags(i);
             }
         }
 
-        public static bool applyLaneArrowFlags(uint laneId, bool check=true) {
+        public static bool ApplyLaneArrowFlags(uint laneId, bool check = true) {
 #if DEBUGFLAGS
-			Log._Debug($"Flags.applyLaneArrowFlags({laneId}, {check}) called");
+            Log._Debug($"Flags.applyLaneArrowFlags({laneId}, {check}) called");
 #endif
 
-            if (laneId <= 0)
+            if (laneId <= 0) {
                 return true;
+            }
 
-            if (check && !mayHaveLaneArrows(laneId)) {
-                removeLaneArrowFlags(laneId);
+            if (check && !CanHaveLaneArrows(laneId)) {
+                RemoveLaneArrowFlags(laneId);
                 return false;
             }
 
             LaneArrows? hwArrows = highwayLaneArrowFlags[laneId];
             LaneArrows? arrows = laneArrowFlags[laneId];
-            uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
+            uint laneFlags = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
 
             if (hwArrows != null) {
                 laneFlags &= ~lfr; // remove all arrows
@@ -850,16 +1023,17 @@ namespace TrafficManager.State {
             }
 
 #if DEBUGFLAGS
-			Log._Debug($"Flags.applyLaneArrowFlags: Setting lane flags of lane {laneId} to {((NetLane.Flags)laneFlags).ToString()}");
+            Log._Debug($"Flags.applyLaneArrowFlags: Setting lane flags of lane {laneId} to " +
+                       $"{(NetLane.Flags)laneFlags}");
 #endif
             Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags = Convert.ToUInt16(laneFlags);
             return true;
         }
 
-        public static LaneArrows getFinalLaneArrowFlags(uint laneId, bool check=true) {
-            if (! mayHaveLaneArrows(laneId)) {
+        public static LaneArrows GetFinalLaneArrowFlags(uint laneId, bool check = true) {
+            if (!CanHaveLaneArrows(laneId)) {
 #if DEBUGFLAGS
-				Log._Debug($"Lane {laneId} may not have lane arrows");
+                Log._Debug($"Lane {laneId} may not have lane arrows");
 #endif
                 return LaneArrows.None;
             }
@@ -876,59 +1050,74 @@ namespace TrafficManager.State {
                 ret &= ~lfr; // remove all arrows
                 ret |= (uint)flags; // add desired arrows
             } else {
-                Constants.ServiceFactory.NetService.ProcessLane(laneId, delegate (uint lId, ref NetLane lane) {
-                    ret = lane.m_flags;
-                    ret &= (uint)LaneArrows.LeftForwardRight;
-                    return true;
-                });
+                Constants.ServiceFactory.NetService.ProcessLane(
+                    laneId,
+                    delegate(uint lId, ref NetLane lane) {
+                        ret = lane.m_flags;
+                        ret &= (uint)LaneArrows.LeftForwardRight;
+                        return true;
+                    });
             }
 
             return (LaneArrows)ret;
         }
 
-        public static void removeLaneArrowFlags(uint laneId) {
-            if (laneId <= 0)
+        public static void RemoveLaneArrowFlags(uint laneId) {
+            if (laneId <= 0) {
                 return;
+            }
 
-            if (highwayLaneArrowFlags[laneId] != null)
+            if (highwayLaneArrowFlags[laneId] != null) {
                 return; // modification of arrows in highway rule mode is forbidden
+            }
 
             laneArrowFlags[laneId] = null;
-            uint laneFlags = (uint)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
 
-            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (NetLane.Flags.Created | NetLane.Flags.Deleted)) == NetLane.Flags.Created) {
+            // uint laneFlags = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags;
+            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &
+                 (NetLane.Flags.Created | NetLane.Flags.Deleted)) == NetLane.Flags.Created) {
                 Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &= (ushort)~lfr;
             }
         }
 
         internal static void removeHighwayLaneArrowFlagsAtSegment(ushort segmentId) {
-            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created)
+            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+
+            if ((segmentsBuffer[segmentId].m_flags &
+                 (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
                 return;
+            }
 
             int i = 0;
-            uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
+            uint curLaneId = segmentsBuffer[segmentId].m_lanes;
+            NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
 
-            while (i < Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info.m_lanes.Length && curLaneId != 0u) {
-                Flags.removeHighwayLaneArrowFlags(curLaneId);
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+            int segmentLanesCount = segmentsBuffer[segmentId].Info.m_lanes.Length;
+            while (i < segmentLanesCount && curLaneId != 0u) {
+                RemoveHighwayLaneArrowFlags(curLaneId);
+                curLaneId = lanesBuffer[curLaneId].m_nextLane;
                 ++i;
             } // foreach lane
         }
 
-        public static void clearHighwayLaneArrows() {
-            for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_size; ++i) {
+        public static void ClearHighwayLaneArrows() {
+            uint lanesCount = Singleton<NetManager>.instance.m_lanes.m_size;
+            for (uint i = 0; i < lanesCount; ++i) {
                 highwayLaneArrowFlags[i] = null;
             }
         }
 
-        public static void resetSpeedLimits() {
+        public static void ResetSpeedLimits() {
             try {
                 Monitor.Enter(laneSpeedLimitLock);
                 laneSpeedLimit.Clear();
-                for (int i = 0; i < Singleton<NetManager>.instance.m_segments.m_size; ++i) {
+
+                uint segmentsCount = Singleton<NetManager>.instance.m_segments.m_size;
+                for (int i = 0; i < segmentsCount; ++i) {
                     laneSpeedLimitArray[i] = null;
                 }
-            } finally {
+            }
+            finally {
                 Monitor.Exit(laneSpeedLimitLock);
             }
         }
@@ -945,7 +1134,8 @@ namespace TrafficManager.State {
             try {
                 Monitor.Enter(laneSpeedLimitLock);
                 laneSpeedLimit.Clear();
-            } finally {
+            }
+            finally {
                 Monitor.Exit(laneSpeedLimitLock);
             }
 
@@ -971,8 +1161,6 @@ namespace TrafficManager.State {
             highwayLaneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
         }
 
-        public static void OnBeforeLoadData() {
-
-        }
+        public static void OnBeforeLoadData() { }
     }
 }

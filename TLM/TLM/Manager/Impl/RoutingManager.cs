@@ -141,7 +141,7 @@
                     updatedSegmentBuckets[segmentId >> 6] |= 1uL << (int)(segmentId & 63);
                 }
 
-                Flags.clearHighwayLaneArrows();
+                Flags.ClearHighwayLaneArrows();
                 segmentsUpdated = true;
 
                 if (Services.SimulationService.SimulationPaused ||
@@ -201,7 +201,7 @@
             bool logRouting = DebugSwitch.RoutingBasicLog.Get();
             Log._Debug($"RoutingManager.RecalculateAll: called");
 #endif
-            Flags.clearHighwayLaneArrows();
+            Flags.ClearHighwayLaneArrows();
             for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 try {
                     RecalculateSegment((ushort)segmentId);
@@ -294,7 +294,7 @@
                                     segId,
                                     seg.m_startNode == nodeId,
                                     laneIndex)) {
-                                    Flags.removeHighwayLaneArrowFlags(laneId);
+                                    Flags.RemoveHighwayLaneArrowFlags(laneId);
                                 }
 
                                 return true;
@@ -1999,7 +1999,7 @@
         }
 
         private void UpdateHighwayLaneArrows(uint laneId, bool startNode, ArrowDirection dir) {
-            LaneArrows? prevHighwayArrows = Flags.getHighwayLaneArrowFlags(laneId);
+            LaneArrows? prevHighwayArrows = Flags.GetHighwayLaneArrowFlags(laneId);
             var newHighwayArrows = LaneArrows.None;
 
             if (prevHighwayArrows != null) {
@@ -2023,7 +2023,7 @@
             //           $"prevHighwayArrows={prevHighwayArrows}");
 
             if (newHighwayArrows != prevHighwayArrows && newHighwayArrows != LaneArrows.None) {
-                Flags.setHighwayLaneArrowFlags(laneId, newHighwayArrows, false);
+                Flags.SetHighwayLaneArrowFlags(laneId, newHighwayArrows, false);
             }
         }
 

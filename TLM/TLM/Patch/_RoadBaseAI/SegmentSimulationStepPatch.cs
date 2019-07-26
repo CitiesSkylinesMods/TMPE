@@ -16,7 +16,7 @@
             uint laneIndex = 0;
 
             while (laneIndex < numLanes && curLaneId != 0u) {
-                Flags.applyLaneArrowFlags(curLaneId);
+                Flags.ApplyLaneArrowFlags(curLaneId);
 
                 laneIndex++;
                 curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;

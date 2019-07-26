@@ -139,8 +139,8 @@ namespace TrafficManager.UI.SubTools {
 				GUILayout.Label(Translation.GetString("Lane") + " " + (i + 1), laneTitleStyle);
 				GUILayout.BeginVertical();
 				GUILayout.BeginHorizontal();
-				if (!Flags.applyLaneArrowFlags(laneList[i].laneId)) {
-					Flags.removeLaneArrowFlags(laneList[i].laneId);
+				if (!Flags.ApplyLaneArrowFlags(laneList[i].laneId)) {
+					Flags.RemoveLaneArrowFlags(laneList[i].laneId);
 				}
 				SetLaneArrowError res = SetLaneArrowError.Invalid;
 				bool buttonClicked = false;

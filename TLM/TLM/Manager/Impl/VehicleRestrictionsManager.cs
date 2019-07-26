@@ -793,7 +793,7 @@
         public List<Configuration.LaneVehicleTypes> SaveData(ref bool success) {
             var ret = new List<Configuration.LaneVehicleTypes>();
 
-            foreach (KeyValuePair<uint, ExtVehicleType> e in Flags.getAllLaneAllowedVehicleTypes()) {
+            foreach (KeyValuePair<uint, ExtVehicleType> e in Flags.GetAllLaneAllowedVehicleTypes()) {
                 try {
                     ret.Add(new Configuration.LaneVehicleTypes(e.Key, LegacyExtVehicleType.ToOld(e.Value)));
                     Log._Trace($"Saving lane vehicle restriction: laneid={e.Key} vehicleType={e.Value}");

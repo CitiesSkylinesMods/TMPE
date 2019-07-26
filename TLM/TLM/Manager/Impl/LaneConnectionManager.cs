@@ -570,7 +570,7 @@
                 return;
             }
 
-            if (!Flags.mayHaveLaneArrows(laneId, startNode)) {
+            if (!Flags.CanHaveLaneArrows(laneId, startNode)) {
                 if (logLaneConnections) {
                     Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
                                $"lane {laneId}, startNode? {startNode} must not have lane arrows");

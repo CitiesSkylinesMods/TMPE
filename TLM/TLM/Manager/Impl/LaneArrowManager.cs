@@ -31,7 +31,7 @@
         }
 
         public LaneArrows GetFinalLaneArrows(uint laneId) {
-            return Flags.getFinalLaneArrowFlags(laneId, true);
+            return Flags.GetFinalLaneArrowFlags(laneId, true);
         }
 
         public bool SetLaneArrows(uint laneId,
@@ -49,7 +49,7 @@
                                      bool startNode,
                                      LaneArrows flags,
                                      out SetLaneArrowError res) {
-            if (Flags.toggleLaneArrowFlags(laneId, startNode, flags, out res)) {
+            if (Flags.ToggleLaneArrowFlags(laneId, startNode, flags, out res)) {
                 OnLaneChange(laneId);
                 return true;
             }
@@ -79,7 +79,7 @@
 
         private void ApplyFlags() {
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                Flags.applyLaneArrowFlags(laneId);
+                Flags.ApplyLaneArrowFlags(laneId);
             }
         }
 
@@ -90,7 +90,7 @@
 
         public override void OnAfterLoadData() {
             base.OnAfterLoadData();
-            Flags.clearHighwayLaneArrows();
+            Flags.ClearHighwayLaneArrows();
             ApplyFlags();
         }
 
@@ -183,7 +183,7 @@
 
             for (uint i = 0; i < Singleton<NetManager>.instance.m_lanes.m_buffer.Length; i++) {
                 try {
-                    LaneArrows? laneArrows = Flags.getLaneArrowFlags(i);
+                    LaneArrows? laneArrows = Flags.GetLaneArrowFlags(i);
 
                     if (laneArrows == null) {
                         continue;

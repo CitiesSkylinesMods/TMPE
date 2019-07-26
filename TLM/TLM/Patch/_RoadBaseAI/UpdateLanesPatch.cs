@@ -16,8 +16,8 @@
             NetManager netManager = Singleton<NetManager>.instance;
             uint laneId = netManager.m_segments.m_buffer[segmentID].m_lanes;
             while (laneId != 0) {
-                if (!Flags.applyLaneArrowFlags(laneId)) {
-                    Flags.removeLaneArrowFlags(laneId);
+                if (!Flags.ApplyLaneArrowFlags(laneId)) {
+                    Flags.RemoveLaneArrowFlags(laneId);
                 }
 
                 laneId = netManager.m_lanes.m_buffer[laneId].m_nextLane;

@@ -121,7 +121,7 @@
                     goto nextIter;
                 }
 
-                float? setSpeedLimit = Flags.getLaneSpeedLimit(curLaneId);
+                float? setSpeedLimit = Flags.GetLaneSpeedLimit(curLaneId);
 
                 if (setSpeedLimit != null) {
                     meanSpeedLimit += ToGameSpeedLimit(setSpeedLimit.Value); // custom speed limit
@@ -234,7 +234,7 @@
         /// <returns>Speed limit if set for lane, otherwise 0</returns>
         public float GetCustomSpeedLimit(uint laneId) {
             // check custom speed limit
-            float? setSpeedLimit = Flags.getLaneSpeedLimit(laneId);
+            float? setSpeedLimit = Flags.GetLaneSpeedLimit(laneId);
             if (setSpeedLimit != null) {
                 return setSpeedLimit.Value;
             }
@@ -350,7 +350,7 @@
                     continue;
                 }
 
-                Flags.setLaneSpeedLimit(laneId, GetCustomSpeedLimit(laneId));
+                Flags.SetLaneSpeedLimit(laneId, GetCustomSpeedLimit(laneId));
             }
         }
 
@@ -559,7 +559,7 @@
                 return false;
             }
 
-            Flags.setLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
+            Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
             return true;
         }
 
@@ -616,7 +616,7 @@
                     $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
                     $"to {speedLimit * SpeedLimit.SPEED_TO_KMPH}");
 #endif
-                Flags.setLaneSpeedLimit(curLaneId, speedLimit);
+                Flags.SetLaneSpeedLimit(curLaneId, speedLimit);
 
                 nextIter:
                 curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
@@ -793,7 +793,7 @@
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
                 // NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
                 // float? setSpeedLimit = Flags.getLaneSpeedLimit(curLaneId);
-                Flags.setLaneSpeedLimit(curLaneId, null);
+                Flags.SetLaneSpeedLimit(curLaneId, null);
 
                 curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
                 laneIndex++;
@@ -833,13 +833,13 @@
                         Log._Debug($"SpeedLimitManager.LoadData: Loading lane speed limit: lane "+
                             $"{laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
 #endif
-                        Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
+                        Flags.SetLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
                         Log._Debug(
                             $"SpeedLimitManager.LoadData: Loading lane speed limit: " +
                             $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit} km/h");
                         float kmph = laneSpeedLimit.speedLimit /
                                      SpeedLimit.SPEED_TO_KMPH; // convert to game units
-                        Flags.setLaneSpeedLimit(laneSpeedLimit.laneId, kmph);
+                        Flags.SetLaneSpeedLimit(laneSpeedLimit.laneId, kmph);
                     } else {
 #if DEBUGLOAD
                     Log._Debug($"SpeedLimitManager.LoadData: " +
@@ -861,7 +861,7 @@
         List<Configuration.LaneSpeedLimit> ICustomDataManager<List<Configuration.LaneSpeedLimit>>.
             SaveData(ref bool success) {
             var ret = new List<Configuration.LaneSpeedLimit>();
-            foreach (KeyValuePair<uint, float> e in Flags.getAllLaneSpeedLimits()) {
+            foreach (KeyValuePair<uint, float> e in Flags.GetAllLaneSpeedLimits()) {
                 try {
                     var laneSpeedLimit = new Configuration.LaneSpeedLimit(e.Key, e.Value);
 #if DEBUGSAVE

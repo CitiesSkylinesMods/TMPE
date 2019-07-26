@@ -9,6 +9,7 @@
         /// Notifies the vehicle state manager about a released vehicle.
         /// </summary>
         [HarmonyPrefix]
+        [UsedImplicitly]
         public static void Prefix(VehicleManager __instance, ushort vehicle) {
             Constants.ManagerFactory.ExtVehicleManager.OnReleaseVehicle(
                 vehicle,
