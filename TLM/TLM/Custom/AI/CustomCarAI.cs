@@ -175,7 +175,7 @@ namespace TrafficManager.Custom.AI {
             IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
             extVehicleMan.UpdateVehiclePosition(vehicleId, ref vehicleData);
 
-            if (!Options.isStockLaneChangerUsed()
+            if (!Options.IsStockLaneChangerUsed()
                 && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0) {
                 extVehicleMan.LogTraffic(vehicleId, ref vehicleData);
             }

@@ -1,4 +1,4 @@
-﻿#define DEBUGFLAGS
+﻿// #define DEBUGFLAGS
 
 namespace TrafficManager.State {
     using System;

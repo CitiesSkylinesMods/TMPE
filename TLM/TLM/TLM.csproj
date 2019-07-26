@@ -198,6 +198,10 @@
     <Compile Include="State\Keybinds\KeybindSettingsBase.cs" />
     <Compile Include="State\Keybinds\KeybindSettingsPage.cs" />
     <Compile Include="State\Keybinds\KeybindUI.cs" />
+    <Compile Include="State\OptionsKeybindsTab.cs" />
+    <Compile Include="State\OptionsMaintenanceTab.cs" />
+    <Compile Include="State\OptionsOverlaysTab.cs" />
+    <Compile Include="State\OptionsVehicleRestrictionsTab.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
     <Compile Include="Traffic\Data\SpeedLimit.cs" />
     <Compile Include="TrafficManager.cs" />

@@ -23,27 +23,27 @@
 
         public bool LoadData(byte[] data) {
             if (data.Length >= 1) {
-                //Options.setSimAccuracy(data[0]);
+                // Options.setSimAccuracy(data[0]);
             }
 
             if (data.Length >= 2) {
-                //Options.setLaneChangingRandomization(options[1]);
+                // Options.setLaneChangingRandomization(options[1]);
             }
 
             if (data.Length >= 3) {
-                Options.setRecklessDrivers(data[2]);
+                Options.SetRecklessDrivers(data[2]);
             }
 
             if (data.Length >= 4) {
-                Options.setRelaxedBusses(data[3] == 1);
+                OptionsVehicleRestrictionsTab.SetRelaxedBusses(data[3] == 1);
             }
 
             if (data.Length >= 5) {
-                Options.setNodesOverlay(data[4] == 1);
+                OptionsOverlaysTab.SetNodesOverlay(data[4] == 1);
             }
 
             if (data.Length >= 6) {
-                Options.setMayEnterBlockedJunctions(data[5] == 1);
+                OptionsVehicleRestrictionsTab.SetMayEnterBlockedJunctions(data[5] == 1);
             }
 
             if (data.Length >= 7) {
@@ -51,35 +51,35 @@
             }
 
             if (data.Length >= 8) {
-                Options.setHighwayRules(data[7] == 1);
+                OptionsVehicleRestrictionsTab.SetHighwayRules(data[7] == 1);
             }
 
             if (data.Length >= 9) {
-                Options.setPrioritySignsOverlay(data[8] == 1);
+                OptionsOverlaysTab.SetPrioritySignsOverlay(data[8] == 1);
             }
 
             if (data.Length >= 10) {
-                Options.setTimedLightsOverlay(data[9] == 1);
+                OptionsOverlaysTab.SetTimedLightsOverlay(data[9] == 1);
             }
 
             if (data.Length >= 11) {
-                Options.setSpeedLimitsOverlay(data[10] == 1);
+                OptionsOverlaysTab.SetSpeedLimitsOverlay(data[10] == 1);
             }
 
             if (data.Length >= 12) {
-                Options.setVehicleRestrictionsOverlay(data[11] == 1);
+                OptionsOverlaysTab.SetVehicleRestrictionsOverlay(data[11] == 1);
             }
 
             if (data.Length >= 13) {
-                Options.setStrongerRoadConditionEffects(data[12] == 1);
+                Options.SetStrongerRoadConditionEffects(data[12] == 1);
             }
 
             if (data.Length >= 14) {
-                Options.setAllowUTurns(data[13] == 1);
+                OptionsVehicleRestrictionsTab.SetAllowUTurns(data[13] == 1);
             }
 
             if (data.Length >= 15) {
-                Options.setAllowLaneChangesWhileGoingStraight(data[14] == 1);
+                OptionsVehicleRestrictionsTab.SetAllowLaneChangesWhileGoingStraight(data[14] == 1);
             }
 
             if (data.Length >= 16) {
@@ -87,39 +87,39 @@
             }
 
             if (data.Length >= 17) {
-                //Options.setDynamicPathRecalculation(data[16] == (byte)1);
+                // Options.setDynamicPathRecalculation(data[16] == (byte)1);
             }
 
             if (data.Length >= 18) {
-                Options.setConnectedLanesOverlay(data[17] == 1);
+                OptionsOverlaysTab.SetConnectedLanesOverlay(data[17] == 1);
             }
 
             if (data.Length >= 19) {
-                Options.setPrioritySignsEnabled(data[18] == 1);
+                OptionsVehicleRestrictionsTab.SetPrioritySignsEnabled(data[18] == 1);
             }
 
             if (data.Length >= 20) {
-                Options.setTimedLightsEnabled(data[19] == 1);
+                OptionsVehicleRestrictionsTab.SetTimedLightsEnabled(data[19] == 1);
             }
 
             if (data.Length >= 21) {
-                Options.setCustomSpeedLimitsEnabled(data[20] == 1);
+                OptionsMaintenanceTab.SetCustomSpeedLimitsEnabled(data[20] == 1);
             }
 
             if (data.Length >= 22) {
-                Options.setVehicleRestrictionsEnabled(data[21] == 1);
+                OptionsMaintenanceTab.SetVehicleRestrictionsEnabled(data[21] == 1);
             }
 
             if (data.Length >= 23) {
-                Options.setLaneConnectorEnabled(data[22] == 1);
+                OptionsMaintenanceTab.SetLaneConnectorEnabled(data[22] == 1);
             }
 
             if (data.Length >= 24) {
-                Options.setJunctionRestrictionsOverlay(data[23] == 1);
+                OptionsOverlaysTab.SetJunctionRestrictionsOverlay(data[23] == 1);
             }
 
             if (data.Length >= 25) {
-                Options.setJunctionRestrictionsEnabled(data[24] == 1);
+                OptionsMaintenanceTab.SetJunctionRestrictionsEnabled(data[24] == 1);
             }
 
             if (data.Length >= 26) {
@@ -127,7 +127,7 @@
             }
 
             if (data.Length >= 27) {
-                Options.setPreferOuterLane(data[26] == 1);
+                OptionsVehicleRestrictionsTab.SetPreferOuterLane(data[26] == 1);
             }
 
             if (data.Length >= 28) {
@@ -135,19 +135,19 @@
             }
 
             if (data.Length >= 29) {
-                Options.setEvacBussesMayIgnoreRules(data[28] == 1);
+                OptionsVehicleRestrictionsTab.SetEvacBussesMayIgnoreRules(data[28] == 1);
             }
 
             if (data.Length >= 30) {
-                Options.setInstantEffects(data[29] == 1);
+                Options.SetInstantEffects(data[29] == 1);
             }
 
             if (data.Length >= 31) {
-                Options.setParkingRestrictionsEnabled(data[30] == 1);
+                OptionsMaintenanceTab.SetParkingRestrictionsEnabled(data[30] == 1);
             }
 
             if (data.Length >= 32) {
-                Options.setParkingRestrictionsOverlay(data[31] == 1);
+                OptionsOverlaysTab.SetParkingRestrictionsOverlay(data[31] == 1);
             }
 
             if (data.Length >= 33) {
@@ -155,16 +155,16 @@
             }
 
             if (data.Length >= 34) {
-                Options.setShowPathFindStats(data[33] == 1);
+                OptionsMaintenanceTab.SetShowPathFindStats(data[33] == 1);
             }
 
             if (data.Length >= 35) {
-                Options.setAltLaneSelectionRatio(data[34]);
+                Options.SetAltLaneSelectionRatio(data[34]);
             }
 
             if (data.Length >= 36) {
                 try {
-                    Options.setVehicleRestrictionsAggression(
+                    OptionsVehicleRestrictionsTab.SetVehicleRestrictionsAggression(
                         (VehicleRestrictionsAggression)data[35]);
                 }
                 catch (Exception e) {
@@ -174,7 +174,7 @@
             }
 
             if (data.Length >= 37) {
-                Options.setTrafficLightPriorityRules(data[36] == 1);
+                OptionsVehicleRestrictionsTab.SetTrafficLightPriorityRules(data[36] == 1);
             }
 
             if (data.Length >= 38) {
@@ -182,15 +182,15 @@
             }
 
             if (data.Length >= 39) {
-                Options.setTurnOnRedEnabled(data[38] == 1);
+                OptionsMaintenanceTab.SetTurnOnRedEnabled(data[38] == 1);
             }
 
             if (data.Length >= 40) {
-                Options.setAllowNearTurnOnRed(data[39] == 1);
+                OptionsVehicleRestrictionsTab.SetAllowNearTurnOnRed(data[39] == 1);
             }
 
             if (data.Length >= 41) {
-                Options.setAllowFarTurnOnRed(data[40] == 1);
+                OptionsVehicleRestrictionsTab.SetAllowFarTurnOnRed(data[40] == 1);
             }
 
             return true;
