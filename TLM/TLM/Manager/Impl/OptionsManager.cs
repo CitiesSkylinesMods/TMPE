@@ -31,7 +31,7 @@
             }
 
             if (data.Length >= 3) {
-                Options.SetRecklessDrivers(data[2]);
+                OptionsGameplayTab.SetRecklessDrivers(data[2]);
             }
 
             if (data.Length >= 4) {
@@ -47,7 +47,7 @@
             }
 
             if (data.Length >= 7) {
-                Options.setAdvancedAI(data[6] == 1);
+                OptionsGameplayTab.SetAdvancedAi(data[6] == 1);
             }
 
             if (data.Length >= 8) {
@@ -71,7 +71,7 @@
             }
 
             if (data.Length >= 13) {
-                Options.SetStrongerRoadConditionEffects(data[12] == 1);
+                OptionsGameplayTab.SetStrongerRoadConditionEffects(data[12] == 1);
             }
 
             if (data.Length >= 14) {
@@ -83,7 +83,7 @@
             }
 
             if (data.Length >= 16) {
-                Options.setDisableDespawning(data[15] != 1);
+                OptionsGameplayTab.SetDisableDespawning(data[15] != 1);
             }
 
             if (data.Length >= 17) {
@@ -123,7 +123,7 @@
             }
 
             if (data.Length >= 26) {
-                Options.setProhibitPocketCars(data[25] == 1);
+                OptionsGameplayTab.SetProhibitPocketCars(data[25] == 1);
             }
 
             if (data.Length >= 27) {
@@ -131,7 +131,7 @@
             }
 
             if (data.Length >= 28) {
-                Options.setIndividualDrivingStyle(data[27] == 1);
+                OptionsGameplayTab.SetIndividualDrivingStyle(data[27] == 1);
             }
 
             if (data.Length >= 29) {
@@ -139,7 +139,7 @@
             }
 
             if (data.Length >= 30) {
-                Options.SetInstantEffects(data[29] == 1);
+                OptionsGeneralTab.SetInstantEffects(data[29] == 1);
             }
 
             if (data.Length >= 31) {
@@ -151,7 +151,7 @@
             }
 
             if (data.Length >= 33) {
-                Options.setBanRegularTrafficOnBusLanes(data[32] == 1);
+                OptionsVehicleRestrictionsTab.SetBanRegularTrafficOnBusLanes(data[32] == 1);
             }
 
             if (data.Length >= 34) {
@@ -159,7 +159,7 @@
             }
 
             if (data.Length >= 35) {
-                Options.SetAltLaneSelectionRatio(data[34]);
+                OptionsGameplayTab.SetAltLaneSelectionRatio(data[34]);
             }
 
             if (data.Length >= 36) {
@@ -178,7 +178,7 @@
             }
 
             if (data.Length >= 38) {
-                Options.setRealisticPublicTransport(data[37] == 1);
+                OptionsGameplayTab.SetRealisticPublicTransport(data[37] == 1);
             }
 
             if (data.Length >= 39) {
@@ -198,8 +198,8 @@
 
         public byte[] SaveData(ref bool success) {
             return new byte[] {
-                0, //Options.simAccuracy,
-                0, //Options.laneChangingRandomization,
+                0, // Options.simAccuracy,
+                0, // Options.laneChangingRandomization,
                 (byte)Options.recklessDrivers,
                 (byte)(Options.relaxedBusses ? 1 : 0),
                 (byte)(Options.nodesOverlay ? 1 : 0),
@@ -214,7 +214,7 @@
                 (byte)(Options.allowUTurns ? 1 : 0),
                 (byte)(Options.allowLaneChangesWhileGoingStraight ? 1 : 0),
                 (byte)(Options.disableDespawning ? 0 : 1),
-                0, //Options.IsDynamicPathRecalculationActive()
+                0, // Options.IsDynamicPathRecalculationActive()
                 (byte)(Options.connectedLanesOverlay ? 1 : 0),
                 (byte)(Options.prioritySignsEnabled ? 1 : 0),
                 (byte)(Options.timedLightsEnabled ? 1 : 0),

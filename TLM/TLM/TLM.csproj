@@ -198,6 +198,8 @@
     <Compile Include="State\Keybinds\KeybindSettingsBase.cs" />
     <Compile Include="State\Keybinds\KeybindSettingsPage.cs" />
     <Compile Include="State\Keybinds\KeybindUI.cs" />
+    <Compile Include="State\OptionsGameplayTab.cs" />
+    <Compile Include="State\OptionsGeneralTab.cs" />
     <Compile Include="State\OptionsKeybindsTab.cs" />
     <Compile Include="State\OptionsMaintenanceTab.cs" />
     <Compile Include="State\OptionsOverlaysTab.cs" />

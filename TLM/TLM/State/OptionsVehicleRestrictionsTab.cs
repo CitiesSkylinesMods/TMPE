@@ -425,5 +425,16 @@ namespace TrafficManager.State {
             }
         }
 
+        public static void SetBanRegularTrafficOnBusLanes(bool value) {
+            Options.banRegularTrafficOnBusLanes = value;
+
+            if (banRegularTrafficOnBusLanesToggle != null) {
+                banRegularTrafficOnBusLanesToggle.isChecked = value;
+            }
+
+            VehicleRestrictionsManager.Instance.ClearCache();
+            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+        }
+
     } // end class
 }

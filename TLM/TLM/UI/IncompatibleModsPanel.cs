@@ -10,6 +10,8 @@ using static ColossalFramework.Plugins.PluginManager;
 
 namespace TrafficManager.UI
 {
+    using State;
+
     public class IncompatibleModsPanel : UIPanel
     {
         private const ulong LOCAL_MOD = ulong.MaxValue;
@@ -184,7 +186,7 @@ namespace TrafficManager.UI
         private void RunModsCheckerOnStartup_eventCheckChanged(bool value)
         {
             Log._Debug("Incompatible mods checker run on game launch changed to " + value);
-            State.Options.setScanForKnownIncompatibleMods(value);
+            OptionsGeneralTab.SetScanForKnownIncompatibleMods(value);
         }
 
         /// <summary>
