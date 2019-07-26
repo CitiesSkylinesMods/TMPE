@@ -14,8 +14,7 @@
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
-            Log._DebugOnlyError($"- Not implemented -");
-            // TODO implement
+            Log.NotImpl("InternalPrintDebugInfo for OptionsManager");
         }
 
         public bool MayPublishSegmentChanges() {

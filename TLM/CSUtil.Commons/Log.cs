@@ -129,6 +129,10 @@
             LogToFile(s, LogLevel.Error);
         }
 
+        public static void ErrorFormat(string format, params object[] args) {
+            LogToFile(string.Format(format, args), LogLevel.Error);
+        }
+
         /// <summary>
         /// Log error only in debug mode
         /// </summary>
@@ -136,6 +140,15 @@
         [Conditional("DEBUG")]
         public static void _DebugOnlyError(string s) {
             LogToFile(s, LogLevel.Error);
+        }
+
+        /// <summary>
+        /// Writes an Error message about something not implemented. Debug only.
+        /// </summary>
+        /// <param name="what">The hint about what is not implemented</param>
+        [Conditional("DEBUG")]
+        public static void NotImpl(string what) {
+            LogToFile("Not implemented: " + what, LogLevel.Error);
         }
 
         private static void LogToFile(string log, LogLevel level) {

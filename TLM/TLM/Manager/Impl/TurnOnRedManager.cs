@@ -1,234 +1,273 @@
-using ColossalFramework;
-using CSUtil.Commons;
-using TrafficManager.State;
-using TrafficManager.Traffic.Data;
-
 namespace TrafficManager.Manager.Impl {
     using API.Manager;
+    using CSUtil.Commons;
     using State.ConfigData;
+    using Traffic.Data;
 
-	public class TurnOnRedManager : AbstractGeometryObservingManager, ITurnOnRedManager {
-		private TurnOnRedManager() {
-			TurnOnRedSegments = new TurnOnRedSegments[2 * NetManager.MAX_SEGMENT_COUNT];
-		}
+    public class TurnOnRedManager
+        : AbstractGeometryObservingManager,
+          ITurnOnRedManager
+    {
+        private TurnOnRedManager() {
+            TurnOnRedSegments = new TurnOnRedSegments[2 * NetManager.MAX_SEGMENT_COUNT];
+        }
 
-		public static TurnOnRedManager Instance { get; } = new TurnOnRedManager();
+        public static TurnOnRedManager Instance { get; } = new TurnOnRedManager();
 
-		public TurnOnRedSegments[] TurnOnRedSegments { get; }
+        public TurnOnRedSegments[] TurnOnRedSegments { get; }
 
-		public override void OnBeforeLoadData() {
-			base.OnBeforeLoadData();
+        public override void OnBeforeLoadData() {
+            base.OnBeforeLoadData();
 
-			// JunctionRestrictionsManager requires our data during loading of custom data
-			for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-				if (!Services.NetService.IsSegmentValid((ushort)i)) {
-					continue;
-				}
+            // JunctionRestrictionsManager requires our data during loading of custom data
+            for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
+                if (!Services.NetService.IsSegmentValid((ushort)i)) {
+                    continue;
+                }
 
-				HandleValidSegment(ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[i]);
-			}
-		}
+                HandleValidSegment(ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[i]);
+            }
+        }
 
-		public override void OnLevelUnloading() {
-			base.OnLevelUnloading();
-			for (int i = 0; i < TurnOnRedSegments.Length; ++i) {
-				TurnOnRedSegments[i].Reset();
-			}
-		}
+        public override void OnLevelUnloading() {
+            base.OnLevelUnloading();
 
-		public int GetIndex(ushort segmentId, bool startNode) {
-			return (int)segmentId + (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT);
-		}
+            for (int i = 0; i < TurnOnRedSegments.Length; ++i) {
+                TurnOnRedSegments[i].Reset();
+            }
+        }
 
-		protected override void InternalPrintDebugInfo() {
-			base.InternalPrintDebugInfo();
-			Log._Debug($"Turn-on-red segments:");
-			for (int i = 0; i < TurnOnRedSegments.Length; ++i) {
-				Log._Debug($"Segment end {i}: {TurnOnRedSegments[i]}");
-			}
-		}
+        public int GetIndex(ushort segmentId, bool startNode) {
+            return segmentId + (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT);
+        }
 
-		protected override void HandleValidSegment(ref ExtSegment seg) {
-			UpdateSegment(ref seg);
-		}
+        protected override void InternalPrintDebugInfo() {
+            base.InternalPrintDebugInfo();
+            Log._Debug("Turn-on-red segments:");
 
-		protected override void HandleInvalidSegment(ref ExtSegment seg) {
-			ResetSegment(seg.segmentId);
-		}
+            for (int i = 0; i < TurnOnRedSegments.Length; ++i) {
+                Log._Debug($"Segment end {i}: {TurnOnRedSegments[i]}");
+            }
+        }
 
-		protected void UpdateSegment(ref ExtSegment seg) {
+        protected override void HandleValidSegment(ref ExtSegment seg) {
+            UpdateSegment(ref seg);
+        }
+
+        protected override void HandleInvalidSegment(ref ExtSegment seg) {
+            ResetSegment(seg.segmentId);
+        }
+
+        protected void UpdateSegment(ref ExtSegment seg) {
 #if DEBUG
-			bool debug = DebugSwitch.TurnOnRed.Get();
-			if (debug) {
-				Log._Debug($"TurnOnRedManager.UpdateSegment({seg.segmentId}) called.");
-			}
+            if (DebugSwitch.TurnOnRed.Get()) {
+                Log._Debug($"TurnOnRedManager.UpdateSegment({seg.segmentId}) called.");
+            }
 #endif
+            ResetSegment(seg.segmentId);
 
-			ResetSegment(seg.segmentId);
+            IExtSegmentEndManager extSegmentEndManager =
+                Constants.ManagerFactory.ExtSegmentEndManager;
+            ushort startNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, true);
 
-			IExtSegmentEndManager extSegmentEndManager = Constants.ManagerFactory.ExtSegmentEndManager;
-			ushort startNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, true);
-			if (startNodeId != 0) {
-				UpdateSegmentEnd(ref seg, ref extSegmentEndManager.ExtSegmentEnds[extSegmentEndManager.GetIndex(seg.segmentId, true)]);
-			}
+            if (startNodeId != 0) {
+                int index0 = extSegmentEndManager.GetIndex(seg.segmentId, true);
+                UpdateSegmentEnd(
+                    ref seg,
+                    ref extSegmentEndManager.ExtSegmentEnds[index0]);
+            }
 
-			ushort endNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, false);
-			if (endNodeId != 0) {
-				UpdateSegmentEnd(ref seg, ref extSegmentEndManager.ExtSegmentEnds[extSegmentEndManager.GetIndex(seg.segmentId, false)]);
-			}
-		}
+            ushort endNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, false);
 
-		protected void UpdateSegmentEnd(ref ExtSegment seg, ref ExtSegmentEnd end) {
+            if (endNodeId != 0) {
+                int index1 = extSegmentEndManager.GetIndex(seg.segmentId, false);
+                UpdateSegmentEnd(
+                    ref seg,
+                    ref extSegmentEndManager.ExtSegmentEnds[index1]);
+            }
+        }
+
+        protected void UpdateSegmentEnd(ref ExtSegment seg, ref ExtSegmentEnd end) {
 #if DEBUG
-			bool debug = DebugSwitch.TurnOnRed.Get();
-			if (debug) {
-				Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}) called.");
-			}
+            bool logTurnOnRed = DebugSwitch.TurnOnRed.Get();
+#else
+            const bool logTurnOnRed = false;
 #endif
-			IExtSegmentManager segmentManager = Constants.ManagerFactory.ExtSegmentManager;
-			IExtSegmentEndManager segmentEndManager = Constants.ManagerFactory.ExtSegmentEndManager;
+            if (logTurnOnRed) {
+                Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}) called.");
+            }
 
-			ushort segmentId = seg.segmentId;
-			ushort nodeId = end.nodeId;
+            IExtSegmentManager segmentManager = Constants.ManagerFactory.ExtSegmentManager;
+            IExtSegmentEndManager segmentEndManager = Constants.ManagerFactory.ExtSegmentEndManager;
 
-			bool hasOutgoingSegment = false;
-			Services.NetService.IterateNodeSegments(end.nodeId, (ushort otherSegId, ref NetSegment otherSeg) => {
-				if (otherSegId != segmentId && segmentEndManager.ExtSegmentEnds[segmentEndManager.GetIndex(otherSegId, otherSeg.m_startNode == nodeId)].outgoing) {
-					hasOutgoingSegment = true;
-					return false;
-				} else {
-					return true;
-				}
-			});
+            ushort segmentId = seg.segmentId;
+            ushort nodeId = end.nodeId;
+            bool hasOutgoingSegment = false;
 
-			// check if traffic can flow to the node and that there is at least one left segment
-			if (!end.incoming || !hasOutgoingSegment) {
-#if DEBUG
-				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): outgoing one-way or insufficient number of outgoing segments.");
-				}
-#endif
-				return;
-			}
+            Services.NetService.IterateNodeSegments(
+                end.nodeId,
+                (ushort otherSegId, ref NetSegment otherSeg) => {
+                    int index0 = segmentEndManager.GetIndex(otherSegId,otherSeg.m_startNode == nodeId);
 
-			bool lhd = Services.SimulationService.LeftHandDrive;
+                    if (otherSegId != segmentId
+                        && segmentEndManager.ExtSegmentEnds[index0].outgoing)
+                    {
+                        hasOutgoingSegment = true;
+                        return false;
+                    }
 
-			// check node
-			// note that we must not check for the `TrafficLights` flag here because the flag might not be loaded yet
-			bool nodeValid = false;
-			Services.NetService.ProcessNode(nodeId, (ushort _, ref NetNode node) => {
-				nodeValid =
-					(node.m_flags & NetNode.Flags.LevelCrossing) == NetNode.Flags.None &&
-					node.Info?.m_class?.m_service != ItemClass.Service.Beautification;
-				return true;
-			});
+                    return true;
+                });
 
-			if (!nodeValid) {
-#if DEBUG
-				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): node invalid");
-				}
-#endif
-				return;
-			}
+            // check if traffic can flow to the node and that there is at least one left segment
+            if (!end.incoming || !hasOutgoingSegment) {
+                if (logTurnOnRed) {
+                    Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
+                               "outgoing one-way or insufficient number of outgoing segments.");
+                }
 
-			// get left/right segments
-			ushort leftSegmentId = 0;
-			ushort rightSegmentId = 0;
-			Services.NetService.ProcessSegment(end.segmentId, (ushort _, ref NetSegment segment) => {
-				segment.GetLeftAndRightSegments(nodeId, out leftSegmentId, out rightSegmentId);
-				return true;
-			});
+                return;
+            }
 
-#if DEBUG
-			if (debug) {
-				Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): got left/right segments: {leftSegmentId}/{rightSegmentId}");
-			}
-#endif
+            bool lhd = Services.SimulationService.LeftHandDrive;
 
-			// validate left/right segments according to geometric properties
-			if (leftSegmentId != 0 && segmentEndManager.GetDirection(ref end, leftSegmentId) != ArrowDirection.Left) {
-#if DEBUG
-				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): left segment is not geometrically left");
-				}
-#endif
-				leftSegmentId = 0;
-			}
+            // check node
+            // note that we must not check for the `TrafficLights` flag here because the flag might not be loaded yet
+            bool nodeValid = false;
+            Services.NetService.ProcessNode(
+                nodeId,
+                (ushort _, ref NetNode node) => {
+                    nodeValid =
+                        (node.m_flags & NetNode.Flags.LevelCrossing) ==
+                        NetNode.Flags.None &&
+                        node.Info?.m_class?.m_service != ItemClass.Service.Beautification;
+                    return true;
+                });
 
-			if (rightSegmentId != 0 && segmentEndManager.GetDirection(ref end, rightSegmentId) != ArrowDirection.Right) {
-#if DEBUG
-				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): right segment is not geometrically right");
-				}
-#endif
-				rightSegmentId = 0;
-			}
+            if (!nodeValid) {
+                if (logTurnOnRed) {
+                    Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): node invalid");
+                }
 
-			// check for incoming one-ways
-			if (leftSegmentId != 0 && !segmentEndManager.ExtSegmentEnds[segmentEndManager.GetIndex(leftSegmentId, nodeId)].outgoing) {
-#if DEBUG
-				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): left segment is incoming one-way");
-				}
-#endif
-				leftSegmentId = 0;
-			}
+                return;
+            }
 
-			if (rightSegmentId != 0 && !segmentEndManager.ExtSegmentEnds[segmentEndManager.GetIndex(rightSegmentId, nodeId)].outgoing) {
-#if DEBUG
-				if (debug) {
-					Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): right segment is incoming one-way");
-				}
-#endif
-				rightSegmentId = 0;
-			}
+            // get left/right segments
+            ushort leftSegmentId = 0;
+            ushort rightSegmentId = 0;
+            Services.NetService.ProcessSegment(
+                end.segmentId,
+                (ushort _, ref NetSegment segment) => {
+                    segment.GetLeftAndRightSegments(
+                        nodeId,
+                        out leftSegmentId,
+                        out rightSegmentId);
+                    return true;
+                });
 
-			if (seg.oneWay) {
-				if ((lhd && rightSegmentId != 0) || (!lhd && leftSegmentId != 0)) {
-					// special case: one-way to one-way in non-preferred direction
-#if DEBUG
-					if (debug) {
-						Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): source is incoming one-way. checking for one-way in non-preferred direction");
-					}
-#endif
-					ushort targetSegmentId = lhd ? rightSegmentId : leftSegmentId;
-					if (!segmentManager.ExtSegments[targetSegmentId].oneWay) {
-						// disallow turn in non-preferred direction
-#if DEBUG
-						if (debug) {
-							Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): turn in non-preferred direction {(lhd ? "right" : "left")} disallowed");
-						}
-#endif
-						if (lhd) {
-							rightSegmentId = 0;
-						} else {
-							leftSegmentId = 0;
-						}
-					}
-				}
-			} else if (lhd) {
-				// default case (LHD): turn in preferred direction
-				rightSegmentId = 0;
-			} else {
-				// default case (RHD): turn in preferred direction
-				leftSegmentId = 0;
-			}
+            if (logTurnOnRed) {
+                Log._Debug(
+                    $"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
+                    $"got left/right segments: {leftSegmentId}/{rightSegmentId}");
+            }
 
-			int index = GetIndex(end.segmentId, end.startNode);
-			TurnOnRedSegments[index].leftSegmentId = leftSegmentId;
-			TurnOnRedSegments[index].rightSegmentId = rightSegmentId;
+            // validate left/right segments according to geometric properties
+            if (leftSegmentId != 0
+                && segmentEndManager.GetDirection(ref end, leftSegmentId) != ArrowDirection.Left)
+            {
+                if (logTurnOnRed) {
+                    Log._Debug(
+                        $"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
+                        "left segment is not geometrically left");
+                }
 
-#if DEBUG
-			if (debug) {
-				Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): Finished calculation. leftSegmentId={leftSegmentId}, rightSegmentId={rightSegmentId}");
-			}
-#endif
-		}
+                leftSegmentId = 0;
+            }
 
-		protected void ResetSegment(ushort segmentId) {
-			TurnOnRedSegments[GetIndex(segmentId, true)].Reset();
-			TurnOnRedSegments[GetIndex(segmentId, false)].Reset();
-		}
-	}
+            if (rightSegmentId != 0
+                && segmentEndManager.GetDirection(ref end, rightSegmentId) != ArrowDirection.Right)
+            {
+                if (logTurnOnRed) {
+                    Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
+                               "right segment is not geometrically right");
+                }
+
+                rightSegmentId = 0;
+            }
+
+            // check for incoming one-ways
+            int indexL = segmentEndManager.GetIndex(leftSegmentId, nodeId);
+            if (leftSegmentId != 0
+                && !segmentEndManager.ExtSegmentEnds[indexL].outgoing)
+            {
+                if (logTurnOnRed) {
+                    Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
+                               "left segment is incoming one-way");
+                }
+
+                leftSegmentId = 0;
+            }
+
+            int indexR = segmentEndManager.GetIndex(rightSegmentId, nodeId);
+            if (rightSegmentId != 0
+                && !segmentEndManager.ExtSegmentEnds[indexR].outgoing)
+            {
+                if (logTurnOnRed) {
+                    Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
+                               "right segment is incoming one-way");
+                }
+
+                rightSegmentId = 0;
+            }
+
+            if (seg.oneWay) {
+                if ((lhd && rightSegmentId != 0) || (!lhd && leftSegmentId != 0)) {
+                    // special case: one-way to one-way in non-preferred direction
+                    if (logTurnOnRed) {
+                        Log._Debug(
+                            $"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
+                            "source is incoming one-way. checking for one-way in non-preferred direction");
+                    }
+
+                    ushort targetSegmentId = lhd ? rightSegmentId : leftSegmentId;
+
+                    if (!segmentManager.ExtSegments[targetSegmentId].oneWay) {
+                        // disallow turn in non-preferred direction
+                        if (logTurnOnRed) {
+                            Log._Debug(
+                                $"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
+                                $"turn in non-preferred direction {(lhd ? "right" : "left")} disallowed");
+                        }
+
+                        if (lhd) {
+                            rightSegmentId = 0;
+                        } else {
+                            leftSegmentId = 0;
+                        }
+                    }
+                }
+            } else if (lhd) {
+                // default case (LHD): turn in preferred direction
+                rightSegmentId = 0;
+            } else {
+                // default case (RHD): turn in preferred direction
+                leftSegmentId = 0;
+            }
+
+            int index = GetIndex(end.segmentId, end.startNode);
+            TurnOnRedSegments[index].leftSegmentId = leftSegmentId;
+            TurnOnRedSegments[index].rightSegmentId = rightSegmentId;
+
+            if (logTurnOnRed) {
+                Log._Debug(
+                    $"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
+                    $"Finished calculation. leftSegmentId={leftSegmentId}, rightSegmentId={rightSegmentId}");
+            }
+        }
+
+        protected void ResetSegment(ushort segmentId) {
+            TurnOnRedSegments[GetIndex(segmentId, true)].Reset();
+            TurnOnRedSegments[GetIndex(segmentId, false)].Reset();
+        }
+    }
 }

@@ -22,9 +22,7 @@
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
-            Log._DebugOnlyError($"- Not implemented -");
-
-            // TODO implement
+            Log.NotImpl("InternalPrintDebugInfo for TrafficLightManager");
         }
 
         // TODO: Consider replacing out error code with Result<> or VoidResult<>
