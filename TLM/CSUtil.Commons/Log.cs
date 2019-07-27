@@ -93,7 +93,7 @@
         /// <summary>
         /// Log a warning only in debug mode if cond is true
         /// NOTE: If a lambda contains values from `out` and `ref` scope args,
-        /// then you can not use a lambda, instead use `if (cond) { Log._DebugOnlyWarning }`
+        /// then you can not use a lambda, instead use `if (cond) { Log._DebugOnlyWarning() }`
         /// </summary>
         /// <param name="cond">The condition</param>
         /// <param name="s">The function which returns text to log</param>
@@ -115,7 +115,7 @@
         /// <summary>
         /// Log a warning only if cond is true
         /// NOTE: If a lambda contains values from `out` and `ref` scope args,
-        /// then you can not use a lambda, instead use `if (cond) { Log.Warning }`
+        /// then you can not use a lambda, instead use `if (cond) { Log.Warning() }`
         /// </summary>
         /// <param name="cond">The condition</param>
         /// <param name="s">The function which returns text to log</param>
@@ -131,6 +131,19 @@
 
         public static void ErrorFormat(string format, params object[] args) {
             LogToFile(string.Format(format, args), LogLevel.Error);
+        }
+
+        /// <summary>
+        /// Log an error only if cond is true
+        /// NOTE: If a lambda contains values from `out` and `ref` scope args,
+        /// then you can not use a lambda, instead use `if (cond) { Log.Error() }`
+        /// </summary>
+        /// <param name="cond">The condition</param>
+        /// <param name="s">The function which returns text to log</param>
+        public static void ErrorIf(bool cond, Func<string> s) {
+            if (cond) {
+                LogToFile(s(), LogLevel.Error);
+            }
         }
 
         /// <summary>

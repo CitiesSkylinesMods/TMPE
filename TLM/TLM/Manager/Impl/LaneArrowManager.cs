@@ -203,5 +203,21 @@
 
             return ret;
         }
+
+        /// <summary>
+        /// Used for loading and saving LaneFlags
+        /// </summary>
+        /// <returns>ICustomDataManager for lane flags as a string</returns>
+        public static ICustomDataManager<string> AsLaneFlagsDM() {
+            return Instance;
+        }
+
+        /// <summary>
+        /// Used for loading and saving lane arrows
+        /// </summary>
+        /// <returns>ICustomDataManager for lane arrows</returns>
+        public static ICustomDataManager<List<Configuration.LaneArrowData>> AsLaneArrowsDM() {
+            return Instance;
+        }
     }
 }

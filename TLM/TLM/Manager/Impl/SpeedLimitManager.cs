@@ -938,6 +938,22 @@
 //            return ret;
 //        }
 #endif
+
+        /// <summary>
+        /// Used for loading and saving lane speed limits
+        /// </summary>
+        /// <returns>ICustomDataManager with custom lane speed limits</returns>
+        public static ICustomDataManager<List<Configuration.LaneSpeedLimit>> AsLaneSpeedLimitsDM() {
+            return Instance;
+        }
+
+        /// <summary>
+        /// Used for loading and saving custom default speed limits
+        /// </summary>
+        /// <returns>ICustomDataManager with custom default speed limits</returns>
+        public static ICustomDataManager<Dictionary<string, float>> AsCustomDefaultSpeedLimitsDM() {
+            return Instance;
+        }
     }
 
 }
