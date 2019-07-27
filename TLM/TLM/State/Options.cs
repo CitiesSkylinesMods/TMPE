@@ -198,10 +198,6 @@
             return false;
         }
 
-        internal static bool IsStockLaneChangerUsed() {
-            return !advancedAI;
-        }
-
         internal static int getRecklessDriverModulo() {
             switch (recklessDrivers) {
                 case 0:
