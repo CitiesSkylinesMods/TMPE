@@ -196,9 +196,8 @@ namespace TrafficManager.Manager.Impl {
             }
 
             // check for incoming one-ways
-            int indexL = segmentEndManager.GetIndex(leftSegmentId, nodeId);
             if (leftSegmentId != 0
-                && !segmentEndManager.ExtSegmentEnds[indexL].outgoing)
+                && !segmentEndManager.ExtSegmentEnds[segmentEndManager.GetIndex(leftSegmentId, nodeId)].outgoing)
             {
                 if (logTurnOnRed) {
                     Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
@@ -208,9 +207,8 @@ namespace TrafficManager.Manager.Impl {
                 leftSegmentId = 0;
             }
 
-            int indexR = segmentEndManager.GetIndex(rightSegmentId, nodeId);
             if (rightSegmentId != 0
-                && !segmentEndManager.ExtSegmentEnds[indexR].outgoing)
+                && !segmentEndManager.ExtSegmentEnds[segmentEndManager.GetIndex(rightSegmentId, nodeId)].outgoing)
             {
                 if (logTurnOnRed) {
                     Log._Debug($"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
