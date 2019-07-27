@@ -7,7 +7,9 @@ using TrafficManager.Manager;
 using UnityEngine;
 
 namespace TrafficManager {
-	/// <summary>
+    using API.Manager;
+
+    /// <summary>
 	/// Helper class to make Traffic Manager services available in-game
 	/// </summary>
 	public class TrafficManager : MonoBehaviour {

@@ -1,149 +1,188 @@
-﻿using ColossalFramework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrafficManager.State;
-using TrafficManager.Geometry;
-using CSUtil.Commons;
-using TrafficManager.Custom.AI;
-using System.Threading;
-using UnityEngine;
-using TrafficManager.Geometry.Impl;
+﻿namespace TrafficManager.Manager.Impl {
+    using System;
+    using System.Threading;
+    using API.Manager;
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using State;
+    using UnityEngine;
 
-namespace TrafficManager.Manager.Impl {
-	public class UtilityManager : AbstractCustomManager, IUtilityManager {
-		public static UtilityManager Instance { get; private set; } = null;
+    public class UtilityManager : AbstractCustomManager, IUtilityManager {
+        public static UtilityManager Instance { get; }
 
-		static UtilityManager() {
-			Instance = new UtilityManager();
-		}
+        static UtilityManager() {
+            Instance = new UtilityManager();
+        }
 
-		public void ClearTraffic() {
-			try {
-				Monitor.Enter(Singleton<VehicleManager>.instance);
+        public void ClearTraffic() {
+            try {
+                Monitor.Enter(Singleton<VehicleManager>.instance);
 
-				for (uint i = 0; i < Singleton<VehicleManager>.instance.m_vehicles.m_size; ++i) {
-					if (
-						(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[i].m_flags & Vehicle.Flags.Created) != 0)
-						Singleton<VehicleManager>.instance.ReleaseVehicle((ushort)i);
-				}
+                VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+                for (uint i = 0; i < vehicleManager.m_vehicles.m_size; ++i) {
+                    if ((vehicleManager.m_vehicles.m_buffer[i].m_flags & Vehicle.Flags.Created) != 0) {
+                        vehicleManager.ReleaseVehicle((ushort)i);
+                    }
+                }
 
-				TrafficMeasurementManager.Instance.ResetTrafficStats();
-			} catch (Exception ex) {
-				Log.Error($"Error occured while trying to clear traffic: {ex.ToString()}");
-			} finally {
-				Monitor.Exit(Singleton<VehicleManager>.instance);
-			}
-		}
+                TrafficMeasurementManager.Instance.ResetTrafficStats();
+            }
+            catch (Exception ex) {
+                Log.Error($"Error occured while trying to clear traffic: {ex}");
+            }
+            finally {
+                Monitor.Exit(Singleton<VehicleManager>.instance);
+            }
+        }
 
-		public void RemoveParkedVehicles() {
-			try {
-				Monitor.Enter(Singleton<VehicleManager>.instance);
+        public void RemoveParkedVehicles() {
+            try {
+                Monitor.Enter(Singleton<VehicleManager>.instance);
 
-				for (uint i = 0; i < Singleton<VehicleManager>.instance.m_parkedVehicles.m_size; ++i) {
-					if (
-						(Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[i].m_flags & (ushort)VehicleParked.Flags.Created) != 0)
-						Singleton<VehicleManager>.instance.ReleaseParkedVehicle((ushort)i);
-				}
-			} catch (Exception ex) {
-				Log.Error($"Error occured while trying to remove parked vehicles: {ex.ToString()}");
-			} finally {
-				Monitor.Exit(Singleton<VehicleManager>.instance);
-			}
-		}
+                VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
-		public void PrintAllDebugInfo() {
-			Log._Debug($"UtilityManager.PrintAllDebugInfo(): Pausing simulation.");
-			Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
+                for (uint i = 0; i < vehicleManager.m_parkedVehicles.m_size; ++i) {
+                    if ((vehicleManager.m_parkedVehicles.m_buffer[i].m_flags &
+                         (ushort)VehicleParked.Flags.Created) != 0)
+                    {
+                        vehicleManager.ReleaseParkedVehicle((ushort)i);
+                    }
+                }
+            }
+            catch (Exception ex) {
+                Log.Error($"Error occured while trying to remove parked vehicles: {ex}");
+            }
+            finally {
+                Monitor.Exit(Singleton<VehicleManager>.instance);
+            }
+        }
 
-			Log._Debug("=== Flags.PrintDebugInfo() ===");
-			try {
-				Flags.PrintDebugInfo();
-			} catch (Exception e) {
-				Log.Error($"Error occurred while printing debug info for flags: {e}");
-			}
+        public void PrintAllDebugInfo() {
+            Log._Debug("UtilityManager.PrintAllDebugInfo(): Pausing simulation.");
+            Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
 
-			foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
-				try {
-					manager.PrintDebugInfo();
-				} catch (Exception e) {
-					Log.Error($"Error occurred while printing debug info for manager {manager.GetType().Name}: {e}");
-				}
-			}
+            Log._Debug("=== Flags.PrintDebugInfo() ===");
+            try {
+                Flags.PrintDebugInfo();
+            }
+            catch (Exception e) {
+                Log.Error($"Error occurred while printing debug info for flags: {e}");
+            }
 
-			Log._Debug($"UtilityManager.PrintAllDebugInfo(): Unpausing simulation.");
-			Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
-		}
+            foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
+                try {
+                    manager.PrintDebugInfo();
+                }
+                catch (Exception e) {
+                    Log.Error($"Error occurred while printing debug info for manager {manager.GetType().Name}: {e}");
+                }
+            }
 
-		public void ResetStuckEntities() {
-			Log.Info($"UtilityManager.RemoveStuckEntities() called.");
+            Log._Debug("UtilityManager.PrintAllDebugInfo(): Unpausing simulation.");
+            Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
+        }
 
-			bool wasPaused = Singleton<SimulationManager>.instance.ForcedSimulationPaused;
+        public void ResetStuckEntities() {
+            Log.Info("UtilityManager.RemoveStuckEntities() called.");
 
-			if (!wasPaused) {
-				Log.Info($"UtilityManager.RemoveStuckEntities(): Pausing simulation.");
-				Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
-			}
+            bool wasPausedBeforeReset = Singleton<SimulationManager>.instance.ForcedSimulationPaused;
 
-			Log.Info($"UtilityManager.RemoveStuckEntities(): Waiting for all paths.");
-			Singleton<PathManager>.instance.WaitForAllPaths();
+            if (!wasPausedBeforeReset) {
+                Log.Info("UtilityManager.RemoveStuckEntities(): Pausing simulation.");
+                Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
+            }
 
-			Log.Info($"UtilityManager.RemoveStuckEntities(): Resetting citizen instances that are waiting for a path.");
-			for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
-				//Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing instance {citizenInstanceId}.");
-				if ((Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_flags & CitizenInstance.Flags.WaitingPath) != CitizenInstance.Flags.None) {
-					CitizenAI ai = Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].Info.m_citizenAI;
+            Log.Info("UtilityManager.RemoveStuckEntities(): Waiting for all paths.");
+            Singleton<PathManager>.instance.WaitForAllPaths();
 
-					if (Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_path != 0u) {
-						Log.Info($"Resetting stuck citizen instance {citizenInstanceId} (waiting for path)");
+            Log.Info("UtilityManager.RemoveStuckEntities(): Resetting citizen instances that are waiting for a path.");
+            CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+            PathManager pathManager = Singleton<PathManager>.instance;
 
-						Singleton<PathManager>.instance.ReleasePath(Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_path);
-						Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_path = 0u;
-					}
-					Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_flags &= ~(CitizenInstance.Flags.WaitingTransport | CitizenInstance.Flags.EnteringVehicle | CitizenInstance.Flags.BoredOfWaiting | CitizenInstance.Flags.WaitingTaxi | CitizenInstance.Flags.WaitingPath);
-				} else {
+            for (uint citizenInstanceId = 1; citizenInstanceId < CitizenManager.MAX_INSTANCE_COUNT; ++citizenInstanceId) {
+                // Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing instance {citizenInstanceId}.");
+                if ((citizenManager.m_instances.m_buffer[citizenInstanceId].m_flags &
+                     CitizenInstance.Flags.WaitingPath) != CitizenInstance.Flags.None)
+                {
+                    // CitizenAI ai = citizenManager.m_instances.m_buffer[citizenInstanceId].Info.m_citizenAI;
+                    if (citizenManager.m_instances.m_buffer[citizenInstanceId].m_path != 0u) {
+                        Log.Info(
+                            $"Resetting stuck citizen instance {citizenInstanceId} (waiting for path)");
+
+                        pathManager.ReleasePath(citizenManager.m_instances.m_buffer[citizenInstanceId].m_path);
+                        citizenManager.m_instances.m_buffer[citizenInstanceId].m_path = 0u;
+                    }
+
+                    citizenManager.m_instances.m_buffer[citizenInstanceId].m_flags &=
+                        ~(CitizenInstance.Flags.WaitingTransport |
+                          CitizenInstance.Flags.EnteringVehicle |
+                          CitizenInstance.Flags.BoredOfWaiting | CitizenInstance.Flags.WaitingTaxi |
+                          CitizenInstance.Flags.WaitingPath);
+                } else {
 #if DEBUG
-					if (Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_path == 0 &&
-						(Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_flags & CitizenInstance.Flags.Character) != CitizenInstance.Flags.None) {
-						Log._Debug($"Found potential floating citizen instance: {citizenInstanceId} Source building: {Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_sourceBuilding} Target building: {Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_targetBuilding} Distance to target position: {(Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].GetLastFramePosition() - (Vector3)Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_targetPos).magnitude}");
-					}
+                    if (citizenManager.m_instances.m_buffer[citizenInstanceId].m_path == 0 &&
+                        (citizenManager.m_instances.m_buffer[citizenInstanceId].m_flags &
+                         CitizenInstance.Flags.Character) != CitizenInstance.Flags.None)
+                    {
+                        float magnitude =
+                            (citizenManager.m_instances.m_buffer[citizenInstanceId].GetLastFramePosition() -
+                             (Vector3)citizenManager.m_instances.m_buffer[citizenInstanceId].m_targetPos
+                             ).magnitude;
+                        Log._DebugFormat(
+                            "Found potential floating citizen instance: {0} Source building: {1} " +
+                            "Target building: {2} Distance to target position: {3}",
+                            citizenInstanceId,
+                            citizenManager.m_instances.m_buffer[citizenInstanceId].m_sourceBuilding,
+                            citizenManager.m_instances.m_buffer[citizenInstanceId].m_targetBuilding,
+                            magnitude);
+                    }
 #endif
-				}
-			}
+                }
+            }
 
-			Log.Info($"UtilityManager.RemoveStuckEntities(): Resetting vehicles that are waiting for a path.");
-			for (uint vehicleId = 1; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++vehicleId) {
-				//Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
-				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.WaitingPath) != 0) {
-					if (Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_path != 0u) {
-						Log.Info($"Resetting stuck vehicle {vehicleId} (waiting for path)");
+            Log.Info("UtilityManager.RemoveStuckEntities(): Resetting vehicles that are waiting for a path.");
+            VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
-						Singleton<PathManager>.instance.ReleasePath(Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_path);
-							Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_path = 0u;
-					}
-					Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags &= ~Vehicle.Flags.WaitingPath;
-				}
-			}
+            for (uint vehicleId = 1; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++vehicleId) {
+                // Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
+                if ((vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.WaitingPath) != 0) {
+                    if (vehicleManager.m_vehicles.m_buffer[vehicleId].m_path != 0u) {
+                        Log.Info($"Resetting stuck vehicle {vehicleId} (waiting for path)");
 
-			Log.Info($"UtilityManager.RemoveStuckEntities(): Resetting vehicles that are parking and where no parked vehicle is assigned to the driver.");
-			for (uint vehicleId = 1; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++vehicleId) {
-				//Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
-				if ((Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.Parking) != 0) {
-					ushort driverInstanceId = Constants.ManagerFactory.ExtVehicleManager.GetDriverInstanceId((ushort)vehicleId, ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
-					uint citizenId = Singleton<CitizenManager>.instance.m_instances.m_buffer[(int)driverInstanceId].m_citizen;
-					if (citizenId != 0u && Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].m_parkedVehicle == 0) {
+                        pathManager.ReleasePath(vehicleManager.m_vehicles.m_buffer[vehicleId].m_path);
+                        vehicleManager.m_vehicles.m_buffer[vehicleId].m_path = 0u;
+                    }
 
-						Log.Info($"Resetting vehicle {vehicleId} (parking without parked vehicle)");
-						Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags &= ~Vehicle.Flags.Parking;
-					}
-				}
-			}
+                    vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags &= ~Vehicle.Flags.WaitingPath;
+                }
+            }
 
-			if (!wasPaused) {
-				Log.Info($"UtilityManager.RemoveStuckEntities(): Unpausing simulation.");
-				Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
-			}
-		}
-	}
+            Log.Info(
+                "UtilityManager.RemoveStuckEntities(): Resetting vehicles that are parking and " +
+                "where no parked vehicle is assigned to the driver.");
+
+            for (uint vehicleId = 1; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount;
+                 ++vehicleId) {
+                // Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
+                if ((vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags
+                     & Vehicle.Flags.Parking) != 0)
+                {
+                    ushort driverInstanceId = Constants.ManagerFactory.ExtVehicleManager.GetDriverInstanceId(
+                        (ushort)vehicleId, ref vehicleManager.m_vehicles.m_buffer[vehicleId]);
+                    uint citizenId = citizenManager.m_instances.m_buffer[driverInstanceId].m_citizen;
+
+                    if (citizenId != 0u && citizenManager.m_citizens.m_buffer[citizenId].m_parkedVehicle == 0)
+                    {
+                        Log.Info($"Resetting vehicle {vehicleId} (parking without parked vehicle)");
+                        vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags &= ~Vehicle.Flags.Parking;
+                    }
+                }
+            }
+
+            if (!wasPausedBeforeReset) {
+                Log.Info("UtilityManager.RemoveStuckEntities(): Unpausing simulation.");
+                Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
+            }
+        }
+    }
 }

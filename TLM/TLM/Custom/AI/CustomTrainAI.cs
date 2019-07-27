@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager.Custom.AI {
     using System;
     using System.Runtime.CompilerServices;
+    using API.Manager;
     using API.Traffic.Data;
     using API.Traffic.Enums;
     using ColossalFramework;
@@ -54,7 +55,9 @@
             // NON-STOCK CODE START
             extVehicleMan.UpdateVehiclePosition(vehicleId, ref vehicleData);
 
-            if (!Options.isStockLaneChangerUsed() && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0) {
+            if (Options.advancedAI
+                && (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0)
+            {
                 // Advanced AI traffic measurement
                 extVehicleMan.LogTraffic(vehicleId, ref vehicleData);
             }

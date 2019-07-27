@@ -2,7 +2,7 @@
     /// <summary>
     /// Represents the reason why a parked car could not be spawned
     /// </summary>
-    public enum ParkingUnableReason {
+    public enum ParkingError {
         /// <summary>
         /// Parked car could be spawned
         /// </summary>

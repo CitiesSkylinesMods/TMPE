@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.API.Traffic.Enums {
-    public enum ToggleTrafficLightUnableReason {
+    public enum ToggleTrafficLightError {
         None,
         NoJunction,
         HasTimedLight,

@@ -17,6 +17,8 @@ using TrafficManager.Util;
 using CSUtil.Commons.Benchmark;
 
 namespace TrafficManager.UI {
+    using API.Manager;
+
 #if DEBUG
 	public class DebugMenuPanel : UIPanel {
 		//private static UIState _uiState = UIState.None;

@@ -139,10 +139,10 @@ namespace TrafficManager.UI.SubTools {
 				GUILayout.Label(Translation.GetString("Lane") + " " + (i + 1), laneTitleStyle);
 				GUILayout.BeginVertical();
 				GUILayout.BeginHorizontal();
-				if (!Flags.applyLaneArrowFlags(laneList[i].laneId)) {
-					Flags.removeLaneArrowFlags(laneList[i].laneId);
+				if (!Flags.ApplyLaneArrowFlags(laneList[i].laneId)) {
+					Flags.RemoveLaneArrowFlags(laneList[i].laneId);
 				}
-				SetLaneArrowUnableReason res = SetLaneArrowUnableReason.Invalid;
+				SetLaneArrowError res = SetLaneArrowError.Invalid;
 				bool buttonClicked = false;
 				if (GUILayout.Button("←", ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2), GUILayout.Width(35), GUILayout.Height(25))) {
 					buttonClicked = true;
@@ -159,14 +159,14 @@ namespace TrafficManager.UI.SubTools {
 
 				if (buttonClicked) {
 					switch (res) {
-						case SetLaneArrowUnableReason.Invalid:
-						case SetLaneArrowUnableReason.Success:
+						case SetLaneArrowError.Invalid:
+						case SetLaneArrowError.Success:
 						default:
 							break;
-						case SetLaneArrowUnableReason.HighwayArrows:
+						case SetLaneArrowError.HighwayArrows:
 							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Highway"));
 							break;
-						case SetLaneArrowUnableReason.LaneConnection:
+						case SetLaneArrowError.LaneConnection:
 							MainTool.ShowTooltip(Translation.GetString("Lane_Arrow_Changer_Disabled_Connection"));
 							break;
 					}

@@ -1,24 +1,23 @@
-﻿using ColossalFramework.Math;
-using CSUtil.Commons;
-using Harmony;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrafficManager.Geometry;
-using TrafficManager.Geometry.Impl;
-using TrafficManager.Traffic.Enums;
-using UnityEngine;
+﻿namespace TrafficManager.Patch._NetManager {
+    using Harmony;
+    using JetBrains.Annotations;
 
-namespace TrafficManager.Patch._NetManager {
-	[HarmonyPatch(typeof(NetManager), "UpdateSegment", new[] { typeof(ushort), typeof(ushort), typeof(int) })]
-	public static class UpdateSegmentPatch {
-		/// <summary>
-		/// Initiates a segment geometry recalculation when a segment is updated.
-		/// </summary>
-		[HarmonyPostfix]
-		public static void Postfix(NetManager __instance, ushort segment, ushort fromNode, int level) {
-			Constants.ManagerFactory.ExtSegmentManager.Recalculate(segment);
-		}
-	}
+    [HarmonyPatch(
+        typeof(NetManager),
+        "UpdateSegment",
+        new[] { typeof(ushort), typeof(ushort), typeof(int) })]
+    [UsedImplicitly]
+    public static class UpdateSegmentPatch {
+        /// <summary>
+        /// Initiates a segment geometry recalculation when a segment is updated.
+        /// </summary>
+        [HarmonyPostfix]
+        [UsedImplicitly]
+        public static void Postfix(NetManager __instance,
+                                   ushort segment,
+                                   ushort fromNode,
+                                   int level) {
+            Constants.ManagerFactory.ExtSegmentManager.Recalculate(segment);
+        }
+    }
 }

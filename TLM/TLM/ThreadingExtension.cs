@@ -21,6 +21,8 @@ using TrafficManager.RedirectionFramework;
 using TrafficManager.RedirectionFramework;
 
 namespace TrafficManager {
+    using API.Manager;
+
     public sealed class ThreadingExtension : ThreadingExtensionBase {
 		//int ticksSinceLastMinuteUpdate = 0;
 

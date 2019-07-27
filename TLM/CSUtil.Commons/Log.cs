@@ -1,7 +1,9 @@
 ﻿namespace CSUtil.Commons {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Text;
     using System.Threading;
     using UnityEngine;
 
@@ -47,12 +49,22 @@
         }
 
         /// <summary>
+        /// Will log only if debug mode, the string is prepared using string.Format
+        /// </summary>
+        /// <param name="format">The text</param>
+        [Conditional("DEBUG")]
+        public static void _DebugFormat(string format, params object[] args) {
+            LogToFile(string.Format(format, args), LogLevel.Debug);
+        }
+
+        /// <summary>
         /// Will log only if debug mode is enabled and the condition is true
         /// NOTE: If a lambda contains values from `out` and `ref` scope args,
         /// then you can not use a lambda, instead use `if (cond) { Log._Debug }`
         /// </summary>
         /// <param name="cond">The condition</param>
         /// <param name="s">The function which returns text to log</param>
+        // TODO: Add log thread and replace formatted strings with lists to perform late formatting in that thread
         [Conditional("DEBUG")]
         public static void _DebugIf(bool cond, Func<string> s) {
             if (cond) {
@@ -96,6 +108,10 @@
             LogToFile(s, LogLevel.Warning);
         }
 
+        public static void WarningFormat(string format, params object[] args) {
+            LogToFile(string.Format(format, args), LogLevel.Warning);
+        }
+
         /// <summary>
         /// Log a warning only if cond is true
         /// NOTE: If a lambda contains values from `out` and `ref` scope args,
@@ -113,6 +129,10 @@
             LogToFile(s, LogLevel.Error);
         }
 
+        public static void ErrorFormat(string format, params object[] args) {
+            LogToFile(string.Format(format, args), LogLevel.Error);
+        }
+
         /// <summary>
         /// Log error only in debug mode
         /// </summary>
@@ -120,6 +140,15 @@
         [Conditional("DEBUG")]
         public static void _DebugOnlyError(string s) {
             LogToFile(s, LogLevel.Error);
+        }
+
+        /// <summary>
+        /// Writes an Error message about something not implemented. Debug only.
+        /// </summary>
+        /// <param name="what">The hint about what is not implemented</param>
+        [Conditional("DEBUG")]
+        public static void NotImpl(string what) {
+            LogToFile("Not implemented: " + what, LogLevel.Error);
         }
 
         private static void LogToFile(string log, LogLevel level) {

@@ -1,239 +1,296 @@
-﻿using ColossalFramework;
-using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using TrafficManager.Geometry;
-using TrafficManager.Geometry.Impl;
-using TrafficManager.State;
-using TrafficManager.Traffic.Data;
-using TrafficManager.Util;
+﻿namespace TrafficManager.Manager.Impl {
+    using System;
+    using System.Collections.Generic;
+    using System.Threading;
+    using API.Manager;
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using State.ConfigData;
+    using Geometry;
+    using Traffic.Data;
+    using Util;
 
-namespace TrafficManager.Manager.Impl {
-	using State.ConfigData;
+    public class GeometryManager
+        : AbstractCustomManager,
+          IGeometryManager
+    {
+        public static GeometryManager Instance { get; } = new GeometryManager();
 
-	public class GeometryManager : AbstractCustomManager, IGeometryManager {
-		public static GeometryManager Instance { get; private set; } = new GeometryManager();
+        private class GeometryUpdateObservable : GenericObservable<GeometryUpdate> {
+        }
 
-		public class GeometryUpdateObservable : GenericObservable<GeometryUpdate> {
+        private bool stateUpdated;
+        private readonly ulong[] updatedSegmentBuckets;
+        private readonly ulong[] updatedNodeBuckets;
+        private readonly object updateLock;
+        private readonly Queue<SegmentEndReplacement> segmentReplacements;
+        private readonly GeometryUpdateObservable geometryUpdateObservable;
 
-		}
+        private GeometryManager() {
+            stateUpdated = false;
+            updatedSegmentBuckets = new ulong[576];
+            updatedNodeBuckets = new ulong[512];
+            updateLock = new object();
+            segmentReplacements = new Queue<SegmentEndReplacement>();
+            geometryUpdateObservable = new GeometryUpdateObservable();
+        }
 
-		private bool stateUpdated;
-		private ulong[] updatedSegmentBuckets;
-		private ulong[] updatedNodeBuckets;
-		private object updateLock;
-		private Queue<SegmentEndReplacement> segmentReplacements;
-		private GeometryUpdateObservable geometryUpdateObservable;
+        public override void OnBeforeLoadData() {
+            base.OnBeforeLoadData();
+            segmentReplacements.Clear();
+            SimulationStep();
+        }
 
-		private GeometryManager() {
-			stateUpdated = false;
-			updatedSegmentBuckets = new ulong[576];
-			updatedNodeBuckets = new ulong[512];
-			updateLock = new object();
-			segmentReplacements = new Queue<SegmentEndReplacement>();
-			geometryUpdateObservable = new GeometryUpdateObservable();
-		}
+        public void OnUpdateSegment(ref ExtSegment seg) {
+            MarkAsUpdated(ref seg);
+        }
 
-		public override void OnBeforeLoadData() {
-			base.OnBeforeLoadData();
-			segmentReplacements.Clear();
-			SimulationStep();
-		}
-
-		public void OnUpdateSegment(ref ExtSegment seg) {
-			MarkAsUpdated(ref seg);
-		}
-
-		public void SimulationStep(bool onlyFirstPass=false) {
+        public void SimulationStep(bool onlyFirstPass = false) {
 #if DEBUG
-			bool debug = DebugSwitch.GeometryDebug.Get();
+            bool logGeometry = DebugSwitch.GeometryDebug.Get();
+#else
+            const bool logGeometry = false;
 #endif
-			if (!stateUpdated) {
-				return;
-			}
+            if (!stateUpdated) {
+                return;
+            }
 
-			NetManager netManager = Singleton<NetManager>.instance;
-			if (!onlyFirstPass && (netManager.m_segmentsUpdated || netManager.m_nodesUpdated)) { // TODO maybe refactor NetManager use (however this could influence performance)
+            NetManager netManager = Singleton<NetManager>.instance;
+            if (!onlyFirstPass && (netManager.m_segmentsUpdated || netManager.m_nodesUpdated)) {
+                // TODO maybe refactor NetManager use (however this could influence performance)
+                if (logGeometry) {
+                    Log._Debug(
+                        $"GeometryManager.SimulationStep(): Skipping! stateUpdated={stateUpdated}, " +
+                        $"m_segmentsUpdated={netManager.m_segmentsUpdated}, " +
+                        $"m_nodesUpdated={netManager.m_nodesUpdated}");
+                }
+
+                return;
+            }
+
+            try {
+                Monitor.Enter(updateLock);
+
+                bool updatesMissing = onlyFirstPass;
+
+                for (var pass = 0; pass < (onlyFirstPass ? 1 : 2); ++pass) {
+                    bool firstPass = pass == 0;
+
+                    int len = updatedSegmentBuckets.Length;
+                    for (var i = 0; i < len; i++) {
+                        ulong segMask = updatedSegmentBuckets[i];
+
+                        if (segMask == 0uL) {
+                            continue;
+                        }
+
+                        for (var m = 0; m < 64; m++) {
+                            if ((segMask & 1uL << m) == 0uL) {
+                                continue;
+                            }
+
+                            ushort segmentId = (ushort)(i << 6 | m);
+                            ExtSegment seg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId];
+
+                            if (firstPass ^ !seg.valid) {
+                                if (!firstPass) {
+                                    updatesMissing = true;
+                                    if (logGeometry) {
+                                        Log.Warning(
+                                            "GeometryManager.SimulationStep(): Detected invalid " +
+                                            $"segment {segmentId} in second pass");
+                                    }
+                                }
+
+                                continue;
+                            }
+
+                            if (logGeometry) {
+                                Log._Debug(
+                                    $"GeometryManager.SimulationStep(): Notifying observers about " +
+                                    $"segment {segmentId}. Valid? {seg.valid} First pass? {firstPass}");
+                            }
+
+                            NotifyObservers(new GeometryUpdate(ref seg));
+                            updatedSegmentBuckets[i] &= ~(1uL << m);
+                        }
+                    }
+
+                    len = updatedNodeBuckets.Length;
+
+                    for (var i = 0; i < len; i++) {
+                        ulong nodeMask = updatedNodeBuckets[i];
+
+                        if (nodeMask == 0uL) {
+                            continue;
+                        }
+
+                        for (var m = 0; m < 64; m++) {
+                            if ((nodeMask & 1uL << m) == 0uL) {
+                                continue;
+                            }
+
+                            ushort nodeId = (ushort)(i << 6 | m);
+                            bool valid = Services.NetService.IsNodeValid(nodeId);
+
+                            if (firstPass ^ !valid) {
+                                if (!firstPass) {
+                                    updatesMissing = true;
+
+                                    if (logGeometry) {
+                                        Log.Warning(
+                                            "GeometryManager.SimulationStep(): Detected invalid " +
+                                            $"node {nodeId} in second pass");
+                                    }
+                                }
+
+                                continue;
+                            }
+
+                            if (logGeometry) {
+                                Log._Debug(
+                                    "GeometryManager.SimulationStep(): Notifying observers about " +
+                                    $"node {nodeId}. Valid? {valid} First pass? {firstPass}");
+                            }
+
+                            NotifyObservers(new GeometryUpdate(nodeId));
+                            updatedNodeBuckets[i] &= ~(1uL << m);
+                        }
+                    }
+                }
+
+                if (updatesMissing) {
+                    return;
+                }
+
+                while (segmentReplacements.Count > 0) {
+                    SegmentEndReplacement replacement = segmentReplacements.Dequeue();
+
+                    if (logGeometry) {
+                        Log._Debug(
+                            "GeometryManager.SimulationStep(): Notifying observers about " +
+                            $"segment end replacement {replacement}");
+                    }
+
+                    NotifyObservers(new GeometryUpdate(replacement));
+                }
+
+                stateUpdated = false;
+            } finally {
+                Monitor.Exit(updateLock);
+            }
+        }
+
+        public void MarkAllAsUpdated() {
+            for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+                if (!Services.NetService.IsSegmentValid((ushort)segmentId)) {
+                    continue;
+                }
+
+                MarkAsUpdated(
+                    ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId],
+                    true);
+            }
+        }
+
+        public void MarkAsUpdated(ref ExtSegment seg, bool updateNodes = true) {
 #if DEBUG
-				if (debug)
-					Log._Debug($"GeometryManager.SimulationStep(): Skipping! stateUpdated={stateUpdated}, m_segmentsUpdated={netManager.m_segmentsUpdated}, m_nodesUpdated={netManager.m_nodesUpdated}");
+            if (DebugSwitch.GeometryDebug.Get()) {
+                Log._Debug(
+                    $"GeometryManager.MarkAsUpdated(segment {seg.segmentId}): Marking segment as updated");
+            }
 #endif
-				return;
-			}
+            try {
+                Monitor.Enter(updateLock);
 
-			try {
-				Monitor.Enter(updateLock);
+                updatedSegmentBuckets[seg.segmentId >> 6] |= 1uL << (seg.segmentId & 63);
+                stateUpdated = true;
 
-				bool updatesMissing = onlyFirstPass;
-				for (int pass = 0; pass < (onlyFirstPass ? 1 : 2); ++pass) {
-					bool firstPass = pass == 0;
+                if (updateNodes) {
+                    MarkAsUpdated(
+                        Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, true));
+                    MarkAsUpdated(
+                        Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, false));
+                }
 
-					int len = updatedSegmentBuckets.Length;
-					for (int i = 0; i < len; i++) {
-						ulong segMask = updatedSegmentBuckets[i];
-						if (segMask != 0uL) {
-							for (int m = 0; m < 64; m++) {
-								if ((segMask & 1uL << m) != 0uL) {
-									ushort segmentId = (ushort)(i << 6 | m);
-									ExtSegment seg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId];
-									if (firstPass ^ !seg.valid) {
-										if (! firstPass) {
-											updatesMissing = true;
+                if (!seg.valid) {
+                    SimulationStep(true);
+                }
+            } finally {
+                Monitor.Exit(updateLock);
+            }
+        }
+
+        public void MarkAsUpdated(ushort nodeId, bool updateSegments = false) {
 #if DEBUG
-											if (debug)
-												Log.Warning($"GeometryManager.SimulationStep(): Detected invalid segment {segmentId} in second pass");
+            if (DebugSwitch.GeometryDebug.Get()) {
+                Log._Debug(
+                    $"GeometryManager.MarkAsUpdated(node {nodeId}): Marking node as updated");
+            }
 #endif
-										}
-										continue;
-									}
+            try {
+                Monitor.Enter(updateLock);
+
+                if (nodeId == 0) {
+                    return;
+                }
+
+                updatedNodeBuckets[nodeId >> 6] |= 1uL << (nodeId & 63);
+                stateUpdated = true;
+
+                if (updateSegments) {
+                    Services.NetService.IterateNodeSegments(
+                        nodeId,
+                        (ushort segmentId, ref NetSegment _) => {
+                            MarkAsUpdated(
+                                ref Constants
+                                    .ManagerFactory.ExtSegmentManager
+                                    .ExtSegments[segmentId],
+                                false);
+                            return true;
+                        });
+                }
+
+                if (!Services.NetService.IsNodeValid(nodeId)) {
+                    SimulationStep(true);
+                }
+            }
+            finally {
+                Monitor.Exit(updateLock);
+            }
+        }
+
+        public void OnSegmentEndReplacement(SegmentEndReplacement replacement) {
 #if DEBUG
-									if (debug)
-										Log._Debug($"GeometryManager.SimulationStep(): Notifying observers about segment {segmentId}. Valid? {seg.valid} First pass? {firstPass}");
+            if (DebugSwitch.GeometryDebug.Get()) {
+                Log._Debug(
+                    "GeometryManager.OnSegmentEndReplacement(): Detected segment replacement: " +
+                    $"{replacement.oldSegmentEndId.SegmentId} -> {replacement.newSegmentEndId.SegmentId}");
+            }
 #endif
-									NotifyObservers(new GeometryUpdate(ref seg));
-									updatedSegmentBuckets[i] &= ~(1uL << m);
-								}
-							}
-						}
-					}
+            try {
+                Monitor.Enter(updateLock);
 
-					len = updatedNodeBuckets.Length;
-					for (int i = 0; i < len; i++) {
-						ulong nodeMask = updatedNodeBuckets[i];
-						if (nodeMask != 0uL) {
-							for (int m = 0; m < 64; m++) {
-								if ((nodeMask & 1uL << m) != 0uL) {
-									ushort nodeId = (ushort)(i << 6 | m);
-									bool valid = Services.NetService.IsNodeValid(nodeId);
-									if (firstPass ^ !valid) {
-										if (!firstPass) {
-											updatesMissing = true;
+                segmentReplacements.Enqueue(replacement);
+                stateUpdated = true;
+            }
+            finally {
+                Monitor.Exit(updateLock);
+            }
+        }
+
+        public IDisposable Subscribe(IObserver<GeometryUpdate> observer) {
 #if DEBUG
-											if (debug)
-												Log.Warning($"GeometryManager.SimulationStep(): Detected invalid node {nodeId} in second pass");
+            if (DebugSwitch.GeometryDebug.Get()) {
+                Log._Debug(
+                    $"GeometryManager.Subscribe(): Subscribing observer {observer.GetType().Name}");
+            }
 #endif
-										}
-										continue;
-									}
-#if DEBUG
-									if (debug)
-										Log._Debug($"GeometryManager.SimulationStep(): Notifying observers about node {nodeId}. Valid? {valid} First pass? {firstPass}");
-#endif
-									NotifyObservers(new GeometryUpdate(nodeId));
-									updatedNodeBuckets[i] &= ~(1uL << m);
-								}
-							}
-						}
-					}
-				}
+            return geometryUpdateObservable.Subscribe(observer);
+        }
 
-				if (! updatesMissing) {
-					while (segmentReplacements.Count > 0) {
-						SegmentEndReplacement replacement = segmentReplacements.Dequeue();
-#if DEBUG
-						if (debug)
-							Log._Debug($"GeometryManager.SimulationStep(): Notifying observers about segment end replacement {replacement}");
-#endif
-						NotifyObservers(new GeometryUpdate(replacement));
-					}
-
-					stateUpdated = false;
-				}
-			} finally {
-				Monitor.Exit(updateLock);
-			}
-		}
-
-		public void MarkAllAsUpdated() {
-			for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-				if (!Services.NetService.IsSegmentValid((ushort)segmentId)) {
-					continue;
-				}
-
-				MarkAsUpdated(ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId], true);
-			}
-		}
-
-		public void MarkAsUpdated(ref ExtSegment seg, bool updateNodes = true) {
-#if DEBUG
-			if (DebugSwitch.GeometryDebug.Get())
-				Log._Debug($"GeometryManager.MarkAsUpdated(segment {seg.segmentId}): Marking segment as updated");
-#endif
-			try {
-				Monitor.Enter(updateLock);
-
-				updatedSegmentBuckets[seg.segmentId >> 6] |= 1uL << (int)(seg.segmentId & 63);
-				stateUpdated = true;
-
-				if (updateNodes) {
-					MarkAsUpdated(Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, true));
-					MarkAsUpdated(Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, false));
-				}
-
-				if (! seg.valid) {
-					SimulationStep(true);
-				}
-			} finally {
-				Monitor.Exit(updateLock);
-			}
-		}
-
-		public void MarkAsUpdated(ushort nodeId, bool updateSegments = false) {
-#if DEBUG
-			if (DebugSwitch.GeometryDebug.Get())
-				Log._Debug($"GeometryManager.MarkAsUpdated(node {nodeId}): Marking node as updated");
-#endif
-			try {
-				Monitor.Enter(updateLock);
-
-				if (nodeId != 0) {
-					updatedNodeBuckets[nodeId >> 6] |= 1uL << (int)(nodeId & 63);
-					stateUpdated = true;
-
-					if (updateSegments) {
-						Services.NetService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment _) => {
-							MarkAsUpdated(ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId], false);
-							return true;
-						});
-					}
-
-					if (! Services.NetService.IsNodeValid(nodeId)) {
-						SimulationStep(true);
-					}
-				}
-			} finally {
-				Monitor.Exit(updateLock);
-			}
-		}
-
-		public void OnSegmentEndReplacement(SegmentEndReplacement replacement) {
-#if DEBUG
-			if (DebugSwitch.GeometryDebug.Get())
-				Log._Debug($"GeometryManager.OnSegmentEndReplacement(): Detected segment replacement: {replacement.oldSegmentEndId.SegmentId} -> {replacement.newSegmentEndId.SegmentId}");
-#endif
-			try {
-				Monitor.Enter(updateLock);
-
-				segmentReplacements.Enqueue(replacement);
-				stateUpdated = true;
-			} finally {
-				Monitor.Exit(updateLock);
-			}
-		}
-
-		public IDisposable Subscribe(IObserver<GeometryUpdate> observer) {
-#if DEBUG
-			if (DebugSwitch.GeometryDebug.Get())
-				Log._Debug($"GeometryManager.Subscribe(): Subscribing observer {observer.GetType().Name}");
-#endif
-			return geometryUpdateObservable.Subscribe(observer);
-		}
-
-		protected void NotifyObservers(GeometryUpdate geometryUpdate) {
-			geometryUpdateObservable.NotifyObservers(geometryUpdate);
-		}
-	}
+        private void NotifyObservers(GeometryUpdate geometryUpdate) {
+            geometryUpdateObservable.NotifyObservers(geometryUpdate);
+        }
+    }
 }

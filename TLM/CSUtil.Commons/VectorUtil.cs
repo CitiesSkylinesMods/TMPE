@@ -2,26 +2,15 @@
     using UnityEngine;
 
     public static class VectorUtil {
+        /// <summary>
+        /// Given a rectangle and screen resolution, pushes the rectangle back into screen space
+        /// if it was moved beyond any screen edge.
+        /// </summary>
+        /// <param name="rect">The subject rectangle</param>
+        /// <param name="resolution">The limiting rectangle from (0, 0) to resolution</param>
         public static void ClampRectToScreen(ref Rect rect, Vector2 resolution) {
-            // Log._Debug($"ClampPosToScreen([{rect.x}, {rect.y}, {rect.xMax}, {rect.yMax}], " +
-            //           $"[{resolution.x}, {resolution.y}]) called");
-            if (rect.x < 0) {
-                rect.x = 0;
-            }
-
-            if (rect.y < 0) {
-                rect.y = 0;
-            }
-
-            if (rect.xMax >= resolution.x) {
-                rect.x = resolution.x - rect.width;
-            }
-
-            if (rect.yMax >= resolution.y) {
-                rect.y = resolution.y - rect.height;
-            }
-
-            // Log._Debug($"ClampPosToScreen() -> [{rect.x}, {rect.y}, {rect.xMax}, {rect.yMax}]");
+            rect.x = Mathf.Clamp(rect.x, 0f, resolution.x - rect.width);
+            rect.y = Mathf.Clamp(rect.y, 0f, resolution.y - rect.height);
         }
     }
 }

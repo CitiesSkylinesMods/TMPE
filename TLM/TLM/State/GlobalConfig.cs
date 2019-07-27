@@ -82,6 +82,7 @@
         private static GlobalConfig WriteDefaultConfig(GlobalConfig oldConfig, bool resetAll, out DateTime modifiedTime) {
             Log._Debug($"Writing default config...");
             GlobalConfig conf = new GlobalConfig();
+
             if (!resetAll && oldConfig != null) {
                 conf.Main.MainMenuButtonX = oldConfig.Main.MainMenuButtonX;
                 conf.Main.MainMenuButtonY = oldConfig.Main.MainMenuButtonY;
@@ -194,10 +195,12 @@
                         filename = BACKUP_FILENAME + "." + backupIndex;
                         ++backupIndex;
                     }
+
                     WriteConfig(conf, filename);
                 } catch (Exception e) {
                     Log.Warning($"Error occurred while saving backup config to '{filename}': {e.ToString()}");
                 }
+
                 Reset(conf);
             } else {
                 Instance = conf;
@@ -215,6 +218,7 @@
         private static void ReloadIfNewer() {
             try {
                 DateTime modifiedTime = File.GetLastWriteTime(FILENAME);
+
                 if (modifiedTime > ModifiedTime) {
                     Log.Info($"Detected modification of global config.");
                     Reload(false);

@@ -1,5 +1,6 @@
 namespace TrafficManager.Custom.AI {
     using System.Runtime.CompilerServices;
+    using API.Manager;
     using API.Traffic.Enums;
     using API.TrafficLight;
     using ColossalFramework;
@@ -410,7 +411,7 @@ namespace TrafficManager.Custom.AI {
         [RedirectMethod]
         [UsedImplicitly]
         public bool CustomCheckTrafficLights(ushort nodeId, ushort segmentId) {
-#if DEBUGTTL
+#if DEBUG
             bool logTimedLights = DebugSwitch.TimedTrafficLights.Get()
                                  && DebugSettings.NodeId == nodeId;
 #endif
@@ -445,7 +446,7 @@ namespace TrafficManager.Custom.AI {
 
             if (lights == null) {
                 // NON-STOCK CODE END
-#if DEBUGTTL
+#if DEBUG
                 Log._DebugIf(
                     logTimedLights,
                     () => $"CustomHumanAI.CustomCheckTrafficLights({nodeId}, " +
@@ -485,7 +486,7 @@ namespace TrafficManager.Custom.AI {
                     pedestrianLightState = (RoadBaseAI.TrafficLightState)lights.PedestrianLightState;
                 }
 
-#if DEBUGTTL
+#if DEBUG
                 Log._DebugIf(
                     logTimedLights,
                     () => $"CustomHumanAI.CustomCheckTrafficLights({nodeId}, {segmentId}): " +

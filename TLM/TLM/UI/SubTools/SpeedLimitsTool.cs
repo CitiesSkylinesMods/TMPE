@@ -416,7 +416,7 @@
             var displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
             displayMph = GUILayout.Toggle(displayMph, Translation.GetString("Display_speed_limits_mph"));
             if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != displayMph) {
-                Options.setDisplayInMPH(displayMph);
+                OptionsGeneralTab.SetDisplayInMph(displayMph);
             }
 
             GUILayout.FlexibleSpace();

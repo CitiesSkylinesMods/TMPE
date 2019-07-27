@@ -26,7 +26,8 @@ using TrafficManager.Traffic.Enums;
 /// (having custom traffic lights or priority signs).
 /// </summary>
 namespace TrafficManager.Traffic.Impl {
-	using API.Traffic.Data;
+    using API.Manager;
+    using API.Traffic.Data;
 	using API.Traffic.Enums;
 
 	[Obsolete("should be removed when implementing issue #240")]

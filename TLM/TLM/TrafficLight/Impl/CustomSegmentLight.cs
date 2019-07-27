@@ -1,4 +1,4 @@
-﻿#define DEBUGVISUALSx
+﻿﻿#define DEBUGVISUALSx
 
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,8 @@ using TrafficManager.Manager;
 using TrafficManager.Traffic.Data;
 
 namespace TrafficManager.TrafficLight.Impl {
-	using API.Traffic.Enums;
+    using API.Manager;
+    using API.Traffic.Enums;
 	using State.ConfigData;
 
 	/// <summary>
