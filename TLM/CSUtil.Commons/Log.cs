@@ -81,6 +81,10 @@
             LogToFile(s, LogLevel.Info);
         }
 
+        public static void InfoFormat(string format, params object[] args) {
+            LogToFile(string.Format(format, args), LogLevel.Info);
+        }
+
         /// <summary>
         /// Will log a warning only if debug mode
         /// </summary>

@@ -5,7 +5,7 @@
     public class DespawnButton : MenuButton {
         public override bool Active => false;
 
-        public override ButtonFunction Function => Options.disableDespawning
+        protected override ButtonFunction Function => Options.disableDespawning
                                                        ? ButtonFunction.DespawnDisabled
                                                        : ButtonFunction.DespawnEnabled;
 
