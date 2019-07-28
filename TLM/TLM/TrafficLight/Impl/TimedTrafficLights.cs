@@ -576,6 +576,8 @@ namespace TrafficManager.TrafficLight.Impl {
 #if DEBUG
             bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
                                     && DebugSettings.NodeId == NodeId;
+#else
+            const bool logTrafficLights = false;
 #endif
 
             if (!IsMasterNode() || !IsStarted()) {
