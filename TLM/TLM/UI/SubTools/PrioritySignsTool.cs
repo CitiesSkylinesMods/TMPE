@@ -7,6 +7,7 @@
     using CSUtil.Commons;
     using Manager.Impl;
     using State;
+    using Textures;
     using Traffic.Data;
     using UnityEngine;
     using Util;
@@ -315,7 +316,7 @@
                         }
 
                         if (MainTool.DrawGenericSquareOverlayTexture(
-                                TextureResources.PrioritySignTextures[sign],
+                                RoadUITextures.PrioritySignTextures[sign],
                                 camPos,
                                 signPos,
                                 90f,
@@ -361,7 +362,7 @@
                     // draw remove button and handle click
                     if (showRemoveButton
                         && MainTool.DrawHoverableSquareOverlayTexture(
-                            TextureResources.SignRemoveTexture2D,
+                            RoadUITextures.SignRemove,
                             camPos,
                             nodePos,
                             90f)

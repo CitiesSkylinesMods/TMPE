@@ -7,6 +7,8 @@ using TrafficManager.Util;
 using UnityEngine;
 
 namespace TrafficManager.UI {
+    using Textures;
+
     public class UIMainMenuButton : UIButton, IObserver<GlobalConfig> {
         private const string MAIN_MENU_BUTTON_BG_BASE = "TMPE_MainMenuButtonBgBase";
         private const string MAIN_MENU_BUTTON_BG_HOVERED = "TMPE_MainMenuButtonBgHovered";

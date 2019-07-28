@@ -3,6 +3,7 @@
     using ColossalFramework;
     using Manager.Impl;
     using State;
+    using Textures;
     using UnityEngine;
     using Util;
     using static Util.SegmentLaneTraverser;
@@ -176,7 +177,7 @@
                 }
 
                 GUI.color = guiColor;
-                GUI.DrawTexture(boundingBox, TextureResources.ParkingRestrictionTextures[allowed]);
+                GUI.DrawTexture(boundingBox, RoadUITextures.ParkingRestrictionTextures[allowed]);
 
                 if (hoveredHandle && clicked && !IsCursorInPanel() &&
                     parkingManager.ToggleParkingAllowed(segmentId, e.Key)) {

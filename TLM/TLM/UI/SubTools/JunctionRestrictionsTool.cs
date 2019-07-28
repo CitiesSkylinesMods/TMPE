@@ -1,4 +1,4 @@
-﻿#define DEBUGCONN_off
+﻿// #define DEBUGCONN_off
 
 namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
@@ -8,6 +8,7 @@ namespace TrafficManager.UI.SubTools {
     using Manager.Impl;
     using State;
     using State.ConfigData;
+    using Textures;
     using UnityEngine;
 
     public class JunctionRestrictionsTool : SubTool {
@@ -289,8 +290,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? TextureResources.LaneChangeAllowedTexture2D
-                            : TextureResources.LaneChangeForbiddenTexture2D,
+                            ? JunctionUITextures.LaneChangeAllowedTexture2D
+                            : JunctionUITextures.LaneChangeForbiddenTexture2D,
                         out signHovered);
 
                     if (signHovered && handleClick) {
@@ -336,8 +337,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? TextureResources.UturnAllowedTexture2D
-                            : TextureResources.UturnForbiddenTexture2D,
+                            ? JunctionUITextures.UturnAllowedTexture2D
+                            : JunctionUITextures.UturnForbiddenTexture2D,
                         out signHovered);
 
                     if (signHovered && handleClick) {
@@ -397,8 +398,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? TextureResources.EnterBlockedJunctionAllowedTexture2D
-                            : TextureResources.EnterBlockedJunctionForbiddenTexture2D,
+                            ? JunctionUITextures.EnterBlockedJunctionAllowedTexture2D
+                            : JunctionUITextures.EnterBlockedJunctionForbiddenTexture2D,
                         out signHovered);
 
                     if (signHovered && handleClick) {
@@ -443,8 +444,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? TextureResources.PedestrianCrossingAllowedTexture2D
-                            : TextureResources.PedestrianCrossingForbiddenTexture2D,
+                            ? JunctionUITextures.PedestrianCrossingAllowedTexture2D
+                            : JunctionUITextures.PedestrianCrossingForbiddenTexture2D,
                         out signHovered);
 
                     if (signHovered && handleClick) {
@@ -508,8 +509,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? TextureResources.LeftOnRedAllowedTexture2D
-                            : TextureResources.LeftOnRedForbiddenTexture2D,
+                            ? JunctionUITextures.LeftOnRedAllowedTexture2D
+                            : JunctionUITextures.LeftOnRedForbiddenTexture2D,
                         out signHovered);
 
                     if (signHovered && handleClick) {
@@ -562,8 +563,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? TextureResources.RightOnRedAllowedTexture2D
-                            : TextureResources.RightOnRedForbiddenTexture2D,
+                            ? JunctionUITextures.RightOnRedAllowedTexture2D
+                            : JunctionUITextures.RightOnRedForbiddenTexture2D,
                         out signHovered);
 
                     if (signHovered && handleClick) {

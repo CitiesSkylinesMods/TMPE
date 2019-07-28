@@ -6,6 +6,7 @@
     using GenericGameBridge.Service;
     using Manager.Impl;
     using State;
+    using Textures;
     using Traffic;
     using Traffic.Data;
     using UnityEngine;
@@ -310,7 +311,7 @@
             GUILayout.FlexibleSpace();
 
             // speed limit sign
-            GUILayout.Box(TextureResources.GetSpeedLimitTexture(currentSpeedLimit),
+            GUILayout.Box(SpeedLimitTextures.GetSpeedLimitTexture(currentSpeedLimit),
                           GUILayout.Width(GUI_SPEED_SIGN_SIZE),
                           GUILayout.Height(GUI_SPEED_SIGN_SIZE));
             GUILayout.Label(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
@@ -506,7 +507,7 @@
             GUILayout.FlexibleSpace();
             float signSize = TrafficManagerTool.AdaptWidth(GUI_SPEED_SIGN_SIZE);
             if (GUILayout.Button(
-                TextureResources.GetSpeedLimitTexture(speedLimit),
+                SpeedLimitTextures.GetSpeedLimitTexture(speedLimit),
                 GUILayout.Width(signSize),
                 GUILayout.Height(signSize * SpeedLimit.GetVerticalTextureScale()))) {
                 currentPaletteSpeedLimit = speedLimit;
@@ -610,7 +611,7 @@
 
                     float laneSpeedLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId);
                     bool hoveredHandle = MainTool.DrawGenericOverlayGridTexture(
-                        TextureResources.GetSpeedLimitTexture(laneSpeedLimit),
+                        SpeedLimitTextures.GetSpeedLimitTexture(laneSpeedLimit),
                         camPos,
                         zero,
                         f,
@@ -628,7 +629,7 @@
                         && (laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) !=
                         VehicleInfo.VehicleType.None)
                     {
-                        Texture2D tex1 = TextureResources.VehicleInfoSignTextures[
+                        Texture2D tex1 = RoadUITextures.VehicleInfoSignTextures[
                             LegacyExtVehicleType.ToNew(ExtVehicleType.PassengerTrain)];
                         MainTool.DrawStaticSquareOverlayGridTexture(
                             tex1,
@@ -732,7 +733,7 @@
                     // Draw something right here, the road sign texture
                     GUI.color = guiColor;
                     float displayLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key);
-                    Texture2D tex = TextureResources.GetSpeedLimitTexture(displayLimit);
+                    Texture2D tex = SpeedLimitTextures.GetSpeedLimitTexture(displayLimit);
                     GUI.DrawTexture(boundingBox, tex);
 
                     if (hoveredHandle && Input.GetMouseButton(0) && !IsCursorInPanel()) {

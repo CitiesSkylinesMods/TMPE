@@ -243,6 +243,11 @@
     <Compile Include="UI\MainMenu\MenuButton.cs" />
     <Compile Include="UI\LinearSpriteButton.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
+    <Compile Include="UI\Textures\JunctionUITextures.cs" />
+    <Compile Include="UI\Textures\RoadUITextures.cs" />
+    <Compile Include="UI\Textures\SpeedLimitTextures.cs" />
+    <Compile Include="UI\Textures\TextureResources.cs" />
+    <Compile Include="UI\Textures\TrafficLightTextures.cs" />
     <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
@@ -278,7 +283,6 @@
     <Compile Include="TrafficLight\Impl\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\TextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficManagerMode.cs" />
     <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />

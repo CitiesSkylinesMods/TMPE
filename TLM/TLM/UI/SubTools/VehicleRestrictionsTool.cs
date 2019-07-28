@@ -5,6 +5,7 @@
     using GenericGameBridge.Service;
     using Manager.Impl;
     using State;
+    using Textures;
     using Util;
     using UnityEngine;
     using static Util.SegmentLaneTraverser;
@@ -535,7 +536,7 @@
                     }
 
                     bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(
-                        TextureResources.VehicleRestrictionTextures[vehicleType][allowed],
+                        RoadUITextures.VehicleRestrictionTextures[vehicleType][allowed],
                         camPos,
                         zero,
                         f,

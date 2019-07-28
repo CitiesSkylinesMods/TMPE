@@ -1,7 +1,7 @@
-#define DEBUGFRONTVEH_off
-#define DEBUGREG_off
+// #define DEBUGFRONTVEH_off
+// #define DEBUGREG_off
+// #define DEBUGMETRIC2_off
 #define DEBUGMETRIC
-#define DEBUGMETRIC2_off
 
 namespace TrafficManager.Traffic.Impl {
     using System;
