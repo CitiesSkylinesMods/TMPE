@@ -81,7 +81,7 @@ namespace TrafficManager.UI.SubTools {
                 Vector3 nodePos = netManager.m_nodes.m_buffer[nodeId].m_position;
                 Vector3 diff = nodePos - camPos;
 
-                if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance) {
+                if (diff.magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
                     continue; // do not draw if too distant
                 }
 
@@ -623,7 +623,7 @@ namespace TrafficManager.UI.SubTools {
                 size,
                 size);
             hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
-            guiColor.a = MainTool.GetHandleAlpha(hoveredHandle);
+            guiColor.a = TrafficManagerTool.GetHandleAlpha(hoveredHandle);
 
             GUI.color = guiColor;
             GUI.DrawTexture(boundingBox, signTexture);

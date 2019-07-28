@@ -12,7 +12,7 @@
                 if (windowTexture_ == null) {
                     windowTexture_ = TrafficManagerTool.AdjustAlpha(
                         TextureResources.WindowBackgroundTexture2D,
-                        MainTool.GetWindowAlpha());
+                        TrafficManagerTool.GetWindowAlpha());
                 }
 
                 return windowTexture_;
@@ -52,10 +52,10 @@
         private Texture2D BorderlessTexture {
             get {
                 if (borderlessTexture_ == null) {
-                    borderlessTexture_ = TrafficManagerTool.MakeTex(
+                    borderlessTexture_ = TrafficManagerTool.CreateSolidColorTexture(
                         1,
                         1,
-                        new Color(0.5f, 0.5f, 0.5f, MainTool.GetWindowAlpha()));
+                        new Color(0.5f, 0.5f, 0.5f, TrafficManagerTool.GetWindowAlpha()));
                 }
 
                 return borderlessTexture_;

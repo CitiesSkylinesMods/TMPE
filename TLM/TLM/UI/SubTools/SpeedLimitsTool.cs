@@ -146,7 +146,7 @@
                     // if ((netManager.m_segments.m_buffer[segmentId].m_flags &
                     // NetSegment.Flags.Untouchable) != NetSegment.Flags.None) continue;
                     if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos)
-                        .magnitude > TrafficManagerTool.MaxOverlayDistance) {
+                        .magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
                         continue; // do not draw if too distant
                     }
 
@@ -723,7 +723,7 @@
                                                size * speedLimitSignVerticalScale);
                     bool hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
 
-                    guiColor.a = MainTool.GetHandleAlpha(hoveredHandle);
+                    guiColor.a = TrafficManagerTool.GetHandleAlpha(hoveredHandle);
 
                     if (hoveredHandle) {
                         // mouse hovering over sign

@@ -52,12 +52,12 @@ namespace TrafficManager.UI.MainMenu {
 
             backgroundSprite = "GenericPanel";
             color = new Color32(75, 75, 135, 255);
-            width = Translation.getMenuWidth();
+            width = Translation.GetMenuWidth();
             height = 30;
 
             //height = LoadingExtension.IsPathManagerCompatible ? 430 : 230;
             Vector2 resolution = UIView.GetAView().GetScreenResolution();
-            relativePosition = new Vector3(resolution.x - Translation.getMenuWidth() - 30f, 65f);
+            relativePosition = new Vector3(resolution.x - Translation.GetMenuWidth() - 30f, 65f);
 
             _title = AddUIComponent<UILabel>();
             _title.text = "Version " + TrafficManagerMod.Version;
@@ -139,14 +139,14 @@ namespace TrafficManager.UI.MainMenu {
             textfield.enabled = true;
             textfield.readOnly = false;
             textfield.builtinKeyNavigation = true;
-            textfield.width = Translation.getMenuWidth() - 30;
+            textfield.width = Translation.GetMenuWidth() - 30;
             return textfield;
         }
 
         private UIButton CreateButton(string text, int y, MouseEventHandler eventClick) {
             var button = AddUIComponent<UIButton>();
             button.textScale = 0.8f;
-            button.width = Translation.getMenuWidth() - 30;
+            button.width = Translation.GetMenuWidth() - 30;
             button.height = 30;
             button.normalBgSprite = "ButtonMenu";
             button.disabledBgSprite = "ButtonMenuDisabled";

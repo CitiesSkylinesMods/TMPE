@@ -172,7 +172,7 @@
                 }
 
                 if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).magnitude >
-                    TrafficManagerTool.MaxOverlayDistance) {
+                    TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
                     continue; // do not draw if too distant
                 }
 
@@ -428,7 +428,7 @@
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
             Vector3 diff = center - camPos;
 
-            if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance) {
+            if (diff.magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
                 return false; // do not draw if too distant
             }
 

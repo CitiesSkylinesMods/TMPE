@@ -150,7 +150,7 @@
                             hoveredSegment);
 
                         // SWITCH PEDESTRIAN LIGHT
-                        guiColor.a = MainTool.GetHandleAlpha(
+                        guiColor.a = TrafficManagerTool.GetHandleAlpha(
                             hoveredButton[0] == segmentId && hoveredButton[1] == 2 &&
                             segmentLights.ManualPedestrianMode);
                         GUI.color = guiColor;
@@ -239,7 +239,7 @@
                                     offsetScreenPos.y - (infoHeight / 2f),
                                     infoWidth,
                                     infoHeight);
-                                guiColor.a = MainTool.GetHandleAlpha(false);
+                                guiColor.a = TrafficManagerTool.GetHandleAlpha(false);
 
                                 GUI.DrawTexture(
                                     infoRect,
@@ -390,7 +390,7 @@
             float manualPedestrianWidth = 36f * zoom;
             float manualPedestrianHeight = 35f * zoom;
 
-            guiColor.a = MainTool.GetHandleAlpha(
+            guiColor.a = TrafficManagerTool.GetHandleAlpha(
                 hoveredButton[0] == segmentId
                 && (hoveredButton[1] == 1
                     || hoveredButton[1] == 2));
@@ -758,7 +758,7 @@
 
             // right arrow light
             if (hasRightSegment) {
-                guiColor.a = MainTool.GetHandleAlpha(
+                guiColor.a = TrafficManagerTool.GetHandleAlpha(
                     hoveredButton[0] == segmentId && hoveredButton[1] == 4);
             }
 
@@ -994,7 +994,7 @@
         private void SetAlpha(int segmentId, int buttonId) {
             Color guiColor = GUI.color;
 
-            guiColor.a = MainTool.GetHandleAlpha(
+            guiColor.a = TrafficManagerTool.GetHandleAlpha(
                 hoveredButton[0] == segmentId
                 && hoveredButton[1] == buttonId);
 

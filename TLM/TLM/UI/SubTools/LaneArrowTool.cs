@@ -75,7 +75,7 @@
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
             Vector3 diff = nodePos - camPos;
 
-            if (diff.magnitude > TrafficManagerTool.MaxOverlayDistance) {
+            if (diff.magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
                 return; // do not draw if too distant
             }
 

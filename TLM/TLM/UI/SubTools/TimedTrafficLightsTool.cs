@@ -1425,7 +1425,7 @@
 
                         // SWITCH MANUAL PEDESTRIAN LIGHT BUTTON
                         if (!timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-                            guiColor.a = MainTool.GetHandleAlpha(
+                            guiColor.a = TrafficManagerTool.GetHandleAlpha(
                                 _hoveredButton[0] == srcSegmentId &&
                                 (_hoveredButton[1] == 1 || _hoveredButton[1] == 2) &&
                                 _hoveredNode == nodeId);
@@ -1460,7 +1460,7 @@
                         }
 
                         // SWITCH PEDESTRIAN LIGHT
-                        guiColor.a = MainTool.GetHandleAlpha(
+                        guiColor.a = TrafficManagerTool.GetHandleAlpha(
                             _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 2 &&
                             _hoveredNode == nodeId);
 
@@ -1525,7 +1525,7 @@
                         offsetScreenPos.y -= (lightHeight + 10f * zoom) * lightOffset;
 
                         if (!timedActive && (_timedPanelAdd || _timedEditStep >= 0)) {
-                            guiColor.a = MainTool.GetHandleAlpha(
+                            guiColor.a = TrafficManagerTool.GetHandleAlpha(
                                 _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == -1 &&
                                 _hoveredNode == nodeId);
                             GUI.color = guiColor;
@@ -1574,7 +1574,7 @@
                                     offsetScreenPos.y - (infoHeight / 2f),
                                     infoWidth,
                                     infoHeight);
-                                guiColor.a = MainTool.GetHandleAlpha(false);
+                                guiColor.a = TrafficManagerTool.GetHandleAlpha(false);
                                 GUI.DrawTexture(
                                     infoRect,
                                     RoadUITextures.VehicleInfoSignTextures[
@@ -1683,7 +1683,7 @@
                         switch (liveSegmentLight.CurrentMode) {
                             case LightMode.Simple: {
                                 // no arrow light
-                                guiColor.a = MainTool.GetHandleAlpha(
+                                guiColor.a = TrafficManagerTool.GetHandleAlpha(
                                     _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 &&
                                     _hoveredNode == nodeId);
 
@@ -1763,7 +1763,7 @@
                             case LightMode.SingleLeft: {
                                 if (hasOutgoingLeftSegment) {
                                     // left arrow light
-                                    guiColor.a = MainTool.GetHandleAlpha(
+                                    guiColor.a = TrafficManagerTool.GetHandleAlpha(
                                         _hoveredButton[0] == srcSegmentId &&
                                         _hoveredButton[1] == 3 && _hoveredNode == nodeId);
 
@@ -1846,7 +1846,7 @@
                                 }
 
                                 // forward-right arrow light
-                                guiColor.a = MainTool.GetHandleAlpha(
+                                guiColor.a = TrafficManagerTool.GetHandleAlpha(
                                     _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 4 &&
                                     _hoveredNode == nodeId);
 
@@ -1934,7 +1934,7 @@
 
                             case LightMode.SingleRight: {
                                 // forward-left light
-                                guiColor.a = MainTool.GetHandleAlpha(
+                                guiColor.a = TrafficManagerTool.GetHandleAlpha(
                                     _hoveredButton[0] == srcSegmentId && _hoveredButton[1] == 3 &&
                                     _hoveredNode == nodeId);
 
@@ -2053,7 +2053,7 @@
 
                                 // right arrow light
                                 if (hasOutgoingRightSegment) {
-                                    guiColor.a = MainTool.GetHandleAlpha(
+                                    guiColor.a = TrafficManagerTool.GetHandleAlpha(
                                         _hoveredButton[0] == srcSegmentId &&
                                         _hoveredButton[1] == 4 &&
                                         _hoveredNode == nodeId);
@@ -2142,7 +2142,7 @@
                             default: {
                                 // left arrow light
                                 if (hasOutgoingLeftSegment) {
-                                    guiColor.a = MainTool.GetHandleAlpha(
+                                    guiColor.a = TrafficManagerTool.GetHandleAlpha(
                                         _hoveredButton[0] == srcSegmentId &&
                                         _hoveredButton[1] == 3 && _hoveredNode == nodeId);
 
@@ -2238,7 +2238,7 @@
 
                                 // forward arrow light
                                 if (hasOutgoingForwardSegment) {
-                                    guiColor.a = MainTool.GetHandleAlpha(
+                                    guiColor.a = TrafficManagerTool.GetHandleAlpha(
                                         _hoveredButton[0] == srcSegmentId &&
                                         _hoveredButton[1] == 4 && _hoveredNode == nodeId);
 
@@ -2330,7 +2330,7 @@
 
                                 // right arrow light
                                 if (hasOutgoingRightSegment) {
-                                    guiColor.a = MainTool.GetHandleAlpha(
+                                    guiColor.a = TrafficManagerTool.GetHandleAlpha(
                                         _hoveredButton[0] == srcSegmentId &&
                                         _hoveredButton[1] == 5 && _hoveredNode == nodeId);
 
