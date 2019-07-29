@@ -5,6 +5,7 @@ namespace TrafficManager.Custom.AI {
     using ColossalFramework.Globalization;
     using ColossalFramework.Math;
     using CSUtil.Commons;
+    using CSUtil.Commons.Benchmark;
     using JetBrains.Annotations;
     using Manager.Impl;
     using RedirectionFramework.Attributes;
@@ -180,26 +181,24 @@ namespace TrafficManager.Custom.AI {
                 }
             }
 
-#if BENCHMARK
-            using (var bm = new Benchmark(null, "ExtParkVehicle")) {
-#endif
-            return Constants.ManagerFactory.VehicleBehaviorManager.ParkPassengerCar(
-                vehicleId,
-                ref vehicleData,
-                vehicleData.Info,
-                driverCitizenId,
-                ref citizenManager.m_citizens.m_buffer[driverCitizenId],
-                driverCitizenInstanceId,
-                ref citizenManager.m_instances.m_buffer[driverCitizenInstanceId],
-                ref ExtCitizenInstanceManager.Instance.ExtInstances[driverCitizenInstanceId],
-                targetBuildingId,
-                pathPos,
-                nextPath,
-                nextPositionIndex,
-                out segmentOffset);
-#if BENCHMARK
+            using (var bm = Benchmark.MaybeCreateBenchmark(null, "ExtParkVehicle")) {
+                return Constants.ManagerFactory.VehicleBehaviorManager.ParkPassengerCar(
+                    vehicleId,
+                    ref vehicleData,
+                    vehicleData.Info,
+                    driverCitizenId,
+                    ref citizenManager.m_citizens.m_buffer[driverCitizenId],
+                    driverCitizenInstanceId,
+                    ref citizenManager.m_instances.m_buffer[
+                        driverCitizenInstanceId],
+                    ref ExtCitizenInstanceManager.Instance.ExtInstances[
+                        driverCitizenInstanceId],
+                    targetBuildingId,
+                    pathPos,
+                    nextPath,
+                    nextPositionIndex,
+                    out segmentOffset);
             }
-#endif
         }
 
         [RedirectReverse]

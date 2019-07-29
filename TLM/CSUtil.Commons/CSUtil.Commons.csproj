@@ -66,6 +66,7 @@
     <Compile Include="ArrowDirection.cs" />
     <Compile Include="ArrowDirectionUtil.cs" />
     <Compile Include="Benchmark\BenchmarkProfileProvider.cs" />
+    <Compile Include="Benchmark\NullBenchmark.cs" />
     <Compile Include="EnumUtil.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="LogicUtil.cs" />

@@ -7,6 +7,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using API.Traffic.Enums;
     using API.TrafficLight;
     using CSUtil.Commons;
+    using CSUtil.Commons.Benchmark;
     using Manager.Impl;
     using State;
     using State.ConfigData;
@@ -642,21 +643,18 @@ namespace TrafficManager.TrafficLight.Impl {
             // Log._Debug($"TTL @ {timedNode.NodeId}: curFrame={curFrame} lastFlowWaitCalc={lastFlowWaitCalc}");
             if (lastFlowWaitCalc < curFrame) {
                 // Log._Debug($"TTL @ {timedNode.NodeId}: lastFlowWaitCalc<curFrame");
-#if BENCHMARK
-                using (var bm = new Benchmark(null, "CalcWaitFlow")) {
-#endif
-                CalcWaitFlow(true, timedNode.CurrentStep, out wait, out flow);
-#if BENCHMARK
+                using (var bm = Benchmark.MaybeCreateBenchmark(null, "CalcWaitFlow")) {
+                    CalcWaitFlow(true, timedNode.CurrentStep, out wait, out flow);
                 }
-#endif
+
                 if (updateValues) {
                     lastFlowWaitCalc = curFrame;
-                    //Log._Debug($"TTL @ {timedNode.NodeId}: updated lastFlowWaitCalc=curFrame={curFrame}");
+                    // Log._Debug($"TTL @ {timedNode.NodeId}: updated lastFlowWaitCalc=curFrame={curFrame}");
                 }
             } else {
                 flow = CurrentFlow;
                 wait = CurrentWait;
-                //Log._Debug($"TTL @ {timedNode.NodeId}: lastFlowWaitCalc>=curFrame wait={maxWait} flow={minFlow}");
+                // Log._Debug($"TTL @ {timedNode.NodeId}: lastFlowWaitCalc>=curFrame wait={maxWait} flow={minFlow}");
             }
 
             float newFlow = CurrentFlow;

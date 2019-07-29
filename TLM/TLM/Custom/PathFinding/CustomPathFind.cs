@@ -542,14 +542,14 @@
                         $"\tm_queueItem={queueItem_}\n" +
                         $"\tm_isHeavyVehicle={isHeavyVehicle_}\n" +
                         $"\tm_failedPathFinds={m_failedPathFinds}\n" +
-                        $"\tm_succeededPathFinds={m_succeededPathFinds}\n" +
+                        $"\tm_succeededPathFinds={m_succeededPathFinds}\n"
 #if PARKINGAI || JUNCTIONRESTRICTIONS
-                        $"\tm_startSegmentA={startSegmentA_}\n" +
-                        $"\tm_startSegmentB={startSegmentB_}\n" +
+                        + $"\tm_startSegmentA={startSegmentA_}\n"
+                        + $"\tm_startSegmentB={startSegmentB_}\n"
 #endif
 #if ROUTING
-                        $"\tm_isRoadVehicle={isRoadVehicle_}\n" +
-                        $"\tm_isLaneArrowObeyingEntity={isLaneArrowObeyingEntity_}"
+                        + $"\tm_isRoadVehicle={isRoadVehicle_}\n"
+                        + $"\tm_isLaneArrowObeyingEntity={isLaneArrowObeyingEntity_}"
 #endif
                     );
             }

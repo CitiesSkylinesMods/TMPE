@@ -602,17 +602,11 @@ namespace TrafficManager.TrafficLight.Impl {
                 logTrafficLights,
                 () => $"TimedTrafficLights.SimulationStep(): TTL SimStep: NodeId={NodeId} Setting lights (1)");
 
-#if BENCHMARK
-            //using (var bm = new Benchmark(null, "SetLights.1")) {
-#endif
+            // using (var bm = Benchmark.MaybeCreateBenchmark(null, "SetLights.1")) {
             SetLights();
-#if BENCHMARK
-            //}
-#endif
+            // }
 
-#if BENCHMARK
-            //using (var bm = new Benchmark(null, "StepDone")) {
-#endif
+            // using (var bm = Benchmark.MaybeCreateBenchmark(null, "StepDone")) {
             if (!Steps[CurrentStep].StepDone(true)) {
                 Log._DebugIf(
                     logTrafficLights,
@@ -621,9 +615,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
                 return;
             }
-#if BENCHMARK
-            //}
-#endif
+            // } // end benchmark
 
             //-------------------
             // step is done
@@ -645,9 +637,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
                 if (Steps[nextStepIndex].MinTime == 0 && Steps[nextStepIndex].ChangeMetric ==
                     Steps[CurrentStep].ChangeMetric) {
-#if BENCHMARK
-                    // using (var bm = new Benchmark(null, "bestNextStepIndex")) {
-#endif
+                    // using (var bm = Benchmark.MaybeCreateBenchmark(null, "bestNextStepIndex")) {
 
                     // next step has minTime=0. calculate flow/wait ratios and compare.
                     int prevStepIndex = CurrentStep;
@@ -751,25 +741,18 @@ namespace TrafficManager.TrafficLight.Impl {
                             tlsMan.TrafficLightSimulations[slaveNodeId].timedLight;
                         slaveTtl2.GetStep(CurrentStep).NextStepRefIndex = bestNextStepIndex;
                     }
-#if BENCHMARK
-                    //}
-#endif
+
+                    // } // end benchmark
                 } else {
                     Steps[CurrentStep].NextStepRefIndex = nextStepIndex;
                 }
             }
 
-#if BENCHMARK
-            //using (var bm = new Benchmark(null, "SetLights.2")) {
-#endif
+            // using (var bm = Benchmark.MaybeCreateBenchmark(null, "SetLights.2")) {
             SetLights(); // check if this is needed
-#if BENCHMARK
-            //}
-#endif
+            // }
 
-#if BENCHMARK
-            //using (var bm = new Benchmark(null, "IsEndTransitionDone")) {
-#endif
+            // using (var bm = Benchmark.MaybeCreateBenchmark(null, "IsEndTransitionDone")) {
             if (!Steps[CurrentStep].IsEndTransitionDone()) {
                 Log._DebugIf(
                     logTrafficLights,
@@ -778,9 +761,9 @@ namespace TrafficManager.TrafficLight.Impl {
 
                 return;
             }
-#if BENCHMARK
-            //}
-#endif
+
+            // } // end benchmark
+
             //-----------------------------------
             // ending transition (yellow) finished
             if (logTrafficLights) {
@@ -792,9 +775,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     NodeId, NumSteps());
             }
 
-#if BENCHMARK
-            // using (var bm = new Benchmark(null, "ChangeStep")) {
-#endif
+            // using (var bm = Benchmark.MaybeCreateBenchmark(null, "ChangeStep")) {
 
             //---------------------------------
             // change step
@@ -819,9 +800,8 @@ namespace TrafficManager.TrafficLight.Impl {
                 slaveTtl3.GetStep(newStepIndex).Start(oldStepIndex);
                 slaveTtl3.GetStep(newStepIndex).UpdateLiveLights();
             }
-#if BENCHMARK
-            //}
-#endif
+
+            // } // end benchmark
         }
 
         public void SetLights(bool noTransition = false) {

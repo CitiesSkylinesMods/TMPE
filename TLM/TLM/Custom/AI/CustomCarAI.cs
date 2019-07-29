@@ -18,10 +18,8 @@ namespace TrafficManager.Custom.AI {
     using State.ConfigData;
     using Traffic.Data;
     using UnityEngine;
-#if BENCHMARK
     using System.Diagnostics.CodeAnalysis;
     using CSUtil.Commons.Benchmark;
-#endif
 
     // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
     [TargetType(typeof(CarAI))]
@@ -471,20 +469,18 @@ namespace TrafficManager.Custom.AI {
                 $"undergroundTarget={undergroundTarget}");
 
             ExtVehicleType vehicleType;
-#if BENCHMARK
-            using (var bm = new Benchmark(null, "OnStartPathFind")) {
-#endif
-            vehicleType =
-                ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, null);
-            if (vehicleType == ExtVehicleType.None) {
-                Log._DebugOnlyWarning(
-                    $"CustomCarAI.CustomStartPathFind({vehicleId}): Vehicle {vehicleId} " +
-                    "does not have a valid vehicle type!");
-                vehicleType = ExtVehicleType.RoadVehicle;
+
+            using (var bm = Benchmark.MaybeCreateBenchmark(null, "OnStartPathFind")) {
+                vehicleType =
+                    ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, null);
+                if (vehicleType == ExtVehicleType.None) {
+                    Log._DebugOnlyWarning(
+                        $"CustomCarAI.CustomStartPathFind({vehicleId}): Vehicle {vehicleId} " +
+                        "does not have a valid vehicle type!");
+                    vehicleType = ExtVehicleType.RoadVehicle;
+                }
             }
-#if BENCHMARK
-            }
-#endif
+
             VehicleInfo info = m_info;
             bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground
                                                            | Vehicle.Flags.Transition)) != 0;
