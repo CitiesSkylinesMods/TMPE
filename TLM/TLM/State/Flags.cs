@@ -10,7 +10,6 @@ namespace TrafficManager.State {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using Manager.Impl;
-    using Traffic.Enums;
 
     [Obsolete]
     public class Flags {

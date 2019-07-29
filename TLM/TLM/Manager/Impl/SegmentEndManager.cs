@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager.Manager.Impl {
     using System;
     using API.Manager;
+    using API.Traffic;
     using CSUtil.Commons;
     using State.ConfigData;
     using Traffic;

@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.API.Manager {
     using System;
-    using TrafficManager.Traffic;
+    using Traffic;
 
     [Obsolete("should be removed when implementing issue #240")]
     public interface ISegmentEndManager {

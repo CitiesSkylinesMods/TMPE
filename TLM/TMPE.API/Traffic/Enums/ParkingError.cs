@@ -7,10 +7,12 @@
         /// Parked car could be spawned
         /// </summary>
         None,
+
         /// <summary>
         /// No free parking space was found
         /// </summary>
         NoSpaceFound,
+
         /// <summary>
         /// The maximum allowed number of parked vehicles has been reached
         /// </summary>

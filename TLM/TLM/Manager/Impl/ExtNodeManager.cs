@@ -1,5 +1,7 @@
 ﻿namespace TrafficManager.Manager.Impl {
+    using API.Geometry;
     using API.Manager;
+    using API.Traffic.Data;
     using CSUtil.Commons;
     using Geometry;
     using Geometry.Impl;

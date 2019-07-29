@@ -1,4 +1,4 @@
-namespace TrafficManager.Util {
+namespace TrafficManager.API.Util {
     using JetBrains.Annotations;
 
     /// <summary>

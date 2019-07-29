@@ -5,12 +5,12 @@ namespace TrafficManager.Manager.Impl {
     using API.Manager;
     using API.Traffic.Enums;
     using API.TrafficLight;
+    using API.TrafficLight.Data;
     using CSUtil.Commons;
     using State;
     using State.ConfigData;
     using Traffic;
     using TrafficLight;
-    using TrafficLight.Data;
     using TrafficLight.Impl;
     using static RoadBaseAI;
     using ExtVehicleType = global::TrafficManager.Traffic.ExtVehicleType;

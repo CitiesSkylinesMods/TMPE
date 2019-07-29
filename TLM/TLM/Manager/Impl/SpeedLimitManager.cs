@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using API.Manager;
+    using API.Traffic.Data;
     using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;

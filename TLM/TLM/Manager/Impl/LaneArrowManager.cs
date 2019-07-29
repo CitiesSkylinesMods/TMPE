@@ -3,12 +3,12 @@
     using System.Collections.Generic;
     using System.Linq;
     using API.Manager;
+    using API.Traffic.Data;
     using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
     using State;
     using Traffic.Data;
-    using Traffic.Enums;
 
     public class LaneArrowManager
         : AbstractGeometryObservingManager,

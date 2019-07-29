@@ -4,6 +4,7 @@
     using System.Reflection;
     using System.Threading;
     using API.Manager;
+    using API.Traffic.Data;
     using API.Traffic.Enums;
     using API.TrafficLight;
     using ColossalFramework;
@@ -15,7 +16,6 @@
     using RedirectionFramework.Attributes;
     using State;
     using Traffic.Data;
-    using Traffic.Enums;
     using UnityEngine;
 
 #if DEBUG

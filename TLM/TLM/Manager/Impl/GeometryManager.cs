@@ -2,7 +2,10 @@
     using System;
     using System.Collections.Generic;
     using System.Threading;
+    using API.Geometry;
     using API.Manager;
+    using API.Traffic.Data;
+    using API.Util;
     using ColossalFramework;
     using CSUtil.Commons;
     using State.ConfigData;

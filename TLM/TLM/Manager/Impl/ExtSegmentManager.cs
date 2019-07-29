@@ -1,5 +1,6 @@
 ﻿namespace TrafficManager.Manager.Impl {
     using API.Manager;
+    using API.Traffic.Data;
     using ColossalFramework;
     using CSUtil.Commons;
     using State.ConfigData;

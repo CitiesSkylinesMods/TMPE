@@ -2,7 +2,6 @@
     using System.Collections.Generic;
     using Manager;
     using Traffic.Enums;
-    using TrafficManager.Traffic.Enums;
 
     public interface ITimedTrafficLightsStep : ICustomSegmentLightsManager {
         // TODO documentation
@@ -17,8 +16,15 @@
         float CurrentWait { get; }
         float CurrentFlow { get; }
 
-        void CalcWaitFlow(bool countOnlyMovingIfGreen, int stepRefIndex, out float wait, out float flow);
-        RoadBaseAI.TrafficLightState GetLightState(ushort segmentId, ExtVehicleType vehicleType, int lightType);
+        void CalcWaitFlow(bool countOnlyMovingIfGreen,
+                          int stepRefIndex,
+                          out float wait,
+                          out float flow);
+
+        RoadBaseAI.TrafficLightState GetLightState(ushort segmentId,
+                                                   ExtVehicleType vehicleType,
+                                                   int lightType);
+
         float GetMetric(float flow, float wait);
         ICustomSegmentLights GetSegmentLights(ushort segmentId);
         long MaxTimeRemaining();

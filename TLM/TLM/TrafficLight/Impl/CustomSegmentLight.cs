@@ -3,7 +3,9 @@
 namespace TrafficManager.TrafficLight.Impl {
     using System;
     using API.Manager;
+    using API.Traffic.Data;
     using API.Traffic.Enums;
+    using API.TrafficLight;
     using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;

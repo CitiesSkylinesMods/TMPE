@@ -7,6 +7,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using System.Collections.Generic;
     using System.Linq;
     using API.Manager;
+    using API.Traffic;
     using API.Traffic.Enums;
     using API.TrafficLight;
     using CSUtil.Commons;

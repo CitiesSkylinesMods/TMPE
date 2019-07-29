@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using API.Manager;
+    using API.Traffic.Data;
     using API.Traffic.Enums;
     using API.TrafficLight;
     using ColossalFramework;

@@ -1,50 +1,47 @@
-using System;
-using TrafficManager.Traffic.Enums;
+namespace TrafficManager.API.Traffic.Data {
+    using Enums;
+    using JetBrains.Annotations;
 
-namespace TrafficManager.Traffic.Data {
-	using API.Traffic.Enums;
+    /// <summary>
+    /// A priority segment specifies the priority signs that are present at each end of a certain segment.
+    /// </summary>
+    public struct PrioritySegment {
+        /// <summary>
+        /// Priority sign at start node (default: None)
+        /// </summary>
+        public PriorityType startType;
 
-	/// <summary>
-	/// A priority segment specifies the priority signs that are present at each end of a certain segment.
-	/// </summary>
-	public struct PrioritySegment {
-		/// <summary>
-		/// Priority sign at start node (default: None)
-		/// </summary>
-		public PriorityType startType;
+        /// <summary>
+        /// Priority sign at end node (default: None)
+        /// </summary>
+        public PriorityType endType;
 
-		/// <summary>
-		/// Priority sign at end node (default: None)
-		/// </summary>
-		public PriorityType endType;
+        public override string ToString() {
+            return string.Format(
+                "[PrioritySegment\n\tstartType = {0}\n\tendType = {1}\nPrioritySegment]",
+                startType,
+                endType);
+        }
 
-		public override string ToString() {
-			return $"[PrioritySegment\n" +
-				"\t" + $"startType = {startType}\n" +
-				"\t" + $"endType = {endType}\n" +
-				"PrioritySegment]";
-		}
+        [UsedImplicitly]
+        public PrioritySegment(PriorityType startType, PriorityType endType) {
+            this.startType = startType;
+            this.endType = endType;
+        }
 
-		public PrioritySegment(PriorityType startType, PriorityType endType) {
-			this.startType = startType;
-			this.endType = endType;
-		}
+        public void Reset() {
+            startType = PriorityType.None;
+            endType = PriorityType.None;
+        }
 
-		public void Reset() {
-			startType = PriorityType.None;
-			endType = PriorityType.None;
-		}
+        public bool IsDefault() {
+            return !HasPrioritySignAtNode(true) && !HasPrioritySignAtNode(false);
+        }
 
-		public bool IsDefault() {
-			return !HasPrioritySignAtNode(true) && !HasPrioritySignAtNode(false);
-		}
-
-		public bool HasPrioritySignAtNode(bool startNode) {
-			if (startNode) {
-				return startType != PriorityType.None;
-			} else {
-				return endType != PriorityType.None;
-			}
-		}
-	}
+        public bool HasPrioritySignAtNode(bool startNode) {
+            return startNode
+                       ? startType != PriorityType.None
+                       : endType != PriorityType.None;
+        }
+    }
 }

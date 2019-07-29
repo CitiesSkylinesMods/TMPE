@@ -1,6 +1,9 @@
 ﻿namespace TrafficManager.Manager {
     using System;
+    using API.Geometry;
     using API.Manager;
+    using API.Traffic.Data;
+    using API.Util;
     using CSUtil.Commons;
     using Geometry;
     using JetBrains.Annotations;

@@ -1,7 +1,10 @@
 namespace TrafficManager.Manager.Impl {
     using System;
     using System.Collections.Generic;
+    using API.Geometry;
     using API.Manager;
+    using API.Traffic;
+    using API.Traffic.Data;
     using ColossalFramework;
     using CSUtil.Commons;
     using Geometry;

@@ -1,6 +1,7 @@
 namespace TrafficManager.Custom.AI {
     using System.Runtime.CompilerServices;
     using API.Manager;
+    using API.Traffic.Data;
     using API.Traffic.Enums;
     using API.TrafficLight;
     using ColossalFramework;
@@ -12,7 +13,6 @@ namespace TrafficManager.Custom.AI {
     using State;
     using State.ConfigData;
     using Traffic.Data;
-    using Traffic.Enums;
     using UnityEngine;
 
     [TargetType(typeof(HumanAI))]

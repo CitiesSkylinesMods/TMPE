@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.API.Manager {
-    using TrafficManager.Traffic.Data;
+    using Traffic.Data;
     using UnityEngine;
 
     public interface IExtBuildingManager {

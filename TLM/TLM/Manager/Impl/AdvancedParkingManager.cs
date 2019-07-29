@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager.Manager.Impl {
     using System;
     using API.Manager;
+    using API.Traffic.Data;
     using API.Traffic.Enums;
     using ColossalFramework;
     using ColossalFramework.Globalization;
@@ -12,7 +13,6 @@
     using State;
     using State.ConfigData;
     using Traffic.Data;
-    using Traffic.Enums;
     using UI;
     using UnityEngine;
     using Util;

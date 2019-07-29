@@ -2,6 +2,7 @@
     using System;
     using System.Collections.Generic;
     using API.Manager;
+    using API.Traffic.Data;
     using CSUtil.Commons;
     using Traffic.Data;
 

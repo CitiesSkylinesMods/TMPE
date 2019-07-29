@@ -1,5 +1,6 @@
 ﻿namespace TrafficManager.Custom.AI {
     using System.Runtime.CompilerServices;
+    using API.Traffic.Enums;
     using ColossalFramework;
     using ColossalFramework.Math;
     using CSUtil.Commons;
@@ -8,7 +9,6 @@
     using RedirectionFramework.Attributes;
     using State;
     using State.ConfigData;
-    using Traffic.Enums;
 
     [TargetType(typeof(ResidentAI))]
     public class CustomResidentAI : ResidentAI {

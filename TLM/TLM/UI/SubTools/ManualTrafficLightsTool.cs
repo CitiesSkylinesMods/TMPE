@@ -1,5 +1,6 @@
 ﻿namespace TrafficManager.UI.SubTools {
     using API.Manager;
+    using API.Traffic.Data;
     using API.Traffic.Enums;
     using API.TrafficLight;
     using ColossalFramework;

@@ -6,6 +6,7 @@
     using API.Manager;
     using API.Traffic.Data;
     using API.Traffic.Enums;
+    using API.Util;
     using ColossalFramework;
     using ColossalFramework.Math;
     using ColossalFramework.UI;
@@ -15,7 +16,6 @@
     using State;
     using State.ConfigData;
     using Traffic.Data;
-    using Traffic.Enums;
     using MainMenu;
     using SubTools;
     using Util;

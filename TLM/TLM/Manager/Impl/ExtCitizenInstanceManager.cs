@@ -11,7 +11,6 @@
     using State;
     using State.ConfigData;
     using Traffic.Data;
-    using Traffic.Enums;
     using UnityEngine;
 
     public class ExtCitizenInstanceManager
