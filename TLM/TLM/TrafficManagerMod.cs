@@ -1,5 +1,6 @@
 namespace TrafficManager
 {
+    using System;
     using System.Reflection;
     using ColossalFramework.UI;
     using CSUtil.Commons;
@@ -53,6 +54,17 @@ namespace TrafficManager
             } else {
                 // or when game first loads if TM:PE was already enabled
                 LoadingManager.instance.m_introLoaded += CheckForIncompatibleMods;
+            }
+
+            // Log Mono version
+            Type monoRt = Type.GetType("Mono.Runtime");
+            if (monoRt != null) {
+                MethodInfo displayName = monoRt.GetMethod(
+                    "GetDisplayName",
+                    BindingFlags.NonPublic | BindingFlags.Static);
+                if (displayName != null) {
+                    Log.InfoFormat("Mono version: {0}", displayName.Invoke(null, null));
+                }
             }
         }
 

@@ -214,9 +214,11 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public bool IsAnyMainGreen() {
             foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                if (e.Value.IsMainGreen())
+                if (e.Value.IsMainGreen()) {
                     return true;
+                }
             }
+
             return false;
         }
 
@@ -333,8 +335,7 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public ICustomSegmentLight GetCustomLight(ExtVehicleType vehicleType) {
-            ICustomSegmentLight ret = null;
-            if (!CustomLights.TryGetValue(vehicleType, out ret)) {
+            if (!CustomLights.TryGetValue(vehicleType, out ICustomSegmentLight ret)) {
                 ret = MainSegmentLight;
             }
 
