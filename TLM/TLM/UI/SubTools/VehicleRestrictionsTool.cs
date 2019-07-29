@@ -344,22 +344,22 @@
             NetInfo selectedSegmentInfo = netManager.m_segments.m_buffer[SelectedSegmentId].Info;
 
             bool LaneVisitorFun(SegmentLaneVisitData data) {
-                if (data.segVisitData.initial) {
+                if (data.SegVisitData.Initial) {
                     return true;
                 }
 
-                if (sortedLaneIndex != null && data.sortedLaneIndex != sortedLaneIndex) {
+                if (sortedLaneIndex != null && data.SortedLaneIndex != sortedLaneIndex) {
                     return true;
                 }
 
-                ushort segmentId = data.segVisitData.curSeg.segmentId;
+                ushort segmentId = data.SegVisitData.CurSeg.segmentId;
                 NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 
-                byte selectedLaneIndex = data.initLanePos.laneIndex;
+                byte selectedLaneIndex = data.InitLanePos.laneIndex;
                 NetInfo.Lane selectedLaneInfo = selectedSegmentInfo.m_lanes[selectedLaneIndex];
 
-                uint laneId = data.curLanePos.laneId;
-                byte laneIndex = data.curLanePos.laneIndex;
+                uint laneId = data.CurLanePos.laneId;
+                byte laneIndex = data.CurLanePos.laneIndex;
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
                 ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(

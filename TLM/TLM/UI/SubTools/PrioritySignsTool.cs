@@ -72,22 +72,21 @@
                 bool VisitorFun(SegmentVisitData data) {
                     foreach (bool startNode in Constants.ALL_BOOL) {
                         TrafficPriorityManager.Instance.SetPrioritySign(
-                            data.curSeg.segmentId,
+                            data.CurSeg.segmentId,
                             startNode,
                             primaryPrioType);
                         ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(
-                            data.curSeg.segmentId,
+                            data.CurSeg.segmentId,
                             startNode);
-                        ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(
-                                                                            data.curSeg.segmentId,
-                                                                            startNode)];
+                        ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[
+                            segEndMan.GetIndex(data.CurSeg.segmentId,startNode)];
 
                         for (int i = 0; i < 8; ++i) {
                             ushort otherSegmentId = Singleton<NetManager>.instance.m_nodes
                                                                          .m_buffer[nodeId]
                                                                          .GetSegment(i);
 
-                            if (otherSegmentId == 0 || otherSegmentId == data.curSeg.segmentId) {
+                            if (otherSegmentId == 0 || otherSegmentId == data.CurSeg.segmentId) {
                                 continue;
                             }
 
@@ -162,7 +161,7 @@
                             NetTool.RenderOverlay(
                                 cameraInfo,
                                 ref Singleton<NetManager>.instance.m_segments.m_buffer[
-                                    data.curSeg.segmentId],
+                                    data.CurSeg.segmentId],
                                 color,
                                 color);
                             return true;

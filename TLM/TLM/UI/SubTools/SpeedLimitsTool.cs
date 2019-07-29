@@ -667,24 +667,26 @@
                                 SpeedLimitManager.LANE_TYPES,
                                 SpeedLimitManager.VEHICLE_TYPES,
                                 data => {
-                                    if (data.segVisitData.initial) {
+                                    if (data.SegVisitData.Initial) {
                                         return true;
                                     }
 
-                                    if (slIndexCopy != data.sortedLaneIndex) {
+                                    if (slIndexCopy != data.SortedLaneIndex) {
                                         return true;
                                     }
 
                                     Constants.ServiceFactory.NetService.ProcessSegment(
-                                        data.segVisitData.curSeg.segmentId,
+                                        data.SegVisitData.CurSeg.segmentId,
                                         (ushort curSegmentId, ref NetSegment curSegment) =>
                                         {
-                                            NetInfo.Lane curLaneInfo = curSegment.Info.m_lanes[data.curLanePos.laneIndex];
+                                            NetInfo.Lane curLaneInfo = curSegment.Info.m_lanes[
+                                                data.CurLanePos.laneIndex];
+
                                             SpeedLimitManager.Instance.SetSpeedLimit(
                                                 curSegmentId,
-                                                data.curLanePos.laneIndex,
+                                                data.CurLanePos.laneIndex,
                                                 curLaneInfo,
-                                                data.curLanePos.laneId,
+                                                data.CurLanePos.laneId,
                                                 speedLimitToSet);
                                             return true;
                                         });
@@ -758,18 +760,18 @@
                                 SpeedLimitManager.VEHICLE_TYPES,
                                 data =>
                                 {
-                                    if (data.segVisitData.initial) {
+                                    if (data.SegVisitData.Initial) {
                                         return true;
                                     }
 
                                     bool reverse =
-                                        data.segVisitData.viaStartNode ==
-                                        data.segVisitData.viaInitialStartNode;
+                                        data.SegVisitData.ViaStartNode
+                                        == data.SegVisitData.ViaInitialStartNode;
 
-                                    ushort otherSegmentId = data.segVisitData.curSeg.segmentId;
+                                    ushort otherSegmentId = data.SegVisitData.CurSeg.segmentId;
                                     NetInfo otherSegmentInfo =
                                         netManager.m_segments.m_buffer[otherSegmentId].Info;
-                                    byte laneIndex = data.curLanePos.laneIndex;
+                                    byte laneIndex = data.CurLanePos.laneIndex;
                                     NetInfo.Lane laneInfo = otherSegmentInfo.m_lanes[laneIndex];
 
                                     NetInfo.Direction otherNormDir = laneInfo.m_finalDirection;

@@ -193,17 +193,17 @@
                         }
 
                         bool LaneVisitor(SegmentLaneVisitData data) {
-                            if (data.segVisitData.initial) {
+                            if (data.SegVisitData.Initial) {
                                 return true;
                             }
 
-                            bool reverse = data.segVisitData.viaStartNode ==
-                                           data.segVisitData.viaInitialStartNode;
+                            bool reverse = data.SegVisitData.ViaStartNode ==
+                                           data.SegVisitData.ViaInitialStartNode;
 
-                            ushort otherSegmentId = data.segVisitData.curSeg.segmentId;
+                            ushort otherSegmentId = data.SegVisitData.CurSeg.segmentId;
                             NetInfo otherSegmentInfo =
                                 netManager.m_segments.m_buffer[otherSegmentId].Info;
-                            byte laneIndex = data.curLanePos.laneIndex;
+                            byte laneIndex = data.CurLanePos.laneIndex;
                             NetInfo.Lane laneInfo = otherSegmentInfo.m_lanes[laneIndex];
 
                             NetInfo.Direction otherNormDir = laneInfo.m_finalDirection;
