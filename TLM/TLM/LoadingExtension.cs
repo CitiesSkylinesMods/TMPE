@@ -54,9 +54,8 @@ namespace TrafficManager {
         public static HarmonyInstance HarmonyInst { get; private set; }
         // public static TrafficManagerMode ToolMode { get; set; }
         // public static TrafficManagerTool TrafficManagerTool { get; set; }
-#if !TAM
+
         public static UIBase BaseUI { get; private set; }
-#endif
 
         public static UITransportDemand TransportDemandUI { get; private set; }
 
@@ -370,7 +369,7 @@ namespace TrafficManager {
                 case SimulationManager.UpdateMode.NewGameFromScenario:
                 case SimulationManager.UpdateMode.LoadGame: {
                     if (BuildConfig.applicationVersion != BuildConfig.VersionToString(
-                            TrafficManagerMod.GameVersion,
+                            TrafficManagerMod.GAME_VERSION,
                             false))
                     {
                         string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
@@ -381,16 +380,16 @@ namespace TrafficManager {
 
                         Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
 
-                        bool isModTooOld = TrafficManagerMod.GameVersionA < versionA ||
-                                           (TrafficManagerMod.GameVersionA == versionA &&
-                                            TrafficManagerMod.GameVersionB < versionB);
+                        bool isModTooOld = TrafficManagerMod.GAME_VERSION_A < versionA ||
+                                           (TrafficManagerMod.GAME_VERSION_A == versionA &&
+                                            TrafficManagerMod.GAME_VERSION_B < versionB);
                             // || (TrafficManagerMod.GameVersionA == versionA
                             // && TrafficManagerMod.GameVersionB == versionB
                             // && TrafficManagerMod.GameVersionC < versionC);
 
-                        bool isModNewer = TrafficManagerMod.GameVersionA < versionA ||
-                                          (TrafficManagerMod.GameVersionA == versionA &&
-                                           TrafficManagerMod.GameVersionB > versionB);
+                        bool isModNewer = TrafficManagerMod.GAME_VERSION_A < versionA ||
+                                          (TrafficManagerMod.GAME_VERSION_A == versionA &&
+                                           TrafficManagerMod.GAME_VERSION_B > versionB);
                             // || (TrafficManagerMod.GameVersionA == versionA
                             // && TrafficManagerMod.GameVersionB == versionB
                             // && TrafficManagerMod.GameVersionC > versionC);
@@ -402,7 +401,7 @@ namespace TrafficManager {
                                 "Please be aware that TM:PE has not been updated for the newest game " +
                                 "version yet and thus it is very likely it will not work as expected.",
                                 BuildConfig.applicationVersion,
-                                BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false));
+                                BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false));
 
                             Log.Error(msg);
                             Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
@@ -419,7 +418,7 @@ namespace TrafficManager {
                                 "Traffic Manager: President Edition has been built for game version {0}. " +
                                 "You are running game version {1}. Some features of TM:PE will not " +
                                 "work with older game versions. Please let Steam update your game.",
-                                BuildConfig.VersionToString(TrafficManagerMod.GameVersion, false),
+                                BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false),
                                 BuildConfig.applicationVersion);
 
                             Log.Error(msg);

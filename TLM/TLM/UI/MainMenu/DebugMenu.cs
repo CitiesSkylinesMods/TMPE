@@ -60,7 +60,7 @@ namespace TrafficManager.UI.MainMenu {
             relativePosition = new Vector3(resolution.x - Translation.GetMenuWidth() - 30f, 65f);
 
             _title = AddUIComponent<UILabel>();
-            _title.text = "Version " + TrafficManagerMod.Version;
+            _title.text = "Version " + TrafficManagerMod.VERSION;
             _title.relativePosition = new Vector3(50.0f, 5.0f);
 
             int y = 30;

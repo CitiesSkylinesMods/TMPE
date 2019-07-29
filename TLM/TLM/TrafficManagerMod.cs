@@ -1,65 +1,73 @@
-using CSUtil.Commons;
-using ICities;
-using System.Reflection;
-using ColossalFramework.UI;
-using TrafficManager.State;
-using TrafficManager.Util;
-
 namespace TrafficManager
 {
-    public class TrafficManagerMod : IUserMod
-    {
+    using System.Reflection;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using ICities;
+    using JetBrains.Annotations;
+    using State;
+    using Util;
+
+    public class TrafficManagerMod : IUserMod {
 #if LABS
-        public const string Branch = "LABS";
+        public const string BRANCH = "LABS";
 #elif DEBUG
-        public const string Branch = "DEBUG";
+        public const string BRANCH = "DEBUG";
 #else
-        public const string Branch = "STABLE";
+        public const string BRANCH = "STABLE";
 #endif
 
-        public static readonly uint GameVersion = 184803856u;
-        public static readonly uint GameVersionA = 1u;
-        public static readonly uint GameVersionB = 12u;
-        public static readonly uint GameVersionC = 1u;
-        public static readonly uint GameVersionBuild = 2u;
+        public const uint GAME_VERSION = 184803856u;
+        public const uint GAME_VERSION_A = 1u;
+        public const uint GAME_VERSION_B = 12u;
+        public const uint GAME_VERSION_C = 1u;
+        public const uint GAME_VERSION_BUILD = 2u;
 
-        public static readonly string Version = "11.0-alpha4";
+        public const string VERSION = "11.0-alpha4";
 
-        public static readonly string ModName = "TM:PE " + Branch + " " + Version;
+        public static readonly string ModName = "TM:PE " + BRANCH + " " + VERSION;
 
         public string Name => ModName;
 
         public string Description => "Manage your city's traffic";
 
-        public void OnEnabled()
-        {
-            Log.Info($"TM:PE enabled. Version {Version}, Build {Assembly.GetExecutingAssembly().GetName().Version} {Branch} for game version {GameVersionA}.{GameVersionB}.{GameVersionC}-f{GameVersionBuild}");
-            Log.Info($"Enabled TM:PE has GUID {Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId}");
+        [UsedImplicitly]
+        public void OnEnabled() {
+            Log.InfoFormat(
+                "TM:PE enabled. Version {0}, Build {1} {2} for game version {3}.{4}.{5}-f{6}",
+                VERSION,
+                Assembly.GetExecutingAssembly().GetName().Version,
+                BRANCH,
+                GAME_VERSION_A,
+                GAME_VERSION_B,
+                GAME_VERSION_C,
+                GAME_VERSION_BUILD);
+            Log.InfoFormat(
+                "Enabled TM:PE has GUID {0}",
+                Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId);
 
             // check for incompatible mods
-            if (UIView.GetAView() != null)
-            { // when TM:PE is enabled in content manager
+            if (UIView.GetAView() != null) {
+                // when TM:PE is enabled in content manager
                 CheckForIncompatibleMods();
-            }
-            else
-            { // or when game first loads if TM:PE was already enabled
+            } else {
+                // or when game first loads if TM:PE was already enabled
                 LoadingManager.instance.m_introLoaded += CheckForIncompatibleMods;
             }
         }
 
-        public void OnDisabled()
-        {
+        [UsedImplicitly]
+        public void OnDisabled() {
             Log.Info("TM:PE disabled.");
             LoadingManager.instance.m_introLoaded -= CheckForIncompatibleMods;
         }
 
-        public void OnSettingsUI(UIHelperBase helper)
-        {
+        [UsedImplicitly]
+        public void OnSettingsUI(UIHelperBase helper) {
             Options.MakeSettings(helper);
         }
 
-        private static void CheckForIncompatibleMods()
-        {   
+        private static void CheckForIncompatibleMods() {
             ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
             mcc.PerformModCheck();
         }
