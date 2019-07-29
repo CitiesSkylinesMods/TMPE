@@ -1,6 +1,4 @@
-﻿// #define DEBUGCONN_off
-
-namespace TrafficManager.UI.SubTools {
+﻿namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
     using API.Manager;
     using ColossalFramework;

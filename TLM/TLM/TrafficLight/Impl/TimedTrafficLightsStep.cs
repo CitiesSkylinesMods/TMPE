@@ -1,7 +1,3 @@
-#define DEBUGSTEPx
-#define DEBUGTTLx
-#define DEBUGMETRICx
-
 namespace TrafficManager.TrafficLight.Impl {
     using System;
     using System.Collections.Generic;

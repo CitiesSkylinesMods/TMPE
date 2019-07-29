@@ -1,5 +1,3 @@
-#define DEBUGTTLx
-
 namespace TrafficManager.TrafficLight.Impl {
     using System;
     using System.Collections.Generic;

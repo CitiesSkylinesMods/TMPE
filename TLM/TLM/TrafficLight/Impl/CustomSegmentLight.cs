@@ -1,4 +1,4 @@
-﻿#define DEBUGVISUALSx
+﻿// #define DEBUGVISUALS
 
 namespace TrafficManager.TrafficLight.Impl {
     using System;

@@ -1,8 +1,3 @@
-// #define DEBUGFRONTVEH_off
-// #define DEBUGREG_off
-// #define DEBUGMETRIC2_off
-#define DEBUGMETRIC
-
 namespace TrafficManager.Traffic.Impl {
     using System;
     using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿#define DEBUGGET_off
+﻿// #define DEBUGGET
 
 namespace TrafficManager.TrafficLight.Impl {
     using System;
