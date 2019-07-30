@@ -1,5 +1,6 @@
 namespace TrafficManager.API.Util {
     using JetBrains.Annotations;
+    using UnityEngine;
 
     /// <summary>
     /// Represents a void return type which may also carry an error.
@@ -38,7 +39,7 @@ namespace TrafficManager.API.Util {
 
         private TValue value_ { get; }
 
-        public TError Error { get; }
+        private TError error_ { get; }
 
         public Result(TValue value) {
             isOk_ = true;
@@ -47,11 +48,31 @@ namespace TrafficManager.API.Util {
 
         public Result(TError error) {
             isOk_ = false;
-            Error = error;
+            error_ = error;
         }
 
         public bool IsOk => isOk_;
 
         public bool IsError => !isOk_;
-   }
+
+        /// <summary>
+        /// On success, retrieve the value
+        /// </summary>
+        public TValue Value {
+            get {
+                Debug.Assert(IsOk);
+                return value_;
+            }
+        }
+
+        /// <summary>
+        /// On error retrieve the error
+        /// </summary>
+        public TError Error {
+            get {
+                Debug.Assert(IsError);
+                return error_;
+            }
+        }
+    }
 }
