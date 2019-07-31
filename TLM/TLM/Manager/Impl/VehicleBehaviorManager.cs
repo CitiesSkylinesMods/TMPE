@@ -1492,7 +1492,7 @@
 
                     var sign = prioMan.GetPrioritySign(prevPos.m_segment, isTargetStartNode);
 
-                    if (sign != PriorityType.None) {
+                    if (sign != PriorityType.None && sign != PriorityType.Main) {
                         if (logPriority) {
                             Log._DebugFormat(
                                 "VehicleBehaviorManager.MayChangeSegment({0}): Vehicle is arriving " +
