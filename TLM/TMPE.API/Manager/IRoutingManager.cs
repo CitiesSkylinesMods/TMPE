@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.API.Manager {
     using System;
     using CSUtil.Commons;
-    using TrafficManager.Traffic.Enums;
+    using Traffic.Enums;
 
     public struct SegmentRoutingData {
         public bool startNodeOutgoingOneWay;
@@ -109,10 +109,15 @@
         public bool startNode;
 
         public override string ToString() {
-            return
-                $"[LaneTransitionData\n\tlaneId = {laneId}\n\tlaneIndex = {laneIndex}\n" +
-                $"\tsegmentId = {segmentId}\n\tstartNode = {startNode}\n\ttype = {type}\n" +
-                $"\tdistance = {distance}\nLaneTransitionData]";
+            return string.Format(
+                "[LaneTransitionData\n\tlaneId = {0}\n\tlaneIndex = {1}\n\tsegmentId = {2}\n" +
+                "\tstartNode = {3}\n\ttype = {4}\n\tdistance = {5}\nLaneTransitionData]",
+                laneId,
+                laneIndex,
+                segmentId,
+                startNode,
+                type,
+                distance);
         }
 
         public void Set(uint laneId,

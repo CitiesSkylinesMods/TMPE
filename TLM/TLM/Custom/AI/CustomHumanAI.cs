@@ -1,10 +1,12 @@
 namespace TrafficManager.Custom.AI {
     using System.Runtime.CompilerServices;
     using API.Manager;
+    using API.Traffic.Data;
     using API.Traffic.Enums;
     using API.TrafficLight;
     using ColossalFramework;
     using CSUtil.Commons;
+    using CSUtil.Commons.Benchmark;
     using JetBrains.Annotations;
     using Manager;
     using Manager.Impl;
@@ -12,7 +14,6 @@ namespace TrafficManager.Custom.AI {
     using State;
     using State.ConfigData;
     using Traffic.Data;
-    using Traffic.Enums;
     using UnityEngine;
 
     [TargetType(typeof(HumanAI))]
@@ -68,30 +69,35 @@ namespace TrafficManager.Custom.AI {
                         $"Path: {instanceData.m_path}, mainPathState={mainPathState}");
                 }
 
-#if BENCHMARK
-                using (var bm = new Benchmark(null, "ConvertPathStateToSoftPathState+UpdateCitizenPathState")) {
-#endif
-                ExtSoftPathState finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
+                ExtSoftPathState finalPathState;
+                using (var bm = Benchmark.MaybeCreateBenchmark(
+                    null,
+                    "ConvertPathStateToSoftPathState+UpdateCitizenPathState"))
+                {
+                    finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
 
-                if (Options.parkingAI) {
-                    finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(
-                        instanceId,
-                        ref instanceData,
-                        ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceId],
-                        ref ExtCitizenManager.Instance.ExtCitizens[citizenId],
-                        ref citizensBuffer[instanceData.m_citizen],
-                        mainPathState);
-                    if (logParkingAi) {
-                        Log._Debug(
-                            $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
-                            $"Applied Parking AI logic. Path: {instanceData.m_path}, " +
-                            $"mainPathState={mainPathState}, finalPathState={finalPathState}, " +
-                            $"extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceId]}");
-                    }
-                } // if Options.parkingAi
-#if BENCHMARK
+                    if (Options.parkingAI) {
+                        finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(
+                            instanceId,
+                            ref instanceData,
+                            ref ExtCitizenInstanceManager
+                                .Instance.ExtInstances[
+                                    instanceId],
+                            ref ExtCitizenManager
+                                .Instance.ExtCitizens[
+                                    citizenId],
+                            ref citizensBuffer[
+                                instanceData.m_citizen],
+                            mainPathState);
+                        if (logParkingAi) {
+                            Log._Debug(
+                                $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
+                                $"Applied Parking AI logic. Path: {instanceData.m_path}, " +
+                                $"mainPathState={mainPathState}, finalPathState={finalPathState}, " +
+                                $"extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceId]}");
+                        }
+                    } // if Options.parkingAi
                 }
-#endif
 
                 switch (finalPathState) {
                     case ExtSoftPathState.Ready: {
@@ -201,21 +207,17 @@ namespace TrafficManager.Custom.AI {
             }
 
             // NON-STOCK CODE START
-#if BENCHMARK
-            using (var bm = new Benchmark(null, "ExtSimulationStep")) {
-#endif
-            if (Options.parkingAI) {
-                if (ExtSimulationStep(
-                    instanceId,
-                    ref instanceData,
-                    ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceId],
-                    physicsLodRefPos)) {
-                    return;
+            using (var bm = Benchmark.MaybeCreateBenchmark(null, "ExtSimulationStep")) {
+                if (Options.parkingAI) {
+                    if (ExtSimulationStep(
+                        instanceId,
+                        ref instanceData,
+                        ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceId],
+                        physicsLodRefPos)) {
+                        return;
+                    }
                 }
             }
-#if BENCHMARK
-            }
-#endif
 
             // NON-STOCK CODE END
             base.SimulationStep(instanceId, ref instanceData, physicsLodRefPos);
@@ -421,28 +423,22 @@ namespace TrafficManager.Custom.AI {
             uint stepWaitTime = currentFrameIndex - simGroup & 255u;
 
             // NON-STOCK CODE START
-#if BENCHMARK
-            using (var bm = new Benchmark(null, "GetNodeSimulation")) {
-#endif
             bool customSim = Options.timedLightsEnabled &&
                             TrafficLightSimulationManager.Instance.HasActiveSimulation(nodeId);
-#if BENCHMARK
-            }
-#endif
+
             RoadBaseAI.TrafficLightState pedestrianLightState;
             NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
             bool startNode = segmentsBuffer[segmentId].m_startNode == nodeId;
 
             ICustomSegmentLights lights = null;
-#if BENCHMARK
-            using (var bm = new Benchmark(null, "GetSegmentLights")) {
-#endif
-            if (customSim) {
-                lights = CustomSegmentLightsManager.Instance.GetSegmentLights(segmentId, startNode, false);
+            using (var bm = Benchmark.MaybeCreateBenchmark(null, "GetSegmentLights")) {
+                if (customSim) {
+                    lights = CustomSegmentLightsManager.Instance.GetSegmentLights(
+                        segmentId,
+                        startNode,
+                        false);
+                }
             }
-#if BENCHMARK
-            }
-#endif
 
             if (lights == null) {
                 // NON-STOCK CODE END

@@ -1,4 +1,5 @@
 ﻿namespace TrafficManager.Geometry.Impl {
+    using API.Traffic;
     using Traffic;
 
     public class SegmentEndId : ISegmentEndId {

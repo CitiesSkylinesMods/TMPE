@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Threading;
     using API.Manager;
+    using API.Traffic.Data;
     using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -11,7 +12,6 @@
     using State.ConfigData;
     using State;
     using Traffic.Data;
-    using Traffic.Enums;
 
     public class RoutingManager
         : AbstractGeometryObservingManager,

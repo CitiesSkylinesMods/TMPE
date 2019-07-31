@@ -1,8 +1,9 @@
 ﻿namespace TrafficManager.State.ConfigData {
     using System;
+    using API.Traffic.Enums;
     using JetBrains.Annotations;
     using Traffic;
-    using Traffic.Enums;
+    using ExtVehicleType = Traffic.ExtVehicleType;
 
 #if DEBUG
     /// <summary>

@@ -7,10 +7,7 @@
     using PathFinding;
     using RedirectionFramework.Attributes;
     using UnityEngine;
-
-#if BENCHMARK
     using CSUtil.Commons.Benchmark;
-#endif
 
     [TargetType(typeof(FireTruckAI))]
     public class CustomFireTruckAI : CarAI {
@@ -23,18 +20,18 @@
                                         bool startBothWays,
                                         bool endBothWays,
                                         bool undergroundTarget) {
-#if BENCHMARK
-            using (var bm = new Benchmark(null, "OnStartPathFind")) {
-#endif
-            ExtVehicleType vehicleType = ExtVehicleManager.Instance.OnStartPathFind(
-                vehicleId,
-                ref vehicleData,
-                (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0
-                    ? ExtVehicleType.Emergency
-                    : ExtVehicleType.Service);
-#if BENCHMARK
+
+            ExtVehicleType vehicleType;
+
+            using (var bm = Benchmark.MaybeCreateBenchmark(null, "OnStartPathFind")) {
+                vehicleType = ExtVehicleManager.Instance.OnStartPathFind(
+                    vehicleId,
+                    ref vehicleData,
+                    (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0
+                        ? ExtVehicleType.Emergency
+                        : ExtVehicleType.Service);
             }
-#endif
+
             VehicleInfo info = m_info;
             bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground
                                                            | Vehicle.Flags.Transition)) != 0;

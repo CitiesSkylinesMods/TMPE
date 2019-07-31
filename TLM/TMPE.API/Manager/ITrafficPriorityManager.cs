@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.API.Manager {
+    using Traffic.Data;
     using Traffic.Enums;
-    using TrafficManager.Traffic.Data;
 
     public interface ITrafficPriorityManager {
         // TODO define me!

@@ -1,73 +1,79 @@
-﻿using ColossalFramework;
-using ColossalFramework.Math;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrafficManager.State;
-using TrafficManager.Geometry;
-using TrafficManager.TrafficLight;
-using UnityEngine;
-using TrafficManager.Manager;
-using TrafficManager.Manager.Impl;
-using TrafficManager.Traffic.Enums;
+﻿namespace TrafficManager.UI.SubTools {
+    using API.Traffic.Enums;
+    using Manager.Impl;
+    using State;
+    using UnityEngine;
 
-namespace TrafficManager.UI.SubTools {
-	using API.Traffic.Enums;
+    public class ToggleTrafficLightsTool : SubTool {
+        public ToggleTrafficLightsTool(TrafficManagerTool mainTool)
+            : base(mainTool) { }
 
-	public class ToggleTrafficLightsTool : SubTool {
-		public ToggleTrafficLightsTool(TrafficManagerTool mainTool) : base(mainTool) {
+        public override void OnPrimaryClickOverlay() {
+            if (IsCursorInPanel()) {
+                return;
+            }
 
-		}
+            if (HoveredNodeId == 0) {
+                return;
+            }
 
-		public override void OnPrimaryClickOverlay() {
-			if (IsCursorInPanel())
-				return;
-			if (HoveredNodeId == 0)
-				return;
+            Constants.ServiceFactory.NetService.ProcessNode(
+                HoveredNodeId,
+                (ushort nId, ref NetNode node) => {
+                    ToggleTrafficLight(HoveredNodeId, ref node);
+                    return true;
+                });
+        }
 
-			Constants.ServiceFactory.NetService.ProcessNode(HoveredNodeId, delegate (ushort nId, ref NetNode node) {
-				ToggleTrafficLight(HoveredNodeId, ref node);
-				return true;
-			});
-		}
+        public void ToggleTrafficLight(ushort nodeId,
+                                       ref NetNode node,
+                                       bool showMessageOnError = true) {
+            ToggleTrafficLightError reason;
+            if (!TrafficLightManager.Instance.CanToggleTrafficLight(
+                    nodeId,
+                    !TrafficLightManager.Instance.HasTrafficLight(
+                        nodeId,
+                        ref node),
+                    ref node,
+                    out reason))
+            {
+                if (showMessageOnError) {
+                    switch (reason) {
+                        case ToggleTrafficLightError.HasTimedLight: {
+                            MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
+                            break;
+                        }
 
-		public void ToggleTrafficLight(ushort nodeId, ref NetNode node, bool showMessageOnError=true) {
-			ToggleTrafficLightError reason;
-			if (!TrafficLightManager.Instance.CanToggleTrafficLight(nodeId, !TrafficLightManager.Instance.HasTrafficLight(nodeId, ref node), ref node, out reason)) {
-				if (showMessageOnError) {
-					switch (reason) {
-						case ToggleTrafficLightError.HasTimedLight:
-							MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
-							break;
-						case ToggleTrafficLightError.IsLevelCrossing:
-							MainTool.ShowTooltip(Translation.GetString("Node_is_level_crossing"));
-							break;
-						default:
-							break;
-					}
-				}
-				return;
-			}
+                        case ToggleTrafficLightError.IsLevelCrossing: {
+                            MainTool.ShowTooltip(Translation.GetString("Node_is_level_crossing"));
+                            break;
+                        }
+                    }
+                }
 
-			TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
-			TrafficLightManager.Instance.ToggleTrafficLight(nodeId, ref node);
-		}
+                return;
+            }
 
-		public override void OnToolGUI(Event e) {
+            TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
+            TrafficLightManager.Instance.ToggleTrafficLight(nodeId, ref node);
+        }
 
-		}
+        public override void OnToolGUI(Event e) { }
 
-		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
-			if (MainTool.GetToolController().IsInsideUI || !Cursor.visible) {
-				return;
-			}
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+            if (MainTool.GetToolController().IsInsideUI || !Cursor.visible) {
+                return;
+            }
 
-			if (HoveredNodeId == 0) return;
+            if (HoveredNodeId == 0) {
+                return;
+            }
 
-			if (!Flags.mayHaveTrafficLight(HoveredNodeId)) return;
+            if (!Flags.mayHaveTrafficLight(HoveredNodeId)) {
+                return;
+            }
 
-			MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0), false);
-		}
-	}
+            MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0), false);
+        }
+    }
 }

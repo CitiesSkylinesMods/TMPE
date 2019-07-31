@@ -56,19 +56,19 @@ namespace TrafficManager.State {
             UIHelper panelHelper = new UIHelper(currentPanel);
 
             UIHelperBase generalGroup = panelHelper.AddGroup(T("General"));
-            string[] languageLabels = new string[Translation.AVAILABLE_LANGUAGE_CODES.Count + 1];
+            string[] languageLabels = new string[Translation.AvailableLanguageCodes.Count + 1];
             languageLabels[0] = T("Game_language");
 
-            for (int i = 0; i < Translation.AVAILABLE_LANGUAGE_CODES.Count; ++i) {
+            for (int i = 0; i < Translation.AvailableLanguageCodes.Count; ++i) {
                 languageLabels[i + 1] =
-                    Translation.LANGUAGE_LABELS[Translation.AVAILABLE_LANGUAGE_CODES[i]];
+                    Translation.LanguageLabels[Translation.AvailableLanguageCodes[i]];
             }
 
             int languageIndex = 0;
             string curLangCode = GlobalConfig.Instance.LanguageCode;
 
             if (curLangCode != null) {
-                languageIndex = Translation.AVAILABLE_LANGUAGE_CODES.IndexOf(curLangCode);
+                languageIndex = Translation.AvailableLanguageCodes.IndexOf(curLangCode);
                 if (languageIndex < 0) {
                     languageIndex = 0;
                 } else {
@@ -167,9 +167,9 @@ namespace TrafficManager.State {
                 GlobalConfig.WriteConfig();
                 Options.MenuRebuildRequired = true;
                 localeChanged = true;
-            } else if (newLanguageIndex - 1 < Translation.AVAILABLE_LANGUAGE_CODES.Count) {
+            } else if (newLanguageIndex - 1 < Translation.AvailableLanguageCodes.Count) {
                 GlobalConfig.Instance.LanguageCode =
-                    Translation.AVAILABLE_LANGUAGE_CODES[newLanguageIndex - 1];
+                    Translation.AvailableLanguageCodes[newLanguageIndex - 1];
                 GlobalConfig.WriteConfig();
                 Options.MenuRebuildRequired = true;
                 localeChanged = true;

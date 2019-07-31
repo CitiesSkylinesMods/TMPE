@@ -5,12 +5,13 @@ namespace TrafficManager.Manager.Impl {
     using API.Manager;
     using API.Traffic.Enums;
     using API.TrafficLight;
+    using API.TrafficLight.Data;
     using CSUtil.Commons;
+    using CSUtil.Commons.Benchmark;
     using State;
     using State.ConfigData;
     using Traffic;
     using TrafficLight;
-    using TrafficLight.Data;
     using TrafficLight.Impl;
     using static RoadBaseAI;
     using ExtVehicleType = global::TrafficManager.Traffic.ExtVehicleType;
@@ -70,14 +71,11 @@ namespace TrafficManager.Manager.Impl {
             out TrafficLightState pedestrianLightState)
         {
             bool callStockMethod = true;
-#if BENCHMARK
-            using (var bm = new Benchmark(null, "callStockMethod")) {
-#endif
-            callStockMethod = !Options.timedLightsEnabled
-                              || !Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
-#if BENCHMARK
+            using (var bm = Benchmark.MaybeCreateBenchmark(null, "callStockMethod")) {
+                callStockMethod = !Options.timedLightsEnabled
+                                  || !Instance
+                                      .TrafficLightSimulations[nodeId].IsSimulationRunning();
             }
-#endif
 
             if (callStockMethod) {
                 RoadBaseAI.GetTrafficLightState(
@@ -87,24 +85,20 @@ namespace TrafficManager.Manager.Impl {
                     out vehicleLightState,
                     out pedestrianLightState);
             } else {
-#if BENCHMARK
-                using (var bm = new Benchmark(null, "GetCustomTrafficLightState")) {
-#endif
-                GetCustomTrafficLightState(
+                using (var bm = Benchmark.MaybeCreateBenchmark(null, "GetCustomTrafficLightState")) {
+                    GetCustomTrafficLightState(
 #if DEBUG
-                    vehicleId,
-                    ref vehicleData,
+                        vehicleId,
+                        ref vehicleData,
 #endif
-                    nodeId,
-                    fromSegmentId,
-                    fromLaneIndex,
-                    toSegmentId,
-                    out vehicleLightState,
-                    out pedestrianLightState,
-                    ref Instance.TrafficLightSimulations[nodeId]);
-#if BENCHMARK
+                        nodeId,
+                        fromSegmentId,
+                        fromLaneIndex,
+                        toSegmentId,
+                        out vehicleLightState,
+                        out pedestrianLightState,
+                        ref Instance.TrafficLightSimulations[nodeId]);
                 }
-#endif
             }
         }
 
@@ -126,14 +120,10 @@ namespace TrafficManager.Manager.Impl {
         {
             bool callStockMethod;
 
-#if BENCHMARK
-            using (var bm = new Benchmark(null, "callStockMethod")) {
-#endif
-            callStockMethod = !Options.timedLightsEnabled ||
-                              !Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
-#if BENCHMARK
+            using (var bm = Benchmark.MaybeCreateBenchmark(null, "callStockMethod")) {
+                callStockMethod = !Options.timedLightsEnabled ||
+                                  !Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
             }
-#endif
 
             if (callStockMethod) {
                 RoadBaseAI.GetTrafficLightState(
@@ -145,24 +135,21 @@ namespace TrafficManager.Manager.Impl {
                     out vehicles,
                     out pedestrians);
             } else {
-#if BENCHMARK
-                using (var bm = new Benchmark(null, "GetCustomTrafficLightState")) {
-#endif
-                GetCustomTrafficLightState(
+                using (var bm = Benchmark.MaybeCreateBenchmark(null, "GetCustomTrafficLightState")) {
+                    GetCustomTrafficLightState(
 #if DEBUG
-                    vehicleId,
-                    ref vehicleData,
+                        vehicleId,
+                        ref vehicleData,
 #endif
-                    nodeId,
-                    fromSegmentId,
-                    fromLaneIndex,
-                    toSegmentId,
-                    out vehicleLightState,
-                    out pedestrianLightState,
-                    ref Instance.TrafficLightSimulations[nodeId]);
-#if BENCHMARK
-                    }
-#endif
+                        nodeId,
+                        fromSegmentId,
+                        fromLaneIndex,
+                        toSegmentId,
+                        out vehicleLightState,
+                        out pedestrianLightState,
+                        ref Instance.TrafficLightSimulations[nodeId]);
+                }
+
                 vehicles = false;
                 pedestrians = false;
             }

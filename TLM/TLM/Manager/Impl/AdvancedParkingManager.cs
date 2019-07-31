@@ -1,18 +1,19 @@
 ﻿namespace TrafficManager.Manager.Impl {
     using System;
     using API.Manager;
+    using API.Traffic.Data;
     using API.Traffic.Enums;
     using ColossalFramework;
     using ColossalFramework.Globalization;
     using ColossalFramework.Math;
     using CSUtil.Commons;
+    using CSUtil.Commons.Benchmark;
     using Custom.AI;
     using Custom.PathFinding;
     using JetBrains.Annotations;
     using State;
     using State.ConfigData;
     using Traffic.Data;
-    using Traffic.Enums;
     using UI;
     using UnityEngine;
     using Util;
@@ -1814,24 +1815,24 @@
                                          float maxDistance,
                                          ushort homeId) {
             bool found;
-#if BENCHMARK
-            using (var bm = new Benchmark(null, "FindParkingSpaceInVicinity")) {
-#endif
-            found = AdvancedParkingManager.Instance.FindParkingSpaceInVicinity(
-                refPos,
-                Vector3.zero,
-                parkedVehicle.Info,
-                homeId,
-                0,
-                maxDistance,
-                out _,
-                out _,
-                out Vector3 parkPos,
-                out Quaternion parkRot,
-                out _);
-#if BENCHMARK
+            Vector3 parkPos;
+            Quaternion parkRot;
+
+            using (var bm = Benchmark.MaybeCreateBenchmark(null, "FindParkingSpaceInVicinity")) {
+                found = Instance.FindParkingSpaceInVicinity(
+                    refPos,
+                    Vector3.zero,
+                    parkedVehicle.Info,
+                    homeId,
+                    0,
+                    maxDistance,
+                    out _,
+                    out _,
+                    out parkPos,
+                    out parkRot,
+                    out _);
             }
-#endif
+
             if (found) {
                 Singleton<VehicleManager>.instance.RemoveFromGrid(parkedVehicleId, ref parkedVehicle);
                 parkedVehicle.m_position = parkPos;

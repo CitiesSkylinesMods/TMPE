@@ -1,6 +1,5 @@
 ﻿namespace TrafficManager.API.Manager {
     using Traffic.Data;
-    using TrafficManager.Traffic.Data;
     using UnityEngine;
 
     public interface IVehicleBehaviorManager {

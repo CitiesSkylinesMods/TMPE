@@ -1,7 +1,9 @@
 namespace TrafficManager.Manager.Impl {
     using System;
     using System.Collections.Generic;
+    using API.Geometry;
     using API.Manager;
+    using API.Traffic;
     using API.Traffic.Data;
     using API.Traffic.Enums;
     using API.TrafficLight;
@@ -1610,6 +1612,22 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return ret;
+        }
+
+        /// <summary>
+        /// Used for loading and saving PrioritySegments
+        /// </summary>
+        /// <returns>ICustomDataManager for prio segments</returns>
+        public static ICustomDataManager<List<int[]>> AsPrioritySegmentsDM() {
+            return Instance;
+        }
+
+        /// <summary>
+        /// Used for loading and saving CustomPrioritySegments
+        /// </summary>
+        /// <returns>ICustomDataManager for custom prio segments</returns>
+        public static ICustomDataManager<List<Configuration.PrioritySegment>> AsCustomPrioritySegmentsDM() {
+            return Instance;
         }
     }
 }

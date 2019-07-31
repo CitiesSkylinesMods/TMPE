@@ -2,15 +2,17 @@
     using System;
     using System.Collections.Generic;
     using Manager;
+    using Traffic;
     using Traffic.Enums;
-    using TrafficManager.Traffic;
-    using TrafficManager.TrafficLight;
 
     public interface ICustomSegmentLights : ICloneable, ISegmentEndId {
         // TODO documentation
         ushort NodeId { get; }
         IDictionary<ExtVehicleType, ICustomSegmentLight> CustomLights { get; }
-        RoadBaseAI.TrafficLightState AutoPedestrianLightState { get; set; } // TODO should not be writable
+
+        RoadBaseAI.TrafficLightState
+            AutoPedestrianLightState { get; set; } // TODO should not be writable
+
         bool InvalidPedestrianLight { get; set; } // TODO improve & remove
         RoadBaseAI.TrafficLightState? PedestrianLightState { get; set; }
         RoadBaseAI.TrafficLightState? InternalPedestrianLightState { get; }
@@ -37,7 +39,10 @@
         ICustomSegmentLight GetCustomLight(byte laneIndex);
         ICustomSegmentLight GetCustomLight(ExtVehicleType vehicleType);
         bool Relocate(ushort segmentId, bool startNode, ICustomSegmentLightsManager lightsManager);
-        ICustomSegmentLights Clone(ICustomSegmentLightsManager newLightsManager, bool performHousekeeping = true);
+
+        ICustomSegmentLights Clone(ICustomSegmentLightsManager newLightsManager,
+                                   bool performHousekeeping = true);
+
         void Housekeeping(bool mayDelete, bool calculateAutoPedLight);
     }
 }

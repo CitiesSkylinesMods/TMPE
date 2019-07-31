@@ -1,39 +1,42 @@
-﻿namespace TrafficManager.Traffic.Data {
-	public struct ExtBuilding {
-		/// <summary>
-		/// Building id
-		/// </summary>
-		public ushort buildingId;
+﻿namespace TrafficManager.API.Traffic.Data {
+    public struct ExtBuilding {
+        /// <summary>
+        /// Building id
+        /// </summary>
+        public ushort buildingId;
 
-		/// <summary>
-		/// Current parking space demand (0-100)
-		/// </summary>
-		public byte parkingSpaceDemand;
+        /// <summary>
+        /// Current parking space demand (0-100)
+        /// </summary>
+        public byte parkingSpaceDemand;
 
-		/// <summary>
-		/// Current incoming public transport demand (0-100)
-		/// </summary>
-		public byte incomingPublicTransportDemand;
+        /// <summary>
+        /// Current incoming public transport demand (0-100)
+        /// </summary>
+        public byte incomingPublicTransportDemand;
 
-		/// <summary>
-		/// Current outgoing public transport demand (0-100)
-		/// </summary>
-		public byte outgoingPublicTransportDemand;
+        /// <summary>
+        /// Current outgoing public transport demand (0-100)
+        /// </summary>
+        public byte outgoingPublicTransportDemand;
 
-		public override string ToString() {
-			return $"[ExtBuilding {base.ToString()}\n" +
-				"\t" + $"buildingId = {buildingId}\n" +
-				"\t" + $"parkingSpaceDemand = {parkingSpaceDemand}\n" +
-				"\t" + $"incomingPublicTransportDemand = {incomingPublicTransportDemand}\n" +
-				"\t" + $"outgoingPublicTransportDemand = {outgoingPublicTransportDemand}\n" +
-				"ExtBuilding]";
-		}
+        public override string ToString() {
+            return string.Format(
+                "[ExtBuilding {0}\n\tbuildingId = {1}\n\tparkingSpaceDemand = {2}\n" +
+                "\tincomingPublicTransportDemand = {3}\n\toutgoingPublicTransportDemand = {4}" +
+                "\nExtBuilding]",
+                base.ToString(),
+                buildingId,
+                parkingSpaceDemand,
+                incomingPublicTransportDemand,
+                outgoingPublicTransportDemand);
+        }
 
-		public ExtBuilding(ushort buildingId) {
-			this.buildingId = buildingId;
-			parkingSpaceDemand = 0;
-			incomingPublicTransportDemand = 0;
-			outgoingPublicTransportDemand = 0;
-		}
-	}
+        public ExtBuilding(ushort buildingId) {
+            this.buildingId = buildingId;
+            parkingSpaceDemand = 0;
+            incomingPublicTransportDemand = 0;
+            outgoingPublicTransportDemand = 0;
+        }
+    }
 }

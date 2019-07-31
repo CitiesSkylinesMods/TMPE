@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.API.Manager {
     using System;
     using Geometry;
-    using TrafficManager.Traffic.Data;
+    using Traffic.Data;
     using Util;
 
     public struct GeometryUpdate {

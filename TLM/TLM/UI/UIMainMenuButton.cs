@@ -1,13 +1,18 @@
-﻿using ColossalFramework.UI;
-using CSUtil.Commons;
-using System;
-using TrafficManager.State;
-using TrafficManager.State.Keybinds;
-using TrafficManager.Util;
-using UnityEngine;
+﻿namespace TrafficManager.UI {
+    using System;
+    using API.Util;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using State;
+    using State.Keybinds;
+    using Textures;
+    using UnityEngine;
+    using Util;
 
-namespace TrafficManager.UI {
-    public class UIMainMenuButton : UIButton, IObserver<GlobalConfig> {
+    public class UIMainMenuButton
+        : UIButton,
+          IObserver<GlobalConfig>
+    {
         private const string MAIN_MENU_BUTTON_BG_BASE = "TMPE_MainMenuButtonBgBase";
         private const string MAIN_MENU_BUTTON_BG_HOVERED = "TMPE_MainMenuButtonBgHovered";
         private const string MAIN_MENU_BUTTON_BG_ACTIVE = "TMPE_MainMenuButtonBgActive";
@@ -20,23 +25,23 @@ namespace TrafficManager.UI {
 
         private UIDragHandle Drag { get; set; }
 
-        IDisposable confDisposable;
+        private IDisposable confDisposable_;
 
         public override void Start() {
             // Place the button.
             OnUpdate(GlobalConfig.Instance);
 
-            confDisposable = GlobalConfig.Instance.Subscribe(this);
+            confDisposable_ = GlobalConfig.Instance.Subscribe(this);
 
             // Set the atlas and background/foreground
             var spriteNames = new[] {
-                                        MAIN_MENU_BUTTON_BG_BASE,
-                                        MAIN_MENU_BUTTON_BG_HOVERED,
-                                        MAIN_MENU_BUTTON_BG_ACTIVE,
-                                        MAIN_MENU_BUTTON_FG_BASE,
-                                        MAIN_MENU_BUTTON_FG_HOVERED,
-                                        MAIN_MENU_BUTTON_FG_ACTIVE
-                                    };
+                MAIN_MENU_BUTTON_BG_BASE,
+                MAIN_MENU_BUTTON_BG_HOVERED,
+                MAIN_MENU_BUTTON_BG_ACTIVE,
+                MAIN_MENU_BUTTON_FG_BASE,
+                MAIN_MENU_BUTTON_FG_HOVERED,
+                MAIN_MENU_BUTTON_FG_ACTIVE
+            };
             atlas = TextureUtil.GenerateLinearAtlas(
                 "TMPE_MainMenuButtonAtlas",
                 TextureResources.MainMenuButtonTexture2D,
@@ -79,9 +84,7 @@ namespace TrafficManager.UI {
         }
 
         public override void OnDestroy() {
-            if (confDisposable != null) {
-                confDisposable.Dispose();
-            }
+            confDisposable_?.Dispose();
         }
 
         internal void SetPosLock(bool lck) {
@@ -113,25 +116,37 @@ namespace TrafficManager.UI {
 
                 GlobalConfig.WriteConfig();
             }
+
             base.OnPositionChanged();
         }
 
         internal void UpdateSprites() {
-            if (! LoadingExtension.BaseUI.IsVisible()) {
-                m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled = m_BackgroundSprites.m_Focused = MAIN_MENU_BUTTON_BG_BASE;
+            if (!LoadingExtension.BaseUI.IsVisible()) {
+                m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
+                                                   m_BackgroundSprites.m_Focused =
+                                                       MAIN_MENU_BUTTON_BG_BASE;
                 m_BackgroundSprites.m_Hovered = MAIN_MENU_BUTTON_BG_HOVERED;
                 m_PressedBgSprite = MAIN_MENU_BUTTON_BG_ACTIVE;
 
-                m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled = m_ForegroundSprites.m_Focused = MAIN_MENU_BUTTON_FG_BASE;
+                m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
+                                                   m_ForegroundSprites.m_Focused =
+                                                       MAIN_MENU_BUTTON_FG_BASE;
                 m_ForegroundSprites.m_Hovered = MAIN_MENU_BUTTON_FG_HOVERED;
                 m_PressedFgSprite = MAIN_MENU_BUTTON_FG_ACTIVE;
             } else {
-                m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled = m_BackgroundSprites.m_Focused = m_BackgroundSprites.m_Hovered = MAIN_MENU_BUTTON_BG_ACTIVE;
+                m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
+                                                   m_BackgroundSprites.m_Focused =
+                                                       m_BackgroundSprites.m_Hovered =
+                                                           MAIN_MENU_BUTTON_BG_ACTIVE;
                 m_PressedBgSprite = MAIN_MENU_BUTTON_BG_HOVERED;
 
-                m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled = m_ForegroundSprites.m_Focused = m_ForegroundSprites.m_Hovered = MAIN_MENU_BUTTON_FG_ACTIVE;
+                m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
+                                                   m_ForegroundSprites.m_Focused =
+                                                       m_ForegroundSprites.m_Hovered =
+                                                           MAIN_MENU_BUTTON_FG_ACTIVE;
                 m_PressedFgSprite = MAIN_MENU_BUTTON_FG_HOVERED;
             }
+
             this.Invalidate();
         }
 

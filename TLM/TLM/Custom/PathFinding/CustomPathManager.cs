@@ -1,5 +1,5 @@
-#define QUEUEDSTATSx
-#define DEBUGPF3x
+// #define QUEUEDSTATS
+// #define DEBUGPF3
 
 namespace TrafficManager.Custom.PathFinding {
     using System;

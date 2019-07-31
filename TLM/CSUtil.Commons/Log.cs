@@ -1,9 +1,7 @@
 ﻿namespace CSUtil.Commons {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
-    using System.Text;
     using System.Threading;
     using UnityEngine;
 
@@ -13,6 +11,31 @@
     #endif
 #endif
 
+    /// <summary>
+    /// Log.Trace, Log.Debug, Log.Info, Log.Warning, Log.Error -- these format the message in place,
+    ///     ✔ Cheap if there is a const string or a very simple format call with a few args.
+    ///     ✔ Cheap if wrapped in an if (booleanValue) { ... }
+    ///     Log.Debug and Log.Trace are optimized away if not in Debug mode
+    ///     ⚠ Expensive if multiple $"string {interpolations}" are used (like breaking into multiple lines)
+    ///
+    /// Log.DebugFormat, Log.InfoFormat, ... - these format message later, when logging. Good for
+    /// very-very long format strings with multiple complex arguments.
+    ///     ✔ As they use format string literal, it can be split multiple lines without perf penalty
+    ///     💲 The cost incurred: bulding args array (with pointers)
+    ///     Prevents multiple calls to string.Format as opposed to multiline $"string {interpolations}"
+    ///     Log.DebugFormat is optimized away, others are not, so is a good idea to wrap in if (boolValue)
+    ///     ⚠ Expensive if not wrapped in a if () condition
+    ///
+    /// Log.DebugIf, Log.WarningIf, ... - these first check a condition, and then call a lambda,
+    /// which provides a formatted string.
+    ///     ✔ Lambda building is just as cheap as format args building
+    ///     💲 The cost incurred: each captured value (pointer) is copied into lambda
+    ///     ✔ Actual string is formatted ONLY if the condition holds true
+    ///     Log.DebugIf is optimized away if not in Debug mode
+    ///     ⚠ Cannot capture out and ref values
+    ///
+    /// Log.NotImpl logs an error if something is not implemented and only in debug mode
+    /// </summary>
     public static class Log {
         private static readonly object LogLock = new object();
 
@@ -81,6 +104,10 @@
             LogToFile(s, LogLevel.Info);
         }
 
+        public static void InfoFormat(string format, params object[] args) {
+            LogToFile(string.Format(format, args), LogLevel.Info);
+        }
+
         /// <summary>
         /// Will log a warning only if debug mode
         /// </summary>
@@ -93,7 +120,7 @@
         /// <summary>
         /// Log a warning only in debug mode if cond is true
         /// NOTE: If a lambda contains values from `out` and `ref` scope args,
-        /// then you can not use a lambda, instead use `if (cond) { Log._DebugOnlyWarning }`
+        /// then you can not use a lambda, instead use `if (cond) { Log._DebugOnlyWarning() }`
         /// </summary>
         /// <param name="cond">The condition</param>
         /// <param name="s">The function which returns text to log</param>
@@ -115,7 +142,7 @@
         /// <summary>
         /// Log a warning only if cond is true
         /// NOTE: If a lambda contains values from `out` and `ref` scope args,
-        /// then you can not use a lambda, instead use `if (cond) { Log.Warning }`
+        /// then you can not use a lambda, instead use `if (cond) { Log.Warning() }`
         /// </summary>
         /// <param name="cond">The condition</param>
         /// <param name="s">The function which returns text to log</param>
@@ -131,6 +158,19 @@
 
         public static void ErrorFormat(string format, params object[] args) {
             LogToFile(string.Format(format, args), LogLevel.Error);
+        }
+
+        /// <summary>
+        /// Log an error only if cond is true
+        /// NOTE: If a lambda contains values from `out` and `ref` scope args,
+        /// then you can not use a lambda, instead use `if (cond) { Log.Error() }`
+        /// </summary>
+        /// <param name="cond">The condition</param>
+        /// <param name="s">The function which returns text to log</param>
+        public static void ErrorIf(bool cond, Func<string> s) {
+            if (cond) {
+                LogToFile(s(), LogLevel.Error);
+            }
         }
 
         /// <summary>

@@ -1,391 +1,483 @@
-﻿using ColossalFramework;
-using ColossalFramework.Math;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrafficManager.Custom.AI;
-using TrafficManager.State;
-using TrafficManager.Geometry;
-using TrafficManager.TrafficLight;
-using UnityEngine;
-using TrafficManager.Traffic;
-using TrafficManager.Manager;
-using TrafficManager.Util;
-using CSUtil.Commons;
-using TrafficManager.Geometry.Impl;
-using TrafficManager.Manager.Impl;
-using static TrafficManager.Traffic.Data.PrioritySegment;
-using static TrafficManager.Util.SegmentTraverser;
-using ColossalFramework.UI;
-using TrafficManager.Traffic.Enums;
-using TrafficManager.Traffic.Data;
-
-namespace TrafficManager.UI.SubTools {
+﻿namespace TrafficManager.UI.SubTools {
+    using System;
+    using System.Collections.Generic;
     using API.Manager;
+    using API.Traffic.Data;
     using API.Traffic.Enums;
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using Manager.Impl;
+    using State;
+    using Textures;
+    using Traffic.Data;
+    using UnityEngine;
+    using Util;
+    using static Util.SegmentTraverser;
 
-	public class PrioritySignsTool : SubTool {
-		public enum PrioritySignsMassEditMode {
-			MainYield = 0,
-			MainStop = 1,
-			YieldMain = 2,
-			StopMain = 3,
-			Delete = 4
-		}
+    public class PrioritySignsTool : SubTool {
+        private enum PrioritySignsMassEditMode {
+            MainYield = 0,
+            MainStop = 1,
+            YieldMain = 2,
+            StopMain = 3,
+            Delete = 4
+        }
 
-		private HashSet<ushort> currentPriorityNodeIds;
-		private PrioritySignsMassEditMode massEditMode = PrioritySignsMassEditMode.MainYield;
+        private readonly HashSet<ushort> currentPriorityNodeIds;
+        private PrioritySignsMassEditMode massEditMode = PrioritySignsMassEditMode.MainYield;
 
-		public PrioritySignsTool(TrafficManagerTool mainTool) : base(mainTool) {
-			currentPriorityNodeIds = new HashSet<ushort>();
-		}
+        public PrioritySignsTool(TrafficManagerTool mainTool)
+            : base(mainTool) {
+            currentPriorityNodeIds = new HashSet<ushort>();
+        }
 
-		public override void OnPrimaryClickOverlay() {
-			if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
-				if (HoveredSegmentId != 0) {
-					SelectedNodeId = 0;
+        public override void OnPrimaryClickOverlay() {
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+                if (HoveredSegmentId == 0) {
+                    return;
+                }
 
-					PriorityType primaryPrioType = PriorityType.None;
-					PriorityType secondaryPrioType = PriorityType.None;
-					switch (massEditMode) {
-						case PrioritySignsMassEditMode.MainYield:
-							primaryPrioType = PriorityType.Main;
-							secondaryPrioType = PriorityType.Yield;
-							break;
-						case PrioritySignsMassEditMode.MainStop:
-							primaryPrioType = PriorityType.Main;
-							secondaryPrioType = PriorityType.Stop;
-							break;
-						case PrioritySignsMassEditMode.YieldMain:
-							primaryPrioType = PriorityType.Yield;
-							secondaryPrioType = PriorityType.Main;
-							break;
-						case PrioritySignsMassEditMode.StopMain:
-							primaryPrioType = PriorityType.Stop;
-							secondaryPrioType = PriorityType.Main;
-							break;
-						case PrioritySignsMassEditMode.Delete:
-						default:
-							break;
-					}
+                SelectedNodeId = 0;
 
-					IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-					SegmentTraverser.Traverse(HoveredSegmentId, TraverseDirection.AnyDirection, TraverseSide.Straight, SegmentStopCriterion.None, delegate (SegmentVisitData data) {
-						foreach (bool startNode in Constants.ALL_BOOL) {
-							TrafficPriorityManager.Instance.SetPrioritySign(data.curSeg.segmentId, startNode, primaryPrioType);
-							ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(data.curSeg.segmentId, startNode);
-							ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(data.curSeg.segmentId, startNode)];
+                var primaryPrioType = PriorityType.None;
+                var secondaryPrioType = PriorityType.None;
 
-							for (int i = 0; i < 8; ++i) {
-								ushort otherSegmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(i);
-								if (otherSegmentId == 0 || otherSegmentId == data.curSeg.segmentId) {
-									continue;
-								}
+                switch (massEditMode) {
+                    case PrioritySignsMassEditMode.MainYield: {
+                        primaryPrioType = PriorityType.Main;
+                        secondaryPrioType = PriorityType.Yield;
+                        break;
+                    }
 
-								ArrowDirection dir = segEndMan.GetDirection(ref curEnd, otherSegmentId);
-								if (dir != ArrowDirection.Forward) {
-									TrafficPriorityManager.Instance.SetPrioritySign(otherSegmentId, (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, nodeId), secondaryPrioType);
-								}
-							}
-						}
-						
-						return true;
-					});
+                    case PrioritySignsMassEditMode.MainStop: {
+                        primaryPrioType = PriorityType.Main;
+                        secondaryPrioType = PriorityType.Stop;
+                        break;
+                    }
 
-					// cycle mass edit mode
-					massEditMode = (PrioritySignsMassEditMode)(((int)massEditMode + 1) % Enum.GetValues(typeof(PrioritySignsMassEditMode)).GetLength(0));
+                    case PrioritySignsMassEditMode.YieldMain: {
+                        primaryPrioType = PriorityType.Yield;
+                        secondaryPrioType = PriorityType.Main;
+                        break;
+                    }
 
-					// update priority node cache
-					RefreshCurrentPriorityNodeIds();
-				}
-				return;
-			}
+                    case PrioritySignsMassEditMode.StopMain: {
+                        primaryPrioType = PriorityType.Stop;
+                        secondaryPrioType = PriorityType.Main;
+                        break;
+                    }
+                }
 
-			if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
-				return;
-			}
+                IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
-			if (! MayNodeHavePrioritySigns(HoveredNodeId)) {
-				return;
-			}
+                bool VisitorFun(SegmentVisitData data) {
+                    foreach (bool startNode in Constants.ALL_BOOL) {
+                        TrafficPriorityManager.Instance.SetPrioritySign(
+                            data.CurSeg.segmentId,
+                            startNode,
+                            primaryPrioType);
+                        ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(
+                            data.CurSeg.segmentId,
+                            startNode);
+                        ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[
+                            segEndMan.GetIndex(data.CurSeg.segmentId,startNode)];
 
-			SelectedNodeId = HoveredNodeId;
-			Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
-			// update priority node cache
-			RefreshCurrentPriorityNodeIds();
-		}
+                        for (int i = 0; i < 8; ++i) {
+                            ushort otherSegmentId = Singleton<NetManager>.instance.m_nodes
+                                                                         .m_buffer[nodeId]
+                                                                         .GetSegment(i);
 
-		public override void OnToolGUI(Event e) {
-			
-		}
+                            if (otherSegmentId == 0 || otherSegmentId == data.CurSeg.segmentId) {
+                                continue;
+                            }
 
-		public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
-			if (MainTool.GetToolController().IsInsideUI || !Cursor.visible) {
-				return;
-			}
+                            ArrowDirection dir = segEndMan.GetDirection(
+                                ref curEnd,
+                                otherSegmentId);
 
-			if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
-				// draw hovered segments
-				if (HoveredSegmentId != 0) {
-					Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
-					SegmentTraverser.Traverse(HoveredSegmentId, TraverseDirection.AnyDirection, TraverseSide.Straight, SegmentStopCriterion.None, delegate (SegmentVisitData data) {
-						NetTool.RenderOverlay(cameraInfo, ref Singleton<NetManager>.instance.m_segments.m_buffer[data.curSeg.segmentId], color, color);
-						return true;
-					});
-				} else {
-					massEditMode = PrioritySignsMassEditMode.MainYield;
-				}
-				return;
-			}
-			massEditMode = PrioritySignsMassEditMode.MainYield;
+                            if (dir != ArrowDirection.Forward) {
+                                TrafficPriorityManager.Instance.SetPrioritySign(
+                                    otherSegmentId,
+                                    (bool)Constants.ServiceFactory.NetService.IsStartNode(
+                                        otherSegmentId,
+                                        nodeId),
+                                    secondaryPrioType);
+                            }
+                        }
+                    }
 
-			if (HoveredNodeId == SelectedNodeId) {
-				return;
-			}
+                    return true;
+                }
 
-			// no highlight for existing priority node in sign mode
-			if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
-				//Log._Debug($"PrioritySignsTool.RenderOverlay: HasNodePrioritySign({HoveredNodeId})=true");
-				return;
-			}
+                SegmentTraverser.Traverse(
+                    HoveredSegmentId,
+                    TraverseDirection.AnyDirection,
+                    TraverseSide.Straight,
+                    SegmentStopCriterion.None,
+                    VisitorFun);
 
-			if (! TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(HoveredNodeId)) {
-				//Log._Debug($"PrioritySignsTool.RenderOverlay: MayNodeHavePrioritySigns({HoveredNodeId})=false");
-				return;
-			}
+                // cycle mass edit mode
+                massEditMode =
+                    (PrioritySignsMassEditMode)(((int)massEditMode + 1) %
+                                                Enum.GetValues(typeof(PrioritySignsMassEditMode))
+                                                    .GetLength(0));
 
-			MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
-		}
+                // update priority node cache
+                RefreshCurrentPriorityNodeIds();
+                return;
+            }
 
-		private void RefreshCurrentPriorityNodeIds() {
-			TrafficPriorityManager tpm = TrafficPriorityManager.Instance;
+            if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
+                return;
+            }
 
-			currentPriorityNodeIds.Clear();
-			for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-				if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
-					continue;
-				}
+            if (!MayNodeHavePrioritySigns(HoveredNodeId)) {
+                return;
+            }
 
-				if (!tpm.MayNodeHavePrioritySigns((ushort)nodeId)) {
-					continue;
-				}
+            SelectedNodeId = HoveredNodeId;
+            Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
 
-				if (!tpm.HasNodePrioritySign((ushort)nodeId) && nodeId != SelectedNodeId) {
-					continue;
-				}
+            // update priority node cache
+            RefreshCurrentPriorityNodeIds();
+        }
 
-				/*if (! MainTool.IsNodeWithinViewDistance(nodeId)) {
-					continue;
-				}*/
+        public override void OnToolGUI(Event e) { }
 
-				currentPriorityNodeIds.Add((ushort)nodeId);
-			}
-			//Log._Debug($"PrioritySignsTool.RefreshCurrentPriorityNodeIds: currentPriorityNodeIds={string.Join(", ", currentPriorityNodeIds.Select(x => x.ToString()).ToArray())}");
-		}
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+            if (MainTool.GetToolController().IsInsideUI || !Cursor.visible) {
+                return;
+            }
 
-		public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-			if (viewOnly && !Options.prioritySignsOverlay)
-				return;
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+                // draw hovered segments
+                if (HoveredSegmentId != 0) {
+                    Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
+                    SegmentTraverser.Traverse(
+                        HoveredSegmentId,
+                        TraverseDirection.AnyDirection,
+                        TraverseSide.Straight,
+                        SegmentStopCriterion.None,
+                        data => {
+                            NetTool.RenderOverlay(
+                                cameraInfo,
+                                ref Singleton<NetManager>.instance.m_segments.m_buffer[
+                                    data.CurSeg.segmentId],
+                                color,
+                                color);
+                            return true;
+                        });
+                } else {
+                    massEditMode = PrioritySignsMassEditMode.MainYield;
+                }
 
-			if (UIBase.GetTrafficManagerTool(false)?.GetToolMode() == ToolMode.JunctionRestrictions)
-				return;
+                return;
+            }
 
-			ShowGUI(viewOnly);
-		}
+            massEditMode = PrioritySignsMassEditMode.MainYield;
 
-		public void ShowGUI(bool viewOnly) {
-			try {
-				IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
-				IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-				TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
-				TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
-				TrafficLightManager tlm = TrafficLightManager.Instance;
+            if (HoveredNodeId == SelectedNodeId) {
+                return;
+            }
 
-				Vector3 camPos = Constants.ServiceFactory.SimulationService.CameraPosition;
+            // no highlight for existing priority node in sign mode
+            if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
+                // Log._Debug($"PrioritySignsTool.RenderOverlay: HasNodePrioritySign({HoveredNodeId})=true");
+                return;
+            }
 
-				bool clicked = !viewOnly ? MainTool.CheckClicked() : false;
+            if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(HoveredNodeId)) {
+                // Log._Debug($"PrioritySignsTool.RenderOverlay: MayNodeHavePrioritySigns({HoveredNodeId})=false");
+                return;
+            }
 
-				ushort removedNodeId = 0;
-				bool showRemoveButton = false;
-				foreach (ushort nodeId in currentPriorityNodeIds) {
-					if (! Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
-						continue;
-					}
+            MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+        }
 
-					if (!MainTool.IsNodeWithinViewDistance(nodeId)) {
-						continue;
-					}
+        private void RefreshCurrentPriorityNodeIds() {
+            TrafficPriorityManager tpm = TrafficPriorityManager.Instance;
 
-					Vector3 nodePos = default(Vector3);
-					Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
-						nodePos = node.m_position;
-						return true;
-					});
+            currentPriorityNodeIds.Clear();
+            for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+                if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
+                    continue;
+                }
 
-					for (int i = 0; i < 8; ++i) {
-						ushort segmentId = 0;
-						Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
-							segmentId = node.GetSegment(i);
-							return true;
-						});
+                if (!tpm.MayNodeHavePrioritySigns((ushort)nodeId)) {
+                    continue;
+                }
 
-						if (segmentId == 0) {
-							continue;
-						}
+                if (!tpm.HasNodePrioritySign((ushort)nodeId) && nodeId != SelectedNodeId) {
+                    continue;
+                }
 
-						bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
-						ExtSegment seg = segMan.ExtSegments[segmentId];
-						ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
+                /*if (! MainTool.IsNodeWithinViewDistance(nodeId)) {
+                        continue;
+                }*/
 
-						if (seg.oneWay && segEnd.outgoing) {
-							continue;
-						}
+                currentPriorityNodeIds.Add((ushort)nodeId);
+            }
 
-						// calculate sign position
-						Vector3 signPos = nodePos;
+            // Log._Debug($"PrioritySignsTool.RefreshCurrentPriorityNodeIds:
+            //     currentPriorityNodeIds={string.Join(", ", currentPriorityNodeIds.Select(
+            //     x => x.ToString()).ToArray())}");
+        }
 
-						Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort sId, ref NetSegment segment) {
-							signPos += 10f * (startNode ? segment.m_startDirection : segment.m_endDirection);
-							return true;
-						});
+        public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
+            if (viewOnly && !Options.prioritySignsOverlay) {
+                return;
+            }
 
-						Vector3 signScreenPos;
-						if (! MainTool.WorldToScreenPoint(signPos, out signScreenPos)) {
-							continue;
-						}
+            if (UIBase.GetTrafficManagerTool(false)?.GetToolMode()
+                == ToolMode.JunctionRestrictions)
+            {
+                return;
+            }
 
-						// draw sign and handle input
-						PriorityType sign = prioMan.GetPrioritySign(segmentId, startNode);
-						if (viewOnly && sign == PriorityType.None) {
-							continue;
-						}
-						if (!viewOnly && sign != PriorityType.None) {
-							showRemoveButton = true;
-						}
+            ShowGUI(viewOnly);
+        }
 
-						if (MainTool.DrawGenericSquareOverlayTexture(TextureResources.PrioritySignTextures[sign], camPos, signPos, 90f, !viewOnly) && clicked) {
-							PriorityType? newSign = null;
-							switch (sign) {
-								case PriorityType.Main:
-									newSign = PriorityType.Yield;
-									break;
-								case PriorityType.Yield:
-									newSign = PriorityType.Stop;
-									break;
-								case PriorityType.Stop:
-									newSign = PriorityType.Main;
-									break;
-								case PriorityType.None:
-								default:
-									newSign = prioMan.CountPrioritySignsAtNode(nodeId, PriorityType.Main) >= 2 ? PriorityType.Yield : PriorityType.Main;
-									break;
-							}
+        private void ShowGUI(bool viewOnly) {
+            try {
+                IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+                IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+                TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
-							if (newSign != null) {
-								SetPrioritySign(segmentId, startNode, (PriorityType)newSign);
-							}
-						} // draw sign
-					} // foreach segment end
+                Vector3 camPos = Constants.ServiceFactory.SimulationService.CameraPosition;
 
-					if (viewOnly) {
-						continue;
-					}
+                bool clicked = !viewOnly && MainTool.CheckClicked();
 
-					// draw remove button and handle click
-					if (showRemoveButton && MainTool.DrawHoverableSquareOverlayTexture(TextureResources.SignRemoveTexture2D, camPos, nodePos, 90f) && clicked) {
-						prioMan.RemovePrioritySignsFromNode(nodeId);
-						Log._Debug($"PrioritySignsTool.ShowGUI: Removed priority signs from node {nodeId}");
-						removedNodeId = nodeId;
-					}
-				} // foreach node
+                ushort removedNodeId = 0;
+                bool showRemoveButton = false;
 
-				if (removedNodeId != 0) {
-					currentPriorityNodeIds.Remove(removedNodeId);
-					SelectedNodeId = 0;
-				}
-			} catch (Exception e) {
-				Log.Error(e.ToString());
-			}
-		}
+                foreach (ushort nodeId in currentPriorityNodeIds) {
+                    if (! Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                        continue;
+                    }
 
-		public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType sign) {
-			ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
+                    if (!MainTool.IsNodeWithinViewDistance(nodeId)) {
+                        continue;
+                    }
 
-			// check for restrictions
-			if (!MayNodeHavePrioritySigns(nodeId)) {
-				Log._Debug($"PrioritySignsTool.SetPrioritySign: MayNodeHavePrioritySigns({nodeId})=false");
-				return false;
-			}
+                    Vector3 nodePos = default;
+                    Constants.ServiceFactory.NetService.ProcessNode(
+                        nodeId,
+                        (ushort nId, ref NetNode node) => {
+                            nodePos = node.m_position;
+                            return true;
+                        });
 
-			bool success = TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, sign);
-			Log._Debug($"PrioritySignsTool.SetPrioritySign: SetPrioritySign({segmentId}, {startNode}, {sign})={success}");
-			if (success && (sign == PriorityType.Stop || sign == PriorityType.Yield)) {
-				// make all undefined segments a main road
-				Log._Debug($"PrioritySignsTool.SetPrioritySign: flagging remaining segments at node {nodeId} as main road.");
-				for (int i = 0; i < 8; ++i) {
-					ushort otherSegmentId = 0;
-					Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
-						otherSegmentId = node.GetSegment(i);
-						return true;
-					});
+                    for (int i = 0; i < 8; ++i) {
+                        ushort segmentId = 0;
+                        Constants.ServiceFactory.NetService.ProcessNode(
+                            nodeId,
+                            (ushort nId, ref NetNode node) => {
+                                segmentId = node.GetSegment(i);
+                                return true;
+                            });
 
-					if (otherSegmentId == 0 || otherSegmentId == segmentId) {
-						continue;
-					}
+                        if (segmentId == 0) {
+                            continue;
+                        }
 
-					bool otherStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, nodeId);
+                        bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+                        ExtSegment seg = segMan.ExtSegments[segmentId];
+                        ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
-					if (TrafficPriorityManager.Instance.GetPrioritySign(otherSegmentId, otherStartNode) == PriorityType.None) {
-						Log._Debug($"PrioritySignsTool.SetPrioritySign: setting main priority sign for segment {otherSegmentId} @ {nodeId}");
-						TrafficPriorityManager.Instance.SetPrioritySign(otherSegmentId, otherStartNode, PriorityType.Main);
-					}
-				}
-			}
-			return success;
-		}
+                        if (seg.oneWay && segEnd.outgoing) {
+                            continue;
+                        }
 
-		public override void Cleanup() {
-			//TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+                        // calculate sign position
+                        Vector3 signPos = nodePos;
 
-			//foreach (PrioritySegment trafficSegment in prioMan.PrioritySegments) {
-			//	try {
-			//		trafficSegment?.Instance1?.Reset();
-			//		trafficSegment?.Instance2?.Reset();
-			//	} catch (Exception e) {
-			//		Log.Error($"Error occured while performing PrioritySignsTool.Cleanup: {e.ToString()}");
-			//	}
-			//}
+                        Constants.ServiceFactory.NetService.ProcessSegment(
+                            segmentId,
+                            (ushort sId, ref NetSegment segment) => {
+                                signPos +=
+                                    10f * (startNode
+                                               ? segment.m_startDirection
+                                               : segment.m_endDirection);
+                                return true;
+                            });
 
-			
-		}
+                        if (!MainTool.WorldToScreenPoint(signPos, out Vector3 _)) {
+                            continue;
+                        }
 
-		public override void OnActivate() {
-			RefreshCurrentPriorityNodeIds();
-		}
+                        // draw sign and handle input
+                        PriorityType sign = prioMan.GetPrioritySign(segmentId, startNode);
+                        if (viewOnly && sign == PriorityType.None) {
+                            continue;
+                        }
 
-		public override void Initialize() {
-			base.Initialize();
-			Cleanup();
-			if (Options.prioritySignsOverlay) {
-				RefreshCurrentPriorityNodeIds();
-			} else {
-				currentPriorityNodeIds.Clear();
-			}
-		}
+                        if (!viewOnly && sign != PriorityType.None) {
+                            showRemoveButton = true;
+                        }
 
-		private bool MayNodeHavePrioritySigns(ushort nodeId) {
-			SetPrioritySignError reason;
-			//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Checking if node {nodeId} may have priority signs.");
-			if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(nodeId, out reason)) {
-				//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not allow priority signs: {reason}");
-				if (reason == SetPrioritySignError.HasTimedLight) {
-					MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
-				}
-				return false;
-			}
-			//Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} allows priority signs");
-			return true;
-		}
-	}
+                        if (MainTool.DrawGenericSquareOverlayTexture(
+                                RoadUITextures.PrioritySignTextures[sign],
+                                camPos,
+                                signPos,
+                                90f,
+                                !viewOnly) && clicked)
+                        {
+                            PriorityType? newSign;
+                            switch (sign) {
+                                case PriorityType.Main: {
+                                    newSign = PriorityType.Yield;
+                                    break;
+                                }
+
+                                case PriorityType.Yield: {
+                                    newSign = PriorityType.Stop;
+                                    break;
+                                }
+
+                                case PriorityType.Stop: {
+                                    newSign = PriorityType.Main;
+                                    break;
+                                }
+
+                                // also: case PriorityType.None:
+                                default: {
+                                    newSign = prioMan.CountPrioritySignsAtNode(
+                                                  nodeId,
+                                                  PriorityType.Main) >= 2
+                                                  ? PriorityType.Yield
+                                                  : PriorityType.Main;
+                                    break;
+                                }
+                            }
+
+                            // newSign is never null here
+                            SetPrioritySign(segmentId, startNode, (PriorityType)newSign);
+                        } // draw sign
+                    } // foreach segment end
+
+                    if (viewOnly) {
+                        continue;
+                    }
+
+                    // draw remove button and handle click
+                    if (showRemoveButton
+                        && MainTool.DrawHoverableSquareOverlayTexture(
+                            RoadUITextures.SignRemove,
+                            camPos,
+                            nodePos,
+                            90f)
+                        && clicked)
+                    {
+                        prioMan.RemovePrioritySignsFromNode(nodeId);
+                        Log._Debug($"PrioritySignsTool.ShowGUI: Removed priority signs from node {nodeId}");
+                        removedNodeId = nodeId;
+                    }
+                } // foreach node
+
+                if (removedNodeId != 0) {
+                    currentPriorityNodeIds.Remove(removedNodeId);
+                    SelectedNodeId = 0;
+                }
+            } catch (Exception e) {
+                Log.Error(e.ToString());
+            }
+        }
+
+        private bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType sign) {
+            ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
+
+            // check for restrictions
+            if (!MayNodeHavePrioritySigns(nodeId)) {
+                Log._Debug($"PrioritySignsTool.SetPrioritySign: MayNodeHavePrioritySigns({nodeId})=false");
+                return false;
+            }
+
+            bool success = TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, sign);
+            Log._Debug($"PrioritySignsTool.SetPrioritySign: SetPrioritySign({segmentId}, " +
+                       $"{startNode}, {sign})={success}");
+
+            if (!success || (sign != PriorityType.Stop && sign != PriorityType.Yield)) {
+                return success;
+            }
+
+            // make all undefined segments a main road
+            Log._Debug("PrioritySignsTool.SetPrioritySign: flagging remaining segments at node " +
+                       $"{nodeId} as main road.");
+
+            for (int i = 0; i < 8; ++i) {
+                ushort otherSegmentId = 0;
+                Constants.ServiceFactory.NetService.ProcessNode(
+                    nodeId,
+                    (ushort nId, ref NetNode node) => {
+                        otherSegmentId = node.GetSegment(i);
+                        return true;
+                    });
+
+                if (otherSegmentId == 0 || otherSegmentId == segmentId) {
+                    continue;
+                }
+
+                bool otherStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, nodeId);
+
+                if (TrafficPriorityManager.Instance.GetPrioritySign(otherSegmentId, otherStartNode)
+                    == PriorityType.None)
+                {
+                    Log._Debug("PrioritySignsTool.SetPrioritySign: setting main priority sign " +
+                               $"for segment {otherSegmentId} @ {nodeId}");
+                    TrafficPriorityManager.Instance.SetPrioritySign(
+                        otherSegmentId,
+                        otherStartNode,
+                        PriorityType.Main);
+                }
+            }
+
+            return success;
+        }
+
+        public override void Cleanup() {
+            //TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+            //foreach (PrioritySegment trafficSegment in prioMan.PrioritySegments) {
+            //	try {
+            //		trafficSegment?.Instance1?.Reset();
+            //		trafficSegment?.Instance2?.Reset();
+            //	} catch (Exception e) {
+            //		Log.Error($"Error occured while performing PrioritySignsTool.Cleanup: {e.ToString()}");
+            //	}
+            //}
+        }
+
+        public override void OnActivate() {
+            RefreshCurrentPriorityNodeIds();
+        }
+
+        public override void Initialize() {
+            base.Initialize();
+            Cleanup();
+
+            if (Options.prioritySignsOverlay) {
+                RefreshCurrentPriorityNodeIds();
+            } else {
+                currentPriorityNodeIds.Clear();
+            }
+        }
+
+        private bool MayNodeHavePrioritySigns(ushort nodeId) {
+            SetPrioritySignError reason;
+            // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Checking if node {nodeId}
+            //     may have priority signs.");
+
+            if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(nodeId, out reason)) {
+                // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not
+                //     allow priority signs: {reason}");
+                if (reason == SetPrioritySignError.HasTimedLight) {
+                    MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
+                }
+
+                return false;
+            }
+
+            // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} allows priority signs");
+            return true;
+        }
+    }
 }

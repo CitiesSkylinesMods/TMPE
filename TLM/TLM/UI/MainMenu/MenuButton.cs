@@ -1,8 +1,9 @@
-﻿using ColossalFramework.UI;
-using System;
-using UnityEngine;
+﻿namespace TrafficManager.UI.MainMenu {
+    using System;
+    using ColossalFramework.UI;
+    using Textures;
+    using UnityEngine;
 
-namespace TrafficManager.UI.MainMenu {
     public abstract class MenuButton : LinearSpriteButton {
         public enum ButtonFunction {
             LaneConnector,
@@ -33,7 +34,7 @@ namespace TrafficManager.UI.MainMenu {
 
         public abstract void OnClickInternal(UIMouseEventParameter p);
 
-        public abstract ButtonFunction Function { get; }
+        protected abstract ButtonFunction Function { get; }
 
         public override bool CanActivate() {
             return true;
@@ -45,11 +46,13 @@ namespace TrafficManager.UI.MainMenu {
 
         public override string[] FunctionNames {
             get {
-                var functions = Enum.GetValues(typeof(ButtonFunction));
-                string[] ret = new string[functions.Length];
+                Array functions = Enum.GetValues(typeof(ButtonFunction));
+                var ret = new string[functions.Length];
+
                 for (int i = 0; i < functions.Length; ++i) {
                     ret[i] = functions.GetValue(i).ToString();
                 }
+
                 return ret;
             }
         }
