@@ -4,7 +4,6 @@
     using ColossalFramework;
     using CSUtil.Commons;
     using State.ConfigData;
-    using Traffic.Data;
 
     public class ExtSegmentManager
         : AbstractCustomManager,

@@ -9,7 +9,6 @@
     using JetBrains.Annotations;
     using State;
     using State.ConfigData;
-    using Traffic.Data;
     using UnityEngine;
 
     public class ExtVehicleManager
@@ -816,8 +815,8 @@
                     dls.MaxMaxOptLaneChanges,
                     egoism);
                 extVehicle.minSafeSpeedImprovement = Mathf.Lerp(
-                    dls.MinMinSafeSpeedImprovement,
-                    dls.MaxMinSafeSpeedImprovement,
+                    dls.MinMinSafeSpeedImprovement.GameSpeed,
+                    dls.MaxMinSafeSpeedImprovement.GameSpeed,
                     altruism);
                 extVehicle.minSafeTrafficImprovement = Mathf.Lerp(
                     dls.MinMinSafeTrafficImprovement,

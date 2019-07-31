@@ -11,7 +11,6 @@
     using Manager.Impl;
     using State;
     using Textures;
-    using Traffic.Data;
     using TrafficLight;
     using UnityEngine;
 

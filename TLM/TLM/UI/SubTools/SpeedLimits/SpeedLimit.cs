@@ -1,9 +1,17 @@
-﻿namespace TrafficManager.Traffic.Data {
-    using System;
+﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System.Collections.Generic;
     using State;
-    using UI;
     using UnityEngine;
+    using Util;
+
+    /// <summary>
+    /// Defines styles available for road signs
+    /// </summary>
+    public enum MphSignStyle {
+        SquareUS = 0,
+        RoundUK = 1,
+        RoundGerman = 2,
+    }
 
     public enum SpeedUnit {
         CurrentlyConfigured, // Currently selected in the options menu
@@ -11,35 +19,24 @@
         Mph
     }
 
-    public enum MphSignStyle {
-        SquareUS = 0,
-        RoundUK = 1,
-        RoundGerman = 2,
-    }
-
     /// <summary>
-    /// Defines a speed limit value with default Kmph and display value of Mph
-    /// for when the option is set to display Mph. The engine still uses kmph.
+    /// Contains constants and implements algorithms for building the speed limit palette and
+    /// selecting speeds from the palette.
     /// </summary>
-    public struct SpeedLimit {
-        public const float SPEED_TO_KMPH = 50.0f; // 1.0f equals 50 km/h
-        private const ushort LOWER_KMPH = 10;
-        public const ushort UPPER_KMPH = 140;
-        private const ushort KMPH_STEP = 10;
-
+    public class SpeedLimit {
         public const int
             BREAK_PALETTE_COLUMN_KMPH = 8; // palette shows N in a row, then break and another row
-
-        private const float SPEED_TO_MPH = 32.06f; // 50 km/h converted to mph
-        private const ushort LOWER_MPH = 5;
-        public const ushort UPPER_MPH = 90;
-        private const ushort MPH_STEP = 5;
 
         public const int
             BREAK_PALETTE_COLUMN_MPH = 10; // palette shows M in a row, then break and another row
 
-        private const float LOWER_SPEED = 0.1f;
-        private const float UPPER_SPEED = 2 * 10.0f; // 1000 km/h
+        private const ushort LOWER_KMPH = 10;
+        public const ushort UPPER_KMPH = 140;
+        private const ushort KMPH_STEP = 10;
+
+        private const ushort LOWER_MPH = 5;
+        public const ushort UPPER_MPH = 90;
+        private const ushort MPH_STEP = 5;
 
         /// <summary>
         /// Produces list of speed limits to offer user in the palette
@@ -52,13 +49,13 @@
             switch (unit) {
                 case SpeedUnit.Kmph:
                     for (var km = LOWER_KMPH; km <= UPPER_KMPH; km += KMPH_STEP) {
-                        result.Add(km / SPEED_TO_KMPH);
+                        result.Add(km / Constants.SPEED_TO_KMPH);
                     }
 
                     break;
                 case SpeedUnit.Mph:
                     for (var mi = LOWER_MPH; mi <= UPPER_MPH; mi += MPH_STEP) {
-                        result.Add(mi / SPEED_TO_MPH);
+                        result.Add(mi / Constants.SPEED_TO_MPH);
                     }
 
                     break;
@@ -73,7 +70,7 @@
         }
 
         public static string ToMphPreciseString(float speed) {
-            if (IsZero(speed)) {
+            if (FloatUtil.IsZero(speed)) {
                 return Translation.GetString("Speed_limit_unlimited");
             }
 
@@ -81,23 +78,11 @@
         }
 
         public static string ToKmphPreciseString(float speed) {
-            if (IsZero(speed)) {
+            if (FloatUtil.IsZero(speed)) {
                 return Translation.GetString("Speed_limit_unlimited");
             }
 
             return ToKmphPrecise(speed) + " km/h";
-        }
-
-        public static bool NearlyEqual(float a, float b) {
-            return Mathf.Abs(a - b) < 0.001f;
-        }
-
-        public static bool IsZero(float speed) {
-            return Math.Abs(speed) < Constants.VERY_SMALL_FLOAT;
-        }
-
-        public static bool IsValidRange(float speed) {
-            return IsZero(speed) || (speed >= LOWER_SPEED && speed <= UPPER_SPEED);
         }
 
         /// <summary>
@@ -106,12 +91,12 @@
         /// <param name="speed">Speed, scale: 1f=32 MPH</param>
         /// <returns>Speed in MPH rounded to nearest 5 MPH</returns>
         public static ushort ToMphRounded(float speed) {
-            var mph = speed * SPEED_TO_MPH;
+            var mph = speed * Constants.SPEED_TO_MPH;
             return (ushort)(Mathf.Round(mph / MPH_STEP) * MPH_STEP);
         }
 
         public static ushort ToMphPrecise(float speed) {
-            return (ushort)Mathf.Round(speed * SPEED_TO_MPH);
+            return (ushort)Mathf.Round(speed * Constants.SPEED_TO_MPH);
         }
 
         /// <summary>
@@ -120,12 +105,12 @@
         /// <param name="speed">Speed, scale: 1f=50km/h</param>
         /// <returns>Speed in km/h rounded to nearest 10 km/h</returns>
         public static ushort ToKmphRounded(float speed) {
-            var kmph = speed * SPEED_TO_KMPH;
+            var kmph = speed * Constants.SPEED_TO_KMPH;
             return (ushort)(Mathf.Round(kmph / KMPH_STEP) * KMPH_STEP);
         }
 
         public static ushort ToKmphPrecise(float speed) {
-            return (ushort)Mathf.Round(speed * SPEED_TO_KMPH);
+            return (ushort)Mathf.Round(speed * Constants.SPEED_TO_KMPH);
         }
 
         /// <summary>
@@ -146,10 +131,10 @@
                 }
 
                 if (rounded == 0) {
-                    return UPPER_MPH / SPEED_TO_MPH;
+                    return UPPER_MPH / Constants.SPEED_TO_MPH;
                 }
 
-                return (rounded > LOWER_MPH ? rounded - MPH_STEP : LOWER_MPH) / SPEED_TO_MPH;
+                return (rounded > LOWER_MPH ? rounded - MPH_STEP : LOWER_MPH) / Constants.SPEED_TO_MPH;
             } else {
                 ushort rounded = ToKmphRounded(speed);
                 if (rounded == LOWER_KMPH) {
@@ -157,10 +142,10 @@
                 }
 
                 if (rounded == 0) {
-                    return UPPER_KMPH / SPEED_TO_KMPH;
+                    return UPPER_KMPH / Constants.SPEED_TO_KMPH;
                 }
 
-                return (rounded > LOWER_KMPH ? rounded - KMPH_STEP : LOWER_KMPH) / SPEED_TO_KMPH;
+                return (rounded > LOWER_KMPH ? rounded - KMPH_STEP : LOWER_KMPH) / Constants.SPEED_TO_KMPH;
             }
         }
 
@@ -183,7 +168,7 @@
                     rounded = 0;
                 }
 
-                return rounded / SPEED_TO_MPH;
+                return rounded / Constants.SPEED_TO_MPH;
             } else {
                 ushort rounded = ToKmphRounded(speed);
                 rounded += KMPH_STEP;
@@ -192,7 +177,7 @@
                     rounded = 0;
                 }
 
-                return rounded / SPEED_TO_KMPH;
+                return rounded / Constants.SPEED_TO_KMPH;
             }
         }
 

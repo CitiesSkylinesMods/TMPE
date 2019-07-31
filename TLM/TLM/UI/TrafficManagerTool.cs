@@ -15,9 +15,9 @@
     using Manager.Impl;
     using State;
     using State.ConfigData;
-    using Traffic.Data;
     using MainMenu;
     using SubTools;
+    using SubTools.SpeedLimits;
     using Util;
     using UnityEngine;
 

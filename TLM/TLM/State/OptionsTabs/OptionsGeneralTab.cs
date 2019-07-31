@@ -4,8 +4,8 @@ namespace TrafficManager.State {
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
-    using Traffic.Data;
     using UI;
+    using UI.SubTools.SpeedLimits;
     using UnityEngine;
 
     public static class OptionsGeneralTab {

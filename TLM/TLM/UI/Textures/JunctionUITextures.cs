@@ -2,7 +2,6 @@ namespace TrafficManager.UI.Textures {
     using System;
     using System.Collections.Generic;
     using State;
-    using Traffic.Data;
     using UnityEngine;
     using Util;
     using static TextureResources;

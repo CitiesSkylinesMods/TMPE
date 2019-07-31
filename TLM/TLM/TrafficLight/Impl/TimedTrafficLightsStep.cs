@@ -736,7 +736,7 @@ namespace TrafficManager.TrafficLight.Impl {
             metric = GetMetric(flow, wait);
             return ChangeMetric == StepChangeMetric.Default
                        ? metric < 0
-                       : Math.Abs(metric) < Constants.VERY_SMALL_FLOAT;
+                       : Math.Abs(metric) < FloatUtil.VERY_SMALL_FLOAT;
         }
 
         /// <summary>

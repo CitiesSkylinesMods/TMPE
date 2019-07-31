@@ -15,7 +15,6 @@
     using Manager.Impl;
     using RedirectionFramework.Attributes;
     using State;
-    using Traffic.Data;
     using UnityEngine;
 
 #if DEBUG

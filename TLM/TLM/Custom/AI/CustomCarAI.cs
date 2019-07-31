@@ -16,7 +16,6 @@ namespace TrafficManager.Custom.AI {
     using RedirectionFramework.Attributes;
     using State;
     using State.ConfigData;
-    using Traffic.Data;
     using UnityEngine;
     using System.Diagnostics.CodeAnalysis;
     using CSUtil.Commons.Benchmark;

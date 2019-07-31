@@ -10,7 +10,6 @@
     using CSUtil.Commons;
     using State.ConfigData;
     using Geometry;
-    using Traffic.Data;
     using Util;
 
     public class GeometryManager

@@ -13,7 +13,6 @@ namespace TrafficManager.Custom.PathFinding {
     using Manager.Impl;
     using RedirectionFramework.Attributes;
     using State;
-    using Traffic.Data;
     using UnityEngine;
 
 #if !PF_DIJKSTRA

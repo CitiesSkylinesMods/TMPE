@@ -7,7 +7,6 @@
     using JetBrains.Annotations;
     using Manager.Impl;
     using Textures;
-    using Traffic.Data;
     using TrafficLight;
     using UnityEngine;
 

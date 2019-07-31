@@ -6,7 +6,7 @@
     using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
-    using Traffic.Data;
+
 #if DEBUG
     using State.ConfigData;
 #endif

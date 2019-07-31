@@ -5,18 +5,22 @@ namespace TrafficManager {
     using JetBrains.Annotations;
     using State;
     using Traffic;
-    using Traffic.Data;
+    using UI.SubTools.SpeedLimits;
 
     [Serializable]
     public class Configuration {
         [Serializable]
         public class LaneSpeedLimit {
             public uint laneId;
+
+            /// <summary>
+            /// Unit: km/h.
+            /// </summary>
             public ushort speedLimit;
 
             public LaneSpeedLimit(uint laneId, float speedLimit) {
                 this.laneId = laneId;
-                this.speedLimit = (ushort)(speedLimit * SpeedLimit.SPEED_TO_KMPH);
+                this.speedLimit = (ushort)(speedLimit * Constants.SPEED_TO_KMPH);
             }
         }
 

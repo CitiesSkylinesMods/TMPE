@@ -1,18 +1,16 @@
-﻿namespace TrafficManager.UI.SubTools {
+﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System;
     using System.Collections.Generic;
     using ColossalFramework;
+    using ColossalFramework.UI;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
     using Manager.Impl;
     using State;
     using Textures;
     using Traffic;
-    using Traffic.Data;
     using UnityEngine;
     using Util;
-    using static ColossalFramework.UI.UITextureAtlas;
-    using static Util.SegmentLaneTraverser;
 
     public class SpeedLimitsTool : SubTool {
         /// <summary>Visible sign size, slightly reduced from 100 to accomodate another column for MPH</summary>
@@ -380,7 +378,7 @@
                     info.m_Atlas.material.mainTexture != null &&
                     info.m_Atlas.material.mainTexture is Texture2D mainTex)
                 {
-                    SpriteInfo spriteInfo = info.m_Atlas[info.m_Thumbnail];
+                    UITextureAtlas.SpriteInfo spriteInfo = info.m_Atlas[info.m_Thumbnail];
 
                     if (spriteInfo != null && spriteInfo.texture != null &&
                         spriteInfo.texture.width > 0 && spriteInfo.texture.height > 0) {
@@ -436,7 +434,7 @@
 
             foreach (float speedLimit in allSpeedLimits) {
                 // Highlight palette item if it is very close to its float speed
-                if (SpeedLimit.NearlyEqual(currentPaletteSpeedLimit, speedLimit)) {
+                if (FloatUtil.NearlyEqual(currentPaletteSpeedLimit, speedLimit)) {
                     GUI.color = Color.gray;
                 }
 
@@ -802,5 +800,5 @@
 
             return hovered;
         }
-    }
+    } // end class
 }

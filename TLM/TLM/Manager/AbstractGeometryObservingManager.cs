@@ -8,7 +8,6 @@
     using Geometry;
     using JetBrains.Annotations;
     using State.ConfigData;
-    using Traffic.Data;
     using Util;
 
     public abstract class AbstractGeometryObservingManager : AbstractCustomManager, IObserver<GeometryUpdate> {
