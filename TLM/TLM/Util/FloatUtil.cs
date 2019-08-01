@@ -5,7 +5,7 @@ namespace TrafficManager.Util {
     /// <summary>
     /// Provides static functions for handling floating point values.
     /// </summary>
-    public class FloatUtil {
+    public static class FloatUtil {
         /// <summary>
         /// A very small value for float comparisons to zero
         /// </summary>
