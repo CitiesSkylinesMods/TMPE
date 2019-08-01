@@ -922,7 +922,7 @@
 
             if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph) {
                 MphValue rounded = speed.ToMphRounded(MPH_STEP);
-                rounded = new MphValue((ushort)(rounded.Mph + MPH_STEP));
+                rounded += MPH_STEP;
 
                 if (rounded.Mph > UPPER_MPH) {
                     rounded = new MphValue(0);
@@ -931,7 +931,7 @@
                 return SpeedValue.FromMph(rounded);
             } else {
                 KmphValue rounded = speed.ToKmphRounded(KMPH_STEP);
-                rounded = new KmphValue((ushort)(rounded.Kmph + KMPH_STEP));
+                rounded += KMPH_STEP;
 
                 if (rounded.Kmph > UPPER_KMPH) {
                     rounded = new KmphValue(0);
