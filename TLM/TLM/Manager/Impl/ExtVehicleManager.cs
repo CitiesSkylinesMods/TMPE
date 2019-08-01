@@ -815,8 +815,8 @@
                     dls.MaxMaxOptLaneChanges,
                     egoism);
                 extVehicle.minSafeSpeedImprovement = Mathf.Lerp(
-                    dls.MinMinSafeSpeedImprovement.GameSpeed,
-                    dls.MaxMinSafeSpeedImprovement.GameSpeed,
+                    dls.MinMinSafeSpeedImprovement.GameUnits,
+                    dls.MaxMinSafeSpeedImprovement.GameUnits,
                     altruism);
                 extVehicle.minSafeTrafficImprovement = Mathf.Lerp(
                     dls.MinMinSafeTrafficImprovement,

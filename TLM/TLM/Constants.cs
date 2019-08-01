@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager {
     using API.Manager;
     using GenericGameBridge.Factory;
+    using JetBrains.Annotations;
 
     public static class Constants {
         /// <summary>
@@ -21,6 +22,7 @@
         /// <summary>
         /// Conversion rate from MPH to game speed (also exists in TrafficManager.API.Constants)
         /// </summary>
+        [UsedImplicitly]
         public const float SPEED_TO_MPH = 32.06f; // 50 km/h converted to mph
 
         public static float ByteToFloat(byte b) {

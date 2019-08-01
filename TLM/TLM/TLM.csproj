@@ -240,8 +240,9 @@
     <Compile Include="UI\MainMenu\MenuButton.cs" />
     <Compile Include="UI\LinearSpriteButton.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
-    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimit.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
     <Compile Include="UI\Textures\JunctionUITextures.cs" />
     <Compile Include="UI\Textures\RoadUITextures.cs" />
     <Compile Include="UI\Textures\SpeedLimitTextures.cs" />

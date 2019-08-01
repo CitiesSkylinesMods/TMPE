@@ -129,13 +129,13 @@
         /// Minimum minimum required speed improvement for safe lane changes (in game units).
         /// Set to 5 km/h in game units.
         /// </summary>
-        public SpeedValue MinMinSafeSpeedImprovement = SpeedValue.FromKmph(5f);
+        public readonly SpeedValue MinMinSafeSpeedImprovement = SpeedValue.FromKmph(5);
 
         /// <summary>
         /// Maximum minimum required speed improvement for safe lane changes (in game units)
         /// Set to 30 km/h in game units.
         /// </summary>
-        public SpeedValue MaxMinSafeSpeedImprovement = SpeedValue.FromKmph(30f);
+        public readonly SpeedValue MaxMinSafeSpeedImprovement = SpeedValue.FromKmph(30);
 
         /*
          * min. required traffic flow improvement for safe lane changes

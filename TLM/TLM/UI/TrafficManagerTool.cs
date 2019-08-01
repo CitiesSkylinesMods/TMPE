@@ -1315,8 +1315,7 @@
                 // ushort segmentId = vState.currentSegmentId;
 
                 // Converting magnitudes into game speed float, and then into km/h
-                float vehSpeed = SpeedLimit.ToKmphPrecise(
-                    vehicleManager.m_vehicles.m_buffer[i].GetLastFrameVelocity().magnitude / 8f);
+                SpeedValue vehSpeed = SpeedValue.FromVelocity(vehicleManager.m_vehicles.m_buffer[i].GetLastFrameVelocity().magnitude);
 #if DEBUG
                 if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None &&
                     driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {
@@ -1324,7 +1323,7 @@
                 }
 #endif
                 string labelStr = string.Format(
-                    "V #{0} is a {1}{2} {3} @ ~{4:0.0} km/h (len: {5:0.0}, {6} @ {7} ({8}), l. {9} " +
+                    "V #{0} is a {1}{2} {3} @ ~{4} (len: {5:0.0}, {6} @ {7} ({8}), l. {9} " +
                     "-> {10}, l. {11}), w: {12}\n" +
                     "di: {13} dc: {14} m: {15} f: {16} l: {17} lid: {18} ltsu: {19} lpu: {20} " +
                     "als: {21} srnd: {22} trnd: {23}",
@@ -1332,7 +1331,7 @@
                     vState.recklessDriver ? "reckless " : string.Empty,
                     vState.flags,
                     vState.vehicleType,
-                    vehSpeed,
+                    vehSpeed.ToKmphPrecise().ToString(),
                     vState.totalLength,
                     vState.junctionTransitState,
                     vState.currentSegmentId,

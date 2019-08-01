@@ -2649,10 +2649,10 @@
                     if (logLaneSelection) {
                         Log._DebugFormat(
                             "VehicleBehaviorManager.FindBestLane({0}): a lane change for speed " +
-                            "improvement is possible. optImprovementInKmH={1} km/h speedDiff={2} " +
+                            "improvement is possible. optImprovementInKmH={1} speedDiff={2} " +
                             "(bestOptMeanSpeed={3}, vehicleCurVelocity={4}, foundSafeLaneChange={5})",
                             vehicleId,
-                            SpeedLimit.ToKmphPrecise(optImprovementSpeed),
+                            new SpeedValue(optImprovementSpeed).ToKmphPrecise(),
                             speedDiff,
                             bestOptMeanSpeed,
                             vehicleCurSpeed,
