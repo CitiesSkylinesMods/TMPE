@@ -16,7 +16,7 @@ namespace TrafficManager.API.Traffic.Data {
             return $"{Kmph:0.0} km/h";
         }
 
-        public ushort Kmph { get; set; }
+        public ushort Kmph { get; }
     }
 
     /// <summary>
@@ -32,7 +32,7 @@ namespace TrafficManager.API.Traffic.Data {
             return $"{Mph} MPH";
         }
 
-        public ushort Mph { get; set; }
+        public ushort Mph { get; }
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ namespace TrafficManager.API.Traffic.Data {
         /// <summary>
         /// Sets or returns stored value in game units (no conversion)
         /// </summary>
-        public float GameUnits { get; set; }
+        public float GameUnits { get; }
 
         /// <summary>
         /// Converts stored value in game units into velocity magnitude (8x the game units)

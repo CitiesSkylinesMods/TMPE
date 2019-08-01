@@ -238,7 +238,8 @@
             }
 
             if (currentSpeedLimit.GameUnits < 0f) {
-                currentSpeedLimit.GameUnits = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info);
+                currentSpeedLimit = new SpeedValue(
+                    SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info));
                 Log._Debug($"set currentSpeedLimit to {currentSpeedLimit}");
             }
 
@@ -259,7 +260,8 @@
                 currentInfoIndex =
                     (currentInfoIndex + mainNetInfos.Count - 1) % mainNetInfos.Count;
                 info = mainNetInfos[currentInfoIndex];
-                currentSpeedLimit.GameUnits = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info);
+                currentSpeedLimit = new SpeedValue(
+                    SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info));
                 UpdateRoadTex(info);
             }
 
@@ -283,7 +285,8 @@
             if (GUILayout.Button("→", GUILayout.Width(50))) {
                 currentInfoIndex = (currentInfoIndex + 1) % mainNetInfos.Count;
                 info = mainNetInfos[currentInfoIndex];
-                currentSpeedLimit.GameUnits = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info);
+                currentSpeedLimit = new SpeedValue(
+                    SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info));
                 UpdateRoadTex(info);
             }
 
@@ -919,19 +922,19 @@
 
             if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph) {
                 MphValue rounded = speed.ToMphRounded(MPH_STEP);
-                rounded.Mph += MPH_STEP;
+                rounded = new MphValue((ushort)(rounded.Mph + MPH_STEP));
 
                 if (rounded.Mph > UPPER_MPH) {
-                    rounded.Mph = 0;
+                    rounded = new MphValue(0);
                 }
 
                 return SpeedValue.FromMph(rounded);
             } else {
                 KmphValue rounded = speed.ToKmphRounded(KMPH_STEP);
-                rounded.Kmph += KMPH_STEP;
+                rounded = new KmphValue((ushort)(rounded.Kmph + KMPH_STEP));
 
                 if (rounded.Kmph > UPPER_KMPH) {
-                    rounded.Kmph = 0;
+                    rounded = new KmphValue(0);
                 }
 
                 return SpeedValue.FromKmph(rounded);
