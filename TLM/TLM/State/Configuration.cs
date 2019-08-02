@@ -6,7 +6,6 @@ namespace TrafficManager {
     using JetBrains.Annotations;
     using State;
     using Traffic;
-    using UI.SubTools.SpeedLimits;
 
     [Serializable]
     public class Configuration {
