@@ -6,7 +6,6 @@ namespace TrafficManager.Manager.Impl {
     using API.TrafficLight;
     using ColossalFramework;
     using CSUtil.Commons;
-    using Traffic.Data;
     using TrafficLight;
     using TrafficLight.Impl;
 

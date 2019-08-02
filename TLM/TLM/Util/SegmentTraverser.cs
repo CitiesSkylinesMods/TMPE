@@ -4,7 +4,6 @@
     using API.Manager;
     using API.Traffic.Data;
     using CSUtil.Commons;
-    using Traffic.Data;
 
     public class SegmentTraverser {
         [Flags]

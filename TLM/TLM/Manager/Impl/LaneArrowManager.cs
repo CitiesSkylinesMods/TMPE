@@ -8,7 +8,6 @@
     using ColossalFramework;
     using CSUtil.Commons;
     using State;
-    using Traffic.Data;
 
     public class LaneArrowManager
         : AbstractGeometryObservingManager,

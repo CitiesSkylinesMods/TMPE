@@ -1,20 +1,33 @@
-﻿namespace TrafficManager.UI.SubTools {
+﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System;
     using System.Collections.Generic;
+    using API.Traffic.Data;
     using ColossalFramework;
+    using ColossalFramework.UI;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
     using Manager.Impl;
     using State;
     using Textures;
     using Traffic;
-    using Traffic.Data;
     using UnityEngine;
     using Util;
-    using static ColossalFramework.UI.UITextureAtlas;
-    using static Util.SegmentLaneTraverser;
 
     public class SpeedLimitsTool : SubTool {
+        public const int
+            BREAK_PALETTE_COLUMN_KMPH = 8; // palette shows N in a row, then break and another row
+
+        public const int
+            BREAK_PALETTE_COLUMN_MPH = 10; // palette shows M in a row, then break and another row
+
+        private const ushort LOWER_KMPH = 10;
+        public const ushort UPPER_KMPH = 140;
+        public const ushort KMPH_STEP = 10;
+
+        private const ushort LOWER_MPH = 5;
+        public const ushort UPPER_MPH = 90;
+        public const ushort MPH_STEP = 5;
+
         /// <summary>Visible sign size, slightly reduced from 100 to accomodate another column for MPH</summary>
         private const int GUI_SPEED_SIGN_SIZE = 80;
         private readonly float speedLimitSignSize = 70f;
@@ -22,7 +35,7 @@
         private bool cursorInSecondaryPanel;
 
         /// <summary>Currently selected speed limit on the limits palette</summary>
-        private float currentPaletteSpeedLimit = -1f;
+        private SpeedValue currentPaletteSpeedLimit = new SpeedValue(-1f);
 
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir =
             new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
@@ -34,7 +47,7 @@
         private readonly HashSet<ushort> currentlyVisibleSegmentIds;
         private bool defaultsWindowVisible;
         private int currentInfoIndex = -1;
-        private float currentSpeedLimit = -1f;
+        private SpeedValue currentSpeedLimit = new SpeedValue(-1f);
 
         private Texture2D RoadTexture {
             get {
@@ -117,7 +130,7 @@
             lastCamPos = null;
             lastCamRot = null;
             currentInfoIndex = -1;
-            currentSpeedLimit = -1f;
+            currentSpeedLimit = new SpeedValue(-1f);
         }
 
         private Quaternion? lastCamRot;
@@ -224,8 +237,9 @@
                 UpdateRoadTex(info);
             }
 
-            if (currentSpeedLimit < 0f) {
-                currentSpeedLimit = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info);
+            if (currentSpeedLimit.GameUnits < 0f) {
+                currentSpeedLimit = new SpeedValue(
+                    SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info));
                 Log._Debug($"set currentSpeedLimit to {currentSpeedLimit}");
             }
 
@@ -246,7 +260,8 @@
                 currentInfoIndex =
                     (currentInfoIndex + mainNetInfos.Count - 1) % mainNetInfos.Count;
                 info = mainNetInfos[currentInfoIndex];
-                currentSpeedLimit = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info);
+                currentSpeedLimit = new SpeedValue(
+                    SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info));
                 UpdateRoadTex(info);
             }
 
@@ -270,7 +285,8 @@
             if (GUILayout.Button("→", GUILayout.Width(50))) {
                 currentInfoIndex = (currentInfoIndex + 1) % mainNetInfos.Count;
                 info = mainNetInfos[currentInfoIndex];
-                currentSpeedLimit = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info);
+                currentSpeedLimit = new SpeedValue(
+                    SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info));
                 UpdateRoadTex(info);
             }
 
@@ -299,7 +315,7 @@
                 // currentSpeedLimit = (currentSpeedLimitIndex +
                 //     SpeedLimitManager.Instance.AvailableSpeedLimits.Count - 1)
                 //     % SpeedLimitManager.Instance.AvailableSpeedLimits.Count;
-                currentSpeedLimit = SpeedLimit.GetPrevious(currentSpeedLimit);
+                currentSpeedLimit = GetPrevious(currentSpeedLimit);
             }
 
             GUILayout.FlexibleSpace();
@@ -329,7 +345,7 @@
             if (GUILayout.Button("→", GUILayout.Width(50))) {
                 // currentSpeedLimitIndex = (currentSpeedLimitIndex + 1) %
                 //     SpeedLimitManager.Instance.AvailableSpeedLimits.Count;
-                currentSpeedLimit = SpeedLimit.GetNext(currentSpeedLimit);
+                currentSpeedLimit = GetNext(currentSpeedLimit);
             }
 
             GUILayout.FlexibleSpace();
@@ -354,7 +370,7 @@
 
             if (GUILayout.Button(Translation.GetString("Save"), GUILayout.Width(70))) {
                 SpeedLimitManager.Instance.FixCurrentSpeedLimits(info);
-                SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit);
+                SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit.GameUnits);
             }
 
             GUILayout.FlexibleSpace();
@@ -362,7 +378,7 @@
             if (GUILayout.Button(
                 Translation.GetString("Save") + " & " + Translation.GetString("Apply"),
                 GUILayout.Width(160))) {
-                SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit);
+                SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit.GameUnits);
                 SpeedLimitManager.Instance.ClearCurrentSpeedLimits(info);
             }
 
@@ -380,7 +396,7 @@
                     info.m_Atlas.material.mainTexture != null &&
                     info.m_Atlas.material.mainTexture is Texture2D mainTex)
                 {
-                    SpriteInfo spriteInfo = info.m_Atlas[info.m_Thumbnail];
+                    UITextureAtlas.SpriteInfo spriteInfo = info.m_Atlas[info.m_Thumbnail];
 
                     if (spriteInfo != null && spriteInfo.texture != null &&
                         spriteInfo.texture.width > 0 && spriteInfo.texture.height > 0) {
@@ -426,17 +442,16 @@
             GUILayout.FlexibleSpace();
 
             Color oldColor = GUI.color;
-            List<float> allSpeedLimits = SpeedLimit.EnumerateSpeedLimits(SpeedUnit.CurrentlyConfigured);
-            allSpeedLimits.Add(0); // add last item: no limit
+            List<SpeedValue> allSpeedLimits = EnumerateSpeedLimits(SpeedUnit.CurrentlyConfigured);
+            allSpeedLimits.Add(new SpeedValue(0)); // add last item: no limit
 
             bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
             var column = 0u; // break palette to a new line at breakColumn
-            int breakColumn = showMph ? SpeedLimit.BREAK_PALETTE_COLUMN_MPH
-                                  : SpeedLimit.BREAK_PALETTE_COLUMN_KMPH;
+            int breakColumn = showMph ? BREAK_PALETTE_COLUMN_MPH : BREAK_PALETTE_COLUMN_KMPH;
 
-            foreach (float speedLimit in allSpeedLimits) {
+            foreach (SpeedValue speedLimit in allSpeedLimits) {
                 // Highlight palette item if it is very close to its float speed
-                if (SpeedLimit.NearlyEqual(currentPaletteSpeedLimit, speedLimit)) {
+                if (FloatUtil.NearlyEqual(currentPaletteSpeedLimit.GameUnits, speedLimit.GameUnits)) {
                     GUI.color = Color.gray;
                 }
 
@@ -499,7 +514,7 @@
         /// <summary>Helper to create speed limit sign + label below converted to the opposite unit</summary>
         /// <param name="showMph">Config value from GlobalConfig.I.M.ShowMPH</param>
         /// <param name="speedLimit">The float speed to show</param>
-        private void GuiSpeedLimitsWindow_AddButton(bool showMph, float speedLimit) {
+        private void GuiSpeedLimitsWindow_AddButton(bool showMph, SpeedValue speedLimit) {
             // The button is wrapped in vertical sub-layout and a label for MPH/KMPH is added
             GUILayout.BeginVertical();
 
@@ -509,7 +524,7 @@
             if (GUILayout.Button(
                 SpeedLimitTextures.GetSpeedLimitTexture(speedLimit),
                 GUILayout.Width(signSize),
-                GUILayout.Height(signSize * SpeedLimit.GetVerticalTextureScale()))) {
+                GUILayout.Height(signSize * GetVerticalTextureScale()))) {
                 currentPaletteSpeedLimit = speedLimit;
             }
 
@@ -521,8 +536,8 @@
             GUILayout.FlexibleSpace();
             GUILayout.Label(
                 showMph
-                    ? SpeedLimit.ToKmphPreciseString(speedLimit)
-                    : SpeedLimit.ToMphPreciseString(speedLimit));
+                    ? ToKmphPreciseString(speedLimit)
+                    : ToMphPreciseString(speedLimit));
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
@@ -541,7 +556,9 @@
             Vector3 center = segment.m_bounds.center;
             NetManager netManager = Singleton<NetManager>.instance;
             var hovered = false;
-            float speedLimitToSet = viewOnly ? -1f : currentPaletteSpeedLimit;
+            SpeedValue speedLimitToSet = viewOnly
+                                             ? new SpeedValue(-1f)
+                                             : currentPaletteSpeedLimit;
             bool showPerLane = showLimitsPerLane;
 
             if (!viewOnly) {
@@ -551,7 +568,7 @@
             }
 
             // US signs are rectangular, all other are round
-            float speedLimitSignVerticalScale = SpeedLimit.GetVerticalTextureScale();
+            float speedLimitSignVerticalScale = GetVerticalTextureScale();
 
             if (showPerLane) {
                 // show individual speed limit handle per lane
@@ -609,7 +626,9 @@
                         directions.Add(laneInfo.m_finalDirection);
                     }
 
-                    float laneSpeedLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId);
+                    SpeedValue laneSpeedLimit = new SpeedValue(
+                        SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId));
+
                     bool hoveredHandle = MainTool.DrawGenericOverlayGridTexture(
                         SpeedLimitTextures.GetSpeedLimitTexture(laneSpeedLimit),
                         camPos,
@@ -653,7 +672,7 @@
                             laneIndex,
                             laneInfo,
                             laneId,
-                            speedLimitToSet);
+                            speedLimitToSet.GameUnits);
 
                         if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
                             int slIndexCopy = sortedLaneIndex;
@@ -687,7 +706,7 @@
                                                 data.CurLanePos.laneIndex,
                                                 curLaneInfo,
                                                 data.CurLanePos.laneId,
-                                                speedLimitToSet);
+                                                speedLimitToSet.GameUnits);
                                             return true;
                                         });
 
@@ -734,15 +753,19 @@
 
                     // Draw something right here, the road sign texture
                     GUI.color = guiColor;
-                    float displayLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key);
+                    SpeedValue displayLimit = new SpeedValue(
+                        SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key));
                     Texture2D tex = SpeedLimitTextures.GetSpeedLimitTexture(displayLimit);
+
                     GUI.DrawTexture(boundingBox, tex);
 
                     if (hoveredHandle && Input.GetMouseButton(0) && !IsCursorInPanel()) {
                         // change the speed limit to the selected one
                         // Log._Debug($"Setting speed limit of segment {segmentId}, dir {e.Key.ToString()}
                         //     to {speedLimitToSet}");
-                        SpeedLimitManager.Instance.SetSpeedLimit(segmentId, e.Key, currentPaletteSpeedLimit);
+                        SpeedLimitManager.Instance.SetSpeedLimit(segmentId,
+                                                                 e.Key,
+                                                                 currentPaletteSpeedLimit.GameUnits);
 
                         if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
                             NetInfo.Direction normDir = e.Key;
@@ -787,7 +810,7 @@
                                         SpeedLimitManager.Instance.SetSpeedLimit(
                                             otherSegmentId,
                                             laneInfo.m_finalDirection,
-                                            speedLimitToSet);
+                                            speedLimitToSet.GameUnits);
                                     }
 
                                     return true;
@@ -802,5 +825,133 @@
 
             return hovered;
         }
-    }
+
+        public static string ToMphPreciseString(SpeedValue speed) {
+            return FloatUtil.IsZero(speed.GameUnits)
+                       ? Translation.GetString("Speed_limit_unlimited")
+                       : speed.ToMphPrecise().ToString();
+        }
+
+        public static string ToKmphPreciseString(SpeedValue speed) {
+            return FloatUtil.IsZero(speed.GameUnits)
+                       ? Translation.GetString("Speed_limit_unlimited")
+                       : speed.ToKmphPrecise().ToString();
+        }
+
+        /// <summary>
+        /// Produces list of speed limits to offer user in the palette
+        /// </summary>
+        /// <param name="unit">What kind of speed limit list is required</param>
+        /// <returns>List from smallest to largest speed with the given unit. Zero (no limit) is not added to the list.
+        /// The values are in-game speeds as float.</returns>
+        public static List<SpeedValue> EnumerateSpeedLimits(SpeedUnit unit) {
+            var result = new List<SpeedValue>();
+            switch (unit) {
+                case SpeedUnit.Kmph:
+                    for (var km = LOWER_KMPH; km <= UPPER_KMPH; km += KMPH_STEP) {
+                        result.Add(SpeedValue.FromKmph(km));
+                    }
+
+                    break;
+                case SpeedUnit.Mph:
+                    for (var mi = LOWER_MPH; mi <= UPPER_MPH; mi += MPH_STEP) {
+                        result.Add(SpeedValue.FromMph(mi));
+                    }
+
+                    break;
+                case SpeedUnit.CurrentlyConfigured:
+                    // Automatically choose from the config
+                    return GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
+                               ? EnumerateSpeedLimits(SpeedUnit.Mph)
+                               : EnumerateSpeedLimits(SpeedUnit.Kmph);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Based on the MPH/KMPH settings round the current speed to the nearest STEP and
+        /// then decrease by STEP.
+        /// </summary>
+        /// <param name="speed">Ingame speed</param>
+        /// <returns>Ingame speed decreased by the increment for MPH or KMPH</returns>
+        public static SpeedValue GetPrevious(SpeedValue speed) {
+            if (speed.GameUnits < 0f) {
+                return new SpeedValue(-1f);
+            }
+
+            if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph) {
+                MphValue rounded = speed.ToMphRounded(MPH_STEP);
+                if (rounded.Mph == LOWER_MPH) {
+                    return new SpeedValue(0);
+                }
+
+                if (rounded.Mph == 0) {
+                    return SpeedValue.FromMph(UPPER_MPH);
+                }
+
+                return SpeedValue.FromMph(rounded.Mph > LOWER_MPH
+                                              ? (ushort)(rounded.Mph - MPH_STEP)
+                                              : LOWER_MPH);
+            } else {
+                KmphValue rounded = speed.ToKmphRounded(KMPH_STEP);
+                if (rounded.Kmph == LOWER_KMPH) {
+                    return new SpeedValue(0);
+                }
+
+                if (rounded.Kmph == 0) {
+                    return SpeedValue.FromKmph(UPPER_KMPH);
+                }
+
+                return SpeedValue.FromKmph(rounded.Kmph > LOWER_KMPH
+                                               ? (ushort)(rounded.Kmph - KMPH_STEP)
+                                               : LOWER_KMPH);
+            }
+        }
+
+        /// <summary>
+        /// Based on the MPH/KMPH settings round the current speed to the nearest STEP and
+        /// then increase by STEP.
+        /// </summary>
+        /// <param name="speed">Ingame speed</param>
+        /// <returns>Ingame speed increased by the increment for MPH or KMPH</returns>
+        public static SpeedValue GetNext(SpeedValue speed) {
+            if (speed.GameUnits < 0f) {
+                return new SpeedValue(-1f);
+            }
+
+            if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph) {
+                MphValue rounded = speed.ToMphRounded(MPH_STEP);
+                rounded += MPH_STEP;
+
+                if (rounded.Mph > UPPER_MPH) {
+                    rounded = new MphValue(0);
+                }
+
+                return SpeedValue.FromMph(rounded);
+            } else {
+                KmphValue rounded = speed.ToKmphRounded(KMPH_STEP);
+                rounded += KMPH_STEP;
+
+                if (rounded.Kmph > UPPER_KMPH) {
+                    rounded = new KmphValue(0);
+                }
+
+                return SpeedValue.FromKmph(rounded);
+            }
+        }
+
+        /// <summary>
+        /// For US signs and MPH enabled, scale textures vertically by 1.25f.
+        /// Other signs are round.
+        /// </summary>
+        /// <returns>Multiplier for horizontal sign size</returns>
+        public static float GetVerticalTextureScale() {
+            return (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph &&
+                    GlobalConfig.Instance.Main.MphRoadSignStyle == MphSignStyle.SquareUS)
+                       ? 1.25f
+                       : 1.0f;
+        }
+
+    } // end class
 }

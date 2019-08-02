@@ -10,7 +10,6 @@
     using JetBrains.Annotations;
     using State;
     using State.ConfigData;
-    using Traffic.Data;
     using UnityEngine;
 
     public class LaneConnectionManager

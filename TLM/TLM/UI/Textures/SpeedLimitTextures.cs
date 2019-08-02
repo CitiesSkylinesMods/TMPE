@@ -1,8 +1,9 @@
 namespace TrafficManager.UI.Textures {
     using System;
     using System.Collections.Generic;
+    using API.Traffic.Data;
     using State;
-    using Traffic.Data;
+    using SubTools.SpeedLimits;
     using UnityEngine;
     using Util;
     using static TextureResources;
@@ -38,11 +39,11 @@ namespace TrafficManager.UI.Textures {
         /// <summary>
         /// Given the float speed, style and MPH option return a texture to render.
         /// </summary>
-        /// <param name="speedLimit">float speed</param>
+        /// <param name="spd">float speed</param>
         /// <param name="mphStyle">Signs theme</param>
         /// <param name="unit">Mph or km/h</param>
         /// <returns></returns>
-        public static Texture2D GetSpeedLimitTexture(float speedLimit, MphSignStyle mphStyle, SpeedUnit unit) {
+        public static Texture2D GetSpeedLimitTexture(SpeedValue spd, MphSignStyle mphStyle, SpeedUnit unit) {
             // Select the source for the textures based on unit and the theme
             bool mph = unit == SpeedUnit.Mph;
             IDictionary<int, Texture2D> textures = TexturesKmph;
@@ -61,10 +62,12 @@ namespace TrafficManager.UI.Textures {
             }
 
             // Round to nearest 5 MPH or nearest 10 km/h
-            ushort index = mph ? SpeedLimit.ToMphRounded(speedLimit) : SpeedLimit.ToKmphRounded(speedLimit);
+            ushort index = mph ? spd.ToMphRounded(SpeedLimitsTool.MPH_STEP).Mph
+                               : spd.ToKmphRounded(SpeedLimitsTool.KMPH_STEP).Kmph;
 
             // Trim the index since 140 km/h / 90 MPH is the max sign we have
-            ushort upper = mph ? SpeedLimit.UPPER_MPH : SpeedLimit.UPPER_KMPH;
+            ushort upper = mph ? SpeedLimitsTool.UPPER_MPH
+                               : SpeedLimitsTool.UPPER_KMPH;
 
             // Show unlimited if the speed cannot be represented by the available sign textures
             if (index == 0 || index > upper) {
@@ -80,12 +83,12 @@ namespace TrafficManager.UI.Textures {
         /// <summary>
         /// Given speed limit, round it up to nearest Kmph or Mph and produce a texture
         /// </summary>
-        /// <param name="speedLimit">Ingame speed</param>
+        /// <param name="spd">Ingame speed</param>
         /// <returns>The texture, hopefully it existed</returns>
-        public static Texture2D GetSpeedLimitTexture(float speedLimit) {
+        public static Texture2D GetSpeedLimitTexture(SpeedValue spd) {
             var m = GlobalConfig.Instance.Main;
             var unit = m.DisplaySpeedLimitsMph ? SpeedUnit.Mph : SpeedUnit.Kmph;
-            return GetSpeedLimitTexture(speedLimit, m.MphRoadSignStyle, unit);
+            return GetSpeedLimitTexture(spd, m.MphRoadSignStyle, unit);
         }
     }
 }

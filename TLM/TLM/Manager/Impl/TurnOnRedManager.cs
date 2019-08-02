@@ -3,7 +3,6 @@ namespace TrafficManager.Manager.Impl {
     using API.Traffic.Data;
     using CSUtil.Commons;
     using State.ConfigData;
-    using Traffic.Data;
 
     public class TurnOnRedManager
         : AbstractGeometryObservingManager,

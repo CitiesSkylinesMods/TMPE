@@ -14,7 +14,6 @@ namespace TrafficManager.Manager.Impl {
     using State;
     using State.ConfigData;
     using Traffic;
-    using Traffic.Data;
     using TrafficLight;
     using UnityEngine;
 

@@ -8,8 +8,9 @@
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using State;
-    using Traffic.Data;
+    using UI.SubTools.SpeedLimits;
     using UnityEngine;
+    using Util;
 
     public class SpeedLimitManager
         : AbstractGeometryObservingManager,
@@ -26,6 +27,9 @@
 
         /// <summary>Ingame speed units, max possible speed</summary>
         public const float MAX_SPEED = 10f * 2f; // 1000 km/h
+
+        /// <summary>Ingame speed units, minimal speed</summary>
+        private const float MIN_SPEED = 0.1f; // 5 km/h
 
         // For each NetInfo (by name) and lane index: game default speed limit
         private Dictionary<string, float[]> vanillaLaneSpeedLimitsByNetInfoName;
@@ -307,7 +311,7 @@
         /// <param name="customSpeedLimit">Custom speed limit which can be zero</param>
         /// <returns>Speed limit in game speed units</returns>
         public float ToGameSpeedLimit(float customSpeedLimit) {
-            return SpeedLimit.IsZero(customSpeedLimit)
+            return FloatUtil.IsZero(customSpeedLimit)
                        ? MAX_SPEED
                        : customSpeedLimit;
         }
@@ -552,7 +556,7 @@
                 return false;
             }
 
-            if (!SpeedLimit.IsValidRange(speedLimit)) {
+            if (!IsValidRange(speedLimit)) {
                 return false;
             }
 
@@ -578,7 +582,7 @@
                 return false;
             }
 
-            if (!SpeedLimit.IsValidRange(speedLimit)) {
+            if (!IsValidRange(speedLimit)) {
                 return false;
             }
 
@@ -615,7 +619,7 @@
 #if DEBUG
                 Log._Debug(
                     $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
-                    $"to {speedLimit * SpeedLimit.SPEED_TO_KMPH}");
+                    $"to {speedLimit * Constants.SPEED_TO_KMPH}");
 #endif
                 Flags.SetLaneSpeedLimit(curLaneId, speedLimit);
 
@@ -828,7 +832,7 @@
                         $"lanes={info?.m_lanes} is {customSpeedLimit}");
 #endif
 
-                    if (SpeedLimit.IsValidRange(customSpeedLimit)) {
+                    if (IsValidRange(customSpeedLimit)) {
                         // lane speed limit differs from default speed limit
 #if DEBUGLOAD
                         Log._Debug($"SpeedLimitManager.LoadData: Loading lane speed limit: lane "+
@@ -839,7 +843,7 @@
                             $"SpeedLimitManager.LoadData: Loading lane speed limit: " +
                             $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit} km/h");
                         float kmph = laneSpeedLimit.speedLimit /
-                                     SpeedLimit.SPEED_TO_KMPH; // convert to game units
+                                     Constants.SPEED_TO_KMPH; // convert to game units
                         Flags.SetLaneSpeedLimit(laneSpeedLimit.laneId, kmph);
                     } else {
 #if DEBUGLOAD
@@ -864,7 +868,7 @@
             var ret = new List<Configuration.LaneSpeedLimit>();
             foreach (KeyValuePair<uint, float> e in Flags.GetAllLaneSpeedLimits()) {
                 try {
-                    var laneSpeedLimit = new Configuration.LaneSpeedLimit(e.Key, e.Value);
+                    var laneSpeedLimit = new Configuration.LaneSpeedLimit(e.Key, new SpeedValue(e.Value));
 #if DEBUGSAVE
                     Log._Debug($"Saving speed limit of lane {laneSpeedLimit.laneId}: " +
                         $"{laneSpeedLimit.speedLimit*SpeedLimit.SPEED_TO_KMPH} km/h");
@@ -955,6 +959,9 @@
         public static ICustomDataManager<Dictionary<string, float>> AsCustomDefaultSpeedLimitsDM() {
             return Instance;
         }
-    }
 
+        public static bool IsValidRange(float speed) {
+            return FloatUtil.IsZero(speed) || (speed >= MIN_SPEED && speed <= MAX_SPEED);
+        }
+    } // end class
 }

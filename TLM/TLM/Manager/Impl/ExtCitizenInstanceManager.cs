@@ -11,7 +11,6 @@
     using Custom.PathFinding;
     using State;
     using State.ConfigData;
-    using Traffic.Data;
     using UnityEngine;
 
     public class ExtCitizenInstanceManager

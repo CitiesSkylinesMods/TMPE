@@ -5,7 +5,6 @@
     using ColossalFramework;
     using CSUtil.Commons;
     using State;
-    using Traffic.Data;
     using UnityEngine;
 
     public class ExtBuildingManager

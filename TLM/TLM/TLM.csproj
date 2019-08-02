@@ -204,7 +204,6 @@
     <Compile Include="State\OptionsTabs\OptionsOverlaysTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsVehicleRestrictionsTab.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
-    <Compile Include="Traffic\Data\SpeedLimit.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
     <Compile Include="Manager\Impl\VehicleRestrictionsManager.cs" />
@@ -241,6 +240,9 @@
     <Compile Include="UI\MainMenu\MenuButton.cs" />
     <Compile Include="UI\LinearSpriteButton.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
     <Compile Include="UI\Textures\JunctionUITextures.cs" />
     <Compile Include="UI\Textures\RoadUITextures.cs" />
     <Compile Include="UI\Textures\SpeedLimitTextures.cs" />
@@ -250,7 +252,6 @@
     <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
-    <Compile Include="UI\SubTools\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
     <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\LaneArrowTool.cs" />
@@ -264,6 +265,7 @@
     <Compile Include="State\Flags.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="Util\FloatUtil.cs" />
     <Compile Include="Util\GenericObservable.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Util\MathUtil.cs" />
@@ -518,6 +520,9 @@
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\80.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\85.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\90.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Traffic\Data" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -9,7 +9,6 @@
     using JetBrains.Annotations;
     using State;
     using Traffic;
-    using Traffic.Data;
     using Util;
     using ExtVehicleType = global::TrafficManager.API.Traffic.Enums.ExtVehicleType;
 

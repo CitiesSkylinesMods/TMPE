@@ -11,7 +11,6 @@
     using JetBrains.Annotations;
     using State.ConfigData;
     using State;
-    using Traffic.Data;
 
     public class RoutingManager
         : AbstractGeometryObservingManager,

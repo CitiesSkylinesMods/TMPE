@@ -10,7 +10,6 @@ namespace TrafficManager.TrafficLight.Impl {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using State.ConfigData;
-    using Traffic.Data;
 
     /// <summary>
     /// Represents the traffic light (left, forward, right) at a specific segment end

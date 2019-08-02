@@ -13,7 +13,6 @@
     using JetBrains.Annotations;
     using State;
     using State.ConfigData;
-    using Traffic.Data;
     using UI;
     using UnityEngine;
     using Util;

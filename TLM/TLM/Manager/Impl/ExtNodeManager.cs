@@ -5,7 +5,6 @@
     using CSUtil.Commons;
     using Geometry;
     using Geometry.Impl;
-    using Traffic.Data;
 
     public class ExtNodeManager
         : AbstractCustomManager,

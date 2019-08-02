@@ -12,7 +12,6 @@ namespace TrafficManager.TrafficLight.Impl {
     using Geometry.Impl;
     using JetBrains.Annotations;
     using State.ConfigData;
-    using Traffic.Data;
     using Util;
 
     /// <summary>

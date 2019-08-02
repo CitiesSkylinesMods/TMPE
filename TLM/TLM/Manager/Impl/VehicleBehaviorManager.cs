@@ -10,8 +10,9 @@
     using JetBrains.Annotations;
     using State;
     using State.ConfigData;
-    using Traffic.Data;
+    using UI.SubTools.SpeedLimits;
     using UnityEngine;
+    using Util;
 
     public class VehicleBehaviorManager : AbstractCustomManager, IVehicleBehaviorManager {
         public const float MIN_SPEED = 8f * 0.2f; // 10 km/h
@@ -1507,7 +1508,7 @@
                             Log._DebugIf(
                                 logPriority,
                                 () => $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
-                                      $"Setting JunctionTransitState to APPROACH (prio)");
+                                      "Setting JunctionTransitState to APPROACH (prio)");
 
                             transitState = VehicleJunctionTransitState.Approach;
                         }
@@ -2016,7 +2017,7 @@
                                 if (next2FwdRoutingIndex >= RoutingManager.Instance.LaneEndForwardRoutings.Length) {
                                     Log._DebugOnlyError(
                                         $"Invalid array index: next2FwdRoutingIndex={next2FwdRoutingIndex}, " +
-                                        $"RoutingManager.Instance.laneEndForwardRoutings.Length=" +
+                                        "RoutingManager.Instance.laneEndForwardRoutings.Length=" +
                                         $"{RoutingManager.Instance.LaneEndForwardRoutings.Length} " +
                                         $"(next1FwdTransitions[j].laneId={next1FwdTransitions[j].laneId}, " +
                                         $"!next1FwdTransitions[j].startNode={!next1FwdTransitions[j].startNode})");
@@ -2161,7 +2162,7 @@
                                                     Log._Debug(
                                                         $"VehicleBehaviorManager.FindBestLane({vehicleId}): " +
                                                         $"Skipping next3 transition {next3FwdTransitions[l]} " +
-                                                        $"(distance too large)");
+                                                        "(distance too large)");
                                                 }
                                                 continue;
                                             }
@@ -2387,7 +2388,7 @@
 #if DEBUG
                     if (currentFwdTransitions[i].laneIndex >= next1SegInfo.m_lanes.Length) {
                         Log.Error(
-                            $"Invalid array index: currentFwdTransitions[i].laneIndex=" +
+                            "Invalid array index: currentFwdTransitions[i].laneIndex=" +
                             $"{currentFwdTransitions[i].laneIndex}, " +
                             $"next1SegInfo.m_lanes.Length={next1SegInfo.m_lanes.Length}");
                     }
@@ -2587,7 +2588,7 @@
                     return bestStayNext1LaneIndex;
                 }
 
-                bool isBssDiffZero = Math.Abs(bestStaySpeedDiff) < Constants.VERY_SMALL_FLOAT;
+                bool isBssDiffZero = Math.Abs(bestStaySpeedDiff) < FloatUtil.VERY_SMALL_FLOAT;
                 if (isBssDiffZero || bestOptMeanSpeed < 0.1f) {
                     //---------------------------------------
                     // edge cases:
@@ -2636,20 +2637,27 @@
                     return bestStayNext1LaneIndex;
                 }
 
-                if (bestStaySpeedDiff < 0 && bestOptSpeedDiff > bestStaySpeedDiff) {
+                if (bestStaySpeedDiff < 0
+                    && bestOptSpeedDiff > bestStaySpeedDiff)
+                {
                     // found a lane change that improves vehicle speed
                     // float improvement = 100f * ((bestOptSpeedDiff - bestStaySpeedDiff)
                     //     / ((bestStayMeanSpeed + bestOptMeanSpeed) / 2f));
-                    var speedDiff = Mathf.Abs(bestOptMeanSpeed - vehicleCurSpeed);
-                    var optImprovementSpeed =
-                        SpeedLimit.ToKmphRounded(bestOptSpeedDiff - bestStaySpeedDiff);
+                    float speedDiff = Mathf.Abs(bestOptMeanSpeed - vehicleCurSpeed);
+                    float optImprovementSpeed = bestOptSpeedDiff - bestStaySpeedDiff;
 
-                    Log._DebugIf(
-                        logLaneSelection,
-                        () => $"VehicleBehaviorManager.FindBestLane({vehicleId}): a lane change for " +
-                        $"speed improvement is possible. optImprovementInKmH={optImprovementSpeed} km/h " +
-                        $"speedDiff={speedDiff} (bestOptMeanSpeed={bestOptMeanSpeed}, " +
-                        $"vehicleCurVelocity={vehicleCurSpeed}, foundSafeLaneChange={foundSafeLaneChange})");
+                    if (logLaneSelection) {
+                        Log._DebugFormat(
+                            "VehicleBehaviorManager.FindBestLane({0}): a lane change for speed " +
+                            "improvement is possible. optImprovementInKmH={1} speedDiff={2} " +
+                            "(bestOptMeanSpeed={3}, vehicleCurVelocity={4}, foundSafeLaneChange={5})",
+                            vehicleId,
+                            new SpeedValue(optImprovementSpeed).ToKmphPrecise(),
+                            speedDiff,
+                            bestOptMeanSpeed,
+                            vehicleCurSpeed,
+                            foundSafeLaneChange);
+                    }
 
                     if (optImprovementSpeed >= vehicleState.minSafeSpeedImprovement &&
                         (foundSafeLaneChange || (speedDiff <= vehicleState.maxUnsafeSpeedDiff)))
@@ -2669,7 +2677,7 @@
                     Log._DebugIf(
                         logLaneSelection,
                         () => $"VehicleBehaviorManager.FindBestLane({vehicleId}): ===> found a faster " +
-                        $"lane to change to but speed improvement is NOT significant OR lane change " +
+                        "lane to change to but speed improvement is NOT significant OR lane change " +
                         $"is unsafe -- selecting bestStayNext1LaneIndex={bestStayNext1LaneIndex} " +
                         $"(foundSafeLaneChange={foundSafeLaneChange})");
 
@@ -2703,7 +2711,7 @@
                     Log._DebugIf(
                         logLaneSelection,
                         () => $"VehicleBehaviorManager.FindBestLane({vehicleId}): ===> found a lane " +
-                        $"that optimizes overall traffic but optimization is NOT significant -- selecting " +
+                        "that optimizes overall traffic but optimization is NOT significant -- selecting " +
                         $"bestStayNext1LaneIndex={bestStayNext1LaneIndex}");
 
                     return bestOptNext1LaneIndex;

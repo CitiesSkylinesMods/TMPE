@@ -97,6 +97,7 @@
     <Compile Include="TrafficLight\ICustomSegmentLights.cs" />
     <Compile Include="TrafficLight\ITimedTrafficLights.cs" />
     <Compile Include="TrafficLight\ITimedTrafficLightsStep.cs" />
+    <Compile Include="Traffic\ApiConstants.cs" />
     <Compile Include="Traffic\Data\ExtNode.cs" />
     <Compile Include="Traffic\Data\ExtSegmentEnd.cs" />
     <Compile Include="Traffic\Data\ExtSegment.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
     <Compile Include="Traffic\Data\SegmentFlags.cs" />
     <Compile Include="Traffic\Data\ExtVehicle.cs" />
+    <Compile Include="Traffic\Data\SpeedValue.cs" />
     <Compile Include="Traffic\Data\TurnOnRedSegments.cs" />
     <Compile Include="Traffic\Enums\CarUsagePolicy.cs" />
     <Compile Include="Traffic\Enums\ExtParkingSpaceLocation.cs" />

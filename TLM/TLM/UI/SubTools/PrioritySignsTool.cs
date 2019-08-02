@@ -9,7 +9,6 @@
     using Manager.Impl;
     using State;
     using Textures;
-    using Traffic.Data;
     using UnityEngine;
     using Util;
     using static Util.SegmentTraverser;
