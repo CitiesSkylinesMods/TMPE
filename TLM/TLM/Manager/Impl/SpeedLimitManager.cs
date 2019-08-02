@@ -868,7 +868,7 @@
             var ret = new List<Configuration.LaneSpeedLimit>();
             foreach (KeyValuePair<uint, float> e in Flags.GetAllLaneSpeedLimits()) {
                 try {
-                    var laneSpeedLimit = new Configuration.LaneSpeedLimit(e.Key, e.Value);
+                    var laneSpeedLimit = new Configuration.LaneSpeedLimit(e.Key, new SpeedValue(e.Value));
 #if DEBUGSAVE
                     Log._Debug($"Saving speed limit of lane {laneSpeedLimit.laneId}: " +
                         $"{laneSpeedLimit.speedLimit*SpeedLimit.SPEED_TO_KMPH} km/h");
