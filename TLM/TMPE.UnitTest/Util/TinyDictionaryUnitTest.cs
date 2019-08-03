@@ -1,4 +1,4 @@
-﻿namespace TMUnitTest.Util {
+namespace TMUnitTest.Util {
     using System;
     using System.Collections.Generic;
     using CSUtil.Commons;
@@ -7,21 +7,26 @@
 
     [TestClass]
     public class TinyDictionaryUnitTest {
+        private static string alice;
+        private static string bob;
+        private static string cedric;
+        private static string dora;
+
+        private static IList<string> alicesNicknames;
+        private static IList<string> bobsNicknames;
+        private static IList<string> cedricsNicknames;
+        private static IList<string> dorasNicknames;
+
+        private static ICollection<string> girls;
+        private static ICollection<string> boys;
+
         private TinyDictionary<byte, byte> dict0;
         private TinyDictionary<string, int> dict1;
         private TinyDictionary<string, IList<string>> dict2;
         private TinyDictionary<ICollection<string>, bool> dict3;
         private TinyDictionary<ushort, IDictionary<ushort, ArrowDirection>> dict4;
 
-        private static string alice, bob, cedric, dora;
-
-        private static IList<string> alicesNicknames,
-                                     bobsNicknames,
-                                     cedricsNicknames,
-                                     dorasNicknames;
-
-        private static ICollection<string> girls, boys;
-
+#pragma warning disable SA1124 // Do not use regions
         #region Zusätzliche Testattribute
 
         //
@@ -45,6 +50,7 @@
         //
 
         #endregion
+#pragma warning restore SA1124 // Do not use regions
 
         [ClassInitialize]
         public static void InitializeClass(TestContext testContext) {
@@ -54,32 +60,35 @@
             dora = "Dora";
 
             alicesNicknames = null;
-            bobsNicknames = new List<string> {"Bobby", "Bobbi", "Bobb"};
-            cedricsNicknames = new List<string> {"Ced"};
+            bobsNicknames = new List<string> { "Bobby", "Bobbi", "Bobb" };
+            cedricsNicknames = new List<string> { "Ced" };
             dorasNicknames = new List<string>();
 
-            girls = new HashSet<string> {alice, dora};
-            boys = new HashSet<string> {bob, cedric};
+            girls = new HashSet<string> { alice, dora };
+            boys = new HashSet<string> { bob, cedric };
         }
 
-        [TestInitialize()]
+        [TestInitialize]
         public void InitializeTest() {
             dict0 = new TinyDictionary<byte, byte>();
 
-            dict1 = new TinyDictionary<string, int>();
-            dict1.Add(alice, 1);
-            dict1.Add(bob, 2);
-            dict1.Add(cedric, 3);
+            dict1 = new TinyDictionary<string, int> {
+                { alice, 1 },
+                { bob, 2 },
+                { cedric, 3 }
+            };
 
-            dict2 = new TinyDictionary<string, IList<string>>();
-            dict2.Add(bob, bobsNicknames);
-            dict2.Add(cedric, cedricsNicknames);
-            dict2.Add(dora, dorasNicknames);
-            dict2.Add(alice, alicesNicknames);
+            dict2 = new TinyDictionary<string, IList<string>> {
+                { bob, bobsNicknames },
+                { cedric, cedricsNicknames },
+                { dora, dorasNicknames },
+                { alice, alicesNicknames }
+            };
 
-            dict3 = new TinyDictionary<ICollection<string>, bool>();
-            dict3.Add(girls, true);
-            dict3.Add(boys, false);
+            dict3 = new TinyDictionary<ICollection<string>, bool> {
+                { girls, true },
+                { boys, false }
+            };
         }
 
         [TestMethod]
@@ -209,7 +218,7 @@
 
         [TestMethod]
         public void TestSet2() {
-            IList<string> eugensNicknames = new List<string> {"Eugenius"};
+            IList<string> eugensNicknames = new List<string> { "Eugenius" };
             dict2["Eugen"] = eugensNicknames;
             Assert.AreEqual(dict2["Eugen"], eugensNicknames);
         }
@@ -247,7 +256,7 @@
         public void TestContainsKey3() {
             Assert.IsTrue(dict3.ContainsKey(girls));
             Assert.IsTrue(dict3.ContainsKey(boys));
-            Assert.IsFalse(dict3.ContainsKey(new HashSet<string> {"Chair"}));
+            Assert.IsFalse(dict3.ContainsKey(new HashSet<string> { "Chair" }));
             Assert.IsFalse(dict3.ContainsKey(null));
         }
 
