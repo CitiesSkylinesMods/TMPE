@@ -44,3 +44,4 @@
 408209297;Extended Road Upgrade
 417926819;Road Assistant
 631930385;Realistic Vehicle Speeds
+1072157697;Cargo Info
