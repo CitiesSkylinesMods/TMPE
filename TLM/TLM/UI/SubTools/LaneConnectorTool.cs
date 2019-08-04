@@ -731,7 +731,7 @@ namespace TrafficManager.UI.SubTools {
             Bezier3 bezier3;
             if (start.SegmentId != target.SegmentId) {
                 Vector3 lDir = NetManager.instance.m_lanes.m_buffer[start.LaneId].m_bezier.Tangent(start.StartNode ? 0f : 1f);
-                Vector3 tDir = NetManager.instance.m_lanes.m_buffer[target.LaneId].m_bezier.Tangent(target.startNode ? 0f : 1f);
+                Vector3 tDir = NetManager.instance.m_lanes.m_buffer[target.LaneId].m_bezier.Tangent(target.StartNode ? 0f : 1f);
 
                 // TODO fix
                 // SegmentEndGeometry segmentEndGeometry = SegmentGeometry.Get(start.segmentId).GetEnd(start.startNode);
