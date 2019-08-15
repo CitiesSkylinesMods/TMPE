@@ -71,7 +71,7 @@ Rarely Ritkán
 Very_rarely Nagyon ritkán
 Only_if_necessary Csak ha szükséges
 Nodes_and_segments Csomópontok és szegmensek
-Lanes sávok
+Lanes Sávok
 Path_Of_Evil_(10_%) A gonosz ösvénye (10%)
 Rush_Hour_(5_%) Csúcsforgalom (5%)
 Minor_Complaints_(2_%) Kisebb panaszok (2%)
@@ -148,8 +148,8 @@ Reset_custom_speed_limits Az egyedi sebességkorlátozások visszaállítása
 Reload_global_configuration Töltse újra a globális konfigurációt
 Reset_global_configuration A globális konfiguráció visszaállítása
 General Tábornok
-Gameplay gameplay
-Overlays lefedések
+Gameplay Gameplay
+Overlays Lefedések
 Individual_driving_styles Egyéni vezetési stílusok
 Evacuation_busses_may_ignore_traffic_rules Az evakuáló buszok figyelmen kívül hagyhatják a közlekedési szabályokat
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Az evakuáló buszok csak menhelyhez juthatnak
@@ -185,37 +185,37 @@ Remove_this_vehicle Távolítsa el ezt a járművet
 Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights A járművek az elsődleges szabályokat a kereszteződéseknél, időzített jelzőlámpákkal követik
 Enable_tutorial_messages Az oktatóüzenetek engedélyezése
 TMPE_TUTORIAL_HEAD_MainMenu Forgalomkezelő: President Edition
-TMPE_TUTORIAL_BODY_MainMenu Üdvözöljük a TM: PE! \ N \ n használati útmutatóban: http://www.viathinksoft.de/tmpe
+TMPE_TUTORIAL_BODY_MainMenu Üdvözöljük a TM: PE! \n\n használati útmutatóban: http://www.viathinksoft.de/tmpe
 TMPE_TUTORIAL_HEAD_JunctionRestrictionsTool Csomópont korlátozások
-TMPE_TUTORIAL_BODY_JunctionRestrictionsTool Ellenőrizze, hogy a járművek és a gyalogosok hogyan viselkedjenek a csomópontokon. \ N \ n1. Kattintson a kezelni kívánt csomópontra. \ N2. Kattintson a megfelelő ikonra a korlátozások váltásához. \ N \ nA rendelkezésre álló korlátozások: \ n- engedélyezze / tiltja a sávváltást az egyenesen haladó járművek számára \ n- engedélyezze / tiltja az u fordulásokat \ n- engedélyezze / tiltja a járművek számára, hogy blokkolt kereszteződésekbe lépjenek \ n- Engedélyezze / tiltsa a gyalogosokat az utca átlépésén
+TMPE_TUTORIAL_BODY_JunctionRestrictionsTool Ellenőrizze, hogy a járművek és a gyalogosok hogyan viselkedjenek a csomópontokon. \n\n1. Kattintson a kezelni kívánt csomópontra. \ N2. Kattintson a megfelelő ikonra a korlátozások váltásához. \n\nA rendelkezésre álló korlátozások: \n- engedélyezze / tiltja a sávváltást az egyenesen haladó járművek számára \n- engedélyezze / tiltja az u fordulásokat \n- engedélyezze / tiltja a járművek számára, hogy blokkolt kereszteződésekbe lépjenek \n- Engedélyezze / tiltsa a gyalogosokat az utca átlépésén
 TMPE_TUTORIAL_HEAD_LaneArrowTool Lane nyilak
-TMPE_TUTORIAL_BODY_LaneArrowTool Korlátozza a járművek által megtett útmutatásokat. \ N \ n1. Kattintson egy csomópont melletti útszakaszra \ n2. Válassza ki az engedélyezett irányokat.
+TMPE_TUTORIAL_BODY_LaneArrowTool Korlátozza a járművek által megtett útmutatásokat. \n\n1. Kattintson egy csomópont melletti útszakaszra \n2. Válassza ki az engedélyezett irányokat.
 TMPE_TUTORIAL_HEAD_LaneConnectorTool Sávcsatlakozó
-TMPE_TUTORIAL_BODY_LaneConnectorTool Csatlakoztasson két vagy több sávot egymással, hogy megmondja, mely sávokat használhatják a járművek. \ N \ n1. Kattintson a sávváltási pontra (szürke körök). \ N2. Kattintson a forrásjelölőre. \ N3. Kattintson egy céljelölőre, hogy összekapcsolja a forrásjelölővel. \ N4. Kattintson bárhová a másodlagos egérgombbal, hogy visszatérjen a forrásjelölő kiválasztásához. \ N \ nHatékony gyorsbillentyűk: \ n \ n- Törlés vagy Backspace: Az összes sávcsatlakozás eltávolítása \ n- Shift + S: Áttekintés az összes rendelkezésre álló „sávon maradásról”. minták
+TMPE_TUTORIAL_BODY_LaneConnectorTool Csatlakoztasson két vagy több sávot egymással, hogy megmondja, mely sávokat használhatják a járművek. \n\n1. Kattintson a sávváltási pontra (szürke körök). \ N2. Kattintson a forrásjelölőre. \ N3. Kattintson egy céljelölőre, hogy összekapcsolja a forrásjelölővel. \ N4. Kattintson bárhová a másodlagos egérgombbal, hogy visszatérjen a forrásjelölő kiválasztásához. \n\nHatékony gyorsbillentyűk: \n\n- Törlés vagy Backspace: Az összes sávcsatlakozás eltávolítása \n- Shift + S: Áttekintés az összes rendelkezésre álló „sávon maradásról”. minták
 TMPE_TUTORIAL_HEAD_ManualTrafficLightsTool Kézi közlekedési lámpák
-TMPE_TUTORIAL_BODY_ManualTrafficLightsTool Próbálja ki az egyéni közlekedési lámpákat. \ N \ n1. Kattintson a csomópontra \ n2. Az eszköz segítségével irányítsa a lámpákat.
+TMPE_TUTORIAL_BODY_ManualTrafficLightsTool Próbálja ki az egyéni közlekedési lámpákat. \n\n1. Kattintson a csomópontra \n2. Az eszköz segítségével irányítsa a lámpákat.
 TMPE_TUTORIAL_HEAD_ParkingRestrictionsTool Parkolási korlátozások
-TMPE_TUTORIAL_BODY_ParkingRestrictionsTool Irányítsa a parkolás engedélyezését. \ N \ nKattintson a "P" ikonra. \ N \ nHatékony gyorsbillentyűk: \ n \ n- Shift: Tartsa nyomva, miközben kattintással alkalmazza a parkolási korlátozásokat egyszerre több útszakaszra.
+TMPE_TUTORIAL_BODY_ParkingRestrictionsTool Irányítsa a parkolás engedélyezését. \n\nKattintson a "P" ikonra. \n\nHatékony gyorsbillentyűk: \n\n- Shift: Tartsa nyomva, miközben kattintással alkalmazza a parkolási korlátozásokat egyszerre több útszakaszra.
 TMPE_TUTORIAL_HEAD_PrioritySignsTool Elsőbbségi jelek
-TMPE_TUTORIAL_BODY_PrioritySignsTool Definiálja a prioritási szabályokat a kereszteződéseken. \ N \ n1. Kattintson a kereszteződésre. \ N2. Kattintson az üres pontokra a rendelkezésre álló prioritási jelek (elsőbbségi út, hozam, megállás) átlépéséhez. \ N \ nA rendelkezésre álló gyorsbillentyűk: \ n \ n- Shift: tartsa lenyomva a Shift billentyűt, ha egyszerre több útszakaszhoz szeretne prioritási jeleket hozzáadni. Kattintson ismét, miközben lenyomva tartja a Shift billentyűt az összes elérhető minta áttekintéséhez.
+TMPE_TUTORIAL_BODY_PrioritySignsTool Definiálja a prioritási szabályokat a kereszteződéseken. \n\n1. Kattintson a kereszteződésre. \ N2. Kattintson az üres pontokra a rendelkezésre álló prioritási jelek (elsőbbségi út, hozam, megállás) átlépéséhez. \n\nA rendelkezésre álló gyorsbillentyűk: \n\n- Shift: tartsa lenyomva a Shift billentyűt, ha egyszerre több útszakaszhoz szeretne prioritási jeleket hozzáadni. Kattintson ismét, miközben lenyomva tartja a Shift billentyűt az összes elérhető minta áttekintéséhez.
 TMPE_TUTORIAL_HEAD_SpeedLimitsTool Sebesség határok
-TMPE_TUTORIAL_BODY_SpeedLimitsTool Állítsa be a sebességkorlátozásokat. \ N \ n1. Az ablakban kattintson a beállítani kívánt sebességkorlátozásra. \ N2. Kattintson egy útszakaszra a sebességkorlátozás megváltoztatásához. \ N \ nHatékony gyorsbillentyűk: \ n \ n- Shift: Tartsa lenyomva a Shift billentyűt, ha egyszerre több sebességet szeretne alkalmazni a sebességkorlátozásokra. \ N- Ctrl: Tartsa lenyomva a Ctrl billentyűt a sebességkorlátozások ellenőrzéséhez. egyedi sávonként.
+TMPE_TUTORIAL_BODY_SpeedLimitsTool Állítsa be a sebességkorlátozásokat. \n\n1. Az ablakban kattintson a beállítani kívánt sebességkorlátozásra. \ N2. Kattintson egy útszakaszra a sebességkorlátozás megváltoztatásához. \n\nHatékony gyorsbillentyűk: \n\n- Shift: Tartsa lenyomva a Shift billentyűt, ha egyszerre több sebességet szeretne alkalmazni a sebességkorlátozásokra. \ N- Ctrl: Tartsa lenyomva a Ctrl billentyűt a sebességkorlátozások ellenőrzéséhez. egyedi sávonként.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool Időzített közlekedési lámpák
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool Állítsa be az időzített közlekedési lámpákat. \ N \ n1. Kattintson a kereszteződésre. \ N2. Az ablakban kattintson az "Lépés hozzáadása" gombra. \ N3. Kattintson az overlay elemekre a kívánt jelzőlámpák állapotának beállításához. \ N4. Kattintson a "Hozzáadás" gombra. \ N5. Ismételje meg kívánt módon.
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool Állítsa be az időzített közlekedési lámpákat. \n\n1. Kattintson a kereszteződésre. \ N2. Az ablakban kattintson az "Lépés hozzáadása" gombra. \ N3. Kattintson az overlay elemekre a kívánt jelzőlámpák állapotának beállításához. \ N4. Kattintson a "Hozzáadás" gombra. \ N5. Ismételje meg kívánt módon.
 TMPE_TUTORIAL_HEAD_ToggleTrafficLightsTool Váltás a közlekedési lámpákra
-TMPE_TUTORIAL_BODY_ToggleTrafficLightsTool Adjon hozzá vagy távolítson el jelzőlámpákat a kereszteződésről / a kereszteződésből. \ N \ nKattintson egy kereszteződésre a közlekedési lámpák váltásához.
+TMPE_TUTORIAL_BODY_ToggleTrafficLightsTool Adjon hozzá vagy távolítson el jelzőlámpákat a kereszteződésről / a kereszteződésből. \n\nKattintson egy kereszteződésre a közlekedési lámpák váltásához.
 TMPE_TUTORIAL_HEAD_VehicleRestrictionsTool Jármű-korlátozások
-TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Bizonyos útszakaszokból tiltsa le a járműveket. \ N \ n1. Kattintson egy útszakaszra. \ N2. Kattintson az ikonokra a korlátozások váltásához. \ N \ nTípusú járműtípusok: \ n \ n- Közúti járművek: Személygépkocsik, buszok, taxik, tehergépkocsik, szolgálati járművek, mentőautók
+TMPE_TUTORIAL_BODY_VehicleRestrictionsTool Bizonyos útszakaszokból tiltsa le a járműveket. \n\n1. Kattintson egy útszakaszra. \ N2. Kattintson az ikonokra a korlátozások váltásához. \n\nTípusú járműtípusok: \n\n- Közúti járművek: Személygépkocsik, buszok, taxik, tehergépkocsik, szolgálati járművek, mentőautók
 TMPE_TUTORIAL_HEAD_SpeedLimitsTool_Defaults Alapértelmezett sebességkorlátozások
 TMPE_TUTORIAL_BODY_SpeedLimitsTool_Defaults 1. Használja a felső rész nyilait az összes úttípus átjárásához. \ N2. Az alsó részben válassza ki a sebességkorlátozást. \ N3. Kattintson a "Mentés" gombra a kiválasztott sebességkorlátozás alapértelmezett beállításához a kiválasztott típusú jövőbeli útszakaszokra. Kattintson a "Mentés és alkalmazás" gombra a kiválasztott típusú összes meglévő út frissítéséhez.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddStep Adjon hozzá egy időzített lépést
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. A játékon belüli átfedésben kattintson a közlekedési lámpákra az állapotuk megváltoztatásához. Használja a „Módmód” gombot az irányjelző lámpák hozzáadásához. \ N2. Írja be a lépés minimális és maximális időtartamát is. A perc után eltelt az idő, a lámpánál számít és összehasonlítják a közeledő járműveket. \ n3. Opcionálisan válassza ki a lépésváltás típusát. Alapértelmezés szerint a lépés megváltozik, ha körülbelül kevesebb jármű vezet, mint várakozik. \ N4. Opcionálisan állítsa be a fény érzékenységét. Például mozgassa a csúszkát balra, hogy az időzített jelzőlámpa kevésbé érzékeny legyen a várakozó járművekre.
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddStep 1. A játékon belüli átfedésben kattintson a közlekedési lámpákra az állapotuk megváltoztatásához. Használja a „Módmód” gombot az irányjelző lámpák hozzáadásához. \ N2. Írja be a lépés minimális és maximális időtartamát is. A perc után eltelt az idő, a lámpánál számít és összehasonlítják a közeledő járműveket. \n3. Opcionálisan válassza ki a lépésváltás típusát. Alapértelmezés szerint a lépés megváltozik, ha körülbelül kevesebb jármű vezet, mint várakozik. \ N4. Opcionálisan állítsa be a fény érzékenységét. Például mozgassa a csúszkát balra, hogy az időzített jelzőlámpa kevésbé érzékeny legyen a várakozó járművekre.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_Copy Másolja az időzített jelzőlámpát
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy Kattintson egy másik kereszteződésre az időzített jelzőlámpa beillesztéséhez. \ N \ nKattintson a másodlagos egérgombbal bárhol a művelet megszakításához.
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_Copy Kattintson egy másik kereszteződésre az időzített jelzőlámpa beillesztéséhez. \n\nKattintson a másodlagos egérgombbal bárhol a művelet megszakításához.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_AddJunction Adjon hozzá egy kereszteződést az ütemezett lámpához
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Kattintson egy másik kereszteződésre a hozzáadásához. Mindkét lámpát összekapcsolják úgy, hogy az időzített program azután mindkét csomópontot egyszerre irányítsa. \ N \ nKattintson a másodlagos egérgombbal bárhol a művelet megszakításához.
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_AddJunction Kattintson egy másik kereszteződésre a hozzáadásához. Mindkét lámpát összekapcsolják úgy, hogy az időzített program azután mindkét csomópontot egyszerre irányítsa. \n\nKattintson a másodlagos egérgombbal bárhol a művelet megszakításához.
 TMPE_TUTORIAL_HEAD_TimedTrafficLightsTool_RemoveJunction Távolítsa el a kereszteződést az időzített lámpáról
-TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Kattintson az egyik olyan csomópontra, amelyet ez az időzített program irányít. A kiválasztott jelzőlámpa eltávolításra kerül, így az időzített program már nem fogja kezelni. \ N \ nKattintson a másodlagos egérgombbal bárhol a művelet megszakításához.
+TMPE_TUTORIAL_BODY_TimedTrafficLightsTool_RemoveJunction Kattintson az egyik olyan csomópontra, amelyet ez az időzített program irányít. A kiválasztott jelzőlámpa eltávolításra kerül, így az időzített program már nem fogja kezelni. \n\nKattintson a másodlagos egérgombbal bárhol a művelet megszakításához.
 Public_transport Tömegközlekedés
 Prevent_excessive_transfers_at_public_transport_stations Kerülje el a szükségtelen transzfereket a tömegközlekedési állomásokon
 Compact_main_menu Kompakt főmenü
@@ -242,7 +242,7 @@ Keybind_use_junction_restrictions_tool Használja a 'Junction Restrictions' eszk
 Keybind_use_speed_limits_tool Használja a „Sebességkorlátozások” eszközt
 Keybind_lane_connector_stay_in_lane Maradjon a sávban
 Keybind_lane_connector_delete Tiszta sávcsatlakozások
-Keybinds keybinds
+Keybinds Keybinds
 Keybind_Exit_subtool Lépjen ki az eszközből, és zárja be a TM: PE menüt
 Keybind_conflict A kiválasztott kulcs ütközik egy másik gyorsbillentyűvel. Kérjük, válasszon valami mást.
 Keybind_category_Global Globális kulcsok
