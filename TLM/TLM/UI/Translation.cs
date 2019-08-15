@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI {
+namespace TrafficManager.UI {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -30,6 +30,7 @@
                 "en",
                 "es",
                 "fr",
+                "hu",
                 "it",
                 "ja",
                 "ko",
@@ -46,6 +47,7 @@
                 ["en"] = "English",
                 ["es"] = "Español",
                 ["fr"] = "Français",
+                ["hu"] = "Magyar",
                 ["it"] = "Italiano",
                 ["ja"] = "日本語",
                 ["ko"] = "한국의",

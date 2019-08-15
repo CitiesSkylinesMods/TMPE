@@ -522,7 +522,10 @@
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\90.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Traffic\Data" />
+    <Folder Include="Traffic\Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\lang_hu.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
