@@ -154,7 +154,7 @@ Individual_driving_styles Egyéni vezetési stílusok
 Evacuation_busses_may_ignore_traffic_rules Az evakuáló buszok figyelmen kívül hagyhatják a közlekedési szabályokat
 Evacuation_busses_may_only_be_used_to_reach_a_shelter Az evakuáló buszok csak menhelyhez juthatnak
 Vehicle_behavior A jármű viselkedése
-Policies_&_Restrictions házirendje
+Policies_&_Restrictions Házirendje
 At_junctions A kereszteződésnél
 In_case_of_emergency Sürgős esetben
 Show_lane-wise_speed_limits Mutassa meg a sáv szerinti sebességkorlátozásokat
