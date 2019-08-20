@@ -48,31 +48,48 @@ This will clone the source code to your local machine...
 
 > You only need to do these steps once
 
-Open `\TLM\TMPL.sln` in your IDE, then...
+#### Dependencies
 
-#### In Visual Studio:
+TM:PE relies on several `.dll` files bundled with the game. They can be found in the following folder (may be different folder depending on where game is installed):
 
-* Reference paths must be added to each project that appers in the **Solution Explorer** on the right:
-    * Right-click a project, then choose **Properties**
-    * Select **Reference Paths** on the left
-    * Add folder: `C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\` (may be different folder depending on where game is installed)
+> `C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\`
 
-#### In JetBrains Rider:
+You'll have to link the dependencies using _only one_ of the following methods:
 
-* [Activate Roslyn Analyzers](https://www.jetbrains.com/help/rider/Settings_Roslyn_Analyzers.html) ([why?](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/pull/463))
+* Create a `\TLM\dependencies` folder and copy in the `.dll` files
+* Create a `\TLM\dependencies` symlink to the `...\Managed` folder shown above
+* Manually add reference paths to each project in the solution.
+
+If you choose the latter option, the procedure depends on your IDE.
+
+In Visual Studio:
+
+* Open `\TLM\TMPL.sln` in your IDE, then...
+* For each project listed in the **Solution Explorer** (right sidebar):
+    1. Right-click the project, then choose **Properties**
+    2. Select **Reference Paths** on the left
+    3. Add folder: `C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\` (may be different folder depending on where game is installed)
+
+In JetBrains Rider:
+
 * At time of writing, there is no GUI for adding Reference Paths so you have to do it manually:
     * For each project, create a `<project name>.csproj.user` file (in the folder of that project)
         * For example, the `TLM` project needs a `TLM.csproj.user` file (in the `\TLM` folder)
     * Paste in the following code, editing the path if necessary:
-
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ReferencePath>C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\</ReferencePath>
     </PropertyGroup>
-</Project> 
+</Project>
 ```
+
+#### Enable Roslyn Analyzers
+
+This is only required for the JetBrains Rider IDE:
+
+* [Activate Roslyn Analyzers](https://www.jetbrains.com/help/rider/Settings_Roslyn_Analyzers.html) ([why?](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/pull/463))
 
 ## Build
 
@@ -83,8 +100,11 @@ This will compile the source code to DLL files...
 There are several build configurations, but we mostly use just three:
 
 * `DEBUG` - this build enables all kinds of debug features, including the in-game debug menu, debug overlays and debug logging
+    * Mod display name will include `DEBUG`
 * `RELEASE` - this build is for public releases of the `STABLE` edition of TM:PE
+    * Mod display name will include `STABLE`
 * `RELEASE LABS` - this build is for the public releases of the `LABS` edition of TM:PE
+    * Mod display name will include `LABS`
 
 #### In Visual Studio:
 
