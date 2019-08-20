@@ -1,4 +1,4 @@
-# Logging in TM:PE
+﻿# Logging in TM:PE
 
 This guide explains:
 
@@ -22,8 +22,46 @@ More importantly, TM:PE has lots of ready made logging that can be turned on or 
 
 ## Log switches
 
-> TODO:
-> * Explain `DebugSwitch` and how to flick the switch
+Log switches determine which sets of existing log messages are output to the `TMPE.log`.
+
+### Toggling existing switches
+
+Build the solution in `DEBUG` mode, then launch Cities: Skylines.
+
+This will add a `<Debug>` section to the `TMPE_GlobalConfig.xml` file, which can be found in the following folder (may be different depending on where you installed the game):
+
+> `C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines`
+
+> TODO - describe how to cross-reference the xml switches with the `TLM/State/ConfigData/DebugSettings.cs`
+
+To enable a logging for a switch, change it's value from `false` to `true` and save the changes.
+
+The `TMPE_GlobalConfig.xml` will then need to be reloaded:
+
+* In TM:PE mod options, select the **Maintenance** tab
+* Click the **Reload global configuration** button
+
+Logging associated with that switch will now be output to the `TMPE.log` file.
+
+### Extended options
+
+Some of the existing logging can be filtered to specific vehicle types or path modes. You can define those in the `TMPE_GlobalConfig.xml` via the following elements (`None` means "don't filter"):
+
+```xml
+<ExtVehicleType>None</ExtVehicleType>
+<ExtPathMode>None</ExtPathMode>
+```
+
+### Adding new switches
+
+In `TLM/State/ConfigData/DebugSettings.cs`:
+
+* Add a new `DebugSwitch` enum value
+* Add the default value to the `Switches` array
+
+> If your `TMPE_GlobalConfig.xml` already contains the `<Debug>` section, remember to add a new `<Boolean>` element _before_ launching the game.
+
+Once the switch is defined, you can then use it with applicable logging methods listed below.
 
 ## Logging methods
 
