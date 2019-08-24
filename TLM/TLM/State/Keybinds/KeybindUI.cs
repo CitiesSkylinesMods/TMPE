@@ -8,6 +8,7 @@ namespace TrafficManager.State.Keybinds {
     using CSUtil.Commons;
     using UI;
     using UnityEngine;
+    using UXLibrary.Keyboard;
 
     /// <summary>
     /// Helper for creating keyboard bindings Settings page.
@@ -128,7 +129,9 @@ namespace TrafficManager.State.Keybinds {
             return label;
         }
 
-        public void CreateKeybindButton(UIPanel parent, KeybindSetting setting, SavedInputKey editKey,
+        public void CreateKeybindButton(UIPanel parent,
+                                        KeybindSetting setting,
+                                        SavedInputKey editKey,
                                         float widthFraction) {
             var btn = parent.AddUIComponent<UIButton>();
             btn.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);

@@ -6,7 +6,7 @@ namespace TrafficManager.UI {
         ManualSwitch = 3,
         TimedLightsSelectNode = 4,
         TimedLightsShowLights = 5,
-        LaneChange = 6,
+        LaneArrows = 6,
         TimedLightsAddNode = 7,
         TimedLightsRemoveNode = 8,
         TimedLightsCopyLights = 9,

@@ -127,7 +127,7 @@ namespace TrafficManager.UI {
         // Not used
         [UsedImplicitly]
         public static void SetCurrentLanguage(string lang) {
-            if (lang != null && !LanguageLabels.ContainsKey(lang)) {
+            if ((lang != null) && !LanguageLabels.ContainsKey(lang)) {
                 Log.Warning($"Translation.SetCurrentLanguage: Invalid language code: {lang}");
                 return;
             }
@@ -138,7 +138,7 @@ namespace TrafficManager.UI {
         private static void LoadTranslations() {
             string currentLang = GetCurrentLanguage();
 
-            if (_translations == null || _loadedLanguage == null || ! _loadedLanguage.Equals(currentLang)) {
+            if ((_translations == null) || (_loadedLanguage == null) || ! _loadedLanguage.Equals(currentLang)) {
                 try {
                     string filename = RESOURCES_PREFIX + GetTranslatedFileName(DEFAULT_TRANSLATION_FILENAME);
                     Log._Debug($"Loading translations from file '{filename}'. Language={currentLang}");
@@ -152,7 +152,7 @@ namespace TrafficManager.UI {
 
                     _translations = new Dictionary<string, string>();
                     foreach (string line in lines) {
-                        if (line == null || line.Trim().Length == 0) {
+                        if (line.Trim().Length == 0) {
                             continue;
                         }
 
@@ -215,7 +215,7 @@ namespace TrafficManager.UI {
                     m_Key = tutorialKey
                 };
 
-                if (locale != null && !locale.Exists(key)) {
+                if ((locale != null) && !locale.Exists(key)) {
                     locale.AddLocalizedString(key, entry.Value);
                 }
             }

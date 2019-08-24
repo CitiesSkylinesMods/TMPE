@@ -16,10 +16,10 @@
             {
                 // prioritize service vehicles and public transport when hitting the vehicle limit
                 ItemClass.Service service = info.GetService();
-                if (service == ItemClass.Service.Residential ||
-                    service == ItemClass.Service.Industrial ||
-                    service == ItemClass.Service.Commercial ||
-                    service == ItemClass.Service.Office) {
+                if ((service == ItemClass.Service.Residential) ||
+                    (service == ItemClass.Service.Industrial) ||
+                    (service == ItemClass.Service.Commercial) ||
+                    (service == ItemClass.Service.Office)) {
                     vehicle = 0;
                     return false;
                 }

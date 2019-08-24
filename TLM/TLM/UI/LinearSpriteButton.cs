@@ -5,6 +5,7 @@
     using State.Keybinds;
     using UnityEngine;
     using Util;
+    using UXLibrary.Keyboard;
 
     public abstract class LinearSpriteButton : UIButton {
         protected enum ButtonMouseState {
@@ -158,7 +159,6 @@
             isVisible = Visible;
             this.Invalidate();
         }
-
 
         /// <summary>
         /// If shortcut key was set to a non-empty something, then form a text tooltip,

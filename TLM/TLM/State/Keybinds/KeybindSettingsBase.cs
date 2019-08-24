@@ -7,6 +7,7 @@ namespace TrafficManager.State.Keybinds {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using UnityEngine;
+    using UXLibrary.Keyboard;
 
     public class KeybindSettingsBase : UICustomControl {
         protected static readonly string KeyBindingTemplate = "KeyBindingTemplate";
@@ -17,46 +18,21 @@ namespace TrafficManager.State.Keybinds {
         // to be fields of type KeybindSetting.
 
         /// <value>
-        /// This input key can not be changed and is not checked, instead it is display only
+        /// This input key (Esc) can not be changed and is not checked, instead it is display only
         /// </value>
-        protected static KeybindSetting ToolCancelViewOnly = new KeybindSetting(
-            "Global",
-            "Key_ExitSubtool",
-            SavedInputKey.Encode(KeyCode.Escape, false, false, false));
+        public static KeybindSetting ToolCancelViewOnly;
+        public static KeybindSetting LaneArrows_Select; // left click
+        public static KeybindSetting LaneArrows_Deselect; // right click
 
-        public static KeybindSetting ToggleMainMenu = new KeybindSetting(
-            "Global",
-            "Key_ToggleTMPEMainMenu",
-            SavedInputKey.Encode(KeyCode.Semicolon, false, true, false));
-
-        public static KeybindSetting ToggleTrafficLightTool =
-            new KeybindSetting("Global", "Key_ToggleTrafficLightTool");
-
-        public static KeybindSetting LaneArrowTool =
-            new KeybindSetting("Global", "Key_LaneArrowTool");
-
-        public static KeybindSetting LaneConnectionsTool =
-            new KeybindSetting("Global", "Key_LaneConnectionsTool");
-
-        public static KeybindSetting PrioritySignsTool =
-            new KeybindSetting("Global", "Key_PrioritySignsTool");
-
-        public static KeybindSetting JunctionRestrictionsTool =
-            new KeybindSetting("Global", "Key_JunctionRestrictionsTool");
-
-        public static KeybindSetting SpeedLimitsTool =
-            new KeybindSetting("Global", "Key_SpeedLimitsTool");
-
-        public static KeybindSetting LaneConnectorStayInLane = new KeybindSetting(
-            "LaneConnector",
-            "Key_LaneConnector_StayInLane",
-            SavedInputKey.Encode(KeyCode.S, false, true, false));
-
-        public static KeybindSetting LaneConnectorDelete = new KeybindSetting(
-            "LaneConnector",
-            "Key_LaneConnector_Delete",
-            SavedInputKey.Encode(KeyCode.Delete, false, false, false),
-            SavedInputKey.Encode(KeyCode.Backspace, false, false, false));
+        public static KeybindSetting ToggleMainMenu;
+        public static KeybindSetting ToggleTrafficLightTool;
+        public static KeybindSetting LaneArrowTool;
+        public static KeybindSetting LaneConnectionsTool;
+        public static KeybindSetting PrioritySignsTool;
+        public static KeybindSetting JunctionRestrictionsTool;
+        public static KeybindSetting SpeedLimitsTool;
+        public static KeybindSetting LaneConnectorStayInLane;
+        public static KeybindSetting LaneConnectorDelete;
 
         protected KeybindUI keybindUi_ = new KeybindUI();
 
@@ -64,6 +40,75 @@ namespace TrafficManager.State.Keybinds {
         /// Counter to produce alternating UI row colors (dark and light).
         /// </summary>
         private int uiRowCount_;
+
+        public static void SetupKeybinds(UXLibrary.UxLibrary root) {
+            // These are the settings which can not be changed
+            ToolCancelViewOnly = new KeybindSetting(
+                root,
+                "Global",
+                "Key_ExitSubtool",
+                SavedInputKey.Encode(KeyCode.Escape, false, false, false));
+
+            // These below are the settings which can be changed
+            ToggleMainMenu = new KeybindSetting(
+                root,
+                "Global",
+                "Key_ToggleTMPEMainMenu",
+                SavedInputKey.Encode(KeyCode.Semicolon, false, true, false));
+            ToggleTrafficLightTool = new KeybindSetting(
+                root,
+                "Global",
+                "Key_ToggleTrafficLightTool");
+            LaneArrowTool = new KeybindSetting(
+                root,
+                "Global",
+                "Key_LaneArrowTool");
+            LaneConnectionsTool = new KeybindSetting(
+                root,
+                "Global",
+                "Key_LaneConnectionsTool");
+            PrioritySignsTool = new KeybindSetting(
+                root,
+                "Global",
+                "Key_PrioritySignsTool");
+            JunctionRestrictionsTool = new KeybindSetting(
+                root,
+                "Global",
+                "Key_JunctionRestrictionsTool");
+            SpeedLimitsTool = new KeybindSetting(
+                root,
+                "Global",
+                "Key_SpeedLimitsTool");
+
+            //----------------------
+            // Lane Arrows tool
+            //----------------------
+            LaneArrows_Select = new KeybindSetting(
+                root,
+                "LaneArrows",
+                "Key_LaneArrows_Select",
+                SavedInputKey.Encode(KeyCode.Mouse0, false, false, false));
+            LaneArrows_Deselect = new KeybindSetting(
+                root,
+                "LaneArrows",
+                "Key_LaneArrows_Deselect",
+                SavedInputKey.Encode(KeyCode.Mouse1, false, false, false));
+
+            //----------------------
+            // Lane Connector tool
+            //----------------------
+            LaneConnectorStayInLane = new KeybindSetting(
+                root,
+                "LaneConnector",
+                "Key_LaneConnector_StayInLane",
+                SavedInputKey.Encode(KeyCode.S, false, true, false));
+            LaneConnectorDelete = new KeybindSetting(
+                root,
+                "LaneConnector",
+                "Key_LaneConnector_Delete",
+                SavedInputKey.Encode(KeyCode.Delete, false, false, false),
+                SavedInputKey.Encode(KeyCode.Backspace, false, false, false));
+        }
 
         protected static void TryCreateConfig() {
             try {

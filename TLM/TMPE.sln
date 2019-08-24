@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSUtil.CameraControl", "CSU
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMPE.API", "TMPE.API\TMPE.API.csproj", "{C911D31C-C85D-42A8-A839-7B209A715495}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UXLibrary", "UXLibrary\UXLibrary.csproj", "{DD123AAC-271B-4F13-88BC-7CD362590E07}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Benchmark|Any CPU = Benchmark|Any CPU
@@ -153,6 +155,18 @@ Global
 		{C911D31C-C85D-42A8-A839-7B209A715495}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C911D31C-C85D-42A8-A839-7B209A715495}.Release LABS|Any CPU.ActiveCfg = Release|Any CPU
 		{C911D31C-C85D-42A8-A839-7B209A715495}.Release LABS|Any CPU.Build.0 = Release|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.Benchmark|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.Benchmark|Any CPU.Build.0 = Debug|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.PF2_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.PF2_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.Release LABS|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.Release LABS|Any CPU.Build.0 = Debug|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD123AAC-271B-4F13-88BC-7CD362590E07}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

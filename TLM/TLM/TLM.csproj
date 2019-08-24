@@ -192,8 +192,6 @@
     <Compile Include="State\ConfigData\AdvancedVehicleAI.cs" />
     <Compile Include="State\Configuration.cs" />
     <Compile Include="State\GlobalConfig.cs" />
-    <Compile Include="State\Keybinds\Keybind.cs" />
-    <Compile Include="State\Keybinds\KeybindSetting.cs" />
     <Compile Include="State\Keybinds\KeybindSettingsBase.cs" />
     <Compile Include="State\Keybinds\KeybindSettingsPage.cs" />
     <Compile Include="State\Keybinds\KeybindUI.cs" />
@@ -419,6 +417,10 @@
       <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
       <Name>TMPE.GenericGameBridge</Name>
     </ProjectReference>
+    <ProjectReference Include="..\UXLibrary\UXLibrary.csproj">
+      <Project>{dd123aac-271b-4f13-88bc-7cd362590e07}</Project>
+      <Name>UXLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\mainmenu-btns.png" />
@@ -541,6 +543,7 @@ xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)UXLibrary.dll" "%25DEPLOYDIR%25"
 
 set DEPLOYDIR=</PostBuildEvent>
   </PropertyGroup>

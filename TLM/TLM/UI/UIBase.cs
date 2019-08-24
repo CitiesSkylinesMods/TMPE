@@ -2,8 +2,10 @@ namespace TrafficManager.UI {
     using System;
     using ColossalFramework.UI;
     using CSUtil.Commons;
+    using State.Keybinds;
     using UI.MainMenu;
     using UnityEngine;
+    using UXLibrary;
 
     public class UIBase : UICustomControl {
         public UIMainMenuButton MainMenuButton { get; }
@@ -15,7 +17,7 @@ namespace TrafficManager.UI {
 #endif
 
         public static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired = true) {
-            if (tool == null && createIfRequired) {
+            if ((tool == null) && createIfRequired) {
                 Log.Info("Initializing traffic manager tool...");
                 GameObject toolModControl = ToolsModifierControl.toolController.gameObject;
                 tool = toolModControl.GetComponent<TrafficManagerTool>()
@@ -50,7 +52,11 @@ namespace TrafficManager.UI {
 #endif
 
             ToolMode = TrafficManagerMode.None;
+            UxLib = new UxLibrary("TM:PE", Log.Info);
+            KeybindSettingsBase.SetupKeybinds(UxLib);
         }
+
+        public UxLibrary UxLib { get; set; }
 
         ~UIBase() {
             UnityEngine.Object.Destroy(MainMenuButton);
@@ -73,7 +79,7 @@ namespace TrafficManager.UI {
             Close();
 
             if (MainMenu != null) {
-                CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
+                var keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
                 if(keyHandler != null) {
                     UnityEngine.Object.Destroy(keyHandler);
                 }
@@ -141,7 +147,9 @@ namespace TrafficManager.UI {
 #endif
 
         public static void SetToolMode(TrafficManagerMode mode) {
-            if (mode == ToolMode) return;
+            if (mode == ToolMode) {
+                return;
+            }
 
             ToolMode = mode;
 

@@ -131,7 +131,9 @@
             windowStyle_ = null;
         }
 
-        public virtual void Cleanup() { }
+        public virtual void Cleanup() {
+            LoadingExtension.BaseUI.UxLib.Osd().Clear();
+        }
 
         public virtual void OnActivate() { }
 

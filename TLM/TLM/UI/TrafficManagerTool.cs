@@ -145,7 +145,7 @@
                 [ToolMode.TimedLightsCopyLights] = timedLightsTool,
                 [ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this),
                 [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
-                [ToolMode.LaneChange] = new LaneArrowTool(this),
+                [ToolMode.LaneArrows] = new LaneArrowTool(this),
                 [ToolMode.LaneConnector] = new LaneConnectorTool(this),
                 [ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this),
                 [ToolMode.ParkingRestrictions] = new ParkingRestrictionsTool(this)
@@ -191,7 +191,7 @@
         public void SetToolMode(ToolMode mode) {
             Log._Debug($"SetToolMode: {mode}");
 
-            bool toolModeChanged = (mode != toolMode_);
+            bool toolModeChanged = mode != toolMode_;
             ToolMode oldToolMode = toolMode_;
             subTools_.TryGetValue(oldToolMode, out SubTool oldSubTool);
             toolMode_ = mode;
@@ -203,17 +203,17 @@
             bool realToolChange = toolModeChanged;
 
             if (oldSubTool != null) {
-                if (oldToolMode == ToolMode.TimedLightsSelectNode
-                    || oldToolMode == ToolMode.TimedLightsShowLights
-                    || oldToolMode == ToolMode.TimedLightsAddNode
-                    || oldToolMode == ToolMode.TimedLightsRemoveNode
-                    || oldToolMode == ToolMode.TimedLightsCopyLights) {
+                if ((oldToolMode == ToolMode.TimedLightsSelectNode)
+                    || (oldToolMode == ToolMode.TimedLightsShowLights)
+                    || (oldToolMode == ToolMode.TimedLightsAddNode)
+                    || (oldToolMode == ToolMode.TimedLightsRemoveNode)
+                    || (oldToolMode == ToolMode.TimedLightsCopyLights)) {
                     // TODO refactor to SubToolMode
-                    if (mode != ToolMode.TimedLightsSelectNode
-                        && mode != ToolMode.TimedLightsShowLights
-                        && mode != ToolMode.TimedLightsAddNode
-                        && mode != ToolMode.TimedLightsRemoveNode
-                        && mode != ToolMode.TimedLightsCopyLights) {
+                    if ((mode != ToolMode.TimedLightsSelectNode)
+                        && (mode != ToolMode.TimedLightsShowLights)
+                        && (mode != ToolMode.TimedLightsAddNode)
+                        && (mode != ToolMode.TimedLightsRemoveNode)
+                        && (mode != ToolMode.TimedLightsCopyLights)) {
                         oldSubTool.Cleanup();
                     }
                 } else {
@@ -221,18 +221,18 @@
                 }
             }
 
-            if (toolModeChanged && _activeSubTool != null) {
-                if (oldToolMode == ToolMode.TimedLightsSelectNode
-                    || oldToolMode == ToolMode.TimedLightsShowLights
-                    || oldToolMode == ToolMode.TimedLightsAddNode
-                    || oldToolMode == ToolMode.TimedLightsRemoveNode
-                    || oldToolMode == ToolMode.TimedLightsCopyLights) {
+            if (toolModeChanged && (_activeSubTool != null)) {
+                if ((oldToolMode == ToolMode.TimedLightsSelectNode)
+                    || (oldToolMode == ToolMode.TimedLightsShowLights)
+                    || (oldToolMode == ToolMode.TimedLightsAddNode)
+                    || (oldToolMode == ToolMode.TimedLightsRemoveNode)
+                    || (oldToolMode == ToolMode.TimedLightsCopyLights)) {
                     // TODO refactor to SubToolMode
-                    if (mode != ToolMode.TimedLightsSelectNode
-                        && mode != ToolMode.TimedLightsShowLights
-                        && mode != ToolMode.TimedLightsAddNode
-                        && mode != ToolMode.TimedLightsRemoveNode
-                        && mode != ToolMode.TimedLightsCopyLights) {
+                    if ((mode != ToolMode.TimedLightsSelectNode)
+                        && (mode != ToolMode.TimedLightsShowLights)
+                        && (mode != ToolMode.TimedLightsAddNode)
+                        && (mode != ToolMode.TimedLightsRemoveNode)
+                        && (mode != ToolMode.TimedLightsCopyLights)) {
                         _activeSubTool.Cleanup();
                     } else {
                         realToolChange = false;
@@ -249,7 +249,7 @@
             // subTools.TryGetValue((int)_toolMode, out activeSubTool);
             // Log._Debug($"activeSubTool is now {activeSubTool}");
 
-            if (toolModeChanged && _activeSubTool != null) {
+            if (toolModeChanged && (_activeSubTool != null)) {
                 _activeSubTool.OnActivate();
 
                 if (realToolChange) {
@@ -337,7 +337,7 @@
             }
 
             // !elementsHovered ||
-            if (_activeSubTool != null && _activeSubTool.IsCursorInPanel()) {
+            if ((_activeSubTool != null) && _activeSubTool.IsCursorInPanel()) {
                 Log._Debug("TrafficManagerTool: OnToolUpdate: Subtool contains mouse. Ignoring click.");
 
                 // Log.Message("inside ui: " + m_toolController.IsInsideUI + " visible: "
@@ -669,7 +669,7 @@
                 return false;
             }
 
-            float zoom = 1.0f / (worldPos - camPos).magnitude * 100f * GetBaseZoom();
+            float zoom = (1.0f / (worldPos - camPos).magnitude) * 100f * GetBaseZoom();
             width *= zoom;
             height *= zoom;
 
@@ -760,7 +760,7 @@
                                   .toolController.Tools.OfType<NetTool>()
                                   .FirstOrDefault(nt => nt.m_prefab != null);
 
-                if (netTool != null && elementsHovered) {
+                if ((netTool != null) && elementsHovered) {
                     ToolCursor = netTool.m_upgradeCursor;
                 }
             }
@@ -772,7 +772,7 @@
 
         private bool DetermineHoveredElements() {
             bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible &&
-                                 (_activeSubTool == null || !_activeSubTool.IsCursorInPanel());
+                                 ((_activeSubTool == null) || !_activeSubTool.IsCursorInPanel());
 
             if (mouseRayValid) {
                 HoveredSegmentId = 0;
@@ -867,7 +867,7 @@
                     }
                 }
 
-                if (HoveredNodeId <= 0 && HoveredSegmentId > 0) {
+                if ((HoveredNodeId <= 0) && (HoveredSegmentId > 0)) {
                     // alternative way to get a node hit: check distance to start and end nodes
                     // of the segment
                     ushort startNodeId = Singleton<NetManager>
@@ -881,14 +881,14 @@
                                                                 .m_position).magnitude;
                     float endDist = (segmentOutput.m_hitPos - nodesBuffer[endNodeId]
                                                               .m_position).magnitude;
-                    if (startDist < endDist && startDist < 75f) {
+                    if ((startDist < endDist) && (startDist < 75f)) {
                         HoveredNodeId = startNodeId;
-                    } else if (endDist < startDist && endDist < 75f) {
+                    } else if ((endDist < startDist) && (endDist < 75f)) {
                         HoveredNodeId = endNodeId;
                     }
                 }
 
-                return HoveredNodeId != 0 || HoveredSegmentId != 0;
+                return (HoveredNodeId != 0) || (HoveredSegmentId != 0);
             }
 
             return false; // mouseRayValid=false here
@@ -922,7 +922,7 @@
                 return; // do not draw if too distant
             }
 
-            float zoom = 1.0f / diff.magnitude * 150f;
+            float zoom = (1.0f / diff.magnitude) * 150f;
 
             _counterStyle.fontSize = (int)(11f * zoom);
             _counterStyle.normal.textColor = new Color(1f, 1f, 0f);
@@ -1110,7 +1110,7 @@
                     continue; // do not draw if too distant
                 }
 
-                float zoom = 1.0f / diff.magnitude * 150f;
+                float zoom = (1.0f / diff.magnitude) * 150f;
                 _counterStyle.fontSize = (int)(12f * zoom);
                 _counterStyle.normal.textColor = new Color(1f, 0f, 0f);
 
@@ -1242,7 +1242,7 @@
                     continue; // do not draw if too distant
                 }
 
-                float zoom = 1.0f / diff.magnitude * 150f;
+                float zoom = (1.0f / diff.magnitude) * 150f;
 
                 counterStyle.fontSize = (int)(15f * zoom);
                 counterStyle.normal.textColor = new Color(0f, 0f, 1f);
@@ -1298,7 +1298,7 @@
                     continue; // do not draw if too distant
                 }
 
-                float zoom = 1.0f / diff.magnitude * 150f;
+                float zoom = (1.0f / diff.magnitude) * 150f;
 
                 _counterStyle.fontSize = (int)(10f * zoom);
                 _counterStyle.normal.textColor = new Color(1f, 1f, 1f);
@@ -1317,8 +1317,8 @@
                 // Converting magnitudes into game speed float, and then into km/h
                 SpeedValue vehSpeed = SpeedValue.FromVelocity(vehicleManager.m_vehicles.m_buffer[i].GetLastFrameVelocity().magnitude);
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None &&
-                    driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {
+                if ((GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None) &&
+                    (driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode)) {
                     continue;
                 }
 #endif
@@ -1402,16 +1402,16 @@
                     continue; // do not draw if too distant
                 }
 
-                float zoom = 1.0f / diff.magnitude * 150f;
+                float zoom = (1.0f / diff.magnitude) * 150f;
 
                 _counterStyle.fontSize = (int)(10f * zoom);
                 _counterStyle.normal.textColor = new Color(1f, 0f, 1f);
                 // _counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
 #if DEBUG
-                if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None &&
-                    ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode !=
-                    GlobalConfig.Instance.Debug.ExtPathMode) {
+                if ((GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None) &&
+                    (ExtCitizenInstanceManager.Instance.ExtInstances[i].pathMode !=
+                     GlobalConfig.Instance.Debug.ExtPathMode)) {
                     continue;
                 }
 #endif
@@ -1479,7 +1479,7 @@
                     continue; // do not draw if too distant
                 }
 
-                float zoom = 1.0f / diff.magnitude * 150f;
+                float zoom = (1.0f / diff.magnitude) * 150f;
 
                 _counterStyle.fontSize = (int)(10f * zoom);
                 _counterStyle.normal.textColor = new Color(0f, 1f, 0f);
@@ -1540,11 +1540,11 @@
 
             var numLanes = 0;
 
-            while (laneIndex < info.m_lanes.Length && curLaneId != 0u) {
-                if (((info.m_lanes[laneIndex].m_laneType &
-                      (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None
-                     && (info.m_lanes[laneIndex].m_vehicleType & vehicleTypeFilter) != VehicleInfo.VehicleType.None)
-                    && (dir2 == null || info.m_lanes[laneIndex].m_finalDirection == dir2))
+            while ((laneIndex < info.m_lanes.Length) && (curLaneId != 0u)) {
+                if ((((info.m_lanes[laneIndex].m_laneType &
+                       (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None)
+                     && ((info.m_lanes[laneIndex].m_vehicleType & vehicleTypeFilter) != VehicleInfo.VehicleType.None))
+                    && ((dir2 == null) || (info.m_lanes[laneIndex].m_finalDirection == dir2)))
                 {
                     if (!directions.Contains(info.m_lanes[laneIndex].m_finalDirection)) {
                         directions.Add(info.m_lanes[laneIndex].m_finalDirection);
@@ -1574,7 +1574,7 @@
                 new Dictionary<NetInfo.Direction, int>();
             uint laneIndex = 0;
 
-            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
+            while ((laneIndex < segmentInfo.m_lanes.Length) && (curLaneId != 0u)) {
                 if ((segmentInfo.m_lanes[laneIndex].m_laneType &
                      (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None) {
                     goto nextIter;

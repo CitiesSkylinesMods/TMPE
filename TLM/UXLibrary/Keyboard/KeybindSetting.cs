@@ -1,10 +1,11 @@
-namespace TrafficManager.State.Keybinds {
-    using ColossalFramework;
-    using JetBrains.Annotations;
-    using UnityEngine;
+using ColossalFramework;
+using JetBrains.Annotations;
+using UnityEngine;
 
+namespace UXLibrary.Keyboard {
     /// <summary>
     /// Contains one or two SavedInputKeys, and event handler when the key is changed.
+    /// Create these one per
     /// </summary>
     public class KeybindSetting {
         /// <summary>
@@ -35,13 +36,14 @@ namespace TrafficManager.State.Keybinds {
 
         public delegate void OnKeyChangedHandler();
 
-        public KeybindSetting(string cat,
+        public KeybindSetting(UxLibrary uxmod,
+                              string cat,
                               string configFileKey,
                               InputKey? defaultKey1 = null) {
             Category = cat;
             Key = new SavedInputKey(
                 configFileKey,
-                KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
+                uxmod.KeybindsConf.ConfName,
                 defaultKey1 ?? SavedInputKey.Empty,
                 true);
         }
@@ -54,19 +56,20 @@ namespace TrafficManager.State.Keybinds {
             onKeyChanged_?.Invoke();
         }
 
-        public KeybindSetting(string cat,
+        public KeybindSetting(UxLibrary uxmod,
+                              string cat,
                               string configFileKey,
                               InputKey? defaultKey1,
                               InputKey? defaultKey2) {
             Category = cat;
             Key = new SavedInputKey(
                 configFileKey,
-                KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
+                uxmod.KeybindsConf.ConfName,
                 defaultKey1 ?? SavedInputKey.Empty,
                 true);
             AlternateKey = new SavedInputKey(
                 configFileKey + "_Alternate",
-                KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
+                uxmod.KeybindsConf.ConfName,
                 defaultKey2 ?? SavedInputKey.Empty,
                 true);
         }

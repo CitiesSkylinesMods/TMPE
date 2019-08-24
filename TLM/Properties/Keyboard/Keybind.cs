@@ -1,4 +1,4 @@
-namespace TrafficManager.State.Keybinds {
+namespace UXMod.Keyboard {
     using ColossalFramework;
     using ColossalFramework.UI;
     using UnityEngine;

@@ -255,3 +255,6 @@ Road_signs_theme_mph Theme for MPH road signs
 theme_Square_US US signs
 theme_Round_UK British signs
 theme_Round_German German signs
+UXLib.Keybind.Click Click
+UXLib.Keybind.RightClick Right Click
+UXLib.Keybind.MiddleClick Mid. Click
