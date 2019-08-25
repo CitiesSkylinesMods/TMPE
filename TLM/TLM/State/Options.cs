@@ -114,8 +114,6 @@
         }
 
         public static void MakeSettings(UIHelperBase helper) {
-            Log._Debug($"Options.MakeSettings invoked... lang={Translation.GetCurrentLanguage()}");
-
             // tabbing code is borrowed from RushHour mod
             // https://github.com/PropaneDragon/RushHour/blob/release/RushHour/Options/OptionHandler.cs
             UIHelper actualHelper = helper as UIHelper;
