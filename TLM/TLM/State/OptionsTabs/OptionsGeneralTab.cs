@@ -160,34 +160,21 @@ namespace TrafficManager.State {
         }
 
         private static void OnLanguageChanged(int newLanguageIndex) {
-            bool localeChanged = false;
-
             if (newLanguageIndex <= 0) {
                 GlobalConfig.Instance.LanguageCode = null;
                 GlobalConfig.WriteConfig();
-                Options.MenuRebuildRequired = true;
-                localeChanged = true;
+                Options.RebuildMenu();
             } else if (newLanguageIndex - 1 < Translation.AvailableLanguageCodes.Count) {
-                GlobalConfig.Instance.LanguageCode =
-                    Translation.AvailableLanguageCodes[newLanguageIndex - 1];
+                string newLang = Translation.AvailableLanguageCodes[newLanguageIndex - 1];
+                GlobalConfig.Instance.LanguageCode = newLang;
                 GlobalConfig.WriteConfig();
-                Options.MenuRebuildRequired = true;
-                localeChanged = true;
+                Options.RebuildMenu();
             } else {
-                Log.Warning(
-                    $"Options.onLanguageChanged: Invalid language index: {newLanguageIndex}");
+                Log.Warning($"Options.onLanguageChanged: Invalid language index: {newLanguageIndex}");
+                return;
             }
 
-            if (localeChanged) {
-                MethodInfo onChangedHandler = typeof(OptionsMainPanel).GetMethod(
-                    "OnLocaleChanged",
-                    BindingFlags.Instance | BindingFlags.NonPublic);
-                if (onChangedHandler != null) {
-                    onChangedHandler.Invoke(
-                        UIView.library.Get<OptionsMainPanel>("OptionsPanel"),
-                        new object[0] { });
-                }
-            }
+            Options.RebuildOptions();
         }
 
         private static void OnLockButtonChanged(bool newValue) {

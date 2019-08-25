@@ -55,6 +55,11 @@ namespace TrafficManager {
         // public static TrafficManagerMode ToolMode { get; set; }
         // public static TrafficManagerTool TrafficManagerTool { get; set; }
 
+        /// <summary>
+        /// Contains loaded languages and lookup functions for text translations
+        /// </summary>
+        public static Translation Translator = new Translation();
+
         public static UIBase BaseUI { get; private set; }
 
         public static UITransportDemand TransportDemandUI { get; private set; }
@@ -127,12 +132,14 @@ namespace TrafficManager {
             private set;
         } = new Dictionary<MethodInfo, RedirectCallsState>();
 
-        static LoadingExtension() { }
+        static LoadingExtension() {
+            Translator.LoadAllTranslations();
+        }
 
         public LoadingExtension() {
         }
 
-        public void revertDetours() {
+        public void RevertDetours() {
             if (!DetourInited) {
                 return;
             }
@@ -323,7 +330,6 @@ namespace TrafficManager {
                 }
 
                 Flags.OnLevelUnloading();
-                Translation.OnLevelUnloading();
                 GlobalConfig.OnLevelUnloading();
 
                 // remove vehicle button
@@ -351,7 +357,7 @@ namespace TrafficManager {
                 // ignored - prevents collision with other mods
             }
 
-            revertDetours();
+            RevertDetours();
             IsGameLoaded = false;
         }
 

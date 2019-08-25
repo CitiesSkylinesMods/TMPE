@@ -3,6 +3,7 @@
     using System.IO;
     using System.Xml.Serialization;
     using CSUtil.Commons;
+    using JetBrains.Annotations;
     using State.ConfigData;
     using Util;
 
@@ -53,6 +54,7 @@
         /// <summary>
         /// Language to use (if null then the game's language is being used)
         /// </summary>
+        [CanBeNull]
         public string LanguageCode = null;
 
 #if DEBUG

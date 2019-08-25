@@ -170,7 +170,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.prioritySignsEnabled = val;
 
             if (!val) {
@@ -184,7 +184,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.timedLightsEnabled = val;
 
             if (!val) {
@@ -198,7 +198,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.customSpeedLimitsEnabled = val;
 
             if (!val) {
@@ -211,7 +211,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.vehicleRestrictionsEnabled = val;
             if (!val) {
                 OptionsOverlaysTab.SetVehicleRestrictionsOverlay(false);
@@ -223,7 +223,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.parkingRestrictionsEnabled = val;
 
             if (!val) {
@@ -236,7 +236,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.junctionRestrictionsEnabled = val;
 
             if (!val) {
@@ -267,7 +267,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.laneConnectorEnabled = val;
             RoutingManager.Instance.RequestFullRecalculation();
 
@@ -277,7 +277,7 @@ namespace TrafficManager.State {
         }
 
         public static void SetCustomSpeedLimitsEnabled(bool newValue) {
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.customSpeedLimitsEnabled = newValue;
 
             if (_enableCustomSpeedLimitsToggle != null) {
@@ -290,7 +290,7 @@ namespace TrafficManager.State {
         }
 
         public static void SetVehicleRestrictionsEnabled(bool newValue) {
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.vehicleRestrictionsEnabled = newValue;
 
             if (_enableVehicleRestrictionsToggle != null) {
@@ -303,7 +303,7 @@ namespace TrafficManager.State {
         }
 
         public static void SetParkingRestrictionsEnabled(bool newValue) {
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.parkingRestrictionsEnabled = newValue;
 
             if (_enableParkingRestrictionsToggle != null) {
@@ -316,7 +316,7 @@ namespace TrafficManager.State {
         }
 
         public static void SetJunctionRestrictionsEnabled(bool newValue) {
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.junctionRestrictionsEnabled = newValue;
 
             if (_enableJunctionRestrictionsToggle != null) {
@@ -342,7 +342,7 @@ namespace TrafficManager.State {
         }
 
         public static void SetLaneConnectorEnabled(bool newValue) {
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.laneConnectorEnabled = newValue;
 
             if (_enableLaneConnectorToggle != null) {
