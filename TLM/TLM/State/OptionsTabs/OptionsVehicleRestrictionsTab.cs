@@ -307,7 +307,7 @@ namespace TrafficManager.State {
 
 
         public static void SetPrioritySignsEnabled(bool newValue) {
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.prioritySignsEnabled = newValue;
 
             if (OptionsMaintenanceTab.EnablePrioritySignsToggle != null) {
@@ -320,7 +320,7 @@ namespace TrafficManager.State {
         }
 
         public static void SetTimedLightsEnabled(bool newValue) {
-            Options.MenuRebuildRequired = true;
+            Options.RebuildMenu();
             Options.timedLightsEnabled = newValue;
 
             if (OptionsMaintenanceTab.EnableTimedLightsToggle != null) {
