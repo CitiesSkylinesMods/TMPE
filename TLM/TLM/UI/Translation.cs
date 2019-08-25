@@ -183,7 +183,6 @@ namespace TrafficManager.UI {
             try {
                 string filename = RESOURCES_PREFIX
                                   + GetTranslatedFileName(DEFAULT_TRANSLATION_FILENAME, lang);
-                Log._Debug($"Loading translations from file '{filename}'. Language={lang}");
 
                 string[] lines;
                 using (Stream st = Assembly.GetExecutingAssembly()
@@ -266,7 +265,7 @@ namespace TrafficManager.UI {
                     continue;
                 }
 
-                Log._Debug($"Adding tutorial translation for id {identifier}, key={tutorialKey} value={entry.Value}");
+                // Log._Debug($"Adding tutorial translation for id {identifier}, key={tutorialKey} value={entry.Value}");
 
                 var key = new Locale.Key() {
                     m_Identifier = identifier,
