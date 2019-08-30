@@ -1,9 +1,14 @@
+// Enable DUMP_TRANSLATIONS to write all translations available in the game into a lang.csv file
+// #define DUMP_TRANSLATIONS
+
 namespace TrafficManager.UI {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Text;
     using ColossalFramework;
     using ColossalFramework.Globalization;
     using CSUtil.Commons;
@@ -12,15 +17,58 @@ namespace TrafficManager.UI {
     using Util;
 
     public class Translation {
-        public static readonly IDictionary<string, string> LanguageLabels;
-        public static readonly IList<string> AvailableLanguageCodes;
+        /// <summary>
+        /// Defines the order of language selector dropdown.
+        /// </summary>
+        public static readonly IList<string> AvailableLanguageCodes
+            = new List<string> {
+                                   "en",
+                                   "en-gb",
+                                   "de",
+                                   "es",
+                                   "fr",
+                                   "hu",
+                                   "it",
+                                   "ja",
+                                   "ko",
+                                   "nl",
+                                   "pl",
+                                   "pt",
+                                   "ru",
+                                   "zh", // Mainland China (simplified)
+                                   "zh-tw", // Taiwanese (traditional)
+                               };
+
+        /// <summary>
+        /// Defines column order in CSV, but not the dropdown order.
+        /// Mapping from translation languages (first row of CSV export) to language locales used in
+        /// <see cref="AvailableLanguageCodes"/> above.
+        /// </summary>
+        private static readonly Dictionary<string, string> csv_columns_to_locales_
+            = new Dictionary<string, string>() {
+                                                   { "English", DEFAULT_LANGUAGE_CODE },
+                                                   { "Chinese Simplified", "zh" },
+                                                   { "Chinese Traditional", "zh-tw" },
+                                                   { "Dutch", "nl" },
+                                                   { "English, United Kingdom", "en-gb" },
+                                                   { "French", "fr" },
+                                                   { "German", "de" },
+                                                   { "Hungarian", "hu" },
+                                                   { "Italian", "it" },
+                                                   { "Japanese", "ja" },
+                                                   { "Korean", "ko" },
+                                                   { "Polish", "pl" },
+                                                   { "Portuguese", "pt" },
+                                                   { "Russian", "ru" },
+                                                   { "Spanish", "es" }
+                                               };
+
         private const string DEFAULT_LANGUAGE_CODE = "en";
 
         public const string TUTORIAL_KEY_PREFIX = "TMPE_TUTORIAL_";
         private const string TUTORIAL_HEAD_KEY_PREFIX = TUTORIAL_KEY_PREFIX + "HEAD_";
         public const string TUTORIAL_BODY_KEY_PREFIX = TUTORIAL_KEY_PREFIX + "BODY_";
         private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
-        private const string DEFAULT_TRANSLATION_FILENAME = "lang.txt";
 
         /// <summary>
         /// Stores all languages (first key), and for each language stores translations
@@ -28,61 +76,195 @@ namespace TrafficManager.UI {
         /// </summary>
         private Dictionary<string, Dictionary<string, string>> translations_;
 
-        static Translation() {
-            AvailableLanguageCodes = new List<string> {
-                "de",
-                "en",
-                "es",
-                "fr",
-                "hu",
-                "it",
-                "ja",
-                "ko",
-                "nl",
-                "pl",
-                "pt",
-                "ru",
-                "zh-tw",
-                "zh"
-            };
-
-            LanguageLabels = new TinyDictionary<string, string> {
-                ["de"] = "Deutsch",
-                ["en"] = "English",
-                ["es"] = "Español",
-                ["fr"] = "Français",
-                ["hu"] = "Magyar",
-                ["it"] = "Italiano",
-                ["ja"] = "日本語",
-                ["ko"] = "한국의",
-                ["nl"] = "Nederlands",
-                ["pl"] = "Polski",
-                ["pt"] = "Português",
-                ["ru"] = "Русский язык",
-                ["zh-tw"] = "中文 (繁體)",
-                ["zh"] = "中文 (简体)"
-            };
-        }
-
         public void LoadAllTranslations() {
             // Load all languages together
             translations_ = new Dictionary<string, Dictionary<string, string>>();
-            foreach (string lang in AvailableLanguageCodes) {
-                translations_[lang] = LoadLanguage(lang);
+
+            // Load all translations CSV file with UTF8
+            const string FILENAME = RESOURCES_PREFIX + "Translations.all_translations.csv";
+            string[] lines;
+            using (Stream st = Assembly.GetExecutingAssembly()
+                                       .GetManifestResourceStream(FILENAME)) {
+                using (var sr = new StreamReader(st, Encoding.UTF8)) {
+                    lines = sr.ReadToEnd()
+                              .Split(new[] { "\n", "\r\n" }, StringSplitOptions.None);
+                }
             }
+
+            // Read each line as CSV line
+            // Read language order in the first line
+            string firstLine = lines[0];
+            var languageCodes = new List<string>();
+            using (var sr = new StringReader(firstLine)) {
+                ReadCsvCell(sr); // skip
+                while (true) {
+                    string langName = ReadCsvCell(sr);
+                    if (langName.Length == 0 || !csv_columns_to_locales_.ContainsKey(langName)) {
+                        break;
+                    }
+                    languageCodes.Add(csv_columns_to_locales_[langName]);
+                }
+            }
+
+            // Initialize empty dicts for each language
+            foreach (string lang in languageCodes) {
+                translations_[lang] = new Dictionary<string, string>();
+            }
+
+            // first column is the translation key
+            // Following columns are languages, following the order in AvailableLanguageCodes
+            foreach (string line in lines.Skip(1)) {
+                using (var sr = new StringReader(line)) {
+                    string key = ReadCsvCell(sr);
+                    if (key.Length == 0) {
+                        break; // last line is empty
+                    }
+                    foreach (string lang in languageCodes) {
+                        string cell = ReadCsvCell(sr);
+                        translations_[lang][key] = cell;
+                    }
+                }
+            }
+
+#if DUMP_TRANSLATIONS
+            DumpTranslationsToCsv();
+#endif
+        }
+
+        /// <summary>
+        /// Given a stringReader, read a CSV cell which can be a string until next comma, or quoted
+        /// string (in this case double quotes are decoded to a quote character) and respects
+        /// newlines \n too.
+        /// </summary>
+        /// <param name="sr">Source for reading CSV</param>
+        /// <returns>Cell contents</returns>
+        private static string ReadCsvCell(StringReader sr) {
+            var sb = new StringBuilder();
+            if (sr.Peek() == '"') {
+                sr.Read(); // skip the leading \"
+
+                // The cell begins with a \" character, special reading rules apply
+                while (true) {
+                    int next = sr.Read();
+                    if (next == -1) {
+                        break; // end of the line
+                    }
+
+                    switch (next) {
+                        case '\\': {
+                            int special = sr.Read();
+                            if (special == 'n') {
+                                // Recognized a new line
+                                sb.Append("\n");
+                            } else {
+                                // Not recognized, append as is
+                                sb.Append("\\");
+                                sb.Append((char)special, 1);
+                            }
+
+                            break;
+                        }
+                        case '\"': {
+                            // Found a '""', or a '",'
+                            int peek = sr.Peek();
+                            switch (peek) {
+                                case '\"': {
+                                    sr.Read(); // consume the double quote
+                                    sb.Append("\"");
+                                    break;
+                                }
+                                case ',':
+                                case -1: {
+                                    // Followed by a comma or end-of-string
+                                    sr.Read(); // Consume the comma
+                                    return sb.ToString();
+                                }
+                                default: {
+                                    // Followed by a non-comma, non-end-of-string
+                                    sb.Append("\"");
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                        default: {
+                            sb.Append((char)next, 1);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                // Simple reading rules apply, read to the next comma or end-of-string
+                while (true) {
+                    int next = sr.Read();
+                    if (next == -1 || next == ',') {
+                        break; // end-of-string or a comma
+                    }
+
+                    sb.Append((char)next, 1);
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        // Write translations to a CSV
+        [Conditional("DUMP_TRANSLATIONS")]
+        private void DumpTranslationsToCsv() {
+            string Quote(string s) {
+                return s.Replace("\"", "\"\"")
+                        .Replace("\n", "\\n")
+                        .Replace("\t", "\\t");
+            }
+
+            var sb = new StringBuilder();
+            sb.Append("Original,");
+            foreach (string lang in AvailableLanguageCodes) {
+                sb.Append($"{lang},");
+            }
+
+            sb.Append("\n");
+
+            foreach (KeyValuePair<string, string> englishStr in translations_[DEFAULT_LANGUAGE_CODE]) {
+                sb.Append($"\"{Quote(englishStr.Key)}\",");
+                foreach (string lang in AvailableLanguageCodes) {
+                    sb.Append(
+                        translations_[lang].TryGetValue(englishStr.Key, out string localizedStr)
+                            ? $"\"{Quote(localizedStr)}\","
+                            : ",");
+                }
+
+                sb.Append("\n");
+            }
+
+            File.WriteAllText("lang.csv", sb.ToString(), Encoding.UTF8);
         }
 
         public static string GetString(string key) {
             Translation self = LoadingExtension.Translator;
             string lang = GetCurrentLanguage();
+            return self.Get_(lang, key);
+        }
+
+        public static string Get(string lang, string key) {
+            Translation self = LoadingExtension.Translator;
+            return self.Get_(lang, key);
+        }
+
+        private string Get_(string lang, string key) {
+            if (!translations_.ContainsKey(lang)) {
+                Log.Error($"Translation: Unknown language {lang}");
+                return key;
+            }
 
             // Try find translation in the current language first
-            if (self.translations_[lang].TryGetValue(key, out string ret)) {
+            if (translations_[lang].TryGetValue(key, out string ret))
+            {
                 return ret;
             }
 
             // If not found, try also get translation in the default English
-            return self.translations_[DEFAULT_LANGUAGE_CODE].TryGetValue(key, out string ret2)
+            return translations_[DEFAULT_LANGUAGE_CODE].TryGetValue(key, out string ret2)
                        ? ret2
                        : key;
         }
@@ -164,7 +346,7 @@ namespace TrafficManager.UI {
         // Not used
         [UsedImplicitly]
         public void SetCurrentLanguage(string lang) {
-            if (lang != null && !LanguageLabels.ContainsKey(lang)) {
+            if (lang != null && !AvailableLanguageCodes.Contains(lang)) {
                 Log.Warning($"Translation.SetCurrentLanguage: Invalid language code: {lang}");
                 return;
             }
@@ -172,59 +354,59 @@ namespace TrafficManager.UI {
             GlobalConfig.Instance.LanguageCode = lang;
         }
 
-        /// <summary>
-        /// Load all translations available one by one. Each call loads one language.
-        /// </summary>
-        /// <param name="lang">Another language to load</param>
-        /// <returns>A section of the translation dictionary, translations loaded for the
-        ///     selected language</returns>
-        private static Dictionary<string, string> LoadLanguage(string lang) {
-            var result = new Dictionary<string, string>();
-            try {
-                string filename = RESOURCES_PREFIX
-                                  + GetTranslatedFileName(DEFAULT_TRANSLATION_FILENAME, lang);
-
-                string[] lines;
-                using (Stream st = Assembly.GetExecutingAssembly()
-                                           .GetManifestResourceStream(filename)) {
-                    using (var sr = new StreamReader(st)) {
-                        lines = sr.ReadToEnd()
-                                  .Split(new[] { "\n", "\r\n" }, StringSplitOptions.None);
-                    }
-                }
-
-                foreach (string line in lines) {
-                    if (line.Trim().Length == 0) {
-                        continue;
-                    }
-
-                    // Try break the line on space, if no space - skip that line
-                    int delimiterIndex = line.Trim().IndexOf(' ');
-                    if (delimiterIndex <= 0) {
-                        continue;
-                    }
-
-                    try {
-                        // Try split the line into key and value
-                        string translationKey = line.Substring(0, delimiterIndex);
-                        string translationValue = line.Substring(delimiterIndex + 1)
-                                                      .Trim()
-                                                      .Replace("\\n", "\n");
-                        result.Add(translationKey, translationValue);
-                    }
-                    catch (Exception) {
-                        Log.WarningFormat(
-                            "Failed to add translation for key {0}, lang={1}. Possible duplicate?",
-                            line.Substring(0, delimiterIndex),
-                            lang);
-                    }
-                }
-            } catch (Exception e) {
-                Log.Error($"Error while loading translations for lang={lang}: {e}");
-            }
-
-            return result;
-        }
+//        /// <summary>
+//        /// Load all translations available one by one. Each call loads one language.
+//        /// </summary>
+//        /// <param name="lang">Another language to load</param>
+//        /// <returns>A section of the translation dictionary, translations loaded for the
+//        ///     selected language</returns>
+//        private static Dictionary<string, string> LoadLanguage(string lang) {
+//            var result = new Dictionary<string, string>();
+//            try {
+//                string filename = RESOURCES_PREFIX
+//                                  + GetTranslatedFileName(DEFAULT_TRANSLATION_FILENAME, lang);
+//
+//                string[] lines;
+//                using (Stream st = Assembly.GetExecutingAssembly()
+//                                           .GetManifestResourceStream(filename)) {
+//                    using (var sr = new StreamReader(st)) {
+//                        lines = sr.ReadToEnd()
+//                                  .Split(new[] { "\n", "\r\n" }, StringSplitOptions.None);
+//                    }
+//                }
+//
+//                foreach (string line in lines) {
+//                    if (line.Trim().Length == 0) {
+//                        continue;
+//                    }
+//
+//                    // Try break the line on space, if no space - skip that line
+//                    int delimiterIndex = line.Trim().IndexOf(' ');
+//                    if (delimiterIndex <= 0) {
+//                        continue;
+//                    }
+//
+//                    try {
+//                        // Try split the line into key and value
+//                        string translationKey = line.Substring(0, delimiterIndex);
+//                        string translationValue = line.Substring(delimiterIndex + 1)
+//                                                      .Trim()
+//                                                      .Replace("\\n", "\n");
+//                        result.Add(translationKey, translationValue);
+//                    }
+//                    catch (Exception) {
+//                        Log.WarningFormat(
+//                            "Failed to add translation for key {0}, lang={1}. Possible duplicate?",
+//                            line.Substring(0, delimiterIndex),
+//                            lang);
+//                    }
+//                }
+//            } catch (Exception e) {
+//                Log.Error($"Error while loading translations for lang={lang}: {e}");
+//            }
+//
+//            return result;
+//        }
 
         public void ReloadTutorialTranslations() {
             var locale = (Locale)typeof(LocaleManager)
