@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -669,6 +669,13 @@
 
                 string infoName = info.name;
 
+                // #510 filter out: Decorative networks (`None`) and bike paths (`Bicycle`)
+                if (info.m_vehicleTypes == VehicleInfo.VehicleType.None || info.m_vehicleTypes == VehicleInfo.VehicleType.Bicycle) {
+                    Log.Info(
+                        $"SpeedLimitManager.OnBeforeLoadData: NetInfo @ {i} ({infoName}) skipped as it does not have vehicle lanes.");
+                    continue;
+                }
+
                 // Resharper warning: condition always false
                 // if (infoName == null) {
                 //    Log.Warning($"SpeedLimitManager.OnBeforeLoadData: NetInfo name @ {i} is null!");
@@ -678,7 +685,7 @@
                 if (!vanillaLaneSpeedLimitsByNetInfoName.ContainsKey(infoName)) {
                     if (info.m_lanes == null) {
                         Log.Warning(
-                            $"SpeedLimitManager.OnBeforeLoadData: NetInfo lanes @ {i} is null!");
+                            $"SpeedLimitManager.OnBeforeLoadData: NetInfo @ {i} ({infoName}) lanes is null!");
                         continue;
                     }
 
