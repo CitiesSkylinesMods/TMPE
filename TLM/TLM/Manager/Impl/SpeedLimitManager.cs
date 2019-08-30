@@ -31,6 +31,14 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>Ingame speed units, max possible speed</summary>
         public const float MAX_SPEED = 10f * 2f; // 1000 km/h
 
+        public static readonly SpeedLimitManager Instance = new SpeedLimitManager();
+
+        // For each NetInfo (by name) and lane index: custom speed limit
+        internal Dictionary<string, float> CustomLaneSpeedLimitByNetInfoName;
+
+        // For each name: NetInfo
+        internal Dictionary<string, NetInfo> NetInfoByName;
+
         /// <summary>Ingame speed units, minimal speed</summary>
         private const float MIN_SPEED = 0.1f; // 5 km/h
 
@@ -42,25 +50,12 @@ namespace TrafficManager.Manager.Impl {
 
         private List<NetInfo> customizableNetInfos;
 
-        // For each NetInfo (by name) and lane index: custom speed limit
-        internal Dictionary<string, float> CustomLaneSpeedLimitByNetInfoName;
-
-        // For each name: NetInfo
-        internal Dictionary<string, NetInfo> NetInfoByName;
-
-        public static readonly SpeedLimitManager Instance = new SpeedLimitManager();
-
         private SpeedLimitManager() {
             vanillaLaneSpeedLimitsByNetInfoName = new Dictionary<string, float[]>();
             CustomLaneSpeedLimitByNetInfoName = new Dictionary<string, float>();
             customizableNetInfos = new List<NetInfo>();
             childNetInfoNamesByCustomizableNetInfoName = new Dictionary<string, List<string>>();
             NetInfoByName = new Dictionary<string, NetInfo>();
-        }
-
-        protected override void InternalPrintDebugInfo() {
-            base.InternalPrintDebugInfo();
-            Log.NotImpl("InternalPrintDebugInfo for SpeedLimitManager");
         }
 
         /// <summary>
@@ -87,7 +82,7 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Determines if custom speed limits may be assigned to the given lane info
         /// </summary>
-        /// <param name="laneInfo"></param>
+        /// <param name="laneInfo">The <see cref="NetInfo.Lane"/> that you wish to check.</param>
         /// <returns></returns>
         public bool MayHaveCustomSpeedLimits(NetInfo.Lane laneInfo) {
             return (laneInfo.m_laneType & LANE_TYPES) != NetInfo.LaneType.None
@@ -322,7 +317,7 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Explicitly stores currently set speed limits for all segments of the specified NetInfo
         /// </summary>
-        /// <param name="info"></param>
+        /// <param name="info">The <see cref="NetInfo"/> for which speed limits should be stored.</param>
         public void FixCurrentSpeedLimits(NetInfo info) {
             if (info == null) {
 #if DEBUG
@@ -365,7 +360,7 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Explicitly clear currently set speed limits for all segments of the specified NetInfo
         /// </summary>
-        /// <param name="info"></param>
+        /// <param name="info">The <see cref="NetInfo"/> for which speed limits should be cleared.</param>
         public void ClearCurrentSpeedLimits(NetInfo info) {
             if (info == null) {
                 Log._DebugOnlyWarning("SpeedLimitManager.ClearCurrentSpeedLimits: info is null!");
@@ -410,7 +405,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="info">the NetInfo of which the game default speed limit should be determined</param>
         /// <param name="roundToSignLimits">if true, custom speed limit are rounded to speed limits
         /// available as speed limit sign</param>
-        /// <returns></returns>
+        /// <returns>The vanilla speed limit, in game units.</returns>
         public float GetVanillaNetInfoSpeedLimit(NetInfo info, bool roundToSignLimits = true) {
             if (info == null) {
                 Log._DebugOnlyWarning("SpeedLimitManager.GetVanillaNetInfoSpeedLimit: info is null!");
@@ -512,6 +507,11 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        protected override void InternalPrintDebugInfo() {
+            base.InternalPrintDebugInfo();
+            Log.NotImpl("InternalPrintDebugInfo for SpeedLimitManager");
+        }
+
         private void UpdateNetInfoGameSpeedLimit(NetInfo info, float gameSpeedLimit) {
             if (info == null) {
                 Log._DebugOnlyWarning(
@@ -547,7 +547,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="laneInfo"></param>
         /// <param name="laneId"></param>
         /// <param name="speedLimit">Game speed units, 0=unlimited</param>
-        /// <returns></returns>
+        /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
         public bool SetSpeedLimit(ushort segmentId,
                                   uint laneIndex,
                                   NetInfo.Lane laneInfo,
@@ -737,7 +737,7 @@ namespace TrafficManager.Manager.Impl {
             Log.Info("SpeedLimitManager.OnBeforeLoadData: Scan complete");
 
             mainNetInfos.Sort(
-                delegate (NetInfo a, NetInfo b) {
+                (NetInfo a, NetInfo b) => {
                     bool aRoad = a.m_netAI is RoadBaseAI;
                     bool bRoad = b.m_netAI is RoadBaseAI;
 
