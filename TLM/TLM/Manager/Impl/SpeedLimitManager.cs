@@ -651,17 +651,29 @@ namespace TrafficManager.Manager.Impl {
 
             List<NetInfo> mainNetInfos = new List<NetInfo>();
 
+            // #378: Output some detail either side of null NetInfos to help track down their source
+            string previousNetInfoName = string.Empty; // last non-null netinfo
+            bool previousWasNull = false; // if true, next non-numm netinfo will be output to log
+
             Log.Info($"SpeedLimitManager.OnBeforeLoadData: {numLoaded} NetInfos loaded.");
             for (uint i = 0; i < numLoaded; ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
 
+                // Basic validity checks to see if this NetInfo is something speed limits can be applied to
+                // Checks:
+                // * Not null
+                // * Must be either Road, Metro or Train (incl. Tram, Monorail, etc)
+                // * If requires DLC, the DLC must be active
                 if (info == null
                     || info.m_netAI == null
                     || !(info.m_netAI is RoadBaseAI || info.m_netAI is MetroTrackAI ||
                          info.m_netAI is TrainTrackBaseAI)
                     || !(info.m_dlcRequired == 0 || (uint)(info.m_dlcRequired & dlcMask) != 0u)) {
+
                     if (info == null) {
+                        Log.Info($"SpeedLimitManager.OnBeforeLoadData: Pre-null NetInfo was {previousNetInfoName}");
                         Log.Warning($"SpeedLimitManager.OnBeforeLoadData: NetInfo @ {i} is null!");
+                        previousWasNull = true;
                     }
 
                     continue;
@@ -669,7 +681,14 @@ namespace TrafficManager.Manager.Impl {
 
                 string infoName = info.name;
 
-                // #510 filter out: Decorative networks (`None`) and bike paths (`Bicycle`)
+                if (previousWasNull) {
+                    Log.Info($"SpeedLimitManager.OnBeforeLoadData: Post-null NetInfo is {infoName}");
+                    previousWasNull = false;
+                }
+
+                previousNetInfoName = infoName;
+
+                // #510: Filter out decorative networks (`None`) and bike paths (`Bicycle`)
                 if (info.m_vehicleTypes == VehicleInfo.VehicleType.None || info.m_vehicleTypes == VehicleInfo.VehicleType.Bicycle) {
                     Log.Info(
                         $"SpeedLimitManager.OnBeforeLoadData: NetInfo @ {i} ({infoName}) skipped as it does not have vehicle lanes.");
