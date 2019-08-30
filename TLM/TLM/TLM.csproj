@@ -327,8 +327,6 @@
     <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_zh-tw.txt" />
-    <EmbeddedResource Include="Resources\lang_es.txt" />
     <EmbeddedResource Include="Resources\lanechange_allowed.png" />
     <EmbeddedResource Include="Resources\lanechange_forbidden.png" />
     <EmbeddedResource Include="Resources\bicycle_infosign.png" />
@@ -360,22 +358,12 @@
     <EmbeddedResource Include="Resources\light_counter_pl.png" />
     <EmbeddedResource Include="Resources\light_mode_pl.png" />
     <EmbeddedResource Include="Resources\pedestrian_mode_2_pl.png" />
-    <EmbeddedResource Include="Resources\lang_fr.txt" />
-    <EmbeddedResource Include="Resources\lang_pl.txt" />
-    <EmbeddedResource Include="Resources\lang_ru.txt" />
-    <EmbeddedResource Include="Resources\lang_pt.txt" />
-    <EmbeddedResource Include="Resources\lang.txt" />
-    <EmbeddedResource Include="Resources\lang_de.txt" />
-    <EmbeddedResource Include="Resources\lang_ja.txt" />
     <EmbeddedResource Include="Resources\light_counter_ja.png" />
     <EmbeddedResource Include="Resources\light_mode_ja.png" />
     <EmbeddedResource Include="Resources\clock_pause.png" />
     <EmbeddedResource Include="Resources\clock_test.png" />
     <EmbeddedResource Include="Resources\clock_play.png" />
     <EmbeddedResource Include="Resources\remove_signs.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_nl.txt" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\crossing_allowed.png" />
@@ -387,12 +375,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\MenuButton.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_zh.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_it.txt" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\noimage.png" />
@@ -428,9 +410,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\parking_allowed.png" />
     <EmbeddedResource Include="Resources\parking_disallowed.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_ko.txt" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\remove-btn.png" />
@@ -527,7 +506,7 @@
     <Folder Include="Traffic\Data\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_hu.txt" />
+    <EmbeddedResource Include="Resources\Translations\all_translations.csv" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

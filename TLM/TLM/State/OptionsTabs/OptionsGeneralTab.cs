@@ -60,8 +60,8 @@ namespace TrafficManager.State {
             languageLabels[0] = T("Game_language");
 
             for (int i = 0; i < Translation.AvailableLanguageCodes.Count; ++i) {
-                languageLabels[i + 1] =
-                    Translation.LanguageLabels[Translation.AvailableLanguageCodes[i]];
+                languageLabels[i + 1] = Translation.Get(
+                    Translation.AvailableLanguageCodes[i], "I18n Language Name");
             }
 
             int languageIndex = 0;
