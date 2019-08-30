@@ -350,60 +350,6 @@ namespace TrafficManager.UI {
             GlobalConfig.Instance.LanguageCode = lang;
         }
 
-//        /// <summary>
-//        /// Load all translations available one by one. Each call loads one language.
-//        /// </summary>
-//        /// <param name="lang">Another language to load</param>
-//        /// <returns>A section of the translation dictionary, translations loaded for the
-//        ///     selected language</returns>
-//        private static Dictionary<string, string> LoadLanguage(string lang) {
-//            var result = new Dictionary<string, string>();
-//            try {
-//                string filename = RESOURCES_PREFIX
-//                                  + GetTranslatedFileName(DEFAULT_TRANSLATION_FILENAME, lang);
-//
-//                string[] lines;
-//                using (Stream st = Assembly.GetExecutingAssembly()
-//                                           .GetManifestResourceStream(filename)) {
-//                    using (var sr = new StreamReader(st)) {
-//                        lines = sr.ReadToEnd()
-//                                  .Split(new[] { "\n", "\r\n" }, StringSplitOptions.None);
-//                    }
-//                }
-//
-//                foreach (string line in lines) {
-//                    if (line.Trim().Length == 0) {
-//                        continue;
-//                    }
-//
-//                    // Try break the line on space, if no space - skip that line
-//                    int delimiterIndex = line.Trim().IndexOf(' ');
-//                    if (delimiterIndex <= 0) {
-//                        continue;
-//                    }
-//
-//                    try {
-//                        // Try split the line into key and value
-//                        string translationKey = line.Substring(0, delimiterIndex);
-//                        string translationValue = line.Substring(delimiterIndex + 1)
-//                                                      .Trim()
-//                                                      .Replace("\\n", "\n");
-//                        result.Add(translationKey, translationValue);
-//                    }
-//                    catch (Exception) {
-//                        Log.WarningFormat(
-//                            "Failed to add translation for key {0}, lang={1}. Possible duplicate?",
-//                            line.Substring(0, delimiterIndex),
-//                            lang);
-//                    }
-//                }
-//            } catch (Exception e) {
-//                Log.Error($"Error while loading translations for lang={lang}: {e}");
-//            }
-//
-//            return result;
-//        }
-
         public void ReloadTutorialTranslations() {
             var locale = (Locale)typeof(LocaleManager)
                                  .GetField(
