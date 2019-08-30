@@ -16,37 +16,30 @@ namespace TrafficManager.UI {
     using State;
     using Util;
 
+    /// <summary>
+    /// Adding a new language step by step:
+    /// 1. In Crowdin: Go to languages and add a new language
+    /// 2. Visit the Files menu and click "Edit Schema" on each file
+    /// 3. In the file selection dialog provide the recently exported CSV file
+    /// 4. The columns selection window appears, scroll right and select the new language in some column
+    /// 5. In this file: <see cref="AvailableLanguageCodes"/> and <see cref="csv_columns_to_locales_"/>
+    /// </summary>
     public class Translation {
-        /// <summary>
-        /// Defines the order of language selector dropdown.
-        /// </summary>
-        public static readonly IList<string> AvailableLanguageCodes
-            = new List<string> {
-                                   "en",
-                                   "en-gb",
-                                   "de",
-                                   "es",
-                                   "fr",
-                                   "hu",
-                                   "it",
-                                   "ja",
-                                   "ko",
-                                   "nl",
-                                   "pl",
-                                   "pt",
-                                   "ru",
-                                   "zh", // Mainland China (simplified)
-                                   "zh-tw", // Taiwanese (traditional)
-                               };
+        private const string DEFAULT_LANGUAGE_CODE = "en";
+
+        public const string TUTORIAL_KEY_PREFIX = "TMPE_TUTORIAL_";
+        private const string TUTORIAL_HEAD_KEY_PREFIX = TUTORIAL_KEY_PREFIX + "HEAD_";
+        public const string TUTORIAL_BODY_KEY_PREFIX = TUTORIAL_KEY_PREFIX + "BODY_";
+        private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
 
         /// <summary>
-        /// Defines column order in CSV, but not the dropdown order.
+        /// Defines column order in CSV, but not the dropdown order, the dropdown is just sorted.
         /// Mapping from translation languages (first row of CSV export) to language locales used in
         /// <see cref="AvailableLanguageCodes"/> above.
         /// </summary>
         private static readonly Dictionary<string, string> csv_columns_to_locales_
             = new Dictionary<string, string>() {
-                                                   { "English", DEFAULT_LANGUAGE_CODE },
+                                                   { "English", "en" }, // DEFAULT_LANGUAGE_CODE
                                                    { "Chinese Simplified", "zh" },
                                                    { "Chinese Traditional", "zh-tw" },
                                                    { "Dutch", "nl" },
@@ -63,12 +56,15 @@ namespace TrafficManager.UI {
                                                    { "Spanish", "es" }
                                                };
 
-        private const string DEFAULT_LANGUAGE_CODE = "en";
+        /// <summary>
+        /// Defines the order of language selector dropdown.
+        /// </summary>
+        public static readonly List<string> AvailableLanguageCodes;
 
-        public const string TUTORIAL_KEY_PREFIX = "TMPE_TUTORIAL_";
-        private const string TUTORIAL_HEAD_KEY_PREFIX = TUTORIAL_KEY_PREFIX + "HEAD_";
-        public const string TUTORIAL_BODY_KEY_PREFIX = TUTORIAL_KEY_PREFIX + "BODY_";
-        private const string RESOURCES_PREFIX = "TrafficManager.Resources.";
+        static Translation() {
+            AvailableLanguageCodes = csv_columns_to_locales_.Values.ToList();
+            AvailableLanguageCodes.Sort();
+        }
 
         /// <summary>
         /// Stores all languages (first key), and for each language stores translations
