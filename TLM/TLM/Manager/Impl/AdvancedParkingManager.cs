@@ -2928,14 +2928,14 @@
                 case ExtPathMode.ApproachingParkedCar:
                 case ExtPathMode.RequiresCarPath:
                 case ExtPathMode.RequiresMixedCarPathToTarget: {
-                    ret = Translation.GetString("Entering_vehicle") + ", " + ret;
+                    ret = Translation.Get("Entering_vehicle") + ", " + ret;
                     break;
                 }
 
                 case ExtPathMode.RequiresWalkingPathToParkedCar:
                 case ExtPathMode.CalculatingWalkingPathToParkedCar:
                 case ExtPathMode.WalkingToParkedCar: {
-                    ret = Translation.GetString("Walking_to_car") + ", " + ret;
+                    ret = Translation.Get("Walking_to_car") + ", " + ret;
                     break;
                 }
 
@@ -2943,9 +2943,9 @@
                 case ExtPathMode.TaxiToTarget:
                 case ExtPathMode.WalkingToTarget: {
                     if ((extCitizen.transportMode & ExtTransportMode.PublicTransport) != ExtTransportMode.None) {
-                        ret = Translation.GetString("Using_public_transport") + ", " + ret;
+                        ret = Translation.Get("Using_public_transport") + ", " + ret;
                     } else {
-                        ret = Translation.GetString("Walking") + ", " + ret;
+                        ret = Translation.Get("Walking") + ", " + ret;
                     }
 
                     break;
@@ -2953,7 +2953,7 @@
 
                 case ExtPathMode.CalculatingCarPathToTarget:
                 case ExtPathMode.CalculatingCarPathToKnownParkPos: {
-                    ret = Translation.GetString("Thinking_of_a_good_parking_spot") + ", " + ret;
+                    ret = Translation.Get("Thinking_of_a_good_parking_spot") + ", " + ret;
                     break;
                 }
             }
@@ -2965,9 +2965,9 @@
             switch (driverExtInstance.pathMode) {
                 case ExtPathMode.DrivingToAltParkPos: {
                     if (driverExtInstance.failedParkingAttempts <= 1) {
-                        ret = Translation.GetString("Driving_to_a_parking_spot") + ", " + ret;
+                        ret = Translation.Get("Driving_to_a_parking_spot") + ", " + ret;
                     } else {
-                        ret = Translation.GetString("Driving_to_another_parking_spot") + " (#" +
+                        ret = Translation.Get("Driving_to_another_parking_spot") + " (#" +
                               driverExtInstance.failedParkingAttempts + "), " + ret;
                     }
 
@@ -2976,13 +2976,13 @@
 
                 case ExtPathMode.CalculatingCarPathToKnownParkPos:
                 case ExtPathMode.DrivingToKnownParkPos: {
-                    ret = Translation.GetString("Driving_to_a_parking_spot") + ", " + ret;
+                    ret = Translation.Get("Driving_to_a_parking_spot") + ", " + ret;
                     break;
                 }
 
                 case ExtPathMode.ParkingFailed:
                 case ExtPathMode.CalculatingCarPathToAltParkPos: {
-                    ret = Translation.GetString("Looking_for_a_parking_spot") + ", " + ret;
+                    ret = Translation.Get("Looking_for_a_parking_spot") + ", " + ret;
                     break;
                 }
 

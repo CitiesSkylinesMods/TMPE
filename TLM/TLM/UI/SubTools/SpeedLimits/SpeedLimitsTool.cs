@@ -96,8 +96,8 @@
             string unitTitle = string.Format(
                 " ({0})",
                 GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
-                    ? Translation.GetString("Miles_per_hour")
-                    : Translation.GetString("Kilometers_per_hour"));
+                    ? Translation.Get("Miles_per_hour")
+                    : Translation.Get("Kilometers_per_hour"));
 
             paletteWindowRect.width = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
                                           ? 10 * (GUI_SPEED_SIGN_SIZE + 5)
@@ -107,7 +107,7 @@
                 254,
                 paletteWindowRect,
                 GuiSpeedLimitsWindow,
-                Translation.GetString("Speed_limits") + unitTitle,
+                Translation.Get("Speed_limits") + unitTitle,
                 WindowStyle);
 
             if (defaultsWindowVisible) {
@@ -115,7 +115,7 @@
                     258,
                     defaultsWindowRect,
                     GuiDefaultsWindow,
-                    Translation.GetString("Default_speed_limits"),
+                    Translation.Get("Default_speed_limits"),
                     WindowStyle);
             }
 
@@ -248,7 +248,7 @@
             // Road type label
             GUILayout.BeginVertical();
             GUILayout.Space(10);
-            GUILayout.Label(Translation.GetString("Road_type") + ":");
+            GUILayout.Label(Translation.Get("Road_type") + ":");
             GUILayout.EndVertical();
 
             // switch between NetInfos
@@ -304,7 +304,7 @@
             // Default speed limit label
             GUILayout.BeginVertical();
             GUILayout.Space(10);
-            GUILayout.Label(Translation.GetString("Default_speed_limit") + ":");
+            GUILayout.Label(Translation.Get("Default_speed_limit") + ":");
             GUILayout.EndVertical();
 
             // switch between speed limits
@@ -332,8 +332,8 @@
                           GUILayout.Width(GUI_SPEED_SIGN_SIZE),
                           GUILayout.Height(GUI_SPEED_SIGN_SIZE));
             GUILayout.Label(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
-                                ? Translation.GetString("Miles_per_hour")
-                                : Translation.GetString("Kilometers_per_hour"));
+                                ? Translation.Get("Miles_per_hour")
+                                : Translation.Get("Kilometers_per_hour"));
 
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
@@ -369,7 +369,7 @@
 
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(Translation.GetString("Save"), GUILayout.Width(70))) {
+            if (GUILayout.Button(Translation.Get("Save"), GUILayout.Width(70))) {
                 SpeedLimitManager.Instance.FixCurrentSpeedLimits(info);
                 SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit.GameUnits);
             }
@@ -377,7 +377,7 @@
             GUILayout.FlexibleSpace();
 
             if (GUILayout.Button(
-                Translation.GetString("Save") + " & " + Translation.GetString("Apply"),
+                Translation.Get("Save") + " & " + Translation.Get("Apply"),
                 GUILayout.Width(160))) {
                 SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit.GameUnits);
                 SpeedLimitManager.Instance.ClearCurrentSpeedLimits(info);
@@ -478,7 +478,7 @@
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(Translation.GetString("Default_speed_limits"),
+            if (GUILayout.Button(Translation.Get("Default_speed_limits"),
                                  GUILayout.Width(200))) {
                 TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Defaults");
                 defaultsWindowVisible = true;
@@ -494,13 +494,13 @@
             GUILayout.FlexibleSpace();
             showLimitsPerLane = GUILayout.Toggle(
                 showLimitsPerLane,
-                Translation.GetString("Show_lane-wise_speed_limits"));
+                Translation.Get("Show_lane-wise_speed_limits"));
 
             GUILayout.FlexibleSpace();
 
             // Display MPH checkbox, if ticked will save global config
             bool displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-            displayMph = GUILayout.Toggle(displayMph, Translation.GetString("Display_speed_limits_mph"));
+            displayMph = GUILayout.Toggle(displayMph, Translation.Get("Display_speed_limits_mph"));
 
             if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != displayMph) {
                 OptionsGeneralTab.SetDisplayInMph(displayMph);
@@ -823,13 +823,13 @@
 
         public static string ToMphPreciseString(SpeedValue speed) {
             return FloatUtil.IsZero(speed.GameUnits)
-                       ? Translation.GetString("Speed_limit_unlimited")
+                       ? Translation.Get("Speed_limit_unlimited")
                        : speed.ToMphPrecise().ToString();
         }
 
         public static string ToKmphPreciseString(SpeedValue speed) {
             return FloatUtil.IsZero(speed.GameUnits)
-                       ? Translation.GetString("Speed_limit_unlimited")
+                       ? Translation.Get("Speed_limit_unlimited")
                        : speed.ToKmphPrecise().ToString();
         }
 

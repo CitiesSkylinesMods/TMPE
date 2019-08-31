@@ -110,7 +110,7 @@
                     255,
                     windowRect,
                     GuiVehicleRestrictionsWindow,
-                    Translation.GetString("Vehicle_restrictions"),
+                    Translation.Get("Vehicle_restrictions"),
                     WindowStyle);
                 cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
 
@@ -200,7 +200,7 @@
         private void GuiVehicleRestrictionsWindow(int num) {
             NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
-            if (GUILayout.Button(Translation.GetString("Invert"))) {
+            if (GUILayout.Button(Translation.Get("Invert"))) {
                 // invert pattern
                 NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
 
@@ -250,7 +250,7 @@
             }
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(Translation.GetString("Allow_all_vehicles"))) {
+            if (GUILayout.Button(Translation.Get("Allow_all_vehicles"))) {
                 // allow all vehicle types
                 NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
 
@@ -288,7 +288,7 @@
                 RefreshCurrentRestrictedSegmentIds(SelectedSegmentId);
             }
 
-            if (GUILayout.Button(Translation.GetString("Ban_all_vehicles"))) {
+            if (GUILayout.Button(Translation.Get("Ban_all_vehicles"))) {
                 // ban all vehicle types
                 NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
 
@@ -330,7 +330,7 @@
             GUILayout.EndHorizontal();
 
             if (GUILayout.Button(
-                Translation.GetString(
+                Translation.Get(
                     "Apply_vehicle_restrictions_to_all_road_segments_between_two_junctions"))) {
                 ApplyRestrictionsToAllSegments();
             }

@@ -40,12 +40,12 @@
                 if (showMessageOnError) {
                     switch (reason) {
                         case ToggleTrafficLightError.HasTimedLight: {
-                            MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
+                            MainTool.ShowTooltip(Translation.Get("NODE_IS_TIMED_LIGHT"));
                             break;
                         }
 
                         case ToggleTrafficLightError.IsLevelCrossing: {
-                            MainTool.ShowTooltip(Translation.GetString("Node_is_level_crossing"));
+                            MainTool.ShowTooltip(Translation.Get("Node_is_level_crossing"));
                             break;
                         }
                     }

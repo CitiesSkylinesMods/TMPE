@@ -37,7 +37,7 @@ namespace TrafficManager.State {
         internal static UICheckBox EnableTimedLightsToggle;
 
         private static string T(string s) {
-            return Translation.GetString(s);
+            return Translation.Get(s);
         }
 
         internal static void MakeSettings_Maintenance(UITabstrip tabStrip, int tabIndex) {
