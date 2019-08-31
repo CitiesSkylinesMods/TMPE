@@ -26,13 +26,27 @@ Log switches determine which sets of existing log messages are output to the `TM
 
 ### Toggling existing switches
 
-Build the solution in `DEBUG` mode, then launch Cities: Skylines.
+Build the solution in `DEBUG` mode, then launch Cities: Skylines, then open mod settings to ensure the global config is updated.
 
 This will add a `<Debug>` section to the `TMPE_GlobalConfig.xml` file, which can be found in the following folder (may be different depending on where you installed the game):
 
 > `C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines`
 
-> TODO - describe how to cross-reference the xml switches with the `TLM/State/ConfigData/DebugSettings.cs`
+The relevant section looks like this:
+
+```xml
+<Debug>
+  <Switches>
+    <boolean>false</boolean>
+    <boolean>false</boolean>
+    ...
+  </Switches>
+  <ExtVehicleType>None</ExtVehicleType>
+  <ExtPathMode>None</ExtPathMode>
+</Debug>
+```
+
+The boolean values correlate to the `Switches[]` array in `TLM/State/ConfigData/DebugSettings.cs`.
 
 To enable a logging for a switch, change it's value from `false` to `true` and save the changes.
 
