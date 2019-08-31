@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.State.ConfigData {
+namespace TrafficManager.State.ConfigData {
     using System;
     using API.Traffic.Enums;
     using JetBrains.Annotations;
@@ -40,7 +40,8 @@
             false, // 22: parking ai debug log (vehicles)
             false, // 23: debug lane connections
             false, // 24: debug resource loading
-            false // 25: debug turn-on-red
+            false, // 25: debug turn-on-red
+            false  // 26: debug speed limits (also lists NetInfos skipped due to m_netAI in SpeedLimitsManager.cs)
         };
 
         private int nodeId_ = 0;
@@ -126,7 +127,8 @@
         VehicleParkingAILog = 22,
         LaneConnections = 23,
         ResourceLoading = 24,
-        TurnOnRed = 25
+        TurnOnRed = 25,
+        SpeedLimits = 26
     }
 
     static class DebugSwitchExtensions {
