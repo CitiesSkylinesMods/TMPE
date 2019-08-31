@@ -157,7 +157,7 @@
         }
 
         private static string T(string s) {
-            return Translation.GetString(s);
+            return Translation.Get(s);
         }
 
         internal static void Indent<T>(T component) where T : UIComponent {

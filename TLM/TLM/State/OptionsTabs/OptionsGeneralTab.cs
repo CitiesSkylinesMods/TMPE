@@ -40,7 +40,7 @@ namespace TrafficManager.State {
         private static int _roadSignMphStyleInt;
 
         private static string T(string s) {
-            return Translation.GetString(s);
+            return Translation.Get(s);
         }
 
         internal static void MakeSettings_General(UITabstrip tabStrip, int tabIndex) {

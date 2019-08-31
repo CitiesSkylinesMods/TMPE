@@ -469,7 +469,7 @@
                 // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not
                 //     allow priority signs: {reason}");
                 if (reason == SetPrioritySignError.HasTimedLight) {
-                    MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
+                    MainTool.ShowTooltip(Translation.Get("NODE_IS_TIMED_LIGHT"));
                 }
 
                 return false;

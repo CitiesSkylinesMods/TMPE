@@ -205,6 +205,26 @@ namespace TrafficManager.UI {
         }
 
         // Write translations to a CSV
+
+        public static string Get(string key) {
+            Translation self = LoadingExtension.Translator;
+            string lang = GetCurrentLanguage();
+            return self.Get_(lang, key);
+        }
+
+        public static string Get(string lang, string key) {
+            Translation self = LoadingExtension.Translator;
+            return self.Get_(lang, key);
+        }
+
+        public static bool HasString(string key) {
+            Translation self = LoadingExtension.Translator;
+            string lang = GetCurrentLanguage();
+
+            // Assume the language always exists in self.translations, so only check the string
+            return self.translations_[lang].ContainsKey(key);
+        }
+
         [Conditional("DUMP_TRANSLATIONS")]
         private void DumpTranslationsToCsv() {
             string Quote(string s) {
@@ -236,17 +256,6 @@ namespace TrafficManager.UI {
             File.WriteAllText("lang.csv", sb.ToString(), Encoding.UTF8);
         }
 
-        public static string GetString(string key) {
-            Translation self = LoadingExtension.Translator;
-            string lang = GetCurrentLanguage();
-            return self.Get_(lang, key);
-        }
-
-        public static string Get(string lang, string key) {
-            Translation self = LoadingExtension.Translator;
-            return self.Get_(lang, key);
-        }
-
         private string Get_(string lang, string key) {
             if (!translations_.ContainsKey(lang)) {
                 Log.Error($"Translation: Unknown language {lang}");
@@ -263,14 +272,6 @@ namespace TrafficManager.UI {
             return translations_[DEFAULT_LANGUAGE_CODE].TryGetValue(key, out string ret2)
                        ? ret2
                        : key;
-        }
-
-        public static bool HasString(string key) {
-            Translation self = LoadingExtension.Translator;
-            string lang = GetCurrentLanguage();
-
-            // Assume the language always exists in self.translations, so only check the string
-            return self.translations_[lang].ContainsKey(key);
         }
 
         public static string GetTranslatedFileName(string filename) {

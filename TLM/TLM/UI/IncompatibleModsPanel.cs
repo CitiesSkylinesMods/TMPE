@@ -63,7 +63,7 @@ namespace TrafficManager.UI
             title_.relativePosition = new Vector2(60, 12);
 
             title_.text = TrafficManagerMod.ModName + " " +
-                         Translation.GetString("Traffic_Manager_detected_incompatible_mods");
+                         Translation.Get("Traffic_Manager_detected_incompatible_mods");
 
             closeButton_ = mainPanel_.AddUIComponent<UIButton>();
             closeButton_.eventClick += CloseButtonClick;
@@ -78,7 +78,7 @@ namespace TrafficManager.UI
 
             UIHelper helper = new UIHelper(mainPanel_);
             runModsCheckerOnStartup_ = helper.AddCheckbox(
-                                          Translation.GetString(
+                                          Translation.Get(
                                               "Scan_for_known_incompatible_mods_on_startup"),
                                           GlobalConfig.Instance.Main
                                                .ScanForKnownIncompatibleModsAtStartup,
@@ -211,8 +211,8 @@ namespace TrafficManager.UI
         /// <param name="mod">The <see cref="PluginInfo"/> instance of the incompatible mod.</param>
         private void CreateEntry(ref UIScrollablePanel parent, string modName, PluginInfo mod) {
             string caption = mod.publishedFileID.AsUInt64 == LOCAL_MOD
-                                 ? Translation.GetString("Delete")
-                                 : Translation.GetString("Unsubscribe");
+                                 ? Translation.Get("Delete")
+                                 : Translation.Get("Unsubscribe");
 
             UIPanel panel = parent.AddUIComponent<UIPanel>();
             panel.size = new Vector2(560, 50);

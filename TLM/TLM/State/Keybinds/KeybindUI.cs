@@ -211,7 +211,7 @@ namespace TrafficManager.State.Keybinds {
                     // Check the key conflict
                     var maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
                     if (maybeConflict != string.Empty) {
-                        var message = Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict;
+                        var message = Translation.Get("Keybind_conflict") + "\n\n" + maybeConflict;
                         Log.Info($"Keybind conflict: {message}");
                     UIView.library
                           .ShowModal<ExceptionPanel>("ExceptionPanel")
@@ -248,7 +248,7 @@ namespace TrafficManager.State.Keybinds {
                 var category = editable.Target.Category;
                 var maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
                 if (maybeConflict != string.Empty) {
-                    var message = Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict;
+                    var message = Translation.Get("Keybind_conflict") + "\n\n" + maybeConflict;
                     Log.Info($"Keybind conflict: {message}");
                     UIView.library
                           .ShowModal<ExceptionPanel>("ExceptionPanel")
@@ -396,7 +396,7 @@ namespace TrafficManager.State.Keybinds {
                     || testSampleCategory == tmpeSetting.Category) {
                     if (tmpeSetting.HasKey(testSample)) {
                         return "TM:PE, "
-                               + Translation.GetString("Keybind_category_" + tmpeSetting.Category)
+                               + Translation.Get("Keybind_category_" + tmpeSetting.Category)
                                + " -- " + CamelCaseSplit(field.Name);
                     }
                 }

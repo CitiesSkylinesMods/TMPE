@@ -22,7 +22,7 @@ namespace TrafficManager.State {
         private static UICheckBox _evacBussesMayIgnoreRulesToggle;
 
         private static string T(string s) {
-            return Translation.GetString(s);
+            return Translation.Get(s);
         }
 
         internal static void MakeSettings_VehicleRestrictions(UITabstrip tabStrip, int tabIndex) {

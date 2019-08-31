@@ -62,7 +62,7 @@
                 //        }
                 //    }
             } else {
-                MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
+                MainTool.ShowTooltip(Translation.Get("NODE_IS_TIMED_LIGHT"));
             }
         }
 

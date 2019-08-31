@@ -157,7 +157,7 @@
                 };
 
                 GUILayout.BeginVertical(laneStyle);
-                GUILayout.Label(Translation.GetString("Lane") + " " + (i + 1), laneTitleStyle);
+                GUILayout.Label(Translation.Get("Lane") + " " + (i + 1), laneTitleStyle);
                 GUILayout.BeginVertical();
                 GUILayout.BeginHorizontal();
 
@@ -211,13 +211,13 @@
                     switch (res) {
                         case SetLaneArrowError.HighwayArrows: {
                             MainTool.ShowTooltip(
-                                Translation.GetString("Lane_Arrow_Changer_Disabled_Highway"));
+                                Translation.Get("Lane_Arrow_Changer_Disabled_Highway"));
                             break;
                         }
 
                         case SetLaneArrowError.LaneConnection: {
                             MainTool.ShowTooltip(
-                                Translation.GetString("Lane_Arrow_Changer_Disabled_Connection"));
+                                Translation.Get("Lane_Arrow_Changer_Disabled_Connection"));
                             break;
                         }
                     }
