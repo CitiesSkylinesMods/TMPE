@@ -107,7 +107,7 @@
                     LoadingExtension.BaseUI.MainMenuButton.UpdateTooltip();
                 }
 
-                LoadingExtension.Translator.ReloadTutorialTranslations();
+                LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
             } else {
                 Log._Debug("Rebuilding the TM:PE menu: ignored, BaseUI is null");
             }
@@ -156,10 +156,6 @@
             tabStrip.selectedIndex = 0;
         }
 
-        private static string T(string s) {
-            return Translation.Get(s);
-        }
-
         internal static void Indent<T>(T component) where T : UIComponent {
             UILabel label = component.Find<UILabel>("Label");
 
@@ -202,8 +198,8 @@
             if (warn) {
                 UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
                     "Nope!",
-                    T("Settings_are_defined_for_each_savegame_separately") +
-                    ". https://www.viathinksoft.de/tmpe/#options",
+                    Translation.Options.Get("Warning.Settings are defined for each savegame separately")
+                    + ". https://www.viathinksoft.de/tmpe/#options",
                     false);
             }
 

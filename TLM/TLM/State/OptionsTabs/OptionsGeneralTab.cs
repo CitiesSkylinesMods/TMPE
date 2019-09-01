@@ -1,5 +1,4 @@
 namespace TrafficManager.State {
-    using System.Reflection;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
@@ -39,12 +38,8 @@ namespace TrafficManager.State {
         private static UIDropDown _roadSignsMphThemeDropdown;
         private static int _roadSignMphStyleInt;
 
-        private static string T(string s) {
-            return Translation.Get(s);
-        }
-
         internal static void MakeSettings_General(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(tabStrip, T("General"));
+            Options.AddOptionTab(tabStrip, Translation.Options.Get("Tab.General"));
             tabStrip.selectedIndex = tabIndex;
 
             UIPanel currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -55,13 +50,14 @@ namespace TrafficManager.State {
             currentPanel.autoLayoutPadding.right = 10;
             UIHelper panelHelper = new UIHelper(currentPanel);
 
-            UIHelperBase generalGroup = panelHelper.AddGroup(T("General"));
+            UIHelperBase generalGroup = panelHelper.AddGroup(
+                Translation.Options.Get("Tab.General"));
             string[] languageLabels = new string[Translation.AvailableLanguageCodes.Count + 1];
-            languageLabels[0] = T("Game_language");
+            languageLabels[0] = Translation.Options.Get("General.Game language");
 
             for (int i = 0; i < Translation.AvailableLanguageCodes.Count; ++i) {
-                languageLabels[i + 1] = Translation.Get(
-                    Translation.AvailableLanguageCodes[i], "I18n Language Name");
+                languageLabels[i + 1] = Translation.Options.Get(
+                    Translation.AvailableLanguageCodes[i], "General.Language Name");
             }
 
             int languageIndex = 0;
@@ -77,24 +73,24 @@ namespace TrafficManager.State {
             }
 
             _languageDropdown = generalGroup.AddDropdown(
-                                   T("Language") + ":",
-                                   languageLabels,
-                                   languageIndex,
-                                   OnLanguageChanged) as UIDropDown;
+                                    Translation.Options.Get("General.Select language") + ":",
+                                    languageLabels,
+                                    languageIndex,
+                                    OnLanguageChanged) as UIDropDown;
             _lockButtonToggle = generalGroup.AddCheckbox(
-                                   T("Lock_main_menu_button_position"),
-                                   GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
-                                   OnLockButtonChanged) as UICheckBox;
+                                    Translation.Options.Get("General.Lock main menu button position"),
+                                    GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
+                                    OnLockButtonChanged) as UICheckBox;
             _lockMenuToggle = generalGroup.AddCheckbox(
-                                 T("Lock_main_menu_position"),
-                                 GlobalConfig.Instance.Main.MainMenuPosLocked,
-                                 OnLockMenuChanged) as UICheckBox;
+                                  Translation.Options.Get("General.Lock main menu position"),
+                                  GlobalConfig.Instance.Main.MainMenuPosLocked,
+                                  OnLockMenuChanged) as UICheckBox;
             _tinyMenuToggle = generalGroup.AddCheckbox(
-                                 T("Compact_main_menu"),
-                                 GlobalConfig.Instance.Main.TinyMainMenu,
-                                 OnCompactMainMenuChanged) as UICheckBox;
+                                  Translation.Options.Get("General.Compact main menu"),
+                                  GlobalConfig.Instance.Main.TinyMainMenu,
+                                  OnCompactMainMenuChanged) as UICheckBox;
             _guiTransparencySlider = generalGroup.AddSlider(
-                                        T("Window_transparency") + ":",
+                                        Translation.Options.Get("General.Window transparency") + ":",
                                         0,
                                         90,
                                         5,
@@ -102,7 +98,7 @@ namespace TrafficManager.State {
                                         OnGuiTransparencyChanged) as UISlider;
             _guiTransparencySlider.parent.Find<UILabel>("Label").width = 500;
             _overlayTransparencySlider = generalGroup.AddSlider(
-                                            T("Overlay_transparency") + ":",
+                                             Translation.Options.Get("General.Overlay transparency") + ":",
                                             0,
                                             90,
                                             5,
@@ -110,49 +106,50 @@ namespace TrafficManager.State {
                                             OnOverlayTransparencyChanged) as UISlider;
             _overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
             _enableTutorialToggle = generalGroup.AddCheckbox(
-                                       T("Enable_tutorial_messages"),
+                                        Translation.Options.Get("General.Enable tutorial messages"),
                                        GlobalConfig.Instance.Main.EnableTutorial,
                                        OnEnableTutorialsChanged) as UICheckBox;
             _showCompatibilityCheckErrorToggle
                 = generalGroup.AddCheckbox(
-                      T("Notify_me_if_there_is_an_unexpected_mod_conflict"),
+                      Translation.Options.Get("General.Notify me about TM:PE startup conflicts"),
                       GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage,
                       OnShowCompatibilityCheckErrorChanged) as UICheckBox;
             _scanForKnownIncompatibleModsToggle
                 = generalGroup.AddCheckbox(
-                      T("Scan_for_known_incompatible_mods_on_startup"),
+                      Translation.ModConflicts.Get("Checkbox.Scan for known incompatible mods on startup"),
                       GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,
                       OnScanForKnownIncompatibleModsChanged) as UICheckBox;
             _ignoreDisabledModsToggle = generalGroup.AddCheckbox(
-                                           T("Ignore_disabled_mods"),
-                                           GlobalConfig.Instance.Main.IgnoreDisabledMods,
-                                           OnIgnoreDisabledModsChanged) as UICheckBox;
+                                            Translation.ModConflicts.Get("Ignore disabled mods"),
+                                            GlobalConfig.Instance.Main.IgnoreDisabledMods,
+                                            OnIgnoreDisabledModsChanged) as UICheckBox;
             Options.Indent(_ignoreDisabledModsToggle);
 
             // General: Speed Limits
             SetupSpeedLimitsPanel(generalGroup);
 
             // General: Simulation
-            UIHelperBase simGroup = panelHelper.AddGroup(T("Simulation"));
+            UIHelperBase simGroup = panelHelper.AddGroup(
+                Translation.Options.Get("General.Simulation"));
             _instantEffectsToggle = simGroup.AddCheckbox(
-                                       T("Customizations_come_into_effect_instantaneously"),
+                                       Translation.Options.Get("General.Apply AI changes right away"),
                                        Options.instantEffects,
                                        OnInstantEffectsChanged) as UICheckBox;
         }
 
         private static void SetupSpeedLimitsPanel(UIHelperBase generalGroup) {
             _displayMphToggle = generalGroup.AddCheckbox(
-                                   T("Display_speed_limits_mph"),
-                                   GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
-                                   OnDisplayMphChanged) as UICheckBox;
+                                    Translation.SpeedLimits.Get("Checkbox.Display speed limits mph"),
+                                    GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
+                                    OnDisplayMphChanged) as UICheckBox;
             string[] mphThemeOptions = {
-                T("theme_Square_US"),
-                T("theme_Round_UK"),
-                T("theme_Round_German")
+                Translation.SpeedLimits.Get("Theme.Square US"),
+                Translation.SpeedLimits.Get("Theme.Round UK"),
+                Translation.SpeedLimits.Get("Theme.Round German")
             };
             _roadSignMphStyleInt = (int)GlobalConfig.Instance.Main.MphRoadSignStyle;
             _roadSignsMphThemeDropdown = generalGroup.AddDropdown(
-                                            T("Road_signs_theme_mph") + ":",
+                                            Translation.SpeedLimits.Get("Road signs theme mph") + ":",
                                             mphThemeOptions,
                                             _roadSignMphStyleInt,
                                             OnRoadSignsMphThemeChanged) as UIDropDown;
@@ -233,8 +230,10 @@ namespace TrafficManager.State {
             }
 
             SetGuiTransparency((byte)Mathf.RoundToInt(newVal));
-            _guiTransparencySlider.tooltip = T("Window_transparency") + ": " +
-                                            GlobalConfig.Instance.Main.GuiTransparency + " %";
+            _guiTransparencySlider.tooltip
+                = string.Format(
+                    Translation.Options.Get("General.Window transparency: {0}%"),
+                    GlobalConfig.Instance.Main.GuiTransparency);
 
             GlobalConfig.WriteConfig();
             Log._Debug($"GuiTransparency changed to {GlobalConfig.Instance.Main.GuiTransparency}");
@@ -246,9 +245,9 @@ namespace TrafficManager.State {
             }
 
             SetOverlayTransparency((byte)Mathf.RoundToInt(newVal));
-            _overlayTransparencySlider.tooltip = T("Overlay_transparency") + ": " +
-                                                GlobalConfig.Instance.Main.OverlayTransparency +
-                                                " %";
+            _overlayTransparencySlider.tooltip = string.Format(
+                Translation.Options.Get("General.Overlay transparency: {0}%"),
+                GlobalConfig.Instance.Main.OverlayTransparency);
             GlobalConfig.WriteConfig();
             Log._Debug($"OverlayTransparency changed to {GlobalConfig.Instance.Main.OverlayTransparency}");
         }

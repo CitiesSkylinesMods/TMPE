@@ -716,7 +716,7 @@
                 return;
             }
 
-            if (!Translation.HasString(Translation.TUTORIAL_BODY_KEY_PREFIX + localeKey)) {
+            if (!Translation.Tutorials.HasString(Translation.TUTORIAL_BODY_KEY_PREFIX + localeKey)) {
                 return;
             }
 
@@ -1663,12 +1663,15 @@
             return false;
         }
 
-        public void ShowTooltip(string text) {
+        /// <summary>Displays modal popup with an error</summary>
+        /// <param name="text">The localized message</param>
+        public void ShowError(string text) {
             if (text == null) {
                 return;
             }
 
-            UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel")
+            UIView.library
+                  .ShowModal<ExceptionPanel>("ExceptionPanel")
                   .SetMessage("Info", text, false);
         }
     }

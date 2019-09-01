@@ -14,6 +14,7 @@ namespace TrafficManager {
     using RedirectionFramework;
     using State;
     using UI;
+    using UI.Localization;
     using Object = UnityEngine.Object;
 
     [UsedImplicitly]
@@ -58,7 +59,7 @@ namespace TrafficManager {
         /// <summary>
         /// Contains loaded languages and lookup functions for text translations
         /// </summary>
-        public static Translation Translator = new Translation();
+        public static Translation TranslationDatabase = new Translation();
 
         public static UIBase BaseUI { get; private set; }
 
@@ -133,7 +134,7 @@ namespace TrafficManager {
         } = new Dictionary<MethodInfo, RedirectCallsState>();
 
         static LoadingExtension() {
-            Translator.LoadAllTranslations();
+            TranslationDatabase.LoadAllTranslations();
         }
 
         public LoadingExtension() {

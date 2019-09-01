@@ -62,7 +62,8 @@
                 //        }
                 //    }
             } else {
-                MainTool.ShowTooltip(Translation.Get("NODE_IS_TIMED_LIGHT"));
+                MainTool.ShowError(
+                    Translation.TrafficLights.Get("Error.Node has timed TL script"));
             }
         }
 

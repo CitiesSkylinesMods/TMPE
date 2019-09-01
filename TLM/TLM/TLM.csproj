@@ -249,6 +249,8 @@
     <Compile Include="UI\Textures\TextureResources.cs" />
     <Compile Include="UI\Textures\TrafficLightTextures.cs" />
     <Compile Include="UI\TrafficManagerMode.cs" />
+    <Compile Include="UI\Localization\LookupTable.cs" />
+    <Compile Include="UI\Localization\Translation.cs" />
     <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
@@ -259,7 +261,6 @@
     <Compile Include="UI\SubTools\ManualTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\ToggleTrafficLightsTool.cs" />
-    <Compile Include="UI\Translation.cs" />
     <Compile Include="State\Options.cs" />
     <Compile Include="Manager\Impl\SpeedLimitManager.cs" />
     <Compile Include="State\Flags.cs" />
@@ -506,7 +507,20 @@
     <Folder Include="Traffic\Data\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Translations\all_translations.csv" />
+    <EmbeddedResource Include="Resources\Translations\JunctionRestrictions.csv" />
+    <EmbeddedResource Include="Resources\Translations\ParkingRestrictions.csv" />
+    <EmbeddedResource Include="Resources\Translations\PrioritySigns.csv" />
+    <EmbeddedResource Include="Resources\Translations\AI_Car.csv" />
+    <EmbeddedResource Include="Resources\Translations\AI_Citizen.csv" />
+    <EmbeddedResource Include="Resources\Translations\LaneRouting.csv" />
+    <EmbeddedResource Include="Resources\Translations\Menu.csv" />
+    <EmbeddedResource Include="Resources\Translations\ModConflicts.csv" />
+    <EmbeddedResource Include="Resources\Translations\Options.csv" />
+    <EmbeddedResource Include="Resources\Translations\SpeedLimits.csv" />
+    <Content Include="Resources\Translations\Strings.csv" />
+    <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
+    <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
+    <EmbeddedResource Include="Resources\Translations\VehicleRestrictions.csv" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -21,12 +21,10 @@ namespace TrafficManager.State {
         private static UICheckBox _preferOuterLaneToggle;
         private static UICheckBox _evacBussesMayIgnoreRulesToggle;
 
-        private static string T(string s) {
-            return Translation.Get(s);
-        }
-
         internal static void MakeSettings_VehicleRestrictions(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(tabStrip, T("Policies_&_Restrictions"));
+            Options.AddOptionTab(
+                tabStrip,
+                Translation.Options.Get("Tab.Policies & Restrictions"));
             tabStrip.selectedIndex = tabIndex;
 
             var currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -37,75 +35,91 @@ namespace TrafficManager.State {
             currentPanel.autoLayoutPadding.right = 10;
 
             var panelHelper = new UIHelper(currentPanel);
-            UIHelperBase atJunctionsGroup = panelHelper.AddGroup(T("At_junctions"));
+            UIHelperBase atJunctionsGroup = panelHelper.AddGroup(
+                Translation.Options.Get("Restrictions.At junctions"));
 #if DEBUG
-            _allRelaxedToggle = atJunctionsGroup.AddCheckbox(
-                                   T("All_vehicles_may_ignore_lane_arrows"),
-                                   Options.allRelaxed,
-                                   OnAllRelaxedChanged) as UICheckBox;
+            _allRelaxedToggle
+                = atJunctionsGroup.AddCheckbox(
+                      Translation.Options.Get("Restrictions.All vehicles may ignore lane arrows"),
+                      Options.allRelaxed,
+                      OnAllRelaxedChanged) as UICheckBox;
 #endif
-            _relaxedBussesToggle = atJunctionsGroup.AddCheckbox(
-                                      T("Busses_may_ignore_lane_arrows"),
-                                      Options.relaxedBusses,
-                                      OnRelaxedBussesChanged) as UICheckBox;
+            _relaxedBussesToggle
+                = atJunctionsGroup.AddCheckbox(
+                      Translation.Options.Get("Restrictions.Buses may ignore lane arrows"),
+                      Options.relaxedBusses,
+                      OnRelaxedBussesChanged) as UICheckBox;
             _allowEnterBlockedJunctionsToggle
                 = atJunctionsGroup.AddCheckbox(
-                      T("Vehicles_may_enter_blocked_junctions"),
+                      Translation.Options.Get("Restrictions.Vehicles may enter blocked junctions"),
                       Options.allowEnterBlockedJunctions,
                       onAllowEnterBlockedJunctionsChanged) as UICheckBox;
-            _allowUTurnsToggle = atJunctionsGroup.AddCheckbox(
-                                    T("Vehicles_may_do_u-turns_at_junctions"),
-                                    Options.allowUTurns,
-                                    onAllowUTurnsChanged) as UICheckBox;
-            _allowNearTurnOnRedToggle = atJunctionsGroup.AddCheckbox(
-                                           T("Vehicles_may_turn_on_red"),
-                                           Options.allowNearTurnOnRed,
-                                           onAllowNearTurnOnRedChanged) as UICheckBox;
+            _allowUTurnsToggle
+                = atJunctionsGroup.AddCheckbox(
+                      Translation.Options.Get("Restrictions.Vehicles may do u-turns at junctions"),
+                      Options.allowUTurns,
+                      onAllowUTurnsChanged) as UICheckBox;
+            _allowNearTurnOnRedToggle
+                = atJunctionsGroup.AddCheckbox(
+                      Translation.Options.Get("Restrictions.Vehicles may turn on red"),
+                      Options.allowNearTurnOnRed,
+                      onAllowNearTurnOnRedChanged) as UICheckBox;
             _allowFarTurnOnRedToggle
                 = atJunctionsGroup.AddCheckbox(
-                      T("Also_apply_to_left/right_turns_between_one-way_streets"),
+                      Translation.Options.Get("Restrictions.Also apply to left/right turns between one-way streets"),
                       Options.allowFarTurnOnRed,
                       onAllowFarTurnOnRedChanged) as UICheckBox;
             _allowLaneChangesWhileGoingStraightToggle
                 = atJunctionsGroup.AddCheckbox(
-                      T("Vehicles_going_straight_may_change_lanes_at_junctions"),
+                      Translation.Options.Get("Restrictions.Vehicles going straight may change lanes at junctions"),
                       Options.allowLaneChangesWhileGoingStraight,
                       onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
             _trafficLightPriorityRulesToggle
                 = atJunctionsGroup.AddCheckbox(
-                      T("Vehicles_follow_priority_rules_at_junctions_with_timed_traffic_lights"),
+                      Translation.Options.Get("Restrictions.Vehicles follow priority rules at junctions with timedTL"),
                       Options.trafficLightPriorityRules,
                       OnTrafficLightPriorityRulesChanged) as UICheckBox;
 
             Options.Indent(_allowFarTurnOnRedToggle);
 
-            UIHelperBase onRoadsGroup = panelHelper.AddGroup(T("On_roads"));
+            UIHelperBase onRoadsGroup =
+                panelHelper.AddGroup(Translation.Options.Get("Restrictions.On roads"));
+
             _vehicleRestrictionsAggressionDropdown
                 = onRoadsGroup.AddDropdown(
-                      T("Vehicle_restrictions_aggression") + ":",
-                      new[] { T("Low"), T("Medium"), T("High"), T("Strict") },
+                      Translation.Options.Get("Vehicle restrictions aggression") + ":",
+                      new[] {
+                                Translation.Options.Get("RestrictionsAggression.Low"),
+                                Translation.Options.Get("RestrictionsAggression.Medium"),
+                                Translation.Options.Get("RestrictionsAggression.High"),
+                                Translation.Options.Get("RestrictionsAggression.Strict")
+                            },
                       (int)Options.vehicleRestrictionsAggression,
                       OnVehicleRestrictionsAggressionChanged) as UIDropDown;
             _banRegularTrafficOnBusLanesToggle
                 = onRoadsGroup.AddCheckbox(
-                      T("Ban_private_cars_and_trucks_on_bus_lanes"),
+                      Translation.Options.Get("Restrictions.Ban private cars and trucks on bus lanes"),
                       Options.banRegularTrafficOnBusLanes,
                       OnBanRegularTrafficOnBusLanesChanged) as UICheckBox;
-            _highwayRulesToggle = onRoadsGroup.AddCheckbox(
-                                     T("Enable_highway_specific_lane_merging/splitting_rules"),
-                                     Options.highwayRules,
-                                     OnHighwayRulesChanged) as UICheckBox;
-            _preferOuterLaneToggle = onRoadsGroup.AddCheckbox(
-                                        T("Heavy_trucks_prefer_outer_lanes_on_highways"),
-                                        Options.preferOuterLane,
-                                        OnPreferOuterLaneChanged) as UICheckBox;
+            _highwayRulesToggle
+                = onRoadsGroup.AddCheckbox(
+                      Translation.Options.Get("Restrictions.Enable highway-specific lane merging/splitting rules"),
+                      Options.highwayRules,
+                      OnHighwayRulesChanged) as UICheckBox;
+            _preferOuterLaneToggle
+                = onRoadsGroup.AddCheckbox(
+                      Translation.Options.Get(
+                          "Restrictions.Heavy trucks prefer outer lanes on highways"),
+                      Options.preferOuterLane,
+                      OnPreferOuterLaneChanged) as UICheckBox;
 
             if (SteamHelper.IsDLCOwned(SteamHelper.DLC.NaturalDisastersDLC)) {
                 UIHelperBase inCaseOfEmergencyGroup =
-                    panelHelper.AddGroup(T("In_case_of_emergency"));
+                    panelHelper.AddGroup(
+                        Translation.Options.Get("Restrictions.In case of emergency"));
                 _evacBussesMayIgnoreRulesToggle
                     = inCaseOfEmergencyGroup.AddCheckbox(
-                          T("Evacuation_busses_may_ignore_traffic_rules"),
+                          Translation.Options.Get("Restrictions.Evacuation buses may ignore traffic rules"),
                           Options.evacBussesMayIgnoreRules,
                           OnEvacBussesMayIgnoreRulesChanged) as UICheckBox;
             }

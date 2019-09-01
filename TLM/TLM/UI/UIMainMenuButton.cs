@@ -79,7 +79,7 @@
         /// Reset the tooltip (or set for the first time), or if keybinding has changed
         /// </summary>
         public void UpdateTooltip() {
-            tooltip = Translation.Get("Keybind_toggle_TMPE_main_menu")
+            tooltip = Translation.Menu.Get("Button.Toggle Main Menu")
                       + GetTooltip();
         }
 
