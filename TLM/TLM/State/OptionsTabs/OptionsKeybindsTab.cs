@@ -5,12 +5,9 @@ namespace TrafficManager.State {
     using UI;
 
     public static class OptionsKeybindsTab {
-        private static string T(string s) {
-            return Translation.Get(s);
-        }
-
         internal static void MakeSettings_Keybinds(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(tabStrip, T("Keybinds"));
+            string keybindsTabText = Translation.Options.Get("Tab.Keybinds");
+            Options.AddOptionTab(tabStrip, keybindsTabText);
             tabStrip.selectedIndex = tabIndex;
 
             var currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -22,7 +19,7 @@ namespace TrafficManager.State {
 
             var panelHelper = new UIHelper(currentPanel);
 
-            UIHelperBase keyboardGroup = panelHelper.AddGroup(T("Keybinds"));
+            UIHelperBase keyboardGroup = panelHelper.AddGroup(keybindsTabText);
             ((UIPanel)((UIHelper)keyboardGroup).self).gameObject.AddComponent<KeybindSettingsPage>();
         }
     }

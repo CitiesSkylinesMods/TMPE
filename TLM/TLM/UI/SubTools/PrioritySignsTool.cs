@@ -469,7 +469,8 @@
                 // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not
                 //     allow priority signs: {reason}");
                 if (reason == SetPrioritySignError.HasTimedLight) {
-                    MainTool.ShowTooltip(Translation.Get("NODE_IS_TIMED_LIGHT"));
+                    MainTool.ShowError(
+                        Translation.TrafficLights.Get("Error.Node has timed TL script"));
                 }
 
                 return false;

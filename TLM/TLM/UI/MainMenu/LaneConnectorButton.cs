@@ -7,7 +7,7 @@
 
         protected override ButtonFunction Function => ButtonFunction.LaneConnector;
 
-        public override string Tooltip => "Lane_connector";
+        public override string Tooltip => Translation.Menu.Get("Lane connector");
 
         public override bool Visible => Options.laneConnectorEnabled;
 

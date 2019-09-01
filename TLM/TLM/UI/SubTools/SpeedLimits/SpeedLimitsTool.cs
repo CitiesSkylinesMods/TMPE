@@ -82,8 +82,8 @@
             string unitTitle = string.Format(
                 " ({0})",
                 GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
-                    ? Translation.Get("Miles_per_hour")
-                    : Translation.Get("Kilometers_per_hour"));
+                    ? Translation.SpeedLimits.Get("Miles per hour")
+                    : Translation.SpeedLimits.Get("Kilometers per hour"));
 
             paletteWindowRect.width = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
                                           ? 10 * (GUI_SPEED_SIGN_SIZE + 5)
@@ -93,15 +93,15 @@
                 254,
                 paletteWindowRect,
                 GuiSpeedLimitsWindow,
-                Translation.Get("Speed_limits") + unitTitle,
+                Translation.Menu.Get("Speed limits") + unitTitle,
                 WindowStyle);
 
             if (defaultsWindowVisible) {
                 defaultsWindowRect = GUILayout.Window(
                     258,
                     defaultsWindowRect,
-                    _guiDefaultsWindow,
-                    Translation.Get("Default_speed_limits"),
+                    GuiDefaultsWindow,
+                    Translation.SpeedLimits.Get("Default speed limits"),
                     WindowStyle);
             }
 
@@ -214,7 +214,7 @@
         /// The window for setting the defaullt speeds per road type
         /// </summary>
         /// <param name="num"></param>
-        private void _guiDefaultsWindow(int num) {
+        private void GuiDefaultsWindow(int num) {
             List<NetInfo> mainNetInfos = SpeedLimitManager.Instance.GetCustomizableNetInfos();
 
             if (mainNetInfos == null || mainNetInfos.Count <= 0) {
@@ -247,7 +247,7 @@
             // Road type label
             GUILayout.BeginVertical();
             GUILayout.Space(10);
-            GUILayout.Label(Translation.Get("Road_type") + ":");
+            GUILayout.Label(Translation.SpeedLimits.Get("Defaults.Road type") + ":");
             GUILayout.EndVertical();
 
             // switch between NetInfos
@@ -303,7 +303,7 @@
             // Default speed limit label
             GUILayout.BeginVertical();
             GUILayout.Space(10);
-            GUILayout.Label(Translation.Get("Default_speed_limit") + ":");
+            GUILayout.Label(Translation.SpeedLimits.Get("Default speed limit") + ":");
             GUILayout.EndVertical();
 
             // switch between speed limits
@@ -331,8 +331,8 @@
                           GUILayout.Width(GUI_SPEED_SIGN_SIZE),
                           GUILayout.Height(GUI_SPEED_SIGN_SIZE));
             GUILayout.Label(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
-                                ? Translation.Get("Miles_per_hour")
-                                : Translation.Get("Kilometers_per_hour"));
+                                ? Translation.SpeedLimits.Get("Miles per hour")
+                                : Translation.SpeedLimits.Get("Kilometers per hour"));
 
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
@@ -368,7 +368,9 @@
 
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(Translation.Get("Save"), GUILayout.Width(70))) {
+            if (GUILayout.Button(Translation.SpeedLimits.Get("Button.Save"),
+                                 GUILayout.Width(70)))
+            {
                 SpeedLimitManager.Instance.FixCurrentSpeedLimits(info);
                 SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit.GameUnits);
             }
@@ -376,7 +378,8 @@
             GUILayout.FlexibleSpace();
 
             if (GUILayout.Button(
-                Translation.Get("Save") + " & " + Translation.Get("Apply"),
+                Translation.SpeedLimits.Get("Button.Save")
+                + " & " + Translation.SpeedLimits.Get("Button.Apply"),
                 GUILayout.Width(160))) {
                 SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit.GameUnits);
                 SpeedLimitManager.Instance.ClearCurrentSpeedLimits(info);
@@ -477,7 +480,7 @@
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(Translation.Get("Default_speed_limits"),
+            if (GUILayout.Button(Translation.SpeedLimits.Get("Default speed limits"),
                                  GUILayout.Width(200))) {
                 TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Defaults");
                 defaultsWindowVisible = true;
@@ -493,13 +496,15 @@
             GUILayout.FlexibleSpace();
             showLimitsPerLane = GUILayout.Toggle(
                 showLimitsPerLane,
-                Translation.Get("Show_lane-wise_speed_limits"));
+                Translation.SpeedLimits.Get("Checkbox.Show lane-wise speed limits"));
 
             GUILayout.FlexibleSpace();
 
             // Display MPH checkbox, if ticked will save global config
             bool displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-            displayMph = GUILayout.Toggle(displayMph, Translation.Get("Display_speed_limits_mph"));
+            displayMph = GUILayout.Toggle(
+                displayMph,
+                Translation.SpeedLimits.Get("Checkbox.Display speed limits mph"));
 
             if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != displayMph) {
                 OptionsGeneralTab.SetDisplayInMph(displayMph);
@@ -828,13 +833,13 @@
 
         public static string ToMphPreciseString(SpeedValue speed) {
             return FloatUtil.IsZero(speed.GameUnits)
-                       ? Translation.Get("Speed_limit_unlimited")
+                       ? Translation.SpeedLimits.Get("Unlimited")
                        : speed.ToMphPrecise().ToString();
         }
 
         public static string ToKmphPreciseString(SpeedValue speed) {
             return FloatUtil.IsZero(speed.GameUnits)
-                       ? Translation.Get("Speed_limit_unlimited")
+                       ? Translation.SpeedLimits.Get("Unlimited")
                        : speed.ToKmphPrecise().ToString();
         }
 

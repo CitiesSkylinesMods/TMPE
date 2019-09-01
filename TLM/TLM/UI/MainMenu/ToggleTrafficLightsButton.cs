@@ -6,7 +6,7 @@
 
         protected override ButtonFunction Function => ButtonFunction.ToggleTrafficLights;
 
-        public override string Tooltip => "Switch_traffic_lights";
+        public override string Tooltip => Translation.Menu.Get("Switch traffic lights");
 
         public override bool Visible => true;
 

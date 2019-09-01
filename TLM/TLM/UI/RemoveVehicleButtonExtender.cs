@@ -87,7 +87,7 @@
 
             public override string[] FunctionNames => new[] { "RemoveVehicleNow" };
 
-            public override string Tooltip => Translation.Get("Remove_this_vehicle");
+            public override string Tooltip => Translation.Menu.Get("Button.Remove this vehicle");
 
             public override bool Visible => true;
 

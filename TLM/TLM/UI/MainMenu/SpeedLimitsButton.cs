@@ -7,7 +7,7 @@
 
         protected override ButtonFunction Function => ButtonFunction.SpeedLimits;
 
-        public override string Tooltip => "Speed_limits";
+        public override string Tooltip => Translation.Menu.Get("Speed limits");
 
         public override bool Visible => Options.customSpeedLimitsEnabled;
 

@@ -6,7 +6,7 @@
 
         protected override ButtonFunction Function => ButtonFunction.VehicleRestrictions;
 
-        public override string Tooltip => "Vehicle_restrictions";
+        public override string Tooltip => Translation.Menu.Get("Vehicle restrictions");
 
         public override bool Visible => Options.vehicleRestrictionsEnabled;
     }
