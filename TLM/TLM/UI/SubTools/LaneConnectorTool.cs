@@ -43,12 +43,12 @@
         /// <summary>
         /// Stores potentially visible ids for nodes while the camera did not move
         /// </summary>
-        private GenericArrayCache<uint> CacheVisibleNodeIds { get; }
+        private GenericArrayCache<uint> CachedVisibleNodeIds { get; }
 
         /// <summary>
-        /// Stores last cached camera position in <see cref="CacheVisibleNodeIds"/>
+        /// Stores last cached camera position in <see cref="CachedVisibleNodeIds"/>
         /// </summary>
-        private CameraTransformValue LastCachedCamera;
+        private CameraTransformValue LastCachedCamera { get; set; }
 
         private class NodeLaneMarker {
             internal ushort SegmentId;
@@ -75,7 +75,7 @@
             // Log._Debug($"LaneConnectorTool: Constructor called");
             currentNodeMarkers = new Dictionary<ushort, List<NodeLaneMarker>>();
 
-            CacheVisibleNodeIds = new GenericArrayCache<uint>(NetManager.MAX_NODE_COUNT);
+            CachedVisibleNodeIds = new GenericArrayCache<uint>(NetManager.MAX_NODE_COUNT);
             LastCachedCamera = new CameraTransformValue();
         }
 
@@ -120,7 +120,7 @@
             // Assumption: The states checked in this loop don't change while the tool is active
             var currentCameraState = new CameraTransformValue(currentCamera);
             if (!LastCachedCamera.Equals(currentCameraState)) {
-                CacheVisibleNodeIds.Clear();
+                CachedVisibleNodeIds.Clear();
                 LastCachedCamera = currentCameraState;
 
                 for (uint nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
@@ -155,12 +155,12 @@
                     }
 
                     // Add
-                    CacheVisibleNodeIds.Add(nodeId);
+                    CachedVisibleNodeIds.Add(nodeId);
                 }
             }
 
-            for (int cacheIndex = CacheVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
-                var nodeId = CacheVisibleNodeIds.Values[cacheIndex];
+            for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
+                var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
 
                 List<NodeLaneMarker> nodeMarkers;
                 bool hasMarkers = currentNodeMarkers.TryGetValue((ushort)nodeId, out nodeMarkers);
