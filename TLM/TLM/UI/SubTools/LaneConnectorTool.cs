@@ -10,6 +10,7 @@
     using State.ConfigData;
     using State.Keybinds;
     using UnityEngine;
+    using Util.Caching;
 
     public class LaneConnectorTool : SubTool {
         private enum MarkerSelectionMode {
@@ -39,6 +40,16 @@
         /// <summary>Clear lane lines is Delete/Backspace (configurable)</summary>
         private int frameClearPressed;
 
+        /// <summary>
+        /// Stores potentially visible ids for nodes while the camera did not move
+        /// </summary>
+        private GenericArrayCache<uint> CacheVisibleNodeIds { get; }
+
+        /// <summary>
+        /// Stores last cached camera position in <see cref="CacheVisibleNodeIds"/>
+        /// </summary>
+        private CameraTransformValue LastCachedCamera;
+
         private class NodeLaneMarker {
             internal ushort SegmentId;
             internal ushort NodeId;
@@ -63,6 +74,9 @@
         {
             // Log._Debug($"LaneConnectorTool: Constructor called");
             currentNodeMarkers = new Dictionary<ushort, List<NodeLaneMarker>>();
+
+            CacheVisibleNodeIds = new GenericArrayCache<uint>(NetManager.MAX_NODE_COUNT);
+            LastCachedCamera = new CameraTransformValue();
         }
 
         public override void OnToolGUI(Event e) {
@@ -99,38 +113,59 @@
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
             // Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
-            Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Camera currentCamera = Camera.main;
+            Ray mouseRay = currentCamera.ScreenPointToRay(Input.mousePosition);
 
-            for (uint nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
-                    continue;
+            // Check if camera pos/angle has changed then re-filter the visible nodes
+            // Assumption: The states checked in this loop don't change while the tool is active
+            var currentCameraState = new CameraTransformValue(currentCamera);
+            if (!LastCachedCamera.Equals(currentCameraState)) {
+                CacheVisibleNodeIds.Clear();
+                LastCachedCamera = currentCameraState;
+
+                for (uint nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+                    if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
+                        continue;
+                    }
+
+                    //---------------------------
+                    // Check the connection class
+                    //---------------------------
+                    // TODO refactor connection class check
+                    ItemClass connectionClass =
+                        NetManager.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
+
+                    if ((connectionClass == null) ||
+                        !((connectionClass.m_service == ItemClass.Service.Road) ||
+                          ((connectionClass.m_service == ItemClass.Service.PublicTransport) &&
+                           ((connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain) ||
+                            (connectionClass.m_subService == ItemClass.SubService.PublicTransportMetro) ||
+                            (connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail)))))
+                    {
+                        continue;
+                    }
+
+                    //--------------------------
+                    // Check the camera distance
+                    //--------------------------
+                    Vector3 diff = NetManager.instance.m_nodes.m_buffer[nodeId].m_position - camPos;
+
+                    if (diff.magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
+                        continue; // do not draw if too distant
+                    }
+
+                    // Add
+                    CacheVisibleNodeIds.Add(nodeId);
                 }
+            }
 
-                // TODO refactor connection class check
-                ItemClass connectionClass =
-                    NetManager.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
-
-                if (connectionClass == null ||
-                    !(connectionClass.m_service == ItemClass.Service.Road ||
-                      (connectionClass.m_service == ItemClass.Service.PublicTransport &&
-                       (connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain ||
-                        connectionClass.m_subService == ItemClass.SubService.PublicTransportMetro ||
-                        connectionClass.m_subService ==
-                        ItemClass.SubService.PublicTransportMonorail))))
-                {
-                    continue;
-                }
-
-                Vector3 diff = NetManager.instance.m_nodes.m_buffer[nodeId].m_position - camPos;
-
-                if (diff.magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
-                    continue; // do not draw if too distant
-                }
+            for (int cacheIndex = CacheVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
+                var nodeId = CacheVisibleNodeIds.Values[cacheIndex];
 
                 List<NodeLaneMarker> nodeMarkers;
                 bool hasMarkers = currentNodeMarkers.TryGetValue((ushort)nodeId, out nodeMarkers);
 
-                if (!viewOnly && GetMarkerSelectionMode() == MarkerSelectionMode.None) {
+                if (!viewOnly && (GetMarkerSelectionMode() == MarkerSelectionMode.None)) {
                     MainTool.DrawNodeCircle(
                         cameraInfo,
                         (ushort)nodeId,
@@ -162,7 +197,7 @@
                             laneMarker.Color);
                     }
 
-                    if (viewOnly || nodeId != SelectedNodeId) {
+                    if (viewOnly || (nodeId != SelectedNodeId)) {
                         continue;
                     }
 
@@ -174,12 +209,12 @@
                     // draw target marker (if segment turning angles are within bounds) and
                     // selected source marker in target selection mode
                     bool drawMarker
-                        = (GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource
+                        = ((GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource)
                            && laneMarker.IsSource)
-                          || (GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget
+                          || ((GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget)
                               && ((laneMarker.IsTarget
-                                   && (laneMarker.VehicleType & selectedMarker.VehicleType)
-                                        != VehicleInfo.VehicleType.None
+                                   && ((laneMarker.VehicleType & selectedMarker.VehicleType)
+                                       != VehicleInfo.VehicleType.None)
                                    && CheckSegmentsTurningAngle(
                                        selectedMarker.SegmentId,
                                        ref netManager.m_segments.m_buffer[selectedMarker.SegmentId],
@@ -187,11 +222,11 @@
                                        laneMarker.SegmentId,
                                        ref netManager.m_segments.m_buffer[laneMarker.SegmentId],
                                        laneMarker.StartNode))
-                                  || laneMarker == selectedMarker));
+                                  || (laneMarker == selectedMarker)));
 
                     // highlight hovered marker and selected marker
                     bool highlightMarker =
-                        drawMarker && (laneMarker == selectedMarker || markerIsHovered);
+                        drawMarker && ((laneMarker == selectedMarker) || markerIsHovered);
 
                     if (drawMarker) {
                         laneMarker.Radius = highlightMarker ? 2f : 1f;
@@ -264,14 +299,14 @@
                 }
 
                 bool deleteAll =
-                    frameClearPressed > 0 && (Time.frameCount - frameClearPressed) < 20; // 0.33 sec
+                    (frameClearPressed > 0) && ((Time.frameCount - frameClearPressed) < 20); // 0.33 sec
 
                 NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
 
                 // Must press Shift+S (or another shortcut) within last 20 frames for this to work
-                bool stayInLane = frameStayInLanePressed > 0
-                                 && (Time.frameCount - frameStayInLanePressed) < 20 // 0.33 sec
-                                 && nodesBuffer[SelectedNodeId].CountSegments() == 2;
+                bool stayInLane = (frameStayInLanePressed > 0)
+                                 && ((Time.frameCount - frameStayInLanePressed) < 20) // 0.33 sec
+                                 && (nodesBuffer[SelectedNodeId].CountSegments() == 2);
 
                 if (stayInLane) {
                     frameStayInLanePressed = 0; // not pressed anymore (consumed)
@@ -322,17 +357,17 @@
                                     continue;
                                 }
 
-                                if (stayInLaneMode == StayInLaneMode.Forward ||
-                                    stayInLaneMode == StayInLaneMode.Backward) {
-                                    if (sourceLaneMarker.SegmentIndex == 0
-                                        ^ stayInLaneMode == StayInLaneMode.Backward) {
+                                if ((stayInLaneMode == StayInLaneMode.Forward) ||
+                                    (stayInLaneMode == StayInLaneMode.Backward)) {
+                                    if ((sourceLaneMarker.SegmentIndex == 0)
+                                        ^ (stayInLaneMode == StayInLaneMode.Backward)) {
                                         continue;
                                     }
                                 }
 
                                 foreach (NodeLaneMarker targetLaneMarker in nodeMarkers) {
-                                    if (!targetLaneMarker.IsTarget || targetLaneMarker.SegmentId ==
-                                        sourceLaneMarker.SegmentId) {
+                                    if (!targetLaneMarker.IsTarget || (targetLaneMarker.SegmentId ==
+                                                                       sourceLaneMarker.SegmentId)) {
                                         continue;
                                     }
 
@@ -355,7 +390,7 @@
                 } // if stay in lane
             } // if selected node
 
-            if (GetMarkerSelectionMode() == MarkerSelectionMode.None && HoveredNodeId != 0) {
+            if ((GetMarkerSelectionMode() == MarkerSelectionMode.None) && (HoveredNodeId != 0)) {
                 // draw hovered node
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
             }
@@ -624,13 +659,13 @@
                 NetInfo.Lane[] lanes = segmentsBuffer[segmentId].Info.m_lanes;
                 uint laneId = segmentsBuffer[segmentId].m_lanes;
 
-                for (byte laneIndex = 0; laneIndex < lanes.Length && laneId != 0; laneIndex++)
+                for (byte laneIndex = 0; (laneIndex < lanes.Length) && (laneId != 0); laneIndex++)
                 {
                     NetInfo.Lane laneInfo = lanes[laneIndex];
 
-                    if ((laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != NetInfo.LaneType.None
-                        && (laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES)
-                            != VehicleInfo.VehicleType.None)
+                    if (((laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != NetInfo.LaneType.None)
+                        && ((laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES)
+                            != VehicleInfo.VehicleType.None))
                     {
                         if (connManager.GetLaneEndPoint(
                             segmentId,
@@ -693,7 +728,7 @@
                         laneMarker1.LaneId,
                         laneMarker1.StartNode);
 
-                if (connections == null || connections.Length == 0) {
+                if ((connections == null) || (connections.Length == 0)) {
                     continue;
                 }
 
