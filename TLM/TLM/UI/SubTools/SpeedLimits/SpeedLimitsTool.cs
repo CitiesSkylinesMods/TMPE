@@ -151,11 +151,13 @@
             Transform currentCameraTransform = Camera.main.transform;
             Vector3 camPos = currentCameraTransform.position;
 
-            if (!LastCachedCamera.Equals(currentCamera))
-            {
+            if (!LastCachedCamera.Equals(currentCamera)) {
                 // cache visible segments
                 LastCachedCamera = currentCamera;
                 CachedVisibleSegmentIds.Clear();
+
+                const float MAX_DIST = TrafficManagerTool.MAX_OVERLAY_DISTANCE *
+                                       TrafficManagerTool.MAX_OVERLAY_DISTANCE;
 
                 for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                     if (!Constants.ServiceFactory.NetService.IsSegmentValid((ushort)segmentId)) {
@@ -164,8 +166,8 @@
 
                     // if ((netManager.m_segments.m_buffer[segmentId].m_flags &
                     // NetSegment.Flags.Untouchable) != NetSegment.Flags.None) continue;
-                    if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos)
-                        .magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
+                    Vector3 distToCamera = netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos;
+                    if (distToCamera.sqrMagnitude > MAX_DIST) {
                         continue; // do not draw if too distant
                     }
 
