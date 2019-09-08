@@ -84,7 +84,9 @@
             return base.IsCursorInPanel() || cursorInSecondaryPanel;
         }
 
-        public override void OnActivate() { }
+        public override void OnActivate() {
+            LastCachedCamera = new CameraTransformValue();
+        }
 
         public override void OnPrimaryClickOverlay() { }
 

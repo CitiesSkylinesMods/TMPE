@@ -279,7 +279,7 @@
         /// <summary>
         /// Renders overlays (node selection, segment selection, etc.)
         /// </summary>
-        /// <param name="cameraInfo"></param>
+        /// <param name="cameraInfo">The camera to use</param>
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             // Log._Debug($"RenderOverlay");
             // Log._Debug($"RenderOverlay: {_toolMode} {activeSubTool} {this.GetHashCode()}");
