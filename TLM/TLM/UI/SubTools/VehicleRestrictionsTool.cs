@@ -109,7 +109,7 @@
                 windowRect = GUILayout.Window(
                     255,
                     windowRect,
-                    _guiVehicleRestrictionsWindow,
+                    GuiVehicleRestrictionsWindow,
                     Translation.GetString("Vehicle_restrictions"),
                     WindowStyle);
                 cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
@@ -177,7 +177,7 @@
                 }
 
                 // draw vehicle restrictions
-                if (drawVehicleRestrictionHandles(
+                if (DrawVehicleRestrictionHandles(
                     segmentId,
                     ref netManager.m_segments.m_buffer[segmentId],
                     viewOnly || segmentId != SelectedSegmentId,
@@ -197,7 +197,7 @@
             }
         }
 
-        private void _guiVehicleRestrictionsWindow(int num) {
+        private void GuiVehicleRestrictionsWindow(int num) {
             NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
             if (GUILayout.Button(Translation.GetString("Invert"))) {
@@ -406,7 +406,7 @@
                 LaneVisitorFun);
         }
 
-        private bool drawVehicleRestrictionHandles(ushort segmentId,
+        private bool DrawVehicleRestrictionHandles(ushort segmentId,
                                                    ref NetSegment segment,
                                                    bool viewOnly,
                                                    out bool stateUpdated) {
