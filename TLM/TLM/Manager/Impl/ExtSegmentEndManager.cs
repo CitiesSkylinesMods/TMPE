@@ -156,7 +156,7 @@
             Vector3 sourceDir = Vector3.zero;
             Services.NetService.ProcessSegment(
                 sourceEnd.segmentId,
-                delegate(ushort segId, ref NetSegment seg) {
+                (ushort segId, ref NetSegment seg) => {
                     sourceDir = sourceStartNode
                                     ? seg.m_startDirection
                                     : seg.m_endDirection;

@@ -7,7 +7,7 @@
 
         protected override ButtonFunction Function => ButtonFunction.PrioritySigns;
 
-        public override string Tooltip => Translation.Menu.Get("Add priority signs");
+        public override string Tooltip => Translation.Menu.Get("Tooltip:Add priority signs");
 
         public override bool Visible => Options.prioritySignsEnabled;
 

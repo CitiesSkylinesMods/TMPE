@@ -210,8 +210,8 @@ namespace TrafficManager.UI
         /// <param name="mod">The <see cref="PluginInfo"/> instance of the incompatible mod.</param>
         private void CreateEntry(ref UIScrollablePanel parent, string modName, PluginInfo mod) {
             string caption = mod.publishedFileID.AsUInt64 == LOCAL_MOD
-                                 ? Translation.ModConflicts.Get("Delete")
-                                 : Translation.ModConflicts.Get("Unsubscribe");
+                                 ? Translation.ModConflicts.Get("Button:Delete mod")
+                                 : Translation.ModConflicts.Get("Button:Unsubscribe mod");
 
             UIPanel panel = parent.AddUIComponent<UIPanel>();
             panel.size = new Vector2(560, 50);

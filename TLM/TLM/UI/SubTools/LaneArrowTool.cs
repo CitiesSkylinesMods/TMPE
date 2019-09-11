@@ -158,7 +158,7 @@
 
                 GUILayout.BeginVertical(laneStyle);
                 GUILayout.Label(
-                    Translation.LaneRouting.Get("Lane") + " " + (i + 1),
+                    Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1),
                     laneTitleStyle);
                 GUILayout.BeginVertical();
                 GUILayout.BeginHorizontal();
@@ -213,13 +213,13 @@
                     switch (res) {
                         case SetLaneArrowError.HighwayArrows: {
                             MainTool.ShowError(
-                                Translation.LaneRouting.Get("Error.Disabled due to manual connection"));
+                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to manual connection"));
                             break;
                         }
 
                         case SetLaneArrowError.LaneConnection: {
                             MainTool.ShowError(
-                                Translation.LaneRouting.Get("Error.Disabled due to highway rules"));
+                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to highway rules"));
                             break;
                         }
                     }

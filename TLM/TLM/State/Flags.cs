@@ -1051,7 +1051,7 @@ namespace TrafficManager.State {
             } else {
                 Constants.ServiceFactory.NetService.ProcessLane(
                     laneId,
-                    delegate(uint lId, ref NetLane lane) {
+                    (uint lId, ref NetLane lane) => {
                         ret = lane.m_flags;
                         ret &= (uint)LaneArrows.LeftForwardRight;
                         return true;

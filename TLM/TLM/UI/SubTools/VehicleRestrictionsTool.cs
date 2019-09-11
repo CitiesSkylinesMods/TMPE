@@ -110,7 +110,7 @@
                     255,
                     windowRect,
                     GuiVehicleRestrictionsWindow,
-                    Translation.VehicleRestrictions.Get("Window.Vehicle restrictions"),
+                    Translation.VehicleRestrictions.Get("Dialog.Title:Vehicle restrictions"),
                     WindowStyle);
                 cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
 

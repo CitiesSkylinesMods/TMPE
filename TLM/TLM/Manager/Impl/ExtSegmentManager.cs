@@ -144,7 +144,7 @@
             bool ret = false;
             Constants.ServiceFactory.NetService.ProcessSegment(
                 segmentId,
-                delegate(ushort segId, ref NetSegment segment) {
+                (ushort segId, ref NetSegment segment) => {
                     ret = CalculateHasBusLane(segment.Info);
                     return true;
                 });

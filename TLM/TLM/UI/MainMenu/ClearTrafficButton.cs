@@ -15,7 +15,7 @@
             ConfirmPanel.ShowModal(
                 Translation.Menu.Get("Clear traffic"),
                 Translation.Menu.Get("Clear traffic, confirmation"),
-                delegate(UIComponent comp, int ret) {
+                (comp, ret) => {
                     if (ret == 1) {
                         Constants.ServiceFactory.SimulationService.AddAction(
                             () => { UtilityManager.Instance.ClearTraffic(); });
