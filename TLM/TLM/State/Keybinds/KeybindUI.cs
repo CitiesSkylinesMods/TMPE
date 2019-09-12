@@ -211,7 +211,7 @@ namespace TrafficManager.State.Keybinds {
                     // Check the key conflict
                     var maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
                     if (maybeConflict != string.Empty) {
-                        var message = Translation.Options.Get("Error.Keybind conflict")
+                        var message = Translation.Options.Get("Keybinds.Dialog.Text:Keybind conflict")
                                       + "\n\n" + maybeConflict;
                         Log.Info($"Keybind conflict: {message}");
                     UIView.library
@@ -249,7 +249,7 @@ namespace TrafficManager.State.Keybinds {
                 var category = editable.Target.Category;
                 var maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
                 if (maybeConflict != string.Empty) {
-                    var message = Translation.Options.Get("Error.Keybind conflict")
+                    var message = Translation.Options.Get("Keybinds.Dialog.Text:Keybind conflict")
                                   + "\n\n" + maybeConflict;
                     Log.Info($"Keybind conflict: {message}");
                     UIView.library

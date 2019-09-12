@@ -107,7 +107,7 @@
                 254,
                 paletteWindowRect,
                 GuiSpeedLimitsWindow,
-                Translation.Menu.Get("Speed limits") + unitTitle,
+                Translation.Menu.Get("Tooltip:Speed limits") + unitTitle,
                 WindowStyle);
 
             if (defaultsWindowVisible) {

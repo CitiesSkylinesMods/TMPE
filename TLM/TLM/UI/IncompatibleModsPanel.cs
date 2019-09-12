@@ -63,7 +63,7 @@ namespace TrafficManager.UI
             title_.relativePosition = new Vector2(60, 12);
 
             title_.text = TrafficManagerMod.ModName + " " +
-                         Translation.ModConflicts.Get("WindowTitle.detected incompatible mods");
+                         Translation.ModConflicts.Get("Window.Title:Detected incompatible mods");
 
             closeButton_ = mainPanel_.AddUIComponent<UIButton>();
             closeButton_.eventClick += CloseButtonClick;
@@ -77,7 +77,7 @@ namespace TrafficManager.UI
             panel.size = new Vector2(565, 320);
 
             UIHelper helper = new UIHelper(mainPanel_);
-            string checkboxLabel = Translation.ModConflicts.Get("Checkbox.Scan for known incompatible mods on startup");
+            string checkboxLabel = Translation.ModConflicts.Get("Checkbox:Scan for known incompatible mods on startup");
             runModsCheckerOnStartup_ = helper.AddCheckbox(
                                           checkboxLabel,
                                           GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,

@@ -79,7 +79,7 @@
         /// Reset the tooltip (or set for the first time), or if keybinding has changed
         /// </summary>
         public void UpdateTooltip() {
-            tooltip = Translation.Menu.Get("Button.Toggle Main Menu")
+            tooltip = Translation.Menu.Get("Toolip:Toggle Main Menu")
                       + GetTooltip();
         }
 

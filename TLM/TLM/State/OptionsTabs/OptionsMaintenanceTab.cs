@@ -41,7 +41,7 @@ namespace TrafficManager.State {
         }
 
         internal static void MakeSettings_Maintenance(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(tabStrip, T("Maintenance"));
+            Options.AddOptionTab(tabStrip, T("Tab:Maintenance"));
             tabStrip.selectedIndex = tabIndex;
 
             var currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -52,30 +52,30 @@ namespace TrafficManager.State {
             currentPanel.autoLayoutPadding.right = 10;
 
             var panelHelper = new UIHelper(currentPanel);
-            UIHelperBase maintenanceGroup = panelHelper.AddGroup(T("Maintenance"));
+            UIHelperBase maintenanceGroup = panelHelper.AddGroup(T("Tab:Maintenance"));
 
             _resetStuckEntitiesBtn = maintenanceGroup.AddButton(
-                                         T("Button.Reset stuck cims and vehicles"),
+                                         T("Maintenance.Button:Reset stuck cims and vehicles"),
                                          onClickResetStuckEntities) as UIButton;
 
             _removeParkedVehiclesBtn = maintenanceGroup.AddButton(
-                                           T("Button.Remove parked vehicles"),
+                                           T("Maintenance.Button:Remove parked vehicles"),
                                            OnClickRemoveParkedVehicles) as UIButton;
 #if DEBUG
             _resetSpeedLimitsBtn = maintenanceGroup.AddButton(
-                                       T("Button.Reset custom speed limits"),
+                                       T("Maintenance.Button:Reset custom speed limits"),
                                        OnClickResetSpeedLimits) as UIButton;
 #endif
             _reloadGlobalConfBtn = maintenanceGroup.AddButton(
                                        T("Maintenance.Button:Reload global configuration"),
                                        OnClickReloadGlobalConf) as UIButton;
             _resetGlobalConfBtn = maintenanceGroup.AddButton(
-                                      T("Button.Reset global configuration"),
+                                      T("Maintenance.Button:Reset global configuration"),
                                       OnClickResetGlobalConf) as UIButton;
 
 #if QUEUEDSTATS
             _showPathFindStatsToggle = maintenanceGroup.AddCheckbox(
-                                           T("Show path-find stats"),
+                                           T("Maintenance.Checkbox:Show path-find stats"),
                                            Options.showPathFindStats,
                                            OnShowPathFindStatsChanged) as UICheckBox;
 #endif
@@ -83,38 +83,38 @@ namespace TrafficManager.State {
             var featureGroup =
                 panelHelper.AddGroup(T("Maintenance.Group:Activated features")) as UIHelper;
             EnablePrioritySignsToggle = featureGroup.AddCheckbox(
-                                            T("Priority signs"),
+                                            T("Checkbox:Priority signs"),
                                             Options.prioritySignsEnabled,
                                             OnPrioritySignsEnabledChanged) as UICheckBox;
             EnableTimedLightsToggle = featureGroup.AddCheckbox(
-                                          T("Timed traffic lights"),
+                                          T("Checkbox:Timed traffic lights"),
                                           Options.timedLightsEnabled,
                                           OnTimedLightsEnabledChanged) as UICheckBox;
             _enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(
-                                                 T("Speed limits"),
+                                                 T("Checkbox:Speed limits"),
                                                  Options.customSpeedLimitsEnabled,
                                                  OnCustomSpeedLimitsEnabledChanged) as UICheckBox;
             _enableVehicleRestrictionsToggle = featureGroup.AddCheckbox(
-                                                       T("Vehicle restrictions"),
+                                                       T("Checkbox:Vehicle restrictions"),
                                                        Options.vehicleRestrictionsEnabled,
                                                        OnVehicleRestrictionsEnabledChanged) as
                                                    UICheckBox;
             _enableParkingRestrictionsToggle = featureGroup.AddCheckbox(
-                                                       T("Parking restrictions"),
+                                                       T("Checkbox:Parking restrictions"),
                                                        Options.parkingRestrictionsEnabled,
                                                        OnParkingRestrictionsEnabledChanged) as
                                                    UICheckBox;
             _enableJunctionRestrictionsToggle = featureGroup.AddCheckbox(
-                                                        T("Junction restrictions"),
+                                                        T("Checkbox:Junction restrictions"),
                                                         Options.junctionRestrictionsEnabled,
                                                         OnJunctionRestrictionsEnabledChanged) as
                                                     UICheckBox;
             _turnOnRedEnabledToggle = featureGroup.AddCheckbox(
-                                          T("Maintenance.Turn on red"),
+                                          T("Maintenance.Checkbox:Turn on red"),
                                           Options.turnOnRedEnabled,
                                           OnTurnOnRedEnabledChanged) as UICheckBox;
             _enableLaneConnectorToggle = featureGroup.AddCheckbox(
-                                             T("Lane connector"),
+                                             T("Maintenance.Checkbox:Lane connector"),
                                              Options.laneConnectorEnabled,
                                              OnLaneConnectorEnabledChanged) as UICheckBox;
 
