@@ -115,7 +115,7 @@
                     258,
                     defaultsWindowRect,
                     GuiDefaultsWindow,
-                    Translation.SpeedLimits.Get("Default speed limits"),
+                    Translation.SpeedLimits.Get("Window.Title:Default speed limits"),
                     WindowStyle);
             }
 
@@ -248,7 +248,7 @@
             // Road type label
             GUILayout.BeginVertical();
             GUILayout.Space(10);
-            GUILayout.Label(Translation.SpeedLimits.Get("Defaults.Road type") + ":");
+            GUILayout.Label(Translation.SpeedLimits.Get("Defaults.Label:Road type") + ":");
             GUILayout.EndVertical();
 
             // switch between NetInfos
@@ -304,7 +304,7 @@
             // Default speed limit label
             GUILayout.BeginVertical();
             GUILayout.Space(10);
-            GUILayout.Label(Translation.SpeedLimits.Get("Default speed limit") + ":");
+            GUILayout.Label(Translation.SpeedLimits.Get("Label:Default speed limit") + ":");
             GUILayout.EndVertical();
 
             // switch between speed limits
@@ -369,7 +369,7 @@
 
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(Translation.SpeedLimits.Get("Button.Save"),
+            if (GUILayout.Button(Translation.SpeedLimits.Get("Button:Save"),
                                  GUILayout.Width(70)))
             {
                 SpeedLimitManager.Instance.FixCurrentSpeedLimits(info);
@@ -379,8 +379,7 @@
             GUILayout.FlexibleSpace();
 
             if (GUILayout.Button(
-                Translation.SpeedLimits.Get("Button.Save")
-                + " & " + Translation.SpeedLimits.Get("Button.Apply"),
+                Translation.SpeedLimits.Get("Button:Save & Apply"),
                 GUILayout.Width(160))) {
                 SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit.GameUnits);
                 SpeedLimitManager.Instance.ClearCurrentSpeedLimits(info);
@@ -481,7 +480,7 @@
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(Translation.SpeedLimits.Get("Default speed limits"),
+            if (GUILayout.Button(Translation.SpeedLimits.Get("Window.Title:Default speed limits"),
                                  GUILayout.Width(200))) {
                 TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Defaults");
                 defaultsWindowVisible = true;
@@ -497,7 +496,7 @@
             GUILayout.FlexibleSpace();
             showLimitsPerLane = GUILayout.Toggle(
                 showLimitsPerLane,
-                Translation.SpeedLimits.Get("Checkbox.Show lane-wise speed limits"));
+                Translation.SpeedLimits.Get("Checkbox:Show lane-wise speed limits"));
 
             GUILayout.FlexibleSpace();
 
@@ -505,7 +504,7 @@
             bool displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
             displayMph = GUILayout.Toggle(
                 displayMph,
-                Translation.SpeedLimits.Get("Checkbox.Display speed limits mph"));
+                Translation.SpeedLimits.Get("Checkbox:Display speed limits mph"));
 
             if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != displayMph) {
                 OptionsGeneralTab.SetDisplayInMph(displayMph);

@@ -142,20 +142,21 @@ namespace TrafficManager.State {
 
         private static void SetupSpeedLimitsPanel(UIHelperBase generalGroup) {
             _displayMphToggle = generalGroup.AddCheckbox(
-                                    Translation.SpeedLimits.Get("Checkbox.Display speed limits mph"),
+                                    Translation.SpeedLimits.Get("Checkbox:Display speed limits mph"),
                                     GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
                                     OnDisplayMphChanged) as UICheckBox;
             string[] mphThemeOptions = {
-                Translation.SpeedLimits.Get("Theme.Square US"),
-                Translation.SpeedLimits.Get("Theme.Round UK"),
-                Translation.SpeedLimits.Get("Theme.Round German")
+                Translation.SpeedLimits.Get("General.Theme.Option:Square US"),
+                Translation.SpeedLimits.Get("General.Theme.Option:Round UK"),
+                Translation.SpeedLimits.Get("General.Theme.Option:Round German")
             };
             _roadSignMphStyleInt = (int)GlobalConfig.Instance.Main.MphRoadSignStyle;
-            _roadSignsMphThemeDropdown = generalGroup.AddDropdown(
-                                            Translation.SpeedLimits.Get("Road signs theme mph") + ":",
-                                            mphThemeOptions,
-                                            _roadSignMphStyleInt,
-                                            OnRoadSignsMphThemeChanged) as UIDropDown;
+            _roadSignsMphThemeDropdown
+                = generalGroup.AddDropdown(
+                      Translation.SpeedLimits.Get("General.Dropdown:Road signs theme mph") + ":",
+                      mphThemeOptions,
+                      _roadSignMphStyleInt,
+                      OnRoadSignsMphThemeChanged) as UIDropDown;
             _roadSignsMphThemeDropdown.width = 400;
         }
 

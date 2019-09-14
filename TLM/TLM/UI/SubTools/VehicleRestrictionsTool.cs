@@ -200,7 +200,7 @@
         private void GuiVehicleRestrictionsWindow(int num) {
             NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
-            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button.Invert"))) {
+            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button:Invert"))) {
                 // invert pattern
                 NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
 
@@ -251,7 +251,7 @@
 
             GUILayout.BeginHorizontal();
             if (GUILayout.Button(
-                Translation.VehicleRestrictions.Get("Button.Allow all vehicles")))
+                Translation.VehicleRestrictions.Get("Button:Allow all vehicles")))
             {
                 // allow all vehicle types
                 NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
@@ -290,7 +290,7 @@
                 RefreshCurrentRestrictedSegmentIds(SelectedSegmentId);
             }
 
-            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button.Ban all vehicles"))) {
+            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button:Ban all vehicles"))) {
                 // ban all vehicle types
                 NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
 
@@ -332,7 +332,7 @@
             GUILayout.EndHorizontal();
 
             if (GUILayout.Button(
-                Translation.VehicleRestrictions.Get("Button.Apply to entire road"))) {
+                Translation.VehicleRestrictions.Get("Button:Apply to entire road"))) {
                 ApplyRestrictionsToAllSegments();
             }
 

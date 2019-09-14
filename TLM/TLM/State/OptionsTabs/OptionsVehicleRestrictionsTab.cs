@@ -53,27 +53,27 @@ namespace TrafficManager.State {
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Vehicles may enter blocked junctions"),
                       Options.allowEnterBlockedJunctions,
-                      onAllowEnterBlockedJunctionsChanged) as UICheckBox;
+                      OnAllowEnterBlockedJunctionsChanged) as UICheckBox;
             _allowUTurnsToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Vehicles may do u-turns at junctions"),
                       Options.allowUTurns,
-                      onAllowUTurnsChanged) as UICheckBox;
+                      OnAllowUTurnsChanged) as UICheckBox;
             _allowNearTurnOnRedToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Vehicles may turn on red"),
                       Options.allowNearTurnOnRed,
-                      onAllowNearTurnOnRedChanged) as UICheckBox;
+                      OnAllowNearTurnOnRedChanged) as UICheckBox;
             _allowFarTurnOnRedToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Also apply to left/right turns between one-way streets"),
                       Options.allowFarTurnOnRed,
-                      onAllowFarTurnOnRedChanged) as UICheckBox;
+                      OnAllowFarTurnOnRedChanged) as UICheckBox;
             _allowLaneChangesWhileGoingStraightToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Vehicles going straight may change lanes at junctions"),
                       Options.allowLaneChangesWhileGoingStraight,
-                      onAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
+                      OnAllowLaneChangesWhileGoingStraightChanged) as UICheckBox;
             _trafficLightPriorityRulesToggle
                 = atJunctionsGroup.AddCheckbox(
                       Translation.Options.Get("VR.Checkbox:Vehicles follow priority rules at junctions with timedTL"),
@@ -143,7 +143,7 @@ namespace TrafficManager.State {
             Options.relaxedBusses = newRelaxedBusses;
         }
 
-        private static void onAllowEnterBlockedJunctionsChanged(bool newValue) {
+        private static void OnAllowEnterBlockedJunctionsChanged(bool newValue) {
             if (!Options.IsGameLoaded()) {
                 return;
             }
@@ -157,7 +157,7 @@ namespace TrafficManager.State {
             SetAllowEnterBlockedJunctions(newValue);
         }
 
-        private static void onAllowUTurnsChanged(bool newValue) {
+        private static void OnAllowUTurnsChanged(bool newValue) {
             if (!Options.IsGameLoaded()) {
                 return;
             }
@@ -171,7 +171,7 @@ namespace TrafficManager.State {
             SetAllowUTurns(newValue);
         }
 
-        private static void onAllowNearTurnOnRedChanged(bool newValue) {
+        private static void OnAllowNearTurnOnRedChanged(bool newValue) {
             if (!Options.IsGameLoaded()) {
                 return;
             }
@@ -190,7 +190,7 @@ namespace TrafficManager.State {
             }
         }
 
-        private static void onAllowFarTurnOnRedChanged(bool newValue) {
+        private static void OnAllowFarTurnOnRedChanged(bool newValue) {
             if (!Options.IsGameLoaded()) {
                 return;
             }
@@ -204,7 +204,7 @@ namespace TrafficManager.State {
             SetAllowFarTurnOnRed(newValue);
         }
 
-        private static void onAllowLaneChangesWhileGoingStraightChanged(bool newValue) {
+        private static void OnAllowLaneChangesWhileGoingStraightChanged(bool newValue) {
             if (!Options.IsGameLoaded()) {
                 return;
             }
