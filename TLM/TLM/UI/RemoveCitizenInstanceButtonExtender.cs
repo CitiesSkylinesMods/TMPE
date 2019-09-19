@@ -90,7 +90,7 @@
 
             public override string[] FunctionNames => new[] { "RemoveCitizenInstanceNow" };
 
-            public override string Tooltip => Translation.Menu.Get("Button.Remove this citizen");
+            public override string Tooltip => Translation.Menu.Get("Button:Remove this citizen");
 
             public override bool Visible => true;
 

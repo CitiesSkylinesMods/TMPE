@@ -109,8 +109,8 @@
                 windowRect = GUILayout.Window(
                     255,
                     windowRect,
-                    _guiVehicleRestrictionsWindow,
-                    Translation.VehicleRestrictions.Get("Window.Vehicle restrictions"),
+                    GuiVehicleRestrictionsWindow,
+                    Translation.VehicleRestrictions.Get("Dialog.Title:Vehicle restrictions"),
                     WindowStyle);
                 cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
 
@@ -177,7 +177,7 @@
                 }
 
                 // draw vehicle restrictions
-                if (drawVehicleRestrictionHandles(
+                if (DrawVehicleRestrictionHandles(
                     segmentId,
                     ref netManager.m_segments.m_buffer[segmentId],
                     viewOnly || segmentId != SelectedSegmentId,
@@ -197,10 +197,10 @@
             }
         }
 
-        private void _guiVehicleRestrictionsWindow(int num) {
+        private void GuiVehicleRestrictionsWindow(int num) {
             NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
-            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button.Invert"))) {
+            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button:Invert"))) {
                 // invert pattern
                 NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
 
@@ -251,7 +251,7 @@
 
             GUILayout.BeginHorizontal();
             if (GUILayout.Button(
-                Translation.VehicleRestrictions.Get("Button.Allow all vehicles")))
+                Translation.VehicleRestrictions.Get("Button:Allow all vehicles")))
             {
                 // allow all vehicle types
                 NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
@@ -290,7 +290,7 @@
                 RefreshCurrentRestrictedSegmentIds(SelectedSegmentId);
             }
 
-            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button.Ban all vehicles"))) {
+            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button:Ban all vehicles"))) {
                 // ban all vehicle types
                 NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
 
@@ -332,7 +332,7 @@
             GUILayout.EndHorizontal();
 
             if (GUILayout.Button(
-                Translation.VehicleRestrictions.Get("Button.Apply to entire road"))) {
+                Translation.VehicleRestrictions.Get("Button:Apply to entire road"))) {
                 ApplyRestrictionsToAllSegments();
             }
 
@@ -407,7 +407,7 @@
                 LaneVisitorFun);
         }
 
-        private bool drawVehicleRestrictionHandles(ushort segmentId,
+        private bool DrawVehicleRestrictionHandles(ushort segmentId,
                                                    ref NetSegment segment,
                                                    bool viewOnly,
                                                    out bool stateUpdated) {

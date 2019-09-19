@@ -111,6 +111,12 @@ namespace TrafficManager.UI.Localization {
                     }
                     foreach (string lang in languageCodes) {
                         string cell = ReadCsvCell(sr);
+                        // Empty translations are not accepted for all languages other than English
+                        // We don't load those keys
+                        if (string.IsNullOrEmpty(cell) &&
+                            lang != Translation.DEFAULT_LANGUAGE_CODE) {
+                            continue;
+                        }
                         AllLanguages[lang][key] = cell;
                     }
                 }

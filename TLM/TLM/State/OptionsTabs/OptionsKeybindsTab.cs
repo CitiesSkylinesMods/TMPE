@@ -6,7 +6,7 @@ namespace TrafficManager.State {
 
     public static class OptionsKeybindsTab {
         internal static void MakeSettings_Keybinds(UITabstrip tabStrip, int tabIndex) {
-            string keybindsTabText = Translation.Options.Get("Tab.Keybinds");
+            string keybindsTabText = Translation.Options.Get("Tab:Keybinds");
             Options.AddOptionTab(tabStrip, keybindsTabText);
             tabStrip.selectedIndex = tabIndex;
 

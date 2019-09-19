@@ -6,6 +6,7 @@
     using Textures;
     using UnityEngine;
     using Util;
+    using Util.Caching;
     using static Util.SegmentLaneTraverser;
 
     public class ParkingRestrictionsTool : SubTool {
@@ -14,10 +15,21 @@
 
         private const float SIGN_SIZE = 80f;
 
-        private readonly HashSet<ushort> currentlyVisibleSegmentIds;
+        /// <summary>
+        /// Stores potentially visible segment ids while the camera did not move
+        /// </summary>
+        private GenericArrayCache<ushort> CachedVisibleSegmentIds { get; }
 
-        public ParkingRestrictionsTool(TrafficManagerTool mainTool) : base(mainTool) {
-            currentlyVisibleSegmentIds = new HashSet<ushort>();
+        /// <summary>
+        /// Stores last cached camera position in <see cref="CachedVisibleSegmentIds"/>
+        /// </summary>
+        private CameraTransformValue LastCachedCamera { get; set; }
+
+        public ParkingRestrictionsTool(TrafficManagerTool mainTool)
+            : base(mainTool)
+        {
+            CachedVisibleSegmentIds = new GenericArrayCache<ushort>(NetManager.MAX_SEGMENT_COUNT);
+            LastCachedCamera = new CameraTransformValue();
         }
 
         public override void OnActivate() { }
@@ -36,7 +48,7 @@
 
         public override void Cleanup() {
             segmentCenterByDir.Clear();
-            currentlyVisibleSegmentIds.Clear();
+            CachedVisibleSegmentIds.Clear();
             lastCamPos = null;
             lastCamRot = null;
         }
@@ -45,18 +57,20 @@
         private Vector3? lastCamPos;
 
         private void ShowSigns(bool viewOnly) {
-            Quaternion camRot = Camera.main.transform.rotation;
-            Vector3 camPos = Camera.main.transform.position;
             NetManager netManager = Singleton<NetManager>.instance;
             ParkingRestrictionsManager parkingManager = ParkingRestrictionsManager.Instance;
 
-            if (lastCamPos == null
-                || lastCamRot == null
-                || !lastCamRot.Equals(camRot)
-                || !lastCamPos.Equals(camPos))
-            {
+            var currentCamera = new CameraTransformValue(Camera.main);
+            Transform currentCameraTransform = Camera.main.transform;
+            Vector3 camPos = currentCameraTransform.position;
+
+            if (!LastCachedCamera.Equals(currentCamera)) {
                 // cache visible segments
-                currentlyVisibleSegmentIds.Clear();
+                LastCachedCamera = currentCamera;
+                CachedVisibleSegmentIds.Clear();
+
+                const float MAX_DIST = TrafficManagerTool.MAX_OVERLAY_DISTANCE *
+                                       TrafficManagerTool.MAX_OVERLAY_DISTANCE;
 
                 for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                     if (!Constants.ServiceFactory.NetService.IsSegmentValid((ushort)segmentId)) {
@@ -66,8 +80,8 @@
                     // if ((netManager.m_segments.m_buffer[segmentId].m_flags
                     //     & NetSegment.Flags.Untouchable) != NetSegment.Flags.None)
                     // continue;
-                    if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).magnitude
-                        > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
+                    Vector3 distToCamera = netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos;
+                    if (distToCamera.sqrMagnitude > MAX_DIST) {
                         continue; // do not draw if too distant
                     }
 
@@ -83,34 +97,28 @@
                         continue;
                     }
 
-                    currentlyVisibleSegmentIds.Add((ushort)segmentId);
+                    CachedVisibleSegmentIds.Add((ushort)segmentId);
                 } // end for all segments
-
-                lastCamPos = camPos;
-                lastCamRot = camRot;
             }
 
             bool clicked = !viewOnly && MainTool.CheckClicked();
 
-            foreach (ushort segmentId in currentlyVisibleSegmentIds) {
-                bool visible = MainTool.WorldToScreenPoint(
-                    netManager.m_segments.m_buffer[segmentId].m_bounds.center,
-                    out Vector3 _);
-
-                if (!visible) {
-                    continue;
-                }
+            for (int segmentIdIndex = CachedVisibleSegmentIds.Size - 1;
+                 segmentIdIndex >= 0;
+                 segmentIdIndex--)
+            {
+                ushort segmentId = CachedVisibleSegmentIds.Values[segmentIdIndex];
 
                 // draw parking restrictions
-                if (MainTool.GetToolMode() == ToolMode.SpeedLimits
-                    || (MainTool.GetToolMode() == ToolMode.VehicleRestrictions
-                        && segmentId == SelectedSegmentId))
+                if ((MainTool.GetToolMode() == ToolMode.SpeedLimits)
+                    || ((MainTool.GetToolMode() == ToolMode.VehicleRestrictions)
+                        && (segmentId == SelectedSegmentId)))
                 {
                     continue;
                 }
 
                 // no parking restrictions overlay on selected segment when in vehicle restrictions mode
-                drawParkingRestrictionHandles(
+                DrawParkingRestrictionHandles(
                     segmentId,
                     clicked,
                     ref netManager.m_segments.m_buffer[segmentId],
@@ -119,7 +127,7 @@
             }
         }
 
-        private bool drawParkingRestrictionHandles(ushort segmentId,
+        private bool DrawParkingRestrictionHandles(ushort segmentId,
                                                    bool clicked,
                                                    ref NetSegment segment,
                                                    bool viewOnly,
@@ -154,7 +162,7 @@
                     continue;
                 }
 
-                float zoom = 1.0f / (e.Value - camPos).magnitude * 100f * MainTool.GetBaseZoom();
+                float zoom = (1.0f / (e.Value - camPos).magnitude) * 100f * MainTool.GetBaseZoom();
                 float size = (viewOnly ? 0.8f : 1f) * SIGN_SIZE * zoom;
                 Color guiColor = GUI.color;
                 Rect boundingBox = new Rect(
@@ -207,8 +215,8 @@
                             NetInfo.Lane laneInfo = otherSegmentInfo.m_lanes[laneIndex];
 
                             NetInfo.Direction otherNormDir = laneInfo.m_finalDirection;
-                            if ((netManager.m_segments.m_buffer[otherSegmentId].m_flags &
-                                 NetSegment.Flags.Invert) != NetSegment.Flags.None ^ reverse) {
+                            if (((netManager.m_segments.m_buffer[otherSegmentId].m_flags &
+                                  NetSegment.Flags.Invert) != NetSegment.Flags.None) ^ reverse) {
                                 otherNormDir = NetInfo.InvertDirection(otherNormDir);
                             }
 

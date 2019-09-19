@@ -36,8 +36,12 @@ namespace TrafficManager.State {
         internal static UICheckBox EnablePrioritySignsToggle;
         internal static UICheckBox EnableTimedLightsToggle;
 
+        private static string T(string text) {
+            return Translation.Options.Get(text);
+        }
+
         internal static void MakeSettings_Maintenance(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(tabStrip, Translation.Options.Get("Maintenance"));
+            Options.AddOptionTab(tabStrip, T("Tab:Maintenance"));
             tabStrip.selectedIndex = tabIndex;
 
             var currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -48,77 +52,71 @@ namespace TrafficManager.State {
             currentPanel.autoLayoutPadding.right = 10;
 
             var panelHelper = new UIHelper(currentPanel);
-            UIHelperBase maintenanceGroup =
-                panelHelper.AddGroup(Translation.Options.Get("Maintenance"));
+            UIHelperBase maintenanceGroup = panelHelper.AddGroup(T("Tab:Maintenance"));
 
-            _resetStuckEntitiesBtn
-                = maintenanceGroup.AddButton(
-                      Translation.Options.Get("Button.Reset stuck cims and vehicles"),
-                      onClickResetStuckEntities) as UIButton;
+            _resetStuckEntitiesBtn = maintenanceGroup.AddButton(
+                                         T("Maintenance.Button:Reset stuck cims and vehicles"),
+                                         onClickResetStuckEntities) as UIButton;
 
-            _removeParkedVehiclesBtn
-                = maintenanceGroup.AddButton(
-                      Translation.Options.Get("Button.Remove parked vehicles"),
-                      onClickRemoveParkedVehicles) as UIButton;
+            _removeParkedVehiclesBtn = maintenanceGroup.AddButton(
+                                           T("Maintenance.Button:Remove parked vehicles"),
+                                           OnClickRemoveParkedVehicles) as UIButton;
 #if DEBUG
-            _resetSpeedLimitsBtn
-                = maintenanceGroup.AddButton(
-                      Translation.Options.Get("Button.Reset custom speed limits"),
-                      onClickResetSpeedLimits) as UIButton;
+            _resetSpeedLimitsBtn = maintenanceGroup.AddButton(
+                                       T("Maintenance.Button:Reset custom speed limits"),
+                                       OnClickResetSpeedLimits) as UIButton;
 #endif
-            _reloadGlobalConfBtn
-                = maintenanceGroup.AddButton(
-                      Translation.Options.Get("Button.Reload global configuration"),
-                      onClickReloadGlobalConf) as UIButton;
-            _resetGlobalConfBtn
-                = maintenanceGroup.AddButton(
-                      Translation.Options.Get("Button.Reset global configuration"),
-                      onClickResetGlobalConf) as UIButton;
+            _reloadGlobalConfBtn = maintenanceGroup.AddButton(
+                                       T("Maintenance.Button:Reload global configuration"),
+                                       OnClickReloadGlobalConf) as UIButton;
+            _resetGlobalConfBtn = maintenanceGroup.AddButton(
+                                      T("Maintenance.Button:Reset global configuration"),
+                                      OnClickResetGlobalConf) as UIButton;
 
 #if QUEUEDSTATS
             _showPathFindStatsToggle = maintenanceGroup.AddCheckbox(
-                                           Translation.Options.Get("Show path-find stats"),
+                                           T("Maintenance.Checkbox:Show path-find stats"),
                                            Options.showPathFindStats,
-                                           onShowPathFindStatsChanged) as UICheckBox;
+                                           OnShowPathFindStatsChanged) as UICheckBox;
 #endif
 
-            var featureGroup = panelHelper.AddGroup(
-                                   Translation.Options.Get("Activated features")) as UIHelper;
+            var featureGroup =
+                panelHelper.AddGroup(T("Maintenance.Group:Activated features")) as UIHelper;
             EnablePrioritySignsToggle = featureGroup.AddCheckbox(
-                                            Translation.Options.Get("Priority signs"),
+                                            T("Checkbox:Priority signs"),
                                             Options.prioritySignsEnabled,
                                             OnPrioritySignsEnabledChanged) as UICheckBox;
             EnableTimedLightsToggle = featureGroup.AddCheckbox(
-                                          Translation.Options.Get("Timed traffic lights"),
+                                          T("Checkbox:Timed traffic lights"),
                                           Options.timedLightsEnabled,
                                           OnTimedLightsEnabledChanged) as UICheckBox;
             _enableCustomSpeedLimitsToggle = featureGroup.AddCheckbox(
-                                                Translation.Options.Get("Speed limits"),
-                                                Options.customSpeedLimitsEnabled,
-                                                OnCustomSpeedLimitsEnabledChanged) as UICheckBox;
-            _enableVehicleRestrictionsToggle
-                = featureGroup.AddCheckbox(
-                      Translation.Options.Get("Vehicle restrictions"),
-                      Options.vehicleRestrictionsEnabled,
-                      OnVehicleRestrictionsEnabledChanged) as UICheckBox;
-            _enableParkingRestrictionsToggle
-                = featureGroup.AddCheckbox(
-                      Translation.Options.Get("Parking restrictions"),
-                      Options.parkingRestrictionsEnabled,
-                      OnParkingRestrictionsEnabledChanged) as UICheckBox;
-            _enableJunctionRestrictionsToggle
-                = featureGroup.AddCheckbox(
-                      Translation.Options.Get("Junction restrictions"),
-                      Options.junctionRestrictionsEnabled,
-                      OnJunctionRestrictionsEnabledChanged) as UICheckBox;
+                                                 T("Checkbox:Speed limits"),
+                                                 Options.customSpeedLimitsEnabled,
+                                                 OnCustomSpeedLimitsEnabledChanged) as UICheckBox;
+            _enableVehicleRestrictionsToggle = featureGroup.AddCheckbox(
+                                                       T("Checkbox:Vehicle restrictions"),
+                                                       Options.vehicleRestrictionsEnabled,
+                                                       OnVehicleRestrictionsEnabledChanged) as
+                                                   UICheckBox;
+            _enableParkingRestrictionsToggle = featureGroup.AddCheckbox(
+                                                       T("Checkbox:Parking restrictions"),
+                                                       Options.parkingRestrictionsEnabled,
+                                                       OnParkingRestrictionsEnabledChanged) as
+                                                   UICheckBox;
+            _enableJunctionRestrictionsToggle = featureGroup.AddCheckbox(
+                                                        T("Checkbox:Junction restrictions"),
+                                                        Options.junctionRestrictionsEnabled,
+                                                        OnJunctionRestrictionsEnabledChanged) as
+                                                    UICheckBox;
             _turnOnRedEnabledToggle = featureGroup.AddCheckbox(
-                                         Translation.Options.Get("Maintenance.Turn on red"),
-                                         Options.turnOnRedEnabled,
-                                         OnTurnOnRedEnabledChanged) as UICheckBox;
+                                          T("Maintenance.Checkbox:Turn on red"),
+                                          Options.turnOnRedEnabled,
+                                          OnTurnOnRedEnabledChanged) as UICheckBox;
             _enableLaneConnectorToggle = featureGroup.AddCheckbox(
-                                            Translation.Options.Get("Lane connector"),
-                                            Options.laneConnectorEnabled,
-                                            OnLaneConnectorEnabledChanged) as UICheckBox;
+                                             T("Maintenance.Checkbox:Lane connector"),
+                                             Options.laneConnectorEnabled,
+                                             OnLaneConnectorEnabledChanged) as UICheckBox;
 
             Options.Indent(_turnOnRedEnabledToggle);
         }
@@ -132,7 +130,7 @@ namespace TrafficManager.State {
                 () => { UtilityManager.Instance.ResetStuckEntities(); });
         }
 
-        private static void onClickRemoveParkedVehicles() {
+        private static void OnClickRemoveParkedVehicles() {
             if (!Options.IsGameLoaded()) {
                 return;
             }
@@ -142,7 +140,7 @@ namespace TrafficManager.State {
             });
         }
 
-        private static void onClickResetSpeedLimits() {
+        private static void OnClickResetSpeedLimits() {
             if (!Options.IsGameLoaded()) {
                 return;
             }
@@ -150,16 +148,16 @@ namespace TrafficManager.State {
             Flags.ResetSpeedLimits();
         }
 
-        private static void onClickReloadGlobalConf() {
+        private static void OnClickReloadGlobalConf() {
             GlobalConfig.Reload();
         }
 
-        private static void onClickResetGlobalConf() {
+        private static void OnClickResetGlobalConf() {
             GlobalConfig.Reset(null, true);
         }
 
 #if QUEUEDSTATS
-        private static void onShowPathFindStatsChanged(bool newVal) {
+        private static void OnShowPathFindStatsChanged(bool newVal) {
             if (!Options.IsGameLoaded())
                 return;
 

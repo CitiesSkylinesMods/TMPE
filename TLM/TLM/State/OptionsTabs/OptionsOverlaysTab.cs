@@ -24,7 +24,7 @@ namespace TrafficManager.State {
 #endif
 
         internal static void MakeSettings_Overlays(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(tabStrip, Translation.Options.Get("Tab.Overlays"));
+            Options.AddOptionTab(tabStrip, Translation.Options.Get("Tab:Overlays"));
             tabStrip.selectedIndex = tabIndex;
 
             var currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
@@ -37,56 +37,56 @@ namespace TrafficManager.State {
             var panelHelper = new UIHelper(currentPanel);
 
             _prioritySignsOverlayToggle = panelHelper.AddCheckbox(
-                                              Translation.Options.Get("Priority signs"),
+                                              Translation.Options.Get("Checkbox:Priority signs"),
                                              Options.prioritySignsOverlay,
                                              OnPrioritySignsOverlayChanged) as UICheckBox;
             _timedLightsOverlayToggle = panelHelper.AddCheckbox(
-                                           Translation.Options.Get("Timed traffic lights"),
+                                           Translation.Options.Get("Checkbox:Timed traffic lights"),
                                            Options.timedLightsOverlay,
                                            OnTimedLightsOverlayChanged) as UICheckBox;
             _speedLimitsOverlayToggle = panelHelper.AddCheckbox(
-                                            Translation.Options.Get("Speed limits"),
+                                            Translation.Options.Get("Checkbox:Speed limits"),
                                            Options.speedLimitsOverlay,
                                            OnSpeedLimitsOverlayChanged) as UICheckBox;
             _vehicleRestrictionsOverlayToggle
                 = panelHelper.AddCheckbox(
-                      Translation.Options.Get("Vehicle restrictions"),
+                      Translation.Options.Get("Checkbox:Vehicle restrictions"),
                       Options.vehicleRestrictionsOverlay,
                       OnVehicleRestrictionsOverlayChanged) as UICheckBox;
             _parkingRestrictionsOverlayToggle
                 = panelHelper.AddCheckbox(
-                      Translation.Options.Get("Parking restrictions"),
+                      Translation.Options.Get("Checkbox:Parking restrictions"),
                       Options.parkingRestrictionsOverlay,
                       OnParkingRestrictionsOverlayChanged) as UICheckBox;
             _junctionRestrictionsOverlayToggle
                 = panelHelper.AddCheckbox(
-                      Translation.Options.Get("Junction restrictions"),
+                      Translation.Options.Get("Checkbox:Junction restrictions"),
                       Options.junctionRestrictionsOverlay,
                       OnJunctionRestrictionsOverlayChanged) as UICheckBox;
             _connectedLanesOverlayToggle
                 = panelHelper.AddCheckbox(
-                      Translation.Options.Get("Overlay.Connected lanes"),
+                      Translation.Options.Get("Overlay.Checkbox:Connected lanes"),
                       Options.connectedLanesOverlay,
                       OnConnectedLanesOverlayChanged) as UICheckBox;
             _nodesOverlayToggle = panelHelper.AddCheckbox(
-                                     Translation.Options.Get("Overlay.Nodes and segments"),
+                                     Translation.Options.Get("Overlay.Checkbox:Nodes and segments"),
                                      Options.nodesOverlay,
                                      onNodesOverlayChanged) as UICheckBox;
             _showLanesToggle = panelHelper.AddCheckbox(
-                                  Translation.Options.Get("Overlay.Lanes"),
+                                  Translation.Options.Get("Overlay.Checkbox:Lanes"),
                                   Options.showLanes,
                                   onShowLanesChanged) as UICheckBox;
 #if DEBUG
             _vehicleOverlayToggle = panelHelper.AddCheckbox(
-                                       Translation.Options.Get("Overlay.Vehicles"),
+                                       Translation.Options.Get("Overlay.Checkbox:Vehicles"),
                                        Options.vehicleOverlay,
                                        onVehicleOverlayChanged) as UICheckBox;
             _citizenOverlayToggle = panelHelper.AddCheckbox(
-                                        Translation.Options.Get("Overlay.Citizens"),
+                                        Translation.Options.Get("Overlay.Checkbox:Citizens"),
                                        Options.citizenOverlay,
                                        onCitizenOverlayChanged) as UICheckBox;
             _buildingOverlayToggle = panelHelper.AddCheckbox(
-                                         Translation.Options.Get("Overlay.Buildings"),
+                                         Translation.Options.Get("Overlay.Checkbox:Buildings"),
                                         Options.buildingOverlay,
                                         onBuildingOverlayChanged) as UICheckBox;
 #endif

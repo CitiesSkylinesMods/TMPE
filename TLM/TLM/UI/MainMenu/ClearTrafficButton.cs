@@ -7,15 +7,15 @@
 
         protected override ButtonFunction Function => ButtonFunction.ClearTraffic;
 
-        public override string Tooltip => Translation.Menu.Get("Clear traffic");
+        public override string Tooltip => Translation.Menu.Get("Tooltip:Clear traffic");
 
         public override bool Visible => true;
 
         public override void OnClickInternal(UIMouseEventParameter p) {
             ConfirmPanel.ShowModal(
-                Translation.Menu.Get("Clear traffic"),
-                Translation.Menu.Get("Clear traffic, confirmation"),
-                delegate(UIComponent comp, int ret) {
+                Translation.Menu.Get("Tooltip:Clear traffic"),
+                Translation.Menu.Get("Dialog.Text:Clear traffic, confirmation"),
+                (comp, ret) => {
                     if (ret == 1) {
                         Constants.ServiceFactory.SimulationService.AddAction(
                             () => { UtilityManager.Instance.ClearTraffic(); });

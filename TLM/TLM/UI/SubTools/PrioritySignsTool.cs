@@ -470,7 +470,7 @@
                 //     allow priority signs: {reason}");
                 if (reason == SetPrioritySignError.HasTimedLight) {
                     MainTool.ShowError(
-                        Translation.TrafficLights.Get("Error.Node has timed TL script"));
+                        Translation.TrafficLights.Get("Dialog.Text:Node has timed TL script"));
                 }
 
                 return false;

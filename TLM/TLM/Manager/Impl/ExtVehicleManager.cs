@@ -843,7 +843,7 @@
             ushort transitNodeId1 = 0;
             Constants.ServiceFactory.NetService.ProcessSegment(
                 curPos.m_segment,
-                delegate(ushort segmentId, ref NetSegment segment) {
+                (ushort segmentId, ref NetSegment segment) => {
                     transitNodeId1 = startNode ? segment.m_startNode : segment.m_endNode;
                     return true;
                 });
@@ -851,7 +851,7 @@
             ushort transitNodeId2 = 0;
             Constants.ServiceFactory.NetService.ProcessSegment(
                 nextPos.m_segment,
-                delegate(ushort segmentId, ref NetSegment segment) {
+                (ushort segmentId, ref NetSegment segment) => {
                     transitNodeId2 = startNode ? segment.m_startNode : segment.m_endNode;
                     return true;
                 });

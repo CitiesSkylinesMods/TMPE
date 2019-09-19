@@ -6,7 +6,7 @@
 
         protected override ButtonFunction Function => ButtonFunction.TimedTrafficLights;
 
-        public override string Tooltip => Translation.Menu.Get("Timed traffic lights");
+        public override string Tooltip => Translation.Menu.Get("Tooltip:Timed traffic lights");
 
         public override bool Visible => Options.timedLightsEnabled;
     }

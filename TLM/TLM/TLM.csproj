@@ -266,6 +266,8 @@
     <Compile Include="State\Flags.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="Util\Caching\CameraTransformValue.cs" />
+    <Compile Include="Util\Caching\GenericArrayCache.cs" />
     <Compile Include="Util\FloatUtil.cs" />
     <Compile Include="Util\GenericObservable.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />

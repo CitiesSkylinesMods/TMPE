@@ -41,13 +41,13 @@
                     switch (reason) {
                         case ToggleTrafficLightError.HasTimedLight: {
                             MainTool.ShowError(
-                                Translation.TrafficLights.Get("Error.Node has timed TL script"));
+                                Translation.TrafficLights.Get("Dialog.Text:Node has timed TL script"));
                             break;
                         }
 
                         case ToggleTrafficLightError.IsLevelCrossing: {
                             MainTool.ShowError(
-                                Translation.TrafficLights.Get("Error.Node is level crossing"));
+                                Translation.TrafficLights.Get("Dialog.Text:Node is level crossing"));
                             break;
                         }
                     }

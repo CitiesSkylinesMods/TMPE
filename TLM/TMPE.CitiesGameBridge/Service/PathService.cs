@@ -12,7 +12,7 @@
             bool ret = false;
             ProcessUnit(
                 unitId,
-                delegate(uint uId, ref PathUnit unit) {
+                (uint uId, ref PathUnit unit) => {
                     ret = LogicUtil.CheckFlags(
                         unit.m_pathFindFlags,
                         flagMask,
