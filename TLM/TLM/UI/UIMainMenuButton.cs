@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI {
+namespace TrafficManager.UI {
     using System;
     using API.Util;
     using ColossalFramework.UI;
@@ -79,7 +79,7 @@
         /// Reset the tooltip (or set for the first time), or if keybinding has changed
         /// </summary>
         public void UpdateTooltip() {
-            tooltip = Translation.Menu.Get("Toolip:Toggle Main Menu")
+            tooltip = Translation.Menu.Get("Tooltip:Toggle Main Menu")
                       + GetTooltip();
         }
 
