@@ -11,7 +11,6 @@
     using Manager.Impl;
     using State;
     using Textures;
-    using TrafficLight;
     using UnityEngine;
 
     public class TimedTrafficLightsTool : SubTool {
@@ -131,7 +130,7 @@
                                 MainTool.SetToolMode(ToolMode.TimedLightsShowLights);
                             }
                         } else {
-                            MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
+                            MainTool.ShowError(T("Dialog.Text:Node has timed TL script"));
                         }
                     }
 
@@ -213,15 +212,15 @@
                                             .CountSegments();
 
                     if (numSourceSegments != numTargetSegments) {
-                        MainTool.ShowTooltip(
-                            Translation.GetString(
-                                "The_chosen_traffic_light_program_is_incompatible_to_this_junction"));
+                        MainTool.ShowError(
+                            T("Dialog.Text:Incompatible traffic light script"));
                         return;
                     }
 
                     // check for existing simulation
                     if (tlsMan.HasTimedSimulation(HoveredNodeId)) {
-                        MainTool.ShowTooltip(Translation.GetString("NODE_IS_TIMED_LIGHT"));
+                        MainTool.ShowError(
+                            T("Dialog.Text:Node has timed TL script"));
                         return;
                     }
 
@@ -257,12 +256,12 @@
                 case ToolMode.TimedLightsShowLights:
                 case ToolMode.TimedLightsAddNode:
                 case ToolMode.TimedLightsRemoveNode: {
-                    _guiTimedTrafficLights();
+                    GuiTimedTrafficLights();
                     break;
                 }
 
                 case ToolMode.TimedLightsCopyLights: {
-                    _guiTimedTrafficLightsCopy();
+                    GuiTimedTrafficLightsCopy();
                     break;
                 }
             }
@@ -300,8 +299,8 @@
 
                 if (MainTool.GetToolMode() == ToolMode.TimedLightsAddNode ||
                     MainTool.GetToolMode() == ToolMode.TimedLightsRemoveNode) {
-                    GUILayout.Label(Translation.GetString("Select_junction"));
-                    if (GUILayout.Button(Translation.GetString("Cancel"))) {
+                    GUILayout.Label(T("TTL.Label:Select junction"));
+                    if (GUILayout.Button(T("Button:Cancel"))) {
                         MainTool.SetToolMode(ToolMode.TimedLightsShowLights);
                     } else {
                         DragWindow(ref _windowRect);
@@ -342,13 +341,13 @@
                             if (i == currentStep) {
                                 GUILayout.BeginVertical();
                                 GUILayout.Space(5);
+
                                 string labelStr = string.Format(
-                                        "{0} {1}: ({2}){3}/{4}",
-                                        Translation.GetString("State"),
-                                        i + 1,
-                                        Translation.GetString("min/max"),
-                                        timedNodeMain.GetStep(i).MinTimeRemaining(),
-                                        timedNodeMain.GetStep(i).MaxTimeRemaining());
+                                    T("Format:State {0}: (min/max) {1}..{2}"),
+                                    i + 1,
+                                    timedNodeMain.GetStep(i).MinTimeRemaining(),
+                                    timedNodeMain.GetStep(i).MaxTimeRemaining());
+
                                 float flow = float.NaN;
                                 float wait = float.NaN;
 
@@ -373,14 +372,13 @@
 
                                 if (!float.IsNaN(flow) && !float.IsNaN(wait)) {
                                     labelStr += string.Format(
-                                        " {0}: {1:0.##} {2}: {3:0.##}",
-                                        Translation.GetString("avg._flow"), flow,
-                                        Translation.GetString("avg._wait"), wait);
+                                        T("Format:Avg. flow: {0:0.##} avg. wait: {1:0.##}"),
+                                        flow,
+                                        wait);
                                 }
 
-                                GUIStyle labelLayout = layout;
-
-                                if (inTestMode && !Single.IsNaN(wait) && !Single.IsNaN(flow)) {
+                                GUIStyle labelLayout;
+                                if (inTestMode && !float.IsNaN(wait) && !float.IsNaN(flow)) {
                                     labelLayout = timedNodeMain.GetStep(i)
                                                                .ShouldGoToNextStep(flow, wait, out float metric)
                                                       ? layoutRed : layoutGreen;
@@ -401,7 +399,7 @@
                                 GUILayout.EndVertical();
 
                                 if (GUILayout.Button(
-                                    Translation.GetString("Skip"),
+                                    T("TTL.Button:Skip"),
                                     GUILayout.Width(80)))
                                 {
                                     foreach (ushort nodeId in selectedNodeIds) {
@@ -413,8 +411,7 @@
                             } else {
                                 GUILayout.Label(
                                     string.Format(
-                                        "{0} {1}: {2} - {3}",
-                                        Translation.GetString("State"),
+                                        T("Format:State {0}: {1}..{2}"),
                                         i + 1,
                                         timedNodeMain.GetStep(i).MinTime,
                                         timedNodeMain.GetStep(i).MaxTime),
@@ -429,8 +426,7 @@
 
                             GUILayout.Label(
                                 string.Format(
-                                    "{0} {1}: {2} - {3}",
-                                    Translation.GetString("State"),
+                                    T("Format:State {0}: {1}..{2}"),
                                     i + 1,
                                     timedNodeMain.GetStep(i).MinTime,
                                     timedNodeMain.GetStep(i).MaxTime),
@@ -441,7 +437,7 @@
 
                                 if (i > 0) {
                                     if (GUILayout.Button(
-                                        Translation.GetString("up"),
+                                        T("TTL.Button:up"),
                                         GUILayout.Width(48))) {
                                         foreach (ushort nodeId in selectedNodeIds) {
                                             tlsMan.TrafficLightSimulations[nodeId].timedLight
@@ -456,7 +452,7 @@
 
                                 if (i < numSteps - 1) {
                                     if (GUILayout.Button(
-                                        Translation.GetString("down"),
+                                        T("TTL.Button:down"),
                                         GUILayout.Width(48))) {
                                         foreach (ushort nodeId in selectedNodeIds) {
                                             tlsMan.TrafficLightSimulations[nodeId].timedLight
@@ -473,7 +469,7 @@
 
                                 GUI.color = Color.red;
                                 if (GUILayout.Button(
-                                    Translation.GetString("Delete"),
+                                    T("Button:Delete"),
                                     GUILayout.Width(70))) {
                                     RemoveStep(i);
                                 }
@@ -481,7 +477,7 @@
                                 GUI.color = Color.white;
 
                                 if (GUILayout.Button(
-                                    Translation.GetString("Edit"),
+                                    T("Button:Edit"),
                                     GUILayout.Width(65)))
                                 {
                                     _timedPanelAdd = false;
@@ -496,20 +492,24 @@
                                     nodeSelectionLocked = true;
 
                                     foreach (ushort nodeId in selectedNodeIds) {
-                                        tlsMan.TrafficLightSimulations[nodeId].timedLight
-                                              ?.GetStep(i).UpdateLiveLights(true);
+                                        tlsMan.TrafficLightSimulations[nodeId]
+                                              .timedLight
+                                              ?.GetStep(i)
+                                              .UpdateLiveLights(true);
                                     }
                                 }
 
                                 if (GUILayout.Button(
-                                    Translation.GetString("View"),
+                                    T("Button:View"),
                                     GUILayout.Width(70))) {
                                     _timedPanelAdd = false;
                                     _timedViewedStep = i;
 
                                     foreach (ushort nodeId in selectedNodeIds) {
-                                        tlsMan.TrafficLightSimulations[nodeId].timedLight
-                                              ?.GetStep(i).UpdateLiveLights(true);
+                                        tlsMan.TrafficLightSimulations[nodeId]
+                                              .timedLight
+                                              ?.GetStep(i)
+                                              .UpdateLiveLights(true);
                                     }
                                 }
                             }
@@ -520,7 +520,10 @@
                         int oldStepMaxValue = _stepMaxValue;
 
                         // Editing step
-                        GUILayout.Label(Translation.GetString("Min._Time:"), GUILayout.Width(75));
+                        GUILayout.Label(
+                            T("TTL.Label:Min. time:"),
+                            GUILayout.Width(75));
+
                         _stepMinValueStr = GUILayout.TextField(
                             _stepMinValueStr,
                             GUILayout.Height(20));
@@ -529,7 +532,10 @@
                             _stepMinValue = oldStepMinValue;
                         }
 
-                        GUILayout.Label(Translation.GetString("Max._Time:"), GUILayout.Width(75));
+                        GUILayout.Label(
+                            T("TTL.Label:Max. time:"),
+                            GUILayout.Width(75));
+
                         _stepMaxValueStr = GUILayout.TextField(
                             _stepMaxValueStr,
                             GUILayout.Height(20));
@@ -538,7 +544,10 @@
                             _stepMaxValue = oldStepMaxValue;
                         }
 
-                        if (GUILayout.Button(Translation.GetString("Save"), GUILayout.Width(70))) {
+                        if (GUILayout.Button(
+                            T("Button:Save"),
+                            GUILayout.Width(70)))
+                        {
                             if (_stepMinValue < 0) {
                                 _stepMinValue = 0;
                             }
@@ -559,7 +568,8 @@
                             foreach (ushort nodeId in selectedNodeIds) {
                                 ITimedTrafficLightsStep step = tlsMan
                                                                .TrafficLightSimulations[nodeId]
-                                                               .timedLight?.GetStep(_timedEditStep);
+                                                               .timedLight
+                                                               ?.GetStep(_timedEditStep);
 
                                 if (step != null) {
                                     step.MinTime = _stepMinValue;
@@ -595,14 +605,20 @@
                         int oldStepMinValue = _stepMinValue;
                         int oldStepMaxValue = _stepMaxValue;
 
-                        GUILayout.Label(Translation.GetString("Min._Time:"), GUILayout.Width(65));
+                        GUILayout.Label(
+                            T("TTL.Label:Min. time:"),
+                            GUILayout.Width(65));
+
                         _stepMinValueStr = GUILayout.TextField(_stepMinValueStr, GUILayout.Height(20));
 
                         if (!int.TryParse(_stepMinValueStr, out _stepMinValue)) {
                             _stepMinValue = oldStepMinValue;
                         }
 
-                        GUILayout.Label(Translation.GetString("Max._Time:"), GUILayout.Width(65));
+                        GUILayout.Label(
+                            T("TTL.Label:Max. time:"),
+                            GUILayout.Width(65));
+
                         _stepMaxValueStr = GUILayout.TextField(_stepMaxValueStr, GUILayout.Height(20));
 
                         if (!int.TryParse(_stepMaxValueStr, out _stepMaxValue)) {
@@ -613,7 +629,10 @@
                             _timedPanelAdd = false;
                         }
 
-                        if (GUILayout.Button(Translation.GetString("Add"), GUILayout.Width(70))) {
+                        if (GUILayout.Button(
+                            T("Button:Add"),
+                            GUILayout.Width(70)))
+                        {
                             TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddStep");
                             if (_stepMinValue < 0) {
                                 _stepMinValue = 0;
@@ -651,7 +670,7 @@
 
                     } else {
                         if (_timedEditStep < 0) {
-                            if (GUILayout.Button(Translation.GetString("Add_step"))) {
+                            if (GUILayout.Button(T("TTL.Button:Add step"))) {
                                 TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddStep");
                                 _timedPanelAdd = true;
                                 nodeSelectionLocked = true;
@@ -671,14 +690,16 @@
                     if (timedLightActive) {
                         if (GUILayout.Button(
                             _timedShowNumbers
-                                ? Translation.GetString("Hide_counters")
-                                : Translation.GetString("Show_counters"))) {
+                                ? T("TTL.Button:Hide counters")
+                                : T("TTL.Button:Show counters"))) {
                             _timedShowNumbers = !_timedShowNumbers;
                         }
 
-                        if (GUILayout.Button(Translation.GetString("Stop"))) {
+                        if (GUILayout.Button(T("TTL.Button:Stop"))) {
                             foreach (ushort nodeId in selectedNodeIds) {
-                                tlsMan.TrafficLightSimulations[nodeId].timedLight?.Stop();
+                                tlsMan.TrafficLightSimulations[nodeId]
+                                      .timedLight
+                                      ?.Stop();
                             }
                         }
 
@@ -715,19 +736,21 @@
                         //     new GUILayoutOption[] { });
                         bool testMode = GUILayout.Toggle(
                             inTestMode,
-                            Translation.GetString("Enable_test_mode_(stay_in_current_step)"));
+                            T("TTL.Checkbox:Pause in this step"));
 
                         foreach (ushort nodeId in selectedNodeIds) {
                             tlsMan.TrafficLightSimulations[nodeId].timedLight?.SetTestMode(testMode);
                         }
                     } else {
                         if (_timedEditStep < 0 && !_timedPanelAdd) {
-                            if (GUILayout.Button(Translation.GetString("Start"))) {
+                            if (GUILayout.Button(T("TTL.Button:Start"))) {
                                 _timedPanelAdd = false;
                                 nodeSelectionLocked = false;
 
                                 foreach (ushort nodeId in selectedNodeIds) {
-                                    tlsMan.TrafficLightSimulations[nodeId].timedLight?.Start();
+                                    tlsMan.TrafficLightSimulations[nodeId]
+                                          .timedLight
+                                          ?.Start();
                                 }
                             }
                         }
@@ -744,18 +767,18 @@
                 if (selectedNodeIds.Count == 1 && timedNodeMain.NumSteps() > 0) {
                     GUILayout.BeginHorizontal();
 
-                    if (GUILayout.Button(Translation.GetString("Rotate_left"))) {
+                    if (GUILayout.Button(T("TTL.Button:Rotate left"))) {
                         timedNodeMain.RotateLeft();
                         _timedViewedStep = 0;
                     }
 
-                    if (GUILayout.Button(Translation.GetString("Copy"))) {
+                    if (GUILayout.Button(T("TTL.Button:Copy"))) {
                         TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Copy");
                         nodeIdToCopy = selectedNodeIds[0];
                         MainTool.SetToolMode(ToolMode.TimedLightsCopyLights);
                     }
 
-                    if (GUILayout.Button(Translation.GetString("Rotate_right"))) {
+                    if (GUILayout.Button(T("TTL.Button:Rotate right"))) {
                         timedNodeMain.RotateRight();
                         _timedViewedStep = 0;
                     }
@@ -766,13 +789,17 @@
                 if (!timedLightActive) {
                     GUILayout.Space(30);
 
-                    if (GUILayout.Button(Translation.GetString("Add_junction_to_timed_light"))) {
+                    if (GUILayout.Button(
+                        T("TTL.Button:Add junction to TTL")))
+                    {
                         TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddJunction");
                         MainTool.SetToolMode(ToolMode.TimedLightsAddNode);
                     }
 
                     if (selectedNodeIds.Count > 1) {
-                        if (GUILayout.Button(Translation.GetString("Remove_junction_from_timed_light"))) {
+                        if (GUILayout.Button(
+                            T("TTL.Button:Remove junction from TTL")))
+                        {
                             TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_RemoveJunction");
                             MainTool.SetToolMode(ToolMode.TimedLightsRemoveNode);
                         }
@@ -780,7 +807,7 @@
 
                     GUILayout.Space(30);
 
-                    if (GUILayout.Button(Translation.GetString("Remove_timed_traffic_light"))) {
+                    if (GUILayout.Button(T("TTL.Button:Remove entire TTL"))) {
                         DisableTimed();
                         ClearSelectedNodes();
                         MainTool.SetToolMode(ToolMode.TimedLightsSelectNode);
@@ -833,8 +860,7 @@
 
             if (editable) {
                 GUILayout.Label(
-                    Translation.GetString("After_min._time_has_elapsed_switch_to_next_step_if") +
-                    ":");
+                    T("TTL.Label:After min. time go to next step if") + ":");
 
                 if (GUILayout.Toggle(
                     _stepMetric == StepChangeMetric.Default,
@@ -867,7 +893,7 @@
                 }
             } else {
                 GUILayout.Label(
-                    Translation.GetString("Adaptive_step_switching") + ": " +
+                    T("TTL.Label:Adaptive step switching") + ": " +
                     GetStepChangeMetricDescription(_stepMetric));
             }
 
@@ -885,11 +911,14 @@
             }
 
             GUILayout.BeginHorizontal();
+            string sensText = T("TTL.Label:Flow sensitivity");
+
+            // TODO: Clarify for the user what this means, more help text, simpler UI
             if (editable) {
+                string flowBalanceText = string.Format(formatStr, _waitFlowBalance);
                 GUILayout.Label(
-                    Translation.GetString("Sensitivity") + " (" +
-                    String.Format(formatStr, _waitFlowBalance) + ", " + getWaitFlowBalanceInfo() +
-                    "):");
+                    $"{sensText} ({flowBalanceText}, {GetWaitFlowBalanceInfo()}):");
+
                 if (_waitFlowBalance <= 0.01f) {
                     if (_waitFlowBalance >= 0) {
                         if (GUILayout.Button("-.001")) {
@@ -940,23 +969,22 @@
                 }
 
                 GUILayout.BeginHorizontal();
-                GUIStyle style = new GUIStyle();
-                style.normal.textColor = Color.white;
-                style.alignment = TextAnchor.LowerLeft;
+                GUIStyle style = new GUIStyle {
+                                                  normal = { textColor = Color.white },
+                                                  alignment = TextAnchor.LowerLeft
+                                              };
                 GUILayout.Label(
-                    Translation.GetString("Low"),
+                    T("TTL.Label:Low"),
                     style,
                     GUILayout.Height(10));
                 style.alignment = TextAnchor.LowerRight;
                 GUILayout.Label(
-                    Translation.GetString("High"),
+                    T("TTL.Label:High"),
                     style,
                     GUILayout.Height(10));
             } else {
-                GUILayout.Label(
-                    Translation.GetString("Sensitivity") + ": " +
-                    string.Format(formatStr, _waitFlowBalance) + " (" + getWaitFlowBalanceInfo() +
-                    ")");
+                string flowBalanceText = string.Format(formatStr, _waitFlowBalance);
+                GUILayout.Label($"{sensText}: {flowBalanceText} ({GetWaitFlowBalanceInfo()})");
             }
 
             GUILayout.EndHorizontal();
@@ -968,25 +996,23 @@
             switch (metric) {
                 // also: case StepChangeMetric.Default:
                 default: {
-                    return Translation.GetString("flow_ratio") + " < " +
-                           Translation.GetString("wait_ratio") + " (" +
-                           Translation.GetString("default") + ")";
+                    return T("TTL.Label:Flow ratio below wait ratio");
                 }
 
                 case StepChangeMetric.FirstFlow: {
-                    return Translation.GetString("flow_ratio") + " > 0";
+                    return T("TTL.Label:Flow ratio > 0");
                 }
 
                 case StepChangeMetric.FirstWait: {
-                    return Translation.GetString("wait_ratio") + " > 0";
+                    return T("TTL.Label:Wait ratio > 0");
                 }
 
                 case StepChangeMetric.NoFlow: {
-                    return Translation.GetString("flow_ratio") + " = 0";
+                    return T("TTL.Label:Flow ratio is 0");
                 }
 
                 case StepChangeMetric.NoWait: {
-                    return Translation.GetString("wait_ratio") + " = 0";
+                    return T("TTL.Label:Wait ratio is 0");
                 }
             }
         }
@@ -997,21 +1023,24 @@
             _windowRect2 = GUILayout.Window(
                 252,
                 _windowRect2,
-                _guiTimedTrafficLightsNodeWindow,
-                Translation.GetString("Select_nodes_windowTitle"),
+                GuiTimedTrafficLightsNodeWindow,
+                T("TTL.Window.Title:Select nodes"),
                 WindowStyle);
 
             _cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
         }
 
-        private void _guiTimedTrafficLights() {
+        /// <summary>
+        /// Main TTL manager window
+        /// </summary>
+        private void GuiTimedTrafficLights() {
             _cursorInSecondaryPanel = false;
 
             _windowRect = GUILayout.Window(
                 253,
                 _windowRect,
                 GuiTimedControlPanel,
-                Translation.GetString("Timed_traffic_lights_manager"),
+                T("Dialog.Title:Timed traffic lights manager"),
                 WindowStyle);
 
             _cursorInSecondaryPanel = _windowRect.Contains(Event.current.mousePosition);
@@ -1023,41 +1052,54 @@
             ShowGUI();
         }
 
-        private void _guiTimedTrafficLightsCopy() {
+        /// <summary>
+        /// Copy and paste TTL settings window
+        /// </summary>
+        private void GuiTimedTrafficLightsCopy() {
             _cursorInSecondaryPanel = false;
 
             _windowRect2 = GUILayout.Window(
                 255,
                 _windowRect2,
-                _guiTimedTrafficLightsPasteWindow,
-                Translation.GetString("Paste"),
+                GuiTimedTrafficLightsPasteWindow,
+                T("TTL.Window.Title:Paste"),
                 WindowStyle);
 
             _cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
         }
 
-        private void _guiTimedTrafficLightsPasteWindow(int num) {
-            GUILayout.Label(Translation.GetString("Select_junction"));
+        private void GuiTimedTrafficLightsPasteWindow(int num) {
+            GUILayout.Label(T("TTL.Label:Select junction"));
         }
 
-        private void _guiTimedTrafficLightsNodeWindow(int num) {
+        /// <summary>
+        /// :Select nodes for TTL" window
+        /// </summary>
+        /// <param name="num">Not used</param>
+        private void GuiTimedTrafficLightsNodeWindow(int num) {
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
             if (selectedNodeIds.Count < 1) {
-                GUILayout.Label(Translation.GetString("Select_nodes"));
+                GUILayout.Label(T("Label:Select nodes"));
             } else {
                 string txt = selectedNodeIds.Aggregate(
                     string.Empty,
-                    (current, t) => current + (Translation.GetString("Node") + " " + t + "\n"));
+                    (current, t) => {
+                        string format = T("TTL.Label.Format:Node {0}") + "\n";
+                        return current + string.Format(format, t.ToString());
+                    });
 
                 GUILayout.Label(txt);
 
                 if (selectedNodeIds.Count > 0 &&
-                    GUILayout.Button(Translation.GetString("Deselect_all_nodes"))) {
+                    GUILayout.Button(T("TTL.Button:Deselect all nodes")))
+                {
                     ClearSelectedNodes();
                 }
 
-                if (!GUILayout.Button(Translation.GetString("Setup_timed_traffic_light"))) return;
+                if (!GUILayout.Button(T("TTL.Button:Setup timed traffic light"))) {
+                    return;
+                }
 
                 _waitFlowBalance = GlobalConfig.Instance.TimedTrafficLights.FlowToWaitRatio;
 
@@ -1072,32 +1114,32 @@
             DragWindow(ref _windowRect2);
         }
 
-        private string getWaitFlowBalanceInfo() {
+        private string GetWaitFlowBalanceInfo() {
             if (_waitFlowBalance < 0.1f) {
-                return Translation.GetString("Extreme_long_green/red_phases");
+                return T("TTL.FlowBalance:Extreme long green/red phases");
             }
 
             if (_waitFlowBalance < 0.5f) {
-                return Translation.GetString("Very_long_green/red_phases");
+                return T("TTL.FlowBalance:Very long green/red phases");
             }
 
             if (_waitFlowBalance < 0.75f) {
-                return Translation.GetString("Long_green/red_phases");
+                return T("TTL.FlowBalance:Long green/red phases");
             }
 
             if (_waitFlowBalance < 1.25f) {
-                return Translation.GetString("Moderate_green/red_phases");
+                return T("TTL.FlowBalance:Moderate green/red phases");
             }
 
             if (_waitFlowBalance < 1.5f) {
-                return Translation.GetString("Short_green/red_phases");
+                return T("TTL.FlowBalance:Short green/red phases");
             }
 
             if (_waitFlowBalance < 2.5f) {
-                return Translation.GetString("Very_short_green/red_phases");
+                return T("TTL.FlowBalance:Very short green/red phases");
             }
 
-            return Translation.GetString("Extreme_short_green/red_phases");
+            return T("TTL.FlowBalance:Extreme short green/red phases");
         }
 
         private void DisableTimed() {
@@ -1613,7 +1655,9 @@
                             _counterStyle.normal.textColor = new Color(1f, 0f, 0f);
                             GUI.Label(
                                 segIdRect,
-                                Translation.GetString("Segment") + " " + srcSegmentId,
+                                string.Format(
+                                    T("TTL.Label.Format:Segment {0}"),
+                                    srcSegmentId),
                                 _counterStyle);
                         }
 #endif
@@ -2425,5 +2469,9 @@
                 _hoveredButton[1] = 0;
             }
         }
-    }
+
+        private static string T(string text) {
+            return Translation.TrafficLights.Get(text);
+        }
+    } // end class
 }

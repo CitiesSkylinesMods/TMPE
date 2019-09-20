@@ -1,7 +1,9 @@
 ﻿namespace TrafficManager.State {
     using System.Collections.Generic;
+    using System.Reflection;
     using API.Traffic.Enums;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
     using ICities;
     using UI;
     using UnityEngine;
@@ -91,13 +93,23 @@
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
 
-        internal static bool MenuRebuildRequired {
-            set {
-                if (value) {
-                    if (LoadingExtension.BaseUI != null) {
-                        LoadingExtension.BaseUI.RebuildMenu();
-                    }
+        /// <summary>
+        /// Invoked on options change to refresh the main menu and possibly update the labels for
+        /// a new language. Takes a second, very slow.
+        /// </summary>
+        internal static void RebuildMenu() {
+            if (LoadingExtension.BaseUI != null) {
+                Log._Debug("Rebuilding the TM:PE menu...");
+                LoadingExtension.BaseUI.RebuildMenu();
+
+                // TM:PE main button also needs to be uidated
+                if (LoadingExtension.BaseUI.MainMenuButton != null) {
+                    LoadingExtension.BaseUI.MainMenuButton.UpdateTooltip();
                 }
+
+                LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
+            } else {
+                Log._Debug("Rebuilding the TM:PE menu: ignored, BaseUI is null");
             }
         }
 
@@ -144,10 +156,6 @@
             tabStrip.selectedIndex = 0;
         }
 
-        private static string T(string s) {
-            return Translation.GetString(s);
-        }
-
         internal static void Indent<T>(T component) where T : UIComponent {
             UILabel label = component.Find<UILabel>("Label");
 
@@ -190,8 +198,8 @@
             if (warn) {
                 UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
                     "Nope!",
-                    T("Settings_are_defined_for_each_savegame_separately") +
-                    ". https://www.viathinksoft.de/tmpe/#options",
+                    Translation.Options.Get("Dialog.Text:Settings are stored in savegame")
+                    + ". https://www.viathinksoft.de/tmpe/#options",
                     false);
             }
 
@@ -218,6 +226,27 @@
         /// <returns></returns>
         public static bool IsDynamicLaneSelectionActive() {
             return advancedAI && altLaneSelectionRatio > 0;
+        }
+
+        /// <summary>
+        /// Inform the main Options window of the C:S about language change. This should rebuild the
+        /// options tab for TM:PE.
+        /// </summary>
+        public static void RebuildOptions() {
+            // Inform the Main Options Panel about locale change, recreate the categories
+            MethodInfo onChangedHandler = typeof(OptionsMainPanel)
+                .GetMethod(
+                    "OnLocaleChanged",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+            if (onChangedHandler == null) {
+                Log.Error("Cannot rebuild options panel, OnLocaleChanged handler is null");
+                return;
+            }
+
+            Log._Debug("Informing the main OptionsPanel about the locale change...");
+            onChangedHandler.Invoke(
+                UIView.library.Get<OptionsMainPanel>("OptionsPanel"),
+                new object[] { });
         }
     }
 }

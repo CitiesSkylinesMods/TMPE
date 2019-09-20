@@ -14,6 +14,7 @@ namespace TrafficManager {
     using RedirectionFramework;
     using State;
     using UI;
+    using UI.Localization;
     using Object = UnityEngine.Object;
 
     [UsedImplicitly]
@@ -54,6 +55,11 @@ namespace TrafficManager {
         public static HarmonyInstance HarmonyInst { get; private set; }
         // public static TrafficManagerMode ToolMode { get; set; }
         // public static TrafficManagerTool TrafficManagerTool { get; set; }
+
+        /// <summary>
+        /// Contains loaded languages and lookup functions for text translations
+        /// </summary>
+        public static Translation TranslationDatabase = new Translation();
 
         public static UIBase BaseUI { get; private set; }
 
@@ -127,12 +133,14 @@ namespace TrafficManager {
             private set;
         } = new Dictionary<MethodInfo, RedirectCallsState>();
 
-        static LoadingExtension() { }
+        static LoadingExtension() {
+            TranslationDatabase.LoadAllTranslations();
+        }
 
         public LoadingExtension() {
         }
 
-        public void revertDetours() {
+        public void RevertDetours() {
             if (!DetourInited) {
                 return;
             }
@@ -323,7 +331,6 @@ namespace TrafficManager {
                 }
 
                 Flags.OnLevelUnloading();
-                Translation.OnLevelUnloading();
                 GlobalConfig.OnLevelUnloading();
 
                 // remove vehicle button
@@ -351,7 +358,7 @@ namespace TrafficManager {
                 // ignored - prevents collision with other mods
             }
 
-            revertDetours();
+            RevertDetours();
             IsGameLoaded = false;
         }
 

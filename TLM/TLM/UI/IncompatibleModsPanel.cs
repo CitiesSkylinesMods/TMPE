@@ -63,7 +63,7 @@ namespace TrafficManager.UI
             title_.relativePosition = new Vector2(60, 12);
 
             title_.text = TrafficManagerMod.ModName + " " +
-                         Translation.GetString("Traffic_Manager_detected_incompatible_mods");
+                         Translation.ModConflicts.Get("Window.Title:Detected incompatible mods");
 
             closeButton_ = mainPanel_.AddUIComponent<UIButton>();
             closeButton_.eventClick += CloseButtonClick;
@@ -77,11 +77,10 @@ namespace TrafficManager.UI
             panel.size = new Vector2(565, 320);
 
             UIHelper helper = new UIHelper(mainPanel_);
+            string checkboxLabel = Translation.ModConflicts.Get("Checkbox:Scan for known incompatible mods on startup");
             runModsCheckerOnStartup_ = helper.AddCheckbox(
-                                          Translation.GetString(
-                                              "Scan_for_known_incompatible_mods_on_startup"),
-                                          GlobalConfig.Instance.Main
-                                               .ScanForKnownIncompatibleModsAtStartup,
+                                          checkboxLabel,
+                                          GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,
                                           RunModsCheckerOnStartup_eventCheckChanged) as UICheckBox;
             runModsCheckerOnStartup_.relativePosition = new Vector3(20, height - 30f);
 
@@ -139,7 +138,7 @@ namespace TrafficManager.UI
             blurEffect_.isVisible = true;
             ValueAnimator.Animate(
                 "ModalEffect",
-                delegate(float val) { blurEffect_.opacity = val; },
+                val => blurEffect_.opacity = val,
                 new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
 
             // Make sure modal dialog is in front of all other UI
@@ -211,8 +210,8 @@ namespace TrafficManager.UI
         /// <param name="mod">The <see cref="PluginInfo"/> instance of the incompatible mod.</param>
         private void CreateEntry(ref UIScrollablePanel parent, string modName, PluginInfo mod) {
             string caption = mod.publishedFileID.AsUInt64 == LOCAL_MOD
-                                 ? Translation.GetString("Delete")
-                                 : Translation.GetString("Unsubscribe");
+                                 ? Translation.ModConflicts.Get("Button:Delete mod")
+                                 : Translation.ModConflicts.Get("Button:Unsubscribe mod");
 
             UIPanel panel = parent.AddUIComponent<UIPanel>();
             panel.size = new Vector2(560, 50);
@@ -228,9 +227,7 @@ namespace TrafficManager.UI
                 caption,
                 (int)panel.width - 170,
                 10,
-                delegate(UIComponent component, UIMouseEventParameter param) {
-                    UnsubscribeClick(component, param, mod);
-                });
+                (component, param) => UnsubscribeClick(component, param, mod));
         }
 
         /// <summary>

@@ -1198,7 +1198,7 @@
             uint ret = 0;
             Constants.ServiceFactory.CitizenService.ProcessCitizenInstance(
                 instanceId,
-                delegate(ushort citInstId, ref CitizenInstance citizenInst) {
+                (ushort citInstId, ref CitizenInstance citizenInst) => {
                     ret = citizenInst.m_citizen;
                     return true;
                 });

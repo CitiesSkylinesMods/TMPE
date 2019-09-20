@@ -157,7 +157,7 @@ namespace TrafficManager.UI.MainMenu {
             button.playAudioEvents = true;
             button.text = text;
             button.relativePosition = new Vector3(15f, y);
-            button.eventClick += delegate(UIComponent component, UIMouseEventParameter eventParam) {
+            button.eventClick += (component, eventParam) => {
                 eventClick(component, eventParam);
                 button.Invalidate();
             };

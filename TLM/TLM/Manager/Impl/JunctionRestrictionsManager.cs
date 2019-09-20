@@ -915,7 +915,7 @@ namespace TrafficManager.Manager.Impl {
                             Configuration.SegmentNodeFlags flags = segNodeConf.startNodeFlags;
                             Services.NetService.ProcessNode(
                                 startNodeId,
-                                delegate(ushort nId, ref NetNode node) {
+                                (ushort nId, ref NetNode node) => {
                                     if (flags.uturnAllowed != null &&
                                         IsUturnAllowedConfigurable(
                                             segNodeConf.segmentId,
@@ -998,7 +998,7 @@ namespace TrafficManager.Manager.Impl {
                             Configuration.SegmentNodeFlags flags1 = segNodeConf.endNodeFlags;
                             Services.NetService.ProcessNode(
                                 endNodeId,
-                                delegate(ushort nId, ref NetNode node) {
+                                (ushort nId, ref NetNode node) => {
                                     if (flags1.uturnAllowed != null &&
                                         IsUturnAllowedConfigurable(
                                             segNodeConf.segmentId,

@@ -153,7 +153,7 @@
                     GetButtonForegroundTextureId(ButtonName, FunctionName, true);
 
             string shortcutText = GetShortcutTooltip();
-            tooltip = Translation.GetString(Tooltip) + shortcutText;
+            tooltip = Tooltip + shortcutText;
 
             isVisible = Visible;
             this.Invalidate();

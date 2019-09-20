@@ -17,12 +17,8 @@ namespace TrafficManager.State {
         private static UICheckBox _realisticPublicTransportToggle;
         private static UISlider _altLaneSelectionRatioSlider;
 
-        private static string T(string s) {
-            return Translation.GetString(s);
-        }
-
         internal static void MakeSettings_Gameplay(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(tabStrip, T("Gameplay"));
+            Options.AddOptionTab(tabStrip, Translation.Options.Get("Tab:Gameplay"));
             tabStrip.selectedIndex = tabIndex;
             var currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
             currentPanel.autoLayout = true;
@@ -31,62 +27,72 @@ namespace TrafficManager.State {
             currentPanel.autoLayoutPadding.left = 10;
             currentPanel.autoLayoutPadding.right = 10;
             var panelHelper = new UIHelper(currentPanel);
-            UIHelperBase vehBehaviorGroup = panelHelper.AddGroup(T("Vehicle_behavior"));
+            UIHelperBase vehBehaviorGroup = panelHelper.AddGroup(
+                Translation.Options.Get("Gameplay.Group:Vehicle behavior"));
 
             _recklessDriversDropdown
                 = vehBehaviorGroup.AddDropdown(
-                      T("Reckless_driving") + ":",
+                      Translation.Options.Get("Gameplay.Dropdown:Reckless drivers%") + ":",
                       new[] {
-                          T("Path_Of_Evil_(10_%)"), T("Rush_Hour_(5_%)"),
-                          T("Minor_Complaints_(2_%)"), T("Holy_City_(0_%)")
+                                Translation.Options.Get("Gameplay.Dropdown.Option:Path Of Evil (10%)"),
+                                Translation.Options.Get("Gameplay.Dropdown.Option:Rush Hour (5%)"),
+                                Translation.Options.Get("Gameplay.Dropdown.Option:Minor Complaints (2%)"),
+                                Translation.Options.Get("Gameplay.Dropdown.Option:Holy City (0%)")
                       },
                       Options.recklessDrivers,
                       OnRecklessDriversChanged) as UIDropDown;
-            _recklessDriversDropdown.width = 300;
-            _individualDrivingStyleToggle = vehBehaviorGroup.AddCheckbox(
-                                               T("Individual_driving_styles"),
-                                               Options.individualDrivingStyle,
-                                               onIndividualDrivingStyleChanged) as UICheckBox;
+            _recklessDriversDropdown.width = 350;
+            _individualDrivingStyleToggle
+                = vehBehaviorGroup.AddCheckbox(
+                      Translation.Options.Get("Gameplay.Checkbox:Individual driving styles"),
+                      Options.individualDrivingStyle,
+                      onIndividualDrivingStyleChanged) as UICheckBox;
 
             if (SteamHelper.IsDLCOwned(SteamHelper.DLC.SnowFallDLC)) {
                 _strongerRoadConditionEffectsToggle
                     = vehBehaviorGroup.AddCheckbox(
-                          T("Road_condition_has_a_bigger_impact_on_vehicle_speed"),
+                          Translation.Options.Get("Gameplay.Checkbox:Increase road condition impact"),
                           Options.strongerRoadConditionEffects,
                           OnStrongerRoadConditionEffectsChanged) as UICheckBox;
             }
 
+            // TODO: Duplicates main menu button function
             _disableDespawningToggle = vehBehaviorGroup.AddCheckbox(
-                                          T("Disable_despawning"),
+                                          Translation.Options.Get("Maintenance.Checkbox:Disable despawning"),
                                           Options.disableDespawning,
                                           onDisableDespawningChanged) as UICheckBox;
 
-            UIHelperBase vehAiGroup = panelHelper.AddGroup(T("Advanced_Vehicle_AI"));
+            UIHelperBase vehAiGroup = panelHelper.AddGroup(
+                Translation.Options.Get("Gameplay.Group:Advanced vehicle AI"));
             _advancedAIToggle = vehAiGroup.AddCheckbox(
-                                   T("Enable_Advanced_Vehicle_AI"),
+                                   Translation.Options.Get("Gameplay.Checkbox:Enable advanced vehicle AI"),
                                    Options.advancedAI,
                                    OnAdvancedAiChanged) as UICheckBox;
-            _altLaneSelectionRatioSlider = vehAiGroup.AddSlider(
-                                              T("Dynamic_lane_section") + ":",
-                                              0,
-                                              100,
-                                              5,
-                                              Options.altLaneSelectionRatio,
-                                              OnAltLaneSelectionRatioChanged) as UISlider;
+            _altLaneSelectionRatioSlider
+                = vehAiGroup.AddSlider(
+                      Translation.Options.Get("Gameplay.Slider:Dynamic lane selection") + ":",
+                      0,
+                      100,
+                      5,
+                      Options.altLaneSelectionRatio,
+                      OnAltLaneSelectionRatioChanged) as UISlider;
             _altLaneSelectionRatioSlider.parent.Find<UILabel>("Label").width = 450;
 
-            UIHelperBase parkAiGroup = panelHelper.AddGroup(T("Parking_AI"));
-            _prohibitPocketCarsToggle = parkAiGroup.AddCheckbox(
-                                           T("Enable_more_realistic_parking"),
-                                           Options.parkingAI,
-                                           OnProhibitPocketCarsChanged) as UICheckBox;
+            UIHelperBase parkAiGroup = panelHelper.AddGroup(
+                Translation.Options.Get("Gameplay.Group:Parking AI"));
+            _prohibitPocketCarsToggle
+                = parkAiGroup.AddCheckbox(
+                      Translation.Options.Get("Gameplay.Checkbox:Enable more realistic parking"),
+                      Options.parkingAI,
+                      OnProhibitPocketCarsChanged) as UICheckBox;
 
-            UIHelperBase ptGroup = panelHelper.AddGroup(T("Public_transport"));
-            _realisticPublicTransportToggle = ptGroup.AddCheckbox(
-                                                 T(
-                                                     "Prevent_excessive_transfers_at_public_transport_stations"),
-                                                 Options.realisticPublicTransport,
-                                                 OnRealisticPublicTransportChanged) as UICheckBox;
+            UIHelperBase ptGroup = panelHelper.AddGroup(
+                Translation.Options.Get("Gameplay.Group:Public transport"));
+            _realisticPublicTransportToggle
+                = ptGroup.AddCheckbox(
+                      Translation.Options.Get("Gameplay.Checkbox:No excessive transfers"),
+                      Options.realisticPublicTransport,
+                      OnRealisticPublicTransportChanged) as UICheckBox;
         }
 
         private static void OnRecklessDriversChanged(int newRecklessDrivers) {
@@ -98,13 +104,13 @@ namespace TrafficManager.State {
             Options.recklessDrivers = newRecklessDrivers;
         }
 
-        private static void OnAdvancedAiChanged(bool newAdvancedAI) {
+        private static void OnAdvancedAiChanged(bool newAdvancedAi) {
             if (!Options.IsGameLoaded()) {
                 return;
             }
 
-            Log._Debug($"advancedAI changed to {newAdvancedAI}");
-            SetAdvancedAi(newAdvancedAI);
+            Log._Debug($"advancedAI changed to {newAdvancedAi}");
+            SetAdvancedAi(newAdvancedAi);
         }
 
         private static void OnStrongerRoadConditionEffectsChanged(bool newStrongerRoadConditionEffects) {
@@ -163,15 +169,15 @@ namespace TrafficManager.State {
                 return;
             }
 
-            SetAltLaneSelectionRatio((byte)Mathf.RoundToInt(newVal));
+            SetDLSPercentage((byte)Mathf.RoundToInt(newVal));
             _altLaneSelectionRatioSlider.tooltip =
-                T("Percentage_of_vehicles_performing_dynamic_lane_section") + ": " +
+                Translation.Options.Get("Gameplay.Tooltip:DLS_percentage") + ": " +
                 Options.altLaneSelectionRatio + " %";
 
             Log._Debug($"altLaneSelectionRatio changed to {Options.altLaneSelectionRatio}");
         }
 
-        public static void SetAltLaneSelectionRatio(byte val) {
+        public static void SetDLSPercentage(byte val) {
             bool changed = val != Options.altLaneSelectionRatio;
             Options.altLaneSelectionRatio = val;
 
@@ -184,16 +190,16 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void SetAdvancedAi(bool newAdvancedAI) {
-            bool changed = newAdvancedAI != Options.advancedAI;
-            Options.advancedAI = newAdvancedAI;
+        public static void SetAdvancedAi(bool newAdvancedAi) {
+            bool changed = newAdvancedAi != Options.advancedAI;
+            Options.advancedAI = newAdvancedAi;
 
             if (changed && _advancedAIToggle != null) {
-                _advancedAIToggle.isChecked = newAdvancedAI;
+                _advancedAIToggle.isChecked = newAdvancedAi;
             }
 
-            if (changed && !newAdvancedAI) {
-                SetAltLaneSelectionRatio(0);
+            if (changed && !newAdvancedAi) {
+                SetDLSPercentage(0);
             }
         }
 
@@ -216,7 +222,7 @@ namespace TrafficManager.State {
         }
 
         public static void SetProhibitPocketCars(bool newValue) {
-            bool valueChanged = newValue != Options.parkingAI;
+            // bool valueChanged = newValue != Options.parkingAI;
             Options.parkingAI = newValue;
 
             if (_prohibitPocketCarsToggle != null) {

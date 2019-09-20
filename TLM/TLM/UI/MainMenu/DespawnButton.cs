@@ -10,7 +10,9 @@
                                                        : ButtonFunction.DespawnEnabled;
 
         public override string Tooltip =>
-            Options.disableDespawning ? "Enable_despawning" : "Disable_despawning";
+            Options.disableDespawning
+                ? Translation.Options.Get("Maintenance.Button:Enable despawning")
+                : Translation.Options.Get("Maintenance.Checkbox:Disable despawning");
 
         public override bool Visible => true;
 

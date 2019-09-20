@@ -159,7 +159,7 @@
             }
 
             if (data.Length >= 35) {
-                OptionsGameplayTab.SetAltLaneSelectionRatio(data[34]);
+                OptionsGameplayTab.SetDLSPercentage(data[34]);
             }
 
             if (data.Length >= 36) {

@@ -33,12 +33,12 @@ namespace TrafficManager.UI {
             relativePosition = new Vector3(540f, 10f);
 
             viewModeLabel_ = AddUIComponent<UILabel>();
-            viewModeLabel_.text = Translation.GetString("Outgoing_demand");
+            viewModeLabel_.text = Translation.Menu.Get("Label:Outgoing demand");
             viewModeLabel_.relativePosition = new Vector3(3f, 33f);
             viewModeLabel_.textScale = 0.75f;
 
             switchViewModeButton_ = _createButton(
-                Translation.GetString("Switch_view"),
+                Translation.Menu.Get("Button:Switch view"),
                 3,
                 3,
                 clickSwitchViewMode);
@@ -65,10 +65,10 @@ namespace TrafficManager.UI {
 
         private void clickSwitchViewMode(UIComponent component, UIMouseEventParameter eventParam) {
             if (TrafficManagerTool.CurrentTransportDemandViewMode == TransportDemandViewMode.Outgoing) {
-                viewModeLabel_.text = Translation.GetString("Incoming_demand");
+                viewModeLabel_.text = Translation.Menu.Get("Label:Incoming demand");
                 TrafficManagerTool.CurrentTransportDemandViewMode = TransportDemandViewMode.Incoming;
             } else {
-                viewModeLabel_.text = Translation.GetString("Outgoing_demand");
+                viewModeLabel_.text = Translation.Menu.Get("Label:Outgoing demand");
                 TrafficManagerTool.CurrentTransportDemandViewMode = TransportDemandViewMode.Outgoing;
             }
         }
@@ -80,11 +80,11 @@ namespace TrafficManager.UI {
                 TrafficManagerTool.CurrentTransportDemandViewMode =
                     TransportDemandViewMode.Outgoing;
                 if (viewModeLabel_ != null) {
-                    viewModeLabel_.text = Translation.GetString("Outgoing_demand");
+                    viewModeLabel_.text = Translation.Menu.Get("Label:Outgoing demand");
                 }
 
                 if (switchViewModeButton_ != null) {
-                    switchViewModeButton_.text = Translation.GetString("Switch_view");
+                    switchViewModeButton_.text = Translation.Menu.Get("Button:Switch view");
                 }
 
                 this.Show();

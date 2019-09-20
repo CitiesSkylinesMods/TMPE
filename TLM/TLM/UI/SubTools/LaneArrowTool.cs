@@ -9,13 +9,13 @@
     using UnityEngine;
 
     public class LaneArrowTool : SubTool {
-        private bool cursorInSecondaryPanel;
+        private bool cursorInSecondaryPanel_;
 
         public LaneArrowTool(TrafficManagerTool mainTool)
             : base(mainTool) { }
 
         public override bool IsCursorInPanel() {
-            return base.IsCursorInPanel() || cursorInSecondaryPanel;
+            return base.IsCursorInPanel() || cursorInSecondaryPanel_;
         }
 
         public override void OnPrimaryClickOverlay() {
@@ -47,7 +47,7 @@
 
         public override void OnToolGUI(Event e) {
             // base.OnToolGUI(e);
-            cursorInSecondaryPanel = false;
+            cursorInSecondaryPanel_ = false;
 
             if (SelectedNodeId == 0 || SelectedSegmentId == 0) return;
 
@@ -82,14 +82,14 @@
             int width = numLanes * 128;
             var windowRect3 = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, 50);
             GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, BorderlessStyle);
-            cursorInSecondaryPanel = windowRect3.Contains(Event.current.mousePosition);
+            cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             NetManager netManager = Singleton<NetManager>.instance;
 
             // Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
-            if (!cursorInSecondaryPanel
+            if (!cursorInSecondaryPanel_
                 && HoveredSegmentId != 0
                 && HoveredNodeId != 0
                 && (HoveredSegmentId != SelectedSegmentId
@@ -157,7 +157,9 @@
                 };
 
                 GUILayout.BeginVertical(laneStyle);
-                GUILayout.Label(Translation.GetString("Lane") + " " + (i + 1), laneTitleStyle);
+                GUILayout.Label(
+                    Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1),
+                    laneTitleStyle);
                 GUILayout.BeginVertical();
                 GUILayout.BeginHorizontal();
 
@@ -210,14 +212,14 @@
                 if (buttonClicked) {
                     switch (res) {
                         case SetLaneArrowError.HighwayArrows: {
-                            MainTool.ShowTooltip(
-                                Translation.GetString("Lane_Arrow_Changer_Disabled_Highway"));
+                            MainTool.ShowError(
+                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to manual connection"));
                             break;
                         }
 
                         case SetLaneArrowError.LaneConnection: {
-                            MainTool.ShowTooltip(
-                                Translation.GetString("Lane_Arrow_Changer_Disabled_Connection"));
+                            MainTool.ShowError(
+                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to highway rules"));
                             break;
                         }
                     }

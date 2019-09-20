@@ -6,7 +6,7 @@
 
         protected override ButtonFunction Function => ButtonFunction.LaneArrows;
 
-        public override string Tooltip => "Change_lane_arrows";
+        public override string Tooltip => Translation.Menu.Get("Tooltip:Change lane arrows");
 
         public override bool Visible => true;
 
