@@ -517,6 +517,8 @@
     <EmbeddedResource Include="Resources\Translations\ModConflicts.csv" />
     <EmbeddedResource Include="Resources\Translations\Options.csv" />
     <EmbeddedResource Include="Resources\Translations\SpeedLimits.csv" />
+    <EmbeddedResource Include="Resources\TrafficLights\TrafficLightDisabled.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\TrafficLightEnabled.png" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />

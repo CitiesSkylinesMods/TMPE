@@ -121,7 +121,7 @@ namespace TrafficManager.State {
         }
 
         [Obsolete]
-        public static bool mayHaveTrafficLight(ushort nodeId) {
+        public static bool MayHaveTrafficLight(ushort nodeId) {
             if (nodeId <= 0) {
                 return false;
             }
@@ -175,7 +175,7 @@ namespace TrafficManager.State {
             Log._Debug($"Flags: Set node traffic light: {nodeId}={flag}");
 #endif
 
-            if (!mayHaveTrafficLight(nodeId)) {
+            if (!MayHaveTrafficLight(nodeId)) {
                 //Log.Warning($"Flags: Refusing to add/delete traffic light to/from node: {nodeId} {flag}");
                 return false;
             }

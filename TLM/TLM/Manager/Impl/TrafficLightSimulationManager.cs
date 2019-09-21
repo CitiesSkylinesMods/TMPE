@@ -514,7 +514,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            if (!Flags.mayHaveTrafficLight(nodeId)) {
+            if (!Flags.MayHaveTrafficLight(nodeId)) {
                 if (logTrafficLights) {
                     Log._Debug(
                         $"TrafficLightSimulationManager.HandleValidNode({nodeId}): Node must not " +

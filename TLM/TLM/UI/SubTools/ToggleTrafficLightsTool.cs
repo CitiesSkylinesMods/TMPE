@@ -1,12 +1,34 @@
 ﻿namespace TrafficManager.UI.SubTools {
     using API.Traffic.Enums;
+    using ColossalFramework;
     using Manager.Impl;
     using State;
+    using State.ConfigData;
+    using Textures;
     using UnityEngine;
+    using Util.Caching;
 
     public class ToggleTrafficLightsTool : SubTool {
+        /// <summary>
+        /// Stores potentially visible ids for nodes while the camera did not move
+        /// </summary>
+        private GenericArrayCache<ushort> CachedVisibleNodeIds { get; }
+
+        /// <summary>
+        /// Stores last cached camera position in <see cref="CachedVisibleNodeIds"/>
+        /// </summary>
+        private CameraTransformValue LastCachedCamera { get; set; }
+
+        /// <summary>
+        /// Size of the traffic light icon.
+        /// </summary>
+        private const float SIGN_SIZE = 50f;
+
         public ToggleTrafficLightsTool(TrafficManagerTool mainTool)
-            : base(mainTool) { }
+            : base(mainTool) {
+            CachedVisibleNodeIds = new GenericArrayCache<ushort>(NetManager.MAX_NODE_COUNT);
+            LastCachedCamera = new CameraTransformValue();
+        }
 
         public override void OnPrimaryClickOverlay() {
             if (IsCursorInPanel()) {
@@ -60,22 +82,112 @@
             TrafficLightManager.Instance.ToggleTrafficLight(nodeId, ref node);
         }
 
-        public override void OnToolGUI(Event e) { }
+        public override void OnToolGUI(Event e) {
+            Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+            NetManager netManager = Singleton<NetManager>.instance;
+            NetNode[] nodesBuffer = netManager.m_nodes.m_buffer;
+
+            //--------------------------------
+            // Render all visible node states
+            //--------------------------------
+            for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
+                var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
+
+                // Check whether there is a traffic light and CAN be any at all
+                if (TrafficLightManager.Instance.HasTrafficLight(
+                    nodeId,
+                    ref nodesBuffer[nodeId])) {
+                    // Render traffic light icon
+                    MainTool.DrawGenericOverlayTexture(
+                        JunctionUITextures.LeftOnRedAllowedTexture2D,
+                        camPos,
+                        nodesBuffer[nodeId].m_position,
+                        SIGN_SIZE,
+                        SIGN_SIZE,
+                        false);
+                } else {
+                    // Render traffic light possible but disabled icon
+                    MainTool.DrawGenericOverlayTexture(
+                        JunctionUITextures.LeftOnRedForbiddenTexture2D,
+                        camPos,
+                        nodesBuffer[nodeId].m_position,
+                        SIGN_SIZE,
+                        SIGN_SIZE,
+                        false);
+                }
+            }
+        }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             if (MainTool.GetToolController().IsInsideUI || !Cursor.visible) {
                 return;
             }
 
-            if (HoveredNodeId == 0) {
-                return;
+            // For current camera store its position and cast a ray via mouse position
+            Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+            Camera currentCamera = Camera.main;
+            // Ray mouseRay = currentCamera.ScreenPointToRay(Input.mousePosition);
+
+            // Check if camera pos/angle has changed then re-filter the visible nodes
+            // Assumption: The states checked in this loop don't change while the tool is active
+            var currentCameraState = new CameraTransformValue(currentCamera);
+            if (!LastCachedCamera.Equals(currentCameraState)) {
+                CachedVisibleNodeIds.Clear();
+                LastCachedCamera = currentCameraState;
+
+                FilterVisibleNodes(camPos);
             }
 
-            if (!Flags.mayHaveTrafficLight(HoveredNodeId)) {
-                return;
+            // Render the current hovered node as blue
+            if ((HoveredNodeId != 0) && Flags.MayHaveTrafficLight(HoveredNodeId)) {
+                MainTool.DrawNodeCircle(
+                    cameraInfo,
+                    HoveredNodeId,
+                    Input.GetMouseButton(0),
+                    false);
             }
+        }
 
-            MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0), false);
+        /// <summary>
+        /// For all nodes find those which are potentially visible, and not too far from the camera
+        /// </summary>
+        /// <param name="camPos">Position of the camera</param>
+        private void FilterVisibleNodes(Vector3 camPos) {
+            for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+                if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                    continue;
+                }
+
+                //---------------------------------------
+                // If cannot have a traffic light at all
+                //---------------------------------------
+                if (!Flags.MayHaveTrafficLight(nodeId)) {
+                    continue;
+                }
+
+                //--------------------------------------------
+                // Only allow traffic lights on normal roads, not rail or metro etc.
+                //--------------------------------------------
+                ItemClass connectionClass =
+                    NetManager.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
+
+                if ((connectionClass == null) ||
+                    (connectionClass.m_service != ItemClass.Service.Road)) {
+                    continue;
+                }
+
+                //--------------------------
+                // Check the camera distance
+                //--------------------------
+                Vector3 diff = NetManager.instance.m_nodes.m_buffer[nodeId].m_position - camPos;
+
+                if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
+                    continue; // do not draw if too distant
+                }
+
+                // Add
+                CachedVisibleNodeIds.Add(nodeId);
+            }
         }
     }
 }
