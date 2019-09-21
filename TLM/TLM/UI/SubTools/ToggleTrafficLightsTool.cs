@@ -22,7 +22,7 @@
         /// <summary>
         /// Size of the traffic light icon.
         /// </summary>
-        private const float SIGN_SIZE = 50f;
+        private const float SIGN_SIZE = 80f;
 
         public ToggleTrafficLightsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -99,7 +99,7 @@
                     ref nodesBuffer[nodeId])) {
                     // Render traffic light icon
                     MainTool.DrawGenericOverlayTexture(
-                        JunctionUITextures.LeftOnRedAllowedTexture2D,
+                        TrafficLightTextures.TrafficLightEnabled,
                         camPos,
                         nodesBuffer[nodeId].m_position,
                         SIGN_SIZE,
@@ -108,7 +108,7 @@
                 } else {
                     // Render traffic light possible but disabled icon
                     MainTool.DrawGenericOverlayTexture(
-                        JunctionUITextures.LeftOnRedForbiddenTexture2D,
+                        TrafficLightTextures.TrafficLightDisabled,
                         camPos,
                         nodesBuffer[nodeId].m_position,
                         SIGN_SIZE,
