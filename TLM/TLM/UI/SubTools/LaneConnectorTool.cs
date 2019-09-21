@@ -184,17 +184,17 @@
 
                     foreach (NodeLaneMarker targetLaneMarker in laneMarker.ConnectedMarkers) {
                         // render lane connection from laneMarker to targetLaneMarker
-                        if (!Constants.ServiceFactory.NetService.IsLaneValid(
-                                targetLaneMarker.LaneId)) {
+                        if (!Constants.ServiceFactory.NetService.IsLaneValid( targetLaneMarker.LaneId)) {
                             continue;
                         }
 
-                        RenderLane(
+                        DrawLaneCurve(
                             cameraInfo,
                             laneMarker.Position,
                             targetLaneMarker.Position,
                             NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
-                            laneMarker.Color);
+                            laneMarker.Color,
+                            Color.black);
                     }
 
                     if (viewOnly || (nodeId != SelectedNodeId)) {
@@ -235,22 +235,30 @@
                     }
 
                     if (markerIsHovered) {
-                        // if (hoveredMarker != sourceLaneMarker)
-                        //   Log._Debug($"Marker @ lane {sourceLaneMarker.laneId} hovered");
                         hoveredMarker = laneMarker;
                     }
 
+                    var circleColor = laneMarker.IsTarget ? Color.white : laneMarker.Color;
+
                     if (drawMarker) {
-                        // DrawLaneMarker(laneMarker, cameraInfo);
                         RenderManager.instance.OverlayEffect.DrawCircle(
                             cameraInfo,
-                            laneMarker.Color,
+                            circleColor,
                             laneMarker.Position,
                             laneMarker.Radius,
-                            laneMarker.Position.y - 100f,
+                            laneMarker.Position.y - 100f, // through all the geometry -100..100
                             laneMarker.Position.y + 100f,
                             false,
                             true);
+                        RenderManager.instance.OverlayEffect.DrawCircle(
+                            cameraInfo,
+                            Color.black,
+                            laneMarker.Position,
+                            laneMarker.Radius * 0.75f, // inner black
+                            laneMarker.Position.y - 100f, // through all the geometry -100..100
+                            laneMarker.Position.y + 100f,
+                            false,
+                            false);
                     }
                 } // end foreach lanemarker in node markers
             } // end for node in all nodes
@@ -288,13 +296,15 @@
                         NetManager.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
 
                     ToolBase.RaycastOutput output;
+                    // Draw a currently dragged curve
                     if (RayCastSegmentAndNode(out output)) {
-                        RenderLane(
+                        DrawLaneCurve(
                             cameraInfo,
                             selectedMarker.Position,
                             output.m_hitPos,
                             selNodePos,
-                            selectedMarker.Color);
+                            Color.Lerp(selectedMarker.Color, Color.white, 0.33f),
+                            Color.white);
                     }
                 }
 
@@ -641,6 +651,7 @@
             }
 
             List<NodeLaneMarker> nodeMarkers = new List<NodeLaneMarker>();
+            int nodeMarkerColorIndex = 0;
             LaneConnectionManager connManager = LaneConnectionManager.Instance;
 
             int offsetMultiplier = node.CountSegments() <= 2 ? 3 : 1;
@@ -675,17 +686,19 @@
                             laneInfo,
                             out bool isSource,
                             out bool isTarget,
-                            out Vector3? pos)) {
-                            pos = (Vector3)pos + offset;
+                            out Vector3? pos))
+                        {
+                            pos = pos.Value + offset;
 
                             float terrainY =
-                                Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(
-                                    ((Vector3)pos));
+                                Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos.Value);
 
-                            Vector3 finalPos = new Vector3(
-                                ((Vector3)pos).x,
-                                terrainY,
-                                ((Vector3)pos).z);
+                            var finalPos = new Vector3(pos.Value.x, terrainY, pos.Value.z);
+
+                            Color32 nodeMarkerColor
+                                = isSource
+                                      ? COLOR_CHOICES[nodeMarkerColorIndex % COLOR_CHOICES.Length]
+                                      : default; // or black (not used while rendering)
 
                             nodeMarkers.Add(
                                 new NodeLaneMarker {
@@ -695,7 +708,7 @@
                                     StartNode = !isEndNode,
                                     Position = finalPos,
                                     SecondaryPosition = (Vector3)pos,
-                                    Color = ColorChoices[nodeMarkers.Count % ColorChoices.Length],
+                                    Color = nodeMarkerColor,
                                     IsSource = isSource,
                                     IsTarget = isTarget,
                                     LaneType = laneInfo.m_laneType,
@@ -707,6 +720,10 @@
                                               laneInfo.m_similarLaneIndex - 1,
                                     SegmentIndex = i
                                 });
+
+                            if (isSource) {
+                                nodeMarkerColorIndex++;
+                            }
                         }
                     }
 
@@ -789,12 +806,23 @@
             return true;
         }
 
-        private void RenderLane(RenderManager.CameraInfo cameraInfo,
-                                Vector3 start,
-                                Vector3 end,
-                                Vector3 middlePoint,
-                                Color color,
-                                float size = 0.1f) {
+        /// <summary>
+        /// Draw a bezier curve from `start` to `end` and bent towards `middlePoint` with `color`
+        /// </summary>
+        /// <param name="cameraInfo">The camera to use</param>
+        /// <param name="start">Where the bezier to begin</param>
+        /// <param name="end">Where the bezier to end</param>
+        /// <param name="middlePoint">Where the bezier is bent towards</param>
+        /// <param name="color">The inner curve color</param>
+        /// <param name="outlineColor">The outline color</param>
+        /// <param name="size">The thickness</param>
+        private void DrawLaneCurve(RenderManager.CameraInfo cameraInfo,
+                                   Vector3 start,
+                                   Vector3 end,
+                                   Vector3 middlePoint,
+                                   Color color,
+                                   Color outlineColor,
+                                   float size = 0.1f) {
             Bezier3 bezier;
             bezier.a = start;
             bezier.d = end;
@@ -809,6 +837,19 @@
                 out bezier.b,
                 out bezier.c);
 
+            // Draw black outline
+            RenderManager.instance.OverlayEffect.DrawBezier(
+                cameraInfo,
+                outlineColor,
+                bezier,
+                size * 2f,
+                0,
+                0,
+                -1f,
+                1280f,
+                false,
+                false);
+            // Inside the outline draw colored bezier
             RenderManager.instance.OverlayEffect.DrawBezier(
                 cameraInfo,
                 color,
@@ -836,56 +877,40 @@
             return MainTool.DoRayCast(input, out output);
         }
 
-        private static readonly Color32[] ColorChoices
+        /// <summary>
+        /// Generated with http://phrogz.net/css/distinct-colors.html
+        /// HSV Value start 84%, end 37% (cutting away too bright and too dark).
+        /// The colors are slightly reordered to create some variety
+        /// </summary>
+        private static readonly Color32[] COLOR_CHOICES
             = {
-                new Color32(161, 64, 206, 255),
-                new Color32(79, 251, 8, 255),
-                new Color32(243, 96, 44, 255),
-                new Color32(45, 106, 105, 255),
-                new Color32(253, 165, 187, 255),
-                new Color32(90, 131, 14, 255),
-                new Color32(58, 20, 70, 255),
-                new Color32(248, 246, 183, 255),
-                new Color32(255, 205, 29, 255),
-                new Color32(91, 50, 18, 255),
-                new Color32(76, 239, 155, 255),
-                new Color32(241, 25, 130, 255),
-                new Color32(125, 197, 240, 255),
-                new Color32(57, 102, 187, 255),
-                new Color32(160, 27, 61, 255),
-                new Color32(167, 251, 107, 255),
-                new Color32(165, 94, 3, 255),
-                new Color32(204, 18, 161, 255),
-                new Color32(208, 136, 237, 255),
-                new Color32(232, 211, 202, 255),
-                new Color32(45, 182, 15, 255),
-                new Color32(8, 40, 47, 255),
-                new Color32(249, 172, 142, 255),
-                new Color32(248, 99, 101, 255),
-                new Color32(180, 250, 208, 255),
-                new Color32(126, 25, 77, 255),
-                new Color32(243, 170, 55, 255),
-                new Color32(47, 69, 126, 255),
-                new Color32(50, 105, 70, 255),
-                new Color32(156, 49, 1, 255),
-                new Color32(233, 231, 255, 255),
-                new Color32(107, 146, 253, 255),
-                new Color32(127, 35, 26, 255),
-                new Color32(240, 94, 222, 255),
-                new Color32(58, 28, 24, 255),
-                new Color32(165, 179, 240, 255),
-                new Color32(239, 93, 145, 255),
-                new Color32(47, 110, 138, 255),
-                new Color32(57, 195, 101, 255),
-                new Color32(124, 88, 213, 255),
-                new Color32(252, 220, 144, 255),
-                new Color32(48, 106, 224, 255),
-                new Color32(90, 109, 28, 255),
-                new Color32(56, 179, 208, 255),
-                new Color32(239, 73, 177, 255),
-                new Color32(84, 60, 2, 255),
-                new Color32(169, 104, 238, 255),
-                new Color32(97, 201, 238, 255),
+                  new Color32(240, 30, 30, 255),
+                  new Color32(80, 214, 0, 255),
+                  new Color32(30, 30, 214, 255),
+                  new Color32(214, 136, 107, 255),
+                  new Color32(120, 189, 94, 255),
+                  new Color32(106, 41, 163, 255),
+                  new Color32(54, 118, 214, 255),
+                  new Color32(163, 57, 41, 255),
+                  new Color32(54, 161, 214, 255),
+                  new Color32(107, 214, 193, 255),
+                  new Color32(214, 161, 175, 255),
+                  new Color32(214, 0, 171, 255),
+                  new Color32(151, 178, 201, 255),
+                  new Color32(189, 101, 0, 255),
+                  new Color32(154, 142, 189, 255),
+                  new Color32(189, 186, 142, 255),
+                  new Color32(176, 88, 147, 255),
+                  new Color32(163, 41, 73, 255),
+                  new Color32(150, 140, 0, 255),
+                  new Color32(0, 140, 150, 255),
+                  new Color32(0, 0, 138, 255),
+                  new Color32(0, 60, 112, 255),
+                  new Color32(112, 86, 56, 255),
+                  new Color32(88, 112, 84, 255),
+                  new Color32(0, 99, 53, 255),
+                  new Color32(75, 75, 99, 255),
+                  new Color32(99, 75, 85, 255)
             };
     }
 }
