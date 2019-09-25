@@ -842,7 +842,7 @@
                 cameraInfo,
                 outlineColor,
                 bezier,
-                size * 2f,
+                size * 1.5f,
                 0,
                 0,
                 -1f,
