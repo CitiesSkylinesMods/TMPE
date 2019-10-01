@@ -45,6 +45,7 @@ namespace TrafficManager.UI.Textures {
         // Toggle TL Tool
         //--------------------------
         public static readonly Texture2D TrafficLightEnabled;
+        public static readonly Texture2D TrafficLightEnabledTimed;
         public static readonly Texture2D TrafficLightDisabled;
 
         static TrafficLightTextures() {
@@ -106,8 +107,9 @@ namespace TrafficManager.UI.Textures {
             //--------------------------
             // Toggle TL Tool
             //--------------------------
-            TrafficLightEnabled = LoadDllResource("TrafficLights.TrafficLightEnabled.png", 200, 200);
-            TrafficLightDisabled = LoadDllResource("TrafficLights.TrafficLightDisabled.png", 200, 200);
+            TrafficLightEnabled = LoadDllResource("TrafficLights.IconJunctionTrafficLights.png", 64, 64);
+            TrafficLightEnabledTimed = LoadDllResource("TrafficLights.IconJunctionTimedTL.png", 64, 64);
+            TrafficLightDisabled = LoadDllResource("TrafficLights.IconJunctionNoTrafficLights.png", 64, 64);
         }
     }
 }

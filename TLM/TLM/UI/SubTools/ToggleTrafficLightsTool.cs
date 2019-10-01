@@ -3,7 +3,6 @@
     using ColossalFramework;
     using Manager.Impl;
     using State;
-    using State.ConfigData;
     using Textures;
     using UnityEngine;
     using Util.Caching;
@@ -22,7 +21,7 @@
         /// <summary>
         /// Size of the traffic light icon.
         /// </summary>
-        private const float SIGN_SIZE = 80f;
+        private const float SIGN_SIZE = 64f;
 
         public ToggleTrafficLightsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -94,27 +93,27 @@
                 var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
 
                 // Check whether there is a traffic light and CAN be any at all
+                Texture2D overlayTex;
+                if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
+                    overlayTex = TrafficLightTextures.TrafficLightEnabledTimed;
+                } else
                 if (TrafficLightManager.Instance.HasTrafficLight(
                     nodeId,
                     ref nodesBuffer[nodeId])) {
                     // Render traffic light icon
-                    MainTool.DrawGenericOverlayTexture(
-                        TrafficLightTextures.TrafficLightEnabled,
-                        camPos,
-                        nodesBuffer[nodeId].m_position,
-                        SIGN_SIZE,
-                        SIGN_SIZE,
-                        false);
+                    overlayTex = TrafficLightTextures.TrafficLightEnabled;
                 } else {
                     // Render traffic light possible but disabled icon
-                    MainTool.DrawGenericOverlayTexture(
-                        TrafficLightTextures.TrafficLightDisabled,
-                        camPos,
-                        nodesBuffer[nodeId].m_position,
-                        SIGN_SIZE,
-                        SIGN_SIZE,
-                        false);
+                    overlayTex = TrafficLightTextures.TrafficLightDisabled;
                 }
+
+                MainTool.DrawGenericOverlayTexture(
+                    overlayTex,
+                    camPos,
+                    nodesBuffer[nodeId].m_position,
+                    SIGN_SIZE,
+                    SIGN_SIZE,
+                    false);
             }
         }
 

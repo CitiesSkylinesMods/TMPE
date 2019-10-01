@@ -19,7 +19,7 @@
         }
 
         public override void OnPrimaryClickOverlay() {
-            if (HoveredNodeId == 0 || HoveredSegmentId == 0) return;
+            if ((HoveredNodeId == 0) || (HoveredSegmentId == 0)) return;
 
             NetNode.Flags netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
 
@@ -29,8 +29,8 @@
 
             NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
-            if (segmentsBuffer[HoveredSegmentId].m_startNode != HoveredNodeId &&
-                segmentsBuffer[HoveredSegmentId].m_endNode != HoveredNodeId) {
+            if ((segmentsBuffer[HoveredSegmentId].m_startNode != HoveredNodeId) &&
+                (segmentsBuffer[HoveredSegmentId].m_endNode != HoveredNodeId)) {
                 return;
             }
 
@@ -49,7 +49,7 @@
             // base.OnToolGUI(e);
             cursorInSecondaryPanel_ = false;
 
-            if (SelectedNodeId == 0 || SelectedSegmentId == 0) return;
+            if ((SelectedNodeId == 0) || (SelectedSegmentId == 0)) return;
 
             int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(
                 SelectedSegmentId,
@@ -80,7 +80,7 @@
             }
 
             int width = numLanes * 128;
-            var windowRect3 = new Rect(screenPos.x - width / 2, screenPos.y - 70, width, 50);
+            var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, 50);
             GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, BorderlessStyle);
             cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
         }
@@ -90,16 +90,16 @@
 
             // Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
             if (!cursorInSecondaryPanel_
-                && HoveredSegmentId != 0
-                && HoveredNodeId != 0
-                && (HoveredSegmentId != SelectedSegmentId
-                    || HoveredNodeId != SelectedNodeId))
+                && (HoveredSegmentId != 0)
+                && (HoveredNodeId != 0)
+                && ((HoveredSegmentId != SelectedSegmentId)
+                    || (HoveredNodeId != SelectedNodeId)))
             {
                 NetNode.Flags nodeFlags = netManager.m_nodes.m_buffer[HoveredNodeId].m_flags;
 
-                if ((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId
-                     || netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId)
-                    && (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)
+                if (((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId)
+                     || (netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId))
+                    && ((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None))
                 {
                     NetTool.RenderOverlay(
                         cameraInfo,
