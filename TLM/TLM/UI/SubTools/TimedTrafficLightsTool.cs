@@ -278,7 +278,7 @@
                 && (!IsNodeSelected(HoveredNodeId) ^ onlySelected)
                 && !MainTool.GetToolController().IsInsideUI
                 && Cursor.visible
-                && Flags.mayHaveTrafficLight(HoveredNodeId))
+                && Flags.MayHaveTrafficLight(HoveredNodeId))
             {
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId);
             }

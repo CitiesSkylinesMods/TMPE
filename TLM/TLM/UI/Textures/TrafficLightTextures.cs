@@ -41,6 +41,13 @@ namespace TrafficManager.UI.Textures {
         public static readonly Texture2D PedestrianModeAutomatic;
         public static readonly Texture2D PedestrianModeManual;
 
+        //--------------------------
+        // Toggle TL Tool
+        //--------------------------
+        public static readonly Texture2D TrafficLightEnabled;
+        public static readonly Texture2D TrafficLightEnabledTimed;
+        public static readonly Texture2D TrafficLightDisabled;
+
         static TrafficLightTextures() {
             // simple
             RedLight = LoadDllResource("light_1_1.png", 103, 243);
@@ -96,6 +103,13 @@ namespace TrafficManager.UI.Textures {
             ClockPlay = LoadDllResource("clock_play.png", 512, 512);
             ClockPause = LoadDllResource("clock_pause.png", 512, 512);
             ClockTest = LoadDllResource("clock_test.png", 512, 512);
+
+            //--------------------------
+            // Toggle TL Tool
+            //--------------------------
+            TrafficLightEnabled = LoadDllResource("TrafficLights.IconJunctionTrafficLights.png", 64, 64);
+            TrafficLightEnabledTimed = LoadDllResource("TrafficLights.IconJunctionTimedTL.png", 64, 64);
+            TrafficLightDisabled = LoadDllResource("TrafficLights.IconJunctionNoTrafficLights.png", 64, 64);
         }
     }
 }

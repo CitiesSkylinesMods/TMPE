@@ -34,7 +34,11 @@
         private static bool _mouseClickProcessed;
 
         public const float DEBUG_CLOSE_LOD = 300f;
-        public const float MAX_OVERLAY_DISTANCE = 450f;
+
+        /// <summary>
+        /// Square of the distance, where overlays are not rendered
+        /// </summary>
+        public const float MAX_OVERLAY_DISTANCE_SQR = 450f * 450f;
 
         private IDictionary<ToolMode, SubTool> subTools_;
 
@@ -99,7 +103,7 @@
 
         internal bool IsPosWithinOverlayDistance(Vector3 position) {
             return (position - Singleton<SimulationManager>.instance.m_simulationView.m_position)
-                   .magnitude <= MAX_OVERLAY_DISTANCE;
+                   .sqrMagnitude <= MAX_OVERLAY_DISTANCE_SQR;
         }
 
         internal static float AdaptWidth(float originalWidth) {

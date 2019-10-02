@@ -34,9 +34,9 @@
                 MainTool.DrawNodeCircle(cameraInfo, SelectedNodeId, true);
             }
 
-            if (HoveredNodeId != 0 && HoveredNodeId != SelectedNodeId &&
-                (Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags &
-                 (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None) {
+            if ((HoveredNodeId != 0) && (HoveredNodeId != SelectedNodeId) &&
+                ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags &
+                  (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None)) {
                 // draw hovered node
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
             }
@@ -63,7 +63,7 @@
             NetManager netManager = Singleton<NetManager>.instance;
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
-            if (!viewOnly && SelectedNodeId != 0) {
+            if (!viewOnly && (SelectedNodeId != 0)) {
                 currentRestrictedNodeIds.Add(SelectedNodeId);
             }
 
@@ -79,7 +79,7 @@
                 Vector3 nodePos = netManager.m_nodes.m_buffer[nodeId].m_position;
                 Vector3 diff = nodePos - camPos;
 
-                if (diff.magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
+                if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
                     continue; // do not draw if too distant
                 }
 
@@ -89,7 +89,7 @@
                     continue;
                 }
 
-                bool viewOnlyNode = viewOnly || nodeId != SelectedNodeId;
+                bool viewOnlyNode = viewOnly || (nodeId != SelectedNodeId);
 
                 // draw junction restrictions
                 if (drawSignHandles(
@@ -131,8 +131,8 @@
             }
 
             if (!logJunctions &&
-                (Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags &
-                 (NetNode.Flags.Junction | NetNode.Flags.Bend)) == NetNode.Flags.None) {
+                ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags &
+                  (NetNode.Flags.Junction | NetNode.Flags.Bend)) == NetNode.Flags.None)) {
                 return;
             }
 
@@ -202,7 +202,7 @@
             stateUpdated = false;
 
             if (viewOnly && !Options.junctionRestrictionsOverlay &&
-                MainTool.GetToolMode() != ToolMode.JunctionRestrictions) {
+                (MainTool.GetToolMode() != ToolMode.JunctionRestrictions)) {
                 return false;
             }
 
@@ -269,12 +269,12 @@
                 if (debug
                     || (configurable
                         && (!viewOnly
-                            || allowed != Constants.ManagerFactory
-                                                   .JunctionRestrictionsManager
-                                                   .GetDefaultLaneChangingAllowedWhenGoingStraight(
-                                                       segmentId,
-                                                       startNode,
-                                                       ref node))))
+                            || (allowed != Constants.ManagerFactory
+                                                    .JunctionRestrictionsManager
+                                                    .GetDefaultLaneChangingAllowedWhenGoingStraight(
+                                                        segmentId,
+                                                        startNode,
+                                                        ref node)))))
                 {
                     DrawSign(
                         viewOnly,
@@ -316,12 +316,12 @@
                 if (debug
                     || (configurable
                         && (!viewOnly
-                            || allowed != Constants.ManagerFactory
-                                                   .JunctionRestrictionsManager
-                                                   .GetDefaultUturnAllowed(
-                                                       segmentId,
-                                                       startNode,
-                                                       ref node))))
+                            || (allowed != Constants.ManagerFactory
+                                                    .JunctionRestrictionsManager
+                                                    .GetDefaultUturnAllowed(
+                                                        segmentId,
+                                                        startNode,
+                                                        ref node)))))
                 {
                     DrawSign(
                         viewOnly,
@@ -377,12 +377,12 @@
                 if (debug
                     || (configurable
                         && (!viewOnly
-                            || allowed != Constants.ManagerFactory
-                                                   .JunctionRestrictionsManager
-                                                   .GetDefaultEnteringBlockedJunctionAllowed(
-                                                       segmentId,
-                                                       startNode,
-                                                       ref node))))
+                            || (allowed != Constants.ManagerFactory
+                                                    .JunctionRestrictionsManager
+                                                    .GetDefaultEnteringBlockedJunctionAllowed(
+                                                        segmentId,
+                                                        startNode,
+                                                        ref node)))))
                 {
                     DrawSign(
                         viewOnly,
@@ -488,12 +488,12 @@
                 if (debug
                     || (configurable
                         && (!viewOnly
-                            || allowed != junctionRestrictionsManager
-                                .GetDefaultTurnOnRedAllowed(
-                                    lhd,
-                                    segmentId,
-                                    startNode,
-                                    ref node))))
+                            || (allowed != junctionRestrictionsManager
+                                    .GetDefaultTurnOnRedAllowed(
+                                        lhd,
+                                        segmentId,
+                                        startNode,
+                                        ref node)))))
                 {
                     DrawSign(
                         viewOnly,
@@ -542,12 +542,12 @@
                 if (debug
                     || (configurable
                         && (!viewOnly
-                            || allowed != junctionRestrictionsManager
-                                .GetDefaultTurnOnRedAllowed(
-                                    !lhd,
-                                    segmentId,
-                                    startNode,
-                                    ref node))))
+                            || (allowed != junctionRestrictionsManager
+                                    .GetDefaultTurnOnRedAllowed(
+                                        !lhd,
+                                        segmentId,
+                                        startNode,
+                                        ref node)))))
                 {
                     DrawSign(
                         viewOnly,
@@ -600,9 +600,7 @@
                               Texture2D signTexture,
                               out bool hoveredHandle) {
             Vector3 signCenter = zero + (f * x * xu) + (f * y * yu); // in game coordinates
-
-            Vector3 signScreenPos;
-            bool visible = MainTool.WorldToScreenPoint(signCenter, out signScreenPos);
+            bool visible = MainTool.WorldToScreenPoint(signCenter, out Vector3 signScreenPos);
 
             if (!visible) {
                 hoveredHandle = false;
@@ -610,14 +608,13 @@
             }
 
             Vector3 diff = signCenter - camPos;
-
-            float zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
+            float zoom = (1.0f / diff.magnitude) * 100f * MainTool.GetBaseZoom();
             float size = (small ? 0.75f : 1f) * (viewOnly ? 0.8f : 1f) *
                          junctionRestrictionsSignSize * zoom;
 
             var boundingBox = new Rect(
-                signScreenPos.x - size / 2,
-                signScreenPos.y - size / 2,
+                signScreenPos.x - (size / 2),
+                signScreenPos.y - (size / 2),
                 size,
                 size);
             hoveredHandle = !viewOnly && TrafficManagerTool.IsMouseOver(boundingBox);

@@ -150,7 +150,7 @@
                     //--------------------------
                     Vector3 diff = NetManager.instance.m_nodes.m_buffer[nodeId].m_position - camPos;
 
-                    if (diff.magnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE) {
+                    if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
                         continue; // do not draw if too distant
                     }
 
