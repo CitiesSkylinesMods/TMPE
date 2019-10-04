@@ -213,13 +213,13 @@
                     switch (res) {
                         case SetLaneArrowError.HighwayArrows: {
                             MainTool.ShowError(
-                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to manual connection"));
+                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to highway rules"));
                             break;
                         }
 
                         case SetLaneArrowError.LaneConnection: {
                             MainTool.ShowError(
-                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to highway rules"));
+                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to manual connection"));
                             break;
                         }
                     }
