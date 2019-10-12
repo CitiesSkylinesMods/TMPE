@@ -1,6 +1,7 @@
 namespace TrafficManager.State.Keybinds {
     using ColossalFramework;
     using ColossalFramework.UI;
+    using UI;
     using UnityEngine;
 
     /// <summary>
@@ -18,6 +19,9 @@ namespace TrafficManager.State.Keybinds {
         /// <param name="k">The key</param>
         /// <returns>The shortcut, example: "Ctrl + Alt + H"</returns>
         public static string ToLocalizedString(SavedInputKey k) {
+            if (k.value == SavedInputKey.Empty) {
+                return Translation.Options.Get("Keybind:None");
+            }
             return k.ToLocalizedString("KEYNAME");
         }
 

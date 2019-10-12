@@ -199,7 +199,7 @@
                 UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
                     "Nope!",
                     Translation.Options.Get("Dialog.Text:Settings are stored in savegame")
-                    + ". https://www.viathinksoft.de/tmpe/#options",
+                    + " https://www.viathinksoft.de/tmpe/#options",
                     false);
             }
 
