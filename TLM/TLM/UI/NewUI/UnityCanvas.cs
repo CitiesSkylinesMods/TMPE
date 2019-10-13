@@ -39,11 +39,13 @@ namespace TrafficManager.UI.NewUI {
         /// <param name="canvasName">The gameobject name in scene tree</param>
         public UnityCanvas(string canvasName, Vector2 pos, Vector2 size) {
             DestroyAllWithName(canvasName);
+
             CreateCanvasObject(canvasName, pos);
             CreateCoUiPanel(canvasName, pos, size);
             SetupEventSystem();
+
             // By default the form gets a vertical layout group component.
-            CreateForm(pos, size);
+            CreateCanvasFormBackground(pos, size);
         }
 
         private void CreateCanvasObject(string canvasName, Vector2 pos) {
@@ -69,10 +71,8 @@ namespace TrafficManager.UI.NewUI {
             UIView coView = UIView.GetAView();
             coPanel_ = coView.AddUIComponent(typeof(EventsBlockingCoUiPanel)) as EventsBlockingCoUiPanel;
             coPanel_.name = canvasName;
-            coPanel_.position = pos;
             coPanel_.size = size;
-
-            UIView.SetFocus(coPanel_);
+            // UIView.SetFocus(coPanel_);
         }
 
         private void SetupEventSystem() {
@@ -93,25 +93,10 @@ namespace TrafficManager.UI.NewUI {
         }
 
         /// <summary>
-        /// To prevent same forms created multiple times, try delete the old form with the same name
-        /// </summary>
-        /// <param name="canvasName"></param>
-        private void DestroyAllWithName(string canvasName) {
-            // Try finding and destroying objects with the given name
-            for (var nTry = 0; nTry < 15; nTry++) {
-                GameObject destroy = GameObject.Find(canvasName);
-                if (destroy == null) {
-                    break;
-                }
-
-                UnityEngine.Object.Destroy(destroy);
-            }
-        }
-
-        /// <summary>
         /// In the empty canvas creates a form with background image.
+        /// By default the form gets a vertical layout group component.
         /// </summary>
-        private void CreateForm(Vector2 pos, Vector2 size) {
+        private void CreateCanvasFormBackground(Vector2 pos, Vector2 size) {
             formObject_ = new GameObject { name = "Form Background" };
             formObject_.transform.SetParent(canvasObject_.transform, false);
 
@@ -119,12 +104,13 @@ namespace TrafficManager.UI.NewUI {
 
             // Set form group size
             var rectTr = formObject_.AddComponent<RectTransform>();
-            rectTr.SetPositionAndRotation(pos, Quaternion.identity);
-//            rectTr.localPosition = pos;
-            rectTr.anchoredPosition = new Vector2(0f, 0f);
+            // rectTr.position = pos;
+            rectTr.anchoredPosition = pos;
+//            rectTr.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 0, size.x);
+//            rectTr.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 0, size.y);
             rectTr.sizeDelta = size;
 
-            var imageComponent = formObject_.AddComponent<EventsBlockingGraphic>();
+            var imageComponent = formObject_.AddComponent<SimpleGraphic>();
             // imageComponent.color = new Color32(47, 47, 47, 220); // semi-transparent gray
             imageComponent.color = Constants.NORMAL_UI_BACKGROUND; // solid gray
             imageComponent.raycastTarget = true; // block clicks through it
@@ -141,6 +127,49 @@ namespace TrafficManager.UI.NewUI {
             formObject_.AddComponent<VerticalLayoutGroup>();
 
             formObject_.AddComponent<CanvasFormEvents>();
+
+            // Move coPanel to match the form rect
+            // var rect = RectTransformToScreenSpace(formObject_.GetComponent<RectTransform>());
+            // coPanel_.absolutePosition = rect.position;
+            // coPanel_.size = rect.size;
+            Bounds formBounds = GetRectTransformBounds(formObject_.GetComponent<RectTransform>());
+//            var formPos = formBounds.min;
+//            formPos.y = (Screen.height * 0.5f) - formPos.y;
+            // Adjust from bottom-left to top-left corner
+            coPanel_.absolutePosition = formBounds.min - new Vector3(0f, formBounds.size.y, 0f);
+            coPanel_.size = formBounds.size;
+        }
+
+        /// <summary>Convert Canvas RectTransform to screen</summary>
+        /// <param name="transform">Rect transform from a canvas UI element</param>
+        /// <returns>Bounds converted to screen pixels</returns>
+        private static Bounds GetRectTransformBounds(RectTransform transform) {
+            var worldCorners = new Vector3[4];
+
+            transform.GetWorldCorners(worldCorners);
+            var bounds = new Bounds(worldCorners[0], Vector3.zero);
+
+            for (var i = 1; i < 4; ++i) {
+                bounds.Encapsulate(worldCorners[i]);
+            }
+
+            return bounds;
+        }
+
+        /// <summary>
+        /// To prevent same forms created multiple times, try delete the old form with the same name
+        /// </summary>
+        /// <param name="canvasName"></param>
+        private void DestroyAllWithName(string canvasName) {
+            // Try finding and destroying objects with the given name
+            for (var nTry = 0; nTry < 15; nTry++) {
+                GameObject destroy = GameObject.Find(canvasName);
+                if (destroy == null) {
+                    break;
+                }
+
+                UnityEngine.Object.Destroy(destroy);
+            }
         }
 
         public GameObject Text([CanBeNull]

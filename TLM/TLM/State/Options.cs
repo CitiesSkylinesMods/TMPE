@@ -164,7 +164,7 @@
             // add the new main menu
             TestForm = new UnityCanvas(
                 "TMPE_MainMenu",
-                new Vector2(-200f, 0f),
+                new Vector2(200f, 200f),
                 new Vector2(512, 384));
             TestForm.Text(
                 null,

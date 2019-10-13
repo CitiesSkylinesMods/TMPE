@@ -3,7 +3,7 @@ namespace TrafficManager.UI.NewUI {
     using UnityEngine;
     using UnityEngine.UI;
 
-    public class EventsBlockingGraphic : Graphic {
+    public class SimpleGraphic : Graphic {
         protected override void Start() {
             // material.color = Color.white;
         }
@@ -16,7 +16,10 @@ namespace TrafficManager.UI.NewUI {
         }
 
         protected void OnGUI() {
-            Event.current.Use();
+            // Consume all mouse motions and clicks
+            if (Event.current.isMouse) {
+                Event.current.Use();
+            }
         }
     }
 
