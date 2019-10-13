@@ -204,7 +204,7 @@
                         $"{log}");
 
                     if (level == LogLevel.Warning || level == LogLevel.Error) {
-                        w.WriteLine((new System.Diagnostics.StackTrace()).ToString());
+                        w.WriteLine(new System.Diagnostics.StackTrace().ToString());
                         w.WriteLine();
                     }
                 }

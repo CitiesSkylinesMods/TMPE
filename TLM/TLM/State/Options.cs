@@ -6,6 +6,7 @@
     using CSUtil.Commons;
     using ICities;
     using UI;
+    using UI.NewUI;
     using UnityEngine;
 
     public class Options : MonoBehaviour {
@@ -115,6 +116,8 @@
         }
 
         public static void MakeSettings(UIHelperBase helper) {
+            Test_CanvasForm();
+
             // tabbing code is borrowed from RushHour mod
             // https://github.com/PropaneDragon/RushHour/blob/release/RushHour/Options/OptionHandler.cs
             UIHelper actualHelper = helper as UIHelper;
@@ -156,6 +159,33 @@
 
             tabStrip.selectedIndex = 0;
         }
+
+        private static void Test_CanvasForm() {
+            // add the new main menu
+            TestForm = new UnityCanvas(
+                "TMPE_MainMenu",
+                new Vector2(-200f, 0f),
+                new Vector2(512, 384));
+            TestForm.Text(
+                null,
+                new Vector2(0f, 0f),
+                new Vector2(200f, 32f),
+                TrafficManagerMod.ModName);
+
+            var bGroup = TestForm.HorizontalLayoutGroup(null, "Buttons");
+            TestForm.Button(
+                bGroup,
+                new Vector2(0f, 40f),
+                new Vector2(80f, 32f),
+                "Confirm");
+            TestForm.Button(
+                bGroup,
+                new Vector2(0f, 40f),
+                new Vector2(80f, 32f),
+                "Cancel");
+        }
+
+        public static UnityCanvas TestForm { get; set; }
 
         internal static void Indent<T>(T component) where T : UIComponent {
             UILabel label = component.Find<UILabel>("Label");

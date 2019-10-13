@@ -2,7 +2,7 @@ namespace TrafficManager.UI {
     using System;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using New;
+    using NewUI;
     using UI.MainMenu;
     using UnityEngine;
 
@@ -55,13 +55,13 @@ namespace TrafficManager.UI {
             MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
             MainMenu.gameObject.AddComponent<CustomKeyHandler>();
 
-            // add the new main menu
-            NewMainMenu = new UnityCanvas("TMPE_MainMenu");
-            NewMainMenu.Text(
-                null,
-                new Vector2(0f, 0f),
-                new Vector2(200f, 32f),
-                TrafficManagerMod.ModName);
+//            // add the new main menu
+//            NewMainMenu = new UnityCanvas("TMPE_MainMenu");
+//            NewMainMenu.Text(
+//                null,
+//                new Vector2(0f, 0f),
+//                new Vector2(200f, 32f),
+//                TrafficManagerMod.ModName);
 
 #if DEBUG
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));

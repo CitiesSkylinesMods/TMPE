@@ -142,8 +142,8 @@ namespace TrafficManager.UI.MainMenu {
         protected override void OnPositionChanged() {
             GlobalConfig config = GlobalConfig.Instance;
 
-            bool posChanged = config.Main.MainMenuX != (int)absolutePosition.x ||
-                               config.Main.MainMenuY != (int)absolutePosition.y;
+            bool posChanged = (config.Main.MainMenuX != (int)absolutePosition.x) ||
+                               (config.Main.MainMenuY != (int)absolutePosition.y);
 
             if (posChanged) {
                 Log._Debug($"Menu position changed to {absolutePosition.x}|{absolutePosition.y}");

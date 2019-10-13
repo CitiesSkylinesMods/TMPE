@@ -220,8 +220,13 @@
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\IncompatibleModsPanel.cs" />
-    <Compile Include="UI\New\ScreenScaling.cs" />
-    <Compile Include="UI\New\UnityCanvas.cs" />
+    <Compile Include="UI\NewUI\CanvasButton.cs" />
+    <Compile Include="UI\NewUI\CanvasFormEvents.cs" />
+    <Compile Include="UI\NewUI\CanvasText.cs" />
+    <Compile Include="UI\NewUI\Constants.cs" />
+    <Compile Include="UI\NewUI\EventsBlocking.cs" />
+    <Compile Include="UI\NewUI\ScreenScaling.cs" />
+    <Compile Include="UI\NewUI\UnityCanvas.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
