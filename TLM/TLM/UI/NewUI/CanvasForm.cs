@@ -15,9 +15,9 @@ namespace TrafficManager.UI.NewUI {
         private GameObject canvasObject_;
         private Canvas canvasComponent_;
 
-        private uint textCounter_ = 1;
-        private uint buttonCounter_ = 1;
-        private int panelCounter_ = 1;
+        public uint textCounter_ = 1;
+        public uint buttonCounter_ = 1;
+        public int panelCounter_ = 1;
 
         // private string GUI_FONT = "OpenSans-Semibold";
 
@@ -27,9 +27,10 @@ namespace TrafficManager.UI.NewUI {
         private ScreenScaling scaling_;
 
         /// <summary>
-        /// Child to the canvas, contains form and background
+        /// Child to the canvas, contains form root GameObject inside the Canvas, and is responsive
+        /// for rendering solid background.
         /// </summary>
-        private GameObject formObject_;
+        public GameObject rootObject_;
 
         /// <summary>
         /// Transparent CO.UI panel to capture clicks, should maintain size and position always
@@ -51,7 +52,7 @@ namespace TrafficManager.UI.NewUI {
 
             // By default the form gets a vertical layout group component.
             CreateCanvasFormBackground(pos, size);
-            coPanel_.AdjustToMatch(this.formObject_);
+            coPanel_.AdjustToMatch(this.rootObject_);
         }
 
         private void CreateCanvasObject(string canvasName, Vector2 pos) {
@@ -104,20 +105,20 @@ namespace TrafficManager.UI.NewUI {
         /// By default the form gets a vertical layout group component.
         /// </summary>
         private void CreateCanvasFormBackground(Vector2 pos, Vector2 size) {
-            formObject_ = new GameObject { name = "Form Background" };
-            formObject_.transform.SetParent(canvasObject_.transform, false);
+            rootObject_ = new GameObject { name = "Form Background" };
+            rootObject_.transform.SetParent(canvasObject_.transform, false);
 
             //formObject_.AddComponent<CanvasRenderer>();
 
             // Set form group size
-            var rectTr = formObject_.AddComponent<RectTransform>();
+            var rectTr = rootObject_.AddComponent<RectTransform>();
             // rectTr.position = pos;
             rectTr.anchoredPosition = pos;
 //            rectTr.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 0, size.x);
 //            rectTr.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 0, size.y);
             rectTr.sizeDelta = size;
 
-            var imageComponent = formObject_.AddComponent<SimpleGraphic>();
+            var imageComponent = rootObject_.AddComponent<SimpleGraphic>();
             // imageComponent.color = new Color32(47, 47, 47, 220); // semi-transparent gray
             imageComponent.color = Constants.NORMAL_UI_BACKGROUND; // solid gray
             imageComponent.raycastTarget = true; // block clicks through it
@@ -131,9 +132,9 @@ namespace TrafficManager.UI.NewUI {
 //                    JunctionUITextures.UturnAllowedTexture2D.height),
 //                Vector2.zero);
 
-            formObject_.AddComponent<VerticalLayoutGroup>();
+            rootObject_.AddComponent<VerticalLayoutGroup>();
 
-            formObject_.AddComponent<CanvasFormEvents>();
+            rootObject_.AddComponent<CanvasFormEvents>();
         }
 
         /// <summary>
@@ -150,83 +151,6 @@ namespace TrafficManager.UI.NewUI {
 
                 UnityEngine.Object.Destroy(destroy);
             }
-        }
-
-        public CanvasText Text(string text) {
-            return Text(null, text);
-        }
-
-        public CanvasText Text([CanBeNull] GameObject parent,
-                               string text) {
-            return CanvasText.Create(
-                parent == null ? formObject_ : parent,
-                $"Text{textCounter_++}",
-                text);
-        }
-
-        /// <summary>
-        /// Add a panel to the form. Position is set automatically by the active layout group.
-        /// </summary>
-        /// <param name="parent">Parent to attach to</param>
-        /// <param name="size">Size (may be modified by the layout group)</param>
-        /// <returns>New panel</returns>
-        public CanvasPanel Panel([CanBeNull] GameObject parent = null) {
-            return CanvasPanel.Create(
-                parent == null ? formObject_ : parent,
-                $"Panel{panelCounter_++}");
-        }
-
-        public CanvasButton Button([CanBeNull]
-                                   GameObject parent,
-                                   string text) {
-            return CanvasButton.Create(
-                parent == null ? formObject_ : parent,
-                $"Button{buttonCounter_++}",
-                text);
-        }
-
-        public GameObject HorizontalLayoutGroup(string groupName, Action<GameObject> construct) {
-            GameObject g = HorizontalLayoutGroup(null, groupName);
-            construct(g);
-            return g;
-        }
-
-        /// <summary>
-        /// Create a horiz layout group which arranges children left to right
-        /// </summary>
-        /// <param name="groupName">Gameobject name in scene graph</param>
-        /// <param name="construct">Lambda which fills the interior with children</param>
-        /// <returns>The group if you ever need it</returns>
-        public GameObject HorizontalLayoutGroup([CanBeNull] GameObject parent,
-                                                string groupName) {
-            var groupObject = new GameObject(groupName);
-            groupObject.AddComponent<HorizontalLayoutGroup>();
-            groupObject.transform.SetParent(
-                parent == null ? formObject_.transform : parent.transform,
-                false);
-            return groupObject;
-        }
-
-        public GameObject VerticalLayoutGroup(string groupName, Action<GameObject> construct) {
-            GameObject g = VerticalLayoutGroup(null, groupName);
-            construct(g);
-            return g;
-        }
-
-        /// <summary>
-        /// Create a vertical layout group which arranges children top to bottom
-        /// </summary>
-        /// <param name="groupName">Gameobject name in scene graph</param>
-        /// <param name="construct">Lambda which fills the interior with children</param>
-        /// <returns>The group if you ever need it</returns>
-        public GameObject VerticalLayoutGroup([CanBeNull] GameObject parent,
-                                                string groupName) {
-            var groupObject = new GameObject(groupName);
-            groupObject.AddComponent<VerticalLayoutGroup>();
-            groupObject.transform.SetParent(
-                parent == null ? formObject_.transform : parent.transform,
-                false);
-            return groupObject;
         }
     }
 }

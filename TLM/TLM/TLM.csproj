@@ -226,6 +226,7 @@
     <Compile Include="UI\NewUI\Controls\CanvasText.cs" />
     <Compile Include="UI\NewUI\Controls\EventsBlocking.cs" />
     <Compile Include="UI\NewUI\Controls\CanvasPanel.cs" />
+    <Compile Include="UI\NewUI\FormBuilder.cs" />
     <Compile Include="UI\NewUI\ScreenScaling.cs" />
     <Compile Include="UI\NewUI\CanvasForm.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />

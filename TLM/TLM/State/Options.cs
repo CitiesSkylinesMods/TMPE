@@ -162,21 +162,26 @@
 
         private static void Test_CanvasForm() {
             // add the new main menu
-            TestForm = new CanvasForm(
+            FormBuilder b = FormBuilder.Create(
                 "TMPE_MainMenu",
-                new Vector2(200f, 200f),
-                new Vector2(256f, 128f));
+                new Vector2(50f, 50f),
+                new Vector2(256f, 256f));
 
-            // Title bar/drag handle
-            TestForm.Panel().PreferredHeight(32f);
+            TestForm = b.Populate(
+                topLevel => {
+                    // Title bar/drag handle
+                    topLevel.Panel()
+                            .PreferredHeight(32f);
 
-            TestForm.Text(TrafficManagerMod.ModName).PreferredHeight(32f);
+                    topLevel.Text(TrafficManagerMod.ModName)
+                            .PreferredHeight(32f);
 
-            TestForm.HorizontalLayoutGroup(
-                "Buttons",
-                bGroup => {
-                    TestForm.Button(bGroup, "Confirm");
-                    TestForm.Button(bGroup, "Cancel");
+                    topLevel.HorizontalLayoutGroup("Buttons")
+                            .Populate(
+                                bGroup => {
+                                    bGroup.Button("Confirm");
+                                    bGroup.Button("Cancel");
+                                });
                 });
         }
 
