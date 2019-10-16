@@ -1,5 +1,7 @@
 namespace TrafficManager.UI.NewUI {
+    using System;
     using ColossalFramework.UI;
+    using Controls;
     using JetBrains.Annotations;
     using UnityEngine;
     using UnityEngine.EventSystems;
@@ -9,12 +11,15 @@ namespace TrafficManager.UI.NewUI {
     /// Creates an Unity Canvas to hold other UI elements and assists with filling up the form.
     /// Coordinate system: (0, 0) is screen center
     /// </summary>
-    public class UnityCanvas {
+    public class CanvasForm {
         private GameObject canvasObject_;
         private Canvas canvasComponent_;
+
         private uint textCounter_ = 1;
         private uint buttonCounter_ = 1;
-        private string GUI_FONT = "OpenSans-Semibold";
+        private int panelCounter_ = 1;
+
+        // private string GUI_FONT = "OpenSans-Semibold";
 
         /// <summary>
         /// Allows scaling the UI up or down based on vertical resolution
@@ -33,11 +38,11 @@ namespace TrafficManager.UI.NewUI {
         private EventsBlockingCoUiPanel coPanel_;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnityCanvas"/> class.
+        /// Initializes a new instance of the <see cref="CanvasForm"/> class.
         /// Constructs a root level Canvas with a name
         /// </summary>
         /// <param name="canvasName">The gameobject name in scene tree</param>
-        public UnityCanvas(string canvasName, Vector2 pos, Vector2 size) {
+        public CanvasForm(string canvasName, Vector2 pos, Vector2 size) {
             DestroyAllWithName(canvasName);
 
             CreateCanvasObject(canvasName, pos);
@@ -46,6 +51,7 @@ namespace TrafficManager.UI.NewUI {
 
             // By default the form gets a vertical layout group component.
             CreateCanvasFormBackground(pos, size);
+            coPanel_.AdjustToMatch(this.formObject_);
         }
 
         private void CreateCanvasObject(string canvasName, Vector2 pos) {
@@ -69,7 +75,8 @@ namespace TrafficManager.UI.NewUI {
 
         private void CreateCoUiPanel(string canvasName, Vector2 pos, Vector2 size) {
             UIView coView = UIView.GetAView();
-            coPanel_ = coView.AddUIComponent(typeof(EventsBlockingCoUiPanel)) as EventsBlockingCoUiPanel;
+            coPanel_ = coView.AddUIComponent(typeof(EventsBlockingCoUiPanel))
+                           as EventsBlockingCoUiPanel;
             coPanel_.name = canvasName;
             coPanel_.size = size;
             // UIView.SetFocus(coPanel_);
@@ -127,33 +134,6 @@ namespace TrafficManager.UI.NewUI {
             formObject_.AddComponent<VerticalLayoutGroup>();
 
             formObject_.AddComponent<CanvasFormEvents>();
-
-            // Move coPanel to match the form rect
-            // var rect = RectTransformToScreenSpace(formObject_.GetComponent<RectTransform>());
-            // coPanel_.absolutePosition = rect.position;
-            // coPanel_.size = rect.size;
-            Bounds formBounds = GetRectTransformBounds(formObject_.GetComponent<RectTransform>());
-//            var formPos = formBounds.min;
-//            formPos.y = (Screen.height * 0.5f) - formPos.y;
-            // Adjust from bottom-left to top-left corner
-            coPanel_.absolutePosition = formBounds.min - new Vector3(0f, formBounds.size.y, 0f);
-            coPanel_.size = formBounds.size;
-        }
-
-        /// <summary>Convert Canvas RectTransform to screen</summary>
-        /// <param name="transform">Rect transform from a canvas UI element</param>
-        /// <returns>Bounds converted to screen pixels</returns>
-        private static Bounds GetRectTransformBounds(RectTransform transform) {
-            var worldCorners = new Vector3[4];
-
-            transform.GetWorldCorners(worldCorners);
-            var bounds = new Bounds(worldCorners[0], Vector3.zero);
-
-            for (var i = 1; i < 4; ++i) {
-                bounds.Encapsulate(worldCorners[i]);
-            }
-
-            return bounds;
         }
 
         /// <summary>
@@ -172,37 +152,77 @@ namespace TrafficManager.UI.NewUI {
             }
         }
 
-        public GameObject Text([CanBeNull]
-                               GameObject parent,
-                               Vector2 position,
-                               Vector2 size,
+        public CanvasText Text(string text) {
+            return Text(null, text);
+        }
+
+        public CanvasText Text([CanBeNull] GameObject parent,
                                string text) {
             return CanvasText.Create(
                 parent == null ? formObject_ : parent,
-                position,
-                size,
                 $"Text{textCounter_++}",
                 text);
         }
 
+        /// <summary>
+        /// Add a panel to the form. Position is set automatically by the active layout group.
+        /// </summary>
+        /// <param name="parent">Parent to attach to</param>
+        /// <param name="size">Size (may be modified by the layout group)</param>
+        /// <returns>New panel</returns>
+        public CanvasPanel Panel([CanBeNull] GameObject parent = null) {
+            return CanvasPanel.Create(
+                parent == null ? formObject_ : parent,
+                $"Panel{panelCounter_++}");
+        }
+
         public CanvasButton Button([CanBeNull]
                                    GameObject parent,
-                                   Vector2 position,
-                                   Vector2 size,
                                    string text) {
             return CanvasButton.Create(
                 parent == null ? formObject_ : parent,
-                position,
-                size,
                 $"Button{buttonCounter_++}",
                 text);
         }
 
-        public GameObject HorizontalLayoutGroup([CanBeNull]
-                                                GameObject parent,
+        public GameObject HorizontalLayoutGroup(string groupName, Action<GameObject> construct) {
+            GameObject g = HorizontalLayoutGroup(null, groupName);
+            construct(g);
+            return g;
+        }
+
+        /// <summary>
+        /// Create a horiz layout group which arranges children left to right
+        /// </summary>
+        /// <param name="groupName">Gameobject name in scene graph</param>
+        /// <param name="construct">Lambda which fills the interior with children</param>
+        /// <returns>The group if you ever need it</returns>
+        public GameObject HorizontalLayoutGroup([CanBeNull] GameObject parent,
                                                 string groupName) {
             var groupObject = new GameObject(groupName);
             groupObject.AddComponent<HorizontalLayoutGroup>();
+            groupObject.transform.SetParent(
+                parent == null ? formObject_.transform : parent.transform,
+                false);
+            return groupObject;
+        }
+
+        public GameObject VerticalLayoutGroup(string groupName, Action<GameObject> construct) {
+            GameObject g = VerticalLayoutGroup(null, groupName);
+            construct(g);
+            return g;
+        }
+
+        /// <summary>
+        /// Create a vertical layout group which arranges children top to bottom
+        /// </summary>
+        /// <param name="groupName">Gameobject name in scene graph</param>
+        /// <param name="construct">Lambda which fills the interior with children</param>
+        /// <returns>The group if you ever need it</returns>
+        public GameObject VerticalLayoutGroup([CanBeNull] GameObject parent,
+                                                string groupName) {
+            var groupObject = new GameObject(groupName);
+            groupObject.AddComponent<VerticalLayoutGroup>();
             groupObject.transform.SetParent(
                 parent == null ? formObject_.transform : parent.transform,
                 false);

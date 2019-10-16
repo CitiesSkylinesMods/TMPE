@@ -162,30 +162,25 @@
 
         private static void Test_CanvasForm() {
             // add the new main menu
-            TestForm = new UnityCanvas(
+            TestForm = new CanvasForm(
                 "TMPE_MainMenu",
                 new Vector2(200f, 200f),
-                new Vector2(512, 384));
-            TestForm.Text(
-                null,
-                new Vector2(0f, 0f),
-                new Vector2(200f, 32f),
-                TrafficManagerMod.ModName);
+                new Vector2(256f, 128f));
 
-            var bGroup = TestForm.HorizontalLayoutGroup(null, "Buttons");
-            TestForm.Button(
-                bGroup,
-                new Vector2(0f, 40f),
-                new Vector2(80f, 32f),
-                "Confirm");
-            TestForm.Button(
-                bGroup,
-                new Vector2(0f, 40f),
-                new Vector2(80f, 32f),
-                "Cancel");
+            // Title bar/drag handle
+            TestForm.Panel().PreferredHeight(32f);
+
+            TestForm.Text(TrafficManagerMod.ModName).PreferredHeight(32f);
+
+            TestForm.HorizontalLayoutGroup(
+                "Buttons",
+                bGroup => {
+                    TestForm.Button(bGroup, "Confirm");
+                    TestForm.Button(bGroup, "Cancel");
+                });
         }
 
-        public static UnityCanvas TestForm { get; set; }
+        public static CanvasForm TestForm { get; set; }
 
         internal static void Indent<T>(T component) where T : UIComponent {
             UILabel label = component.Find<UILabel>("Label");

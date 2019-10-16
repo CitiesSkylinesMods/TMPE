@@ -17,7 +17,7 @@ namespace TrafficManager.UI {
         /// <summary>
         /// A canvas containing the main menu controls
         /// </summary>
-        public UnityCanvas NewMainMenu;
+        public CanvasForm NewMainMenu;
 
 #if DEBUG
         public DebugMenuPanel DebugMenu { get; private set; }
