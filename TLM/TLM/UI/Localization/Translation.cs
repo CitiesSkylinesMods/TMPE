@@ -1,16 +1,11 @@
 // ReSharper disable once CheckNamespace
 namespace TrafficManager.UI {
-    using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Text;
     using ColossalFramework;
     using ColossalFramework.Globalization;
     using CSUtil.Commons;
-    using JetBrains.Annotations;
     using State;
 
     /// <summary>
@@ -141,22 +136,7 @@ namespace TrafficManager.UI {
         /// <param name="filename">Filename to translate</param>
         /// <returns>Filename with language inserted before extension</returns>
         public static string GetTranslatedFileName(string filename, string language) {
-            switch (language) {
-                case "jaex": {
-                    language = "ja";
-                    break;
-                }
-
-                case "zh-cn": {
-                    language = "zh";
-                    break;
-                }
-
-                case "kr": {
-                    language = "ko";
-                    break;
-                }
-            }
+            language = FixLanguageNameIfLanguageMod(language);
 
             string translatedFilename = filename;
             if (language != DEFAULT_LANGUAGE_CODE) {
@@ -189,11 +169,32 @@ namespace TrafficManager.UI {
             return filename;
         }
 
+        private static string FixLanguageNameIfLanguageMod(string language) {
+            switch (language) {
+                case "jaex": {
+                    language = "ja";
+                    break;
+                }
+
+                case "zh-cn": {
+                    language = "zh";
+                    break;
+                }
+
+                case "kr": {
+                    language = "ko";
+                    break;
+                }
+            }
+
+            return language;
+        }
+
         internal static string GetCurrentLanguage() {
             string lang = GlobalConfig.Instance.LanguageCode;
 
             // Having language code null means use the game language
-            return lang ?? LocaleManager.instance.language;
+            return lang ?? FixLanguageNameIfLanguageMod(LocaleManager.instance.language);
         }
 
         public void ReloadTutorialTranslations() {
