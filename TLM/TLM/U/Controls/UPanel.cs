@@ -5,7 +5,9 @@ namespace TrafficManager.U.Controls {
     using UnityEngine;
     using UnityEngine.UI;
 
-    public class UPanel : Graphic {
+    public class UPanel 
+        : Graphic 
+    {
         private LayoutElement layoutElement_;
         private RectTransform rectTransform_;
         private UWindow parentWindow_;
@@ -53,7 +55,7 @@ namespace TrafficManager.U.Controls {
 
         protected override void Start() {
             // 100% translucent (invisible)
-            this.color = new Color(0f, 1f, 0f, 0.3f);
+            this.color = new Color(0f, 1f, 0f, 1f);
         }
     }
 }

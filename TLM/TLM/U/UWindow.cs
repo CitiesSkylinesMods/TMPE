@@ -61,7 +61,26 @@ namespace TrafficManager.U {
 
         public override void ApplyConstraints() {
             Log._Assert(this.rootObject_ != null, "Must create rootObject before applying constraints");
+
+            void ApplyRecursive(GameObject obj) {
+                var rectTr = obj.GetComponent<RectTransform>();
+                var control = obj.GetComponent<UControl>();
+                
+                if ((control != null) && (rectTr != null)) {
+                    control.ApplyConstraints(rectTr);
+                }
+
+                foreach (Transform child in obj.transform) {
+                    ApplyRecursive(child.gameObject);
+                }
+            }
+            
+            // Root form will be inherited from UControl instead of containing a component UControl,
+            // so it will not be matched in `GetComponent<UControl>` above.
             ApplyConstraints(this.rootObject_.GetComponent<RectTransform>());
+            
+            ApplyRecursive(this.rootObject_);
+            
             this.coPanel_.AdjustToMatch(this.rootObject_);
         }
 

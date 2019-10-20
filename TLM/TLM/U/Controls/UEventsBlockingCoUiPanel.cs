@@ -6,7 +6,7 @@ namespace TrafficManager.U.Controls {
     public class UEventsBlockingCoUiPanel : UIPanel {
         protected void Start() {
             this.backgroundSprite = "GenericPanel";
-            this.color = new Color32(255, 0, 0, 200);
+            this.color = new Color32(255, 0, 0, 255);
         }
 
         protected void OnGUI() {

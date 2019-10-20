@@ -3,7 +3,9 @@ namespace TrafficManager.U {
     using System.Collections.Generic;
     using UnityEngine;
 
-    public abstract class UControl {
+    public abstract class UControl
+        : MonoBehaviour 
+    {
         private readonly List<UConstraint> constraints_ = new List<UConstraint>();
 
         public UControl AddConstraint(UConstraint c) {
