@@ -136,7 +136,7 @@ namespace TrafficManager.UI {
         /// <param name="filename">Filename to translate</param>
         /// <returns>Filename with language inserted before extension</returns>
         public static string GetTranslatedFileName(string filename, string language) {
-            language = FixLanguageNameIfLanguageMod(language);
+            language = GetValidLanguageId(language);
 
             string translatedFilename = filename;
             if (language != DEFAULT_LANGUAGE_CODE) {
@@ -169,7 +169,7 @@ namespace TrafficManager.UI {
             return filename;
         }
 
-        private static string FixLanguageNameIfLanguageMod(string language) {
+        private static string GetValidLanguageId(string language) {
             if (AvailableLanguageCodes.Contains(language))
                 return language;
 
@@ -201,7 +201,7 @@ namespace TrafficManager.UI {
             string lang = GlobalConfig.Instance.LanguageCode;
 
             // Having language code null means use the game language
-            return lang ?? FixLanguageNameIfLanguageMod(LocaleManager.instance.language);
+            return lang ?? GetValidLanguageId(LocaleManager.instance.language);
         }
 
         public void ReloadTutorialTranslations() {
