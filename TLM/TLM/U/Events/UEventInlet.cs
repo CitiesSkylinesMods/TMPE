@@ -1,30 +1,15 @@
-namespace TrafficManager.UI.NewUI {
-    using CSUtil.Commons;
-    using UnityEngine;
-    using UnityEngine.EventSystems;
+using CSUtil.Commons;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
-    public class CanvasFormEvents
+namespace TrafficManager.U.Events {
+    public class UEventInlet
         : MonoBehaviour,
           IPointerDownHandler,
           IPointerClickHandler,
           IPointerUpHandler,
           IPointerExitHandler,
-          IPointerEnterHandler,
-          IBeginDragHandler,
-          IDragHandler,
-          IEndDragHandler {
-        public void OnBeginDrag(PointerEventData eventData) {
-            Log.Info("Drag Begin");
-        }
-
-        public void OnDrag(PointerEventData eventData) {
-            Log.Info("Dragging");
-        }
-
-        public void OnEndDrag(PointerEventData eventData) {
-            Log.Info("Drag Ended");
-        }
-
+          IPointerEnterHandler {
         public void OnPointerClick(PointerEventData eventData) {
             Log.Info("Clicked: " + eventData.pointerCurrentRaycast.gameObject.name);
         }

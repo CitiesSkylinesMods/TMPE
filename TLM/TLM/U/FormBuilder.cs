@@ -1,7 +1,6 @@
-namespace TrafficManager.UI.NewUI {
+namespace TrafficManager.U {
     using System;
     using Controls;
-    using JetBrains.Annotations;
     using UnityEngine;
     using UnityEngine.UI;
 
@@ -9,12 +8,12 @@ namespace TrafficManager.UI.NewUI {
     /// Handles creation of the form tree.
     /// </summary>
     public class FormBuilder {
-        private CanvasForm form_;
-        private GameObject scope_;
+        private readonly UWindow window_;
+        private readonly GameObject scope_;
 
-        private FormBuilder(CanvasForm form, GameObject scope) {
-            form_ = form;
-            scope_ = scope;
+        private FormBuilder(UWindow window, GameObject scope) {
+            this.window_ = window;
+            this.scope_ = scope;
         }
 
         /// <summary>
@@ -23,22 +22,20 @@ namespace TrafficManager.UI.NewUI {
         /// <param name="formName">Form name in Unity Scene and in UIView (same name)</param>
         /// <param name="pos">Position</param>
         /// <param name="size">Size</param>
-        /// <param name="addControlsFn">Function to populate the controls</param>
         /// <returns>new FormBuilder</returns>
-        public static FormBuilder Create(string formName,
-                                         Vector2 pos,
-                                         Vector2 size) {
-            var form = new CanvasForm(formName, pos, size);
+        public static FormBuilder Create(string formName) {
+            var form = new UWindow(formName);
             return new FormBuilder(form, null);
         }
 
         /// <summary>
         /// Populate the form with controls. Nesting is created by calling Populate on controls.
         /// </summary>
+        /// <param name="addControlsFn">Function to populate the controls</param>
         /// <returns>The form ready to use</returns>
-        public CanvasForm Populate(Action<FormBuilder> addControlsFn) {
+        public UWindow Populate(Action<FormBuilder> addControlsFn) {
             addControlsFn(this);
-            return form_;
+            return this.window_;
         }
 
         /// <summary>
@@ -47,24 +44,22 @@ namespace TrafficManager.UI.NewUI {
         /// <param name="parent">Parent to attach to</param>
         /// <param name="size">Size (may be modified by the layout group)</param>
         /// <returns>New panel</returns>
-        public CanvasPanel Panel() {
-            return CanvasPanel.Create(
-                scope_ == null ? form_.rootObject_ : scope_,
-                $"Panel{form_.panelCounter_++}");
+        public UPanel Panel() {
+            return UPanel.Create(this.scope_ == null ? this.window_.rootObject_ : this.scope_,
+                                 this.window_,
+                                 $"Panel{this.window_.panelCounter_++}");
         }
 
         public CanvasText Text(string text) {
-            return CanvasText.Create(
-                scope_ == null ? form_.rootObject_ : scope_,
-                $"Text{form_.textCounter_++}",
-                text);
+            return CanvasText.Create(this.scope_ == null ? this.window_.rootObject_ : this.scope_,
+                                     $"Text{this.window_.textCounter_++}",
+                                     text);
         }
 
         public CanvasButton Button(string text) {
-            return CanvasButton.Create(
-                scope_ == null ? form_.rootObject_ : scope_,
-                $"Button{form_.buttonCounter_++}",
-                text);
+            return CanvasButton.Create(this.scope_ == null ? this.window_.rootObject_ : this.scope_,
+                                       $"Button{this.window_.buttonCounter_++}",
+                                       text);
         }
 
         /// <summary>
@@ -77,9 +72,9 @@ namespace TrafficManager.UI.NewUI {
             var groupObject = new GameObject(groupName);
             groupObject.AddComponent<VerticalLayoutGroup>();
             groupObject.transform.SetParent(
-                scope_ == null ? form_.rootObject_.transform : scope_.transform,
+                this.scope_ == null ? this.window_.rootObject_.transform : this.scope_.transform,
                 false);
-            return new FormBuilder(form_, groupObject);
+            return new FormBuilder(this.window_, groupObject);
         }
 
         /// <summary>
@@ -92,9 +87,9 @@ namespace TrafficManager.UI.NewUI {
             var groupObject = new GameObject(groupName);
             groupObject.AddComponent<HorizontalLayoutGroup>();
             groupObject.transform.SetParent(
-                scope_ == null ? form_.rootObject_.transform : scope_.transform,
+                this.scope_ == null ? this.window_.rootObject_.transform : this.scope_.transform,
                 false);
-            return new FormBuilder(form_, groupObject);
+            return new FormBuilder(this.window_, groupObject);
         }
     }
 }

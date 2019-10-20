@@ -72,6 +72,18 @@
         }
 
         /// <summary>
+        /// Will log Error only if debug mode, and only if the condition is false
+        /// </summary>
+        /// <param name="cond">The error will be logged if cond is false</param>
+        /// <param name="s">The text</param>
+        [Conditional("DEBUG")]
+        public static void _Assert(bool cond, string s) {
+            if (!cond) {
+                LogToFile(s, LogLevel.Error);
+            }
+        }
+
+        /// <summary>
         /// Will log only if debug mode, the string is prepared using string.Format
         /// </summary>
         /// <param name="format">The text</param>
@@ -212,6 +224,10 @@
             finally {
                 Monitor.Exit(LogLock);
             }
+        }
+
+        public static string RectTransform(RectTransform rt) {
+            return $"RT{{pos={rt.position} sz={rt.sizeDelta}}}";
         }
     }
 }

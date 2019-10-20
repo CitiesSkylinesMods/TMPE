@@ -5,8 +5,8 @@
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
+    using U;
     using UI;
-    using UI.NewUI;
     using UnityEngine;
 
     public class Options : MonoBehaviour {
@@ -162,16 +162,15 @@
 
         private static void Test_CanvasForm() {
             // add the new main menu
-            FormBuilder b = FormBuilder.Create(
-                "TMPE_MainMenu",
-                new Vector2(50f, 50f),
-                new Vector2(256f, 256f));
+            FormBuilder b = FormBuilder
+                            .Create("TMPE_MainMenu");
 
-            TestForm = b.Populate(
+            TestUWindow = b.Populate(
                 topLevel => {
                     // Title bar/drag handle
                     topLevel.Panel()
-                            .PreferredHeight(32f);
+                            .PreferredHeight(32f)
+                            .EnableDrag();
 
                     topLevel.Text(TrafficManagerMod.ModName)
                             .PreferredHeight(32f);
@@ -183,9 +182,14 @@
                                     bGroup.Button("Cancel");
                                 });
                 });
+            TestUWindow.SetLeft(50f, Unit.Pixels)
+                    .SetTop(50f, Unit.Pixels)
+                    .SetWidth(0.16f, Unit.ScreenWidth)
+                    .SetHeight(0.25f, Unit.OwnWidth)
+                    .ApplyConstraints();
         }
 
-        public static CanvasForm TestForm { get; set; }
+        public static UWindow TestUWindow { get; set; }
 
         internal static void Indent<T>(T component) where T : UIComponent {
             UILabel label = component.Find<UILabel>("Label");

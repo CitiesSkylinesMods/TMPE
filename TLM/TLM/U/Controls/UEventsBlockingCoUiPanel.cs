@@ -1,16 +1,9 @@
-namespace TrafficManager.UI.NewUI.Controls {
+namespace TrafficManager.U.Controls {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using UnityEngine;
-    using UnityEngine.UI;
 
-    public class SimpleGraphic : Graphic {
-        protected override void Start() {
-            // material.color = Color.white;
-        }
-    }
-
-    public class EventsBlockingCoUiPanel : UIPanel {
+    public class UEventsBlockingCoUiPanel : UIPanel {
         protected void Start() {
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(255, 0, 0, 200);
@@ -34,10 +27,11 @@ namespace TrafficManager.UI.NewUI.Controls {
 //            formPos.y = (Screen.height * 0.5f) - formPos.y;
 
             // Adjust from bottom-left to top-left corner
-            absolutePosition = formBounds.min -
-                               new Vector3(0f, Screen.height - formBounds.size.y, 0f);
+            Vector3 pos = formBounds.min + new Vector3(0f, formBounds.size.y, 0f);
+            pos.y = Screen.height - pos.y;
+            this.absolutePosition = pos;
             // absolutePosition = formBounds.min;
-            size = formBounds.size;
+            this.size = formBounds.size;
             Log.Info($"CoUi panel bounds {formBounds.min} {formBounds.max}");
         }
 

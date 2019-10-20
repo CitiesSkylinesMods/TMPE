@@ -1,4 +1,4 @@
-namespace TrafficManager.UI.NewUI {
+namespace TrafficManager.U {
     using UnityEngine;
 
     /// <summary>

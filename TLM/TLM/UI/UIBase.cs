@@ -2,7 +2,7 @@ namespace TrafficManager.UI {
     using System;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using NewUI;
+    using U;
     using UI.MainMenu;
     using UnityEngine;
 
@@ -17,7 +17,7 @@ namespace TrafficManager.UI {
         /// <summary>
         /// A canvas containing the main menu controls
         /// </summary>
-        public CanvasForm NewMainMenu;
+        public UWindow NewMainMenu;
 
 #if DEBUG
         public DebugMenuPanel DebugMenu { get; private set; }

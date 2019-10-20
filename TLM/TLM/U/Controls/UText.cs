@@ -1,4 +1,4 @@
-namespace TrafficManager.UI.NewUI.Controls {
+namespace TrafficManager.U.Controls {
     using ColossalFramework.UI;
     using JetBrains.Annotations;
     using UnityEngine;
