@@ -170,6 +170,9 @@ namespace TrafficManager.UI {
         }
 
         private static string FixLanguageNameIfLanguageMod(string language) {
+            if (AvailableLanguageCodes.Contains(language))
+                return language;
+
             switch (language) {
                 case "jaex": {
                     language = "ja";
@@ -185,6 +188,10 @@ namespace TrafficManager.UI {
                     language = "ko";
                     break;
                 }
+
+                default:
+                    language = "en";
+                    break;
             }
 
             return language;
