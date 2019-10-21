@@ -193,6 +193,10 @@
                 OptionsVehicleRestrictionsTab.SetAllowFarTurnOnRed(data[40] == 1);
             }
 
+            if (data.Length >= 42) {
+                OptionsVehicleRestrictionsTab.SetDisableTrafficLightsForNewJunctions(data[41] == 1);
+            }
+
             return true;
         }
 

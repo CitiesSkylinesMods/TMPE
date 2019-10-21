@@ -15,6 +15,7 @@ namespace TrafficManager.State {
         private static UICheckBox _allowFarTurnOnRedToggle;
         private static UICheckBox _allowLaneChangesWhileGoingStraightToggle;
         private static UICheckBox _trafficLightPriorityRulesToggle;
+        private static UICheckBox _disableTrafficLightsOnNewJunctionsToggle;
         private static UIDropDown _vehicleRestrictionsAggressionDropdown;
         private static UICheckBox _banRegularTrafficOnBusLanesToggle;
         private static UICheckBox _highwayRulesToggle;
@@ -79,6 +80,11 @@ namespace TrafficManager.State {
                       Translation.Options.Get("VR.Checkbox:Vehicles follow priority rules at junctions with timedTL"),
                       Options.trafficLightPriorityRules,
                       OnTrafficLightPriorityRulesChanged) as UICheckBox;
+            _disableTrafficLightsOnNewJunctionsToggle
+                = atJunctionsGroup.AddCheckbox(
+                      Translation.Options.Get("VR.Checkbox:Disable setting up traffic lights for new junctions"),
+                      Options.disableTrafficLightsForNewJunctions,
+                      OnDisableTrafficLightsForNewJunctionsChanged) as UICheckBox;
 
             Options.Indent(_allowFarTurnOnRedToggle);
 
@@ -235,6 +241,14 @@ namespace TrafficManager.State {
                 SetPrioritySignsEnabled(true);
                 SetTimedLightsEnabled(true);
             }
+        }
+
+        private static void OnDisableTrafficLightsForNewJunctionsChanged(bool newValue) {
+            if (!Options.IsGameLoaded()) {
+                return;
+            }
+            Log._Debug($"DisableTrafficLightsOnNewJunctions changed to {newValue}");
+            Options.disableTrafficLightsForNewJunctions = newValue;
         }
 
         private static void OnVehicleRestrictionsAggressionChanged(int newValue) {
@@ -448,6 +462,14 @@ namespace TrafficManager.State {
 
             VehicleRestrictionsManager.Instance.ClearCache();
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+        }
+
+        public static void SetDisableTrafficLightsForNewJunctions(bool value) {
+            Options.disableTrafficLightsForNewJunctions = value;
+
+            if (_disableTrafficLightsOnNewJunctionsToggle != null) {
+                _disableTrafficLightsOnNewJunctionsToggle.isChecked = value;
+            }
         }
 
     } // end class
