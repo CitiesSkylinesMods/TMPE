@@ -242,7 +242,8 @@
                 (byte)(Options.realisticPublicTransport ? 1 : 0),
                 (byte)(Options.turnOnRedEnabled ? 1 : 0),
                 (byte)(Options.allowNearTurnOnRed ? 1 : 0),
-                (byte)(Options.allowFarTurnOnRed ? 1 : 0)
+                (byte)(Options.allowFarTurnOnRed ? 1 : 0),
+                (byte)(Options.disableTrafficLightsForNewJunctions ? 1 : 0)
             };
         }
     }
