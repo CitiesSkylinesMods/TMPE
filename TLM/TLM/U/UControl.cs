@@ -1,18 +1,18 @@
 namespace TrafficManager.U {
     using System;
     using System.Collections.Generic;
+    using CSUtil.Commons;
     using UnityEngine;
 
     public abstract class UControl
-        : MonoBehaviour 
-    {
+        : MonoBehaviour {
         private readonly List<UConstraint> constraints_ = new List<UConstraint>();
 
         public UControl AddConstraint(UConstraint c) {
             this.constraints_.Add(c);
             return this;
         }
-
+        
         public UControl SetLeft(float value, Unit unit) {
             return AddConstraint(new UConstraint(TransformField.Left, value, unit));
         }
@@ -41,6 +41,10 @@ namespace TrafficManager.U {
         /// Applies constraints to this control. Call this repeatedly for nested controls.
         /// </summary>
         public void ApplyConstraints(RectTransform rt) {
+            if (this.constraints_.Count <= 0) {
+                return;
+            }
+
             // Do not allow RectTransform do the scaling, unhook from the parent size
             rt.anchoredPosition = Vector2.zero;
             rt.anchorMin = Vector2.zero;

@@ -4,7 +4,7 @@ namespace TrafficManager.U.Controls {
     using UnityEngine;
     using UnityEngine.UI;
 
-    public class CanvasText
+    public class UText
         : Text {
         private static LayoutElement layoutElement_;
         private static RectTransform rectTransform_;
@@ -18,9 +18,10 @@ namespace TrafficManager.U.Controls {
         /// <param name="size">The size</param>
         /// <param name="textName">GameObject is given this name</param>
         /// <param name="text">The text to show</param>
-        public static CanvasText Create([NotNull] GameObject parent,
-                                        string textName,
-                                        string text) {
+        /// <returns>Newly created component (inside a gameobject)</returns>
+        public static UText Create([NotNull] GameObject parent,
+                                   string textName,
+                                   string text) {
             var textObject = new GameObject(textName);
             //textObject.AddComponent<CanvasRenderer>();
 
@@ -29,22 +30,24 @@ namespace TrafficManager.U.Controls {
 
             UIView coUiView = UIView.GetAView(); // for font
 
-            var textComponent = textObject.AddComponent<CanvasText>();
+            var textComponent = textObject.AddComponent<UText>();
             textComponent.font = coUiView.defaultFont.baseFont;
             textComponent.text = text;
             textComponent.fontSize = 15;
             textComponent.color = Color.white;
 
+            textObject.AddComponent<UControl>();
             textObject.transform.SetParent(parent.transform, false);
+
             return textComponent;
         }
 
-        public CanvasText Position(Vector2 position) {
+        public UText Position(Vector2 position) {
             rectTransform_.SetPositionAndRotation(position, Quaternion.identity);
             return this;
         }
 
-        public CanvasText Size(Vector2 size) {
+        public UText Size(Vector2 size) {
             rectTransform_.sizeDelta = size;
             return this;
         }
@@ -55,9 +58,18 @@ namespace TrafficManager.U.Controls {
         /// </summary>
         /// <param name="val">Value to set</param>
         /// <returns>This</returns>
-        public CanvasText PreferredHeight(float val) {
+        public UText PreferredHeight(float val) {
             layoutElement_.minHeight = val;
             layoutElement_.preferredHeight = val;
+            return this;
+        }
+
+        public UControl GetUControlComponent() {
+            return this.gameObject.GetComponent<UControl>();
+        }
+
+        public UText Alignment(TextAnchor ta) {
+            this.alignment = ta;
             return this;
         }
     }

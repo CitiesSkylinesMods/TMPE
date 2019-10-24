@@ -169,13 +169,17 @@
                 topLevel => {
                     // Title bar/drag handle
                     topLevel.Panel()
-                            .PreferredHeight(32f)
+                            .PreferredHeight(16f)
                             .EnableDrag();
 
                     topLevel.Text(TrafficManagerMod.ModName)
-                            .PreferredHeight(32f);
+                            .Alignment(TextAnchor.MiddleLeft)
+                            .PreferredHeight(16f);
 
-                    topLevel.HorizontalLayoutGroup("Buttons")
+                    topLevel.HorizontalLayoutGroup("Buttons",
+                                                   hlg => {
+                                                       //hlg.padding = new RectOffset(8, 8, 8, 8);
+                                                   })
                             .Populate(
                                 bGroup => {
                                     bGroup.Button("Confirm");
@@ -185,7 +189,7 @@
             TestUWindow.SetLeft(50f, Unit.Pixels)
                     .SetTop(50f, Unit.Pixels)
                     .SetWidth(0.16f, Unit.ScreenWidth)
-                    .SetHeight(0.25f, Unit.OwnWidth)
+                    .SetHeight(0.5f, Unit.OwnWidth)
                     .ApplyConstraints();
         }
 

@@ -50,16 +50,16 @@ namespace TrafficManager.U {
                                  $"Panel{this.window_.panelCounter_++}");
         }
 
-        public CanvasText Text(string text) {
-            return CanvasText.Create(this.scope_ == null ? this.window_.rootObject_ : this.scope_,
-                                     $"Text{this.window_.textCounter_++}",
-                                     text);
+        public UText Text(string text) {
+            return UText.Create(this.scope_ == null ? this.window_.rootObject_ : this.scope_,
+                                $"Text{this.window_.textCounter_++}",
+                                text);
         }
 
-        public CanvasButton Button(string text) {
-            return CanvasButton.Create(this.scope_ == null ? this.window_.rootObject_ : this.scope_,
-                                       $"Button{this.window_.buttonCounter_++}",
-                                       text);
+        public UButton Button(string text) {
+            return UButton.Create(this.scope_ == null ? this.window_.rootObject_ : this.scope_,
+                                  $"Button{this.window_.buttonCounter_++}",
+                                  text);
         }
 
         /// <summary>
@@ -67,13 +67,15 @@ namespace TrafficManager.U {
         /// </summary>
         /// <param name="groupName">Gameobject name in scene graph</param>
         /// <param name="construct">Lambda which fills the interior with children</param>
+        /// <param name="setupFn">Function to configure layout group parameters</param>
         /// <returns>The group if you ever need it</returns>
-        public FormBuilder VerticalLayoutGroup(string groupName) {
+        public FormBuilder VerticalLayoutGroup(string groupName, Action<VerticalLayoutGroup> setupFn) {
             var groupObject = new GameObject(groupName);
-            groupObject.AddComponent<VerticalLayoutGroup>();
+            var component = groupObject.AddComponent<VerticalLayoutGroup>();
             groupObject.transform.SetParent(
                 this.scope_ == null ? this.window_.rootObject_.transform : this.scope_.transform,
                 false);
+            setupFn(component);
             return new FormBuilder(this.window_, groupObject);
         }
 
@@ -82,13 +84,15 @@ namespace TrafficManager.U {
         /// </summary>
         /// <param name="groupName">Gameobject name in scene graph</param>
         /// <param name="construct">Lambda which fills the interior with children</param>
+        /// <param name="setupFn">Function to configure layout group parameters</param>
         /// <returns>The group if you ever need it</returns>
-        public FormBuilder HorizontalLayoutGroup(string groupName) {
+        public FormBuilder HorizontalLayoutGroup(string groupName, Action<HorizontalLayoutGroup> setupFn) {
             var groupObject = new GameObject(groupName);
-            groupObject.AddComponent<HorizontalLayoutGroup>();
+            var component = groupObject.AddComponent<HorizontalLayoutGroup>();
             groupObject.transform.SetParent(
                 this.scope_ == null ? this.window_.rootObject_.transform : this.scope_.transform,
                 false);
+            setupFn(component);
             return new FormBuilder(this.window_, groupObject);
         }
     }

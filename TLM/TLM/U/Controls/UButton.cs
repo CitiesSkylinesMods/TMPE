@@ -5,10 +5,13 @@ namespace TrafficManager.U.Controls {
     using UnityEngine.EventSystems;
     using UnityEngine.UI;
 
-    public class CanvasButton
+    public class UButton
         : Button,
           IPointerExitHandler,
-          IPointerEnterHandler {
+          IPointerEnterHandler,
+          IPointerDownHandler,
+          IPointerUpHandler
+    {
         /// <summary>
         /// Either contains an image in this button, or colors the button with a solid color
         /// </summary>
@@ -17,13 +20,12 @@ namespace TrafficManager.U.Controls {
         private static RectTransform rectTransform_;
         private static LayoutElement layoutElement_;
 
-        public static CanvasButton Create([CanBeNull]
-                                          GameObject parent,
-                                          string buttonName,
-                                          string text) {
+        public static UButton Create([NotNull] GameObject parent,
+                                     string buttonName,
+                                     string text) {
             var btnObject = new GameObject(buttonName);
 
-            var buttonComponent = btnObject.AddComponent<CanvasButton>();
+            var buttonComponent = btnObject.AddComponent<UButton>();
 
             // Set the colors
             ColorBlock c = buttonComponent.colors;
@@ -42,17 +44,23 @@ namespace TrafficManager.U.Controls {
 
             // Nested text for the button
             if (!string.IsNullOrEmpty(text)) {
-                CanvasText.Create(btnObject, "Label", text);
+                UText.Create(btnObject, "Label", text)
+                     .Alignment(TextAnchor.MiddleCenter);
             }
 
+            // btnObject.AddComponent<UControl>();
+            
+            // let button contents stack vertically if there is a sprite and a label for example, or fill entire button
+            btnObject.AddComponent<VerticalLayoutGroup>(); 
+            
             btnObject.transform.SetParent(parent.transform, false);
-
+            
             return buttonComponent;
         }
 
         protected override void Start() {
-            imgComponent_ = this.gameObject.AddComponent<Image>();
-            imgComponent_.color = this.colors.normalColor;
+            this.imgComponent_ = this.gameObject.AddComponent<Image>();
+            this.imgComponent_.color = this.colors.normalColor;
         }
 
         /// <summary>
@@ -60,7 +68,7 @@ namespace TrafficManager.U.Controls {
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
-        public CanvasButton Position(Vector2 position) {
+        public UButton Position(Vector2 position) {
             rectTransform_.SetPositionAndRotation(position, Quaternion.identity);
             return this;
         }
@@ -70,19 +78,19 @@ namespace TrafficManager.U.Controls {
         /// </summary>
         /// <param name="size"></param>
         /// <returns></returns>
-        public CanvasButton Size(Vector2 size) {
+        public UButton Size(Vector2 size) {
             rectTransform_.sizeDelta = size;
             return this;
         }
 
         public void OnPointerEnter(PointerEventData eventData) {
             Log.Info("Entered CanvasButton");
-            imgComponent_.color = this.colors.highlightedColor;
+            this.imgComponent_.color = this.colors.highlightedColor;
         }
 
         public void OnPointerExit(PointerEventData eventData) {
             Log.Info("Exited CanvasButton");
-            imgComponent_.color = this.colors.normalColor;
+            this.imgComponent_.color = this.colors.normalColor;
         }
 
         /// <summary>
@@ -91,10 +99,20 @@ namespace TrafficManager.U.Controls {
         /// </summary>
         /// <param name="val">Value to set</param>
         /// <returns>This</returns>
-        public CanvasButton PreferredHeight(float val) {
+        public UButton PreferredHeight(float val) {
             layoutElement_.minHeight = val;
             layoutElement_.preferredHeight = val;
             return this;
+        }
+
+        public override void OnPointerDown(PointerEventData eventData) {
+            // set normal color lbut darker
+            this.imgComponent_.color = Color.Lerp(this.colors.normalColor, Color.black, 0.5f);
+        }
+
+        public override void OnPointerUp(PointerEventData eventData) {
+            // restore mouse hover color
+            this.imgComponent_.color = this.colors.highlightedColor;
         }
     }
 }
