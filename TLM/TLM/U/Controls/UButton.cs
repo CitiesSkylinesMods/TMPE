@@ -111,8 +111,10 @@ namespace TrafficManager.U.Controls {
         }
 
         public override void OnPointerUp(PointerEventData eventData) {
-            // restore mouse hover color
-            this.imgComponent_.color = this.colors.highlightedColor;
+            // restore mouse hover color only if still hovering
+            if (eventData.hovered.Contains(this.gameObject)) {
+                this.imgComponent_.color = this.colors.highlightedColor;
+            }
         }
     }
 }

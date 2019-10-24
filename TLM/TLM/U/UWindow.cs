@@ -156,9 +156,10 @@ namespace TrafficManager.U {
 //                    0f,
 //                    JunctionUITextures.UturnAllowedTexture2D.width,
 //                    JunctionUITextures.UturnAllowedTexture2D.height),
-//                Vector2.zero);
+//                Vector2.zero); 
 
-            this.rootObject_.AddComponent<VerticalLayoutGroup>();
+            var vlgComponent = this.rootObject_.AddComponent<VerticalLayoutGroup>();
+            // vlgComponent.childControlHeight = false; // let the controls stack but not stretch
 
             this.rootObject_.AddComponent<UEventInlet>();
         }
