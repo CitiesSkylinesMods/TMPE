@@ -12,7 +12,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
         [UsedImplicitly]
         public static void Postfix(ushort nodeID, ref NetNode data) {
 
-            if (!Options.disableTrafficLightsForNewJunctions)
+            if (Options.automaticallyAddTrafficLightsIfApplicable)
             {
                 return;
             }

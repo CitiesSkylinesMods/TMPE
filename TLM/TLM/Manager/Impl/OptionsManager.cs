@@ -194,7 +194,7 @@
             }
 
             if (data.Length >= 42) {
-                OptionsVehicleRestrictionsTab.SetDisableTrafficLightsForNewJunctions(data[41] == 1);
+                OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
             }
 
             return true;
@@ -243,7 +243,7 @@
                 (byte)(Options.turnOnRedEnabled ? 1 : 0),
                 (byte)(Options.allowNearTurnOnRed ? 1 : 0),
                 (byte)(Options.allowFarTurnOnRed ? 1 : 0),
-                (byte)(Options.disableTrafficLightsForNewJunctions ? 1 : 0)
+                (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0)
             };
         }
     }

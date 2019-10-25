@@ -15,7 +15,7 @@ namespace TrafficManager.State {
         private static UICheckBox _allowFarTurnOnRedToggle;
         private static UICheckBox _allowLaneChangesWhileGoingStraightToggle;
         private static UICheckBox _trafficLightPriorityRulesToggle;
-        private static UICheckBox _disableTrafficLightsOnNewJunctionsToggle;
+        private static UICheckBox _automaticallyAddTrafficLightsIfApplicableToggle;
         private static UIDropDown _vehicleRestrictionsAggressionDropdown;
         private static UICheckBox _banRegularTrafficOnBusLanesToggle;
         private static UICheckBox _highwayRulesToggle;
@@ -80,11 +80,11 @@ namespace TrafficManager.State {
                       Translation.Options.Get("VR.Checkbox:Vehicles follow priority rules at junctions with timedTL"),
                       Options.trafficLightPriorityRules,
                       OnTrafficLightPriorityRulesChanged) as UICheckBox;
-            _disableTrafficLightsOnNewJunctionsToggle
+            _automaticallyAddTrafficLightsIfApplicableToggle
                 = atJunctionsGroup.AddCheckbox(
-                      Translation.Options.Get("VR.Checkbox:Disable setting up traffic lights for new junctions"),
-                      Options.disableTrafficLightsForNewJunctions,
-                      OnDisableTrafficLightsForNewJunctionsChanged) as UICheckBox;
+                      Translation.Options.Get("VR.Checkbox:Automatically add traffic lights if applicable"),
+                      Options.automaticallyAddTrafficLightsIfApplicable,
+                      OnAutomaticallyAddTrafficLightsIfApplicableChanged) as UICheckBox;
 
             Options.Indent(_allowFarTurnOnRedToggle);
 
@@ -243,12 +243,12 @@ namespace TrafficManager.State {
             }
         }
 
-        private static void OnDisableTrafficLightsForNewJunctionsChanged(bool newValue) {
+        private static void OnAutomaticallyAddTrafficLightsIfApplicableChanged(bool newValue) {
             if (!Options.IsGameLoaded()) {
                 return;
             }
-            Log._Debug($"DisableTrafficLightsOnNewJunctions changed to {newValue}");
-            Options.disableTrafficLightsForNewJunctions = newValue;
+            Log._Debug($"AutomaticallyAddTrafficLightsIfApplicableChanged changed to {newValue}");
+            Options.automaticallyAddTrafficLightsIfApplicable = newValue;
         }
 
         private static void OnVehicleRestrictionsAggressionChanged(int newValue) {
@@ -464,11 +464,11 @@ namespace TrafficManager.State {
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
-        public static void SetDisableTrafficLightsForNewJunctions(bool value) {
-            Options.disableTrafficLightsForNewJunctions = value;
+        public static void SetAddTrafficLightsIfApplicable(bool value) {
+            Options.automaticallyAddTrafficLightsIfApplicable = value;
 
-            if (_disableTrafficLightsOnNewJunctionsToggle != null) {
-                _disableTrafficLightsOnNewJunctionsToggle.isChecked = value;
+            if (_automaticallyAddTrafficLightsIfApplicableToggle != null) {
+                _automaticallyAddTrafficLightsIfApplicableToggle.isChecked = value;
             }
         }
 
