@@ -38,6 +38,7 @@ namespace TrafficManager.UI.MainMenu {
         private static UIButton _noneToVehicleButton = null;
         private static UIButton _vehicleToNoneButton = null;
         private static UIButton _printFlagsDebugInfoButton;
+        private static UIButton _resetBenchmarksDataButton;
         private static UIButton _printBenchmarkReportButton;
 #endif
 
@@ -109,6 +110,9 @@ namespace TrafficManager.UI.MainMenu {
 #endif
 #if DEBUG
             _printFlagsDebugInfoButton = CreateButton("Print flags debug info", y, ClickPrintFlagsDebugInfo);
+            y += 40;
+            height += 40;
+            _resetBenchmarksDataButton = CreateButton("Reset benchmarks data", y, ClickResetBenchmarks);
             y += 40;
             height += 40;
             _printBenchmarkReportButton = CreateButton("Print benchmark report", y, ClickPrintBenchmarkReport);
@@ -360,7 +364,6 @@ namespace TrafficManager.UI.MainMenu {
                 () => { Log.Info(BenchmarkProfileProvider.Instance.CreateReport()); });
         }
 
-        [UsedImplicitly]
         private void ClickResetBenchmarks(UIComponent component, UIMouseEventParameter eventParam) {
             Constants.ServiceFactory.SimulationService.AddAction(
                 () => { BenchmarkProfileProvider.Instance.ClearProfiles(); });

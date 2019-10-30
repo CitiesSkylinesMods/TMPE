@@ -7,7 +7,6 @@ namespace TrafficManager.UI.MainMenu {
     using CSUtil.Commons;
     using State;
     using State.Keybinds;
-    using Util;
     using UnityEngine;
 
     public class MainMenuPanel
@@ -122,10 +121,17 @@ namespace TrafficManager.UI.MainMenu {
             Drag.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
 
             UpdateAllSizes();
+            eventVisibilityChanged += OnVisibilityChanged;
             started = true;
         }
 
+        private void OnVisibilityChanged(UIComponent component, bool value) {
+            VersionLabel.enabled = value;
+            StatsLabel.enabled = Options.showPathFindStats && value;
+        }
+
         public override void OnDestroy() {
+            eventVisibilityChanged -= OnVisibilityChanged;
             confDisposable?.Dispose();
         }
 
