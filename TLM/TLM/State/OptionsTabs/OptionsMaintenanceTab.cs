@@ -12,6 +12,9 @@ namespace TrafficManager.State {
 
         [UsedImplicitly]
         private static UIButton _removeParkedVehiclesBtn;
+
+        [UsedImplicitly]
+        private static UIButton _removeAllExistingTrafficLightsBtn;
 #if DEBUG
         [UsedImplicitly]
         private static UIButton _resetSpeedLimitsBtn;
@@ -61,6 +64,10 @@ namespace TrafficManager.State {
             _removeParkedVehiclesBtn = maintenanceGroup.AddButton(
                                            T("Maintenance.Button:Remove parked vehicles"),
                                            OnClickRemoveParkedVehicles) as UIButton;
+
+            _removeAllExistingTrafficLightsBtn = maintenanceGroup.AddButton(
+                                           T("Maintenance.Button:Remove all existing traffic lights"),
+                                           OnClickRemoveAllExistingTrafficLights) as UIButton;
 #if DEBUG
             _resetSpeedLimitsBtn = maintenanceGroup.AddButton(
                                        T("Maintenance.Button:Reset custom speed limits"),
@@ -137,6 +144,27 @@ namespace TrafficManager.State {
 
             Constants.ServiceFactory.SimulationService.AddAction(() => {
                 UtilityManager.Instance.RemoveParkedVehicles();
+            });
+        }
+
+        private static void OnClickRemoveAllExistingTrafficLights() {
+            if (!Options.IsGameLoaded()) {
+                return;
+            }
+
+            ConfirmPanel.ShowModal(T("Maintenance.Dialog.Title:Remove all traffic lights"),
+                                   T("Maintenance.Dialog.Text:Remove all traffic lights, Confirmation"),
+                                   (_, result) => {
+                if(result != 1)
+                {
+                    return;
+                }
+
+                Log._Debug("Removing all existing Traffic Lights");
+                Constants.ServiceFactory.SimulationService.AddAction(() =>
+                {
+                    TrafficLightManager.Instance.RemoveAllExistingTrafficLights();
+                });
             });
         }
 

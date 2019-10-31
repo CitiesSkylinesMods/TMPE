@@ -136,6 +136,7 @@
     <Compile Include="Patch\_CommonBuildingAI\SimulationStepPatch.cs" />
     <Compile Include="Patch\_HumanAI\ArriveAtDestinationPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\GetTrafficLightNodeStatePatch.cs" />
+    <Compile Include="Patch\_RoadBaseAI\UpdateNodePatch.cs" />
     <Compile Include="Patch\_TrainTrackBaseAI\LevelCrossingSimulationStepPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\UpdateLanesPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\SetTrafficLightStatePatch.cs" />

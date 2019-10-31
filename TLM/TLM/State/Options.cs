@@ -68,6 +68,7 @@
         public static bool realisticPublicTransport;
         public static byte altLaneSelectionRatio;
         public static bool highwayRules;
+        public static bool automaticallyAddTrafficLightsIfApplicable = true;
 #if DEBUG
         public static bool showLanes = true;
 #else

@@ -27,6 +27,8 @@
                                 ref NetNode node,
                                 out ToggleTrafficLightError reason);
 
+        void RemoveAllExistingTrafficLights();
+
         bool SetTrafficLight(ushort nodeId, bool flag, ref NetNode node);
 
         bool SetTrafficLight(ushort nodeId,

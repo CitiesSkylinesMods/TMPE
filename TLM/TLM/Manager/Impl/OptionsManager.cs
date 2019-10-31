@@ -193,6 +193,10 @@
                 OptionsVehicleRestrictionsTab.SetAllowFarTurnOnRed(data[40] == 1);
             }
 
+            if (data.Length >= 42) {
+                OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
+            }
+
             return true;
         }
 
@@ -238,7 +242,8 @@
                 (byte)(Options.realisticPublicTransport ? 1 : 0),
                 (byte)(Options.turnOnRedEnabled ? 1 : 0),
                 (byte)(Options.allowNearTurnOnRed ? 1 : 0),
-                (byte)(Options.allowFarTurnOnRed ? 1 : 0)
+                (byte)(Options.allowFarTurnOnRed ? 1 : 0),
+                (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0)
             };
         }
     }

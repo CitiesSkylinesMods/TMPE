@@ -15,6 +15,7 @@ namespace TrafficManager.State {
         private static UICheckBox _allowFarTurnOnRedToggle;
         private static UICheckBox _allowLaneChangesWhileGoingStraightToggle;
         private static UICheckBox _trafficLightPriorityRulesToggle;
+        private static UICheckBox _automaticallyAddTrafficLightsIfApplicableToggle;
         private static UIDropDown _vehicleRestrictionsAggressionDropdown;
         private static UICheckBox _banRegularTrafficOnBusLanesToggle;
         private static UICheckBox _highwayRulesToggle;
@@ -79,6 +80,11 @@ namespace TrafficManager.State {
                       Translation.Options.Get("VR.Checkbox:Vehicles follow priority rules at junctions with timedTL"),
                       Options.trafficLightPriorityRules,
                       OnTrafficLightPriorityRulesChanged) as UICheckBox;
+            _automaticallyAddTrafficLightsIfApplicableToggle
+                = atJunctionsGroup.AddCheckbox(
+                      Translation.Options.Get("VR.Checkbox:Automatically add traffic lights if applicable"),
+                      Options.automaticallyAddTrafficLightsIfApplicable,
+                      OnAutomaticallyAddTrafficLightsIfApplicableChanged) as UICheckBox;
 
             Options.Indent(_allowFarTurnOnRedToggle);
 
@@ -235,6 +241,14 @@ namespace TrafficManager.State {
                 SetPrioritySignsEnabled(true);
                 SetTimedLightsEnabled(true);
             }
+        }
+
+        private static void OnAutomaticallyAddTrafficLightsIfApplicableChanged(bool newValue) {
+            if (!Options.IsGameLoaded()) {
+                return;
+            }
+            Log._Debug($"AutomaticallyAddTrafficLightsIfApplicableChanged changed to {newValue}");
+            Options.automaticallyAddTrafficLightsIfApplicable = newValue;
         }
 
         private static void OnVehicleRestrictionsAggressionChanged(int newValue) {
@@ -448,6 +462,14 @@ namespace TrafficManager.State {
 
             VehicleRestrictionsManager.Instance.ClearCache();
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+        }
+
+        public static void SetAddTrafficLightsIfApplicable(bool value) {
+            Options.automaticallyAddTrafficLightsIfApplicable = value;
+
+            if (_automaticallyAddTrafficLightsIfApplicableToggle != null) {
+                _automaticallyAddTrafficLightsIfApplicableToggle.isChecked = value;
+            }
         }
 
     } // end class
