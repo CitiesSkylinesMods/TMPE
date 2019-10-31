@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
     using API.Traffic.Enums;
     using ColossalFramework;
@@ -9,7 +9,7 @@
     using UnityEngine;
 
     public class LaneArrowTool : SubTool {
-        private bool cursorInSecondaryPanel_;
+private bool cursorInSecondaryPanel_;
 
         public LaneArrowTool(TrafficManagerTool mainTool)
             : base(mainTool) { }
@@ -34,6 +34,15 @@
                 return;
             }
 
+            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            if (altDown) {
+                LaneArrowManager.Instance.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId);
+                return;
+            } else if (ctrlDown) {
+                LaneArrowManager.Instance.SeparateNode(HoveredNodeId);
+                return;
+            }
             SelectedSegmentId = HoveredSegmentId;
             SelectedNodeId = HoveredNodeId;
         }
@@ -88,6 +97,15 @@
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             NetManager netManager = Singleton<NetManager>.instance;
 
+            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+
+            if (ctrlDown) {
+                // draw hovered node
+                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                return;
+            }
+
             // Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
             if (!cursorInSecondaryPanel_
                 && (HoveredSegmentId != 0)
@@ -104,18 +122,23 @@
                     NetTool.RenderOverlay(
                         cameraInfo,
                         ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId],
-                        MainTool.GetToolColor(false, false),
-                        MainTool.GetToolColor(false, false));
+                        MainTool.GetToolColor(altDown, false),
+                        MainTool.GetToolColor(altDown, false));
                 }
             }
 
             if (SelectedSegmentId == 0) return;
 
+            Color color;
+            if (altDown && HoveredSegmentId == SelectedSegmentId)
+                color = MainTool.GetToolColor(true, true);
+            else
+                color = MainTool.GetToolColor(true, false);
             NetTool.RenderOverlay(
                 cameraInfo,
                 ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId],
-                MainTool.GetToolColor(true, false),
-                MainTool.GetToolColor(true, false));
+                color,
+                color);
         }
 
         private void GuiLaneChangeWindow(int num) {
@@ -232,5 +255,6 @@
 
             GUILayout.EndHorizontal();
         }
+
     }
 }

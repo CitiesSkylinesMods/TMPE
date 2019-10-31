@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework;

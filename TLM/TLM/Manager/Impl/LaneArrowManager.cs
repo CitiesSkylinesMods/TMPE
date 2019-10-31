@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -7,7 +7,9 @@
     using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
+    using GenericGameBridge.Service;
     using State;
+    using UnityEngine;
 
     public class LaneArrowManager
         : AbstractGeometryObservingManager,
@@ -217,6 +219,177 @@
         /// <returns>ICustomDataManager for lane arrows</returns>
         public static ICustomDataManager<List<Configuration.LaneArrowData>> AsLaneArrowsDM() {
             return Instance;
+        }
+
+        internal void SeparateNode(ushort nodeId) {
+            NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            if (nodeId == 0)
+                return;
+            if ((node.m_flags & NetNode.Flags.Created) == NetNode.Flags.None)
+                return;
+
+            //var nSegments = node.CountSegments();
+
+            for (int i = 0; i < 8; i++) {
+                ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(i);
+                if (segmentId == 0)
+                    continue;
+
+                SeparateSegmentLanes(segmentId, nodeId);
+            }
+        }
+
+        private static void DistributeLanes2(int total, int a, int b, out int x, out int y) {
+            /* x+y = total
+             * a/b = x/y
+             * y = total*b/(a+b)
+             * x = total - y 
+             */
+            y = (total * b) / (a + b); //floor y to favour x
+            if (y == 0)
+                y = 1;
+            x = total - y;
+
+        }
+
+        private static void avoidzero3_helper(ref int x, ref int y, ref int z) {
+            if (x == 0) {
+                x = 1;
+                if (y > z)
+                    --y;
+                else
+                    --z;
+            }
+        }
+        private static void DistributeLanes3(int total, int a, int b, int c, out int x, out int y, out int z) {
+            //favour: x then y
+            float div = (float)(a + b + c) / (float)total;
+            x = (int)Math.Floor((float)a / div);
+            y = (int)Math.Floor((float)b / div);
+            z = (int)Math.Floor((float)c / div);
+            int rem = total - x - y - z;
+            switch (rem) {
+                case 3:
+                    z++;
+                    y++;
+                    x++;
+                    break;
+                case 2:
+                    y++;
+                    x++;
+                    break;
+                case 1:
+                    x++;
+                    break;
+                case 0:
+                    break;
+                default:
+                    Log.Error($"rem = {rem} : expected rem <= 3");
+                    break;
+            }
+            avoidzero3_helper(ref x, ref y, ref z);
+            avoidzero3_helper(ref y, ref x, ref z);
+            avoidzero3_helper(ref z, ref x, ref y);
+        }
+
+        internal int CountTargetLanesTowardDirection(ushort segmentId, ushort nodeId, ArrowDirection dir) {
+            int count = 0;
+            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            bool startNode = seg.m_startNode == nodeId;
+            IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+            ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
+
+            Services.NetService.IterateNodeSegments(
+                nodeId,
+                (ushort otherSegmentId, ref NetSegment otherSeg) => {
+                    ArrowDirection dir2 = segEndMan.GetDirection(ref segEnd, otherSegmentId);
+                    if (dir == dir2)
+                    {
+                        int forward = 0, backward = 0;
+                        otherSeg.CountLanes(
+                            otherSegmentId,
+                            NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                            VehicleInfo.VehicleType.Car,
+                            ref forward,
+                            ref backward);
+                        bool startNode2 = otherSeg.m_startNode == nodeId;
+                        bool invert2 = (NetManager.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+                        //xor because inverting 2 times is redundant.
+                        if (invert2 ^ (!startNode2))
+                            count += backward;
+                        else
+                            count += forward;
+                    }
+                    return true;
+                });
+
+            return count;
+        }
+
+        internal void SeparateSegmentLanes(ushort segmentId, ushort nodeId) {
+            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            bool startNode = seg.m_startNode == nodeId;
+
+            //list of outgoing lanes from current segment to current node.
+            IList<LanePos> laneList =
+                Constants.ServiceFactory.NetService.GetSortedLanes(
+                    segmentId,
+                    ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
+                    startNode,
+                    LaneArrowManager.LANE_TYPES,
+                    LaneArrowManager.VEHICLE_TYPES,
+                    true
+                    );
+            int srcLaneCount = laneList.Count();
+            if (srcLaneCount == 1)
+                return;
+
+            int leftLanesCount = CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Left);
+            int rightLanesCount = CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Right);
+            int forwardLanesCount = CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
+            int totalLaneCount = leftLanesCount + forwardLanesCount + rightLanesCount;
+            int numdirs = Convert.ToInt32(leftLanesCount > 0) + Convert.ToInt32(rightLanesCount > 0) + Convert.ToInt32(forwardLanesCount > 0);
+
+            Debug.Log($"LaneArrowTool.SeparateSegmentLanes: totalLaneCount {totalLaneCount} | numdirs = {numdirs} | outgoingLaneCount = {srcLaneCount}");
+
+            if (numdirs < 2)
+                return; // no junction
+
+            if (srcLaneCount == 2 && numdirs == 3) {
+                SetLaneArrows(laneList[0].laneId, LaneArrows.LeftForward);
+                SetLaneArrows(laneList[1].laneId, LaneArrows.Right);
+                return;
+            }
+
+            int l = 0, f = 0, r = 0;
+            if (numdirs == 2) {
+                if (leftLanesCount == 0)
+                    DistributeLanes2(srcLaneCount, forwardLanesCount, rightLanesCount, out f, out r);
+                else if (rightLanesCount == 0)
+                    DistributeLanes2(srcLaneCount, leftLanesCount, forwardLanesCount, out l, out f);
+                else //forwarLanesCount == 0
+                    DistributeLanes2(srcLaneCount, leftLanesCount, rightLanesCount, out l, out r);
+            } else {
+                Debug.Assert(numdirs == 3 && srcLaneCount >= 3);
+                DistributeLanes3(srcLaneCount, leftLanesCount, forwardLanesCount, rightLanesCount, out l, out f, out r);
+            }
+            //assign lanes
+            Debug.Log($"LaneArrowTool.SeparateSegmentLanes: leftLanesCount {leftLanesCount} | forwardLanesCount {forwardLanesCount} | rightLanesCount {rightLanesCount}");
+            Debug.Log($"LaneArrowTool.SeparateSegmentLanes: l {l} | f {f} | r {r}");
+
+            for (var i = 0; i < laneList.Count; i++) {
+                var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
+
+                LaneArrows arrow = LaneArrows.None;
+                if (i < l) {
+                    arrow = LaneArrows.Left;
+                } else if (l <= i && i < l + f) {
+                    arrow = LaneArrows.Forward;
+                } else {
+                    arrow = LaneArrows.Right;
+                }
+                SetLaneArrows(laneList[i].laneId, arrow);
+            }
         }
     }
 }
