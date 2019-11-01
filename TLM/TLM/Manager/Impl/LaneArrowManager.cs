@@ -281,16 +281,36 @@ namespace TrafficManager.Manager.Impl {
             }
 
             int l = 0, f = 0, r = 0;
+            bool lhd = Services.SimulationService.LeftHandDrive;
             if (numdirs == 2) {
-                if (leftLanesCount == 0)
-                    DistributeLanes2(srcLaneCount, forwardLanesCount, rightLanesCount, out f, out r);
-                else if (rightLanesCount == 0)
-                    DistributeLanes2(srcLaneCount, leftLanesCount, forwardLanesCount, out l, out f);
-                else //forwarLanesCount == 0
-                    DistributeLanes2(srcLaneCount, leftLanesCount, rightLanesCount, out l, out r);
+                if (!lhd) {
+                    //if right hand drive then favour the more difficult left turns.
+                    if (leftLanesCount == 0)
+                        DistributeLanes2(srcLaneCount, forwardLanesCount, rightLanesCount, out f, out r);
+                    else if (rightLanesCount == 0)
+                        DistributeLanes2(srcLaneCount, leftLanesCount, forwardLanesCount, out l, out f);
+                    else {
+                        //forwarLanesCount == 0
+                        DistributeLanes2(srcLaneCount, leftLanesCount, rightLanesCount, out l, out r);
+                    }
+                }
+                else {
+                    //if left hand drive then favour the more difficult right turns.
+                    if (leftLanesCount == 0)
+                        DistributeLanes2(srcLaneCount, rightLanesCount, forwardLanesCount, out r, out f);
+                    else if (rightLanesCount == 0)
+                        DistributeLanes2(srcLaneCount, forwardLanesCount, leftLanesCount, out f,  out l);
+                    else //forwarLanesCount == 0 
+                        DistributeLanes2(srcLaneCount, rightLanesCount, leftLanesCount, out r,  out l);
+                }
             } else {
                 Debug.Assert(numdirs == 3 && srcLaneCount >= 3);
-                DistributeLanes3(srcLaneCount, leftLanesCount, forwardLanesCount, rightLanesCount, out l, out f, out r);
+                if(!lhd) {
+                    DistributeLanes3(srcLaneCount, leftLanesCount, forwardLanesCount, rightLanesCount, out l, out f, out r);
+                } else {
+                    DistributeLanes3(srcLaneCount, rightLanesCount, forwardLanesCount, leftLanesCount, out r, out f, out l);
+                }
+
             }
             //assign lanes
             Log._Debug($"LaneArrowTool.SeparateSegmentLanes: leftLanesCount {leftLanesCount} | forwardLanesCount {forwardLanesCount} | rightLanesCount {rightLanesCount}");
@@ -300,13 +320,13 @@ namespace TrafficManager.Manager.Impl {
                 var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
 
                 LaneArrows arrow = LaneArrows.None;
-                if (i < l) {
+                if (i < l)
                     arrow = LaneArrows.Left;
-                } else if (l <= i && i < l + f) {
+                else if (l <= i && i < l + f)
                     arrow = LaneArrows.Forward;
-                } else {
+                else
                     arrow = LaneArrows.Right;
-                }
+
                 SetLaneArrows(laneList[i].laneId, arrow);
             }
         }
@@ -350,7 +370,8 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// calculates number of lanes in each direction such that the number of
         /// turning lanes are in porportion to the size of the roads they are turning into
-        /// in other words calculate x and y such that a/b = x/y and x+y=total and x>=1 and y>=1
+        /// in other words calculate x and y such that a/b = x/y and x+y=total and x>=1 and y>=1.
+        /// x is favoured over y (may get more lanes)
         /// </summary>
         /// <param name="total"> number of source lanes</param>
         /// <param name="a">number of target lanes in one direction</param>
@@ -385,6 +406,7 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// calculates number of lanes in each direction such that the number of
         /// turning lanes are in porportion to the size of the roads they are turning into
+        /// x is favoured over y. y is favoured over z.
         /// </summary>
         /// <param name="total"> number of source lanes</param>
         /// <param name="a">number of target lanes leftward </param>
