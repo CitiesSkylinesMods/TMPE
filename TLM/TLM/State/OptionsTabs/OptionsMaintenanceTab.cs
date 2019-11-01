@@ -1,6 +1,7 @@
 namespace TrafficManager.State {
     using ColossalFramework.UI;
     using CSUtil.Commons;
+    using CSUtil.Commons.Benchmark;
     using ICities;
     using JetBrains.Annotations;
     using Manager.Impl;
@@ -161,10 +162,7 @@ namespace TrafficManager.State {
                 }
 
                 Log._Debug("Removing all existing Traffic Lights");
-                Constants.ServiceFactory.SimulationService.AddAction(() =>
-                {
-                    TrafficLightManager.Instance.RemoveAllExistingTrafficLights();
-                });
+                Constants.ServiceFactory.SimulationService.AddAction(() => TrafficLightManager.Instance.RemoveAllExistingTrafficLights());
             });
         }
 
