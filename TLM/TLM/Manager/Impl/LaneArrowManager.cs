@@ -14,7 +14,8 @@ namespace TrafficManager.Manager.Impl {
     public class LaneArrowManager
         : AbstractGeometryObservingManager,
           ICustomDataManager<List<Configuration.LaneArrowData>>,
-          ICustomDataManager<string>, ILaneArrowManager {
+          ICustomDataManager<string>, ILaneArrowManager
+        {
         public const NetInfo.LaneType LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
