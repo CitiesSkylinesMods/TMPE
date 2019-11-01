@@ -37,10 +37,10 @@ namespace TrafficManager.UI.SubTools {
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
             if (altDown) {
-                LaneArrowManager.Instance.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId);
+                LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId);
                 return;
             } else if (ctrlDown) {
-                LaneArrowManager.Instance.SeparateNode(HoveredNodeId);
+                LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId);
                 return;
             }
             SelectedSegmentId = HoveredSegmentId;
