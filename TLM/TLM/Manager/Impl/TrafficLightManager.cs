@@ -108,6 +108,13 @@
             return SetTrafficLight(nodeId, false, ref node, out reason);
         }
 
+        public void RemoveAllExistingTrafficLights() {
+            Array16<NetNode> nodes = NetManager.instance.m_nodes;
+            for (ushort i = 0; i < nodes.m_size; i++) {
+                RemoveTrafficLight(i, ref nodes.m_buffer[i]);
+            }
+        }
+
         public bool ToggleTrafficLight(ushort nodeId, ref NetNode node) {
             return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node);
         }
