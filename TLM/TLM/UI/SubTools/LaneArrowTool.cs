@@ -9,7 +9,7 @@ namespace TrafficManager.UI.SubTools {
     using UnityEngine;
 
     public class LaneArrowTool : SubTool {
-private bool cursorInSecondaryPanel_;
+        private bool cursorInSecondaryPanel_;
 
         public LaneArrowTool(TrafficManagerTool mainTool)
             : base(mainTool) { }
@@ -255,6 +255,5 @@ private bool cursorInSecondaryPanel_;
 
             GUILayout.EndHorizontal();
         }
-
     }
 }
