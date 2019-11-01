@@ -1,4 +1,4 @@
-namespace TrafficManager.Manager.Impl {
+﻿namespace TrafficManager.Manager.Impl {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -84,7 +84,7 @@ namespace TrafficManager.Manager.Impl {
             if (!Options.laneConnectorEnabled) {
                 return false;
             }
-            
+
             bool ret = false;
             Services.NetService.IterateNodeSegments(
                 nodeId,
