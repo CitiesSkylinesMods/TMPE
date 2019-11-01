@@ -221,7 +221,10 @@ namespace TrafficManager.Manager.Impl {
             return Instance;
         }
 
-        internal void SeparateNode(ushort nodeId) {
+        /// <summary>
+        /// separates turning lanes for all segments attached to nodeId
+        /// </summary>
+        public void SeparateNode(ushort nodeId) {
             NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
             if (nodeId == 0)
                 return;
@@ -239,94 +242,10 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        private static void DistributeLanes2(int total, int a, int b, out int x, out int y) {
-            /* x+y = total
-             * a/b = x/y
-             * y = total*b/(a+b)
-             * x = total - y 
-             */
-            y = (total * b) / (a + b); //floor y to favour x
-            if (y == 0)
-                y = 1;
-            x = total - y;
-
-        }
-
-        private static void avoidzero3_helper(ref int x, ref int y, ref int z) {
-            if (x == 0) {
-                x = 1;
-                if (y > z)
-                    --y;
-                else
-                    --z;
-            }
-        }
-        private static void DistributeLanes3(int total, int a, int b, int c, out int x, out int y, out int z) {
-            //favour: x then y
-            float div = (float)(a + b + c) / (float)total;
-            x = (int)Math.Floor((float)a / div);
-            y = (int)Math.Floor((float)b / div);
-            z = (int)Math.Floor((float)c / div);
-            int rem = total - x - y - z;
-            switch (rem) {
-                case 3:
-                    z++;
-                    y++;
-                    x++;
-                    break;
-                case 2:
-                    y++;
-                    x++;
-                    break;
-                case 1:
-                    x++;
-                    break;
-                case 0:
-                    break;
-                default:
-                    Log.Error($"rem = {rem} : expected rem <= 3");
-                    break;
-            }
-            avoidzero3_helper(ref x, ref y, ref z);
-            avoidzero3_helper(ref y, ref x, ref z);
-            avoidzero3_helper(ref z, ref x, ref y);
-        }
-
-        internal int CountTargetLanesTowardDirection(ushort segmentId, ushort nodeId, ArrowDirection dir) {
-            int count = 0;
-            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            bool startNode = seg.m_startNode == nodeId;
-            IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
-
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort otherSegmentId, ref NetSegment otherSeg) => {
-                    ArrowDirection dir2 = segEndMan.GetDirection(ref segEnd, otherSegmentId);
-                    if (dir == dir2)
-                    {
-                        int forward = 0, backward = 0;
-                        otherSeg.CountLanes(
-                            otherSegmentId,
-                            NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
-                            VehicleInfo.VehicleType.Car,
-                            ref forward,
-                            ref backward);
-                        bool startNode2 = otherSeg.m_startNode == nodeId;
-                        bool invert2 = (NetManager.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-                        //xor because inverting 2 times is redundant.
-                        if (invert2 ^ (!startNode2))
-                            count += backward;
-                        else
-                            count += forward;
-                    }
-                    return true;
-                });
-
-            return count;
-        }
-
-        internal void SeparateSegmentLanes(ushort segmentId, ushort nodeId) {
+        /// <summary>
+        /// separates turning lanes for the input segment on the input node.
+        /// </summary>
+        public void SeparateSegmentLanes(ushort segmentId, ushort nodeId) {
             ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             bool startNode = seg.m_startNode == nodeId;
 
@@ -390,6 +309,119 @@ namespace TrafficManager.Manager.Impl {
                 }
                 SetLaneArrows(laneList[i].laneId, arrow);
             }
+        }
+
+        /// <summary>
+        /// returns the number of all target lanes from input segment toward the secified direction.
+        /// </summary>
+        internal int CountTargetLanesTowardDirection(ushort segmentId, ushort nodeId, ArrowDirection dir) {
+            int count = 0;
+            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            bool startNode = seg.m_startNode == nodeId;
+            IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+            ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
+
+            Services.NetService.IterateNodeSegments(
+                nodeId,
+                (ushort otherSegmentId, ref NetSegment otherSeg) => {
+                    ArrowDirection dir2 = segEndMan.GetDirection(ref segEnd, otherSegmentId);
+                    if (dir == dir2) {
+                        int forward = 0, backward = 0;
+                        otherSeg.CountLanes(
+                            otherSegmentId,
+                            NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                            VehicleInfo.VehicleType.Car,
+                            ref forward,
+                            ref backward);
+                        bool startNode2 = otherSeg.m_startNode == nodeId;
+                        bool invert2 = (NetManager.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+                        //xor because inverting 2 times is redundant.
+                        if (invert2 ^ (!startNode2))
+                            count += backward;
+                        else
+                            count += forward;
+                    }
+                    return true;
+                });
+
+            return count;
+        }
+
+        /// <summary>
+        /// calculates number of lanes in each direction such that the number of
+        /// turning lanes are in porportion to the size of the roads they are turning into
+        /// in other words calculate x and y such that a/b = x/y and x+y=total and x>=1 and y>=1
+        /// </summary>
+        /// <param name="total"> number of source lanes</param>
+        /// <param name="a">number of target lanes in one direction</param>
+        /// <param name="b">number of target lanes in the other direction</param>
+        /// <param name="x">number of source lanes turning toward the first direction. </param>
+        /// <param name="y">number of the source lanes turning toward the second direction</param>
+        private static void DistributeLanes2(int total, int a, int b, out int x, out int y) {
+            /* x+y = total
+             * a/b = x/y
+             * y = total*b/(a+b)
+             * x = total - y 
+             */
+            y = (total * b) / (a + b); //floor y to favour x
+            if (y == 0)
+                y = 1;
+            x = total - y;
+        }
+
+        /// <summary>
+        /// helper function to makes sure at least one source lane is assigned to every direction.
+        /// </summary>
+        private static void AvoidZero3_Helper(ref int x, ref int y, ref int z) {
+            if (x == 0) {
+                x = 1;
+                if (y > z)
+                    --y;
+                else
+                    --z;
+            }
+        }
+
+        /// <summary>
+        /// calculates number of lanes in each direction such that the number of
+        /// turning lanes are in porportion to the size of the roads they are turning into
+        /// </summary>
+        /// <param name="total"> number of source lanes</param>
+        /// <param name="a">number of target lanes leftward </param>
+        /// <param name="b">number of target lanes forward</param>
+        /// <param name="c">number of target lanes right-ward</param>
+        /// <param name="x">number of source lanes leftward. </param>
+        /// <param name="y">number of the source lanes forward</param>
+        /// <param name="z">number of the source lanes right-ward</param>
+        private static void DistributeLanes3(int total, int a, int b, int c, out int x, out int y, out int z) {
+            //favour: x then y
+            float div = (float)(a + b + c) / (float)total;
+            x = (int)Math.Floor((float)a / div);
+            y = (int)Math.Floor((float)b / div);
+            z = (int)Math.Floor((float)c / div);
+            int rem = total - x - y - z;
+            switch (rem) {
+                case 3:
+                    z++;
+                    y++;
+                    x++;
+                    break;
+                case 2:
+                    y++;
+                    x++;
+                    break;
+                case 1:
+                    x++;
+                    break;
+                case 0:
+                    break;
+                default:
+                    Log.Error($"rem = {rem} : expected rem <= 3");
+                    break;
+            }
+            AvoidZero3_Helper(ref x, ref y, ref z);
+            AvoidZero3_Helper(ref y, ref x, ref z);
+            AvoidZero3_Helper(ref z, ref x, ref y);
         }
     }
 }
