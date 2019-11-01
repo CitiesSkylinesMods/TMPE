@@ -350,7 +350,7 @@ namespace TrafficManager.Manager.Impl {
             int totalLaneCount = leftLanesCount + forwardLanesCount + rightLanesCount;
             int numdirs = Convert.ToInt32(leftLanesCount > 0) + Convert.ToInt32(rightLanesCount > 0) + Convert.ToInt32(forwardLanesCount > 0);
 
-            Debug.Log($"LaneArrowTool.SeparateSegmentLanes: totalLaneCount {totalLaneCount} | numdirs = {numdirs} | outgoingLaneCount = {srcLaneCount}");
+            Log._Debug($"LaneArrowTool.SeparateSegmentLanes: totalLaneCount {totalLaneCount} | numdirs = {numdirs} | outgoingLaneCount = {srcLaneCount}");
 
             if (numdirs < 2)
                 return; // no junction
@@ -374,8 +374,8 @@ namespace TrafficManager.Manager.Impl {
                 DistributeLanes3(srcLaneCount, leftLanesCount, forwardLanesCount, rightLanesCount, out l, out f, out r);
             }
             //assign lanes
-            Debug.Log($"LaneArrowTool.SeparateSegmentLanes: leftLanesCount {leftLanesCount} | forwardLanesCount {forwardLanesCount} | rightLanesCount {rightLanesCount}");
-            Debug.Log($"LaneArrowTool.SeparateSegmentLanes: l {l} | f {f} | r {r}");
+            Log._Debug($"LaneArrowTool.SeparateSegmentLanes: leftLanesCount {leftLanesCount} | forwardLanesCount {forwardLanesCount} | rightLanesCount {rightLanesCount}");
+            Log._Debug($"LaneArrowTool.SeparateSegmentLanes: l {l} | f {f} | r {r}");
 
             for (var i = 0; i < laneList.Count; i++) {
                 var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
