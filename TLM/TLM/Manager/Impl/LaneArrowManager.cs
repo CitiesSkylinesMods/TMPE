@@ -263,8 +263,9 @@ namespace TrafficManager.Manager.Impl {
                         true
                         );
                 int srcLaneCount = laneList.Count();
-                if (srcLaneCount == 1)
+                if (srcLaneCount == 1) {
                     return;
+                }
 
                 int leftLanesCount = CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Left);
                 int rightLanesCount = CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Right);
@@ -274,8 +275,9 @@ namespace TrafficManager.Manager.Impl {
 
                 Log._Debug($"SeparateSegmentLanes: totalLaneCount {totalLaneCount} | numdirs = {numdirs} | outgoingLaneCount = {srcLaneCount}");
 
-                if (numdirs < 2)
+                if (numdirs < 2) {
                     return; // no junction
+                }
 
                 if (srcLaneCount == 2 && numdirs == 3) {
                     LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.LeftForward);
@@ -398,8 +400,9 @@ namespace TrafficManager.Manager.Impl {
 
             /// <summary>
             /// helper function to makes sure at least one source lane is assigned to every direction.
+            /// if x has zero lanes, it borrows lanes from y and z such that x+y+z remains the same.
             /// </summary>
-            private static void AvoidZero3_Helper(ref int x, ref int y, ref int z) {
+            private static int AvoidZero3_Helper(int x, ref int y, ref int z) {
                 if (x == 0) {
                     x = 1;
                     if (y > z) {
@@ -408,6 +411,7 @@ namespace TrafficManager.Manager.Impl {
                         --z;
                     }
                 }
+                return x;
             }
 
             /// <summary>
@@ -448,9 +452,9 @@ namespace TrafficManager.Manager.Impl {
                         Log.Error($"rem = {rem} : expected rem <= 3");
                         break;
                 }
-                AvoidZero3_Helper(ref x, ref y, ref z);
-                AvoidZero3_Helper(ref y, ref x, ref z);
-                AvoidZero3_Helper(ref z, ref x, ref y);
+                x = AvoidZero3_Helper(x, ref y, ref z);
+                y = AvoidZero3_Helper(y, ref x, ref z);
+                z = AvoidZero3_Helper(z, ref x, ref y);
             }
         }
     }
