@@ -45,6 +45,21 @@ namespace TrafficManager.Manager.Impl {
 
             return false;
         }
+        public bool AddLaneArrows(uint laneId,
+                                  LaneArrows flags,
+                                  bool overrideHighwayArrows = false) {
+
+            LaneArrows flags2 = GetFinalLaneArrows(laneId);
+            return SetLaneArrows(laneId, flags | flags2, overrideHighwayArrows);
+        }
+
+        public bool RemoveLaneArrows(uint laneId,
+                          LaneArrows flags,
+                          bool overrideHighwayArrows = false) {
+
+            LaneArrows flags2 = GetFinalLaneArrows(laneId);
+            return SetLaneArrows(laneId, ~flags & flags2, overrideHighwayArrows);
+        }
 
         public bool ToggleLaneArrows(uint laneId,
                                      bool startNode,
@@ -340,7 +355,7 @@ namespace TrafficManager.Manager.Impl {
             /// <summary>
             /// returns the number of all target lanes from input segment toward the secified direction.
             /// </summary>
-            private static int CountTargetLanesTowardDirection(ushort segmentId, ushort nodeId, ArrowDirection dir) {
+            public static int CountTargetLanesTowardDirection(ushort segmentId, ushort nodeId, ArrowDirection dir) {
                 int count = 0;
                 ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                 bool startNode = seg.m_startNode == nodeId;

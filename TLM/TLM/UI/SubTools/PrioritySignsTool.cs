@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using System;
     using System.Collections.Generic;
     using API.Manager;
@@ -12,6 +12,7 @@
     using UnityEngine;
     using Util;
     using static Util.SegmentTraverser;
+    using GenericGameBridge.Service;
 
     public class PrioritySignsTool : SubTool {
         private enum PrioritySignsMassEditMode {
@@ -29,6 +30,156 @@
             : base(mainTool) {
             currentPriorityNodeIds = new HashSet<ushort>();
         }
+
+
+        private static int CountCarLanes(ushort segmentId) {
+            NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            int forward = 0, backward = 0;
+            segment.CountLanes(
+                segmentId,
+                        NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                        VehicleInfo.VehicleType.Car,
+                        ref forward,
+                        ref backward);
+            return forward + backward;
+        }
+        private static class FixPriorityJunction {
+            private static int CompareSegments(ushort seg1Id, ushort seg2Id) {
+                NetSegment seg1 = Singleton<NetManager>.instance.m_segments.m_buffer[seg1Id];
+                NetSegment seg2 = Singleton<NetManager>.instance.m_segments.m_buffer[seg2Id];
+                int diff = (int)Math.Ceiling(seg2.Info.m_halfWidth - seg1.Info.m_halfWidth);
+                if(diff == 0) {
+                    diff = CountCarLanes(seg2Id) - CountCarLanes(seg1Id);
+                }
+
+                return diff;
+            }
+
+
+            private static void AddSeg_helper(List<ushort> seglist, ushort segId) {
+                if(segId != 0) {
+                    seglist.Add(segId);
+                }
+            }
+            private static bool IsOneWay(ushort segmentId, ushort nodeId) {
+                NetSegment seg = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                int forward = 0, backward = 0;
+                seg.CountLanes(
+                        segmentId,
+                        NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                        VehicleInfo.VehicleType.Car,
+                        ref forward,
+                        ref backward);
+                return forward == 0 || backward == 0;
+            }
+
+            private static void FixMajorSegment(ushort segmentId, ushort nodeId) {
+                ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                bool startNode = seg.m_startNode == nodeId;
+
+                JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
+                JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(segmentId, startNode, false);
+                TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Main);
+
+                int n_right = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Right);
+                int n_left = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Left);
+                int n_forward = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
+
+                //list of outgoing lanes from current segment to current node.
+                IList<LanePos> laneList =
+                    Constants.ServiceFactory.NetService.GetSortedLanes(
+                        segmentId,
+                        ref seg,
+                        startNode,
+                        LaneArrowManager.LANE_TYPES,
+                        LaneArrowManager.VEHICLE_TYPES,
+                        true
+                        );
+
+                //TODO: code for left hand drive
+                //TODO: code for bendy avenue.
+                // ban left turns and use of FR arrow where applicable.
+                for (int i = 0; i < laneList.Count; ++i) {
+                    LaneArrowManager.Instance.SetLaneArrows(
+                        laneList[i].laneId,
+                        LaneArrows.Forward);
+                }
+                if (laneList.Count > 0 && n_right > 0) {
+                    LanePos righMostLane = laneList[laneList.Count - 1];
+                    LaneArrowManager.Instance.SetLaneArrows(righMostLane.laneId, LaneArrows.ForwardRight);
+                }
+            }
+
+            private static void FixMinorSegment(ushort segmentId, ushort nodeId) {
+                ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                bool startNode = seg.m_startNode == nodeId;
+                TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Yield);
+
+                // direction of target lanes
+                int n_right = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Right);
+                int n_left = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Left);
+                int n_forward = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
+
+                IList<LanePos> laneList =
+                    Constants.ServiceFactory.NetService.GetSortedLanes(
+                        segmentId,
+                        ref seg,
+                        startNode,
+                        LaneArrowManager.LANE_TYPES,
+                        LaneArrowManager.VEHICLE_TYPES,
+                        true
+                        );
+
+                // TODO: add code for bend roads
+                // TODO: add code for LHD
+                // only right turn
+                for (int i = 0; i < laneList.Count; ++i) {
+                    LaneArrowManager.Instance.SetLaneArrows(
+                        laneList[i].laneId,
+                        LaneArrows.Right);
+                }
+            }
+
+            public static void Fix(ushort nodeId) {
+                if (nodeId == 0) {
+                    return;
+                }
+                ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+
+                // a list of segments attached to node arranged by size
+                List<ushort> seglist = new List<ushort>();
+                AddSeg_helper(seglist, node.m_segment0);
+                AddSeg_helper(seglist, node.m_segment1);
+                AddSeg_helper(seglist, node.m_segment2);
+                AddSeg_helper(seglist, node.m_segment3);
+                AddSeg_helper(seglist, node.m_segment4);
+                AddSeg_helper(seglist, node.m_segment5);
+                AddSeg_helper(seglist, node.m_segment6);
+                AddSeg_helper(seglist, node.m_segment7);
+                if(seglist.Count < 3) {
+                    // this is not a junctiuon
+                    return;
+                }
+                seglist.Sort(CompareSegments);
+                if(CompareSegments(seglist[0], seglist[2]) == 0){
+                    // all roads connected to the junction are equal.
+                    return;
+                }
+                if(IsOneWay(seglist[0],nodeId) || IsOneWay(seglist[1], nodeId)){
+                    // the rules do not apply to oneway main road.
+                    return;
+                }
+
+                Constants.ManagerFactory.TrafficLightManager.HasTrafficLight(nodeId, ref node);
+                for (int i = 0; i < seglist.Count; ++i) {
+                    if(i < 2) {
+                        FixMajorSegment(seglist[i], nodeId);
+                    } else {
+                        FixMinorSegment(seglist[i], nodeId);
+                    }
+                } //end for
+            } // end method
+        } // end class
 
         public override void OnPrimaryClickOverlay() {
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
@@ -136,6 +287,15 @@
 
             SelectedNodeId = HoveredNodeId;
             Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
+
+            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            if (altDown) {
+                return;
+            } else if (ctrlDown) {
+                FixPriorityJunction.Fix(HoveredNodeId);
+                return;
+            }
 
             // update priority node cache
             RefreshCurrentPriorityNodeIds();
