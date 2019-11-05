@@ -31,19 +31,19 @@ namespace TrafficManager.UI.SubTools {
             currentPriorityNodeIds = new HashSet<ushort>();
         }
 
-
-        private static int CountCarLanes(ushort segmentId) {
-            NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            int forward = 0, backward = 0;
-            segment.CountLanes(
-                segmentId,
-                        NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
-                        VehicleInfo.VehicleType.Car,
-                        ref forward,
-                        ref backward);
-            return forward + backward;
-        }
         private static class FixPriorityJunction {
+            private static int CountCarLanes(ushort segmentId) {
+                NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                int forward = 0, backward = 0;
+                segment.CountLanes(
+                    segmentId,
+                            NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                            VehicleInfo.VehicleType.Car,
+                            ref forward,
+                            ref backward);
+                return forward + backward;
+            }
+
             private static int CompareSegments(ushort seg1Id, ushort seg2Id) {
                 NetSegment seg1 = Singleton<NetManager>.instance.m_segments.m_buffer[seg1Id];
                 NetSegment seg2 = Singleton<NetManager>.instance.m_segments.m_buffer[seg2Id];
@@ -51,26 +51,7 @@ namespace TrafficManager.UI.SubTools {
                 if(diff == 0) {
                     diff = CountCarLanes(seg2Id) - CountCarLanes(seg1Id);
                 }
-
                 return diff;
-            }
-
-
-            private static void AddSeg_helper(List<ushort> seglist, ushort segId) {
-                if(segId != 0) {
-                    seglist.Add(segId);
-                }
-            }
-            private static bool IsOneWay(ushort segmentId, ushort nodeId) {
-                NetSegment seg = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-                int forward = 0, backward = 0;
-                seg.CountLanes(
-                        segmentId,
-                        NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
-                        VehicleInfo.VehicleType.Car,
-                        ref forward,
-                        ref backward);
-                return forward == 0 || backward == 0;
             }
 
             private static void FixMajorSegment(ushort segmentId, ushort nodeId) {
@@ -81,9 +62,9 @@ namespace TrafficManager.UI.SubTools {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(segmentId, startNode, false);
                 TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Main);
 
-                int n_right = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Right);
-                int n_left = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Left);
-                int n_forward = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
+                int n_right = DirectionUtil.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Right);
+                int n_left = DirectionUtil.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Left);
+                int n_forward = DirectionUtil.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
 
                 //list of outgoing lanes from current segment to current node.
                 IList<LanePos> laneList =
@@ -116,9 +97,9 @@ namespace TrafficManager.UI.SubTools {
                 TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Yield);
 
                 // direction of target lanes
-                int n_right = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Right);
-                int n_left = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Left);
-                int n_forward = LaneArrowManager.SeparateTurningLanes.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
+                int n_right = DirectionUtil.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Right);
+                int n_left = DirectionUtil.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Left);
+                int n_forward = DirectionUtil.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
 
                 IList<LanePos> laneList =
                     Constants.ServiceFactory.NetService.GetSortedLanes(
@@ -130,7 +111,7 @@ namespace TrafficManager.UI.SubTools {
                         true
                         );
 
-                // TODO: add code for bend roads
+                // TODO: add code for bendy roads
                 // TODO: add code for LHD
                 // only right turn
                 for (int i = 0; i < laneList.Count; ++i) {
@@ -140,7 +121,7 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
-            public static void Fix(ushort nodeId) {
+            public static void FixJunction(ushort nodeId) {
                 if (nodeId == 0) {
                     return;
                 }
@@ -148,24 +129,23 @@ namespace TrafficManager.UI.SubTools {
 
                 // a list of segments attached to node arranged by size
                 List<ushort> seglist = new List<ushort>();
-                AddSeg_helper(seglist, node.m_segment0);
-                AddSeg_helper(seglist, node.m_segment1);
-                AddSeg_helper(seglist, node.m_segment2);
-                AddSeg_helper(seglist, node.m_segment3);
-                AddSeg_helper(seglist, node.m_segment4);
-                AddSeg_helper(seglist, node.m_segment5);
-                AddSeg_helper(seglist, node.m_segment6);
-                AddSeg_helper(seglist, node.m_segment7);
+                for(int i =0; i < 8; ++i) {
+                    ushort segId = node.GetSegment(i);
+                    if (segId != 0) {
+                        seglist.Add(segId);
+                    }
+                }
                 if(seglist.Count < 3) {
                     // this is not a junctiuon
                     return;
                 }
                 seglist.Sort(CompareSegments);
+
                 if(CompareSegments(seglist[0], seglist[2]) == 0){
                     // all roads connected to the junction are equal.
                     return;
                 }
-                if(IsOneWay(seglist[0],nodeId) || IsOneWay(seglist[1], nodeId)){
+                if(DirectionUtil.IsOneWay(seglist[0]) || DirectionUtil.IsOneWay(seglist[1])){
                     // the rules do not apply to oneway main road.
                     return;
                 }
@@ -179,10 +159,222 @@ namespace TrafficManager.UI.SubTools {
                     }
                 } //end for
             } // end method
+
+            private static bool Func(SegmentVisitData data) {
+                foreach (bool startNode in Constants.ALL_BOOL) {
+                    TrafficPriorityManager.Instance.SetPrioritySign(
+                        data.CurSeg.segmentId,
+                        startNode,
+                        PriorityType.Main);
+
+                    ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(
+                        data.CurSeg.segmentId,
+                        startNode);
+
+                    IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+                    ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[
+                        segEndMan.GetIndex(data.CurSeg.segmentId, startNode)];
+
+                    JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
+                        data.CurSeg.segmentId,
+                        startNode
+                        , false);
+                    JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
+                        data.CurSeg.segmentId,
+                        startNode,
+                        true);
+
+                    for (int i = 0; i < 8; ++i) {
+                        ushort otherSegmentId = Singleton<NetManager>.instance.m_nodes
+                                                                     .m_buffer[nodeId]
+                                                                     .GetSegment(i);
+
+                        if (otherSegmentId == 0 || otherSegmentId == data.CurSeg.segmentId) {
+                            continue;
+                        }
+
+                        ArrowDirection dir = segEndMan.GetDirection(
+                            ref curEnd,
+                            otherSegmentId);
+
+                        if (dir != ArrowDirection.Forward) {
+                            TrafficPriorityManager.Instance.SetPrioritySign(
+                                otherSegmentId,
+                                (bool)Constants.ServiceFactory.NetService.IsStartNode(
+                                    otherSegmentId,
+                                    nodeId),
+                                PriorityType.Yield);
+                        }
+                    }
+                }
+                return true;
+            }
+
+            public static bool FuncLanes(SegmentTraverser.SegmentVisitData data) {
+                ushort segmentId = data.CurSeg.segmentId;
+
+                ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                bool startNode = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+                ushort nodeId;
+                if(startNode) {
+                    nodeId = segment.m_startNode;
+                } else {
+                    nodeId = segment.m_endNode;
+                }
+
+                ref NetNode node = ref NetManager.instance.m_nodes.m_buffer[nodeId];
+
+                bool isJunction = node.CountSegments() >= 3;
+                Debug.Log($"segment={segmentId} node={nodeId} startNode={startNode} isJunction={isJunction}");
+
+                //Fix turning lanes:
+                // direction of target lanes
+
+                ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                IList<LanePos> laneList =
+                    Constants.ServiceFactory.NetService.GetSortedLanes(
+                        segmentId,
+                        ref seg,
+                        startNode,
+                        LaneArrowManager.LANE_TYPES,
+                        LaneArrowManager.VEHICLE_TYPES,
+                        true);
+                int n_src = laneList.Count;
+
+                if (!isJunction) {
+                    ushort otherSegmentId = 0;
+                    for (int i = 0; i < 8; ++i) {
+                        otherSegmentId = node.GetSegment(i);
+                        if (otherSegmentId != 0 && otherSegmentId != segmentId)
+                            break;
+                    }
+                    ref NetSegment otherSegment = ref NetManager.instance.m_segments.m_buffer[otherSegmentId];
+                    bool startNode2 = (otherSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+                    IList<LanePos> targetLaneList =
+                        Constants.ServiceFactory.NetService.GetSortedLanes(
+                            otherSegmentId,
+                            ref otherSegment,
+                            startNode2,
+                            LaneArrowManager.LANE_TYPES,
+                            LaneArrowManager.VEHICLE_TYPES,
+                            true);
+
+                    Debug.Log($"segmentId={segmentId} otherSegmentId={otherSegmentId} startNode2={startNode2} n_src={n_src} n_trg={targetLaneList.Count}");
+                    if (n_src == targetLaneList.Count) {
+                        // Connect lanes
+                        for (int i = 0; i < n_src; ++i) {
+                            LaneConnectionManager.Instance.AddLaneConnection(
+                                laneList[i].laneId,
+                                targetLaneList[i].laneId,
+                                startNode);
+                        }
+                    }
+
+                    return true;
+                }
+
+                int n_right = DirectionUtil.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Right);
+                int n_left = DirectionUtil.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Left);
+                int n_forward = DirectionUtil.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
+
+                switch (n_src) {
+                    case 0:
+                        break;
+                    case 1:
+                        LaneArrows arrows = LaneArrows.Forward;
+                        if (n_right > 0) {
+                            arrows |= LaneArrows.Right;
+                        }
+                        if (n_left > 0) {
+                            arrows |= LaneArrows.Left;
+                        }
+                        LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, arrows);
+                        break;
+                    case 2:
+                        if(n_right > 0 && n_left > 0) {
+                            LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.Forward | LaneArrows.Left);
+                            LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows.Forward | LaneArrows.Right);
+
+                        } else if(n_right > 0) {
+                            LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.Forward );
+                            LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows.Right);
+                        } else if (n_left > 0) {
+                            LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.Left);
+                            LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows.Forward);
+                        } else {
+                            LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.Forward);
+                            LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows.Forward);
+                        }
+                        break;
+                    default:
+                        for(int i = 0; i < laneList.Count; ++i) {
+                            LaneArrowManager.Instance.SetLaneArrows(laneList[i].laneId, LaneArrows.Forward);
+                        }
+                        if (n_right > 0) {
+                            LaneArrowManager.Instance.SetLaneArrows(laneList[n_src-1].laneId, LaneArrows.Right);
+                        }
+                        if (n_left > 0) {
+                            LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.Left);
+                        }
+                        break;
+                }
+
+                return true;
+            }
+
+            public static void FixRabout(ushort segmentId) {
+                if (segmentId != 0) {
+                    SegmentTraverser.Traverse(
+                        segmentId,
+                        TraverseDirection.Outgoing,
+                        TraverseSide.Straight,
+                        SegmentStopCriterion.None,
+                        data => {
+                            FuncLanes(data);
+                            Func(data);
+                            return true;
+                        }
+                        );
+                }
+                /*
+                bool isRabout = SegmentRoundAboutTraverser.TraverseAround(segmentId,null);
+
+
+                if (isRabout) {
+                    //fix all round about rules.
+                    SegmentRoundAboutTraverser.TraverseAround(segmentId, func);
+
+                    // post fix:
+                    ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                    TrafficPriorityManager.Instance.SetPrioritySign(segmentId, true, PriorityType.Main);
+                }//end if
+                */
+            }
+
+            public static void RaboutRenderOverlay(TrafficManagerTool MainTool,  RenderManager.CameraInfo cameraInfo, ushort HoveredSegmentId) {
+                bool isRabout = SegmentRoundAboutTraverser.TraverseAround(HoveredSegmentId, null);
+                if(!isRabout) {
+                    return;
+                }
+                Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
+                SegmentRoundAboutTraverser.TraverseAround(
+                    HoveredSegmentId,
+                    segmentId => {
+                        NetTool.RenderOverlay(
+                            cameraInfo,
+                            ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
+                            color,
+                            color);
+                        return true;
+                    });
+            }
         } // end class
 
         public override void OnPrimaryClickOverlay() {
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            if (shiftDown) {
                 if (HoveredSegmentId == 0) {
                     return;
                 }
@@ -194,28 +386,28 @@ namespace TrafficManager.UI.SubTools {
 
                 switch (massEditMode) {
                     case PrioritySignsMassEditMode.MainYield: {
-                        primaryPrioType = PriorityType.Main;
-                        secondaryPrioType = PriorityType.Yield;
-                        break;
-                    }
+                            primaryPrioType = PriorityType.Main;
+                            secondaryPrioType = PriorityType.Yield;
+                            break;
+                        }
 
                     case PrioritySignsMassEditMode.MainStop: {
-                        primaryPrioType = PriorityType.Main;
-                        secondaryPrioType = PriorityType.Stop;
-                        break;
-                    }
+                            primaryPrioType = PriorityType.Main;
+                            secondaryPrioType = PriorityType.Stop;
+                            break;
+                        }
 
                     case PrioritySignsMassEditMode.YieldMain: {
-                        primaryPrioType = PriorityType.Yield;
-                        secondaryPrioType = PriorityType.Main;
-                        break;
-                    }
+                            primaryPrioType = PriorityType.Yield;
+                            secondaryPrioType = PriorityType.Main;
+                            break;
+                        }
 
                     case PrioritySignsMassEditMode.StopMain: {
-                        primaryPrioType = PriorityType.Stop;
-                        secondaryPrioType = PriorityType.Main;
-                        break;
-                    }
+                            primaryPrioType = PriorityType.Stop;
+                            secondaryPrioType = PriorityType.Main;
+                            break;
+                        }
                 }
 
                 IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
@@ -230,7 +422,7 @@ namespace TrafficManager.UI.SubTools {
                             data.CurSeg.segmentId,
                             startNode);
                         ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[
-                            segEndMan.GetIndex(data.CurSeg.segmentId,startNode)];
+                            segEndMan.GetIndex(data.CurSeg.segmentId, startNode)];
 
                         for (int i = 0; i < 8; ++i) {
                             ushort otherSegmentId = Singleton<NetManager>.instance.m_nodes
@@ -271,30 +463,25 @@ namespace TrafficManager.UI.SubTools {
                     (PrioritySignsMassEditMode)(((int)massEditMode + 1) %
                                                 Enum.GetValues(typeof(PrioritySignsMassEditMode))
                                                     .GetLength(0));
-
-                // update priority node cache
+            } else if (altDown) {
+                FixPriorityJunction.FixRabout(HoveredSegmentId);
                 RefreshCurrentPriorityNodeIds();
                 return;
-            }
-
-            if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
-                return;
-            }
-
-            if (!MayNodeHavePrioritySigns(HoveredNodeId)) {
-                return;
-            }
-
-            SelectedNodeId = HoveredNodeId;
-            Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
-
-            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-            if (altDown) {
-                return;
             } else if (ctrlDown) {
-                FixPriorityJunction.Fix(HoveredNodeId);
+                FixPriorityJunction.FixJunction(HoveredNodeId);
+                RefreshCurrentPriorityNodeIds();
                 return;
+            } else {
+                if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
+                    return;
+                }
+
+                if (!MayNodeHavePrioritySigns(HoveredNodeId)) {
+                    return;
+                }
+
+                SelectedNodeId = HoveredNodeId;
+                Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
             }
 
             // update priority node cache
@@ -308,7 +495,29 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+
+            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            if (altDown) {
+                if (HoveredSegmentId != 0) {
+                    Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
+                    SegmentTraverser.Traverse(
+                        HoveredSegmentId,
+                        TraverseDirection.Outgoing,
+                        TraverseSide.Straight,
+                        SegmentStopCriterion.None,
+                        data => {
+                            NetTool.RenderOverlay(
+                                cameraInfo,
+                                ref Singleton<NetManager>.instance.m_segments.m_buffer[
+                                    data.CurSeg.segmentId],
+                                color,
+                                color);
+                            return true;
+                        });
+                    //FixPriorityJunction.RaboutRenderOverlay(MainTool, cameraInfo, HoveredSegmentId);
+                    return;
+                }
+            } else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
                 // draw hovered segments
                 if (HoveredSegmentId != 0) {
                     Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);

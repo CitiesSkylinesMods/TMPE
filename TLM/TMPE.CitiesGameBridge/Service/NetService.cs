@@ -1,4 +1,4 @@
-﻿namespace CitiesGameBridge.Service {
+namespace CitiesGameBridge.Service {
     using System;
     using System.Collections.Generic;
     using ColossalFramework;
