@@ -7,10 +7,25 @@ namespace TrafficManager.Util {
     using ColossalFramework;
 
     public class SegmentRoundAboutTraverser {
+        public List<ushort> segmentList = null;
 
-        public delegate bool SegmentVisitor(ushort segmentId);
+        public SegmentRoundAboutTraverser Instance = new SegmentRoundAboutTraverser();
 
 
+        /// <summary>
+        /// tail node>-------->head node
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <returns></returns>
+        private static ushort GetHeadNode(ushort segmentId) {
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+            if(invert) {
+                return segment.m_startNode;
+            } else {
+                return segment.m_endNode;
+            }
+        }
         /// <summary>
         /// Traverses around a roundabout. At each
         /// traversed segment, the given `visitor` is notified.
@@ -22,51 +37,35 @@ namespace TrafficManager.Util {
         /// pass null if you are trying to see if segment is part of a round about.
         /// </param>
         /// <returns>true if its a roundabout</returns>
-
-       public static bool TraverseAround(ushort segmentId,SegmentVisitor visitorFun) {
+        public bool TraverseAround(ushort segmentId) {
+            segmentList.Clear();
             if (segmentId == 0 || !DirectionUtil.IsOneWay(segmentId)) {
                 return false;
             }
-            visitorFun?.Invoke(segmentId);
-            ref NetSegment firstSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-
-            do {
-                ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-                ref NetNode endNode = ref NetManager.instance.m_nodes.m_buffer[segment.m_endNode];
-
-                List<ushort> nextSegmentIds = new List<ushort>();
-                for (int i = 0; i < 8; ++i) {
-                    ushort nextSegmentId = endNode.GetSegment(i);
-                    ref NetSegment nextSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[nextSegmentId];
-                    if (nextSegmentId == 0 || nextSegmentId == segmentId) {
-                        //not a roundabout;
-                        return false;
+            return TraverseAroundRecursive(segmentId);
+        }
+        private bool TraverseAroundRecursive(ushort segmentId) {
+            segmentList.Add(segmentId);
+            ushort headNodeId = GetHeadNode(segmentId);
+            ref NetNode headNode = ref NetManager.instance.m_nodes.m_buffer[headNodeId];
+            for (int i = 0; i < 8; ++i) {
+                ushort nextSegmentId = headNode.GetSegment(i);
+                if (DirectionUtil.IsOneWay(segmentId, nextSegmentId)) {
+                    bool isRAbout = false;
+                    if(nextSegmentId == segmentList[0])
+                        isRAbout = true;
+                    else if( segmentList.Contains(nextSegmentId)) {
+                        isRAbout = false;
+                    } else {
+                        isRAbout = TraverseAroundRecursive(nextSegmentId);
                     }
-
-                    bool isOneWay =  DirectionUtil.IsOneWay(segmentId);
-                    bool nextIsStartNode = segment.m_endNode == nextSegment.m_startNode;
-                    ArrowDirection dir = DirectionUtil.GetDirection(segmentId, nextSegmentId, segment.m_endNode);
-                    bool isForward = dir == ArrowDirection.Forward;
-                    if (isForward && nextIsStartNode && isOneWay) {
-                        nextSegmentIds.Add(nextSegmentId);
-                    }
-                }
-                if (nextSegmentIds.Count == 0) {
-                    //not a round about
-                    return false;
-                } else {
-                    //TODO: add code for LHD and RHD
-                    //TODO: consider multiple forward branches
-                    ushort nextSegmentId = nextSegmentIds[0];
-                    visitorFun?.Invoke(segmentId);
-
-                    ref NetSegment nextSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[nextSegmentId];
-                    bool formsLoop = nextSegment.m_endNode == firstSegment.m_startNode;
-                    if (formsLoop) {
+                    if (isRAbout) {
                         return true;
-                    }
-                }
-            } while (true);
+                    } //end if
+                } // end if
+            } // end for
+            segmentList.Remove(segmentId);
+            return false;
         }
     } // end class
-}
+}//end namespace

@@ -160,6 +160,18 @@ namespace TrafficManager.UI.SubTools {
                 } //end for
             } // end method
 
+            private static bool IsHighwayJunction(ushort nodeId) {
+                ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+                IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+                bool ret = true;
+                for(int i = 0; i < 8; ++i) {
+                    ushort segmentId = node.GetSegment(i);
+                    if (segmentId != 0) {
+                        ret &= segMan.CalculateIsHighway(segmentId);
+                    }
+                }
+                return ret;
+            }
             private static bool Func(SegmentVisitData data) {
                 foreach (bool startNode in Constants.ALL_BOOL) {
                     TrafficPriorityManager.Instance.SetPrioritySign(
@@ -184,10 +196,10 @@ namespace TrafficManager.UI.SubTools {
                         startNode,
                         true);
 
+                    bool isHighway = IsHighwayJunction(nodeId);
+                    ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
                     for (int i = 0; i < 8; ++i) {
-                        ushort otherSegmentId = Singleton<NetManager>.instance.m_nodes
-                                                                     .m_buffer[nodeId]
-                                                                     .GetSegment(i);
+                        ushort otherSegmentId = node.GetSegment(i);
 
                         if (otherSegmentId == 0 || otherSegmentId == data.CurSeg.segmentId) {
                             continue;
@@ -198,15 +210,18 @@ namespace TrafficManager.UI.SubTools {
                             otherSegmentId);
 
                         if (dir != ArrowDirection.Forward) {
+                            bool startNode2 = (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, nodeId);
                             TrafficPriorityManager.Instance.SetPrioritySign(
                                 otherSegmentId,
-                                (bool)Constants.ServiceFactory.NetService.IsStartNode(
-                                    otherSegmentId,
-                                    nodeId),
+                                startNode2,
                                 PriorityType.Yield);
-                        }
-                    }
-                }
+                            if(isHighway) {
+                                //ignore highway rules:
+                                JunctionRestrictionsManager.Instance.SetLaneChangingAllowedWhenGoingStraight(otherSegmentId, startNode2, true);
+                            }
+                        }// end if
+                    } // end if
+                }//end for
                 return true;
             }
 
