@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -77,9 +77,38 @@
         }
 
         /// <summary>
-        /// Determines if there exist custom lane connections at the specified node
+        /// Determines if there exist custom lane connections at the specified segment end
         /// </summary>
+        /// <param name="segmentId"></param>
         /// <param name="nodeId"></param>
+        public bool HasSegmentConnections(ushort segmentId, ushort nodeId) {
+            if (!Options.laneConnectorEnabled) {
+                return false;
+            }
+            bool ret = false;
+            Services.NetService.IterateSegmentLanes(
+              segmentId,
+              (uint laneId,
+               ref NetLane lane,
+               NetInfo.Lane laneInfo,
+               ushort segId,
+               ref NetSegment seg,
+               byte laneIndex) => {
+                   if (HasConnections(
+                        laneId,
+                        seg.m_startNode == nodeId)) {
+                       ret = true;
+                       return false;
+                   }
+                   return true;
+               });
+            return ret;
+       }
+
+            /// <summary>
+            /// Determines if there exist custom lane connections at the specified node
+            /// </summary>
+            /// <param name="nodeId"></param>
         public bool HasNodeConnections(ushort nodeId) {
             if (!Options.laneConnectorEnabled) {
                 return false;
@@ -89,23 +118,7 @@
             Services.NetService.IterateNodeSegments(
                 nodeId,
                 (ushort segmentId, ref NetSegment segment) => {
-                    Services.NetService.IterateSegmentLanes(
-                        segmentId,
-                        (uint laneId,
-                         ref NetLane lane,
-                         NetInfo.Lane laneInfo,
-                         ushort segId,
-                         ref NetSegment seg,
-                         byte laneIndex) => {
-                            if (HasConnections(
-                                laneId,
-                                seg.m_startNode == nodeId)) {
-                                ret = true;
-                                return false;
-                            }
-
-                            return true;
-                        });
+                    ret = HasSegmentConnections(segmentId, nodeId);
                     return !ret;
                 });
             return ret;

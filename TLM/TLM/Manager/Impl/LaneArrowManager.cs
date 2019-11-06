@@ -241,15 +241,25 @@ namespace TrafficManager.Manager.Impl {
             /// <summary>
             /// separates turning lanes for all segments attached to nodeId
             /// </summary>
-            public static void SeparateNode(ushort nodeId) {
+            public static void SeparateNode(ushort nodeId, out SetLaneArrowError res ) {
                 NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
                 if (nodeId == 0) {
+                    res = SetLaneArrowError.Invalid;
                     return;
                 }
                 if ((node.m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+                    res = SetLaneArrowError.Invalid;
                     return;
                 }
-                //var nSegments = node.CountSegments();
+                if (LaneConnectionManager.Instance.HasNodeConnections(nodeId)) {
+                    res = SetLaneArrowError.LaneConnection;
+                    return;
+                }
+                if (Options.highwayRules && IsHighwayJunction(nodeId)) {
+                    res = SetLaneArrowError.HighwayArrows;
+                    return;
+                }
+                res = SetLaneArrowError.Success;
 
                 for (int i = 0; i < 8; i++) {
                     ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(i);
@@ -257,14 +267,38 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    SeparateSegmentLanes(segmentId, nodeId);
+                    SeparateSegmentLanes(segmentId, nodeId, out res);
                 }
+                Debug.Assert(res == SetLaneArrowError.Success);
+            }
+
+            private static bool IsHighwayJunction(ushort nodeId) {
+                ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+                IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+                bool ret = true;
+                for (int i = 0; i < 8; ++i) {
+                    ushort segmentId = node.GetSegment(i);
+                    if (segmentId != 0) {
+                        ret &= segMan.CalculateIsHighway(segmentId);
+                    }
+                }
+                return ret;
             }
 
             /// <summary>
             /// separates turning lanes for the input segment on the input node.
             /// </summary>
-            public static void SeparateSegmentLanes(ushort segmentId, ushort nodeId) {
+            public static void SeparateSegmentLanes(ushort segmentId, ushort nodeId, out SetLaneArrowError res) {
+                if(segmentId == 0 || nodeId == 0) {
+                    res = SetLaneArrowError.Invalid;
+                    return;
+                }
+                if (Options.highwayRules && IsHighwayJunction(nodeId)) {
+                    res = SetLaneArrowError.HighwayArrows;
+                    return;
+                }
+                res = SetLaneArrowError.Success;
+
                 ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                 bool startNode = seg.m_startNode == nodeId;
 
@@ -272,14 +306,21 @@ namespace TrafficManager.Manager.Impl {
                 IList<LanePos> laneList =
                     Constants.ServiceFactory.NetService.GetSortedLanes(
                         segmentId,
-                        ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
+                        ref seg,
                         startNode,
                         LaneArrowManager.LANE_TYPES,
                         LaneArrowManager.VEHICLE_TYPES,
                         true
                         );
                 int srcLaneCount = laneList.Count();
-                if (srcLaneCount == 1) {
+                for(int i = 0; i < srcLaneCount; ++i) {
+                    if(LaneConnectionManager.Instance.HasConnections(laneList[i].laneId, startNode)) {
+                        res = SetLaneArrowError.LaneConnection;
+                        return;
+                    }
+                }
+
+                if (srcLaneCount <= 1) {
                     return;
                 }
 
@@ -351,6 +392,45 @@ namespace TrafficManager.Manager.Impl {
                     }
                     LaneArrowManager.Instance.SetLaneArrows(laneList[i].laneId, arrow);
                 }
+            }
+
+            /// <summary>
+            /// returns the number of all target lanes from input segment toward the secified direction.
+            /// </summary>
+            private static int CountTargetLanesTowardDirection(ushort segmentId, ushort nodeId, ArrowDirection dir) {
+                int count = 0;
+                ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                bool startNode = seg.m_startNode == nodeId;
+                IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+                ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
+
+                LaneArrowManager.Instance.Services.NetService.IterateNodeSegments(
+                    nodeId,
+                    (ushort otherSegmentId, ref NetSegment otherSeg) => {
+                        ArrowDirection dir2 = segEndMan.GetDirection(ref segEnd, otherSegmentId);
+                        if (dir == dir2) {
+                            int forward = 0, backward = 0;
+                            otherSeg.CountLanes(
+                                otherSegmentId,
+                                NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                                VehicleInfo.VehicleType.Car,
+                                ref forward,
+                                ref backward);
+                            bool startNode2 = otherSeg.m_startNode == nodeId;
+                            //xor because inverting 2 times is redundant.
+                            if (startNode2) {
+                                count += forward;
+                            } else {
+                                count += backward;
+                            }
+                            Log._Debug(
+                                $"dir={dir} startNode={startNode} segmentId={segmentId}\n" +
+                                $"startNode2={startNode2} forward={forward} backward={backward} count={count}");
+                        }
+                        return true;
+                    });
+
+                return count;
             }
 
             /// <summary>
