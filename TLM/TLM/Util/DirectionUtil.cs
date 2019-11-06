@@ -26,9 +26,8 @@ namespace TrafficManager.Util {
                             ref backward);
 
                         bool startNode2 = otherSeg.m_startNode == nodeId;
-                        bool invert2 = (NetManager.instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-                            //xor because inverting 2 times is redundant.
-                        if (invert2 ^ (!startNode2)) {
+
+                        if (startNode2) {
                             count += backward;
                         } else {
                             count += forward;
