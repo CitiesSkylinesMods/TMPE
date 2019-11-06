@@ -239,7 +239,7 @@ namespace TrafficManager.Manager.Impl {
                     res = SetLaneArrowError.LaneConnection;
                     return;
                 }
-                if (IsHighwayJunction(nodeId)) {
+                if (Options.highwayRules && IsHighwayJunction(nodeId)) {
                     res = SetLaneArrowError.HighwayArrows;
                     return;
                 }
@@ -277,7 +277,7 @@ namespace TrafficManager.Manager.Impl {
                     res = SetLaneArrowError.Invalid;
                     return;
                 }
-                if (IsHighwayJunction(nodeId) && ) {
+                if (Options.highwayRules && IsHighwayJunction(nodeId)) {
                     res = SetLaneArrowError.HighwayArrows;
                     return;
                 }
