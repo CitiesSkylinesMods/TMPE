@@ -36,15 +36,29 @@ namespace TrafficManager.UI.SubTools {
 
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            SetLaneArrowError res = SetLaneArrowError.Success;
             if (altDown) {
-                LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId);
-                return;
+                LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId, out res);
             } else if (ctrlDown) {
-                LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId);
-                return;
+                LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId, out res);
+            } else {
+                SelectedSegmentId = HoveredSegmentId;
+                SelectedNodeId = HoveredNodeId;
             }
-            SelectedSegmentId = HoveredSegmentId;
-            SelectedNodeId = HoveredNodeId;
+            switch (res) {
+                case SetLaneArrowError.HighwayArrows: {
+                     MainTool.ShowError(
+                        Translation.LaneRouting.Get("Dialog.Text:Disabled due to highway rules"));
+                        break;
+                }
+
+                case SetLaneArrowError.LaneConnection: {
+                    MainTool.ShowError(
+                       Translation.LaneRouting.Get("Dialog.Text:Disabled due to manual connection"));
+                        break;
+                    }
+            }
+
         }
 
         public override void OnSecondaryClickOverlay() {
