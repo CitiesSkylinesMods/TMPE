@@ -401,7 +401,7 @@ namespace TrafficManager.Manager.Impl {
                                 ref forward,
                                 ref backward);
                             bool startNode2 = otherSeg.m_startNode == nodeId;
-                            //xor because inverting 2 times is redundant.
+
                             if (startNode2) {
                                 count += forward;
                             } else {
