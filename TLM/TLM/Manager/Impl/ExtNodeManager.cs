@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using API.Geometry;
     using API.Manager;
     using API.Traffic.Data;
@@ -27,6 +27,32 @@
             for (uint i = 0; i < ExtNodes.Length; ++i) {
                 ExtNodes[i] = new ExtNode((ushort)i);
             }
+        }
+
+        /// <summary>
+        /// assuming highway rules are on, does the junction follow highway rules?
+        /// </summary>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public static bool JunctionHasHighwayRules(ushort nodeId) {
+            return IsHighwayJunction(nodeId) && !LaneConnectionManager.Instance.HasNodeConnections(nodeId);
+        }
+
+        /// <summary>
+        /// Are all segments at nodeId highways?
+        /// </summary>
+        /// <param name="nodeId"></param>
+        /// <returns></returns>
+        public static bool IsHighwayJunction(ushort nodeId) {
+            IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+            bool ret = true;
+            Constants.ServiceFactory.NetService.IterateNodeSegments(
+                nodeId,
+                (ushort segmentId, ref NetSegment segment) => {
+                    ret &= segMan.CalculateIsHighway(segmentId);
+                    return ret;
+                });
+            return ret;
         }
 
         public bool IsValid(ushort nodeId) {

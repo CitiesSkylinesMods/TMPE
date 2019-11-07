@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using API.Manager;
     using API.Traffic.Data;
     using ColossalFramework;
@@ -86,6 +86,35 @@
             }
 
             Constants.ManagerFactory.GeometryManager.OnUpdateSegment(ref extSegment);
+        }
+
+        /// <summary>
+        ///  Check if the given segments are part of a oneway road.
+        /// </summary>
+        /// <param name="segmentId1"></param>
+        /// <param name="segmentId2"></param>
+        /// <param name="nodeId">shared node between segment1 and segment2</param>
+        /// <returns></returns>
+        public bool IsOneWayRoad(ushort segmentId1, ushort segmentId2, ushort nodeId) {
+            //Debug.Log($"A:{segmentId1}, {segmentId2}");
+            bool isOneWay1 = CalculateIsOneWay(segmentId1);
+            bool isOneWay2 = CalculateIsOneWay(segmentId2);
+            if (!isOneWay1 || !isOneWay2) {
+                return false;
+            }
+
+            IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+            int index1 = segEndMan.GetIndex(segmentId1, nodeId);
+            int index2 = segEndMan.GetIndex(segmentId1, nodeId);
+            if (index1 <= 0 || index2 <= 0) {
+                return false; //nodeId is not a shared node.
+            }
+
+            ExtSegmentEnd seg1 = segEndMan.ExtSegmentEnds[index1];
+            ExtSegmentEnd seg2 = segEndMan.ExtSegmentEnds[index2];
+
+            bool ret = (seg1.outgoing && seg2.incoming) || (seg1.incoming && seg2.outgoing);
+            return ret;
         }
 
         public bool CalculateIsOneWay(ushort segmentId) {

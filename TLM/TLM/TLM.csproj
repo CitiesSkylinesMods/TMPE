@@ -276,15 +276,15 @@
     <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\Caching\CameraTransformValue.cs" />
     <Compile Include="Util\Caching\GenericArrayCache.cs" />
-    <Compile Include="Util\DirectionUtil.cs" />
     <Compile Include="Util\FloatUtil.cs" />
     <Compile Include="Util\GenericObservable.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\LoopUtil.cs" />
     <Compile Include="Util\ModsCompatibilityChecker.cs" />
+    <Compile Include="Util\PriorityRoad.cs" />
+    <Compile Include="Util\RoundAboutTraverser.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
-    <Compile Include="Util\SegmentRundAboutTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
@@ -433,9 +433,6 @@
     <EmbeddedResource Include="Resources\left_on_red_forbidden.png" />
     <EmbeddedResource Include="Resources\right_on_red_allowed.png" />
     <EmbeddedResource Include="Resources\right_on_red_forbidden.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.7\analyzers\dotnet\cs\Microsoft.CodeAnalysis.VersionCheckAnalyzer.resources.dll" />
