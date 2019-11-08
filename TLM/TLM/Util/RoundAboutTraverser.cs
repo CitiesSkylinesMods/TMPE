@@ -1,4 +1,5 @@
 namespace TrafficManager.Util {
+    using TrafficManager.UI.SubTools;
     using System.Collections.Generic;
     using ColossalFramework;
     using UnityEngine;
@@ -8,6 +9,7 @@ namespace TrafficManager.Util {
     using TrafficManager.Manager.Impl;
     using API.Traffic.Enums;
     using GenericGameBridge.Service;
+    using State;
 
     public class RoundAboutTraverser {
         public static RoundAboutTraverser Instance = new RoundAboutTraverser();
@@ -17,75 +19,38 @@ namespace TrafficManager.Util {
 
         public List<ushort> segmentList = null;
 
+        public static void FixLanesRAbout(ushort segmentId) {
+            if (!Options.rabout_DecicatedExitLanes) {
+                return;
+            }
 
-        private void FixRules(ushort segmentId) {
-            foreach (bool startNode in Constants.ALL_BOOL) {
-                TrafficPriorityManager.Instance.SetPrioritySign(
-                    segmentId,
-                    startNode,
-                    PriorityType.Main);
-
-                ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(
-                    segmentId,
-                    startNode);
-
-                IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-                ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[
-                    segEndMan.GetIndex(segmentId, startNode)];
-
-                JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
-                    segmentId,
-                    startNode
-                    , false);
-                JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
-                    segmentId,
-                    startNode,
-                    true);
-
-                //Apply rules for connected roads
-                bool isHighway = ExtNodeManager.IsHighwayJunction(nodeId);
-                ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
-                for (int i = 0; i < 8; ++i) {
-                    ushort otherSegmentId = node.GetSegment(i);
-
-                    if (otherSegmentId == 0 || otherSegmentId == segmentId || segmentList.Contains(otherSegmentId) ) {
-                        continue; // continue if it is part of roundabout
-                    }
-
-                    bool startNode2 = (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, nodeId);
-                    TrafficPriorityManager.Instance.SetPrioritySign(
-                        otherSegmentId,
-                        startNode2,
-                        PriorityType.Yield);
-                    if (isHighway) {
-                        //ignore highway rules:
-                        JunctionRestrictionsManager.Instance.SetLaneChangingAllowedWhenGoingStraight(otherSegmentId, startNode2, true);
-                    } // endif
-                } // end for
-            }//end foreach
-            return;
-        }
-
-        public static void FixLanes(ushort segmentId) {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            /*ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             bool startNode = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
             ushort nodeId;
             if (startNode) {
                 nodeId = segment.m_startNode;
             } else {
                 nodeId = segment.m_endNode;
-            }
+            }*/
+            ushort nodeId = GetHeadNode(segmentId);
             if (LaneArrowManager.SeparateTurningLanes.CanChangeLanes(segmentId, nodeId) != SetLaneArrowError.Success) {
                 return;
             }
 
+
+            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             ref NetNode node = ref NetManager.instance.m_nodes.m_buffer[nodeId];
             bool isJunction = node.CountSegments() >= 3;
-            Debug.Log($"segment={segmentId} node={nodeId} startNode={startNode} isJunction={isJunction}");
+            bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+            //Debug.Log($"segment={segmentId} node={nodeId} startNode={startNode} isJunction={isJunction}");
 
-            //Fix turning lanes:
-            // direction of target lanes
-            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            if (!isJunction) {
+                if (Options.rabout_NoLaneSwitchingInRabout) {
+                    //LaneConnectorTool.StayInLane(nodeId, LaneConnectorTool.StayInLaneMode.Both);
+                }
+                return;
+            }
+
             IList<LanePos> laneList =
                 Constants.ServiceFactory.NetService.GetSortedLanes(
                     segmentId,
@@ -95,38 +60,6 @@ namespace TrafficManager.Util {
                     LaneArrowManager.VEHICLE_TYPES,
                     true);
             int n_src = laneList.Count;
-
-            if (!isJunction) {
-                //if this is not a section and the next junction has as many lanes then connect lanes.
-                ushort otherSegmentId = 0;
-                for (int i = 0; i < 8; ++i) {
-                    otherSegmentId = node.GetSegment(i);
-                    if (otherSegmentId != 0 && otherSegmentId != segmentId)
-                        break;
-                }
-                ref NetSegment otherSegment = ref NetManager.instance.m_segments.m_buffer[otherSegmentId];
-                bool startNode2 = (otherSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-                IList<LanePos> targetLaneList =
-                    Constants.ServiceFactory.NetService.GetSortedLanes(
-                        otherSegmentId,
-                        ref otherSegment,
-                        startNode2,
-                        LaneArrowManager.LANE_TYPES,
-                        LaneArrowManager.VEHICLE_TYPES,
-                        true);
-
-                Debug.Log($"segmentId={segmentId} otherSegmentId={otherSegmentId} startNode2={startNode2} n_src={n_src} n_trg={targetLaneList.Count}");
-                if (n_src == targetLaneList.Count) {
-                    // Connect lanes
-                    for (int i = 0; i < n_src; ++i) {
-                        LaneConnectionManager.Instance.AddLaneConnection(
-                            laneList[i].laneId,
-                            targetLaneList[i].laneId,
-                            startNode);
-                    }
-                }
-                return;
-            }
 
             // check for exits.
             bool bLeft, bRight, bForward;
@@ -169,26 +102,105 @@ namespace TrafficManager.Util {
             }
         }
 
+        private static void FixRulesRAbout(ushort segmentId) {
+            foreach (bool startNode in Constants.ALL_BOOL) {
+                TrafficPriorityManager.Instance.SetPrioritySign(
+                    segmentId,
+                    startNode,
+                    PriorityType.Main);
+
+                ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(
+                    segmentId,
+                    startNode);
+
+                IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+                ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[
+                    segEndMan.GetIndex(segmentId, startNode)];
+
+                if (Options.rabout_NoCrossingRAbout) {
+                    JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
+                        segmentId,
+                        startNode
+                        , false);
+                }
+                JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
+                    segmentId,
+                    startNode,
+                    true);
+            }
+        }
+
+        private static void FixRulesMinor(ushort segmentId, ushort nodeId) {
+            bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+            bool isHighway = ExtNodeManager.IsHighwayJunction(nodeId);
+
+            if (Options.rabout_NoCrossingAtConnections) {
+                JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
+                    segmentId,
+                    startNode,
+                    false);
+            }
+            TrafficPriorityManager.Instance.SetPrioritySign(
+                segmentId,
+                startNode,
+                PriorityType.Yield);
+
+            if (isHighway || Options.rabout_SwitchLanesAtEntry) {
+                //ignore highway rules:
+                JunctionRestrictionsManager.Instance.SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, true);
+            } // endif
+        }
+
+        private static void FixLanesMinor(ushort segmentId, ushort nodeId) {
+            if (!Options.rabout_NoLaneSwitchingNearEntries) {
+                return;
+            }
+            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            Debug.Log($"segment={segmentId} node={nodeId} len={seg.m_averageLength}");
+            int shortUnit = 5;
+            int MeterPerUnit = 8;
+            if ( seg.m_averageLength >= shortUnit * MeterPerUnit) {
+                return;
+            }
+            ushort otherNodeId = seg.GetOtherNode(nodeId);
+            Debug.Log($"segment={segmentId} node={nodeId} len={seg.m_averageLength} otherNodeId={otherNodeId}");
+            //LaneConnectorTool.StayInLane(otherNodeId, LaneConnectorTool.StayInLaneMode.Both);
+        }
+
+        private void FixMinor(ushort nodeId) {
+            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            for (int i = 0; i < 8; ++i) {
+                //find connected segments.
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId == 0 || segmentList.Contains(segmentId)) {
+                    continue; // continue if it is part of roundabout
+                } // end if
+
+                FixRulesMinor(segmentId, nodeId);
+                FixLanesMinor(segmentId, nodeId);
+            }//end for
+        }
+
         /// <summary>
         /// Fixes the round about or returns false if it is not a round about.
         /// </summary>
         /// <param name="segmentId"></param>
         /// <returns></returns>
-        public bool FixRabout(ushort segmentId) {
-            bool isRAbout = Instance.TraverseLoop(segmentId);
+        public bool FixRabout(ushort initialSegmentId) {
+            bool isRAbout = Instance.TraverseLoop(initialSegmentId);
             if (!isRAbout) {
-                Debug.Log($"segment {segmentId} not a roundabout.");
+                Debug.Log($"segment {initialSegmentId} not a roundabout.");
                 return false;
             }
             int count = segmentList.Count;
-            string m = $"\n segmentId={segmentId} seglist.count={count}\n";
-            for (int i = 0; i < count; ++i)
-                m += $"[{i}]:[{segmentList[i]}]";
-            Debug.Log(m);
+            string m = $"\n segmentId={initialSegmentId} seglist.count={count}\n";
 
-            foreach (ushort segId in segmentList) {
-                FixRules(segId);
-                FixLanes(segId);
+            for (int i = 0; i < count; ++i) {
+                ushort segId = segmentList[i];
+                //Debug.Log($"{i} : {segId}");
+                FixLanesRAbout(segId);
+                FixRulesRAbout(segId);
+                FixMinor(GetHeadNode(segId));
             }
             return true;
         }

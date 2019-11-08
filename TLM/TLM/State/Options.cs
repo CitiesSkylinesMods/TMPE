@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.State {
+namespace TrafficManager.State {
     using System.Collections.Generic;
     using System.Reflection;
     using API.Traffic.Enums;
@@ -94,6 +94,16 @@
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
 
+        //mass edit tab
+        public static bool rabout_SwitchLanesAtEntry = false;
+        public static bool rabout_NoLaneSwitchingInRabout = false;
+        public static bool rabout_NoLaneSwitchingNearEntries = true;
+        public static bool rabout_DecicatedExitLanes = false;
+        public static bool rabout_NoCrossingRAbout = true;
+        public static bool rabout_NoCrossingAtConnections = false;
+
+        public static bool avn_NoZebraCrossingAcrossAvn = true;
+
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for
         /// a new language. Takes a second, very slow.
@@ -141,6 +151,10 @@
             // VEHICLE RESTRICTIONS
             ++tabIndex;
             OptionsVehicleRestrictionsTab.MakeSettings_VehicleRestrictions(tabStrip, tabIndex);
+
+            // MASS EDIT
+            ++tabIndex;
+            OptionsMassEditTab.MakeSettings_MasEdit(tabStrip, tabIndex);
 
             // OVERLAYS
             ++tabIndex;

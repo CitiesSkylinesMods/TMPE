@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using System;
     using API.Manager;
     using API.Traffic.Enums;
@@ -197,6 +197,34 @@
                 OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
             }
 
+            if (data.Length >= 43) {
+                OptionsMassEditTab.Set_RAbout_SwitchLanesAtEntry(data[42] == 1);
+            }
+
+            if (data.Length >= 44) {
+                OptionsMassEditTab.Set_RAbout_NoLaneSwitchingInRabout(data[43] == 1);
+            }
+
+            if (data.Length >= 45) {
+                OptionsMassEditTab.Set_RAbout_NoLaneSwitchingNearEntries(data[44] == 1);
+            }
+
+            if (data.Length >= 46) {
+                OptionsMassEditTab.Set_RAbout_DecicatedExitLanes(data[45] == 1);
+            }
+
+            if (data.Length >= 47) {
+                OptionsMassEditTab.Set_RAbout_NoCrossingRAbout(data[46] == 1);
+            }
+
+            if (data.Length >= 48) {
+                OptionsMassEditTab.Set_RAbout_NoCrossingAtConnections(data[47] == 1);
+            }
+
+            if (data.Length >= 49) {
+                OptionsMassEditTab.Set_Avn_NoZebraCrossingAcrossAvn(data[48] == 1);
+            }
+
             return true;
         }
 
@@ -243,7 +271,25 @@
                 (byte)(Options.turnOnRedEnabled ? 1 : 0),
                 (byte)(Options.allowNearTurnOnRed ? 1 : 0),
                 (byte)(Options.allowFarTurnOnRed ? 1 : 0),
-                (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0)
+                (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0),
+                            /*
+private static UICheckBox _rabout_SwitchLanesAtEntryToggle;43
+private static UICheckBox _rabout_NoLaneSwitchingInRaboutToggle;44
+private static UICheckBox _rabout_NoLaneSwitchingNearEntriesToggle;45
+private static UICheckBox _rabout_DecicatedExitLanesToggle;//46
+private static UICheckBox _rabout_NoCrossingRAboutToggle;//47
+private static UICheckBox _rabout_NoCrossingAtConnectionsToggle;//48
+
+private static UICheckBox _avn_NoZebraCrossingAcrossAvnToggle;49
+*/
+                (byte)(Options.rabout_SwitchLanesAtEntry ? 1 : 0),
+                (byte)(Options.rabout_NoLaneSwitchingInRabout ? 1 : 0),
+                (byte)(Options.rabout_NoLaneSwitchingNearEntries ? 1 : 0),
+                (byte)(Options.rabout_DecicatedExitLanes ? 1 : 0),
+                (byte)(Options.rabout_NoCrossingRAbout ? 1 : 0),
+                (byte)(Options.rabout_NoCrossingAtConnections ? 1 : 0),
+                (byte)(Options.avn_NoZebraCrossingAcrossAvn ? 1 : 0),
+
             };
         }
     }

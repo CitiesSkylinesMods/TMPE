@@ -209,6 +209,7 @@
     <Compile Include="State\OptionsTabs\OptionsGeneralTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsKeybindsTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsMaintenanceTab.cs" />
+    <Compile Include="State\OptionsTabs\OptionsMassEditTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsOverlaysTab.cs" />
     <Compile Include="State\OptionsTabs\OptionsVehicleRestrictionsTab.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />

@@ -10,6 +10,7 @@ namespace TrafficManager.Util {
     using UnityEngine;
     using CSUtil.Commons;
     using static TrafficManager.Util.SegmentTraverser;
+    using State;
 
     public static class PriorityRoad {
         public static void FixRoad(ushort initialSegmentId) {
@@ -93,7 +94,9 @@ namespace TrafficManager.Util {
         private static void FixMajorSegmentRules(ushort segmentId, ushort nodeId) {
             bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
             JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
-            JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(segmentId, startNode, false);
+            if(Options.avn_NoZebraCrossingAcrossAvn) {
+                JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(segmentId, startNode, false);
+            }
             TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Main);
         }
 
@@ -132,17 +135,24 @@ namespace TrafficManager.Util {
             segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out bLeft, out bForward, out bRight);
 
 
-            //TODO: code for left hand drive
-            //TODO: code for bendy avenue.
-            // ban left turns and use of FR arrow where applicable.
             for (int i = 0; i < srcLaneCount; ++i) {
                 LaneArrowManager.Instance.SetLaneArrows(
                     laneList[i].laneId,
                     LaneArrows.Forward);
             }
-            if (srcLaneCount > 0 && bRight) {
-                LanePos righMostLane = laneList[laneList.Count - 1];
-                LaneArrowManager.Instance.SetLaneArrows(righMostLane.laneId, LaneArrows.ForwardRight);
+            bool lhd = LaneArrowManager.Instance.Services.SimulationService.LeftHandDrive;
+            if (!lhd) {
+                // RHD: ban left turns at avenue. use FR arrow where applicable.
+                if (srcLaneCount > 0 && bRight) {
+                    LanePos righMostLane = laneList[laneList.Count - 1];
+                    LaneArrowManager.Instance.SetLaneArrows(righMostLane.laneId, LaneArrows.ForwardRight);
+                }
+            } else {
+                // LHD: ban right turns at avenue. use LF arrow where applicable.
+                if (srcLaneCount > 0 && bLeft) {
+                    LanePos leftMostLane = laneList[0];
+                    LaneArrowManager.Instance.SetLaneArrows(leftMostLane.laneId, LaneArrows.LeftForward);
+                }
             }
         }
 
@@ -167,26 +177,41 @@ namespace TrafficManager.Util {
                     );
             int srcLaneCount = laneList.Count;
 
-            LaneArrows turnarrow = LaneArrows.Right;
+            bool bLeft, bRight, bForward;
+            IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+            ref ExtSegmentEnd segEnd = ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
+            segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out bLeft, out bForward, out bRight);
+
+            // LHD vs RHD variables.
+            bool lhd = LaneArrowManager.Instance.Services.SimulationService.LeftHandDrive;
+            ArrowDirection nearDir = lhd ? ArrowDirection.Left : ArrowDirection.Right;
+            LaneArrows nearArrow   = lhd ? LaneArrows.Left     : LaneArrows.Right;
+            bool             bnear = lhd ? bLeft               : bRight;
+            int sideLaneIndex      = lhd ? srcLaneCount - 1    : 0;
+
+            LaneArrows turnArrow = nearArrow;
             {
-                // Check for slight right turn into the main road.
-                IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-                ref ExtSegmentEnd segEnd = ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
+                // Check for slight turn into the main road.
                 ArrowDirection dir0 = segEndMan.GetDirection(ref segEnd, segList[0]);
                 ArrowDirection dir1 = segEndMan.GetDirection(ref segEnd, segList[1]);
                 Debug.Assert(dir1 != dir0); // Assume main road is not angled: then dir1 != dir0
-                if (dir0 != ArrowDirection.Right && dir1 != ArrowDirection.Right) {
-                    turnarrow = LaneArrows.Forward; //slight right uses forward arrow.
+                if (dir0 != nearDir && dir1 != nearDir) {
+                    turnArrow = LaneArrows.Forward; //slight turn uses forward arrow.
                 }
             }
 
-            // TODO: add code for bendy roads
-            // TODO: add code for LHD
-            // only right turn
+            // only take the near turn into main road.
             for (int i = 0; i < srcLaneCount; ++i) {
-                LaneArrowManager.Instance.SetLaneArrows(
-                    laneList[i].laneId,
-                    turnarrow);
+                LaneArrowManager.Instance.SetLaneArrows(laneList[i].laneId, turnArrow);
+            }
+
+            /* in case there are multiple minor roads attached to the priority road at the same side
+             * and the main road is straigh, then add a turn arrow into the other minor roads.
+             */
+            if(srcLaneCount > 0 && bnear && turnArrow == LaneArrows.Forward) {
+                LaneArrowManager.Instance.AddLaneArrows( //TODO test
+                    laneList[sideLaneIndex].laneId,
+                    nearArrow);
             }
         }
 
