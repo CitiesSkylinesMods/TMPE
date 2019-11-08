@@ -8,8 +8,29 @@ namespace TrafficManager.Util {
     using System;
     using GenericGameBridge.Service;
     using UnityEngine;
+    using CSUtil.Commons;
+    using static TrafficManager.Util.SegmentTraverser;
 
-    class PriorityRoad {
+    public static class PriorityRoad {
+        public static void FixRoad(ushort initialSegmentId) {
+            SegmentTraverser.Traverse(
+                initialSegmentId,
+                TraverseDirection.AnyDirection,
+                TraverseSide.Straight,
+                SegmentStopCriterion.None,
+                VisitorFunc);
+        }
+
+        private static bool VisitorFunc(SegmentVisitData data) {
+            ushort segmentId = data.CurSeg.segmentId;
+            foreach (bool startNode in Constants.ALL_BOOL) {
+                ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
+                //ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+                FixJunction(nodeId);
+            }
+            return true;
+        }
+
         public static void FixJunction(ushort nodeId) {
             if (nodeId == 0) {
                 return;
@@ -39,6 +60,11 @@ namespace TrafficManager.Util {
             bool ignoreLanes =
                 ExtSegmentManager.Instance.CalculateIsOneWay(seglist[0]) ||
                 ExtSegmentManager.Instance.CalculateIsOneWay(seglist[1]);
+
+            // Turning allowed when the main road is agnled.
+            ArrowDirection dir = GetDirection(seglist[0], seglist[1], nodeId);
+            ignoreLanes &= dir != ArrowDirection.Forward;
+
             Debug.Log($"ignorelanes={ignoreLanes}");
 
             for (int i = 0; i < seglist.Count; ++i) {
@@ -50,13 +76,19 @@ namespace TrafficManager.Util {
                 } else {
                     FixMinorSegmentRules(seglist[i], nodeId);
                     if (!ignoreLanes) {
-                        FixMinorSegmentLanes(seglist[i], nodeId);
+                        FixMinorSegmentLanes(seglist[i], nodeId, ref seglist);
                     }
                 }
             } //end for
         } // end method
 
-
+        private static ArrowDirection GetDirection(ushort segmentId, ushort otherSegmentId, ushort nodeId) {
+            IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+            bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+            ref ExtSegmentEnd segEnd = ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
+            ArrowDirection dir = segEndMan.GetDirection(ref segEnd, otherSegmentId);
+            return dir;
+        }
 
         private static void FixMajorSegmentRules(ushort segmentId, ushort nodeId) {
             bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
@@ -114,9 +146,9 @@ namespace TrafficManager.Util {
             }
         }
 
-        private static void FixMinorSegmentLanes(ushort segmentId, ushort nodeId) {
+        private static void FixMinorSegmentLanes(ushort segmentId, ushort nodeId, ref List<ushort> segList) {
             if (LaneArrowManager.SeparateTurningLanes.CanChangeLanes(segmentId, nodeId) != SetLaneArrowError.Success) {
-                Debug.Log("cant change lanes");
+                Debug.Log("can't change lanes");
                 return;
             }
             ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
@@ -135,9 +167,18 @@ namespace TrafficManager.Util {
                     );
             int srcLaneCount = laneList.Count;
 
-            IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            ref ExtSegmentEnd segEnd = ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
-
+            LaneArrows turnarrow = LaneArrows.Right;
+            {
+                // Check for slight right turn into the main road.
+                IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+                ref ExtSegmentEnd segEnd = ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
+                ArrowDirection dir0 = segEndMan.GetDirection(ref segEnd, segList[0]);
+                ArrowDirection dir1 = segEndMan.GetDirection(ref segEnd, segList[1]);
+                Debug.Assert(dir1 != dir0); // Assume main road is not angled: then dir1 != dir0
+                if (dir0 != ArrowDirection.Right && dir1 != ArrowDirection.Right) {
+                    turnarrow = LaneArrows.Forward; //slight right uses forward arrow.
+                }
+            }
 
             // TODO: add code for bendy roads
             // TODO: add code for LHD
@@ -145,7 +186,7 @@ namespace TrafficManager.Util {
             for (int i = 0; i < srcLaneCount; ++i) {
                 LaneArrowManager.Instance.SetLaneArrows(
                     laneList[i].laneId,
-                    LaneArrows.Right);
+                    turnarrow);
             }
         }
 

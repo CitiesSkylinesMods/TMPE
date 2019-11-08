@@ -31,16 +31,24 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnPrimaryClickOverlay() {
-            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            //bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-            if (shiftDown) {
+            if(ctrlDown || shiftDown) {
                 if (HoveredSegmentId == 0) {
                     return;
                 }
-
                 SelectedNodeId = 0;
+            }
 
+            if (ctrlDown && shiftDown) {
+                bool isRAbout = RoundAboutTraverser.Instance.FixRabout(HoveredSegmentId);
+                if (!isRAbout) {
+                    PriorityRoad.FixRoad(HoveredSegmentId);
+                }
+            } else if (ctrlDown) {
+                PriorityRoad.FixJunction(HoveredNodeId);
+            } else if (shiftDown) {
                 var primaryPrioType = PriorityType.None;
                 var secondaryPrioType = PriorityType.None;
 
@@ -123,14 +131,6 @@ namespace TrafficManager.UI.SubTools {
                     (PrioritySignsMassEditMode)(((int)massEditMode + 1) %
                                                 Enum.GetValues(typeof(PrioritySignsMassEditMode))
                                                     .GetLength(0));
-            } else if (altDown) {
-                RoundAboutTraverser.FixRabout(HoveredSegmentId);
-                RefreshCurrentPriorityNodeIds();
-                return;
-            } else if (ctrlDown) {
-                PriorityRoad.FixJunction(HoveredNodeId);
-                RefreshCurrentPriorityNodeIds();
-                return;
             } else {
                 if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
                     return;
@@ -154,26 +154,35 @@ namespace TrafficManager.UI.SubTools {
             if (MainTool.GetToolController().IsInsideUI || !Cursor.visible) {
                 return;
             }
+            if (HoveredSegmentId == 0) {
+                return;
+            }
 
-
-            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-            if (altDown) {
-                if (HoveredSegmentId != 0) {
-                    bool isRAbout = RoundAboutTraverser.Instance.TraverseLoop(HoveredSegmentId);
-                    if (isRAbout) {
-                        foreach(uint segmentId in RoundAboutTraverser.Instance.segmentList) {
-                            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-                            Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
-                            NetTool.RenderOverlay(
-                                cameraInfo,
-                                ref seg,
-                                color,
-                                color);
-                        } //end foreach
-                    }//endif
+            //bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            if (ctrlDown && shiftDown) {
+                bool isRAbout = RoundAboutTraverser.Instance.TraverseLoop(HoveredSegmentId);
+                if (isRAbout) {
+                    foreach (uint segmentId in RoundAboutTraverser.Instance.segmentList) {
+                        ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                        Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
+                        NetTool.RenderOverlay(
+                            cameraInfo,
+                            ref seg,
+                            color,
+                            color);
+                    } // end foreach
+                    massEditMode = PrioritySignsMassEditMode.MainYield;
                     return;
-                } //end if
-            } else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+                }// endif
+                // else if it is not a round about fall back to normal shiftDown case.
+            } else if (ctrlDown) {
+                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                massEditMode = PrioritySignsMassEditMode.MainYield;
+                return;
+            }
+            if (shiftDown) {
                 // draw hovered segments
                 if (HoveredSegmentId != 0) {
                     Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
