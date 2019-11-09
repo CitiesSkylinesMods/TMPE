@@ -97,7 +97,7 @@ namespace TrafficManager.State {
         //mass edit tab
         public static bool rabout_SwitchLanesAtEntry = false;
         public static bool rabout_NoLaneSwitchingInRabout = false;
-        public static bool rabout_NoLaneSwitchingNearEntries = true;
+        public static bool rabout_NoLaneSwitchingNearEntries = false;
         public static bool rabout_DecicatedExitLanes = false;
         public static bool rabout_NoCrossingRAbout = true;
         public static bool rabout_NoCrossingAtConnections = false;

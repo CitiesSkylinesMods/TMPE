@@ -46,8 +46,12 @@ namespace TrafficManager.UI.SubTools {
                 if (!isRAbout) {
                     PriorityRoad.FixRoad(HoveredSegmentId);
                 }
+                RefreshMassEditOverlay();
+                return;
             } else if (ctrlDown) {
                 PriorityRoad.FixJunction(HoveredNodeId);
+                RefreshMassEditOverlay();
+                return;
             } else if (shiftDown) {
                 var primaryPrioType = PriorityType.None;
                 var secondaryPrioType = PriorityType.None;
@@ -150,6 +154,15 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnToolGUI(Event e) { }
 
+        public static bool showMassEditOverlay = false;
+        public static bool refreshMassEditOverlay = false;
+
+        private void RefreshMassEditOverlay() {
+            refreshMassEditOverlay = true;
+            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            refreshMassEditOverlay = false;
+        }
+
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             if (MainTool.GetToolController().IsInsideUI || !Cursor.visible) {
                 return;
@@ -160,6 +173,12 @@ namespace TrafficManager.UI.SubTools {
 
             //bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            if(ctrlDown) {
+                showMassEditOverlay = true;
+            } else {
+                showMassEditOverlay = false;
+            }
+
             bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             if (ctrlDown && shiftDown) {
                 bool isRAbout = RoundAboutTraverser.Instance.TraverseLoop(HoveredSegmentId);
@@ -257,7 +276,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.prioritySignsOverlay) {
+            if (viewOnly && !(Options.prioritySignsOverlay || PrioritySignsTool.showMassEditOverlay)) {
                 return;
             }
 
@@ -487,7 +506,7 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
 
-            if (Options.prioritySignsOverlay) {
+            if (Options.prioritySignsOverlay || showMassEditOverlay) {
                 RefreshCurrentPriorityNodeIds();
             } else {
                 currentPriorityNodeIds.Clear();

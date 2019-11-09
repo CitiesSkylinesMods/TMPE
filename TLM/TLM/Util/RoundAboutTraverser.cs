@@ -46,7 +46,7 @@ namespace TrafficManager.Util {
 
             if (!isJunction) {
                 if (Options.rabout_NoLaneSwitchingInRabout) {
-                    //LaneConnectorTool.StayInLane(nodeId, LaneConnectorTool.StayInLaneMode.Both);
+                    LaneConnectorTool.StayInLane(nodeId, LaneConnectorTool.StayInLaneMode.Both);
                 }
                 return;
             }
@@ -164,7 +164,7 @@ namespace TrafficManager.Util {
             }
             ushort otherNodeId = seg.GetOtherNode(nodeId);
             Debug.Log($"segment={segmentId} node={nodeId} len={seg.m_averageLength} otherNodeId={otherNodeId}");
-            //LaneConnectorTool.StayInLane(otherNodeId, LaneConnectorTool.StayInLaneMode.Both);
+            LaneConnectorTool.StayInLane(otherNodeId, LaneConnectorTool.StayInLaneMode.Both);
         }
 
         private void FixMinor(ushort nodeId) {

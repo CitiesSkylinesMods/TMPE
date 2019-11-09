@@ -33,10 +33,10 @@ namespace TrafficManager.State {
             UIHelperBase raboutGroup = panelHelper.AddGroup(
                 Translation.Options.Get("MassEdit.Group:Roundabout Roundabouts)"));
 
-            _rabout_SwitchLanesAtEntryToggle = panelHelper.AddCheckbox(
-                    Translation.Options.Get("MassEdit.Group:Roundabout Switch lanes at all entries to roundabouts (if turned off switch lanes sign only applies to highway junctions"),
-                    Options.rabout_SwitchLanesAtEntry,
-                    On_RAbout_SwitchLanesAtEntry_Changed) as UICheckBox;
+            _rabout_DecicatedExitLanesToggle = panelHelper.AddCheckbox(
+                    Translation.Options.Get("MassEdit.Group.Roundabout: dedicated exit lanes"),
+                    Options.rabout_DecicatedExitLanes,
+                    On_RAbout_DecicatedExitLanes_Changed) as UICheckBox;
 
             _rabout_NoLaneSwitchingInRaboutToggle = panelHelper.AddCheckbox(
                     Translation.Options.Get("MassEdit.Group.Roundabout: No lane switching in the middle of roundabout"),
@@ -48,10 +48,10 @@ namespace TrafficManager.State {
                     Options.rabout_NoLaneSwitchingNearEntries,
                     On_RAbout_NoLaneSwitchingNearEntries_Changed) as UICheckBox;
 
-            _rabout_DecicatedExitLanesToggle = panelHelper.AddCheckbox(
-                    Translation.Options.Get("MassEdit.Group.Roundabout: dedicated exit lanes"),
-                    Options.rabout_DecicatedExitLanes,
-                    On_RAbout_DecicatedExitLanes_Changed) as UICheckBox;
+            _rabout_SwitchLanesAtEntryToggle = panelHelper.AddCheckbox(
+                    Translation.Options.Get("MassEdit.Group:Roundabout Switch lanes at all entries to roundabouts (if turned off switch lanes sign only applies to highway junctions"),
+                    Options.rabout_SwitchLanesAtEntry,
+                    On_RAbout_SwitchLanesAtEntry_Changed) as UICheckBox;
 
             _rabout_NoCrossingRAboutToggle = panelHelper.AddCheckbox(
                     Translation.Options.Get("MassEdit.Group.Roundabout: no pedasterians crossing across the roundabout"),
