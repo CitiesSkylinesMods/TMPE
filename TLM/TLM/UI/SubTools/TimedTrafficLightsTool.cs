@@ -1,4 +1,5 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
+    using TrafficManager.Util;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -102,6 +103,13 @@
             if (HoveredNodeId <= 0 || nodeSelectionLocked) {
                 return;
             }
+            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            if(ctrlDown) {
+                AutoTimedTrafficLights.Setup(HoveredNodeId);
+                RefreshCurrentTimedNodeIds(HoveredNodeId);
+                MainTool.SetToolMode(ToolMode.TimedLightsShowLights);
+            }
+
 
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
@@ -249,7 +257,10 @@
 
             switch (MainTool.GetToolMode()) {
                 case ToolMode.TimedLightsSelectNode: {
-                    GuiTimedTrafficLightsNode();
+                    bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+                    if (!ctrlDown) {
+                        GuiTimedTrafficLightsNode();
+                    }
                     break;
                 }
 
