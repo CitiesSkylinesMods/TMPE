@@ -410,11 +410,15 @@
                     continue;
                 }
 
-                var otherStartNode = (bool)Constants.ServiceFactory.NetService
+                var otherStartNode = Constants.ServiceFactory.NetService
                                                     .IsStartNode(otherSegmentId, segEnd.nodeId);
+                if (otherStartNode == null) {
+                    Log.Warning($"Incorrect ExtSegmentEnd.nodeId - data integrity problem! Segment {otherSegmentId} is not connected to Node {segEnd.nodeId}");
+                    continue;
+                }
 
                 ExtSegmentEnd otherSegEnd =
-                    ExtSegmentEnds[GetIndex(otherSegmentId, otherStartNode)];
+                    ExtSegmentEnds[GetIndex(otherSegmentId, (bool)otherStartNode)];
 
                 if (!otherSegEnd.outgoing) {
                     continue;
