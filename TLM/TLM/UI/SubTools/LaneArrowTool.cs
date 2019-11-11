@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
     using API.Traffic.Enums;
     using ColossalFramework;
@@ -34,8 +34,31 @@
                 return;
             }
 
-            SelectedSegmentId = HoveredSegmentId;
-            SelectedNodeId = HoveredNodeId;
+            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            SetLaneArrowError res = SetLaneArrowError.Success;
+            if (altDown) {
+                LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId, out res);
+            } else if (ctrlDown) {
+                LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId, out res);
+            } else {
+                SelectedSegmentId = HoveredSegmentId;
+                SelectedNodeId = HoveredNodeId;
+            }
+            switch (res) {
+                case SetLaneArrowError.HighwayArrows: {
+                     MainTool.ShowError(
+                        Translation.LaneRouting.Get("Dialog.Text:Disabled due to highway rules"));
+                        break;
+                }
+
+                case SetLaneArrowError.LaneConnection: {
+                    MainTool.ShowError(
+                       Translation.LaneRouting.Get("Dialog.Text:Disabled due to manual connection"));
+                        break;
+                    }
+            }
+
         }
 
         public override void OnSecondaryClickOverlay() {
@@ -88,6 +111,15 @@
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             NetManager netManager = Singleton<NetManager>.instance;
 
+            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+
+            if (ctrlDown) {
+                // draw hovered node
+                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                return;
+            }
+
             // Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
             if (!cursorInSecondaryPanel_
                 && (HoveredSegmentId != 0)
@@ -104,18 +136,23 @@
                     NetTool.RenderOverlay(
                         cameraInfo,
                         ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId],
-                        MainTool.GetToolColor(false, false),
-                        MainTool.GetToolColor(false, false));
+                        MainTool.GetToolColor(altDown, false),
+                        MainTool.GetToolColor(altDown, false));
                 }
             }
 
             if (SelectedSegmentId == 0) return;
 
+            Color color;
+            if (altDown && HoveredSegmentId == SelectedSegmentId)
+                color = MainTool.GetToolColor(true, true);
+            else
+                color = MainTool.GetToolColor(true, false);
             NetTool.RenderOverlay(
                 cameraInfo,
                 ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId],
-                MainTool.GetToolColor(true, false),
-                MainTool.GetToolColor(true, false));
+                color,
+                color);
         }
 
         private void GuiLaneChangeWindow(int num) {
