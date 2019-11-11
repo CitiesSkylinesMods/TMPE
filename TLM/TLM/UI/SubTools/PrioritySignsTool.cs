@@ -155,28 +155,28 @@ namespace TrafficManager.UI.SubTools {
         public override void OnToolGUI(Event e) { }
 
         public static bool showMassEditOverlay = false;
-        public static bool refreshMassEditOverlay = false;
 
         private void RefreshMassEditOverlay() {
-            refreshMassEditOverlay = true;
+            showMassEditOverlay = true;
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
-            refreshMassEditOverlay = false;
+            showMassEditOverlay = false;
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             if (MainTool.GetToolController().IsInsideUI || !Cursor.visible) {
                 return;
             }
-            if (HoveredSegmentId == 0) {
-                return;
-            }
 
             //bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            if(ctrlDown) {
+            if (ctrlDown) {
                 showMassEditOverlay = true;
             } else {
                 showMassEditOverlay = false;
+            }
+
+            if (HoveredSegmentId == 0) {
+                return;
             }
 
             bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);

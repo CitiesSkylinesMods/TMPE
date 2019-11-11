@@ -43,7 +43,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.junctionRestrictionsOverlay) {
+            if (viewOnly && !(Options.junctionRestrictionsOverlay || PrioritySignsTool.showMassEditOverlay)) {
                 return;
             }
 
