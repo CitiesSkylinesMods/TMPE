@@ -230,45 +230,6 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// returns the number of all target lanes from input segment toward the secified direction.
-        /// </summary>
-        public static int CountTargetLanesTowardDirection(ushort segmentId, ushort nodeId, ArrowDirection dir) {
-            int count = 0;
-            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            bool startNode = seg.m_startNode == nodeId;
-            IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
-
-            LaneArrowManager.Instance.Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort otherSegmentId, ref NetSegment otherSeg) => {
-                    ArrowDirection dir2 = segEndMan.GetDirection(ref segEnd, otherSegmentId);
-                    if (dir == dir2) {
-                        int forward = 0, backward = 0;
-                        otherSeg.CountLanes(
-                            otherSegmentId,
-                            NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
-                            VehicleInfo.VehicleType.Car,
-                            ref forward,
-                            ref backward);
-                        bool startNode2 = otherSeg.m_startNode == nodeId;
-                            //xor because inverting 2 times is redundant.
-                            if (startNode2) {
-                            count += forward;
-                        } else {
-                            count += backward;
-                        }
-                        Log._Debug(
-                            $"dir={dir} startNode={startNode} segmentId={segmentId}\n" +
-                            $"startNode2={startNode2} forward={forward} backward={backward} count={count}");
-                    }
-                    return true;
-                });
-
-            return count;
-        }
-
-        /// <summary>
         /// Used for loading and saving lane arrows
         /// </summary>
         /// <returns>ICustomDataManager for lane arrows</returns>
@@ -349,6 +310,7 @@ namespace TrafficManager.Manager.Impl {
                 if(res != SetLaneArrowError.Success) {
                     return;
                 }
+                res = SetLaneArrowError.Success;
 
                 ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                 bool startNode = seg.m_startNode == nodeId;
@@ -438,6 +400,41 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
+            /// <summary>
+            /// returns the number of all target lanes from input segment toward the secified direction.
+            /// </summary>
+            private static int CountTargetLanesTowardDirection(ushort segmentId, ushort nodeId, ArrowDirection dir) {
+                int count = 0;
+                ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                bool startNode = seg.m_startNode == nodeId;
+                IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+                ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
+
+                LaneArrowManager.Instance.Services.NetService.IterateNodeSegments(
+                    nodeId,
+                    (ushort otherSegmentId, ref NetSegment otherSeg) => {
+                        ArrowDirection dir2 = segEndMan.GetDirection(ref segEnd, otherSegmentId);
+                        if (dir == dir2) {
+                            int forward = 0, backward = 0;
+                            otherSeg.CountLanes(
+                                otherSegmentId,
+                                NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                                VehicleInfo.VehicleType.Car,
+                                ref forward,
+                                ref backward);
+                            bool startNode2 = otherSeg.m_startNode == nodeId;
+                            //xor because inverting 2 times is redundant.
+                            if (startNode2) {
+                                count += forward;
+                            } else {
+                                count += backward;
+                            }
+                            Log._Debug(
+                                $"dir={dir} startNode={startNode} segmentId={segmentId}\n" +
+                                $"startNode2={startNode2} forward={forward} backward={backward} count={count}");
+                        }
+                        return true;
+                    });
 
 
             /// <summary>
