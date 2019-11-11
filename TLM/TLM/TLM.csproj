@@ -139,7 +139,7 @@
     <Compile Include="U\UWindow.cs" />
     <Compile Include="U\Constants.cs" />
     <Compile Include="U\UConstraint.cs" />
-    <Compile Include="U\UControl.cs" />
+    <Compile Include="U\UConstrained.cs" />
     <Compile Include="U\Controls\UButton.cs" />
     <Compile Include="U\Controls\UPanel.cs" />
     <Compile Include="U\Controls\UText.cs" />
@@ -546,10 +546,10 @@
 set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
 
 del /Q "%25DEPLOYDIR%25*"
-xcopy /y "$(TargetDir)TrafficManager.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)TrafficManager.*" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "%25DEPLOYDIR%25"
-xcopy /y "$(TargetDir)TMPE.API.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)TMPE.API.*" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"

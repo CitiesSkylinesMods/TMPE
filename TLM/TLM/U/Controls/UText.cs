@@ -1,4 +1,5 @@
 namespace TrafficManager.U.Controls {
+    using System;
     using ColossalFramework.UI;
     using JetBrains.Annotations;
     using UnityEngine;
@@ -19,9 +20,9 @@ namespace TrafficManager.U.Controls {
         /// <param name="textName">GameObject is given this name</param>
         /// <param name="text">The text to show</param>
         /// <returns>Newly created component (inside a gameobject)</returns>
-        public static UText Create([NotNull] GameObject parent,
-                                   string textName,
-                                   string text) {
+        public static GameObject Create([NotNull] GameObject parent,
+                                        string textName,
+                                        string text) {
             var textObject = new GameObject(textName);
             //textObject.AddComponent<CanvasRenderer>();
 
@@ -36,10 +37,11 @@ namespace TrafficManager.U.Controls {
             textComponent.fontSize = 15;
             textComponent.color = Color.white;
 
-            textObject.AddComponent<UControl>();
             textObject.transform.SetParent(parent.transform, false);
 
-            return textComponent;
+            textObject.AddComponent<UConstrained>();
+
+            return textObject;
         }
 
         public UText Position(Vector2 position) {
@@ -52,20 +54,8 @@ namespace TrafficManager.U.Controls {
             return this;
         }
 
-        /// <summary>
-        /// See https://docs.unity3d.com/Manual/script-LayoutElement.html for preferred, minimum and
-        /// flexible sizes
-        /// </summary>
-        /// <param name="val">Value to set</param>
-        /// <returns>This</returns>
-        public UText PreferredHeight(float val) {
-            layoutElement_.minHeight = val;
-            layoutElement_.preferredHeight = val;
-            return this;
-        }
-
-        public UControl GetUControlComponent() {
-            return this.gameObject.GetComponent<UControl>();
+        public UConstrained GetUControlComponent() {
+            return this.gameObject.GetComponent<UConstrained>();
         }
 
         public UText Alignment(TextAnchor ta) {

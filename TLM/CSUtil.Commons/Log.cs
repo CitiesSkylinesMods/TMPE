@@ -79,7 +79,7 @@
         [Conditional("DEBUG")]
         public static void _Assert(bool cond, string s) {
             if (!cond) {
-                LogToFile(s, LogLevel.Error);
+                _DebugOnlyError(s);
             }
         }
 

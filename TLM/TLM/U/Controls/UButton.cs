@@ -1,4 +1,5 @@
 namespace TrafficManager.U.Controls {
+    using System;
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using UnityEngine;
@@ -20,9 +21,9 @@ namespace TrafficManager.U.Controls {
         private static RectTransform rectTransform_;
         private static LayoutElement layoutElement_;
 
-        public static UButton Create([NotNull] GameObject parent,
-                                     string buttonName,
-                                     string text) {
+        public static UButton Construct([NotNull] GameObject parent,
+                                        string buttonName,
+                                        string text) {
             var btnObject = new GameObject(buttonName);
 
             var buttonComponent = btnObject.AddComponent<UButton>();
@@ -44,11 +45,12 @@ namespace TrafficManager.U.Controls {
 
             // Nested text for the button
             if (!string.IsNullOrEmpty(text)) {
-                UText.Create(btnObject, "Label", text)
-                     .Alignment(TextAnchor.MiddleCenter);
+                GameObject textObj = UText.Create(btnObject, "Label", text);
+                textObj.GetComponent<UText>()
+                       .Alignment(TextAnchor.MiddleCenter);
             }
 
-            // btnObject.AddComponent<UControl>();
+            btnObject.AddComponent<UConstrained>();
             
             // let button contents stack vertically if there is a sprite and a label for example, or fill entire button
             btnObject.AddComponent<VerticalLayoutGroup>(); 
@@ -91,18 +93,6 @@ namespace TrafficManager.U.Controls {
         public void OnPointerExit(PointerEventData eventData) {
             Log.Info("Exited CanvasButton");
             this.imgComponent_.color = this.colors.normalColor;
-        }
-
-        /// <summary>
-        /// See https://docs.unity3d.com/Manual/script-LayoutElement.html for preferred, minimum and
-        /// flexible sizes
-        /// </summary>
-        /// <param name="val">Value to set</param>
-        /// <returns>This</returns>
-        public UButton PreferredHeight(float val) {
-            layoutElement_.minHeight = val;
-            layoutElement_.preferredHeight = val;
-            return this;
         }
 
         public override void OnPointerDown(PointerEventData eventData) {

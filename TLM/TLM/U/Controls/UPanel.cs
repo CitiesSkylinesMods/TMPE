@@ -1,13 +1,13 @@
 namespace TrafficManager.U.Controls {
+    using System;
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.U.Events;
     using UnityEngine;
     using UnityEngine.UI;
 
-    public class UPanel 
-        : Graphic 
-    {
+    public class UPanel
+        : Graphic {
         private LayoutElement layoutElement_;
         private RectTransform rectTransform_;
         private UWindow parentWindow_;
@@ -20,9 +20,9 @@ namespace TrafficManager.U.Controls {
         /// <param name="parentWindow">If drag is enabled, this will receive drag events</param>
         /// <param name="panelName">Control name in Unity Scene Tree</param>
         /// <returns>The new canvas panel component</returns>
-        public static UPanel Create([NotNull] GameObject parentObject,
-                                    UWindow parentWindow,
-                                    string panelName) {
+        public static GameObject Create([NotNull] UWindow parentWindow,
+                                        GameObject parentObject,
+                                        string panelName) {
             var panelObject = new GameObject(panelName);
 
             var panel = panelObject.AddComponent<UPanel>();
@@ -31,20 +31,10 @@ namespace TrafficManager.U.Controls {
             panel.parentWindow_ = parentWindow;
 
             panelObject.transform.SetParent(parentObject.transform, false);
+            
+            panelObject.AddComponent<UConstrained>();
 
-            return panel;
-        }
-
-        /// <summary>
-        /// See https://docs.unity3d.com/Manual/script-LayoutElement.html for preferred, minimum and
-        /// flexible sizes
-        /// </summary>
-        /// <param name="val">Value to set</param>
-        /// <returns>This</returns>
-        public UPanel PreferredHeight(float val) {
-            this.layoutElement_.minHeight = val;
-            this.layoutElement_.preferredHeight = val;
-            return this;
+            return panelObject;
         }
 
         public void EnableDrag() {
@@ -54,8 +44,8 @@ namespace TrafficManager.U.Controls {
         }
 
         protected override void Start() {
-            // 100% translucent (invisible)
-            this.color = new Color(0f, 1f, 0f, 1f);
+            // Should be 100% translucent (invisible)
+            this.color = new Color(0f, 1f, 0f, 1f); // for debug: green
         }
     }
 }

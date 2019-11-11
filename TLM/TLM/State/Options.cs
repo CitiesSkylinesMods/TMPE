@@ -5,6 +5,7 @@
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
+    using TrafficManager.U.Controls;
     using U;
     using UI;
     using UnityEngine;
@@ -162,35 +163,34 @@
 
         private static void Test_CanvasForm() {
             // add the new main menu
-            FormBuilder b = FormBuilder
-                            .Create("TMPE_MainMenu");
+            Log._Debug("creation step 1");
+            // CreateWindow creates a canvas, and a background panel, root of the window child controls
+            FormBuilder<UPanel> window = FormBuilder<UWindow>.CreateWindow("TMPE_MainMenu");
 
-            TestUWindow = b.Populate(
-                topLevel => {
-                    // Title bar/drag handle
-                    topLevel.Panel()
-                            .PreferredHeight(16f)
-                            .EnableDrag();
+            // Title bar/drag handle
+            Log._Debug("creation step 2");
+            FormBuilder<UPanel> titlebarPanel = window.Panel();
+            titlebarPanel.Get().EnableDrag();
 
-                    topLevel.Text(TrafficManagerMod.ModName)
-                            .Alignment(TextAnchor.MiddleLeft)
-                            .PreferredHeight(16f);
+            Log._Debug("creation step 3");
+            FormBuilder<UText> titleText = window.Text(TrafficManagerMod.ModName);
+            titleText.Get().Alignment(TextAnchor.MiddleLeft);
+            titleText.GetUConstrained().PreferredHeight(16f);
 
-                    topLevel.HorizontalLayoutGroup("Buttons",
-                                                   hlg => {
-                                                       //hlg.padding = new RectOffset(8, 8, 8, 8);
-                                                   })
-                            .Populate(
-                                bGroup => {
-                                    bGroup.Button("Confirm");
-                                    bGroup.Button("Cancel");
-                                });
-                });
-            TestUWindow.SetLeft(50f, Unit.Pixels)
-                    .SetTop(50f, Unit.Pixels)
-                    .SetWidth(0.16f, Unit.ScreenWidth)
-                    .SetHeight(0.5f, Unit.OwnWidth)
-                    .ApplyConstraints();
+            Log._Debug("creation step 4");
+            FormBuilder<UPanel> btnPanel = window.Panel().HorizontalLayout();
+            btnPanel.Button("Confirm");
+            btnPanel.Button("Cancel");
+
+            Log._Debug("creation step 5");
+            TestUWindow = window.GetUWindow();
+            window.GetUConstrained()
+                .SetLeft(50f, Unit.Pixels)
+                .SetTop(50f, Unit.Pixels)
+                .SetWidth(0.16f, Unit.ScreenWidth)
+                .SetHeight(0.5f, Unit.OwnWidth)
+                .ApplyConstraints();
+            Log._Debug("creation done");
         }
 
         public static UWindow TestUWindow { get; set; }
