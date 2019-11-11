@@ -259,7 +259,7 @@
 
                         segEndMan.CalculateOutgoingLeftStraightRightSegments(
                             ref segEnd,
-                            ref nodesBuffer[segmentId],
+                            ref nodesBuffer[SelectedNodeId],
                             out bool hasLeftSegment,
                             out bool hasForwardSegment,
                             out bool hasRightSegment);
