@@ -105,7 +105,11 @@ namespace TrafficManager.UI.SubTools {
             }
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             if(ctrlDown) {
-                AutoTimedTrafficLights.Setup(HoveredNodeId);
+                AutoTimedTrafficLights.ErrorResult res = AutoTimedTrafficLights.Setup(HoveredNodeId);
+                if (res != AutoTimedTrafficLights.ErrorResult.Success ) {
+                    MainTool.ShowError($"Timed traffic light not created. error = {res}");
+                    return;
+                }
                 RefreshCurrentTimedNodeIds(HoveredNodeId);
                 MainTool.SetToolMode(ToolMode.TimedLightsShowLights);
             }
