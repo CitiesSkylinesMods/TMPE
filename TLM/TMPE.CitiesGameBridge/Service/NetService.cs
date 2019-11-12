@@ -1,4 +1,4 @@
-﻿namespace CitiesGameBridge.Service {
+namespace CitiesGameBridge.Service {
     using System;
     using System.Collections.Generic;
     using ColossalFramework;
@@ -121,6 +121,12 @@
                     }
                 } else {
                     ushort segmentId = node.GetSegment(0);
+                    for (int i = 0; i < 8; ++i) {
+                        segmentId = node.GetSegment(i);
+                        if (segmentId != 0) {
+                            break;
+                        }
+                    }
                     ushort initSegId = segmentId;
 
                     while (true) {
