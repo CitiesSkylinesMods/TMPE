@@ -11,9 +11,9 @@ namespace TrafficManager.Util {
     using GenericGameBridge.Service;
     using State;
 
-    public class RoundAboutTraverser {
-        public static RoundAboutTraverser Instance = new RoundAboutTraverser();
-        public RoundAboutTraverser() {
+    public class RoundaboutMassEdit {
+        public static RoundaboutMassEdit Instance = new RoundaboutMassEdit();
+        public RoundaboutMassEdit() {
             segmentList = new List<ushort>();
         }
 
@@ -224,32 +224,73 @@ namespace TrafficManager.Util {
             }
             return TraverseAroundRecursive(segmentId);
         }
+
         private bool TraverseAroundRecursive(ushort segmentId) {
             segmentList.Add(segmentId);
-            ushort headNodeId = GetHeadNode(segmentId);
-            ref NetNode headNode = ref NetManager.instance.m_nodes.m_buffer[headNodeId];
+            Debug.Log($"\nTraverseAroundRecursive({segmentId}) ");
+            var segments = GetSortedSegments( segmentId);
+            Debug.Log($"\nsegments[0]({segments[0]}) ");
 
-            for (int i = 0; i < 8; ++i) {
-                ushort nextSegmentId = headNode.GetSegment(i);
-                if(!IsPartofRoundabout(nextSegmentId, segmentId, headNodeId)) {
-                    continue;
+            foreach (var nextSegmentId in segments) {
+                bool isRAbout = false;
+                if (nextSegmentId == segmentList[0]) {
+                    isRAbout = true;
+                } else if (segmentList.Contains(nextSegmentId)) {
+                    isRAbout = false;
+                } else {
+                    isRAbout = TraverseAroundRecursive(nextSegmentId);
                 }
-                if(GetDirection(segmentId, nextSegmentId, headNodeId) == ArrowDirection.Forward) {
-                    bool isRAbout = false;
-                    if (nextSegmentId == segmentList[0]) {
-                        isRAbout = true;
-                    } else if (segmentList.Contains(nextSegmentId)) {
-                        isRAbout = false;
-                    } else {
-                        isRAbout = TraverseAroundRecursive(nextSegmentId);
-                    }
-                    if (isRAbout) {
-                        return true;
-                    } //end if
-                } // end if
-            } // end for
+                if (isRAbout) {
+                    return true;
+                } //end if
+            }// end foreach
             segmentList.Remove(segmentId);
             return false;
+        }
+
+        private static List<ushort> GetSortedSegments(ushort segmentId) {
+            ushort headNodeId = GetHeadNode(segmentId);
+            ushort rightSegmentID = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].GetRightSegment(headNodeId);
+            Debug.Log($"\n rightSegmentID={rightSegmentID} = .m_buffer[segmentId={segmentId}].GetRightSegment(headNodeId={headNodeId})\n");
+            var list0 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Forward, true);
+            var list1 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Left   , false);
+            var list2 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Right  , true);
+
+            list0.AddRange(list1);
+            list1.AddRange(list2);
+            return list0;
+        }
+
+        private static List<ushort> GetSortedSegmentsHelper(
+            ushort headNodeId,
+            ushort segmentId,
+            ArrowDirection dir,
+            bool preferLeft = true) {
+            ArrowDirection preferDir = preferLeft ? ArrowDirection.Left : ArrowDirection.Right;
+            List<ushort> sortedSegList = new List<ushort>();
+
+            Constants.ServiceFactory.NetService.IterateNodeSegments(
+                headNodeId,
+                ClockDirection.CounterClockwise,
+                (ushort NextSegmentId, ref NetSegment _) => {
+                    Debug.Log($"\n segmentId={segmentId} NextSegmentId={NextSegmentId} headNodeId={headNodeId} dir={dir}");
+                    if (!IsPartofRoundabout(NextSegmentId, segmentId, headNodeId)) {
+                        return true;
+                    }
+                    if (GetDirection(segmentId, NextSegmentId, headNodeId) == dir) {
+                        //Debug.Log($"segmentId={segmentId} NextSegmentId={NextSegmentId} headNodeId={headNodeId} dir={dir}");
+                        Debug.Log($"\n**ADDING** {NextSegmentId}\n");
+                        for (int i = 0; i < sortedSegList.Count; ++i) {
+                            if (GetDirection(NextSegmentId, sortedSegList[i], headNodeId) == preferDir) {
+                                sortedSegList.Insert(i, NextSegmentId);
+                                return true;
+                            }
+                        }
+                        sortedSegList.Add(NextSegmentId);
+                    }
+                    return true;
+                });
+            return sortedSegList;
         }
 
         private static ArrowDirection GetDirection(ushort segmentId0, ushort segmentId1, ushort nodeId) {

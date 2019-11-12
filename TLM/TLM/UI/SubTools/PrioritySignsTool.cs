@@ -42,7 +42,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             if (ctrlDown && shiftDown) {
-                bool isRAbout = RoundAboutTraverser.Instance.FixRabout(HoveredSegmentId);
+                bool isRAbout = RoundaboutMassEdit.Instance.FixRabout(HoveredSegmentId);
                 if (!isRAbout) {
                     PriorityRoad.FixRoad(HoveredSegmentId);
                 }
@@ -181,9 +181,9 @@ namespace TrafficManager.UI.SubTools {
 
             bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             if (ctrlDown && shiftDown) {
-                bool isRAbout = RoundAboutTraverser.Instance.TraverseLoop(HoveredSegmentId);
+                bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId);
                 if (isRAbout) {
-                    foreach (uint segmentId in RoundAboutTraverser.Instance.segmentList) {
+                    foreach (uint segmentId in RoundaboutMassEdit.Instance.segmentList) {
                         ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                         Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
                         NetTool.RenderOverlay(
