@@ -175,7 +175,7 @@
             Log._Debug("creation step 3");
             FormBuilder<UText> titleText = window.Text(TrafficManagerMod.ModName);
             titleText.Get().Alignment(TextAnchor.MiddleLeft);
-            titleText.GetUConstrained().PreferredHeight(16f);
+            titleText.GetUConstrainer().PreferredHeight(16f);
 
             Log._Debug("creation step 4");
             FormBuilder<UPanel> btnPanel = window.Panel().HorizontalLayout();
@@ -184,7 +184,7 @@
 
             Log._Debug("creation step 5");
             TestUWindow = window.GetUWindow();
-            window.GetUConstrained()
+            window.GetUConstrainer()
                 .SetLeft(50f, Unit.Pixels)
                 .SetTop(50f, Unit.Pixels)
                 .SetWidth(0.16f, Unit.ScreenWidth)

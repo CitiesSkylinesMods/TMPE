@@ -8,35 +8,35 @@ namespace TrafficManager.U {
     /// <summary>
     /// Implements a component for a Canvas gameobject, which applies constraints to its size and position.
     /// </summary>
-    public class UConstrained : MonoBehaviour {
+    public class UConstrainer : MonoBehaviour {
         private readonly List<UConstraint> constraints_ = new List<UConstraint>();
 
-        public UConstrained AddConstraint(UConstraint c) {
+        public UConstrainer AddConstraint(UConstraint c) {
             this.constraints_.Add(c);
             return this;
         }
 
-        public UConstrained SetLeft(float value, Unit unit) {
+        public UConstrainer SetLeft(float value, Unit unit) {
             return AddConstraint(new UConstraint(TransformField.Left, value, unit));
         }
 
-        public UConstrained SetRight(float value, Unit unit) {
+        public UConstrainer SetRight(float value, Unit unit) {
             return AddConstraint(new UConstraint(TransformField.Right, value, unit));
         }
 
-        public UConstrained SetWidth(float value, Unit unit) {
+        public UConstrainer SetWidth(float value, Unit unit) {
             return AddConstraint(new UConstraint(TransformField.Width, value, unit));
         }
 
-        public UConstrained SetTop(float value, Unit unit) {
+        public UConstrainer SetTop(float value, Unit unit) {
             return AddConstraint(new UConstraint(TransformField.Top, value, unit));
         }
 
-        public UConstrained SetBottom(float value, Unit unit) {
+        public UConstrainer SetBottom(float value, Unit unit) {
             return AddConstraint(new UConstraint(TransformField.Bottom, value, unit));
         }
 
-        public UConstrained SetHeight(float value, Unit unit) {
+        public UConstrainer SetHeight(float value, Unit unit) {
             return AddConstraint(new UConstraint(TransformField.Height, value, unit));
         }
 
@@ -63,10 +63,10 @@ namespace TrafficManager.U {
 
             void ApplyRecursive(GameObject obj) {
                 var rectTr = obj.GetComponent<RectTransform>();
-                var control = obj.GetComponent<UConstrained>();
+                var constrainer = obj.GetComponent<UConstrainer>();
 
-                if ((control != null) && (rectTr != null)) {
-                    control.ApplyConstraints(rectTr);
+                if ((constrainer != null) && (rectTr != null)) {
+                    constrainer.ApplyConstraints(rectTr);
                 }
 
                 foreach (Transform child in obj.transform) {
@@ -92,7 +92,7 @@ namespace TrafficManager.U {
         /// </summary>
         /// <param name="val">Value to set</param>
         /// <returns>This</returns>
-        public UConstrained PreferredHeight(float val) {
+        public UConstrainer PreferredHeight(float val) {
             var layoutElement = this.gameObject.GetComponent<LayoutElement>();
             Log._Assert(layoutElement != null, "A UControl must have a LayoutElement component in parent"); 
             

@@ -50,7 +50,7 @@ namespace TrafficManager.U.Controls {
                        .Alignment(TextAnchor.MiddleCenter);
             }
 
-            btnObject.AddComponent<UConstrained>();
+            btnObject.AddComponent<UConstrainer>();
             
             // let button contents stack vertically if there is a sprite and a label for example, or fill entire button
             btnObject.AddComponent<VerticalLayoutGroup>(); 

@@ -18,7 +18,7 @@ namespace TrafficManager.U {
         private readonly UWindow window_;
 
         private FormBuilder(UWindow root, [NotNull] GameObject currentControl) {
-            var uConstrained = currentControl.GetComponent<UConstrained>();
+            var uConstrained = currentControl.GetComponent<UConstrainer>();
             Log._Debug($"Creating formbuilder<{typeof(T)}>'{currentControl.name}' uconstr={uConstrained != null}");
             this.window_ = root;
             this.currentControl_ = currentControl;
@@ -108,8 +108,8 @@ namespace TrafficManager.U {
             return component;
         }
 
-        public UConstrained GetUConstrained() {
-            var constrainedComponent = this.currentControl_.GetComponent<UConstrained>();
+        public UConstrainer GetUConstrainer() {
+            var constrainedComponent = this.currentControl_.GetComponent<UConstrainer>();
             Log._Assert(constrainedComponent != null,
                         $"FormBuilder<{typeof(T)}>'{this.currentControl_.name}' without a UConstrained component");
             return constrainedComponent;

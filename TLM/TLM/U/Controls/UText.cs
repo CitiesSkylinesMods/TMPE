@@ -39,7 +39,7 @@ namespace TrafficManager.U.Controls {
 
             textObject.transform.SetParent(parent.transform, false);
 
-            textObject.AddComponent<UConstrained>();
+            textObject.AddComponent<UConstrainer>();
 
             return textObject;
         }
@@ -54,8 +54,8 @@ namespace TrafficManager.U.Controls {
             return this;
         }
 
-        public UConstrained GetUControlComponent() {
-            return this.gameObject.GetComponent<UConstrained>();
+        public UConstrainer GetUControlComponent() {
+            return this.gameObject.GetComponent<UConstrainer>();
         }
 
         public UText Alignment(TextAnchor ta) {

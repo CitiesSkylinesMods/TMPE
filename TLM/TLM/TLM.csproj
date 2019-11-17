@@ -136,10 +136,11 @@
     <Compile Include="U\Controls\USimpleGraphic.cs" />
     <Compile Include="U\Events\UDragHandler.cs" />
     <Compile Include="U\Events\UEventInlet.cs" />
+    <Compile Include="U\IUConstraintEvents.cs" />
     <Compile Include="U\UWindow.cs" />
     <Compile Include="U\Constants.cs" />
     <Compile Include="U\UConstraint.cs" />
-    <Compile Include="U\UConstrained.cs" />
+    <Compile Include="U\UConstrainer.cs" />
     <Compile Include="U\Controls\UButton.cs" />
     <Compile Include="U\Controls\UPanel.cs" />
     <Compile Include="U\Controls\UText.cs" />

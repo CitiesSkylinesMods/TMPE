@@ -1,6 +1,5 @@
 namespace TrafficManager.U {
     using CSUtil.Commons;
-    using TrafficManager.U.Events;
     using ColossalFramework.UI;
     using Controls;
     using UnityEngine;
@@ -14,7 +13,8 @@ namespace TrafficManager.U {
     /// Coordinate system: (0, 0) is screen center
     /// </summary>
     public class UWindow
-        : MonoBehaviour
+        : MonoBehaviour,
+          IUConstraintEvents
     {
         public uint textCounter_ = 1;
         public uint buttonCounter_ = 1;
@@ -100,6 +100,7 @@ namespace TrafficManager.U {
             rectComponent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Screen.height);
             
             canvasObject.AddComponent<UWindow>();
+            canvasObject.AddComponent<UConstrainer>();
 
             return canvasObject;
         }
@@ -176,13 +177,18 @@ namespace TrafficManager.U {
             }
         }
 
+        /// <summary>
+        /// Handles mouse drag events by modifying constraints Positoin Left and Top.
+        /// If no constraints found, the window will not move.
+        /// </summary>
+        /// <param name="drag"></param>
         public void OnDrag(Vector2 drag) {
             Log._Debug($"OnDrag {drag}");
 
-            var ucontrol = GetComponent<UConstrained>();
+            var constrainer = GetComponent<UConstrainer>();
             
             // For each constraint, find those setting left and top coords, and change the values
-            ucontrol.ForEachConstraintModify(c => {
+            constrainer.ForEachConstraintModify(c => {
                 // magic scale is used to adjust mouse movements to match actual screen coords
                 // i have no idea what is happening here, probably canvas scaling is borked
                 const float MAGIC_SCALE = 2f;
@@ -202,7 +208,16 @@ namespace TrafficManager.U {
                     }
                 }
             });
-            ucontrol.ApplyConstraints();
+            
+            constrainer.ApplyConstraints();
+        }
+
+        public void OnUConstraintMove() {
+            this.coUiPanel_.AdjustToMatch(this.gameObject);
+        }
+
+        public void OnUConstraintResize() {
+            this.coUiPanel_.AdjustToMatch(this.gameObject);
         }
     }
 }

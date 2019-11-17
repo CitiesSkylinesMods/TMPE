@@ -32,11 +32,14 @@ namespace TrafficManager.U.Controls {
 
             panelObject.transform.SetParent(parentObject.transform, false);
             
-            panelObject.AddComponent<UConstrained>();
+            panelObject.AddComponent<UConstrainer>();
 
             return panelObject;
         }
 
+        /// <summary>
+        /// Stores the window in the drag handler, when mouse drag events come, it will get moving.
+        /// </summary>
         public void EnableDrag() {
             var component = this.gameObject.AddComponent<UDragHandler>();
             component.DragWindow = this.parentWindow_;

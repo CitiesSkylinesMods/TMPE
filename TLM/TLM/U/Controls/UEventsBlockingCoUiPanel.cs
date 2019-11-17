@@ -16,8 +16,11 @@ namespace TrafficManager.U.Controls {
             }
         }
 
+        /// <summary>
+        /// Move coPanel to match the form rect
+        /// </summary>
+        /// <param name="formObject">The form whose shape we should take</param>
         public void AdjustToMatch(GameObject formObject) {
-            // Move coPanel to match the form rect
             // var rect = RectTransformToScreenSpace(formObject_.GetComponent<RectTransform>());
             // coPanel_.absolutePosition = rect.position;
             // coPanel_.size = rect.size;
