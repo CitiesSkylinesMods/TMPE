@@ -100,14 +100,31 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnPrimaryClickOverlay() {
-            if (HoveredNodeId <= 0 || nodeSelectionLocked) {
+            if (HoveredNodeId <= 0 || nodeSelectionLocked || !Flags.MayHaveTrafficLight(HoveredNodeId)) {
                 return;
             }
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             if(ctrlDown) {
                 AutoTimedTrafficLights.ErrorResult res = AutoTimedTrafficLights.Setup(HoveredNodeId);
-                if (res != AutoTimedTrafficLights.ErrorResult.Success ) {
-                    MainTool.ShowError($"Timed traffic light not created. error = {res}");
+                if (res != AutoTimedTrafficLights.ErrorResult.Success) {
+                    string message;
+                    switch (res) {
+                        case AutoTimedTrafficLights.ErrorResult.NoJunction:
+                            message = "Dialog.Text:This is not a junction";
+                            break;
+                        case AutoTimedTrafficLights.ErrorResult.NoNeed:
+                            message = "Dialog.Text:There is no need";
+                            break;
+                        case AutoTimedTrafficLights.ErrorResult.TTLExists:
+                            message = "Dialog.Text:Timed traffic lights already exists";
+                            break;
+                        default: //Unreachable code
+                            message = $"error = {res}";
+                            break;
+                    }
+                    message = Translation.TrafficLights.Get("Dialog.Text:Default timed traffic lights not createed because : ") +
+                        Translation.TrafficLights.Get(message);
+                    MainTool.ShowError(message);
                     return;
                 }
                 RefreshCurrentTimedNodeIds(HoveredNodeId);

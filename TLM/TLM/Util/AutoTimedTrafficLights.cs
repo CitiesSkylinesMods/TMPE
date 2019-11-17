@@ -1,10 +1,6 @@
-
-
 namespace TrafficManager.Util {
-    using TrafficManager.TrafficLight;
     using TrafficManager.Manager.Impl;
     using System.Collections.Generic;
-    using ICities;
     using ColossalFramework;
     using UnityEngine;
     using GenericGameBridge.Service;
@@ -16,20 +12,43 @@ namespace TrafficManager.Util {
     using CSUtil.Commons;
 
     public static class AutoTimedTrafficLights {
-        private static readonly bool NoCollidingRightTurns = true;
+        //Configurations: TODO move to mass edit options tab after PR #553.
+        /// <summary>
+        /// allocate dedicated turning lanes.
+        /// </summary>
+        private static readonly bool SeparateLanes = true;
 
+        /// <summary>
+        /// allow cars to turn right when ever there is the opportunity.
+        /// </summary>
+        private static readonly bool AllowRightTurns = true;
+
+        /// <summary>
+        /// Due to game limitations, sometimes allowing right turn can lead to car collisions, unless if
+        /// timed traffic lights interface changes. should we currently do not setup lane connector. Should we
+        /// allow right turns in such situations anyways?
+        /// </summary>
+        private static readonly bool AllowCollidingRightTurns = false;
+
+        //Shortcuts:
         private static TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
         private static INetService netService = Constants.ServiceFactory.NetService;
         private static CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
-        private static JunctionRestrictionsManager junctionRestrictionsManager = JunctionRestrictionsManager.Instance;
+        //private static JunctionRestrictionsManager junctionRestrictionsManager = JunctionRestrictionsManager.Instance;
         private static IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
         private static IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+        private static ref TrafficLightSimulation Sim(ushort nodeId) => ref tlsMan.TrafficLightSimulations[nodeId];
+        private static ref ITimedTrafficLights TimedLight(ushort nodeId) => ref Sim(nodeId).timedLight;
 
-        private enum GreenLane {
+        /// <summary>
+        /// The directions toward which the traffic light is green
+        /// </summary>
+        private enum GreenDir {
             AllRed,
             AllGreen,
             RightOnly
         }
+
         public enum ErrorResult {
             Success = 0,
             NoJunction,
@@ -38,13 +57,18 @@ namespace TrafficManager.Util {
             Other,
         }
 
-
+        /// <summary>
+        /// creats a sorted list of segmetns connected to nodeId.
+        /// roads without outgoing lanes are excluded as they do not need traffic lights
+        /// </summary>
+        /// <param name="nodeId">the junction</param>
+        /// <returns>a list of segments aranged in counter clockwise direction.</returns>
         private static List<ushort> CWSegments(ushort nodeId) {
             List<ushort> segList = new List<ushort>();
             netService.IterateNodeSegments(
                 nodeId,
                 ClockDirection.Clockwise,
-                (ushort segId, ref NetSegment seg) => {
+                (ushort segId, ref NetSegment _) => {
                     if (CountOutgoingLanes(segId, nodeId) > 0) {
                         segList.Add(segId);
                     }
@@ -54,80 +78,23 @@ namespace TrafficManager.Util {
             return segList;
         }
 
-        public static bool Add(List<ushort> nodes) {
-            bool ret = true;
-            foreach(ushort nodeId in nodes ) {
-                ret &= tlsMan.SetUpTimedTrafficLight(nodeId, nodes);
-                if(!ret) {
-                    break;
-                }
-            }
-            return ret;
-        }
-
+        /// <summary>
+        /// Adds an empty timed traffic light if it does not already exists.
+        /// additionally allocates dedicated turning lanes if possible.
+        /// </summary>
+        /// <param name="nodeId">the junction for which we want a traffic light</param>
+        /// <returns>true if sucessful</returns>
         public static bool Add(ushort nodeId) {
             List<ushort> nodeGroup = new List<ushort>(1);
             nodeGroup.Add(nodeId);
             return tlsMan.SetUpTimedTrafficLight(nodeId, nodeGroup);
         }
 
-        private static void SetupStep(ITimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenLane m) {
-            bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
-
-            //get step data for side seg
-            ICustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, startNode);
-
-            //for each lane type
-            foreach (ExtVehicleType vehicleType in liveSegmentLights.VehicleTypes) {
-                //set light mode
-                ICustomSegmentLight liveSegmentLight = liveSegmentLights.GetCustomLight(vehicleType);
-                liveSegmentLight.CurrentMode = LightMode.All;
-                //TODO do this only for the first step.
-                TimedLight(nodeId).ChangeLightMode(
-                    segmentId,
-                    vehicleType,
-                    liveSegmentLight.CurrentMode);
-
-                // calculate directions
-                bool bLeft, bRight, bForward;
-                ref ExtSegmentEnd segEnd = ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
-                ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
-                segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out bLeft, out bForward, out bRight);
-                //Debug.Log($"\n segment={segmentId} node={nodeId} vehicleType={vehicleType} \n VehicleTypes.Count={liveSegmentLights.VehicleTypes.Count}");
-                //Debug.Log($"bLeft={bLeft} bRight={bRight} bForward={bForward}");
-
-                // set light states
-                var green = RoadBaseAI.TrafficLightState.Green;
-                var red = RoadBaseAI.TrafficLightState.Red;
-                switch (m) {
-                    case GreenLane.AllRed:
-                        liveSegmentLight.SetStates(red, red, red);
-                        break;
-
-                    case GreenLane.AllGreen:
-                        liveSegmentLight.SetStates(green, green, green);
-                        break;
-
-                    case GreenLane.RightOnly when bRight:
-                        liveSegmentLight.SetStates(red, red, green);
-                        break;
-
-                    case GreenLane.RightOnly when bLeft:
-                        // go forward instead of right
-                        liveSegmentLight.SetStates(green, red , red);
-                        break;
-
-                    default:
-                        Debug.LogAssertion("Unreachable code.");
-                        liveSegmentLight.SetStates(green, green, green);
-                        break;
-                } // end switch
-            } // end foreach
-            step.UpdateLights(); //save
-        }
-
-
-
+        /// <summary>
+        /// Creates and configures default traffic the input junction
+        /// </summary>
+        /// <param name="nodeId">input junction</param>
+        /// <returns>true if successful</returns>
         public static ErrorResult Setup(ushort nodeId) {
             if(tlsMan.HasTimedSimulation(nodeId)) {
                 return ErrorResult.TTLExists;
@@ -144,23 +111,25 @@ namespace TrafficManager.Util {
                 return ErrorResult.Other;
             }
 
-            LaneArrowManager.SeparateTurningLanes.SeparateNode(nodeId, out _);
+            if (SeparateLanes) {
+                LaneArrowManager.SeparateTurningLanes.SeparateNode(nodeId, out _);
+            }
 
+            //Is it special case:
             {
                 var segList2Way = TwoWayRoads(segList, out int n2);
-                Debug.Log($"n2 == {n2}");
+                //Debug.Log($"n2 == {n2}");
                 if (n2 < 2) {
                     return ErrorResult.NoNeed;
                 }
                 bool b = HasIncommingOneWaySegment(nodeId);
-                Debug.Log($"HasIncommingOneWaySegment == {b}");
+                //Debug.Log($"HasIncommingOneWaySegment == {b}");
                 if (n2 == 2 && !b) {
-                    Debug.Log($"special case");
+                    //Debug.Log($"special case");
                     return SetupSpecial(nodeId, segList2Way);
                 }
             }
-
-            Debug.Log("normal case");
+            //Debug.Log("normal case");
 
             for (int i = 0; i < n; ++i) {
                 ITimedTrafficLightsStep step = TimedLight(nodeId).AddStep(
@@ -170,16 +139,16 @@ namespace TrafficManager.Util {
                     waitFlowBalance: 0.3f,
                     makeRed:true);
 
-                SetupStep(step, nodeId, segList[i], GreenLane.AllGreen);
+                SetupHelper(step, nodeId, segList[i], GreenDir.AllGreen);
 
                 ushort rightsegmentId = segList[(i + 1) % n];
                 if ( NeedsRightOnly(rightsegmentId, nodeId)) {
-                    SetupStep(step, nodeId, rightsegmentId, GreenLane.RightOnly);
+                    SetupHelper(step, nodeId, rightsegmentId, GreenDir.RightOnly);
                 } else {
-                    SetupStep(step, nodeId, rightsegmentId, GreenLane.AllRed);
+                    SetupHelper(step, nodeId, rightsegmentId, GreenDir.AllRed);
                 }
                 for (int j = 2; j < n; ++j) {
-                    SetupStep(step, nodeId, segList[(i + j) % n], GreenLane.AllRed);
+                    SetupHelper(step, nodeId, segList[(i + j) % n], GreenDir.AllRed);
                 }
             }
 
@@ -188,14 +157,17 @@ namespace TrafficManager.Util {
             return ErrorResult.Success;
         }
 
+        /// <summary>
+        /// speical case where:
+        /// multiple outgoing one way roads. only two 2way roads.
+        ///  - each 1-way road gets a go
+        ///  - then the two 2-way roads get a go.
+        /// this way we can save one step.
+        /// </summary>
+        /// <param name="nodeId"></param>
+        /// <param name="segList2Way"></param>
+        /// <returns></returns>
         private static ErrorResult SetupSpecial(ushort nodeId, List<ushort> segList2Way) {
-            /* speical case where:
-             * multiple outgoing one way roads. only two 2way roads.
-             *  - each 1-way road gets a go
-             *  - then the two 2-way roads get a go.
-             * this way we can save one step.
-             */
-
             var segList1Way = OneWayRoads(nodeId, out var n1);
 
             // the two 2-way roads get a go.
@@ -207,10 +179,10 @@ namespace TrafficManager.Util {
                     waitFlowBalance: 0.3f,
                     makeRed: true);
 
-                SetupStep(step, nodeId, segList2Way[0], GreenLane.AllGreen);
-                SetupStep(step, nodeId, segList2Way[1], GreenLane.AllGreen);
+                SetupHelper(step, nodeId, segList2Way[0], GreenDir.AllGreen);
+                SetupHelper(step, nodeId, segList2Way[1], GreenDir.AllGreen);
                 foreach (var segId in segList1Way) {
-                    SetupStep(step, nodeId, segId, GreenLane.AllRed);
+                    SetupHelper(step, nodeId, segId, GreenDir.AllRed);
                 }
             }
 
@@ -223,17 +195,81 @@ namespace TrafficManager.Util {
                     waitFlowBalance: 0.3f,
                     makeRed: true);
 
-                SetupStep(step, nodeId, segList1Way[i], GreenLane.AllGreen);
+                SetupHelper(step, nodeId, segList1Way[i], GreenDir.AllGreen);
                 for (int j = 1; j < n1; ++j) {
-                    SetupStep(step, nodeId, segList1Way[(i + j) % n1], GreenLane.AllRed);
+                    SetupHelper(step, nodeId, segList1Way[(i + j) % n1], GreenDir.AllRed);
                 }
                 foreach (var segId in segList2Way) {
-                    SetupStep(step, nodeId, segId, GreenLane.AllRed);
+                    SetupHelper(step, nodeId, segId, GreenDir.AllRed);
                 }
             }
 
             Sim(nodeId).Housekeeping();
             return ErrorResult.Success;
+        }
+
+        /// <summary>
+        /// Configures traffic light for and for all lane types at input segmentId, nodeId, and step.
+        /// </summary>
+        /// <param name="step"></param>
+        /// <param name="nodeId"></param>
+        /// <param name="segmentId"></param>
+        /// <param name="m">Determines which directions are green</param>
+        private static void SetupHelper(ITimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m) {
+            bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+
+            //get step data for side seg
+            ICustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, startNode);
+
+            //for each lane type
+            foreach (ExtVehicleType vehicleType in liveSegmentLights.VehicleTypes) {
+                //set light mode
+                ICustomSegmentLight liveSegmentLight = liveSegmentLights.GetCustomLight(vehicleType);
+                liveSegmentLight.CurrentMode = LightMode.All;
+
+                TimedLight(nodeId).ChangeLightMode(
+                    segmentId,
+                    vehicleType,
+                    liveSegmentLight.CurrentMode);
+
+                // set light states
+                var green = RoadBaseAI.TrafficLightState.Green;
+                var red = RoadBaseAI.TrafficLightState.Red;
+                switch (m) {
+                    case GreenDir.AllRed:
+                        liveSegmentLight.SetStates(red, red, red);
+                        break;
+
+                    case GreenDir.AllGreen:
+                        liveSegmentLight.SetStates(green, green, green);
+                        break;
+
+                    case GreenDir.RightOnly: {
+                            // calculate directions
+                            bool bLeft, bRight, bForward;
+                            ref ExtSegmentEnd segEnd = ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
+                            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+                            segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out bLeft, out bForward, out bRight);
+                            //Debug.Log($"\n segment={segmentId} node={nodeId} vehicleType={vehicleType} \n VehicleTypes.Count={liveSegmentLights.VehicleTypes.Count}");
+                            //Debug.Log($"bLeft={bLeft} bRight={bRight} bForward={bForward}");
+                            if (bRight) {
+                                liveSegmentLight.SetStates(red, red, green);
+                            } else if (bLeft) {
+                                // go forward instead of right
+                                liveSegmentLight.SetStates(green, red, red);
+                            } else {
+                                Debug.LogAssertion("Unreachable code.");
+                                liveSegmentLight.SetStates(green, green, green);
+                            }
+                            break;
+                        }
+                    default:
+                        Debug.LogAssertion("Unreachable code.");
+                        liveSegmentLight.SetStates(green, green, green);
+                        break;
+                } // end switch
+            } // end foreach
+            step.UpdateLights(); //save
         }
 
         private static bool HasIncommingOneWaySegment(ushort nodeId) {
@@ -243,7 +279,7 @@ namespace TrafficManager.Util {
                 if (segId != 0 && segMan.CalculateIsOneWay(segId)) {
                     int n = CountIncomingLanes(segId, nodeId);
                     int dummy = CountOutgoingLanes(segId, nodeId);
-                    Debug.Log($"seg={segId} node={nodeId} CountIncomingLanes={n} CountOutgoingLanes={dummy}");
+                    //Debug.Log($"seg={segId} node={nodeId} CountIncomingLanes={n} CountOutgoingLanes={dummy}");
                     if (n > 0) {
                         return true;
                     }
@@ -252,6 +288,10 @@ namespace TrafficManager.Util {
             return false;
         }
 
+        /// <summary>filters out oneway roads from segList. Assumes all segments in seglist have outgoing lanes. </summary>
+        /// <param name="segList"> List of segments returned by SWSegments. </param>
+        /// <param name="count">number of two way roads connected to the junction</param>
+        /// <returns>A list of all two way roads connected to the junction</returns>
         private static List<ushort> TwoWayRoads(List<ushort> segList, out int count) {
             List<ushort> segList2 = new List<ushort>();
             foreach(var segId in segList) {
@@ -263,6 +303,9 @@ namespace TrafficManager.Util {
             return segList2;
         }
 
+        /// <param name="nodeId"></param>
+        /// <param name="count">number of all one way roads at input junction.</param>
+        /// <returns>list of all oneway roads connected to input junction</returns>
         private static List<ushort> OneWayRoads(ushort nodeId, out int count) {
             List<ushort> segList2 = new List<ushort>();
             ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
@@ -276,9 +319,26 @@ namespace TrafficManager.Util {
             return segList2;
         }
 
+        /// <summary>
+        /// wierd road connections where right turn is possible only  if:
+        ///  - timed traffic light gives more control over directions to turn to.
+        ///  - lane connector is used.
+        ///  Note: for other more normal cases furthur chaking is performed in SetupHelper() to determine if a right turn is necessary.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="nodeId"></param>
+        /// <returns>
+        /// false AllowRightTurns == false
+        /// otherwise true if AllowCollidingRightTurns == true
+        /// otherwise false if it is special case described above.
+        /// otherwise true if right turn is easily possible, without complications.
+        /// otherwise false.
+        /// </returns>
         private static bool NeedsRightOnly(ushort segmentId, ushort nodeId) {
-            //These are the cases where right turn is possible only if we use the lane connection tool.
-            if (!NoCollidingRightTurns) {
+            if (!AllowRightTurns) {
+                return false;
+            }
+            if (AllowCollidingRightTurns) {
                 return true;
             }
             ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
@@ -304,12 +364,15 @@ namespace TrafficManager.Util {
             return false;
         }
 
-
-        private static ref TrafficLightSimulation Sim(ushort nodeId) => ref tlsMan.TrafficLightSimulations[nodeId];
-        private static ref ITimedTrafficLights TimedLight(ushort nodeId) => ref Sim(nodeId).timedLight;
-
+        /// <summary>
+        /// count the lanes going out or comming in a segment from inpout junctions.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="nodeId"></param>
+        /// <param name="outgoing">true if lanes our going out toward the junction</param>
+        /// <returns></returns>
         private static int CountLanes(ushort segmentId, ushort nodeId, bool outgoing = true) {
-            return Constants.ServiceFactory.NetService.GetSortedLanes(
+            return netService.GetSortedLanes(
                                 segmentId,
                                 ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
                                 netService.IsStartNode(segmentId, nodeId) ^ (!outgoing),
@@ -322,6 +385,13 @@ namespace TrafficManager.Util {
         private static int CountIncomingLanes(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
 
 
+        /// <summary>
+        /// Counts the number of roads toward the given directions.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="nodeId"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
         private static int CountDirSegs(ushort segmentId, ushort nodeId, ArrowDirection dir) {
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
             int ret = 0;
@@ -336,10 +406,5 @@ namespace TrafficManager.Util {
                 });
             return ret;
         }
-
-
-
-
-
     }
 }
