@@ -120,7 +120,7 @@ namespace CitiesGameBridge.Service {
                         }
                     }
                 } else {
-                    ushort segmentId = node.GetSegment(0);
+                    ushort segmentId = 0;
                     for (int i = 0; i < 8; ++i) {
                         segmentId = node.GetSegment(i);
                         if (segmentId != 0) {
