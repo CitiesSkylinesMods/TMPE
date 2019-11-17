@@ -8,7 +8,7 @@ namespace TrafficManager.State {
     public static class OptionsKeybindsTab {
         internal static void MakeSettings_Keybinds(ExtUITabstrip tabStrip) {
             string keybindsTabText = Translation.Options.Get("Tab:Keybinds");
-            UIHelper panelHelper = tabStrip.AddTabPage(keybindsTabText);
+            UIHelper panelHelper = tabStrip.AddTabPage(keybindsTabText, false);
             UIHelperBase keyboardGroup = panelHelper.AddGroup(keybindsTabText);
             ((UIPanel)((UIHelper)keyboardGroup).self).gameObject.AddComponent<KeybindSettingsPage>();
         }

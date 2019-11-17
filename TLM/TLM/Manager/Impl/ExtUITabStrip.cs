@@ -1,3 +1,7 @@
+// tabbing code is borrowed from RushHour mod and Advanced toolbar mod
+// https://github.com/PropaneDragon/RushHour/blob/release/RushHour/Options/OptionHandler.cs
+// https://github.com/CWMlolzlz/CS-AdvancedToolbar/blob/master/Source/ExpandableToolbar.cs
+
 namespace TrafficManager.Manager.Impl {
     using UnityEngine;
     using ICities;
@@ -52,14 +56,14 @@ namespace TrafficManager.Manager.Impl {
 
         private UIScrollablePanel CreateScrollebalePanel(UIPanel panel) {
             panel.autoLayout = true;
-            panel.autoLayoutDirection = LayoutDirection.Horizontal; //Why?
+            panel.autoLayoutDirection = LayoutDirection.Horizontal;
 
             UIScrollablePanel scrollablePanel = panel.AddUIComponent<UIScrollablePanel>();
             scrollablePanel.autoLayout = true;
             scrollablePanel.autoLayoutStart = LayoutStart.TopLeft;
             scrollablePanel.wrapLayout = true;
             scrollablePanel.size = new Vector2(panel.size.x - 50, panel.size.y + 35);
-            scrollablePanel.autoLayoutDirection = LayoutDirection.Horizontal; //Why?
+            scrollablePanel.autoLayoutDirection = LayoutDirection.Horizontal; //Vertical does not work but why?
 
             UIScrollbar verticalScrollbar = CreateVerticalScrollbar(panel, scrollablePanel);
             verticalScrollbar.Show();
@@ -69,7 +73,7 @@ namespace TrafficManager.Manager.Impl {
             return scrollablePanel;
         }
 
-        public UIHelper AddTabPage(string name) {
+        public UIHelper AddTabPage(string name, bool scrollBars=true) {
             UIButton tabButton = base.AddTab(name);
             tabButton.normalBgSprite = "SubBarButtonBase";
             tabButton.disabledBgSprite = "SubBarButtonBaseDisabled";
@@ -80,10 +84,19 @@ namespace TrafficManager.Manager.Impl {
             tabButton.autoSize = true;
 
             selectedIndex = tabCount - 1;
-            UIPanel currentPanel = this.tabContainer.components[selectedIndex] as UIPanel;
+            UIPanel currentPanel = tabContainer.components[selectedIndex] as UIPanel;
             currentPanel.autoLayoutPadding = new RectOffset(10, 10, 0, 16);
-            UIScrollablePanel scrollablePanel = CreateScrollebalePanel(currentPanel);
-            UIHelper panelHelper = new UIHelper(scrollablePanel);
+            currentPanel.autoLayout = true;
+
+            UIHelper panelHelper;
+            if (scrollBars) {
+                UIScrollablePanel scrollablePanel = CreateScrollebalePanel(currentPanel);
+                panelHelper = new UIHelper(scrollablePanel);
+            }
+            else {
+                currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
+                panelHelper = new UIHelper(currentPanel);
+            }
             return panelHelper;
         }
 
