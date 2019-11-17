@@ -122,13 +122,17 @@ namespace TrafficManager.UI.SubTools {
 
                     return true;
                 }
-
-                SegmentTraverser.Traverse(
-                    HoveredSegmentId,
-                    TraverseDirection.AnyDirection,
-                    TraverseSide.Straight,
-                    SegmentStopCriterion.None,
-                    VisitorFun);
+                bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+                if (isRAbout) {
+                    SegmentTraverser.Traverse(segmentList, VisitorFun);
+                } else {
+                    SegmentTraverser.Traverse(
+                        HoveredSegmentId,
+                        TraverseDirection.AnyDirection,
+                        TraverseSide.Straight,
+                        SegmentStopCriterion.None,
+                        VisitorFun);
+                }
 
                 // cycle mass edit mode
                 massEditMode =
@@ -169,42 +173,35 @@ namespace TrafficManager.UI.SubTools {
 
             //bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
             if (ctrlDown) {
                 showMassEditOverlay = true;
+                massEditMode = PrioritySignsMassEditMode.MainYield;
             } else {
                 showMassEditOverlay = false;
             }
 
             if (HoveredSegmentId == 0) {
+                if(shiftDown) {
+                    massEditMode = PrioritySignsMassEditMode.MainYield;
+                }
                 return;
             }
 
-            bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-            if (ctrlDown && shiftDown) {
-                bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId);
+            if (shiftDown) {
+                bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+                Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
                 if (isRAbout) {
-                    foreach (uint segmentId in RoundaboutMassEdit.Instance.segmentList) {
+                    foreach (uint segmentId in segmentList) {
                         ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-                        Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
                         NetTool.RenderOverlay(
                             cameraInfo,
                             ref seg,
                             color,
                             color);
                     } // end foreach
-                    massEditMode = PrioritySignsMassEditMode.MainYield;
-                    return;
-                }// endif
-                // else if it is not a round about fall back to normal shiftDown case.
-            } else if (ctrlDown) {
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
-                massEditMode = PrioritySignsMassEditMode.MainYield;
-                return;
-            }
-            if (shiftDown) {
-                // draw hovered segments
-                if (HoveredSegmentId != 0) {
-                    Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
+                } else {
                     SegmentTraverser.Traverse(
                         HoveredSegmentId,
                         TraverseDirection.AnyDirection,
@@ -219,10 +216,10 @@ namespace TrafficManager.UI.SubTools {
                                 color);
                             return true;
                         });
-                } else {
-                    massEditMode = PrioritySignsMassEditMode.MainYield;
                 }
-
+                return;
+            }else if (ctrlDown) {
+                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 return;
             }
 

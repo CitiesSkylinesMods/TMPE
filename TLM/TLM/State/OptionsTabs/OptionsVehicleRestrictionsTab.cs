@@ -5,6 +5,8 @@ namespace TrafficManager.State {
     using ICities;
     using Manager.Impl;
     using UI;
+    using UnityEngine;
+    using static Options;
 
     public static class OptionsVehicleRestrictionsTab {
         private static UICheckBox _relaxedBussesToggle;
@@ -22,20 +24,8 @@ namespace TrafficManager.State {
         private static UICheckBox _preferOuterLaneToggle;
         private static UICheckBox _evacBussesMayIgnoreRulesToggle;
 
-        internal static void MakeSettings_VehicleRestrictions(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(
-                tabStrip,
-                Translation.Options.Get("Tab:Policies & Restrictions"));
-            tabStrip.selectedIndex = tabIndex;
-
-            var currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
-            currentPanel.autoLayout = true;
-            currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
-            currentPanel.autoLayoutPadding.top = 5;
-            currentPanel.autoLayoutPadding.left = 10;
-            currentPanel.autoLayoutPadding.right = 10;
-
-            var panelHelper = new UIHelper(currentPanel);
+        internal static void MakeSettings_VehicleRestrictions(ExtUITabstrip tabStrip) {
+            UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Policies & Restrictions"));
             UIHelperBase atJunctionsGroup = panelHelper.AddGroup(
                 Translation.Options.Get("VR.Group:At junctions"));
 #if DEBUG
@@ -129,6 +119,8 @@ namespace TrafficManager.State {
                           Options.evacBussesMayIgnoreRules,
                           OnEvacBussesMayIgnoreRulesChanged) as UICheckBox;
             }
+
+            OptionsMassEditTab.MakePanel_MasEdit(panelHelper);
         }
 
         private static void OnAllRelaxedChanged(bool newAllRelaxed) {

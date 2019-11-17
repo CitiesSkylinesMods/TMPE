@@ -7,6 +7,7 @@ namespace TrafficManager.State {
     using ICities;
     using UI;
     using UnityEngine;
+    using Manager.Impl;
 
     public class Options : MonoBehaviour {
 #if DEBUG
@@ -94,16 +95,6 @@ namespace TrafficManager.State {
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
 
-        //mass edit tab
-        public static bool rabout_SwitchLanesAtEntry = false;
-        public static bool rabout_NoLaneSwitchingInRabout = false;
-        public static bool rabout_NoLaneSwitchingNearEntries = false;
-        public static bool rabout_DecicatedExitLanes = false;
-        public static bool rabout_NoCrossingRAbout = true;
-        public static bool rabout_NoCrossingAtConnections = false;
-
-        public static bool avn_NoZebraCrossingAcrossAvn = true;
-
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for
         /// a new language. Takes a second, very slow.
@@ -125,51 +116,90 @@ namespace TrafficManager.State {
         }
 
         public static void MakeSettings(UIHelperBase helper) {
-            // tabbing code is borrowed from RushHour mod
-            // https://github.com/PropaneDragon/RushHour/blob/release/RushHour/Options/OptionHandler.cs
-            UIHelper actualHelper = helper as UIHelper;
-            UIComponent container = actualHelper.self as UIComponent;
-
-            UITabstrip tabStrip = container.AddUIComponent<UITabstrip>();
-            tabStrip.relativePosition = new Vector3(0, 0);
-            tabStrip.size = new Vector2(container.width - 20, 40);
-
-            UITabContainer tabContainer = container.AddUIComponent<UITabContainer>();
-            tabContainer.relativePosition = new Vector3(0, 40);
-            tabContainer.size = new Vector2(container.width - 20, container.height - tabStrip.height - 20);
-            tabStrip.tabPages = tabContainer;
-
-            int tabIndex = 0;
-
-            // GENERAL
-            OptionsGeneralTab.MakeSettings_General(tabStrip, tabIndex);
-
-            // GAMEPLAY
-            ++tabIndex;
-            OptionsGameplayTab.MakeSettings_Gameplay(tabStrip, tabIndex);
-
-            // VEHICLE RESTRICTIONS
-            ++tabIndex;
-            OptionsVehicleRestrictionsTab.MakeSettings_VehicleRestrictions(tabStrip, tabIndex);
-
-            // MASS EDIT
-            ++tabIndex;
-            OptionsMassEditTab.MakeSettings_MasEdit(tabStrip, tabIndex);
-
-            // OVERLAYS
-            ++tabIndex;
-            OptionsOverlaysTab.MakeSettings_Overlays(tabStrip, tabIndex);
-
-            // MAINTENANCE
-            ++tabIndex;
-            OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip, tabIndex);
-
-            // KEYBOARD
-            ++tabIndex;
-            OptionsKeybindsTab.MakeSettings_Keybinds(tabStrip, tabIndex);
-
-            tabStrip.selectedIndex = 0;
+            //ExtUITabstrip.Test.OnSettingsUI(helper);return;
+            ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
+            OptionsGeneralTab.MakeSettings_General(tabStrip);
+            OptionsGameplayTab.MakeSettings_Gameplay(tabStrip);
+            OptionsVehicleRestrictionsTab.MakeSettings_VehicleRestrictions(tabStrip);
+            OptionsOverlaysTab.MakeSettings_Overlays(tabStrip);
+            OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip);
+            OptionsKeybindsTab.MakeSettings_Keybinds(tabStrip);
+            tabStrip.Invalidate();
         }
+
+        public abstract class SerializableOptionBase {
+            public abstract void Load(byte data);
+            public abstract byte Save();
+        }
+
+        public abstract class SerializableUIOptionBase<TVal, TUI> : SerializableOptionBase
+            where TUI : UIComponent
+        {
+            protected TVal _value;
+            public readonly TVal DefaultValue;
+            public TVal Value { get => _value; }
+
+            public abstract void AddUI(UIHelperBase container);
+
+            public abstract void SetValue(TVal newVal);
+
+            protected TUI _ui;
+            protected readonly bool _tooltip;
+            public string Key;
+            public string GroupName;
+            public string Label { get => $"{GroupName}.CheckBox: {Key}"; }
+            public string Tooltip { get => $"{GroupName}.Tooltip: {Key}"; }
+
+            public void DefaultOnValueChanged(TVal newVal) {
+                Options.IsGameLoaded();
+                Log._Debug($"{GroupName}.{Label} changed to {newVal}");
+                _value = newVal;
+            }
+
+            public SerializableUIOptionBase(
+                string key,
+                TVal default_value,
+                string group_name,
+                bool tooltip = false)
+            {
+                Key = key;
+                DefaultValue = _value =  default_value;
+                GroupName = group_name;
+                _tooltip = tooltip;
+            }
+        }
+
+        public sealed class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox> {
+            public event ICities.OnCheckChanged OnValueChanged;
+            public CheckboxOption(
+                string key,
+                bool default_value,
+                string group_name,
+                bool tooltip = false) :
+                base( key, default_value, group_name, tooltip) {
+                OnValueChanged = DefaultOnValueChanged;
+            }
+
+            public override void Load(byte data) => SetValue(data != 0);
+            public override byte Save() => Value ? (byte)1 : (byte)0;
+            public override void SetValue(bool newVal) {
+                if (_ui != null) {
+                    _ui.isChecked = newVal;
+                }
+                _value = newVal;
+            }
+
+            public override void AddUI(UIHelperBase container) {
+                _ui = container.AddCheckbox(
+                    Translation.Options.Get(Label),
+                    DefaultValue,
+                    this.OnValueChanged) as UICheckBox;
+                if (_tooltip) {
+                    _ui.tooltip = Translation.Options.Get(Tooltip);
+                }
+            }
+        }
+
 
         internal static void Indent<T>(T component) where T : UIComponent {
             UILabel label = component.Find<UILabel>("Label");
@@ -183,20 +213,6 @@ namespace TrafficManager.State {
             if (check != null) {
                 check.relativePosition += new Vector3(22.0f, 0);
             }
-        }
-
-        public static void AddOptionTab(UITabstrip tabStrip, string caption) {
-            UIButton tabButton = tabStrip.AddTab(caption);
-
-            tabButton.normalBgSprite = "SubBarButtonBase";
-            tabButton.disabledBgSprite = "SubBarButtonBaseDisabled";
-            tabButton.focusedBgSprite = "SubBarButtonBaseFocused";
-            tabButton.hoveredBgSprite = "SubBarButtonBaseHovered";
-            tabButton.pressedBgSprite = "SubBarButtonBasePressed";
-
-            tabButton.textPadding = new RectOffset(10, 10, 10, 10);
-            tabButton.autoSize = true;
-            tabButton.tooltip = caption;
         }
 
         /// <summary>

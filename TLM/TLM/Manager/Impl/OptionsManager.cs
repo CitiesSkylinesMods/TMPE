@@ -197,34 +197,25 @@ namespace TrafficManager.Manager.Impl {
                 OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
             }
 
-            if (data.Length >= 43) {
-                OptionsMassEditTab.Set_RAbout_SwitchLanesAtEntry(data[42] == 1);
-            }
+            Func<int, Options.SerializableOptionBase, int> loadBool = (idx, opt) => {
+                if (data.Length > idx) {
+                    opt.Load(data[idx]);
+                }
+                return idx + 1;
+            };
 
-            if (data.Length >= 44) {
-                OptionsMassEditTab.Set_RAbout_NoLaneSwitchingInRabout(data[43] == 1);
-            }
-
-            if (data.Length >= 45) {
-                OptionsMassEditTab.Set_RAbout_NoLaneSwitchingNearEntries(data[44] == 1);
-            }
-
-            if (data.Length >= 46) {
-                OptionsMassEditTab.Set_RAbout_DecicatedExitLanes(data[45] == 1);
-            }
-
-            if (data.Length >= 47) {
-                OptionsMassEditTab.Set_RAbout_NoCrossingRAbout(data[46] == 1);
-            }
-
-            if (data.Length >= 48) {
-                OptionsMassEditTab.Set_RAbout_NoCrossingAtConnections(data[47] == 1);
-            }
-
-            if (data.Length >= 49) {
-                OptionsMassEditTab.Set_Avn_NoZebraCrossingAcrossAvn(data[48] == 1);
-            }
-
+            int index = 42;
+            index = loadBool(index, OptionsMassEditTab.rabout_SwitchLanesYeildR);
+            index = loadBool(index, OptionsMassEditTab.rabout_StayInLaneMainR);
+            index = loadBool(index, OptionsMassEditTab.rabout_StayInLaneNearRabout);
+            index = loadBool(index, OptionsMassEditTab.rabout_DecicatedExitLanes);
+            index = loadBool(index, OptionsMassEditTab.rabout_NoCrossMainR);
+            index = loadBool(index, OptionsMassEditTab.rabout_NoCrossYeildR);
+            index = loadBool(index, OptionsMassEditTab.avn_NoCrossMainR);
+            index = loadBool(index, OptionsMassEditTab.rabout_SwitchLanesYeildR);
+            index = loadBool(index, OptionsMassEditTab.rabout_SwitchLanesYeildR);
+            index = loadBool(index, OptionsMassEditTab.rabout_SwitchLanesYeildR);
+            index = loadBool(index, OptionsMassEditTab.rabout_SwitchLanesYeildR);
             return true;
         }
 
@@ -272,23 +263,14 @@ namespace TrafficManager.Manager.Impl {
                 (byte)(Options.allowNearTurnOnRed ? 1 : 0),
                 (byte)(Options.allowFarTurnOnRed ? 1 : 0),
                 (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0),
-                            /*
-private static UICheckBox _rabout_SwitchLanesAtEntryToggle;43
-private static UICheckBox _rabout_NoLaneSwitchingInRaboutToggle;44
-private static UICheckBox _rabout_NoLaneSwitchingNearEntriesToggle;45
-private static UICheckBox _rabout_DecicatedExitLanesToggle;//46
-private static UICheckBox _rabout_NoCrossingRAboutToggle;//47
-private static UICheckBox _rabout_NoCrossingAtConnectionsToggle;//48
 
-private static UICheckBox _avn_NoZebraCrossingAcrossAvnToggle;49
-*/
-                (byte)(Options.rabout_SwitchLanesAtEntry ? 1 : 0),
-                (byte)(Options.rabout_NoLaneSwitchingInRabout ? 1 : 0),
-                (byte)(Options.rabout_NoLaneSwitchingNearEntries ? 1 : 0),
-                (byte)(Options.rabout_DecicatedExitLanes ? 1 : 0),
-                (byte)(Options.rabout_NoCrossingRAbout ? 1 : 0),
-                (byte)(Options.rabout_NoCrossingAtConnections ? 1 : 0),
-                (byte)(Options.avn_NoZebraCrossingAcrossAvn ? 1 : 0),
+                (byte)(OptionsMassEditTab.rabout_SwitchLanesYeildR.Save()),
+                (byte)(OptionsMassEditTab.rabout_StayInLaneMainR.Save()),
+                (byte)(OptionsMassEditTab.rabout_StayInLaneNearRabout.Save()),
+                (byte)(OptionsMassEditTab.rabout_DecicatedExitLanes.Save()),
+                (byte)(OptionsMassEditTab.rabout_NoCrossMainR.Save()),
+                (byte)(OptionsMassEditTab.rabout_NoCrossYeildR.Save()),
+                (byte)(OptionsMassEditTab.avn_NoCrossMainR.Save()),
 
             };
         }

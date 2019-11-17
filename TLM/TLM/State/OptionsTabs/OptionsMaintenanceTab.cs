@@ -44,18 +44,8 @@ namespace TrafficManager.State {
             return Translation.Options.Get(text);
         }
 
-        internal static void MakeSettings_Maintenance(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(tabStrip, T("Tab:Maintenance"));
-            tabStrip.selectedIndex = tabIndex;
-
-            var currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
-            currentPanel.autoLayout = true;
-            currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
-            currentPanel.autoLayoutPadding.top = 5;
-            currentPanel.autoLayoutPadding.left = 10;
-            currentPanel.autoLayoutPadding.right = 10;
-
-            var panelHelper = new UIHelper(currentPanel);
+        internal static void MakeSettings_Maintenance(ExtUITabstrip tabStrip) {
+            UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Maintenance"));
             UIHelperBase maintenanceGroup = panelHelper.AddGroup(T("Tab:Maintenance"));
 
             _resetStuckEntitiesBtn = maintenanceGroup.AddButton(
