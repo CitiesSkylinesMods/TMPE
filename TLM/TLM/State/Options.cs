@@ -127,11 +127,6 @@ namespace TrafficManager.State {
             tabStrip.Invalidate();
         }
 
-        public abstract class SerializableOptionBase {
-            public abstract void Load(byte data);
-            public abstract byte Save();
-        }
-
         internal static void Indent<T>(T component) where T : UIComponent {
             UILabel label = component.Find<UILabel>("Label");
 
