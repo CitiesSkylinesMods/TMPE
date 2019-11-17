@@ -17,16 +17,9 @@ namespace TrafficManager.State {
         private static UICheckBox _realisticPublicTransportToggle;
         private static UISlider _altLaneSelectionRatioSlider;
 
-        internal static void MakeSettings_Gameplay(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(tabStrip, Translation.Options.Get("Tab:Gameplay"));
-            tabStrip.selectedIndex = tabIndex;
-            var currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
-            currentPanel.autoLayout = true;
-            currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
-            currentPanel.autoLayoutPadding.top = 5;
-            currentPanel.autoLayoutPadding.left = 10;
-            currentPanel.autoLayoutPadding.right = 10;
-            var panelHelper = new UIHelper(currentPanel);
+        internal static void MakeSettings_Gameplay(ExtUITabstrip tabStrip) {
+            UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Gameplay"));
+
             UIHelperBase vehBehaviorGroup = panelHelper.AddGroup(
                 Translation.Options.Get("Gameplay.Group:Vehicle behavior"));
 
