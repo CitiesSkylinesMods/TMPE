@@ -10,6 +10,25 @@ namespace TrafficManager.State {
     public static class OptionsMassEditTab {
         //TODO: Add options to a list.
 
+        //rabout_DecicatedExitLanes
+        //rabout_SwitchLanesYeildR<
+        //rabout_SwitchLanesMainR*<
+        //rabout_StayInLaneMainR
+        //rabout_StayInLaneNearRabout
+        //rabout_NoCrossMainR
+        //rabout_NoCrossYeildR<
+        //rabout_PrioritySigns*
+
+        //avn_NoCrossMainR
+        //avn_NoCrossYield*<
+        //avn_NoLeftTurns*<
+        //avn_EnterBlockedMain*<
+        //avn_EnterBlockedYeild*
+        //avn_StopEntry*
+        //avn_PrioritySigns*
+        //avn_SwitchLanesMain*<
+        //avn_SwtichLanesYeild*<
+
         //TODO remove comments after adding translations.
         public static CheckboxOption rabout_DecicatedExitLanes = new CheckboxOption(
             key: "rabout_DecicatedExitLanes",

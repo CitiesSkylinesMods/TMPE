@@ -120,8 +120,8 @@ namespace TrafficManager.Util {
                 if (OptionsMassEditTab.rabout_NoCrossMainR.Value) {
                     JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
                         segmentId,
-                        startNode
-                        , false);
+                        startNode,
+                        false);
                 }
                 JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
                     segmentId,
@@ -232,6 +232,9 @@ namespace TrafficManager.Util {
         }
 
         private bool TraverseAroundRecursive(ushort segmentId) {
+            if (segmentList.Count > 20) {
+                return false; // too long. prune
+            }
             segmentList.Add(segmentId);
             //Debug.Log($"\nTraverseAroundRecursive({segmentId}) ");
             var segments = GetSortedSegments( segmentId);
@@ -257,11 +260,11 @@ namespace TrafficManager.Util {
             ushort headNodeId = GetHeadNode(segmentId);
             bool lhd = LaneArrowManager.Instance.Services.SimulationService.LeftHandDrive;
             var list0 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Forward, !lhd);
-            var list1 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Left   , lhd);
+            var list1 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Left   ,  lhd);
             var list2 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Right  , !lhd);
 
             list0.AddRange(list1);
-            list1.AddRange(list2);
+            list0.AddRange(list2);
             return list0;
         }
 
@@ -281,7 +284,7 @@ namespace TrafficManager.Util {
                         return true;
                     }
                     if (GetDirection(segmentId, NextSegmentId, headNodeId) == dir) {
-                        //Debug.Log($"segmentId={segmentId} NextSegmentId={NextSegmentId} headNodeId={headNodeId} dir={dir}");
+                        Debug.Log($"segmentId={segmentId} NextSegmentId={NextSegmentId} headNodeId={headNodeId} dir={dir}");
                         for (int i = 0; i < sortedSegList.Count; ++i) {
                             if (GetDirection(NextSegmentId, sortedSegList[i], headNodeId) == preferDir) {
                                 sortedSegList.Insert(i, NextSegmentId);
