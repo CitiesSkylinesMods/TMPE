@@ -14,12 +14,11 @@ namespace TrafficManager.U {
     /// </summary>
     public class UWindow
         : MonoBehaviour,
-          IUConstraintEvents
-    {
+          IUConstraintEvents {
         public uint textCounter_ = 1;
         public uint buttonCounter_ = 1;
         public int panelCounter_ = 1;
-        
+
         private UEventsBlockingCoUiPanel coUiPanel_;
 //        private GameObject windowBackground_;
 
@@ -32,7 +31,7 @@ namespace TrafficManager.U {
         /// </summary>
         private UWindow() {
             GameObject obj = this.gameObject;
-            
+
             CreateCoUiPanel(obj.name);
             SetupEventSystem();
 
@@ -77,7 +76,7 @@ namespace TrafficManager.U {
 
         public static GameObject CreateCanvasObject(string canvasName) {
             DestroyAllWithName(canvasName);
-            
+
             var canvasObject = new GameObject { name = canvasName };
 
             var canvasComponent = canvasObject.AddComponent<Canvas>();
@@ -91,14 +90,14 @@ namespace TrafficManager.U {
             // scalerComponent.referencePixelsPerUnit = 100f;
 
             canvasObject.AddComponent<GraphicRaycaster>();
-            
+
             var rectComponent = canvasObject.GetComponent<RectTransform>();
             rectComponent.anchoredPosition = Vector2.zero;
             rectComponent.offsetMin = Vector2.zero;
             rectComponent.offsetMax = Vector2.zero;
             rectComponent.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Screen.width);
             rectComponent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Screen.height);
-            
+
             canvasObject.AddComponent<UWindow>();
             canvasObject.AddComponent<UConstrainer>();
 
@@ -108,7 +107,7 @@ namespace TrafficManager.U {
         private void CreateCoUiPanel(string canvasName) {
             UIView coView = UIView.GetAView();
             this.coUiPanel_ = coView.AddUIComponent(typeof(UEventsBlockingCoUiPanel))
-                           as UEventsBlockingCoUiPanel;
+                                  as UEventsBlockingCoUiPanel;
             this.coUiPanel_.name = canvasName;
         }
 
@@ -178,38 +177,35 @@ namespace TrafficManager.U {
         }
 
         /// <summary>
-        /// Handles mouse drag events by modifying constraints Positoin Left and Top.
+        /// Handles mouse drag events by finding the root panel and modifying its constraints Position Left and Top.
         /// If no constraints found, the window will not move.
         /// </summary>
-        /// <param name="drag"></param>
+        /// <param name="drag">The offset detected for mouse being dragged</param>
         public void OnDrag(Vector2 drag) {
             Log._Debug($"OnDrag {drag}");
 
-            var constrainer = GetComponent<UConstrainer>();
-            
-            // For each constraint, find those setting left and top coords, and change the values
-            constrainer.ForEachConstraintModify(c => {
-                // magic scale is used to adjust mouse movements to match actual screen coords
-                // i have no idea what is happening here, probably canvas scaling is borked
-                const float MAGIC_SCALE = 2f;
-                
-                switch (c.field_) {
-                    case TransformField.Left: {
-                        Log._Assert(c.unit_ == Unit.Pixels, 
-                                    "For dragging to work, the Left constraint must be set in pixels");
-                        c.value_ += drag.x * MAGIC_SCALE;
-                        break;
-                    }
-                    case TransformField.Top: {
-                        Log._Assert(c.unit_ == Unit.Pixels, 
-                                    "For dragging to work, the Top constraint must be set in pixels");
-                        c.value_ += -drag.y * MAGIC_SCALE;
-                        break;
-                    }
-                }
-            });
-            
+            // Assume UWindow root canvas only has 1 panel child object which we then need to move
+            GameObject rootPanel = this.gameObject.transform.GetChild(0).gameObject; 
+            var constrainer = rootPanel.GetComponent<UConstrainer>();
+
+            // magic scale is used to adjust mouse movements to match actual screen coords
+            // i have no idea what is happening here, probably canvas scaling is borked
+            const float MAGIC_SCALE = 2f;
+
+            // Modify left constraint (must exist)
+            UConstraint leftConstr = constrainer.GetConstraint(TransformField.Left);
+            Log._Assert(leftConstr.unit_ == Unit.Pixels,
+                        "For dragging to work, the Left constraint must be set in pixels");
+            leftConstr.value_ += drag.x * MAGIC_SCALE;
+
+            // Modify top constraint (must exist)
+            UConstraint topConstr = constrainer.GetConstraint(TransformField.Top);
+            Log._Assert(topConstr.unit_ == Unit.Pixels,
+                        "For dragging to work, the Top constraint must be set in pixels");
+            topConstr.value_ += -drag.y * MAGIC_SCALE;
+
             constrainer.ApplyConstraints();
+            this.coUiPanel_.AdjustToMatch(rootPanel);
         }
 
         public void OnUConstraintMove() {

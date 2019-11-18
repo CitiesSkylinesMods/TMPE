@@ -165,26 +165,26 @@
             // add the new main menu
             Log._Debug("creation step 1");
             // CreateWindow creates a canvas, and a background panel, root of the window child controls
-            FormBuilder<UPanel> window = FormBuilder<UWindow>.CreateWindow("TMPE_MainMenu");
+            FormBuilder<UPanel> windowBuilder = FormBuilder<UPanel>.CreateWindow("TMPE_MainMenu");
 
             // Title bar/drag handle
             Log._Debug("creation step 2");
-            FormBuilder<UPanel> titlebarPanel = window.Panel();
+            FormBuilder<UPanel> titlebarPanel = windowBuilder.Panel();
             titlebarPanel.Get().EnableDrag();
 
             Log._Debug("creation step 3");
-            FormBuilder<UText> titleText = window.Text(TrafficManagerMod.ModName);
+            FormBuilder<UText> titleText = windowBuilder.Text(TrafficManagerMod.ModName);
             titleText.Get().Alignment(TextAnchor.MiddleLeft);
             titleText.GetUConstrainer().PreferredHeight(16f);
 
             Log._Debug("creation step 4");
-            FormBuilder<UPanel> btnPanel = window.Panel().HorizontalLayout();
+            FormBuilder<UPanel> btnPanel = windowBuilder.Panel().HorizontalLayout();
             btnPanel.Button("Confirm");
             btnPanel.Button("Cancel");
 
             Log._Debug("creation step 5");
-            TestUWindow = window.GetUWindow();
-            window.GetUConstrainer()
+            TestUWindow = windowBuilder.GetUWindow();
+            windowBuilder.GetUConstrainer()
                 .SetLeft(50f, Unit.Pixels)
                 .SetTop(50f, Unit.Pixels)
                 .SetWidth(0.16f, Unit.ScreenWidth)

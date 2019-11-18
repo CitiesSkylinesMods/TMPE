@@ -9,10 +9,16 @@ namespace TrafficManager.U {
     /// Implements a component for a Canvas gameobject, which applies constraints to its size and position.
     /// </summary>
     public class UConstrainer : MonoBehaviour {
-        private readonly List<UConstraint> constraints_ = new List<UConstraint>();
+//        private readonly List<UConstraint> constraints_ = new List<UConstraint>();
+
+        /// <summary>
+        /// Contains constraints one per constraint type
+        /// </summary>
+        private readonly Dictionary<TransformField, UConstraint> uniqueConstraints_ =
+            new Dictionary<TransformField, UConstraint>();
 
         public UConstrainer AddConstraint(UConstraint c) {
-            this.constraints_.Add(c);
+            this.uniqueConstraints_.Add(c.field_, c);
             return this;
         }
 
@@ -44,7 +50,7 @@ namespace TrafficManager.U {
         /// Applies constraints to this control. Call this repeatedly for nested controls.
         /// </summary>
         public void ApplyConstraints(RectTransform rt) {
-            if (this.constraints_.Count <= 0) {
+            if (this.uniqueConstraints_.Count <= 0) {
                 return;
             }
 
@@ -53,14 +59,12 @@ namespace TrafficManager.U {
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.zero;
 
-            foreach (UConstraint c in this.constraints_) {
-                c.Apply(rt);
+            foreach (KeyValuePair<TransformField, UConstraint> kvPair in this.uniqueConstraints_) {
+                kvPair.Value.Apply(rt);
             }
         }
 
         public void ApplyConstraints() {
-            // Log._Assert(this.rootObject_ != null, "Must create rootObject before applying constraints");
-
             void ApplyRecursive(GameObject obj) {
                 var rectTr = obj.GetComponent<RectTransform>();
                 var constrainer = obj.GetComponent<UConstrainer>();
@@ -74,16 +78,11 @@ namespace TrafficManager.U {
                 }
             }
 
-            // Root form will be inherited from UControl instead of containing a component UControl,
-            // so it will not be matched in `GetComponent<UControl>` above.
-            // ApplyConstraints(this.rootObject_.GetComponent<RectTransform>());
             ApplyRecursive(this.gameObject);
         }
 
-        public void ForEachConstraintModify(Action<UConstraint> forEach) {
-            foreach (UConstraint c in this.constraints_) {
-                forEach(c);
-            }
+        public UConstraint GetConstraint(TransformField field) {
+            return this.uniqueConstraints_[field];
         }
 
         /// <summary>

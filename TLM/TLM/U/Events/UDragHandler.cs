@@ -13,7 +13,7 @@ namespace TrafficManager.U.Events {
         private Vector3 dragLastPosition_;
 
         public void OnBeginDrag(PointerEventData eventData) {
-            dragLastPosition_ = Input.mousePosition;
+            this.dragLastPosition_ = Input.mousePosition;
             Log.Info("Drag Started");
         }
 
