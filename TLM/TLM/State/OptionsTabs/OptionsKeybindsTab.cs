@@ -3,22 +3,12 @@ namespace TrafficManager.State {
     using ICities;
     using Keybinds;
     using UI;
+    using Manager.Impl;
 
     public static class OptionsKeybindsTab {
-        internal static void MakeSettings_Keybinds(UITabstrip tabStrip, int tabIndex) {
+        internal static void MakeSettings_Keybinds(ExtUITabstrip tabStrip) {
             string keybindsTabText = Translation.Options.Get("Tab:Keybinds");
-            Options.AddOptionTab(tabStrip, keybindsTabText);
-            tabStrip.selectedIndex = tabIndex;
-
-            var currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
-            currentPanel.autoLayout = true;
-            currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
-            currentPanel.autoLayoutPadding.top = 5;
-            currentPanel.autoLayoutPadding.left = 10;
-            currentPanel.autoLayoutPadding.right = 10;
-
-            var panelHelper = new UIHelper(currentPanel);
-
+            UIHelper panelHelper = tabStrip.AddTabPage(keybindsTabText, false);
             UIHelperBase keyboardGroup = panelHelper.AddGroup(keybindsTabText);
             ((UIPanel)((UIHelper)keyboardGroup).self).gameObject.AddComponent<KeybindSettingsPage>();
         }
