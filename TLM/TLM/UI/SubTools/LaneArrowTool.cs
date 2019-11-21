@@ -133,11 +133,13 @@ namespace TrafficManager.UI.SubTools {
                      || (netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId))
                     && ((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None))
                 {
-                    NetTool.RenderOverlay(
+                    bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(HoveredSegmentId,HoveredNodeId);
+                    MainTool.DrawHalfSegment(
                         cameraInfo,
-                        ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId],
+                        HoveredSegmentId,
+                        bStartNode,
                         MainTool.GetToolColor(altDown, false),
-                        MainTool.GetToolColor(altDown, false));
+                        false);
                 }
             }
 

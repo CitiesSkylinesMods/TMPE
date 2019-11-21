@@ -446,11 +446,71 @@
             DrawOverlayBezier(cameraInfo, bezier, color, alpha);
         }
 
+        public void DrawHalfSegment(RenderManager.CameraInfo cameraInfo,
+                       ushort segmentId,
+                       bool bStartNode,
+                       Color color,
+                       bool alpha = false) {
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            float width = segment.Info.m_halfWidth;
+            ushort nodeId, otherNodeId;
+
+            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+
+
+            Vector3 GetPos(ushort nodeId) {
+                Vector3 pos = nodeBuffer[nodeId].m_position;
+                float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
+                if (terrainY > pos.y) {
+                    pos.y = terrainY;
+                }
+                return pos;
+            }
+
+            bool IsMiddle(ushort nodeId) {
+                return (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
+            }
+
+
+            Bezier3 bezier;
+            bezier.a = GetPos(segment.m_startNode);
+            bezier.d = GetPos(segment.m_endNode);
+
+            NetSegment.CalculateMiddlePoints(
+                bezier.a,
+                segment.m_startDirection,
+                bezier.d,
+                segment.m_endDirection,
+                IsMiddle(segment.m_startNode),
+                IsMiddle(segment.m_endNode),
+                out bezier.b,
+                out bezier.c);
+
+            if(bStartNode & !IsMiddle(segment.m_endNode))
+                bezier = bezier.Cut(0, 0.5f);
+            if(!bStartNode && !IsMiddle(segment.m_startNode))
+                bezier = bezier.Cut(0.5f, 1f);
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
+                cameraInfo,
+                color,
+                bezier,
+                width * 2f,
+                bStartNode ? 0 : width,
+                bStartNode ? width : 0,
+                -1f,
+                1280f,
+                false,
+                alpha);
+        }
+
         private void DrawOverlayBezier(RenderManager.CameraInfo cameraInfo,
                                        Bezier3 bezier,
                                        Color color,
-                                       bool alpha = false) {
-            const float width = 8f; // 8 - small roads; 16 - big roads
+                                       bool alpha = false,
+                                       float width = 8f) {
+            //const float width = 8f; // 8 - small roads; 16 - big roads
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
                 cameraInfo,
