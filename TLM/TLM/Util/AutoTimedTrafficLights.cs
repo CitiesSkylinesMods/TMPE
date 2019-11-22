@@ -118,18 +118,14 @@ namespace TrafficManager.Util {
             //Is it special case:
             {
                 var segList2Way = TwoWayRoads(segList, out int n2);
-                //Debug.Log($"n2 == {n2}");
                 if (n2 < 2) {
                     return ErrorResult.NoNeed;
                 }
                 bool b = HasIncommingOneWaySegment(nodeId);
-                //Debug.Log($"HasIncommingOneWaySegment == {b}");
                 if (n2 == 2 && !b) {
-                    //Debug.Log($"special case");
                     return SetupSpecial(nodeId, segList2Way);
                 }
             }
-            //Debug.Log("normal case");
 
             for (int i = 0; i < n; ++i) {
                 ITimedTrafficLightsStep step = TimedLight(nodeId).AddStep(
@@ -250,8 +246,6 @@ namespace TrafficManager.Util {
                             ref ExtSegmentEnd segEnd = ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
                             ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
                             segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out bLeft, out bForward, out bRight);
-                            //Debug.Log($"\n segment={segmentId} node={nodeId} vehicleType={vehicleType} \n VehicleTypes.Count={liveSegmentLights.VehicleTypes.Count}");
-                            //Debug.Log($"bLeft={bLeft} bRight={bRight} bForward={bForward}");
                             if (bRight) {
                                 liveSegmentLight.SetStates(red, red, green);
                             } else if (bLeft) {
@@ -279,7 +273,6 @@ namespace TrafficManager.Util {
                 if (segId != 0 && segMan.CalculateIsOneWay(segId)) {
                     int n = CountIncomingLanes(segId, nodeId);
                     int dummy = CountOutgoingLanes(segId, nodeId);
-                    //Debug.Log($"seg={segId} node={nodeId} CountIncomingLanes={n} CountOutgoingLanes={dummy}");
                     if (n > 0) {
                         return true;
                     }
