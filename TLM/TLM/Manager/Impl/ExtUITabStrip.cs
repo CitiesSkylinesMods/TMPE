@@ -118,6 +118,7 @@ namespace TrafficManager.Manager.Impl {
             return tabStrip;
         }
 
+#if DEBUG
         public static class Test {
             private static int n = 0;
             public static void OnSettingsUI(UIHelperBase helper_base) {
@@ -147,5 +148,7 @@ namespace TrafficManager.Manager.Impl {
                 } // end for i
             } // end method MakePage
         } //end cLass Test
+#endif
+
     } //end ExtUITabstrip
 } // end namesapce
