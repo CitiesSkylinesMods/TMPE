@@ -34,7 +34,6 @@ namespace TrafficManager.Util {
         private static TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
         private static INetService netService = Constants.ServiceFactory.NetService;
         private static CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
-        //private static JunctionRestrictionsManager junctionRestrictionsManager = JunctionRestrictionsManager.Instance;
         private static IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
         private static IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
         private static ref TrafficLightSimulation Sim(ushort nodeId) => ref tlsMan.TrafficLightSimulations[nodeId];
@@ -149,7 +148,7 @@ namespace TrafficManager.Util {
             }
 
             Sim(nodeId).Housekeeping();
-
+            TimedLight(nodeId).Start();
             return ErrorResult.Success;
         }
 
@@ -201,6 +200,7 @@ namespace TrafficManager.Util {
             }
 
             Sim(nodeId).Housekeeping();
+            TimedLight(nodeId).Start();
             return ErrorResult.Success;
         }
 
