@@ -6,6 +6,7 @@ namespace TrafficManager.UI.SubTools {
     using GenericGameBridge.Service;
     using Manager.Impl;
     using State;
+    using TrafficManager.API.Traffic.Data;
     using UnityEngine;
 
     public class LaneArrowTool : SubTool {
@@ -41,7 +42,7 @@ namespace TrafficManager.UI.SubTools {
                 LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId, out res);
             } else if (ctrlDown) {
                 LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId, out res);
-            } else {
+            } else if (HasOutgoingLanes()) {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
             }
@@ -108,13 +109,19 @@ namespace TrafficManager.UI.SubTools {
             cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
         }
 
+        private bool HasOutgoingLanes() {
+            ExtSegmentEndManager segEndMan = ExtSegmentEndManager.Instance;
+            ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(HoveredSegmentId, HoveredNodeId)];
+            return segEnd.incoming; // Outgoing lanes toward the node is incomming lanes to the segment end.
+        }
+
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             NetManager netManager = Singleton<NetManager>.instance;
 
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 
-            if (ctrlDown) {
+            if (ctrlDown && !cursorInSecondaryPanel_ && (HoveredNodeId != 0)) {
                 // draw hovered node
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 return;
@@ -132,29 +139,30 @@ namespace TrafficManager.UI.SubTools {
                 if (((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId)
                      || (netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId))
                     && ((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None))
-                {
+                    {
                     bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(HoveredSegmentId,HoveredNodeId);
+                    Color color = MainTool.GetToolColor(false, !HasOutgoingLanes());
                     MainTool.DrawHalfSegment(
                         cameraInfo,
                         HoveredSegmentId,
                         bStartNode,
-                        MainTool.GetToolColor(altDown, false),
-                        false);
+                        color,
+                        altDown);
                 }
             }
 
-            if (SelectedSegmentId == 0) return;
+            if (SelectedSegmentId != 0) {
+                Color color = MainTool.GetToolColor(true, false);
+                if (altDown && HoveredSegmentId == SelectedSegmentId) {
+                    color.r += 30;
+                }
 
-            Color color;
-            if (altDown && HoveredSegmentId == SelectedSegmentId)
-                color = MainTool.GetToolColor(true, true);
-            else
-                color = MainTool.GetToolColor(true, false);
-            NetTool.RenderOverlay(
-                cameraInfo,
-                ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId],
-                color,
-                color);
+                NetTool.RenderOverlay(
+                    cameraInfo,
+                    ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId],
+                    color,
+                    color);
+            }
         }
 
         private void GuiLaneChangeWindow(int num) {
