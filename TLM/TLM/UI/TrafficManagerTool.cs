@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI {
+namespace TrafficManager.UI {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -415,35 +415,28 @@
             DrawNodeCircle(cameraInfo, nodeId, GetToolColor(warning, false), alpha);
         }
 
+        /// <returns>the average half width of all connected segments</returns>
+        private float NodeRadius(ushort nodeId) {
+
+            float sum_half_width = 0;
+            int count = 0;
+            Constants.ServiceFactory.NetService.IterateNodeSegments(
+                nodeId,
+                (ushort segmentId, ref NetSegment segment) => {
+                    sum_half_width += segment.Info.m_halfWidth;
+                    count++;
+                    return true;
+                });
+            return sum_half_width / count;
+        }
+
         public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                    ushort nodeId,
                                    Color color,
                                    bool alpha = false) {
-            NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            NetSegment segment =
-                Singleton<NetManager>.instance.m_segments.m_buffer[ nodesBuffer[nodeId].m_segment0];
-
-            Vector3 pos = nodesBuffer[nodeId].m_position;
-            float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
-            if (terrainY > pos.y) {
-                pos.y = terrainY;
-            }
-
-            Bezier3 bezier;
-            bezier.a = pos;
-            bezier.d = pos;
-
-            NetSegment.CalculateMiddlePoints(
-                bezier.a,
-                segment.m_startDirection,
-                bezier.d,
-                segment.m_endDirection,
-                false,
-                false,
-                out bezier.b,
-                out bezier.c);
-
-            DrawOverlayBezier(cameraInfo, bezier, color, alpha);
+            float r = NodeRadius(nodeId);
+            Vector3 pos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+            DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha);
         }
 
         public void DrawHalfSegment(RenderManager.CameraInfo cameraInfo,
@@ -486,10 +479,11 @@
                 out bezier.b,
                 out bezier.c);
 
+
             if(bStartNode & !IsMiddle(segment.m_endNode))
                 bezier = bezier.Cut(0, 0.5f);
-            if(!bStartNode && !IsMiddle(segment.m_startNode))
-                bezier = bezier.Cut(0.5f, 1f);
+            if (!bStartNode && !IsMiddle(segment.m_startNode))
+                bezier = bezier.Cut(0.5f, 1);
 
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
@@ -499,26 +493,6 @@
                 width * 2f,
                 bStartNode ? 0 : width,
                 bStartNode ? width : 0,
-                -1f,
-                1280f,
-                false,
-                alpha);
-        }
-
-        private void DrawOverlayBezier(RenderManager.CameraInfo cameraInfo,
-                                       Bezier3 bezier,
-                                       Color color,
-                                       bool alpha = false,
-                                       float width = 8f) {
-            //const float width = 8f; // 8 - small roads; 16 - big roads
-            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
-            Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
-                cameraInfo,
-                color,
-                bezier,
-                width * 2f,
-                width,
-                width,
                 -1f,
                 1280f,
                 false,
