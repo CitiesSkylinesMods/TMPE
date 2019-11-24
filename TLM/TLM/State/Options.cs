@@ -116,7 +116,6 @@ namespace TrafficManager.State {
         }
 
         public static void MakeSettings(UIHelperBase helper) {
-            //ExtUITabstrip.Test.OnSettingsUI(helper);return;
             ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
             OptionsGeneralTab.MakeSettings_General(tabStrip);
             OptionsGameplayTab.MakeSettings_Gameplay(tabStrip);

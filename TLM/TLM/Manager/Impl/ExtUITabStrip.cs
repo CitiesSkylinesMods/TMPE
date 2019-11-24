@@ -54,7 +54,7 @@ namespace TrafficManager.Manager.Impl {
             return verticalScrollbar;
         }
 
-        private UIScrollablePanel CreateScrollebalePanel(UIPanel panel) {
+        private UIScrollablePanel CreateScrollablePanel(UIPanel panel) {
             panel.autoLayout = true;
             panel.autoLayoutDirection = LayoutDirection.Horizontal;
 
@@ -90,7 +90,7 @@ namespace TrafficManager.Manager.Impl {
 
             UIHelper panelHelper;
             if (scrollBars) {
-                UIScrollablePanel scrollablePanel = CreateScrollebalePanel(currentPanel);
+                UIScrollablePanel scrollablePanel = CreateScrollablePanel(currentPanel);
                 panelHelper = new UIHelper(scrollablePanel);
             }
             else {
@@ -100,8 +100,8 @@ namespace TrafficManager.Manager.Impl {
             return panelHelper;
         }
 
-        public static ExtUITabstrip Create(UIHelperBase helper_base) {
-            UIHelper actualHelper = helper_base as UIHelper;
+        public static ExtUITabstrip Create(UIHelperBase helperBase) {
+            UIHelper actualHelper = helperBase as UIHelper;
             UIComponent container = actualHelper.self as UIComponent;
 
             ExtUITabstrip tabStrip = container.AddUIComponent<ExtUITabstrip>();
@@ -121,9 +121,9 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
         public static class Test {
             private static int n = 0;
-            public static void OnSettingsUI(UIHelperBase helper_base) {
+            public static void OnSettingsUI(UIHelperBase helperBase) {
                 n = 0;
-                ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper_base);
+                ExtUITabstrip tabStrip = ExtUITabstrip.Create(helperBase);
                 AddTab(tabStrip, "A");
                 AddTab(tabStrip, "B");
                 AddTab(tabStrip, "C");
