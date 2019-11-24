@@ -133,6 +133,24 @@ namespace TrafficManager.UI.SubTools {
             set => TrafficManagerTool.HoveredNodeId = value;
         }
 
+        private void DrawSegmentEnd(
+                       RenderManager.CameraInfo cameraInfo,
+                       ushort segmentId,
+                       bool bStartNode,
+                       Color color,
+                       bool alpha = false) {
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            bool IsJunction(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
+
+            float cut = 0.5f;
+            if (bStartNode & !IsJunction(segment.m_endNode))
+                cut = 1;
+            if (!bStartNode && !IsJunction(segment.m_startNode))
+                cut = 1;
+            MainTool.DrawCutSegment(cameraInfo, segmentId, cut, bStartNode, color, alpha);
+        }
+
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             NetManager netManager = Singleton<NetManager>.instance;
 
@@ -161,7 +179,7 @@ namespace TrafficManager.UI.SubTools {
                     bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(HoveredSegmentId, HoveredNodeId);
                     Color color = MainTool.GetToolColor(PrimaryDown, !HasOutgoingLanes());
                     bool alpha = !altDown && HasOutgoingLanes();
-                    MainTool.DrawHalfSegment(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
+                    DrawSegmentEnd(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
                 }
             }
 
@@ -169,7 +187,7 @@ namespace TrafficManager.UI.SubTools {
                 Color color = MainTool.GetToolColor(true, false);
                 bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
                 bool alpha = !altDown && HoveredSegmentId == SelectedSegmentId;
-                MainTool.DrawHalfSegment(cameraInfo, SelectedSegmentId, bStartNode, color, alpha);
+                DrawSegmentEnd(cameraInfo, SelectedSegmentId, bStartNode, color, alpha);
             }
         }
 

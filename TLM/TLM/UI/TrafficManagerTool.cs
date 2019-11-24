@@ -439,8 +439,9 @@ namespace TrafficManager.UI {
             DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha);
         }
 
-        public void DrawHalfSegment(RenderManager.CameraInfo cameraInfo,
+        public void DrawCutSegment(RenderManager.CameraInfo cameraInfo,
                        ushort segmentId,
+                       float cut,
                        bool bStartNode,
                        Color color,
                        bool alpha = false) {
@@ -460,9 +461,6 @@ namespace TrafficManager.UI {
 
             bool IsMiddle(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
 
-            bool IsJunction(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
-
-
             Bezier3 bezier;
             bezier.a = GetPos(segment.m_startNode);
             bezier.d = GetPos(segment.m_endNode);
@@ -477,10 +475,11 @@ namespace TrafficManager.UI {
                 out bezier.b,
                 out bezier.c);
 
-            if(bStartNode & IsJunction(segment.m_endNode))
-                bezier = bezier.Cut(0, 0.5f);
-            if (!bStartNode && IsJunction(segment.m_startNode))
-                bezier = bezier.Cut(0.5f, 1);
+            if (bStartNode) {
+                bezier = bezier.Cut(0, cut);
+            } else {
+                bezier = bezier.Cut(1 - cut, 1);
+            }
 
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
