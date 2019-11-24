@@ -449,8 +449,6 @@ namespace TrafficManager.UI {
             ushort nodeId, otherNodeId;
 
             NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-
-
             Vector3 GetPos(ushort nodeId) {
                 Vector3 pos = nodeBuffer[nodeId].m_position;
                 float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
@@ -460,9 +458,9 @@ namespace TrafficManager.UI {
                 return pos;
             }
 
-            bool IsMiddle(ushort nodeId) {
-                return (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
-            }
+            bool IsMiddle(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
+
+            bool IsJunction(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
 
 
             Bezier3 bezier;
@@ -479,10 +477,9 @@ namespace TrafficManager.UI {
                 out bezier.b,
                 out bezier.c);
 
-
-            if(bStartNode & !IsMiddle(segment.m_endNode))
+            if(bStartNode & IsJunction(segment.m_endNode))
                 bezier = bezier.Cut(0, 0.5f);
-            if (!bStartNode && !IsMiddle(segment.m_startNode))
+            if (!bStartNode && IsJunction(segment.m_startNode))
                 bezier = bezier.Cut(0.5f, 1);
 
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
