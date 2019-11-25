@@ -15,6 +15,7 @@ namespace TrafficManager {
     using State;
     using UI;
     using UI.Localization;
+    using UnityEngine;
     using Object = UnityEngine.Object;
 
     [UsedImplicitly]
@@ -333,21 +334,20 @@ namespace TrafficManager {
                 Flags.OnLevelUnloading();
                 GlobalConfig.OnLevelUnloading();
 
-                // remove vehicle button
-                var removeVehicleButtonExtender = UIView
-                                                  .GetAView().gameObject
-                                                  .GetComponent<RemoveVehicleButtonExtender>();
-                if (removeVehicleButtonExtender != null) {
-                    Object.Destroy(removeVehicleButtonExtender, 10f);
+                var gameObject = UIView.GetAView().gameObject;
+                void Destroy<T>()
+                    where T : MonoBehaviour
+                {
+                    var obj = (Object)gameObject.GetComponent<T>();
+                    if (obj != null) {
+                        Object.Destroy(obj, 10f);
+                    }
                 }
 
-                // remove citizen instance button
-                var removeCitizenInstanceButtonExtender = UIView
-                                                          .GetAView().gameObject
-                                                          .GetComponent<RemoveCitizenInstanceButtonExtender>();
-                if (removeCitizenInstanceButtonExtender != null) {
-                    Object.Destroy(removeCitizenInstanceButtonExtender, 10f);
-                }
+                Destroy<RemoveVehicleButtonExtender>();
+                Destroy<AdjustRoadSelectPanelExtender>();
+                Destroy<RemoveCitizenInstanceButtonExtender>();
+
 #if TRACE
                 Singleton<CodeProfiler>.instance.OnLevelUnloading();
 #endif
@@ -528,6 +528,9 @@ namespace TrafficManager {
 
             // add "remove citizen instance" button
             UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
+
+            // add quick edit panels:
+            UIView.GetAView().gameObject.AddComponent<AdjustRoadSelectPanelExtender>();
 
             InitDetours();
 

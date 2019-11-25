@@ -12,6 +12,7 @@ namespace TrafficManager.UI.Textures {
         public static readonly Texture2D NoImageTexture2D;
         public static readonly Texture2D RemoveButtonTexture2D;
         public static readonly Texture2D WindowBackgroundTexture2D;
+        public static readonly Texture2D RoadQuickEditButtons;
 
         static TextureResources() {
             // missing image
@@ -25,9 +26,13 @@ namespace TrafficManager.UI.Textures {
             MainMenuButtonsTexture2D = LoadDllResource("mainmenu-btns.png", 960, 30);
             MainMenuButtonsTexture2D.name = "TMPE_MainMenuButtons";
 
+            RoadQuickEditButtons = LoadDllResource("road-edit-btns.png", 16 * 30, 30);
+            RoadQuickEditButtons.name = "TMPE_RoadQuickEdit";
+
             RemoveButtonTexture2D = LoadDllResource("remove-btn.png", 150, 30);
 
             WindowBackgroundTexture2D = LoadDllResource("WindowBackground.png", 16, 60);
+
         }
 
         internal static Texture2D LoadDllResource(string resourceName, int width, int height)
