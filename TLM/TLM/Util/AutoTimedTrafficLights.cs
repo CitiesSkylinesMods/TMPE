@@ -12,7 +12,6 @@ namespace TrafficManager.Util {
     using CSUtil.Commons;
 
     public static class AutoTimedTrafficLights {
-        //Configurations: TODO move to mass edit options tab after PR #553.
         /// <summary>
         /// allocate dedicated turning lanes.
         /// </summary>

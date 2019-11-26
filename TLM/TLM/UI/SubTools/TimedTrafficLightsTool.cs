@@ -109,20 +109,19 @@ namespace TrafficManager.UI.SubTools {
                 if (res != AutoTimedTrafficLights.ErrorResult.Success) {
                     string message;
                     switch (res) {
-                        case AutoTimedTrafficLights.ErrorResult.NoJunction:
-                            message = "Dialog.Text:Auto TL not a junction";
-                            break;
                         case AutoTimedTrafficLights.ErrorResult.NoNeed:
                             message = "Dialog.Text:Auto TL no need";
                             break;
                         case AutoTimedTrafficLights.ErrorResult.TTLExists:
-                            message = "Dialog.Text:Auto TL already exists";
+                            message = "Dialog.Text:Node has timed TL script";
                             break;
                         default: //Unreachable code
                             message = $"error = {res}";
                             break;
                     }
-                    message = Translation.TrafficLights.Get("Dialog.Text:Auto TL create failed because") +
+                    message =
+                        Translation.TrafficLights.Get("Dialog.Text:Auto TL create failed because") +
+                        "\n" +
                         Translation.TrafficLights.Get(message);
                     MainTool.ShowError(message);
                     return;
