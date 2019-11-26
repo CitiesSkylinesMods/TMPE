@@ -2,7 +2,7 @@
 // https://github.com/PropaneDragon/RushHour/blob/release/RushHour/Options/OptionHandler.cs
 // https://github.com/CWMlolzlz/CS-AdvancedToolbar/blob/master/Source/ExpandableToolbar.cs
 
-namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.UI.Helpers {
     using UnityEngine;
     using ICities;
     using ColossalFramework.UI;
