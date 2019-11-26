@@ -25,6 +25,13 @@ namespace TrafficManager.UI {
                 Refresh();
             }
         }
+        private UICheckBox priorityRoadToggle;
+        public void HidePriorityRoadToggle() {
+            Debug.Log($"priority toggle => {priorityRoadToggle.name}");
+            priorityRoadToggle.Disable();
+            priorityRoadToggle.Hide(); //TODO actually hide
+            priorityRoadToggle.isVisible = false;
+        }
 
         public IList<PanelExt> panels;
         public void Start() {
@@ -33,23 +40,22 @@ namespace TrafficManager.UI {
 
             RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
             if (roadWorldInfoPanel != null) {
-                UICheckBox priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
-                priorityRoadToggle.isVisible = false;
-                priorityRoadToggle.Hide(); //TODO actually hide
-                Debug.Log($"priority toggle => {priorityRoadToggle.name}");
-
+                priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
                 PanelExt panel = AddPanel(roadWorldInfoPanel.component);
                 panel.relativePosition += new Vector3(0, -15f);
+                roadWorldInfoPanel.component.eventVisibilityChanged +=
+                    (_, __) => HidePriorityRoadToggle();
+
                 panels.Add(panel);
             }
 
             UIPanel roadAdjustPanel = UIView.Find<UIPanel>("AdjustRoad");
             if (roadAdjustPanel != null) {
-                UILabel roadSelectLabel = roadAdjustPanel.Find<UILabel>("Label");
-                UILabel roadSelectLegend = roadAdjustPanel.Find<UILabel>("LegendLabel");
-                UISprite roadSelectSprite = roadAdjustPanel.Find<UISprite>("Sprite");
-                roadSelectLabel.isVisible = false;
-                roadSelectLegend.isVisible = false;
+                //UILabel roadSelectLabel = roadAdjustPanel.Find<UILabel>("Label");
+                //UILabel roadSelectLegend = roadAdjustPanel.Find<UILabel>("LegendLabel");
+                //UISprite roadSelectSprite = roadAdjustPanel.Find<UISprite>("Sprite");
+                //roadSelectLabel.isVisible = false;
+                //roadSelectLegend.isVisible = false;
                 //roadSelectSprite.isVisible = false;
                 PanelExt panel = AddPanel(roadAdjustPanel);
                 panels.Add(panel);
@@ -64,6 +70,7 @@ namespace TrafficManager.UI {
             panel.width = 210;
             panel.height = 50;
             panel.AlignTo(container, UIAlignAnchor.BottomLeft);
+            panel.relativePosition += new Vector3(70, 0);
             panels.Add(panel);
             return panel;
         }
