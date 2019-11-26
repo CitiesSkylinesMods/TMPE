@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using State;
 
     public class TimedTrafficLightsButton : MenuToolModeButton {

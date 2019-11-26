@@ -6,6 +6,7 @@ namespace TrafficManager.State {
     using UI;
     using UI.SubTools.SpeedLimits;
     using UnityEngine;
+    using UI.Helpers;
 
     public static class OptionsGeneralTab {
         private static UICheckBox _instantEffectsToggle;
@@ -42,17 +43,9 @@ namespace TrafficManager.State {
             return Translation.Options.Get(key);
         }
 
-        internal static void MakeSettings_General(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(tabStrip, T("Tab:General"));
-            tabStrip.selectedIndex = tabIndex;
+        internal static void MakeSettings_General(ExtUITabstrip tabStrip) {
 
-            UIPanel currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
-            currentPanel.autoLayout = true;
-            currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
-            currentPanel.autoLayoutPadding.top = 5;
-            currentPanel.autoLayoutPadding.left = 10;
-            currentPanel.autoLayoutPadding.right = 10;
-            UIHelper panelHelper = new UIHelper(currentPanel);
+            UIHelper panelHelper = tabStrip.AddTabPage(T("Tab:General"));
 
             UIHelperBase generalGroup = panelHelper.AddGroup(
                 T("Tab:General"));

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.State {
+namespace TrafficManager.State {
     using System.Collections.Generic;
     using System.Reflection;
     using API.Traffic.Enums;
@@ -7,6 +7,7 @@
     using ICities;
     using UI;
     using UnityEngine;
+    using UI.Helpers;
 
     public class Options : MonoBehaviour {
 #if DEBUG
@@ -115,46 +116,14 @@
         }
 
         public static void MakeSettings(UIHelperBase helper) {
-            // tabbing code is borrowed from RushHour mod
-            // https://github.com/PropaneDragon/RushHour/blob/release/RushHour/Options/OptionHandler.cs
-            UIHelper actualHelper = helper as UIHelper;
-            UIComponent container = actualHelper.self as UIComponent;
-
-            UITabstrip tabStrip = container.AddUIComponent<UITabstrip>();
-            tabStrip.relativePosition = new Vector3(0, 0);
-            tabStrip.size = new Vector2(container.width - 20, 40);
-
-            UITabContainer tabContainer = container.AddUIComponent<UITabContainer>();
-            tabContainer.relativePosition = new Vector3(0, 40);
-            tabContainer.size = new Vector2(container.width - 20, container.height - tabStrip.height - 20);
-            tabStrip.tabPages = tabContainer;
-
-            int tabIndex = 0;
-
-            // GENERAL
-            OptionsGeneralTab.MakeSettings_General(tabStrip, tabIndex);
-
-            // GAMEPLAY
-            ++tabIndex;
-            OptionsGameplayTab.MakeSettings_Gameplay(tabStrip, tabIndex);
-
-            // VEHICLE RESTRICTIONS
-            ++tabIndex;
-            OptionsVehicleRestrictionsTab.MakeSettings_VehicleRestrictions(tabStrip, tabIndex);
-
-            // OVERLAYS
-            ++tabIndex;
-            OptionsOverlaysTab.MakeSettings_Overlays(tabStrip, tabIndex);
-
-            // MAINTENANCE
-            ++tabIndex;
-            OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip, tabIndex);
-
-            // KEYBOARD
-            ++tabIndex;
-            OptionsKeybindsTab.MakeSettings_Keybinds(tabStrip, tabIndex);
-
-            tabStrip.selectedIndex = 0;
+            ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
+            OptionsGeneralTab.MakeSettings_General(tabStrip);
+            OptionsGameplayTab.MakeSettings_Gameplay(tabStrip);
+            OptionsVehicleRestrictionsTab.MakeSettings_VehicleRestrictions(tabStrip);
+            OptionsOverlaysTab.MakeSettings_Overlays(tabStrip);
+            OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip);
+            OptionsKeybindsTab.MakeSettings_Keybinds(tabStrip);
+            tabStrip.Invalidate();
         }
 
         internal static void Indent<T>(T component) where T : UIComponent {
@@ -169,20 +138,6 @@
             if (check != null) {
                 check.relativePosition += new Vector3(22.0f, 0);
             }
-        }
-
-        public static void AddOptionTab(UITabstrip tabStrip, string caption) {
-            UIButton tabButton = tabStrip.AddTab(caption);
-
-            tabButton.normalBgSprite = "SubBarButtonBase";
-            tabButton.disabledBgSprite = "SubBarButtonBaseDisabled";
-            tabButton.focusedBgSprite = "SubBarButtonBaseFocused";
-            tabButton.hoveredBgSprite = "SubBarButtonBaseHovered";
-            tabButton.pressedBgSprite = "SubBarButtonBasePressed";
-
-            tabButton.textPadding = new RectOffset(10, 10, 10, 10);
-            tabButton.autoSize = true;
-            tabButton.tooltip = caption;
         }
 
         /// <summary>
