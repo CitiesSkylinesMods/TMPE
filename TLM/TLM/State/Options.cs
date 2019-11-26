@@ -116,7 +116,6 @@ namespace TrafficManager.State {
         }
 
         public static void MakeSettings(UIHelperBase helper) {
-            //ExtUITabstrip.Test.OnSettingsUI(helper);return;
             ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
             OptionsGeneralTab.MakeSettings_General(tabStrip);
             OptionsGameplayTab.MakeSettings_Gameplay(tabStrip);
@@ -126,80 +125,6 @@ namespace TrafficManager.State {
             OptionsKeybindsTab.MakeSettings_Keybinds(tabStrip);
             tabStrip.Invalidate();
         }
-
-        public abstract class SerializableOptionBase {
-            public abstract void Load(byte data);
-            public abstract byte Save();
-        }
-
-        public abstract class SerializableUIOptionBase<TVal, TUI> : SerializableOptionBase
-            where TUI : UIComponent
-        {
-            protected TVal _value;
-            public readonly TVal DefaultValue;
-            public TVal Value { get => _value; }
-
-            public abstract void AddUI(UIHelperBase container);
-
-            public abstract void SetValue(TVal newVal);
-
-            protected TUI _ui;
-            protected readonly bool _tooltip;
-            public string Key;
-            public string GroupName;
-            public string Label { get => $"{GroupName}.CheckBox: {Key}"; }
-            public string Tooltip { get => $"{GroupName}.Tooltip: {Key}"; }
-
-            public void DefaultOnValueChanged(TVal newVal) {
-                Options.IsGameLoaded();
-                Log._Debug($"{GroupName}.{Label} changed to {newVal}");
-                _value = newVal;
-            }
-
-            public SerializableUIOptionBase(
-                string key,
-                TVal default_value,
-                string group_name,
-                bool tooltip = false)
-            {
-                Key = key;
-                DefaultValue = _value =  default_value;
-                GroupName = group_name;
-                _tooltip = tooltip;
-            }
-        }
-
-        public sealed class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox> {
-            public event ICities.OnCheckChanged OnValueChanged;
-            public CheckboxOption(
-                string key,
-                bool default_value,
-                string group_name,
-                bool tooltip = false) :
-                base( key, default_value, group_name, tooltip) {
-                OnValueChanged = DefaultOnValueChanged;
-            }
-
-            public override void Load(byte data) => SetValue(data != 0);
-            public override byte Save() => Value ? (byte)1 : (byte)0;
-            public override void SetValue(bool newVal) {
-                if (_ui != null) {
-                    _ui.isChecked = newVal;
-                }
-                _value = newVal;
-            }
-
-            public override void AddUI(UIHelperBase container) {
-                _ui = container.AddCheckbox(
-                    Translation.Options.Get(Label),
-                    DefaultValue,
-                    this.OnValueChanged) as UICheckBox;
-                if (_tooltip) {
-                    _ui.tooltip = Translation.Options.Get(Tooltip);
-                }
-            }
-        }
-
 
         internal static void Indent<T>(T component) where T : UIComponent {
             UILabel label = component.Find<UILabel>("Label");

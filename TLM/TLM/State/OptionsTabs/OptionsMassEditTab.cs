@@ -1,11 +1,8 @@
 namespace TrafficManager.State {
-    using ColossalFramework.UI;
     using ICities;
     using UI;
     using Manager.Impl;
-
-    using static Options;
-    using UnityEngine;
+    using UI.Helpers;
 
     public static class OptionsMassEditTab {
         //TODO: Add options to a list.

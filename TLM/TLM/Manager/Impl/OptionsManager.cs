@@ -4,6 +4,7 @@ namespace TrafficManager.Manager.Impl {
     using API.Traffic.Enums;
     using CSUtil.Commons;
     using State;
+    using UI.Helpers;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -197,7 +198,7 @@ namespace TrafficManager.Manager.Impl {
                 OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
             }
 
-            Func<int, Options.SerializableOptionBase, int> loadBool = (idx, opt) => {
+            Func<int, SerializableOptionBase, int> loadBool = (idx, opt) => {
                 if (data.Length > idx) {
                     opt.Load(data[idx]);
                 }
