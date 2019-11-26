@@ -60,6 +60,7 @@ namespace TrafficManager.UI.Helpers {
 
             UIScrollablePanel scrollablePanel = panel.AddUIComponent<UIScrollablePanel>();
             scrollablePanel.autoLayout = true;
+            scrollablePanel.autoLayoutPadding = new RectOffset(10, 10, 0, 16);
             scrollablePanel.autoLayoutStart = LayoutStart.TopLeft;
             scrollablePanel.wrapLayout = true;
             scrollablePanel.size = new Vector2(panel.size.x - 50, panel.size.y + 35);
@@ -85,7 +86,6 @@ namespace TrafficManager.UI.Helpers {
 
             selectedIndex = tabCount - 1;
             UIPanel currentPanel = tabContainer.components[selectedIndex] as UIPanel;
-            currentPanel.autoLayoutPadding = new RectOffset(10, 10, 0, 16);
             currentPanel.autoLayout = true;
 
             UIHelper panelHelper;
