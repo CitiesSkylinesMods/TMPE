@@ -3,7 +3,7 @@ namespace TrafficManager.State {
     using ICities;
     using Keybinds;
     using UI;
-    using Manager.Impl;
+    using UI.Helpers;
 
     public static class OptionsKeybindsTab {
         internal static void MakeSettings_Keybinds(ExtUITabstrip tabStrip) {

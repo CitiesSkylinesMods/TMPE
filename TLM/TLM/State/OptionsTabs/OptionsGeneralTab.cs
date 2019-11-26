@@ -6,7 +6,7 @@ namespace TrafficManager.State {
     using UI;
     using UI.SubTools.SpeedLimits;
     using UnityEngine;
-    using TrafficManager.Manager.Impl;
+    using UI.Helpers;
 
     public static class OptionsGeneralTab {
         private static UICheckBox _instantEffectsToggle;

@@ -6,6 +6,7 @@ namespace TrafficManager.State {
     using JetBrains.Annotations;
     using Manager.Impl;
     using UI;
+    using UI.Helpers;
 
     public static class OptionsMaintenanceTab {
         [UsedImplicitly]

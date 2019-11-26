@@ -7,7 +7,7 @@ namespace TrafficManager.State {
     using ICities;
     using UI;
     using UnityEngine;
-    using Manager.Impl;
+    using UI.Helpers;
 
     public class Options : MonoBehaviour {
 #if DEBUG

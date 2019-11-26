@@ -3,7 +3,7 @@ namespace TrafficManager.State {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using UI;
-    using Manager.Impl;
+    using UI.Helpers;
 
     public static class OptionsOverlaysTab {
         private static UICheckBox _prioritySignsOverlayToggle;

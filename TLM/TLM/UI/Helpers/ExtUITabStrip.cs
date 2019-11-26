@@ -2,7 +2,7 @@
 // https://github.com/PropaneDragon/RushHour/blob/release/RushHour/Options/OptionHandler.cs
 // https://github.com/CWMlolzlz/CS-AdvancedToolbar/blob/master/Source/ExpandableToolbar.cs
 
-namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.UI.Helpers {
     using UnityEngine;
     using ICities;
     using ColossalFramework.UI;
@@ -54,12 +54,13 @@ namespace TrafficManager.Manager.Impl {
             return verticalScrollbar;
         }
 
-        private UIScrollablePanel CreateScrollebalePanel(UIPanel panel) {
+        private UIScrollablePanel CreateScrollablePanel(UIPanel panel) {
             panel.autoLayout = true;
             panel.autoLayoutDirection = LayoutDirection.Horizontal;
 
             UIScrollablePanel scrollablePanel = panel.AddUIComponent<UIScrollablePanel>();
             scrollablePanel.autoLayout = true;
+            scrollablePanel.autoLayoutPadding = new RectOffset(10, 10, 0, 16);
             scrollablePanel.autoLayoutStart = LayoutStart.TopLeft;
             scrollablePanel.wrapLayout = true;
             scrollablePanel.size = new Vector2(panel.size.x - 50, panel.size.y + 35);
@@ -85,12 +86,11 @@ namespace TrafficManager.Manager.Impl {
 
             selectedIndex = tabCount - 1;
             UIPanel currentPanel = tabContainer.components[selectedIndex] as UIPanel;
-            currentPanel.autoLayoutPadding = new RectOffset(10, 10, 0, 16);
             currentPanel.autoLayout = true;
 
             UIHelper panelHelper;
             if (scrollBars) {
-                UIScrollablePanel scrollablePanel = CreateScrollebalePanel(currentPanel);
+                UIScrollablePanel scrollablePanel = CreateScrollablePanel(currentPanel);
                 panelHelper = new UIHelper(scrollablePanel);
             }
             else {
@@ -100,8 +100,8 @@ namespace TrafficManager.Manager.Impl {
             return panelHelper;
         }
 
-        public static ExtUITabstrip Create(UIHelperBase helper_base) {
-            UIHelper actualHelper = helper_base as UIHelper;
+        public static ExtUITabstrip Create(UIHelperBase helperBase) {
+            UIHelper actualHelper = helperBase as UIHelper;
             UIComponent container = actualHelper.self as UIComponent;
 
             ExtUITabstrip tabStrip = container.AddUIComponent<ExtUITabstrip>();
@@ -118,11 +118,12 @@ namespace TrafficManager.Manager.Impl {
             return tabStrip;
         }
 
+#if DEBUG
         public static class Test {
             private static int n = 0;
-            public static void OnSettingsUI(UIHelperBase helper_base) {
+            public static void OnSettingsUI(UIHelperBase helperBase) {
                 n = 0;
-                ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper_base);
+                ExtUITabstrip tabStrip = ExtUITabstrip.Create(helperBase);
                 AddTab(tabStrip, "A");
                 AddTab(tabStrip, "B");
                 AddTab(tabStrip, "C");
@@ -147,5 +148,7 @@ namespace TrafficManager.Manager.Impl {
                 } // end for i
             } // end method MakePage
         } //end cLass Test
+#endif
+
     } //end ExtUITabstrip
 } // end namesapce

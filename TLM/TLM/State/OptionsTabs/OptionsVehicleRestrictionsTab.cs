@@ -6,7 +6,7 @@ namespace TrafficManager.State {
     using Manager.Impl;
     using UI;
     using UnityEngine;
-    using static Options;
+    using UI.Helpers;
 
     public static class OptionsVehicleRestrictionsTab {
         private static UICheckBox _relaxedBussesToggle;
