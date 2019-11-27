@@ -9,7 +9,7 @@ namespace TrafficManager.State {
         // * i dont have it
         // < I do not thing it is necessary
 
-        //rabout_DecicatedExitLanes
+        //rabout_DedicatedExitLanes
         //rabout_SwitchLanesYeildR*<
         //rabout_SwitchLanesMainR*<
         //rabout_StayInLaneMainR
@@ -29,8 +29,8 @@ namespace TrafficManager.State {
         //avn_SwtichLanesYeild*<
 
         //TODO remove comments after adding translations.
-        public static CheckboxOption rabout_DecicatedExitLanes = new CheckboxOption(
-            key: "rabout_DecicatedExitLanes",
+        public static CheckboxOption rabout_DedicatedExitLanes = new CheckboxOption(
+            key: "rabout_DedicatedExitLanes",
             default_value: true,
             group_name: "MassEdit",
             tooltip: true);
@@ -89,7 +89,7 @@ namespace TrafficManager.State {
             rabout_NoCrossYeildR.AddUI(raboutGroup);
             rabout_StayInLaneMainR.AddUI(raboutGroup);
             rabout_StayInLaneNearRabout.AddUI(raboutGroup);
-            rabout_DecicatedExitLanes.AddUI(raboutGroup);
+            rabout_DedicatedExitLanes.AddUI(raboutGroup);
             rabout_PrioritySigns.AddUI(raboutGroup);
 
             UIHelperBase avnGroup = panelHelper.AddGroup(

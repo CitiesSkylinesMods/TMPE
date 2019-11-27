@@ -4,7 +4,7 @@ namespace TrafficManager.UI.Helpers {
     using ICities;
     using State;
 
-    //TODO issue #562: inherit ISerializable Interface
+    //TODO issue #562: implement ISerializable Interface
     //[Serializable()]
     public abstract class SerializableUIOptionBase<TVal, TUI> : ISerializableOptionBase
         where TUI : UIComponent {
@@ -15,6 +15,8 @@ namespace TrafficManager.UI.Helpers {
             get => _value;
             set => _value = value;
         }
+        public static implicit operator TVal(SerializableUIOptionBase<TVal,TUI> a) => a.Value;
+
         public abstract void Load(byte data);
         public abstract byte Save();
 

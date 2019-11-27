@@ -404,5 +404,30 @@ namespace CitiesGameBridge.Service {
                 });
             return ret;
         }
+
+        public ushort GetHeadNode(ref NetSegment segment) {
+            // tail node>-------->head node
+            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+            if (invert) {
+                return segment.m_startNode;
+            } else {
+                return segment.m_endNode;
+            }
+        }
+
+        public ushort GetHeadNode(ushort segmentId) =>
+            GetHeadNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
+
+        public ushort GetTailNode(ref NetSegment segment) {
+            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+            if (!invert) {
+                return segment.m_startNode;
+            } else {
+                return segment.m_endNode;
+            }//endif
+        }
+
+        public ushort GetTailNode(ushort segmentId) =>
+            GetTailNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
     }
 }

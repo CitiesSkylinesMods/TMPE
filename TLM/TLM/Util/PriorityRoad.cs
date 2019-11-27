@@ -12,16 +12,10 @@ namespace TrafficManager.Util {
     using static TrafficManager.Util.SegmentTraverser;
     using State;
     using System.Linq;
+    using static Util.Shortcuts;
 
     public static class PriorityRoad {
-        private static IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-        private static INetService netService = Constants.ServiceFactory.NetService;
-        private static IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
-        private static ref NetSegment GetSeg(ushort segmentId) =>
-         ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-        private static ref ExtSegmentEnd GetSegEnd(ushort segmentId, ushort nodeId) =>
-            ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
-        private static Func<bool, int> Int = (bool b) => b ? 1 : 0;
+
         private static void Swap(List<ushort> list, int i1, int i2) {
             ushort temp = list[i1];
             list[i1] = list[i2];
@@ -54,7 +48,6 @@ namespace TrafficManager.Util {
             ushort segmentId = data.CurSeg.segmentId;
             foreach (bool startNode in Constants.ALL_BOOL) {
                 ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
-                //ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
                 FixJunction(nodeId);
             }
             return true;
@@ -63,17 +56,17 @@ namespace TrafficManager.Util {
         private static bool IsStraighOneWay(ushort segmentId0, ushort segmentId1, ushort nodeId) {
             ref NetSegment seg0 = ref GetSeg(segmentId0);
             //ref NetSegment seg1 = ref GetSeg(segmentId1);
-            bool ret = ExtSegmentManager.Instance.CalculateIsOneWay(segmentId0) &&
-                       ExtSegmentManager.Instance.CalculateIsOneWay(segmentId1);
+            bool ret = segMan.CalculateIsOneWay(segmentId0) &&
+                       segMan.CalculateIsOneWay(segmentId1);
             if(!ret) {
                 return false;
             }
 
-            if (RoundaboutMassEdit.GetHeadNode(segmentId0) == RoundaboutMassEdit.GetTailNode(segmentId1)) {
+            if (netService.GetHeadNode(segmentId0) == netService.GetTailNode(segmentId1)) {
                 if( GetDirection(segmentId0, segmentId1, nodeId) == ArrowDirection.Forward ) {
                     return true;
                 }
-            }else if (RoundaboutMassEdit.GetHeadNode(segmentId0) == RoundaboutMassEdit.GetTailNode(segmentId1)) {
+            }else if (netService.GetHeadNode(segmentId0) == netService.GetTailNode(segmentId1)) {
                 if (GetDirection(segmentId1, segmentId0, nodeId) == ArrowDirection.Forward) {
                     return true;
                 }
@@ -145,11 +138,11 @@ namespace TrafficManager.Util {
 
             // slot 0: incomming road.
             // slot 1: outgoing road.
-            if (RoundaboutMassEdit.GetHeadNode(segmentList[1]) == RoundaboutMassEdit.GetTailNode(segmentList[0])) {
+            if (netService.GetHeadNode(segmentList[1]) == netService.GetTailNode(segmentList[0])) {
                 Swap(segmentList, 0, 1);
             }
 
-            return RoundaboutMassEdit.GetHeadNode(segmentList[0]) == RoundaboutMassEdit.GetTailNode(segmentList[1]);
+            return netService.GetHeadNode(segmentList[0]) == netService.GetTailNode(segmentList[1]);
         }
 
         private static void HandleSplitAvenue(List<ushort> segmentList, ushort nodeId) {
@@ -179,11 +172,10 @@ namespace TrafficManager.Util {
             if (nodeId == 0) {
                 return;
             }
-            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
 
             List<ushort> segmentList = new List<ushort>();
             for (int i = 0; i < 8; ++i) {
-                ushort segId = node.GetSegment(i);
+                ushort segId = GetNode(nodeId).GetSegment(i);
                 if (segId != 0) {
                     segmentList.Add(segId);
                 }
@@ -211,8 +203,8 @@ namespace TrafficManager.Util {
 
             // "long turn" is allowed when the main road is oneway.
             bool ignoreLanes =
-                ExtSegmentManager.Instance.CalculateIsOneWay(segmentList[0]) ||
-                ExtSegmentManager.Instance.CalculateIsOneWay(segmentList[1]);
+                segMan.CalculateIsOneWay(segmentList[0]) ||
+                segMan.CalculateIsOneWay(segmentList[1]);
 
             // Turning allowed when the main road is agnled.
             ArrowDirection dir = GetDirection(segmentList[0], segmentList[1], nodeId);
@@ -249,6 +241,7 @@ namespace TrafficManager.Util {
             }
             TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Main);
         }
+
 
         private static void FixMinorSegmentRules(List<ushort> segmentList, ushort segmentId, ushort nodeId) {
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
@@ -313,7 +306,7 @@ namespace TrafficManager.Util {
             }
 
             ref NetSegment seg = ref GetSeg(segmentId);
-            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ref NetNode node = ref GetNode(nodeId);
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
 
             //list of outgoing lanes from current segment to current node.
@@ -364,7 +357,7 @@ namespace TrafficManager.Util {
                 return;
             }
             ref NetSegment seg = ref GetSeg(segmentId);
-            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ref NetNode node = ref GetNode(nodeId);
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
 
             //list of outgoing lanes from current segment to current node.

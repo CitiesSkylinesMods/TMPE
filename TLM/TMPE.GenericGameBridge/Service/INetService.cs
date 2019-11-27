@@ -1,4 +1,4 @@
-﻿namespace GenericGameBridge.Service {
+namespace GenericGameBridge.Service {
     using System.Collections.Generic;
 
     public delegate bool NetSegmentHandler(ushort segmentId, ref NetSegment segment);
@@ -112,5 +112,17 @@
         void PublishSegmentChanges(ushort segmentId);
 
         bool? IsStartNode(ushort segmentId, ushort nodeId);
+
+        /// <summary>tail node>-------->head node</summary>
+        ushort GetHeadNode(ushort segmentId);
+
+        /// <summary>tail node>-------->head node</summary>
+        ushort GetHeadNode(ref NetSegment segment);
+
+        /// <summary>tail node>-------->head node</summary>
+        ushort GetTailNode(ushort segmentId);
+
+        /// <summary>tail node>-------->head node</summary>
+        ushort GetTailNode(ref NetSegment segment);
     }
 }

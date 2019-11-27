@@ -208,7 +208,7 @@ namespace TrafficManager.Manager.Impl {
             int index = 42;
             index = loadBool(index, OptionsMassEditTab.rabout_StayInLaneMainR);
             index = loadBool(index, OptionsMassEditTab.rabout_StayInLaneNearRabout);
-            index = loadBool(index, OptionsMassEditTab.rabout_DecicatedExitLanes);
+            index = loadBool(index, OptionsMassEditTab.rabout_DedicatedExitLanes);
             index = loadBool(index, OptionsMassEditTab.rabout_NoCrossMainR);
             index = loadBool(index, OptionsMassEditTab.rabout_NoCrossYeildR);
             index = loadBool(index, OptionsMassEditTab.rabout_PrioritySigns);
@@ -261,14 +261,13 @@ namespace TrafficManager.Manager.Impl {
                 (byte)(Options.allowFarTurnOnRed ? 1 : 0),
                 (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0),
 
-                (byte)(OptionsMassEditTab.rabout_SwitchLanesYeildR.Save()),
                 (byte)(OptionsMassEditTab.rabout_StayInLaneMainR.Save()),
                 (byte)(OptionsMassEditTab.rabout_StayInLaneNearRabout.Save()),
-                (byte)(OptionsMassEditTab.rabout_DecicatedExitLanes.Save()),
+                (byte)(OptionsMassEditTab.rabout_DedicatedExitLanes.Save()),
                 (byte)(OptionsMassEditTab.rabout_NoCrossMainR.Save()),
                 (byte)(OptionsMassEditTab.rabout_NoCrossYeildR.Save()),
+                (byte)(OptionsMassEditTab.rabout_PrioritySigns.Save()),
                 (byte)(OptionsMassEditTab.avn_NoCrossMainR.Save()),
-
             };
         }
     }

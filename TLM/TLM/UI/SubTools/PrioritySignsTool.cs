@@ -41,6 +41,7 @@ namespace TrafficManager.UI.SubTools {
                 SelectedNodeId = 0;
             }
 
+            //TODO provide revert/clear mode  issue #568
             if (ctrlDown && shiftDown) {
                 bool isRAbout = RoundaboutMassEdit.Instance.FixRabout(HoveredSegmentId);
                 if (!isRAbout) {

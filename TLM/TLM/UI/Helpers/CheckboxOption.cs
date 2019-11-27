@@ -12,9 +12,6 @@ namespace TrafficManager.UI.Helpers {
             : base(key, default_value, group_name, tooltip) {
             OnValueChanged = DefaultOnValueChanged;
         }
-
-        public override void Load(byte data) => Value = (data != 0);
-        public override byte Save() => Value ? (byte)1 : (byte)0;
         public override bool Value {
             get => base.Value;
             set {
@@ -24,6 +21,9 @@ namespace TrafficManager.UI.Helpers {
                 }
             }
         }
+
+        public override void Load(byte data) => Value = (data != 0);
+        public override byte Save() => Value ? (byte)1 : (byte)0;
 
         public override void AddUI(UIHelperBase container) {
             _ui = container.AddCheckbox(
