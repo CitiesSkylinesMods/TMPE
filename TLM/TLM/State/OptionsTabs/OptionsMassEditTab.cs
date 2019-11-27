@@ -5,16 +5,18 @@ namespace TrafficManager.State {
     using UI.Helpers;
 
     public static class OptionsMassEditTab {
-        //TODO: Add options to a list.
+        // TODO: Add options to a list.
+        // * i dont have it
+        // < I do not thing it is necessary
 
         //rabout_DecicatedExitLanes
-        //rabout_SwitchLanesYeildR<
+        //rabout_SwitchLanesYeildR*<
         //rabout_SwitchLanesMainR*<
         //rabout_StayInLaneMainR
         //rabout_StayInLaneNearRabout
         //rabout_NoCrossMainR
-        //rabout_NoCrossYeildR<
-        //rabout_PrioritySigns*
+        //rabout_NoCrossYeildR
+        //rabout_PrioritySigns
 
         //avn_NoCrossMainR
         //avn_NoCrossYield*<
@@ -29,23 +31,15 @@ namespace TrafficManager.State {
         //TODO remove comments after adding translations.
         public static CheckboxOption rabout_DecicatedExitLanes = new CheckboxOption(
             key: "rabout_DecicatedExitLanes",
-            default_value: false,
+            default_value: true,
             group_name: "MassEdit",
             tooltip: true);
         // label: dedicated exit lanes.
         // tooltip: one dedicated lane for each exit, the rest of lanes go forw
 
-        public static CheckboxOption rabout_SwitchLanesYeildR = new CheckboxOption(
-            key: "rabout_SwitchLanesYeildR",
-            default_value: false,
-            group_name: "MassEdit",
-            true);
-        // Vehicles may choose their lane while entring the roundabout
-        // If turned off, only highways may choose lane.
-
         public static CheckboxOption rabout_StayInLaneMainR = new CheckboxOption(
             key: "rabout_StayInLaneMainR",
-            default_value: false,
+            default_value: true,
             group_name: "MassEdit",
             true);
         // Stay in lane inside the roundabout.
@@ -53,7 +47,7 @@ namespace TrafficManager.State {
 
         public static CheckboxOption rabout_StayInLaneNearRabout = new CheckboxOption(
             key: "rabout_StayInLaneNearRabout",
-            default_value: false,
+            default_value: true,
             group_name: "MassEdit",
             true);
         // Stay in lane near the roundabout.
@@ -71,6 +65,12 @@ namespace TrafficManager.State {
             group_name: "MassEdit");
         // Pedesterians shall not cross the roads around the roundabout.
 
+        public static CheckboxOption rabout_PrioritySigns = new CheckboxOption(
+            key: "rabout_PrioritySigns",
+            default_value: true,
+            group_name: "MassEdit");
+        // Add priority signs.
+
         public static CheckboxOption avn_NoCrossMainR = new CheckboxOption(
             key: "avn_NoCrossMainR",
             default_value: true,
@@ -78,23 +78,25 @@ namespace TrafficManager.State {
         // Pedesterians shall not cross Main avenue at small junctions.
 
         internal static void MakeSettings_MasEdit(ExtUITabstrip tabStrip, int tabIndex) {
-            UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:MassEdit"));
+            UIHelper panelHelper = tabStrip.AddTabPage(T("Tab:MassEdit"));
             MakePanel_MasEdit(panelHelper);
         }
 
         internal static void MakePanel_MasEdit(UIHelperBase panelHelper) {
             UIHelperBase raboutGroup = panelHelper.AddGroup(
-                Translation.Options.Get("MassEdit.Group: Roundabouts"));
+                T("MassEdit.Group: Roundabouts"));
             rabout_NoCrossMainR.AddUI(raboutGroup);
             rabout_NoCrossYeildR.AddUI(raboutGroup);
             rabout_StayInLaneMainR.AddUI(raboutGroup);
             rabout_StayInLaneNearRabout.AddUI(raboutGroup);
-            rabout_SwitchLanesYeildR.AddUI(raboutGroup);
             rabout_DecicatedExitLanes.AddUI(raboutGroup);
+            rabout_PrioritySigns.AddUI(raboutGroup);
 
             UIHelperBase avnGroup = panelHelper.AddGroup(
-                    Translation.Options.Get("MassEdit.Group.Priority: Priority roads"));
+                    T("MassEdit.Group.Priority: Priority roads"));
             avn_NoCrossMainR.AddUI(avnGroup);
         }
+
+        private static string T(string key) => Translation.Options.Get(key);
     } // end class
 }

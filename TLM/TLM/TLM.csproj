@@ -229,6 +229,7 @@
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\Helpers\CheckboxOption.cs" />
+    <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />
     <Compile Include="UI\Helpers\SerializableOptionBase.cs" />
     <Compile Include="UI\Helpers\SerializableUIOptionBase.cs" />
     <Compile Include="UI\IncompatibleModsPanel.cs" />

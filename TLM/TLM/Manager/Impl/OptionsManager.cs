@@ -198,7 +198,7 @@ namespace TrafficManager.Manager.Impl {
                 OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
             }
 
-            Func<int, SerializableOptionBase, int> loadBool = (idx, opt) => {
+            Func<int, ISerializableOptionBase, int> loadBool = (idx, opt) => {
                 if (data.Length > idx) {
                     opt.Load(data[idx]);
                 }
@@ -206,17 +206,13 @@ namespace TrafficManager.Manager.Impl {
             };
 
             int index = 42;
-            index = loadBool(index, OptionsMassEditTab.rabout_SwitchLanesYeildR);
             index = loadBool(index, OptionsMassEditTab.rabout_StayInLaneMainR);
             index = loadBool(index, OptionsMassEditTab.rabout_StayInLaneNearRabout);
             index = loadBool(index, OptionsMassEditTab.rabout_DecicatedExitLanes);
             index = loadBool(index, OptionsMassEditTab.rabout_NoCrossMainR);
             index = loadBool(index, OptionsMassEditTab.rabout_NoCrossYeildR);
+            index = loadBool(index, OptionsMassEditTab.rabout_PrioritySigns);
             index = loadBool(index, OptionsMassEditTab.avn_NoCrossMainR);
-            index = loadBool(index, OptionsMassEditTab.rabout_SwitchLanesYeildR);
-            index = loadBool(index, OptionsMassEditTab.rabout_SwitchLanesYeildR);
-            index = loadBool(index, OptionsMassEditTab.rabout_SwitchLanesYeildR);
-            index = loadBool(index, OptionsMassEditTab.rabout_SwitchLanesYeildR);
             return true;
         }
 

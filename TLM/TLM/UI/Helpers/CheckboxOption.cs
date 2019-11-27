@@ -13,13 +13,16 @@ namespace TrafficManager.UI.Helpers {
             OnValueChanged = DefaultOnValueChanged;
         }
 
-        public override void Load(byte data) => SetValue(data != 0);
+        public override void Load(byte data) => Value = (data != 0);
         public override byte Save() => Value ? (byte)1 : (byte)0;
-        public override void SetValue(bool newVal) {
-            if (_ui != null) {
-                _ui.isChecked = newVal;
+        public override bool Value {
+            get => base.Value;
+            set {
+                base.Value = value;
+                if (_ui != null) {
+                    _ui.isChecked = value;
+                }
             }
-            _value = newVal;
         }
 
         public override void AddUI(UIHelperBase container) {
