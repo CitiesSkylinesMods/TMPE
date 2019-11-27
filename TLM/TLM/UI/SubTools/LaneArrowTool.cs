@@ -42,7 +42,7 @@ namespace TrafficManager.UI.SubTools {
                 LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId, out res);
             } else if (ctrlDown) {
                 LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId, out res);
-            } else if (HasOutgoingLanes()) {
+            } else if (IsHoverValid()) {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
             }
@@ -109,28 +109,37 @@ namespace TrafficManager.UI.SubTools {
             cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
         }
 
-        private bool HasOutgoingLanes() {
+
+        private bool IsHoverValid() => IsSegmentEndHoverable(HoveredSegmentId, HoveredNodeId);
+        private bool IsSegmentEndHoverable(ushort segmentId, ushort nodeId) {
+#if DEBUG
+            if(!Constants.ServiceFactory.NetService.IsNodeValid(nodeId) ||
+               !Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+                throw new System.Exception("Invalid node or segment ID");
+            }
+#endif
             ExtSegmentEndManager segEndMan = ExtSegmentEndManager.Instance;
-            ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(HoveredSegmentId, HoveredNodeId)];
-            return segEnd.incoming; // Outgoing lanes toward the node is incomming lanes to the segment end.
+            ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
+            NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            bool IsJunction(ushort nodeId) => (nodesBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
+
+            // Outgoing lanes toward the node is incomming lanes to the segment end.
+            return IsJunction(nodeId) && segEnd.incoming;
         }
 
-
-        protected ushort HoveredNodeId {
+        protected override ushort HoveredNodeId {
         get {
-                NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-                bool IsJunction(ushort nodeId) => (nodesBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
-                if (!IsJunction(TrafficManagerTool.HoveredNodeId))
+                if (!IsSegmentEndHoverable(HoveredSegmentId, base.HoveredNodeId))
                 {
                     ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId];
-                    ushort otherNodeId = segment.GetOtherNode(TrafficManagerTool.HoveredNodeId);
-                    if (IsJunction(otherNodeId)) {
+                    ushort otherNodeId = segment.GetOtherNode(base.HoveredNodeId);
+                    if (IsSegmentEndHoverable(HoveredSegmentId, otherNodeId)) {
                         return otherNodeId;
                     }
                 }
-                return TrafficManagerTool.HoveredNodeId;
+                return base.HoveredNodeId;
             }
-            set => TrafficManagerTool.HoveredNodeId = value;
+            set => base.HoveredNodeId = value;
         }
 
         private void DrawSegmentEnd(
@@ -140,13 +149,11 @@ namespace TrafficManager.UI.SubTools {
                        Color color,
                        bool alpha = false) {
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            bool IsJunction(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
 
             float cut = 0.5f;
-            if (bStartNode & !IsJunction(segment.m_endNode))
+            if (bStartNode & !IsSegmentEndHoverable(segmentId, segment.m_endNode))
                 cut = 1;
-            if (!bStartNode && !IsJunction(segment.m_startNode))
+            if (!bStartNode && !IsSegmentEndHoverable(segmentId, segment.m_startNode))
                 cut = 1;
             MainTool.DrawCutSegment(cameraInfo, segmentId, cut, bStartNode, color, alpha);
         }
@@ -176,9 +183,10 @@ namespace TrafficManager.UI.SubTools {
                      || (netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId))
                     && ((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None))
                     {
+                    bool canHover = IsHoverValid();
                     bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(HoveredSegmentId, HoveredNodeId);
-                    Color color = MainTool.GetToolColor(PrimaryDown, !HasOutgoingLanes());
-                    bool alpha = !altDown && HasOutgoingLanes();
+                    Color color = MainTool.GetToolColor(PrimaryDown, !canHover);
+                    bool alpha = !altDown && canHover;
                     DrawSegmentEnd(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
                 }
             }
