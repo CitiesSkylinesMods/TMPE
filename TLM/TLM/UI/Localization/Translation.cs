@@ -106,7 +106,8 @@ namespace TrafficManager.UI {
                                                      { "Portuguese", "pt" },
                                                      { "Russian", "ru" },
                                                      { "Spanish", "es" },
-                                                     { "Turkish", "tr"}
+                                                     { "Turkish", "tr"},
+                                                     { "Ukrainian", "uk"}
                                                  };
             AvailableLanguageCodes = CsvColumnsToLocales.Values.ToList();
             AvailableLanguageCodes.Sort();
