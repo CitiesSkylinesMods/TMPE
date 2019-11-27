@@ -264,9 +264,11 @@
 
         // Overridden to disable base class behavior
         protected override void OnEnable() {
-            Log._Debug("TrafficManagerTool.OnEnable(): Performing cleanup");
-            foreach (KeyValuePair<ToolMode, SubTool> e in subTools_) {
-                e.Value.Cleanup();
+            if (subTools_ != null) {
+                Log._Debug("TrafficManagerTool.OnEnable(): Performing cleanup");
+                foreach (KeyValuePair<ToolMode, SubTool> e in subTools_) {
+                    e.Value.Cleanup();
+                }
             }
         }
 
