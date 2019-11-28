@@ -31,7 +31,6 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnPrimaryClickOverlay() {
-            //bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             if(ctrlDown || shiftDown) {
@@ -159,11 +158,18 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnToolGUI(Event e) { }
 
+        /// <summary>
+        /// show overlay for other subtools influced by mass edit.
+        /// </summary>
         public static bool showMassEditOverlay = false;
 
+        /// <summary>
+        /// refreshes all subtools incflucned by mass edit.
+        /// </summary>
         private void RefreshMassEditOverlay() {
             showMassEditOverlay = true;
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            RefreshCurrentPriorityNodeIds();
             showMassEditOverlay = false;
         }
 
@@ -172,7 +178,6 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            //bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
@@ -274,7 +279,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !(Options.prioritySignsOverlay || PrioritySignsTool.showMassEditOverlay)) {
+            if (viewOnly && !Options.prioritySignsOverlay) {
                 return;
             }
 
@@ -504,7 +509,7 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
 
-            if (Options.prioritySignsOverlay || showMassEditOverlay) {
+            if (Options.prioritySignsOverlay ) {
                 RefreshCurrentPriorityNodeIds();
             } else {
                 currentPriorityNodeIds.Clear();

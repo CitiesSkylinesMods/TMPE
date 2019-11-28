@@ -6,34 +6,34 @@ namespace TrafficManager.Util {
     using TrafficManager.API.Traffic.Data;
     using static Constants;
 
-    public static class Shortcuts {
-        private static NetNode[] _nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+    internal static class Shortcuts {
+        private static NetNode[] _nodeBuffer => Singleton<NetManager>.instance.m_nodes.m_buffer;
 
-        private static NetSegment[] _segBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+        private static NetSegment[] _segBuffer => Singleton<NetManager>.instance.m_segments.m_buffer;
 
-        private static ExtSegmentEnd[] _segEndBuff = segEndMan.ExtSegmentEnds;
+        private static ExtSegmentEnd[] _segEndBuff => segEndMan.ExtSegmentEnds;
 
-        public static IExtSegmentEndManager segEndMan = ManagerFactory.ExtSegmentEndManager;
+        internal static IExtSegmentEndManager segEndMan => ManagerFactory.ExtSegmentEndManager;
 
-        public static IExtSegmentManager segMan = ManagerFactory.ExtSegmentManager;
+        internal static IExtSegmentManager segMan => ManagerFactory.ExtSegmentManager;
 
-        public static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
+        internal static INetService netService => ServiceFactory.NetService;
 
-        public static ref NetSegment GetSeg(ushort segmentId) => ref _segBuffer[segmentId];
+        internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
 
-        public static ref ExtSegmentEnd GetSegEnd(ushort segmentId, ushort nodeId) =>
+        internal static ref NetSegment GetSeg(ushort segmentId) => ref _segBuffer[segmentId];
+
+        internal static ref ExtSegmentEnd GetSegEnd(ushort segmentId, ushort nodeId) =>
             ref _segEndBuff[segEndMan.GetIndex(segmentId, nodeId)];
 
-        public static ref ExtSegmentEnd GetSegEnd(ushort segmentId, bool startNode) =>
+        internal static ref ExtSegmentEnd GetSegEnd(ushort segmentId, bool startNode) =>
             ref _segEndBuff[segEndMan.GetIndex(segmentId, startNode)];
 
-        public static INetService netService = ServiceFactory.NetService;
+        internal static bool HasJunctionFlag(ushort nodeId) => HasJunctionFlag(ref GetNode(nodeId));
 
-        public static bool HasJunctionFlag(ushort nodeId) => HasJunctionFlag(ref GetNode(nodeId));
-
-        public static bool HasJunctionFlag(ref NetNode node) =>
+        internal static bool HasJunctionFlag(ref NetNode node) =>
             (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 
-        public static Func<bool, int> Int = (bool b) => b ? 1 : 0;
+        internal static Func<bool, int> Int = (bool b) => b ? 1 : 0;
     }
 }
