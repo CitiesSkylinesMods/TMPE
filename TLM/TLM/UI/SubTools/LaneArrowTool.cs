@@ -155,7 +155,7 @@ namespace TrafficManager.UI.SubTools {
                 cut = 1;
             if (!bStartNode && !IsSegmentEndHoverable(segmentId, segment.m_startNode))
                 cut = 1;
-            MainTool.DrawCutSegment(cameraInfo, segmentId, cut, bStartNode, color, alpha);
+            MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {

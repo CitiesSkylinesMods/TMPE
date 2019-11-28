@@ -416,7 +416,7 @@ namespace TrafficManager.UI {
         }
 
         /// <returns>the average half width of all connected segments</returns>
-        private float NodeRadius(ushort nodeId) {
+        private float CalculateNodeRadius(ushort nodeId) {
 
             float sum_half_width = 0;
             int count = 0;
@@ -434,12 +434,12 @@ namespace TrafficManager.UI {
                                    ushort nodeId,
                                    Color color,
                                    bool alpha = false) {
-            float r = NodeRadius(nodeId);
+            float r = CalculateNodeRadius(nodeId);
             Vector3 pos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
             DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha);
         }
 
-        public void DrawCutSegment(RenderManager.CameraInfo cameraInfo,
+        public void DrawCutSegmentEnd(RenderManager.CameraInfo cameraInfo,
                        ushort segmentId,
                        float cut,
                        bool bStartNode,
