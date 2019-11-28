@@ -439,12 +439,21 @@ namespace TrafficManager.UI {
             DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha);
         }
 
+        /// <summary>
+        /// Draws a half sausage at segment end.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="cut">The lenght of the highlight [0~1] </param>
+        /// <param name="bStartNode">Determines the direction of the half sausage.</param>
         public void DrawCutSegmentEnd(RenderManager.CameraInfo cameraInfo,
                        ushort segmentId,
                        float cut,
                        bool bStartNode,
                        Color color,
                        bool alpha = false) {
+            if( segmentId == 0) {
+                return;
+            }
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             float width = segment.Info.m_halfWidth;
             ushort nodeId, otherNodeId;

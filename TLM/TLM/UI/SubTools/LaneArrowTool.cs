@@ -42,7 +42,7 @@ namespace TrafficManager.UI.SubTools {
                 LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId, out res);
             } else if (ctrlDown) {
                 LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId, out res);
-            } else if (IsHoverValid()) {
+            } else if (HasHoverLaneArrows()) {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
             }
@@ -109,9 +109,15 @@ namespace TrafficManager.UI.SubTools {
             cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
         }
 
+        /// <summary>
+        /// Determines whether or not the hovered segment end has lane arrows.
+        /// </summary>
+        private bool HasHoverLaneArrows() => HasSegmentEndLaneArrows(HoveredSegmentId, HoveredNodeId);
 
-        private bool IsHoverValid() => IsSegmentEndHoverable(HoveredSegmentId, HoveredNodeId);
-        private bool IsSegmentEndHoverable(ushort segmentId, ushort nodeId) {
+        /// <summary>
+        /// determines whether or not the given segment end has lane arrows.
+        /// </summary>
+        private bool HasSegmentEndLaneArrows(ushort segmentId, ushort nodeId) {
             if(nodeId == 0 || segmentId == 0) {
                 return false;
             }
@@ -132,11 +138,15 @@ namespace TrafficManager.UI.SubTools {
 
         protected override ushort HoveredNodeId {
         get {
-                if (!IsSegmentEndHoverable(HoveredSegmentId, base.HoveredNodeId))
+                // if the current segment end does not have lane arrows
+                // and the other end of the segment does have lane arrows, then
+                // assume the user intends to hover over that one.
+                // This code makes it easier to hover over small segments.
+                if (!HasSegmentEndLaneArrows(HoveredSegmentId, base.HoveredNodeId))
                 {
                     ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId];
                     ushort otherNodeId = segment.GetOtherNode(base.HoveredNodeId);
-                    if (IsSegmentEndHoverable(HoveredSegmentId, otherNodeId)) {
+                    if (HasSegmentEndLaneArrows(HoveredSegmentId, otherNodeId)) {
                         return otherNodeId;
                     }
                 }
@@ -145,6 +155,9 @@ namespace TrafficManager.UI.SubTools {
             set => base.HoveredNodeId = value;
         }
 
+        /// <summary>
+        /// Draws a half sausage to highlight the segment end.
+        /// </summary>
         private void DrawSegmentEnd(
                        RenderManager.CameraInfo cameraInfo,
                        ushort segmentId,
@@ -154,9 +167,14 @@ namespace TrafficManager.UI.SubTools {
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
 
             float cut = 0.5f;
-            if (bStartNode & !IsSegmentEndHoverable(segmentId, segment.m_endNode))
+
+            // if the other side of the segment does not have lane arrows then
+            // the length of the hover is not reduced by half.
+            // but the highlight still looks like a half sausage.
+            // this is important to give user visual feedback which area is hoverable.
+            if (bStartNode & !HasSegmentEndLaneArrows(segmentId, segment.m_endNode))
                 cut = 1;
-            if (!bStartNode && !IsSegmentEndHoverable(segmentId, segment.m_startNode))
+            if (!bStartNode && !HasSegmentEndLaneArrows(segmentId, segment.m_startNode))
                 cut = 1;
             MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
         }
@@ -184,9 +202,8 @@ namespace TrafficManager.UI.SubTools {
 
                 if (((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId)
                      || (netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId))
-                    && ((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None))
-                    {
-                    bool canHover = IsHoverValid();
+                    && ((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)) {
+                    bool canHover = HasHoverLaneArrows();
                     bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(HoveredSegmentId, HoveredNodeId);
                     Color color = MainTool.GetToolColor(PrimaryDown, !canHover);
                     bool alpha = !altDown && canHover;
