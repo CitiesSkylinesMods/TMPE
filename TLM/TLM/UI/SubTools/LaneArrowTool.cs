@@ -112,10 +112,13 @@ namespace TrafficManager.UI.SubTools {
 
         private bool IsHoverValid() => IsSegmentEndHoverable(HoveredSegmentId, HoveredNodeId);
         private bool IsSegmentEndHoverable(ushort segmentId, ushort nodeId) {
+            if(nodeId == 0 || segmentId == 0) {
+                return false;
+            }
 #if DEBUG
             if(!Constants.ServiceFactory.NetService.IsNodeValid(nodeId) ||
                !Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
-                throw new System.Exception("Invalid node or segment ID");
+                Debug.LogError("Invalid node or segment ID");
             }
 #endif
             ExtSegmentEndManager segEndMan = ExtSegmentEndManager.Instance;
