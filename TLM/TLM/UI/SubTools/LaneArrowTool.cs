@@ -166,9 +166,8 @@ namespace TrafficManager.UI.SubTools {
                        bool alpha = false) {
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
 
-            // if the other side of the segment does not have lane arrows then
-            // the length of the hover is not reduced by half.
-            // but the highlight still looks like a half sausage.
+            // if only one side of the segment has lane arrows then the length of the
+            // is 1. but the highlight still looks like a sausage which is cut at one end.
             // this is important to give user visual feedback which area is hoverable.
             bool con =
                 HasSegmentEndLaneArrows(segmentId, segment.m_startNode) ^
