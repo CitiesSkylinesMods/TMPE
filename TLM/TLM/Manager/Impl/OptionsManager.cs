@@ -1,9 +1,10 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using System;
     using API.Manager;
     using API.Traffic.Enums;
     using CSUtil.Commons;
     using State;
+    using UI.Helpers;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -197,6 +198,21 @@
                 OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
             }
 
+            Func<int, ISerializableOptionBase, int> loadBool = (idx, opt) => {
+                if (data.Length > idx) {
+                    opt.Load(data[idx]);
+                }
+                return idx + 1;
+            };
+
+            int index = 42;
+            index = loadBool(index, OptionsMassEditTab.rabout_StayInLaneMainR);
+            index = loadBool(index, OptionsMassEditTab.rabout_StayInLaneNearRabout);
+            index = loadBool(index, OptionsMassEditTab.rabout_DedicatedExitLanes);
+            index = loadBool(index, OptionsMassEditTab.rabout_NoCrossMainR);
+            index = loadBool(index, OptionsMassEditTab.rabout_NoCrossYeildR);
+            index = loadBool(index, OptionsMassEditTab.rabout_PrioritySigns);
+            index = loadBool(index, OptionsMassEditTab.avn_NoCrossMainR);
             return true;
         }
 
@@ -243,7 +259,15 @@
                 (byte)(Options.turnOnRedEnabled ? 1 : 0),
                 (byte)(Options.allowNearTurnOnRed ? 1 : 0),
                 (byte)(Options.allowFarTurnOnRed ? 1 : 0),
-                (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0)
+                (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0),
+
+                (byte)(OptionsMassEditTab.rabout_StayInLaneMainR.Save()),
+                (byte)(OptionsMassEditTab.rabout_StayInLaneNearRabout.Save()),
+                (byte)(OptionsMassEditTab.rabout_DedicatedExitLanes.Save()),
+                (byte)(OptionsMassEditTab.rabout_NoCrossMainR.Save()),
+                (byte)(OptionsMassEditTab.rabout_NoCrossYeildR.Save()),
+                (byte)(OptionsMassEditTab.rabout_PrioritySigns.Save()),
+                (byte)(OptionsMassEditTab.avn_NoCrossMainR.Save()),
             };
         }
     }

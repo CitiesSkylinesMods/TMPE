@@ -1,9 +1,16 @@
-﻿namespace GenericGameBridge.Service {
+namespace GenericGameBridge.Service {
     using ColossalFramework.Math;
+    using System;
     using UnityEngine;
 
     public interface ISimulationService {
-        bool LeftHandDrive { get; }
+        /// <summary>
+        /// The implementation of this property confuses Left hand drive and left hand traffic.
+        /// </summary>
+        [Obsolete]
+        bool LeftHandDrive { get; } // Issue #577
+
+        bool LeftHandTraffic { get; }
 
         uint CurrentBuildIndex { get; set; }
 

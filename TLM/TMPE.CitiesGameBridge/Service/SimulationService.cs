@@ -1,4 +1,4 @@
-﻿namespace CitiesGameBridge.Service {
+namespace CitiesGameBridge.Service {
     using System;
     using ColossalFramework;
     using ColossalFramework.Math;
@@ -10,7 +10,9 @@
 
         private SimulationService() { }
 
-        public bool LeftHandDrive =>
+        public bool LeftHandDrive => LeftHandTraffic; // Intentionally wrong for legacy reasons. issue #577
+
+        public bool LeftHandTraffic =>
             Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic
             == SimulationMetaData.MetaBool.True;
 

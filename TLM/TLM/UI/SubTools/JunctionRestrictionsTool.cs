@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
     using API.Manager;
     using ColossalFramework;
@@ -43,7 +43,7 @@
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.junctionRestrictionsOverlay) {
+            if (viewOnly && !(Options.junctionRestrictionsOverlay || PrioritySignsTool.showMassEditOverlay)) {
                 return;
             }
 
@@ -163,7 +163,7 @@
         public override void Initialize() {
             base.Initialize();
             Cleanup();
-            if (Options.junctionRestrictionsOverlay) {
+            if (Options.junctionRestrictionsOverlay || PrioritySignsTool.showMassEditOverlay) {
                 RefreshCurrentRestrictedNodeIds();
             } else {
                 currentRestrictedNodeIds.Clear();
@@ -201,7 +201,7 @@
             bool hovered = false;
             stateUpdated = false;
 
-            if (viewOnly && !Options.junctionRestrictionsOverlay &&
+            if (viewOnly && !(Options.junctionRestrictionsOverlay || PrioritySignsTool.showMassEditOverlay) &&
                 (MainTool.GetToolMode() != ToolMode.JunctionRestrictions)) {
                 return false;
             }
