@@ -120,7 +120,7 @@ namespace TrafficManager.State {
                           OnEvacBussesMayIgnoreRulesChanged) as UICheckBox;
             }
 
-            OptionsMassEditTab.MakePanel_MasEdit(panelHelper);
+            OptionsMassEditTab.MakePanel_MassEdit(panelHelper);
         }
 
         private static void OnAllRelaxedChanged(bool newAllRelaxed) {

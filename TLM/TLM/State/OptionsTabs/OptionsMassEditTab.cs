@@ -77,12 +77,12 @@ namespace TrafficManager.State {
             group_name: "MassEdit");
         // Pedesterians shall not cross Main avenue at small junctions.
 
-        internal static void MakeSettings_MasEdit(ExtUITabstrip tabStrip, int tabIndex) {
+        internal static void MakeSettings_MassEdit(ExtUITabstrip tabStrip, int tabIndex) {
             UIHelper panelHelper = tabStrip.AddTabPage(T("Tab:MassEdit"));
-            MakePanel_MasEdit(panelHelper);
+            MakePanel_MassEdit(panelHelper);
         }
 
-        internal static void MakePanel_MasEdit(UIHelperBase panelHelper) {
+        internal static void MakePanel_MassEdit(UIHelperBase panelHelper) {
             UIHelperBase raboutGroup = panelHelper.AddGroup(
                 T("MassEdit.Group: Roundabouts"));
             rabout_NoCrossMainR.AddUI(raboutGroup);

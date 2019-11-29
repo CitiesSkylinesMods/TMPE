@@ -47,14 +47,18 @@ namespace TrafficManager.UI.SubTools {
                 //    // TODO uncomment as part of issue #541
                 //    //PriorityRoad.FixRoad(HoveredSegmentId);
                 //}
-                RefreshMassEditOverlay();
-                return;
+                if (isRAbout) {
+                    RefreshMassEditOverlay();
+                    return;
+                }
+            // TODO uncomment as part of issue #541
             //} else if (ctrlDown) {
-            //    // TODO uncomment as part of issue #541
+            //
             //    //PriorityRoad.FixJunction(HoveredNodeId);
             //    RefreshMassEditOverlay();
             //    return;
-            } else if (shiftDown) {
+            }
+            if (shiftDown) {
                 var primaryPrioType = PriorityType.None;
                 var secondaryPrioType = PriorityType.None;
 

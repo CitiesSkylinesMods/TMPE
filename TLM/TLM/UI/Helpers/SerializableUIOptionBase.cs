@@ -15,7 +15,7 @@ namespace TrafficManager.UI.Helpers {
             get => _value;
             set => _value = value;
         }
-        public static implicit operator TVal(SerializableUIOptionBase<TVal,TUI> a) => a.Value;
+        public static implicit operator TVal(SerializableUIOptionBase<TVal, TUI> a) => a.Value;
 
         public abstract void Load(byte data);
         public abstract byte Save();
@@ -38,8 +38,7 @@ namespace TrafficManager.UI.Helpers {
             string key,
             TVal default_value,
             string group_name,
-            bool tooltip = false)
-        {
+            bool tooltip = false) {
             _value = DefaultValue = default_value;
             Key = key;
             GroupName = group_name;
