@@ -9,7 +9,7 @@ namespace TrafficManager.UI.MainMenu {
 
         public override string Tooltip =>
             Translation.Menu.Get("Tooltip:Add priority signs") + "\n" +
-            Translation.Menu.Get("Tooltip.Keybinds:CTRL+SHIFT+Click quick-setup roundabout.");
+            Translation.Menu.Get("Tooltip.Keybinds:Add priority signs");
 
         public override bool Visible => Options.prioritySignsEnabled;
 

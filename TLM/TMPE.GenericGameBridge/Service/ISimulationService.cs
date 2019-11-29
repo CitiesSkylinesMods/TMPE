@@ -4,13 +4,11 @@ namespace GenericGameBridge.Service {
     using UnityEngine;
 
     public interface ISimulationService {
-        /// <summary>
-        /// The implementation of this property confuses Left hand drive and left hand traffic.
-        /// </summary>
-        [Obsolete]
-        bool LeftHandDrive { get; } // Issue #577
 
-        bool LeftHandTraffic { get; }
+        [Obsolete]
+        bool LeftHandDrive { get; } // remove as part of Issue #577
+
+        bool TrafficDrivesOnLeft { get; }
 
         uint CurrentBuildIndex { get; set; }
 

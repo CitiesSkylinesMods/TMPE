@@ -26,8 +26,8 @@ namespace TrafficManager.UI.Helpers {
         protected readonly bool _tooltip;
         public string Key;
         public string GroupName;
-        public string Label { get => $"{GroupName}.CheckBox: {Key}"; }
-        public string Tooltip { get => $"{GroupName}.Tooltip: {Key}"; }
+        public string Label { get => $"{GroupName}.Option:{Key}"; }
+        public string Tooltip { get => $"{GroupName}.Tooltip:{Key}"; }
         public void DefaultOnValueChanged(TVal newVal) {
             Options.IsGameLoaded();
             Log._Debug($"{GroupName}.{Label} changed to {newVal}");

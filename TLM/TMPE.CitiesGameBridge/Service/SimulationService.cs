@@ -10,9 +10,9 @@ namespace CitiesGameBridge.Service {
 
         private SimulationService() { }
 
-        public bool LeftHandDrive => LeftHandTraffic; // Intentionally wrong for legacy reasons. issue #577
+        public bool LeftHandDrive => TrafficDrivesOnLeft; // remove as part of issue #577
 
-        public bool LeftHandTraffic =>
+        public bool TrafficDrivesOnLeft =>
             Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic
             == SimulationMetaData.MetaBool.True;
 
