@@ -1,5 +1,5 @@
 namespace TrafficManager.Util {
-    using TrafficManager.UI.SubTools;
+    using System;
     using System.Collections.Generic;
     using UnityEngine;
     using API.Traffic.Data;
@@ -9,6 +9,8 @@ namespace TrafficManager.Util {
     using GenericGameBridge.Service;
     using State;
     using static Util.Shortcuts;
+    using static Manager.Impl.LaneArrowManager.SeparateTurningLanes;
+    using static UI.SubTools.LaneConnectorTool;
 
     public class RoundaboutMassEdit {
         public static RoundaboutMassEdit Instance = new RoundaboutMassEdit();
@@ -18,16 +20,21 @@ namespace TrafficManager.Util {
 
         private List<ushort> segmentList = null;
 
-        public static void FixLanesRAbout(ushort segmentId) {
+        public static void FixLanesRAbout(ushort segmentId, ushort nextSegmentId) {
             ushort nodeId = netService.GetHeadNode(segmentId);
 
-            if (OptionsMassEditTab.rabout_StayInLaneMainR && !HasJunctionFlag(nodeId) ) {
-                LaneConnectorTool.StayInLane(nodeId, LaneConnectorTool.StayInLaneMode.Both);
+            if (OptionsMassEditTab.rabout_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
+                StayInLane(nodeId, StayInLaneMode.Both);
             }
+
+            // allocation of dedicated exit lanes is supported only when the roundabout is round
+            // in which case the next segment should be straigh ahead.
+            bool isStraight = segEndMan.GetDirection(segmentId, nextSegmentId, nodeId) == ArrowDirection.Forward;
 
             if (OptionsMassEditTab.rabout_DedicatedExitLanes &&
                 HasJunctionFlag(nodeId) &&
-                LaneArrowManager.SeparateTurningLanes.CanChangeLanes(segmentId, nodeId) == SetLaneArrowError.Success) {
+                CanChangeLanes(segmentId, nodeId) == SetLaneArrowError.Success &&
+                isStraight) {
                 bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
                 IList<LanePos> laneList =
                     netService.GetSortedLanes(
@@ -139,13 +146,11 @@ namespace TrafficManager.Util {
             int meterPerUnit = 8;
             ref NetSegment seg = ref GetSeg(segmentId);
             ushort otherNodeId = seg.GetOtherNode(nodeId);
-            //Debug.Log($"segment={segmentId} node={nodeId} len={seg.m_averageLength}");
 
             if (OptionsMassEditTab.rabout_StayInLaneNearRabout &&
                 !HasJunctionFlag(otherNodeId) &&
                 seg.m_averageLength < shortUnit * meterPerUnit) {
-                //Debug.Log($"segment={segmentId} node={nodeId} len={seg.m_averageLength} otherNodeId={otherNodeId}");
-                LaneConnectorTool.StayInLane(otherNodeId, LaneConnectorTool.StayInLaneMode.Both);
+                StayInLane(otherNodeId, StayInLaneMode.Both);
             }
         }
 
@@ -171,16 +176,16 @@ namespace TrafficManager.Util {
         public bool FixRabout(ushort initialSegmentId) {
             bool isRAbout = TraverseLoop(initialSegmentId, out _);
             if (!isRAbout) {
-                Debug.Log($"segment {initialSegmentId} not a roundabout.");
+                Log._Debug($"segment {initialSegmentId} not a roundabout.");
                 return false;
             }
             int count = segmentList.Count;
-            string m = $"\n segmentId={initialSegmentId} seglist.count={count}\n";
+            Log._Debug($"\n segmentId={initialSegmentId} seglist.count={count}\n");
 
             for (int i = 0; i < count; ++i) {
                 ushort segId = segmentList[i];
-                //Debug.Log($"{i} : {segId}");
-                FixLanesRAbout(segId);
+                ushort nextSegId = segmentList[(i + 1) % count];
+                FixLanesRAbout(segId, nextSegId);
                 FixRulesRAbout(segId);
                 FixMinor(netService.GetHeadNode(segId));
             }
@@ -215,14 +220,13 @@ namespace TrafficManager.Util {
                 return false; // too long. prune
             }
             segmentList.Add(segmentId);
-            //Debug.Log($"\nTraverseAroundRecursive({segmentId}) ");
             var segments = GetSortedSegments( segmentId);
 
             foreach (var nextSegmentId in segments) {
                 bool isRAbout = false;
                 if (nextSegmentId == segmentList[0]) {
                     isRAbout = true;
-                } else if (segmentList.Contains(nextSegmentId)) {
+                } else if (Contains(nextSegmentId)) {
                     isRAbout = false;
                 } else {
                     isRAbout = TraverseAroundRecursive(nextSegmentId);
@@ -237,10 +241,10 @@ namespace TrafficManager.Util {
 
         private static List<ushort> GetSortedSegments(ushort segmentId) {
             ushort headNodeId = netService.GetHeadNode(segmentId);
-            bool lhd = LaneArrowManager.Instance.Services.SimulationService.LeftHandDrive;
-            var list0 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Forward, !lhd);
-            var list1 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Left   ,  lhd);
-            var list2 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Right  , !lhd);
+            bool lht = LaneArrowManager.Instance.Services.SimulationService.LeftHandTraffic;
+            var list0 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Forward, !lht);
+            var list1 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Left   ,  lht);
+            var list2 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Right  , !lht);
 
             list0.AddRange(list1);
             list0.AddRange(list2);
@@ -262,10 +266,9 @@ namespace TrafficManager.Util {
                     if (!IsPartofRoundabout(NextSegmentId, segmentId, headNodeId)) {
                         return true;
                     }
-                    if (GetDirection(segmentId, NextSegmentId, headNodeId) == dir) {
-                        Debug.Log($"segmentId={segmentId} NextSegmentId={NextSegmentId} headNodeId={headNodeId} dir={dir}");
+                    if (segEndMan.GetDirection(segmentId, NextSegmentId, headNodeId) == dir) {
                         for (int i = 0; i < sortedSegList.Count; ++i) {
-                            if (GetDirection(NextSegmentId, sortedSegList[i], headNodeId) == preferDir) {
+                            if (segEndMan.GetDirection(NextSegmentId, sortedSegList[i], headNodeId) == preferDir) {
                                 sortedSegList.Insert(i, NextSegmentId);
                                 return true;
                             }
@@ -277,23 +280,33 @@ namespace TrafficManager.Util {
             return sortedSegList;
         }
 
-        private static ArrowDirection GetDirection(ushort segmentId0, ushort segmentId1, ushort nodeId) {
-            bool startNode0 = (bool)netService.IsStartNode(segmentId0, nodeId);
-            ref ExtSegmentEnd segmenEnd0 = ref GetSegEnd(segmentId0, startNode0);
-            ArrowDirection dir = segEndMan.GetDirection(ref segmenEnd0, segmentId1);
-            return dir; // == ArrowDirection.Forward;
+        /// <summary>
+        /// Checks wheather the next segmentId looks like to be part of a roundabout.
+        /// Assumes prevSegmentId is oneway
+        /// </summary>
+        /// <param name="nextSegmentId"></param>
+        /// <param name="prevSegmentId"></param>
+        /// <param name="headNodeId">head node for prevSegmentId</param>
+        /// <returns></returns>
+        private static bool IsPartofRoundabout( ushort nextSegmentId, ushort prevSegmentId, ushort headNodeId) {
+            bool ret = nextSegmentId != 0 && nextSegmentId != prevSegmentId;
+            ret &= segMan.CalculateIsOneWay(nextSegmentId);
+            ret &= headNodeId == netService.GetTailNode(nextSegmentId);
+            return ret;
         }
 
-        private static bool IsPartofRoundabout( ushort segmentId, ushort prevSegmentId, ushort headNodeId) {
-            //Assuming segmentId is oneway and headNodeId is head of prevSegmentId
-            if(segmentId == 0 || segmentId == prevSegmentId) {
-                return false;
+        /// <summary>
+        /// returns true if the given segment is attached to the middle of the
+        /// path of segmentList by checking for duplicate nodes.
+        /// </summary>
+        private bool Contains(ushort segmentId) {
+            ushort nodeId = netService.GetHeadNode(segmentId);
+            foreach (ushort segId in segmentList) {
+                if (netService.GetHeadNode(segId) == nodeId) {
+                    return true;
+                }
             }
-            if (!segMan.CalculateIsOneWay(segmentId)) {
-                return false;
-            }
-            ushort tailNodeId = netService.GetTailNode(segmentId);
-            return headNodeId == tailNodeId;
+            return false;
         }
     } // end class
 }//end namespace

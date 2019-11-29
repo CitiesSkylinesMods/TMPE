@@ -3,7 +3,7 @@ namespace TrafficManager.UI.Helpers {
     using System;
     using System.Runtime.Serialization;
 
-    //TODO issue #562: inherit ISerializable Interface
+    //TODO issue #562: Inherit ISerializable Interface or something.
     //[Serializable()]
     public abstract class SerializableOptionBase<TVal>: ISerializableOptionBase
     {

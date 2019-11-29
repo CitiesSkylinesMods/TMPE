@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     using CSUtil.Commons;
     using Traffic.Data;
 
@@ -57,6 +57,16 @@
         /// <param name="targetSegmentId">target segment id</param>
         /// <returns>compass direction</returns>
         ArrowDirection GetDirection(ref ExtSegmentEnd sourceEnd, ushort targetSegmentId);
+
+        /// <summary>
+        /// Determines the relative compass direction from the given source end to the target segment.
+        /// </summary>
+        /// <param name="segmentId0">source segment end</param>
+        /// <param name="segmentId1">target segment id</param>
+        /// <param name="nodeId">Shared node. If not provided, shared node is determined automatically.</param>
+        /// <returns>compass direction</returns>
+        ArrowDirection GetDirection(ushort segmentId0, ushort segmentId1, ushort nodeId = 0);
+
 
         /// <summary>
         /// Determines whether the segment end is connected to highways only.
