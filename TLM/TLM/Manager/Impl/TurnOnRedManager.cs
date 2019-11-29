@@ -129,7 +129,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            bool lhd = Services.SimulationService.LeftHandDrive;
+            bool lht = Services.SimulationService.TrafficDrivesOnLeft;
 
             // check node
             // note that we must not check for the `TrafficLights` flag here because the flag might not be loaded yet
@@ -219,7 +219,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (seg.oneWay) {
-                if ((lhd && rightSegmentId != 0) || (!lhd && leftSegmentId != 0)) {
+                if ((lht && rightSegmentId != 0) || (!lht && leftSegmentId != 0)) {
                     // special case: one-way to one-way in non-preferred direction
                     if (logTurnOnRed) {
                         Log._Debug(
@@ -227,24 +227,24 @@ namespace TrafficManager.Manager.Impl {
                             "source is incoming one-way. checking for one-way in non-preferred direction");
                     }
 
-                    ushort targetSegmentId = lhd ? rightSegmentId : leftSegmentId;
+                    ushort targetSegmentId = lht ? rightSegmentId : leftSegmentId;
 
                     if (!segmentManager.ExtSegments[targetSegmentId].oneWay) {
                         // disallow turn in non-preferred direction
                         if (logTurnOnRed) {
                             Log._Debug(
                                 $"TurnOnRedManager.UpdateSegmentEnd({end.segmentId}, {end.startNode}): " +
-                                $"turn in non-preferred direction {(lhd ? "right" : "left")} disallowed");
+                                $"turn in non-preferred direction {(lht ? "right" : "left")} disallowed");
                         }
 
-                        if (lhd) {
+                        if (lht) {
                             rightSegmentId = 0;
                         } else {
                             leftSegmentId = 0;
                         }
                     }
                 }
-            } else if (lhd) {
+            } else if (lht) {
                 // default case (LHD): turn in preferred direction
                 rightSegmentId = 0;
             } else {

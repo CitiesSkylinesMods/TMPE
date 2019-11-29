@@ -319,10 +319,10 @@ namespace TrafficManager.Manager.Impl {
                 if (numdirs < 2) {
                     return; // no junction
                 }
+                bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
 
-                bool lhd = LaneArrowManager.Instance.Services.SimulationService.LeftHandDrive;
                 if (srcLaneCount == 2 && numdirs == 3) {
-                    if (!lhd) {
+                    if (!lht) {
                         LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.LeftForward);
                         LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows.Right);
                     }else {
@@ -334,8 +334,8 @@ namespace TrafficManager.Manager.Impl {
 
                 int l = 0, f = 0, r = 0;
                 if (numdirs == 2) {
-                    if (!lhd) {
-                        //if right hand drive then favour the more difficult left turns.
+                    if (!lht) {
+                        //if traffic drives on right, then favour the more difficult left turns.
                         if (leftLanesCount == 0) {
                             DistributeLanes2(srcLaneCount, forwardLanesCount, rightLanesCount, out f, out r);
                         } else if (rightLanesCount == 0) {
@@ -345,7 +345,7 @@ namespace TrafficManager.Manager.Impl {
                             DistributeLanes2(srcLaneCount, leftLanesCount, rightLanesCount, out l, out r);
                         }
                     } else {
-                        //if left hand drive then favour the more difficult right turns.
+                        //if traffic drives on left, then favour the more difficult right turns.
                         if (leftLanesCount == 0) {
                             DistributeLanes2(srcLaneCount, rightLanesCount, forwardLanesCount, out r, out f);
                         } else if (rightLanesCount == 0) {
@@ -357,7 +357,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 } else {
                     Debug.Assert(numdirs == 3 && srcLaneCount >= 3);
-                    if (!lhd) {
+                    if (!lht) {
                         DistributeLanes3(srcLaneCount, leftLanesCount, forwardLanesCount, rightLanesCount, out l, out f, out r);
                     } else {
                         DistributeLanes3(srcLaneCount, rightLanesCount, forwardLanesCount, leftLanesCount, out r, out f, out l);
