@@ -340,7 +340,7 @@ namespace TrafficManager.Manager.Impl {
                             DistributeLanes2(srcLaneCount, leftLanesCount, rightLanesCount, out l, out r);
                         }
                     } else {
-                        //if traffic drives on right, then favour the more difficult right turns.
+                        //if traffic drives on left, then favour the more difficult right turns.
                         if (leftLanesCount == 0) {
                             DistributeLanes2(srcLaneCount, rightLanesCount, forwardLanesCount, out r, out f);
                         } else if (rightLanesCount == 0) {
