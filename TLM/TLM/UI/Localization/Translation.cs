@@ -89,7 +89,7 @@ namespace TrafficManager.UI {
             LoadingExtension.TranslationDatabase.aiCarLookup_;
 
         /// <summary>
-        /// Gets or sets a value indicating whether indicates whether we've checked the validity of language code at least once
+        /// Gets or sets a value indicating whether we've checked the validity of language code at least once
         /// <see cref="GetCurrentLanguage"/>.
         /// </summary>
         internal static bool IsLanguageCodeVerified { get; set; } = false;
