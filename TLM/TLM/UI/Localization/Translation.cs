@@ -88,6 +88,12 @@ namespace TrafficManager.UI {
         public static Localization.LookupTable AICar =>
             LoadingExtension.TranslationDatabase.aiCarLookup_;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether indicates whether we've checked the validity of language code at least once
+        /// <see cref="GetCurrentLanguage"/>.
+        /// </summary>
+        internal static bool IsLanguageCodeVerified { get; set; } = false;
+
         public void LoadAllTranslations() {
             CsvColumnsToLocales
                 = new Dictionary<string, string> {
@@ -171,39 +177,6 @@ namespace TrafficManager.UI {
             return filename;
         }
 
-        private static string GetValidLanguageId(string language) {
-
-            switch (language) {
-                case "jaex": {
-                    language = "ja";
-                    break;
-                }
-
-                case "zh-cn": {
-                    language = "zh";
-                    break;
-                }
-
-                case "kr": {
-                    language = "ko";
-                    break;
-                }
-            }
-
-            if (!AvailableLanguageCodes.Contains(language)) {
-                language = DEFAULT_LANGUAGE_CODE;
-            }
-
-            return language;
-        }
-
-        internal static string GetCurrentLanguage() {
-            string lang = GlobalConfig.Instance.LanguageCode;
-
-            // Having language code null means use the game language
-            return lang ?? GetValidLanguageId(LocaleManager.instance.language);
-        }
-
         public void ReloadTutorialTranslations() {
             var locale = (Locale)typeof(LocaleManager)
                                  .GetField(
@@ -251,6 +224,55 @@ namespace TrafficManager.UI {
                 resetFun?.Invoke(locale, new object[] { key });
                 locale.AddLocalizedString(key, entry.Value);
             }
+        }
+
+        /// <summary>
+        /// Validates a language id, fixing some known issues, then checks if the language is currently supported by TM:PE.
+        /// If the language is not supported, defaults to the mods' default language.
+        /// </summary>
+        /// <param name="language">The language id to validate</param>
+        /// <returns>A valid language id that TM:PE supports.</returns>
+        private static string GetValidLanguageId(string language) {
+
+            // Game translation mods specify their own translation codes; we transpose them to codes supported by TM:PE.
+            switch (language) {
+                case "jaex": {
+                    language = "ja";
+                    break;
+                }
+
+                case "zh-cn": {
+                    language = "zh";
+                    break;
+                }
+
+                case "kr": {
+                    language = "ko";
+                    break;
+                }
+            }
+
+            // If we don't support the language, use the default language instead
+            if (!AvailableLanguageCodes.Contains(language)) {
+                language = DEFAULT_LANGUAGE_CODE;
+            }
+
+            return language;
+        }
+
+        /// <summary>
+        /// If we've not verified the language code yet, verify it and set 
+        /// </summary>
+        /// <returns>A valid language code</returns>
+        internal static string GetCurrentLanguage() {
+            if (!IsLanguageCodeVerified) {
+                // Try the language specified in config file or, if not present, use the current game language
+                // Then validate against available TM:PE languages or use mod default if not supported
+                GlobalConfig.Instance.LanguageCode = GetValidLanguageId(GlobalConfig.Instance.LanguageCode ?? LocaleManager.instance.language);
+                IsLanguageCodeVerified = true;
+            }
+
+            return GlobalConfig.Instance.LanguageCode;
         }
 
         internal static int GetMenuWidth() {
