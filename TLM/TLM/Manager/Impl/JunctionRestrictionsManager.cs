@@ -401,11 +401,11 @@ namespace TrafficManager.Manager.Impl {
                                                    ref NetNode node) {
             ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
             int index = turnOnRedMan.GetIndex(segmentId, startNode);
-            bool lhd = Services.SimulationService.LeftHandDrive;
+            bool lht = Services.SimulationService.TrafficDrivesOnLeft;
             bool ret =
                 (node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None &&
-                (((lhd == near) && turnOnRedMan.TurnOnRedSegments[index].leftSegmentId != 0) ||
-                 ((!lhd == near) && turnOnRedMan.TurnOnRedSegments[index].rightSegmentId != 0));
+                (((lht == near) && turnOnRedMan.TurnOnRedSegments[index].leftSegmentId != 0) ||
+                ((!lht == near) && turnOnRedMan.TurnOnRedSegments[index].rightSegmentId != 0));
 #if DEBUG
             if (DebugSwitch.JunctionRestrictions.Get()) {
                 Log._Debug(
