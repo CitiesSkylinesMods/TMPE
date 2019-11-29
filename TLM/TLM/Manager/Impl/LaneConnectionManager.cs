@@ -654,7 +654,7 @@ namespace TrafficManager.Manager.Impl {
                     // check if arrow has already been set for this direction
                     switch (dir) {
                         case ArrowDirection.Turn: {
-                            if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
+                            if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
                                 if ((arrows & LaneArrows.Right) != LaneArrows.None) {
                                     return true;
                                 }
@@ -740,7 +740,7 @@ namespace TrafficManager.Manager.Impl {
 
                     switch (dir) {
                         case ArrowDirection.Turn: {
-                            if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
+                            if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
                                 arrows |= LaneArrows.Right;
                             } else {
                                 arrows |= LaneArrows.Left;

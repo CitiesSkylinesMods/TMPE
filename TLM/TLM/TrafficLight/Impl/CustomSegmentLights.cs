@@ -1,4 +1,4 @@
-﻿// #define DEBUGGET
+// #define DEBUGGET
 
 namespace TrafficManager.TrafficLight.Impl {
     using System;
@@ -493,7 +493,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 });
 
             var autoPedestrianLightState = RoadBaseAI.TrafficLightState.Green;
-            bool lhd = Constants.ServiceFactory.SimulationService.LeftHandDrive;
+            bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
 
             if (!(segEnd.incoming && seg.oneWay)) {
                 for (int i = 0; i < 8; ++i) {
@@ -561,10 +561,10 @@ namespace TrafficManager.TrafficLight.Impl {
                             autoPedestrianLightState = RoadBaseAI.TrafficLightState.Red;
                             break;
                         }
-                    } else if (((dir == ArrowDirection.Left && lhd)
-                                || (dir == ArrowDirection.Right && !lhd))
-                               && ((lhd && !otherLights.IsAllRightRed())
-                                   || (!lhd && !otherLights.IsAllLeftRed())))
+                    } else if (((dir == ArrowDirection.Left && lht)
+                                || (dir == ArrowDirection.Right && !lht))
+                               && ((lht && !otherLights.IsAllRightRed())
+                                   || (!lht && !otherLights.IsAllLeftRed())))
                     {
                         Log._DebugIf(
                             logTrafficLights,

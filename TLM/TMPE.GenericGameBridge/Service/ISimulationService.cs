@@ -1,9 +1,13 @@
-﻿namespace GenericGameBridge.Service {
+namespace GenericGameBridge.Service {
     using ColossalFramework.Math;
+    using System;
     using UnityEngine;
 
     public interface ISimulationService {
+        [Obsolete]
         bool LeftHandDrive { get; }
+
+        bool TrafficDrivesOnLeft { get; }
 
         uint CurrentBuildIndex { get; set; }
 
