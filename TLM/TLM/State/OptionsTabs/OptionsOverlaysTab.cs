@@ -3,6 +3,7 @@ namespace TrafficManager.State {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using UI;
+    using UI.Helpers;
 
     public static class OptionsOverlaysTab {
         private static UICheckBox _prioritySignsOverlayToggle;
@@ -23,18 +24,8 @@ namespace TrafficManager.State {
         private static UICheckBox _buildingOverlayToggle;
 #endif
 
-        internal static void MakeSettings_Overlays(UITabstrip tabStrip, int tabIndex) {
-            Options.AddOptionTab(tabStrip, Translation.Options.Get("Tab:Overlays"));
-            tabStrip.selectedIndex = tabIndex;
-
-            var currentPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
-            currentPanel.autoLayout = true;
-            currentPanel.autoLayoutDirection = LayoutDirection.Vertical;
-            currentPanel.autoLayoutPadding.top = 5;
-            currentPanel.autoLayoutPadding.left = 10;
-            currentPanel.autoLayoutPadding.right = 10;
-
-            var panelHelper = new UIHelper(currentPanel);
+        internal static void MakeSettings_Overlays(ExtUITabstrip tabStrip) {
+            UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Overlays"));
 
             _prioritySignsOverlayToggle = panelHelper.AddCheckbox(
                                               Translation.Options.Get("Checkbox:Priority signs"),
