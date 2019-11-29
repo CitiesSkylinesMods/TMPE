@@ -172,7 +172,7 @@ namespace TrafficManager.UI.SubTools {
             // this is important to give user visual feedback which area is hoverable.
             bool con =
                 HasSegmentEndLaneArrows(segmentId, segment.m_startNode) ^
-                HasSegmentEndLaneArrows(segmentId, segment.m_startNode);
+                HasSegmentEndLaneArrows(segmentId, segment.m_endNode);
             float cut = con ? 1f : 0.5f;
 
             MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
@@ -192,6 +192,7 @@ namespace TrafficManager.UI.SubTools {
 
             // Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
             if (!cursorInSecondaryPanel_
+                && HasHoverLaneArrows()
                 && (HoveredSegmentId != 0)
                 && (HoveredNodeId != 0)
                 && ((HoveredSegmentId != SelectedSegmentId)
@@ -202,10 +203,9 @@ namespace TrafficManager.UI.SubTools {
                 if (((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId)
                      || (netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId))
                     && ((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)) {
-                    bool canHover = HasHoverLaneArrows();
                     bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(HoveredSegmentId, HoveredNodeId);
-                    Color color = MainTool.GetToolColor(PrimaryDown, !canHover);
-                    bool alpha = !altDown && canHover;
+                    Color color = MainTool.GetToolColor(PrimaryDown, false);
+                    bool alpha = !altDown;
                     DrawSegmentEnd(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
                 }
             }
