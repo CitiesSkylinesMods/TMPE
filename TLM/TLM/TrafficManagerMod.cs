@@ -24,7 +24,7 @@ namespace TrafficManager
         public const uint GAME_VERSION_C = 1u;
         public const uint GAME_VERSION_BUILD = 2u;
 
-        public const string VERSION = "11.0-alpha4";
+        public const string VERSION = "11.0-alpha11";
 
         public static readonly string ModName = "TM:PE " + BRANCH + " " + VERSION;
 

@@ -172,8 +172,6 @@ namespace TrafficManager.UI {
         }
 
         private static string GetValidLanguageId(string language) {
-            if (AvailableLanguageCodes.Contains(language))
-                return language;
 
             switch (language) {
                 case "jaex": {
@@ -190,10 +188,10 @@ namespace TrafficManager.UI {
                     language = "ko";
                     break;
                 }
+            }
 
-                default:
-                    language = "en";
-                    break;
+            if (!AvailableLanguageCodes.Contains(language)) {
+                language = DEFAULT_LANGUAGE_CODE;
             }
 
             return language;
