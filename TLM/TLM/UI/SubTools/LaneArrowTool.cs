@@ -166,16 +166,15 @@ namespace TrafficManager.UI.SubTools {
                        bool alpha = false) {
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
 
-            float cut = 0.5f;
-
             // if the other side of the segment does not have lane arrows then
             // the length of the hover is not reduced by half.
             // but the highlight still looks like a half sausage.
             // this is important to give user visual feedback which area is hoverable.
-            if (bStartNode & !HasSegmentEndLaneArrows(segmentId, segment.m_endNode))
-                cut = 1;
-            if (!bStartNode && !HasSegmentEndLaneArrows(segmentId, segment.m_startNode))
-                cut = 1;
+            bool con =
+                HasSegmentEndLaneArrows(segmentId, segment.m_startNode) ^
+                HasSegmentEndLaneArrows(segmentId, segment.m_startNode);
+            float cut = con ? 1f : 0.5f;
+
             MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
         }
 
