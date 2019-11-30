@@ -306,6 +306,11 @@ namespace TrafficManager.UI {
             return CurrentLanguage;
         }
 
+#if DEBUG
+        /// <summary>
+        /// Used to size the in-game debug menu based on chosen langauge.
+        /// </summary>
+        /// <returns>Width to use for the menu.</returns>
         internal static int GetMenuWidth() {
             switch (GetCurrentLanguage()) {
                 // also: case null:
@@ -331,5 +336,6 @@ namespace TrafficManager.UI {
                 }
             }
         }
+#endif
     }
 }
