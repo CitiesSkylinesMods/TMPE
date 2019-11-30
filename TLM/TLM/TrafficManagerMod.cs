@@ -2,11 +2,13 @@ namespace TrafficManager
 {
     using System;
     using System.Reflection;
+    using ColossalFramework.Globalization;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
     using State;
+    using TrafficManager.UI;
     using Util;
 
     public class TrafficManagerMod : IUserMod {
@@ -72,10 +74,17 @@ namespace TrafficManager
         public void OnDisabled() {
             Log.Info("TM:PE disabled.");
             LoadingManager.instance.m_introLoaded -= CheckForIncompatibleMods;
+            LocaleManager.eventLocaleChanged -= Translation.SetCurrentLanguageToGameLanguage;
+            Translation.IsListeningToGameLocaleChanged = false; // is this necessary?
         }
 
         [UsedImplicitly]
         public void OnSettingsUI(UIHelperBase helper) {
+            // Note: This bugs out if done in OnEnabled(), hence doing it here instead.
+            if (!Translation.IsListeningToGameLocaleChanged) {
+                Translation.IsListeningToGameLocaleChanged = true;
+                LocaleManager.eventLocaleChanged += new LocaleManager.LocaleChangedHandler(Translation.HandleGameLocaleChange);
+            }
             Options.MakeSettings(helper);
         }
 

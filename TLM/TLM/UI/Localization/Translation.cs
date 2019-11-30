@@ -89,10 +89,16 @@ namespace TrafficManager.UI {
             LoadingExtension.TranslationDatabase.aiCarLookup_;
 
         /// <summary>
-        /// Gets or sets a value indicating whether we've checked the validity of language code at least once
-        /// <see cref="GetCurrentLanguage"/>.
+        /// Gets or sets a value indicating whether we're currently listening to the event fired when user changes game langauge.
+        /// The event is hooked in <see cref="TrafficManagerMod.OnSettingsUI"/> and unhooked in <see cref="TrafficManagerMod.OnDisabled"/>.
         /// </summary>
-        internal static bool IsLanguageCodeVerified { get; set; } = false;
+        public static bool IsListeningToGameLocaleChanged { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating the current lanugage to use for translations.
+        /// Note: Don't access directly, instead use <see cref="GetCurrentLanguage()"/>.
+        /// </summary>
+        private static string CurrentLanguage { get; set; } = string.Empty;
 
         public void LoadAllTranslations() {
             CsvColumnsToLocales
@@ -144,7 +150,7 @@ namespace TrafficManager.UI {
         /// <param name="filename">Filename to translate</param>
         /// <returns>Filename with language inserted before extension</returns>
         public static string GetTranslatedFileName(string filename, string language) {
-            language = GetValidLanguageId(language);
+            language = GetValidLanguageCode(language);
 
             string translatedFilename = filename;
             if (language != DEFAULT_LANGUAGE_CODE) {
@@ -227,52 +233,77 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// Validates a language id, fixing some known issues, then checks if the language is currently supported by TM:PE.
-        /// If the language is not supported, defaults to the mods' default language.
+        /// Triggered when user changes base game language.
         /// </summary>
-        /// <param name="language">The language id to validate</param>
-        /// <returns>A valid language id that TM:PE supports.</returns>
-        private static string GetValidLanguageId(string language) {
+        public static void HandleGameLocaleChange() {
+            // only do something if TM:PE language is set to use game language
+            if (string.IsNullOrEmpty(GlobalConfig.Instance.LanguageCode)) {
+                SetCurrentLanguageToGameLanguage();
+            }
+        }
 
-            // Game translation mods specify their own translation codes; we transpose them to codes supported by TM:PE.
-            switch (language) {
+        /// <summary>
+        /// Sets <see cref="CurrentLanguage"/> based on the game language.
+        /// Note: This does not check to see if user has chosen a specific language in TM:PE settings.
+        /// </summary>
+        public static void SetCurrentLanguageToGameLanguage() {
+            string code = LocaleManager.instance.language;
+
+            // language mods can add their own codes, so deal with those if necessary
+            switch (code) {
                 case "jaex": {
-                    language = "ja";
+                    code = "ja";
                     break;
                 }
 
                 case "zh-cn": {
-                    language = "zh";
+                    code = "zh";
                     break;
                 }
 
                 case "kr": {
-                    language = "ko";
+                    code = "ko";
                     break;
                 }
             }
 
-            // If we don't support the language, use the default language instead
-            if (!AvailableLanguageCodes.Contains(language)) {
-                language = DEFAULT_LANGUAGE_CODE;
-            }
-
-            return language;
+            CurrentLanguage = GetValidLanguageCode(code);
         }
 
         /// <summary>
-        /// If we've not verified the language code yet, verify it and set 
+        /// Sets <see cref="CurrentLanguage"/> based on TM:PE language setting.
+        /// </summary>
+        public static void SetCurrentLanguageToTMPELanguage() {
+            string code = GlobalConfig.Instance.LanguageCode;
+
+            if (string.IsNullOrEmpty(code)) {
+                SetCurrentLanguageToGameLanguage();
+            } else {
+                CurrentLanguage = GetValidLanguageCode(code);
+            }
+        }
+
+        /// <summary>
+        /// Returns a valid language code based on supplied code.
+        /// Note: Does not check for codes added by game language mods.
+        /// </summary>
+        /// <param name="code">The code we want to use.</param>
+        /// <returns>Either the code requested, or the mod default code.</returns>
+        private static string GetValidLanguageCode(string code) {
+            return AvailableLanguageCodes.Contains(code)
+                ? code
+                : DEFAULT_LANGUAGE_CODE;
+        }
+
+        /// <summary>
+        /// Get the currently selected language.
         /// </summary>
         /// <returns>A valid language code</returns>
         internal static string GetCurrentLanguage() {
-            if (!IsLanguageCodeVerified) {
-                // Try the language specified in config file or, if not present, use the current game language
-                // Then validate against available TM:PE languages or use mod default if not supported
-                GlobalConfig.Instance.LanguageCode = GetValidLanguageId(GlobalConfig.Instance.LanguageCode ?? LocaleManager.instance.language);
-                IsLanguageCodeVerified = true;
+            if (string.IsNullOrEmpty(CurrentLanguage)) {
+                SetCurrentLanguageToTMPELanguage();
             }
-
-            return GlobalConfig.Instance.LanguageCode;
+            return CurrentLanguage;
         }
 
         internal static int GetMenuWidth() {
