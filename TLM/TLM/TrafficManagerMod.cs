@@ -74,7 +74,7 @@ namespace TrafficManager
         public void OnDisabled() {
             Log.Info("TM:PE disabled.");
             LoadingManager.instance.m_introLoaded -= CheckForIncompatibleMods;
-            LocaleManager.eventLocaleChanged -= Translation.SetCurrentLanguageToGameLanguage;
+            LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
             Translation.IsListeningToGameLocaleChanged = false; // is this necessary?
         }
 
