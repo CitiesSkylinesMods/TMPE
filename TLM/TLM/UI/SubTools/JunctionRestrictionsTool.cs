@@ -241,7 +241,7 @@ namespace TrafficManager.UI.SubTools {
                 Vector3 centerStart = nodePos + (yu * (viewOnly ? 5f : 14f));
                 Vector3 zero = centerStart - (0.5f * (numSignsPerRow-1) * f * xu); // "top left"
                 if (viewOnly) {
-                    if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
+                    if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
                         zero -= xu * 8f;
                     } else {
                         zero += xu * 8f;
@@ -475,12 +475,12 @@ namespace TrafficManager.UI.SubTools {
                 //--------------------------------
                 IJunctionRestrictionsManager junctionRestrictionsManager =
                     Constants.ManagerFactory.JunctionRestrictionsManager;
-                bool lhd = Constants.ServiceFactory.SimulationService.LeftHandDrive;
+                bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
 
                 // draw "turn-left-on-red allowed" sign at (2; 0)
-                allowed = junctionRestrictionsManager.IsTurnOnRedAllowed(lhd, segmentId, startNode);
+                allowed = junctionRestrictionsManager.IsTurnOnRedAllowed(lht, segmentId, startNode);
                 configurable = junctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(
-                    lhd,
+                    lht,
                     segmentId,
                     startNode,
                     ref node);
@@ -490,7 +490,7 @@ namespace TrafficManager.UI.SubTools {
                         && (!viewOnly
                             || (allowed != junctionRestrictionsManager
                                     .GetDefaultTurnOnRedAllowed(
-                                        lhd,
+                                        lht,
                                         segmentId,
                                         startNode,
                                         ref node)))))
@@ -516,7 +516,7 @@ namespace TrafficManager.UI.SubTools {
 
                         if (MainTool.CheckClicked()) {
                             junctionRestrictionsManager.ToggleTurnOnRedAllowed(
-                                lhd,
+                                lht,
                                 segmentId,
                                 startNode);
                             stateUpdated = true;
@@ -530,11 +530,11 @@ namespace TrafficManager.UI.SubTools {
 
                 // draw "turn-right-on-red allowed" sign at (2; 1)
                 allowed = junctionRestrictionsManager.IsTurnOnRedAllowed(
-                    !lhd,
+                    !lht,
                     segmentId,
                     startNode);
                 configurable = junctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(
-                    !lhd,
+                    !lht,
                     segmentId,
                     startNode,
                     ref node);
@@ -544,7 +544,7 @@ namespace TrafficManager.UI.SubTools {
                         && (!viewOnly
                             || (allowed != junctionRestrictionsManager
                                     .GetDefaultTurnOnRedAllowed(
-                                        !lhd,
+                                        !lht,
                                         segmentId,
                                         startNode,
                                         ref node)))))
@@ -570,7 +570,7 @@ namespace TrafficManager.UI.SubTools {
 
                         if (MainTool.CheckClicked()) {
                             junctionRestrictionsManager.ToggleTurnOnRedAllowed(
-                                !lhd,
+                                !lht,
                                 segmentId,
                                 startNode);
                             stateUpdated = true;

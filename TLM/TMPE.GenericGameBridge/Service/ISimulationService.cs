@@ -4,9 +4,8 @@ namespace GenericGameBridge.Service {
     using UnityEngine;
 
     public interface ISimulationService {
-
         [Obsolete]
-        bool LeftHandDrive { get; } // remove as part of Issue #577
+        bool LeftHandDrive { get; }
 
         bool TrafficDrivesOnLeft { get; }
 

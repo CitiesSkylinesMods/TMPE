@@ -900,15 +900,15 @@ namespace TrafficManager.Manager.Impl {
                     vehicleId, incomingVehicleId, targetToDir, incomingFromDir, incomingToRelDir);
             }
 
-            if (Services.SimulationService.LeftHandDrive) {
-                // mirror situation for left-hand traffic systems
+            if (Services.SimulationService.TrafficDrivesOnLeft) {
+                // mirror situation if traffic drives on left
                 targetToDir = ArrowDirectionUtil.InvertLeftRight(targetToDir);
                 incomingFromDir = ArrowDirectionUtil.InvertLeftRight(incomingFromDir);
                 incomingToRelDir = ArrowDirectionUtil.InvertLeftRight(incomingToRelDir);
 
                 if (logPriority) {
                     Log._DebugFormat(
-                        "  TrafficPriorityManager.HasVehiclePriority({0}, {1}): LHD! targetToDir: {2}, " +
+                        "  TrafficPriorityManager.HasVehiclePriority({0}, {1}): LHT! targetToDir: {2}, " +
                         "incomingFromDir: {3}, incomingToRelDir: {4}",
                         vehicleId, incomingVehicleId, targetToDir, incomingFromDir, incomingToRelDir);
                 }
@@ -1366,7 +1366,7 @@ namespace TrafficManager.Manager.Impl {
                       NetSegment.Flags.Invert) == NetSegment.Flags.None)
                         ? dir
                         : NetInfo.InvertDirection(dir);
-                NetInfo.Direction dir3 = Services.SimulationService.LeftHandDrive
+                NetInfo.Direction dir3 = Services.SimulationService.TrafficDrivesOnLeft
                                              ? NetInfo.InvertDirection(dir2)
                                              : dir2;
 

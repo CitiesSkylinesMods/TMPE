@@ -10,11 +10,13 @@ namespace CitiesGameBridge.Service {
 
         private SimulationService() { }
 
-        public bool LeftHandDrive => TrafficDrivesOnLeft; // remove as part of issue #577
-
         public bool TrafficDrivesOnLeft =>
             Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic
             == SimulationMetaData.MetaBool.True;
+
+        [Obsolete]
+        public bool LeftHandDrive =>
+            TrafficDrivesOnLeft;
 
         public uint CurrentBuildIndex {
             get => Singleton<SimulationManager>.instance.m_currentBuildIndex;

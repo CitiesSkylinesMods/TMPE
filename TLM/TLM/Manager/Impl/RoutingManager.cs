@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -419,7 +419,7 @@
                     return true;
                 });
 
-            bool leftHandDrive = Constants.ServiceFactory.SimulationService.LeftHandDrive;
+            bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             ExtSegment prevSeg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId];
@@ -549,7 +549,7 @@
                 Log._DebugFormat(
                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                     "prevSegIsInverted={4} leftHandDrive={5}",
-                    segmentId, laneIndex, laneId, startNode, prevSegIsInverted, leftHandDrive);
+                    segmentId, laneIndex, laneId, startNode, prevSegIsInverted, lht);
                 Log._DebugFormat(
                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                     "prevSimilarLaneCount={4} prevInnerSimilarLaneIndex={5} prevOuterSimilarLaneIndex={6} " +
@@ -870,8 +870,8 @@
                                         (nextIncomingDir == ArrowDirection.Turn
                                          && (!nextIsRealJunction
                                              || nextIsEndOrOneWayOut
-                                             || ((leftHandDrive && hasRightArrow)
-                                                 || (!leftHandDrive && hasLeftArrow))))) // valid turning lane
+                                             || ((lht && hasRightArrow)
+                                                 || (!lht && hasLeftArrow))))) // valid turning lane
                                     {
                                         if (extendedLogRouting) {
                                             Log._DebugFormat(
@@ -1920,7 +1920,7 @@
                     Constants.ServiceFactory.NetService.ProcessSegment(
                         nextSegmentId,
                         (ushort nextSegId, ref NetSegment segment) => {
-                            nextSegmentId = Constants.ServiceFactory.SimulationService.LeftHandDrive
+                            nextSegmentId = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft
                                                 ? segment.GetLeftSegment(nextNodeId)
                                                 : segment.GetRightSegment(nextNodeId);
                             return true;
