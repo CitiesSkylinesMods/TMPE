@@ -50,7 +50,7 @@ namespace TrafficManager.Util {
         public enum ErrorResult {
             Success = 0,
             NoJunction,
-            NoNeed,
+            NotSupported,
             TTLExists,
             Other,
         }
@@ -98,11 +98,17 @@ namespace TrafficManager.Util {
                 return ErrorResult.TTLExists;
             }
 
+            // issue #575: Support level crossings.
+            NetNode.Flags flags = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags;
+            if((flags & NetNode.Flags.LevelCrossing) != 0) {
+                return ErrorResult.NotSupported;
+            }
+
             var segList = CWSegments(nodeId);
             int n = segList.Count;
 
             if (n < 3) {
-                return ErrorResult.NoNeed;
+                return ErrorResult.NotSupported;
             }
 
             if (!Add(nodeId)) {
@@ -117,7 +123,7 @@ namespace TrafficManager.Util {
             {
                 var segList2Way = TwoWayRoads(segList, out int n2);
                 if (n2 < 2) {
-                    return ErrorResult.NoNeed;
+                    return ErrorResult.NotSupported;
                 }
                 bool b = HasIncommingOneWaySegment(nodeId);
                 if (n2 == 2 && !b) {

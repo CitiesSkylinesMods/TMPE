@@ -109,7 +109,7 @@ namespace TrafficManager.UI.SubTools {
                 if (res != AutoTimedTrafficLights.ErrorResult.Success) {
                     string message;
                     switch (res) {
-                        case AutoTimedTrafficLights.ErrorResult.NoNeed:
+                        case AutoTimedTrafficLights.ErrorResult.NotSupported:
                             message = "Dialog.Text:Auto TL no need";
                             break;
                         case AutoTimedTrafficLights.ErrorResult.TTLExists:
