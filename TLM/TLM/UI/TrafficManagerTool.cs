@@ -410,6 +410,7 @@ namespace TrafficManager.UI {
             }
         }
 
+
         public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                    ushort nodeId,
                                    bool warning = false,
@@ -417,8 +418,21 @@ namespace TrafficManager.UI {
             DrawNodeCircle(cameraInfo, nodeId, GetToolColor(warning, false), alpha);
         }
 
+        /// <summary>
+        /// Gets the coordinates of the given node.
+        /// </summary>
+        private static Vector3 GetNodePos(ushort nodeId) {
+            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            Vector3 pos = nodeBuffer[nodeId].m_position;
+            float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
+            if (terrainY > pos.y) {
+                pos.y = terrainY;
+            }
+            return pos;
+        }
+
         /// <returns>the average half width of all connected segments</returns>
-        private float CalculateNodeRadius(ushort nodeId) {
+        private static float CalculateNodeRadius(ushort nodeId) {
 
             float sum_half_width = 0;
             int count = 0;
@@ -460,21 +474,13 @@ namespace TrafficManager.UI {
             float width = segment.Info.m_halfWidth;
             ushort nodeId, otherNodeId;
 
-            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            Vector3 GetPos(ushort nodeId) {
-                Vector3 pos = nodeBuffer[nodeId].m_position;
-                float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
-                if (terrainY > pos.y) {
-                    pos.y = terrainY;
-                }
-                return pos;
-            }
 
+            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
             bool IsMiddle(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
 
             Bezier3 bezier;
-            bezier.a = GetPos(segment.m_startNode);
-            bezier.d = GetPos(segment.m_endNode);
+            bezier.a = GetNodePos(segment.m_startNode);
+            bezier.d = GetNodePos(segment.m_endNode);
 
             NetSegment.CalculateMiddlePoints(
                 bezier.a,

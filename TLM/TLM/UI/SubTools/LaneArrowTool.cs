@@ -130,10 +130,10 @@ namespace TrafficManager.UI.SubTools {
             ExtSegmentEndManager segEndMan = ExtSegmentEndManager.Instance;
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
             NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            bool IsJunction(ushort nodeId) => (nodesBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
+            bool bJunction = (nodesBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
 
             // Outgoing lanes toward the node is incomming lanes to the segment end.
-            return IsJunction(nodeId) && segEnd.incoming;
+            return bJunction && segEnd.incoming;
         }
 
         protected override ushort HoveredNodeId {
