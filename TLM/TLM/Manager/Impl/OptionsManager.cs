@@ -212,7 +212,6 @@ namespace TrafficManager.Manager.Impl {
             index = loadBool(index, OptionsMassEditTab.rabout_NoCrossMainR);
             index = loadBool(index, OptionsMassEditTab.rabout_NoCrossYeildR);
             index = loadBool(index, OptionsMassEditTab.rabout_PrioritySigns);
-            index = loadBool(index, OptionsMassEditTab.avn_NoCrossMainR);
             return true;
         }
 
@@ -267,7 +266,6 @@ namespace TrafficManager.Manager.Impl {
                 (byte)(OptionsMassEditTab.rabout_NoCrossMainR.Save()),
                 (byte)(OptionsMassEditTab.rabout_NoCrossYeildR.Save()),
                 (byte)(OptionsMassEditTab.rabout_PrioritySigns.Save()),
-                (byte)(OptionsMassEditTab.avn_NoCrossMainR.Save()),
             };
         }
     }

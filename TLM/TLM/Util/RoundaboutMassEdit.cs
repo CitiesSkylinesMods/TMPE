@@ -241,7 +241,7 @@ namespace TrafficManager.Util {
 
         private static List<ushort> GetSortedSegments(ushort segmentId) {
             ushort headNodeId = netService.GetHeadNode(segmentId);
-            bool lht = LaneArrowManager.Instance.Services.SimulationService.LeftHandTraffic;
+            bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
             var list0 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Forward, !lht);
             var list1 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Left   ,  lht);
             var list2 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Right  , !lht);
