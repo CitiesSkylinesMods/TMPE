@@ -88,6 +88,18 @@ namespace TrafficManager.UI {
         public static Localization.LookupTable AICar =>
             LoadingExtension.TranslationDatabase.aiCarLookup_;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether we're currently listening to the event fired when user changes game langauge.
+        /// The event is hooked in <see cref="TrafficManagerMod.OnSettingsUI"/> and unhooked in <see cref="TrafficManagerMod.OnDisabled"/>.
+        /// </summary>
+        public static bool IsListeningToGameLocaleChanged { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating the current lanugage to use for translations.
+        /// Note: Don't access directly, instead use <see cref="GetCurrentLanguage()"/>.
+        /// </summary>
+        private static string CurrentLanguage { get; set; } = string.Empty;
+
         public void LoadAllTranslations() {
             CsvColumnsToLocales
                 = new Dictionary<string, string> {
@@ -138,7 +150,7 @@ namespace TrafficManager.UI {
         /// <param name="filename">Filename to translate</param>
         /// <returns>Filename with language inserted before extension</returns>
         public static string GetTranslatedFileName(string filename, string language) {
-            language = GetValidLanguageId(language);
+            language = GetValidLanguageCode(language);
 
             string translatedFilename = filename;
             if (language != DEFAULT_LANGUAGE_CODE) {
@@ -169,41 +181,6 @@ namespace TrafficManager.UI {
             }
 
             return filename;
-        }
-
-        private static string GetValidLanguageId(string language) {
-            if (AvailableLanguageCodes.Contains(language))
-                return language;
-
-            switch (language) {
-                case "jaex": {
-                    language = "ja";
-                    break;
-                }
-
-                case "zh-cn": {
-                    language = "zh";
-                    break;
-                }
-
-                case "kr": {
-                    language = "ko";
-                    break;
-                }
-
-                default:
-                    language = "en";
-                    break;
-            }
-
-            return language;
-        }
-
-        internal static string GetCurrentLanguage() {
-            string lang = GlobalConfig.Instance.LanguageCode;
-
-            // Having language code null means use the game language
-            return lang ?? GetValidLanguageId(LocaleManager.instance.language);
         }
 
         public void ReloadTutorialTranslations() {
@@ -255,6 +232,85 @@ namespace TrafficManager.UI {
             }
         }
 
+        /// <summary>
+        /// Triggered when user changes base game language.
+        /// </summary>
+        public static void HandleGameLocaleChange() {
+            // only do something if TM:PE language is set to use game language
+            if (string.IsNullOrEmpty(GlobalConfig.Instance.LanguageCode)) {
+                SetCurrentLanguageToGameLanguage();
+            }
+        }
+
+        /// <summary>
+        /// Sets <see cref="CurrentLanguage"/> based on the game language.
+        /// Note: This does not check to see if user has chosen a specific language in TM:PE settings.
+        /// </summary>
+        public static void SetCurrentLanguageToGameLanguage() {
+            string code = LocaleManager.instance.language;
+
+            // language mods can add their own codes, so deal with those if necessary
+            switch (code) {
+                case "jaex": {
+                    code = "ja";
+                    break;
+                }
+
+                case "zh-cn": {
+                    code = "zh";
+                    break;
+                }
+
+                case "kr": {
+                    code = "ko";
+                    break;
+                }
+            }
+
+            CurrentLanguage = GetValidLanguageCode(code);
+        }
+
+        /// <summary>
+        /// Sets <see cref="CurrentLanguage"/> based on TM:PE language setting.
+        /// </summary>
+        public static void SetCurrentLanguageToTMPELanguage() {
+            string code = GlobalConfig.Instance.LanguageCode;
+
+            if (string.IsNullOrEmpty(code)) {
+                SetCurrentLanguageToGameLanguage();
+            } else {
+                CurrentLanguage = GetValidLanguageCode(code);
+            }
+        }
+
+        /// <summary>
+        /// Returns a valid language code based on supplied code.
+        /// Note: Does not check for codes added by game language mods.
+        /// </summary>
+        /// <param name="code">The code we want to use.</param>
+        /// <returns>Either the code requested, or the mod default code.</returns>
+        private static string GetValidLanguageCode(string code) {
+            return AvailableLanguageCodes.Contains(code)
+                ? code
+                : DEFAULT_LANGUAGE_CODE;
+        }
+
+        /// <summary>
+        /// Get the currently selected language.
+        /// </summary>
+        /// <returns>A valid language code</returns>
+        internal static string GetCurrentLanguage() {
+            if (string.IsNullOrEmpty(CurrentLanguage)) {
+                SetCurrentLanguageToTMPELanguage();
+            }
+            return CurrentLanguage;
+        }
+
+#if DEBUG
+        /// <summary>
+        /// Used to size the in-game debug menu based on chosen langauge.
+        /// </summary>
+        /// <returns>Width to use for the menu.</returns>
         internal static int GetMenuWidth() {
             switch (GetCurrentLanguage()) {
                 // also: case null:
@@ -280,5 +336,6 @@ namespace TrafficManager.UI {
                 }
             }
         }
+#endif
     }
 }
