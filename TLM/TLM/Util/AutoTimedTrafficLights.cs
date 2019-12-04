@@ -58,14 +58,17 @@ namespace TrafficManager.Util {
         /// <summary>
         /// creats a sorted list of segmetns connected to nodeId.
         /// roads without outgoing lanes are excluded as they do not need traffic lights
+        /// the segments are arranged in a clockwise direction (Counter clock wise for LHT).
         /// </summary>
         /// <param name="nodeId">the junction</param>
         /// <returns>a list of segments aranged in counter clockwise direction.</returns>
-        private static List<ushort> CWSegments(ushort nodeId) {
+        private static List<ushort> ArrangedSegments(ushort nodeId) {
+            bool lht = Constants.ServiceFactory.SimulationService.LeftHandDrive;
+            ClockDirection clockDir = lht ? ClockDirection.CounterClockwise : ClockDirection.CounterClockwise;
             List<ushort> segList = new List<ushort>();
             netService.IterateNodeSegments(
                 nodeId,
-                ClockDirection.Clockwise,
+                clockDir,
                 (ushort segId, ref NetSegment _) => {
                     if (CountOutgoingLanes(segId, nodeId) > 0) {
                         segList.Add(segId);
@@ -104,7 +107,7 @@ namespace TrafficManager.Util {
                 return ErrorResult.NotSupported;
             }
 
-            var segList = CWSegments(nodeId);
+            var segList = ArrangedSegments(nodeId);
             int n = segList.Count;
 
             if (n < 3) {
