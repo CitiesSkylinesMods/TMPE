@@ -35,7 +35,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name=""></param>
         /// <returns></returns>
         public static bool JunctionHasHighwayRules(ushort nodeId) {
-            return IsHighwayJunction(nodeId) && !LaneConnectionManager.Instance.HasNodeConnections(nodeId);
+            return JunctionHasOnlyHighwayRoads(nodeId) && !LaneConnectionManager.Instance.HasNodeConnections(nodeId);
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="nodeId"></param>
         /// <returns></returns>
-        public static bool IsHighwayJunction(ushort nodeId) {
+        public static bool JunctionHasOnlyHighwayRoads(ushort nodeId) {
             IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
             bool ret = true;
             Constants.ServiceFactory.NetService.IterateNodeSegments(
