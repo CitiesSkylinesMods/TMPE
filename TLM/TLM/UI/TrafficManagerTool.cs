@@ -472,8 +472,6 @@ namespace TrafficManager.UI {
             }
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             float width = segment.Info.m_halfWidth;
-            ushort nodeId, otherNodeId;
-
 
             NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
             bool IsMiddle(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
