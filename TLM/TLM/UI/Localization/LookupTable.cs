@@ -71,8 +71,7 @@ namespace TrafficManager.UI.Localization {
             using (Stream st = Assembly.GetExecutingAssembly()
                                        .GetManifestResourceStream(filename)) {
                 using (var sr = new StreamReader(st, Encoding.UTF8)) {
-                    lines = sr.ReadToEnd()
-                              .Split(new[] { "\n", "\r\n" }, StringSplitOptions.None);
+                    lines = ReadLines(sr);
                 }
             }
 
@@ -96,9 +95,25 @@ namespace TrafficManager.UI.Localization {
                 }
             }
 
+            CollectTranslations(lines, languageCodes, out AllLanguages);
+
+#if DUMP_TRANSLATIONS
+            DumpTranslationsToCsv();
+#endif
+            Log._Debug($"Loaded {AllLanguages.Count} different languages for {Name}");
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <param name="languageCodes"></param>
+        /// <param name="allLanguages">result dictionary where all translations will be collected</param>
+        private static void CollectTranslations(string[] lines, List<string> languageCodes, out Dictionary<string, Dictionary<string, string>> allLanguages) {
+            allLanguages = new Dictionary<string, Dictionary<string, string>>();
             // Initialize empty dicts for each language
             foreach (string lang in languageCodes) {
-                AllLanguages[lang] = new Dictionary<string, string>();
+                allLanguages[lang] = new Dictionary<string, string>();
             }
 
             // first column is the translation key
@@ -109,6 +124,7 @@ namespace TrafficManager.UI.Localization {
                     if (key.Length == 0) {
                         break; // last line is empty
                     }
+
                     foreach (string lang in languageCodes) {
                         string cell = ReadCsvCell(sr);
                         // Empty translations are not accepted for all languages other than English
@@ -117,15 +133,58 @@ namespace TrafficManager.UI.Localization {
                             lang != Translation.DEFAULT_LANGUAGE_CODE) {
                             continue;
                         }
-                        AllLanguages[lang][key] = cell;
+
+                        allLanguages[lang][key] = cell;
                     }
                 }
             }
+        }
 
-#if DUMP_TRANSLATIONS
-            DumpTranslationsToCsv();
-#endif
-            Log._Debug($"Loaded {AllLanguages.Count} different languages for {Name}");
+        /// <summary>
+        /// Read all lines, validate and join separated lines
+        /// </summary>
+        /// <param name="sr">stream to read from</param>
+        /// <returns>collection of valid translation rows</returns>
+        private static string[] ReadLines(StreamReader sr) {
+            string[] lines = sr.ReadToEnd().Split(new[] { "\n", "\r\n" }, StringSplitOptions.None);
+            return ValidateAndJoinLines(lines);
+        }
+
+        /// <summary>
+        /// Validates lines by joining separated incomplete strings with new line characters
+        /// </summary>
+        /// <param name="lines">Lines of translation file to validate</param>
+        /// <returns>Validated and joined collection of translation strings - one per row</returns>
+        private static string[] ValidateAndJoinLines(string[] lines) {
+            int lastIncompleteLineIndex = 0;
+            for (int i = 0; i < lines.Length; i++) {
+                //skip empty lines & search for incomplete parts of translation string until line is valid
+                if (lines[i].Length == 0 || (lines[i].StartsWith("\"") && lines[lastIncompleteLineIndex].EndsWith("\""))) {
+                    continue;
+                }
+
+                // copy index of incomplete translation string value
+                int x = i;
+                // copy incomplete translation string value
+                string line = lines[i];
+                // reset line value
+                lines[i] = null;
+                // move backwards and search for not empty line to concatenate separated part of translation string
+                while (x > 0) {
+                    //skip reset lines
+                    if (lines[x] == null) {
+                        x--;
+                        continue;
+                    }
+                    //join translation string part with head of incomplete separated string
+                    lastIncompleteLineIndex = x;
+                    lines[lastIncompleteLineIndex] = lines[lastIncompleteLineIndex] + "\n" + line;
+                    break;
+                }
+            }
+
+            //collect lines - skip null
+            return lines.Where(line => !string.IsNullOrEmpty(line)).ToArray();
         }
 
         /// <summary>
