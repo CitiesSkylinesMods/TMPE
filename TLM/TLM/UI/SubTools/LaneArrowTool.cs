@@ -6,6 +6,7 @@ namespace TrafficManager.UI.SubTools {
     using GenericGameBridge.Service;
     using Manager.Impl;
     using State;
+    using TrafficManager.API.Traffic.Data;
     using UnityEngine;
 
     public class LaneArrowTool : SubTool {
@@ -41,7 +42,7 @@ namespace TrafficManager.UI.SubTools {
                 LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId, out res);
             } else if (ctrlDown) {
                 LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId, out res);
-            } else {
+            } else if (HasHoverLaneArrows()) {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
             }
@@ -108,13 +109,81 @@ namespace TrafficManager.UI.SubTools {
             cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
         }
 
+        /// <summary>
+        /// Determines whether or not the hovered segment end has lane arrows.
+        /// </summary>
+        private bool HasHoverLaneArrows() => HasSegmentEndLaneArrows(HoveredSegmentId, HoveredNodeId);
+
+        /// <summary>
+        /// determines whether or not the given segment end has lane arrows.
+        /// </summary>
+        private bool HasSegmentEndLaneArrows(ushort segmentId, ushort nodeId) {
+            if(nodeId == 0 || segmentId == 0) {
+                return false;
+            }
+#if DEBUG
+            if(!Constants.ServiceFactory.NetService.IsNodeValid(nodeId) ||
+               !Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+                Debug.LogError("Invalid node or segment ID");
+            }
+#endif
+            ExtSegmentEndManager segEndMan = ExtSegmentEndManager.Instance;
+            ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
+            NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            bool bJunction = (nodesBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
+
+            // Outgoing lanes toward the node is incomming lanes to the segment end.
+            return bJunction && segEnd.incoming;
+        }
+
+        protected override ushort HoveredNodeId {
+        get {
+                // if the current segment end does not have lane arrows
+                // and the other end of the segment does have lane arrows, then
+                // assume the user intends to hover over that one.
+                // This code makes it easier to hover over small segments.
+                if (!HasSegmentEndLaneArrows(HoveredSegmentId, base.HoveredNodeId))
+                {
+                    ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId];
+                    ushort otherNodeId = segment.GetOtherNode(base.HoveredNodeId);
+                    if (HasSegmentEndLaneArrows(HoveredSegmentId, otherNodeId)) {
+                        return otherNodeId;
+                    }
+                }
+                return base.HoveredNodeId;
+            }
+            set => base.HoveredNodeId = value;
+        }
+
+        /// <summary>
+        /// Draws a half sausage to highlight the segment end.
+        /// </summary>
+        private void DrawSegmentEnd(
+                       RenderManager.CameraInfo cameraInfo,
+                       ushort segmentId,
+                       bool bStartNode,
+                       Color color,
+                       bool alpha = false) {
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+
+            // if only one side of the segment has lane arrows then the length of the
+            // is 1. but the highlight still looks like a sausage which is cut at one end.
+            // this is important to give user visual feedback which area is hoverable.
+            bool con =
+                HasSegmentEndLaneArrows(segmentId, segment.m_startNode) ^
+                HasSegmentEndLaneArrows(segmentId, segment.m_endNode);
+            float cut = con ? 1f : 0.5f;
+
+            MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
+        }
+
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             NetManager netManager = Singleton<NetManager>.instance;
 
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-
-            if (ctrlDown) {
+            bool PrimaryDown = Input.GetMouseButton(0);
+            if (ctrlDown && !cursorInSecondaryPanel_ && (HoveredNodeId != 0)) {
                 // draw hovered node
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 return;
@@ -122,6 +191,7 @@ namespace TrafficManager.UI.SubTools {
 
             // Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
             if (!cursorInSecondaryPanel_
+                && HasHoverLaneArrows()
                 && (HoveredSegmentId != 0)
                 && (HoveredNodeId != 0)
                 && ((HoveredSegmentId != SelectedSegmentId)
@@ -131,28 +201,20 @@ namespace TrafficManager.UI.SubTools {
 
                 if (((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId)
                      || (netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId))
-                    && ((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None))
-                {
-                    NetTool.RenderOverlay(
-                        cameraInfo,
-                        ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId],
-                        MainTool.GetToolColor(altDown, false),
-                        MainTool.GetToolColor(altDown, false));
+                    && ((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)) {
+                    bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(HoveredSegmentId, HoveredNodeId);
+                    Color color = MainTool.GetToolColor(PrimaryDown, false);
+                    bool alpha = !altDown;
+                    DrawSegmentEnd(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
                 }
             }
 
-            if (SelectedSegmentId == 0) return;
-
-            Color color;
-            if (altDown && HoveredSegmentId == SelectedSegmentId)
-                color = MainTool.GetToolColor(true, true);
-            else
-                color = MainTool.GetToolColor(true, false);
-            NetTool.RenderOverlay(
-                cameraInfo,
-                ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId],
-                color,
-                color);
+            if (SelectedSegmentId != 0) {
+                Color color = MainTool.GetToolColor(true, false);
+                bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+                bool alpha = !altDown && HoveredSegmentId == SelectedSegmentId;
+                DrawSegmentEnd(cameraInfo, SelectedSegmentId, bStartNode, color, alpha);
+            }
         }
 
         private void GuiLaneChangeWindow(int num) {
