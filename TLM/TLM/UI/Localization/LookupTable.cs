@@ -67,17 +67,17 @@ namespace TrafficManager.UI.Localization {
             string filename = $"{Translation.RESOURCES_PREFIX}Translations.{Name}.csv";
             Log.Info($"Loading translations: {filename}");
 
-            string[] lines;
+            string firstLine;
+            string dataBlock;
             using (Stream st = Assembly.GetExecutingAssembly()
                                        .GetManifestResourceStream(filename)) {
                 using (var sr = new StreamReader(st, Encoding.UTF8)) {
-                    lines = ReadLines(sr);
+                    ReadLines(sr, out firstLine, out dataBlock);
                 }
             }
 
             // Read each line as CSV line
             // Read language order in the first line
-            string firstLine = lines[0];
             var languageCodes = new List<string>();
             using (var sr = new StringReader(firstLine)) {
                 ReadCsvCell(sr); // skip
@@ -95,7 +95,7 @@ namespace TrafficManager.UI.Localization {
                 }
             }
 
-            CollectTranslations(lines, languageCodes, out AllLanguages);
+            CollectTranslations(dataBlock, languageCodes, out AllLanguages);
 
 #if DUMP_TRANSLATIONS
             DumpTranslationsToCsv();
@@ -104,12 +104,14 @@ namespace TrafficManager.UI.Localization {
         }
 
         /// <summary>
-        ///
+        /// Collects translations to map - collection of keyValue pairs for each language code
         /// </summary>
-        /// <param name="lines"></param>
-        /// <param name="languageCodes"></param>
-        /// <param name="allLanguages">result dictionary where all translations will be collected</param>
-        private static void CollectTranslations(string[] lines, List<string> languageCodes, out Dictionary<string, Dictionary<string, string>> allLanguages) {
+        /// <param name="dataBlock">block of data (all rows excluding first)</param>
+        /// <param name="languageCodes">list of language codes</param>
+        /// <param name="allLanguages">result dictionary where all translation string will be collected</param>
+        private static void CollectTranslations(string dataBlock,
+                                                List<string> languageCodes,
+                                                out Dictionary<string, Dictionary<string, string>> allLanguages) {
             allLanguages = new Dictionary<string, Dictionary<string, string>>();
             // Initialize empty dicts for each language
             foreach (string lang in languageCodes) {
@@ -118,8 +120,8 @@ namespace TrafficManager.UI.Localization {
 
             // first column is the translation key
             // Following columns are languages, following the order in AvailableLanguageCodes
-            foreach (string line in lines.Skip(1)) {
-                using (var sr = new StringReader(line)) {
+            using (var sr = new StringReader(dataBlock)) {
+                while (true) {
                     string key = ReadCsvCell(sr);
                     if (key.Length == 0) {
                         break; // last line is empty
@@ -141,50 +143,15 @@ namespace TrafficManager.UI.Localization {
         }
 
         /// <summary>
-        /// Read all lines, validate and join separated lines
+        /// Split stream of data on first row and remaining dataBlock
         /// </summary>
         /// <param name="sr">stream to read from</param>
+        /// <param name="firstLine">first line of tranlation - row with language code names</param>
+        /// <param name="dataBlock">string block of data (all remaining lines)</param>
         /// <returns>collection of valid translation rows</returns>
-        private static string[] ReadLines(StreamReader sr) {
-            string[] lines = sr.ReadToEnd().Split(new[] { "\n", "\r\n" }, StringSplitOptions.None);
-            return ValidateAndJoinLines(lines);
-        }
-
-        /// <summary>
-        /// Validates lines by joining separated incomplete strings with new line characters
-        /// </summary>
-        /// <param name="lines">Lines of translation file to validate</param>
-        /// <returns>Validated and joined collection of translation strings - one per row</returns>
-        private static string[] ValidateAndJoinLines(string[] lines) {
-            int lastIncompleteLineIndex = 0;
-            for (int i = 0; i < lines.Length; i++) {
-                //skip empty lines & search for incomplete parts of translation string until line is valid
-                if (lines[i].Length == 0 || (lines[i].StartsWith("\"") && lines[lastIncompleteLineIndex].EndsWith("\""))) {
-                    continue;
-                }
-
-                // copy index of incomplete translation string value
-                int x = i;
-                // copy incomplete translation string value
-                string line = lines[i];
-                // reset line value
-                lines[i] = null;
-                // move backwards and search for not empty line to concatenate separated part of translation string
-                while (x > 0) {
-                    //skip reset lines
-                    if (lines[x] == null) {
-                        x--;
-                        continue;
-                    }
-                    //join translation string part with head of incomplete separated string
-                    lastIncompleteLineIndex = x;
-                    lines[lastIncompleteLineIndex] = lines[lastIncompleteLineIndex] + "\n" + line;
-                    break;
-                }
-            }
-
-            //collect lines - skip null
-            return lines.Where(line => !string.IsNullOrEmpty(line)).ToArray();
+        private static void ReadLines(StreamReader sr, out string firstLine, out string dataBlock) {
+            firstLine = sr.ReadLine();
+            dataBlock = sr.ReadToEnd();
         }
 
         /// <summary>
@@ -221,7 +188,7 @@ namespace TrafficManager.UI.Localization {
                             break;
                         }
                         case '\"': {
-                            // Found a '""', or a '",'
+                            // Found a '""', or a '",', or a '"/r', or a '"/r'
                             int peek = sr.Peek();
                             switch (peek) {
                                 case '\"': {
@@ -229,10 +196,19 @@ namespace TrafficManager.UI.Localization {
                                     sb.Append("\"");
                                     break;
                                 }
+                                case '\r':
+                                    //Followed by a \r then \n or just \n - end-of-string
+                                    sr.Read();// consume double quote
+                                    sr.Read();// consume \r
+                                    if (sr.Peek() == '\n') {
+                                        sr.Read(); // consume \n
+                                    }
+                                    return sb.ToString();
+                                case '\n':
                                 case ',':
                                 case -1: {
                                     // Followed by a comma or end-of-string
-                                    sr.Read(); // Consume the comma
+                                    sr.Read(); // Consume the comma or newLine(LF)
                                     return sb.ToString();
                                 }
                                 default: {
@@ -250,11 +226,15 @@ namespace TrafficManager.UI.Localization {
                     }
                 }
             } else {
-                // Simple reading rules apply, read to the next comma or end-of-string
+                // Simple reading rules apply, read to the next comma, LF sequence or end-of-string
                 while (true) {
                     int next = sr.Read();
-                    if (next == -1 || next == ',') {
-                        break; // end-of-string or a comma
+                    if (next == -1 || next == ',' || next == '\n') {
+                        break; // end-of-string, a newLine or a comma
+                    }
+                    if (next == '\r' && sr.Peek() == '\n') {
+                        sr.Read(); //consume LF(\n) to complete CRLF(\r\n) newLine escape sequence
+                        break;
                     }
 
                     sb.Append((char)next, 1);
