@@ -22,10 +22,10 @@ namespace TMUnitTest.Translation {
 
         [ClassInitialize]
         public static void InitializeClass(TestContext testContext) {
-            testBlock_LF = File.ReadAllBytes("./Translation/TestFiles/TestBlock_LF.txt");
-            testBlock_CRLF = File.ReadAllBytes("./Translation/TestFiles/TestBlock_CRLF.txt");
-            multilineTestBlock_LF =File.ReadAllBytes("./Translation/TestFiles/MultilineTestBlock_LF.txt");
-            multilineTestBlock_CRLF =File.ReadAllBytes("./Translation/TestFiles/MultilineTestBlock_CRLF.txt");
+            testBlock_LF = File.ReadAllBytes("./Translation/TestFiles/TestBlock_LF.test");
+            testBlock_CRLF = File.ReadAllBytes("./Translation/TestFiles/TestBlock_CRLF.test");
+            multilineTestBlock_LF =File.ReadAllBytes("./Translation/TestFiles/MultilineTestBlock_LF.test");
+            multilineTestBlock_CRLF =File.ReadAllBytes("./Translation/TestFiles/MultilineTestBlock_CRLF.test");
             PrepareData(testBlock_LF, out testBlock_LF_Columns, out testBlock_LF_DataBlock);
             PrepareData(testBlock_CRLF, out testBlock_CRLF_Columns, out testBlock_CRLF_DataBlock);
             PrepareData(multilineTestBlock_LF, out multilineTestBlock_LF_Columns, out multilineTestBlock_LF_DataBlock);
