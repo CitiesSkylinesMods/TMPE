@@ -1,0 +1,41 @@
+"","de","en"
+"new-line-first-cell","test
+de","test_en"
+"new-line-both-cells","test
+de","test
+en"
+"multiple-new-lines-first-cell","test
+multiple
+lines","test en"
+"multiple-new-lines-first-cell-trailing","test
+multiple
+lines
+","test en"
+"multiple-new-lines-both-cells","test
+de
+multiple
+lines","test
+en
+multiple
+lines"
+"multiple-new-lines-first-cell-variable-word-count-per-line","test
+multi line text
+separation","test en"
+"multiple-new-lines-variable-spaces-multi-word","test
+multi    line    text
+separation","test en"
+"multiple-new-lines-contains-comma","test
+multi,line text
+separation","test en"
+"multiple-new-lines-contains-comma-and-quote-marks","test
+multi,line text with ""quote-marked text"" and
+separation","test en"
+"multiple-new-lines-contains-multiple-commas-and-quote-marks","test
+multi, line text with ""quote-marked text"", text between commas,
+separation","test en"
+"multiple-new-lines-contains-multiple-commas-and-quote-marks-2","test
+multi, line text with ""quote-marked
+ text"", text between commas,
+separation",test
+"multiple-new-lines-contains-multiple-commas-and-quote-marks-3","test ""
+line end with ""quote-marks""","test en"
