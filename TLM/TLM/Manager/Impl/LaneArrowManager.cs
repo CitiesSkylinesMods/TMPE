@@ -416,15 +416,20 @@ namespace TrafficManager.Manager.Impl {
                 if (numdirs < 2) {
                     return; // no junction
                 }
+                bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
 
                 if (srcLaneCount == 2 && numdirs == 3) {
-                    LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.LeftForward);
-                    LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows.Right);
+                    if (!lht) {
+                        LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.LeftForward);
+                        LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows.Right);
+                    }else {
+                        LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows.ForwardRight);
+                        LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.Left);
+                    }
                     return;
                 }
 
                 int l = 0, f = 0, r = 0;
-                bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
                 if (numdirs == 2) {
                     if (!lht) {
                         //if traffic drives on right, then favour the more difficult left turns.
