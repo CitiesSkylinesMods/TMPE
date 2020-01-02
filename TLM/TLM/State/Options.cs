@@ -95,6 +95,15 @@ namespace TrafficManager.State {
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
 
+        public static bool
+            rabout_DedicatedExitLanes = true,
+            rabout_StayInLaneMainR = true,
+            rabout_StayInLaneNearRabout = true,
+            rabout_NoCrossMainR = true,
+            rabout_NoCrossYeildR = false,
+            rabout_PrioritySigns = true;
+
+
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for
         /// a new language. Takes a second, very slow.

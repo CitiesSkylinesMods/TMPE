@@ -4,40 +4,40 @@ namespace TrafficManager.State {
     using UI.Helpers;
 
     public static class OptionsMassEditTab {
-        public static CheckboxOption rabout_DedicatedExitLanes = new CheckboxOption(
-            key: "rabout_DedicatedExitLanes",
-            default_value: true,
-            group_name: "MassEdit",
-            tooltip: true);
+        public static CheckboxOption rabout_DedicatedExitLanes = new CheckboxOption("rabout_DedicatedExitLanes") {
+            Label = "Roundabout.Option:Allocate dedicated exit lanes",
+            Tooltip = "Roundabout.Tooltip:Allocate dedicated exit lanes",
+            //default_value: true,
+        };
 
-        public static CheckboxOption rabout_StayInLaneMainR = new CheckboxOption(
-            key: "rabout_StayInLaneMainR",
-            default_value: true,
-            group_name: "MassEdit",
-            false);
+        public static CheckboxOption rabout_StayInLaneMainR = new CheckboxOption("rabout_StayInLaneMainR") {
+            //default_value: true,
+            Label = "Roundabout.Option:Stay in lane inside roundabout",
+        };
 
-        public static CheckboxOption rabout_StayInLaneNearRabout = new CheckboxOption(
-            key: "rabout_StayInLaneNearRabout",
-            default_value: true,
-            group_name: "MassEdit",
-            true);
+        public static CheckboxOption rabout_StayInLaneNearRabout = new CheckboxOption("rabout_StayInLaneNearRabout") {
+            Label = "Roundabout.Option:Stay in lane outside roundabout",
+            Tooltip = "Roundabout.Tooltip:Stay in lane outside roundabout",
+            //default_value: true,
+        };
 
-        public static CheckboxOption rabout_NoCrossMainR = new CheckboxOption(
-            key: "rabout_NoCrossMainR",
-            default_value: true,
-            group_name: "MassEdit");
+        public static CheckboxOption rabout_NoCrossMainR = new CheckboxOption("rabout_NoCrossMainR") {
+            Label = "Roundabout.Option:No crossing inside",
+            //default_value: true,
+        };
 
-        public static CheckboxOption rabout_NoCrossYeildR = new CheckboxOption(
-            key: "rabout_NoCrossYeildR",
-            default_value: false,
-            group_name: "MassEdit");
+        public static CheckboxOption rabout_NoCrossYeildR = new CheckboxOption("rabout_NoCrossYeildR") {
+            //default_value: false,
+            Label = "Roundabout.Option:No crossing on incoming roads",
+        };
 
-        public static CheckboxOption rabout_PrioritySigns = new CheckboxOption(
-            key: "rabout_PrioritySigns",
-            default_value: true,
-            group_name: "MassEdit");
+        public static CheckboxOption rabout_PrioritySigns = new CheckboxOption("rabout_PrioritySigns") {
+            //default_value: true,
+            Label = "Roundabout.Option:Set priority signs",
+        };
 
-        internal static void MakeSettings_MassEdit(ExtUITabstrip tabStrip, int tabIndex) {
+        internal static void MakeSettings_MassEdit(ExtUITabstrip tabStrip, int tabIndex)
+        {
             UIHelper panelHelper = tabStrip.AddTabPage(T("Tab:MassEdit"));
             MakePanel_MassEdit(panelHelper);
         }

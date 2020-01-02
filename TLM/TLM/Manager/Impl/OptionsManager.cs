@@ -198,7 +198,7 @@ namespace TrafficManager.Manager.Impl {
                 OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
             }
 
-            Func<int, ISerializableOptionBase, int> loadBool = (idx, opt) => {
+            int loadBool (int idx, ILegacySerializableOption opt) {
                 if (data.Length > idx) {
                     opt.Load(data[idx]);
                 }
