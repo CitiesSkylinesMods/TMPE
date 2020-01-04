@@ -11,7 +11,6 @@ namespace TrafficManager.Manager.Impl {
     using State;
     using State.ConfigData;
     using Traffic;
-    using TrafficLight;
     using TrafficLight.Impl;
     using static RoadBaseAI;
     using ExtVehicleType = global::TrafficManager.Traffic.ExtVehicleType;
@@ -360,7 +359,7 @@ namespace TrafficManager.Manager.Impl {
                                 });
                         }
                     } else {
-                        if (TrafficLightSimulations[nodeId].IsTimedLight()) {
+                        if (TrafficLightSimulations[timedNodeId].IsTimedLight()) {
                             TrafficLightSimulations[timedNodeId].timedLight.RemoveNodeFromGroup(nodeId);
                         }
                     }
