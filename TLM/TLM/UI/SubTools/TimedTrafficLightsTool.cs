@@ -236,7 +236,7 @@ namespace TrafficManager.UI.SubTools {
                                             .instance.m_nodes.m_buffer[nodeIdToCopy]
                                             .CountSegments();
                     int numTargetSegments = Singleton<NetManager>
-                                            .instance.m_nodes.m_buffer[nodeIdToCopy]
+                                            .instance.m_nodes.m_buffer[HoveredNodeId]
                                             .CountSegments();
 
                     if (numSourceSegments != numTargetSegments) {
