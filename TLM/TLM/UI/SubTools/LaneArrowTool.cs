@@ -128,6 +128,13 @@ namespace TrafficManager.UI.SubTools {
             }
 #endif
             ExtSegmentEndManager segEndMan = ExtSegmentEndManager.Instance;
+            int segmentEndId = segEndMan.GetIndex(segmentId, nodeId);
+            if (segmentEndId <0) {
+#if DEBUG
+                Debug.LogError($"Node {nodeId} is not connected to segment {segmentId}");
+#endif
+                return false;
+            }
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
             NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
             bool bJunction = (nodesBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;

@@ -27,6 +27,7 @@ namespace TrafficManager.UI {
           IObserver<GlobalConfig>
     {
         private ToolMode toolMode_;
+        private NetTool _netTool;
 
         internal static ushort HoveredNodeId;
         internal static ushort HoveredSegmentId;
@@ -127,6 +128,17 @@ namespace TrafficManager.UI {
             }
 
             return TransparencyToAlpha(transparency);
+        }
+
+        internal NetTool NetTool {
+            get {
+                if (_netTool == null) {
+                    Log._Debug("NetTool field value is null. Searching for instance...");
+                    _netTool = ToolsModifierControl.toolController.Tools.OfType<NetTool>().FirstOrDefault();
+                }
+
+                return _netTool;
+            }
         }
 
         private static float TransparencyToAlpha(byte transparency) {
@@ -322,6 +334,11 @@ namespace TrafficManager.UI {
                     InfoManager.InfoMode.None,
                     InfoManager.SubInfoMode.Default);
             }
+            ToolCursor = null;
+            bool elementsHovered = DetermineHoveredElements();
+            if (_activeSubTool != null && NetTool != null && elementsHovered) {
+                ToolCursor = NetTool.m_upgradeCursor;
+            }
 
             bool primaryMouseClicked = Input.GetMouseButtonDown(0);
             bool secondaryMouseClicked = Input.GetMouseButtonDown(1);
@@ -357,7 +374,6 @@ namespace TrafficManager.UI {
             // }
 
             if (_activeSubTool != null) {
-                DetermineHoveredElements();
 
                 if (primaryMouseClicked) {
                     _activeSubTool.OnPrimaryClickOverlay();
@@ -799,20 +815,6 @@ namespace TrafficManager.UI {
             //                tooltipWorldPos = null;
             //        }
             // }
-
-            if (GetToolMode() == ToolMode.None) {
-                ToolCursor = null;
-            } else {
-                bool elementsHovered = DetermineHoveredElements();
-
-                NetTool netTool = ToolsModifierControl
-                                  .toolController.Tools.OfType<NetTool>()
-                                  .FirstOrDefault(nt => nt.m_prefab != null);
-
-                if (netTool != null && elementsHovered) {
-                    ToolCursor = netTool.m_upgradeCursor;
-                }
-            }
         }
 
         public bool DoRayCast(RaycastInput input, out RaycastOutput output) {
