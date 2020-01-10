@@ -130,9 +130,7 @@ namespace TrafficManager.UI.SubTools {
             ExtSegmentEndManager segEndMan = ExtSegmentEndManager.Instance;
             int segmentEndId = segEndMan.GetIndex(segmentId, nodeId);
             if (segmentEndId <0) {
-#if DEBUG
-                Debug.LogError($"Node {nodeId} is not connected to segment {segmentId}");
-#endif
+                Log._Debug($"Node {nodeId} is not connected to segment {segmentId}");
                 return false;
             }
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
