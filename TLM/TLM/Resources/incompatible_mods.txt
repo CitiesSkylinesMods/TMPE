@@ -1,3 +1,5 @@
+1957033250;Traffic Manager: President Edition (Industries Compatible)
+1546870472;Traffic Manager: President Edition (Industries Compatible)
 1581695572;Traffic Manager: President Edition
 1348361731;Traffic Manager: President Edition ALPHA/DEBUG
 498363759;Traffic Manager + Improved AI
