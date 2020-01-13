@@ -12,6 +12,147 @@
 > * **TPP** = Traffic++
 > * **TM** = Traffic Manager
 
+### TM:PE [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), date
+
+- todo
+- Meta: Contains all changes from 11.0-alpha1 to 11.0-alpha12
+- Meta: Old STABLE workshop page (LinuxFan - v10.20) is now obsolete and no longer maintained
+- Meta: Renamed LABS and ALPHA workshop pages to V11 STABLE and V11 LABS respectively
+- Meta: Steam Workshop: TM:PE v11 STABLE (Workshop ID: 1637663252)
+- Meta: Steam Workshop: TM:PE v11 LABS (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha12, 12/01/2020
+
+- Fixed: Array index error when Lane Arrow tool selected (#606, #607)
+- Fixed: Removing junction from traffic light group not working (thanks leaderofthemonkeys) (#605)
+- Fixed: Detection of compatible Timed Traffic Lights node for copying Traffic Light setup (#605)
+- Fixed: Cursor flickering when tool is selected (#607)
+- Updated: Added two obsolete versions of TM:PE to incompatible mod checker (#610)
+- Updated: Language - Italian (Simone Delvecchio / DelvecchioSimone) (#603)
+- Updated: Language - Korean (neinnew) (#603)
+- Updated: Language - Japanese (mashitaro) (#603)
+- Updated: Language - Turkish (Tayfun Bilgi / Tayfun [Typhoon]), Rıdvan SAYLAR / ridvan.saylar) (#603)
+- Updated: Language - Portuguese (BlackScout / BS_BlackScout) (#603)
+- Updated: Language - Chinese Traditional (@jrthsr700tmax) (#603)
+- Updated: Language - Ukrainian (Dmytro Lytovchenko / kvakvs) (#603)
+- Updated: Language - Russian (Dmytro Lytovchenko / kvakvs) (#603)
+- Updated: Language - French (Guillaume Turchini / orion78fr) (#603)
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha11, 25/12/2019
+
+- Added: One-click timed traffic light set-up (thanks Kian Zarrin!) (#554, #540, #5, #324, #572)
+- Added: Turkish language (by Tayfun Bilgi for his dad!) (#572)
+- Added: Ukrainian language (thanks kvakvs) (#572)
+- Improved: Half-overlay indicates which side of segment will get turning lane (#564, #548)
+- Improved: Better node selection circles + code cleanup (#564, #555)
+- Improved: Mod options tabs can now scroll to fit more content (#553, #552)
+- Improved: Disambiguate naming convention for left hand traffic (#580, #577, #581)
+- Improved: More robust CSV parsing for translations (#589, #574)
+- Fixed: Ensure valid language used if selected language no longer exists (#579)
+- Updated: Turkish translations (thanks Tayfun Bilgi / Tayfun [Typhoon]) (#591, #599)
+- Updated: French translations (thanks Guillaume Turchini / orion78fr) (#591)
+- Updated: Japanese translations (thanks しょしょ02 / yamadatarounohosi) (#591)
+- Updated: Chinese Simplified translations (thanks 田七不甜 / TianQiBuTian) (#591, #599)
+- Updated: Chinese Traditional translations (thanks jrthsr700tmax) (#599, #595)
+- Updated: Ukrainian translations (thanks Dmytro Lytovchenko / kvakvs) (#591, #599)
+- Updated: Russian translations (thanks Dmytro Lytovchenko / kvakvs) (#591, #599)
+- Updated: Polish translations (thanks krzychu124) (#591)
+- Updated: Portuguese translations (thanks BS_BlackScout) (#599)
+- Updated: English translations (thanks kian.zarrin & aubergine18) (#591)
+- Meta: Updated `StyleCop.Analyzers` to latest version for compatibility with latest Nuget (#591)
+- Meta: Added readme file with link to localisation guide in the translations folder (#596)
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha10, 23/11/2019
+
+- Added: Lane arrow tool - shortcuts to create separate turning lanes (thanks kianzarrin!) (#538, #537)
+- Fixed: Null reference error in TrafficManager.UI.TrafficManagerTool.OnEnable (#570)
+- Fixed: Bug in IterateNodeSegments + code cleanup (thanks kianzarrin) (#549, #550)
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha9, 10/11/2019
+
+- Added: Features to disable auto-traffic lights, and delete all traffic lights (thanks Craxy & Sqoops) (#320, #390, #535)
+- Fixed: "IndexOutOfRange" error in manual traffic lights tool (thanks leonpeonleon) (#545)
+- Fixed: Path find stats fixed & faster, benchmark profile fixed (#536)
+- Fixed: Typos and missing key in translations (thanks TianQiBuTian) (#529, #528)
+- Fixed: Translations not working when using game translation mods (thanks TianQiBuTian) (#533, #534)
+- Updated: Translations - Chinese Simplified - 田七不甜 (thanks TianQiBuTian) (#536, #530)
+- Updated: Translations - Chinese Traditional - 許景翔 (thanks gk50125012) (#536)
+- Updated: Translations - Portuguese - Alan Willian Duarte (thanks nipodemos13) (#536)
+- Updated: Translations - Japanese - thanks mashitaro (#536)
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha8, 04/10/2019
+
+- Added: Junctions now show traffic light status when using toggle traffic light tool (#527)
+- Update: Add outline to lane connector lines and improve arcs (#526, #523)
+- Update: Improve speed limits overlay performance while camera still (#521, #520)
+- Update: New translation/localisation system (#509, #493)
+- Fixed: Minor typos in new translation/localisation system (thanks TianQiBuTian!) (#528)
+- Fixed: Remove decorative networks from speed limits manager (#513, #510, #378)
+- Meta: Deprecated issues closed (#336, #169)
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha7, 04/09/2019
+
+- Added: Hungarian translations (thanks JozsefHUNGepiM) (#491, #492)
+- Fixed: Train restriction vehicle icons regression (#483)
+- Fixed: Remove trace logging from release builds (thanks TLHeart60) (#454, #499)
+- Fixed: Ignore decorative and malconfigured networks in Speed Limits Manager (#513)
+- Update: Compatible with Tree Respiration mod (#484)
+- Update: Compatible with Vehicle Wealthizer mod (#490, #488)
+- Update: More code cleanup (#350)
+- Meta: Update GitHub issue creation templates (#486)
+- Meta: Updated documentation on wiki and github (#310, #79, #465, #474, #466)
+- Meta: Pathfinds display temporarily disabled (testing FPS Booster mod)
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha6, 04/08/2019
+
+- Added: "Cargo Info" mod is incompatible (#478)
+- Fixed: Vehicles pausing unexpectedly at junctions (#448, #473)
+- Updated: Lots more code cleanup (#467, #475, #438, #435, #476)
+- Meta: "Cargo Info" mod found to break outside connections and cause array index errors.
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha5, 31/07/2019
+
+- Updated: Lots of code clean-up (#461, #349, #377, #451)
+- Meta: Build process will now error if `in` is used without a `readonly struct` (thanks dymanoid!) (#463)
+- Meta: See `Contributing` guide in github wiki if you get build errors due to #463
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha4, 26/07/2019
+
+- Fixed: Adding parking restriction doesn't move already parked cars (#445, #459)
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha3, 25/07/2019
+
+- Added: Mod checker lists mods in `TMPE.log` (#443)
+- Improved: Show version in mod checker title bar (#458)
+- Fixed: Mod checker crashes if blank line in `incompatible_mods.txt` resource (#441)
+- Fixed: Trace log appearing in `RELEASE` builds (#454, #455)
+- Updated: Mod checker will always scan for duplicate TM:PE, even if disabled (#434, #443, #433)
+- Updated: French translations (thanks mjm92150) (#453)
+- Meta: `TMPE.API` now has a `RELEASE LABS` build (#456)
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha2, 23/07/2019
+
+- Fixed: Unable to set "no limit" speed, and speeds over 140 km/h weren't showing as "no limit" (#449, #446)
+- Meta: Lots more back-end code cleanup (#430, #436, #349)
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
+### TM:PE 11.0-alpha1, 17/07/2019
+
+- Update: Migration to Harmony framework (#428, #427, #260, #119)
+- Update: Chinese translation updates (thanks Emphasia) (#417)
+- Meta: Updated changelog to include more of TM:PE history (#422)
+- Meta: Steam Workshop: TM:PE v11 ALPHA (Workshop ID: 1806963141)
+
 ### TM:PE [10.21.1 hotfix](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21...10.21.1), 06/07/2019
 
 - Fixed: Speed panel tanks fps if train tracks on screen (thanks rlas & DaEgi01!) (#411, #413)
