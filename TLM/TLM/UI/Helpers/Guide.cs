@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using ColossalFramework;
+using ColossalFramework.Globalization;
 using ICities;
 using UnityEngine;
 
@@ -23,6 +25,21 @@ namespace TrafficManager.UI.Helpers {
             m_info.m_displayDelay = 1;
             m_info.m_tag = "Generic";
             m_info.m_icon = "ToolbarIconRoads";
+        }
+
+        public void AddStrings() {
+            var locale = (Locale)typeof(LocaleManager)
+                     .GetField(
+                         "m_Locale",
+                         BindingFlags.Instance | BindingFlags.NonPublic)
+                     ?.GetValue(SingletonLite<LocaleManager>.instance);
+            var key = new Locale.Key() {
+                m_Identifier = "identifier",
+                m_Key = "key"
+            };
+            string value = "";
+            locale.AddLocalizedString(key, value);
+            // see Translation.ReloadTutorialTranslations
         }
 
     }
