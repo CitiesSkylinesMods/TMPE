@@ -2,7 +2,7 @@ namespace TrafficManager.UI.Helpers {
     using ICities;
     using ColossalFramework.UI;
 
-    internal class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox> {
+    public class CheckboxOption : SerializableUIOptionBase<bool, UICheckBox> {
         public CheckboxOption(string fieldName) : base(fieldName) {
             OnValueChanged = DefaultOnValueChanged;
         }

@@ -7,7 +7,7 @@ namespace TrafficManager.UI.Helpers {
     using System;
     using ColossalFramework;
 
-    internal abstract class SerializableUIOptionBase<TVal, TUI> : ILegacySerializableOption
+    public abstract class SerializableUIOptionBase<TVal, TUI> : ILegacySerializableOption
         where TUI : UIComponent {
         //Data:
         public SerializableUIOptionBase(string fieldName) {
