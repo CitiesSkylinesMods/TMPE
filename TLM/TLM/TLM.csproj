@@ -220,6 +220,7 @@
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
+    <Compile Include="UI\Helpers\Guide.cs" />
     <Compile Include="UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
