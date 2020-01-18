@@ -954,7 +954,7 @@ namespace TrafficManager.UI {
             bool considerSegmentLenght = true;
             ushort minSegId = 0;
             NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
-            Vector3 dir0 = node.m_position - m_mousePosition;
+            Vector3 dir0 = m_mousePosition - node.m_position;
             float min_angle = float.MaxValue;
             Constants.ServiceFactory.NetService.IterateNodeSegments(
                 HoveredNodeId,
@@ -963,7 +963,7 @@ namespace TrafficManager.UI {
                     Vector3 dir = segment.m_startNode == HoveredNodeId ?
                         segment.m_startDirection :
                         segment.m_endDirection;
-                    float angle = GetAgnele(-dir, dir0);
+                    float angle = GetAgnele(dir, dir0);
                     if (considerSegmentLenght) {
                         angle *= segment.m_averageLength;
                     }
