@@ -822,13 +822,13 @@ namespace TrafficManager.UI {
         }
 
         private bool DetermineHoveredElements() {
+            HoveredSegmentId = 0;
+            HoveredNodeId = 0;
+
             bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible &&
                                  (_activeSubTool == null || !_activeSubTool.IsCursorInPanel());
 
             if (mouseRayValid) {
-                HoveredSegmentId = 0;
-                HoveredNodeId = 0;
-
                 // find currently hovered node
                 var nodeInput = new RaycastInput(m_mouseRay, m_mouseRayLength) {
                     m_netService = {
@@ -939,11 +939,55 @@ namespace TrafficManager.UI {
                     }
                 }
 
-                return HoveredNodeId != 0 || HoveredSegmentId != 0;
+                if (HoveredNodeId != 0) {
+                    HoveredSegmentId = GetHoveredSegmentFromNode();
+                }
             }
 
-            return false; // mouseRayValid=false here
+            return HoveredNodeId != 0 || HoveredSegmentId != 0;
         }
+
+        /// <summary>
+        /// returns the node segment that is closest to the mouse pointer based on angle.
+        /// </summary>
+        internal ushort GetHoveredSegmentFromNode() {
+            bool considerSegmentLenght = true;
+            ushort minSegId = 0;
+            NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
+            Vector3 dir0 = node.m_position - m_mousePosition;
+            float min_angle = float.MaxValue;
+            Constants.ServiceFactory.NetService.IterateNodeSegments(
+                HoveredNodeId,
+                (ushort segmentId, ref NetSegment segment) =>
+                {
+                    Vector3 dir = segment.m_startNode == HoveredNodeId ?
+                        segment.m_startDirection :
+                        segment.m_endDirection;
+                    float angle = GetAgnele(-dir, dir0);
+                    if (considerSegmentLenght) {
+                        angle *= segment.m_averageLength;
+                    }
+                    if (angle < min_angle) {
+                        min_angle = angle;
+                        minSegId = segmentId;
+                    }
+                    return true;
+                });
+            return minSegId;
+        }
+
+        /// <summary>
+        /// returns the angle between v1 and v2.
+        /// input order does not matter.
+        /// The return value is between 0 to 180.
+        /// </summary>
+        private static float GetAgnele(Vector3 v1, Vector3 v2) {
+            float ret = Vector3.Angle(v1, v2); // -180 to 180 degree
+            if (ret > 180) ret -= 180; // future proofing.
+            ret = Math.Abs(ret);
+            return ret;
+        }
+
 
         /// <summary>
         /// Displays lane ids over lanes
