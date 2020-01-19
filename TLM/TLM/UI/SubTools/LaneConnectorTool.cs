@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework;
@@ -279,6 +279,19 @@
             return bounds.IntersectRay(mouseRay);
         }
 
+        /// <summary>
+        /// Finds the first index for which node.GetSegment(index) != 0 (its possible node.m_segment0 == 0)
+        /// </summary>
+        private static int GetFirstSegmentIDX(NetNode node) {
+            for (int i = 0; i < 8; ++i) {
+                if (node.GetSegment(i) != 0) {
+                    return i;
+                }
+            }
+            Log.Error("GetFirstSegmentIDX: Node does not have any segments");
+            return 0;
+        }
+
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             // Log._Debug($"LaneConnectorTool: RenderOverlay. SelectedNodeId={SelectedNodeId}
             //     SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId}
@@ -361,7 +374,7 @@
 
                         if (nodeMarkers != null) {
                             selectedMarker = null;
-
+                            int forwardSegmenIDX = GetFirstSegmentIDX(nodesBuffer[SelectedNodeId]);
                             foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
                                 if (!sourceLaneMarker.IsSource) {
                                     continue;
@@ -369,7 +382,7 @@
 
                                 if ((stayInLaneMode == StayInLaneMode.Forward) ||
                                     (stayInLaneMode == StayInLaneMode.Backward)) {
-                                    if ((sourceLaneMarker.SegmentIndex == 0)
+                                    if ((sourceLaneMarker.SegmentIndex == forwardSegmenIDX)
                                         ^ (stayInLaneMode == StayInLaneMode.Backward)) {
                                         continue;
                                     }
