@@ -282,13 +282,13 @@ namespace TrafficManager.UI.SubTools {
         /// <summary>
         /// Finds the first index for which node.GetSegment(index) != 0 (its possible node.m_segment0 == 0)
         /// </summary>
-        private static int GetFirstSegmentIDX(NetNode node) {
+        private static int GetFirstSegmentIndex(NetNode node) {
             for (int i = 0; i < 8; ++i) {
                 if (node.GetSegment(i) != 0) {
                     return i;
                 }
             }
-            Log.Error("GetFirstSegmentIDX: Node does not have any segments");
+            Log.Error("GetFirstSegmentIndex: Node does not have any segments");
             return 0;
         }
 
@@ -374,7 +374,7 @@ namespace TrafficManager.UI.SubTools {
 
                         if (nodeMarkers != null) {
                             selectedMarker = null;
-                            int forwardSegmenIDX = GetFirstSegmentIDX(nodesBuffer[SelectedNodeId]);
+                            int forwardSegmentIndex = GetFirstSegmentIndex(nodesBuffer[SelectedNodeId]);
                             foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
                                 if (!sourceLaneMarker.IsSource) {
                                     continue;
@@ -382,7 +382,7 @@ namespace TrafficManager.UI.SubTools {
 
                                 if ((stayInLaneMode == StayInLaneMode.Forward) ||
                                     (stayInLaneMode == StayInLaneMode.Backward)) {
-                                    if ((sourceLaneMarker.SegmentIndex == forwardSegmenIDX)
+                                    if ((sourceLaneMarker.SegmentIndex == forwardSegmentIndex)
                                         ^ (stayInLaneMode == StayInLaneMode.Backward)) {
                                         continue;
                                     }
