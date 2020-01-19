@@ -96,12 +96,12 @@ namespace TrafficManager.State {
             VehicleRestrictionsAggression.Medium;
 
         public static bool
-            rabout_DedicatedExitLanes = true,
-            rabout_StayInLaneMainR = true,
-            rabout_StayInLaneNearRabout = true,
-            rabout_NoCrossMainR = true,
-            rabout_NoCrossYeildR = false,
-            rabout_PrioritySigns = true;
+            RoundAboutQuickFix_DedicatedExitLanes = true,
+            RoundAboutQuickFix_StayInLaneMainR = true,
+            RoundAboutQuickFix_StayInLaneNearRabout = true,
+            RoundAboutQuickFix_NoCrossMainR = true,
+            RoundAboutQuickFix_NoCrossYieldR = false,
+            RoundAboutQuickFix_PrioritySigns = true;
 
 
         /// <summary>

@@ -23,7 +23,7 @@ namespace TrafficManager.Util {
         private static void FixLanesRAbout(ushort segmentId, ushort nextSegmentId) {
             ushort nodeId = netService.GetHeadNode(segmentId);
 
-            if (OptionsMassEditTab.rabout_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
                 StayInLane(nodeId, StayInLaneMode.Both);
             }
 
@@ -31,7 +31,7 @@ namespace TrafficManager.Util {
             // in which case the next segment should be straigh ahead.
             bool isStraight = segEndMan.GetDirection(segmentId, nextSegmentId, nodeId) == ArrowDirection.Forward;
 
-            if (OptionsMassEditTab.rabout_DedicatedExitLanes &&
+            if (OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes &&
                 HasJunctionFlag(nodeId) &&
                 CanChangeLanes(segmentId, nodeId) == SetLaneArrowError.Success &&
                 isStraight) {
@@ -92,7 +92,7 @@ namespace TrafficManager.Util {
 
         private static void FixRulesRAbout(ushort segmentId) {
             foreach (bool startNode in Constants.ALL_BOOL) {
-                if (OptionsMassEditTab.rabout_PrioritySigns) {
+                if (OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns) {
                     TrafficPriorityManager.Instance.SetPrioritySign(
                         segmentId,
                         startNode,
@@ -105,7 +105,7 @@ namespace TrafficManager.Util {
 
                 ExtSegmentEnd curEnd = GetSegEnd(segmentId, startNode);
 
-                if (OptionsMassEditTab.rabout_NoCrossMainR) {
+                if (OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR) {
                     JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
                         segmentId,
                         startNode,
@@ -122,13 +122,13 @@ namespace TrafficManager.Util {
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
             bool isHighway = ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId);
 
-            if (OptionsMassEditTab.rabout_NoCrossYeildR) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
                     segmentId,
                     startNode,
                     false);
             }
-            if (OptionsMassEditTab.rabout_PrioritySigns) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns) {
                 TrafficPriorityManager.Instance.SetPrioritySign(
                     segmentId,
                     startNode,
@@ -147,7 +147,7 @@ namespace TrafficManager.Util {
             ref NetSegment seg = ref GetSeg(segmentId);
             ushort otherNodeId = seg.GetOtherNode(nodeId);
 
-            if (OptionsMassEditTab.rabout_StayInLaneNearRabout &&
+            if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout &&
                 !HasJunctionFlag(otherNodeId) &&
                 seg.m_averageLength < shortUnit * meterPerUnit) {
                 StayInLane(otherNodeId, StayInLaneMode.Both);

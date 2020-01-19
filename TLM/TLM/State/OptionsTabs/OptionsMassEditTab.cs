@@ -4,35 +4,35 @@ namespace TrafficManager.State {
     using UI.Helpers;
 
     public static class OptionsMassEditTab {
-        public static CheckboxOption rabout_DedicatedExitLanes =
-            new CheckboxOption("rabout_DedicatedExitLanes") {
+        public static CheckboxOption RoundAboutQuickFix_DedicatedExitLanes =
+            new CheckboxOption("RoundAboutQuickFix_DedicatedExitLanes") {
             Label = "Roundabout.Option:Allocate dedicated exit lanes",
             Tooltip = "Roundabout.Tooltip:Allocate dedicated exit lanes",
         };
 
-        public static CheckboxOption rabout_StayInLaneMainR =
-            new CheckboxOption("rabout_StayInLaneMainR") {
+        public static CheckboxOption RoundAboutQuickFix_StayInLaneMainR =
+            new CheckboxOption("RoundAboutQuickFix_StayInLaneMainR") {
             Label = "Roundabout.Option:Stay in lane inside roundabout",
         };
 
-        public static CheckboxOption rabout_StayInLaneNearRabout =
-            new CheckboxOption("rabout_StayInLaneNearRabout") {
+        public static CheckboxOption RoundAboutQuickFix_StayInLaneNearRabout =
+            new CheckboxOption("RoundAboutQuickFix_StayInLaneNearRabout") {
             Label = "Roundabout.Option:Stay in lane outside roundabout",
             Tooltip = "Roundabout.Tooltip:Stay in lane outside roundabout",
         };
 
-        public static CheckboxOption rabout_NoCrossMainR =
-            new CheckboxOption("rabout_NoCrossMainR") {
+        public static CheckboxOption RoundAboutQuickFix_NoCrossMainR =
+            new CheckboxOption("RoundAboutQuickFix_NoCrossMainR") {
             Label = "Roundabout.Option:No crossing inside",
         };
 
-        public static CheckboxOption rabout_NoCrossYeildR =
-            new CheckboxOption("rabout_NoCrossYeildR") {
+        public static CheckboxOption RoundAboutQuickFix_NoCrossYieldR =
+            new CheckboxOption("RoundAboutQuickFix_NoCrossYieldR") {
             Label = "Roundabout.Option:No crossing on incoming roads",
         };
 
-        public static CheckboxOption rabout_PrioritySigns =
-            new CheckboxOption("rabout_PrioritySigns") {
+        public static CheckboxOption RoundAboutQuickFix_PrioritySigns =
+            new CheckboxOption("RoundAboutQuickFix_PrioritySigns") {
             Label = "Roundabout.Option:Set priority signs",
         };
 
@@ -44,12 +44,12 @@ namespace TrafficManager.State {
 
         internal static void MakePanel_MassEdit(UIHelperBase panelHelper) {
             UIHelperBase raboutGroup = panelHelper.AddGroup(T("MassEdit.Group:Roundabouts"));
-            rabout_NoCrossMainR.AddUI(raboutGroup);
-            rabout_NoCrossYeildR.AddUI(raboutGroup);
-            rabout_StayInLaneMainR.AddUI(raboutGroup);
-            rabout_StayInLaneNearRabout.AddUI(raboutGroup);
-            rabout_DedicatedExitLanes.AddUI(raboutGroup);
-            rabout_PrioritySigns.AddUI(raboutGroup);
+            RoundAboutQuickFix_NoCrossMainR.AddUI(raboutGroup);
+            RoundAboutQuickFix_NoCrossYieldR.AddUI(raboutGroup);
+            RoundAboutQuickFix_StayInLaneMainR.AddUI(raboutGroup);
+            RoundAboutQuickFix_StayInLaneNearRabout.AddUI(raboutGroup);
+            RoundAboutQuickFix_DedicatedExitLanes.AddUI(raboutGroup);
+            RoundAboutQuickFix_PrioritySigns.AddUI(raboutGroup);
         }
 
         private static string T(string key) => Translation.Options.Get(key);

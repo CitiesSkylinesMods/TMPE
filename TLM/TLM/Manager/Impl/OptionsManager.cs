@@ -198,7 +198,7 @@ namespace TrafficManager.Manager.Impl {
                 OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
             }
 
-            int loadBool (int idx, ILegacySerializableOption opt) {
+            int LoadBool (int idx, ILegacySerializableOption opt) {
                 if (data.Length > idx) {
                     opt.Load(data[idx]);
                 }
@@ -206,12 +206,12 @@ namespace TrafficManager.Manager.Impl {
             };
 
             int index = 42;
-            index = loadBool(index, OptionsMassEditTab.rabout_StayInLaneMainR);
-            index = loadBool(index, OptionsMassEditTab.rabout_StayInLaneNearRabout);
-            index = loadBool(index, OptionsMassEditTab.rabout_DedicatedExitLanes);
-            index = loadBool(index, OptionsMassEditTab.rabout_NoCrossMainR);
-            index = loadBool(index, OptionsMassEditTab.rabout_NoCrossYeildR);
-            index = loadBool(index, OptionsMassEditTab.rabout_PrioritySigns);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns);
             return true;
         }
 
@@ -260,12 +260,12 @@ namespace TrafficManager.Manager.Impl {
                 (byte)(Options.allowFarTurnOnRed ? 1 : 0),
                 (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0),
 
-                (byte)(OptionsMassEditTab.rabout_StayInLaneMainR.Save()),
-                (byte)(OptionsMassEditTab.rabout_StayInLaneNearRabout.Save()),
-                (byte)(OptionsMassEditTab.rabout_DedicatedExitLanes.Save()),
-                (byte)(OptionsMassEditTab.rabout_NoCrossMainR.Save()),
-                (byte)(OptionsMassEditTab.rabout_NoCrossYeildR.Save()),
-                (byte)(OptionsMassEditTab.rabout_PrioritySigns.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns.Save()),
             };
         }
     }
