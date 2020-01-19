@@ -34,8 +34,9 @@ namespace TrafficManager.UI {
 
         private static bool _mouseClickProcessed;
 
-        public const float DEBUG_CLOSE_LOD = 300f;
+        private const bool HoverPrefersSmallerSegments = true;
 
+        public const float DEBUG_CLOSE_LOD = 300f;
         /// <summary>
         /// Square of the distance, where overlays are not rendered
         /// </summary>
@@ -951,7 +952,6 @@ namespace TrafficManager.UI {
         /// returns the node segment that is closest to the mouse pointer based on angle.
         /// </summary>
         internal ushort GetHoveredSegmentFromNode() {
-            bool considerSegmentLenght = true;
             ushort minSegId = 0;
             NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
             Vector3 dir0 = m_mousePosition - node.m_position;
@@ -963,8 +963,8 @@ namespace TrafficManager.UI {
                     Vector3 dir = segment.m_startNode == HoveredNodeId ?
                         segment.m_startDirection :
                         segment.m_endDirection;
-                    float angle = GetAgnele(dir, dir0);
-                    if (considerSegmentLenght) {
+                    float angle = GetAngle(dir, dir0);
+                    if (HoverPrefersSmallerSegments) {
                         angle *= segment.m_averageLength;
                     }
                     if (angle < min_angle) {
@@ -981,7 +981,7 @@ namespace TrafficManager.UI {
         /// input order does not matter.
         /// The return value is between 0 to 180.
         /// </summary>
-        private static float GetAgnele(Vector3 v1, Vector3 v2) {
+        private static float GetAngle(Vector3 v1, Vector3 v2) {
             float ret = Vector3.Angle(v1, v2); // -180 to 180 degree
             if (ret > 180) ret -= 180; // future proofing.
             ret = Math.Abs(ret);
