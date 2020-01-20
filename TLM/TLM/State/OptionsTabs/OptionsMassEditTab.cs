@@ -7,7 +7,7 @@ namespace TrafficManager.State {
     public static class OptionsMassEditTab {
         // TODO: Add options to a list.
         // * i dont have it
-        // < I do not thing it is necessary
+        // < I do not want it
 
         //rabout_DedicatedExitLanes
         //rabout_SwitchLanesYeildR*<
@@ -20,11 +20,11 @@ namespace TrafficManager.State {
 
         //avn_NoCrossMainR
         //avn_NoCrossYield*<
-        //avn_NoLeftTurns*<
+        //avn_NoLeftTurns*
         //avn_EnterBlockedMain*<
         //avn_EnterBlockedYeild*
         //avn_StopEntry*
-        //avn_PrioritySigns*
+        //avn_PrioritySigns*<
         //avn_SwitchLanesMain*<
         //avn_SwtichLanesYeild*<
 
