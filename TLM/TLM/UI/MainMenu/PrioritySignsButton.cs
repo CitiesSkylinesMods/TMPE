@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using State;
     using State.Keybinds;
 
@@ -7,7 +7,9 @@
 
         protected override ButtonFunction Function => ButtonFunction.PrioritySigns;
 
-        public override string Tooltip => Translation.Menu.Get("Tooltip:Add priority signs");
+        public override string Tooltip =>
+            Translation.Menu.Get("Tooltip:Add priority signs") + "\n" +
+            Translation.Menu.Get("Tooltip.Keybinds:Add priority signs");
 
         public override bool Visible => Options.prioritySignsEnabled;
 

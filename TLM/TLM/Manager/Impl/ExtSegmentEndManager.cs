@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using System;
     using API.Manager;
     using API.Traffic.Data;
@@ -174,6 +174,20 @@
                 });
 
             return CalculateArrowDirection(sourceDir, targetDir);
+        }
+
+        public ArrowDirection GetDirection(ushort segmentId0, ushort segmentId1, ushort nodeId = 0) {
+            if (nodeId == 0) {
+                ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[0];
+                nodeId = seg.GetSharedNode(segmentId1);
+                if(nodeId == 0) {
+                    return ArrowDirection.None;
+                }
+            }
+            GenericGameBridge.Service.INetService netService = Constants.ServiceFactory.NetService;
+            ref ExtSegmentEnd segmenEnd0 = ref ExtSegmentEnds[GetIndex(segmentId0, nodeId)];
+            ArrowDirection dir = GetDirection(ref segmenEnd0, segmentId1);
+            return dir;
         }
 
         private ArrowDirection CalculateArrowDirection(Vector3 sourceDir, Vector3 targetDir) {

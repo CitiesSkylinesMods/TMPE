@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using System;
     using System.Collections.Generic;
     using API.Manager;
@@ -31,40 +31,61 @@
         }
 
         public override void OnPrimaryClickOverlay() {
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            if(ctrlDown || shiftDown) {
                 if (HoveredSegmentId == 0) {
                     return;
                 }
-
                 SelectedNodeId = 0;
+            }
 
+            //TODO provide revert/clear mode  issue #568
+            if (ctrlDown && shiftDown) {
+                bool isRAbout = RoundaboutMassEdit.Instance.FixRabout(HoveredSegmentId);
+                //if (!isRAbout) {
+                //    // TODO uncomment as part of issue #541
+                //    //PriorityRoad.FixRoad(HoveredSegmentId);
+                //}
+                if (isRAbout) {
+                    RefreshMassEditOverlay();
+                    return;
+                }
+            // TODO uncomment as part of issue #541
+            //} else if (ctrlDown) {
+            //
+            //    //PriorityRoad.FixJunction(HoveredNodeId);
+            //    RefreshMassEditOverlay();
+            //    return;
+            }
+            if (shiftDown) {
                 var primaryPrioType = PriorityType.None;
                 var secondaryPrioType = PriorityType.None;
 
                 switch (massEditMode) {
                     case PrioritySignsMassEditMode.MainYield: {
-                        primaryPrioType = PriorityType.Main;
-                        secondaryPrioType = PriorityType.Yield;
-                        break;
-                    }
+                            primaryPrioType = PriorityType.Main;
+                            secondaryPrioType = PriorityType.Yield;
+                            break;
+                        }
 
                     case PrioritySignsMassEditMode.MainStop: {
-                        primaryPrioType = PriorityType.Main;
-                        secondaryPrioType = PriorityType.Stop;
-                        break;
-                    }
+                            primaryPrioType = PriorityType.Main;
+                            secondaryPrioType = PriorityType.Stop;
+                            break;
+                        }
 
                     case PrioritySignsMassEditMode.YieldMain: {
-                        primaryPrioType = PriorityType.Yield;
-                        secondaryPrioType = PriorityType.Main;
-                        break;
-                    }
+                            primaryPrioType = PriorityType.Yield;
+                            secondaryPrioType = PriorityType.Main;
+                            break;
+                        }
 
                     case PrioritySignsMassEditMode.StopMain: {
-                        primaryPrioType = PriorityType.Stop;
-                        secondaryPrioType = PriorityType.Main;
-                        break;
-                    }
+                            primaryPrioType = PriorityType.Stop;
+                            secondaryPrioType = PriorityType.Main;
+                            break;
+                        }
                 }
 
                 IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
@@ -79,7 +100,7 @@
                             data.CurSeg.segmentId,
                             startNode);
                         ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[
-                            segEndMan.GetIndex(data.CurSeg.segmentId,startNode)];
+                            segEndMan.GetIndex(data.CurSeg.segmentId, startNode)];
 
                         for (int i = 0; i < 8; ++i) {
                             ushort otherSegmentId = Singleton<NetManager>.instance.m_nodes
@@ -107,35 +128,35 @@
 
                     return true;
                 }
-
-                SegmentTraverser.Traverse(
-                    HoveredSegmentId,
-                    TraverseDirection.AnyDirection,
-                    TraverseSide.Straight,
-                    SegmentStopCriterion.None,
-                    VisitorFun);
+                bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+                if (isRAbout) {
+                    SegmentTraverser.Traverse(segmentList, VisitorFun);
+                } else {
+                    SegmentTraverser.Traverse(
+                        HoveredSegmentId,
+                        TraverseDirection.AnyDirection,
+                        TraverseSide.Straight,
+                        SegmentStopCriterion.None,
+                        VisitorFun);
+                }
 
                 // cycle mass edit mode
                 massEditMode =
                     (PrioritySignsMassEditMode)(((int)massEditMode + 1) %
                                                 Enum.GetValues(typeof(PrioritySignsMassEditMode))
                                                     .GetLength(0));
+            } else {
+                if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
+                    return;
+                }
 
-                // update priority node cache
-                RefreshCurrentPriorityNodeIds();
-                return;
+                if (!MayNodeHavePrioritySigns(HoveredNodeId)) {
+                    return;
+                }
+
+                SelectedNodeId = HoveredNodeId;
+                Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
             }
-
-            if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
-                return;
-            }
-
-            if (!MayNodeHavePrioritySigns(HoveredNodeId)) {
-                return;
-            }
-
-            SelectedNodeId = HoveredNodeId;
-            Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
 
             // update priority node cache
             RefreshCurrentPriorityNodeIds();
@@ -143,15 +164,56 @@
 
         public override void OnToolGUI(Event e) { }
 
+        /// <summary>
+        /// show overlay for other subtools influced by mass edit.
+        /// </summary>
+        public static bool showMassEditOverlay = false;
+
+        /// <summary>
+        /// refreshes all subtools incflucned by mass edit.
+        /// </summary>
+        private void RefreshMassEditOverlay() {
+            showMassEditOverlay = true;
+            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            RefreshCurrentPriorityNodeIds();
+            showMassEditOverlay = false;
+        }
+
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             if (MainTool.GetToolController().IsInsideUI || !Cursor.visible) {
                 return;
             }
 
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
-                // draw hovered segments
-                if (HoveredSegmentId != 0) {
-                    Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
+            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+            if (ctrlDown) {
+                showMassEditOverlay = true;
+                massEditMode = PrioritySignsMassEditMode.MainYield;
+            } else {
+                showMassEditOverlay = false;
+            }
+
+            if (HoveredSegmentId == 0) {
+                if(shiftDown) {
+                    massEditMode = PrioritySignsMassEditMode.MainYield;
+                }
+                return;
+            }
+
+            if (shiftDown) {
+                bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+                Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
+                if (isRAbout) {
+                    foreach (uint segmentId in segmentList) {
+                        ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                        NetTool.RenderOverlay(
+                            cameraInfo,
+                            ref seg,
+                            color,
+                            color);
+                    } // end foreach
+                } else {
                     SegmentTraverser.Traverse(
                         HoveredSegmentId,
                         TraverseDirection.AnyDirection,
@@ -166,12 +228,14 @@
                                 color);
                             return true;
                         });
-                } else {
-                    massEditMode = PrioritySignsMassEditMode.MainYield;
                 }
-
                 return;
             }
+            //else if (ctrlDown) {
+            //    // TODO uncomment as part of issue #541
+            //    MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+            //    return;
+            //}
 
             massEditMode = PrioritySignsMassEditMode.MainYield;
 

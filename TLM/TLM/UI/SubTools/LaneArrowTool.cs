@@ -143,6 +143,11 @@ namespace TrafficManager.UI.SubTools {
 
         protected override ushort HoveredNodeId {
         get {
+                bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+                if (ctrlDown) {
+                    // When control is down, we are selecting node.
+                    return base.HoveredNodeId;
+                }
                 // if the current segment end does not have lane arrows
                 // and the other end of the segment does have lane arrows, then
                 // assume the user intends to hover over that one.
