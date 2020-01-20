@@ -1,16 +1,16 @@
 namespace TrafficManager.Manager.Impl {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using State.ConfigData;
-    using State;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
 
     public class RoutingManager
         : AbstractGeometryObservingManager,

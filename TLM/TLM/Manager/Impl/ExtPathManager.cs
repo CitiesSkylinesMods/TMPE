@@ -1,9 +1,9 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using System;
-    using API.Manager;
     using ColossalFramework;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.Util;
     using UnityEngine;
-    using Util;
 
     public class ExtPathManager
         : AbstractCustomManager,

@@ -1,12 +1,12 @@
 namespace TrafficManager.State {
     using ColossalFramework.UI;
-    using CSUtil.Commons;
     using CSUtil.Commons.Benchmark;
+    using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using UI;
-    using UI.Helpers;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.UI;
 
     public static class OptionsMaintenanceTab {
         [UsedImplicitly]

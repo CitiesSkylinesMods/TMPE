@@ -1,9 +1,9 @@
 namespace TrafficManager.State {
     using ColossalFramework.UI;
     using ICities;
-    using Keybinds;
-    using UI;
-    using UI.Helpers;
+    using TrafficManager.State.Keybinds;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.UI;
 
     public static class OptionsKeybindsTab {
         internal static void MakeSettings_Keybinds(ExtUITabstrip tabStrip) {

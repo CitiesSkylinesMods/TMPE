@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.API.Traffic.Data {
-    using Enums;
+    using TrafficManager.API.Traffic.Enums;
 
     public struct PathCreationArgs {
         /// <summary>

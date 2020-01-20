@@ -2,8 +2,8 @@ namespace TrafficManager.Patch._RoadBaseAI {
     using ColossalFramework;
     using Harmony;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using State;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
 
     [HarmonyPatch(typeof(RoadBaseAI), "UpdateNode")]
     [UsedImplicitly]

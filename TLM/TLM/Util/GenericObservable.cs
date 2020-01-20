@@ -1,9 +1,9 @@
 ﻿namespace TrafficManager.Util {
-    using System;
+    using CSUtil.Commons;
     using System.Collections.Generic;
     using System.Threading;
-    using API.Util;
-    using CSUtil.Commons;
+    using System;
+    using TrafficManager.API.Util;
 
     public abstract class GenericObservable<T> : IObservable<T> {
         /// <summary>

@@ -3,10 +3,10 @@ namespace TrafficManager.State {
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
-    using UI;
-    using UI.SubTools.SpeedLimits;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.UI.SubTools.SpeedLimits;
+    using TrafficManager.UI;
     using UnityEngine;
-    using UI.Helpers;
 
     public static class OptionsGeneralTab {
         private static UICheckBox _instantEffectsToggle;

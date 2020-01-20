@@ -2,7 +2,7 @@
     using ColossalFramework;
     using Harmony;
     using JetBrains.Annotations;
-    using State;
+    using TrafficManager.State;
 
     [HarmonyPatch(typeof(HumanAI), "ArriveAtDestination")]
     public class ArriveAtDestinationPatch {

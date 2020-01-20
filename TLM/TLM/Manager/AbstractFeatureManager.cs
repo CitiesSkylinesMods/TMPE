@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.Manager {
-    using API.Manager;
+    using TrafficManager.API.Manager;
 
     /// <summary>
     /// Helper class to ensure that events are always handled in the simulation thread

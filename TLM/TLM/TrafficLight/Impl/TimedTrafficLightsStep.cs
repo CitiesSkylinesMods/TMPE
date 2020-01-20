@@ -1,19 +1,19 @@
 namespace TrafficManager.TrafficLight.Impl {
-    using System;
+    using CSUtil.Commons.Benchmark;
+    using CSUtil.Commons;
+    using ExtVehicleType = global::TrafficManager.API.Traffic.Enums.ExtVehicleType;
     using System.Collections.Generic;
     using System.Linq;
-    using API.Manager;
-    using API.Traffic;
-    using API.Traffic.Enums;
-    using API.TrafficLight;
-    using CSUtil.Commons;
-    using CSUtil.Commons.Benchmark;
-    using Manager.Impl;
-    using State;
-    using State.ConfigData;
-    using Traffic;
-    using Util;
-    using ExtVehicleType = global::TrafficManager.API.Traffic.Enums.ExtVehicleType;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.Traffic;
+    using TrafficManager.API.TrafficLight;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.Traffic;
+    using TrafficManager.Util;
 
     // TODO class should be completely reworked, approx. in version 1.10
     public class TimedTrafficLightsStep

@@ -1,18 +1,18 @@
 namespace TrafficManager.Manager.Impl {
-    using System;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
     using ColossalFramework;
-    using CSUtil.Commons;
     using CSUtil.Commons.Benchmark;
-    using Custom.PathFinding;
+    using CSUtil.Commons;
     using JetBrains.Annotations;
-    using State;
-    using State.ConfigData;
-    using UI.SubTools.SpeedLimits;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Custom.PathFinding;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.UI.SubTools.SpeedLimits;
+    using TrafficManager.Util;
     using UnityEngine;
-    using Util;
 
     public class VehicleBehaviorManager : AbstractCustomManager, IVehicleBehaviorManager {
         public const float MIN_SPEED = 8f * 0.2f; // 10 km/h

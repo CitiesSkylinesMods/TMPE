@@ -1,18 +1,18 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
-    using System;
-    using System.Collections.Generic;
-    using API.Traffic.Data;
-    using ColossalFramework;
     using ColossalFramework.UI;
+    using ColossalFramework;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using Manager.Impl;
-    using State;
-    using Textures;
-    using Traffic;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
+    using TrafficManager.Traffic;
+    using TrafficManager.UI.Textures;
+    using TrafficManager.Util.Caching;
+    using TrafficManager.Util;
     using UnityEngine;
-    using Util;
-    using Util.Caching;
 
     public class SpeedLimitsTool : SubTool {
         public const int

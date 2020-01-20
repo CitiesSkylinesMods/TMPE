@@ -1,8 +1,8 @@
 namespace TrafficManager.API.TrafficLight.Data {
-    using System;
     using CSUtil.Commons;
-    using Traffic.Enums;
-    using TrafficLight;
+    using System;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.TrafficLight;
 
     public struct TrafficLightSimulation {
         /// <summary>

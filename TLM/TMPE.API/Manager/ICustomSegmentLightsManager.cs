@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.API.Manager {
-    using Traffic.Enums;
-    using TrafficLight;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.TrafficLight;
 
     public interface ICustomSegmentLightsManager {
         // TODO documentation

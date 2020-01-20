@@ -1,10 +1,10 @@
 ﻿namespace TrafficManager.Custom.AI {
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
     using ColossalFramework;
     using JetBrains.Annotations;
-    using PathFinding;
-    using RedirectionFramework.Attributes;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Custom.PathFinding;
+    using TrafficManager.RedirectionFramework.Attributes;
     using UnityEngine;
 
     [TargetType(typeof(PostVanAI))]

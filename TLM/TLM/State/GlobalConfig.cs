@@ -1,11 +1,11 @@
 ﻿namespace TrafficManager.State {
-    using System;
-    using System.IO;
-    using System.Xml.Serialization;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using State.ConfigData;
-    using Util;
+    using System.IO;
+    using System.Xml.Serialization;
+    using System;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     [XmlRootAttribute("GlobalConfig", Namespace = "http://www.viathinksoft.de/tmpe", IsNullable = false)]
     public class GlobalConfig : GenericObservable<GlobalConfig> {

@@ -1,9 +1,9 @@
 namespace TrafficManager.UI.Textures {
-    using System.Collections.Generic;
-    using API.Traffic.Enums;
-    using UnityEngine;
-    using Util;
     using static TextureResources;
+    using System.Collections.Generic;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Util;
+    using UnityEngine;
 
     /// <summary>
     /// UI Textures for controlling road segments

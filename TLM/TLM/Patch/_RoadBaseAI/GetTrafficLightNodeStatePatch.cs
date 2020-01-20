@@ -2,7 +2,7 @@
     using ColossalFramework;
     using Harmony;
     using JetBrains.Annotations;
-    using State;
+    using TrafficManager.State;
     using UnityEngine;
 
     [HarmonyPatch(typeof(RoadBaseAI), "GetTrafficLightNodeState")]

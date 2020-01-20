@@ -1,16 +1,16 @@
 namespace TrafficManager.Manager.Impl {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using API.Manager;
-    using API.Traffic.Data;
     using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using State;
-    using UI.SubTools.SpeedLimits;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State;
+    using TrafficManager.UI.SubTools.SpeedLimits;
+    using TrafficManager.Util;
     using UnityEngine;
-    using Util;
 #if DEBUG
     using State.ConfigData;
 #endif
