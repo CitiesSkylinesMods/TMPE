@@ -95,6 +95,15 @@ namespace TrafficManager.State {
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
 
+        public static bool
+            RoundAboutQuickFix_DedicatedExitLanes = true,
+            RoundAboutQuickFix_StayInLaneMainR = true,
+            RoundAboutQuickFix_StayInLaneNearRabout = true,
+            RoundAboutQuickFix_NoCrossMainR = true,
+            RoundAboutQuickFix_NoCrossYieldR = false,
+            RoundAboutQuickFix_PrioritySigns = true;
+
+
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for
         /// a new language. Takes a second, very slow.

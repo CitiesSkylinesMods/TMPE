@@ -10,15 +10,22 @@ namespace TrafficManager.Manager.Impl {
     using GenericGameBridge.Service;
     using State;
     using UnityEngine;
+    using TrafficManager.Util;
 
     public class LaneArrowManager
         : AbstractGeometryObservingManager,
           ICustomDataManager<List<Configuration.LaneArrowData>>,
           ICustomDataManager<string>, ILaneArrowManager
         {
+        /// <summary>
+        /// lane types for all road vehicles.
+        /// </summary>
         public const NetInfo.LaneType LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
+        /// <summary>
+        /// vehcile types for all road vehicles
+        /// </summary>
         public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
         public const ExtVehicleType EXT_VEHICLE_TYPES =
@@ -31,10 +38,19 @@ namespace TrafficManager.Manager.Impl {
             Log.NotImpl("InternalPrintDebugInfo for LaneArrowManager");
         }
 
+        /// <summary>
+        /// Get the final lane arrows considering both the default lane arrows and user modifications.
+        /// </summary>
         public LaneArrows GetFinalLaneArrows(uint laneId) {
             return Flags.GetFinalLaneArrowFlags(laneId, true);
         }
 
+        /// <summary>
+        /// Set the lane arrows to flags. this will remove all default arrows for the lane
+        /// and replace it with user arrows.
+        /// default arrows may change as user connects or remove more segments to the junction but
+        /// the user arrows stay the same no matter what.
+        /// </summary>
         public bool SetLaneArrows(uint laneId,
                                   LaneArrows flags,
                                   bool overrideHighwayArrows = false) {
@@ -46,6 +62,43 @@ namespace TrafficManager.Manager.Impl {
             return false;
         }
 
+        /// <summary>
+        /// Add arrows to the lane. This will not remove any prevously set flags and
+        /// will remove and replace default arrows only where flag is set.
+        /// default arrows may change as user connects or remove more segments to the junction but
+        /// the user arrows stay the same no matter what.
+        /// </summary>
+        /// <param name="laneId"></param>
+        /// <param name="flags"></param>
+        /// <param name="overrideHighwayArrows"></param>
+        /// <returns></returns>
+        public bool AddLaneArrows(uint laneId,
+                                  LaneArrows flags,
+                                  bool overrideHighwayArrows = false) {
+
+            LaneArrows flags2 = GetFinalLaneArrows(laneId);
+            return SetLaneArrows(laneId, flags | flags2, overrideHighwayArrows);
+        }
+
+        /// <summary>
+        /// remove arrows (user or default) where flag is set.
+        /// default arrows may change as user connects or remove more segments to the junction but
+        /// the user arrows stay the same no matter what.
+        /// </summary>
+        public bool RemoveLaneArrows(uint laneId,
+                          LaneArrows flags,
+                          bool overrideHighwayArrows = false) {
+
+            LaneArrows flags2 = GetFinalLaneArrows(laneId);
+            return SetLaneArrows(laneId, ~flags & flags2, overrideHighwayArrows);
+        }
+
+        /// <summary>
+        /// Toggles a lane arrows (user or default) on and off for the directions where flag is set.
+        /// overrides default settings for the arrows that change.
+        /// default arrows may change as user connects or remove more segments to the junction but
+        /// the user arrows stay the same no matter what.
+        /// </summary>
         public bool ToggleLaneArrows(uint laneId,
                                      bool startNode,
                                      LaneArrows flags,
@@ -221,6 +274,44 @@ namespace TrafficManager.Manager.Impl {
             return Instance;
         }
 
+        /// <summary>
+        /// returns the number of all target lanes from input segment toward the secified direction.
+        /// </summary>
+        private static int CountTargetLanesTowardDirection(ushort segmentId, ushort nodeId, ArrowDirection dir) {
+            int count = 0;
+            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            bool startNode = seg.m_startNode == nodeId;
+            IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+            ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
+
+            LaneArrowManager.Instance.Services.NetService.IterateNodeSegments(
+                nodeId,
+                (ushort otherSegmentId, ref NetSegment otherSeg) => {
+                    ArrowDirection dir2 = segEndMan.GetDirection(ref segEnd, otherSegmentId);
+                    if (dir == dir2) {
+                        int forward = 0, backward = 0;
+                        otherSeg.CountLanes(
+                            otherSegmentId,
+                            NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                            VehicleInfo.VehicleType.Car,
+                            ref forward,
+                            ref backward);
+                        bool startNode2 = otherSeg.m_startNode == nodeId;
+                            //xor because inverting 2 times is redundant.
+                            if (startNode2) {
+                            count += forward;
+                        } else {
+                            count += backward;
+                        }
+                        Log._Debug(
+                            $"dir={dir} startNode={startNode} segmentId={segmentId}\n" +
+                            $"startNode2={startNode2} forward={forward} backward={backward} count={count}");
+                    }
+                    return true;
+                });
+            return count;
+        }
+
         public static class SeparateTurningLanes{
             /// <summary>
             /// separates turning lanes for all segments attached to nodeId
@@ -239,7 +330,7 @@ namespace TrafficManager.Manager.Impl {
                     res = SetLaneArrowError.LaneConnection;
                     return;
                 }
-                if (Options.highwayRules && IsHighwayJunction(nodeId)) {
+                if (Options.highwayRules && ExtNodeManager.JunctionHasHighwayRules(nodeId)) {
                     res = SetLaneArrowError.HighwayArrows;
                     return;
                 }
@@ -256,29 +347,42 @@ namespace TrafficManager.Manager.Impl {
                 Debug.Assert(res == SetLaneArrowError.Success);
             }
 
-            private static bool IsHighwayJunction(ushort nodeId) {
-                ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
-                IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
-                bool ret = true;
-                for (int i = 0; i < 8; ++i) {
-                    ushort segmentId = node.GetSegment(i);
-                    if (segmentId != 0) {
-                        ret &= segMan.CalculateIsHighway(segmentId);
+            public static SetLaneArrowError CanChangeLanes(ushort segmentId, ushort nodeId) {
+                if (segmentId == 0 || nodeId == 0) {
+                    return SetLaneArrowError.Invalid;
+                }
+                if (Options.highwayRules && ExtNodeManager.JunctionHasHighwayRules(nodeId)) {
+                    return SetLaneArrowError.HighwayArrows;
+                }
+
+                ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                bool startNode = seg.m_startNode == nodeId;
+                //list of outgoing lanes from current segment to current node.
+                IList<LanePos> laneList =
+                    Constants.ServiceFactory.NetService.GetSortedLanes(
+                        segmentId,
+                        ref seg,
+                        startNode,
+                        LaneArrowManager.LANE_TYPES,
+                        LaneArrowManager.VEHICLE_TYPES,
+                        true
+                        );
+                int srcLaneCount = laneList.Count();
+                for (int i = 0; i < srcLaneCount; ++i) {
+                    if (LaneConnectionManager.Instance.HasConnections(laneList[i].laneId, startNode)) {
+                        return SetLaneArrowError.LaneConnection; ;
                     }
                 }
-                return ret;
+
+                return SetLaneArrowError.Success;
             }
 
             /// <summary>
             /// separates turning lanes for the input segment on the input node.
             /// </summary>
             public static void SeparateSegmentLanes(ushort segmentId, ushort nodeId, out SetLaneArrowError res) {
-                if(segmentId == 0 || nodeId == 0) {
-                    res = SetLaneArrowError.Invalid;
-                    return;
-                }
-                if (Options.highwayRules && IsHighwayJunction(nodeId)) {
-                    res = SetLaneArrowError.HighwayArrows;
+                res = CanChangeLanes(segmentId,nodeId);
+                if(res != SetLaneArrowError.Success) {
                     return;
                 }
                 res = SetLaneArrowError.Success;
@@ -297,20 +401,13 @@ namespace TrafficManager.Manager.Impl {
                         true
                         );
                 int srcLaneCount = laneList.Count();
-                for(int i = 0; i < srcLaneCount; ++i) {
-                    if(LaneConnectionManager.Instance.HasConnections(laneList[i].laneId, startNode)) {
-                        res = SetLaneArrowError.LaneConnection;
-                        return;
-                    }
-                }
-
                 if (srcLaneCount <= 1) {
                     return;
                 }
 
-                int leftLanesCount = CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Left);
-                int rightLanesCount = CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Right);
-                int forwardLanesCount = CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
+                int leftLanesCount = LaneArrowManager.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Left);
+                int rightLanesCount = LaneArrowManager.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Right);
+                int forwardLanesCount = LaneArrowManager.CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
                 int totalLaneCount = leftLanesCount + forwardLanesCount + rightLanesCount;
                 int numdirs = Convert.ToInt32(leftLanesCount > 0) + Convert.ToInt32(rightLanesCount > 0) + Convert.ToInt32(forwardLanesCount > 0);
 
@@ -381,45 +478,6 @@ namespace TrafficManager.Manager.Impl {
                     }
                     LaneArrowManager.Instance.SetLaneArrows(laneList[i].laneId, arrow);
                 }
-            }
-
-            /// <summary>
-            /// returns the number of all target lanes from input segment toward the secified direction.
-            /// </summary>
-            private static int CountTargetLanesTowardDirection(ushort segmentId, ushort nodeId, ArrowDirection dir) {
-                int count = 0;
-                ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-                bool startNode = seg.m_startNode == nodeId;
-                IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-                ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
-
-                LaneArrowManager.Instance.Services.NetService.IterateNodeSegments(
-                    nodeId,
-                    (ushort otherSegmentId, ref NetSegment otherSeg) => {
-                        ArrowDirection dir2 = segEndMan.GetDirection(ref segEnd, otherSegmentId);
-                        if (dir == dir2) {
-                            int forward = 0, backward = 0;
-                            otherSeg.CountLanes(
-                                otherSegmentId,
-                                NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
-                                VehicleInfo.VehicleType.Car,
-                                ref forward,
-                                ref backward);
-                            bool startNode2 = otherSeg.m_startNode == nodeId;
-
-                            if (startNode2) {
-                                count += forward;
-                            } else {
-                                count += backward;
-                            }
-                            Log._Debug(
-                                $"dir={dir} startNode={startNode} segmentId={segmentId}\n" +
-                                $"startNode2={startNode2} forward={forward} backward={backward} count={count}");
-                        }
-                        return true;
-                    });
-
-                return count;
             }
 
             /// <summary>

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework;
@@ -19,7 +19,7 @@
             SelectTarget
         }
 
-        private enum StayInLaneMode {
+        public enum StayInLaneMode {
             None,
             Both,
             Forward,
@@ -104,7 +104,7 @@
         }
 
         private void ShowOverlay(bool viewOnly, RenderManager.CameraInfo cameraInfo) {
-            if (viewOnly && !Options.connectedLanesOverlay) {
+            if (viewOnly && !(Options.connectedLanesOverlay || PrioritySignsTool.showMassEditOverlay)) {
                 return;
             }
 
@@ -355,48 +355,13 @@
                     }
 
                     if (stayInLaneMode != StayInLaneMode.None) {
-                        List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(
-                            SelectedNodeId,
-                            ref nodesBuffer[SelectedNodeId]);
-
-                        if (nodeMarkers != null) {
-                            selectedMarker = null;
-
-                            foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
-                                if (!sourceLaneMarker.IsSource) {
-                                    continue;
-                                }
-
-                                if ((stayInLaneMode == StayInLaneMode.Forward) ||
-                                    (stayInLaneMode == StayInLaneMode.Backward)) {
-                                    if ((sourceLaneMarker.SegmentIndex == 0)
-                                        ^ (stayInLaneMode == StayInLaneMode.Backward)) {
-                                        continue;
-                                    }
-                                }
-
-                                foreach (NodeLaneMarker targetLaneMarker in nodeMarkers) {
-                                    if (!targetLaneMarker.IsTarget || (targetLaneMarker.SegmentId ==
-                                                                       sourceLaneMarker.SegmentId)) {
-                                        continue;
-                                    }
-
-                                    if (targetLaneMarker.InnerSimilarLaneIndex
-                                        == sourceLaneMarker.InnerSimilarLaneIndex) {
-                                        Log._Debug(
-                                            $"Adding lane connection {sourceLaneMarker.LaneId} -> " +
-                                            $"{targetLaneMarker.LaneId}");
-                                        LaneConnectionManager.Instance.AddLaneConnection(
-                                            sourceLaneMarker.LaneId,
-                                            targetLaneMarker.LaneId,
-                                            sourceLaneMarker.StartNode);
-                                    }
-                                }
-                            }
-                        }
-
+                        selectedMarker = null;
+                        StayInLane(SelectedNodeId, stayInLaneMode);
                         RefreshCurrentNodeMarkers(SelectedNodeId);
-                    } // if stay in lane is not None
+                    }
+
+
+
                 } // if stay in lane
             } // if selected node
 
@@ -404,6 +369,49 @@
                 // draw hovered node
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
             }
+        }
+
+        public static void StayInLane(ushort nodeId, StayInLaneMode stayInLaneMode = StayInLaneMode.Both) {
+            if (stayInLaneMode != StayInLaneMode.None) {
+                NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+                List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(
+                    nodeId,
+                    ref nodesBuffer[nodeId]);
+
+                if (nodeMarkers != null) {
+                    foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
+                        if (!sourceLaneMarker.IsSource) {
+                            continue;
+                        }
+
+                        if ((stayInLaneMode == StayInLaneMode.Forward) ||
+                            (stayInLaneMode == StayInLaneMode.Backward)) {
+                            if ((sourceLaneMarker.SegmentIndex == 0)
+                                ^ (stayInLaneMode == StayInLaneMode.Backward)) {
+                                continue;
+                            }
+                        }
+
+                        foreach (NodeLaneMarker targetLaneMarker in nodeMarkers) {
+                            if (!targetLaneMarker.IsTarget || (targetLaneMarker.SegmentId ==
+                                                               sourceLaneMarker.SegmentId)) {
+                                continue;
+                            }
+
+                            if (targetLaneMarker.InnerSimilarLaneIndex
+                                == sourceLaneMarker.InnerSimilarLaneIndex) {
+                                Log._Debug(
+                                    $"Adding lane connection {sourceLaneMarker.LaneId} -> " +
+                                    $"{targetLaneMarker.LaneId}");
+                                LaneConnectionManager.Instance.AddLaneConnection(
+                                    sourceLaneMarker.LaneId,
+                                    targetLaneMarker.LaneId,
+                                    sourceLaneMarker.StartNode);
+                            } // end if
+                        } // end foreach
+                    } // end foreach
+                } // end if
+            } // end if
         }
 
         public override void OnPrimaryClickOverlay() {
@@ -634,14 +642,14 @@
         public override void Initialize() {
             base.Initialize();
             Cleanup();
-            if (Options.connectedLanesOverlay) {
+            if (Options.connectedLanesOverlay || PrioritySignsTool.showMassEditOverlay) {
                 RefreshCurrentNodeMarkers();
             } else {
                 currentNodeMarkers.Clear();
             }
         }
 
-        private List<NodeLaneMarker> GetNodeMarkers(ushort nodeId, ref NetNode node) {
+        private static List<NodeLaneMarker> GetNodeMarkers(ushort nodeId, ref NetNode node) {
             if (nodeId == 0) {
                 return null;
             }

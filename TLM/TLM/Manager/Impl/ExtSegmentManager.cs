@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using API.Manager;
     using API.Traffic.Data;
     using ColossalFramework;
