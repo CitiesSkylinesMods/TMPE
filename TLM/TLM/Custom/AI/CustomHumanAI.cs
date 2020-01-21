@@ -1,18 +1,18 @@
 namespace TrafficManager.Custom.AI {
-    using System.Runtime.CompilerServices;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.TrafficLight;
     using ColossalFramework;
-    using CSUtil.Commons;
     using CSUtil.Commons.Benchmark;
+    using CSUtil.Commons;
     using JetBrains.Annotations;
-    using Manager;
-    using Manager.Impl;
-    using RedirectionFramework.Attributes;
-    using State;
-    using State.ConfigData;
+    using System.Runtime.CompilerServices;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.TrafficLight;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager;
+    using TrafficManager.RedirectionFramework.Attributes;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
     using UnityEngine;
 
     [TargetType(typeof(HumanAI))]

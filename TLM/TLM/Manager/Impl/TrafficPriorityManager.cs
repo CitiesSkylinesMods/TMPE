@@ -1,20 +1,20 @@
 namespace TrafficManager.Manager.Impl {
-    using System;
-    using System.Collections.Generic;
-    using API.Geometry;
-    using API.Manager;
-    using API.Traffic;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.TrafficLight;
     using ColossalFramework;
     using CSUtil.Commons;
-    using Geometry;
     using JetBrains.Annotations;
-    using State;
-    using State.ConfigData;
-    using Traffic;
-    using TrafficLight;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.API.Geometry;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.Traffic;
+    using TrafficManager.API.TrafficLight;
+    using TrafficManager.Geometry;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.Traffic;
+    using TrafficManager.TrafficLight;
     using UnityEngine;
 
     public class TrafficPriorityManager

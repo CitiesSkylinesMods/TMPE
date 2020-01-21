@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.UI.MainMenu {
     using ColossalFramework.UI;
-    using State;
+    using TrafficManager.State;
 
     public class DespawnButton : MenuButton {
         public override bool Active => false;

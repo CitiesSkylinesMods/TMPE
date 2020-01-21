@@ -1,12 +1,12 @@
 namespace TrafficManager.State {
-    using API.Traffic.Enums;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
-    using Manager.Impl;
-    using UI;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.UI;
     using UnityEngine;
-    using UI.Helpers;
 
     public static class OptionsVehicleRestrictionsTab {
         private static UICheckBox _relaxedBussesToggle;

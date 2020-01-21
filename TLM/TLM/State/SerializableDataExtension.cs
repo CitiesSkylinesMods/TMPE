@@ -1,13 +1,13 @@
 ﻿namespace TrafficManager.State {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Runtime.Serialization.Formatters.Binary;
-    using API.Manager;
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
-    using Manager.Impl;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Runtime.Serialization.Formatters.Binary;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.Manager.Impl;
 
     [UsedImplicitly]
     public class SerializableDataExtension

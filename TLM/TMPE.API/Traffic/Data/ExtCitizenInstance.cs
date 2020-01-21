@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.API.Traffic.Data {
     using System;
-    using Enums;
+    using TrafficManager.API.Traffic.Enums;
 
     public struct ExtCitizenInstance {
         public ushort instanceId;

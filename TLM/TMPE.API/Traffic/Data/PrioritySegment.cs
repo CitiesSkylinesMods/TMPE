@@ -1,6 +1,6 @@
 namespace TrafficManager.API.Traffic.Data {
-    using Enums;
     using JetBrains.Annotations;
+    using TrafficManager.API.Traffic.Enums;
 
     /// <summary>
     /// A priority segment specifies the priority signs that are present at each end of a certain segment.

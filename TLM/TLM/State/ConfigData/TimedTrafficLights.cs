@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.State.ConfigData {
-    using API.Traffic.Enums;
+    using TrafficManager.API.Traffic.Enums;
 
     public class TimedTrafficLights {
         /// <summary>

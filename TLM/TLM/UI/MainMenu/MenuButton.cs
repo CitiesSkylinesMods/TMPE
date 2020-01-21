@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.UI.MainMenu {
-    using System;
     using ColossalFramework.UI;
-    using Textures;
+    using System;
+    using TrafficManager.UI.Textures;
     using UnityEngine;
 
     public abstract class MenuButton : LinearSpriteButton {

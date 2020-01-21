@@ -1,16 +1,16 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using System;
-    using System.Collections.Generic;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using ColossalFramework;
     using ColossalFramework.Globalization;
-    using CSUtil.Commons;
+    using ColossalFramework;
     using CSUtil.Commons.Benchmark;
-    using Custom.PathFinding;
-    using State;
-    using State.ConfigData;
+    using CSUtil.Commons;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Custom.PathFinding;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
     using UnityEngine;
 
     public class ExtCitizenInstanceManager

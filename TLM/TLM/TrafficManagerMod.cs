@@ -1,15 +1,14 @@
-namespace TrafficManager
-{
-    using System;
-    using System.Reflection;
+namespace TrafficManager {
     using ColossalFramework.Globalization;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
-    using State;
+    using System.Reflection;
+    using System;
+    using TrafficManager.State;
     using TrafficManager.UI;
-    using Util;
+    using TrafficManager.Util;
 
     public class TrafficManagerMod : IUserMod {
 #if LABS

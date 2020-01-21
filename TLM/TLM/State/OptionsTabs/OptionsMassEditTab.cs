@@ -1,7 +1,7 @@
 namespace TrafficManager.State {
     using ICities;
-    using UI;
-    using UI.Helpers;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.UI;
 
     public static class OptionsMassEditTab {
         public static CheckboxOption RoundAboutQuickFix_DedicatedExitLanes =

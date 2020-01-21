@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.API.Manager {
     using System.Collections.Generic;
-    using TrafficLight.Data;
+    using TrafficManager.API.TrafficLight.Data;
 
     public interface ITrafficLightSimulationManager {
         // TODO documentation

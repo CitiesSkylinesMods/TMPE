@@ -1,7 +1,7 @@
 namespace TrafficManager.State.Keybinds {
-    using ColossalFramework;
     using ColossalFramework.UI;
-    using UI;
+    using ColossalFramework;
+    using TrafficManager.UI;
     using UnityEngine;
 
     /// <summary>

@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.Patch._RoadBaseAI {
     using ColossalFramework;
     using JetBrains.Annotations;
-    using State;
+    using TrafficManager.State;
 
     // [Harmony] Manually patched because struct references are used
     public class SegmentSimulationStepPatch {

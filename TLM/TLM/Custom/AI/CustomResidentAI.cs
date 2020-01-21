@@ -1,14 +1,14 @@
 ﻿namespace TrafficManager.Custom.AI {
-    using System.Runtime.CompilerServices;
-    using API.Traffic.Enums;
-    using ColossalFramework;
     using ColossalFramework.Math;
+    using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using RedirectionFramework.Attributes;
-    using State;
-    using State.ConfigData;
+    using System.Runtime.CompilerServices;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.RedirectionFramework.Attributes;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
 
     [TargetType(typeof(ResidentAI))]
     public class CustomResidentAI : ResidentAI {

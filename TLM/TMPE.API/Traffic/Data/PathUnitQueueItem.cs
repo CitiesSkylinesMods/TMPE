@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.API.Traffic.Data {
     using System;
-    using Enums;
+    using TrafficManager.API.Traffic.Enums;
 
     public struct PathUnitQueueItem {
         public uint nextPathUnitId; // access requires acquisition of CustomPathFind.QueueLock
