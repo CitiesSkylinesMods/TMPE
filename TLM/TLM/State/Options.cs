@@ -104,7 +104,7 @@ namespace TrafficManager.State {
             RoundAboutQuickFix_PrioritySigns = true;
 
         public static bool
-            PriPriorityRoad_NoCrossMainR = true;
+            PriorityRoad_NoCrossMainR = true;
 
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for
