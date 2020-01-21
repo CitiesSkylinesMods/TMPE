@@ -46,13 +46,17 @@ namespace TrafficManager.UI.SubTools {
                 if (!isRAbout) {
                     PriorityRoad.FixRoad(HoveredSegmentId);
                 }
-                RefreshMassEditOverlay();
-                return;
+                if (isRAbout) {
+                    RefreshMassEditOverlay();
+                    return;
+                }
             } else if (ctrlDown) {
+
                 PriorityRoad.FixJunction(HoveredNodeId);
                 RefreshMassEditOverlay();
                 return;
-            } else if (shiftDown) {
+            }
+            if (shiftDown) {
                 var primaryPrioType = PriorityType.None;
                 var secondaryPrioType = PriorityType.None;
 
@@ -224,7 +228,7 @@ namespace TrafficManager.UI.SubTools {
                         });
                 }
                 return;
-            }else if (ctrlDown) {
+            } else if (ctrlDown) {
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 return;
             }
@@ -509,7 +513,7 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
 
-            if (Options.prioritySignsOverlay ) {
+            if (Options.prioritySignsOverlay) {
                 RefreshCurrentPriorityNodeIds();
             } else {
                 currentPriorityNodeIds.Clear();

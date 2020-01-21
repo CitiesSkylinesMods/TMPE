@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI {
+namespace TrafficManager.UI {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -27,14 +27,16 @@
           IObserver<GlobalConfig>
     {
         private ToolMode toolMode_;
+        private NetTool _netTool;
 
         internal static ushort HoveredNodeId;
         internal static ushort HoveredSegmentId;
 
         private static bool _mouseClickProcessed;
 
-        public const float DEBUG_CLOSE_LOD = 300f;
+        private const bool HoverPrefersSmallerSegments = true;
 
+        public const float DEBUG_CLOSE_LOD = 300f;
         /// <summary>
         /// Square of the distance, where overlays are not rendered
         /// </summary>
@@ -127,6 +129,17 @@
             }
 
             return TransparencyToAlpha(transparency);
+        }
+
+        internal NetTool NetTool {
+            get {
+                if (_netTool == null) {
+                    Log._Debug("NetTool field value is null. Searching for instance...");
+                    _netTool = ToolsModifierControl.toolController.Tools.OfType<NetTool>().FirstOrDefault();
+                }
+
+                return _netTool;
+            }
         }
 
         private static float TransparencyToAlpha(byte transparency) {
@@ -322,6 +335,11 @@
                     InfoManager.InfoMode.None,
                     InfoManager.SubInfoMode.Default);
             }
+            ToolCursor = null;
+            bool elementsHovered = DetermineHoveredElements();
+            if (_activeSubTool != null && NetTool != null && elementsHovered) {
+                ToolCursor = NetTool.m_upgradeCursor;
+            }
 
             bool primaryMouseClicked = Input.GetMouseButtonDown(0);
             bool secondaryMouseClicked = Input.GetMouseButtonDown(1);
@@ -357,7 +375,6 @@
             // }
 
             if (_activeSubTool != null) {
-                DetermineHoveredElements();
 
                 if (primaryMouseClicked) {
                     _activeSubTool.OnPrimaryClickOverlay();
@@ -410,6 +427,7 @@
             }
         }
 
+
         public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                    ushort nodeId,
                                    bool warning = false,
@@ -417,50 +435,92 @@
             DrawNodeCircle(cameraInfo, nodeId, GetToolColor(warning, false), alpha);
         }
 
-        public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
-                                   ushort nodeId,
-                                   Color color,
-                                   bool alpha = false) {
-            NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            NetSegment segment =
-                Singleton<NetManager>.instance.m_segments.m_buffer[ nodesBuffer[nodeId].m_segment0];
-
-            Vector3 pos = nodesBuffer[nodeId].m_position;
+        /// <summary>
+        /// Gets the coordinates of the given node.
+        /// </summary>
+        private static Vector3 GetNodePos(ushort nodeId) {
+            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            Vector3 pos = nodeBuffer[nodeId].m_position;
             float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
             if (terrainY > pos.y) {
                 pos.y = terrainY;
             }
+            return pos;
+        }
+
+        /// <returns>the average half width of all connected segments</returns>
+        private static float CalculateNodeRadius(ushort nodeId) {
+
+            float sum_half_width = 0;
+            int count = 0;
+            Constants.ServiceFactory.NetService.IterateNodeSegments(
+                nodeId,
+                (ushort segmentId, ref NetSegment segment) => {
+                    sum_half_width += segment.Info.m_halfWidth;
+                    count++;
+                    return true;
+                });
+            return sum_half_width / count;
+        }
+
+        public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
+                                   ushort nodeId,
+                                   Color color,
+                                   bool alpha = false) {
+            float r = CalculateNodeRadius(nodeId);
+            Vector3 pos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+            DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha);
+        }
+
+        /// <summary>
+        /// Draws a half sausage at segment end.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="cut">The lenght of the highlight [0~1] </param>
+        /// <param name="bStartNode">Determines the direction of the half sausage.</param>
+        public void DrawCutSegmentEnd(RenderManager.CameraInfo cameraInfo,
+                       ushort segmentId,
+                       float cut,
+                       bool bStartNode,
+                       Color color,
+                       bool alpha = false) {
+            if( segmentId == 0) {
+                return;
+            }
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            float width = segment.Info.m_halfWidth;
+
+            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            bool IsMiddle(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
 
             Bezier3 bezier;
-            bezier.a = pos;
-            bezier.d = pos;
+            bezier.a = GetNodePos(segment.m_startNode);
+            bezier.d = GetNodePos(segment.m_endNode);
 
             NetSegment.CalculateMiddlePoints(
                 bezier.a,
                 segment.m_startDirection,
                 bezier.d,
                 segment.m_endDirection,
-                false,
-                false,
+                IsMiddle(segment.m_startNode),
+                IsMiddle(segment.m_endNode),
                 out bezier.b,
                 out bezier.c);
 
-            DrawOverlayBezier(cameraInfo, bezier, color, alpha);
-        }
+            if (bStartNode) {
+                bezier = bezier.Cut(0, cut);
+            } else {
+                bezier = bezier.Cut(1 - cut, 1);
+            }
 
-        private void DrawOverlayBezier(RenderManager.CameraInfo cameraInfo,
-                                       Bezier3 bezier,
-                                       Color color,
-                                       bool alpha = false) {
-            const float width = 8f; // 8 - small roads; 16 - big roads
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
                 cameraInfo,
                 color,
                 bezier,
                 width * 2f,
-                width,
-                width,
+                bStartNode ? 0 : width,
+                bStartNode ? width : 0,
                 -1f,
                 1280f,
                 false,
@@ -756,20 +816,6 @@
             //                tooltipWorldPos = null;
             //        }
             // }
-
-            if (GetToolMode() == ToolMode.None) {
-                ToolCursor = null;
-            } else {
-                bool elementsHovered = DetermineHoveredElements();
-
-                NetTool netTool = ToolsModifierControl
-                                  .toolController.Tools.OfType<NetTool>()
-                                  .FirstOrDefault(nt => nt.m_prefab != null);
-
-                if (netTool != null && elementsHovered) {
-                    ToolCursor = netTool.m_upgradeCursor;
-                }
-            }
         }
 
         public bool DoRayCast(RaycastInput input, out RaycastOutput output) {
@@ -777,13 +823,13 @@
         }
 
         private bool DetermineHoveredElements() {
+            HoveredSegmentId = 0;
+            HoveredNodeId = 0;
+
             bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible &&
                                  (_activeSubTool == null || !_activeSubTool.IsCursorInPanel());
 
             if (mouseRayValid) {
-                HoveredSegmentId = 0;
-                HoveredNodeId = 0;
-
                 // find currently hovered node
                 var nodeInput = new RaycastInput(m_mouseRay, m_mouseRayLength) {
                     m_netService = {
@@ -894,11 +940,54 @@
                     }
                 }
 
-                return HoveredNodeId != 0 || HoveredSegmentId != 0;
+                if (HoveredNodeId != 0) {
+                    HoveredSegmentId = GetHoveredSegmentFromNode();
+                }
             }
 
-            return false; // mouseRayValid=false here
+            return HoveredNodeId != 0 || HoveredSegmentId != 0;
         }
+
+        /// <summary>
+        /// returns the node segment that is closest to the mouse pointer based on angle.
+        /// </summary>
+        internal ushort GetHoveredSegmentFromNode() {
+            ushort minSegId = 0;
+            NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
+            Vector3 dir0 = m_mousePosition - node.m_position;
+            float min_angle = float.MaxValue;
+            Constants.ServiceFactory.NetService.IterateNodeSegments(
+                HoveredNodeId,
+                (ushort segmentId, ref NetSegment segment) =>
+                {
+                    Vector3 dir = segment.m_startNode == HoveredNodeId ?
+                        segment.m_startDirection :
+                        segment.m_endDirection;
+                    float angle = GetAngle(dir, dir0);
+                    if (HoverPrefersSmallerSegments) {
+                        angle *= segment.m_averageLength;
+                    }
+                    if (angle < min_angle) {
+                        min_angle = angle;
+                        minSegId = segmentId;
+                    }
+                    return true;
+                });
+            return minSegId;
+        }
+
+        /// <summary>
+        /// returns the angle between v1 and v2.
+        /// input order does not matter.
+        /// The return value is between 0 to 180.
+        /// </summary>
+        private static float GetAngle(Vector3 v1, Vector3 v2) {
+            float ret = Vector3.Angle(v1, v2); // -180 to 180 degree
+            if (ret > 180) ret -= 180; // future proofing.
+            ret = Math.Abs(ret);
+            return ret;
+        }
+
 
         /// <summary>
         /// Displays lane ids over lanes

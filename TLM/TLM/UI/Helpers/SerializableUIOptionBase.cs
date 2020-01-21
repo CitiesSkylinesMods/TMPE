@@ -3,47 +3,40 @@ namespace TrafficManager.UI.Helpers {
     using CSUtil.Commons;
     using ICities;
     using State;
+    using System.Reflection;
+    using System;
+    using ColossalFramework;
 
-    //TODO issue #562: implement ISerializable Interface
-    //[Serializable()]
-    public abstract class SerializableUIOptionBase<TVal, TUI> : ISerializableOptionBase
+    public abstract class SerializableUIOptionBase<TVal, TUI> : ILegacySerializableOption
         where TUI : UIComponent {
         //Data:
-        protected TVal _value;
-        public readonly TVal DefaultValue;
-        public virtual TVal Value {
-            get => _value;
-            set => _value = value;
+        public SerializableUIOptionBase(string fieldName) {
+            ValueField = typeof(Options).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
+            if (ValueField == null) {
+                throw new Exception($"{typeof(Options)}.{fieldName} does not exists");
+            }
         }
-        public static implicit operator TVal(SerializableUIOptionBase<TVal,TUI> a) => a.Value;
-
+        private FieldInfo ValueField;
+        private Options OptionInstance => Singleton<Options>.instance;
+        public virtual TVal Value {
+            get => (TVal)ValueField.GetValue(null);
+            set => ValueField.SetValue(null, value);
+        }
+        public static implicit operator TVal(SerializableUIOptionBase<TVal, TUI> a) => a.Value;
         public abstract void Load(byte data);
         public abstract byte Save();
 
         //UI:
         public abstract void AddUI(UIHelperBase container);
         protected TUI _ui;
-        protected readonly bool _tooltip;
-        public string Key;
-        public string GroupName;
-        public string Label { get => $"{GroupName}.CheckBox: {Key}"; }
-        public string Tooltip { get => $"{GroupName}.Tooltip: {Key}"; }
+        public string Label;
+        public string Tooltip;
+
         public void DefaultOnValueChanged(TVal newVal) {
             Options.IsGameLoaded();
-            Log._Debug($"{GroupName}.{Label} changed to {newVal}");
-            _value = newVal;
+            Log._Debug($"{Label} changed to {newVal}");
+            Value = newVal;
         }
 
-        public SerializableUIOptionBase(
-            string key,
-            TVal default_value,
-            string group_name,
-            bool tooltip = false)
-        {
-            _value = DefaultValue = default_value;
-            Key = key;
-            GroupName = group_name;
-            _tooltip = tooltip;
-        }
     }
 }

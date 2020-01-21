@@ -20,10 +20,10 @@ namespace TrafficManager.Util {
 
         private List<ushort> segmentList = null;
 
-        public static void FixLanesRAbout(ushort segmentId, ushort nextSegmentId) {
+        private static void FixLanesRAbout(ushort segmentId, ushort nextSegmentId) {
             ushort nodeId = netService.GetHeadNode(segmentId);
 
-            if (OptionsMassEditTab.rabout_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
                 StayInLane(nodeId, StayInLaneMode.Both);
             }
 
@@ -31,7 +31,7 @@ namespace TrafficManager.Util {
             // in which case the next segment should be straigh ahead.
             bool isStraight = segEndMan.GetDirection(segmentId, nextSegmentId, nodeId) == ArrowDirection.Forward;
 
-            if (OptionsMassEditTab.rabout_DedicatedExitLanes &&
+            if (OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes &&
                 HasJunctionFlag(nodeId) &&
                 CanChangeLanes(segmentId, nodeId) == SetLaneArrowError.Success &&
                 isStraight) {
@@ -92,7 +92,7 @@ namespace TrafficManager.Util {
 
         private static void FixRulesRAbout(ushort segmentId) {
             foreach (bool startNode in Constants.ALL_BOOL) {
-                if (OptionsMassEditTab.rabout_PrioritySigns) {
+                if (OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns) {
                     TrafficPriorityManager.Instance.SetPrioritySign(
                         segmentId,
                         startNode,
@@ -105,7 +105,7 @@ namespace TrafficManager.Util {
 
                 ExtSegmentEnd curEnd = GetSegEnd(segmentId, startNode);
 
-                if (OptionsMassEditTab.rabout_NoCrossMainR) {
+                if (OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR) {
                     JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
                         segmentId,
                         startNode,
@@ -120,15 +120,15 @@ namespace TrafficManager.Util {
 
         private static void FixRulesMinor(ushort segmentId, ushort nodeId) {
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
-            bool isHighway = ExtNodeManager.IsHighwayJunction(nodeId);
+            bool isHighway = ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId);
 
-            if (OptionsMassEditTab.rabout_NoCrossYeildR) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
                     segmentId,
                     startNode,
                     false);
             }
-            if (OptionsMassEditTab.rabout_PrioritySigns) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns) {
                 TrafficPriorityManager.Instance.SetPrioritySign(
                     segmentId,
                     startNode,
@@ -147,7 +147,7 @@ namespace TrafficManager.Util {
             ref NetSegment seg = ref GetSeg(segmentId);
             ushort otherNodeId = seg.GetOtherNode(nodeId);
 
-            if (OptionsMassEditTab.rabout_StayInLaneNearRabout &&
+            if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout &&
                 !HasJunctionFlag(otherNodeId) &&
                 seg.m_averageLength < shortUnit * meterPerUnit) {
                 StayInLane(otherNodeId, StayInLaneMode.Both);
@@ -239,15 +239,27 @@ namespace TrafficManager.Util {
             return false;
         }
 
+        /// <summary>
+        /// in RHT prefering forward then left then right.
+        /// if there are multiple forwards then prefer the leftmost ones.
+        /// if there are mutiple lefts then prefer the rightmost ones.
+        /// if there are multiple rights then prefer the leftmost ones
+        /// LHT is the oposite.
+        /// </summary>
         private static List<ushort> GetSortedSegments(ushort segmentId) {
             ushort headNodeId = netService.GetHeadNode(segmentId);
-            bool lht = LaneArrowManager.Instance.Services.SimulationService.LeftHandTraffic;
+            bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
             var list0 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Forward, !lht);
             var list1 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Left   ,  lht);
             var list2 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Right  , !lht);
 
-            list0.AddRange(list1);
-            list0.AddRange(list2);
+            if (lht) {
+                list0.AddRange(list1);
+                list0.AddRange(list2);
+            } else {
+                list0.AddRange(list1);
+                list0.AddRange(list2);
+            }
             return list0;
         }
 

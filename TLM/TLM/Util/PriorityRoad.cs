@@ -236,7 +236,7 @@ namespace TrafficManager.Util {
         private static void FixMajorSegmentRules(ushort segmentId, ushort nodeId) {
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
             JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
-            if(OptionsMassEditTab.avn_NoCrossMainR.Value) {
+            if(OptionsMassEditTab.PriorityRoad_NoCrossMainR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(segmentId, startNode, false);
             }
             TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Main);

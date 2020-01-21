@@ -17,9 +17,15 @@ namespace TrafficManager.Manager.Impl {
           ICustomDataManager<List<Configuration.LaneArrowData>>,
           ICustomDataManager<string>, ILaneArrowManager
         {
+        /// <summary>
+        /// lane types for all road vehicles.
+        /// </summary>
         public const NetInfo.LaneType LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
+        /// <summary>
+        /// vehcile types for all road vehicles
+        /// </summary>
         public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
         public const ExtVehicleType EXT_VEHICLE_TYPES =
@@ -32,10 +38,19 @@ namespace TrafficManager.Manager.Impl {
             Log.NotImpl("InternalPrintDebugInfo for LaneArrowManager");
         }
 
+        /// <summary>
+        /// Get the final lane arrows considering both the default lane arrows and user modifications.
+        /// </summary>
         public LaneArrows GetFinalLaneArrows(uint laneId) {
             return Flags.GetFinalLaneArrowFlags(laneId, true);
         }
 
+        /// <summary>
+        /// Set the lane arrows to flags. this will remove all default arrows for the lane
+        /// and replace it with user arrows.
+        /// default arrows may change as user connects or remove more segments to the junction but
+        /// the user arrows stay the same no matter what.
+        /// </summary>
         public bool SetLaneArrows(uint laneId,
                                   LaneArrows flags,
                                   bool overrideHighwayArrows = false) {
@@ -46,6 +61,17 @@ namespace TrafficManager.Manager.Impl {
 
             return false;
         }
+
+        /// <summary>
+        /// Add arrows to the lane. This will not remove any prevously set flags and
+        /// will remove and replace default arrows only where flag is set.
+        /// default arrows may change as user connects or remove more segments to the junction but
+        /// the user arrows stay the same no matter what.
+        /// </summary>
+        /// <param name="laneId"></param>
+        /// <param name="flags"></param>
+        /// <param name="overrideHighwayArrows"></param>
+        /// <returns></returns>
         public bool AddLaneArrows(uint laneId,
                                   LaneArrows flags,
                                   bool overrideHighwayArrows = false) {
@@ -54,6 +80,11 @@ namespace TrafficManager.Manager.Impl {
             return SetLaneArrows(laneId, flags | flags2, overrideHighwayArrows);
         }
 
+        /// <summary>
+        /// remove arrows (user or default) where flag is set.
+        /// default arrows may change as user connects or remove more segments to the junction but
+        /// the user arrows stay the same no matter what.
+        /// </summary>
         public bool RemoveLaneArrows(uint laneId,
                           LaneArrows flags,
                           bool overrideHighwayArrows = false) {
@@ -62,6 +93,12 @@ namespace TrafficManager.Manager.Impl {
             return SetLaneArrows(laneId, ~flags & flags2, overrideHighwayArrows);
         }
 
+        /// <summary>
+        /// Toggles a lane arrows (user or default) on and off for the directions where flag is set.
+        /// overrides default settings for the arrows that change.
+        /// default arrows may change as user connects or remove more segments to the junction but
+        /// the user arrows stay the same no matter what.
+        /// </summary>
         public bool ToggleLaneArrows(uint laneId,
                                      bool startNode,
                                      LaneArrows flags,
@@ -379,18 +416,23 @@ namespace TrafficManager.Manager.Impl {
                 if (numdirs < 2) {
                     return; // no junction
                 }
+                bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
 
                 if (srcLaneCount == 2 && numdirs == 3) {
-                    LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.LeftForward);
-                    LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows.Right);
+                    if (!lht) {
+                        LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.LeftForward);
+                        LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows.Right);
+                    }else {
+                        LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows.ForwardRight);
+                        LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows.Left);
+                    }
                     return;
                 }
 
                 int l = 0, f = 0, r = 0;
-                bool lhd = LaneArrowManager.Instance.Services.SimulationService.LeftHandDrive;
                 if (numdirs == 2) {
-                    if (!lhd) {
-                        //if right hand drive then favour the more difficult left turns.
+                    if (!lht) {
+                        //if traffic drives on right, then favour the more difficult left turns.
                         if (leftLanesCount == 0) {
                             DistributeLanes2(srcLaneCount, forwardLanesCount, rightLanesCount, out f, out r);
                         } else if (rightLanesCount == 0) {
@@ -400,7 +442,7 @@ namespace TrafficManager.Manager.Impl {
                             DistributeLanes2(srcLaneCount, leftLanesCount, rightLanesCount, out l, out r);
                         }
                     } else {
-                        //if left hand drive then favour the more difficult right turns.
+                        //if traffic drives on left, then favour the more difficult right turns.
                         if (leftLanesCount == 0) {
                             DistributeLanes2(srcLaneCount, rightLanesCount, forwardLanesCount, out r, out f);
                         } else if (rightLanesCount == 0) {
@@ -412,7 +454,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 } else {
                     Debug.Assert(numdirs == 3 && srcLaneCount >= 3);
-                    if (!lhd) {
+                    if (!lht) {
                         DistributeLanes3(srcLaneCount, leftLanesCount, forwardLanesCount, rightLanesCount, out l, out f, out r);
                     } else {
                         DistributeLanes3(srcLaneCount, rightLanesCount, forwardLanesCount, leftLanesCount, out r, out f, out l);

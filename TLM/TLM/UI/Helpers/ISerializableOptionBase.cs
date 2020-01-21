@@ -1,7 +1,9 @@
 namespace TrafficManager.UI.Helpers {
-    public interface ISerializableOptionBase
+
+    //legacy load and save
+    public interface ILegacySerializableOption
     {
-        public void Load(byte data);
-        public byte Save();
+        void Load(byte data); // TODO keep this for backward compatibality.
+        byte Save(); // TODO: delete this once xml serialization is ready
     }
 }

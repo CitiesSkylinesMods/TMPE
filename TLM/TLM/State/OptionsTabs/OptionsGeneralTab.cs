@@ -157,11 +157,13 @@ namespace TrafficManager.State {
             if (newLanguageIndex <= 0) {
                 GlobalConfig.Instance.LanguageCode = null;
                 GlobalConfig.WriteConfig();
+                Translation.SetCurrentLanguageToGameLanguage();
                 Options.RebuildMenu();
             } else if (newLanguageIndex - 1 < Translation.AvailableLanguageCodes.Count) {
                 string newLang = Translation.AvailableLanguageCodes[newLanguageIndex - 1];
                 GlobalConfig.Instance.LanguageCode = newLang;
                 GlobalConfig.WriteConfig();
+                Translation.SetCurrentLanguageToTMPELanguage();
                 Options.RebuildMenu();
             } else {
                 Log.Warning($"Options.onLanguageChanged: Invalid language index: {newLanguageIndex}");

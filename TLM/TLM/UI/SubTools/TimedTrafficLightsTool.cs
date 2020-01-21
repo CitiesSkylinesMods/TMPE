@@ -1,4 +1,5 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
+    using TrafficManager.Util;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -99,9 +100,36 @@
         }
 
         public override void OnPrimaryClickOverlay() {
-            if (HoveredNodeId <= 0 || nodeSelectionLocked) {
+            if (HoveredNodeId <= 0 || nodeSelectionLocked || !Flags.MayHaveTrafficLight(HoveredNodeId)) {
                 return;
             }
+            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            if(ctrlDown) {
+                AutoTimedTrafficLights.ErrorResult res = AutoTimedTrafficLights.Setup(HoveredNodeId);
+                if (res != AutoTimedTrafficLights.ErrorResult.Success) {
+                    string message;
+                    switch (res) {
+                        case AutoTimedTrafficLights.ErrorResult.NotSupported:
+                            message = "Dialog.Text:Auto TL no need";
+                            break;
+                        case AutoTimedTrafficLights.ErrorResult.TTLExists:
+                            message = "Dialog.Text:Node has timed TL script";
+                            break;
+                        default: //Unreachable code
+                            message = $"error = {res}";
+                            break;
+                    }
+                    message =
+                        Translation.TrafficLights.Get("Dialog.Text:Auto TL create failed because") +
+                        "\n" +
+                        Translation.TrafficLights.Get(message);
+                    MainTool.ShowError(message);
+                    return;
+                }
+                RefreshCurrentTimedNodeIds(HoveredNodeId);
+                MainTool.SetToolMode(ToolMode.TimedLightsShowLights);
+            }
+
 
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
@@ -208,7 +236,7 @@
                                             .instance.m_nodes.m_buffer[nodeIdToCopy]
                                             .CountSegments();
                     int numTargetSegments = Singleton<NetManager>
-                                            .instance.m_nodes.m_buffer[nodeIdToCopy]
+                                            .instance.m_nodes.m_buffer[HoveredNodeId]
                                             .CountSegments();
 
                     if (numSourceSegments != numTargetSegments) {
@@ -249,7 +277,10 @@
 
             switch (MainTool.GetToolMode()) {
                 case ToolMode.TimedLightsSelectNode: {
-                    GuiTimedTrafficLightsNode();
+                    bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+                    if (!ctrlDown) {
+                        GuiTimedTrafficLightsNode();
+                    }
                     break;
                 }
 
