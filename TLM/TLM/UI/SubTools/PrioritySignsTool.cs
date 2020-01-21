@@ -163,18 +163,73 @@ namespace TrafficManager.UI.SubTools {
         public override void OnToolGUI(Event e) { }
 
         /// <summary>
-        /// show overlay for other subtools influced by mass edit.
+        /// Thread safe handling of mass edit overlay.
         /// </summary>
-        public static bool showMassEditOverlay = false;
+        public static class MassEditOVerlay {
+            private static object _lock;
+
+            private static bool _show = false;
+            public static bool Show {
+                get {
+                    lock (_lock) {
+                        return _show;
+                    }
+                }
+                set {
+                    lock (_lock) {
+                        _show = value;
+                    }
+                }
+            }
+
+            private static DateTime _timer = DateTime.MinValue;
+            /// <summary>
+            /// overrides MassEditOVerlay.Show when it is set to a UTC time in future.
+            /// </summary>
+            public static DateTime Timer {
+                get {
+                    lock (_lock) {
+                        return _timer;
+                    }
+                }
+                set {
+                    lock (_lock) {
+                        _timer = value;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// show overlay for other subtools influced by mass edit.
+            /// </summary>
+            public static bool IsActive {
+                get {
+                    lock (_lock) {
+                        return Show || DateTime.Now < Timer;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// refreshes all subtools incflucned by mass edit.
+        /// the mass edit overlay active while processing
+        /// and remains active for one extra second so that
         /// </summary>
         private void RefreshMassEditOverlay() {
-            showMassEditOverlay = true;
+            // processing takes while.
+            // Keep mass edit overlay active so that user has visual feedaback
+            // that something is happening.
+            // this is also to make sure overlay is refresshed
+            // even when the user lets go of the mass edit overlay hotkey.
+            MassEditOVerlay.Timer = DateTime.MaxValue;
+
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
             RefreshCurrentPriorityNodeIds();
-            showMassEditOverlay = false;
+
+            // keep active for one more second so that the user
+            // has a chance to see the new traffic rules.
+            MassEditOVerlay.Timer = DateTime.UtcNow + TimeSpan.FromSeconds(1);
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -185,11 +240,10 @@ namespace TrafficManager.UI.SubTools {
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
+            MassEditOVerlay.Show = ctrlDown;
+
             if (ctrlDown) {
-                showMassEditOverlay = true;
                 massEditMode = PrioritySignsMassEditMode.MainYield;
-            } else {
-                showMassEditOverlay = false;
             }
 
             if (HoveredSegmentId == 0) {

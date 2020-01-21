@@ -43,7 +43,9 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !(Options.junctionRestrictionsOverlay || PrioritySignsTool.showMassEditOverlay)) {
+            if (viewOnly &&
+                !(Options.junctionRestrictionsOverlay
+                || PrioritySignsTool.MassEditOVerlay.IsActive)) {
                 return;
             }
 
@@ -163,7 +165,8 @@ namespace TrafficManager.UI.SubTools {
         public override void Initialize() {
             base.Initialize();
             Cleanup();
-            if (Options.junctionRestrictionsOverlay || PrioritySignsTool.showMassEditOverlay) {
+            if (Options.junctionRestrictionsOverlay ||
+                PrioritySignsTool.MassEditOVerlay.IsActive) {
                 RefreshCurrentRestrictedNodeIds();
             } else {
                 currentRestrictedNodeIds.Clear();
@@ -201,7 +204,9 @@ namespace TrafficManager.UI.SubTools {
             bool hovered = false;
             stateUpdated = false;
 
-            if (viewOnly && !(Options.junctionRestrictionsOverlay || PrioritySignsTool.showMassEditOverlay) &&
+            if (viewOnly &&
+                !(Options.junctionRestrictionsOverlay ||
+                PrioritySignsTool.MassEditOVerlay.IsActive) &&
                 (MainTool.GetToolMode() != ToolMode.JunctionRestrictions)) {
                 return false;
             }

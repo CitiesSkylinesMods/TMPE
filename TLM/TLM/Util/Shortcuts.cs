@@ -1,5 +1,7 @@
 namespace TrafficManager.Util {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using ColossalFramework;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
@@ -7,7 +9,15 @@ namespace TrafficManager.Util {
     using TrafficManager.API.Traffic.Data;
     using static Constants;
 
+    //TODO should I rename this to Extensions or Helpers?
     internal static class Shortcuts {
+        /// <summary>
+        /// returns a new calling Clone() on all items.
+        /// </summary>
+        /// <typeparam name="T">item time must be IClonable</typeparam>
+        internal static IList<T> Clone<T>(this IList<T> listToClone) where T : ICloneable =>
+            listToClone.Select(item => (T)item.Clone()).ToList();
+
         private static NetNode[] _nodeBuffer => Singleton<NetManager>.instance.m_nodes.m_buffer;
 
         private static NetSegment[] _segBuffer => Singleton<NetManager>.instance.m_segments.m_buffer;
@@ -22,7 +32,11 @@ namespace TrafficManager.Util {
 
         internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
 
+        internal static ref NetNode ToNode(this ushort nodeId) => ref GetNode(nodeId);
+
         internal static ref NetSegment GetSeg(ushort segmentId) => ref _segBuffer[segmentId];
+
+        internal static ref NetSegment ToSegment(this ushort segmentId) => ref GetSeg(segmentId);
 
         internal static ref ExtSegmentEnd GetSegEnd(ushort segmentId, ushort nodeId) =>
             ref _segEndBuff[segEndMan.GetIndex(segmentId, nodeId)];

@@ -1,14 +1,12 @@
 namespace TrafficManager.Util {
-    using System.Collections.Generic;
-    using ColossalFramework;
-    using API.Manager;
-    using API.Traffic.Data;
-    using TrafficManager.Manager.Impl;
-    using API.Traffic.Enums;
     using System;
+    using System.Collections.Generic;
+    using API.Traffic.Data;
+    using API.Traffic.Enums;
+    using Manager.Impl;
     using GenericGameBridge.Service;
-    using UnityEngine;
     using CSUtil.Commons;
+    using UnityEngine;
     using static TrafficManager.Util.SegmentTraverser;
     using State;
     using System.Linq;
@@ -16,7 +14,7 @@ namespace TrafficManager.Util {
 
     public static class PriorityRoad {
 
-        private static void Swap(List<ushort> list, int i1, int i2) {
+        private static void Swap(this List<ushort> list, int i1, int i2) {
             ushort temp = list[i1];
             list[i1] = list[i2];
             list[i2] = temp;
@@ -35,6 +33,10 @@ namespace TrafficManager.Util {
             }
         }
 
+        /// <summary>
+        /// Quick-setups as priority junction: for every junctions on the road contianing
+        /// the input segment traversing straight.
+        /// </summary>
         public static void FixRoad(ushort initialSegmentId) {
             SegmentTraverser.Traverse(
                 initialSegmentId,
@@ -102,11 +104,6 @@ namespace TrafficManager.Util {
             return false;
         }
 
-        //TODO move to util or extensions
-        public static IList<T> Clone<T>(this IList<T> listToClone) where T : ICloneable {
-            return listToClone.Select(item => (T)item.Clone()).ToList();
-        }
-
         /// <summary>
         /// if this is a case of split avenue, arranges the input segment list as follows:
         /// slot 0: incomming oneway road.
@@ -131,15 +128,15 @@ namespace TrafficManager.Util {
             if (sum != 2) {
                 return false;
             } else if (!oneway0) {
-                Swap(segmentList, 0, 2);
+                segmentList.Swap( 0, 2);
             } else if (!oneway1) {
-                Swap(segmentList, 1, 2);
+                segmentList.Swap( 1, 2);
             }
 
             // slot 0: incomming road.
             // slot 1: outgoing road.
             if (netService.GetHeadNode(segmentList[1]) == netService.GetTailNode(segmentList[0])) {
-                Swap(segmentList, 0, 1);
+                segmentList.Swap( 0, 1);
             }
 
             return netService.GetHeadNode(segmentList[0]) == netService.GetTailNode(segmentList[1]);
@@ -168,6 +165,14 @@ namespace TrafficManager.Util {
             }
         }
 
+        /// <summary>
+        /// Quick-setups the given junction as priority junction.
+        /// The two biggest roads are considererd prioirty road.
+        /// all other roads are considered minor road.
+        /// Also detects:
+        ///  - split avenue into 2 oneway roads
+        ///  - semi-roundabout
+        /// </summary>
         public static void FixJunction(ushort nodeId) {
             if (nodeId == 0) {
                 return;
@@ -175,7 +180,7 @@ namespace TrafficManager.Util {
 
             List<ushort> segmentList = new List<ushort>();
             for (int i = 0; i < 8; ++i) {
-                ushort segId = GetNode(nodeId).GetSegment(i);
+                ushort segId = nodeId.ToNode().GetSegment(i);
                 if (segId != 0) {
                     segmentList.Add(segId);
                 }
@@ -186,6 +191,8 @@ namespace TrafficManager.Util {
                 return;
             }
 
+            // Note: the difference between semi-roundabout and Split-Aenue detection
+            // is mainly one-way segment angle.
             if (ArrangeSplitAvenue(segmentList, nodeId)) {
                 HandleSplitAvenue(segmentList, nodeId);
                 return;
@@ -256,7 +263,7 @@ namespace TrafficManager.Util {
         private static int CountLanes(ushort segmentId, ushort nodeId, bool outgoing = true) {
             return netService.GetSortedLanes(
                                 segmentId,
-                                ref GetSeg(segmentId),
+                                ref segmentId.ToSegment(),
                                 netService.IsStartNode(segmentId, nodeId) ^ (!outgoing),
                                 LaneArrowManager.LANE_TYPES,
                                 LaneArrowManager.VEHICLE_TYPES,
@@ -275,7 +282,7 @@ namespace TrafficManager.Util {
             bool IsMain(ushort segId) {
                 return segId == segmentList[0] || segId == segmentList[1];
             }
-            ref NetSegment seg = ref GetSeg(segmentId);
+            ref NetSegment seg = ref segmentId.ToSegment();
 
             ushort mainIn, mainOut;
             if (lhd) {
@@ -305,8 +312,8 @@ namespace TrafficManager.Util {
                 return;
             }
 
-            ref NetSegment seg = ref GetSeg(segmentId);
-            ref NetNode node = ref GetNode(nodeId);
+            ref NetSegment seg = ref segmentId.ToSegment();
+            ref NetNode node = ref nodeId.ToNode();
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
 
             //list of outgoing lanes from current segment to current node.
@@ -356,8 +363,8 @@ namespace TrafficManager.Util {
                 Debug.Log("can't change lanes");
                 return;
             }
-            ref NetSegment seg = ref GetSeg(segmentId);
-            ref NetNode node = ref GetNode(nodeId);
+            ref NetSegment seg = ref segmentId.ToSegment();
+            ref NetNode node = ref nodeId.ToNode();
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
 
             //list of outgoing lanes from current segment to current node.
@@ -420,7 +427,7 @@ namespace TrafficManager.Util {
         }
 
         private static int CountCarLanes(ushort segmentId) {
-            ref NetSegment segment = ref GetSeg(segmentId);
+            ref NetSegment segment = ref segmentId.ToSegment();
             int forward = 0, backward = 0;
             segment.CountLanes(
                 segmentId,
