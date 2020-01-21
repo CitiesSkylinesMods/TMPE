@@ -143,7 +143,7 @@ namespace TrafficManager.Util {
         }
 
         private static void HandleSplitAvenue(List<ushort> segmentList, ushort nodeId) {
-            void SetArrows(ushort segmentIdSrc, ushort segmentIdDst, ushort nodeId) {
+            void SetArrows(ushort segmentIdSrc, ushort segmentIdDst) {
                 LaneArrows arrow = ToLaneArrows(GetDirection(segmentIdSrc, segmentIdDst, nodeId));
                 IList<LanePos> lanes = netService.GetSortedLanes(
                                 segmentIdSrc,
@@ -158,8 +158,8 @@ namespace TrafficManager.Util {
                 }
             }
 
-            SetArrows(segmentList[0], segmentList[2], nodeId);
-            SetArrows(segmentList[2], segmentList[1], nodeId);
+            SetArrows(segmentList[0], segmentList[2]);
+            SetArrows(segmentList[2], segmentList[1]);
             foreach(ushort segmentId in segmentList) {
                 FixMajorSegmentRules(segmentId, nodeId);
             }
@@ -216,6 +216,7 @@ namespace TrafficManager.Util {
             // Turning allowed when the main road is agnled.
             ArrowDirection dir = GetDirection(segmentList[0], segmentList[1], nodeId);
             ignoreLanes &= dir != ArrowDirection.Forward;
+            ignoreLanes |= OptionsMassEditTab.PriorityRoad_AllowLeftTurns;
 
             //Debug.Log($"ignorelanes={ignoreLanes}");
 
@@ -243,7 +244,7 @@ namespace TrafficManager.Util {
         private static void FixMajorSegmentRules(ushort segmentId, ushort nodeId) {
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
             JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
-            if(OptionsMassEditTab.PriorityRoad_NoCrossMainR) {
+            if(!OptionsMassEditTab.PriorityRoad_CrossMainR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(segmentId, startNode, false);
             }
             TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Main);
@@ -252,8 +253,13 @@ namespace TrafficManager.Util {
 
         private static void FixMinorSegmentRules(List<ushort> segmentList, ushort segmentId, ushort nodeId) {
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
-            if(HasAccelerationLane( segmentList, segmentId, nodeId)) {
+            if (OptionsMassEditTab.PriorityRoad_EnterBlockedYeild) {
                 JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
+            }
+            if (HasAccelerationLane(segmentList, segmentId, nodeId)) {
+                JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
+            } else if (OptionsMassEditTab.PriorityRoad_StopAtEntry) {
+                TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Stop);
             } else {
                 TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Yield);
             }

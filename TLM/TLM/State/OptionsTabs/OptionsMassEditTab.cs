@@ -4,31 +4,6 @@ namespace TrafficManager.State {
     using UI.Helpers;
 
     public static class OptionsMassEditTab {
-        /* TODO: Add options to a list.
-         Legned:
-          * i dont have it
-          < I do not want it
-
-        rabout_DedicatedExitLanes
-        rabout_SwitchLanesYeildR*<
-        rabout_SwitchLanesMainR*<
-        rabout_StayInLaneMainR
-        rabout_StayInLaneNearRabout
-        rabout_NoCrossMainR
-        rabout_NoCrossYeildR
-        rabout_PrioritySigns
-
-        avn_NoCrossMainR
-        avn_NoCrossYield*<
-        avn_NoLeftTurns*
-        avn_EnterBlockedMain*<
-        avn_EnterBlockedYeild*
-        avn_StopEntry*
-        avn_PrioritySigns*<
-        avn_SwitchLanesMain*<
-        avn_SwtichLanesYeild*<
-        */
-
         public static CheckboxOption RoundAboutQuickFix_DedicatedExitLanes =
             new CheckboxOption("RoundAboutQuickFix_DedicatedExitLanes") {
             Label = "Roundabout.Option:Allocate dedicated exit lanes",
@@ -61,10 +36,29 @@ namespace TrafficManager.State {
             Label = "Roundabout.Option:Set priority signs",
         };
 
-        public static CheckboxOption PriorityRoad_NoCrossMainR =
-            new CheckboxOption("PriorityRoad_NoCrossMainR") {
-                Label = "Priority roads.Option:No Crossings on main road",
+        public static CheckboxOption PriorityRoad_CrossMainR =
+            new CheckboxOption("PriorityRoad_CrossMainR") {
+                Label = "Priority roads.Option:Allow pedestrian crossings on main road",
         };
+
+        public static CheckboxOption PriorityRoad_AllowLeftTurns =
+            new CheckboxOption("PriorityRoad_AllowLeftTurns") {
+                Label = "Priority roads.Option:Allow left turns",
+                Tooltip = "Priority roads.Tooltipn:Allow left turns"
+            };
+
+        public static CheckboxOption PriorityRoad_EnterBlockedYeild =
+            new CheckboxOption("PriorityRoad_EnterBlockedYeild") {
+                Label = "Priority roads.Option:Enter blocked yield road",
+        };
+
+        public static CheckboxOption PriorityRoad_StopAtEntry =
+            new CheckboxOption("PriorityRoad_StopAtEntry") {
+                Label = "Priority roads.Option:Stop signs on entry",
+                Tooltip = "Priority roads.Tooltip:Stop signs on entry"
+        };
+
+
 
         public static void MakeSettings_MassEdit(ExtUITabstrip tabStrip, int tabIndex)
         {
@@ -82,7 +76,10 @@ namespace TrafficManager.State {
             RoundAboutQuickFix_PrioritySigns.AddUI(raboutGroup);
 
             UIHelperBase priorityRoadGroup = panelHelper.AddGroup(T("MassEdit.Group.Priority roads"));
-            PriorityRoad_NoCrossMainR.AddUI(priorityRoadGroup);
+            PriorityRoad_CrossMainR.AddUI(priorityRoadGroup);
+            PriorityRoad_AllowLeftTurns.AddUI(priorityRoadGroup);
+            PriorityRoad_EnterBlockedYeild.AddUI(priorityRoadGroup);
+            PriorityRoad_StopAtEntry.AddUI(priorityRoadGroup);
         }
 
         private static string T(string key) => Translation.Options.Get(key);
