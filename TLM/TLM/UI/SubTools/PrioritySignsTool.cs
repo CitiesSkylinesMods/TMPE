@@ -40,18 +40,15 @@ namespace TrafficManager.UI.SubTools {
                 SelectedNodeId = 0;
             }
 
-            //TODO provide revert/clear mode  issue #568
+            // TODO provide revert/clear mode issue #568
             if (ctrlDown && shiftDown) {
                 bool isRAbout = RoundaboutMassEdit.Instance.FixRabout(HoveredSegmentId);
                 if (!isRAbout) {
                     PriorityRoad.FixRoad(HoveredSegmentId);
                 }
-                if (isRAbout) {
-                    RefreshMassEditOverlay();
-                    return;
-                }
+                RefreshMassEditOverlay();
+                return;
             } else if (ctrlDown) {
-
                 PriorityRoad.FixJunction(HoveredNodeId);
                 RefreshMassEditOverlay();
                 return;
@@ -166,7 +163,7 @@ namespace TrafficManager.UI.SubTools {
         /// Thread safe handling of mass edit overlay.
         /// </summary>
         public static class MassEditOVerlay {
-            private static object _lock;
+            private static object _lock = new object();
 
             private static bool _show = false;
             public static bool Show {
@@ -183,19 +180,26 @@ namespace TrafficManager.UI.SubTools {
             }
 
             private static DateTime _timer = DateTime.MinValue;
+
             /// <summary>
+            /// show mass edit over lay for the input duration.
             /// overrides MassEditOVerlay.Show when it is set to a UTC time in future.
+            /// seconds is
+            /// seconds is
             /// </summary>
-            public static DateTime Timer {
-                get {
-                    lock (_lock) {
-                        return _timer;
-                    }
+            /// <param name="seconds"> duration.
+            /// negative => never
+            /// float.MaxValue => always
+            /// </param>
+            public static void SetTimer(float seconds) {
+                DateTime dt;
+                if (seconds == float.MaxValue) {
+                    dt = DateTime.MaxValue;
+                } else {
+                    dt = DateTime.UtcNow + TimeSpan.FromSeconds(seconds);
                 }
-                set {
-                    lock (_lock) {
-                        _timer = value;
-                    }
+                lock (_lock) {
+                    _timer = dt;
                 }
             }
 
@@ -204,9 +208,13 @@ namespace TrafficManager.UI.SubTools {
             /// </summary>
             public static bool IsActive {
                 get {
+                    bool show;
+                    DateTime timer;
                     lock (_lock) {
-                        return Show || DateTime.Now < Timer;
+                        show = _show;
+                        timer = _timer;
                     }
+                    return show || DateTime.UtcNow < timer;
                 }
             }
         }
@@ -222,14 +230,14 @@ namespace TrafficManager.UI.SubTools {
             // that something is happening.
             // this is also to make sure overlay is refresshed
             // even when the user lets go of the mass edit overlay hotkey.
-            MassEditOVerlay.Timer = DateTime.MaxValue;
+            MassEditOVerlay.SetTimer(float.MaxValue);
 
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
             RefreshCurrentPriorityNodeIds();
 
             // keep active for one more second so that the user
             // has a chance to see the new traffic rules.
-            MassEditOVerlay.Timer = DateTime.UtcNow + TimeSpan.FromSeconds(1);
+            MassEditOVerlay.SetTimer(1);
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
