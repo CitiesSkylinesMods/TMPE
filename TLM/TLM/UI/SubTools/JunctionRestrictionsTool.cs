@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
     using API.Manager;
     using ColossalFramework;
@@ -43,7 +43,7 @@
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.junctionRestrictionsOverlay) {
+            if (viewOnly && !(Options.junctionRestrictionsOverlay || PrioritySignsTool.showMassEditOverlay)) {
                 return;
             }
 
@@ -163,7 +163,7 @@
         public override void Initialize() {
             base.Initialize();
             Cleanup();
-            if (Options.junctionRestrictionsOverlay) {
+            if (Options.junctionRestrictionsOverlay || PrioritySignsTool.showMassEditOverlay) {
                 RefreshCurrentRestrictedNodeIds();
             } else {
                 currentRestrictedNodeIds.Clear();
@@ -201,7 +201,7 @@
             bool hovered = false;
             stateUpdated = false;
 
-            if (viewOnly && !Options.junctionRestrictionsOverlay &&
+            if (viewOnly && !(Options.junctionRestrictionsOverlay || PrioritySignsTool.showMassEditOverlay) &&
                 (MainTool.GetToolMode() != ToolMode.JunctionRestrictions)) {
                 return false;
             }
@@ -241,7 +241,7 @@
                 Vector3 centerStart = nodePos + (yu * (viewOnly ? 5f : 14f));
                 Vector3 zero = centerStart - (0.5f * (numSignsPerRow-1) * f * xu); // "top left"
                 if (viewOnly) {
-                    if (Constants.ServiceFactory.SimulationService.LeftHandDrive) {
+                    if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
                         zero -= xu * 8f;
                     } else {
                         zero += xu * 8f;
@@ -475,12 +475,12 @@
                 //--------------------------------
                 IJunctionRestrictionsManager junctionRestrictionsManager =
                     Constants.ManagerFactory.JunctionRestrictionsManager;
-                bool lhd = Constants.ServiceFactory.SimulationService.LeftHandDrive;
+                bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
 
                 // draw "turn-left-on-red allowed" sign at (2; 0)
-                allowed = junctionRestrictionsManager.IsTurnOnRedAllowed(lhd, segmentId, startNode);
+                allowed = junctionRestrictionsManager.IsTurnOnRedAllowed(lht, segmentId, startNode);
                 configurable = junctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(
-                    lhd,
+                    lht,
                     segmentId,
                     startNode,
                     ref node);
@@ -490,7 +490,7 @@
                         && (!viewOnly
                             || (allowed != junctionRestrictionsManager
                                     .GetDefaultTurnOnRedAllowed(
-                                        lhd,
+                                        lht,
                                         segmentId,
                                         startNode,
                                         ref node)))))
@@ -516,7 +516,7 @@
 
                         if (MainTool.CheckClicked()) {
                             junctionRestrictionsManager.ToggleTurnOnRedAllowed(
-                                lhd,
+                                lht,
                                 segmentId,
                                 startNode);
                             stateUpdated = true;
@@ -530,11 +530,11 @@
 
                 // draw "turn-right-on-red allowed" sign at (2; 1)
                 allowed = junctionRestrictionsManager.IsTurnOnRedAllowed(
-                    !lhd,
+                    !lht,
                     segmentId,
                     startNode);
                 configurable = junctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(
-                    !lhd,
+                    !lht,
                     segmentId,
                     startNode,
                     ref node);
@@ -544,7 +544,7 @@
                         && (!viewOnly
                             || (allowed != junctionRestrictionsManager
                                     .GetDefaultTurnOnRedAllowed(
-                                        !lhd,
+                                        !lht,
                                         segmentId,
                                         startNode,
                                         ref node)))))
@@ -570,7 +570,7 @@
 
                         if (MainTool.CheckClicked()) {
                             junctionRestrictionsManager.ToggleTurnOnRedAllowed(
-                                !lhd,
+                                !lht,
                                 segmentId,
                                 startNode);
                             stateUpdated = true;

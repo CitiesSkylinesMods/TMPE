@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI {
+namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using JetBrains.Annotations;
     using Textures;
@@ -78,12 +78,12 @@
 
         private GUIStyle borderlessStyle_;
 
-        protected ushort HoveredNodeId {
+        protected virtual ushort HoveredNodeId {
             get => TrafficManagerTool.HoveredNodeId;
             set => TrafficManagerTool.HoveredNodeId = value;
         }
 
-        protected ushort HoveredSegmentId {
+        protected virtual ushort HoveredSegmentId {
             get => TrafficManagerTool.HoveredSegmentId;
             set => TrafficManagerTool.HoveredSegmentId = value;
         }

@@ -1,4 +1,4 @@
-﻿// #define DEBUGVISUALS
+// #define DEBUGVISUALS
 
 namespace TrafficManager.TrafficLight.Impl {
     using System;
@@ -262,7 +262,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 }
 
                 case ArrowDirection.Turn: {
-                    return Constants.ServiceFactory.SimulationService.LeftHandDrive
+                    return Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft
                                ? LightRight
                                : LightLeft;
                 }

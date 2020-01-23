@@ -2,7 +2,7 @@
 // https://github.com/PropaneDragon/RushHour/blob/release/RushHour/Options/OptionHandler.cs
 // https://github.com/CWMlolzlz/CS-AdvancedToolbar/blob/master/Source/ExpandableToolbar.cs
 
-namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.UI.Helpers {
     using UnityEngine;
     using ICities;
     using ColossalFramework.UI;
@@ -60,6 +60,7 @@ namespace TrafficManager.Manager.Impl {
 
             UIScrollablePanel scrollablePanel = panel.AddUIComponent<UIScrollablePanel>();
             scrollablePanel.autoLayout = true;
+            scrollablePanel.autoLayoutPadding = new RectOffset(10, 10, 0, 16);
             scrollablePanel.autoLayoutStart = LayoutStart.TopLeft;
             scrollablePanel.wrapLayout = true;
             scrollablePanel.size = new Vector2(panel.size.x - 50, panel.size.y + 35);
@@ -85,7 +86,6 @@ namespace TrafficManager.Manager.Impl {
 
             selectedIndex = tabCount - 1;
             UIPanel currentPanel = tabContainer.components[selectedIndex] as UIPanel;
-            currentPanel.autoLayoutPadding = new RectOffset(10, 10, 0, 16);
             currentPanel.autoLayout = true;
 
             UIHelper panelHelper;

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using System;
     using API.Manager;
     using API.Traffic.Data;
@@ -1393,19 +1393,19 @@
                         IJunctionRestrictionsManager junctionRestrictionsManager
                             = Constants.ManagerFactory.JunctionRestrictionsManager;
                         ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
-                        bool lhd = Constants.ServiceFactory.SimulationService.LeftHandDrive;
+                        bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
                         int torIndex = turnOnRedMan.GetIndex(prevPos.m_segment, isTargetStartNode);
 
                         if ((turnOnRedMan.TurnOnRedSegments[torIndex].leftSegmentId ==
                              position.m_segment
                              && junctionRestrictionsManager.IsTurnOnRedAllowed(
-                                 lhd,
+                                 lht,
                                  prevPos.m_segment,
                                  isTargetStartNode))
                             || (turnOnRedMan.TurnOnRedSegments[torIndex].rightSegmentId ==
                                 position.m_segment
                                 && junctionRestrictionsManager.IsTurnOnRedAllowed(
-                                    !lhd,
+                                    !lht,
                                     prevPos.m_segment,
                                     isTargetStartNode)))
                         {

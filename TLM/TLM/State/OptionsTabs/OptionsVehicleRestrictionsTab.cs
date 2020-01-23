@@ -5,6 +5,8 @@ namespace TrafficManager.State {
     using ICities;
     using Manager.Impl;
     using UI;
+    using UnityEngine;
+    using UI.Helpers;
 
     public static class OptionsVehicleRestrictionsTab {
         private static UICheckBox _relaxedBussesToggle;
@@ -117,6 +119,8 @@ namespace TrafficManager.State {
                           Options.evacBussesMayIgnoreRules,
                           OnEvacBussesMayIgnoreRulesChanged) as UICheckBox;
             }
+
+            OptionsMassEditTab.MakePanel_MassEdit(panelHelper);
         }
 
         private static void OnAllRelaxedChanged(bool newAllRelaxed) {
