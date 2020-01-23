@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI {
+namespace TrafficManager.UI {
     using System;
     using ColossalFramework.UI;
     using CSUtil.Commons;
@@ -156,7 +156,6 @@
             tooltip = Tooltip + shortcutText;
 
             isVisible = Visible;
-            this.Invalidate();
         }
 
 

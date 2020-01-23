@@ -10,31 +10,36 @@ namespace TrafficManager.UI {
     using System.Reflection;
 
     public class AdjustRoadSelectPanelExtender : MonoBehaviour {
+        public static AdjustRoadSelectPanelExtender Instance = null;
         public enum FunctionMode {
             Clear=0,
-            Yeild,
             Stop,
+            Yeild,
             MiddleBarrier,
             Rabout,
         }
-        private FunctionMode _function = FunctionMode.Clear;
-        public FunctionMode Function {
-            get => _function;
-            set {
-                _function = value;
-                Refresh();
-            }
-        }
-        private UICheckBox priorityRoadToggle;
+
+
+        private UICheckBox priorityRoadToggle = null;
         public void HidePriorityRoadToggle() {
+            if (priorityRoadToggle == null)
+                return;
             Debug.Log($"priority toggle => {priorityRoadToggle.name}");
             priorityRoadToggle.Disable();
             priorityRoadToggle.Hide(); //TODO actually hide
+            //priorityRoadToggle.
             priorityRoadToggle.isVisible = false;
+        }
+
+        public class Threading : ThreadingExtensionBase {
+            public override void OnAfterSimulationFrame() {
+                AdjustRoadSelectPanelExtender.Instance?.HidePriorityRoadToggle();
+            }
         }
 
         public IList<PanelExt> panels;
         public void Start() {
+            Instance = this;
             Debug.Log("POINT A1");
             panels = new List<PanelExt>();
 
@@ -77,12 +82,14 @@ namespace TrafficManager.UI {
 
 
         public void OnDestroy() {
+            Instance = null;
+            priorityRoadToggle = null;
             if (panels == null) {
                 return;
             }
 
             foreach (UIPanel panel in panels) {
-                Destroy(panel.gameObject);
+                Destroy(panel);
             }
         }
 
@@ -101,7 +108,7 @@ namespace TrafficManager.UI {
             }
 
             public AdjustRoadSelectPanelExtender adjustRoadSelectPanelExtender;
-            //UIButton Clear, TrafficLight, Stop, Yeild, RightOnly, RoundAbout;
+            //UIButton Clear, TrafficLight, Yeild, Stop , RightOnly, RoundAbout;
             public IList<ButtonExt> buttons;
             public void Start() {
                 Debug.Log("POINT B1");
@@ -114,8 +121,8 @@ namespace TrafficManager.UI {
 
                 buttons = new List<ButtonExt>();
                 buttons.Add(AddUIComponent<ClearButtton>());
-                buttons.Add(AddUIComponent<YeildButtton>());
                 buttons.Add(AddUIComponent<StopButtton>());
+                buttons.Add(AddUIComponent<YeildButtton>());
                 buttons.Add(AddUIComponent<AvneueButtton>());
                 buttons.Add(AddUIComponent<RboutButtton>());
 
@@ -128,29 +135,28 @@ namespace TrafficManager.UI {
                 }
 
                 foreach (UIButton button in buttons) {
-                    Destroy(button.gameObject);
+                    Destroy(button);
                 }
             }
 
             public class ClearButtton : ButtonExt {
                 public override void OnActivate() { }
                 public override void OnDeactivate() { throw new Exception("Unreachable code"); }
-                public override bool Active => false;
                 public override string Tooltip => Translation.Menu.Get("Tooltip:Clear");
                 public override FunctionMode Function => FunctionMode.Clear;
                 protected override void OnClick(UIMouseEventParameter p) {
                     base.OnClick(p);
                 }
             }
-            public class YeildButtton : ButtonExt {
-                public override string Tooltip => Translation.Menu.Get("Tooltip:Yeil entry");
-                public override FunctionMode Function => FunctionMode.Yeild;
-                public override void OnActivate() { }
-                public override void OnDeactivate() { }
-            }
             public class StopButtton : ButtonExt {
                 public override string Tooltip => Translation.Menu.Get("Tooltip:Stop entry");
                 public override FunctionMode Function => FunctionMode.Stop;
+                public override void OnActivate() { }
+                public override void OnDeactivate() { }
+            }
+            public class YeildButtton : ButtonExt {
+                public override string Tooltip => Translation.Menu.Get("Tooltip:Yeil entry");
+                public override FunctionMode Function => FunctionMode.Yeild;
                 public override void OnActivate() { }
                 public override void OnDeactivate() { }
             }
@@ -188,11 +194,17 @@ namespace TrafficManager.UI {
                     }
                 }
 
+                public void Refresh() {
+                    UpdateProperties();
+                    m_BackgroundSprites.m_Disabled = GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Base, false);
+
+                }
+
                 public override void HandleClick(UIMouseEventParameter p) { }
 
-                public AdjustRoadSelectPanelExtender MainExt => Singleton<AdjustRoadSelectPanelExtender>.instance;
+                public AdjustRoadSelectPanelExtender MainExt => AdjustRoadSelectPanelExtender.Instance;
 
-                public override bool Active => MainExt.Function == this.Function;
+                public override bool Active => true;//MainExt.Function == this.Function;
 
                 public abstract FunctionMode Function { get; }
 

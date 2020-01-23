@@ -525,6 +525,7 @@
     <EmbeddedResource Include="Resources\TrafficLights\IconJunctionTrafficLights.png" />
     <EmbeddedResource Include="Resources\TrafficLights\IconJunctionTimedTL.png" />
     <EmbeddedResource Include="Resources\road-edit-btns.png" />
+    <Content Include="Resources\road-edit-btns2.png" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
