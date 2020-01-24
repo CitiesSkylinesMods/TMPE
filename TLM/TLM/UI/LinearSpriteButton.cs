@@ -148,6 +148,7 @@ namespace TrafficManager.UI {
 
         internal void UpdateProperties() {
             bool active = CanActivate() && Active;
+            Log._Debug($"UpdateProperties: button={this} active={active} IsDisabled={IsDisabled}");
 
             m_BackgroundSprites.m_Normal =
                 m_BackgroundSprites.m_Disabled =
@@ -183,7 +184,7 @@ namespace TrafficManager.UI {
             }
 
             isVisible = Visible;
-            //Invalidate(); // TODO: why was this here in the first place?
+            Invalidate(); // TODO: why was this here in the first place?
         }
 
 

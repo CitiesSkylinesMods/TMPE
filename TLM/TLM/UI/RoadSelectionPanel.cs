@@ -25,20 +25,21 @@ namespace TrafficManager.UI {
             Rabout,
         }
 
-        private FunctionMode _function = FunctionMode.Clear;
+        private FunctionMode _function;
         public FunctionMode Function {
-            get => _function;
+            get {
+                Log._Debug($"RoadSelectionPanel.Function returns {_function}");
+                return _function;
+            }
             set {
                 _function = value;
                 Refresh();
             }
         }
 
-        private UICheckBox priorityRoadToggle = null;
-
-        public void HidePriorityRoadToggle() {
+        public void HidePriorityRoadToggle(UIComponent priorityRoadToggle) {
             priorityRoadToggle.eventVisibilityChanged +=
-                (_, __) => priorityRoadToggle.isVisible = false;
+                (component, value) => component.isVisible = false;
         }
 
         public void HideRoadAdjustPanelElements(UIPanel roadAdjustPanel) {
@@ -52,14 +53,16 @@ namespace TrafficManager.UI {
 
         public IList<PanelExt> panels;
         public void Start() {
+            Function = FunctionMode.Clear;
+
             panels = new List<PanelExt>();
 
             RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
             if (roadWorldInfoPanel != null) {
-                priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
                 PanelExt panel = AddPanel(roadWorldInfoPanel.component);
                 panel.relativePosition += new Vector3(0, -15f);
-                HidePriorityRoadToggle();
+                UIComponent priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
+                HidePriorityRoadToggle(priorityRoadToggle);
                 panels.Add(panel);
             }
 
@@ -86,27 +89,25 @@ namespace TrafficManager.UI {
         }
 
         public void OnDestroy() {
-            Instance = null;
-            priorityRoadToggle = null;
-            if (panels == null) {
-                return;
-            }
-
             foreach (UIPanel panel in panels) {
                 Destroy(panel);
             }
+            Instance = null;
         }
 
         public void Refresh() {
-            Log._Debug("Refresh called:\n" + Environment.StackTrace);
+            Log._Debug($"Refresh called Function mode is {Function}:\n" + Environment.StackTrace);
+            if (panels == null)
+                return;
             foreach(var panel in panels) {
                 panel.Refresh();
             }
         }
 
-
         public class PanelExt : UIPanel {
             public void Refresh() {
+                if (buttons == null)
+                    return;
                 foreach(var button in buttons) {
                     button.UpdateProperties();
                 }
@@ -185,7 +186,7 @@ namespace TrafficManager.UI {
                     height = Height;
                 }
 
-                public override void HandleClick(UIMouseEventParameter p) { }
+                public override void HandleClick(UIMouseEventParameter p) { throw new Exception("Unreachable code"); }
 
                 public abstract void OnActivate();
                 public abstract void OnDeactivate();
@@ -210,7 +211,7 @@ namespace TrafficManager.UI {
 
                 public override bool IsDisabled {
                     get {
-                        Log._Debug($"{Function} : selection.len={RoadSelection.Instance.Length} " +
+                        Log._Debug($"ButtonExt.IsDisabled(): {Function} : selection.len={RoadSelection.Instance.Length} " +
                             $"ret={ RoadSelection.Instance.Length == 0}");
                         return RoadSelection.Instance.Length == 0;
                     }
