@@ -215,6 +215,28 @@ namespace TrafficManager.Util {
             return ret;
         }
 
+        public static bool IsRabout(List<ushort> segList, bool semi = false) {
+            try {
+                int n = segList.Count;
+                if (n == 1)
+                    return false;
+                int lastN = semi ? n - 1 : n;
+                for (int i = 0; i < lastN; ++i) {
+                    ushort prevSegmentID = segList[i];
+                    ushort nextSegmentID = segList[(i + 1) % n];
+                    ushort headNodeID = netService.GetHeadNode(prevSegmentID);
+                    bool isRAbout = IsPartofRoundabout(nextSegmentID, prevSegmentID, headNodeID);
+                    if (!isRAbout)
+                        return false;
+                }
+                return true;
+            }
+            catch (Exception e){
+                Log.Error(e.ToString());
+                return false;
+            }
+        }
+
         private bool TraverseAroundRecursive(ushort segmentId) {
             if (segmentList.Count > 20) {
                 return false; // too long. prune

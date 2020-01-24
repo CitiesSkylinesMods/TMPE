@@ -1,13 +1,15 @@
 namespace TrafficManager.UI {
+    using System;
     using System.Collections.Generic;
     using ColossalFramework.UI;
-    using CSUtil.Commons;
-    using Textures;
     using UnityEngine;
-    using System;
     using ColossalFramework;
     using ICities;
-    using System.Reflection;
+    using CSUtil.Commons;
+
+    using Textures;
+    using Util;
+
 
     public class AdjustRoadSelectPanelExtender : MonoBehaviour {
         public static AdjustRoadSelectPanelExtender Instance = null;
@@ -19,6 +21,14 @@ namespace TrafficManager.UI {
             Rabout,
         }
 
+        private FunctionMode _function = FunctionMode.Clear;
+        public FunctionMode Function {
+            get => _function;
+            set {
+                _function = value;
+                Refresh();
+            }
+        }
 
         private UICheckBox priorityRoadToggle = null;
         public void HidePriorityRoadToggle() {
@@ -26,16 +36,17 @@ namespace TrafficManager.UI {
                 return;
             Debug.Log($"priority toggle => {priorityRoadToggle.name}");
             priorityRoadToggle.Disable();
-            priorityRoadToggle.Hide(); //TODO actually hide
-            //priorityRoadToggle.
-            priorityRoadToggle.isVisible = false;
-        }
-
-        public class Threading : ThreadingExtensionBase {
-            public override void OnAfterSimulationFrame() {
-                AdjustRoadSelectPanelExtender.Instance?.HidePriorityRoadToggle();
+            if (!priorityRoadToggle.isVisible) {
+                //priorityRoadToggle.Hide(); //TODO actually hide
+                priorityRoadToggle.isVisible = false;
             }
         }
+
+        //public class Threading : ThreadingExtensionBase {
+        //    public override void OnAfterSimulationFrame() {
+        //        //AdjustRoadSelectPanelExtender.Instance?.HidePriorityRoadToggle();
+        //    }
+        //}
 
         public IList<PanelExt> panels;
         public void Start() {
@@ -48,9 +59,10 @@ namespace TrafficManager.UI {
                 priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
                 PanelExt panel = AddPanel(roadWorldInfoPanel.component);
                 panel.relativePosition += new Vector3(0, -15f);
-                roadWorldInfoPanel.component.eventVisibilityChanged +=
+                //roadWorldInfoPanel.component.eventVisibilityChanged +=
+                //    (_, __) => HidePriorityRoadToggle();
+                priorityRoadToggle.eventVisibilityChanged +=
                     (_, __) => HidePriorityRoadToggle();
-
                 panels.Add(panel);
             }
 
@@ -65,7 +77,10 @@ namespace TrafficManager.UI {
                 PanelExt panel = AddPanel(roadAdjustPanel);
                 panels.Add(panel);
             }
-            Debug.Log("POINT A2");
+
+            RoadSelection.OnChanged += ()=>Refresh();
+
+Debug.Log("POINT A2");
         }
 
         protected PanelExt AddPanel(UIComponent container) {
@@ -91,6 +106,8 @@ namespace TrafficManager.UI {
             foreach (UIPanel panel in panels) {
                 Destroy(panel);
             }
+            //TODO unsuscribe from OnChanged
+            //TODO unsuscribe from eventVisibilityChanged
         }
 
         public void Refresh() {
@@ -140,37 +157,39 @@ namespace TrafficManager.UI {
             }
 
             public class ClearButtton : ButtonExt {
-                public override void OnActivate() { }
-                public override void OnDeactivate() { throw new Exception("Unreachable code"); }
                 public override string Tooltip => Translation.Menu.Get("Tooltip:Clear");
                 public override FunctionMode Function => FunctionMode.Clear;
-                protected override void OnClick(UIMouseEventParameter p) {
-                    base.OnClick(p);
-                }
+                public override bool Active => false;
+                public override void OnActivate() { }
+                public override void OnDeactivate() { throw new Exception("Unreachable code"); }
             }
             public class StopButtton : ButtonExt {
                 public override string Tooltip => Translation.Menu.Get("Tooltip:Stop entry");
                 public override FunctionMode Function => FunctionMode.Stop;
                 public override void OnActivate() { }
                 public override void OnDeactivate() { }
+
             }
             public class YeildButtton : ButtonExt {
                 public override string Tooltip => Translation.Menu.Get("Tooltip:Yeil entry");
                 public override FunctionMode Function => FunctionMode.Yeild;
                 public override void OnActivate() { }
                 public override void OnDeactivate() { }
+
             }
             public class AvneueButtton : ButtonExt {
                 public override string Tooltip => Translation.Menu.Get("Tooltip:Avenue");
                 public override FunctionMode Function => FunctionMode.MiddleBarrier;
                 public override void OnActivate() { }
                 public override void OnDeactivate() { }
+
             }
             public class RboutButtton : ButtonExt {
                 public override string Tooltip => Translation.Menu.Get("Tooltip:Roundabout");
                 public override FunctionMode Function => FunctionMode.Rabout;
                 public override void OnActivate() { }
                 public override void OnDeactivate() { }
+                public override bool IsDisabled => RoundaboutMassEdit.IsRabout(RoadSelection.Selection, semi:false);
             }
 
             public abstract class ButtonExt : LinearSpriteButton {
@@ -180,6 +199,10 @@ namespace TrafficManager.UI {
                     height = Height;
                     Debug.Log("POINT C");
                 }
+
+                public bool IsEnabled => Util.RoadSelection.Length > 0;
+
+                public override void HandleClick(UIMouseEventParameter p) { }
 
                 public abstract void OnActivate();
                 public abstract void OnDeactivate();
@@ -194,17 +217,14 @@ namespace TrafficManager.UI {
                     }
                 }
 
-                public void Refresh() {
-                    UpdateProperties();
-                    m_BackgroundSprites.m_Disabled = GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Base, false);
-
-                }
-
-                public override void HandleClick(UIMouseEventParameter p) { }
-
                 public AdjustRoadSelectPanelExtender MainExt => AdjustRoadSelectPanelExtender.Instance;
+                public override bool CanActivate() => true;
 
-                public override bool Active => true;//MainExt.Function == this.Function;
+                public override bool Active => MainExt.Function == this.Function;
+
+                public override bool CanDisable => false;
+
+                public override bool IsDisabled => RoadSelection.Length == 0;
 
                 public abstract FunctionMode Function { get; }
 
@@ -221,8 +241,6 @@ namespace TrafficManager.UI {
                 public override int Width => 30;
 
                 public override int Height => 30;
-
-                public override bool CanActivate() => true;
             } // end class QuickEditButton
         } // end class PanelExt
     } // end AdjustRoadSelectPanelExt

@@ -1,8 +1,8 @@
 namespace TrafficManager.UI {
-    using System;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using State.Keybinds;
+    using System;
     using UnityEngine;
     using Util;
 
@@ -22,28 +22,34 @@ namespace TrafficManager.UI {
 
         private const string MENU_BUTTON_DEFAULT = "Default";
         private const string MENU_BUTTON_ACTIVE = "Active";
+        private const string MENU_BUTTON_Disabled = "Disabled";
 
         protected static string GetButtonBackgroundTextureId(
             string prefix,
             ButtonMouseState state,
-            bool active) {
+            bool active,
+            bool disabled = false) {
             string ret = prefix + MENU_BUTTON_BACKGROUND;
+
+            if (disabled)
+                return ret + MENU_BUTTON_Disabled;
+
 
             switch (state) {
                 case ButtonMouseState.Base: {
-                    ret += MENU_BUTTON_BASE;
-                    break;
-                }
+                        ret += MENU_BUTTON_BASE;
+                        break;
+                    }
 
                 case ButtonMouseState.Hovered: {
-                    ret += MENU_BUTTON_HOVERED;
-                    break;
-                }
+                        ret += MENU_BUTTON_HOVERED;
+                        break;
+                    }
 
                 case ButtonMouseState.MouseDown: {
-                    ret += MENU_BUTTON_MOUSEDOWN;
-                    break;
-                }
+                        ret += MENU_BUTTON_MOUSEDOWN;
+                        break;
+                    }
             }
 
             ret += active ? MENU_BUTTON_ACTIVE : MENU_BUTTON_DEFAULT;
@@ -53,8 +59,7 @@ namespace TrafficManager.UI {
         private static string GetButtonForegroundTextureId(
             string prefix,
             string function,
-            bool active)
-        {
+            bool active) {
             string ret = prefix + MENU_BUTTON_FOREGROUND + function;
             ret += active ? MENU_BUTTON_ACTIVE : MENU_BUTTON_DEFAULT;
             return ret;
@@ -89,6 +94,10 @@ namespace TrafficManager.UI {
                 textureIds[i++] = GetButtonBackgroundTextureId(ButtonName, mouseState, false);
             }
 
+            if (CanDisable) {
+                textureIds[i++] = GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Base, active: false, disabled: true);
+            }
+
             foreach (string function in FunctionNames) {
                 textureIds[i++] = GetButtonForegroundTextureId(ButtonName, function, false);
             }
@@ -96,6 +105,8 @@ namespace TrafficManager.UI {
             foreach (string function in FunctionNames) {
                 textureIds[i++] = GetButtonForegroundTextureId(ButtonName, function, true);
             }
+
+            // TODO add forground disabled textures.
 
             // Set the atlases for background/foreground
             atlas = TextureUtil.GenerateLinearAtlas(
@@ -110,6 +121,10 @@ namespace TrafficManager.UI {
             // Enable button sounds.
             playAudioEvents = true;
         }
+
+        public virtual bool CanDisable => false;
+
+        public virtual bool IsDisabled => false;
 
         public abstract bool Active { get; }
 
@@ -137,6 +152,10 @@ namespace TrafficManager.UI {
                     m_BackgroundSprites.m_Focused =
                         GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Base, active);
 
+            if (CanDisable) {
+
+            }
+
             m_BackgroundSprites.m_Hovered =
                 GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Hovered, active);
 
@@ -155,7 +174,19 @@ namespace TrafficManager.UI {
             string shortcutText = GetShortcutTooltip();
             tooltip = Tooltip + shortcutText;
 
+
+            if (CanDisable) {
+                m_BackgroundSprites.m_Disabled =
+                    GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Base, active, disabled: true);
+                if (IsDisabled)
+                    Disable();
+                else
+                    Enable();
+            }
+
             isVisible = Visible;
+            //Invalidate();
+
         }
 
 

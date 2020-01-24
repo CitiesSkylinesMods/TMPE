@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI {
+namespace TrafficManager.UI {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using CSUtil.Commons;
@@ -42,7 +42,7 @@
             }
 
             foreach (UIButton button in buttons) {
-                Destroy(button.gameObject);
+                Destroy(button.gameObject); // TODO why not destroy button?
             }
         }
 
