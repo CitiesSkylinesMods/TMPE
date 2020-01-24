@@ -345,8 +345,8 @@ namespace TrafficManager {
                 }
 
                 Destroy<RemoveVehicleButtonExtender>();
+                Util.RoadSelection.Release();
                 Destroy<RoadSelectionPanel>();
-                Destroy<Util.RoadSelection>();
                 Destroy<RemoveCitizenInstanceButtonExtender>();
 
 #if TRACE

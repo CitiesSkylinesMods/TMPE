@@ -217,7 +217,7 @@ namespace TrafficManager.Util {
 
         public static bool IsRabout(List<ushort> segList, bool semi = false) {
             try {
-                int n = segList.Count;
+                int n = segList?.Count ?? 0;
                 if (n == 1)
                     return false;
                 int lastN = semi ? n - 1 : n;

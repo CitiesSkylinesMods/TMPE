@@ -4,14 +4,17 @@ using System.Reflection;
 using System.Collections.Generic;
 using ICities;
 using UnityEngine;
+using CSUtil.Commons;
 
 namespace TrafficManager.Util {
-    public class RoadSelection : MonoBehaviour {
-        public  static RoadSelection Instance { get; private set; } = null;
+    public class RoadSelection {
+        public static RoadSelection Instance { get; private set; }
 
-        public RoadSelection():base() { Instance = this; }
+        public RoadSelection():base() {
+            Instance = this;
+        }
 
-        public void OnDestroy() {
+        public static void Release() {
             Instance = null;
         }
 
@@ -19,7 +22,7 @@ namespace TrafficManager.Util {
 
         public List<ushort> Selection {
             get {
-                if(Length > 0) {
+                if (Length > 0) {
                     FastList<ushort> path = GetPath();
                     var ret = new List<ushort>();
                     for (int i = 0; i < Length; ++i) {
@@ -53,22 +56,25 @@ namespace TrafficManager.Util {
         public event Handler OnChanged;
 
 
-        private class Threading: ThreadingExtensionBase {
+        public class Threading: ThreadingExtensionBase {
             int prev_length = -2;
             ushort prev_segmentID = 0;
+
             public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
-                if (Instance == null)
+                if (Instance == null) {
                     return;
+                }
                 // Assumptions:
                 // - two different paths cannot share a segment.
                 // - UI does not allow to move both ends of the selection simultanously.
                 var path = Instance.GetPath();
                 int len = path?.m_size ?? -1;
                 ushort segmentID = len > 0 ? path.m_buffer[0] : (ushort)0;
-                bool changed = len != prev_length && segmentID != prev_segmentID;
+                bool changed = len != prev_length || segmentID != prev_segmentID;
                 if(changed) {
+                    Log._Debug("RoadSelection.Threading.OnUpdate() road selection changed\n" + Environment.StackTrace);
                     prev_length = len;
-                    prev_segmentID = len > 0 ? path.m_buffer[0] : (ushort)0;
+                    prev_segmentID = segmentID;
                     Instance.OnChanged.Invoke();
                 }
             }

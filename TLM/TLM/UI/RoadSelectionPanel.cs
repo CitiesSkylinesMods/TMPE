@@ -98,7 +98,7 @@ namespace TrafficManager.UI {
         }
 
         public void Refresh() {
-            Log._Debug(Environment.StackTrace);
+            Log._Debug("Refresh called:\n" + Environment.StackTrace);
             foreach(var panel in panels) {
                 panel.Refresh();
             }
