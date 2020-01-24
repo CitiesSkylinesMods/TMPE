@@ -220,7 +220,7 @@
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
-    <Compile Include="UI\AdjustRoadSelectPanelExtender.cs" />
+    <Compile Include="UI\RoadSelectionPanel.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\Helpers\CheckboxOption.cs" />
     <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />
@@ -420,6 +420,9 @@
     <EmbeddedResource Include="Resources\mainmenu-btns.png" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\road-edit-btns.png" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Resources\parking_allowed.png" />
     <EmbeddedResource Include="Resources\parking_disallowed.png" />
   </ItemGroup>
@@ -531,7 +534,6 @@
     <EmbeddedResource Include="Resources\TrafficLights\IconJunctionNoTrafficLights.png" />
     <EmbeddedResource Include="Resources\TrafficLights\IconJunctionTrafficLights.png" />
     <EmbeddedResource Include="Resources\TrafficLights\IconJunctionTimedTL.png" />
-    <Content Include="Resources\road-edit-btns.png" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />

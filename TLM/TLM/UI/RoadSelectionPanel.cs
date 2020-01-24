@@ -13,9 +13,9 @@ namespace TrafficManager.UI {
     using Util;
 
 
-    public class AdjustRoadSelectPanelExtender : MonoBehaviour {
-        public static AdjustRoadSelectPanelExtender Instance { get; private set; } = null;
-        public AdjustRoadSelectPanelExtender(): base() { Instance = this; }
+    public class RoadSelectionPanel : MonoBehaviour {
+        public static RoadSelectionPanel Instance { get; private set; } = null;
+        public RoadSelectionPanel(): base() { Instance = this; }
 
         public enum FunctionMode {
             Clear=0,
@@ -35,25 +35,23 @@ namespace TrafficManager.UI {
         }
 
         private UICheckBox priorityRoadToggle = null;
+
         public void HidePriorityRoadToggle() {
-            if (priorityRoadToggle == null)
-                return;
-            Debug.Log($"priority toggle => {priorityRoadToggle.name}");
-            if (priorityRoadToggle.isVisible) {
-                priorityRoadToggle.isVisible = false;
-            }
-            priorityRoadToggle.Disable();
+            priorityRoadToggle.eventVisibilityChanged +=
+                (_, __) => priorityRoadToggle.isVisible = false;
         }
 
-        //public class Threading : ThreadingExtensionBase {
-        //    public override void OnAfterSimulationFrame() {
-        //        //AdjustRoadSelectPanelExtender.Instance?.HidePriorityRoadToggle();
-        //    }
-        //}
+        public void HideRoadAdjustPanelElements(UIPanel roadAdjustPanel) {
+            UILabel roadSelectLabel = roadAdjustPanel.Find<UILabel>("Label");
+            UILabel roadSelectLegend = roadAdjustPanel.Find<UILabel>("LegendLabel");
+            UISprite roadSelectSprite = roadAdjustPanel.Find<UISprite>("Sprite");
+            roadSelectLabel.isVisible = false;
+            roadSelectLegend.isVisible = false;
+            roadSelectSprite.isVisible = false;
+        }
 
         public IList<PanelExt> panels;
         public void Start() {
-            Debug.Log("POINT A1");
             panels = new List<PanelExt>();
 
             RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
@@ -61,28 +59,18 @@ namespace TrafficManager.UI {
                 priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
                 PanelExt panel = AddPanel(roadWorldInfoPanel.component);
                 panel.relativePosition += new Vector3(0, -15f);
-                //roadWorldInfoPanel.component.eventVisibilityChanged +=
-                //    (_, __) => HidePriorityRoadToggle();
-                priorityRoadToggle.eventVisibilityChanged +=
-                    (_, __) => HidePriorityRoadToggle();
+                HidePriorityRoadToggle();
                 panels.Add(panel);
             }
 
             UIPanel roadAdjustPanel = UIView.Find<UIPanel>("AdjustRoad");
             if (roadAdjustPanel != null) {
-                //UILabel roadSelectLabel = roadAdjustPanel.Find<UILabel>("Label");
-                //UILabel roadSelectLegend = roadAdjustPanel.Find<UILabel>("LegendLabel");
-                //UISprite roadSelectSprite = roadAdjustPanel.Find<UISprite>("Sprite");
-                //roadSelectLabel.isVisible = false;
-                //roadSelectLegend.isVisible = false;
-                //roadSelectSprite.isVisible = false;
+                //HideRoadAdjustPanelElements(roadAdjustPanel);
                 PanelExt panel = AddPanel(roadAdjustPanel);
                 panels.Add(panel);
             }
 
             RoadSelection.Instance.OnChanged += ()=>Refresh();
-
-Debug.Log("POINT A2");
         }
 
         protected PanelExt AddPanel(UIComponent container) {
@@ -92,7 +80,7 @@ Debug.Log("POINT A2");
             panel.width = 210;
             panel.height = 50;
             panel.AlignTo(container, UIAlignAnchor.BottomLeft);
-            panel.relativePosition += new Vector3(70, 0);
+            panel.relativePosition += new Vector3(70, -5);
             panels.Add(panel);
             return panel;
         }
@@ -110,6 +98,7 @@ Debug.Log("POINT A2");
         }
 
         public void Refresh() {
+            Log._Debug(Environment.StackTrace);
             foreach(var panel in panels) {
                 panel.Refresh();
             }
@@ -123,11 +112,10 @@ Debug.Log("POINT A2");
                 }
             }
 
-            public AdjustRoadSelectPanelExtender adjustRoadSelectPanelExtender;
+            public RoadSelectionPanel adjustRoadSelectPanelExtender;
             //UIButton Clear, TrafficLight, Yeild, Stop , RightOnly, RoundAbout;
             public IList<ButtonExt> buttons;
             public void Start() {
-                Debug.Log("POINT B1");
                 //backgroundSprite = "GenericPanel"; //TODO remove
                 //opacity = 0.5f; // TODO remove
                 autoLayout = true;
@@ -141,8 +129,6 @@ Debug.Log("POINT A2");
                 buttons.Add(AddUIComponent<YeildButtton>());
                 buttons.Add(AddUIComponent<AvneueButtton>());
                 buttons.Add(AddUIComponent<RboutButtton>());
-
-                Debug.Log("POINT B2");
             }
 
             public void OnDestroy() {
@@ -189,7 +175,7 @@ Debug.Log("POINT A2");
                 public override void OnActivate() { }
                 public override void OnDeactivate() { }
                 public override bool IsDisabled =>
-                    RoundaboutMassEdit.IsRabout(RoadSelection.Instance.Selection, semi:false);
+                    !RoundaboutMassEdit.IsRabout(RoadSelection.Instance.Selection, semi:false);
             }
 
             public abstract class ButtonExt : LinearSpriteButton {
@@ -197,10 +183,7 @@ Debug.Log("POINT A2");
                     base.Start();
                     width = Width;
                     height = Height;
-                    Debug.Log("POINT C");
                 }
-
-                public bool IsEnabled => RoadSelection.Instance.Length > 0;
 
                 public override void HandleClick(UIMouseEventParameter p) { }
 
@@ -217,14 +200,21 @@ Debug.Log("POINT A2");
                     }
                 }
 
-                public AdjustRoadSelectPanelExtender Root => AdjustRoadSelectPanelExtender.Instance;
+                public RoadSelectionPanel Root => RoadSelectionPanel.Instance;
+
                 public override bool CanActivate() => true;
 
                 public override bool Active => Root.Function == this.Function;
 
-                public override bool CanDisable => false;
+                public override bool CanDisable => true;
 
-                public override bool IsDisabled => RoadSelection.Instance.Length == 0;
+                public override bool IsDisabled {
+                    get {
+                        Log._Debug($"{Function} : selection.len={RoadSelection.Instance.Length} " +
+                            $"ret={ RoadSelection.Instance.Length == 0}");
+                        return RoadSelection.Instance.Length == 0;
+                    }
+                }
 
                 public abstract FunctionMode Function { get; }
 
@@ -238,9 +228,9 @@ Debug.Log("POINT A2");
 
                 public override bool Visible => true;
 
-                public override int Width => 30;
+                public override int Width => 40;
 
-                public override int Height => 30;
+                public override int Height => 40;
             } // end class QuickEditButton
         } // end class PanelExt
     } // end AdjustRoadSelectPanelExt

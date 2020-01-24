@@ -345,7 +345,7 @@ namespace TrafficManager {
                 }
 
                 Destroy<RemoveVehicleButtonExtender>();
-                Destroy<AdjustRoadSelectPanelExtender>();
+                Destroy<RoadSelectionPanel>();
                 Destroy<Util.RoadSelection>();
                 Destroy<RemoveCitizenInstanceButtonExtender>();
 
@@ -533,7 +533,7 @@ namespace TrafficManager {
             new Util.RoadSelection();
 
             // add quick edit panels:
-            UIView.GetAView().gameObject.AddComponent<AdjustRoadSelectPanelExtender>();
+            UIView.GetAView().gameObject.AddComponent<RoadSelectionPanel>();
 
 
             InitDetours();

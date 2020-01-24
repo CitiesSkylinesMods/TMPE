@@ -3,6 +3,8 @@ namespace TrafficManager.UI {
     using CSUtil.Commons;
     using State.Keybinds;
     using System;
+    using System.Collections.Generic;
+    using TrafficManager.State.ConfigData;
     using UnityEngine;
     using Util;
 
@@ -24,7 +26,10 @@ namespace TrafficManager.UI {
         private const string MENU_BUTTON_ACTIVE = "Active";
         private const string MENU_BUTTON_Disabled = "Disabled";
 
-        protected static string GetButtonBackgroundTextureId(
+        protected static string GetButtonDisabledTextureId(string prefix) =>
+            GetButtonBackgroundTextureId(prefix, 0, false, true);
+
+            protected static string GetButtonBackgroundTextureId(
             string prefix,
             ButtonMouseState state,
             bool active,
@@ -80,40 +85,37 @@ namespace TrafficManager.UI {
         public abstract int Height { get; }
 
         public override void Start() {
-            int textureCount =
-                (Enum.GetValues(typeof(ButtonMouseState)).Length * (CanActivate() ? 2 : 1))
-                + (FunctionNames.Length * 2);
-            string[] textureIds = new string[textureCount];
-            int i = 0;
 
+            List<string> textureIds = new List<string>();
             foreach (ButtonMouseState mouseState in EnumUtil.GetValues<ButtonMouseState>()) {
                 if (CanActivate()) {
-                    textureIds[i++] = GetButtonBackgroundTextureId(ButtonName, mouseState, true);
+                    textureIds.Add(GetButtonBackgroundTextureId(ButtonName, mouseState, true));
                 }
 
-                textureIds[i++] = GetButtonBackgroundTextureId(ButtonName, mouseState, false);
+                textureIds.Add(GetButtonBackgroundTextureId(ButtonName, mouseState, false));
             }
 
             if (CanDisable) {
-                textureIds[i++] = GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Base, active: false, disabled: true);
+                textureIds.Add(GetButtonDisabledTextureId(ButtonName));
             }
 
             foreach (string function in FunctionNames) {
-                textureIds[i++] = GetButtonForegroundTextureId(ButtonName, function, false);
+                textureIds.Add(GetButtonForegroundTextureId(ButtonName, function, false));
             }
 
             foreach (string function in FunctionNames) {
-                textureIds[i++] = GetButtonForegroundTextureId(ButtonName, function, true);
+                textureIds.Add(GetButtonForegroundTextureId(ButtonName, function, true));
             }
 
             // TODO add forground disabled textures.
+
 
             // Set the atlases for background/foreground
             atlas = TextureUtil.GenerateLinearAtlas(
                 "TMPE_" + ButtonName + "Atlas",
                 AtlasTexture,
-                textureIds.Length,
-                textureIds);
+                textureIds.Count,
+                textureIds.ToArray());
 
             m_ForegroundSpriteMode = UIForegroundSpriteMode.Scale;
             UpdateProperties();
@@ -152,10 +154,6 @@ namespace TrafficManager.UI {
                     m_BackgroundSprites.m_Focused =
                         GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Base, active);
 
-            if (CanDisable) {
-
-            }
-
             m_BackgroundSprites.m_Hovered =
                 GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Hovered, active);
 
@@ -177,7 +175,7 @@ namespace TrafficManager.UI {
 
             if (CanDisable) {
                 m_BackgroundSprites.m_Disabled =
-                    GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Base, active, disabled: true);
+                    GetButtonDisabledTextureId(ButtonName);
                 if (IsDisabled)
                     Disable();
                 else
@@ -185,8 +183,7 @@ namespace TrafficManager.UI {
             }
 
             isVisible = Visible;
-            //Invalidate();
-
+            //Invalidate(); // TODO: why was this here in the first place?
         }
 
 

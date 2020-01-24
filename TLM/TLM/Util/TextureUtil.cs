@@ -1,6 +1,8 @@
-﻿namespace TrafficManager.Util {
+namespace TrafficManager.Util {
     using System;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using TrafficManager.State.ConfigData;
     using UnityEngine;
 
     public static class TextureUtil {
@@ -21,6 +23,11 @@
                     "Number of sprite name does not match dimensions " +
                     $"(expected {numX} x {numY}, was {spriteNames.Length})");
             }
+
+            Log._DebugIf(
+                DebugSwitch.ResourceLoading.Get(),
+                ()=>$"Loading atlas for {name} count:{numX}x{numY} " +
+                $"texture:{texture.name} size:{texture.width}x{texture.height}");
 
             UITextureAtlas atlas = ScriptableObject.CreateInstance<UITextureAtlas>();
             atlas.padding = 0;
