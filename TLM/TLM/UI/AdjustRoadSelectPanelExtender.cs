@@ -1,6 +1,8 @@
 namespace TrafficManager.UI {
     using System;
     using System.Collections.Generic;
+    using JetBrains.Annotations;
+
     using ColossalFramework.UI;
     using UnityEngine;
     using ColossalFramework;
@@ -12,7 +14,9 @@ namespace TrafficManager.UI {
 
 
     public class AdjustRoadSelectPanelExtender : MonoBehaviour {
-        public static AdjustRoadSelectPanelExtender Instance = null;
+        public static AdjustRoadSelectPanelExtender Instance { get; private set; } = null;
+        public AdjustRoadSelectPanelExtender(): base() { Instance = this; }
+
         public enum FunctionMode {
             Clear=0,
             Stop,
@@ -35,11 +39,10 @@ namespace TrafficManager.UI {
             if (priorityRoadToggle == null)
                 return;
             Debug.Log($"priority toggle => {priorityRoadToggle.name}");
-            priorityRoadToggle.Disable();
-            if (!priorityRoadToggle.isVisible) {
-                //priorityRoadToggle.Hide(); //TODO actually hide
+            if (priorityRoadToggle.isVisible) {
                 priorityRoadToggle.isVisible = false;
             }
+            priorityRoadToggle.Disable();
         }
 
         //public class Threading : ThreadingExtensionBase {
@@ -50,7 +53,6 @@ namespace TrafficManager.UI {
 
         public IList<PanelExt> panels;
         public void Start() {
-            Instance = this;
             Debug.Log("POINT A1");
             panels = new List<PanelExt>();
 
@@ -78,7 +80,7 @@ namespace TrafficManager.UI {
                 panels.Add(panel);
             }
 
-            RoadSelection.OnChanged += ()=>Refresh();
+            RoadSelection.Instance.OnChanged += ()=>Refresh();
 
 Debug.Log("POINT A2");
         }
@@ -95,7 +97,6 @@ Debug.Log("POINT A2");
             return panel;
         }
 
-
         public void OnDestroy() {
             Instance = null;
             priorityRoadToggle = null;
@@ -106,8 +107,6 @@ Debug.Log("POINT A2");
             foreach (UIPanel panel in panels) {
                 Destroy(panel);
             }
-            //TODO unsuscribe from OnChanged
-            //TODO unsuscribe from eventVisibilityChanged
         }
 
         public void Refresh() {
@@ -189,7 +188,8 @@ Debug.Log("POINT A2");
                 public override FunctionMode Function => FunctionMode.Rabout;
                 public override void OnActivate() { }
                 public override void OnDeactivate() { }
-                public override bool IsDisabled => RoundaboutMassEdit.IsRabout(RoadSelection.Selection, semi:false);
+                public override bool IsDisabled =>
+                    RoundaboutMassEdit.IsRabout(RoadSelection.Instance.Selection, semi:false);
             }
 
             public abstract class ButtonExt : LinearSpriteButton {
@@ -200,7 +200,7 @@ Debug.Log("POINT A2");
                     Debug.Log("POINT C");
                 }
 
-                public bool IsEnabled => Util.RoadSelection.Length > 0;
+                public bool IsEnabled => RoadSelection.Instance.Length > 0;
 
                 public override void HandleClick(UIMouseEventParameter p) { }
 
@@ -209,22 +209,22 @@ Debug.Log("POINT A2");
 
                 protected override void OnClick(UIMouseEventParameter p) {
                     if (!Active) {
-                        MainExt.Function = this.Function;
+                        Root.Function = this.Function;
                         OnActivate();
                     } else {
-                        MainExt.Function = FunctionMode.Clear;
+                        Root.Function = FunctionMode.Clear;
                         OnDeactivate();
                     }
                 }
 
-                public AdjustRoadSelectPanelExtender MainExt => AdjustRoadSelectPanelExtender.Instance;
+                public AdjustRoadSelectPanelExtender Root => AdjustRoadSelectPanelExtender.Instance;
                 public override bool CanActivate() => true;
 
-                public override bool Active => MainExt.Function == this.Function;
+                public override bool Active => Root.Function == this.Function;
 
                 public override bool CanDisable => false;
 
-                public override bool IsDisabled => RoadSelection.Length == 0;
+                public override bool IsDisabled => RoadSelection.Instance.Length == 0;
 
                 public abstract FunctionMode Function { get; }
 

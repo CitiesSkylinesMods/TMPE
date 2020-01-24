@@ -42,7 +42,7 @@ namespace TrafficManager.UI {
             }
 
             foreach (UIButton button in buttons) {
-                Destroy(button.gameObject); // TODO why not destroy button?
+                Destroy(button.gameObject);
             }
         }
 

@@ -26,7 +26,7 @@ namespace TrafficManager.UI.Textures {
             MainMenuButtonsTexture2D = LoadDllResource("mainmenu-btns.png", 960, 30);
             MainMenuButtonsTexture2D.name = "TMPE_MainMenuButtons";
 
-            RoadQuickEditButtons = LoadDllResource("road-edit-btns3.png", 16 * 30, 30);
+            RoadQuickEditButtons = LoadDllResource("road-edit-btns.png", 17 * 30, 30);
             RoadQuickEditButtons.name = "TMPE_RoadQuickEdit";
 
             RemoveButtonTexture2D = LoadDllResource("remove-btn.png", 150, 30);

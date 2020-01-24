@@ -346,6 +346,7 @@ namespace TrafficManager {
 
                 Destroy<RemoveVehicleButtonExtender>();
                 Destroy<AdjustRoadSelectPanelExtender>();
+                Destroy<Util.RoadSelection>();
                 Destroy<RemoveCitizenInstanceButtonExtender>();
 
 #if TRACE
@@ -529,8 +530,11 @@ namespace TrafficManager {
             // add "remove citizen instance" button
             UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
 
+            new Util.RoadSelection();
+
             // add quick edit panels:
             UIView.GetAView().gameObject.AddComponent<AdjustRoadSelectPanelExtender>();
+
 
             InitDetours();
 
