@@ -2,15 +2,22 @@
 
 # Changelog
 
+Current versions of TM:PE are:
+
+* [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+* [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141) (test releases)
+
+This changelog includes all versions and major variants of the mod going all the way back to March 2015, just 4 days after the first release of C:SL!
+
 > **Legend:**
 >  
-> * **C:SL** = Cities: Skylines game updates
+> * **C:SL** = Cities: Skylines game updates (for reference)
 > * **TM:PE** = Traffic Manager: President Edition
 >     * TM:PE STABLE - TM:PE versions 10.14 to 10.20
->     * TM:PE LABS - TM:PE versions 10.14 to 10.21.1
->     * TM:PE v11 ALPHA - TM:PE versions 11.0-alpha1 to 11.0-alpha12
+>     * TM:PE LABS - TM:PE versions 10.14 to 10.21.1 (later renamed to TM:PE v11 STABLE)
+>     * TM:PE v11 ALPHA - TM:PE versions 11.0-alpha1 to 11.0-alpha12 (later renamed to TM:PE v11 LABS)
 >     * TM:PE v11 STABLE - TM:PE versions 11.0 and above
->     * TM:PE v11 LABS - TM:PE versions 11.0 and above (beta releases)
+>     * TM:PE v11 LABS - TM:PE versions 11.0 and above (test releases)
 > * **TPP2** = Traffic++ V2
 > * **TMIAI** = Traffic Manager + Improved AI
 > * **TMPlus** = Traffic Manager Plus
@@ -33,10 +40,14 @@
 - Meta: Renamed LABS and ALPHA workshop pages to V11 STABLE and V11 LABS respectively
 - Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
+### C:SL 1.12.3-f2 ("Paradox Launcher"), 22/01/2020
+
+- Paradox Launcher app added
+
 ### TM:PE V11 ALPHA 11.0-alpha12, 12/01/2020
 
 - Fixed: Array index error when Lane Arrow tool selected (#606, #607)
-- Fixed: Removing junction from traffic light group not working (thanks leaderofthemonkeys) (#605)
+- Fixed: Removing junction from traffic light group not working (thanks leaderofthemonkeys for finding this!) (#605)
 - Fixed: Detection of compatible Timed Traffic Lights node for copying Traffic Light setup (#605)
 - Fixed: Cursor flickering when tool is selected (#607)
 - Updated: Added two obsolete versions of TM:PE to incompatible mod checker (#610)
@@ -79,14 +90,14 @@
 ### TM:PE V11 ALPHA 11.0-alpha10, 23/11/2019
 
 - Added: Lane arrow tool - shortcuts to create separate turning lanes (thanks kianzarrin!) (#538, #537)
-- Fixed: Null reference error in TrafficManager.UI.TrafficManagerTool.OnEnable (#570)
-- Fixed: Bug in IterateNodeSegments + code cleanup (thanks kianzarrin) (#549, #550)
+- Fixed: Null reference error in `TrafficManager.UI.TrafficManagerTool.OnEnable` (#570)
+- Fixed: Bug in `IterateNodeSegments` + code clean-up (thanks kianzarrin) (#549, #550)
 - Steam: [TM:PE v11 ALPHA](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 ### TM:PE V11 ALPHA 11.0-alpha9, 10/11/2019
 
 - Added: Features to disable auto-traffic lights, and delete all traffic lights (thanks Craxy & Sqoops) (#320, #390, #535)
-- Fixed: "IndexOutOfRange" error in manual traffic lights tool (thanks leonpeonleon) (#545)
+- Fixed: `IndexOutOfRange` error in manual traffic lights tool (thanks leonpeonleon) (#545)
 - Fixed: Path find stats fixed & faster, benchmark profile fixed (#536)
 - Fixed: Typos and missing key in translations (thanks TianQiBuTian) (#529, #528)
 - Fixed: Translations not working when using game translation mods (thanks TianQiBuTian) (#533, #534)
@@ -95,6 +106,11 @@
 - Updated: Translations - Portuguese - Alan Willian Duarte (thanks nipodemos13) (#536)
 - Updated: Translations - Japanese - thanks mashitaro (#536)
 - Steam: [TM:PE v11 ALPHA](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
+
+### C:SL 1.12.2-f3 ("Modern City Center" and "Downtown Radio"), 07/11/2019
+
+* Added: [Modern City Center](https://skylines.paradoxwikis.com/Modern_City_Center) DLC
+* Added: [Downtown Radio](https://skylines.paradoxwikis.com/Downtown_Radio) DLC
 
 ### TM:PE V11 ALPHA 11.0-alpha8, 04/10/2019
 
@@ -115,9 +131,9 @@
 - Fixed: Ignore decorative and malconfigured networks in Speed Limits Manager (#513)
 - Update: Compatible with Tree Respiration mod (#484)
 - Update: Compatible with Vehicle Wealthizer mod (#490, #488)
-- Update: More code cleanup (#350)
+- Update: More code clean-up (#350)
 - Meta: Update GitHub issue creation templates (#486)
-- Meta: Updated documentation on wiki and github (#310, #79, #465, #474, #466)
+- Meta: Updated documentation on wiki and GitHub (#310, #79, #465, #474, #466)
 - Meta: Pathfinds display temporarily disabled (testing FPS Booster mod)
 - Steam: [TM:PE v11 ALPHA](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
@@ -125,7 +141,7 @@
 
 - Added: "Cargo Info" mod is incompatible (#478)
 - Fixed: Vehicles pausing unexpectedly at junctions (#448, #473)
-- Updated: Lots more code cleanup (#467, #475, #438, #435, #476)
+- Updated: Lots more code clean-up (#467, #475, #438, #435, #476)
 - Meta: "Cargo Info" mod found to break outside connections and cause array index errors.
 - Steam: [TM:PE v11 ALPHA](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
@@ -133,7 +149,7 @@
 
 - Updated: Lots of code clean-up (#461, #349, #377, #451)
 - Meta: Build process will now error if `in` is used without a `readonly struct` (thanks dymanoid!) (#463)
-- Meta: See `Contributing` guide in github wiki if you get build errors due to #463
+- Meta: See `Contributing` guide in GitHub wiki if you get build errors due to #463
 - Steam: [TM:PE v11 ALPHA](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 ### TM:PE V11 ALPHA 11.0-alpha4, 26/07/2019
@@ -155,7 +171,7 @@
 ### TM:PE V11 ALPHA 11.0-alpha2, 23/07/2019
 
 - Fixed: Unable to set "no limit" speed, and speeds over 140 km/h weren't showing as "no limit" (#449, #446)
-- Meta: Lots more back-end code cleanup (#430, #436, #349)
+- Meta: Lots more back-end code clean-up (#430, #436, #349)
 - Steam: [TM:PE v11 ALPHA](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 ### TM:PE V11 ALPHA 11.0-alpha1, 17/07/2019
@@ -197,7 +213,7 @@
 - Fixed: Changes of default junction restrictions not reflected in UI overlay (#358)
 - Fixed: Resetting stuck cims unpauses the simulation (#358, #351)
 - Fixed: Treat duplicate TM:PE subscriptions as mod conflicts (#333, #306, #149, #190, #400)
-- Fixed: TargetInvocationException in mod compatibility checker (#386, #333)
+- Fixed: `TargetInvocationException` in mod compatibility checker (#386, #333)
 - Fixed: Issue with Paradox login blurring compatibility checker dialog (#404)
 - Updated: Game version 1.12.1-f1 compatible (#403)
 - Updated: Chinese translation (thanks Emphasia) (#375, #336)
@@ -293,10 +309,10 @@
 
 ### TM:PE LABS 10.17, 23/03/2019
 
-- Added: Turn-on-red can now be toggled for unpreferred turns between one-ways (#121)
-- Improved: Train behavior at shunts: Trains now prefer to stay on their track (#230)
+- Added: Turn-on-red can now be toggled for unpreferred (far-side) turns between one-ways (#121)
+- Improved: Train behaviour at shunts: Trains now prefer to stay on their track (#230)
 - Improved: Parking AI - Improved public transport (PT) usage patterns, mixed car/PT paths are now possible  (#218)
-- Fixed: Lane selection for u-turns and at dead ends (also optimised) (#101)
+- Fixed: Lane selection for U-turns and at dead ends (also optimised) (#101)
 - Fixed: Parking AI - Tourist cars despawn because they assume they are at an outside connection (#218)
 - Fixed: Parking AI - Return path calculation did not accept beautification segments (#218)
 - Fixed: Parking AI - Cars/Citizens waiting for a path might jump around (#218)
@@ -335,10 +351,10 @@
 
 ### TM:PE LABS 1.10.16, 24/02/2019
 
-- Improved: New icons for empty and remove_priority_sign settings (thanks aubergine10 for those icons) (#75, #77)
+- Improved: New icons for `empty` and `remove_priority_sign` settings (thanks aubergine10 for those icons) (#75, #77)
 - Fixed: Problem with vehicle despawn after road upgrade/remove (thanks pcfantasy for implementation suggestion)(#86, #101)
-- Fixed: problem with vehicles unable to choose lane when u-turn at dead-end (thanks pcfantasy for implementation and aubergine10 for neccesary tests)(#101)
-- Fixed: problem when user couldn't change state of 'Turn on Red' while enabled_by_default option not selected (thanks Sp3ctre18 for bug confirmation) (#102)
+- Fixed: problem with vehicles unable to choose lane when U-turn at dead-end (thanks pcfantasy for implementation and aubergine10 for testing)(#101)
+- Fixed: problem when user couldn't change state of 'Turn on Red' while `enabled_by_default` option not selected (thanks Sp3ctre18 for bug confirmation) (#102)
 - Fixed: Fixed 'silent error' inside log related with "Esc key handler" (#92)
 - Updated: Greatly improved incompatible mod scanner, added dialog to list and unsubscribe incompatible mods (#91)
 - Updated: Changed mod name in Content Manager to __TM:PE__
@@ -354,14 +370,14 @@
 - Improved: Use Escape key to close Traffic Manager without returning to Pause Menu (thanks to aubergine10 for suggestion) (#16)
 - Improved: New icons for cargo and passenger train restriction (thanks to aubergine10) (#17)
 - Updated: Updated pathfinding with missing vanilla logic
-- Updated: Tweaked values in CargoTruckAI path finding (thanks to pcfantasy for improvement suggestion)
+- Updated: Tweaked values in `CargoTruckAI` path finding (thanks to pcfantasy for improvement suggestion)
 - Updated: Tweaked speed multiplier of reckless drivers to get more realistic speed range (thanks to aubergine10 for suggestion) (#23)
 - Updated: Simplified Chinese translation updated (thanks to Emphasia for translating)
 - Steam: [Traffic Manager: President Edition (LABS)](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 ### TM:PE LABS 1.10.14, 27/01/2019
 
-- Fixed: Added missing Car AI type (postVanAI) - now post vans and post trucks are assigned to service vehicles group
+- Fixed: Added missing Car AI type (`postVanAI`) - now post vans and post trucks are assigned to service vehicles group
 - Fixed: Vehicles doesn't stop when driving through toll booth - fixes toll booth income too
 - Fixed: Cargo Airport doesn't work (Cargo planes not spawning and not arriving)
 - Fixed: Mod Options layout (text label overlaps slider control if too wide)
@@ -389,11 +405,11 @@
 
 - Added: Allow/disallow vehicles to enter a blocked junction at transition and pedestrian crossing nodes (#195)
 - Fixed: Emergency vehicles pass closed barriers at level crossings
-- Fixed: Bus lines render u-turn where they should not (#207)
+- Fixed: Bus lines render U-turn where they should not (#207)
 - Fixed: Parking AI - Cims leaving the city despawn their car at public transport stations (#214)
 - Fixed: Crossing restrictions do not work at intersection between road and highway (#212)
 - Updated: Compatible with C:SL 1.11.0-f3
-- Updated: Bent nodes do not allow for u-turns by default (#170)
+- Updated: Bent nodes do not allow for U-turns by default (#170)
 - Updated: Russian translation (thanks to vitalii2011 for translating)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
@@ -409,11 +425,11 @@
 ### TM:PE 1.10.11, 21/07/2018
 
 - Updated: U-turn lane connections are represented by appropriate lane arrow (#201)
-- Fixed: Heavy vehicles are unable to u-turn at dead ends (#194)
+- Fixed: Heavy vehicles are unable to U-turn at dead ends (#194)
 - Fixed: Routing & Priority rules do not work properly for acute (< 30°)/obtuse(> 150°) segment angles (#199)
 - Fixed: Buses do not prefer lanes with correct lane arrow (#206)
 - Fixed: Race condition in path-finding might cause paths to be assigned to wrong vehicle/citizen (#205)
-- Fixed: Vehicles are unable to perform u-turns when setting off on multi-lane roads (#197)
+- Fixed: Vehicles are unable to perform U-turns when setting off on multi-lane roads (#197)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.10.10, 14/07/2018
@@ -454,7 +470,7 @@
 - Fixed: U-turn routing is inconsistent on transport lines vs. bus paths (#137, thanks to Zorgoth for reporting this issue)
 - Fixed: Junction restrictions for pedestrian crossings are sometimes not preserved (#142, thanks to Anrew and wizardrazer for reporting this issue)
 - Fixed: Geometry subscription feature may cause performance issues (#145)
-- Fixed: Parking AI: Transport mode storage causes performance issues during loading (#147, thanks to hannebambel002 and oneeyets for reporting and further for providing logs and savegames)
+- Fixed: Parking AI: Transport mode storage causes performance issues during loading (#147, thanks to hannebambel002 and oneeyets for reporting and further for providing logs and save games)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.10.6, 24/05/2018
@@ -471,9 +487,9 @@
 - Improved: Parking AI - Improved behaviour in situations where vehicles are parked near public transport hubs and road connections are partially unavailable
 - Improved: Window design
 - Fixed: Parking AI - Not all possible paths are regarded during path-finding
-- Fixed: Parking AI - Cims become confused when trying to return their abandoned car back home (special thanks to Wildcard-25 for reporting and solving this issue)
+- Fixed: Parking AI - Cims become confused when trying to return their abandoned car back home (thanks Wildcard-25 for reporting and fixing!)
 - Fixed: Parking AI - Cims do not search for parking building when road-side parking spaces are found
-- Fixed: Parking AI - Parked vehicles are spawned near the source building even when cims are already en route
+- Fixed: Parking AI - Parked vehicles are spawned near the source building even when cims are already en-route
 - Fixed: Parking AI - Cims sometimes get stuck in an infinite loop while trying to enter their parked car
 - Fixed: Lane connector does not work for roads with more than ten lanes
 - Fixed: Allowing/Disallowing vehicles to enter a blocked junction does not work for certain junctions
@@ -635,7 +651,7 @@
 
 ### TM:PE 1.9.6, 28/05/2017
 
-- Fixed: Vehicles cannot perform u-turns at junctions with only one outgoing segment (thanks to Sunbird for reporting this issue)
+- Fixed: Vehicles cannot perform U-turns at junctions with only one outgoing segment (thanks to Sunbird for reporting this issue)
 - Fixed: Path-finding costs for large distances exceed the maximum allowed value (thanks to Huitsi for reporting this issue)
 - Fixed: Under certain circumstances path-finding at railroad crossings allow switching from road to rail tracks.
 - Updated: Simplified Chinese translation
@@ -715,12 +731,12 @@
 - Improved: Advanced Vehicle AI - Algorithm updated, performance improved - Possible routing decisions are now being pre-calculated
 - Improved: AI - Tuned path-finding parameters
 - Fixed: Cars sometimes get stuck forever when the Advanced Parking AI is activated (thanks to cmfcmf for reporting this issue)
-- Fixed: Busses do not perform u-turns even if the transport line show u-turns (thanks to dymanoid for reporting this issue)
+- Fixed: Busses do not perform U-turns even if the transport line show U-turns (thanks to dymanoid for reporting this issue)
 - Fixed: Timed traffic lights do not work as expected on single-direction train tracks (thanks to DaEgi01 for reporting this issue)
 - Fixed: Vehicle restriction and speed limit signs overlay is displayed on the wrong side of inverted road segments
 - Fixed: Influx statistics value is zero (thanks to hjo for reporting this issue)
 - Updated: Compatible with C:SL 1.7.0-f5
-- Updated: Major code refactorings
+- Updated: Major code refactoring
 - Updated: UI - More compact, movable main menu UI
 - Updated: translations: German, Polish, Russian, Portuguese, Traditional Chinese
 - Updated: Path-finding cost multiplicator for vehicle restrictions is now configurable in TMPE_GlobalConfig.xml
@@ -839,7 +855,7 @@
 ### TM:PE 1.8.8, 25/12/2016
 
 - Fixed: Taxis are not being used
-- Fixed: Prohibiting u-turns with the junction restriction tool does not work (thanks to Kisoe for reporting this issue)
+- Fixed: Prohibiting U-turns with the junction restriction tool does not work (thanks to Kisoe for reporting this issue)
 - Fixed: Cars are sometimes floating across the map while trying to park (thanks to [Delta ²k5] for reporting this issue)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
@@ -858,7 +874,7 @@
 - Updated: Compatible with C:SL 1.6.2-f1
 - Updated: The position of the main menu button is now forced inside screen bounds on startup
 - Updated: A timed traffic light step with zero minimum time assigned can now be skipped automatically
-- Updated: Using the lane connector to create a u-turn now automatically enables the "u-turn allowed" junction restriction
+- Updated: Using the lane connector to create a U-turn now automatically enables the "U-turn allowed" junction restriction
 - Updated: French translation (thanks to simon.royer007 for translating)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
@@ -885,7 +901,7 @@
 - Fixed: Bicycles cannot change from bicycle lanes to pedestrian lanes
 - Fixed: Travel probabilities set in the "Citizen Lifecycle Rebalance v2.1" mod are not obeyed (thanks to informmanuel, shaundoddmusic for reporting this issue)
 - Fixed: Number of tourists seems to drop when activating the mod (statistics were not updated, thanks to hpp7117, wjrohn for reporting this issue)
-- Fixed: When loading a second savegame a second main menu button is displayed (thanks to Cpt. Whitepaw for reporting this issue)
+- Fixed: When loading a second save game a second main menu button is displayed (thanks to Cpt. Whitepaw for reporting this issue)
 - Fixed: While path-finding is in progress vehicles do "bungee-jumping" on the current segment (thanks to mxolsenx, Howzitworld for reporting this issue)
 - Fixed: Cims leaving the city search for parking spaces near the outside connection which is obviously not required   
 - Updated: U-turns are now only allowed to be performed from the innermost lane     
@@ -902,7 +918,7 @@
 
 ### TM:PE 1.8.3, 4/12/2016
 
-- Improved: Tweaked u-turn behaviour
+- Improved: Tweaked U-turn behaviour
 - Improved: Info views
 - Fixed: Despite having the Parking AI activated, cims sometimes still spawn pocket cars.
 - Fixed: When the Parking AI is active, bicycle lanes are not used (thanks to informmanuel for reporting this issue)
@@ -916,7 +932,7 @@
 
 ### TM:PE 1.8.1, 1/12/2016
 
-- Fixed: Mod crashed when loading a second savegame
+- Fixed: Mod crashed when loading a second save game
 - Updated: translations: Polish, Chinese (simplified)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
@@ -1036,7 +1052,7 @@
 - Improved: UI - Clicking with the secondary mouse button now deselects the currently selected node/segment for all tools
 - Improved: AI - Tuned randomization of lane changing behaviour
 - Fixed: AI: At specific junctions, vehicles were not obeying lane connections correctly (thanks to Mariobro14 for pointing out this problem)
-- Fixed: AI: Path-finding costs for u-turns were not correctly calculated (thanks to Mariobro14 for pointing out this problem)
+- Fixed: AI: Path-finding costs for U-turns were not correctly calculated (thanks to Mariobro14 for pointing out this problem)
 - Fixed: Vehicles were endlessly waiting for each other at junctions with certain priority sign configurations
 - Fixed: AI: Lane changing costs corrected
 - Updated: AI - Introduced path-finding costs for leaving main highway (should reduce amount of detours taken)
@@ -1068,7 +1084,7 @@
 - Added: Ability to enable/disable mod features (e.g. for performance reasons)
 - Improved: Further code improvements
 - Fixed: Vehicle type determination was incorrect (fixed u-turning trams/trains, stuck vehicles)
-- Fixed: Clicking on a train/tram node with the lane connector tool led to an uncorrectable error (thanks to noaccount for reporting this problem)
+- Fixed: Clicking on a train/tram node with the lane connector tool caused an error (thanks to noaccount for reporting this problem)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.7.2, 26/07/2016:
@@ -1163,12 +1179,12 @@
 
 ### TPP2 2.0.10, 02/06/2016
 
-- Fixed: NullPointerException
+- Fixed: `NullPointerException`
 - Steam: [Traffic++ V2](https://steamcommunity.com/sharedfiles/filedetails/?id=626024868)
 
 ### TPP2 2.0.9, 31/05/2016
 
-- Update: Compatbile with Network Extensions 2.5
+- Update: Compatible with Network Extensions 2.5
 - Steam: [Traffic++ V2](https://steamcommunity.com/sharedfiles/filedetails/?id=626024868)
 
 ### TM:PE 1.6.17, 20/04/2016
@@ -1188,7 +1204,7 @@
 
 ### TPP2 2.0.8, 22/03/2016
 
-- Updated: Cpde from TM:PE 1.6.10
+- Updated: Code from TM:PE 1.6.10
 - Updated: Compatible with C:SL 1.4.0-f3
 - Removed: Old code from TPP
 - Steam: [Traffic++ V2](https://steamcommunity.com/sharedfiles/filedetails/?id=626024868)
@@ -1208,7 +1224,7 @@
 ### TM:PE 1.6.14, 17/03/2016
 
 - Fixed: Cargo trucks did not obey vehicle restrictions (thanks to ad.vissers for pointing out this problem)
-- Fixed: When Advanced AI was deactivated, u-turns did not have costs assigned
+- Fixed: When Advanced AI was deactivated, U-turns did not have costs assigned
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.6.13, 16/03/2016
@@ -1367,7 +1383,7 @@
 
 - Fixed: Using the "Old Town" policy led to vehicles not spawning
 - Fixed: Planes, cargo trains and ship were sometimes not arriving
-- Fixed: Trams are not doing u-turns anymore
+- Fixed: Trams are not doing U-turns anymore
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TPP2 2.0.2, 21/02/2016
@@ -1436,7 +1452,7 @@
 - Updated: Timed traffic lights may now be setup at arbitrary nodes on railway tracks
 - Updated: Option dialog is disabled if accessed through the main menu
 - Updated: Vehicles going straight may now change lanes at junctions
-- Updated: Vehicles may now perform u-turns at junctions that have an appropriate lane arrow configuration
+- Updated: Vehicles may now perform U-turns at junctions that have an appropriate lane arrow configuration
 - Updated: Emergency vehicles on duty now always aim for the fastest route
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
@@ -1722,7 +1738,7 @@
 
 - Improved: Adjusted the comparison between flowing (green light) and waiting (red light) traffic
 - Fixed: Pedestrian traffic Lights (thanks to Glowstrontium for pointing out this problem)
-- Fixed: Deleting a segment with a timed traffic light does not cause a NullReferenceException
+- Fixed: Deleting a segment with a timed traffic light does not cause a `NullReferenceException`
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.3.4, 27/12/2015
@@ -1732,13 +1748,13 @@
 
 ### TM:PE 1.3.3, 27/12/2015
 
-- Improved: Hotfix - Deleting a segment with a timed traffic light does not cause a NullReferenceException
+- Improved: Hotfix - Deleting a segment with a timed traffic light does not cause a `NullReferenceException`
 - Updated: If priority signs are located behind the camera they are not rendered anymore
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.3.2, 27/12/2015
 
-- Fixed: Synchronized traffic light rendering: In-game Traffic lights display the correct color (Thanks to Fabrice for pointing out this problem)
+- Fixed: Synchronized traffic light rendering: In-game Traffic lights display the correct colour (Thanks to Fabrice for pointing out this problem)
 - Fixed: Traffic lights switch between green, yellow and red. Not only between green and red.
 - Updated: Priority signs are persistently visible when Traffic Manager is in "Add priority sign" mode
 - Updated: UI tool tips are more explanatory and are shown longer.
@@ -1774,7 +1790,7 @@
 
 ### TMIAI 1.3.2, 02/12/2015
 
-- Fixed: Update to use limits introdiced in C:SL 1.2.2-f2
+- Fixed: Update to use limits introduced in C:SL 1.2.2-f2
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
 ### C:SL 1.2.2-f2, 05/11/2015
@@ -1869,7 +1885,7 @@
 ### TMIAI 1.1, 16/08/2015
 
 - Fixed: But that prevented U-turns
-- Improved: Compatibility with ModTools
+- Improved: Compatibility with Mod Tools
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
 ### TMIAI 1.0, 12/08/2015
@@ -1894,7 +1910,7 @@
 
 ### TMPlus 1.1.5, 06/08/2015
 
-- Fixed: Null reference error when loading old savegames
+- Fixed: Null reference error when loading old save games
 - Updated: New save system
 - Updated: New load system
 - Meta: Lots of code refactoring
@@ -1930,7 +1946,7 @@
 
 ### TMPlus 1.1.2, 15/07/2015
 
-- Updated: Reverted PathFinder as it's causing Null Reference exceptions. Need to refactor it.
+- Updated: Reverted `PathFinder` as it's causing Null Reference exceptions. Need to refactor it.
 - Steam: [Traffic Manager Plus](https://steamcommunity.com/sharedfiles/filedetails/?id=481786333)
 
 ### TMPlus 1.1.1, 14/07/2015
@@ -1978,7 +1994,7 @@
 - Fixed: Vehicles have wrong AI when returning to main menu
 - Fixed: Vehicles using restricted lanes
 - Fixed: Bug preventing the Scrollable Toolbar mod from working in the entirety of the speed customizer panel
-- Updated: Added debug logs to the game's Debug Panel (F7) - thanks to Nefarion for implementing it
+- Updated: Added debug logs to the game's F7 Debug Panel (thanks Nefarion!)
 - Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
 ### TM 1.0.4, 29/05/2015
