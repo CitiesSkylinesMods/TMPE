@@ -20,6 +20,7 @@ namespace TrafficManager.UI {
     using SubTools.SpeedLimits;
     using Util;
     using UnityEngine;
+    using static Util.Shortcuts;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -28,9 +29,12 @@ namespace TrafficManager.UI {
     {
         private ToolMode toolMode_;
         private NetTool _netTool;
+        private bool _requireHoveredLane => _activeSubTool is LaneConnectorTool;
 
         internal static ushort HoveredNodeId;
         internal static ushort HoveredSegmentId;
+        internal static uint HoveredLaneId;
+
 
         private static bool _mouseClickProcessed;
 
@@ -943,8 +947,12 @@ namespace TrafficManager.UI {
                 if (HoveredNodeId != 0) {
                     HoveredSegmentId = GetHoveredSegmentFromNode();
                 }
-            }
 
+                if(HoveredSegmentId != 0 && _requireHoveredLane) {
+                    DetermineHoveredLane();
+                }
+
+            }
             return HoveredNodeId != 0 || HoveredSegmentId != 0;
         }
 
@@ -988,8 +996,21 @@ namespace TrafficManager.UI {
             return ret;
         }
 
-
         /// <summary>
+        private void DetermineHoveredLane() {
+            NetSegment segment = GetSeg(HoveredSegmentId);
+            segment.GetClosestLanePosition(
+                m_mousePosition,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES,
+                out Vector3 pos,
+                out uint laneID,
+                out int laneIndex,
+                out float laneOffset);
+            HoveredLaneId = laneID;
+        }
+
+         /// <summary>
         /// Displays lane ids over lanes
         /// </summary>
         private void GuiDisplayLanes(ushort segmentId,

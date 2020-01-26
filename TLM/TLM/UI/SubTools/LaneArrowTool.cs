@@ -162,7 +162,6 @@ namespace TrafficManager.UI.SubTools {
                 }
                 return base.HoveredNodeId;
             }
-            set => base.HoveredNodeId = value;
         }
 
         /// <summary>
