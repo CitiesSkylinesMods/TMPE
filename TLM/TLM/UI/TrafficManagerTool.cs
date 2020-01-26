@@ -34,7 +34,6 @@ namespace TrafficManager.UI {
         internal static ushort HoveredSegmentId;
         internal static uint HoveredLaneId;
 
-
         private static bool _mouseClickProcessed;
 
         private const bool HoverPrefersSmallerSegments = true;
@@ -951,7 +950,6 @@ namespace TrafficManager.UI {
                 if(HoveredSegmentId != 0) {
                     DetermineHoveredLane();
                 }
-
             }
             return HoveredNodeId != 0 || HoveredSegmentId != 0;
         }
