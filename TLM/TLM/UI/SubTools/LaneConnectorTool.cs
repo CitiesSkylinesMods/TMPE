@@ -277,6 +277,19 @@ namespace TrafficManager.UI.SubTools {
             return bounds.IntersectRay(mouseRay);
         }
 
+        /// <summary>
+        /// Finds the first index for which node.GetSegment(index) != 0 (its possible node.m_segment0 == 0)
+        /// </summary>
+        private static int GetFirstSegmentIndex(NetNode node) {
+            for (int i = 0; i < 8; ++i) {
+                if (node.GetSegment(i) != 0) {
+                    return i;
+                }
+            }
+            Log.Error("GetFirstSegmentIndex: Node does not have any segments");
+            return 0;
+        }
+
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             // Log._Debug($"LaneConnectorTool: RenderOverlay. SelectedNodeId={SelectedNodeId}
             //     SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId}
