@@ -29,7 +29,6 @@ namespace TrafficManager.UI {
     {
         private ToolMode toolMode_;
         private NetTool _netTool;
-        private bool _requireHoveredLane => _activeSubTool is LaneConnectorTool;
 
         internal static ushort HoveredNodeId;
         internal static ushort HoveredSegmentId;
@@ -829,6 +828,7 @@ namespace TrafficManager.UI {
         private bool DetermineHoveredElements() {
             HoveredSegmentId = 0;
             HoveredNodeId = 0;
+            HoveredLaneId = 0;
 
             bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible &&
                                  (_activeSubTool == null || !_activeSubTool.IsCursorInPanel());
@@ -948,7 +948,7 @@ namespace TrafficManager.UI {
                     HoveredSegmentId = GetHoveredSegmentFromNode();
                 }
 
-                if(HoveredSegmentId != 0 && _requireHoveredLane) {
+                if(HoveredSegmentId != 0) {
                     DetermineHoveredLane();
                 }
 
