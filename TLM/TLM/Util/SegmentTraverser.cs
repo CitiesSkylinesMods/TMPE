@@ -125,7 +125,7 @@ namespace TrafficManager.Util {
         ///     segment will be traversed (event the initial segment will be omitted).</param>
         /// <param name="visitorFun">Specifies the stateful visitor that should be notified as soon as
         ///     a traversable segment (which has not been traversed before) is found.</param>
-        public static void Traverse(ushort initialSegmentId,
+        public static List<ushort> Traverse(ushort initialSegmentId,
                                     TraverseDirection direction,
                                     TraverseSide side,
                                     SegmentStopCriterion stopCrit,
@@ -133,7 +133,7 @@ namespace TrafficManager.Util {
         {
             ExtSegment initialSeg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[initialSegmentId];
             if (!initialSeg.valid) {
-                return;
+                return null;
             }
 
             // Log._Debug($"SegmentTraverser: Traversing initial segment {initialSegmentId}");
@@ -144,7 +144,7 @@ namespace TrafficManager.Util {
                         false,
                         false,
                         true))) {
-                return;
+                return null;
             }
 
             HashSet<ushort> visitedSegmentIds = new HashSet<ushort>();
@@ -191,6 +191,7 @@ namespace TrafficManager.Util {
                 });
 
             // Log._Debug($"SegmentTraverser: Traversal finished.");
+            return new List<ushort>(visitedSegmentIds);
         }
 
         private static void TraverseRec(ref ExtSegment prevSeg,

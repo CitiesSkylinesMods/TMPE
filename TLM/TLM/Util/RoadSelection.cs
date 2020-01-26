@@ -20,15 +20,20 @@ namespace TrafficManager.Util {
 
         public int Length => GetPath()?.m_size ?? 0;
 
+
+        /// <summary>
+        /// Creates a list of selected segment IDs. Modifying the returned list has no side effects.
+        /// </summary>
         public List<ushort> Selection {
             get {
                 if (Length > 0) {
                     FastList<ushort> path = GetPath();
-                    var ret = new List<ushort>();
+                    List<ushort> ret = new List<ushort>();
                     for (int i = 0; i < Length; ++i) {
                         ushort segID = path.m_buffer[i];
                         ret.Add(segID);
                     }
+                    return ret;
                 }
                 return null;
             }

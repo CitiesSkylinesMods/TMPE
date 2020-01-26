@@ -373,7 +373,7 @@ namespace CitiesGameBridge.Service {
 
         public void PublishSegmentChanges(ushort segmentId) {
 #if DEBUG
-            Log.Warning($"NetService.PublishSegmentChanges({segmentId}) called.");
+            //Log.Warning($"NetService.PublishSegmentChanges({segmentId}) called.");
 #endif
             ISimulationService simService = SimulationService.Instance;
 

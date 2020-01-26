@@ -372,6 +372,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public static void StayInLane(ushort nodeId, StayInLaneMode stayInLaneMode = StayInLaneMode.Both) {
+            Log._Debug($"Stay In Lane called node:{nodeId} mode:{stayInLaneMode}");
             if (stayInLaneMode != StayInLaneMode.None) {
                 NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
                 List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(

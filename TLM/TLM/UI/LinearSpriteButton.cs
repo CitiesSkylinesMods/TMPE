@@ -148,12 +148,17 @@ namespace TrafficManager.UI {
 
         internal void UpdateProperties() {
             bool active = CanActivate() && Active;
-            Log._Debug($"UpdateProperties: button={this} active={active} IsDisabled={IsDisabled}");
+            bool disabled = CanDisable && IsDisabled;
+
+            Log._DebugIf(
+                DebugSwitch.ResourceLoading.Get(),
+                ()=>$"UpdateProperties: button={this.name} active={active} disabled={disabled}");
 
             m_BackgroundSprites.m_Normal =
                 m_BackgroundSprites.m_Disabled =
                     m_BackgroundSprites.m_Focused =
                         GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Base, active);
+
 
             m_BackgroundSprites.m_Hovered =
                 GetButtonBackgroundTextureId(ButtonName, ButtonMouseState.Hovered, active);
@@ -170,21 +175,24 @@ namespace TrafficManager.UI {
                 m_PressedFgSprite =
                     GetButtonForegroundTextureId(ButtonName, FunctionName, true);
 
-            string shortcutText = GetShortcutTooltip();
-            tooltip = Tooltip + shortcutText;
-
-
             if (CanDisable) {
                 m_BackgroundSprites.m_Disabled =
                     GetButtonDisabledTextureId(ButtonName);
-                if (IsDisabled)
+
+                // TODO add disabled forground textures.
+                // m_ForegroundSprites.m_Disabled =
+
+                if (disabled) {
                     Disable();
-                else
+                } else {
                     Enable();
+                }
             }
 
+            string shortcutText = GetShortcutTooltip();
+            tooltip = Tooltip + shortcutText;
             isVisible = Visible;
-            Invalidate(); // TODO: why was this here in the first place?
+            Invalidate();
         }
 
 

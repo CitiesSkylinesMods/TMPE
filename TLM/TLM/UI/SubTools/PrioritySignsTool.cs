@@ -14,7 +14,7 @@ namespace TrafficManager.UI.SubTools {
     using static Util.SegmentTraverser;
 
     public class PrioritySignsTool : SubTool {
-        private enum PrioritySignsMassEditMode {
+        public enum PrioritySignsMassEditMode {
             MainYield = 0,
             MainStop = 1,
             YieldMain = 2,
@@ -51,94 +51,25 @@ namespace TrafficManager.UI.SubTools {
                     RefreshMassEditOverlay();
                     return;
                 }
-            // TODO uncomment as part of issue #541
-            //} else if (ctrlDown) {
-            //
-            //    //PriorityRoad.FixJunction(HoveredNodeId);
-            //    RefreshMassEditOverlay();
-            //    return;
+                // TODO uncomment as part of issue #541
+                //} else if (ctrlDown) {
+                //
+                //    //PriorityRoad.FixJunction(HoveredNodeId);
+                //    RefreshMassEditOverlay();
+                //    return;
             }
             if (shiftDown) {
-                var primaryPrioType = PriorityType.None;
-                var secondaryPrioType = PriorityType.None;
-
-                switch (massEditMode) {
-                    case PrioritySignsMassEditMode.MainYield: {
-                            primaryPrioType = PriorityType.Main;
-                            secondaryPrioType = PriorityType.Yield;
-                            break;
-                        }
-
-                    case PrioritySignsMassEditMode.MainStop: {
-                            primaryPrioType = PriorityType.Main;
-                            secondaryPrioType = PriorityType.Stop;
-                            break;
-                        }
-
-                    case PrioritySignsMassEditMode.YieldMain: {
-                            primaryPrioType = PriorityType.Yield;
-                            secondaryPrioType = PriorityType.Main;
-                            break;
-                        }
-
-                    case PrioritySignsMassEditMode.StopMain: {
-                            primaryPrioType = PriorityType.Stop;
-                            secondaryPrioType = PriorityType.Main;
-                            break;
-                        }
-                }
-
-                IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-
-                bool VisitorFun(SegmentVisitData data) {
-                    foreach (bool startNode in Constants.ALL_BOOL) {
-                        TrafficPriorityManager.Instance.SetPrioritySign(
-                            data.CurSeg.segmentId,
-                            startNode,
-                            primaryPrioType);
-                        ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(
-                            data.CurSeg.segmentId,
-                            startNode);
-                        ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[
-                            segEndMan.GetIndex(data.CurSeg.segmentId, startNode)];
-
-                        for (int i = 0; i < 8; ++i) {
-                            ushort otherSegmentId = Singleton<NetManager>.instance.m_nodes
-                                                                         .m_buffer[nodeId]
-                                                                         .GetSegment(i);
-
-                            if (otherSegmentId == 0 || otherSegmentId == data.CurSeg.segmentId) {
-                                continue;
-                            }
-
-                            ArrowDirection dir = segEndMan.GetDirection(
-                                ref curEnd,
-                                otherSegmentId);
-
-                            if (dir != ArrowDirection.Forward) {
-                                TrafficPriorityManager.Instance.SetPrioritySign(
-                                    otherSegmentId,
-                                    (bool)Constants.ServiceFactory.NetService.IsStartNode(
-                                        otherSegmentId,
-                                        nodeId),
-                                    secondaryPrioType);
-                            }
-                        }
-                    }
-
-                    return true;
-                }
                 bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
-                if (isRAbout) {
-                    SegmentTraverser.Traverse(segmentList, VisitorFun);
-                } else {
-                    SegmentTraverser.Traverse(
+                if (!isRAbout) {
+                    segmentList = SegmentTraverser.Traverse(
                         HoveredSegmentId,
                         TraverseDirection.AnyDirection,
                         TraverseSide.Straight,
                         SegmentStopCriterion.None,
-                        VisitorFun);
+                        (_)=>true);
                 }
+
+                FixPrioritySigns(massEditMode,segmentList);
 
                 // cycle mass edit mode
                 massEditMode =
@@ -161,6 +92,84 @@ namespace TrafficManager.UI.SubTools {
             // update priority node cache
             RefreshCurrentPriorityNodeIds();
         }
+
+        public static void FixPrioritySigns(PrioritySignsMassEditMode massEditMode, List<ushort> segmentList) {
+            if (segmentList == null || segmentList.Count == 0)
+                return;
+
+            var primaryPrioType = PriorityType.None;
+            var secondaryPrioType = PriorityType.None;
+
+            switch (massEditMode) {
+                case PrioritySignsMassEditMode.MainYield: {
+                        primaryPrioType = PriorityType.Main;
+                        secondaryPrioType = PriorityType.Yield;
+                        break;
+                    }
+
+                case PrioritySignsMassEditMode.MainStop: {
+                        primaryPrioType = PriorityType.Main;
+                        secondaryPrioType = PriorityType.Stop;
+                        break;
+                    }
+
+                case PrioritySignsMassEditMode.YieldMain: {
+                        primaryPrioType = PriorityType.Yield;
+                        secondaryPrioType = PriorityType.Main;
+                        break;
+                    }
+
+                case PrioritySignsMassEditMode.StopMain: {
+                        primaryPrioType = PriorityType.Stop;
+                        secondaryPrioType = PriorityType.Main;
+                        break;
+                    }
+            }
+
+            IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+
+            bool VisitorFun(SegmentVisitData data) {
+                foreach (bool startNode in Constants.ALL_BOOL) {
+                    TrafficPriorityManager.Instance.SetPrioritySign(
+                        data.CurSeg.segmentId,
+                        startNode,
+                        primaryPrioType);
+                    ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(
+                        data.CurSeg.segmentId,
+                        startNode);
+                    ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[
+                        segEndMan.GetIndex(data.CurSeg.segmentId, startNode)];
+
+                    for (int i = 0; i < 8; ++i) {
+                        ushort otherSegmentId = Singleton<NetManager>.instance.m_nodes
+                                                                     .m_buffer[nodeId]
+                                                                     .GetSegment(i);
+
+                        if (otherSegmentId == 0 || otherSegmentId == data.CurSeg.segmentId) {
+                            continue;
+                        }
+
+                        ArrowDirection dir = segEndMan.GetDirection(
+                            ref curEnd,
+                            otherSegmentId);
+
+                        if (dir != ArrowDirection.Forward) {
+                            TrafficPriorityManager.Instance.SetPrioritySign(
+                                otherSegmentId,
+                                (bool)Constants.ServiceFactory.NetService.IsStartNode(
+                                    otherSegmentId,
+                                    nodeId),
+                                secondaryPrioType);
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            SegmentTraverser.Traverse(segmentList, VisitorFun);
+        }
+
 
         public override void OnToolGUI(Event e) { }
 

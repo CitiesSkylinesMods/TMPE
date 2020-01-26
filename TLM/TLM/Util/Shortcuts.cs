@@ -1,5 +1,6 @@
 namespace TrafficManager.Util {
     using System;
+    using System.Collections.Generic;
     using ColossalFramework;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
