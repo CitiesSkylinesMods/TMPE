@@ -26,10 +26,10 @@ namespace TrafficManager.UI {
         private const string MENU_BUTTON_ACTIVE = "Active";
         private const string MENU_BUTTON_Disabled = "Disabled";
 
-        protected static string GetButtonDisabledTextureId(string prefix) =>
+        protected static string GetButtonBackgroundDisabledTextureId(string prefix) =>
             GetButtonBackgroundTextureId(prefix, 0, false, true);
 
-            protected static string GetButtonBackgroundTextureId(
+        protected static string GetButtonBackgroundTextureId(
             string prefix,
             ButtonMouseState state,
             bool active,
@@ -61,10 +61,14 @@ namespace TrafficManager.UI {
             return ret;
         }
 
+        private static string GetButtonForegroundDisabledTextureId(string prefix, string function) =>
+            GetButtonForegroundTextureId(prefix, function, false, true);
+
         private static string GetButtonForegroundTextureId(
             string prefix,
             string function,
-            bool active) {
+            bool active,
+            bool disabled = false) {
             string ret = prefix + MENU_BUTTON_FOREGROUND + function;
             ret += active ? MENU_BUTTON_ACTIVE : MENU_BUTTON_DEFAULT;
             return ret;
@@ -96,7 +100,7 @@ namespace TrafficManager.UI {
             }
 
             if (CanDisable) {
-                textureIds.Add(GetButtonDisabledTextureId(ButtonName));
+                textureIds.Add(GetButtonBackgroundDisabledTextureId(ButtonName));
             }
 
             foreach (string function in FunctionNames) {
@@ -107,8 +111,11 @@ namespace TrafficManager.UI {
                 textureIds.Add(GetButtonForegroundTextureId(ButtonName, function, true));
             }
 
-            // TODO add forground disabled textures.
-
+            if (CanDisable) {
+                foreach (string function in FunctionNames) {
+                    textureIds.Add(GetButtonForegroundDisabledTextureId(ButtonName, function));
+                }
+            }
 
             // Set the atlases for background/foreground
             atlas = TextureUtil.GenerateLinearAtlas(
@@ -126,7 +133,7 @@ namespace TrafficManager.UI {
 
         public virtual bool CanDisable => false;
 
-        public virtual bool IsDisabled => false;
+        public virtual bool ShouldDisable => false;
 
         public abstract bool Active { get; }
 
@@ -148,7 +155,7 @@ namespace TrafficManager.UI {
 
         internal void UpdateProperties() {
             bool active = CanActivate() && Active;
-            bool disabled = CanDisable && IsDisabled;
+            bool disabled = CanDisable && ShouldDisable;
 
             Log._DebugIf(
                 DebugSwitch.ResourceLoading.Get(),
@@ -177,16 +184,12 @@ namespace TrafficManager.UI {
 
             if (CanDisable) {
                 m_BackgroundSprites.m_Disabled =
-                    GetButtonDisabledTextureId(ButtonName);
+                    GetButtonBackgroundDisabledTextureId(ButtonName);
 
-                // TODO add disabled forground textures.
-                // m_ForegroundSprites.m_Disabled =
+                m_ForegroundSprites.m_Disabled =
+                   GetButtonForegroundDisabledTextureId(ButtonName, FunctionName);
 
-                if (disabled) {
-                    Disable();
-                } else {
-                    Enable();
-                }
+                isEnabled = !disabled;
             }
 
             string shortcutText = GetShortcutTooltip();
@@ -194,7 +197,6 @@ namespace TrafficManager.UI {
             isVisible = Visible;
             Invalidate();
         }
-
 
         /// <summary>
         /// If shortcut key was set to a non-empty something, then form a text tooltip,

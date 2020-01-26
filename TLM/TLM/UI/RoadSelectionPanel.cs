@@ -182,7 +182,7 @@ namespace TrafficManager.UI {
                 public override FunctionMode Function => FunctionMode.Boulevard;
                 public override void Do() => throw new NotImplementedException("blocked by #541");
                 public override void Undo() => throw new NotImplementedException("blocked by #541 #568");
-                public override bool IsDisabled => true; // TODO remove after #541
+                public override bool ShouldDisable => true; // TODO remove after #541
             }
 
             public class RAboutButtton : ButtonExt {
@@ -192,7 +192,7 @@ namespace TrafficManager.UI {
                     RoundaboutMassEdit.Instance.FixRabout(RoadSelection.Instance.Selection);
                 public override void Undo() =>
                     RoundaboutMassEdit.Instance.UndoRabout(RoadSelection.Instance.Selection);
-                public override bool IsDisabled {
+                public override bool ShouldDisable {
                     get {
                         Log._Debug("RAboutButtton.IsDisabled() called" + Environment.StackTrace);
                         // TODO why rabout is called multiple times?
@@ -242,7 +242,7 @@ namespace TrafficManager.UI {
 
                 public override bool CanDisable => true;
 
-                public override bool IsDisabled => RoadSelection.Instance.Length == 0;
+                public override bool ShouldDisable => RoadSelection.Instance.Length == 0;
 
                 public abstract FunctionMode Function { get; }
 

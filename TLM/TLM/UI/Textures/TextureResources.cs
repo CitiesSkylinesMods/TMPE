@@ -23,7 +23,7 @@ namespace TrafficManager.UI.Textures {
             MainMenuButtonTexture2D.name = "TMPE_MainMenuButtonIcon";
 
             // Road selection quick setup buttons.
-            RoadQuickEditButtons = LoadDllResource("road-edit-btns.png", 17 * 50, 50);
+            RoadQuickEditButtons = LoadDllResource("road-edit-btns.png", 22 * 50, 50);
             RoadQuickEditButtons.name = "TMPE_RoadQuickEdit";
 
             // main menu buttons
