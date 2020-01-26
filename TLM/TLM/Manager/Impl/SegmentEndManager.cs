@@ -1,11 +1,11 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using System;
-    using API.Manager;
-    using API.Traffic;
     using CSUtil.Commons;
-    using State.ConfigData;
-    using Traffic;
-    using Traffic.Impl;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.Traffic.Impl;
+    using TrafficManager.Traffic;
 
     [Obsolete("should be removed when implementing issue #240")]
     public class SegmentEndManager

@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.UI.MainMenu {
-    using State.Keybinds;
+    using TrafficManager.State.Keybinds;
 
     public class LaneArrowsButton : MenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.LaneChange;

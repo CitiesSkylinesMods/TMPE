@@ -1,5 +1,5 @@
 ﻿namespace GenericGameBridge.Factory {
-    using Service;
+    using GenericGameBridge.Service;
 
     public interface IServiceFactory {
         IBuildingService BuildingService { get; }

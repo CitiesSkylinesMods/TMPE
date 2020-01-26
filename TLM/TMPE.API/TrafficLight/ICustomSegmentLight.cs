@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.API.TrafficLight {
     using System;
     using CSUtil.Commons;
-    using Traffic.Enums;
+    using TrafficManager.API.Traffic.Enums;
 
     public interface ICustomSegmentLight : ICloneable {
         // TODO documentation

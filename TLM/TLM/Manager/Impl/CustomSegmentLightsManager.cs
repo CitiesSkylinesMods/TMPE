@@ -1,13 +1,13 @@
 namespace TrafficManager.Manager.Impl {
-    using System.Collections.Generic;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.TrafficLight;
     using ColossalFramework;
     using CSUtil.Commons;
-    using TrafficLight;
-    using TrafficLight.Impl;
+    using System.Collections.Generic;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.TrafficLight;
+    using TrafficManager.TrafficLight.Impl;
+    using TrafficManager.TrafficLight;
 
     /// <summary>
     /// Manages the states of all custom traffic lights on the map

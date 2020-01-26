@@ -1,8 +1,8 @@
 ﻿namespace TrafficManager.Custom.AI {
-    using API.Manager;
     using JetBrains.Annotations;
-    using Manager;
-    using RedirectionFramework.Attributes;
+    using TrafficManager.API.Manager;
+    using TrafficManager.Manager;
+    using TrafficManager.RedirectionFramework.Attributes;
     using UnityEngine;
 
     [TargetType(typeof(CitizenAI))]

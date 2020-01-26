@@ -1,18 +1,18 @@
 // #define DEBUGGET
 
 namespace TrafficManager.TrafficLight.Impl {
-    using System;
-    using System.Collections.Generic;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.TrafficLight;
     using ColossalFramework;
     using CSUtil.Commons;
-    using Geometry.Impl;
     using JetBrains.Annotations;
-    using State.ConfigData;
-    using Util;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.TrafficLight;
+    using TrafficManager.Geometry.Impl;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     /// <summary>
     /// Represents the set of custom traffic lights located at a node

@@ -1,10 +1,10 @@
 namespace TrafficManager.Manager.Impl {
-    using API.Geometry;
-    using API.Manager;
-    using API.Traffic.Data;
     using CSUtil.Commons;
-    using Geometry;
-    using Geometry.Impl;
+    using TrafficManager.API.Geometry;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Geometry.Impl;
+    using TrafficManager.Geometry;
 
     public class ExtNodeManager
         : AbstractCustomManager,

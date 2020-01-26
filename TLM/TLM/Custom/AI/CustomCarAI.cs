@@ -1,24 +1,24 @@
 // #define DEBUGV
 
 namespace TrafficManager.Custom.AI {
-    using System;
-    using System.Runtime.CompilerServices;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using ColossalFramework;
     using ColossalFramework.Math;
+    using ColossalFramework;
+    using CSUtil.Commons.Benchmark;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using Manager;
-    using Manager.Impl;
-    using PathFinding;
-    using RedirectionFramework.Attributes;
-    using State;
-    using State.ConfigData;
-    using UnityEngine;
     using System.Diagnostics.CodeAnalysis;
-    using CSUtil.Commons.Benchmark;
+    using System.Runtime.CompilerServices;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Custom.PathFinding;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager;
+    using TrafficManager.RedirectionFramework.Attributes;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using UnityEngine;
 
     // TODO inherit from VehicleAI (in order to keep the correct references to `base`)
     [TargetType(typeof(CarAI))]

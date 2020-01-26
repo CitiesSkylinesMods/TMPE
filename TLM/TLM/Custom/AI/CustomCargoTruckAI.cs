@@ -1,13 +1,13 @@
 namespace TrafficManager.Custom.AI {
-    using System.Runtime.CompilerServices;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using PathFinding;
-    using RedirectionFramework.Attributes;
+    using System.Runtime.CompilerServices;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Custom.PathFinding;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.RedirectionFramework.Attributes;
     using UnityEngine;
 
     [TargetType(typeof(CargoTruckAI))]

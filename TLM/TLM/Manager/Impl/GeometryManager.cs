@@ -1,16 +1,16 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using API.Geometry;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Util;
     using ColossalFramework;
     using CSUtil.Commons;
-    using State.ConfigData;
-    using Geometry;
-    using Util;
+    using System.Collections.Generic;
+    using System.Threading;
+    using System;
+    using TrafficManager.API.Geometry;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Util;
+    using TrafficManager.Geometry;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     public class GeometryManager
         : AbstractCustomManager,

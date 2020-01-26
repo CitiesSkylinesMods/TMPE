@@ -1,17 +1,17 @@
 namespace TrafficManager.Util {
-    using System;
+    using ColossalFramework.Plugins;
+    using ColossalFramework.UI;
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using ICities;
+    using static ColossalFramework.Plugins.PluginManager;
     using System.Collections.Generic;
     using System.IO;
     using System.Reflection;
-    using ColossalFramework;
-    using ColossalFramework.Plugins;
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
-    using ICities;
-    using State;
-    using UI;
+    using System;
+    using TrafficManager.State;
+    using TrafficManager.UI;
     using UnityEngine;
-    using static ColossalFramework.Plugins.PluginManager;
 
     public class ModsCompatibilityChecker {
         // Game always uses ulong.MaxValue to depict local mods

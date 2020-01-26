@@ -1,18 +1,18 @@
 namespace TrafficManager.Traffic.Impl {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using API.Manager;
-    using API.Traffic;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
-    using Geometry.Impl;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using State;
-    using Util;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.Traffic;
+    using TrafficManager.Geometry.Impl;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
+    using TrafficManager.Util;
 
     /// <summary>
     /// A segment end describes a directional traffic segment connected to a controlled node

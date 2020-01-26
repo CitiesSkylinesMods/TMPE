@@ -1,13 +1,13 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using System;
+    using CSUtil.Commons;
     using System.Collections.Generic;
     using System.Linq;
-    using API.Manager;
-    using API.Traffic.Enums;
-    using CSUtil.Commons;
-    using State;
-    using State.ConfigData;
-    using Util;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.Util;
 
     /// <summary>
     /// Manages traffic light toggling

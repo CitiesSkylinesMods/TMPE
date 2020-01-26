@@ -1,9 +1,9 @@
 namespace TrafficManager.State.ConfigData {
-    using System;
-    using API.Traffic.Enums;
+    using ExtVehicleType = TrafficManager.Traffic.ExtVehicleType;
     using JetBrains.Annotations;
-    using Traffic;
-    using ExtVehicleType = Traffic.ExtVehicleType;
+    using System;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Traffic;
 
 #if DEBUG
     /// <summary>
@@ -12,7 +12,7 @@ namespace TrafficManager.State.ConfigData {
     public class DebugSettings {
         /// <summary>
         /// Do not use directly.
-        /// Use DebugSwitch.<EnumName>.Get() to access the switch values
+        /// Use DebugSwitch.$EnumName$.Get() to access the switch values.
         /// </summary>
         public bool[] Switches = {
             false, // 0: path-finding debug log

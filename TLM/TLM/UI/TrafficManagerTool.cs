@@ -1,24 +1,24 @@
 namespace TrafficManager.UI {
-    using System;
+    using ColossalFramework.Math;
+    using ColossalFramework.UI;
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using JetBrains.Annotations;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.Util;
-    using ColossalFramework;
-    using ColossalFramework.Math;
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
-    using JetBrains.Annotations;
-    using Manager.Impl;
-    using State;
-    using State.ConfigData;
-    using MainMenu;
-    using SubTools;
-    using SubTools.SpeedLimits;
-    using Util;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.Util;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.UI.MainMenu;
+    using TrafficManager.UI.SubTools.SpeedLimits;
+    using TrafficManager.UI.SubTools;
+    using TrafficManager.Util;
     using UnityEngine;
 
     [UsedImplicitly]

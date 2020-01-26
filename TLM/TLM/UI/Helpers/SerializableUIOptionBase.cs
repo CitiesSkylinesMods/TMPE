@@ -1,11 +1,11 @@
 namespace TrafficManager.UI.Helpers {
     using ColossalFramework.UI;
+    using ColossalFramework;
     using CSUtil.Commons;
     using ICities;
-    using State;
     using System.Reflection;
     using System;
-    using ColossalFramework;
+    using TrafficManager.State;
 
     public abstract class SerializableUIOptionBase<TVal, TUI> : ILegacySerializableOption
         where TUI : UIComponent {
