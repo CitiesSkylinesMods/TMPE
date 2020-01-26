@@ -1,15 +1,15 @@
 // #define DEBUGVISUALS
 
 namespace TrafficManager.TrafficLight.Impl {
-    using System;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.TrafficLight;
     using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using State.ConfigData;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.TrafficLight;
+    using TrafficManager.State.ConfigData;
 
     /// <summary>
     /// Represents the traffic light (left, forward, right) at a specific segment end

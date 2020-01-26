@@ -1,18 +1,18 @@
 namespace TrafficManager {
-    using System.Collections.Generic;
-    using System.Reflection;
-    using API.Manager;
-    using ColossalFramework;
     using ColossalFramework.UI;
-    using CSUtil.Commons;
+    using ColossalFramework;
     using CSUtil.Commons.Benchmark;
+    using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
-    using RedirectionFramework;
-    using State;
-    using UI;
-    using UnityEngine;
     using static LoadingExtension;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using TrafficManager.API.Manager;
+    using TrafficManager.RedirectionFramework;
+    using TrafficManager.State;
+    using TrafficManager.UI;
+    using UnityEngine;
 
     [UsedImplicitly]
     public sealed class ThreadingExtension : ThreadingExtensionBase {

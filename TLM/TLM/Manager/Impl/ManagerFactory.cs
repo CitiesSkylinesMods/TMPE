@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using API.Manager;
+    using TrafficManager.API.Manager;
 
     public class ManagerFactory : IManagerFactory {
         public static IManagerFactory Instance = new ManagerFactory();

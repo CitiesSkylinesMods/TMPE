@@ -1,17 +1,17 @@
 ﻿// #define QUEUEDSTATS
 
 namespace TrafficManager.Custom.AI {
-    using System;
-    using System.Runtime.CompilerServices;
-    using ColossalFramework;
     using ColossalFramework.Math;
+    using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using RedirectionFramework.Attributes;
-    using State;
-    using State.ConfigData;
-    using Traffic;
+    using System.Runtime.CompilerServices;
+    using System;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.RedirectionFramework.Attributes;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.Traffic;
     using UnityEngine;
 
     // TODO inherit from PrefabAI (in order to keep the correct references to `base`)

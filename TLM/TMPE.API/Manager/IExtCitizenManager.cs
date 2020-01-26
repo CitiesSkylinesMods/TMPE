@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.API.Manager {
-    using Traffic.Data;
+    using TrafficManager.API.Traffic.Data;
 
     public interface IExtCitizenManager {
         // TODO define me!

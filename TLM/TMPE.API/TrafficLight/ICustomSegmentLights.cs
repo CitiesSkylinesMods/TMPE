@@ -1,9 +1,9 @@
 ﻿namespace TrafficManager.API.TrafficLight {
     using System;
     using System.Collections.Generic;
-    using Manager;
-    using Traffic;
-    using Traffic.Enums;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic;
+    using TrafficManager.API.Traffic.Enums;
 
     public interface ICustomSegmentLights : ICloneable, ISegmentEndId {
         // TODO documentation

@@ -1,12 +1,12 @@
 namespace TrafficManager.State.Keybinds {
-    using System;
+    using ColossalFramework.UI;
+    using ColossalFramework;
+    using CSUtil.Commons;
     using System.Linq;
     using System.Reflection;
     using System.Text.RegularExpressions;
-    using ColossalFramework;
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
-    using UI;
+    using System;
+    using TrafficManager.UI;
     using UnityEngine;
 
     /// <summary>

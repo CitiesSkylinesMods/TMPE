@@ -2,8 +2,8 @@ namespace TrafficManager.State {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using UI;
-    using UI.Helpers;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.UI;
 
     public static class OptionsOverlaysTab {
         private static UICheckBox _prioritySignsOverlayToggle;

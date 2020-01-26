@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.UI.MainMenu {
-    using State;
-    using State.Keybinds;
+    using TrafficManager.State;
+    using TrafficManager.State.Keybinds;
 
     public class SpeedLimitsButton : MenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.SpeedLimits;

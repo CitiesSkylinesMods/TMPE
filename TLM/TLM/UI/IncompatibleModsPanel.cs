@@ -1,15 +1,14 @@
-namespace TrafficManager.UI
-{
-    using System;
-    using System.Collections.Generic;
-    using ColossalFramework;
+namespace TrafficManager.UI {
     using ColossalFramework.IO;
     using ColossalFramework.PlatformServices;
     using ColossalFramework.UI;
+    using ColossalFramework;
     using CSUtil.Commons;
-    using State;
-    using UnityEngine;
     using static ColossalFramework.Plugins.PluginManager;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.State;
+    using UnityEngine;
 
     public class IncompatibleModsPanel : UIPanel {
         private const ulong LOCAL_MOD = ulong.MaxValue;

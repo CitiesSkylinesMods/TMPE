@@ -1,10 +1,10 @@
 namespace TrafficManager.Manager.Impl {
-    using System;
-    using API.Manager;
-    using API.Traffic.Data;
     using ColossalFramework;
     using CSUtil.Commons;
-    using State.ConfigData;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State.ConfigData;
     using UnityEngine;
 
     public class ExtSegmentEndManager

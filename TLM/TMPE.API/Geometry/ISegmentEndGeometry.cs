@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.API.Geometry {
     using CSUtil.Commons;
-    using Traffic;
-    using Traffic.Enums;
+    using TrafficManager.API.Traffic;
+    using TrafficManager.API.Traffic.Enums;
 
     public interface ISegmentEndGeometry : ISegmentEndId {
         /// <summary>

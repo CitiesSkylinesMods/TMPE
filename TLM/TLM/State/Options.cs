@@ -1,13 +1,13 @@
 namespace TrafficManager.State {
-    using System.Collections.Generic;
-    using System.Reflection;
-    using API.Traffic.Enums;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
-    using UI;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.UI;
     using UnityEngine;
-    using UI.Helpers;
 
     public class Options : MonoBehaviour {
 #if DEBUG

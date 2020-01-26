@@ -1,12 +1,12 @@
 namespace TrafficManager.UI.SubTools {
-    using System.Collections.Generic;
-    using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using Manager.Impl;
-    using State;
+    using System.Collections.Generic;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
     using UnityEngine;
 
     public class LaneArrowTool : SubTool {

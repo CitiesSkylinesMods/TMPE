@@ -1,13 +1,13 @@
 namespace TrafficManager.UI {
-    using System;
-    using API.Util;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using State;
-    using State.Keybinds;
-    using Textures;
+    using System;
+    using TrafficManager.API.Util;
+    using TrafficManager.State.Keybinds;
+    using TrafficManager.State;
+    using TrafficManager.UI.Textures;
+    using TrafficManager.Util;
     using UnityEngine;
-    using Util;
 
     public class UIMainMenuButton
         : UIButton,

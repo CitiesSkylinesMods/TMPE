@@ -1,17 +1,17 @@
 namespace TrafficManager.Manager.Impl {
-    using System;
-    using System.Collections.Generic;
-    using API.Geometry;
-    using API.Manager;
-    using API.Traffic;
-    using API.Traffic.Data;
     using ColossalFramework;
     using CSUtil.Commons;
-    using Geometry;
     using JetBrains.Annotations;
-    using State;
-    using State.ConfigData;
-    using Traffic;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.API.Geometry;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic;
+    using TrafficManager.Geometry;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.Traffic;
 
     public class JunctionRestrictionsManager
         : AbstractGeometryObservingManager,

@@ -1,20 +1,20 @@
 ﻿namespace TrafficManager.Custom.PathFinding {
-    using System;
+    using ColossalFramework.Math;
+    using ColossalFramework.UI;
+    using ColossalFramework;
+    using CSUtil.Commons;
     using System.Diagnostics;
     using System.Reflection;
     using System.Threading;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.TrafficLight;
-    using ColossalFramework;
-    using ColossalFramework.Math;
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
-    using Manager;
-    using Manager.Impl;
-    using RedirectionFramework.Attributes;
-    using State;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.TrafficLight;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.Manager;
+    using TrafficManager.RedirectionFramework.Attributes;
+    using TrafficManager.State;
     using UnityEngine;
 
 #if DEBUG
