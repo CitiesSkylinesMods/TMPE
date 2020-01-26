@@ -11,7 +11,6 @@ namespace TrafficManager.UI.SubTools {
     using State.Keybinds;
     using UnityEngine;
     using Util.Caching;
-    using static Util.Shortcuts;
 
     public class LaneConnectorTool : SubTool {
         private enum MarkerSelectionMode {
@@ -204,7 +203,8 @@ namespace TrafficManager.UI.SubTools {
 
                     // bounds.center = laneMarker.position;
                     // bounds.IntersectRay(mouseRay);
-                    bool markerIsHovered = laneMarker.LaneId == HoveredLaneId;
+                    bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay);
+
                     // draw source marker in source selection mode,
                     // draw target marker (if segment turning angles are within bounds) and
                     // selected source marker in target selection mode
@@ -262,6 +262,21 @@ namespace TrafficManager.UI.SubTools {
                     }
                 } // end foreach lanemarker in node markers
             } // end for node in all nodes
+        }
+
+        private bool IsLaneMarkerHovered(NodeLaneMarker laneMarker, ref Ray mouseRay) {
+            Bounds bounds = new Bounds(Vector3.zero, Vector3.one) {
+                center = laneMarker.Position
+            };
+
+            if (bounds.IntersectRay(mouseRay)) {
+                return true;
+            }
+
+            bounds = new Bounds(Vector3.zero, Vector3.one) {
+                center = laneMarker.SecondaryPosition
+            };
+            return bounds.IntersectRay(mouseRay);
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {

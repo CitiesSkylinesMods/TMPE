@@ -78,11 +78,15 @@ namespace TrafficManager.UI {
 
         private GUIStyle borderlessStyle_;
 
-        protected virtual ushort HoveredNodeId => TrafficManagerTool.HoveredNodeId;
+        protected virtual ushort HoveredNodeId {
+            get => TrafficManagerTool.HoveredNodeId;
+            set => TrafficManagerTool.HoveredNodeId = value;
+        }
 
-        protected virtual ushort HoveredSegmentId => TrafficManagerTool.HoveredSegmentId;
-
-        protected virtual uint HoveredLaneId => TrafficManagerTool.HoveredLaneId;
+        protected virtual ushort HoveredSegmentId {
+            get => TrafficManagerTool.HoveredSegmentId;
+            set => TrafficManagerTool.HoveredSegmentId = value;
+        }
 
         protected ushort SelectedNodeId {
             get => TrafficManagerTool.SelectedNodeId;
