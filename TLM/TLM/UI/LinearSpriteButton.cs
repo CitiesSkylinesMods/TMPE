@@ -70,7 +70,13 @@ namespace TrafficManager.UI {
             bool active,
             bool disabled = false) {
             string ret = prefix + MENU_BUTTON_FOREGROUND + function;
-            ret += active ? MENU_BUTTON_ACTIVE : MENU_BUTTON_DEFAULT;
+            if (disabled) {
+                ret += MENU_BUTTON_Disabled;
+            }else if (active) {
+                ret += MENU_BUTTON_ACTIVE;
+            } else {
+                ret += MENU_BUTTON_DEFAULT;
+            }
             return ret;
         }
 
