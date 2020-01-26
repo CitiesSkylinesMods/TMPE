@@ -136,7 +136,7 @@ namespace TrafficManager.UI {
                 //opacity = 0.5f; // TODO remove
                 autoLayout = true;
                 autoLayoutDirection = LayoutDirection.Horizontal;
-                padding = new RectOffset(5, 5, 5, 5);
+                padding = new RectOffset(1,1,1,1);
                 autoLayoutPadding = new RectOffset(5, 5, 5, 5);
 
                 buttons = new List<ButtonExt>();

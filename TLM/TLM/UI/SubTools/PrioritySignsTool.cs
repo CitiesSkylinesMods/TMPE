@@ -296,7 +296,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.prioritySignsOverlay) {
+            if (viewOnly && !(Options.prioritySignsOverlay || showMassEditOverlay)) {
                 return;
             }
 
@@ -526,7 +526,7 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
 
-            if (Options.prioritySignsOverlay) {
+            if (Options.prioritySignsOverlay || showMassEditOverlay) {
                 RefreshCurrentPriorityNodeIds();
             } else {
                 currentPriorityNodeIds.Clear();
