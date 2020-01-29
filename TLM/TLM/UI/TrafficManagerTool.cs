@@ -948,7 +948,7 @@ namespace TrafficManager.UI {
                 }
 
                 if(HoveredSegmentId != 0) {
-                    DetermineHoveredLane();
+                    DetermineHoveredLane(segmentOutput.m_hitPos);
                 }
             }
             return HoveredNodeId != 0 || HoveredSegmentId != 0;
@@ -995,12 +995,15 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        private void DetermineHoveredLane() {
+        /// Determine the 
+        /// </summary>
+        /// <param name="hitPos"></param>
+        private void DetermineHoveredLane(Vector3 hitPos) {
             NetSegment segment = GetSeg(HoveredSegmentId);
             segment.GetClosestLanePosition(
-                m_mousePosition,
-                LaneArrowManager.LANE_TYPES,
-                LaneArrowManager.VEHICLE_TYPES,
+                hitPos,
+                NetInfo.LaneType.All,
+                VehicleInfo.VehicleType.All,
                 out Vector3 pos,
                 out uint laneID,
                 out int laneIndex,

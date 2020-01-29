@@ -262,21 +262,6 @@ namespace TrafficManager.UI.SubTools {
             } // end for node in all nodes
         }
 
-        private bool IsLaneMarkerHovered(NodeLaneMarker laneMarker, ref Ray mouseRay) {
-            Bounds bounds = new Bounds(Vector3.zero, Vector3.one) {
-                center = laneMarker.Position
-            };
-
-            if (bounds.IntersectRay(mouseRay)) {
-                return true;
-            }
-
-            bounds = new Bounds(Vector3.zero, Vector3.one) {
-                center = laneMarker.SecondaryPosition
-            };
-            return bounds.IntersectRay(mouseRay);
-        }
-
         /// <summary>
         /// Finds the first index for which node.GetSegment(index) != 0 (its possible node.m_segment0 == 0)
         /// </summary>
