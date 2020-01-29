@@ -944,7 +944,7 @@ namespace TrafficManager.UI {
                 }
 
                 if (HoveredNodeId != 0) {
-                    HoveredSegmentId = GetHoveredSegmentFromNode();
+                    HoveredSegmentId = GetHoveredSegmentFromNode(segmentOutput.m_hitPos);
                 }
 
                 if(HoveredSegmentId != 0) {
@@ -957,10 +957,10 @@ namespace TrafficManager.UI {
         /// <summary>
         /// returns the node segment that is closest to the mouse pointer based on angle.
         /// </summary>
-        internal ushort GetHoveredSegmentFromNode() {
+        internal ushort GetHoveredSegmentFromNode(Vector3 hitPos) {
             ushort minSegId = 0;
             NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
-            Vector3 dir0 = m_mousePosition - node.m_position;
+            Vector3 dir0 = hitPos - node.m_position;
             float min_angle = float.MaxValue;
             Constants.ServiceFactory.NetService.IterateNodeSegments(
                 HoveredNodeId,
