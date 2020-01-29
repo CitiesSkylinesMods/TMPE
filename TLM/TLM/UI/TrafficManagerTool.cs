@@ -938,8 +938,8 @@ namespace TrafficManager.UI {
                     }
                 }
 
-                if (HoveredNodeId != 0) {
-                    HoveredSegmentId = GetHoveredSegmentFromNode();
+                if (HoveredNodeId != 0 && HoveredSegmentId != 0) {
+                    HoveredSegmentId = GetHoveredSegmentFromNode(segmentOutput.m_hitPos);
                 }
             }
 
@@ -947,9 +947,9 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// returns the node(HoveredNodeId) segment that is closest to the mouse pointer.
+        /// returns the node(HoveredNodeId) segment that is closest to the input position.
         /// </summary>
-        internal ushort GetHoveredSegmentFromNode() {
+        internal ushort GetHoveredSegmentFromNode(Vector3 hitPos) {
             ushort minSegId = 0;
             NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
             float minDistance = float.MaxValue;
@@ -957,8 +957,8 @@ namespace TrafficManager.UI {
                 HoveredNodeId,
                 (ushort segmentId, ref NetSegment segment) =>
                 {
-                    Vector3 pos = segment.GetClosestPosition(m_mousePosition);
-                    float distance = (m_mousePosition - pos).sqrMagnitude;
+                    Vector3 pos = segment.GetClosestPosition(hitPos);
+                    float distance = (hitPos - pos).sqrMagnitude;
                     if (distance < minDistance) {
                         minDistance = distance;
                         minSegId = segmentId;
