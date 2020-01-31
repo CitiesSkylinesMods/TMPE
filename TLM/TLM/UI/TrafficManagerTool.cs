@@ -1004,7 +1004,7 @@ namespace TrafficManager.UI {
 
         private static float prev_H = 0f;
         private static float prev_H_Fixed;
-        internal static float GetFixedHitHeight() {
+        internal static float GetAccurateHitHeight() {
             // cache result.
             if (HitPos.y == prev_H) {
                 return prev_H_Fixed;

@@ -79,8 +79,8 @@ namespace TrafficManager.UI.SubTools {
             internal Bezier3 bezier;
 
             private Bounds[] bounds;
-            private static float prev_H = float.MinValue;
-            internal bool IntersectRay(Ray ray, float  hitH) {
+            private float prev_H;
+            internal bool IntersectRay(Ray ray, float hitH) {
                 if (hitH != prev_H || bounds == null)
                     CalculateBounds(hitH);
                 prev_H = hitH;
@@ -109,7 +109,7 @@ namespace TrafficManager.UI.SubTools {
                         if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
                             // linear bezier
                             Bounds bounds = bezier0.GetBounds();
-                            bounds.Expand(0.2f);
+                            bounds.Expand(0.25f);
                             this.bounds = new Bounds[] { bounds };
                             return;
                         }
@@ -122,7 +122,6 @@ namespace TrafficManager.UI.SubTools {
                 float size = 1f / n;
                 for (int i = 0; i < n; i++) {
                     Bezier3 bezier = bezier0.Cut(i * size, (i + 1) * size);
-
                     Bounds bounds = bezier.GetBounds();
                     bounds.Expand(0.9f);
                     this.bounds[i] = bounds;
@@ -297,7 +296,7 @@ namespace TrafficManager.UI.SubTools {
 
                     // highlight hovered marker and selected marker
                     if (drawMarker) {
-                        float hitH = TrafficManagerTool.GetFixedHitHeight();
+                        float hitH = TrafficManagerTool.GetAccurateHitHeight();
                         bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay, hitH);
 
                         if (!markerIsHovered &&
