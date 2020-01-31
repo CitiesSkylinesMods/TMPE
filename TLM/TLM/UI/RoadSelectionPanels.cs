@@ -56,7 +56,7 @@ namespace TrafficManager.UI {
         /// Enable overrlay for various traffic rules influenced by road selection pannel.
         /// this enables Traffic manager tool.
         /// </summary>
-        public void ShowMassEditOverlay() {
+        private void ShowMassEditOverlay() {
             UIBase.EnableTool();
             showMassEditOverlay = true;
             UIBase.GetTrafficManagerTool()?.InitializeSubTools();
@@ -65,8 +65,9 @@ namespace TrafficManager.UI {
         /// <summary>
         /// mass edit overlay is activated whenever input panel becomes visiable.
         /// mass edit overlay is de-activated whenever input pannel becomes invisible.
+        /// Then re-activats last tool.
         /// </summary>
-        public void RegisterMassEditOverlay(UIPanel panel) {
+        private void RegisterMassEditOverlay(UIPanel panel) {
             panel.eventVisibilityChanged +=
                 (component, value) => {
                     if (value) {
@@ -82,9 +83,21 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
+        /// Tutorial message is activated when input panel becomes visiable.
+        /// </summary>
+        private void RegisterAdvisor(UIPanel panel) {
+            panel.eventVisibilityChanged +=
+                (component, value) => {
+                    if (value) {
+                        TrafficManagerTool.ShowAdvisor("RoadSelection");
+                    }
+                };
+        }
+
+        /// <summary>
         ///  list all instances of road selection panels.
         /// </summary>
-        public IList<PanelExt> panels;
+        private IList<PanelExt> panels;
 
         public void Start() {
             Function = FunctionMode.Clear;
@@ -98,14 +111,17 @@ namespace TrafficManager.UI {
                 panel.relativePosition += new Vector3(-10f, -10f);
                 UIComponent priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
                 HidePriorityRoadToggle(priorityRoadToggle);
+                RegisterAdvisor(panel);
+
             }
 
             // attach another instance of road selection panel to AdjustRoad tab.
             UIPanel roadAdjustPanel = UIView.Find<UIPanel>("AdjustRoad");
             if (roadAdjustPanel != null) {
-                AddPanel(roadAdjustPanel);
+                PanelExt panel = AddPanel(roadAdjustPanel);
                 // HideRoadAdjustPanelElements(roadAdjustPanel);
-                RegisterMassEditOverlay(roadAdjustPanel);
+                RegisterMassEditOverlay(panel);
+                RegisterAdvisor(panel);
             }
 
             // every time user changes the road selection, all buttons will go back to inactive state.
@@ -113,7 +129,7 @@ namespace TrafficManager.UI {
         }
 
         // Create a road selection panel. Multiple instances are allowed.
-        protected PanelExt AddPanel(UIComponent container) {
+        private PanelExt AddPanel(UIComponent container) {
             UIView uiview = UIView.GetAView();
             PanelExt panel = uiview.AddUIComponent(typeof(PanelExt)) as PanelExt;
             panel.TopContainer = this;
