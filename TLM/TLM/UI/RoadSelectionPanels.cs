@@ -1,12 +1,12 @@
 namespace TrafficManager.UI {
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Textures;
+    using ColossalFramework.UI;
     using UnityEngine;
-    using Util;
+    using CSUtil.Commons;
+    using TrafficManager.UI.Textures;
+    using TrafficManager.Util;
     using static UI.SubTools.PrioritySignsTool;
 
     public class RoadSelectionPanels : MonoBehaviour {
@@ -108,6 +108,7 @@ namespace TrafficManager.UI {
                 RegisterMassEditOverlay(roadAdjustPanel);
             }
 
+            // every time user changes the road selection, all buttons will go back to inactive state.
             RoadSelection.Instance.OnChanged += () => Refresh(reset: true);
         }
 
@@ -164,7 +165,7 @@ namespace TrafficManager.UI {
             public void Start() {
                 autoLayout = true;
                 autoLayoutDirection = LayoutDirection.Horizontal;
-                padding = new RectOffset(1,1,1,1);
+                padding = new RectOffset(1, 1, 1, 1);
                 autoLayoutPadding = new RectOffset(5, 5, 5, 5);
 
                 buttons = new List<ButtonExt>();
@@ -210,7 +211,7 @@ namespace TrafficManager.UI {
                 public override FunctionMode Function => FunctionMode.Boulevard;
                 public override void Do() => throw new NotImplementedException("blocked by #541");
                 public override void Undo() => throw new NotImplementedException("blocked by #541 #568");
-                public override bool ShouldDisable => true; // TODO remove after #541
+                public override bool ShouldDisable => true; // Always disabled. TODO remove after #541
             }
 
             public class RAboutButtton : ButtonExt {

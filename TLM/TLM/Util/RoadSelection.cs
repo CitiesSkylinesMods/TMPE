@@ -1,15 +1,14 @@
-using System;
-using System.Reflection;
-using System.Collections.Generic;
-using ICities;
 using CSUtil.Commons;
+using ICities;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace TrafficManager.Util {
     public class RoadSelection {
-        // instace of singleton
+        /// instance of singleton
         public static RoadSelection Instance { get; private set; }
 
-        public RoadSelection():base() {
+        public RoadSelection() : base() {
             Instance = this;
         }
 
@@ -53,28 +52,41 @@ namespace TrafficManager.Util {
         /// </summary>
         public event Handler OnChanged;
 
-        public class Threading: ThreadingExtensionBase {
-            int prev_length = -2;
-            ushort prev_segmentID = 0;
+        public class Threading : ThreadingExtensionBase {
+            private int prev_length = -2;
+            private ushort prev_segmentID = 0;
 
             public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
                 if (Instance == null) {
                     return;
                 }
+                // Performance critical part of the code:
                 var path = Instance.GetPath();
                 int len = path?.m_size ?? -1;
                 ushort segmentID = len > 0 ? path.m_buffer[0] : (ushort)0;
 
                 // Assumptions:
-                // - two different paths cannot share a segment.
-                // - UI does not allow to move both ends of the selection simultanously.
+                //  A- two different paths cannot share a segment.
+                //  B- UI does not allow to move both ends of the selection simultanously.
                 // Conclusions:
-                // - If user choses another path, all segments in path.m_buffer change.
-                // - If user modifies a path, the length of the path changes.
+                //  A- If user choses another path, all segments in path.m_buffer change.
+                //  B- If user modifies a path, the length of the path changes.
+                // Caveat: 
+                //  A- Changing the center of selection without changing selected segments is
+                //   detected as selection changed. (it deactivates all buttons) 
                 bool changed = len != prev_length || segmentID != prev_segmentID;
-                if(changed) {
-                    Log._Debug("RoadSelection.Threading.OnUpdate() road selection changed\n" +
-                        Environment.StackTrace);
+
+                if (changed && len == prev_length) {
+                    // this part is not so performance critical anymore.
+                    // fix caveat A: changing center of selection is not recognised as
+                    // selection changed.
+                    for (int i = 0; i < len; ++i) {
+                        if (prev_segmentID == path.m_buffer[i])
+                            changed = false;
+                    }
+                }
+                if (changed) {
+                    Log._Debug("RoadSelection.Threading.OnUpdate() road selection changed");
                     prev_length = len;
                     prev_segmentID = segmentID;
                     Instance.OnChanged.Invoke();

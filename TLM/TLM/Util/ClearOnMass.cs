@@ -1,16 +1,6 @@
-
 namespace TrafficManager.Util {
-    using System;
-    using ColossalFramework;
-    using API.Traffic.Enums;
     using Manager.Impl;
-    using TrafficManager.API.Traffic.Data;
-    using static Util.SegmentTraverser;
-    using static Util.Shortcuts;
-    using CSUtil.Commons;
     using TrafficManager.API.Manager;
-    using UI.SubTools;
-    using System.Collections.Generic;
 
     // TODO: this is a hack around #623. Thefore this does not exactly clears traffic rules
     // (which is the intention here) but merely sets them to whatever the default value is. 
