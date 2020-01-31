@@ -923,7 +923,6 @@ namespace TrafficManager.UI {
                 
                 if(HoveredSegmentId != 0) {
                     HitPos = segmentOutput.m_hitPos;
-                    HitPos.y += 0.5f; // workaround: reduce vertical hitpose error.
                 }
 
                 if (HoveredNodeId <= 0 && HoveredSegmentId > 0) {
@@ -993,6 +992,24 @@ namespace TrafficManager.UI {
             if (ret > 180) ret -= 180; // future proofing.
             ret = Math.Abs(ret);
             return ret;
+        }
+
+        static float prev_H = 0f;
+        static float prev_R;
+        internal static float GetFixedHitHeight() {
+            // cache result.
+            if (HitPos.y == prev_H) {
+                return prev_R;
+            }
+            prev_H = HitPos.y;
+
+            if (Shortcuts.GetSeg(HoveredSegmentId).GetClosestLanePosition(
+                HitPos, NetInfo.LaneType.All, VehicleInfo.VehicleType.All,
+                out Vector3 pos, out uint laneID, out int laneIndex, out float laneOffset)) {
+                
+                return prev_R = pos.y;
+            }
+            return prev_R = HitPos.y + 0.5f;
         }
 
 

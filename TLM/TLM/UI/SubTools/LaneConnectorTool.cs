@@ -65,23 +65,25 @@ namespace TrafficManager.UI.SubTools {
             internal readonly float Radius = 1f;
             internal Color Color;
             internal readonly List<NodeLaneMarker> ConnectedMarkers = new List<NodeLaneMarker>();
+            internal SegmentLaneMarker segmentLaneMarker;
             [UsedImplicitly]
             internal NetInfo.LaneType LaneType;
             internal VehicleInfo.VehicleType VehicleType;
+            
         }
 
         // code revived from the old Traffic++ mod : https://github.com/joaofarias/csl-traffic/blob/a4c5609e030c5bde91811796b9836aad60ddde20/CSL-Traffic/Tools/RoadCustomizerTool.cs
-        class SegmentLaneMarker {
-            public uint laneID;
-            public int laneIndex;
-            public Bezier3 bezier;
+        private class SegmentLaneMarker {
+            internal uint laneID;
+            internal int laneIndex;
+            internal Bezier3 bezier;
 
-            Bounds[] bounds;
-            static float prev_H = float.MinValue;
-            public bool IntersectRay(Ray ray, Vector3 HitPos) {
-                if (HitPos.y != prev_H || bounds == null)
-                    CalculateBounds(HitPos.y);
-
+            private Bounds[] bounds;
+            private static float prev_H = float.MinValue;
+            internal bool IntersectRay(Ray ray, float  hitH) {
+                if (hitH != prev_H || bounds == null)
+                    CalculateBounds(hitH);
+                prev_H = hitH;
                 foreach (Bounds bounds in bounds) {
                     if (bounds.IntersectRay(ray))
                         return true;
@@ -127,7 +129,7 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
-            public void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge=false) {
+            internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge=false) {
                 float minH = Mathf.Min(bezier.a.y, bezier.d.y);
                 float maxH = Mathf.Max(bezier.a.y, bezier.d.y);
                 RenderManager.instance.OverlayEffect.DrawBezier(
@@ -142,40 +144,6 @@ namespace TrafficManager.UI.SubTools {
                     true,
                     false);
             }
-
-            static ushort prev_segentID = 0;
-            static List<SegmentLaneMarker> laneMarkers = null;
-            public static List<SegmentLaneMarker> GetMarkers(ushort segmentID) {
-                if (segmentID == prev_segentID && laneMarkers != null)
-                    return laneMarkers;
-
-                var segment = GetSeg(segmentID);
-                var info = segment.Info;
-                laneMarkers = new List<SegmentLaneMarker>();
-                uint laneID = segment.m_lanes;
-                for (int laneIndex = 0; laneIndex < info.m_lanes.Length; laneIndex++) {
-                    NetLane lane = NetManager.instance.m_lanes.m_buffer[laneID];
-                    //var laneInfo = info.m_lanes[laneIndex];
-                    laneMarkers.Add(new SegmentLaneMarker() {
-                        bezier = lane.m_bezier,
-                        laneID = laneID,
-                        laneIndex = laneIndex,
-                    });
-                    laneID = lane.m_nextLane;
-                }
-
-                prev_segentID = segmentID;
-                return laneMarkers;
-            }
-            public static SegmentLaneMarker GetMarker(NodeLaneMarker marker) {
-                var laneMarkers = GetMarkers(marker.SegmentId);
-                foreach (var laneMarker in laneMarkers) {
-                    if (laneMarker.laneID == marker.LaneId) {
-                        return laneMarker;
-                    }
-                }
-                return null;
-            } 
         }
 
         public LaneConnectorTool(TrafficManagerTool mainTool)
@@ -329,13 +297,13 @@ namespace TrafficManager.UI.SubTools {
 
                     // highlight hovered marker and selected marker
                     if (drawMarker) {
-                        bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay);
+                        float hitH = TrafficManagerTool.GetFixedHitHeight();
+                        bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay, hitH);
 
-                        SegmentLaneMarker segmentLaneMarker = SegmentLaneMarker.GetMarker(laneMarker);
                         if (!markerIsHovered &&
-                            segmentLaneMarker.IntersectRay(mouseRay, HitPos)) {
+                            laneMarker.segmentLaneMarker.IntersectRay(mouseRay, hitH)) {
                             //only draw lane when segmentLaneMarker is hovered but laneMarker is not hovered.
-                            segmentLaneMarker.RenderOverlay(cameraInfo, Color.white);
+                            laneMarker.segmentLaneMarker.RenderOverlay(cameraInfo, Color.white);
                             markerIsHovered = true;
                         }
                         
@@ -369,11 +337,11 @@ namespace TrafficManager.UI.SubTools {
             } // end for node in all nodes
         }
 
-        private bool IsLaneMarkerHovered(NodeLaneMarker laneMarker, ref Ray mouseRay) {
+        private bool IsLaneMarkerHovered(NodeLaneMarker laneMarker, ref Ray mouseRay, float hitH) {
             Vector3 pos = laneMarker.SecondaryPosition;
-            if ( HitPos.y - pos.y > 2.5f) {
-                // if marker is projected on another road plane then modify its height
-                pos.y = HitPos.y;
+            if (hitH - pos.y > 2.5f) {
+                // if marker is projected on road plane above then modify its height
+                pos.y = hitH;
             }
             Bounds bounds = new Bounds(Vector3.zero, Vector3.one * laneMarker.Radius) {
                 center = pos,
@@ -815,6 +783,13 @@ namespace TrafficManager.UI.SubTools {
                                       ? COLOR_CHOICES[nodeMarkerColorIndex % COLOR_CHOICES.Length]
                                       : default; // or black (not used while rendering)
 
+                            NetLane lane = NetManager.instance.m_lanes.m_buffer[laneId];
+                            SegmentLaneMarker segmentLaneMarker = new SegmentLaneMarker {
+                                bezier = lane.m_bezier,
+                                laneID = laneId,
+                                laneIndex = laneIndex,
+                            };
+
                             nodeMarkers.Add(
                                 new NodeLaneMarker {
                                     SegmentId = segmentId,
@@ -833,7 +808,8 @@ namespace TrafficManager.UI.SubTools {
                                             ? laneInfo.m_similarLaneIndex
                                             : laneInfo.m_similarLaneCount -
                                               laneInfo.m_similarLaneIndex - 1,
-                                    SegmentIndex = i
+                                    SegmentIndex = i,
+                                    segmentLaneMarker = segmentLaneMarker,
                                 });
 
                             if (isSource) {
