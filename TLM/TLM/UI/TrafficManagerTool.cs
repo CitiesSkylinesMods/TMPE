@@ -1,26 +1,25 @@
 namespace TrafficManager.UI {
-    using ColossalFramework.Math;
-    using ColossalFramework.UI;
-    using ColossalFramework;
-    using CSUtil.Commons;
-    using JetBrains.Annotations;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using System;
-    using TrafficManager.API.Manager;
-    using TrafficManager.API.Traffic.Data;
-    using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.API.Util;
-    using TrafficManager.Manager.Impl;
-    using TrafficManager.State.ConfigData;
-    using TrafficManager.State;
-    using TrafficManager.UI.MainMenu;
-    using TrafficManager.UI.SubTools.SpeedLimits;
-    using TrafficManager.UI.SubTools;
-    using TrafficManager.Util;
+    using API.Manager;
+    using API.Traffic.Data;
+    using API.Traffic.Enums;
+    using API.Util;
+    using ColossalFramework;
+    using ColossalFramework.Math;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using JetBrains.Annotations;
+    using Manager.Impl;
+    using State;
+    using State.ConfigData;
+    using MainMenu;
+    using SubTools;
+    using SubTools.SpeedLimits;
+    using Util;
     using UnityEngine;
-    using static Util.Shortcuts;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -32,7 +31,6 @@ namespace TrafficManager.UI {
 
         internal static ushort HoveredNodeId;
         internal static ushort HoveredSegmentId;
-        internal static uint HoveredLaneId;
 
         private static bool _mouseClickProcessed;
 
@@ -827,7 +825,6 @@ namespace TrafficManager.UI {
         private bool DetermineHoveredElements() {
             HoveredSegmentId = 0;
             HoveredNodeId = 0;
-            HoveredLaneId = 0;
 
             bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible &&
                                  (_activeSubTool == null || !_activeSubTool.IsCursorInPanel());
@@ -944,23 +941,20 @@ namespace TrafficManager.UI {
                 }
 
                 if (HoveredNodeId != 0) {
-                    HoveredSegmentId = GetHoveredSegmentFromNode(segmentOutput.m_hitPos);
-                }
-
-                if(HoveredSegmentId != 0) {
-                    DetermineHoveredLane(segmentOutput.m_hitPos);
+                    HoveredSegmentId = GetHoveredSegmentFromNode();
                 }
             }
+
             return HoveredNodeId != 0 || HoveredSegmentId != 0;
         }
 
         /// <summary>
         /// returns the node segment that is closest to the mouse pointer based on angle.
         /// </summary>
-        internal ushort GetHoveredSegmentFromNode(Vector3 hitPos) {
+        internal ushort GetHoveredSegmentFromNode() {
             ushort minSegId = 0;
             NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
-            Vector3 dir0 = hitPos - node.m_position;
+            Vector3 dir0 = m_mousePosition - node.m_position;
             float min_angle = float.MaxValue;
             Constants.ServiceFactory.NetService.IterateNodeSegments(
                 HoveredNodeId,
@@ -994,24 +988,8 @@ namespace TrafficManager.UI {
             return ret;
         }
 
-        /// <summary>
-        /// Determine the 
-        /// </summary>
-        /// <param name="hitPos"></param>
-        private void DetermineHoveredLane(Vector3 hitPos) {
-            NetSegment segment = GetSeg(HoveredSegmentId);
-            segment.GetClosestLanePosition(
-                hitPos,
-                NetInfo.LaneType.All,
-                VehicleInfo.VehicleType.All,
-                out Vector3 pos,
-                out uint laneID,
-                out int laneIndex,
-                out float laneOffset);
-            HoveredLaneId = laneID;
-        }
 
-         /// <summary>
+        /// <summary>
         /// Displays lane ids over lanes
         /// </summary>
         private void GuiDisplayLanes(ushort segmentId,
