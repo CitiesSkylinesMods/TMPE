@@ -1,10 +1,10 @@
 ﻿namespace TrafficManager.Custom.Data {
-    using System;
-    using ColossalFramework;
     using ColossalFramework.Math;
+    using ColossalFramework;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using RedirectionFramework.Attributes;
+    using System;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.RedirectionFramework.Attributes;
     using UnityEngine;
 
     [TargetType(typeof(Vehicle))]

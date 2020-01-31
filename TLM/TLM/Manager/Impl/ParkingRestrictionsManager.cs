@@ -1,9 +1,9 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using System;
-    using System.Collections.Generic;
-    using API.Manager;
-    using API.Traffic.Data;
     using CSUtil.Commons;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
 
     public class ParkingRestrictionsManager
         : AbstractGeometryObservingManager,

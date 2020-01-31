@@ -1,16 +1,16 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using System;
-    using System.Collections.Generic;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
-    using JetBrains.Annotations;
-    using State;
-    using Traffic;
-    using Util;
     using ExtVehicleType = global::TrafficManager.API.Traffic.Enums.ExtVehicleType;
+    using JetBrains.Annotations;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.State;
+    using TrafficManager.Traffic;
+    using TrafficManager.Util;
 
     public class VehicleRestrictionsManager
         : AbstractGeometryObservingManager,

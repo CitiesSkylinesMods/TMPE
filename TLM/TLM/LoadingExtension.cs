@@ -1,22 +1,21 @@
 namespace TrafficManager {
-    using System;
-    using System.Collections.Generic;
-    using System.Reflection;
-    using API.Manager;
-    using ColossalFramework;
     using ColossalFramework.UI;
+    using ColossalFramework;
     using CSUtil.Commons;
-    using Custom.PathFinding;
     using Harmony;
     using ICities;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using RedirectionFramework;
-    using State;
-    using UI;
-    using UI.Localization;
     using UnityEngine;
     using Object = UnityEngine.Object;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.Custom.PathFinding;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.RedirectionFramework;
+    using TrafficManager.State;
+    using TrafficManager.UI;
 
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {

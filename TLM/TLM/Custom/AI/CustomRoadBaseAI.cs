@@ -1,8 +1,8 @@
 namespace TrafficManager.Custom.AI {
     using ColossalFramework;
-    using RedirectionFramework.Attributes;
-    using UI;
-    using UI.SubTools;
+    using TrafficManager.RedirectionFramework.Attributes;
+    using TrafficManager.UI;
+    using TrafficManager.UI.SubTools;
 
     [TargetType(typeof(RoadBaseAI))]
     public class CustomRoadBaseAI : RoadBaseAI {

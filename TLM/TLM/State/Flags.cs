@@ -1,15 +1,15 @@
 ﻿// #define DEBUGFLAGS
 
 namespace TrafficManager.State {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using API.Traffic.Enums;
     using ColossalFramework;
-    using ConfigData;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using Manager.Impl;
+    using System.Collections.Generic;
+    using System.Threading;
+    using System;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State.ConfigData;
 
     [Obsolete]
     public class Flags {

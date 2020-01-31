@@ -1,7 +1,7 @@
 namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using JetBrains.Annotations;
-    using Textures;
+    using TrafficManager.UI.Textures;
     using UnityEngine;
 
     public abstract class SubTool {

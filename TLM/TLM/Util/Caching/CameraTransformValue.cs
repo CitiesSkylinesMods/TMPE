@@ -1,6 +1,6 @@
 namespace TrafficManager.Util.Caching {
+    using TrafficManager.Util;
     using UnityEngine;
-    using Util;
 
     /// <summary>
     /// Stores transform of the camera, namely position, rotation.

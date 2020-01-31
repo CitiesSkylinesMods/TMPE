@@ -1,7 +1,7 @@
 namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using State;
+    using TrafficManager.State;
     using UnityEngine;
 
     public class UITransportDemand : UIPanel {

@@ -1,5 +1,5 @@
 namespace TrafficManager.State.Keybinds {
-    using UI;
+    using TrafficManager.UI;
 
     public class KeybindSettingsPage : KeybindSettingsBase {
         private void Awake() {

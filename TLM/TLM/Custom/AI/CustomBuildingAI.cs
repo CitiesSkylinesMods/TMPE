@@ -1,10 +1,10 @@
 ﻿namespace TrafficManager.Custom.AI {
-    using ColossalFramework;
     using ColossalFramework.Math;
+    using ColossalFramework;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using RedirectionFramework.Attributes;
-    using State;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.RedirectionFramework.Attributes;
+    using TrafficManager.State;
     using UnityEngine;
 
     [TargetType(typeof(BuildingAI))]

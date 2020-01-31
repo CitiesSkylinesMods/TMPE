@@ -1,12 +1,12 @@
 namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using State.Keybinds;
     using System;
     using System.Collections.Generic;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.State.Keybinds;
+    using TrafficManager.Util;
     using UnityEngine;
-    using Util;
 
     public abstract class LinearSpriteButton : UIButton {
         protected enum ButtonMouseState {

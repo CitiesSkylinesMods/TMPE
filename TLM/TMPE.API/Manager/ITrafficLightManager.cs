@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.API.Manager {
-    using Traffic.Enums;
+    using TrafficManager.API.Traffic.Enums;
 
     public interface ITrafficLightManager {
         // TODO documentation

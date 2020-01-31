@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.API.Geometry {
     using System;
-    using Traffic;
+    using TrafficManager.API.Traffic;
 
     public struct SegmentEndReplacement {
         public ISegmentEndId oldSegmentEndId;

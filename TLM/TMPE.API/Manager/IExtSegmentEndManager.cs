@@ -1,6 +1,6 @@
 namespace TrafficManager.API.Manager {
     using CSUtil.Commons;
-    using Traffic.Data;
+    using TrafficManager.API.Traffic.Data;
 
     public interface IExtSegmentEndManager {
         /// <summary>

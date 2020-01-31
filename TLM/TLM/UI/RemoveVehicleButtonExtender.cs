@@ -1,8 +1,8 @@
 namespace TrafficManager.UI {
-    using System.Collections.Generic;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using Textures;
+    using System.Collections.Generic;
+    using TrafficManager.UI.Textures;
     using UnityEngine;
 
     public class RemoveVehicleButtonExtender : MonoBehaviour {

@@ -5,10 +5,10 @@
     /// <summary>
     /// This Enum is kept for save compatibility.
     /// DO NOT USE.
-    /// Please use TMPE.API.Traffic.Enums.ExtVehicleType
+    /// Please use TMPE.API.Traffic.Enums.ExtVehicleType.
     /// </summary>
     [Flags]
-    [Obsolete]
+    [Obsolete("For save compatibility. Instead use Traffic.Enums.ExtVehicleType.")]
     public enum ExtVehicleType {
         None = 0,
         PassengerCar = 1,

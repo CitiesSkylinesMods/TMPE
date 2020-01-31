@@ -1,10 +1,10 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using System;
-    using API.Manager;
-    using API.Traffic.Data;
     using ColossalFramework;
     using CSUtil.Commons;
-    using State;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State;
     using UnityEngine;
 
     public class TrafficMeasurementManager : AbstractCustomManager, ITrafficMeasurementManager {

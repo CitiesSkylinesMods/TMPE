@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.API.TrafficLight {
     using System.Collections.Generic;
-    using Manager;
-    using Traffic.Enums;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Enums;
 
     public interface ITimedTrafficLightsStep : ICustomSegmentLightsManager {
         // TODO documentation

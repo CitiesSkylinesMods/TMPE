@@ -1,12 +1,12 @@
 namespace TrafficManager.UI.SubTools {
-    using System.Collections.Generic;
-    using API.Manager;
     using ColossalFramework;
     using CSUtil.Commons;
-    using Manager.Impl;
-    using State;
-    using State.ConfigData;
-    using Textures;
+    using System.Collections.Generic;
+    using TrafficManager.API.Manager;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.UI.Textures;
     using UnityEngine;
 
     public class JunctionRestrictionsTool : SubTool {
