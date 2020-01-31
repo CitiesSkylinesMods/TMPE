@@ -11,6 +11,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.State;
     using TrafficManager.Util.Caching;
     using UnityEngine;
+    using static Util.Shortcuts;
 
     public class LaneConnectorTool : SubTool {
         private enum MarkerSelectionMode {
@@ -138,7 +139,7 @@ namespace TrafficManager.UI.SubTools {
                 if (segmentID == prev_segentID && laneMarkers != null)
                     return laneMarkers;
 
-                var segment = segmentID.ToSegment();
+                var segment = GetSeg(segmentID);
                 var info = segment.Info;
                 laneMarkers = new List<SegmentLaneMarker>();
                 uint laneID = segment.m_lanes;
@@ -148,7 +149,7 @@ namespace TrafficManager.UI.SubTools {
                     laneMarkers.Add(new SegmentLaneMarker() {
                         bezier = lane.m_bezier,
                         laneID = laneID,
-                        laneIndex = laneIndex
+                        laneIndex = laneIndex,
                     });
                     laneID = lane.m_nextLane;
                 }
@@ -166,7 +167,6 @@ namespace TrafficManager.UI.SubTools {
                 return null;
             } 
         }
-
 
         public LaneConnectorTool(TrafficManagerTool mainTool)
             : base(mainTool) {
