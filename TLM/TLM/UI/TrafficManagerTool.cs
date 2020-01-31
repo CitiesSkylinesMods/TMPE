@@ -923,6 +923,7 @@ namespace TrafficManager.UI {
                 
                 if(HoveredSegmentId != 0) {
                     HitPos = segmentOutput.m_hitPos;
+                    HitPos.y += 0.5f; // workaround: reduce vertical hitpose error.
                 }
 
                 if (HoveredNodeId <= 0 && HoveredSegmentId > 0) {
