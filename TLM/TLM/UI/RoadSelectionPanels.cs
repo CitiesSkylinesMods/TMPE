@@ -9,12 +9,12 @@ namespace TrafficManager.UI {
     using Util;
     using static UI.SubTools.PrioritySignsTool;
 
-    public class RoadSelectionPanel : MonoBehaviour {
-        public static RoadSelectionPanel Instance { get; private set; } = null;
-        public RoadSelectionPanel() : base() { Instance = this; }
+    public class RoadSelectionPanels : MonoBehaviour {
+        public static RoadSelectionPanels Instance { get; private set; } = null;
+        public RoadSelectionPanels() : base() { Instance = this; }
 
         public enum FunctionMode {
-            Clear = 0,
+            Clear = 0, /// Indicates No button is in active state.
             Stop,
             Yield,
             Boulevard,
@@ -22,8 +22,12 @@ namespace TrafficManager.UI {
         }
 
         private FunctionMode _function;
+
         public FunctionMode Function {
+            /// returns which button is in active state
             get => _function;
+
+            /// sets which button is in active state then refreshes buttons in all panels.
             set {
                 if (_function != value) {
                     _function = value;
@@ -32,12 +36,12 @@ namespace TrafficManager.UI {
             }
         }
 
-        public void HidePriorityRoadToggle(UIComponent priorityRoadToggle) {
+        private void HidePriorityRoadToggle(UIComponent priorityRoadToggle) {
             priorityRoadToggle.eventVisibilityChanged +=
                 (component, value) => component.isVisible = false;
         }
 
-        public void HideRoadAdjustPanelElements(UIPanel roadAdjustPanel) {
+        private void HideRoadAdjustPanelElements(UIPanel roadAdjustPanel) {
             UILabel roadSelectLabel = roadAdjustPanel.Find<UILabel>("Label");
             UILabel roadSelectLegend = roadAdjustPanel.Find<UILabel>("LegendLabel");
             UISprite roadSelectSprite = roadAdjustPanel.Find<UISprite>("Sprite");
@@ -48,11 +52,20 @@ namespace TrafficManager.UI {
 
         ToolBase previousTool;
 
+        /// <summary>
+        /// Enable overrlay for various traffic rules influenced by road selection pannel.
+        /// this enables Traffic manager tool.
+        /// </summary>
         public void ShowMassEditOverlay() {
             UIBase.EnableTool();
             showMassEditOverlay = true;
             UIBase.GetTrafficManagerTool()?.InitializeSubTools();
         }
+
+        /// <summary>
+        /// mass edit overlay is activated whenever input panel becomes visiable.
+        /// mass edit overlay is de-activated whenever input pannel becomes invisible.
+        /// </summary>
         public void RegisterMassEditOverlay(UIPanel panel) {
             panel.eventVisibilityChanged +=
                 (component, value) => {
@@ -68,12 +81,17 @@ namespace TrafficManager.UI {
                 };
         }
 
+        /// <summary>
+        ///  list all instances of road selection panels.
+        /// </summary>
         public IList<PanelExt> panels;
+
         public void Start() {
             Function = FunctionMode.Clear;
 
             panels = new List<PanelExt>();
 
+            // attach an instance of road selection panel to RoadWorldInfoPanel.
             RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
             if (roadWorldInfoPanel != null) {
                 PanelExt panel = AddPanel(roadWorldInfoPanel.component);
@@ -82,6 +100,7 @@ namespace TrafficManager.UI {
                 HidePriorityRoadToggle(priorityRoadToggle);
             }
 
+            // attach another instance of road selection panel to AdjustRoad tab.
             UIPanel roadAdjustPanel = UIView.Find<UIPanel>("AdjustRoad");
             if (roadAdjustPanel != null) {
                 AddPanel(roadAdjustPanel);
@@ -92,6 +111,7 @@ namespace TrafficManager.UI {
             RoadSelection.Instance.OnChanged += () => Refresh(reset: true);
         }
 
+        // Create a road selection panel. Multiple instances are allowed.
         protected PanelExt AddPanel(UIComponent container) {
             UIView uiview = UIView.GetAView();
             PanelExt panel = uiview.AddUIComponent(typeof(PanelExt)) as PanelExt;
@@ -111,6 +131,10 @@ namespace TrafficManager.UI {
             Instance = null;
         }
 
+        /// <summary>
+        /// Refreshes all butons in all panels according to state indicated by FunctionMode
+        /// </summary>
+        /// <param name="reset">if true, deactivates all buttons</param>
         public void Refresh(bool reset = false) {
             Log._Debug($"Refresh called Function mode is {Function}\n");
             if (reset) {
@@ -121,6 +145,9 @@ namespace TrafficManager.UI {
             }
         }
 
+        /// <summary>
+        /// Panel container for the Road selection UI. Multiple instances are allowed.
+        /// </summary>
         public class PanelExt : UIPanel {
             public void Refresh() {
                 foreach (var button in buttons ?? Enumerable.Empty<ButtonExt>()) {
@@ -128,12 +155,13 @@ namespace TrafficManager.UI {
                 }
             }
 
-            public RoadSelectionPanel TopContainer;
-            //UIButton Clear, TrafficLight, Yeild, Stop , RightOnly, RoundAbout;
+            /// Container of this panel.
+            public RoadSelectionPanels TopContainer;
+
+            /// list of buttons contained in this panel.
             public IList<ButtonExt> buttons;
+
             public void Start() {
-                //backgroundSprite = "GenericPanel"; //TODO remove
-                //opacity = 0.5f; // TODO remove
                 autoLayout = true;
                 autoLayoutDirection = LayoutDirection.Horizontal;
                 padding = new RectOffset(1,1,1,1);
@@ -156,8 +184,8 @@ namespace TrafficManager.UI {
             public class ClearButtton : ButtonExt {
                 public override string Tooltip => Translation.Menu.Get("Tooltip:Clear");
                 public override FunctionMode Function => FunctionMode.Clear;
-                public override bool Active => false;
-                public override void Do() => // TODO delete everything as part of #568
+                public override bool Active => false; // Clear funtionality can't be undone. #568
+                public override void Do() => // TODO delete all rules as part of #568
                     FixPrioritySigns(PrioritySignsMassEditMode.Delete, RoadSelection.Instance.Selection);
                 public override void Undo() => throw new Exception("Unreachable code");
             }
@@ -192,18 +220,18 @@ namespace TrafficManager.UI {
                     RoundaboutMassEdit.Instance.FixRabout(RoadSelection.Instance.Selection);
                 public override void Undo() =>
                     RoundaboutMassEdit.Instance.UndoRabout(RoadSelection.Instance.Selection);
+
                 public override bool ShouldDisable {
                     get {
                         Log._Debug("RAboutButtton.IsDisabled() called" + Environment.StackTrace);
-                        // TODO why rabout is called multiple times?
                         if (RoadSelection.Instance.Length <= 1) {
                             return true;
                         }
                         var segmentList = RoadSelection.Instance.Selection;
-                        bool isRabout = RoundaboutMassEdit.IsRabout(segmentList, semi: false);
+                        bool isRabout = RoundaboutMassEdit.IsRabout(segmentList, semi: true);
                         if (!isRabout) {
                             segmentList.Reverse();
-                            isRabout = RoundaboutMassEdit.IsRabout(segmentList, semi: false);
+                            isRabout = RoundaboutMassEdit.IsRabout(segmentList, semi: true);
                         }
                         return !isRabout;
                     }
@@ -219,7 +247,10 @@ namespace TrafficManager.UI {
 
                 public override void HandleClick(UIMouseEventParameter p) { throw new Exception("Unreachable code"); }
 
+                // Handles button click on activation. Apply traffic rules here.
                 public abstract void Do();
+
+                // Handles button click on de-activation. Reset/Undo traffic rules here.
                 public abstract void Undo();
 
                 protected override void OnClick(UIMouseEventParameter p) {
@@ -234,7 +265,7 @@ namespace TrafficManager.UI {
                     }
                 }
 
-                public RoadSelectionPanel Root => RoadSelectionPanel.Instance;
+                public RoadSelectionPanels Root => RoadSelectionPanels.Instance;
 
                 public override bool CanActivate() => true;
 

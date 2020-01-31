@@ -220,7 +220,7 @@
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
-    <Compile Include="UI\RoadSelectionPanel.cs" />
+    <Compile Include="UI\RoadSelectionPanels.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\Helpers\CheckboxOption.cs" />
     <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />

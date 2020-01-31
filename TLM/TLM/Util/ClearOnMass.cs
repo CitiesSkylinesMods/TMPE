@@ -12,7 +12,8 @@ namespace TrafficManager.Util {
     using UI.SubTools;
     using System.Collections.Generic;
 
-    //TODO: this is a work around #623
+    // TODO: this is a hack around #623. Thefore this does not exactly clears traffic rules
+    // (which is the intention here) but merely sets them to whatever the default value is. 
     public static class ClearUtil {
         static IJunctionRestrictionsManager JRMan = JunctionRestrictionsManager.Instance;
 
@@ -39,7 +40,5 @@ namespace TrafficManager.Util {
                 JRMan.SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, defautVal);
             }
         }
-
-
     }
 }
