@@ -823,7 +823,15 @@ namespace TrafficManager.UI {
             return RayCast(input, out output);
         }
 
-        private bool DetermineHoveredElements() {
+        private static Vector3 prev_mousePosition;
+        private bool DetermineHoveredElements() {            
+            if(prev_mousePosition == m_mousePosition) {
+                // if mouse ray is not changing use cached results.
+                // the assumption is that its practically impossible to change mouse ray
+                // without changing m_mousePosition.
+                return HoveredNodeId != 0 || HoveredSegmentId != 0;
+            }
+
             HoveredSegmentId = 0;
             HoveredNodeId = 0;
             HitPos = Vector3.zero;
@@ -994,12 +1002,12 @@ namespace TrafficManager.UI {
             return ret;
         }
 
-        static float prev_H = 0f;
-        static float prev_R;
+        private static float prev_H = 0f;
+        private static float prev_H_Fixed;
         internal static float GetFixedHitHeight() {
             // cache result.
             if (HitPos.y == prev_H) {
-                return prev_R;
+                return prev_H_Fixed;
             }
             prev_H = HitPos.y;
 
@@ -1007,9 +1015,9 @@ namespace TrafficManager.UI {
                 HitPos, NetInfo.LaneType.All, VehicleInfo.VehicleType.All,
                 out Vector3 pos, out uint laneID, out int laneIndex, out float laneOffset)) {
                 
-                return prev_R = pos.y;
+                return prev_H_Fixed = pos.y;
             }
-            return prev_R = HitPos.y + 0.5f;
+            return prev_H_Fixed = HitPos.y + 0.5f;
         }
 
 
