@@ -11,8 +11,6 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.State;
     using TrafficManager.Util.Caching;
     using UnityEngine;
-    using Util.Caching;
-    using TrafficManager.KianUtil;
 
     public class LaneConnectorTool : SubTool {
         private enum MarkerSelectionMode {
@@ -321,8 +319,6 @@ namespace TrafficManager.UI.SubTools {
 
                     // highlight hovered marker and selected marker
                     if (drawMarker) {
-                        var circleColor = laneMarker.IsTarget ? Color.white : laneMarker.Color;
-
                         bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay);
 
                         SegmentLaneMarker segmentLaneMarker = SegmentLaneMarker.GetMarker(laneMarker);
@@ -330,7 +326,7 @@ namespace TrafficManager.UI.SubTools {
                             markerIsHovered = true;
 
                             //only draw lane when segmentLaneMarker is hovered but laneMarker is not hovered.
-                            segmentLaneMarker.RenderOverlay(cameraInfo, circleColor);
+                            segmentLaneMarker.RenderOverlay(cameraInfo, Color.white);
                         }
                         
                         if (markerIsHovered) {
@@ -339,6 +335,7 @@ namespace TrafficManager.UI.SubTools {
 
                         bool highlightMarker = laneMarker == selectedMarker || markerIsHovered;
                         float magnify = highlightMarker ? 2f : 1f;
+                        var circleColor = laneMarker.IsTarget ? Color.white : laneMarker.Color;
                         RenderManager.instance.OverlayEffect.DrawCircle(
                             cameraInfo,
                             circleColor,
@@ -516,10 +513,6 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnPrimaryClickOverlay() {
-            //bool ctrl = Input.GetKey(KeyCode.LeftControl);
-            //if (ctrl) {
-            //    KianUtil.NetService.DebugSeg(HitPos, HitPos + 10f*Vector3.right);
-            //}
 #if DEBUG
             bool logLaneConn = DebugSwitch.LaneConnections.Get();
 #else
@@ -1019,159 +1012,5 @@ namespace TrafficManager.UI.SubTools {
                   new Color32(75, 75, 99, 255),
                   new Color32(99, 75, 85, 255)
             };
-    }
-}
-
-namespace TrafficManager.KianUtil {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using ICities;
-    using ColossalFramework;
-    using UnityEngine;
-    using System.Diagnostics;
-    using System.Timers;
-    using Util;
-    using static Util.Shortcuts;
-
-    public static class NetService {
-        public static NetManager netMan => Singleton<NetManager>.instance;
-        public static SimulationManager simMan => Singleton<SimulationManager>.instance;
-        public static NetTool netTool = Singleton<NetTool>.instance;
-        internal static ref NetNode ToNode(this ushort ID) => ref Singleton<NetManager>.instance.m_nodes.m_buffer[ID];
-        internal static ref NetSegment ToSegment(this ushort ID) => ref Singleton<NetManager>.instance.m_segments.m_buffer[ID];
-
-        internal static void Log(string m) {
-            //m  += "\n" + System.Environment.StackTrace + ";
-            UnityEngine.Debug.Log(m);
-            CSUtil.Commons.Log._Debug(m);
-        }
-
-        public static NetInfo _bInfo = null;
-        public static NetInfo _bInfo2 = null;
-
-        public static NetInfo PedestrianBridgeInfo =>
-            _bInfo = _bInfo ?? GetInfo("Pedestrian Elevated");
-        public static NetInfo GravelBridgeInfo =>
-            _bInfo2 = _bInfo2 ?? GetInfo("Pedestrian Gravel Elevated");
-
-        public static NetInfo GetInfo(string name) {
-            int count = PrefabCollection<NetInfo>.LoadedCount();
-            for (uint i = 0; i < count; ++i) {
-                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                if (info.name == name)
-                    return info;
-                //Log(info.name);
-            }
-            throw new Exception("NetInfo not found!");
-        }
-
-        public class NetServiceException : Exception {
-            public NetServiceException(string m) : base(m) { }
-            public NetServiceException() : base() { }
-            public NetServiceException(string m, Exception e) : base(m, e) { }
-        }
-
-        public static ushort CreateNode(Vector3 position, NetInfo info = null) {
-            info = info ?? PedestrianBridgeInfo;
-            Log($"creating node for {info.name} at position {position.ToString("000.000")}");
-            bool res = netMan.CreateNode(node: out ushort nodeID, randomizer: ref simMan.m_randomizer,
-                info: info, position: position, buildIndex: simMan.m_currentBuildIndex);
-            if (!res)
-                throw new NetServiceException("Node creation failed");
-            simMan.m_currentBuildIndex++;
-            return nodeID;
-
-        }
-
-        public static ushort CreateSegment(
-            ushort startNodeID, ushort endNodeID,
-            Vector3 startDir, Vector3 endDir,
-            NetInfo info = null) {
-            Log("CreateSegment input info is " + info?.name);
-            info = info ?? startNodeID.ToNode().Info;
-            Log($"creating segment for {info.name} between nodes {startNodeID} {endNodeID}");
-            var bi = simMan.m_currentBuildIndex;
-            startDir.y = endDir.y = 0;
-            startDir.Normalize(); endDir.Normalize();
-            bool res = netMan.CreateSegment(
-                segment: out ushort segmentID, randomizer: ref simMan.m_randomizer, info: info,
-                startNode: startNodeID, endNode: endNodeID, startDirection: startDir, endDirection: endDir,
-                buildIndex: bi, modifiedIndex: bi, invert: false);
-            if (!res)
-                throw new NetServiceException("Segment creation failed");
-            simMan.m_currentBuildIndex++;
-            return segmentID;
-        }
-
-        public static ushort CreateSegment(ushort startNodeID, ushort endNodeID, NetInfo info = null) {
-            Vector3 startPos = startNodeID.ToNode().m_position;
-            Vector3 endPos = endNodeID.ToNode().m_position;
-            var dir = endPos - startPos;
-            return CreateSegment(startNodeID, endNodeID, dir, -dir, info);
-        }
-
-        public static ushort CreateSegment(ushort startNodeID, ushort endNodeID, Vector2 middlePoint, NetInfo info = null) {
-            Vector3 startPos = startNodeID.ToNode().m_position;
-            Vector3 endPos = endNodeID.ToNode().m_position;
-            Vector3 middlePos = middlePoint.ToPos();
-            Vector3 startDir = middlePos - startPos;
-            Vector3 endDir = middlePos - endPos;
-            return CreateSegment(startNodeID, endNodeID, startDir, endDir,info);
-        }
-
-
-        public static float GetClosestHeight(this ushort segmentID, Vector3 Pos) =>
-            segmentID.ToSegment().GetClosestPosition(Pos).Height();
-
-
-        public static ushort CopyMove(ushort segmentID) {
-            Log("CopyMove");
-            Vector3 move = new Vector3(70, 0, 70);
-            var segment = segmentID.ToSegment();
-            var startPos = segment.m_startNode.ToNode().m_position + move;
-            var endPos = segment.m_endNode.ToNode().m_position + move;
-            NetInfo info = GetInfo("Basic Road");
-            ushort nodeID1 = CreateNode(startPos, info);
-            ushort nodeID2 = CreateNode(endPos, info);
-            return CreateSegment(nodeID1, nodeID2);
-        }
-
-        public static void DebugSeg(Vector3 v1, Vector3 v2) {
-            Vector3 v12 = 0.5f * (v1 + v2);
-            ushort nodeID1 = CreateNode(v1, PedestrianBridgeInfo);
-            ushort nodeID2 = CreateNode(v2, GravelBridgeInfo);
-            ushort nodeID12 = CreateNode(v12, PedestrianBridgeInfo);
-            CreateSegment(nodeID1, nodeID12, PedestrianBridgeInfo); //v1
-            CreateSegment(nodeID2, nodeID12, GravelBridgeInfo); //v2
-        }
-    }
-
-    public static class VectorUtils {
-        public static float Angle(this Vector2 v) => Vector2.Angle(v, Vector2.right);
-
-        public static Vector2 Rotate(this Vector2 v, float angle) => Vector2ByAgnle(v.magnitude, angle + v.Angle());
-        public static Vector2 Rotate90CCW(this Vector2 v) => new Vector2(-v.y, +v.x);
-        public static Vector2 PerpendicularCCW(this Vector2 v) => v.normalized.Rotate90CCW();
-        public static Vector2 Rotate90CC(this Vector2 v) => new Vector2(+v.y, -v.x);
-        public static Vector2 PerpendicularCC(this Vector2 v) => v.normalized.Rotate90CC();
-
-        public static Vector2 Extend(this Vector2 v, float magnitude) => NewMagnitude(v, magnitude + v.magnitude);
-        public static Vector2 NewMagnitude(this Vector2 v, float magnitude) => magnitude * v.normalized;
-
-        /// <param name="angle">angle in degrees with Vector.right</param>
-        public static Vector2 Vector2ByAgnle(float magnitude, float angle) {
-            angle *= Mathf.Deg2Rad;
-            return new Vector2(
-                x: magnitude * Mathf.Cos(angle),
-                y: magnitude * Mathf.Sin(angle)
-                );
-        }
-        /// returns rotated vector counter clockwise
-        ///
-        public static Vector3 ToPos(this Vector2 v2, float h = 0) => new Vector3(v2.x, h, v2.y);
-        public static Vector2 ToPoint(this Vector3 v3) => new Vector2(v3.x, v3.z);
-        public static float Height(this Vector3 v3) => v3.y;
     }
 }
