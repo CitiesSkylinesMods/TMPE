@@ -77,9 +77,10 @@ namespace TrafficManager.UI.SubTools {
             public Bezier3 bezier;
 
             Bounds[] bounds;
-            public bool IntersectRay(Ray ray) {
-                if (bounds == null)
-                    CalculateBounds();
+            float prev_H = float.MinValue;
+            public bool IntersectRay(Ray ray, Vector3 HitPos) {
+                if (HitPos.y != prev_H || bounds == null)
+                    CalculateBounds(HitPos.y);
 
                 foreach (Bounds bounds in bounds) {
                     if (bounds.IntersectRay(ray))
@@ -89,7 +90,17 @@ namespace TrafficManager.UI.SubTools {
                 return false;
             }
 
-            void CalculateBounds() {
+            void CalculateBounds(float mouseH) {
+                mouseH += 0.5f; // workaround: reduce hitpose error.
+                Bezier3 bezier0 = bezier;
+                // if marker is projected on another road plane then modify its height
+                float minH = Mathf.Min(bezier.a.y, bezier.d.y);
+                float maxH = Mathf.Max(bezier.a.y, bezier.d.y);
+                if (mouseH < minH - 2f || mouseH > maxH + 2f) {
+                    bezier0 = new Bezier3(bezier.a, bezier.b, bezier.c, bezier.d);
+                    bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier.d.y = mouseH;
+                }
+
                 float angle = Vector3.Angle(this.bezier.a, this.bezier.b);
                 if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
                     angle = Vector3.Angle(this.bezier.b, this.bezier.c);
@@ -97,8 +108,8 @@ namespace TrafficManager.UI.SubTools {
                         angle = Vector3.Angle(this.bezier.c, this.bezier.d);
                         if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
                             // linear bezier
-                            Bounds bounds = this.bezier.GetBounds();
-                            bounds.Expand(0.3f);
+                            Bounds bounds = bezier0.GetBounds();
+                            bounds.Expand(0.15f);
                             this.bounds = new Bounds[] { bounds };
                             return;
                         }
@@ -106,12 +117,11 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 // split bezier in 10 parts to correctly raycast curves
-                Bezier3 bezier;
-                int amount = 10;
-                bounds = new Bounds[amount];
-                float size = 1f / amount;
-                for (int i = 0; i < amount; i++) {
-                    bezier = this.bezier.Cut(i * size, (i + 1) * size);
+                int n = 10;
+                bounds = new Bounds[n];
+                float size = 1f / n;
+                for (int i = 0; i < n; i++) {
+                    Bezier3 bezier = bezier0.Cut(i * size, (i + 1) * size);
 
                     Bounds bounds = bezier.GetBounds();
                     bounds.Expand(0.9f);
@@ -120,6 +130,8 @@ namespace TrafficManager.UI.SubTools {
             }
 
             public void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge=false) {
+                float minH = Mathf.Min(bezier.a.y, bezier.d.y);
+                float maxH = Mathf.Max(bezier.a.y, bezier.d.y);
                 RenderManager.instance.OverlayEffect.DrawBezier(
                     cameraInfo,
                     color,
@@ -127,8 +139,8 @@ namespace TrafficManager.UI.SubTools {
                     enlarge ? 1.5f : 1f,
                     0,
                     0,
-                    Mathf.Min(bezier.a.y, bezier.d.y) - 100f,
-                    Mathf.Max(bezier.a.y, bezier.d.y) + 100f,
+                    minH - 100f,
+                    maxH+ 100f,
                     true,
                     false);
             }
@@ -322,11 +334,11 @@ namespace TrafficManager.UI.SubTools {
                         bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay);
 
                         SegmentLaneMarker segmentLaneMarker = SegmentLaneMarker.GetMarker(laneMarker);
-                        if (!markerIsHovered && segmentLaneMarker.IntersectRay(mouseRay)) {
-                            markerIsHovered = true;
-
+                        if (!markerIsHovered &&
+                            segmentLaneMarker.IntersectRay(mouseRay, HitPos)) {
                             //only draw lane when segmentLaneMarker is hovered but laneMarker is not hovered.
                             segmentLaneMarker.RenderOverlay(cameraInfo, Color.white);
+                            markerIsHovered = true;
                         }
                         
                         if (markerIsHovered) {
@@ -360,10 +372,14 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private bool IsLaneMarkerHovered(NodeLaneMarker laneMarker, ref Ray mouseRay) {
+            Vector3 pos = laneMarker.SecondaryPosition;
+            if (Mathf.Abs(pos.y - HitPos.y) > 2f) {
+                // if marker is projected on another road plane then modify its height
+                pos.y = HitPos.y;
+            }
             Bounds bounds = new Bounds(Vector3.zero, Vector3.one * laneMarker.Radius) {
-                center = laneMarker.SecondaryPosition
+                center = pos,
             };
-
             return bounds.IntersectRay(mouseRay);
         }
 

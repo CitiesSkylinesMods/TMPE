@@ -31,6 +31,7 @@ namespace TrafficManager.UI {
 
         internal static ushort HoveredNodeId;
         internal static ushort HoveredSegmentId;
+        internal static Vector3 HitPos;
 
         private static bool _mouseClickProcessed;
 
@@ -825,6 +826,7 @@ namespace TrafficManager.UI {
         private bool DetermineHoveredElements() {
             HoveredSegmentId = 0;
             HoveredNodeId = 0;
+            HitPos = Vector3.zero;
 
             bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible &&
                                  (_activeSubTool == null || !_activeSubTool.IsCursorInPanel());
@@ -917,6 +919,10 @@ namespace TrafficManager.UI {
                             HoveredSegmentId = segmentOutput.m_netSegment;
                         }
                     }
+                }
+                
+                if(HoveredSegmentId != 0) {
+                    HitPos = segmentOutput.m_hitPos;
                 }
 
                 if (HoveredNodeId <= 0 && HoveredSegmentId > 0) {
