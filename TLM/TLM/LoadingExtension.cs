@@ -337,7 +337,7 @@ namespace TrafficManager {
                 void Destroy<T>()
                     where T : MonoBehaviour
                 {
-                    var obj = (Object)gameObject.GetComponent<T>();
+                    Object obj = (Object)gameObject.GetComponent<T>();
                     if (obj != null) {
                         Object.Destroy(obj, 10f);
                     }
