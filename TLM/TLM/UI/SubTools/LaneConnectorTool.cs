@@ -56,14 +56,14 @@ namespace TrafficManager.UI.SubTools {
             internal ushort SegmentId;
             internal ushort NodeId;
             internal bool StartNode;
-            internal Vector3 Position; 
-            internal Vector3 SecondaryPosition;
+            internal Vector3 Position; /// projected on train
+            internal Vector3 SecondaryPosition; /// original height.
             internal bool IsSource;
             internal bool IsTarget;
             internal uint LaneId;
             internal int InnerSimilarLaneIndex;
             internal int SegmentIndex;
-            internal float Radius = 1f;
+            internal readonly float Radius = 1f;
             internal Color Color;
             internal readonly List<NodeLaneMarker> ConnectedMarkers = new List<NodeLaneMarker>();
             [UsedImplicitly]
@@ -99,7 +99,7 @@ namespace TrafficManager.UI.SubTools {
                         if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
                             // linear bezier
                             Bounds bounds = this.bezier.GetBounds();
-                            bounds.Expand(0.1f);
+                            bounds.Expand(0.3f);
                             this.bounds = new Bounds[] { bounds };
                             return;
                         }
@@ -321,12 +321,16 @@ namespace TrafficManager.UI.SubTools {
 
                     // highlight hovered marker and selected marker
                     if (drawMarker) {
+                        var circleColor = laneMarker.IsTarget ? Color.white : laneMarker.Color;
+
                         bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay);
+
                         SegmentLaneMarker segmentLaneMarker = SegmentLaneMarker.GetMarker(laneMarker);
                         if (!markerIsHovered && segmentLaneMarker.IntersectRay(mouseRay)) {
                             markerIsHovered = true;
-                            //only draw lane when lane is hovered and node circle is not hovered.
-                            segmentLaneMarker.RenderOverlay(cameraInfo, Color.white);
+
+                            //only draw lane when segmentLaneMarker is hovered but laneMarker is not hovered.
+                            segmentLaneMarker.RenderOverlay(cameraInfo, circleColor);
                         }
                         
                         if (markerIsHovered) {
@@ -334,13 +338,12 @@ namespace TrafficManager.UI.SubTools {
                         }
 
                         bool highlightMarker = laneMarker == selectedMarker || markerIsHovered;
-                        laneMarker.Radius = highlightMarker ? 2f : 1f;
-                        var circleColor = laneMarker.IsTarget ? Color.white : laneMarker.Color;
+                        float magnify = highlightMarker ? 2f : 1f;
                         RenderManager.instance.OverlayEffect.DrawCircle(
                             cameraInfo,
                             circleColor,
                             laneMarker.Position,
-                            laneMarker.Radius,
+                            laneMarker.Radius * magnify,
                             laneMarker.Position.y - 100f, // through all the geometry -100..100
                             laneMarker.Position.y + 100f,
                             false,
@@ -349,7 +352,7 @@ namespace TrafficManager.UI.SubTools {
                             cameraInfo,
                             Color.black,
                             laneMarker.Position,
-                            laneMarker.Radius * 0.75f, // inner black
+                            laneMarker.Radius * 0.75f * magnify, // inner black
                             laneMarker.Position.y - 100f, // through all the geometry -100..100
                             laneMarker.Position.y + 100f,
                             false,
@@ -360,7 +363,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private bool IsLaneMarkerHovered(NodeLaneMarker laneMarker, ref Ray mouseRay) {
-            Bounds bounds = new Bounds(Vector3.zero, Vector3.one) {
+            Bounds bounds = new Bounds(Vector3.zero, Vector3.one * laneMarker.Radius) {
                 center = laneMarker.SecondaryPosition
             };
 
@@ -811,8 +814,8 @@ namespace TrafficManager.UI.SubTools {
                                     LaneId = laneId,
                                     NodeId = nodeId,
                                     StartNode = !isEndNode,
-                                    Position = finalPos, // terrainY 
-                                    SecondaryPosition = (Vector3)pos, // originalY
+                                    Position = finalPos,  
+                                    SecondaryPosition = (Vector3)pos, 
                                     Color = nodeMarkerColor,
                                     IsSource = isSource,
                                     IsTarget = isTarget,
