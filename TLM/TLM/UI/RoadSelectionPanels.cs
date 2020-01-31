@@ -199,7 +199,7 @@ namespace TrafficManager.UI {
             }
 
             public class ClearButtton : ButtonExt {
-                public override string Tooltip => Translation.Menu.Get("Tooltip:Clear");
+                public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
                 public override FunctionMode Function => FunctionMode.Clear;
                 public override bool Active => false; // Clear funtionality can't be undone. #568
                 public override void Do() => // TODO delete all rules as part of #568
@@ -207,7 +207,7 @@ namespace TrafficManager.UI {
                 public override void Undo() => throw new Exception("Unreachable code");
             }
             public class StopButtton : ButtonExt {
-                public override string Tooltip => Translation.Menu.Get("Tooltip:Stop entry");
+                public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
                 public override FunctionMode Function => FunctionMode.Stop;
                 public override void Do() =>
                     FixPrioritySigns(PrioritySignsMassEditMode.MainStop, RoadSelection.Instance.Selection);
@@ -215,7 +215,7 @@ namespace TrafficManager.UI {
                     FixPrioritySigns(PrioritySignsMassEditMode.Delete, RoadSelection.Instance.Selection);
             }
             public class YieldButton : ButtonExt {
-                public override string Tooltip => Translation.Menu.Get("Tooltip:Yield entry");
+                public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
                 public override FunctionMode Function => FunctionMode.Yield;
                 public override void Do() =>
                     FixPrioritySigns(PrioritySignsMassEditMode.MainYield, RoadSelection.Instance.Selection);
@@ -223,7 +223,7 @@ namespace TrafficManager.UI {
                     FixPrioritySigns(PrioritySignsMassEditMode.Delete, RoadSelection.Instance.Selection);
             }
             public class BoulevardButtton : ButtonExt {
-                public override string Tooltip => Translation.Menu.Get("Tooltip:Boulevard");
+                public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
                 public override FunctionMode Function => FunctionMode.Boulevard;
                 public override void Do() => throw new NotImplementedException("blocked by #541");
                 public override void Undo() => throw new NotImplementedException("blocked by #541 #568");
@@ -231,7 +231,7 @@ namespace TrafficManager.UI {
             }
 
             public class RAboutButtton : ButtonExt {
-                public override string Tooltip => Translation.Menu.Get("Tooltip:Roundabout");
+                public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
                 public override FunctionMode Function => FunctionMode.Rabout;
                 public override void Do() =>
                     RoundaboutMassEdit.Instance.FixRabout(RoadSelection.Instance.Selection);
