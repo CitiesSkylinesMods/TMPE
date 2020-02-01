@@ -8,6 +8,8 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.State;
     using TrafficManager.UI.Textures;
     using UnityEngine;
+    using TrafficManager.State.Keybinds;
+    using static TrafficManager.Util.Shortcuts;
 
     public class JunctionRestrictionsTool : SubTool {
         private readonly HashSet<ushort> currentRestrictedNodeIds;
@@ -19,11 +21,21 @@ namespace TrafficManager.UI.SubTools {
             currentRestrictedNodeIds = new HashSet<ushort>();
         }
 
+        private bool prev_deletePressed = false;
         public override void OnToolGUI(Event e) {
             // if (SelectedNodeId != 0) {
             //        overlayHandleHovered = false;
             // }
             // ShowSigns(false);
+
+            // handle delete
+            bool deletePressed = KeybindSettingsBase.LaneConnectorDelete.IsPressed(e);
+            bool deleteDown = !prev_deletePressed && deletePressed;
+            prev_deletePressed = deletePressed;
+            if (deleteDown) {
+                bool startNode = (bool)netService.IsStartNode(HoveredSegmentId, HoveredNodeId);
+                JunctionRestrictionsManager.Instance.ClearSegmentEnd(HoveredSegmentId, startNode);
+            }
         }
 
         public override void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
