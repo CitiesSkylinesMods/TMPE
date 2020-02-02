@@ -16,12 +16,26 @@ namespace TrafficManager {
     using TrafficManager.State;
     using TrafficManager.UI.Localization;
     using TrafficManager.UI;
+    using static TrafficManager.Util.Shortcuts;
 
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
+        internal static LoadingExtension Instance = null;
 
-        public class Detour {
+        internal bool HotReload { get; private set; } = false;
+
+        internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
+
+        internal static bool InGame() {
+            try {
+                return currentMode == AppMode.Game;
+            } catch {
+                return false;
+            }
+        }
+
+public class Detour {
             public MethodInfo OriginalMethod;
             public MethodInfo CustomMethod;
             public RedirectCallsState Redirect;
@@ -261,6 +275,8 @@ namespace TrafficManager {
         }
 
         public override void OnCreated(ILoading loading) {
+            Log._Debug("KIAN DEBUG: LoadingExtension.OnCreated()");
+
             // SelfDestruct.DestructOldInstances(this);
             base.OnCreated(loading);
 
@@ -270,6 +286,9 @@ namespace TrafficManager {
             CustomPathManager = new CustomPathManager();
 
             RegisterCustomManagers();
+
+            Instance = this;
+            HotReload = InGame();
         }
 
         private void RegisterCustomManagers() {
@@ -307,6 +326,7 @@ namespace TrafficManager {
             base.OnReleased();
 
             UIBase.ReleaseTool();
+            Instance = null;
         }
 
         public override void OnLevelUnloading() {

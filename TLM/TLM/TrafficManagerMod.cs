@@ -9,6 +9,8 @@ namespace TrafficManager {
     using TrafficManager.State;
     using TrafficManager.UI;
     using TrafficManager.Util;
+    using static TrafficManager.Util.Shortcuts;
+    using ColossalFramework;
 
     public class TrafficManagerMod : IUserMod {
 #if LABS
@@ -75,6 +77,12 @@ namespace TrafficManager {
             LoadingManager.instance.m_introLoaded -= CheckForIncompatibleMods;
             LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
             Translation.IsListeningToGameLocaleChanged = false; // is this necessary?
+
+            if (LoadingExtension.InGame() && LoadingExtension.Instance != null) {
+                //Hot reload Unloading
+                LoadingExtension.Instance.OnLevelUnloading();
+                LoadingExtension.Instance.OnReleased();
+            }
         }
 
         [UsedImplicitly]
