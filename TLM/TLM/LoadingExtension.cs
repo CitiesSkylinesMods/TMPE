@@ -17,6 +17,7 @@ namespace TrafficManager {
     using TrafficManager.UI.Localization;
     using TrafficManager.UI;
     using static TrafficManager.Util.Shortcuts;
+    using UnityEngine;
 
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {
@@ -35,7 +36,12 @@ namespace TrafficManager {
             }
         }
 
-public class Detour {
+        FastList<ISimulationManager> simManager =>
+            typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
+                ?.GetValue(null) as FastList<ISimulationManager>;
+
+
+        public class Detour {
             public MethodInfo OriginalMethod;
             public MethodInfo CustomMethod;
             public RedirectCallsState Redirect;
@@ -336,11 +342,6 @@ public class Detour {
                 CustomPathManager._instance.WaitForAllPaths();
             }
 
-            // Object.Destroy(BaseUI);
-            // BaseUI = null;
-            // Object.Destroy(TransportDemandUI);
-            // TransportDemandUI = null;
-
             try {
                 var reverseManagers = new List<ICustomManager>(RegisteredManagers);
                 reverseManagers.Reverse();
@@ -353,21 +354,40 @@ public class Detour {
                 Flags.OnLevelUnloading();
                 GlobalConfig.OnLevelUnloading();
 
-                // remove vehicle button
-                var removeVehicleButtonExtender = UIView
-                                                  .GetAView().gameObject
-                                                  .GetComponent<RemoveVehicleButtonExtender>();
-                if (removeVehicleButtonExtender != null) {
-                    Object.Destroy(removeVehicleButtonExtender, 10f);
+                var gameObject = UIView.GetAView().gameObject;
+                void Destroy<T>() where T : MonoBehaviour {
+                    Object obj = (Object)gameObject.GetComponent<T>();
+                    if (obj != null) {
+                        Object.Destroy(obj);
+                    }
                 }
 
-                // remove citizen instance button
-                var removeCitizenInstanceButtonExtender = UIView
-                                                          .GetAView().gameObject
-                                                          .GetComponent<RemoveCitizenInstanceButtonExtender>();
-                if (removeCitizenInstanceButtonExtender != null) {
-                    Object.Destroy(removeCitizenInstanceButtonExtender, 10f);
+                // remove vehicle button
+                Destroy<RemoveVehicleButtonExtender>();
+                Destroy<RemoveCitizenInstanceButtonExtender>();
+
+                if (IsPathManagerReplaced) {
+                    IsPathManagerReplaced = false;
+
+                    simManager?.Remove(CustomPathManager);
+
+                    Object.Destroy(CustomPathManager);
+                    CustomPathManager = null;
                 }
+
+                Log.Info("Removing Controls from UI.");
+                if (BaseUI != null) {
+                    Object.Destroy(BaseUI);
+                    Log._Debug("removed UIBase instance.");
+                    BaseUI = null;
+                }
+
+                if (TransportDemandUI != null) {
+                    UIView uiView = UIView.GetAView();
+                    Object.Destroy(TransportDemandUI);
+                    TransportDemandUI = null;
+                }
+
 #if TRACE
                 Singleton<CodeProfiler>.instance.OnLevelUnloading();
 #endif
@@ -496,11 +516,7 @@ public class Detour {
                     pathManagerInstance?.SetValue(null, CustomPathManager);
 
                     Log._Debug("Getting Current SimulationManager");
-                    var simManager =
-                        typeof(SimulationManager).GetField(
-                                                     "m_managers",
-                                                     BindingFlags.Static | BindingFlags.NonPublic)
-                                                 ?.GetValue(null) as FastList<ISimulationManager>;
+                    var simManager = this.simManager;
 
                     Log._Debug("Removing Stock PathManager");
                     simManager?.Remove(stockPathManager);

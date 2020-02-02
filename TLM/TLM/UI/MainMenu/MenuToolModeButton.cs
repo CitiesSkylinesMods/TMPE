@@ -10,7 +10,6 @@ namespace TrafficManager.UI.MainMenu {
 
         public override void OnClickInternal(UIMouseEventParameter p) {
             UIBase.GetTrafficManagerTool().SetToolMode(Active ? ToolMode.None : ToolMode);
-            Log._Debug("KIAN DEBUG LOG!!!!!! HOT RELOAD VERSION 2 2 2 2 2 2");
         }
     }
 }
