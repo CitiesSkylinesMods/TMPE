@@ -310,7 +310,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode">at start node?</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool ToggleUturnAllowed(ushort segmentId, bool startNode);
 
@@ -321,7 +321,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode">at start node?</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool ToggleNearTurnOnRedAllowed(ushort segmentId, bool startNode);
 
@@ -332,7 +332,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode">at start node?</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool ToggleFarTurnOnRedAllowed(ushort segmentId, bool startNode);
 
@@ -344,7 +344,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode">at start node?</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool ToggleTurnOnRedAllowed(bool near, ushort segmentId, bool startNode);
 
@@ -355,7 +355,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode">at start node?</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool ToggleLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode);
 
@@ -366,7 +366,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode">at start node?</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool ToggleEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode);
 
@@ -377,7 +377,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode">at start node?</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool TogglePedestrianCrossingAllowed(ushort segmentId, bool startNode);
         #endregion
@@ -391,7 +391,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetUturnAllowed(ushort segmentId, bool startNode, bool value);
 
@@ -403,7 +403,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetNearTurnOnRedAllowed(ushort segmentId, bool startNode, bool value);
 
@@ -415,7 +415,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetFarTurnOnRedAllowed(ushort segmentId, bool startNode, bool value);
 
@@ -428,7 +428,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetTurnOnRedAllowed(bool near, ushort segmentId, bool startNode, bool value);
 
@@ -440,7 +440,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, bool value);
 
@@ -452,7 +452,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode, bool value);
 
@@ -464,7 +464,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetPedestrianCrossingAllowed(ushort segmentId, bool startNode, bool value);
         #endregion
@@ -480,7 +480,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value. Passing in <c>TernaryBool.Undefined</c> removes the traffic bool.</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetUturnAllowed(ushort segmentId, bool startNode, TernaryBool value);
 
@@ -492,7 +492,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value. Passing in <c>TernaryBool.Undefined</c> removes the traffic bool.</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetNearTurnOnRedAllowed(ushort segmentId, bool startNode, TernaryBool value);
 
@@ -504,7 +504,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value. Passing in <code>TernaryBool.Undefined</code> removes the traffic bool.</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetFarTurnOnRedAllowed(ushort segmentId, bool startNode, TernaryBool value);
 
@@ -517,7 +517,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value. Passing in <code>TernaryBool.Undefined</code> removes the traffic bool.</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetTurnOnRedAllowed(bool near, ushort segmentId, bool startNode, TernaryBool value);
 
@@ -529,7 +529,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value. Passing in <code>TernaryBool.Undefined</code> removes the traffic bool.</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode, TernaryBool value);
 
@@ -541,7 +541,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value. Passing in <code>TernaryBool.Undefined</code> removes the traffic bool.</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode, TernaryBool value);
 
@@ -553,7 +553,7 @@ namespace TrafficManager.API.Manager {
         /// <param name="value">new value. Passing in <code>TernaryBool.Undefined</code> removes the traffic bool.</param>
         /// <returns> <c>true</c> on success.
         /// Silently returns <c>true</c> if the given <paramref name="value"/> equals to the flag.
-        /// On failure (including when traffic rule is not configurable) returns false<c>false</c>
+        /// On failure (including when traffic rule is not configurable) returns <c>false</c>
         /// </returns>
         bool SetPedestrianCrossingAllowed(ushort segmentId, bool startNode, TernaryBool value);
         #endregion

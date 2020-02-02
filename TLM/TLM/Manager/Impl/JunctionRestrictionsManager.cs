@@ -835,7 +835,7 @@ namespace TrafficManager.Manager.Impl {
             return ref Shortcuts.GetNode(nodeId);
         }
 
-        #region Set<Traffic Rule>AllowedTernaryBool 
+        #region Set<Traffic Rule>Allowed: TernaryBool 
 
         public bool SetUturnAllowed(ushort segmentId, bool startNode, TernaryBool value) {
             if (!Services.NetService.IsSegmentValid(segmentId)) {
