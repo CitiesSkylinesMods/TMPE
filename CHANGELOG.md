@@ -28,7 +28,6 @@ This changelog includes all versions and major variants of the mod going all the
 ### TM:PE V11 STABLE [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), date
 
 - Meta: Contains ~100 changes from TM:PE v11 ALPHA versions 11.0-alpha1 to 11.0-alpha12
-- Meta: Contains ~100 changes from 11.0-alpha1 to 11.0-alpha12
 - Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
 - Improved: Better segment hovering when mouse on node (thanks kianzarrin!) (#615, #538, #594, #616, #576)
 - Fixed: Lane arrow tool sometimes selects wrong node (thanks kianzarrin!) (#616)
