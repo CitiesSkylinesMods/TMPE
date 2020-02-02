@@ -16,7 +16,7 @@ This changelog includes all versions and major variants of the mod going all the
 >     * TM:PE STABLE - TM:PE versions 10.14 to 10.20
 >     * TM:PE LABS - TM:PE versions 10.14 to 10.21.1 (later renamed to TM:PE v11 STABLE)
 >     * TM:PE v11 ALPHA - TM:PE versions 11.0-alpha1 to 11.0-alpha12 (later renamed to TM:PE v11 LABS)
->     * TM:PE v11 STABLE - TM:PE versions 11.0 and above
+>     * TM:PE v11 STABLE - TM:PE versions 11.0 and above (stable releases)
 >     * TM:PE v11 LABS - TM:PE versions 11.0 and above (test releases)
 > * **TPP2** = Traffic++ V2
 > * **TMIAI** = Traffic Manager + Improved AI
@@ -27,15 +27,33 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TM:PE V11 STABLE [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), date
 
-- todo
-- Meta: Contains all changes from 11.0-alpha1 to 11.0-alpha12
+- Meta: Contains ~100 changes from TM:PE v11 ALPHA versions 11.0-alpha1 to 11.0-alpha12
+- Meta: Contains ~100 changes from 11.0-alpha1 to 11.0-alpha12
+- Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
+- Improved: Better segment hovering when mouse on node (thanks kianzarrin!) (#615, #538, #594, #616, #576)
+- Fixed: Lane arrow tool sometimes selects wrong node (thanks kianzarrin!) (#616)
+- Fixed: Show error dialog can get caught in loop (thanks kianzarrin!) (#594)
+- Fixed: Junction Manager not resetting on level unload (thanks kianzarrin!) (#637, #636)
+- Fixed: Stay in lane always assumed segment0 exists (thans kianzarrin!) (#619, #618)
+- Updated: Added 2 x Traffic Manager Plus and 1 x Traffic Manager as incompatible (#627)
+- Updated: Added 'Trees Respiration' mod as incompatible (depends on load order) (#614, #611)
+- Updated: Replaced imports with fully qualified alphabetically sorted imports (#620)
 - Meta: Old STABLE workshop page (LinuxFan - v10.20) is now obsolete and no longer maintained
 - Meta: Renamed LABS and ALPHA workshop pages to V11 STABLE and V11 LABS respectively
 - Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 ### TM:PE V11 LABS [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), date
 
-- todo
+- Meta: Contains ~100 changes from TM:PE v11 ALPHA versions 11.0-alpha1 to 11.0-alpha12
+- Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
+- Improved: Better segment hovering when mouse on node (thanks kianzarrin!) (#615, #538, #594, #616, #576)
+- Fixed: Lane arrow tool sometimes selects wrong node (thanks kianzarrin!) (#616)
+- Fixed: Show error dialog can get caught in loop (thanks kianzarrin!) (#594)
+- Fixed: Junction Manager not resetting on level unload (thanks kianzarrin!) (#637, #636)
+- Fixed: Stay in lane always assumed segment0 exists (thans kianzarrin!) (#619, #618)
+- Updated: Added 2 x Traffic Manager Plus and 1 x Traffic Manager as incompatible (#627)
+- Updated: Added 'Trees Respiration' mod as incompatible (depends on load order) (#614, #611)
+- Updated: Replaced imports with fully qualified alphabetically sorted imports (#620)
 - Meta: Old STABLE workshop page (LinuxFan - v10.20) is now obsolete and no longer maintained
 - Meta: Renamed LABS and ALPHA workshop pages to V11 STABLE and V11 LABS respectively
 - Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
