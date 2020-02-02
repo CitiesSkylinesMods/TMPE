@@ -46,8 +46,8 @@ namespace TrafficManager {
                 GAME_VERSION_C,
                 GAME_VERSION_BUILD);
             Log.InfoFormat(
-            "Enabled TM:PE has GUID {0}",
-            Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId);
+                "Enabled TM:PE has GUID {0}",
+                Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId);
 
             // check for incompatible mods
             if (UIView.GetAView() != null) {
