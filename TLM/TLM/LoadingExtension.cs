@@ -281,7 +281,7 @@ namespace TrafficManager {
         }
 
         public override void OnCreated(ILoading loading) {
-            Log._Debug("KIAN DEBUG: LoadingExtension.OnCreated()");
+            Log._Debug("LoadingExtension.OnCreated() called");
 
             // SelfDestruct.DestructOldInstances(this);
             base.OnCreated(loading);

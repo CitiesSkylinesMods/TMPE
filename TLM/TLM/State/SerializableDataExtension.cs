@@ -22,18 +22,16 @@ namespace TrafficManager.State {
         public override void OnCreated(ISerializableData serializableData) {
             _serializableData = serializableData;
 
-            Log._Debug("KIAN DEBUG: SerializableDataExtension: OnCreated !!!!!!!!!!!!!!!!!!!!!");
+            Log._Debug("SerializableDataExtension.OnCreated() called");
 
             if (LoadingExtension.Instance.HotReload) {
-                Log._Debug("KIAN DEBUG: HOT RELOAD SerializableDataExtension.OnCreated!!!");
+                Log._Debug("HOT RELOAD ...");
                 OnLoadData();
                 LoadingExtension.Instance.OnLevelLoaded(LoadMode.LoadGame);
             }
         }
 
-        public override void OnReleased() {
-            Log._Debug("KIAN DEBUG: SerializableDataExtension: OnReleased !!!!!!!!!!!!!!!!!!!!!");
-        }
+        public override void OnReleased() { }
 
         public override void OnLoadData() {
             Log.Info("Loading Traffic Manager: PE Data");
