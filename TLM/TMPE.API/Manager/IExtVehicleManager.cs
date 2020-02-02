@@ -1,9 +1,6 @@
-﻿using TrafficManager.Traffic.Enums;
-using TrafficManager.Traffic.Data;
-
-namespace TrafficManager.Manager {
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
+﻿namespace TrafficManager.API.Manager {
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
 
     public interface IExtVehicleManager {
         /// <summary>
@@ -70,7 +67,9 @@ namespace TrafficManager.Manager {
         /// <param name="vehicleData">vehicle data</param>
         /// <param name="vehicleType">vehicle type to set, optional</param>
         /// <returns>vehicle type</returns>
-        ExtVehicleType OnStartPathFind(ushort vehicleId, ref Vehicle vehicleData, ExtVehicleType? vehicleType);
+        ExtVehicleType OnStartPathFind(ushort vehicleId,
+                                       ref Vehicle vehicleData,
+                                       ExtVehicleType? vehicleType);
 
         /// <summary>
         /// Handles a vehicle when path-finding starts.
@@ -79,7 +78,9 @@ namespace TrafficManager.Manager {
         /// <param name="vehicleData">vehicle data</param>
         /// <param name="vehicleType">vehicle type to set, optional</param>
         /// <returns>vehicle type</returns>
-        ExtVehicleType OnStartPathFind(ref ExtVehicle extVehicle, ref Vehicle vehicleData, ExtVehicleType? vehicleType);
+        ExtVehicleType OnStartPathFind(ref ExtVehicle extVehicle,
+                                       ref Vehicle vehicleData,
+                                       ExtVehicleType? vehicleType);
 
         /// <summary>
         /// Retrieves the driver citizen instance id for the given vehicle.
@@ -104,7 +105,11 @@ namespace TrafficManager.Manager {
         /// <param name="segEnd">ext. segment end</param>
         /// <param name="curPos">current path position</param>
         /// <param name="nextPos">next path position</param>
-        void UpdatePosition(ref ExtVehicle extVehicle, ref Vehicle vehicleData, ref ExtSegmentEnd segEnd, ref PathUnit.Position curPos, ref PathUnit.Position nextPos);
+        void UpdatePosition(ref ExtVehicle extVehicle,
+                            ref Vehicle vehicleData,
+                            ref ExtSegmentEnd segEnd,
+                            ref PathUnit.Position curPos,
+                            ref PathUnit.Position nextPos);
 
         /// <summary>
         /// Unlinks the given vehicle from any segment end that the vehicle is currently linked to.
@@ -117,7 +122,8 @@ namespace TrafficManager.Manager {
         /// </summary>
         /// <param name="extVehicle">vehicle</param>
         /// <param name="transitState">junction transit state</param>
-        void SetJunctionTransitState(ref ExtVehicle extVehicle, VehicleJunctionTransitState transitState);
+        void SetJunctionTransitState(ref ExtVehicle extVehicle,
+                                     VehicleJunctionTransitState transitState);
 
         /// <summary>
         /// Determines if the junction transit state has been recently modified

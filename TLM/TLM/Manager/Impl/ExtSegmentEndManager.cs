@@ -1,369 +1,477 @@
-﻿using ColossalFramework;
-using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using TrafficManager.Custom.AI;
-using TrafficManager.Geometry.Impl;
-using TrafficManager.State;
-using TrafficManager.Traffic;
-using TrafficManager.Traffic.Data;
-using TrafficManager.Traffic.Enums;
-using TrafficManager.Util;
-using UnityEngine;
-
 namespace TrafficManager.Manager.Impl {
-	public class ExtSegmentEndManager : AbstractCustomManager, IExtSegmentEndManager {
-		public static ExtSegmentEndManager Instance { get; private set; } = null;
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State.ConfigData;
+    using UnityEngine;
 
-		static ExtSegmentEndManager() {
-			Instance = new ExtSegmentEndManager();
-		}
+    public class ExtSegmentEndManager
+        : AbstractCustomManager,
+          IExtSegmentEndManager
+    {
+        public static ExtSegmentEndManager Instance { get; }
 
-		/// <summary>
-		/// All additional data for segment ends
-		/// </summary>
-		public ExtSegmentEnd[] ExtSegmentEnds { get; private set; } = null;
+        static ExtSegmentEndManager() {
+            Instance = new ExtSegmentEndManager();
+        }
 
-		private ExtSegmentEndManager() {
-			ExtSegmentEnds = new ExtSegmentEnd[NetManager.MAX_SEGMENT_COUNT * 2];
-			for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-				ExtSegmentEnds[GetIndex((ushort)i, true)] = new ExtSegmentEnd((ushort)i, true);
-				ExtSegmentEnds[GetIndex((ushort)i, false)] = new ExtSegmentEnd((ushort)i, false);
-			}
-		}
+        /// <summary>
+        /// All additional data for segment ends
+        /// </summary>
+        public ExtSegmentEnd[] ExtSegmentEnds { get; }
+
+        private ExtSegmentEndManager() {
+            ExtSegmentEnds = new ExtSegmentEnd[NetManager.MAX_SEGMENT_COUNT * 2];
+            for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
+                ExtSegmentEnds[GetIndex((ushort)i, true)] = new ExtSegmentEnd((ushort)i, true);
+                ExtSegmentEnds[GetIndex((ushort)i, false)] = new ExtSegmentEnd((ushort)i, false);
+            }
+        }
 
 #if DEBUG
-		public string GenerateVehicleChainDebugInfo(ushort segmentId, bool startNode) {
-			int index = GetIndex(segmentId, startNode);
-			ushort vehicleId = ExtSegmentEnds[index].firstVehicleId;
-			string ret = "";
-			int numIter = 0;
-			while (vehicleId != 0) {
-				ret += $" -> {vehicleId} (seg: {Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].currentSegmentId}@{Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].currentStartNode} , adj: {Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].previousVehicleIdOnSegment}..{Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment})";
-				vehicleId = Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
+        public string GenerateVehicleChainDebugInfo(ushort segmentId, bool startNode) {
+            int index = GetIndex(segmentId, startNode);
+            ushort vehicleId = ExtSegmentEnds[index].firstVehicleId;
+            string ret = string.Empty;
+            int numIter = 0;
 
-				if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
-					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
-					break;
-				}
-			}
-			return ret;
-		}
+            while (vehicleId != 0) {
+                ref ExtVehicle extVehicle = ref Constants.ManagerFactory.ExtVehicleManager
+                                                         .ExtVehicles[vehicleId];
+                ret += string.Format(
+                    " -> {0} (seg: {1}@{2} , adj: {3}..{4})",
+                    vehicleId,
+                    extVehicle.currentSegmentId,
+                    extVehicle.currentStartNode,
+                    extVehicle.previousVehicleIdOnSegment,
+                    extVehicle.nextVehicleIdOnSegment);
+
+                vehicleId = extVehicle.nextVehicleIdOnSegment;
+
+                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                    CODebugBase<LogChannel>.Error(
+                        LogChannel.Core,
+                        "Invalid list detected!\n" + Environment.StackTrace);
+                    break;
+                }
+            }
+
+            return ret;
+        }
 #endif
 
-		public void Reset(ushort segmentId) {
-			Reset(ref ExtSegmentEnds[GetIndex(segmentId, true)]);
-			Reset(ref ExtSegmentEnds[GetIndex(segmentId, false)]);
-		}
+        public void Reset(ushort segmentId) {
+            Reset(ref ExtSegmentEnds[GetIndex(segmentId, true)]);
+            Reset(ref ExtSegmentEnds[GetIndex(segmentId, false)]);
+        }
 
-		protected void Reset(ref ExtSegmentEnd extSegmentEnd) {
-			IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
-			int numIter = 0;
-			while (extSegmentEnd.firstVehicleId != 0) {
-				extVehicleMan.Unlink(ref extVehicleMan.ExtVehicles[extSegmentEnd.firstVehicleId]);
+        private void Reset(ref ExtSegmentEnd extSegmentEnd) {
+            IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
+            int numIter = 0;
 
-				if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
-					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
-					break;
-				}
-			}
+            while (extSegmentEnd.firstVehicleId != 0) {
+                extVehicleMan.Unlink(ref extVehicleMan.ExtVehicles[extSegmentEnd.firstVehicleId]);
 
-			extSegmentEnd.nodeId = 0;
-			extSegmentEnd.outgoing = false;
-			extSegmentEnd.incoming = false;
-			extSegmentEnd.firstVehicleId = 0;
-		}
+                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                    CODebugBase<LogChannel>.Error(
+                        LogChannel.Core,
+                        $"Invalid list detected!\n{Environment.StackTrace}");
+                    break;
+                }
+            }
 
-		public int GetIndex(ushort segmentId, bool startNode) {
-			return (int)segmentId * 2 + (startNode ? 0 : 1);
-		}
+            extSegmentEnd.nodeId = 0;
+            extSegmentEnd.outgoing = false;
+            extSegmentEnd.incoming = false;
+            extSegmentEnd.firstVehicleId = 0;
+        }
 
-		public int GetIndex(ushort segmentId, ushort nodeId) {
-			bool found = false;
-			bool startNode = false;
-			Services.NetService.ProcessSegment(segmentId, (ushort _, ref NetSegment seg) => {
-				if (seg.m_startNode == nodeId) {
-					found = true;
-					startNode = true;
-				} else if (seg.m_endNode == nodeId) {
-					found = true;
-				}
-				return true;
-			});
+        public int GetIndex(ushort segmentId, bool startNode) {
+            return (segmentId * 2) + (startNode ? 0 : 1);
+        }
 
-			if (!found) {
-				Log.Warning($"ExtSegmentEndManager.GetIndex({segmentId}, {nodeId}): Node is not connected to segment.");
-				return -1;
-			} else {
-				return GetIndex(segmentId, startNode);
-			}
-		}
+        public int GetIndex(ushort segmentId, ushort nodeId) {
+            bool found = false;
+            bool startNode = false;
+            Services.NetService.ProcessSegment(
+                segmentId,
+                (ushort _, ref NetSegment seg) => {
+                    if (seg.m_startNode == nodeId) {
+                        found = true;
+                        startNode = true;
+                    } else if (seg.m_endNode == nodeId) {
+                        found = true;
+                    }
 
-		public uint GetRegisteredVehicleCount(ref ExtSegmentEnd end) {
-			IExtVehicleManager vehStateManager = Constants.ManagerFactory.ExtVehicleManager;
+                    return true;
+                });
 
-			ushort vehicleId = end.firstVehicleId;
-			uint ret = 0;
-			int numIter = 0;
-			while (vehicleId != 0) {
-				++ret;
-				vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
+            if (!found) {
+                Log.Warning(
+                    $"ExtSegmentEndManager.GetIndex({segmentId}, {nodeId}): Node is not " +
+                    "connected to segment.");
+                return -1;
+            }
 
-				if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
-					CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
-					break;
-				}
-			}
-			return ret;
-		}
+            return GetIndex(segmentId, startNode);
+        }
 
-		public ArrowDirection GetDirection(ref ExtSegmentEnd sourceEnd, ushort targetSegmentId) {
-			IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
-			if (! extSegMan.IsValid(sourceEnd.segmentId) || ! extSegMan.IsValid(targetSegmentId)) {
-				return ArrowDirection.None;
-			}
+        public uint GetRegisteredVehicleCount(ref ExtSegmentEnd end) {
+            IExtVehicleManager vehStateManager = Constants.ManagerFactory.ExtVehicleManager;
+            ushort vehicleId = end.firstVehicleId;
+            uint ret = 0;
+            int numIter = 0;
 
-			bool? targetStartNode = Services.NetService.IsStartNode(targetSegmentId, sourceEnd.nodeId);
-			if (targetStartNode == null) {
-				return ArrowDirection.None;
-			}
+            while (vehicleId != 0) {
+                ++ret;
+                vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 
-			bool sourceStartNode = sourceEnd.startNode;
+                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                    CODebugBase<LogChannel>.Error(
+                        LogChannel.Core,
+                        $"Invalid list detected!\n{Environment.StackTrace}");
+                    break;
+                }
+            }
 
-			Vector3 sourceDir = Vector3.zero;
-			Services.NetService.ProcessSegment(sourceEnd.segmentId, delegate (ushort segId, ref NetSegment seg) {
-				sourceDir = sourceStartNode ? seg.m_startDirection : seg.m_endDirection;
-				return true;
-			});
+            return ret;
+        }
 
-			Vector3 targetDir = Vector3.zero;
-			Services.NetService.ProcessSegment(targetSegmentId, delegate (ushort segId, ref NetSegment seg) {
-				targetDir = (bool)targetStartNode ? seg.m_startDirection : seg.m_endDirection;
-				return true;
-			});
+        public ArrowDirection GetDirection(ref ExtSegmentEnd sourceEnd, ushort targetSegmentId) {
+            IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
+            if (!extSegMan.IsValid(sourceEnd.segmentId) || !extSegMan.IsValid(targetSegmentId)) {
+                return ArrowDirection.None;
+            }
 
-			return CalculateArrowDirection(sourceDir, targetDir);
-		}
+            bool? targetStartNode = Services.NetService.IsStartNode(targetSegmentId, sourceEnd.nodeId);
 
-		protected ArrowDirection CalculateArrowDirection(Vector3 sourceDir, Vector3 targetDir) {
-			sourceDir.y = 0;
-			sourceDir.Normalize();
+            if (targetStartNode == null) {
+                return ArrowDirection.None;
+            }
 
-			targetDir.y = 0;
-			targetDir.Normalize();
-			float c = Vector3.Cross(sourceDir, targetDir).y;
+            bool sourceStartNode = sourceEnd.startNode;
 
-			if (c >= 0.5f) { // [+30°, +150°]
-				return ArrowDirection.Left;
-			} else if (c <= -0.5f) { // [-30°, -150°]
-				return ArrowDirection.Right;
-			} else { // (-30°, +30°) / (-150°, -180°] / (+150°, +180°]
-				float d = Vector3.Dot(sourceDir, targetDir);
-				if (d > 0) { // (-30°, +30°)
-					if (c > 0) { // (0°, 30°]
-						return ArrowDirection.Left;
-					} else if (c < 0) { // (0°, -30°]
-						return ArrowDirection.Right;
-					} else { // [0°]
-						return ArrowDirection.Turn;
-					}
-				} else { // (-150°, -180°] / (+150°, +180°]
-					return ArrowDirection.Forward;
-				}
-			}
-		}
+            Vector3 sourceDir = Vector3.zero;
+            Services.NetService.ProcessSegment(
+                sourceEnd.segmentId,
+                (ushort segId, ref NetSegment seg) => {
+                    sourceDir = sourceStartNode
+                                    ? seg.m_startDirection
+                                    : seg.m_endDirection;
+                    return true;
+                });
 
-		private static Vector3 GetSegmentDir(ref NetSegment segment, bool startNode) {
-			return startNode ? segment.m_startDirection : segment.m_endDirection;
-		}
+            Vector3 targetDir = Vector3.zero;
+            Services.NetService.ProcessSegment(
+                targetSegmentId,
+                (ushort segId, ref NetSegment seg) => {
+                    targetDir = (bool)targetStartNode
+                                    ? seg.m_startDirection
+                                    : seg.m_endDirection;
+                    return true;
+                });
 
-		public void Recalculate(ushort segmentId) {
-			Recalculate(ref ExtSegmentEnds[GetIndex(segmentId, true)]);
-			Recalculate(ref ExtSegmentEnds[GetIndex(segmentId, false)]);
-		}
+            return CalculateArrowDirection(sourceDir, targetDir);
+        }
 
-		public void Recalculate(ushort segmentId, bool startNode) {
-			Recalculate(ref ExtSegmentEnds[GetIndex(segmentId, startNode)]);
-		}
+        public ArrowDirection GetDirection(ushort segmentId0, ushort segmentId1, ushort nodeId = 0) {
+            if (nodeId == 0) {
+                ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[0];
+                nodeId = seg.GetSharedNode(segmentId1);
+                if(nodeId == 0) {
+                    return ArrowDirection.None;
+                }
+            }
+            GenericGameBridge.Service.INetService netService = Constants.ServiceFactory.NetService;
+            ref ExtSegmentEnd segmenEnd0 = ref ExtSegmentEnds[GetIndex(segmentId0, nodeId)];
+            ArrowDirection dir = GetDirection(ref segmenEnd0, segmentId1);
+            return dir;
+        }
 
-		protected void Recalculate(ref ExtSegmentEnd segEnd) {
-			IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
-			ushort segmentId = segEnd.segmentId;
-			bool startNode = segEnd.startNode;
+        private ArrowDirection CalculateArrowDirection(Vector3 sourceDir, Vector3 targetDir) {
+            sourceDir.y = 0;
+            sourceDir.Normalize();
 
-#if DEBUGGEO
-			bool output = GlobalConfig.Instance.Debug.Switches[5];
+            targetDir.y = 0;
+            targetDir.Normalize();
+            float c = Vector3.Cross(sourceDir, targetDir).y;
 
-			if (output)
-				Log._Debug($"ExtSegmentEndManager.Recalculate({segmentId}, {startNode}) called.");
+            if (c >= 0.5f) {
+                // [+30°, +150°]
+                return ArrowDirection.Left;
+            }
+
+            if (c <= -0.5f) {
+                // [-30°, -150°]
+                return ArrowDirection.Right;
+            }
+
+            // Handle cases (-30°, +30°) / (-150°, -180°] / (+150°, +180°]
+            float d = Vector3.Dot(sourceDir, targetDir);
+            if (d > 0) {
+                // (-30°, +30°)
+                if (c > 0) {
+                    // (0°, 30°]
+                    return ArrowDirection.Left;
+                }
+
+                if (c < 0) {
+                    // (0°, -30°]
+                    return ArrowDirection.Right;
+                }
+
+                // [0°]
+                return ArrowDirection.Turn;
+            }
+
+            // (-150°, -180°] / (+150°, +180°]
+            return ArrowDirection.Forward;
+        }
+
+        private static Vector3 GetSegmentDir(ref NetSegment segment, bool startNode) {
+            return startNode ? segment.m_startDirection : segment.m_endDirection;
+        }
+
+        public void Recalculate(ushort segmentId) {
+            Recalculate(ref ExtSegmentEnds[GetIndex(segmentId, true)]);
+            Recalculate(ref ExtSegmentEnds[GetIndex(segmentId, false)]);
+        }
+
+        public void Recalculate(ushort segmentId, bool startNode) {
+            Recalculate(ref ExtSegmentEnds[GetIndex(segmentId, startNode)]);
+        }
+
+        private void Recalculate(ref ExtSegmentEnd segEnd) {
+            ushort segmentId = segEnd.segmentId;
+            bool startNode = segEnd.startNode;
+
+#if DEBUG
+            bool logGeometry = DebugSwitch.GeometryDebug.Get();
+#else
+            const bool logGeometry = false;
 #endif
 
-			ushort nodeIdBeforeRecalc = segEnd.nodeId;
-			Reset(ref segEnd);
+            if (logGeometry) {
+                Log._Debug($"ExtSegmentEndManager.Recalculate({segmentId}, {startNode}) called.");
+            }
 
-			if (! Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
-				if (nodeIdBeforeRecalc != 0) {
-					Constants.ManagerFactory.ExtNodeManager.RemoveSegment(nodeIdBeforeRecalc, segmentId);
-				}
-				return;
-			}
+            ushort nodeIdBeforeRecalc = segEnd.nodeId;
+            Reset(ref segEnd);
 
-			ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
-			segEnd.nodeId = nodeId;
-			CalculateIncomingOutgoing(segmentId, nodeId, out segEnd.incoming, out segEnd.outgoing);
+            if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+                if (nodeIdBeforeRecalc != 0) {
+                    Constants.ManagerFactory.ExtNodeManager.RemoveSegment(
+                        nodeIdBeforeRecalc,
+                        segmentId);
+                }
 
-			if (nodeIdBeforeRecalc != 0 && nodeIdBeforeRecalc != nodeId) {
-				Constants.ManagerFactory.ExtNodeManager.RemoveSegment(nodeIdBeforeRecalc, segmentId);
-			}
+                return;
+            }
 
-			Constants.ManagerFactory.ExtNodeManager.AddSegment(nodeId, segmentId);
+            ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
+            segEnd.nodeId = nodeId;
+            CalculateIncomingOutgoing(segmentId, nodeId, out segEnd.incoming, out segEnd.outgoing);
 
-#if DEBUGGEO
-			if (output) {
-				Log.Info($"ExtSegmentEndManager.Recalculate({segmentId}, {startNode}): Recalculated ext. segment end: {segEnd}");
-			}
+            if (nodeIdBeforeRecalc != 0 && nodeIdBeforeRecalc != nodeId) {
+                Constants.ManagerFactory.ExtNodeManager.RemoveSegment(
+                    nodeIdBeforeRecalc,
+                    segmentId);
+            }
+
+            Constants.ManagerFactory.ExtNodeManager.AddSegment(nodeId, segmentId);
+
+            if (logGeometry) {
+                Log.Info($"ExtSegmentEndManager.Recalculate({segmentId}, {startNode}): " +
+                         $"Recalculated ext. segment end: {segEnd}");
+            }
+        }
+
+        private void CalculateIncomingOutgoing(ushort segmentId,
+                                               ushort nodeId,
+                                               out bool incoming,
+                                               out bool outgoing) {
+            NetManager instance = Singleton<NetManager>.instance;
+            NetInfo info = instance.m_segments.m_buffer[segmentId].Info;
+
+            var dir = NetInfo.Direction.Forward;
+
+            if (instance.m_segments.m_buffer[segmentId].m_startNode == nodeId) {
+                dir = NetInfo.Direction.Backward;
+            }
+
+            NetInfo.Direction dir2 =
+                ((instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) ==
+                 NetSegment.Flags.None)
+                    ? dir
+                    : NetInfo.InvertDirection(dir);
+
+            var hasForward = false;
+            var hasBackward = false;
+            var isOutgoingOneWay = true;
+            uint laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
+            var laneIndex = 0;
+
+            while (laneIndex < info.m_lanes.Length && laneId != 0u) {
+                bool validLane =
+                    (info.m_lanes[laneIndex].m_laneType &
+                     (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) !=
+                    NetInfo.LaneType.None &&
+                    (info.m_lanes[laneIndex].m_vehicleType &
+                     (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train |
+                      VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro |
+                      VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None;
+                // TODO the lane types and vehicle types should be specified to make it clear which lanes we need to check
+                if (validLane) {
+                    if ((info.m_lanes[laneIndex].m_finalDirection & dir2) !=
+                        NetInfo.Direction.None) {
+                        isOutgoingOneWay = false;
+                    }
+
+                    if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Forward) !=
+                        NetInfo.Direction.None) {
+                        hasForward = true;
+                    }
+
+                    if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Backward) !=
+                        NetInfo.Direction.None) {
+                        hasBackward = true;
+                    }
+                }
+
+                laneId = instance.m_lanes.m_buffer[laneId].m_nextLane;
+                laneIndex++;
+            }
+
+            bool isOneway = !(hasForward && hasBackward);
+            if (!isOneway) {
+                isOutgoingOneWay = false;
+            }
+
+            incoming = (hasForward || hasBackward) && !isOutgoingOneWay;
+            outgoing = (hasForward || hasBackward) && (isOutgoingOneWay || !isOneway);
+        }
+
+        public bool CalculateOnlyHighways(ushort segmentId, bool startNode) {
+            ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
+#if DEBUG
+            bool logGeometry = DebugSwitch.GeometryDebug.Get();
+#else
+            const bool logGeometry = false;
 #endif
-		}
+            if (logGeometry) {
+                Log._Debug($"Checking if segment {segmentId} is connected to highways only " +
+                           $"at node {nodeId}.");
+            }
 
-		protected void CalculateIncomingOutgoing(ushort segmentId, ushort nodeId, out bool incoming, out bool outgoing) {
-			var instance = Singleton<NetManager>.instance;
+            bool hasOtherSegments = false;
 
-			var info = instance.m_segments.m_buffer[segmentId].Info;
+            for (var s = 0; s < 8; s++) {
+                ushort otherSegmentId = 0;
+                Constants.ServiceFactory.NetService.ProcessNode(
+                    nodeId,
+                    (ushort nId, ref NetNode node) => {
+                        otherSegmentId = node.GetSegment(s);
+                        return true;
+                    });
+                if (otherSegmentId == 0 || otherSegmentId == segmentId) {
+                    continue;
+                }
 
-			var dir = NetInfo.Direction.Forward;
-			if (instance.m_segments.m_buffer[segmentId].m_startNode == nodeId)
-				dir = NetInfo.Direction.Backward;
-			var dir2 = ((instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) ? dir : NetInfo.InvertDirection(dir);
+                hasOtherSegments = true;
 
-			var hasForward = false;
-			var hasBackward = false;
-			bool isOutgoingOneWay = true;
-			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
-			var laneIndex = 0;
-			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
-				bool validLane = (info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
-					(info.m_lanes[laneIndex].m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None;
-				// TODO the lane types and vehicle types should be specified to make it clear which lanes we need to check
+                // determine geometry
+                CalculateIncomingOutgoing(
+                    otherSegmentId,
+                    nodeId,
+                    out bool otherIsIncoming,
+                    out bool otherIsOutgoing);
 
-				if (validLane) {
-					if ((info.m_lanes[laneIndex].m_finalDirection & dir2) != NetInfo.Direction.None) {
-						isOutgoingOneWay = false;
-					}
+                bool otherIsOneWay = otherIsIncoming ^ otherIsOutgoing;
+                bool otherIsHighway =
+                    Constants.ManagerFactory.ExtSegmentManager.CalculateIsHighway(otherSegmentId);
 
-					if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
-						hasForward = true;
-					}
+                if (logGeometry) {
+                    Log._Debug(
+                        $"Segment {segmentId} is connected to segment {otherSegmentId} at node " +
+                        $"{nodeId}. otherIsOneWay={otherIsOneWay} otherIsIncoming={otherIsIncoming} " +
+                        $"otherIsOutgoing={otherIsOutgoing} otherIsHighway={otherIsHighway}");
+                }
 
-					if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
-						hasBackward = true;
-					}
-				}
+                if (!otherIsHighway || !otherIsOneWay) {
+                    return false;
+                }
+            }
 
-				laneId = instance.m_lanes.m_buffer[laneId].m_nextLane;
-				laneIndex++;
-			}
+            return hasOtherSegments;
+        }
 
-			bool isOneway = !(hasForward && hasBackward);
-			if (!isOneway)
-				isOutgoingOneWay = false;
+        public void CalculateOutgoingLeftStraightRightSegments(
+            ref ExtSegmentEnd segEnd,
+            ref NetNode node,
+            out bool left,
+            out bool straight,
+            out bool right)
+        {
+            left = false;
+            straight = false;
+            right = false;
 
-			incoming = (hasForward || hasBackward) && !isOutgoingOneWay;
-			outgoing = (hasForward || hasBackward) && (isOutgoingOneWay || !isOneway);
-		}
+            for (int i = 0; i < 8; ++i) {
+                ushort otherSegmentId = node.GetSegment(i);
+                if (otherSegmentId == 0 || otherSegmentId == segEnd.segmentId) {
+                    continue;
+                }
 
-		public bool CalculateOnlyHighways(ushort segmentId, bool startNode) {
-			ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
-#if DEBUGGEO
-			bool output = GlobalConfig.Instance.Debug.Switches[5];
+                var otherStartNode = Constants.ServiceFactory.NetService
+                                                    .IsStartNode(otherSegmentId, segEnd.nodeId);
+                if (otherStartNode == null) {
+                    Log.Warning($"Incorrect ExtSegmentEnd.nodeId - data integrity problem! Segment {otherSegmentId} is not connected to Node {segEnd.nodeId}");
+                    continue;
+                }
 
-			if (output)
-				Log._Debug($"Checking if segment {segmentId} is connected to highways only at node {nodeId}.");
-#endif
+                ExtSegmentEnd otherSegEnd =
+                    ExtSegmentEnds[GetIndex(otherSegmentId, (bool)otherStartNode)];
 
-			bool hasOtherSegments = false;
-			for (var s = 0; s < 8; s++) {
-				ushort otherSegmentId = 0;
-				Constants.ServiceFactory.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
-					otherSegmentId = node.GetSegment(s);
-					return true;
-				});
-				if (otherSegmentId == 0 || otherSegmentId == segmentId)
-					continue;
+                if (!otherSegEnd.outgoing) {
+                    continue;
+                }
 
-				hasOtherSegments = true;
+                switch (GetDirection(ref segEnd, otherSegmentId)) {
+                    case ArrowDirection.Left:
+                        left = true;
+                        break;
+                    case ArrowDirection.Forward:
+                        straight = true;
+                        break;
+                    case ArrowDirection.Right:
+                        right = true;
+                        break;
+                }
+            }
+        }
 
-				// determine geometry
-				bool otherIsIncoming;
-				bool otherIsOutgoing;
-				CalculateIncomingOutgoing(otherSegmentId, nodeId, out otherIsIncoming, out otherIsOutgoing);
-				bool otherIsOneWay = otherIsIncoming ^ otherIsOutgoing;
-				bool otherIsHighway = Constants.ManagerFactory.ExtSegmentManager.CalculateIsHighway(otherSegmentId);
+        protected override void InternalPrintDebugInfo() {
+            base.InternalPrintDebugInfo();
+            Log._Debug($"Extended segment end data:");
 
-#if DEBUGGEO
-				if (output)
-					Log._Debug($"Segment {segmentId} is connected to segment {otherSegmentId} at node {nodeId}. otherIsOneWay={otherIsOneWay} otherIsIncoming={otherIsIncoming} otherIsOutgoing={otherIsOutgoing} otherIsHighway={otherIsHighway}");
-#endif
-				if (!otherIsHighway || !otherIsOneWay) {
-					return false;
-				}
-			}
+            for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
+                if (!Constants.ManagerFactory.ExtSegmentManager.IsValid((ushort)i)) {
+                    continue;
+                }
 
-			return hasOtherSegments;
-		}
+                Log._Debug($"Segment {i} @ start node: {ExtSegmentEnds[GetIndex((ushort)i, true)]}");
+                Log._Debug($"Segment {i} @ end node: {ExtSegmentEnds[GetIndex((ushort)i, false)]}");
+            }
+        }
 
-		public void CalculateOutgoingLeftStraightRightSegments(ref ExtSegmentEnd segEnd, ref NetNode node, out bool left, out bool straight, out bool right) {
-			IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
+        public override void OnLevelUnloading() {
+            base.OnLevelUnloading();
 
-			left = false;
-			straight = false;
-			right = false;
-
-			for (int i = 0; i < 8; ++i) {
-				ushort otherSegmentId = node.GetSegment(i);
-				if (otherSegmentId == 0 || otherSegmentId == segEnd.segmentId) {
-					continue;
-				}
-
-				bool otherStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, segEnd.nodeId);
-				ExtSegmentEnd otherSegEnd = ExtSegmentEnds[GetIndex(otherSegmentId, otherStartNode)];
-
-				if (!otherSegEnd.outgoing) {
-					continue;
-				}
-
-				switch (GetDirection(ref segEnd, otherSegmentId)) {
-					case ArrowDirection.Left:
-						left = true;
-						break;
-					case ArrowDirection.Forward:
-						straight = true;
-						break;
-					case ArrowDirection.Right:
-						right = true;
-						break;
-				}
-			}
-		}
-
-		protected override void InternalPrintDebugInfo() {
-			base.InternalPrintDebugInfo();
-			Log._Debug($"Extended segment end data:");
-			for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-				if (!Constants.ManagerFactory.ExtSegmentManager.IsValid((ushort)i)) {
-					continue;
-				}
-				Log._Debug($"Segment {i} @ start node: {ExtSegmentEnds[GetIndex((ushort)i, true)]}");
-				Log._Debug($"Segment {i} @ end node: {ExtSegmentEnds[GetIndex((ushort)i, false)]}");
-			}
-		}
-
-		public override void OnLevelUnloading() {
-			base.OnLevelUnloading();
-			for (int i = 0; i < ExtSegmentEnds.Length; ++i) {
-				Reset(ref ExtSegmentEnds[i]);
-			}
-		}
-	}
+            for (int i = 0; i < ExtSegmentEnds.Length; ++i) {
+                Reset(ref ExtSegmentEnds[i]);
+            }
+        }
+    }
 }

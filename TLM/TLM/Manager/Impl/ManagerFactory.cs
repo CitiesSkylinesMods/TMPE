@@ -1,175 +1,71 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrafficManager.Manager;
+﻿namespace TrafficManager.Manager.Impl {
+    using TrafficManager.API.Manager;
 
-namespace TrafficManager.Manager.Impl {
-	using API.Manager;
+    public class ManagerFactory : IManagerFactory {
+        public static IManagerFactory Instance = new ManagerFactory();
 
-	public class ManagerFactory : IManagerFactory {
-		public static IManagerFactory Instance = new ManagerFactory();
+        public IAdvancedParkingManager AdvancedParkingManager =>
+            Impl.AdvancedParkingManager.Instance;
 
-		public IAdvancedParkingManager AdvancedParkingManager {
-			get {
-				return Impl.AdvancedParkingManager.Instance;
-			}
-		}
+        public ICustomSegmentLightsManager CustomSegmentLightsManager =>
+            Impl.CustomSegmentLightsManager.Instance;
 
-		public ICustomSegmentLightsManager CustomSegmentLightsManager {
-			get {
-				return Impl.CustomSegmentLightsManager.Instance;
-			}
-		}
-		
-		public IExtBuildingManager ExtBuildingManager {
-			get {
-				return Impl.ExtBuildingManager.Instance;
-			}
-		}
+        public IExtBuildingManager ExtBuildingManager => Impl.ExtBuildingManager.Instance;
 
-		public IExtCitizenInstanceManager ExtCitizenInstanceManager {
-			get {
-				return Impl.ExtCitizenInstanceManager.Instance;
-			}
-		}
+        public IExtCitizenInstanceManager ExtCitizenInstanceManager =>
+            Impl.ExtCitizenInstanceManager.Instance;
 
-		public IExtCitizenManager ExtCitizenManager {
-			get {
-				return Impl.ExtCitizenManager.Instance;
-			}
-		}
+        public IExtCitizenManager ExtCitizenManager => Impl.ExtCitizenManager.Instance;
 
-		public IExtNodeManager ExtNodeManager {
-			get {
-				return Impl.ExtNodeManager.Instance;
-			}
-		}
+        public IExtNodeManager ExtNodeManager => Impl.ExtNodeManager.Instance;
 
-		public IExtPathManager ExtPathManager {
-			get {
-				return Impl.ExtPathManager.Instance;
-			}
-		}
+        public IExtPathManager ExtPathManager => Impl.ExtPathManager.Instance;
 
-		public IExtSegmentManager ExtSegmentManager {
-			get {
-				return Impl.ExtSegmentManager.Instance;
-			}
-		}
+        public IExtSegmentManager ExtSegmentManager => Impl.ExtSegmentManager.Instance;
 
-		public IExtSegmentEndManager ExtSegmentEndManager {
-			get {
-				return Impl.ExtSegmentEndManager.Instance;
-			}
-		}
+        public IExtSegmentEndManager ExtSegmentEndManager => Impl.ExtSegmentEndManager.Instance;
 
-		public IExtVehicleManager ExtVehicleManager {
-			get {
-				return Impl.ExtVehicleManager.Instance;
-			}
-		}
+        public IExtVehicleManager ExtVehicleManager => Impl.ExtVehicleManager.Instance;
 
-		public IJunctionRestrictionsManager JunctionRestrictionsManager {
-			get {
-				return Impl.JunctionRestrictionsManager.Instance;
-			}
-		}
+        public IJunctionRestrictionsManager JunctionRestrictionsManager =>
+            Impl.JunctionRestrictionsManager.Instance;
 
-		public ILaneArrowManager LaneArrowManager {
-			get {
-				return Impl.LaneArrowManager.Instance;
-			}
-		}
+        public ILaneArrowManager LaneArrowManager => Impl.LaneArrowManager.Instance;
 
-		public ILaneConnectionManager LaneConnectionManager {
-			get {
-				return Impl.LaneConnectionManager.Instance;
-			}
-		}
+        public ILaneConnectionManager LaneConnectionManager => Impl.LaneConnectionManager.Instance;
 
-		public IGeometryManager GeometryManager {
-			get {
-				return Impl.GeometryManager.Instance;
-			}
-		}
+        public IGeometryManager GeometryManager => Impl.GeometryManager.Instance;
 
-		public IOptionsManager OptionsManager {
-			get {
-				return Impl.OptionsManager.Instance;
-			}
-		}
+        public IOptionsManager OptionsManager => Impl.OptionsManager.Instance;
 
-		public IParkingRestrictionsManager ParkingRestrictionsManager {
-			get {
-				return Impl.ParkingRestrictionsManager.Instance;
-			}
-		}
+        public IParkingRestrictionsManager ParkingRestrictionsManager =>
+            Impl.ParkingRestrictionsManager.Instance;
 
-		public IRoutingManager RoutingManager {
-			get {
-				return Impl.RoutingManager.Instance;
-			}
-		}
+        public IRoutingManager RoutingManager => Impl.RoutingManager.Instance;
 
-		public ISegmentEndManager SegmentEndManager {
-			get {
-				return Impl.SegmentEndManager.Instance;
-			}
-		}
+        public ISegmentEndManager SegmentEndManager => Impl.SegmentEndManager.Instance;
 
-		public ISpeedLimitManager SpeedLimitManager {
-			get {
-				return Impl.SpeedLimitManager.Instance;
-			}
-		}
+        public ISpeedLimitManager SpeedLimitManager => Impl.SpeedLimitManager.Instance;
 
-		public ITrafficLightManager TrafficLightManager {
-			get {
-				return Impl.TrafficLightManager.Instance;
-			}
-		}
+        public ITrafficLightManager TrafficLightManager => Impl.TrafficLightManager.Instance;
 
-		public ITrafficLightSimulationManager TrafficLightSimulationManager {
-			get {
-				return Impl.TrafficLightSimulationManager.Instance;
-			}
-		}
+        public ITrafficLightSimulationManager TrafficLightSimulationManager =>
+            Impl.TrafficLightSimulationManager.Instance;
 
-		public ITrafficMeasurementManager TrafficMeasurementManager {
-			get {
-				return Impl.TrafficMeasurementManager.Instance;
-			}
-		}
+        public ITrafficMeasurementManager TrafficMeasurementManager =>
+            Impl.TrafficMeasurementManager.Instance;
 
-		public ITrafficPriorityManager TrafficPriorityManager {
-			get {
-				return Impl.TrafficPriorityManager.Instance;
-			}
-		}
+        public ITrafficPriorityManager TrafficPriorityManager =>
+            Impl.TrafficPriorityManager.Instance;
 
-		public ITurnOnRedManager TurnOnRedManager {
-			get {
-				return Impl.TurnOnRedManager.Instance;
-			}
-		}
+        public ITurnOnRedManager TurnOnRedManager => Impl.TurnOnRedManager.Instance;
 
-		public IUtilityManager UtilityManager {
-			get {
-				return Impl.UtilityManager.Instance;
-			}
-		}
+        public IUtilityManager UtilityManager => Impl.UtilityManager.Instance;
 
-		public IVehicleBehaviorManager VehicleBehaviorManager {
-			get {
-				return Impl.VehicleBehaviorManager.Instance;
-			}
-		}
+        public IVehicleBehaviorManager VehicleBehaviorManager =>
+            Impl.VehicleBehaviorManager.Instance;
 
-		public IVehicleRestrictionsManager VehicleRestrictionsManager {
-			get {
-				return Impl.VehicleRestrictionsManager.Instance;
-			}
-		}
-	}
+        public IVehicleRestrictionsManager VehicleRestrictionsManager =>
+            Impl.VehicleRestrictionsManager.Instance;
+    }
 }

@@ -1,75 +1,72 @@
-﻿using System;
+﻿namespace TrafficManager.API.Traffic.Data {
+    using System;
 
-namespace TrafficManager.Traffic.Data {
-	public struct ExtSegment : IEquatable<ExtSegment> {
-		/// <summary>
-		/// Segment id
-		/// </summary>
-		public ushort segmentId;
+    public struct ExtSegment : IEquatable<ExtSegment> {
+        /// <summary>
+        /// Segment id
+        /// </summary>
+        public ushort segmentId;
 
-		/// <summary>
-		/// Segment valid?
-		/// </summary>
-		public bool valid;
+        /// <summary>
+        /// Segment valid?
+        /// </summary>
+        public bool valid;
 
-		/// <summary>
-		/// Is one-way?
-		/// </summary>
-		public bool oneWay;
+        /// <summary>
+        /// Is one-way?
+        /// </summary>
+        public bool oneWay;
 
-		/// <summary>
-		/// Is highway?
-		/// </summary>
-		public bool highway;
+        /// <summary>
+        /// Is highway?
+        /// </summary>
+        public bool highway;
 
-		/// <summary>
-		/// Has bus lane?
-		/// </summary>
-		public bool buslane;
+        /// <summary>
+        /// Has bus lane?
+        /// </summary>
+        public bool buslane;
 
-		public override string ToString() {
-			return $"[ExtSegment {base.ToString()}\n" +
-				"\t" + $"segmentId={segmentId}\n" +
-				"\t" + $"valid={valid}\n" +
-				"\t" + $"oneWay={oneWay}\n" +
-				"\t" + $"highway={highway}\n" +
-				"\t" + $"buslane={buslane}\n" +
-				"ExtSegment]";
-		}
+        public override string ToString() {
+            return string.Format(
+                "[ExtSegment {0}\n\tsegmentId={1}\n\tvalid={2}\n\toneWay={3}\n\thighway={4}\n" +
+                "\tbuslane={5}\nExtSegment]",
+                base.ToString(),
+                segmentId,
+                valid,
+                oneWay,
+                highway,
+                buslane);
+        }
 
-		public ExtSegment(ushort segmentId) {
-			this.segmentId = segmentId;
-			valid = false;
-			oneWay = false;
-			highway = false;
-			buslane = false;
-		}
+        public ExtSegment(ushort segmentId) {
+            this.segmentId = segmentId;
+            valid = false;
+            oneWay = false;
+            highway = false;
+            buslane = false;
+        }
 
-		public void Reset() {
-			oneWay = false;
-			highway = false;
-			buslane = false;
-		}
+        public void Reset() {
+            oneWay = false;
+            highway = false;
+            buslane = false;
+        }
 
-		public bool Equals(ExtSegment otherSeg) {
-			return segmentId == otherSeg.segmentId;
-		}
+        public bool Equals(ExtSegment otherSeg) {
+            return segmentId == otherSeg.segmentId;
+        }
 
-		public override bool Equals(object other) {
-			if (other == null) {
-				return false;
-			}
-			if (!(other is ExtSegment)) {
-				return false;
-			}
-			return Equals((ExtSegment)other);
-		}
+        public override bool Equals(object other) {
+            return other is ExtSegment segment
+                   && Equals(segment);
+        }
 
-		public override int GetHashCode() {
-			int prime = 31;
-			int result = 1;
-			result = prime * result + segmentId.GetHashCode();
-			return result;
-		}
-	}
+        public override int GetHashCode() {
+            int prime = 31;
+            int result = 1;
+            result = prime * result + segmentId.GetHashCode();
+            return result;
+        }
+    }
 }

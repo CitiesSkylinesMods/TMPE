@@ -1,49 +1,22 @@
-﻿using System;
-using GenericGameBridge.Factory;
-using GenericGameBridge.Service;
+﻿namespace CitiesGameBridge.Factory {
+    using GenericGameBridge.Factory;
+    using GenericGameBridge.Service;
 
-namespace CitiesGameBridge.Factory {
-	public class ServiceFactory : IServiceFactory {
-		public static readonly IServiceFactory Instance = new ServiceFactory();
+    public class ServiceFactory : IServiceFactory {
+        public static readonly IServiceFactory Instance = new ServiceFactory();
 
-		private ServiceFactory() {
+        private ServiceFactory() { }
 
-		}
+        public IBuildingService BuildingService => Service.BuildingService.Instance;
 
-		public IBuildingService BuildingService {
-			get {
-				return Service.BuildingService.Instance;
-			}
-		}
+        public ICitizenService CitizenService => Service.CitizenService.Instance;
 
-		public ICitizenService CitizenService {
-			get {
-				return Service.CitizenService.Instance;
-			}
-		}
+        public INetService NetService => Service.NetService.Instance;
 
-		public INetService NetService {
-			get {
-				return Service.NetService.Instance;
-			}
-		}
+        public IPathService PathService => Service.PathService.Instance;
 
-		public IPathService PathService {
-			get {
-				return Service.PathService.Instance;
-			}
-		}
+        public ISimulationService SimulationService => Service.SimulationService.Instance;
 
-		public ISimulationService SimulationService {
-			get {
-				return Service.SimulationService.Instance;
-			}
-		}
-
-		public IVehicleService VehicleService {
-			get {
-				return Service.VehicleService.Instance;
-			}
-		}
-	}
+        public IVehicleService VehicleService => Service.VehicleService.Instance;
+    }
 }

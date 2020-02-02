@@ -1,14 +1,19 @@
 ﻿namespace TrafficManager.Manager {
-    using System;
     using CSUtil.Commons;
-    using Geometry;
-    using State;
-    using Traffic.Data;
-    using Util;
+    using JetBrains.Annotations;
+    using System;
+    using TrafficManager.API.Geometry;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Util;
+    using TrafficManager.Geometry;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     public abstract class AbstractGeometryObservingManager : AbstractCustomManager, IObserver<GeometryUpdate> {
-        private IDisposable geoUpdateUnsubscriber = null;
+        private IDisposable geoUpdateUnsubscriber;
 
+        [UsedImplicitly]
         private object geoLock = new object();
 
         /// <summary>
@@ -59,57 +64,74 @@
         }
 
         public void OnUpdate(GeometryUpdate update) {
+#if DEBUG
+            bool logGeometry = DebugSwitch.GeometryDebug.Get();
+#else
+            const bool logGeometry = false;
+#endif
             if (update.segment != null) {
                 // Handle a segment update
                 ExtSegment seg = (ExtSegment)update.segment;
+
                 if (!seg.valid) {
-#if DEBUGGEO
-                    if (GlobalConfig.Instance.Debug.Switches[5])
-                        Log._Debug($"{this.GetType().Name}.HandleInvalidSegment({seg.segmentId})");
-#endif
+                    if (logGeometry) {
+                        Log._Debug($"{GetType().Name}.HandleInvalidSegment({seg.segmentId})");
+                    }
+
                     HandleInvalidSegment(ref seg);
                 } else {
-#if DEBUGGEO
-                    if (GlobalConfig.Instance.Debug.Switches[5])
-                        Log._Debug($"{this.GetType().Name}.HandleValidSegment({seg.segmentId})");
-#endif
+                    if (logGeometry) {
+                        Log._Debug($"{GetType().Name}.HandleValidSegment({seg.segmentId})");
+                    }
+
                     HandleValidSegment(ref seg);
                 }
             } else if (update.nodeId != null) {
                 // Handle a node update
                 ushort nodeId = (ushort)update.nodeId;
-                Services.NetService.ProcessNode(nodeId, delegate (ushort nId, ref NetNode node) {
-                    if ((node.m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) == NetNode.Flags.Created) {
-#if DEBUGGEO
-                        if (GlobalConfig.Instance.Debug.Switches[5])
-                            Log._Debug($"{this.GetType().Name}.HandleValidNode({nodeId})");
-#endif
-                        HandleValidNode(nodeId, ref node);
-                    } else {
-#if DEBUGGEO
-                        if (GlobalConfig.Instance.Debug.Switches[5])
-                            Log._Debug($"{this.GetType().Name}.HandleInvalidNode({nodeId})");
-#endif
-                        HandleInvalidNode(nodeId, ref node);
-                    }
-                    return true;
-                });
+                Services.NetService.ProcessNode(
+                    nodeId,
+                    (ushort nId, ref NetNode node) => {
+                        if ((node.m_flags &
+                             (NetNode.Flags.Created | NetNode.Flags.Deleted)) ==
+                            NetNode.Flags.Created) {
+                            if (logGeometry) {
+                                Log._Debug($"{GetType().Name}.HandleValidNode({nodeId})");
+                            }
+
+                            HandleValidNode(nodeId, ref node);
+                        } else {
+                            if (logGeometry) {
+                                Log._Debug($"{GetType().Name}.HandleInvalidNode({nodeId})");
+                            }
+
+                            HandleInvalidNode(nodeId, ref node);
+                        }
+
+                        return true;
+                    });
             } else {
                 // Handle a segment end replacement
                 IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
-#if DEBUGGEO
-                if (GlobalConfig.Instance.Debug.Switches[5])
-                    Log._Debug($"{this.GetType().Name}.HandleSegmentReplacement({update.replacement.oldSegmentEndId} -> {update.replacement.newSegmentEndId})");
-#endif
-                HandleSegmentEndReplacement(update.replacement, ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(update.replacement.newSegmentEndId.SegmentId, update.replacement.newSegmentEndId.StartNode)]);
+                if (logGeometry) {
+                    Log._Debug(
+                        $"{GetType().Name}.HandleSegmentReplacement({update.replacement.oldSegmentEndId} " +
+                        $"-> {update.replacement.newSegmentEndId})");
+                }
+
+                int index0 = segEndMan.GetIndex(
+                    update.replacement.newSegmentEndId.SegmentId,
+                    update.replacement.newSegmentEndId.StartNode);
+
+                HandleSegmentEndReplacement(
+                    update.replacement,
+                    ref segEndMan.ExtSegmentEnds[index0]);
             }
         }
 
         ~AbstractGeometryObservingManager() {
-            if (geoUpdateUnsubscriber != null) {
-                geoUpdateUnsubscriber.Dispose();
-            }
+            geoUpdateUnsubscriber?.Dispose();
         }
     }
 }

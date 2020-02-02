@@ -17,17 +17,20 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
@@ -97,6 +100,7 @@
     <Compile Include="TrafficLight\ICustomSegmentLights.cs" />
     <Compile Include="TrafficLight\ITimedTrafficLights.cs" />
     <Compile Include="TrafficLight\ITimedTrafficLightsStep.cs" />
+    <Compile Include="Traffic\ApiConstants.cs" />
     <Compile Include="Traffic\Data\ExtNode.cs" />
     <Compile Include="Traffic\Data\ExtSegmentEnd.cs" />
     <Compile Include="Traffic\Data\ExtSegment.cs" />
@@ -111,6 +115,7 @@
     <Compile Include="Traffic\Data\SegmentEndFlags.cs" />
     <Compile Include="Traffic\Data\SegmentFlags.cs" />
     <Compile Include="Traffic\Data\ExtVehicle.cs" />
+    <Compile Include="Traffic\Data\SpeedValue.cs" />
     <Compile Include="Traffic\Data\TurnOnRedSegments.cs" />
     <Compile Include="Traffic\Enums\CarUsagePolicy.cs" />
     <Compile Include="Traffic\Enums\ExtParkingSpaceLocation.cs" />
@@ -127,19 +132,20 @@
     <Compile Include="Traffic\Enums\LaneEndTransitionType.cs" />
     <Compile Include="Traffic\Enums\LightMode.cs" />
     <Compile Include="Traffic\Enums\ParkedCarApproachState.cs" />
-    <Compile Include="Traffic\Enums\ParkingUnableReason.cs" />
+    <Compile Include="Traffic\Enums\ParkingError.cs" />
     <Compile Include="Traffic\Enums\PriorityType.cs" />
     <Compile Include="Traffic\Enums\EmergencyBehavior.cs" />
-    <Compile Include="Traffic\Enums\SetLaneArrowUnableReason.cs" />
-    <Compile Include="Traffic\Enums\SetPrioritySignUnableReason.cs" />
+    <Compile Include="Traffic\Enums\SetLaneArrowError.cs" />
+    <Compile Include="Traffic\Enums\SetPrioritySignError.cs" />
     <Compile Include="Traffic\Enums\StepChangeMetric.cs" />
-    <Compile Include="Traffic\Enums\ToggleTrafficLightUnableReason.cs" />
+    <Compile Include="Traffic\Enums\ToggleTrafficLightError.cs" />
     <Compile Include="Traffic\Enums\TrafficLightSimulationType.cs" />
     <Compile Include="Traffic\Enums\VehicleJunctionTransitState.cs" />
     <Compile Include="Traffic\Enums\VehicleRestrictionsAggression.cs" />
     <Compile Include="Traffic\Enums\VehicleRestrictionsMode.cs" />
     <Compile Include="Traffic\ISegmentEnd.cs" />
     <Compile Include="Traffic\ISegmentEndId.cs" />
+    <Compile Include="Util\Functional.cs" />
     <Compile Include="Util\IObservable.cs" />
     <Compile Include="Util\IObserver.cs" />
     <Compile Include="Util\IVisitor.cs" />
@@ -153,6 +159,13 @@
       <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
       <Name>TMPE.GenericGameBridge</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

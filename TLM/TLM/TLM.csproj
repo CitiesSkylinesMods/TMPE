@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;PF2;QUEUEDSTATS;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;PF_DIJKSTRA;QUEUEDSTATS;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -29,7 +29,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>PF2;QUEUEDSTATS;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>PF_DIJKSTRA;QUEUEDSTATS;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -38,7 +38,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FullDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;PF2;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGCONN;DEBUGHK;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;PF_DIJKSTRA;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGHK;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
@@ -49,7 +49,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Benchmark|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Benchmark\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;BENCHMARK</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;BENCHMARK;PF_DIJKSTRA;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
@@ -60,7 +60,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'PF2_Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\PF2_Debug\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGGEO;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGTTL;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PF2;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PF_DIJKSTRA;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
@@ -70,7 +70,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release LABS|AnyCPU'">
     <OutputPath>bin\Release LABS\</OutputPath>
-    <DefineConstants>PF2;QUEUEDSTATS;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;LABS</DefineConstants>
+    <DefineConstants>PF_DIJKSTRA;QUEUEDSTATS;PARKINGAI;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;LABS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -125,7 +125,6 @@
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Custom\Data\CustomVehicle.cs" />
-    <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
@@ -133,10 +132,12 @@
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="UI\Helpers\ExtUITabStrip.cs" />
     <Compile Include="Manager\Impl\SegmentEndManager.cs" />
     <Compile Include="Patch\_CommonBuildingAI\SimulationStepPatch.cs" />
     <Compile Include="Patch\_HumanAI\ArriveAtDestinationPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\GetTrafficLightNodeStatePatch.cs" />
+    <Compile Include="Patch\_RoadBaseAI\UpdateNodePatch.cs" />
     <Compile Include="Patch\_TrainTrackBaseAI\LevelCrossingSimulationStepPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\UpdateLanesPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\SetTrafficLightStatePatch.cs" />
@@ -155,8 +156,8 @@
     <Compile Include="RedirectionFramework\RedirectionUtil.cs" />
     <Compile Include="RedirectionFramework\Redirector.cs" />
     <Compile Include="RedirectionFramework\Tuple.cs" />
-    <Compile Include="Custom\PathFinding\CustomPathFind2.cs" />
-    <Compile Include="Custom\PathFinding\StockPathFind.cs" />
+    <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
+    <AdditionalFiles Include="Custom\PathFinding\StockPathFind.cs" />
     <Compile Include="Manager\Impl\ExtCitizenManager.cs" />
     <Compile Include="Manager\Impl\GeometryManager.cs" />
     <Compile Include="Manager\Impl\TurnOnRedManager.cs" />
@@ -182,9 +183,8 @@
     <Compile Include="Patch\_VehicleManager\ReleaseVehiclePatch.cs" />
     <Compile Include="Patch\_Vehicle\UnspawnPatch.cs" />
     <Compile Include="Patch\_Vehicle\SpawnPatch.cs" />
-    <Compile Include="PrintTransportLines.cs" />
     <Compile Include="State\ConfigData\Gameplay.cs" />
-    <Compile Include="State\ConfigData\Debug.cs" />
+    <Compile Include="State\ConfigData\DebugSettings.cs" />
     <Compile Include="State\ConfigData\DynamicLaneSelection.cs" />
     <Compile Include="State\ConfigData\Main.cs" />
     <Compile Include="State\ConfigData\ParkingAI.cs" />
@@ -199,9 +199,14 @@
     <Compile Include="State\Keybinds\KeybindSettingsBase.cs" />
     <Compile Include="State\Keybinds\KeybindSettingsPage.cs" />
     <Compile Include="State\Keybinds\KeybindUI.cs" />
+    <Compile Include="State\OptionsTabs\OptionsGameplayTab.cs" />
+    <Compile Include="State\OptionsTabs\OptionsGeneralTab.cs" />
+    <Compile Include="State\OptionsTabs\OptionsKeybindsTab.cs" />
+    <Compile Include="State\OptionsTabs\OptionsMaintenanceTab.cs" />
+    <Compile Include="State\OptionsTabs\OptionsMassEditTab.cs" />
+    <Compile Include="State\OptionsTabs\OptionsOverlaysTab.cs" />
+    <Compile Include="State\OptionsTabs\OptionsVehicleRestrictionsTab.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLights.cs" />
-    <Compile Include="Traffic\Data\SpeedLimit.cs" />
-    <Compile Include="TrafficManager.cs" />
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
     <Compile Include="Manager\Impl\VehicleRestrictionsManager.cs" />
@@ -216,6 +221,9 @@
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
+    <Compile Include="UI\Helpers\CheckboxOption.cs" />
+    <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />
+    <Compile Include="UI\Helpers\SerializableUIOptionBase.cs" />
     <Compile Include="UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
@@ -238,10 +246,20 @@
     <Compile Include="UI\MainMenu\MenuButton.cs" />
     <Compile Include="UI\LinearSpriteButton.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
+    <Compile Include="UI\Textures\JunctionUITextures.cs" />
+    <Compile Include="UI\Textures\RoadUITextures.cs" />
+    <Compile Include="UI\Textures\SpeedLimitTextures.cs" />
+    <Compile Include="UI\Textures\TextureResources.cs" />
+    <Compile Include="UI\Textures\TrafficLightTextures.cs" />
+    <Compile Include="UI\TrafficManagerMode.cs" />
+    <Compile Include="UI\Localization\LookupTable.cs" />
+    <Compile Include="UI\Localization\Translation.cs" />
     <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
-    <Compile Include="UI\SubTools\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
     <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\LaneArrowTool.cs" />
@@ -249,17 +267,22 @@
     <Compile Include="UI\SubTools\ManualTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\ToggleTrafficLightsTool.cs" />
-    <Compile Include="UI\Translation.cs" />
     <Compile Include="State\Options.cs" />
     <Compile Include="Manager\Impl\SpeedLimitManager.cs" />
     <Compile Include="State\Flags.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="Util\AutoTimedTrafficLights.cs" />
+    <Compile Include="Util\Caching\CameraTransformValue.cs" />
+    <Compile Include="Util\Caching\GenericArrayCache.cs" />
+    <Compile Include="Util\Shortcuts.cs" />
+    <Compile Include="Util\FloatUtil.cs" />
     <Compile Include="Util\GenericObservable.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\LoopUtil.cs" />
     <Compile Include="Util\ModsCompatibilityChecker.cs" />
+    <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
@@ -273,9 +296,7 @@
     <Compile Include="TrafficLight\Impl\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\TextureResources.cs" />
     <Compile Include="TrafficManagerMod.cs" />
-    <Compile Include="TrafficManagerMode.cs" />
     <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />
     <Compile Include="Manager\Impl\TrafficPriorityManager.cs" />
     <Compile Include="UI\UIBase.cs" />
@@ -316,8 +337,6 @@
     <EmbeddedResource Include="Resources\sign_yield.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_zh-tw.txt" />
-    <EmbeddedResource Include="Resources\lang_es.txt" />
     <EmbeddedResource Include="Resources\lanechange_allowed.png" />
     <EmbeddedResource Include="Resources\lanechange_forbidden.png" />
     <EmbeddedResource Include="Resources\bicycle_infosign.png" />
@@ -349,22 +368,12 @@
     <EmbeddedResource Include="Resources\light_counter_pl.png" />
     <EmbeddedResource Include="Resources\light_mode_pl.png" />
     <EmbeddedResource Include="Resources\pedestrian_mode_2_pl.png" />
-    <EmbeddedResource Include="Resources\lang_fr.txt" />
-    <EmbeddedResource Include="Resources\lang_pl.txt" />
-    <EmbeddedResource Include="Resources\lang_ru.txt" />
-    <EmbeddedResource Include="Resources\lang_pt.txt" />
-    <EmbeddedResource Include="Resources\lang.txt" />
-    <EmbeddedResource Include="Resources\lang_de.txt" />
-    <EmbeddedResource Include="Resources\lang_ja.txt" />
     <EmbeddedResource Include="Resources\light_counter_ja.png" />
     <EmbeddedResource Include="Resources\light_mode_ja.png" />
     <EmbeddedResource Include="Resources\clock_pause.png" />
     <EmbeddedResource Include="Resources\clock_test.png" />
     <EmbeddedResource Include="Resources\clock_play.png" />
     <EmbeddedResource Include="Resources\remove_signs.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_nl.txt" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\crossing_allowed.png" />
@@ -376,12 +385,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\MenuButton.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_zh.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_it.txt" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\noimage.png" />
@@ -419,9 +422,6 @@
     <EmbeddedResource Include="Resources\parking_disallowed.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\lang_ko.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\remove-btn.png" />
   </ItemGroup>
   <ItemGroup>
@@ -437,8 +437,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+    <Analyzer Include="..\packages\ReflectionIT.Analyzer.Structs.0.1.0\analyzers\dotnet\cs\ReflectionIT.Analyzer.Structs.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\SpeedLimits\Kmh\0.png" />
@@ -510,6 +511,28 @@
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\80.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\85.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\Mph_US\90.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Traffic\Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Translations\JunctionRestrictions.csv" />
+    <EmbeddedResource Include="Resources\Translations\ParkingRestrictions.csv" />
+    <EmbeddedResource Include="Resources\Translations\PrioritySigns.csv" />
+    <EmbeddedResource Include="Resources\Translations\AI_Car.csv" />
+    <EmbeddedResource Include="Resources\Translations\AI_Citizen.csv" />
+    <EmbeddedResource Include="Resources\Translations\LaneRouting.csv" />
+    <EmbeddedResource Include="Resources\Translations\Menu.csv" />
+    <EmbeddedResource Include="Resources\Translations\ModConflicts.csv" />
+    <EmbeddedResource Include="Resources\Translations\Options.csv" />
+    <EmbeddedResource Include="Resources\Translations\SpeedLimits.csv" />
+    <EmbeddedResource Include="Resources\TrafficLights\IconJunctionNoTrafficLights.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\IconJunctionTrafficLights.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\IconJunctionTimedTL.png" />
+    <Content Include="Resources\Translations\Strings.csv" />
+    <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
+    <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
+    <EmbeddedResource Include="Resources\Translations\VehicleRestrictions.csv" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

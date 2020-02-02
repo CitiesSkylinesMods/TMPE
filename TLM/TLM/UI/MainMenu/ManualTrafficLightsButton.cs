@@ -1,10 +1,13 @@
-﻿using TrafficManager.State;
+﻿namespace TrafficManager.UI.MainMenu {
+    using TrafficManager.State;
 
-namespace TrafficManager.UI.MainMenu {
     public class ManualTrafficLightsButton : MenuToolModeButton {
-        public override ToolMode ToolMode => ToolMode.ManualSwitch;
-        public override ButtonFunction Function => ButtonFunction.ManualTrafficLights;
-        public override string Tooltip => "Manual_traffic_lights";
+        protected override ToolMode ToolMode => ToolMode.ManualSwitch;
+
+        protected override ButtonFunction Function => ButtonFunction.ManualTrafficLights;
+
+        public override string Tooltip => Translation.Menu.Get("Tooltip:Manual traffic lights");
+
         public override bool Visible => Options.timedLightsEnabled;
     }
 }

@@ -1,10 +1,13 @@
-﻿using TrafficManager.State;
-
 namespace TrafficManager.UI.MainMenu {
+    using TrafficManager.State;
+
     public class TimedTrafficLightsButton : MenuToolModeButton {
-        public override ToolMode ToolMode => ToolMode.TimedLightsSelectNode;
-        public override ButtonFunction Function => ButtonFunction.TimedTrafficLights;
-        public override string Tooltip => "Timed_traffic_lights";
+        protected override ToolMode ToolMode => ToolMode.TimedLightsSelectNode;
+
+        protected override ButtonFunction Function => ButtonFunction.TimedTrafficLights;
+
+        public override string Tooltip => Translation.Menu.Get("Tooltip:Timed traffic lights") + "\n" + Translation.Menu.Get("Tooltip.Keybinds:Auto TL");
+
         public override bool Visible => Options.timedLightsEnabled;
     }
 }

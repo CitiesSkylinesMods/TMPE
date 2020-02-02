@@ -1,211 +1,229 @@
-﻿using ColossalFramework;
-using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using TrafficManager.Custom.AI;
-using TrafficManager.Geometry.Impl;
-using TrafficManager.State;
-using TrafficManager.Traffic;
-using TrafficManager.Traffic.Data;
-using TrafficManager.Traffic.Enums;
-using TrafficManager.Util;
-using UnityEngine;
-
 namespace TrafficManager.Manager.Impl {
-	public class ExtSegmentManager : AbstractCustomManager, IExtSegmentManager {
-		public static ExtSegmentManager Instance { get; private set; } = null;
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State.ConfigData;
 
-		static ExtSegmentManager() {
-			Instance = new ExtSegmentManager();
-		}
-		
-		/// <summary>
-		/// All additional data for buildings
-		/// </summary>
-		public ExtSegment[] ExtSegments { get; private set; } = null;
+    public class ExtSegmentManager
+        : AbstractCustomManager,
+          IExtSegmentManager
+    {
+        public static ExtSegmentManager Instance { get; }
 
-		private ExtSegmentManager() {
-			ExtSegments = new ExtSegment[NetManager.MAX_SEGMENT_COUNT];
-			for (uint i = 0; i < ExtSegments.Length; ++i) {
-				ExtSegments[i] = new ExtSegment((ushort)i);
-			}
-		}
+        static ExtSegmentManager() {
+            Instance = new ExtSegmentManager();
+        }
 
-		public bool IsValid(ushort segmentId) {
-			return Constants.ServiceFactory.NetService.IsSegmentValid(segmentId);
-		}
+        /// <summary>
+        /// All additional data for buildings
+        /// </summary>
+        public ExtSegment[] ExtSegments { get; }
 
-		protected void Reset(ref ExtSegment extSegment) {
-			extSegment.Reset();
-		}
+        private ExtSegmentManager() {
+            ExtSegments = new ExtSegment[NetManager.MAX_SEGMENT_COUNT];
 
-		public void Recalculate(ushort segmentId) {
-			Recalculate(ref ExtSegments[segmentId]);
-		}
+            for (uint i = 0; i < ExtSegments.Length; ++i) {
+                ExtSegments[i] = new ExtSegment((ushort)i);
+            }
+        }
 
-		protected void Recalculate(ref ExtSegment extSegment) {
-			IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-			ushort segmentId = extSegment.segmentId;
+        public bool IsValid(ushort segmentId) {
+            return Constants.ServiceFactory.NetService.IsSegmentValid(segmentId);
+        }
 
-#if DEBUGGEO
-			bool output = GlobalConfig.Instance.Debug.Switches[5];
+        private void Reset(ref ExtSegment extSegment) {
+            extSegment.Reset();
+        }
 
-			if (output)
-				Log._Debug($">>> ExtSegmentManager.Recalculate({segmentId}) called.");
+        public void Recalculate(ushort segmentId) {
+            Recalculate(ref ExtSegments[segmentId]);
+        }
+
+        private void Recalculate(ref ExtSegment extSegment) {
+            IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+            ushort segmentId = extSegment.segmentId;
+
+#if DEBUG
+            bool logGeometry = DebugSwitch.GeometryDebug.Get();
+#else
+            const bool logGeometry = false;
 #endif
+            if (logGeometry) {
+                Log._Debug($">>> ExtSegmentManager.Recalculate({segmentId}) called.");
+            }
 
-			if (! IsValid(segmentId)) {
-				if (extSegment.valid) {
-					Reset(ref extSegment);
-					extSegment.valid = false;
+            if (!IsValid(segmentId)) {
+                if (extSegment.valid) {
+                    Reset(ref extSegment);
+                    extSegment.valid = false;
 
-					extSegEndMan.Recalculate(segmentId);
-					Constants.ManagerFactory.GeometryManager.OnUpdateSegment(ref extSegment);
-				}
-				return;
-			}
+                    extSegEndMan.Recalculate(segmentId);
+                    Constants.ManagerFactory.GeometryManager.OnUpdateSegment(ref extSegment);
+                }
 
-#if DEBUGGEO
-			if (output)
-				Log.Info($"Recalculating geometries of segment {segmentId} STARTED");
-#endif
+                return;
+            }
 
-			Reset(ref extSegment);
-			extSegment.valid = true;
+            if (logGeometry) {
+                Log.Info($"Recalculating geometries of segment {segmentId} STARTED");
+            }
 
-			extSegment.oneWay = CalculateIsOneWay(segmentId);
-			extSegment.highway = CalculateIsHighway(segmentId);
-			extSegment.buslane = CalculateHasBusLane(segmentId);
+            Reset(ref extSegment);
+            extSegment.valid = true;
 
-			extSegEndMan.Recalculate(segmentId);
+            extSegment.oneWay = CalculateIsOneWay(segmentId);
+            extSegment.highway = CalculateIsHighway(segmentId);
+            extSegment.buslane = CalculateHasBusLane(segmentId);
 
-#if DEBUGGEO
-			if (output) {
-				Log.Info($"Recalculated ext. segment {segmentId} (flags={Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags}): {extSegment}");
-			}
-#endif
+            extSegEndMan.Recalculate(segmentId);
 
-			Constants.ManagerFactory.GeometryManager.OnUpdateSegment(ref extSegment);
-		}
+            if (logGeometry) {
+                NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+                Log.Info(
+                    $"Recalculated ext. segment {segmentId} (flags={segmentsBuffer[segmentId].m_flags}): " +
+                    $"{extSegment}");
+            }
 
-		public bool CalculateIsOneWay(ushort segmentId) {
-			if (!IsValid(segmentId))
-				return false;
+            Constants.ManagerFactory.GeometryManager.OnUpdateSegment(ref extSegment);
+        }
 
-			var instance = Singleton<NetManager>.instance;
+        public bool CalculateIsOneWay(ushort segmentId) {
+            if (!IsValid(segmentId)) {
+                return false;
+            }
 
-			var info = instance.m_segments.m_buffer[segmentId].Info;
+            NetManager instance = Singleton<NetManager>.instance;
 
-			var hasForward = false;
-			var hasBackward = false;
+            NetInfo info = instance.m_segments.m_buffer[segmentId].Info;
 
-			var laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
-			var laneIndex = 0;
-			while (laneIndex < info.m_lanes.Length && laneId != 0u) {
-				bool validLane = (info.m_lanes[laneIndex].m_laneType & (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None &&
-					(info.m_lanes[laneIndex].m_vehicleType & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None;
-				// TODO the lane types and vehicle types should be specified to make it clear which lanes we need to check
+            var hasForward = false;
+            var hasBackward = false;
 
-				if (validLane) {
-					if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
-						hasForward = true;
-					}
+            uint laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
+            var laneIndex = 0;
+            while (laneIndex < info.m_lanes.Length && laneId != 0u) {
+                bool validLane =
+                    (info.m_lanes[laneIndex].m_laneType &
+                     (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) !=
+                    NetInfo.LaneType.None &&
+                    (info.m_lanes[laneIndex].m_vehicleType &
+                     (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train |
+                      VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro |
+                      VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None;
 
-					if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
-						hasBackward = true;
-					}
+                // TODO the lane types and vehicle types should be specified to make it clear which lanes we need to check
+                if (validLane) {
+                    if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Forward) !=
+                        NetInfo.Direction.None) {
+                        hasForward = true;
+                    }
 
-					if (hasForward && hasBackward) {
-						return false;
-					}
-				}
+                    if ((info.m_lanes[laneIndex].m_direction & NetInfo.Direction.Backward) !=
+                        NetInfo.Direction.None) {
+                        hasBackward = true;
+                    }
 
-				laneId = instance.m_lanes.m_buffer[laneId].m_nextLane;
-				laneIndex++;
-			}
+                    if (hasForward && hasBackward) {
+                        return false;
+                    }
+                }
 
-			return true;
-		}
+                laneId = instance.m_lanes.m_buffer[laneId].m_nextLane;
+                laneIndex++;
+            }
 
-		public bool CalculateHasBusLane(ushort segmentId) {
-			if (!IsValid(segmentId))
-				return false;
+            return true;
+        }
 
-			bool ret = false;
-			Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
-				ret = CalculateHasBusLane(segment.Info);
-				return true;
-			});
-			return ret;
-		}
+        public bool CalculateHasBusLane(ushort segmentId) {
+            if (!IsValid(segmentId)) {
+                return false;
+            }
 
-		/// <summary>
-		/// Calculates if the given segment info describes a segment having a bus lane
-		/// </summary>
-		/// <param name="segmentInfo"></param>
-		/// <returns></returns>
-		protected bool CalculateHasBusLane(NetInfo segmentInfo) {
-			for (int laneIndex = 0; laneIndex < segmentInfo.m_lanes.Length; ++laneIndex) {
-				if (segmentInfo.m_lanes[laneIndex].m_laneType == NetInfo.LaneType.TransportVehicle &&
-					(segmentInfo.m_lanes[laneIndex].m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
-					return true;
-				}
-			}
+            bool ret = false;
+            Constants.ServiceFactory.NetService.ProcessSegment(
+                segmentId,
+                (ushort segId, ref NetSegment segment) => {
+                    ret = CalculateHasBusLane(segment.Info);
+                    return true;
+                });
+            return ret;
+        }
 
-			return false;
-		}
+        /// <summary>
+        /// Calculates if the given segment info describes a segment having a bus lane
+        /// </summary>
+        /// <param name="segmentInfo"></param>
+        /// <returns></returns>
+        private bool CalculateHasBusLane(NetInfo segmentInfo) {
+            foreach (NetInfo.Lane lane in segmentInfo.m_lanes) {
+                if (lane.m_laneType == NetInfo.LaneType.TransportVehicle &&
+                    (lane.m_vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
+                    return true;
+                }
+            }
 
-		public bool CalculateIsHighway(ushort segmentId) {
-			if (!IsValid(segmentId))
-				return false;
+            return false;
+        }
 
-			bool ret = false;
-			Constants.ServiceFactory.NetService.ProcessSegment(segmentId, delegate (ushort segId, ref NetSegment segment) {
-				ret = CalculateIsHighway(segment.Info);
-				return true;
-			});
-			return ret;
-		}
+        public bool CalculateIsHighway(ushort segmentId) {
+            if (!IsValid(segmentId)) {
+                return false;
+            }
 
-		/// <summary>
-		/// Calculates if the given segment info describes a highway segment
-		/// </summary>
-		/// <param name="segmentInfo"></param>
-		/// <returns></returns>
-		protected bool CalculateIsHighway(NetInfo segmentInfo) {
-			if (segmentInfo.m_netAI is RoadBaseAI)
-				return ((RoadBaseAI)segmentInfo.m_netAI).m_highwayRules;
-			return false;
-		}
+            var ret = false;
+            Constants.ServiceFactory.NetService.ProcessSegment(
+                segmentId,
+                (ushort segId, ref NetSegment segment) => {
+                    ret = CalculateIsHighway(segment.Info);
+                    return true;
+                });
+            return ret;
+        }
 
-		protected override void InternalPrintDebugInfo() {
-			base.InternalPrintDebugInfo();
-			Log._Debug($"Extended segment data:");
-			for (int i = 0; i < ExtSegments.Length; ++i) {
-				if (! IsValid((ushort)i)) {
-					continue;
-				}
-				Log._Debug($"Segment {i}: {ExtSegments[i]}");
-			}
-		}
+        /// <summary>
+        /// Calculates if the given segment info describes a highway segment
+        /// </summary>
+        /// <param name="segmentInfo"></param>
+        /// <returns></returns>
+        private bool CalculateIsHighway(NetInfo segmentInfo) {
+            return segmentInfo.m_netAI is RoadBaseAI
+                   && ((RoadBaseAI)segmentInfo.m_netAI).m_highwayRules;
+        }
 
-		public override void OnLevelUnloading() {
-			base.OnLevelUnloading();
-			for (int i = 0; i < ExtSegments.Length; ++i) {
-				ExtSegments[i].valid = false;
-				Reset(ref ExtSegments[i]);
-			}
-		}
+        protected override void InternalPrintDebugInfo() {
+            base.InternalPrintDebugInfo();
+            Log._Debug($"Extended segment data:");
 
-		public override void OnBeforeLoadData() {
-			base.OnBeforeLoadData();
-			Log._Debug($"ExtSegmentManager.OnBeforeLoadData: Calculating {ExtSegments.Length} extended segments...");
-			for (int i = 0; i < ExtSegments.Length; ++i) {
-				Recalculate(ref ExtSegments[i]);
-			}
-			Log._Debug($"ExtSegmentManager.OnBeforeLoadData: Calculation finished.");
-		}
-	}
+            for (int i = 0; i < ExtSegments.Length; ++i) {
+                if (!IsValid((ushort)i)) {
+                    continue;
+                }
+
+                Log._Debug($"Segment {i}: {ExtSegments[i]}");
+            }
+        }
+
+        public override void OnLevelUnloading() {
+            base.OnLevelUnloading();
+
+            for (int i = 0; i < ExtSegments.Length; ++i) {
+                ExtSegments[i].valid = false;
+                Reset(ref ExtSegments[i]);
+            }
+        }
+
+        public override void OnBeforeLoadData() {
+            base.OnBeforeLoadData();
+            Log._Debug($"ExtSegmentManager.OnBeforeLoadData: Calculating {ExtSegments.Length} " +
+                       "extended segments...");
+
+            for (int i = 0; i < ExtSegments.Length; ++i) {
+                Recalculate(ref ExtSegments[i]);
+            }
+
+            Log._Debug($"ExtSegmentManager.OnBeforeLoadData: Calculation finished.");
+        }
+    }
 }

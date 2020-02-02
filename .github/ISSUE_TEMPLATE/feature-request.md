@@ -1,20 +1,18 @@
 ---
 name: Feature Request
-about: Make suggestions on how TM:PE could improve.
+about: Share your ideas to make the mod even better...
 labels: feature, triage
 ---
 
-<!-- Want to see an example feature request before you submit one? See: https://bit.ly/tmpe-etfr -->
-
-### Description
+### Describe your idea
 
 
-### Sources / Links (Optional)
-<!-- Example: For turn on red, a link to a "turn on red rule" in a drivers handbook. -->
+
+### Screenshots?
+
+<!-- You can paste an image, or drag an image file, or paste URLs to images -->
+<!-- How to take screenshots? See: https://bit.ly/2Kc8owO -->
 
 
-### Screenshots (Optional)
-<!-- Don't know how to share screenshots? See: https://bit.ly/2Kc8owO -->
 
-
-### Additional Info
+### Notes or questions?

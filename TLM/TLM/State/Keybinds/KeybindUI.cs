@@ -1,12 +1,12 @@
 namespace TrafficManager.State.Keybinds {
-    using System;
+    using ColossalFramework.UI;
+    using ColossalFramework;
+    using CSUtil.Commons;
     using System.Linq;
     using System.Reflection;
     using System.Text.RegularExpressions;
-    using ColossalFramework;
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
-    using UI;
+    using System;
+    using TrafficManager.UI;
     using UnityEngine;
 
     /// <summary>
@@ -211,7 +211,8 @@ namespace TrafficManager.State.Keybinds {
                     // Check the key conflict
                     var maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
                     if (maybeConflict != string.Empty) {
-                        var message = Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict;
+                        var message = Translation.Options.Get("Keybinds.Dialog.Text:Keybind conflict")
+                                      + "\n\n" + maybeConflict;
                         Log.Info($"Keybind conflict: {message}");
                     UIView.library
                           .ShowModal<ExceptionPanel>("ExceptionPanel")
@@ -248,7 +249,8 @@ namespace TrafficManager.State.Keybinds {
                 var category = editable.Target.Category;
                 var maybeConflict = FindConflict(editedBinding.Value, inputKey, category);
                 if (maybeConflict != string.Empty) {
-                    var message = Translation.GetString("Keybind_conflict") + "\n\n" + maybeConflict;
+                    var message = Translation.Options.Get("Keybinds.Dialog.Text:Keybind conflict")
+                                  + "\n\n" + maybeConflict;
                     Log.Info($"Keybind conflict: {message}");
                     UIView.library
                           .ShowModal<ExceptionPanel>("ExceptionPanel")
@@ -396,7 +398,7 @@ namespace TrafficManager.State.Keybinds {
                     || testSampleCategory == tmpeSetting.Category) {
                     if (tmpeSetting.HasKey(testSample)) {
                         return "TM:PE, "
-                               + Translation.GetString("Keybind_category_" + tmpeSetting.Category)
+                               + Translation.Options.Get("KeybindCategory." + tmpeSetting.Category)
                                + " -- " + CamelCaseSplit(field.Name);
                     }
                 }
