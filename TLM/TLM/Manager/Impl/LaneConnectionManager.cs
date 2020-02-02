@@ -63,8 +63,9 @@ namespace TrafficManager.Manager.Impl {
 
 
         /// <summary>
-        /// determines weather the input lane is heading toward a start node.
+        /// determines whether or not the input lane is heading toward a start node.
         /// </summary>
+        /// <returns>true if heading toward and start node.</returns>
         private bool isHeadStartNode(uint sourceLaneId) {
             NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
             ushort segmentId = laneBuffer[sourceLaneId].m_segment;
