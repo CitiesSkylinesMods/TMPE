@@ -1,4 +1,4 @@
-﻿// #define DEBUGFLAGS
+// #define DEBUGFLAGS
 
 namespace TrafficManager.State {
     using ColossalFramework;
@@ -10,6 +10,7 @@ namespace TrafficManager.State {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
+    using static TrafficManager.Util.Shortcuts;
 
     [Obsolete]
     public class Flags {
@@ -730,6 +731,23 @@ namespace TrafficManager.State {
                 curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
                 ++laneIndex;
             }
+        }
+
+        /// <summary>
+        /// removes the custom lane arrow flags. requires post recalculation.
+        /// </summary>
+        /// <param name="laneId"></param>
+        /// <returns><c>true</c>on success, <c>false</c> otherwise</returns>
+        public static bool resetLaneArrowFlags(uint laneId) {
+#if DEBUGFLAGS
+            Log._Debug($"Flags.resetLaneArrowFlags: Resetting lane arrows of lane {laneId}.");
+#endif
+            if (LaneConnectionManager.Instance.HasConnections(laneId)) {
+                return false;
+            }
+
+            laneArrowFlags[laneId] = null;
+            return true;
         }
 
         public static bool setLaneArrowFlags(uint laneId,

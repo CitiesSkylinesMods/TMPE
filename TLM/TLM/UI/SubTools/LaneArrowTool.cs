@@ -8,6 +8,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using UnityEngine;
+    using static TrafficManager.Util.Shortcuts;
 
     public class LaneArrowTool : SubTool {
         private bool cursorInSecondaryPanel_;
@@ -72,6 +73,14 @@ namespace TrafficManager.UI.SubTools {
         public override void OnToolGUI(Event e) {
             // base.OnToolGUI(e);
             cursorInSecondaryPanel_ = false;
+
+            bool del = Input.GetKeyDown(KeyCode.Delete);
+            if (del) {
+                bool startNode = (bool)netService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+                Log._Debug("KIAN DEBUG LANE DELETE!: deleting lane arrows: " +
+                    $"SelectedSegmentId={SelectedSegmentId} SelectedNodeId={SelectedNodeId} startNode={startNode}");
+                LaneArrowManager.Instance.ResetLaneArrows(SelectedSegmentId, startNode);
+            }
 
             if ((SelectedNodeId == 0) || (SelectedSegmentId == 0)) return;
 
