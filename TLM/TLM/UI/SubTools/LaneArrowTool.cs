@@ -77,7 +77,7 @@ namespace TrafficManager.UI.SubTools {
             bool del = Input.GetKeyDown(KeyCode.Delete);
             if (del) {
                 bool startNode = (bool)netService.IsStartNode(SelectedSegmentId, SelectedNodeId);
-                Log._Debug("KIAN DEBUG LANE DELETE!: deleting lane arrows: " +
+                Log._Debug("deleting lane arrows: " +
                     $"SelectedSegmentId={SelectedSegmentId} SelectedNodeId={SelectedNodeId} startNode={startNode}");
                 LaneArrowManager.Instance.ResetLaneArrows(SelectedSegmentId, startNode);
             }
