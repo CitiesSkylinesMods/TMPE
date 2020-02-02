@@ -16,7 +16,7 @@ namespace TrafficManager
         public static readonly uint GameVersionBuild = 2u;
 
         // Note: `Version` is also used in UI/MainMenu/VersionLabel.cs
-        public static readonly string Version = "11.0-alpha";
+        public static readonly string Version = "11.0";
 
 #if LABS
         public string Branch => "LABS";
