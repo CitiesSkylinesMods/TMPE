@@ -37,14 +37,14 @@ namespace TrafficManager {
         [UsedImplicitly]
         public void OnEnabled() {
             Log.InfoFormat(
-            "TM:PE enabled. Version {0}, Build {1} {2} for game version {3}.{4}.{5}-f{6}",
-            VERSION,
-            Assembly.GetExecutingAssembly().GetName().Version,
-            BRANCH,
-            GAME_VERSION_A,
-            GAME_VERSION_B,
-            GAME_VERSION_C,
-            GAME_VERSION_BUILD);
+                "TM:PE enabled. Version {0}, Build {1} {2} for game version {3}.{4}.{5}-f{6}",
+                VERSION,
+                Assembly.GetExecutingAssembly().GetName().Version,
+                BRANCH,
+                GAME_VERSION_A,
+                GAME_VERSION_B,
+                GAME_VERSION_C,
+                GAME_VERSION_BUILD);
             Log.InfoFormat(
             "Enabled TM:PE has GUID {0}",
             Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId);
@@ -62,8 +62,8 @@ namespace TrafficManager {
             Type monoRt = Type.GetType("Mono.Runtime");
             if (monoRt != null) {
                 MethodInfo displayName = monoRt.GetMethod(
-                "GetDisplayName",
-                BindingFlags.NonPublic | BindingFlags.Static);
+                    "GetDisplayName",
+                    BindingFlags.NonPublic | BindingFlags.Static);
                 if (displayName != null) {
                     Log.InfoFormat("Mono version: {0}", displayName.Invoke(null, null));
                 }
