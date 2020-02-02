@@ -132,9 +132,9 @@ This changelog includes all versions and major variants of the mod going all the
 ### TM:PE V11 ALPHA 11.0-alpha8, 04/10/2019
 
 - Added: Junctions now show traffic light status when using toggle traffic light tool (#527)
-- Update: Add outline to lane connector lines and improve arcs (#526, #523)
-- Update: Improve speed limits overlay performance while camera still (#521, #520)
-- Update: New translation/localisation system (#509, #493)
+- Updated: Add outline to lane connector lines and improve arcs (#526, #523)
+- Updated: Improve speed limits overlay performance while camera still (#521, #520)
+- Updated: New translation/localisation system (#509, #493)
 - Fixed: Minor typos in new translation/localisation system (thanks TianQiBuTian!) (#528)
 - Fixed: Remove decorative networks from speed limits manager (#513, #510, #378)
 - Meta: Deprecated issues closed (#336, #169)
@@ -146,9 +146,9 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Train restriction vehicle icons regression (#483)
 - Fixed: Remove trace logging from release builds (thanks TLHeart60) (#454, #499)
 - Fixed: Ignore decorative and malconfigured networks in Speed Limits Manager (#513)
-- Update: Compatible with Tree Respiration mod (#484)
-- Update: Compatible with Vehicle Wealthizer mod (#490, #488)
-- Update: More code clean-up (#350)
+- Updated: Compatible with Tree Respiration mod (#484)
+- Updated: Compatible with Vehicle Wealthizer mod (#490, #488)
+- Updated: More code clean-up (#350)
 - Meta: Update GitHub issue creation templates (#486)
 - Meta: Updated documentation on wiki and GitHub (#310, #79, #465, #474, #466)
 - Meta: Pathfinds display temporarily disabled (testing FPS Booster mod)
@@ -193,8 +193,8 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TM:PE V11 ALPHA 11.0-alpha1, 17/07/2019
 
-- Update: Migration to Harmony framework (thanks LinuxFan!) (#428, #427, #260, #119)
-- Update: Chinese translation updates (thanks Emphasia) (#417)
+- Updated: Migration to Harmony framework (thanks LinuxFan!) (#428, #427, #260, #119)
+- Updated: Chinese translation updates (thanks Emphasia) (#417)
 - Meta: Updated changelog to include more of TM:PE history (#422)
 - Meta: LinuxFan workshop page (STABLE 10.20) no longer updated, so LABS page had to remain on v10.21.1 (bugfix of STABLE 10.20)
 - Meta: New ALPHA page was created to allow test releases of v11 branch
@@ -1201,7 +1201,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TPP2 2.0.9, 31/05/2016
 
-- Update: Compatible with Network Extensions 2.5
+- Updated: Compatible with Network Extensions 2.5
 - Steam: [Traffic++ V2](https://steamcommunity.com/sharedfiles/filedetails/?id=626024868)
 
 ### TM:PE 1.6.17, 20/04/2016
@@ -1830,7 +1830,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TM 1.0.9rc, 12/10/2015
 
-- Update: Compatible with C:SL 1.2.1-f1
+- Updated: Compatible with C:SL 1.2.1-f1
 - Meta: Released as version 1.09rc
 - Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
@@ -1860,7 +1860,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TPP 1.5.5, 24/09/2015
 
-- Update: Compatible with C:SL 1.2.0 (thanks javitonino)
+- Updated: Compatible with C:SL 1.2.0 (thanks javitonino)
 - Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
 ### C:SL 1.2 (After Dark), 24/09/2015
@@ -1921,7 +1921,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TM 1.0.6, 07/08/2015
 
-- Update: Revert to old version with C:S 1.1.1 compatibility
+- Updated: Revert to old version with C:S 1.1.1 compatibility
 - Meta: Released as version 1.06
 - Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
@@ -2066,14 +2066,14 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TPP 1.3.2 hotfix, 19/05/2015
 
-- Update: Compatible with C:SL 1.1.0b
+- Updated: Compatible with C:SL 1.1.0b
 - Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
 ### TM 1.0.4 hotfix, 19/05/2015
 
 - Fixed: Support for tunnels in AIs and pathfinder
-- Update: Compatible with C:SL 1.1.0b
-- Update: Traffic++ Compatibility - No despawn or lane changer available in compatibility mode
+- Updated: Compatible with C:SL 1.1.0b
+- Updated: Traffic++ Compatibility - No despawn or lane changer available in compatibility mode
 - Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
 ### C:SL 1.1.0b, 19/05/2015
