@@ -55,7 +55,7 @@ namespace TrafficManager.UI.SubTools {
             internal ushort SegmentId;
             internal ushort NodeId;
             internal bool StartNode;
-            internal Vector3 Position; /// projected on train
+            internal Vector3 Position; /// projected on terrain
             internal Vector3 SecondaryPosition; /// original height.
             internal bool IsSource;
             internal bool IsTarget;
