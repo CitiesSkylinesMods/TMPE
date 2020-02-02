@@ -1,36 +1,37 @@
 ---
-name: Bug Report
-about: Help us understand what we need to fix.
-labels: bug, triage
+name: Report a Bug
+about: Tell us what we need to fix...
+labels: BUG, triage
 ---
 
-<!-- Want to see an example bug report before you submit one? See: https://bit.ly/tmpe-etbr -->
-
-### Description
+### Describe the problem
 
 
-### Reproduction Steps
-Add more steps as nessecary.
+
+### Steps to reproduce
+
+<!-- Explain how to trigger the problem, add more steps if necessary -->
+
 1. 
 2. 
 3. 
 
-### Mod List
-Please list the mods enabled when you noticed the bug.
-- TM:PE xx.xx
-- 
-- 
+### Log files
 
-### Output Log
-<!-- Don't know how to share your log file? See: https://bit.ly/2I3YVFL -->
+<!-- How to find and share log files: https://bit.ly/2I3YVFL -->
 
 
-### Savegame (Optional)
-<!-- Don't know how to share savegames? See: https://bit.ly/2FXog0z -->
+
+### Savegame?
+
+<!-- How to share save games: https://bit.ly/2FXog0z -->
 
 
-### Screenshots (Optional)
-<!-- Don't know how to share screenshots? See: https://bit.ly/2Kc8owO -->
+
+### Screenshots?
+
+<!-- How to take and share screenshots: https://bit.ly/2Kc8owO -->
 
 
-### Additional Info
+
+### Notes or questions?

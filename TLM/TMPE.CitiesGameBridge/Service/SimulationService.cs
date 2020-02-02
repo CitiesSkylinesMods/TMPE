@@ -1,81 +1,58 @@
-﻿using System;
-using ColossalFramework;
-using ColossalFramework.Math;
-using GenericGameBridge.Service;
-using UnityEngine;
-
 namespace CitiesGameBridge.Service {
-	public class SimulationService : ISimulationService {
-		public static readonly ISimulationService Instance = new SimulationService();
-		
-		private SimulationService() {
+    using System;
+    using ColossalFramework;
+    using ColossalFramework.Math;
+    using GenericGameBridge.Service;
+    using UnityEngine;
 
-		}
+    public class SimulationService : ISimulationService {
+        public static readonly ISimulationService Instance = new SimulationService();
 
-		public bool LeftHandDrive {
-			get {
-				return Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
-			}
-		}
+        private SimulationService() { }
 
-		public uint CurrentBuildIndex {
-			get {
-				return Singleton<SimulationManager>.instance.m_currentBuildIndex;
-			}
+        public bool TrafficDrivesOnLeft =>
+            Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic
+            == SimulationMetaData.MetaBool.True;
 
-			set {
-				Singleton<SimulationManager>.instance.m_currentBuildIndex = value;
-			}
-		}
+        [Obsolete]
+        public bool LeftHandDrive =>
+            TrafficDrivesOnLeft;
 
-		public uint CurrentFrameIndex {
-			get {
-				return Singleton<SimulationManager>.instance.m_currentFrameIndex;
-			}
-		}
+        public uint CurrentBuildIndex {
+            get => Singleton<SimulationManager>.instance.m_currentBuildIndex;
+            set => Singleton<SimulationManager>.instance.m_currentBuildIndex = value;
+        }
 
-		public Vector3 CameraPosition {
-			get {
-				return Singleton<SimulationManager>.instance.m_simulationView.m_position;
-			}
-		}
+        public uint CurrentFrameIndex => Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-		public Randomizer Randomizer {
-			get {
-				return Singleton<SimulationManager>.instance.m_randomizer;
-			}
-		}
+        public Vector3 CameraPosition =>
+            Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
-		public bool SimulationPaused {
-			get {
-				return Singleton<SimulationManager>.instance.SimulationPaused;
-			}			
-		}
+        public Randomizer Randomizer => Singleton<SimulationManager>.instance.m_randomizer;
 
-		public bool ForcedSimulationPaused {
-			get {
-				return Singleton<SimulationManager>.instance.ForcedSimulationPaused;
-			}
-		}
+        public bool SimulationPaused => Singleton<SimulationManager>.instance.SimulationPaused;
 
-		public AsyncAction AddAction(Action action) {
-			return Singleton<SimulationManager>.instance.AddAction(action);
-		}
+        public bool ForcedSimulationPaused =>
+            Singleton<SimulationManager>.instance.ForcedSimulationPaused;
 
-		public void PauseSimulation(bool forced) {
-			if (forced) {
-				Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
-			} else {
-				Singleton<SimulationManager>.instance.SimulationPaused = true;
-			}
-		}
+        public AsyncAction AddAction(Action action) {
+            return Singleton<SimulationManager>.instance.AddAction(action);
+        }
 
-		public void ResumeSimulation(bool forced) {
-			if (forced) {
-				Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
-			} else {
-				Singleton<SimulationManager>.instance.SimulationPaused = false;
-			}
-		}
-	}
+        public void PauseSimulation(bool forced) {
+            if (forced) {
+                Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
+            } else {
+                Singleton<SimulationManager>.instance.SimulationPaused = true;
+            }
+        }
+
+        public void ResumeSimulation(bool forced) {
+            if (forced) {
+                Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
+            } else {
+                Singleton<SimulationManager>.instance.SimulationPaused = false;
+            }
+        }
+    }
 }

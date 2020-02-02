@@ -1,9 +1,7 @@
 ﻿namespace TrafficManager.API.TrafficLight {
     using System.Collections.Generic;
     using CSUtil.Commons;
-    using Traffic.Enums;
-    using TrafficManager.Traffic.Enums;
-    using TrafficManager.TrafficLight;
+    using TrafficManager.API.Traffic.Enums;
 
     public interface ITimedTrafficLights {
         IDictionary<ushort, IDictionary<ushort, ArrowDirection>> Directions { get; }
@@ -14,8 +12,17 @@
         bool TestMode { get; set; } // TODO private set
         IList<ushort> NodeGroup { get; set; } // TODO private set
 
-        ITimedTrafficLightsStep AddStep(int minTime, int maxTime, StepChangeMetric changeMetric, float waitFlowBalance, bool makeRed = false);
-        long CheckNextChange(ushort segmentId, bool startNode, ExtVehicleType vehicleType, int lightType);
+        ITimedTrafficLightsStep AddStep(int minTime,
+                                        int maxTime,
+                                        StepChangeMetric changeMetric,
+                                        float waitFlowBalance,
+                                        bool makeRed = false);
+
+        long CheckNextChange(ushort segmentId,
+                             bool startNode,
+                             ExtVehicleType vehicleType,
+                             int lightType);
+
         ITimedTrafficLightsStep GetStep(int stepId);
         bool Housekeeping(); // TODO improve & remove
         bool IsMasterNode();

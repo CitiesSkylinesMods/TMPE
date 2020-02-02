@@ -1,223 +1,277 @@
-﻿using ColossalFramework;
-using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using TrafficManager.Geometry;
-using TrafficManager.State;
-using TrafficManager.Traffic;
-using TrafficManager.Traffic.Data;
-using TrafficManager.Util;
-using UnityEngine;
+﻿namespace TrafficManager.Manager.Impl {
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State;
+    using UnityEngine;
 
-namespace TrafficManager.Manager.Impl {
-	public class TrafficMeasurementManager : AbstractCustomManager, ITrafficMeasurementManager {
-		public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
-		public const NetInfo.LaneType LANE_TYPES = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+    public class TrafficMeasurementManager : AbstractCustomManager, ITrafficMeasurementManager {
+        private const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
-		public static readonly TrafficMeasurementManager Instance = new TrafficMeasurementManager();
+        private const NetInfo.LaneType LANE_TYPES =
+            NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
-		public const ushort REF_REL_SPEED_PERCENT_DENOMINATOR = 100;
-		public const ushort REF_REL_SPEED = 10000;
+        public const ushort REF_REL_SPEED_PERCENT_DENOMINATOR = 100;
 
-		public LaneTrafficData[][] LaneTrafficData { get; private set; }
+        public const ushort REF_REL_SPEED = 10000;
 
-		public SegmentDirTrafficData[] SegmentDirTrafficData { get; private set; }
+        public static readonly TrafficMeasurementManager Instance = new TrafficMeasurementManager();
 
-		private uint[] meanSpeeds = { 0, 0 };
-		private int[] meanSpeedLanes = { 0, 0 };
+        private readonly uint[] meanSpeeds = { 0, 0 };
 
-		private TrafficMeasurementManager() {
-			LaneTrafficData = new LaneTrafficData[NetManager.MAX_SEGMENT_COUNT][];
-			SegmentDirTrafficData = new SegmentDirTrafficData[NetManager.MAX_SEGMENT_COUNT * 2];
+        private readonly int[] meanSpeedLanes = { 0, 0 };
 
-			for (int i = 0; i < SegmentDirTrafficData.Length; ++i) {
-				SegmentDirTrafficData[i].meanSpeed = REF_REL_SPEED;
-			}
-			ResetTrafficStats();
-		}
+        public LaneTrafficData[][] LaneTrafficData { get; }
 
-		protected override void InternalPrintDebugInfo() {
-			base.InternalPrintDebugInfo();
-			Log._Debug($"Lane traffic data:");
-			if (LaneTrafficData == null) {
-				Log._Debug($"\t<null>");
-			} else {
-				for (int i = 0; i < LaneTrafficData.Length; ++i) {
-					if (LaneTrafficData[i] == null) {
-						continue;
-					}
-					Log._Debug($"\tSegment {i}:");
-					for (int k = 0; k < LaneTrafficData[i].Length; ++k) {
-						Log._Debug($"\t\tLane {k}: {LaneTrafficData[i][k]}");
-					}
-				}
-			}
+        public SegmentDirTrafficData[] SegmentDirTrafficData { get; }
 
-			Log._Debug($"Segment direction traffic data:");
-			if (SegmentDirTrafficData == null) {
-				Log._Debug($"\t<null>");
-			} else {
-				for (int i = 0; i < SegmentDirTrafficData.Length; ++i) {
-					Log._Debug($"\tIndex {i}: {SegmentDirTrafficData[i]}");
-				}
-			}
-		}
+        private TrafficMeasurementManager() {
+            LaneTrafficData = new LaneTrafficData[NetManager.MAX_SEGMENT_COUNT][];
+            SegmentDirTrafficData = new SegmentDirTrafficData[NetManager.MAX_SEGMENT_COUNT * 2];
 
-		public ushort CalcLaneRelativeMeanSpeed(ushort segmentId, byte laneIndex, uint laneId, NetInfo.Lane laneInfo) {
-			if (LaneTrafficData[segmentId] == null || laneIndex >= LaneTrafficData[segmentId].Length) {
-				return REF_REL_SPEED;
-			}
+            for (int i = 0; i < SegmentDirTrafficData.Length; ++i) {
+                SegmentDirTrafficData[i].meanSpeed = REF_REL_SPEED;
+            }
 
-			ushort currentBuf = LaneTrafficData[segmentId][laneIndex].trafficBuffer;
-			ushort curRelSpeed = REF_REL_SPEED;
+            ResetTrafficStats();
+        }
 
-			// we use integer division here because it's faster
-			if (currentBuf > 0) {
-				uint laneVehicleSpeedLimit = Math.Min(3u * 8u, (uint)((Options.customSpeedLimitsEnabled ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(segmentId, laneIndex, laneId, laneInfo) : laneInfo.m_speedLimit) * 8f));
-				if (laneVehicleSpeedLimit <= 0) {
-					// fallback: custom lanes may not have valid values set for speed limit
-					laneVehicleSpeedLimit = 1;
-				}
-				curRelSpeed = (ushort)Math.Min((uint)REF_REL_SPEED, ((LaneTrafficData[segmentId][laneIndex].accumulatedSpeeds * (uint)REF_REL_SPEED) / currentBuf) / laneVehicleSpeedLimit); // 0 .. 10000, m_speedLimit of highway is 2, actual max. vehicle speed on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different units for velocity)
+        protected override void InternalPrintDebugInfo() {
+            base.InternalPrintDebugInfo();
+            Log._Debug("Lane traffic data:");
 
-				if (curRelSpeed >= (uint)GlobalConfig.Instance.DynamicLaneSelection.VolumeMeasurementRelSpeedThreshold * (uint)REF_REL_SPEED_PERCENT_DENOMINATOR) {
-					ushort lastBuf = LaneTrafficData[segmentId][laneIndex].lastTrafficBuffer;
-					ushort maxBuf = LaneTrafficData[segmentId][laneIndex].maxTrafficBuffer;
+            if (LaneTrafficData == null) {
+                Log._Debug("\t<null>");
+            } else {
+                for (var i = 0; i < LaneTrafficData.Length; ++i) {
+                    if (LaneTrafficData[i] == null) {
+                        continue;
+                    }
 
-					float factor = Mathf.Clamp01(1f - (float)lastBuf / (float)maxBuf);
-					curRelSpeed = (ushort)(curRelSpeed + (uint)(factor * (float)((uint)REF_REL_SPEED - (uint)curRelSpeed)));
-				}
-			}
-			return curRelSpeed;
-		}
+                    Log._Debug($"\tSegment {i}:");
+                    for (var k = 0; k < LaneTrafficData[i].Length; ++k) {
+                        Log._Debug($"\t\tLane {k}: {LaneTrafficData[i][k]}");
+                    }
+                }
+            }
 
-		public void OnBeforeSimulationStep(ushort segmentId, ref NetSegment segment) {
-			GlobalConfig conf = GlobalConfig.Instance;
-			
-			// calculate traffic density
-			NetInfo segmentInfo = segment.Info;
-			uint curLaneId = segment.m_lanes;
-			int numLanes = segmentInfo.m_lanes.Length;
+            Log._Debug("Segment direction traffic data:");
 
-			if (LaneTrafficData[segmentId] == null || LaneTrafficData[segmentId].Length < numLanes) {
-				LaneTrafficData[segmentId] = new LaneTrafficData[numLanes];
-				for (int i = 0; i < numLanes; ++i) {
-					//laneTrafficData[segmentId][i] = new LaneTrafficData();
-					LaneTrafficData[segmentId][i].meanSpeed = REF_REL_SPEED;
-				}
-			}
+            if (SegmentDirTrafficData == null) {
+                Log._Debug("\t<null>");
+            } else {
+                for (var i = 0; i < SegmentDirTrafficData.Length; ++i) {
+                    Log._Debug($"\tIndex {i}: {SegmentDirTrafficData[i]}");
+                }
+            }
+        }
 
-			// calculate max./min. lane speed
-			for (int i = 0; i < 2; ++i) {
-				meanSpeeds[i] = 0;
-				meanSpeedLanes[i] = 0;
-			}
+        public ushort CalcLaneRelativeMeanSpeed(ushort segmentId,
+                                                byte laneIndex,
+                                                uint laneId,
+                                                NetInfo.Lane laneInfo) {
+            if (LaneTrafficData[segmentId] == null
+                || laneIndex >= LaneTrafficData[segmentId].Length)
+            {
+                return REF_REL_SPEED;
+            }
 
-			curLaneId = segment.m_lanes;
+            ushort currentBuf = LaneTrafficData[segmentId][laneIndex].trafficBuffer;
+            ushort curRelSpeed = REF_REL_SPEED;
 
-			byte laneIndex = 0;
-			while (laneIndex < numLanes && curLaneId != 0u) {
-				NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+            // we use integer division here because it's faster
+            if (currentBuf > 0) {
+                uint laneVehicleSpeedLimit = Math.Min(
+                    3u * 8u,
+                    (uint)((Options.customSpeedLimitsEnabled
+                                ? SpeedLimitManager.Instance.GetLockFreeGameSpeedLimit(
+                                    segmentId,
+                                    laneIndex,
+                                    laneId,
+                                    laneInfo)
+                                : laneInfo.m_speedLimit) * 8f));
 
-				if ((laneInfo.m_laneType & LANE_TYPES) != NetInfo.LaneType.None && (laneInfo.m_vehicleType & VEHICLE_TYPES) != VehicleInfo.VehicleType.None) {
-					int dirIndex = GetDirIndex(laneInfo.m_finalDirection);
+                if (laneVehicleSpeedLimit <= 0) {
+                    // fallback: custom lanes may not have valid values set for speed limit
+                    laneVehicleSpeedLimit = 1;
+                }
 
-					// calculate reported mean speed
-					ushort newRelSpeed = CalcLaneRelativeMeanSpeed(segmentId, laneIndex, curLaneId, segment.Info.m_lanes[laneIndex]);
+                // 0 .. 10000, m_speedLimit of highway is 2 (100 km/h), actual max. vehicle speed
+                // on highway is 16, that's why we use x*8 == x<<3 (don't ask why CO uses different
+                // units for velocity)
+                curRelSpeed = (ushort)Math.Min(
+                    REF_REL_SPEED,
+                    (LaneTrafficData[segmentId][laneIndex].accumulatedSpeeds * REF_REL_SPEED)
+                        / currentBuf
+                        / laneVehicleSpeedLimit);
 
-					meanSpeeds[dirIndex] += newRelSpeed;
-					++meanSpeedLanes[dirIndex];
+                if (curRelSpeed >=
+                    GlobalConfig.Instance.DynamicLaneSelection.VolumeMeasurementRelSpeedThreshold *
+                    (uint)REF_REL_SPEED_PERCENT_DENOMINATOR)
+                {
+                    ushort lastBuf = LaneTrafficData[segmentId][laneIndex].lastTrafficBuffer;
+                    ushort maxBuf = LaneTrafficData[segmentId][laneIndex].maxTrafficBuffer;
 
-					LaneTrafficData[segmentId][laneIndex].meanSpeed = newRelSpeed;
+                    float factor = Mathf.Clamp01(1f - (lastBuf / (float)maxBuf));
+                    curRelSpeed =
+                        (ushort)(curRelSpeed + (uint)(factor * (REF_REL_SPEED - (uint)curRelSpeed)));
+                }
+            }
 
-					ushort trafficBuffer = LaneTrafficData[segmentId][laneIndex].trafficBuffer;
+            return curRelSpeed;
+        }
 
-					// remember historic data
-					LaneTrafficData[segmentId][laneIndex].lastTrafficBuffer = trafficBuffer;
+        public void OnBeforeSimulationStep(ushort segmentId, ref NetSegment segment) {
+            GlobalConfig conf = GlobalConfig.Instance;
 
-					if (trafficBuffer > LaneTrafficData[segmentId][laneIndex].maxTrafficBuffer) {
-						LaneTrafficData[segmentId][laneIndex].maxTrafficBuffer = trafficBuffer;
-					}
+            // calculate traffic density
+            NetInfo segmentInfo = segment.Info;
+            int numLanes = segmentInfo.m_lanes.Length;
 
-					// reset buffers
-					if (conf.AdvancedVehicleAI.MaxTrafficBuffer > 0) {
-						if (LaneTrafficData[segmentId][laneIndex].trafficBuffer > conf.AdvancedVehicleAI.MaxTrafficBuffer) {
-							LaneTrafficData[segmentId][laneIndex].accumulatedSpeeds /= (LaneTrafficData[segmentId][laneIndex].trafficBuffer / conf.AdvancedVehicleAI.MaxTrafficBuffer);
-							LaneTrafficData[segmentId][laneIndex].trafficBuffer = (ushort)conf.AdvancedVehicleAI.MaxTrafficBuffer;
-						} else if (LaneTrafficData[segmentId][laneIndex].trafficBuffer == conf.AdvancedVehicleAI.MaxTrafficBuffer) {
-							LaneTrafficData[segmentId][laneIndex].accumulatedSpeeds = 0;
-							LaneTrafficData[segmentId][laneIndex].trafficBuffer = 0;
-						}
-					} else {
-						LaneTrafficData[segmentId][laneIndex].accumulatedSpeeds = 0;
-						LaneTrafficData[segmentId][laneIndex].trafficBuffer = 0;
-					}
-				}
+            if (LaneTrafficData[segmentId] == null || LaneTrafficData[segmentId].Length < numLanes) {
+                LaneTrafficData[segmentId] = new LaneTrafficData[numLanes];
+                for (int i = 0; i < numLanes; ++i) {
+                    // laneTrafficData[segmentId][i] = new LaneTrafficData();
+                    LaneTrafficData[segmentId][i].meanSpeed = REF_REL_SPEED;
+                }
+            }
 
-				laneIndex++;
-				curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
-			}
+            // calculate max./min. lane speed
+            for (var i = 0; i < 2; ++i) {
+                meanSpeeds[i] = 0;
+                meanSpeedLanes[i] = 0;
+            }
 
-			for (int i = 0; i < 2; ++i) {
-				int segDirIndex = i == 0 ? GetDirIndex(segmentId, NetInfo.Direction.Forward) : GetDirIndex(segmentId, NetInfo.Direction.Backward);
+            uint curLaneId = segment.m_lanes;
 
-				if (meanSpeedLanes[i] > 0) {
-					SegmentDirTrafficData[segDirIndex].meanSpeed = (ushort)Math.Min(REF_REL_SPEED, (meanSpeeds[i] / meanSpeedLanes[i]));
-				} else {
-					SegmentDirTrafficData[segDirIndex].meanSpeed = REF_REL_SPEED;
-				}
-			}
-		}
+            byte laneIndex = 0;
+            while (laneIndex < numLanes && curLaneId != 0u) {
+                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
-		public bool GetLaneTrafficData(ushort segmentId, byte laneIndex, out LaneTrafficData trafficData) {
-			if (LaneTrafficData[segmentId] == null || laneIndex >= LaneTrafficData[segmentId].Length) {
-				trafficData = default(LaneTrafficData);
-				return false;
-			} else {
-				trafficData = LaneTrafficData[segmentId][laneIndex];
-				return true;
-			}
-		}
+                if ((laneInfo.m_laneType & LANE_TYPES) != NetInfo.LaneType.None
+                    && (laneInfo.m_vehicleType & VEHICLE_TYPES) != VehicleInfo.VehicleType.None)
+                {
+                    int dirIndex = GetDirIndex(laneInfo.m_finalDirection);
 
-		public void DestroySegmentStats(ushort segmentId) {
-			LaneTrafficData[segmentId] = null;
+                    // calculate reported mean speed
+                    ushort newRelSpeed = CalcLaneRelativeMeanSpeed(
+                        segmentId,
+                        laneIndex,
+                        curLaneId,
+                        segment.Info.m_lanes[laneIndex]);
 
-			int fwdIndex = GetDirIndex(segmentId, NetInfo.Direction.Forward);
-			int backIndex = GetDirIndex(segmentId, NetInfo.Direction.Backward);
+                    meanSpeeds[dirIndex] += newRelSpeed;
+                    ++meanSpeedLanes[dirIndex];
 
-			SegmentDirTrafficData[fwdIndex] = default(SegmentDirTrafficData);
-			SegmentDirTrafficData[fwdIndex].meanSpeed = REF_REL_SPEED;
+                    LaneTrafficData[segmentId][laneIndex].meanSpeed = newRelSpeed;
 
-			SegmentDirTrafficData[backIndex] = default(SegmentDirTrafficData);
-			SegmentDirTrafficData[backIndex].meanSpeed = REF_REL_SPEED;
-		}
+                    ushort trafficBuffer = LaneTrafficData[segmentId][laneIndex].trafficBuffer;
 
-		public void ResetTrafficStats() {
-			for (int i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-				DestroySegmentStats((ushort)i);
-			}
-		}
+                    // remember historic data
+                    LaneTrafficData[segmentId][laneIndex].lastTrafficBuffer = trafficBuffer;
 
-		public void AddTraffic(ushort segmentId, byte laneIndex, ushort speed) {
-			if (LaneTrafficData[segmentId] == null || laneIndex >= LaneTrafficData[segmentId].Length)
-				return;
+                    if (trafficBuffer > LaneTrafficData[segmentId][laneIndex].maxTrafficBuffer) {
+                        LaneTrafficData[segmentId][laneIndex].maxTrafficBuffer = trafficBuffer;
+                    }
 
-			LaneTrafficData[segmentId][laneIndex].trafficBuffer = (ushort)Math.Min(65535u, (uint)LaneTrafficData[segmentId][laneIndex].trafficBuffer + 1u);
-			LaneTrafficData[segmentId][laneIndex].accumulatedSpeeds += (uint)speed;
-		}
+                    // reset buffers
+                    if (conf.AdvancedVehicleAI.MaxTrafficBuffer > 0) {
+                        if (LaneTrafficData[segmentId][laneIndex].trafficBuffer >
+                            conf.AdvancedVehicleAI.MaxTrafficBuffer) {
+                            LaneTrafficData[segmentId][laneIndex].accumulatedSpeeds /=
+                                LaneTrafficData[segmentId][laneIndex].trafficBuffer
+                                / conf.AdvancedVehicleAI.MaxTrafficBuffer;
+                            LaneTrafficData[segmentId][laneIndex].trafficBuffer =
+                                (ushort)conf.AdvancedVehicleAI.MaxTrafficBuffer;
+                        } else if (LaneTrafficData[segmentId][laneIndex].trafficBuffer ==
+                                   conf.AdvancedVehicleAI.MaxTrafficBuffer) {
+                            LaneTrafficData[segmentId][laneIndex].accumulatedSpeeds = 0;
+                            LaneTrafficData[segmentId][laneIndex].trafficBuffer = 0;
+                        }
+                    } else {
+                        LaneTrafficData[segmentId][laneIndex].accumulatedSpeeds = 0;
+                        LaneTrafficData[segmentId][laneIndex].trafficBuffer = 0;
+                    }
+                }
 
-		public int GetDirIndex(ushort segmentId, NetInfo.Direction dir) {
-			return (int)segmentId + (dir == NetInfo.Direction.Backward ? NetManager.MAX_SEGMENT_COUNT : 0);
-		}
+                laneIndex++;
+                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+            }
 
-		public int GetDirIndex(NetInfo.Direction dir) {
-			return dir == NetInfo.Direction.Backward ? 1 : 0;
-		}
+            for (int i = 0; i < 2; ++i) {
+                int segDirIndex = i == 0
+                                      ? GetDirIndex(segmentId, NetInfo.Direction.Forward)
+                                      : GetDirIndex(segmentId, NetInfo.Direction.Backward);
 
-		public override void OnLevelUnloading() {
-			base.OnLevelUnloading();
-			ResetTrafficStats();
-		}
-	}
+                if (meanSpeedLanes[i] > 0) {
+                    SegmentDirTrafficData[segDirIndex].meanSpeed = (ushort)Math.Min(
+                        REF_REL_SPEED,
+                        meanSpeeds[i] / meanSpeedLanes[i]);
+                } else {
+                    SegmentDirTrafficData[segDirIndex].meanSpeed = REF_REL_SPEED;
+                }
+            }
+        }
+
+        public bool GetLaneTrafficData(ushort segmentId,
+                                       byte laneIndex,
+                                       out LaneTrafficData trafficData) {
+            if (LaneTrafficData[segmentId] == null
+                || laneIndex >= LaneTrafficData[segmentId].Length)
+            {
+                trafficData = default;
+                return false;
+            }
+
+            trafficData = LaneTrafficData[segmentId][laneIndex];
+            return true;
+        }
+
+        public void DestroySegmentStats(ushort segmentId) {
+            LaneTrafficData[segmentId] = null;
+
+            int fwdIndex = GetDirIndex(segmentId, NetInfo.Direction.Forward);
+            int backIndex = GetDirIndex(segmentId, NetInfo.Direction.Backward);
+
+            SegmentDirTrafficData[fwdIndex] = default;
+            SegmentDirTrafficData[fwdIndex].meanSpeed = REF_REL_SPEED;
+
+            SegmentDirTrafficData[backIndex] = default;
+            SegmentDirTrafficData[backIndex].meanSpeed = REF_REL_SPEED;
+        }
+
+        public void ResetTrafficStats() {
+            for (int i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
+                DestroySegmentStats((ushort)i);
+            }
+        }
+
+        public void AddTraffic(ushort segmentId, byte laneIndex, ushort speed) {
+            if (LaneTrafficData[segmentId] == null ||
+                laneIndex >= LaneTrafficData[segmentId].Length)
+                return;
+
+            LaneTrafficData[segmentId][laneIndex].trafficBuffer = (ushort)Math.Min(
+                ushort.MaxValue,
+                LaneTrafficData[segmentId][laneIndex].trafficBuffer + 1u);
+            LaneTrafficData[segmentId][laneIndex].accumulatedSpeeds += speed;
+        }
+
+        public int GetDirIndex(ushort segmentId, NetInfo.Direction dir) {
+            return segmentId + (dir == NetInfo.Direction.Backward
+                                    ? NetManager.MAX_SEGMENT_COUNT
+                                    : 0);
+        }
+
+        public int GetDirIndex(NetInfo.Direction dir) {
+            return dir == NetInfo.Direction.Backward ? 1 : 0;
+        }
+
+        public override void OnLevelUnloading() {
+            base.OnLevelUnloading();
+            ResetTrafficStats();
+        }
+    }
 }

@@ -1,84 +1,114 @@
-﻿using ColossalFramework;
-using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using TrafficManager.Custom.AI;
-using TrafficManager.Geometry;
-using TrafficManager.Geometry.Impl;
-using TrafficManager.State;
-using TrafficManager.Traffic;
-using TrafficManager.Traffic.Data;
-using TrafficManager.Traffic.Enums;
-using TrafficManager.Util;
-using UnityEngine;
-
 namespace TrafficManager.Manager.Impl {
-	public class ExtNodeManager : AbstractCustomManager, IExtNodeManager {
-		public static ExtNodeManager Instance { get; private set; } = null;
+    using CSUtil.Commons;
+    using TrafficManager.API.Geometry;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Geometry.Impl;
+    using TrafficManager.Geometry;
 
-		static ExtNodeManager() {
-			Instance = new ExtNodeManager();
-		}
-		
-		/// <summary>
-		/// All additional data for nodes
-		/// </summary>
-		public ExtNode[] ExtNodes { get; private set; } = null;
+    public class ExtNodeManager
+        : AbstractCustomManager,
+          IExtNodeManager
+    {
+        public static ExtNodeManager Instance { get; }
 
-		private ExtNodeManager() {
-			ExtNodes = new ExtNode[NetManager.MAX_NODE_COUNT];
-			for (uint i = 0; i < ExtNodes.Length; ++i) {
-				ExtNodes[i] = new ExtNode((ushort)i);
-			}
-		}
+        static ExtNodeManager() {
+            Instance = new ExtNodeManager();
+        }
 
-		public bool IsValid(ushort nodeId) {
-			return Services.NetService.IsNodeValid(nodeId);
-		}
+        /// <summary>
+        /// All additional data for nodes
+        /// </summary>
+        public ExtNode[] ExtNodes { get; }
 
-		public void AddSegment(ushort nodeId, ushort segmentId) {
-			if (ExtNodes[nodeId].segmentIds.Add(segmentId) && ExtNodes[nodeId].removedSegmentEndId != null) {
-				SegmentEndReplacement replacement = new SegmentEndReplacement();
-				replacement.oldSegmentEndId = ExtNodes[nodeId].removedSegmentEndId;
-				replacement.newSegmentEndId = new SegmentEndId(segmentId, (bool)Services.NetService.IsStartNode(segmentId, nodeId));
-				ExtNodes[nodeId].removedSegmentEndId = null;
+        private ExtNodeManager() {
+            ExtNodes = new ExtNode[NetManager.MAX_NODE_COUNT];
 
-				Constants.ManagerFactory.GeometryManager.OnSegmentEndReplacement(replacement);
-			}
-		}
+            for (uint i = 0; i < ExtNodes.Length; ++i) {
+                ExtNodes[i] = new ExtNode((ushort)i);
+            }
+        }
 
-		public void RemoveSegment(ushort nodeId, ushort segmentId) {
-			if (ExtNodes[nodeId].segmentIds.Remove(segmentId)) {
-				ExtNodes[nodeId].removedSegmentEndId = new SegmentEndId(segmentId, (bool)Services.NetService.IsStartNode(segmentId, nodeId));
-			}
-		}
+        /// <summary>
+        /// assuming highway rules are on, does the junction follow highway rules?
+        /// </summary>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public static bool JunctionHasHighwayRules(ushort nodeId) {
+            return JunctionHasOnlyHighwayRoads(nodeId) && !LaneConnectionManager.Instance.HasNodeConnections(nodeId);
+        }
 
-		public void Reset(ushort nodeId) {
-			Reset(ref ExtNodes[nodeId]);
-		}
+        /// <summary>
+        /// Are all segments at nodeId highways?
+        /// </summary>
+        /// <param name="nodeId"></param>
+        /// <returns></returns>
+        public static bool JunctionHasOnlyHighwayRoads(ushort nodeId) {
+            IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+            bool ret = true;
+            Constants.ServiceFactory.NetService.IterateNodeSegments(
+                nodeId,
+                (ushort segmentId, ref NetSegment segment) => {
+                    ret &= segMan.CalculateIsHighway(segmentId);
+                    return ret;
+                });
+            return ret;
+        }
 
-		protected void Reset(ref ExtNode node) {
-			node.Reset();
-		}
+        public bool IsValid(ushort nodeId) {
+            return Services.NetService.IsNodeValid(nodeId);
+        }
 
-		protected override void InternalPrintDebugInfo() {
-			base.InternalPrintDebugInfo();
-			Log._Debug($"Extended node data:");
-			for (uint i = 0; i < ExtNodes.Length; ++i) {
-				if (! IsValid((ushort)i)) {
-					continue;
-				}
-				Log._Debug($"Node {i}: {ExtNodes[i]}");
-			}
-		}
+        public void AddSegment(ushort nodeId, ushort segmentId) {
+            if (ExtNodes[nodeId].segmentIds.Add(segmentId) &&
+                ExtNodes[nodeId].removedSegmentEndId != null)
+            {
+                var replacement = new SegmentEndReplacement {
+                    oldSegmentEndId = ExtNodes[nodeId].removedSegmentEndId,
+                    newSegmentEndId = new SegmentEndId(
+                        segmentId,
+                        (bool)Services.NetService.IsStartNode(segmentId, nodeId))
+                };
+                ExtNodes[nodeId].removedSegmentEndId = null;
+                Constants.ManagerFactory.GeometryManager.OnSegmentEndReplacement(replacement);
+            }
+        }
 
-		public override void OnLevelUnloading() {
-			base.OnLevelUnloading();
-			for (int i = 0; i < ExtNodes.Length; ++i) {
-				Reset(ref ExtNodes[i]);
-			}
-		}
-	}
+        public void RemoveSegment(ushort nodeId, ushort segmentId) {
+            if (ExtNodes[nodeId].segmentIds.Remove(segmentId)) {
+                ExtNodes[nodeId].removedSegmentEndId = new SegmentEndId(
+                    segmentId,
+                    (bool)Services.NetService.IsStartNode(segmentId, nodeId));
+            }
+        }
+
+        public void Reset(ushort nodeId) {
+            Reset(ref ExtNodes[nodeId]);
+        }
+
+        private void Reset(ref ExtNode node) {
+            node.Reset();
+        }
+
+        protected override void InternalPrintDebugInfo() {
+            base.InternalPrintDebugInfo();
+            Log._Debug($"Extended node data:");
+
+            for (uint i = 0; i < ExtNodes.Length; ++i) {
+                if (!IsValid((ushort)i)) {
+                    continue;
+                }
+
+                Log._Debug($"Node {i}: {ExtNodes[i]}");
+            }
+        }
+
+        public override void OnLevelUnloading() {
+            base.OnLevelUnloading();
+
+            for (int i = 0; i < ExtNodes.Length; ++i) {
+                Reset(ref ExtNodes[i]);
+            }
+        }
+    }
 }

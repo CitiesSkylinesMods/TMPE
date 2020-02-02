@@ -1,31 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+﻿namespace CSUtil.Commons.Benchmark {
+    using System;
+    using System.Diagnostics;
+    using System.Reflection;
 
-namespace CSUtil.Commons.Benchmark {
-	public class Benchmark : IDisposable {
-		private BenchmarkProfile profile;
+    public class Benchmark : IDisposable {
+        private BenchmarkProfile profile;
 
-		public Benchmark(string id = null, string postfix = null) {
-			if (id == null) {
-				StackFrame frame = new StackFrame(1);
-				MethodBase method = frame.GetMethod();
-				id = method.DeclaringType.Name + "#" + method.Name;
-			}
+#if !BENCHMARK
+        /// <summary>
+        /// Does nothing when #define BENCHMARK is not set
+        /// </summary>
+        public class NullBenchmark : IDisposable {
+            public void Dispose() { }
+        }
 
-			if (postfix != null) {
-				id += "#" + postfix;
-			}
+        private static NullBenchmark reusableNullBenchmark_ = new NullBenchmark();
+#endif
 
-			profile = BenchmarkProfileProvider.Instance.GetProfile(id);
-			profile.Start();
-		}
+        /// <summary>
+        /// Creates Benchmark object if #define BENCHMARK is set, otherwise creates a NullBenchmark
+        /// </summary>
+        public static IDisposable MaybeCreateBenchmark(string id = null, string postfix = null) {
+#if BENCHMARK
+            return new Benchmark(id, postfix);
+#else
+            return reusableNullBenchmark_;
+#endif
+        }
 
-		public void Dispose() {
-			profile.Stop();
-		}
-	}
+        private Benchmark(string id = null, string postfix = null) {
+            if (id == null) {
+                StackFrame frame = new StackFrame(1);
+                MethodBase method = frame.GetMethod();
+                id = method.DeclaringType.Name + "#" + method.Name;
+            }
+
+            if (postfix != null) {
+                id += "#" + postfix;
+            }
+
+            profile = BenchmarkProfileProvider.Instance.GetProfile(id);
+            profile.Start();
+        }
+
+        public void Dispose() {
+            profile.Stop();
+        }
+    }
 }

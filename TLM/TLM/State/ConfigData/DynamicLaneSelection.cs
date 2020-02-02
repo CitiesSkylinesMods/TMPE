@@ -1,4 +1,6 @@
 ﻿namespace TrafficManager.State.ConfigData {
+    using TrafficManager.API.Traffic.Data;
+
     public class DynamicLaneSelection {
         /// <summary>
         /// Maximum allowed reserved space on previous vehicle lane
@@ -123,14 +125,16 @@
          */
 
         /// <summary>
-        /// Minimum minimum required speed improvement for safe lane changes (in km/h)
+        /// Minimum minimum required speed improvement for safe lane changes (in game units).
+        /// Set to 5 km/h in game units.
         /// </summary>
-        public float MinMinSafeSpeedImprovement = 5f;
+        public readonly SpeedValue MinMinSafeSpeedImprovement = SpeedValue.FromKmph(5);
 
         /// <summary>
-        /// Maximum minimum required speed improvement for safe lane changes (in km/h)
+        /// Maximum minimum required speed improvement for safe lane changes (in game units)
+        /// Set to 30 km/h in game units.
         /// </summary>
-        public float MaxMinSafeSpeedImprovement = 30f;
+        public readonly SpeedValue MaxMinSafeSpeedImprovement = SpeedValue.FromKmph(30);
 
         /*
          * min. required traffic flow improvement for safe lane changes

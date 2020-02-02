@@ -1,244 +1,314 @@
-﻿using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrafficManager.Geometry;
-using TrafficManager.Geometry.Impl;
-using TrafficManager.State;
-using TrafficManager.Traffic.Enums;
-using TrafficManager.TrafficLight;
-using TrafficManager.Util;
+﻿namespace TrafficManager.Manager.Impl {
+    using CSUtil.Commons;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.Util;
 
-namespace TrafficManager.Manager.Impl {
-	using API.Traffic.Enums;
+    /// <summary>
+    /// Manages traffic light toggling
+    /// </summary>
+    public class TrafficLightManager
+        : AbstractCustomManager,
+          ICustomDataManager<List<Configuration.NodeTrafficLight>>,
+          ICustomDataManager<string>,
+          ITrafficLightManager
+    {
+        public static readonly TrafficLightManager Instance = new TrafficLightManager();
 
-	/// <summary>
-	/// Manages traffic light toggling
-	/// </summary>
-	public class TrafficLightManager : AbstractCustomManager, ICustomDataManager<List<Configuration.NodeTrafficLight>>, ICustomDataManager<string>, ITrafficLightManager {
-		public static readonly TrafficLightManager Instance = new TrafficLightManager();
+        protected override void InternalPrintDebugInfo() {
+            base.InternalPrintDebugInfo();
+            Log.NotImpl("InternalPrintDebugInfo for TrafficLightManager");
+        }
 
-		protected override void InternalPrintDebugInfo() {
-			base.InternalPrintDebugInfo();
-			Log._Debug($"- Not implemented -");
-			// TODO implement
-		}
+        // TODO: Consider replacing out error code with Result<> or VoidResult<>
+        public bool SetTrafficLight(ushort nodeId, bool flag, ref NetNode node) {
+            return SetTrafficLight(nodeId, flag, ref node, out ToggleTrafficLightError _);
+        }
 
-		public bool SetTrafficLight(ushort nodeId, bool flag, ref NetNode node) {
-			ToggleTrafficLightUnableReason reason;
-			return SetTrafficLight(nodeId, flag, ref node, out reason);
-		}
-
-		public bool SetTrafficLight(ushort nodeId, bool flag, ref NetNode node, out ToggleTrafficLightUnableReason reason) {
-#if DEBUGTTL
-			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
-				Log._Debug($"TrafficLightManager.SetTrafficLight: called for node {nodeId}, flag={flag}");
+        public bool SetTrafficLight(ushort nodeId,
+                                    bool flag,
+                                    ref NetNode node,
+                                    out ToggleTrafficLightError reason) {
+#if DEBUG
+            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
+                                      && DebugSettings.NodeId == nodeId;
+#else
+            const bool logTrafficLights = false;
 #endif
-			if (! IsTrafficLightToggleable(nodeId, flag, ref node, out reason)) {
-#if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
-					Log._Debug($"TrafficLightManager.SetTrafficLight: Traffic light @ {nodeId} is not toggleable");
+            if (logTrafficLights) {
+                Log._Debug($"TrafficLightManager.SetTrafficLight: called for node {nodeId}, flag={flag}");
+            }
+
+            if (!CanToggleTrafficLight(nodeId, flag, ref node, out reason)) {
+                if (logTrafficLights) {
+                    Log._Debug($"TrafficLightManager.SetTrafficLight: Traffic light @ {nodeId} is not toggleable");
+                }
+
+                if (reason != ToggleTrafficLightError.HasTimedLight || !flag) {
+                    if (logTrafficLights) {
+                        Log._Debug("TrafficLightManager.SetTrafficLight: ... but has timed light " +
+                                   "and we want to enable it");
+                    }
+
+                    return false;
+                }
+            }
+
+            NetNode.Flags flags = node.m_flags | NetNode.Flags.CustomTrafficLights;
+            if (flag) {
+                if (logTrafficLights) {
+                    Log._Debug($"Adding traffic light @ node {nodeId}");
+                }
+
+                flags |= NetNode.Flags.TrafficLights;
+                TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
+            } else {
+                if (logTrafficLights) {
+                    Log._Debug($"Removing traffic light @ node {nodeId}");
+                }
+
+                flags &= ~NetNode.Flags.TrafficLights;
+            }
+
+            if (logTrafficLights) {
+                Log._Debug("TrafficLightManager.SetTrafficLight: Setting traffic light at " +
+                           $"node {nodeId} -- flags={flags}");
+            }
+
+            node.m_flags = flags;
+            Constants.ManagerFactory.GeometryManager.MarkAsUpdated(nodeId, true);
+            return true;
+        }
+
+        public bool AddTrafficLight(ushort nodeId, ref NetNode node) {
+            ToggleTrafficLightError reason;
+            return AddTrafficLight(nodeId, ref node, out reason);
+        }
+
+        public bool AddTrafficLight(ushort nodeId,
+                                    ref NetNode node,
+                                    out ToggleTrafficLightError reason) {
+            TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
+            return SetTrafficLight(nodeId, true, ref node, out reason);
+        }
+
+        public bool RemoveTrafficLight(ushort nodeId, ref NetNode node) {
+            ToggleTrafficLightError reason;
+            return RemoveTrafficLight(nodeId, ref node, out reason);
+        }
+
+        public bool RemoveTrafficLight(ushort nodeId,
+                                       ref NetNode node,
+                                       out ToggleTrafficLightError reason) {
+            return SetTrafficLight(nodeId, false, ref node, out reason);
+        }
+
+        public void RemoveAllExistingTrafficLights() {
+            Array16<NetNode> nodes = NetManager.instance.m_nodes;
+            for (ushort i = 0; i < nodes.m_size; i++) {
+                RemoveTrafficLight(i, ref nodes.m_buffer[i]);
+            }
+        }
+
+        public bool ToggleTrafficLight(ushort nodeId, ref NetNode node) {
+            return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node);
+        }
+
+        public bool ToggleTrafficLight(ushort nodeId, ref NetNode node, out ToggleTrafficLightError reason) {
+            return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node, out reason);
+        }
+
+        public bool CanToggleTrafficLight(ushort nodeId,
+                                          bool flag,
+                                          ref NetNode node,
+                                          out ToggleTrafficLightError reason)
+        {
+#if DEBUG
+            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId;
+#else
+            const bool logTrafficLights = false;
 #endif
-				if (reason != ToggleTrafficLightUnableReason.HasTimedLight || !flag) {
-#if DEBUGTTL
-					if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
-						Log._Debug($"TrafficLightManager.SetTrafficLight: ... but has timed light and we want to enable it");
-#endif
-					return false;
-				}
-			}
+            if (!flag && TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
+                reason = ToggleTrafficLightError.HasTimedLight;
+                if (logTrafficLights) {
+                    Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node has a timed traffic light");
+                }
 
-			NetNode.Flags flags = node.m_flags | NetNode.Flags.CustomTrafficLights;
-			if ((bool)flag) {
-#if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
-					Log._Debug($"Adding traffic light @ node {nodeId}");
-#endif
-				flags |= NetNode.Flags.TrafficLights;
-				TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
-			} else {
-#if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
-					Log._Debug($"Removing traffic light @ node {nodeId}");
-#endif
-				flags &= ~NetNode.Flags.TrafficLights;
-			}
-#if DEBUGTTL
-			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
-				Log._Debug($"TrafficLightManager.SetTrafficLight: Setting traffic light at node {nodeId} -- flags={flags}");
-#endif
-			node.m_flags = flags;
-			Constants.ManagerFactory.GeometryManager.MarkAsUpdated(nodeId, true);
-			return true;
-		}
+                return false;
+            }
 
-		public bool AddTrafficLight(ushort nodeId, ref NetNode node) {
-			ToggleTrafficLightUnableReason reason;
-			return AddTrafficLight(nodeId, ref node, out reason);
-		}
+            if (flag && !LogicUtil.CheckFlags(
+                    (uint)node.m_flags,
+                    (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction),
+                    (uint)(NetNode.Flags.Created | NetNode.Flags.Junction))) {
+                reason = ToggleTrafficLightError.NoJunction;
 
-		public bool AddTrafficLight(ushort nodeId, ref NetNode node, out ToggleTrafficLightUnableReason reason) {
-			TrafficPriorityManager.Instance.RemovePrioritySignsFromNode(nodeId);
-			return SetTrafficLight(nodeId, true, ref node, out reason);
-		}
+                if (logTrafficLights) {
+                    Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node is not a junction");
+                }
 
-		public bool RemoveTrafficLight(ushort nodeId, ref NetNode node) {
-			ToggleTrafficLightUnableReason reason;
-			return RemoveTrafficLight(nodeId, ref node, out reason);
-		}
+                return false;
+            }
 
-		public bool RemoveTrafficLight(ushort nodeId, ref NetNode node, out ToggleTrafficLightUnableReason reason) {
-			return SetTrafficLight(nodeId, false, ref node, out reason);
-		}
+            if (!flag && LogicUtil.CheckFlags(
+                    (uint)node.m_flags,
+                    (uint)NetNode.Flags.LevelCrossing,
+                    (uint)NetNode.Flags.LevelCrossing)) {
+                reason = ToggleTrafficLightError.IsLevelCrossing;
 
-		public bool ToggleTrafficLight(ushort nodeId, ref NetNode node) {
-			return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node);
-		}
+                if (logTrafficLights) {
+                    Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node is a level crossing");
+                }
 
-		public bool ToggleTrafficLight(ushort nodeId, ref NetNode node, out ToggleTrafficLightUnableReason reason) {
-			return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node, out reason);
-		}
+                return false;
+            }
 
-		public bool IsTrafficLightToggleable(ushort nodeId, bool flag, ref NetNode node, out ToggleTrafficLightUnableReason reason) {
-			if (!flag && TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
-				reason = ToggleTrafficLightUnableReason.HasTimedLight;
-#if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
-					Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node has a timed traffic light");
-#endif
-				return false;
-			}
+            int numRoads = 0;
+            int numTrainTracks = 0;
+            int numMonorailTracks = 0;
+            int numPedSegments = 0;
+            Services.NetService.IterateNodeSegments(
+                nodeId,
+                (ushort segmentId, ref NetSegment segment) => {
+                    NetInfo info = segment.Info;
+                    if (info.m_class.m_service == ItemClass.Service.Road) {
+                        ++numRoads;
+                    } else if ((info.m_vehicleTypes & VehicleInfo.VehicleType.Train) !=
+                               VehicleInfo.VehicleType.None) {
+                        ++numTrainTracks;
+                    } else if ((info.m_vehicleTypes & VehicleInfo.VehicleType.Monorail) !=
+                               VehicleInfo.VehicleType.None) {
+                        ++numMonorailTracks;
+                    }
 
-			if (flag && !LogicUtil.CheckFlags((uint)node.m_flags, (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction), (uint)(NetNode.Flags.Created | NetNode.Flags.Junction))) {
-				reason = ToggleTrafficLightUnableReason.NoJunction;
-#if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
-					Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node is not a junction");
-#endif
-				return false;
-			}
+                    if (info.m_hasPedestrianLanes) {
+                        ++numPedSegments;
+                    }
 
-			if (!flag && LogicUtil.CheckFlags((uint)node.m_flags, (uint)(NetNode.Flags.LevelCrossing), (uint)(NetNode.Flags.LevelCrossing))) {
-				reason = ToggleTrafficLightUnableReason.IsLevelCrossing;
-#if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
-					Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Node is a level crossing");
-#endif
-				return false;
-			}
+                    return true;
+                });
 
-			int numRoads = 0;
-			int numTrainTracks = 0;
-			int numMonorailTracks = 0;
-			int numPedSegments = 0;
-			Services.NetService.IterateNodeSegments(nodeId, delegate (ushort segmentId, ref NetSegment segment) {
-				NetInfo info = segment.Info;
-				if (info.m_class.m_service == ItemClass.Service.Road) {
-					++numRoads;
-				} else if ((info.m_vehicleTypes & VehicleInfo.VehicleType.Train) != VehicleInfo.VehicleType.None) {
-					++numTrainTracks;
-				} else if ((info.m_vehicleTypes & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None) {
-					++numMonorailTracks;
-				}
-				if (info.m_hasPedestrianLanes) {
-					++numPedSegments;
-				}
+            if (numRoads >= 2 || numTrainTracks >= 2 || numMonorailTracks >= 2 || numPedSegments != 0) {
+                if (logTrafficLights) {
+                    Log._DebugFormat(
+                        "Can toggle traffic lights at node {0}: numRoads={1} numTrainTracks={2} " +
+                        "numMonorailTracks={3} numPedSegments={4}",
+                        nodeId, numRoads, numTrainTracks, numMonorailTracks, numPedSegments);
+                }
 
-				return true;
-			});
+                reason = ToggleTrafficLightError.None;
+                return true;
+            }
 
-			if (numRoads >= 2 || numTrainTracks >= 2 || numMonorailTracks >= 2 || numPedSegments != 0) {
-#if DEBUGTTL
-				if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
-					Log._Debug($"Can toggle traffic lights at node {nodeId}: numRoads={numRoads} numTrainTracks={numTrainTracks} numMonorailTracks={numMonorailTracks} numPedSegments={numPedSegments}");
-#endif
-				reason = ToggleTrafficLightUnableReason.None;
-				return true;
-			}
+            if (logTrafficLights) {
+                Log._DebugFormat(
+                    "Cannot toggle traffic lights at node {0}: Insufficient segments. numRoads={1} " +
+                    "numTrainTracks={2} numMonorailTracks={3} numPedSegments={4}",
+                    nodeId, numRoads, numTrainTracks, numMonorailTracks, numPedSegments);
+            }
 
-#if DEBUGTTL
-			if (GlobalConfig.Instance.Debug.Switches[7] && GlobalConfig.Instance.Debug.NodeId == nodeId)
-				Log._Debug($"Cannot toggle traffic lights at node {nodeId}: Insufficient segments. numRoads={numRoads} numTrainTracks={numTrainTracks} numMonorailTracks={numMonorailTracks} numPedSegments={numPedSegments}");
-#endif
-			reason = ToggleTrafficLightUnableReason.InsufficientSegments;
-			return false;
-		}
+            reason = ToggleTrafficLightError.InsufficientSegments;
+            return false;
+        }
 
-		public bool IsTrafficLightEnablable(ushort nodeId, ref NetNode node, out ToggleTrafficLightUnableReason reason) {
-			bool ret = IsTrafficLightToggleable(nodeId, true, ref node, out reason);
-			if (!ret && reason == ToggleTrafficLightUnableReason.HasTimedLight) {
-				reason = ToggleTrafficLightUnableReason.None;
-				return true;
-			}
-			return ret;
-		}
+        public bool CanEnableTrafficLight(ushort nodeId,
+                                          ref NetNode node,
+                                          out ToggleTrafficLightError reason) {
+            var ret = CanToggleTrafficLight(nodeId, true, ref node, out reason);
 
-		public bool HasTrafficLight(ushort nodeId, ref NetNode node) {
-			return LogicUtil.CheckFlags((uint)node.m_flags, (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.TrafficLights), (uint)(NetNode.Flags.Created | NetNode.Flags.TrafficLights));
-		}
+            if (!ret && reason == ToggleTrafficLightError.HasTimedLight) {
+                reason = ToggleTrafficLightError.None;
+                return true;
+            }
 
-		[Obsolete]
-		public bool LoadData(string data) {
-			bool success = true;
-			var trafficLightDefs = data.Split(',');
+            return ret;
+        }
 
-			Log.Info($"Loading junction traffic light data (old method)");
+        public bool HasTrafficLight(ushort nodeId, ref NetNode node) {
+            return LogicUtil.CheckFlags(
+                (uint)node.m_flags,
+                (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.TrafficLights),
+                (uint)(NetNode.Flags.Created | NetNode.Flags.TrafficLights));
+        }
 
-			foreach (var split in trafficLightDefs.Select(def => def.Split(':')).Where(split => split.Length > 1)) {
-				try {
+        [Obsolete]
+        public bool LoadData(string data) {
+            bool success = true;
+            var trafficLightDefs = data.Split(',');
+            Log.Info($"Loading junction traffic light data (old method)");
+
+            IEnumerable<string[]> src = trafficLightDefs
+                                        .Select(def => def.Split(':'))
+                                        .Where(split => split.Length > 1);
+            foreach (string[] split in src) {
+                try {
 #if DEBUGLOAD
-					Log._Debug($"Traffic light split data: {split[0]} , {split[1]}");
+                    Log._Debug($"Traffic light split data: {split[0]} , {split[1]}");
 #endif
-					var nodeId = Convert.ToUInt16(split[0]);
-					uint flag = Convert.ToUInt16(split[1]);
+                    ushort nodeId = Convert.ToUInt16(split[0]);
+                    uint flag = Convert.ToUInt16(split[1]);
 
-					if (!Services.NetService.IsNodeValid(nodeId))
-						continue;
+                    if (!Services.NetService.IsNodeValid(nodeId)) {
+                        continue;
+                    }
 
-					Flags.setNodeTrafficLight(nodeId, flag > 0);
-				} catch (Exception e) {
-					// ignore as it's probably bad save data.
-					Log.Error($"Error setting the NodeTrafficLights: " + e.ToString());
-					success = false;
-				}
-			}
-			return success;
-		}
+                    Flags.setNodeTrafficLight(nodeId, flag > 0);
+                } catch (Exception e) {
+                    // ignore as it's probably bad save data.
+                    Log.Error($"Error setting the NodeTrafficLights: " + e.ToString());
+                    success = false;
+                }
+            }
 
-		[Obsolete]
-		public string SaveData(ref bool success) {
-			return null;
-		}
+            return success;
+        }
 
-		public bool LoadData(List<Configuration.NodeTrafficLight> data) {
-			bool success = true;
-			Log.Info($"Loading toggled traffic lights (new method)");
+        [Obsolete]
+        public string SaveData(ref bool success) {
+            return null;
+        }
 
-			foreach (Configuration.NodeTrafficLight nodeLight in data) {
-				try {
-					if (!Services.NetService.IsNodeValid(nodeLight.nodeId))
-						continue;
+        public bool LoadData(List<Configuration.NodeTrafficLight> data) {
+            bool success = true;
+            Log.Info($"Loading toggled traffic lights (new method)");
+
+            foreach (Configuration.NodeTrafficLight nodeLight in data) {
+                try {
+                    if (!Services.NetService.IsNodeValid(nodeLight.nodeId))
+                        continue;
 
 #if DEBUGLOAD
-					Log._Debug($"Setting traffic light @ {nodeLight.nodeId} to {nodeLight.trafficLight}");
+                    Log._Debug($"Setting traffic light @ {nodeLight.nodeId} to {nodeLight.trafficLight}");
 #endif
-					Services.NetService.ProcessNode(nodeLight.nodeId, delegate (ushort nodeId, ref NetNode node) {
-						SetTrafficLight(nodeLight.nodeId, nodeLight.trafficLight, ref node);
-						return true;
-					});
-					//Flags.setNodeTrafficLight(nodeLight.nodeId, nodeLight.trafficLight);
-				} catch (Exception e) {
-					// ignore as it's probably bad save data.
-					Log.Error($"Error setting the NodeTrafficLights @ {nodeLight.nodeId}: " + e.ToString());
-					success = false;
-				}
-			}
-			return success;
-		}
+                    Services.NetService.ProcessNode(
+                        nodeLight.nodeId,
+                        (ushort nodeId, ref NetNode node) => {
+                            SetTrafficLight(
+                                nodeLight.nodeId,
+                                nodeLight.trafficLight,
+                                ref node);
+                            return true;
+                        });
 
-		List<Configuration.NodeTrafficLight> ICustomDataManager<List<Configuration.NodeTrafficLight>>.SaveData(ref bool success) {
-			return null;
-		}
-	}
+                    // Flags.setNodeTrafficLight(nodeLight.nodeId, nodeLight.trafficLight);
+                } catch (Exception e) {
+                    // ignore as it's probably bad save data.
+                    Log.Error($"Error setting the NodeTrafficLights @ {nodeLight.nodeId}: {e}");
+                    success = false;
+                }
+            }
+
+            return success;
+        }
+
+        List<Configuration.NodeTrafficLight>
+            ICustomDataManager<List<Configuration.NodeTrafficLight>>.SaveData(ref bool success) {
+            return null;
+        }
+    }
 }

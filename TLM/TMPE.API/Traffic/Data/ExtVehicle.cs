@@ -1,5 +1,6 @@
 namespace TrafficManager.API.Traffic.Data {
-    using Enums;
+    using System;
+    using TrafficManager.API.Traffic.Enums;
 
     public struct ExtVehicle {
         public ushort vehicleId;
@@ -33,37 +34,48 @@ namespace TrafficManager.API.Traffic.Data {
         public float minSafeTrafficImprovement;
 
         public override string ToString() {
-            return $"[VehicleState\n" +
-                   "\t" + $"vehicleId = {vehicleId}\n" +
-                   "\t" + $"lastPathId = {lastPathId}\n" +
-                   "\t" + $"lastPathPositionIndex = {lastPathPositionIndex}\n" +
-                   "\t" + $"junctionTransitState = {junctionTransitState}\n" +
-                   "\t" + $"lastTransitStateUpdate = {lastTransitStateUpdate}\n" +
-                   "\t" + $"lastPositionUpdate = {lastPositionUpdate}\n" +
-                   "\t" + $"totalLength = {totalLength}\n" +
-                   "\t" + $"waitTime = {waitTime}\n" +
-                   "\t" + $"flags = {flags}\n" +
-                   "\t" + $"vehicleType = {vehicleType}\n" +
-                   "\t" + $"heavyVehicle = {heavyVehicle}\n" +
-                   "\t" + $"recklessDriver = {recklessDriver}\n" +
-                   "\t" + $"currentSegmentId = {currentSegmentId}\n" +
-                   "\t" + $"currentStartNode = {currentStartNode}\n" +
-                   "\t" + $"currentLaneIndex = {currentLaneIndex}\n" +
-                   "\t" + $"nextSegmentId = {nextSegmentId}\n" +
-                   "\t" + $"nextLaneIndex = {nextLaneIndex}\n" +
-                   "\t" + $"previousVehicleIdOnSegment = {previousVehicleIdOnSegment}\n" +
-                   "\t" + $"nextVehicleIdOnSegment = {nextVehicleIdOnSegment}\n" +
-                   "\t" + $"lastAltLaneSelSegmentId = {lastAltLaneSelSegmentId}\n" +
-                   "\t" + $"junctionTransitState = {junctionTransitState}\n" +
-                   "\t" + $"timedRand = {timedRand}\n" +
-                   "\t" + $"dlsReady = {dlsReady}\n" +
-                   "\t" + $"maxReservedSpace = {maxReservedSpace}\n" +
-                   "\t" + $"laneSpeedRandInterval = {laneSpeedRandInterval}\n" +
-                   "\t" + $"maxOptLaneChanges = {maxOptLaneChanges}\n" +
-                   "\t" + $"maxUnsafeSpeedDiff = {maxUnsafeSpeedDiff}\n" +
-                   "\t" + $"minSafeSpeedImprovement = {minSafeSpeedImprovement}\n" +
-                   "\t" + $"minSafeTrafficImprovement = {minSafeTrafficImprovement}\n" +
-                   "VehicleState]";
+            return string.Format(
+                "[VehicleState\n\tvehicleId = {0}\n\tlastPathId = {1}\n" +
+                "\tlastPathPositionIndex = {2}\n\tjunctionTransitState = {3}\n" +
+                "\tlastTransitStateUpdate = {4}\n\tlastPositionUpdate = {5}\n\ttotalLength = {6}\n" +
+                "\twaitTime = {7}\n\tflags = {8}\n\tvehicleType = {9}\n\theavyVehicle = {10}\n" +
+                "\trecklessDriver = {11}\n\tcurrentSegmentId = {12}\n\tcurrentStartNode = {13}\n" +
+                "\tcurrentLaneIndex = {14}\n\tnextSegmentId = {15}\n\tnextLaneIndex = {16}\n" +
+                "\tpreviousVehicleIdOnSegment = {17}\n\tnextVehicleIdOnSegment = {18}\n\t" +
+                "lastAltLaneSelSegmentId = {19}\n\tjunctionTransitState = {20}\n" +
+                "\ttimedRand = {21}\n\tdlsReady = {22}\n\tmaxReservedSpace = {23}\n" +
+                "\tlaneSpeedRandInterval = {24}\n\tmaxOptLaneChanges = {25}\n" +
+                "\tmaxUnsafeSpeedDiff = {26}\n\tminSafeSpeedImprovement = {27}\n" +
+                "\tminSafeTrafficImprovement = {28}\nVehicleState]",
+                vehicleId,
+                lastPathId,
+                lastPathPositionIndex,
+                junctionTransitState,
+                lastTransitStateUpdate,
+                lastPositionUpdate,
+                totalLength,
+                waitTime,
+                flags,
+                vehicleType,
+                heavyVehicle,
+                recklessDriver,
+                currentSegmentId,
+                currentStartNode,
+                currentLaneIndex,
+                nextSegmentId,
+                nextLaneIndex,
+                previousVehicleIdOnSegment,
+                nextVehicleIdOnSegment,
+                lastAltLaneSelSegmentId,
+                junctionTransitState,
+                timedRand,
+                dlsReady,
+                maxReservedSpace,
+                laneSpeedRandInterval,
+                maxOptLaneChanges,
+                maxUnsafeSpeedDiff,
+                minSafeSpeedImprovement,
+                minSafeTrafficImprovement);
         }
 
         public ExtVehicle(ushort vehicleId) {

@@ -1,8 +1,8 @@
 ﻿namespace TrafficManager.State.ConfigData {
     using System.Collections.Generic;
     using System.Linq;
-    using Traffic.Data;
-    using UI.MainMenu;
+    using TrafficManager.UI.MainMenu;
+    using TrafficManager.UI.SubTools.SpeedLimits;
 
     public class Main {
         /// <summary>

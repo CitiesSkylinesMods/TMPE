@@ -1,49 +1,60 @@
-﻿using ColossalFramework.UI;
-using CSUtil.Commons;
-using System;
-using ColossalFramework;
-using TrafficManager.State.Keybinds;
-using TrafficManager.Util;
-using UnityEngine;
+﻿namespace TrafficManager.UI {
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using System;
+    using TrafficManager.State.Keybinds;
+    using TrafficManager.Util;
+    using UnityEngine;
 
-namespace TrafficManager.UI.MainMenu {
     public abstract class LinearSpriteButton : UIButton {
-        public enum ButtonMouseState {
+        protected enum ButtonMouseState {
             Base,
             Hovered,
             MouseDown
         }
 
-        public const string MENU_BUTTON_BACKGROUND = "Bg";
-        public const string MENU_BUTTON_FOREGROUND = "Fg";
+        private const string MENU_BUTTON_BACKGROUND = "Bg";
+        private const string MENU_BUTTON_FOREGROUND = "Fg";
 
-        public const string MENU_BUTTON_BASE = "Base";
-        public const string MENU_BUTTON_HOVERED = "Hovered";
-        public const string MENU_BUTTON_MOUSEDOWN = "MouseDown";
+        private const string MENU_BUTTON_BASE = "Base";
+        private const string MENU_BUTTON_HOVERED = "Hovered";
+        private const string MENU_BUTTON_MOUSEDOWN = "MouseDown";
 
-        public const string MENU_BUTTON_DEFAULT = "Default";
-        public const string MENU_BUTTON_ACTIVE = "Active";
+        private const string MENU_BUTTON_DEFAULT = "Default";
+        private const string MENU_BUTTON_ACTIVE = "Active";
 
-        protected static string GetButtonBackgroundTextureId(string prefix, ButtonMouseState state, bool active) {
+        protected static string GetButtonBackgroundTextureId(
+            string prefix,
+            ButtonMouseState state,
+            bool active) {
             string ret = prefix + MENU_BUTTON_BACKGROUND;
 
             switch (state) {
-                case ButtonMouseState.Base:
+                case ButtonMouseState.Base: {
                     ret += MENU_BUTTON_BASE;
                     break;
-                case ButtonMouseState.Hovered:
+                }
+
+                case ButtonMouseState.Hovered: {
                     ret += MENU_BUTTON_HOVERED;
                     break;
-                case ButtonMouseState.MouseDown:
+                }
+
+                case ButtonMouseState.MouseDown: {
                     ret += MENU_BUTTON_MOUSEDOWN;
                     break;
+                }
             }
 
             ret += active ? MENU_BUTTON_ACTIVE : MENU_BUTTON_DEFAULT;
             return ret;
         }
 
-        protected static string GetButtonForegroundTextureId(string prefix, string function, bool active) {
+        private static string GetButtonForegroundTextureId(
+            string prefix,
+            string function,
+            bool active)
+        {
             string ret = prefix + MENU_BUTTON_FOREGROUND + function;
             ret += active ? MENU_BUTTON_ACTIVE : MENU_BUTTON_DEFAULT;
             return ret;
@@ -60,18 +71,21 @@ namespace TrafficManager.UI.MainMenu {
         public abstract Texture2D AtlasTexture { get; }
 
         public abstract int Width { get; }
+
         public abstract int Height { get; }
 
         public override void Start() {
-            var textureCount = Enum.GetValues(typeof(ButtonMouseState)).Length * (CanActivate() ? 2 : 1)
-                               + FunctionNames.Length * 2;
+            int textureCount =
+                (Enum.GetValues(typeof(ButtonMouseState)).Length * (CanActivate() ? 2 : 1))
+                + (FunctionNames.Length * 2);
             string[] textureIds = new string[textureCount];
-
             int i = 0;
+
             foreach (ButtonMouseState mouseState in EnumUtil.GetValues<ButtonMouseState>()) {
                 if (CanActivate()) {
                     textureIds[i++] = GetButtonBackgroundTextureId(ButtonName, mouseState, true);
                 }
+
                 textureIds[i++] = GetButtonBackgroundTextureId(ButtonName, mouseState, false);
             }
 
@@ -84,7 +98,11 @@ namespace TrafficManager.UI.MainMenu {
             }
 
             // Set the atlases for background/foreground
-            atlas = TextureUtil.GenerateLinearAtlas("TMPE_" + ButtonName + "Atlas", AtlasTexture, textureIds.Length, textureIds);
+            atlas = TextureUtil.GenerateLinearAtlas(
+                "TMPE_" + ButtonName + "Atlas",
+                AtlasTexture,
+                textureIds.Length,
+                textureIds);
 
             m_ForegroundSpriteMode = UIForegroundSpriteMode.Scale;
             UpdateProperties();
@@ -101,9 +119,10 @@ namespace TrafficManager.UI.MainMenu {
 
         public abstract void HandleClick(UIMouseEventParameter p);
 
-        public virtual KeybindSetting ShortcutKey {
-            get { return null; }
-        }
+        /// <summary>
+        /// Override this to return non-null, and it will display a keybind tooltip
+        /// </summary>
+        public virtual KeybindSetting ShortcutKey => null;
 
         protected override void OnClick(UIMouseEventParameter p) {
             HandleClick(p);
@@ -111,7 +130,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         internal void UpdateProperties() {
-            bool active = CanActivate() ? Active : false;
+            bool active = CanActivate() && Active;
 
             m_BackgroundSprites.m_Normal =
                 m_BackgroundSprites.m_Disabled =
@@ -133,8 +152,8 @@ namespace TrafficManager.UI.MainMenu {
                 m_PressedFgSprite =
                     GetButtonForegroundTextureId(ButtonName, FunctionName, true);
 
-            var shortcutText = GetShortcutTooltip();
-            tooltip = Translation.GetString(Tooltip) + shortcutText;
+            string shortcutText = GetShortcutTooltip();
+            tooltip = Tooltip + shortcutText;
 
             isVisible = Visible;
             this.Invalidate();

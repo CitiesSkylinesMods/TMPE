@@ -1,37 +1,43 @@
-using ColossalFramework.UI;
-using CSUtil.Commons;
-using System;
-using TrafficManager.UI.MainMenu;
-
 namespace TrafficManager.UI {
-    public class UIBase : UICustomControl {
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using System;
+    using TrafficManager.UI.MainMenu;
+    using UnityEngine;
 
-        public UIMainMenuButton MainMenuButton { get; private set; }
+    public class UIBase : UICustomControl {
+        public UIMainMenuButton MainMenuButton { get; }
+
         public MainMenuPanel MainMenu { get; private set; }
+
 #if DEBUG
         public DebugMenuPanel DebugMenu { get; private set; }
 #endif
-        public static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired=true) {
+
+        public static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired = true) {
             if (tool == null && createIfRequired) {
                 Log.Info("Initializing traffic manager tool...");
-                tool = ToolsModifierControl.toolController.gameObject.GetComponent<TrafficManagerTool>() ??
-                       ToolsModifierControl.toolController.gameObject.AddComponent<TrafficManagerTool>();
+                GameObject toolModControl = ToolsModifierControl.toolController.gameObject;
+                tool = toolModControl.GetComponent<TrafficManagerTool>()
+                       ?? toolModControl.AddComponent<TrafficManagerTool>();
                 tool.Initialize();
             }
 
             return tool;
         }
-        private static TrafficManagerTool tool = null;
+
+        private static TrafficManagerTool tool;
+
         public static TrafficManagerMode ToolMode { get; set; }
 
-        private bool _uiShown = false;
+        private bool _uiShown;
 
         public UIBase() {
             Log._Debug("##### Initializing UIBase.");
 
             // Get the UIView object. This seems to be the top-level object for most
             // of the UI.
-            var uiView = UIView.GetAView();
+            UIView uiView = UIView.GetAView();
 
             // Add a new button to the view.
             MainMenuButton = (UIMainMenuButton)uiView.AddUIComponent(typeof(UIMainMenuButton));
@@ -65,6 +71,7 @@ namespace TrafficManager.UI {
 
         internal void RebuildMenu() {
             Close();
+
             if (MainMenu != null) {
                 CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
                 if(keyHandler != null) {
@@ -77,7 +84,7 @@ namespace TrafficManager.UI {
 #endif
             }
 
-            var uiView = UIView.GetAView();
+            UIView uiView = UIView.GetAView();
             MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
             MainMenu.gameObject.AddComponent<CustomKeyHandler>();
 #if DEBUG
@@ -92,12 +99,12 @@ namespace TrafficManager.UI {
                 Log.Error("Error on Show(): " + e);
             }
 
-            foreach (var button in GetMenu().Buttons) {
+            foreach (MenuButton button in GetMenu().Buttons) {
                 button.UpdateProperties();
             }
 
             GetMenu().Show();
-            Translation.ReloadTutorialTranslations();
+            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
             TrafficManagerTool.ShowAdvisor("MainMenu");
 #if DEBUG
             GetDebugMenu().Show();
@@ -109,7 +116,6 @@ namespace TrafficManager.UI {
         }
 
         public void Close() {
-            var uiView = UIView.GetAView();
             GetMenu().Hide();
 #if DEBUG
             GetDebugMenu().Hide();

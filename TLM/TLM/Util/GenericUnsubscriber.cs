@@ -1,29 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+﻿namespace TrafficManager.Util {
+    using System.Collections.Generic;
+    using System.Threading;
+    using System;
+    using TrafficManager.API.Util;
 
-namespace TrafficManager.Util {
-	public class GenericUnsubscriber<T> : IDisposable {
-		private List<IObserver<T>> observers;
-		private IObserver<T> observer;
-		public object lck;
+    public class GenericUnsubscriber<T> : IDisposable {
+        private readonly List<IObserver<T>> observers_;
+        private readonly IObserver<T> observer_;
+        private readonly object lck_;
 
-		public GenericUnsubscriber(List<IObserver<T>> observers, IObserver<T> observer, object lck) {
-			this.observers = observers;
-			this.observer = observer;
-			this.lck = lck;
-		}
+        public GenericUnsubscriber(List<IObserver<T>> observers,
+                                   IObserver<T> observer,
+                                   object lck) {
+            observers_ = observers;
+            observer_ = observer;
+            lck_ = lck;
+        }
 
-		public void Dispose() {
-			if (observer != null) {
-				try {
-					Monitor.Enter(lck);
-					observers.Remove(observer);
-				} finally {
-					Monitor.Exit(lck);
-				}
-			}
-		}
-	}
+        public void Dispose() {
+            if (observer_ == null) {
+                return;
+            }
+
+            try {
+                Monitor.Enter(lck_);
+                observers_.Remove(observer_);
+            }
+            finally {
+                Monitor.Exit(lck_);
+            }
+        }
+    }
 }

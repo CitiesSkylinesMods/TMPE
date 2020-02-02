@@ -1,0 +1,12 @@
+"","de","en","fr"
+"language-columns","value-de","value-en","value-fr"
+"empty-values-quote-marks","","",""
+"empty-values-quote-marks-mixed","","en",""
+"empty-values-no-quote-marks",,,
+"empty-values-no-quote-marks-mixed",,,"lang-fr"
+"empty-values-no-quote-marks-mixed",,"lang-en",lang-fr
+"escape-sign-text","\test value de/","\test value en/","\test value fr/"
+"text-contains-comma","test value de","test,value en","test value fr"
+"text-contains-quote-mark","test ""value de","test value en","test value fr"
+"text-contains-quote-mark-multiple","test ""value"" de","test value en","test value fr"
+"last-row","last row column de","last row column en","last row column fr"

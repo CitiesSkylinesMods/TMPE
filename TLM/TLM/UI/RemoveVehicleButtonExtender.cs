@@ -1,130 +1,103 @@
-﻿using ColossalFramework;
-using ColossalFramework.UI;
-using CSUtil.Commons;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrafficManager.Manager.Impl;
-using TrafficManager.UI.MainMenu;
-using UnityEngine;
+﻿namespace TrafficManager.UI {
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using System.Collections.Generic;
+    using TrafficManager.UI.Textures;
+    using UnityEngine;
 
-namespace TrafficManager.UI {
-	public class RemoveVehicleButtonExtender : MonoBehaviour {
-		private IList<UIButton> buttons;
+    public class RemoveVehicleButtonExtender : MonoBehaviour {
+        private IList<UIButton> buttons;
 
-		public void Start() {
-			buttons = new List<UIButton>();
+        public void Start() {
+            buttons = new List<UIButton>();
 
-			var citizenVehicleInfoPanel = GameObject.Find("(Library) CitizenVehicleWorldInfoPanel").GetComponent<CitizenVehicleWorldInfoPanel>();
-			if (citizenVehicleInfoPanel != null) {
-				buttons.Add(AddRemoveVehicleButton(citizenVehicleInfoPanel));
-			}
+            var citizenVehicleInfoPanel
+                = GameObject.Find("(Library) CitizenVehicleWorldInfoPanel")
+                            .GetComponent<CitizenVehicleWorldInfoPanel>();
 
-			var cityServiceVehicleInfoPanel = GameObject.Find("(Library) CityServiceVehicleWorldInfoPanel").GetComponent<CityServiceVehicleWorldInfoPanel>();
-			if (cityServiceVehicleInfoPanel != null) {
-				buttons.Add(AddRemoveVehicleButton(cityServiceVehicleInfoPanel));
-			}
+            if (citizenVehicleInfoPanel != null) {
+                buttons.Add(AddRemoveVehicleButton(citizenVehicleInfoPanel));
+            }
 
-			var publicTransportVehicleInfoPanel = GameObject.Find("(Library) PublicTransportVehicleWorldInfoPanel").GetComponent<PublicTransportVehicleWorldInfoPanel>();
-			if (publicTransportVehicleInfoPanel != null) {
-				buttons.Add(AddRemoveVehicleButton(publicTransportVehicleInfoPanel));
-			}
-		}
+            var cityServiceVehicleInfoPanel
+                = GameObject.Find("(Library) CityServiceVehicleWorldInfoPanel")
+                            .GetComponent<CityServiceVehicleWorldInfoPanel>();
 
-		public void OnDestroy() {
-			if (buttons == null) {
-				return;
-			}
+            if (cityServiceVehicleInfoPanel != null) {
+                buttons.Add(AddRemoveVehicleButton(cityServiceVehicleInfoPanel));
+            }
 
-			foreach (UIButton button in buttons) {
-				Destroy(button.gameObject);
-			}
-		}
+            var publicTransportVehicleInfoPanel
+                = GameObject.Find("(Library) PublicTransportVehicleWorldInfoPanel")
+                            .GetComponent<PublicTransportVehicleWorldInfoPanel>();
 
-		protected UIButton AddRemoveVehicleButton(WorldInfoPanel panel) {
-			UIButton button = UIView.GetAView().AddUIComponent(typeof(RemoveVehicleButton)) as RemoveVehicleButton;
-			
-			button.AlignTo(panel.component, UIAlignAnchor.TopRight);
-			button.relativePosition += new Vector3(- button.width - 80f, 50f);
+            if (publicTransportVehicleInfoPanel != null) {
+                buttons.Add(AddRemoveVehicleButton(publicTransportVehicleInfoPanel));
+            }
+        }
 
-			return button;
-		}
+        public void OnDestroy() {
+            if (buttons == null) {
+                return;
+            }
 
-		public class RemoveVehicleButton : LinearSpriteButton {
-			public override void Start() {
-				base.Start();
-				width = Width;
-				height = Height;
-			}
+            foreach (UIButton button in buttons) {
+                Destroy(button.gameObject);
+            }
+        }
 
-			public override void HandleClick(UIMouseEventParameter p) {
-				InstanceID instance = WorldInfoPanel.GetCurrentInstanceID();
-				Log._Debug($"Current vehicle instance: {instance.Vehicle}");
-				if (instance.Vehicle != 0) {
-					Constants.ServiceFactory.SimulationService.AddAction(() => Constants.ServiceFactory.VehicleService.ReleaseVehicle(instance.Vehicle));
-				} else if (instance.ParkedVehicle != 0) {
-					Constants.ServiceFactory.SimulationService.AddAction(() => Constants.ServiceFactory.VehicleService.ReleaseParkedVehicle(instance.ParkedVehicle));
-				}
-			}
+        protected UIButton AddRemoveVehicleButton(WorldInfoPanel panel) {
+            UIButton button =
+                UIView.GetAView()
+                      .AddUIComponent(typeof(RemoveVehicleButton)) as RemoveVehicleButton;
 
-			public override bool Active {
-				get {
-					return false;
-				}
-			}
+            button.AlignTo(panel.component, UIAlignAnchor.TopRight);
+            button.relativePosition += new Vector3(-button.width - 80f, 50f);
 
-			public override Texture2D AtlasTexture {
-				get {
-					return TextureResources.RemoveButtonTexture2D;
-				}
-			}
+            return button;
+        }
 
-			public override string ButtonName {
-				get {
-					return "RemoveVehicle";
-				}
-			}
+        public class RemoveVehicleButton : LinearSpriteButton {
+            public override void Start() {
+                base.Start();
+                width = Width;
+                height = Height;
+            }
 
-			public override string FunctionName {
-				get {
-					return "RemoveVehicleNow";
-				}
-			}
+            public override void HandleClick(UIMouseEventParameter p) {
+                InstanceID instance = WorldInfoPanel.GetCurrentInstanceID();
+                Log._Debug($"Current vehicle instance: {instance.Vehicle}");
 
-			public override string[] FunctionNames {
-				get {
-					return new string[] { "RemoveVehicleNow" };
-				}
-			}
+                if (instance.Vehicle != 0) {
+                    Constants.ServiceFactory.SimulationService.AddAction(
+                        () => Constants.ServiceFactory.VehicleService.ReleaseVehicle(instance.Vehicle));
+                } else if (instance.ParkedVehicle != 0) {
+                    Constants.ServiceFactory.SimulationService.AddAction(
+                        () => Constants.ServiceFactory.VehicleService.ReleaseParkedVehicle(instance.ParkedVehicle));
+                }
+            }
 
-			public override string Tooltip {
-				get {
-					return Translation.GetString("Remove_this_vehicle");
-				}
-			}
+            public override bool Active => false;
 
-			public override bool Visible {
-				get {
-					return true;
-				}
-			}
+            public override Texture2D AtlasTexture => TextureResources.RemoveButtonTexture2D;
 
-			public override int Width {
-				get {
-					return 30;
-				}
-			}
+            public override string ButtonName => "RemoveVehicle";
 
-			public override int Height {
-				get {
-					return 30;
-				}
-			}
+            public override string FunctionName => "RemoveVehicleNow";
 
-			public override bool CanActivate() {
-				return false;
-			}
-		}
-	}
+            public override string[] FunctionNames => new[] { "RemoveVehicleNow" };
+
+            public override string Tooltip => Translation.Menu.Get("Button:Remove this vehicle");
+
+            public override bool Visible => true;
+
+            public override int Width => 30;
+
+            public override int Height => 30;
+
+            public override bool CanActivate() {
+                return false;
+            }
+        }
+    }
 }

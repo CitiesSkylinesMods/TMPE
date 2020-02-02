@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace TrafficManager.API.Util {
+    using System;
 
-namespace TrafficManager.Util {
-	public interface IObservable<T> {
-		IDisposable Subscribe(IObserver<T> observer); 
-	}
+    public interface IObservable<T> {
+        IDisposable Subscribe(IObserver<T> observer);
+    }
 }

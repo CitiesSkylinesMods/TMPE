@@ -1,10 +1,13 @@
-﻿using TrafficManager.State;
+﻿namespace TrafficManager.UI.MainMenu {
+    using TrafficManager.State;
 
-namespace TrafficManager.UI.MainMenu {
     public class ParkingRestrictionsButton : MenuToolModeButton {
-        public override ToolMode ToolMode => ToolMode.ParkingRestrictions;
-        public override ButtonFunction Function => ButtonFunction.ParkingRestrictions;
-        public override string Tooltip => "Parking_restrictions";
+        protected override ToolMode ToolMode => ToolMode.ParkingRestrictions;
+
+        protected override ButtonFunction Function => ButtonFunction.ParkingRestrictions;
+
+        public override string Tooltip => Translation.Menu.Get("Tooltip:Parking restrictions");
+
         public override bool Visible => Options.parkingRestrictionsEnabled;
     }
 }

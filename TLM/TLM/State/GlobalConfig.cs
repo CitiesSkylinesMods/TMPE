@@ -1,10 +1,11 @@
 ﻿namespace TrafficManager.State {
-    using System;
+    using CSUtil.Commons;
+    using JetBrains.Annotations;
     using System.IO;
     using System.Xml.Serialization;
-    using CSUtil.Commons;
-    using State.ConfigData;
-    using Util;
+    using System;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     [XmlRootAttribute("GlobalConfig", Namespace = "http://www.viathinksoft.de/tmpe", IsNullable = false)]
     public class GlobalConfig : GenericObservable<GlobalConfig> {
@@ -53,10 +54,11 @@
         /// <summary>
         /// Language to use (if null then the game's language is being used)
         /// </summary>
+        [CanBeNull]
         public string LanguageCode = null;
 
 #if DEBUG
-        public Debug Debug = new Debug();
+        public DebugSettings Debug = new DebugSettings();
 #endif
 
         public AdvancedVehicleAI AdvancedVehicleAI = new AdvancedVehicleAI();
@@ -82,6 +84,7 @@
         private static GlobalConfig WriteDefaultConfig(GlobalConfig oldConfig, bool resetAll, out DateTime modifiedTime) {
             Log._Debug($"Writing default config...");
             GlobalConfig conf = new GlobalConfig();
+
             if (!resetAll && oldConfig != null) {
                 conf.Main.MainMenuButtonX = oldConfig.Main.MainMenuButtonX;
                 conf.Main.MainMenuButtonY = oldConfig.Main.MainMenuButtonY;
@@ -134,7 +137,7 @@
                     GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
                     if (LoadingExtension.IsGameLoaded
 #if DEBUG
-                        && !conf.Debug.Switches[10]
+                        && !DebugSwitch.NoRoutingRecalculationOnConfigReload.Get()
 #endif
                         ) {
                         Constants.ManagerFactory.RoutingManager.RequestFullRecalculation();
@@ -142,7 +145,7 @@
 
 #if DEBUG
                     if (conf.Debug == null) {
-                        conf.Debug = new Debug();
+                        conf.Debug = new DebugSettings();
                     }
 #endif
 
@@ -194,10 +197,12 @@
                         filename = BACKUP_FILENAME + "." + backupIndex;
                         ++backupIndex;
                     }
+
                     WriteConfig(conf, filename);
                 } catch (Exception e) {
                     Log.Warning($"Error occurred while saving backup config to '{filename}': {e.ToString()}");
                 }
+
                 Reset(conf);
             } else {
                 Instance = conf;
@@ -215,6 +220,7 @@
         private static void ReloadIfNewer() {
             try {
                 DateTime modifiedTime = File.GetLastWriteTime(FILENAME);
+
                 if (modifiedTime > ModifiedTime) {
                     Log.Info($"Detected modification of global config.");
                     Reload(false);
