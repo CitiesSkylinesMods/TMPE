@@ -25,7 +25,7 @@ This changelog includes all versions and major variants of the mod going all the
 > * **TPP** = Traffic++
 > * **TM** = Traffic Manager
 
-### TM:PE V11 STABLE [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), date
+### TM:PE V11 STABLE [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), 03/02/2020
 
 - Meta: Contains ~100 changes from TM:PE v11 ALPHA versions 11.0-alpha1 to 11.0-alpha12
 - Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
@@ -41,7 +41,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Meta: Renamed LABS and ALPHA workshop pages to V11 STABLE and V11 LABS respectively
 - Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-### TM:PE V11 LABS [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), date
+### TM:PE V11 LABS [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), 03/02/2020
 
 - Meta: Contains ~100 changes from TM:PE v11 ALPHA versions 11.0-alpha1 to 11.0-alpha12
 - Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
