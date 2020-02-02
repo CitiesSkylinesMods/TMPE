@@ -377,6 +377,7 @@ namespace TrafficManager {
 
                 Log.Info("Removing Controls from UI.");
                 if (BaseUI != null) {
+                    BaseUI.Close();
                     Object.Destroy(BaseUI);
                     Log._Debug("removed UIBase instance.");
                     BaseUI = null;
