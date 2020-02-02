@@ -793,38 +793,39 @@ namespace TrafficManager.Manager.Impl {
             ret |= SetUturnAllowed(segmentId, startNode, TernaryBool.Undefined);
             return ret;
         }
+
         private void SetSegmentEndFlags(ushort segmentId, bool startNode, SegmentEndFlags flags) {
             if (flags.uturnAllowed != TernaryBool.Undefined) {
-                SetUturnAllowed(segmentId, startNode, flags.uturnAllowed);
+                SetUturnAllowed(segmentId, startNode, flags.IsUturnAllowed());
             }
 
             if (flags.nearTurnOnRedAllowed != TernaryBool.Undefined) {
-                SetNearTurnOnRedAllowed(segmentId, startNode, flags.nearTurnOnRedAllowed);
+                SetNearTurnOnRedAllowed(segmentId, startNode, flags.IsNearTurnOnRedAllowed());
             }
 
             if (flags.nearTurnOnRedAllowed != TernaryBool.Undefined) {
-                SetFarTurnOnRedAllowed(segmentId, startNode, flags.nearTurnOnRedAllowed);
+                SetFarTurnOnRedAllowed(segmentId, startNode, flags.IsNearTurnOnRedAllowed());
             }
 
             if (flags.straightLaneChangingAllowed != TernaryBool.Undefined) {
                 SetLaneChangingAllowedWhenGoingStraight(
                     segmentId,
                     startNode,
-                    flags.straightLaneChangingAllowed);
+                    flags.IsLaneChangingAllowedWhenGoingStraight());
             }
 
             if (flags.enterWhenBlockedAllowed != TernaryBool.Undefined) {
                 SetEnteringBlockedJunctionAllowed(
                     segmentId,
                     startNode,
-                    flags.enterWhenBlockedAllowed);
+                    flags.IsEnteringBlockedJunctionAllowed());
             }
 
             if (flags.pedestrianCrossingAllowed != TernaryBool.Undefined) {
                 SetPedestrianCrossingAllowed(
                     segmentId,
                     startNode,
-                    flags.pedestrianCrossingAllowed);
+                    flags.IsPedestrianCrossingAllowed());
             }
         }
 
