@@ -24,10 +24,12 @@ namespace TrafficManager.Util {
                     $"(expected {numX} x {numY}, was {spriteNames.Length})");
             }
 
+#if DEBUG
             Log._DebugIf(
-                DebugSwitch.ResourceLoading.Get(),
+            DebugSwitch.ResourceLoading.Get(),
                 ()=>$"Loading atlas for {name} count:{numX}x{numY} " +
                 $"texture:{texture.name} size:{texture.width}x{texture.height}");
+#endif
 
             UITextureAtlas atlas = ScriptableObject.CreateInstance<UITextureAtlas>();
             atlas.padding = 0;

@@ -163,9 +163,11 @@ namespace TrafficManager.UI {
             bool active = CanActivate() && Active;
             bool disabled = CanDisable && ShouldDisable;
 
+#if DEBUG
             Log._DebugIf(
                 DebugSwitch.ResourceLoading.Get(),
                 ()=>$"UpdateProperties: button={this.name} active={active} disabled={disabled}");
+#endif
 
             m_BackgroundSprites.m_Normal =
                 m_BackgroundSprites.m_Disabled =
