@@ -886,7 +886,7 @@ namespace TrafficManager.Manager.Impl {
             base.OnLevelUnloading();
 
             for (int i = 0; i < segmentFlags_.Length; ++i) {
-                segmentFlags_[i].Reset(startNode:null, resetDefaults: true);
+                segmentFlags_[i].Reset(startNode: null, resetDefaults: true);
             }
 
             for (int i = 0; i < invalidSegmentFlags.Length; ++i) {
