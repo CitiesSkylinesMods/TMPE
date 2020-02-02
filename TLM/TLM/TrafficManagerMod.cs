@@ -14,9 +14,9 @@ namespace TrafficManager {
 #if LABS
         public const string BRANCH = "LABS";
 #elif DEBUG
-    public const string BRANCH = "DEBUG";
+        public const string BRANCH = "DEBUG";
 #else
-    public const string BRANCH = "STABLE";
+        public const string BRANCH = "STABLE";
 #endif
 
         // These values from `BuildConfig` class (`APPLICATION_VERSION` constants) in game file `Managed/Assembly-CSharp.dll` (use ILSpy to inspect them)
