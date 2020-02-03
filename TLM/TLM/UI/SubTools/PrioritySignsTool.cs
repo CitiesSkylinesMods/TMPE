@@ -379,7 +379,7 @@ namespace TrafficManager.UI.SubTools {
                         }
 
                         if (MainTool.DrawGenericSquareOverlayTexture(
-                                RoadUITextures.PrioritySignTextures[sign],
+                                RoadUI.PrioritySignTextures[sign],
                                 camPos,
                                 signPos,
                                 90f,
@@ -425,7 +425,7 @@ namespace TrafficManager.UI.SubTools {
                     // draw remove button and handle click
                     if (showRemoveButton
                         && MainTool.DrawHoverableSquareOverlayTexture(
-                            RoadUITextures.SignRemove,
+                            RoadUI.SignRemove,
                             camPos,
                             nodePos,
                             90f)
