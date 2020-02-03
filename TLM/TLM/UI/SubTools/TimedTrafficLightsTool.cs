@@ -1,17 +1,17 @@
 namespace TrafficManager.UI.SubTools {
-    using TrafficManager.Util;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.TrafficLight;
     using ColossalFramework;
     using CSUtil.Commons;
-    using Manager.Impl;
-    using State;
-    using Textures;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.TrafficLight;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
+    using TrafficManager.UI.Textures;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class TimedTrafficLightsTool : SubTool {

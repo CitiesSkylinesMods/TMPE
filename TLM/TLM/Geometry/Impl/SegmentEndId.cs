@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.Geometry.Impl {
-    using API.Traffic;
-    using Traffic;
+    using TrafficManager.API.Traffic;
+    using TrafficManager.Traffic;
 
     public class SegmentEndId : ISegmentEndId {
         public ushort SegmentId { get; protected set; }

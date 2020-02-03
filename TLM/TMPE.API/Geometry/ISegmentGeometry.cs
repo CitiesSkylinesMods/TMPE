@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.Geometry {
-    using API.Geometry;
-    using API.Traffic.Enums;
     using JetBrains.Annotations;
+    using TrafficManager.API.Geometry;
+    using TrafficManager.API.Traffic.Enums;
 
     // Not used
     [UsedImplicitly]

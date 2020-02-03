@@ -1,8 +1,8 @@
 ﻿namespace TrafficManager.API.Manager {
     using System;
-    using Geometry;
-    using Traffic.Data;
-    using Util;
+    using TrafficManager.API.Geometry;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Util;
 
     public struct GeometryUpdate {
         public ExtSegment? segment { get; private set; }

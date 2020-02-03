@@ -1,21 +1,21 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using System;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using ColossalFramework;
     using ColossalFramework.Globalization;
     using ColossalFramework.Math;
-    using CSUtil.Commons;
+    using ColossalFramework;
     using CSUtil.Commons.Benchmark;
-    using Custom.AI;
-    using Custom.PathFinding;
+    using CSUtil.Commons;
     using JetBrains.Annotations;
-    using State;
-    using State.ConfigData;
-    using UI;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Custom.AI;
+    using TrafficManager.Custom.PathFinding;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.UI;
+    using TrafficManager.Util;
     using UnityEngine;
-    using Util;
 
     public class AdvancedParkingManager
         : AbstractFeatureManager,

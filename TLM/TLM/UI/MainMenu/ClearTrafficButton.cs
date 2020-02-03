@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.UI.MainMenu {
     using ColossalFramework.UI;
-    using Manager.Impl;
+    using TrafficManager.Manager.Impl;
 
     public class ClearTrafficButton : MenuButton {
         public override bool Active => false;

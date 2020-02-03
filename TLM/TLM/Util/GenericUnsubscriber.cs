@@ -1,8 +1,8 @@
 ﻿namespace TrafficManager.Util {
-    using System;
     using System.Collections.Generic;
     using System.Threading;
-    using API.Util;
+    using System;
+    using TrafficManager.API.Util;
 
     public class GenericUnsubscriber<T> : IDisposable {
         private readonly List<IObserver<T>> observers_;

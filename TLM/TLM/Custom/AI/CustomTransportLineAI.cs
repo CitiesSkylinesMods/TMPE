@@ -1,13 +1,13 @@
 ﻿namespace TrafficManager.Custom.AI {
-    using System.Runtime.CompilerServices;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using PathFinding;
-    using RedirectionFramework.Attributes;
-    using State.ConfigData;
+    using System.Runtime.CompilerServices;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Custom.PathFinding;
+    using TrafficManager.RedirectionFramework.Attributes;
+    using TrafficManager.State.ConfigData;
     using UnityEngine;
 
     // TODO inherit from NetAI (in order to keep the correct references to `base`)

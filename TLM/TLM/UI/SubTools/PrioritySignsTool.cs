@@ -1,17 +1,17 @@
 namespace TrafficManager.UI.SubTools {
-    using System;
-    using System.Collections.Generic;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
-    using Manager.Impl;
-    using State;
-    using Textures;
-    using UnityEngine;
-    using Util;
     using static Util.SegmentTraverser;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
+    using TrafficManager.UI.Textures;
+    using TrafficManager.Util;
+    using UnityEngine;
 
     public class PrioritySignsTool : SubTool {
         private enum PrioritySignsMassEditMode {
@@ -19,7 +19,7 @@ namespace TrafficManager.UI.SubTools {
             MainStop = 1,
             YieldMain = 2,
             StopMain = 3,
-            Delete = 4
+            Delete = 4,
         }
 
         private readonly HashSet<ushort> currentPriorityNodeIds;

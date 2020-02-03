@@ -1,20 +1,20 @@
 namespace TrafficManager.TrafficLight.Impl {
-    using System;
+    using CSUtil.Commons;
+    using GenericGameBridge.Service;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
-    using API.Manager;
-    using API.Traffic;
-    using API.Traffic.Enums;
-    using API.TrafficLight;
-    using CSUtil.Commons;
-    using GenericGameBridge.Service;
-    using Geometry.Impl;
-    using Manager.Impl;
-    using State.ConfigData;
-    using Traffic;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.Traffic;
+    using TrafficManager.API.TrafficLight;
+    using TrafficManager.Geometry.Impl;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.Traffic;
+    using TrafficManager.Util;
     using UnityEngine;
-    using Util;
 
     // TODO define TimedTrafficLights per node group, not per individual nodes
     public class TimedTrafficLights : ITimedTrafficLights {

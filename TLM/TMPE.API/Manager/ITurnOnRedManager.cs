@@ -1,5 +1,5 @@
 namespace TrafficManager.API.Manager {
-    using Traffic.Data;
+    using TrafficManager.API.Traffic.Data;
 
     public interface ITurnOnRedManager {
         TurnOnRedSegments[] TurnOnRedSegments { get; }

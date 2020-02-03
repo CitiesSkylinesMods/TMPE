@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.API.Manager {
-    using Traffic.Data;
-    using Traffic.Enums;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
 
     public interface IExtVehicleManager {
         /// <summary>

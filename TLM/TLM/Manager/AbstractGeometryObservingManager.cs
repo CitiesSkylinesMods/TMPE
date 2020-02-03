@@ -1,14 +1,14 @@
 ﻿namespace TrafficManager.Manager {
-    using System;
-    using API.Geometry;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Util;
     using CSUtil.Commons;
-    using Geometry;
     using JetBrains.Annotations;
-    using State.ConfigData;
-    using Util;
+    using System;
+    using TrafficManager.API.Geometry;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Util;
+    using TrafficManager.Geometry;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     public abstract class AbstractGeometryObservingManager : AbstractCustomManager, IObserver<GeometryUpdate> {
         private IDisposable geoUpdateUnsubscriber;

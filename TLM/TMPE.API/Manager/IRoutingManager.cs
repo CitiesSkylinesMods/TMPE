@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.API.Manager {
     using System;
     using CSUtil.Commons;
-    using Traffic.Enums;
+    using TrafficManager.API.Traffic.Enums;
 
     public struct SegmentRoutingData {
         public bool startNodeOutgoingOneWay;

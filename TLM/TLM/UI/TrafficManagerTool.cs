@@ -1,24 +1,24 @@
 namespace TrafficManager.UI {
-    using System;
+    using ColossalFramework.Math;
+    using ColossalFramework.UI;
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using JetBrains.Annotations;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.Util;
-    using ColossalFramework;
-    using ColossalFramework.Math;
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
-    using JetBrains.Annotations;
-    using Manager.Impl;
-    using State;
-    using State.ConfigData;
-    using MainMenu;
-    using SubTools;
-    using SubTools.SpeedLimits;
-    using Util;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.Util;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.UI.MainMenu;
+    using TrafficManager.UI.SubTools.SpeedLimits;
+    using TrafficManager.UI.SubTools;
+    using TrafficManager.Util;
     using UnityEngine;
 
     [UsedImplicitly]
@@ -33,8 +33,6 @@ namespace TrafficManager.UI {
         internal static ushort HoveredSegmentId;
 
         private static bool _mouseClickProcessed;
-
-        private const bool HoverPrefersSmallerSegments = true;
 
         public const float DEBUG_CLOSE_LOD = 300f;
         /// <summary>
@@ -940,8 +938,8 @@ namespace TrafficManager.UI {
                     }
                 }
 
-                if (HoveredNodeId != 0) {
-                    HoveredSegmentId = GetHoveredSegmentFromNode();
+                if (HoveredNodeId != 0 && HoveredSegmentId != 0) {
+                    HoveredSegmentId = GetHoveredSegmentFromNode(segmentOutput.m_hitPos);
                 }
             }
 
@@ -949,26 +947,20 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// returns the node segment that is closest to the mouse pointer based on angle.
+        /// returns the node(HoveredNodeId) segment that is closest to the input position.
         /// </summary>
-        internal ushort GetHoveredSegmentFromNode() {
+        internal ushort GetHoveredSegmentFromNode(Vector3 hitPos) {
             ushort minSegId = 0;
             NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
-            Vector3 dir0 = m_mousePosition - node.m_position;
-            float min_angle = float.MaxValue;
+            float minDistance = float.MaxValue;
             Constants.ServiceFactory.NetService.IterateNodeSegments(
                 HoveredNodeId,
                 (ushort segmentId, ref NetSegment segment) =>
                 {
-                    Vector3 dir = segment.m_startNode == HoveredNodeId ?
-                        segment.m_startDirection :
-                        segment.m_endDirection;
-                    float angle = GetAngle(dir, dir0);
-                    if (HoverPrefersSmallerSegments) {
-                        angle *= segment.m_averageLength;
-                    }
-                    if (angle < min_angle) {
-                        min_angle = angle;
+                    Vector3 pos = segment.GetClosestPosition(hitPos);
+                    float distance = (hitPos - pos).sqrMagnitude;
+                    if (distance < minDistance) {
+                        minDistance = distance;
                         minSegId = segmentId;
                     }
                     return true;
@@ -976,20 +968,7 @@ namespace TrafficManager.UI {
             return minSegId;
         }
 
-        /// <summary>
-        /// returns the angle between v1 and v2.
-        /// input order does not matter.
-        /// The return value is between 0 to 180.
-        /// </summary>
-        private static float GetAngle(Vector3 v1, Vector3 v2) {
-            float ret = Vector3.Angle(v1, v2); // -180 to 180 degree
-            if (ret > 180) ret -= 180; // future proofing.
-            ret = Math.Abs(ret);
-            return ret;
-        }
-
-
-        /// <summary>
+         /// <summary>
         /// Displays lane ids over lanes
         /// </summary>
         private void GuiDisplayLanes(ushort segmentId,
