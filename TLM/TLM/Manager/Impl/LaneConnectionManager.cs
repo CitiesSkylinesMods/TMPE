@@ -66,7 +66,7 @@ namespace TrafficManager.Manager.Impl {
         /// determines whether or not the input lane is heading toward a start node.
         /// </summary>
         /// <returns>true if heading toward and start node.</returns>
-        private bool isHeadStartNode(uint sourceLaneId) {
+        private bool IsHeadingTowardsStartNode(uint sourceLaneId) {
             NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
             ushort segmentId = laneBuffer[sourceLaneId].m_segment;
             NetSegment segment = GetSeg(segmentId);
@@ -86,7 +86,7 @@ namespace TrafficManager.Manager.Impl {
             if (!Options.laneConnectorEnabled) {
                 return false;
             }
-            return HasConnections(sourceLaneId, isHeadStartNode(sourceLaneId));
+            return HasConnections(sourceLaneId, IsHeadingTowardsStartNode(sourceLaneId));
         }
 
 

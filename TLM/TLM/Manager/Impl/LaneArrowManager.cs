@@ -133,7 +133,7 @@ namespace TrafficManager.Manager.Impl {
         /// Resets lane arrows to their default value for the given lane
         /// </summary>
         public void ResetLaneArrows(uint laneId) {
-            if (Flags.resetLaneArrowFlags(laneId)) {
+            if (Flags.ResetLaneArrowFlags(laneId)) {
                 RecalculateFlags(laneId);
                 OnLaneChange(laneId);
             }

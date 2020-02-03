@@ -738,7 +738,7 @@ namespace TrafficManager.State {
         /// </summary>
         /// <param name="laneId"></param>
         /// <returns><c>true</c>on success, <c>false</c> otherwise</returns>
-        public static bool resetLaneArrowFlags(uint laneId) {
+        public static bool ResetLaneArrowFlags(uint laneId) {
 #if DEBUGFLAGS
             Log._Debug($"Flags.resetLaneArrowFlags: Resetting lane arrows of lane {laneId}.");
 #endif
