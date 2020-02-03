@@ -293,8 +293,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? JunctionUITextures.LaneChangeAllowedTexture2D
-                            : JunctionUITextures.LaneChangeForbiddenTexture2D,
+                            ? JunctionRestrictions.LaneChangeAllowed
+                            : JunctionRestrictions.LaneChangeForbidden,
                         out signHovered);
 
                     if (signHovered && handleClick) {
@@ -340,8 +340,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? JunctionUITextures.UturnAllowedTexture2D
-                            : JunctionUITextures.UturnForbiddenTexture2D,
+                            ? JunctionRestrictions.UturnAllowed
+                            : JunctionRestrictions.UturnForbidden,
                         out signHovered);
 
                     if (signHovered && handleClick) {
@@ -401,8 +401,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? JunctionUITextures.EnterBlockedJunctionAllowedTexture2D
-                            : JunctionUITextures.EnterBlockedJunctionForbiddenTexture2D,
+                            ? JunctionRestrictions.EnterBlockedJunctionAllowed
+                            : JunctionRestrictions.EnterBlockedJunctionForbidden,
                         out signHovered);
 
                     if (signHovered && handleClick) {
@@ -447,8 +447,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? JunctionUITextures.PedestrianCrossingAllowedTexture2D
-                            : JunctionUITextures.PedestrianCrossingForbiddenTexture2D,
+                            ? JunctionRestrictions.PedestrianCrossingAllowed
+                            : JunctionRestrictions.PedestrianCrossingForbidden,
                         out signHovered);
 
                     if (signHovered && handleClick) {
@@ -512,8 +512,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? JunctionUITextures.LeftOnRedAllowedTexture2D
-                            : JunctionUITextures.LeftOnRedForbiddenTexture2D,
+                            ? JunctionRestrictions.LeftOnRedAllowed
+                            : JunctionRestrictions.LeftOnRedForbidden,
                         out signHovered);
 
                     if (signHovered && handleClick) {
@@ -566,8 +566,8 @@ namespace TrafficManager.UI.SubTools {
                         y,
                         guiColor,
                         allowed
-                            ? JunctionUITextures.RightOnRedAllowedTexture2D
-                            : JunctionUITextures.RightOnRedForbiddenTexture2D,
+                            ? JunctionRestrictions.RightOnRedAllowed
+                            : JunctionRestrictions.RightOnRedForbidden,
                         out signHovered);
 
                     if (signHovered && handleClick) {

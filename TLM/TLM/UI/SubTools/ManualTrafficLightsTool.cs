@@ -244,7 +244,7 @@
 
                                 GUI.DrawTexture(
                                     infoRect,
-                                    RoadUITextures.VehicleInfoSignTextures[TrafficManagerTool.InfoSignsToDisplay[k]]);
+                                    RoadUI.VehicleInfoSignTextures[TrafficManagerTool.InfoSignsToDisplay[k]]);
 
                                 ++numInfos;
                             }

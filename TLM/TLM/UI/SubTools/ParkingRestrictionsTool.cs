@@ -182,7 +182,7 @@
                 }
 
                 GUI.color = guiColor;
-                GUI.DrawTexture(boundingBox, RoadUITextures.ParkingRestrictionTextures[allowed]);
+                GUI.DrawTexture(boundingBox, RoadUI.ParkingRestrictionTextures[allowed]);
 
                 if (hoveredHandle && clicked && !IsCursorInPanel() &&
                     parkingManager.ToggleParkingAllowed(segmentId, e.Key)) {
