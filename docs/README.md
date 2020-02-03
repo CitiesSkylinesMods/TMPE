@@ -15,29 +15,7 @@ Official releases:
 * [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141) (latest beta test releases)
 * [Download Binaries](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/releases) (for non-Steam users)
 * [Installation Guide](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Installation) (for all users)
-
-#### TM:PE V11 STABLE [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), 03/02/2020
-
-- Contains ~100 improvements from TM:PE v11 ALPHA versions, including:
-    - Timed traffic lights: Add default sequence (Ctrl+Click a junction)
-    - Lane arrows: Turning lanes (Ctrl+Click a junction, or Alt+Click a segment)
-    - Vanilla traffic lights: Remove or Disable auto-placed traffic lights (buttons in mod options)
-    - New [languages](https://crowdin.com/project/tmpe): Hungarian, Turkish, Ukrainian; all other languages updated!
-    - Migration to Harmony for improved compatibility
-- Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
-- Improved: Better segment hovering when mouse on node (thanks kianzarrin!) (#615, #538, #594, #616, #576)
-- Fixed: Lane arrow tool sometimes selects wrong node (thanks kianzarrin!) (#616)
-- Fixed: Show error dialog can get caught in loop (thanks kianzarrin!) (#594)
-- Fixed: Junction Manager not resetting on level unload (thanks kianzarrin!) (#637, #636)
-- Fixed: Stay in lane always assumed segment0 exists (thans kianzarrin!) (#619, #618)
-- Updated: Added 2 x Traffic Manager Plus and 1 x Traffic Manager as incompatible (#627)
-- Updated: Added 'Trees Respiration' mod as incompatible (depends on load order) (#614, #611)
-- Updated: Replaced imports with fully qualified alphabetically sorted imports (#620)
-- Updated: Organised resource images in to folders (#641)
-- Meta: Old STABLE workshop page (LinuxFan - v10.20) is now obsolete and no longer maintained
-- Meta: Renamed workshop pages; LABS -> V11 STABLE, and ALPHA -> V11 LABS
-
-See [Full Changelog](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/CHANGELOG.md) for details of earlier releases and LABS releases.
+* [Full Changelog](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/CHANGELOG.md) (release notes for all versions)
 
 ## Support Policy
 
