@@ -79,7 +79,7 @@ namespace TrafficManager.UI {
 
             public override bool Active => false;
 
-            public override Texture2D AtlasTexture => TextureResources.RemoveButtonTexture2D;
+            public override Texture2D AtlasTexture => Textures.MainMenu.RemoveButton;
 
             public override string ButtonName => "RemoveVehicle";
 

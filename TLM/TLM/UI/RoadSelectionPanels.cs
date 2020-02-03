@@ -8,6 +8,7 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using static UI.SubTools.PrioritySignsTool;
+    using static Textures.TextureResources;
 
     public class RoadSelectionPanels : MonoBehaviour {
         public static RoadSelectionPanels Instance { get; private set; } = null;
@@ -243,6 +244,12 @@ namespace TrafficManager.UI {
             }
 
             public abstract class ButtonExt : LinearSpriteButton {
+                public static readonly Texture2D RoadQuickEditButtons;
+                static ButtonExt() {
+                    RoadQuickEditButtons = LoadDllResource("road-edit-btns.png", 22 * 50, 50);
+                    RoadQuickEditButtons.name = "TMPE_RoadQuickEdit";
+                }
+
                 public override void Start() {
                     base.Start();
                     width = Width;
@@ -287,7 +294,7 @@ namespace TrafficManager.UI {
 
                 public override string ButtonName => "RoadQuickEdit_" + this.GetType().ToString();
 
-                public override Texture2D AtlasTexture => TextureResources.RoadQuickEditButtons;
+                public override Texture2D AtlasTexture => RoadQuickEditButtons;
 
                 public override bool Visible => true;
 
