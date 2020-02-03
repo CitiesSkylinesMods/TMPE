@@ -1,6 +1,5 @@
-namespace TrafficManager.UI.MainMenu {
+﻿namespace TrafficManager.UI.MainMenu {
     using ColossalFramework.UI;
-    using CSUtil.Commons;
 
     public abstract class MenuToolModeButton : MenuButton {
         protected abstract ToolMode ToolMode { get; }
