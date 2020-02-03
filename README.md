@@ -33,6 +33,7 @@ Official releases:
 - Updated: Added 2 x Traffic Manager Plus and 1 x Traffic Manager as incompatible (#627)
 - Updated: Added 'Trees Respiration' mod as incompatible (depends on load order) (#614, #611)
 - Updated: Replaced imports with fully qualified alphabetically sorted imports (#620)
+- Updated: Organised resource images in to folders (#641)
 - Meta: Old STABLE workshop page (LinuxFan - v10.20) is now obsolete and no longer maintained
 - Meta: Renamed workshop pages; LABS -> V11 STABLE, and ALPHA -> V11 LABS
 

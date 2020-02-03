@@ -41,6 +41,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Added 2 x Traffic Manager Plus and 1 x Traffic Manager as incompatible (#627)
 - Updated: Added 'Trees Respiration' mod as incompatible (depends on load order) (#614, #611)
 - Updated: Replaced imports with fully qualified alphabetically sorted imports (#620)
+- Updated: Organised resource images in to folders (#641)
 - Meta: Old STABLE workshop page (LinuxFan - v10.20) is now obsolete and no longer maintained
 - Meta: Renamed LABS and ALPHA workshop pages to V11 STABLE and V11 LABS respectively
 - Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
@@ -61,6 +62,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Added 2 x Traffic Manager Plus and 1 x Traffic Manager as incompatible (#627)
 - Updated: Added 'Trees Respiration' mod as incompatible (depends on load order) (#614, #611)
 - Updated: Replaced imports with fully qualified alphabetically sorted imports (#620)
+- Updated: Organised resource images in to folders (#641)
 - Meta: Old STABLE workshop page (LinuxFan - v10.20) is now obsolete and no longer maintained
 - Meta: Renamed LABS and ALPHA workshop pages to V11 STABLE and V11 LABS respectively
 - Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
