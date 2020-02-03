@@ -27,8 +27,12 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TM:PE V11 STABLE [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), 03/02/2020
 
-- Meta: Contains ~100 changes from TM:PE v11 ALPHA versions 11.0-alpha1 to 11.0-alpha12
-- Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
+- Contains ~100 improvements from TM:PE v11 ALPHA previews, including:
+    - Timed traffic lights: Add default sequence (Ctrl+Click a junction)
+    - Lane arrows: Turning lanes (Ctrl+Click a junction, or Alt+Click a segment)
+    - Vanilla traffic lights: Remove or Disable auto-placed traffic lights (buttons in mod options)
+    - New [languages](https://crowdin.com/project/tmpe): Hungarian, Turkish, Ukrainian; all other languages updated!
+    - Migration to Harmony for improved compatibility- Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
 - Improved: Better segment hovering when mouse on node (thanks kianzarrin!) (#615, #538, #594, #616, #576)
 - Fixed: Lane arrow tool sometimes selects wrong node (thanks kianzarrin!) (#616)
 - Fixed: Show error dialog can get caught in loop (thanks kianzarrin!) (#594)
@@ -43,8 +47,12 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TM:PE V11 LABS [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), 03/02/2020
 
-- Meta: Contains ~100 changes from TM:PE v11 ALPHA versions 11.0-alpha1 to 11.0-alpha12
-- Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
+- Contains ~100 improvements from TM:PE v11 ALPHA previews, including:
+    - Timed traffic lights: Add default sequence (Ctrl+Click a junction)
+    - Lane arrows: Turning lanes (Ctrl+Click a junction, or Alt+Click a segment)
+    - Vanilla traffic lights: Remove or Disable auto-placed traffic lights (buttons in mod options)
+    - New [languages](https://crowdin.com/project/tmpe): Hungarian, Turkish, Ukrainian; all other languages updated!
+    - Migration to Harmony for improved compatibility- Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
 - Improved: Better segment hovering when mouse on node (thanks kianzarrin!) (#615, #538, #594, #616, #576)
 - Fixed: Lane arrow tool sometimes selects wrong node (thanks kianzarrin!) (#616)
 - Fixed: Show error dialog can get caught in loop (thanks kianzarrin!) (#594)
