@@ -109,7 +109,7 @@ namespace TrafficManager.UI.SubTools {
                         if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
                             // linear bezier
                             Bounds bounds = bezier0.GetBounds();
-                            bounds.Expand(0.25f);
+                            bounds.Expand(0.3f);
                             this.bounds = new Bounds[] { bounds };
                             return;
                         }
@@ -251,6 +251,8 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
+                bool foundHoveredMarker = false;
+
                 foreach (NodeLaneMarker laneMarker in nodeMarkers) {
                     if (!Constants.ServiceFactory.NetService.IsLaneValid(laneMarker.LaneId)) {
                         continue;
@@ -296,18 +298,22 @@ namespace TrafficManager.UI.SubTools {
 
                     // highlight hovered marker and selected marker
                     if (drawMarker) {
-                        float hitH = TrafficManagerTool.GetAccurateHitHeight();
-                        bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay, hitH);
+                        bool markerIsHovered = false;
+                        if (!foundHoveredMarker) {
+                            float hitH = TrafficManagerTool.GetAccurateHitHeight();
+                            markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay, hitH);
 
-                        if (!markerIsHovered &&
-                            laneMarker.segmentLaneMarker.IntersectRay(mouseRay, hitH)) {
-                            //only draw lane when segmentLaneMarker is hovered but laneMarker is not hovered.
-                            laneMarker.segmentLaneMarker.RenderOverlay(cameraInfo, Color.white);
-                            markerIsHovered = true;
-                        }
-                        
-                        if (markerIsHovered) {
-                            hoveredMarker = laneMarker;
+                            if (!markerIsHovered &&
+                                laneMarker.segmentLaneMarker.IntersectRay(mouseRay, hitH)) {
+                                //only draw lane when segmentLaneMarker is hovered but laneMarker is not hovered.
+                                laneMarker.segmentLaneMarker.RenderOverlay(cameraInfo, Color.white);
+                                markerIsHovered = true;
+                            }
+
+                            if (markerIsHovered) {
+                                hoveredMarker = laneMarker;
+                                foundHoveredMarker = true;
+                            }
                         }
 
                         bool highlightMarker = laneMarker == selectedMarker || markerIsHovered;
