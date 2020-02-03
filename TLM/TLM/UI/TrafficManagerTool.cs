@@ -35,8 +35,6 @@ namespace TrafficManager.UI {
 
         private static bool _mouseClickProcessed;
 
-        private const bool HoverPrefersSmallerSegments = true;
-
         public const float DEBUG_CLOSE_LOD = 300f;
         /// <summary>
         /// Square of the distance, where overlays are not rendered
@@ -954,8 +952,8 @@ namespace TrafficManager.UI {
                     }
                 }
 
-                if (HoveredNodeId != 0) {
-                    HoveredSegmentId = GetHoveredSegmentFromNode();
+                if (HoveredNodeId != 0 && HoveredSegmentId != 0) {
+                    HoveredSegmentId = GetHoveredSegmentFromNode(segmentOutput.m_hitPos);
                 }
             }
 
@@ -963,43 +961,25 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// returns the node segment that is closest to the mouse pointer based on angle.
+        /// returns the node(HoveredNodeId) segment that is closest to the input position.
         /// </summary>
-        internal ushort GetHoveredSegmentFromNode() {
+        internal ushort GetHoveredSegmentFromNode(Vector3 hitPos) {
             ushort minSegId = 0;
             NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
-            Vector3 dir0 = m_mousePosition - node.m_position;
-            float min_angle = float.MaxValue;
+            float minDistance = float.MaxValue;
             Constants.ServiceFactory.NetService.IterateNodeSegments(
                 HoveredNodeId,
                 (ushort segmentId, ref NetSegment segment) =>
                 {
-                    Vector3 dir = segment.m_startNode == HoveredNodeId ?
-                        segment.m_startDirection :
-                        segment.m_endDirection;
-                    float angle = GetAngle(dir, dir0);
-                    if (HoverPrefersSmallerSegments) {
-                        angle *= segment.m_averageLength;
-                    }
-                    if (angle < min_angle) {
-                        min_angle = angle;
+                    Vector3 pos = segment.GetClosestPosition(hitPos);
+                    float distance = (hitPos - pos).sqrMagnitude;
+                    if (distance < minDistance) {
+                        minDistance = distance;
                         minSegId = segmentId;
                     }
                     return true;
                 });
             return minSegId;
-        }
-
-        /// <summary>
-        /// returns the angle between v1 and v2.
-        /// input order does not matter.
-        /// The return value is between 0 to 180.
-        /// </summary>
-        private static float GetAngle(Vector3 v1, Vector3 v2) {
-            float ret = Vector3.Angle(v1, v2); // -180 to 180 degree
-            if (ret > 180) ret -= 180; // future proofing.
-            ret = Math.Abs(ret);
-            return ret;
         }
 
         private static float prev_H = 0f;
@@ -1019,7 +999,6 @@ namespace TrafficManager.UI {
             }
             return prev_H_Fixed = HitPos.y + 0.5f;
         }
-
 
         /// <summary>
         /// Displays lane ids over lanes

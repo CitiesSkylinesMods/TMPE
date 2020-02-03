@@ -4,9 +4,12 @@
 1348361731;Traffic Manager: President Edition ALPHA/DEBUG
 498363759;Traffic Manager + Improved AI
 563720449;Traffic Manager + Improved AI (Japanese Ver.)
-492391912;Improvedd AI (Traffic++)
+492391912;Improved AI (Traffic++)
 409184143;Traffic++
 626024868;Traffic++ V2
+568443446;Traffic Manager Plus 1.2.0
+481786333;Traffic Manager Plus
+427585724;Traffic Manager
 407335588;No Despawn Mod
 600733054;No On-Street Parking
 1628112268;RightTurnNoStop
