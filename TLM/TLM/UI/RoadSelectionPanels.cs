@@ -36,10 +36,8 @@ namespace TrafficManager.UI {
             }
         }
 
-        private void HidePriorityRoadToggle(UIComponent priorityRoadToggle) {
-            priorityRoadToggle.eventVisibilityChanged +=
-                (component, value) => component.isVisible = false;
-        }
+        private void HidePriorityRoadToggle(UIComponent component, bool value) =>
+             component.isVisible = false;
 
         private void HideRoadAdjustPanelElements(UIPanel roadAdjustPanel) {
             UILabel roadSelectLabel = roadAdjustPanel.Find<UILabel>("Label");
@@ -49,8 +47,6 @@ namespace TrafficManager.UI {
             roadSelectLegend.isVisible = false;
             roadSelectSprite.isVisible = false;
         }
-
-        ToolBase previousTool;
 
         /// <summary>
         /// Enable overrlay for various traffic rules influenced by road selection pannel.
@@ -62,43 +58,28 @@ namespace TrafficManager.UI {
             UIBase.GetTrafficManagerTool()?.InitializeSubTools();
         }
 
-        /// <summary>
-        /// mass edit overlay is activated whenever input panel becomes visiable.
-        /// mass edit overlay is de-activated whenever input pannel becomes invisible.
-        /// Then re-activats last tool.
-        /// </summary>
-        private void RegisterMassEditOverlay(UIPanel panel) {
-            panel.eventVisibilityChanged +=
-                (component, value) => {
-                    if (value) {
-                        previousTool = ToolsModifierControl.toolController.CurrentTool;
-                        ShowMassEditOverlay();
-                    } else {
-                        showMassEditOverlay = false;
-                        UIBase.GetTrafficManagerTool()?.InitializeSubTools();
-                        ToolsModifierControl.toolController.CurrentTool = previousTool;
-                        previousTool = null;
-                    }
-                };
+
+        private void MassEditOverlayOnEvent(UIComponent component, bool value) {
+            if (value) {
+                ShowMassEditOverlay();
+            } else {
+                showMassEditOverlay = false;
+                UIBase.GetTrafficManagerTool()?.InitializeSubTools();
+                UIBase.DisableTool();
+            }
         }
 
-        /// <summary>
-        /// Tutorial message is activated when input panel becomes visiable.
-        /// </summary>
-        private void RegisterAdvisor(UIPanel panel) {
-            panel.eventVisibilityChanged +=
-                (component, value) => {
-                    if (value) {
-                        TrafficManagerTool.ShowAdvisor("RoadSelection");
-                    }
-                };
+        private void ShowAdvisorOnEvent(UIComponent component, bool value) {
+            if (value) {
+                TrafficManagerTool.ShowAdvisor("RoadSelection");
+            }
         }
 
         /// <summary>
         ///  list all instances of road selection panels.
         /// </summary>
         private IList<PanelExt> panels;
-
+        private UIComponent priorityRoadToggle;
         public void Start() {
             Function = FunctionMode.Clear;
 
@@ -109,24 +90,26 @@ namespace TrafficManager.UI {
             if (roadWorldInfoPanel != null) {
                 PanelExt panel = AddPanel(roadWorldInfoPanel.component);
                 panel.relativePosition += new Vector3(-10f, -10f);
-                UIComponent priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
-                HidePriorityRoadToggle(priorityRoadToggle);
-                RegisterAdvisor(panel);
+                priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
+                priorityRoadToggle.eventVisibilityChanged += HidePriorityRoadToggle;
 
+                panel.eventVisibilityChanged += ShowAdvisorOnEvent;
             }
 
             // attach another instance of road selection panel to AdjustRoad tab.
             UIPanel roadAdjustPanel = UIView.Find<UIPanel>("AdjustRoad");
             if (roadAdjustPanel != null) {
                 PanelExt panel = AddPanel(roadAdjustPanel);
-                // HideRoadAdjustPanelElements(roadAdjustPanel);
-                RegisterMassEditOverlay(panel);
-                RegisterAdvisor(panel);
+                panel.eventVisibilityChanged += MassEditOverlayOnEvent;
+                panel.eventVisibilityChanged += ShowAdvisorOnEvent;
             }
 
             // every time user changes the road selection, all buttons will go back to inactive state.
-            RoadSelection.Instance.OnChanged += () => Refresh(reset: true);
+            RoadSelection.Instance.OnChanged += RefreshOnEvent;
         }
+
+        private static void RefreshOnEvent() =>
+            Instance.Refresh(reset: true);
 
         // Create a road selection panel. Multiple instances are allowed.
         private PanelExt AddPanel(UIComponent container) {
@@ -142,7 +125,11 @@ namespace TrafficManager.UI {
         }
 
         public void OnDestroy() {
+            RoadSelection.Instance.OnChanged -= RefreshOnEvent;
+            priorityRoadToggle.eventVisibilityChanged -= HidePriorityRoadToggle;
+
             foreach (UIPanel panel in panels ?? Enumerable.Empty<PanelExt>()) {
+                panel.eventVisibilityChanged -= ShowAdvisorOnEvent;
                 Destroy(panel);
             }
             Instance = null;
