@@ -50,5 +50,16 @@ namespace TrafficManager.Util {
             (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 
         internal static Func<bool, int> Int = (bool b) => b ? 1 : 0;
+
+        /// <summary>
+        /// useful for easily debugin inline functions
+        /// to be used like this example:
+        /// TYPE inlinefunctionname(...) => expression
+        /// TYPE inlinefunctionname(...) => expression.LogRet("messege");
+        /// </summary>
+        internal static T LogRet<T>(this T a, string m) {
+            Log._Debug(m + a);
+            return a;
+        }
     }
 }

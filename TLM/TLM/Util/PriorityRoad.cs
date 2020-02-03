@@ -20,6 +20,20 @@ namespace TrafficManager.Util {
             list[i2] = temp;
         }
 
+        private static string ToSTR<T>(this IEnumerable<T> segmentList) {
+            string ret = "{ ";
+            foreach(T segmentId in segmentList) {
+                ret += $"{segmentId}, ";
+            }
+            ret.Remove(ret.Length - 2, 2);
+            ret += " }";
+            return ret;
+        }
+
+        private static string ToSTR(this List<LanePos> laneList) =>
+            (from lanePos in laneList select lanePos.laneId).ToSTR();
+
+
         private static LaneArrows ToLaneArrows(ArrowDirection dir) {
             switch (dir) {
                 case ArrowDirection.Forward:
@@ -55,77 +69,27 @@ namespace TrafficManager.Util {
             return true;
         }
 
-        private static bool IsStraighOneWay(ushort segmentId0, ushort segmentId1, ushort nodeId) {
-            ref NetSegment seg0 = ref GetSeg(segmentId0);
-            //ref NetSegment seg1 = ref GetSeg(segmentId1);
-            bool ret = segMan.CalculateIsOneWay(segmentId0) &&
-                       segMan.CalculateIsOneWay(segmentId1);
-            if(!ret) {
-                return false;
-            }
-
-            if (netService.GetHeadNode(segmentId0) == netService.GetTailNode(segmentId1)) {
-                if( GetDirection(segmentId0, segmentId1, nodeId) == ArrowDirection.Forward ) {
-                    return true;
-                }
-            }else if (netService.GetHeadNode(segmentId0) == netService.GetTailNode(segmentId1)) {
-                if (GetDirection(segmentId1, segmentId0, nodeId) == ArrowDirection.Forward) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         /// <summary>
-        /// If this is the case of a semi roundabout puts the roundabout roads in the
-        /// first two elements of the intput list.
-        /// </summary>
-        /// <param name="segmentList"></param>
-        /// <param name="nodeId"></param>
-        /// <returns>true if it is a semi roundabout</returns>
-        private static bool ArrangeSemiRabout(List<ushort> segmentList, ushort nodeId) {
-            if (segmentList.Count != 3) {
-                return false;
-            } else if (IsStraighOneWay(segmentList[0], segmentList[1], nodeId)) {
-                return true;
-            } else if (IsStraighOneWay(segmentList[1], segmentList[2], nodeId)) {
-                ushort temp = segmentList[0];
-                segmentList[0] = segmentList[1];
-                segmentList[1] = segmentList[2];
-                segmentList[2] = temp;
-                return true;
-            } else if (IsStraighOneWay(segmentList[0], segmentList[2], nodeId)) {
-                ushort temp = segmentList[1];
-                segmentList[1] = segmentList[2];
-                segmentList[2] = temp;
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// if this is a case of split avenue, arranges the input segment list as follows:
+        /// if the roads form a T shape then try to arrange them like this (if possible)
         /// slot 0: incomming oneway road.
         /// slot 1: outgoing oneway road.
         /// slot 2: 2 way raod.
-        /// Note: the arrangement of segmentList might be altered regardless of whether this is
-        /// a case of SplitAvenue.
+        /// Post Condtion: the arrangement of <paramref name="segmentList"/> might be
+        /// altered regardless of return value.
         /// </summary>
-        /// <param name="segmentList"></param>
-        /// <param name="nodeId"></param>
-        /// <returns>true if this is a case of split avenue</returns>
-        private static bool ArrangeSplitAvenue(List<ushort> segmentList, ushort nodeId) {
+        /// <returns>true on sucessful arrangement, false otherwise</returns>
+        private static bool ArrangeT(List<ushort> segmentList) {
             if (segmentList.Count != 3) {
                 return false;
             }
             bool oneway0 = segMan.CalculateIsOneWay(segmentList[0]);
             bool oneway1 = segMan.CalculateIsOneWay(segmentList[1]);
-            bool oneway2 = segMan.CalculateIsOneWay(segmentList[1]);
-            int sum = Int(oneway0) + Int(oneway1) + Int(oneway2);
+            bool oneway2 = segMan.CalculateIsOneWay(segmentList[2]);
+            int sum = Int(oneway0) + Int(oneway1) + Int(oneway2); // number of one way roads
 
-            // put the avenue in slot 2.
+            // put the two-way road in slot 2.
             if (sum != 2) {
+                // expected a one way road and 2 two-way roads.
                 return false;
             } else if (!oneway0) {
                 segmentList.Swap( 0, 2);
@@ -137,12 +101,14 @@ namespace TrafficManager.Util {
             // slot 1: outgoing road.
             if (netService.GetHeadNode(segmentList[1]) == netService.GetTailNode(segmentList[0])) {
                 segmentList.Swap( 0, 1);
+                return true;
             }
 
             return netService.GetHeadNode(segmentList[0]) == netService.GetTailNode(segmentList[1]);
         }
 
         private static void HandleSplitAvenue(List<ushort> segmentList, ushort nodeId) {
+            Log._Debug($"HandleSplitAvenue(segmentList, {nodeId}) was called");
             void SetArrows(ushort segmentIdSrc, ushort segmentIdDst) {
                 LaneArrows arrow = ToLaneArrows(GetDirection(segmentIdSrc, segmentIdDst, nodeId));
                 IList<LanePos> lanes = netService.GetSortedLanes(
@@ -187,28 +153,32 @@ namespace TrafficManager.Util {
             }
 
             if (segmentList.Count < 3) {
-                // this is not a junctiuon
+                Log._Debug("FixJunction: This is not a junction.");
                 return;
             }
 
-            // Note: the difference between semi-roundabout and Split-Aenue detection
-            // is mainly one-way segment angle.
-            if (ArrangeSplitAvenue(segmentList, nodeId)) {
-                HandleSplitAvenue(segmentList, nodeId);
-                return;
-            }
-
-            bool isSemiRabout = ArrangeSemiRabout(segmentList, nodeId);
-
-            if(!isSemiRabout) {
-                segmentList.Sort(CompareSegments);
-                if (CompareSegments(segmentList[1], segmentList[2]) == 0) {
-                    // cannot figure out which road should be treaded as the main road.
+            bool isSemiRabout = false;
+            if (ArrangeT(segmentList)) {
+                isSemiRabout = GetDirection(segmentList[0], segmentList[1], nodeId) == ArrowDirection.Forward;
+                // isSemiRabout if one of these shapes: |- \- /-
+                // split avenue if one of these shapes: >-  <-
+                // they are all T shaped the difference is the angle.
+                if (!isSemiRabout) {
+                    HandleSplitAvenue(segmentList, nodeId);
                     return;
                 }
             }
-
-            // "long turn" is allowed when the main road is oneway.
+            else {
+                segmentList.Sort(CompareSegments);
+            }
+            
+            if (CompareSegments(segmentList[1], segmentList[2]) == 0) {
+                Log._Debug("FixJunction: cannot determine which road should be treaded as the main road.\n" +
+                    "segmentList=" + segmentList.ToSTR());
+                return;
+            }
+            
+            // "far turn" is allowed when the main road is oneway.
             bool ignoreLanes =
                 segMan.CalculateIsOneWay(segmentList[0]) ||
                 segMan.CalculateIsOneWay(segmentList[1]);
@@ -218,7 +188,8 @@ namespace TrafficManager.Util {
             ignoreLanes &= dir != ArrowDirection.Forward;
             ignoreLanes |= OptionsMassEditTab.PriorityRoad_AllowLeftTurns;
 
-            //Debug.Log($"ignorelanes={ignoreLanes}");
+            Log._Debug($"ignorelanes={ignoreLanes} isSemiRabout={isSemiRabout}\n" +
+                        "segmentList=" + segmentList.ToSTR());
 
             for (int i = 0; i < segmentList.Count; ++i) {
                 if (i < 2) {
@@ -227,9 +198,9 @@ namespace TrafficManager.Util {
                         FixMajorSegmentLanes(segmentList[i], nodeId);
                     }
                 } else {
-                    FixMinorSegmentRules(segmentList, segmentList[i], nodeId);
+                    FixMinorSegmentRules(segmentList[i], nodeId, segmentList);
                     if (!ignoreLanes) {
-                        FixMinorSegmentLanes(segmentList[i], nodeId, ref segmentList);
+                        FixMinorSegmentLanes(segmentList[i], nodeId, segmentList);
                     }
                 }
             } //end for
@@ -242,6 +213,7 @@ namespace TrafficManager.Util {
         }
 
         private static void FixMajorSegmentRules(ushort segmentId, ushort nodeId) {
+            Log._Debug($"FixMajorSegmentRules({segmentId}, {nodeId}) was called");
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
             JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
             if(!OptionsMassEditTab.PriorityRoad_CrossMainR) {
@@ -251,7 +223,8 @@ namespace TrafficManager.Util {
         }
 
 
-        private static void FixMinorSegmentRules(List<ushort> segmentList, ushort segmentId, ushort nodeId) {
+        private static void FixMinorSegmentRules(ushort segmentId, ushort nodeId, List<ushort> segmentList) {
+            Log._Debug($"FixMinorSegmentRules({segmentId}, {nodeId}, segmentList) was called");
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
             if (OptionsMassEditTab.PriorityRoad_EnterBlockedYeild) {
                 JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
@@ -265,7 +238,6 @@ namespace TrafficManager.Util {
             }
         }
 
-        //TODO move to ExtSegmentManager
         private static int CountLanes(ushort segmentId, ushort nodeId, bool outgoing = true) {
             return netService.GetSortedLanes(
                                 segmentId,
@@ -281,7 +253,7 @@ namespace TrafficManager.Util {
 
 
         private static bool HasAccelerationLane(List<ushort> segmentList, ushort segmentId, ushort nodeId) {
-            bool lhd = LaneArrowManager.Instance.Services.SimulationService.LeftHandDrive;
+            bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
             if (!segMan.CalculateIsOneWay(segmentId)) {
                 return false;
             }
@@ -291,7 +263,7 @@ namespace TrafficManager.Util {
             ref NetSegment seg = ref segmentId.ToSegment();
 
             ushort mainIn, mainOut;
-            if (lhd) {
+            if (lht) {
                 mainOut = seg.GetLeftSegment(nodeId);
                 mainIn = seg.GetRightSegment(nodeId);
             } else {
@@ -299,13 +271,13 @@ namespace TrafficManager.Util {
                 mainIn = seg.GetLeftSegment(nodeId);
             }
 
-            //Debug.Log($"segmentId:{segmentId} mainOut={mainOut} mainIn={mainIn} ");
+            Log._Debug($"HasAccelerationLane: segmentId:{segmentId} mainOut={mainOut} mainIn={mainIn} ");
             if (IsMain(mainOut) && IsMain(mainIn) ) {
                 int Oy = CountOutgoingLanes(segmentId, nodeId);
                 int Mo = CountOutgoingLanes(mainOut, nodeId);
                 int Mi = CountIncomingLanes(mainIn, nodeId);
                 bool ret = Oy > 0 && Oy == Mo - Mi;
-                //Debug.Log($"Oy={Oy} Mo={Mo} Mi={Mi} ret={ret} = Oy == Mo - Mi ");
+                Log._Debug($"HasAccelerationLane: Oy={Oy} Mo={Mo} Mi={Mi} ret={ret} = Oy == Mo - Mi ");
                 return ret;
             }
 
@@ -313,14 +285,16 @@ namespace TrafficManager.Util {
         }
 
         private static void FixMajorSegmentLanes(ushort segmentId, ushort nodeId) {
+            Log._Debug($"FixMajorSegmentLanes({segmentId}, {nodeId}) was called");
             if (LaneArrowManager.SeparateTurningLanes.CanChangeLanes(segmentId, nodeId) != SetLaneArrowError.Success) {
-                Debug.Log("cant change lanes");
+                Log._Debug("FixMajorSegmentLanes: can't change lanes");
                 return;
             }
 
             ref NetSegment seg = ref segmentId.ToSegment();
             ref NetNode node = ref nodeId.ToNode();
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+            bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
 
             //list of outgoing lanes from current segment to current node.
             IList<LanePos> laneList =
@@ -330,23 +304,23 @@ namespace TrafficManager.Util {
                     startNode,
                     LaneArrowManager.LANE_TYPES,
                     LaneArrowManager.VEHICLE_TYPES,
-                    true
+                    !lht
                     );
             int srcLaneCount = laneList.Count;
+            Log._Debug($"FixMajorSegmentLanes: segment:{segmentId} laneList:" + laneList.ToSTR());
 
             bool bLeft, bRight, bForward;
             ref ExtSegmentEnd segEnd = ref GetSegEnd(segmentId, nodeId);
             segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out bLeft, out bForward, out bRight);
 
-            bool lhd = LaneArrowManager.Instance.Services.SimulationService.LeftHandDrive;
-            LaneArrows arrowShort = lhd ? LaneArrows.Left : LaneArrows.Right;
-            LaneArrows arrowLong = lhd ? LaneArrows.Right : LaneArrows.Left;
+            LaneArrows arrowShort = lht ? LaneArrows.Left : LaneArrows.Right;
+            LaneArrows arrowFar = lht ? LaneArrows.Right : LaneArrows.Left;
             for (int i = 0; i < srcLaneCount; ++i) {
                 uint laneId = laneList[i].laneId;
                 LaneArrows arrows = LaneArrowManager.Instance.GetFinalLaneArrows(laneId);
                 LaneArrowManager.Instance.RemoveLaneArrows(
                     laneId,
-                    arrowLong);
+                    arrowFar);
 
                 if (arrows != arrowShort) {
                     LaneArrowManager.Instance.SetLaneArrows(
@@ -355,18 +329,18 @@ namespace TrafficManager.Util {
                 }
             }
 
-            bool bShort = lhd ? bLeft : bRight;
+            bool bShort = lht ? bLeft : bRight;
             if (srcLaneCount > 0 && bShort) {
-                //TODO LHD righMostLane
-                LanePos righMostLane = laneList[laneList.Count - 1];
-                LaneArrowManager.Instance.AddLaneArrows(righMostLane.laneId, arrowShort);
+                LanePos outerMostLane = laneList[laneList.Count - 1];
+                LaneArrowManager.Instance.AddLaneArrows(outerMostLane.laneId, arrowShort);
             }
 
         }
 
-        private static void FixMinorSegmentLanes(ushort segmentId, ushort nodeId, ref List<ushort> segList) {
+        private static void FixMinorSegmentLanes(ushort segmentId, ushort nodeId, List<ushort> segmentList) {
+            Log._Debug($"FixMinorSegmentLanes({segmentId}, {nodeId}, segmentList) was called");
             if (LaneArrowManager.SeparateTurningLanes.CanChangeLanes(segmentId, nodeId) != SetLaneArrowError.Success) {
-                Debug.Log("can't change lanes");
+                Debug.Log("FixMinorSegmentLanes(): can't change lanes");
                 return;
             }
             ref NetSegment seg = ref segmentId.ToSegment();
@@ -390,17 +364,17 @@ namespace TrafficManager.Util {
             segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out bLeft, out bForward, out bRight);
 
             // LHD vs RHD variables.
-            bool lhd = LaneArrowManager.Instance.Services.SimulationService.LeftHandDrive;
-            ArrowDirection nearDir = lhd ? ArrowDirection.Left : ArrowDirection.Right;
-            LaneArrows nearArrow   = lhd ? LaneArrows.Left     : LaneArrows.Right;
-            bool             bnear = lhd ? bLeft               : bRight;
-            int sideLaneIndex      = lhd ? srcLaneCount - 1    : 0;
+            bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
+            ArrowDirection nearDir = lht ? ArrowDirection.Left : ArrowDirection.Right;
+            LaneArrows nearArrow   = lht ? LaneArrows.Left     : LaneArrows.Right;
+            bool             bnear = lht ? bLeft               : bRight;
+            int sideLaneIndex      = lht ? srcLaneCount - 1    : 0;
 
             LaneArrows turnArrow = nearArrow;
             {
                 // Check for slight turn into the main road.
-                ArrowDirection dir0 = segEndMan.GetDirection(ref segEnd, segList[0]);
-                ArrowDirection dir1 = segEndMan.GetDirection(ref segEnd, segList[1]);
+                ArrowDirection dir0 = segEndMan.GetDirection(ref segEnd, segmentList[0]);
+                ArrowDirection dir1 = segEndMan.GetDirection(ref segEnd, segmentList[1]);
                 Debug.Assert(dir1 != dir0); // Assume main road is not angled: then dir1 != dir0
                 if (dir0 != nearDir && dir1 != nearDir) {
                     turnArrow = LaneArrows.Forward; //slight turn uses forward arrow.
@@ -416,7 +390,7 @@ namespace TrafficManager.Util {
              * and the main road is straigh, then add a turn arrow into the other minor roads.
              */
             if(srcLaneCount > 0 && bnear && turnArrow == LaneArrows.Forward) {
-                LaneArrowManager.Instance.AddLaneArrows( //TODO test
+                LaneArrowManager.Instance.AddLaneArrows( 
                     laneList[sideLaneIndex].laneId,
                     nearArrow);
             }
