@@ -80,10 +80,9 @@ namespace TrafficManager.UI.SubTools {
 
             private Bounds[] bounds;
             private float prev_H;
+
             internal bool IntersectRay(Ray ray, float hitH) {
-                if (hitH != prev_H || bounds == null)
-                    CalculateBounds(hitH);
-                prev_H = hitH;
+                CalculateBounds(hitH);
                 foreach (Bounds bounds in bounds) {
                     if (bounds.IntersectRay(ray))
                         return true;
@@ -92,13 +91,22 @@ namespace TrafficManager.UI.SubTools {
                 return false;
             }
 
+
             void CalculateBounds(float hitH) {
-                // if marker is projected on another road plane then modify its height
+                float maxH = Mathf.Max(bezier.a.y, bezier.d.y);
+                if ((hitH == prev_H || hitH == maxH) && bounds != null) {
+                    // use cached results if mouse has not moved or hitH is ignored.
+                    return; 
+                }
+
                 Bezier3 bezier0 = bezier;
-                //float minH = Mathf.Min(bezier0.a.y, bezier0.d.y);
-                float maxH = Mathf.Max(bezier0.a.y, bezier0.d.y);
                 if (hitH > maxH + 2.5f) {
+                    // if marker is projected on another road plane then modify its height
                     bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = hitH;
+                    prev_H = hitH;
+                } else {
+                    // ignore hitH
+                    prev_H = maxH; 
                 }
 
                 float angle = Vector3.Angle(bezier0.a, bezier0.b);
@@ -109,7 +117,7 @@ namespace TrafficManager.UI.SubTools {
                         if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
                             // linear bezier
                             Bounds bounds = bezier0.GetBounds();
-                            bounds.Expand(0.3f);
+                            bounds.Expand(0.4f);
                             this.bounds = new Bounds[] { bounds };
                             return;
                         }
