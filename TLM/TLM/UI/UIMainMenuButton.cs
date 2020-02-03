@@ -40,11 +40,11 @@ namespace TrafficManager.UI {
                 MAIN_MENU_BUTTON_BG_ACTIVE,
                 MAIN_MENU_BUTTON_FG_BASE,
                 MAIN_MENU_BUTTON_FG_HOVERED,
-                MAIN_MENU_BUTTON_FG_ACTIVE
+                MAIN_MENU_BUTTON_FG_ACTIVE,
             };
             atlas = TextureUtil.GenerateLinearAtlas(
                 "TMPE_MainMenuButtonAtlas",
-                TextureResources.MainMenuButtonTexture2D,
+                Textures.MainMenu.MainMenuButton,
                 6,
                 spriteNames);
 

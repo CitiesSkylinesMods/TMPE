@@ -430,7 +430,7 @@
             }
 
             // fallback to "noimage" texture
-            roadTexture = TextureResources.NoImageTexture2D;
+            roadTexture = Textures.MainMenu.NoImage;
         }
 
         /// <summary>
@@ -649,7 +649,7 @@
                         && ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) !=
                             VehicleInfo.VehicleType.None))
                     {
-                        Texture2D tex1 = RoadUITextures.VehicleInfoSignTextures[
+                        Texture2D tex1 = RoadUI.VehicleInfoSignTextures[
                             LegacyExtVehicleType.ToNew(ExtVehicleType.PassengerTrain)];
                         MainTool.DrawStaticSquareOverlayGridTexture(
                             tex1,
