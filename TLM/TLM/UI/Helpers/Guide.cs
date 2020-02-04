@@ -18,37 +18,50 @@ namespace TrafficManager.UI.Helpers {
         }
         public void Deactivate() => m_guide?.Deactivate();
 
-        public GuidePair(string s = "some text here") {
+        public GuidePair() {
             m_info = new GuideInfo();
-            m_info.m_name = s;
             m_info.m_delayType = GuideInfo.Delay.OccurrenceCount;
             m_info.m_displayDelay = 1;
             m_info.m_tag = "Generic";
             m_info.m_icon = "ToolbarIconRoads";
         }
 
-        public void AddStrings() {
-            var locale = (Locale)typeof(LocaleManager)
-                     .GetField(
-                         "m_Locale",
-                         BindingFlags.Instance | BindingFlags.NonPublic)
-                     ?.GetValue(SingletonLite<LocaleManager>.instance);
-            var key = new Locale.Key() {
-                m_Identifier = "identifier",
-                m_Key = "key"
-            };
-            string value = "";
-            locale.AddLocalizedString(key, value);
-            // see Translation.ReloadTutorialTranslations
-        }
+        public static GuidePair example = new GuidePair() {
+            m_info = {
+                //TMPE_TUTORIAL_HEAD_LaneArrowTool
+                //TMPE_TUTORIAL_BODY_LaneArrowTool
+                // TUTORIAL_ADVISER_TITLE
+                // TUTORIAL_ADVISER
+                m_name = "TMPE_TUTORIAL_BODY_LaneArrowTool",
+                m_tag = "Generic",
+            }
+        };
 
+        //public void AddStrings() {
+        //    var locale = (Locale)typeof(LocaleManager)
+        //             .GetField(
+        //                 "m_Locale",
+        //                 BindingFlags.Instance | BindingFlags.NonPublic)
+        //             ?.GetValue(SingletonLite<LocaleManager>.instance);
+        //    var key = new Locale.Key() {
+        //        m_Identifier = "identifier",
+        //        m_Key = "key"
+        //    };
+        //    string value = "";
+        //    locale.AddLocalizedString(key, value);
+        //    // see Translation.ReloadTutorialTranslations
+        //}
     }
 
 
-    public class Test {
-        public void OnSuccess() {
-
-
+    public class Test : ThreadingExtensionBase {
+        public void Run() {
+            GuidePair.example.Activate();
         }
+        public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
+            base.OnUpdate(realTimeDelta, simulationTimeDelta);
+            Run();
+        }
+        
     }
 }
