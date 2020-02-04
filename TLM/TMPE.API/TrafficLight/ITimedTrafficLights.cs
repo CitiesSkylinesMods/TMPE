@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.API.TrafficLight {
     using System.Collections.Generic;
     using CSUtil.Commons;
-    using Traffic.Enums;
+    using TrafficManager.API.Traffic.Enums;
 
     public interface ITimedTrafficLights {
         IDictionary<ushort, IDictionary<ushort, ArrowDirection>> Directions { get; }

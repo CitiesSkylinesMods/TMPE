@@ -1,10 +1,10 @@
-﻿namespace TrafficManager.Manager.Impl {
-    using API.Geometry;
-    using API.Manager;
-    using API.Traffic.Data;
+namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
-    using Geometry;
-    using Geometry.Impl;
+    using TrafficManager.API.Geometry;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Geometry.Impl;
+    using TrafficManager.Geometry;
 
     public class ExtNodeManager
         : AbstractCustomManager,
@@ -27,6 +27,32 @@
             for (uint i = 0; i < ExtNodes.Length; ++i) {
                 ExtNodes[i] = new ExtNode((ushort)i);
             }
+        }
+
+        /// <summary>
+        /// assuming highway rules are on, does the junction follow highway rules?
+        /// </summary>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public static bool JunctionHasHighwayRules(ushort nodeId) {
+            return JunctionHasOnlyHighwayRoads(nodeId) && !LaneConnectionManager.Instance.HasNodeConnections(nodeId);
+        }
+
+        /// <summary>
+        /// Are all segments at nodeId highways?
+        /// </summary>
+        /// <param name="nodeId"></param>
+        /// <returns></returns>
+        public static bool JunctionHasOnlyHighwayRoads(ushort nodeId) {
+            IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+            bool ret = true;
+            Constants.ServiceFactory.NetService.IterateNodeSegments(
+                nodeId,
+                (ushort segmentId, ref NetSegment segment) => {
+                    ret &= segMan.CalculateIsHighway(segmentId);
+                    return ret;
+                });
+            return ret;
         }
 
         public bool IsValid(ushort nodeId) {

@@ -1,11 +1,11 @@
 ﻿namespace TrafficManager.UI.SubTools {
-    using API.Traffic.Enums;
     using ColossalFramework;
-    using Manager.Impl;
-    using State;
-    using Textures;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
+    using TrafficManager.UI.Textures;
+    using TrafficManager.Util.Caching;
     using UnityEngine;
-    using Util.Caching;
 
     public class ToggleTrafficLightsTool : SubTool {
         /// <summary>

@@ -1,14 +1,14 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using System;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using ColossalFramework;
     using ColossalFramework.Math;
+    using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using State;
-    using State.ConfigData;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
     using UnityEngine;
 
     public class ExtVehicleManager

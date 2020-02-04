@@ -1,6 +1,5 @@
 ﻿namespace TrafficManager.State.ConfigData {
-    using API.Traffic.Data;
-    using UI.SubTools.SpeedLimits;
+    using TrafficManager.API.Traffic.Data;
 
     public class DynamicLaneSelection {
         /// <summary>

@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.Manager {
-    using API.Manager;
     using CSUtil.Commons;
     using GenericGameBridge.Factory;
+    using TrafficManager.API.Manager;
 
     /// <summary>
     /// Abstract manager class, supports events before/after loading/saving.

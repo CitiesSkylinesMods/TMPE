@@ -1,15 +1,14 @@
-namespace TrafficManager
-{
-    using System;
-    using System.Reflection;
+namespace TrafficManager {
     using ColossalFramework.Globalization;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
-    using State;
+    using System.Reflection;
+    using System;
+    using TrafficManager.State;
     using TrafficManager.UI;
-    using Util;
+    using TrafficManager.Util;
 
     public class TrafficManagerMod : IUserMod {
 #if LABS
@@ -20,15 +19,16 @@ namespace TrafficManager
         public const string BRANCH = "STABLE";
 #endif
 
-        public const uint GAME_VERSION = 184803856u;
+        // These values from `BuildConfig` class (`APPLICATION_VERSION` constants) in game file `Managed/Assembly-CSharp.dll` (use ILSpy to inspect them)
+        public const uint GAME_VERSION = 185066000u;
         public const uint GAME_VERSION_A = 1u;
         public const uint GAME_VERSION_B = 12u;
-        public const uint GAME_VERSION_C = 1u;
+        public const uint GAME_VERSION_C = 3u;
         public const uint GAME_VERSION_BUILD = 2u;
 
-        public const string VERSION = "11.0-alpha11";
+        public const string VERSION = "11.0";
 
-        public static readonly string ModName = "TM:PE " + BRANCH + " " + VERSION;
+        public static readonly string ModName = "TM:PE " + VERSION + " " + BRANCH;
 
         public string Name => ModName;
 

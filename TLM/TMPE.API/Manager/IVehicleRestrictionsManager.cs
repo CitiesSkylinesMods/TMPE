@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.API.Manager {
     using System.Collections.Generic;
-    using Traffic.Enums;
+    using TrafficManager.API.Traffic.Enums;
 
     public interface IVehicleRestrictionsManager {
         // TODO documentation

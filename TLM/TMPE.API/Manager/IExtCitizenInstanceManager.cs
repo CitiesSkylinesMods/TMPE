@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.API.Manager {
     using System;
-    using Traffic.Data;
+    using TrafficManager.API.Traffic.Data;
     using UnityEngine;
 
     public interface IExtCitizenInstanceManager {

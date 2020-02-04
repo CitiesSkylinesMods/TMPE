@@ -1,15 +1,15 @@
 namespace TrafficManager.Custom.AI {
-    using System;
-    using System.Runtime.CompilerServices;
-    using ColossalFramework;
     using ColossalFramework.Globalization;
     using ColossalFramework.Math;
-    using CSUtil.Commons;
+    using ColossalFramework;
     using CSUtil.Commons.Benchmark;
+    using CSUtil.Commons;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using RedirectionFramework.Attributes;
-    using State;
+    using System.Runtime.CompilerServices;
+    using System;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.RedirectionFramework.Attributes;
+    using TrafficManager.State;
     using UnityEngine;
 
     // TODO move Parking AI features from here to a distinct manager

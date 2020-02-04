@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.UI.MainMenu {
     using ColossalFramework.UI;
-    using Custom.PathFinding;
+    using TrafficManager.Custom.PathFinding;
     using UnityEngine;
 
     public class StatsLabel : UILabel {

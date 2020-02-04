@@ -1,12 +1,12 @@
 namespace TrafficManager.UI.Textures {
-    using System;
-    using System.Collections.Generic;
-    using API.Traffic.Data;
-    using State;
-    using SubTools.SpeedLimits;
-    using UnityEngine;
-    using Util;
     using static TextureResources;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State;
+    using TrafficManager.UI.SubTools.SpeedLimits;
+    using TrafficManager.Util;
+    using UnityEngine;
 
     public static class SpeedLimitTextures {
         public static readonly IDictionary<int, Texture2D> TexturesKmph;

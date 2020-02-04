@@ -1,9 +1,9 @@
-﻿namespace TrafficManager.Manager.Impl {
-    using API.Manager;
-    using API.Traffic.Data;
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
-    using State.ConfigData;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State.ConfigData;
 
     public class ExtSegmentManager
         : AbstractCustomManager,

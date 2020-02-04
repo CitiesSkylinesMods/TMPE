@@ -1,13 +1,13 @@
 namespace TrafficManager.UI {
-    using System;
-    using API.Util;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using State;
-    using State.Keybinds;
-    using Textures;
+    using System;
+    using TrafficManager.API.Util;
+    using TrafficManager.State.Keybinds;
+    using TrafficManager.State;
+    using TrafficManager.UI.Textures;
+    using TrafficManager.Util;
     using UnityEngine;
-    using Util;
 
     public class UIMainMenuButton
         : UIButton,
@@ -40,11 +40,11 @@ namespace TrafficManager.UI {
                 MAIN_MENU_BUTTON_BG_ACTIVE,
                 MAIN_MENU_BUTTON_FG_BASE,
                 MAIN_MENU_BUTTON_FG_HOVERED,
-                MAIN_MENU_BUTTON_FG_ACTIVE
+                MAIN_MENU_BUTTON_FG_ACTIVE,
             };
             atlas = TextureUtil.GenerateLinearAtlas(
                 "TMPE_MainMenuButtonAtlas",
-                TextureResources.MainMenuButtonTexture2D,
+                Textures.MainMenu.MainMenuButton,
                 6,
                 spriteNames);
 

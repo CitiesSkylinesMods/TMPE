@@ -1,8 +1,8 @@
 ﻿namespace TrafficManager.UI {
-    using System.Collections.Generic;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using Textures;
+    using System.Collections.Generic;
+    using TrafficManager.UI.Textures;
     using UnityEngine;
 
     public class RemoveCitizenInstanceButtonExtender : MonoBehaviour {
@@ -82,7 +82,7 @@
 
             public override bool Active => false;
 
-            public override Texture2D AtlasTexture => TextureResources.RemoveButtonTexture2D;
+            public override Texture2D AtlasTexture => Textures.MainMenu.RemoveButton;
 
             public override string ButtonName => "RemoveCitizenInstance";
 

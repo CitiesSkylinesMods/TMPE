@@ -1,24 +1,24 @@
 namespace TrafficManager.UI {
-    using System;
+    using ColossalFramework.Math;
+    using ColossalFramework.UI;
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using JetBrains.Annotations;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.Util;
-    using ColossalFramework;
-    using ColossalFramework.Math;
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
-    using JetBrains.Annotations;
-    using Manager.Impl;
-    using State;
-    using State.ConfigData;
-    using MainMenu;
-    using SubTools;
-    using SubTools.SpeedLimits;
-    using Util;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.Util;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State;
+    using TrafficManager.UI.MainMenu;
+    using TrafficManager.UI.SubTools.SpeedLimits;
+    using TrafficManager.UI.SubTools;
+    using TrafficManager.Util;
     using UnityEngine;
 
     [UsedImplicitly]
@@ -27,6 +27,7 @@ namespace TrafficManager.UI {
           IObserver<GlobalConfig>
     {
         private ToolMode toolMode_;
+        private NetTool _netTool;
 
         internal static ushort HoveredNodeId;
         internal static ushort HoveredSegmentId;
@@ -34,7 +35,6 @@ namespace TrafficManager.UI {
         private static bool _mouseClickProcessed;
 
         public const float DEBUG_CLOSE_LOD = 300f;
-
         /// <summary>
         /// Square of the distance, where overlays are not rendered
         /// </summary>
@@ -127,6 +127,17 @@ namespace TrafficManager.UI {
             }
 
             return TransparencyToAlpha(transparency);
+        }
+
+        internal NetTool NetTool {
+            get {
+                if (_netTool == null) {
+                    Log._Debug("NetTool field value is null. Searching for instance...");
+                    _netTool = ToolsModifierControl.toolController.Tools.OfType<NetTool>().FirstOrDefault();
+                }
+
+                return _netTool;
+            }
         }
 
         private static float TransparencyToAlpha(byte transparency) {
@@ -322,6 +333,11 @@ namespace TrafficManager.UI {
                     InfoManager.InfoMode.None,
                     InfoManager.SubInfoMode.Default);
             }
+            ToolCursor = null;
+            bool elementsHovered = DetermineHoveredElements();
+            if (_activeSubTool != null && NetTool != null && elementsHovered) {
+                ToolCursor = NetTool.m_upgradeCursor;
+            }
 
             bool primaryMouseClicked = Input.GetMouseButtonDown(0);
             bool secondaryMouseClicked = Input.GetMouseButtonDown(1);
@@ -357,7 +373,6 @@ namespace TrafficManager.UI {
             // }
 
             if (_activeSubTool != null) {
-                DetermineHoveredElements();
 
                 if (primaryMouseClicked) {
                     _activeSubTool.OnPrimaryClickOverlay();
@@ -799,20 +814,6 @@ namespace TrafficManager.UI {
             //                tooltipWorldPos = null;
             //        }
             // }
-
-            if (GetToolMode() == ToolMode.None) {
-                ToolCursor = null;
-            } else {
-                bool elementsHovered = DetermineHoveredElements();
-
-                NetTool netTool = ToolsModifierControl
-                                  .toolController.Tools.OfType<NetTool>()
-                                  .FirstOrDefault(nt => nt.m_prefab != null);
-
-                if (netTool != null && elementsHovered) {
-                    ToolCursor = netTool.m_upgradeCursor;
-                }
-            }
         }
 
         public bool DoRayCast(RaycastInput input, out RaycastOutput output) {
@@ -820,13 +821,13 @@ namespace TrafficManager.UI {
         }
 
         private bool DetermineHoveredElements() {
+            HoveredSegmentId = 0;
+            HoveredNodeId = 0;
+
             bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible &&
                                  (_activeSubTool == null || !_activeSubTool.IsCursorInPanel());
 
             if (mouseRayValid) {
-                HoveredSegmentId = 0;
-                HoveredNodeId = 0;
-
                 // find currently hovered node
                 var nodeInput = new RaycastInput(m_mouseRay, m_mouseRayLength) {
                     m_netService = {
@@ -937,13 +938,37 @@ namespace TrafficManager.UI {
                     }
                 }
 
-                return HoveredNodeId != 0 || HoveredSegmentId != 0;
+                if (HoveredNodeId != 0 && HoveredSegmentId != 0) {
+                    HoveredSegmentId = GetHoveredSegmentFromNode(segmentOutput.m_hitPos);
+                }
             }
 
-            return false; // mouseRayValid=false here
+            return HoveredNodeId != 0 || HoveredSegmentId != 0;
         }
 
         /// <summary>
+        /// returns the node(HoveredNodeId) segment that is closest to the input position.
+        /// </summary>
+        internal ushort GetHoveredSegmentFromNode(Vector3 hitPos) {
+            ushort minSegId = 0;
+            NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
+            float minDistance = float.MaxValue;
+            Constants.ServiceFactory.NetService.IterateNodeSegments(
+                HoveredNodeId,
+                (ushort segmentId, ref NetSegment segment) =>
+                {
+                    Vector3 pos = segment.GetClosestPosition(hitPos);
+                    float distance = (hitPos - pos).sqrMagnitude;
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        minSegId = segmentId;
+                    }
+                    return true;
+                });
+            return minSegId;
+        }
+
+         /// <summary>
         /// Displays lane ids over lanes
         /// </summary>
         private void GuiDisplayLanes(ushort segmentId,

@@ -1,5 +1,5 @@
 namespace TrafficManager.TrafficLight.Impl {
-    using API.TrafficLight;
+    using TrafficManager.API.TrafficLight;
 
     internal class CustomSegment {
         public ICustomSegmentLights StartNodeLights;

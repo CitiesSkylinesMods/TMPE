@@ -1,13 +1,13 @@
 ﻿namespace TrafficManager.UI.SubTools {
-    using System.Collections.Generic;
     using ColossalFramework;
-    using Manager.Impl;
-    using State;
-    using Textures;
-    using UnityEngine;
-    using Util;
-    using Util.Caching;
     using static Util.SegmentLaneTraverser;
+    using System.Collections.Generic;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
+    using TrafficManager.UI.Textures;
+    using TrafficManager.Util.Caching;
+    using TrafficManager.Util;
+    using UnityEngine;
 
     public class ParkingRestrictionsTool : SubTool {
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir
@@ -182,7 +182,7 @@
                 }
 
                 GUI.color = guiColor;
-                GUI.DrawTexture(boundingBox, RoadUITextures.ParkingRestrictionTextures[allowed]);
+                GUI.DrawTexture(boundingBox, RoadUI.ParkingRestrictionTextures[allowed]);
 
                 if (hoveredHandle && clicked && !IsCursorInPanel() &&
                     parkingManager.ToggleParkingAllowed(segmentId, e.Key)) {

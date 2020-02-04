@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.Patch._RoadBaseAI {
     using Harmony;
     using JetBrains.Annotations;
-    using State;
+    using TrafficManager.State;
     using static RoadBaseAI;
 
     [HarmonyPatch(typeof(RoadBaseAI), "SetTrafficLightState")]

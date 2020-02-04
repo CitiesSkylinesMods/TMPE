@@ -1,13 +1,13 @@
 ﻿namespace TrafficManager.UI.SubTools {
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.TrafficLight;
     using ColossalFramework;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using Textures;
     using TrafficLight;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.TrafficLight;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.UI.Textures;
     using UnityEngine;
 
     public class ManualTrafficLightsTool : SubTool {
@@ -244,7 +244,7 @@
 
                                 GUI.DrawTexture(
                                     infoRect,
-                                    RoadUITextures.VehicleInfoSignTextures[TrafficManagerTool.InfoSignsToDisplay[k]]);
+                                    RoadUI.VehicleInfoSignTextures[TrafficManagerTool.InfoSignsToDisplay[k]]);
 
                                 ++numInfos;
                             }

@@ -1,9 +1,10 @@
-﻿namespace TrafficManager.Util {
-    using System;
-    using System.Collections.Generic;
-    using API.Manager;
-    using API.Traffic.Data;
+namespace TrafficManager.Util {
+    using ColossalFramework;
     using CSUtil.Commons;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
 
     public class SegmentTraverser {
         [Flags]
@@ -75,6 +76,38 @@
                 ViaStartNode = viaStartNode;
                 Initial = initial;
             }
+        }
+
+        public static void Traverse(List<ushort> segmentList, SegmentVisitor visitorFun) {
+            if (segmentList == null) {
+                return;
+            }
+            ushort prevSegId = 0;
+            ExtSegment[] extSegment_buffer = Constants.ManagerFactory.ExtSegmentManager.ExtSegments;
+            NetSegment[] segment_buffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            foreach (var segId in segmentList) {
+                SegmentTraverser.SegmentVisitData data;
+                if (prevSegId == 0) {
+                    data = new SegmentVisitData(
+                        ref extSegment_buffer[segId],
+                        ref extSegment_buffer[segId],
+                        false,
+                        false,
+                        true);
+                } else {
+                    data = new SegmentVisitData(
+                        ref extSegment_buffer[prevSegId],
+                        ref extSegment_buffer[segId],
+                        true,
+                        segment_buffer[prevSegId].m_endNode == segment_buffer[segId].m_startNode,
+                        false);
+                }
+                if (!visitorFun(data)) {
+                    break;
+                }
+                prevSegId = segId;
+            }
+
         }
 
         /// <summary>

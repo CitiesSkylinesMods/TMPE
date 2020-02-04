@@ -1,8 +1,8 @@
 namespace TrafficManager.UI {
-    using System;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using UI.MainMenu;
+    using System;
+    using TrafficManager.UI.MainMenu;
     using UnityEngine;
 
     public class UIBase : UICustomControl {

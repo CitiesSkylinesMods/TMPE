@@ -1,14 +1,14 @@
 ﻿namespace TrafficManager.UI.SubTools {
-    using System.Collections.Generic;
-    using API.Traffic.Enums;
     using ColossalFramework;
     using GenericGameBridge.Service;
-    using Manager.Impl;
-    using State;
-    using Textures;
-    using Util;
-    using UnityEngine;
     using static Util.SegmentLaneTraverser;
+    using System.Collections.Generic;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
+    using TrafficManager.UI.Textures;
+    using TrafficManager.Util;
+    using UnityEngine;
 
     public class VehicleRestrictionsTool : SubTool {
         private static readonly ExtVehicleType[] RoadVehicleTypes = {
@@ -537,7 +537,7 @@
                     }
 
                     bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(
-                        RoadUITextures.VehicleRestrictionTextures[vehicleType][allowed],
+                        RoadUI.VehicleRestrictionTextures[vehicleType][allowed],
                         camPos,
                         zero,
                         f,

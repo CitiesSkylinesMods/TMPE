@@ -1,16 +1,16 @@
-﻿namespace TrafficManager.UI.SubTools {
-    using System.Collections.Generic;
-    using System.Linq;
-    using ColossalFramework;
+namespace TrafficManager.UI.SubTools {
     using ColossalFramework.Math;
+    using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using State;
-    using State.ConfigData;
-    using State.Keybinds;
+    using System.Collections.Generic;
+    using System.Linq;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.State.Keybinds;
+    using TrafficManager.State;
+    using TrafficManager.Util.Caching;
     using UnityEngine;
-    using Util.Caching;
 
     public class LaneConnectorTool : SubTool {
         private enum MarkerSelectionMode {
@@ -19,7 +19,7 @@
             SelectTarget
         }
 
-        private enum StayInLaneMode {
+        public enum StayInLaneMode {
             None,
             Both,
             Forward,
@@ -70,8 +70,7 @@
         }
 
         public LaneConnectorTool(TrafficManagerTool mainTool)
-            : base(mainTool)
-        {
+            : base(mainTool) {
             // Log._Debug($"LaneConnectorTool: Constructor called");
             currentNodeMarkers = new Dictionary<ushort, List<NodeLaneMarker>>();
 
@@ -104,7 +103,7 @@
         }
 
         private void ShowOverlay(bool viewOnly, RenderManager.CameraInfo cameraInfo) {
-            if (viewOnly && !Options.connectedLanesOverlay) {
+            if (viewOnly && !(Options.connectedLanesOverlay || PrioritySignsTool.showMassEditOverlay)) {
                 return;
             }
 
@@ -140,8 +139,7 @@
                           ((connectionClass.m_service == ItemClass.Service.PublicTransport) &&
                            ((connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain) ||
                             (connectionClass.m_subService == ItemClass.SubService.PublicTransportMetro) ||
-                            (connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail)))))
-                    {
+                            (connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail))))) {
                         continue;
                     }
 
@@ -184,7 +182,7 @@
 
                     foreach (NodeLaneMarker targetLaneMarker in laneMarker.ConnectedMarkers) {
                         // render lane connection from laneMarker to targetLaneMarker
-                        if (!Constants.ServiceFactory.NetService.IsLaneValid( targetLaneMarker.LaneId)) {
+                        if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneMarker.LaneId)) {
                             continue;
                         }
 
@@ -279,6 +277,19 @@
             return bounds.IntersectRay(mouseRay);
         }
 
+        /// <summary>
+        /// Finds the first index for which node.GetSegment(index) != 0 (its possible node.m_segment0 == 0)
+        /// </summary>
+        private static int GetFirstSegmentIndex(NetNode node) {
+            for (int i = 0; i < 8; ++i) {
+                if (node.GetSegment(i) != 0) {
+                    return i;
+                }
+            }
+            Log.Error("GetFirstSegmentIndex: Node does not have any segments");
+            return 0;
+        }
+
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             // Log._Debug($"LaneConnectorTool: RenderOverlay. SelectedNodeId={SelectedNodeId}
             //     SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId}
@@ -334,69 +345,31 @@
                     // "stay in lane"
                     switch (stayInLaneMode) {
                         case StayInLaneMode.None: {
-                            stayInLaneMode = StayInLaneMode.Both;
-                            break;
-                        }
+                                stayInLaneMode = StayInLaneMode.Both;
+                                break;
+                            }
 
                         case StayInLaneMode.Both: {
-                            stayInLaneMode = StayInLaneMode.Forward;
-                            break;
-                        }
+                                stayInLaneMode = StayInLaneMode.Forward;
+                                break;
+                            }
 
                         case StayInLaneMode.Forward: {
-                            stayInLaneMode = StayInLaneMode.Backward;
-                            break;
-                        }
+                                stayInLaneMode = StayInLaneMode.Backward;
+                                break;
+                            }
 
                         case StayInLaneMode.Backward: {
-                            stayInLaneMode = StayInLaneMode.None;
-                            break;
-                        }
+                                stayInLaneMode = StayInLaneMode.None;
+                                break;
+                            }
                     }
 
                     if (stayInLaneMode != StayInLaneMode.None) {
-                        List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(
-                            SelectedNodeId,
-                            ref nodesBuffer[SelectedNodeId]);
-
-                        if (nodeMarkers != null) {
-                            selectedMarker = null;
-
-                            foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
-                                if (!sourceLaneMarker.IsSource) {
-                                    continue;
-                                }
-
-                                if ((stayInLaneMode == StayInLaneMode.Forward) ||
-                                    (stayInLaneMode == StayInLaneMode.Backward)) {
-                                    if ((sourceLaneMarker.SegmentIndex == 0)
-                                        ^ (stayInLaneMode == StayInLaneMode.Backward)) {
-                                        continue;
-                                    }
-                                }
-
-                                foreach (NodeLaneMarker targetLaneMarker in nodeMarkers) {
-                                    if (!targetLaneMarker.IsTarget || (targetLaneMarker.SegmentId ==
-                                                                       sourceLaneMarker.SegmentId)) {
-                                        continue;
-                                    }
-
-                                    if (targetLaneMarker.InnerSimilarLaneIndex
-                                        == sourceLaneMarker.InnerSimilarLaneIndex) {
-                                        Log._Debug(
-                                            $"Adding lane connection {sourceLaneMarker.LaneId} -> " +
-                                            $"{targetLaneMarker.LaneId}");
-                                        LaneConnectionManager.Instance.AddLaneConnection(
-                                            sourceLaneMarker.LaneId,
-                                            targetLaneMarker.LaneId,
-                                            sourceLaneMarker.StartNode);
-                                    }
-                                }
-                            }
-                        }
-
+                        selectedMarker = null;
+                        StayInLane(SelectedNodeId, stayInLaneMode);
                         RefreshCurrentNodeMarkers(SelectedNodeId);
-                    } // if stay in lane is not None
+                    }
                 } // if stay in lane
             } // if selected node
 
@@ -404,6 +377,49 @@
                 // draw hovered node
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
             }
+        }
+
+        public static void StayInLane(ushort nodeId, StayInLaneMode stayInLaneMode = StayInLaneMode.Both) {
+            if (stayInLaneMode != StayInLaneMode.None) {
+                NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+                List<NodeLaneMarker> nodeMarkers = GetNodeMarkers(
+                    nodeId,
+                    ref nodesBuffer[nodeId]);
+
+                if (nodeMarkers != null) {
+                    int forwardSegmentIndex = GetFirstSegmentIndex(nodesBuffer[nodeId]);
+                    foreach (NodeLaneMarker sourceLaneMarker in nodeMarkers) {
+                        if (!sourceLaneMarker.IsSource) {
+                            continue;
+                        }
+                        if ((stayInLaneMode == StayInLaneMode.Forward) ||
+                            (stayInLaneMode == StayInLaneMode.Backward)) {
+                            if ((sourceLaneMarker.SegmentIndex == forwardSegmentIndex)
+                                ^ (stayInLaneMode == StayInLaneMode.Backward)) {
+                                continue;
+                            }
+                        }
+
+                        foreach (NodeLaneMarker targetLaneMarker in nodeMarkers) {
+                            if (!targetLaneMarker.IsTarget || (targetLaneMarker.SegmentId ==
+                                                               sourceLaneMarker.SegmentId)) {
+                                continue;
+                            }
+
+                            if (targetLaneMarker.InnerSimilarLaneIndex
+                                == sourceLaneMarker.InnerSimilarLaneIndex) {
+                                Log._Debug(
+                                    $"Adding lane connection {sourceLaneMarker.LaneId} -> " +
+                                    $"{targetLaneMarker.LaneId}");
+                                LaneConnectionManager.Instance.AddLaneConnection(
+                                    sourceLaneMarker.LaneId,
+                                    targetLaneMarker.LaneId,
+                                    sourceLaneMarker.StartNode);
+                            } // end if
+                        } // end foreach
+                    } // end foreach
+                } // end if
+            } // end if
         }
 
         public override void OnPrimaryClickOverlay() {
@@ -512,8 +528,7 @@
                 } else if (LaneConnectionManager.Instance.AddLaneConnection(
                     selectedMarker.LaneId,
                     hoveredMarker.LaneId,
-                    selectedMarker.StartNode))
-                {
+                    selectedMarker.StartNode)) {
                     // try to add connection
                     selectedMarker.ConnectedMarkers.Add(hoveredMarker);
                     Log._DebugIf(
@@ -547,30 +562,30 @@
             switch (GetMarkerSelectionMode()) {
                 // also: case MarkerSelectionMode.None:
                 default: {
-                    Log._DebugIf(
-                        logLaneConn,
-                        () => "LaneConnectorTool: OnSecondaryClickOverlay: nothing to do");
-                    stayInLaneMode = StayInLaneMode.None;
-                    break;
-                }
+                        Log._DebugIf(
+                            logLaneConn,
+                            () => "LaneConnectorTool: OnSecondaryClickOverlay: nothing to do");
+                        stayInLaneMode = StayInLaneMode.None;
+                        break;
+                    }
 
                 case MarkerSelectionMode.SelectSource: {
-                    // deselect node
-                    Log._DebugIf(
-                        logLaneConn,
-                        () => "LaneConnectorTool: OnSecondaryClickOverlay: selected node id = 0");
-                    SelectedNodeId = 0;
-                    break;
-                }
+                        // deselect node
+                        Log._DebugIf(
+                            logLaneConn,
+                            () => "LaneConnectorTool: OnSecondaryClickOverlay: selected node id = 0");
+                        SelectedNodeId = 0;
+                        break;
+                    }
 
                 case MarkerSelectionMode.SelectTarget: {
-                    // deselect source marker
-                    Log._DebugIf(
-                        logLaneConn,
-                        () => "LaneConnectorTool: OnSecondaryClickOverlay: switch to selected source mode");
-                    selectedMarker = null;
-                    break;
-                }
+                        // deselect source marker
+                        Log._DebugIf(
+                            logLaneConn,
+                            () => "LaneConnectorTool: OnSecondaryClickOverlay: switch to selected source mode");
+                        selectedMarker = null;
+                        break;
+                    }
             }
         }
 
@@ -597,8 +612,7 @@
 
             for (uint nodeId = forceNodeId == 0 ? 1u : forceNodeId;
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
-                 ++nodeId)
-            {
+                 ++nodeId) {
                 if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
                     continue;
                 }
@@ -634,14 +648,14 @@
         public override void Initialize() {
             base.Initialize();
             Cleanup();
-            if (Options.connectedLanesOverlay) {
+            if (Options.connectedLanesOverlay || PrioritySignsTool.showMassEditOverlay) {
                 RefreshCurrentNodeMarkers();
             } else {
                 currentNodeMarkers.Clear();
             }
         }
 
-        private List<NodeLaneMarker> GetNodeMarkers(ushort nodeId, ref NetNode node) {
+        private static List<NodeLaneMarker> GetNodeMarkers(ushort nodeId, ref NetNode node) {
             if (nodeId == 0) {
                 return null;
             }
@@ -670,14 +684,12 @@
                 NetInfo.Lane[] lanes = segmentsBuffer[segmentId].Info.m_lanes;
                 uint laneId = segmentsBuffer[segmentId].m_lanes;
 
-                for (byte laneIndex = 0; (laneIndex < lanes.Length) && (laneId != 0); laneIndex++)
-                {
+                for (byte laneIndex = 0; (laneIndex < lanes.Length) && (laneId != 0); laneIndex++) {
                     NetInfo.Lane laneInfo = lanes[laneIndex];
 
                     if (((laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != NetInfo.LaneType.None)
                         && ((laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES)
-                            != VehicleInfo.VehicleType.None))
-                    {
+                            != VehicleInfo.VehicleType.None)) {
                         if (connManager.GetLaneEndPoint(
                             segmentId,
                             !isEndNode,
@@ -686,8 +698,7 @@
                             laneInfo,
                             out bool isSource,
                             out bool isTarget,
-                            out Vector3? pos))
-                        {
+                            out Vector3? pos)) {
                             pos = pos.Value + offset;
 
                             float terrainY =
@@ -778,8 +789,7 @@
                                                bool sourceStartNode,
                                                ushort targetSegmentId,
                                                ref NetSegment targetSegment,
-                                               bool targetStartNode)
-        {
+                                               bool targetStartNode) {
             NetManager netManager = Singleton<NetManager>.instance;
             NetInfo sourceSegmentInfo = netManager.m_segments.m_buffer[sourceSegmentId].Info;
             NetInfo targetSegmentInfo = netManager.m_segments.m_buffer[targetSegmentId].Info;

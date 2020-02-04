@@ -1,33 +1,13 @@
 namespace TrafficManager.UI.Textures {
-    using System;
+    using CSUtil.Commons;
     using System.IO;
     using System.Reflection;
-    using CSUtil.Commons;
-    using State.ConfigData;
+    using System;
+    using TrafficManager.State.ConfigData;
     using UnityEngine;
 
     public static class TextureResources {
-        public static readonly Texture2D MainMenuButtonTexture2D;
-        public static readonly Texture2D MainMenuButtonsTexture2D;
-        public static readonly Texture2D NoImageTexture2D;
-        public static readonly Texture2D RemoveButtonTexture2D;
-        public static readonly Texture2D WindowBackgroundTexture2D;
-
         static TextureResources() {
-            // missing image
-            NoImageTexture2D = LoadDllResource("noimage.png", 64, 64);
-
-            // main menu icon
-            MainMenuButtonTexture2D = LoadDllResource("MenuButton.png", 300, 50);
-            MainMenuButtonTexture2D.name = "TMPE_MainMenuButtonIcon";
-
-            // main menu buttons
-            MainMenuButtonsTexture2D = LoadDllResource("mainmenu-btns.png", 960, 30);
-            MainMenuButtonsTexture2D.name = "TMPE_MainMenuButtons";
-
-            RemoveButtonTexture2D = LoadDllResource("remove-btn.png", 150, 30);
-
-            WindowBackgroundTexture2D = LoadDllResource("WindowBackground.png", 16, 60);
         }
 
         internal static Texture2D LoadDllResource(string resourceName, int width, int height)

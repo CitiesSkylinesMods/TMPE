@@ -1,7 +1,7 @@
 namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using JetBrains.Annotations;
-    using Textures;
+    using TrafficManager.UI.Textures;
     using UnityEngine;
 
     public abstract class SubTool {
@@ -11,7 +11,7 @@ namespace TrafficManager.UI {
             get {
                 if (windowTexture_ == null) {
                     windowTexture_ = TrafficManagerTool.AdjustAlpha(
-                        TextureResources.WindowBackgroundTexture2D,
+                        Textures.MainMenu.WindowBackground,
                         TrafficManagerTool.GetWindowAlpha());
                 }
 

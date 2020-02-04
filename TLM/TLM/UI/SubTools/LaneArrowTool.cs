@@ -1,12 +1,12 @@
 namespace TrafficManager.UI.SubTools {
-    using System.Collections.Generic;
-    using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using Manager.Impl;
-    using State;
+    using System.Collections.Generic;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
     using UnityEngine;
 
     public class LaneArrowTool : SubTool {
@@ -128,6 +128,11 @@ namespace TrafficManager.UI.SubTools {
             }
 #endif
             ExtSegmentEndManager segEndMan = ExtSegmentEndManager.Instance;
+            int segmentEndId = segEndMan.GetIndex(segmentId, nodeId);
+            if (segmentEndId <0) {
+                Log._Debug($"Node {nodeId} is not connected to segment {segmentId}");
+                return false;
+            }
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
             NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
             bool bJunction = (nodesBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
@@ -138,6 +143,11 @@ namespace TrafficManager.UI.SubTools {
 
         protected override ushort HoveredNodeId {
         get {
+                bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+                if (ctrlDown) {
+                    // When control is down, we are selecting node.
+                    return base.HoveredNodeId;
+                }
                 // if the current segment end does not have lane arrows
                 // and the other end of the segment does have lane arrows, then
                 // assume the user intends to hover over that one.

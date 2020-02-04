@@ -1,9 +1,10 @@
-﻿namespace TrafficManager.Manager.Impl {
-    using System;
-    using API.Manager;
-    using API.Traffic.Enums;
+namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
-    using State;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.State;
+    using TrafficManager.UI.Helpers;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -197,6 +198,20 @@
                 OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
             }
 
+            int LoadBool (int idx, ILegacySerializableOption opt) {
+                if (data.Length > idx) {
+                    opt.Load(data[idx]);
+                }
+                return idx + 1;
+            };
+
+            int index = 42;
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns);
             return true;
         }
 
@@ -243,7 +258,14 @@
                 (byte)(Options.turnOnRedEnabled ? 1 : 0),
                 (byte)(Options.allowNearTurnOnRed ? 1 : 0),
                 (byte)(Options.allowFarTurnOnRed ? 1 : 0),
-                (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0)
+                (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0),
+
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns.Save()),
             };
         }
     }

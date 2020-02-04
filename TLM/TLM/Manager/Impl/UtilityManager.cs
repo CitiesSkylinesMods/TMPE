@@ -1,10 +1,10 @@
 ﻿namespace TrafficManager.Manager.Impl {
-    using System;
-    using System.Threading;
-    using API.Manager;
     using ColossalFramework;
     using CSUtil.Commons;
-    using State;
+    using System.Threading;
+    using System;
+    using TrafficManager.API.Manager;
+    using TrafficManager.State;
     using UnityEngine;
 
     public class UtilityManager : AbstractCustomManager, IUtilityManager {

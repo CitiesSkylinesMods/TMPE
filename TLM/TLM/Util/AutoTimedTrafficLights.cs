@@ -1,15 +1,15 @@
 namespace TrafficManager.Util {
-    using TrafficManager.Manager.Impl;
-    using System.Collections.Generic;
     using ColossalFramework;
-    using UnityEngine;
+    using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using API.TrafficLight;
-    using API.TrafficLight.Data;
-    using API.Traffic.Enums;
+    using System.Collections.Generic;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
-    using CSUtil.Commons;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.TrafficLight.Data;
+    using TrafficManager.API.TrafficLight;
+    using TrafficManager.Manager.Impl;
+    using UnityEngine;
 
     public static class AutoTimedTrafficLights {
         /// <summary>

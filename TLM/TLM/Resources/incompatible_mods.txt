@@ -1,10 +1,15 @@
+1957033250;Traffic Manager: President Edition (Industries Compatible)
+1546870472;Traffic Manager: President Edition (Industries Compatible)
 1581695572;Traffic Manager: President Edition
 1348361731;Traffic Manager: President Edition ALPHA/DEBUG
 498363759;Traffic Manager + Improved AI
 563720449;Traffic Manager + Improved AI (Japanese Ver.)
-492391912;Improvedd AI (Traffic++)
+492391912;Improved AI (Traffic++)
 409184143;Traffic++
 626024868;Traffic++ V2
+568443446;Traffic Manager Plus 1.2.0
+481786333;Traffic Manager Plus
+427585724;Traffic Manager
 407335588;No Despawn Mod
 600733054;No On-Street Parking
 1628112268;RightTurnNoStop
@@ -34,6 +39,7 @@
 422554572;81 Tiles Updated
 414702884;Zoneable Pedestrian Paths
 631694768;Extended Road Upgrade
+408209297;Extended Road Upgrade
 649522495;District Service Limit
 428094792;[ARIS] Remove Stuck Vehicles
 587530437;Remove Stuck Vehicles [Fixed for v1.4+]
@@ -41,7 +47,7 @@
 421028969;[ARIS] Skylines Overwatch
 583538182;Skylines Overwatch [Fixed for v1.3+]
 813833476;Skylines Overwatch [1.6]
-408209297;Extended Road Upgrade
 417926819;Road Assistant
 631930385;Realistic Vehicle Speeds
 1072157697;Cargo Info
+1803209875;Trees Respiration

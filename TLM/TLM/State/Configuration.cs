@@ -1,11 +1,11 @@
 // TODO this class should be moved to TrafficManager.State, but the deserialization fails if we just do that now. Anyway, we should get rid of these crazy lists of arrays. So let's move the class when we decide rework the load/save system.
 namespace TrafficManager {
-    using System;
-    using System.Collections.Generic;
-    using API.Traffic.Data;
     using JetBrains.Annotations;
-    using State;
-    using Traffic;
+    using System.Collections.Generic;
+    using System;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State;
+    using TrafficManager.Traffic;
 
     [Serializable]
     public class Configuration {

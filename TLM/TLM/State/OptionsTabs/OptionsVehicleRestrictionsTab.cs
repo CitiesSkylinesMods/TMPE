@@ -1,11 +1,12 @@
 namespace TrafficManager.State {
-    using API.Traffic.Enums;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
-    using Manager.Impl;
-    using UI;
-    using UI.Helpers;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.UI.Helpers;
+    using TrafficManager.UI;
+    using UnityEngine;
 
     public static class OptionsVehicleRestrictionsTab {
         private static UICheckBox _relaxedBussesToggle;
@@ -118,6 +119,8 @@ namespace TrafficManager.State {
                           Options.evacBussesMayIgnoreRules,
                           OnEvacBussesMayIgnoreRulesChanged) as UICheckBox;
             }
+
+            OptionsMassEditTab.MakePanel_MassEdit(panelHelper);
         }
 
         private static void OnAllRelaxedChanged(bool newAllRelaxed) {
