@@ -24,6 +24,10 @@ namespace TrafficManager.UI {
         private const string TUTORIAL_HEAD_KEY_PREFIX = TUTORIAL_KEY_PREFIX + "HEAD_";
         public const string TUTORIAL_BODY_KEY_PREFIX = TUTORIAL_KEY_PREFIX + "BODY_";
 
+        public const string GUIDE_KEY_PREFIX = "TMPE_GUIDE_";
+        private const string GUIDE_HEAD_KEY_PREFIX = GUIDE_KEY_PREFIX + "HEAD_";
+        public const string GUIDE_BODY_KEY_PREFIX = GUIDE_KEY_PREFIX + "BODY_";
+
         /// <summary>
         /// Defines column order in CSV, but not the dropdown order, the dropdown is just sorted.
         /// Mapping from translation languages (first row of CSV export) to language locales used in
@@ -80,6 +84,10 @@ namespace TrafficManager.UI {
         public static Localization.LookupTable Tutorials =>
             LoadingExtension.TranslationDatabase.tutorialsLookup_;
 
+        private Localization.LookupTable guidesLookup_;
+        public static Localization.LookupTable Guide =>
+            LoadingExtension.TranslationDatabase.guidesLookup_;
+
         private Localization.LookupTable aiCitizenLookup_;
         public static Localization.LookupTable AICitizen =>
             LoadingExtension.TranslationDatabase.aiCitizenLookup_;
@@ -135,6 +143,7 @@ namespace TrafficManager.UI {
             trafficLightsLookup_ = new Localization.LookupTable("TrafficLights");
             vehicleRestrictionsLookup_ = new Localization.LookupTable("VehicleRestrictions");
             tutorialsLookup_ = new Localization.LookupTable("Tutorials");
+            guidesLookup_ = new Localization.LookupTable("Guides");
             aiCitizenLookup_ = new Localization.LookupTable("AI_Citizen");
             aiCarLookup_ = new Localization.LookupTable("AI_Car");
         }
@@ -183,12 +192,21 @@ namespace TrafficManager.UI {
             return filename;
         }
 
+        Locale locale => (Locale)typeof(LocaleManager)
+            .GetField(
+                "m_Locale",
+                BindingFlags.Instance | BindingFlags.NonPublic)
+            ?.GetValue(SingletonLite<LocaleManager>.instance);
+
+        /// Reset is private method used to delete the key before re-adding it
+        MethodInfo resetFun = typeof(Locale)
+            .GetMethod(
+            "ResetOverriddenLocalizedStrings",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+
+
         public void ReloadTutorialTranslations() {
-            var locale = (Locale)typeof(LocaleManager)
-                                 .GetField(
-                                     "m_Locale",
-                                     BindingFlags.Instance | BindingFlags.NonPublic)
-                                 ?.GetValue(SingletonLite<LocaleManager>.instance);
+            var locale = this.locale;
             if (locale == null) {
                 Log.Warning("Can't update tutorials because locale object is null");
                 return;
@@ -196,11 +214,6 @@ namespace TrafficManager.UI {
 
             string lang = GetCurrentLanguage();
 
-            // Reset is private method used to delete the key before re-adding it
-            MethodInfo resetFun = typeof(Locale)
-                .GetMethod(
-                    "ResetOverriddenLocalizedStrings",
-                    BindingFlags.Instance | BindingFlags.NonPublic);
 
             foreach (KeyValuePair<string, string> entry in tutorialsLookup_.AllLanguages[lang]) {
                 if (!entry.Key.StartsWith(TUTORIAL_KEY_PREFIX)) {
@@ -225,6 +238,53 @@ namespace TrafficManager.UI {
                 var key = new Locale.Key() {
                     m_Identifier = identifier,
                     m_Key = tutorialKey
+                };
+
+                resetFun?.Invoke(locale, new object[] { key });
+                locale.AddLocalizedString(key, entry.Value);
+            }
+        }
+
+        public IEnumerable<string> GetGuides() {
+            string lang = GetCurrentLanguage();
+            foreach (KeyValuePair<string, string> entry in guidesLookup_.AllLanguages[lang]) {
+                if (entry.Key.StartsWith(TUTORIAL_HEAD_KEY_PREFIX)) {
+                    yield return entry.Key.Substring(GUIDE_HEAD_KEY_PREFIX.Length);
+                }
+            }
+        }
+        public void ReloadGuideTranslations() {
+            var locale = this.locale;
+            if (locale == null) {
+                Log.Warning("Can't update guides because locale object is null");
+                return;
+            }
+
+            string lang = GetCurrentLanguage();
+
+            foreach (KeyValuePair<string, string> entry in guidesLookup_.AllLanguages[lang]) {
+                if (!entry.Key.StartsWith(GUIDE_KEY_PREFIX)) {
+                    continue;
+                }
+
+                string identifier;
+                string guideKey;
+
+                if (entry.Key.StartsWith(GUIDE_HEAD_KEY_PREFIX)) {
+                    identifier = "TUTORIAL_TITLE";
+                    guideKey = GUIDE_KEY_PREFIX +
+                                  entry.Key.Substring(GUIDE_HEAD_KEY_PREFIX.Length);
+                } else if (entry.Key.StartsWith(GUIDE_BODY_KEY_PREFIX)) {
+                    identifier = "TUTORIAL_TEXT";
+                    guideKey = GUIDE_KEY_PREFIX +
+                                  entry.Key.Substring(GUIDE_BODY_KEY_PREFIX.Length);
+                } else {
+                    continue;
+                }
+
+                var key = new Locale.Key() {
+                    m_Identifier = identifier,
+                    m_Key = guideKey
                 };
 
                 resetFun?.Invoke(locale, new object[] { key });

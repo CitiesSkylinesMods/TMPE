@@ -48,16 +48,17 @@ namespace TrafficManager.UI.SubTools {
             }
             switch (res) {
                 case SetLaneArrowError.HighwayArrows: {
-                     MainTool.ShowError(
-                        Translation.LaneRouting.Get("Dialog.Text:Disabled due to highway rules"));
-                        break;
+                    MainTool.ShowError(Translation.LaneRouting.Get(
+                        "Dialog.Text:Disabled due to highway rules"));
+                    break;
                 }
-
                 case SetLaneArrowError.LaneConnection: {
-                    MainTool.ShowError(
-                       Translation.LaneRouting.Get("Dialog.Text:Disabled due to manual connection"));
-                        break;
-                    }
+                    MainTool.ActivateGuide("LaneArrowTool");
+                    break;
+                }
+                case SetLaneArrowError.Success:
+                    MainTool.DeactivateGuide("LaneArrowTool");
+                    break;
             }
 
         }

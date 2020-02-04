@@ -221,7 +221,7 @@
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
-    <Compile Include="UI\Helpers\Guide.cs" />
+    <Compile Include="UI\Helpers\GuideWrapper.cs" />
     <Compile Include="UI\Helpers\CheckboxOption.cs" />
     <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />
     <Compile Include="UI\Helpers\SerializableUIOptionBase.cs" />
@@ -518,6 +518,7 @@
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
+    <EmbeddedResource Include="Resources\Translations\Guides.csv" />
     <EmbeddedResource Include="Resources\Translations\VehicleRestrictions.csv" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

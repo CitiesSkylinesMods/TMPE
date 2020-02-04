@@ -797,6 +797,47 @@ namespace TrafficManager.UI {
             }
         }
 
+        #region Guide
+
+        private Dictionary<string, GuideWrapper> GuideTable = new Dictionary<string, GuideWrapper>();
+        private GuideWrapper AddGuide(string localeKey) =>
+            GuideTable[localeKey] = new GuideWrapper(Translation.GUIDE_KEY_PREFIX + localeKey);
+
+        public void InitializeGuideTable() {
+            foreach(string localeKey in LoadingExtension.TranslationDatabase.GetGuides()) {
+                AddGuide(localeKey);
+            }
+        }
+
+        public void ActivateGuide(string localeKey) {
+            try {
+                var guide = GuideTable[localeKey];
+                guide.Activate();
+            }
+            catch {
+                Log.Error($"Guide {localeKey} does not exists");
+            }
+        }
+
+        public void DeactivateGuide(string localeKey) {
+            try {
+                var guide = GuideTable[localeKey];
+                guide.Deactivate();
+            }
+            catch {
+                Log.Error($"Guide {localeKey} does not exists");
+            }
+        }
+        public void DeactivateAllGuides() {
+            foreach(var item in GuideTable) {
+                item.Value.Deactivate();
+            }
+        }
+
+        #endregion Guide
+
+
+
         public override void SimulationStep() {
             base.SimulationStep();
 
