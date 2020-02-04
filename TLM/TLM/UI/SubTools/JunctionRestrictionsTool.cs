@@ -29,9 +29,14 @@ namespace TrafficManager.UI.SubTools {
 
             // handle delete
             if (KeybindSettingsBase.LaneConnectorDelete.KeyDown(e)) {
-                // TODO: #568 provide unified delete key for all managers.
-                bool startNode = (bool)netService.IsStartNode(HoveredSegmentId, HoveredNodeId);
-                JunctionRestrictionsManager.Instance.ClearSegmentEnd(HoveredSegmentId, startNode);
+                netService.IterateNodeSegments(
+                    SelectedNodeId,
+                    (ushort segmmentId, ref NetSegment segment) => {
+                        // TODO: #568 provide unified delete key for all managers.
+                        bool startNode = (bool)netService.IsStartNode(segmmentId, SelectedNodeId);
+                        JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmmentId, startNode);
+                        return true;
+                    });
             }
         }
 

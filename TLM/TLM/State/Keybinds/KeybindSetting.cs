@@ -113,23 +113,8 @@ namespace TrafficManager.State.Keybinds {
         public bool KeyDown(Event e) {
             bool value = Key.IsPressed(e);
             bool ret = value && !prev_value;
-            if (ret) {
-                prev_value = value; //consume
-            }
-            return ret;
-        }
-
-        /// <summary>
-        /// Determines when user first releases the key. the event is consumed first time
-        /// this function is called.
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns>true once when user releases the key.</returns>
-        public bool KeyUp(Event e) {
-            bool value = Key.IsPressed(e);
-            bool ret = !value && prev_value;
-            if (ret) {
-                prev_value = value; //consume
+            if (ret || !value) {
+                prev_value = value; 
             }
             return ret;
         }
