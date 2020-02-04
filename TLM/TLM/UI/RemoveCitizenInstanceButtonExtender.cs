@@ -2,6 +2,7 @@
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System.Collections.Generic;
+    using TrafficManager.U;
     using TrafficManager.UI.Textures;
     using UnityEngine;
 
@@ -49,7 +50,7 @@
             return button;
         }
 
-        public class RemoveCitizenInstanceButton : LinearSpriteButton {
+        public class RemoveCitizenInstanceButton : BaseUButton {
             public override void Start() {
                 base.Start();
                 width = Width;

@@ -5,7 +5,7 @@
     using UnityEngine;
 
     /// <summary>Base class for main menu panel buttons.</summary>
-    public abstract class MenuButton : LinearSpriteButton {
+    public abstract class MenuButton : U.BaseUButton {
         /// <summary>
         /// Defines tool types for TM:PE. Modes are exclusive, one can be active at a time.
         /// </summary>

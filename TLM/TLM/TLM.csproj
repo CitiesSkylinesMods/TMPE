@@ -265,7 +265,6 @@
     <Compile Include="UI\MainMenu\DespawnButton.cs" />
     <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
     <Compile Include="UI\MainMenu\MenuButton.cs" />
-    <Compile Include="UI\LinearSpriteButton.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
@@ -325,6 +324,9 @@
     <Compile Include="UI\UIBase.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
+    <Compile Include="U\BaseUButton.cs" />
+    <Compile Include="U\ButtonMouseState.cs" />
+    <Compile Include="U\ButtonTexture.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\JunctionRestrictions\crossing_allowed.png" />

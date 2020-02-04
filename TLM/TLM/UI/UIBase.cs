@@ -144,7 +144,9 @@ namespace TrafficManager.UI {
 #endif
 
         public static void SetToolMode(TrafficManagerMode mode) {
-            if (mode == ToolMode) return;
+            if (mode == ToolMode) {
+                return;
+            }
 
             ToolMode = mode;
 
