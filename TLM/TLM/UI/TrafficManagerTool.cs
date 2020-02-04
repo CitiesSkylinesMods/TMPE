@@ -269,6 +269,7 @@ namespace TrafficManager.UI {
 
                 if (realToolChange) {
                     ShowAdvisor(_activeSubTool.GetTutorialKey());
+                    DeactivateAllGuides();
                 }
             }
         }
@@ -809,30 +810,57 @@ namespace TrafficManager.UI {
             }
         }
 
-        public void ActivateGuide(string localeKey) {
+        private object GuideLock = new object();
+        private GuideWrapper GuideQueue;
+        private bool bActivateEnqueuedGuide = false;
+        private bool bDeactivateAllGuides;
+
+        private void HandleGuide() {
+            GuideWrapper guide;
+            bool activate;
+            bool deactivateAll;
+            lock (GuideLock) {
+                guide = GuideQueue;
+                activate = bActivateEnqueuedGuide;
+                deactivateAll = bDeactivateAllGuides;
+                GuideQueue = null;
+                bDeactivateAllGuides = false;
+            }
+            if (deactivateAll) {
+                foreach (var item in GuideTable) {
+                    item.Value.Deactivate();
+                }
+            } else if (bActivateEnqueuedGuide) {
+                guide?.Activate();
+            } else {
+                guide?.Deactivate();
+            }
+        }
+
+        private void EnqueueGuide(string localeKey, bool activate) {
             try {
-                var guide = GuideTable[localeKey];
-                guide.Activate();
+                lock (GuideLock) {
+                    GuideQueue = GuideTable[localeKey];
+                    bActivateEnqueuedGuide = true;
+                }
             }
             catch {
                 Log.Error($"Guide {localeKey} does not exists");
             }
         }
 
-        public void DeactivateGuide(string localeKey) {
-            try {
-                var guide = GuideTable[localeKey];
-                guide.Deactivate();
-            }
-            catch {
-                Log.Error($"Guide {localeKey} does not exists");
-            }
-        }
+        public void ActivateGuide(string localeKey) => EnqueueGuide(localeKey, true);
+    
+        public void DeactivateGuide(string localeKey) => EnqueueGuide(localeKey, false);
+
         public void DeactivateAllGuides() {
-            foreach(var item in GuideTable) {
-                item.Value.Deactivate();
+            lock (GuideLock) {
+                GuideQueue = null;
+                bActivateEnqueuedGuide = true;
             }
         }
+
+
 
         #endregion Guide
 
@@ -855,6 +883,7 @@ namespace TrafficManager.UI {
             //                tooltipWorldPos = null;
             //        }
             // }
+            HandleGuide();
         }
 
         public bool DoRayCast(RaycastInput input, out RaycastOutput output) {
