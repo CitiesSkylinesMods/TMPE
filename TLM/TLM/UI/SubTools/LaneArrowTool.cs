@@ -123,8 +123,15 @@ namespace TrafficManager.UI.SubTools {
             }
 
             int width = numLanes * 128;
-            var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, 60);
-            windowRect3 = GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, BorderlessStyle);
+            int height = 50;
+            bool startNode = (bool)netService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+            if (CanReset(SelectedSegmentId, startNode)) {
+                Log._Debug("Expanding height");
+                height += 30;
+            }
+
+            var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, height);
+            GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, BorderlessStyle);
             cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
         }
 
