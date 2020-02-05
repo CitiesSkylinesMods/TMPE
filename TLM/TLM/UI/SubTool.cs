@@ -78,6 +78,10 @@ namespace TrafficManager.UI {
 
         private GUIStyle borderlessStyle_;
 
+        protected virtual Vector3 HitPos => TrafficManagerTool.HitPos;
+
+        protected virtual Vector3 MousePosition => MainTool.MousePosition;
+
         protected virtual ushort HoveredNodeId {
             get => TrafficManagerTool.HoveredNodeId;
             set => TrafficManagerTool.HoveredNodeId = value;

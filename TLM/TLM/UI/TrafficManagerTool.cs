@@ -32,6 +32,7 @@ namespace TrafficManager.UI {
         internal static ushort HoveredNodeId;
         internal static ushort HoveredSegmentId;
         internal static Vector3 HitPos;
+        internal Vector3 MousePosition => m_mousePosition; //expose protected member.
 
         private static bool _mouseClickProcessed;
 
@@ -832,7 +833,7 @@ namespace TrafficManager.UI {
 
             HoveredSegmentId = 0;
             HoveredNodeId = 0;
-            HitPos = Vector3.zero;
+            HitPos = m_mousePosition;
 
             bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible &&
                                  (_activeSubTool == null || !_activeSubTool.IsCursorInPanel());

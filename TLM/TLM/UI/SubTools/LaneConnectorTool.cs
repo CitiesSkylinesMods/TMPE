@@ -62,7 +62,7 @@ namespace TrafficManager.UI.SubTools {
             internal uint LaneId;
             internal int InnerSimilarLaneIndex;
             internal int SegmentIndex;
-            internal readonly float Radius = 1f;
+            static internal float Radius = 1f;
             internal Color Color;
             internal readonly List<NodeLaneMarker> ConnectedMarkers = new List<NodeLaneMarker>();
             internal SegmentLaneMarker segmentLaneMarker;
@@ -70,7 +70,7 @@ namespace TrafficManager.UI.SubTools {
             internal NetInfo.LaneType LaneType;
             internal VehicleInfo.VehicleType VehicleType;
 
-            internal bool IntersectRay(Ray ray, float hitH) {
+            internal bool IntersectRay(ref Ray ray, float hitH) {
                 Vector3 pos = SecondaryPosition;
                 if (hitH - pos.y > 2.5f) {
                     // if marker is projected on road plane above then modify its height
@@ -115,7 +115,7 @@ namespace TrafficManager.UI.SubTools {
             private Bounds[] bounds;
             private float prev_H;
 
-            internal bool IntersectRay(Ray ray, float hitH) {
+            internal bool IntersectRay(ref Ray ray, float hitH) {
                 CalculateBounds(hitH);
                 foreach (Bounds bounds in bounds) {
                     if (bounds.IntersectRay(ray))
@@ -177,7 +177,7 @@ namespace TrafficManager.UI.SubTools {
                     cameraInfo,
                     color,
                     bezier,
-                    enlarge ? 1.5f : 1f,
+                    enlarge ? 1.6f : 1.1f,
                     0,
                     0,
                     minH - 100f,
@@ -345,12 +345,12 @@ namespace TrafficManager.UI.SubTools {
                         bool markerIsHovered = false;
                         if (!foundHoveredMarker) {
                             float hitH = TrafficManagerTool.GetAccurateHitHeight();
-                            markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay, hitH);
+                            markerIsHovered = laneMarker.IntersectRay(ref mouseRay, hitH);
 
                             if (!markerIsHovered &&
-                                laneMarker.segmentLaneMarker.IntersectRay(mouseRay, hitH)) {
+                                laneMarker.segmentLaneMarker.IntersectRay(ref mouseRay, hitH)) {
                                 //only draw lane when segmentLaneMarker is hovered but laneMarker is not hovered.
-                                laneMarker.segmentLaneMarker.RenderOverlay(cameraInfo, color);
+                                laneMarker.segmentLaneMarker.RenderOverlay(cameraInfo, color,true);
                                 markerIsHovered = true;
                             }
 
@@ -365,18 +365,6 @@ namespace TrafficManager.UI.SubTools {
                     }
                 } // end foreach lanemarker in node markers
             } // end for node in all nodes
-        }
-
-        private bool IsLaneMarkerHovered(NodeLaneMarker laneMarker, ref Ray mouseRay, float hitH) {
-            Vector3 pos = laneMarker.SecondaryPosition;
-            if (hitH - pos.y > 2.5f) {
-                // if marker is projected on road plane above then modify its height
-                pos.y = hitH;
-            }
-            Bounds bounds = new Bounds(Vector3.zero, Vector3.one * laneMarker.Radius) {
-                center = pos,
-            };
-            return bounds.IntersectRay(mouseRay);
         }
 
         /// <summary>
@@ -408,17 +396,14 @@ namespace TrafficManager.UI.SubTools {
                     Vector3 selNodePos =
                         NetManager.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
 
-                    ToolBase.RaycastOutput output;
                     // Draw a currently dragged curve
-                    if (RayCastSegmentAndNode(out output)) {
-                        DrawLaneCurve(
-                            cameraInfo,
-                            selectedMarker.Position,
-                            output.m_hitPos,
-                            selNodePos,
-                            Color.Lerp(selectedMarker.Color, Color.white, 0.33f),
-                            Color.white);
-                    }
+                    DrawLaneCurve(
+                        cameraInfo,
+                        selectedMarker.Position,
+                        HitPos,
+                        selNodePos,
+                        Color.Lerp(selectedMarker.Color, Color.white, 0.33f),
+                        Color.white);
                 }
 
                 bool deleteAll =
@@ -816,13 +801,10 @@ namespace TrafficManager.UI.SubTools {
                             NetLane lane = NetManager.instance.m_lanes.m_buffer[laneId];
 
                             // cut the remainder of bezier after the 'node marker circle'
-                            float portion = offset.magnitude / segmentsBuffer[segmentId].m_averageLength;
-                            Bezier3 bezier;
-                            if (isEndNode) {
-                                bezier = lane.m_bezier.Cut(portion, 1);
-                            } else {
-                                bezier = lane.m_bezier.Cut(0, 1-portion);
-                            }
+                            float diameter = 2 * NodeLaneMarker.Radius;
+                            float portion = (offset.magnitude + diameter) / segmentsBuffer[segmentId].m_averageLength;
+
+                            var bezier = lane.m_bezier.Cut(portion, 1 - portion);
 
                             SegmentLaneMarker segmentLaneMarker = new SegmentLaneMarker {
                                 bezier = bezier,
