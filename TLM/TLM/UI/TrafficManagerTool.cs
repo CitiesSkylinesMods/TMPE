@@ -146,7 +146,7 @@ namespace TrafficManager.UI {
 
         internal void Initialize() {
             Log.Info("TrafficManagerTool: Initialization running now.");
-            InitializeGuideTable();
+            Guide = new GuideClass();
 
             SubTool timedLightsTool = new TimedTrafficLightsTool(this);
 
@@ -270,7 +270,7 @@ namespace TrafficManager.UI {
 
                 if (realToolChange) {
                     ShowAdvisor(_activeSubTool.GetTutorialKey());
-                    DeactivateAllGuides();
+                    Guide.DeactivateAll();
                 }
             }
         }
@@ -799,68 +799,85 @@ namespace TrafficManager.UI {
             }
         }
 
-        #region Guide
-        private Dictionary<string, GuideWrapper> GuideTable = new Dictionary<string, GuideWrapper>();
-        private GuideWrapper AddGuide(string localeKey) =>
-            GuideTable[localeKey] = new GuideWrapper(Translation.GUIDE_KEY_PREFIX + localeKey);
+        public GuideClass Guide;
 
-        public void InitializeGuideTable() {
-            foreach(string localeKey in LoadingExtension.TranslationDatabase.GetGuides()) {
-                Log._Debug($"AddGuide with localeKey={localeKey}");
-                AddGuide(localeKey);
-            }
-        }
+        public class GuideClass {
+            private Dictionary<string, GuideWrapper> GuideTable = new Dictionary<string, GuideWrapper>();
+            private GuideWrapper AddGuide(string localeKey) =>
+                GuideTable[localeKey] = new GuideWrapper(Translation.GUIDE_KEY_PREFIX + localeKey);
 
-        private object GuideLock = new object();
-        private GuideWrapper GuideQueue;
-        private bool bActivateEnqueuedGuide = false;
-        private bool bDeactivateAllGuides;
-
-        private void HandleGuide() {
-            GuideWrapper guide;
-            bool activate;
-            bool deactivateAll;
-            lock (GuideLock) {
-                guide = GuideQueue;
-                activate = bActivateEnqueuedGuide;
-                deactivateAll = bDeactivateAllGuides;
-                GuideQueue = null;
-                bDeactivateAllGuides = false;
-            }
-            if (deactivateAll) {
-                foreach (var item in GuideTable) {
-                    item.Value.Deactivate();
+            public GuideClass() {
+                foreach (string localeKey in LoadingExtension.TranslationDatabase.GetGuides()) {
+                    Log._Debug($"AddGuide with localeKey={localeKey}");
+                    AddGuide(localeKey);
                 }
-            } else if (activate) {
-                guide?.Activate();
-            } else {
-                guide?.Deactivate();
             }
+
+            private object Lock = new object();
+            private GuideWrapper Guide;
+            private enum ActionMode {
+                None,
+                Activate,
+                Deactivate,
+                DeactivateAll,
+            }
+            private ActionMode Action = ActionMode.None;
+
+            public void HandleDispatchedActions() {
+                GuideWrapper guide;
+                ActionMode action = ActionMode.None;
+                lock (Lock) {
+                    guide = Guide;
+                    action = Action;
+                    if (action != ActionMode.None) {
+                        //consume action
+                        Guide = null;
+                        action = ActionMode.None;
+                    }
+                }
+
+                switch (action) {
+                    case ActionMode.Activate:
+                        guide?.Activate();
+                        break;
+                    case ActionMode.Deactivate:
+                        guide?.Deactivate();
+                        break;
+                    case ActionMode.DeactivateAll:
+                        foreach (var item in GuideTable) {
+                            item.Value.Deactivate();
+                        }
+                        break;
+                }
+            }
+
+            private void Dispatch(string localeKey, ActionMode action) {
+                if(action == ActionMode.DeactivateAll) {
+                    lock (Lock) {
+                        Guide = null;
+                        Action = ActionMode.DeactivateAll;
+                    }
+                    return;
+                }
+                if (!GuideTable.TryGetValue(localeKey, out GuideWrapper guide)) {
+                    Log.Error($"Guide {localeKey} does not exists");
+                    LoadingExtension.TranslationDatabase.AddMissingGuideString(localeKey);
+                    guide = AddGuide(localeKey);
+                }
+                lock (Lock) {
+                    Guide = guide;
+                    Action = action;
+                }
+            }
+
+            public void Activate(string localeKey) => Dispatch(localeKey, ActionMode.Activate);
+
+            public void Deactivate(string localeKey) => Dispatch(localeKey, ActionMode.Deactivate);
+
+            public void DeactivateAll() => Dispatch(null, ActionMode.DeactivateAll);
+
         }
 
-        private void EnqueueGuide(string localeKey, bool activate) {
-            if (!GuideTable.TryGetValue(localeKey, out GuideWrapper guide)) {
-                Log.Error($"Guide {localeKey} does not exists");
-                LoadingExtension.TranslationDatabase.AddMissingGuideString(localeKey);
-                guide = AddGuide(localeKey);
-            }
-            lock (GuideLock) {
-                GuideQueue = guide;
-                bActivateEnqueuedGuide = activate;
-            }
-        }
-
-        public void ActivateGuide(string localeKey) => EnqueueGuide(localeKey, true);
-    
-        public void DeactivateGuide(string localeKey) => EnqueueGuide(localeKey, false);
-
-        public void DeactivateAllGuides() {
-            lock (GuideLock) {
-                GuideQueue = null;
-                bDeactivateAllGuides = true;
-            }
-        }
-        #endregion Guide
 
         public override void SimulationStep() {
             base.SimulationStep();
@@ -879,7 +896,7 @@ namespace TrafficManager.UI {
             //                tooltipWorldPos = null;
             //        }
             // }
-            HandleGuide();
+            Guide.HandleDispatchedActions();
         }
 
         public bool DoRayCast(RaycastInput input, out RaycastOutput output) {

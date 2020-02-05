@@ -48,16 +48,16 @@ namespace TrafficManager.UI.SubTools {
             }
             switch (res) {
                 case SetLaneArrowError.HighwayArrows: {
-                    MainTool.ActivateGuide("Disabled due to highway rules");
+                    MainTool.Guide.Activate("Disabled due to highway rules");
                     break;
                 }
                 case SetLaneArrowError.LaneConnection: {
-                    MainTool.ActivateGuide("Disabled due to lane connections");
+                    MainTool.Guide.Activate("Disabled due to lane connections");
                     break;
                 }
                 case SetLaneArrowError.Success:
-                    MainTool.DeactivateGuide("Disabled due to lane connections");
-                    MainTool.DeactivateGuide("Disabled due to lane connections");
+                    MainTool.Guide.Deactivate("Disabled due to highway rules");
+                    MainTool.Guide.Deactivate("Disabled due to lane connections");
                     break;
             }
         }
@@ -321,16 +321,16 @@ namespace TrafficManager.UI.SubTools {
                 if (buttonClicked) {
                     switch (res) {
                         case SetLaneArrowError.HighwayArrows: {
-                                MainTool.ActivateGuide("Disabled due to highway rules");
+                                MainTool.Guide.Activate("Disabled due to highway rules");
                                 break;
                             }
                         case SetLaneArrowError.LaneConnection: {
-                                MainTool.ActivateGuide("Disabled due to lane connections");
+                                MainTool.Guide.Activate("Disabled due to lane connections");
                                 break;
                             }
                         case SetLaneArrowError.Success:
-                            MainTool.DeactivateGuide("Disabled due to lane connections");
-                            MainTool.DeactivateGuide("Disabled due to lane connections");
+                            MainTool.Guide.Deactivate("Disabled due to highway rules");
+                            MainTool.Guide.Deactivate("Disabled due to lane connections");
                             break;
                     }
                 }

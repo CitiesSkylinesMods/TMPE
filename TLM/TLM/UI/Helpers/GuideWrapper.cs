@@ -30,13 +30,13 @@ namespace TrafficManager.UI {
 
         internal void Activate() {
             CheckStack();
-            Log._Debug("GuideWrapper.Activate was called");
+            //Log._Debug("GuideWrapper.Activate was called");
             m_guide.Activate(m_info ?? throw new Exception("m_info is null"));
         }
 
         internal void Deactivate() {
             CheckStack();
-            Log._Debug("GuideWrapper.Deactivate was called");
+            //Log._Debug("GuideWrapper.Deactivate was called");
             m_guide.Deactivate();
         }
     }
