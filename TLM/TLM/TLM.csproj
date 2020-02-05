@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -548,8 +548,10 @@ xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "%25DEPLOYDIR%25"
+echo %25time%25
 
-set DEPLOYDIR=</PostBuildEvent>
+set DEPLOYDIR=
+</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
