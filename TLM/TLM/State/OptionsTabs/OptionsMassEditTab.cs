@@ -43,8 +43,8 @@ namespace TrafficManager.State {
 
         public static CheckboxOption PriorityRoad_AllowLeftTurns =
             new CheckboxOption("PriorityRoad_AllowLeftTurns") {
-                Label = "Priority roads.Option:Allow left turns",
-                Tooltip = "Priority roads.Tooltipn:Allow left turns"
+                Label = "Priority roads.Option:Allow far turns",
+                Tooltip = "Priority roads.Tooltipn:Allow far turns"
             };
 
         public static CheckboxOption PriorityRoad_EnterBlockedYeild =
