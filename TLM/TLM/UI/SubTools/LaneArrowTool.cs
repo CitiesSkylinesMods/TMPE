@@ -127,7 +127,7 @@ namespace TrafficManager.UI.SubTools {
             bool startNode = (bool)netService.IsStartNode(SelectedSegmentId, SelectedNodeId);
             if (CanReset(SelectedSegmentId, startNode)) {
                 Log._Debug("Expanding height");
-                height += 30;
+                height += 40;
             }
 
             var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, height);
@@ -368,10 +368,11 @@ namespace TrafficManager.UI.SubTools {
 
             if (CanReset(SelectedSegmentId, (bool)startNode)) {
                 if (GUILayout.Button(
-                    "Reset all",
+                    "     Reset     ", // intentionally big to avoid confusion
                     style1,
-                    GUILayout.Width(135), // intentionally bigger than the text 
-                    GUILayout.Height(25))) {
+                    GUILayout.Width(135), 
+                    GUILayout.Height(25)
+                    )) {
                     Log._Debug("deleting lane arrows: " +
                         $"SelectedSegmentId={SelectedSegmentId} SelectedNodeId={SelectedNodeId} startNode={startNode}");
                     LaneArrowManager.Instance.ResetLaneArrows(SelectedSegmentId, startNode);
