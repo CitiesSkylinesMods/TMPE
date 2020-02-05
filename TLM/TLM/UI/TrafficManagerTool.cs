@@ -799,7 +799,6 @@ namespace TrafficManager.UI {
         }
 
         #region Guide
-
         private Dictionary<string, GuideWrapper> GuideTable = new Dictionary<string, GuideWrapper>();
         private GuideWrapper AddGuide(string localeKey) =>
             GuideTable[localeKey] = new GuideWrapper(Translation.GUIDE_KEY_PREFIX + localeKey);
@@ -830,7 +829,7 @@ namespace TrafficManager.UI {
                 foreach (var item in GuideTable) {
                     item.Value.Deactivate();
                 }
-            } else if (bActivateEnqueuedGuide) {
+            } else if (activate) {
                 guide?.Activate();
             } else {
                 guide?.Deactivate();
@@ -838,14 +837,14 @@ namespace TrafficManager.UI {
         }
 
         private void EnqueueGuide(string localeKey, bool activate) {
-            try {
-                lock (GuideLock) {
-                    GuideQueue = GuideTable[localeKey];
-                    bActivateEnqueuedGuide = true;
-                }
-            }
-            catch {
+            if (!GuideTable.TryGetValue(localeKey, out GuideWrapper guide)) {
                 Log.Error($"Guide {localeKey} does not exists");
+                LoadingExtension.TranslationDatabase.AddMissingGuideString(localeKey);
+                guide = AddGuide(localeKey);
+            }
+            lock (GuideLock) {
+                GuideQueue = guide;
+                bActivateEnqueuedGuide = activate;
             }
         }
 
@@ -856,15 +855,10 @@ namespace TrafficManager.UI {
         public void DeactivateAllGuides() {
             lock (GuideLock) {
                 GuideQueue = null;
-                bActivateEnqueuedGuide = true;
+                bDeactivateAllGuides = true;
             }
         }
-
-
-
         #endregion Guide
-
-
 
         public override void SimulationStep() {
             base.SimulationStep();

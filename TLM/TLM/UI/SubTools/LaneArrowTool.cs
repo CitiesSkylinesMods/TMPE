@@ -328,10 +328,12 @@ namespace TrafficManager.UI.SubTools {
                         }
 
                         case SetLaneArrowError.LaneConnection: {
-                            MainTool.ShowError(
-                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to manual connection"));
+                            MainTool.ActivateGuide("LaneArrowTool");
                             break;
                         }
+                        default:
+                            MainTool.DeactivateAllGuides();
+                            break;
                     }
                 }
 

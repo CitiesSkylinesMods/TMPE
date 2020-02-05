@@ -292,6 +292,33 @@ namespace TrafficManager.UI {
             }
         }
 
+        public void AddMissingGuideString(string localeKey) {
+            var locale = this.locale;
+            if (locale == null) {
+                Log.Warning("Can't update guides because locale object is null");
+                return;
+            }
+
+            {
+                var key1 = new Locale.Key() {
+                    m_Identifier = "TUTORIAL_TITLE",
+                    m_Key = GUIDE_KEY_PREFIX + localeKey,
+                };
+                string value1 = "¶" + GUIDE_HEAD_KEY_PREFIX + localeKey;
+                resetFun?.Invoke(locale, new object[] { key1 });
+                locale.AddLocalizedString(key1, value1);
+            }
+            {
+                var key2 = new Locale.Key() {
+                    m_Identifier = "TUTORIAL_TEXT",
+                    m_Key = GUIDE_KEY_PREFIX + localeKey,
+                };
+                string value2 = "¶" + GUIDE_BODY_KEY_PREFIX + localeKey;
+                resetFun?.Invoke(locale, new object[] { key2 });
+                locale.AddLocalizedString(key2, value2);
+            }
+        }
+
         /// <summary>
         /// Triggered when user changes base game language.
         /// </summary>
