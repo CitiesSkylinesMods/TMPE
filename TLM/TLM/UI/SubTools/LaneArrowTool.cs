@@ -48,19 +48,18 @@ namespace TrafficManager.UI.SubTools {
             }
             switch (res) {
                 case SetLaneArrowError.HighwayArrows: {
-                    MainTool.ShowError(Translation.LaneRouting.Get(
-                        "Dialog.Text:Disabled due to highway rules"));
+                    MainTool.ActivateGuide("Disabled due to highway rules");
                     break;
                 }
                 case SetLaneArrowError.LaneConnection: {
-                    MainTool.ActivateGuide("LaneArrowTool");
+                    MainTool.ActivateGuide("Disabled due to lane connections");
                     break;
                 }
                 case SetLaneArrowError.Success:
-                    MainTool.DeactivateGuide("LaneArrowTool");
+                    MainTool.DeactivateGuide("Disabled due to lane connections");
+                    MainTool.DeactivateGuide("Disabled due to lane connections");
                     break;
             }
-
         }
 
         public override void OnSecondaryClickOverlay() {
@@ -322,17 +321,16 @@ namespace TrafficManager.UI.SubTools {
                 if (buttonClicked) {
                     switch (res) {
                         case SetLaneArrowError.HighwayArrows: {
-                            MainTool.ShowError(
-                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to highway rules"));
-                            break;
-                        }
-
+                                MainTool.ActivateGuide("Disabled due to highway rules");
+                                break;
+                            }
                         case SetLaneArrowError.LaneConnection: {
-                            MainTool.ActivateGuide("LaneArrowTool");
-                            break;
-                        }
-                        default:
-                            MainTool.DeactivateAllGuides();
+                                MainTool.ActivateGuide("Disabled due to lane connections");
+                                break;
+                            }
+                        case SetLaneArrowError.Success:
+                            MainTool.DeactivateGuide("Disabled due to lane connections");
+                            MainTool.DeactivateGuide("Disabled due to lane connections");
                             break;
                     }
                 }

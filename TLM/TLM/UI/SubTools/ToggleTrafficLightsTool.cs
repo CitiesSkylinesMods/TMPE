@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
