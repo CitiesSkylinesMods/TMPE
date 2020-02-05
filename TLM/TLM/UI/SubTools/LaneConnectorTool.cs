@@ -27,6 +27,8 @@ namespace TrafficManager.UI.SubTools {
             Backward
         }
 
+        private static float max_hit_error = 2.5f;
+
         private static readonly Color DefaultNodeMarkerColor = new Color(1f, 1f, 1f, 0.4f);
         private NodeLaneMarker selectedMarker;
         private NodeLaneMarker hoveredMarker;
@@ -72,7 +74,12 @@ namespace TrafficManager.UI.SubTools {
 
             internal bool IntersectRay(ref Ray ray, float hitH) {
                 Vector3 pos = SecondaryPosition;
-                if (hitH - pos.y > 2.5f) {
+                float mouseH = UIBase.GetTrafficManagerTool(false).MousePosition.y;
+                if(hitH < mouseH - max_hit_error) {
+                    // For metros use projection on the terrain.
+                    pos = Position;
+                }
+                else if (hitH - pos.y > max_hit_error) {
                     // if marker is projected on road plane above then modify its height
                     pos.y = hitH;
                 }
@@ -128,13 +135,20 @@ namespace TrafficManager.UI.SubTools {
 
             private void CalculateBounds(float hitH) {
                 float maxH = Mathf.Max(bezier.a.y, bezier.d.y);
-                if ((hitH == prev_H || hitH == maxH) && bounds != null) {
+                float mouseH = UIBase.GetTrafficManagerTool(false).MousePosition.y;
+
+                if ((hitH == prev_H || hitH == maxH || prev_H == mouseH) && bounds != null) {
                     // use cached results if mouse has not moved or hitH is ignored.
                     return; 
                 }
 
                 Bezier3 bezier0 = bezier;
-                if (hitH > maxH + 2.5f) {
+                if (hitH < mouseH - max_hit_error) {
+                    // For Metros use projection on the terrain.
+                    bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = mouseH;
+                    prev_H = mouseH;
+                }
+                else if (hitH > maxH + max_hit_error) {
                     // if marker is projected on another road plane then modify its height
                     bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = hitH;
                     prev_H = hitH;
@@ -397,10 +411,19 @@ namespace TrafficManager.UI.SubTools {
                         NetManager.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
 
                     // Draw a currently dragged curve
+
+                    float hitH = TrafficManagerTool.GetAccurateHitHeight();
+                    var pos = HitPos;
+                    pos.y = hitH; // fix height.
+                    float mouseH = MousePosition.y;
+                    if (hitH < mouseH - max_hit_error) {
+                        // for metros lane curve is projected on the ground.
+                        pos = MousePosition;
+                    }
                     DrawLaneCurve(
                         cameraInfo,
                         selectedMarker.Position,
-                        HitPos,
+                        pos,
                         selNodePos,
                         Color.Lerp(selectedMarker.Color, Color.white, 0.33f),
                         Color.white);
@@ -973,20 +996,6 @@ namespace TrafficManager.UI.SubTools {
                 1280f,
                 false,
                 true);
-        }
-
-        private bool RayCastSegmentAndNode(out ToolBase.RaycastOutput output) {
-            ToolBase.RaycastInput input = new ToolBase.RaycastInput(
-                Camera.main.ScreenPointToRay(Input.mousePosition),
-                Camera.main.farClipPlane);
-
-            input.m_netService.m_service = ItemClass.Service.Road;
-            input.m_netService.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels;
-            input.m_ignoreSegmentFlags = NetSegment.Flags.None;
-            input.m_ignoreNodeFlags = NetNode.Flags.None;
-            input.m_ignoreTerrain = true;
-
-            return MainTool.DoRayCast(input, out output);
         }
 
         /// <summary>
