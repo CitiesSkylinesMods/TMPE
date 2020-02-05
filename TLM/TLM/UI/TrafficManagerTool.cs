@@ -146,6 +146,7 @@ namespace TrafficManager.UI {
 
         internal void Initialize() {
             Log.Info("TrafficManagerTool: Initialization running now.");
+            InitializeGuideTable();
 
             SubTool timedLightsTool = new TimedTrafficLightsTool(this);
 
@@ -805,6 +806,7 @@ namespace TrafficManager.UI {
 
         public void InitializeGuideTable() {
             foreach(string localeKey in LoadingExtension.TranslationDatabase.GetGuides()) {
+                Log._Debug($"AddGuide with localeKey={localeKey}");
                 AddGuide(localeKey);
             }
         }

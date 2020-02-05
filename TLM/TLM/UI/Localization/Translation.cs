@@ -248,11 +248,12 @@ namespace TrafficManager.UI {
         public IEnumerable<string> GetGuides() {
             string lang = GetCurrentLanguage();
             foreach (KeyValuePair<string, string> entry in guidesLookup_.AllLanguages[lang]) {
-                if (entry.Key.StartsWith(TUTORIAL_HEAD_KEY_PREFIX)) {
+                if (entry.Key.StartsWith(GUIDE_HEAD_KEY_PREFIX)) {
                     yield return entry.Key.Substring(GUIDE_HEAD_KEY_PREFIX.Length);
                 }
             }
         }
+
         public void ReloadGuideTranslations() {
             var locale = this.locale;
             if (locale == null) {
