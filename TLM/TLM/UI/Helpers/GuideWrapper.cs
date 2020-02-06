@@ -22,7 +22,7 @@ namespace TrafficManager.UI {
 
         private bool CheckStack() {
             if (!Environment.StackTrace.Contains("SimulationStep")) {
-                Log.Error("Guide should be handled from simulation step. stack is:\n" + Environment.StackTrace);
+                Log.Error("Guide should be handled from simulation step. stack is:\n");
                 return false;
             }
             return true;

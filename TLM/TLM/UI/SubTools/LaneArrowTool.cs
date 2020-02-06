@@ -19,6 +19,23 @@ namespace TrafficManager.UI.SubTools {
             return base.IsCursorInPanel() || cursorInSecondaryPanel_;
         }
 
+        private void HandleResult(SetLaneArrowError result) {
+            switch (result) {
+                case SetLaneArrowError.HighwayArrows: {
+                        MainTool.Guide.Activate("Disabled due to highway rules");
+                        break;
+                    }
+                case SetLaneArrowError.LaneConnection: {
+                        MainTool.Guide.Activate("Disabled due to lane connections");
+                        break;
+                    }
+                case SetLaneArrowError.Success:
+                    MainTool.Guide.Deactivate("Disabled due to highway rules");
+                    MainTool.Guide.Deactivate("Disabled due to lane connections");
+                    break;
+            }
+        }
+
         public override void OnPrimaryClickOverlay() {
             if ((HoveredNodeId == 0) || (HoveredSegmentId == 0)) return;
 
@@ -46,20 +63,7 @@ namespace TrafficManager.UI.SubTools {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
             }
-            switch (res) {
-                case SetLaneArrowError.HighwayArrows: {
-                    MainTool.Guide.Activate("Disabled due to highway rules");
-                    break;
-                }
-                case SetLaneArrowError.LaneConnection: {
-                    MainTool.Guide.Activate("Disabled due to lane connections");
-                    break;
-                }
-                case SetLaneArrowError.Success:
-                    MainTool.Guide.Deactivate("Disabled due to highway rules");
-                    MainTool.Guide.Deactivate("Disabled due to lane connections");
-                    break;
-            }
+            HandleResult(res);
         }
 
         public override void OnSecondaryClickOverlay() {
@@ -319,20 +323,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 if (buttonClicked) {
-                    switch (res) {
-                        case SetLaneArrowError.HighwayArrows: {
-                                MainTool.Guide.Activate("Disabled due to highway rules");
-                                break;
-                            }
-                        case SetLaneArrowError.LaneConnection: {
-                                MainTool.Guide.Activate("Disabled due to lane connections");
-                                break;
-                            }
-                        case SetLaneArrowError.Success:
-                            MainTool.Guide.Deactivate("Disabled due to highway rules");
-                            MainTool.Guide.Deactivate("Disabled due to lane connections");
-                            break;
-                    }
+                    HandleResult(res);
                 }
 
                 GUILayout.EndHorizontal();
