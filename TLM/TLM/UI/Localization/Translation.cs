@@ -28,6 +28,8 @@ namespace TrafficManager.UI {
         private const string GUIDE_HEAD_KEY_PREFIX = GUIDE_KEY_PREFIX + "HEAD_";
         public const string GUIDE_BODY_KEY_PREFIX = GUIDE_KEY_PREFIX + "BODY_";
 
+        private const string TMPE_TITLE_PREFIX = "TM:PE ";
+
         /// <summary>
         /// Defines column order in CSV, but not the dropdown order, the dropdown is just sorted.
         /// Mapping from translation languages (first row of CSV export) to language locales used in
@@ -222,11 +224,12 @@ namespace TrafficManager.UI {
 
                 string identifier;
                 string tutorialKey;
-
+                string value = entry.Value;
                 if (entry.Key.StartsWith(TUTORIAL_HEAD_KEY_PREFIX)) {
                     identifier = "TUTORIAL_ADVISER_TITLE";
                     tutorialKey = TUTORIAL_KEY_PREFIX +
                                   entry.Key.Substring(TUTORIAL_HEAD_KEY_PREFIX.Length);
+                    value = TMPE_TITLE_PREFIX + value;
                 } else if (entry.Key.StartsWith(TUTORIAL_BODY_KEY_PREFIX)) {
                     identifier = "TUTORIAL_ADVISER";
                     tutorialKey = TUTORIAL_KEY_PREFIX +
@@ -241,7 +244,7 @@ namespace TrafficManager.UI {
                 };
 
                 resetFun?.Invoke(locale, new object[] { key });
-                locale.AddLocalizedString(key, entry.Value);
+                locale.AddLocalizedString(key, value);
             }
         }
 
@@ -270,11 +273,12 @@ namespace TrafficManager.UI {
 
                 string identifier;
                 string guideKey;
-
+                string value = entry.Value;
                 if (entry.Key.StartsWith(GUIDE_HEAD_KEY_PREFIX)) {
                     identifier = "TUTORIAL_TITLE";
                     guideKey = GUIDE_KEY_PREFIX +
                                   entry.Key.Substring(GUIDE_HEAD_KEY_PREFIX.Length);
+                    value = TMPE_TITLE_PREFIX + value;
                 } else if (entry.Key.StartsWith(GUIDE_BODY_KEY_PREFIX)) {
                     identifier = "TUTORIAL_TEXT";
                     guideKey = GUIDE_KEY_PREFIX +
@@ -289,7 +293,7 @@ namespace TrafficManager.UI {
                 };
 
                 resetFun?.Invoke(locale, new object[] { key });
-                locale.AddLocalizedString(key, entry.Value);
+                locale.AddLocalizedString(key, value);
             }
         }
 
@@ -305,9 +309,9 @@ namespace TrafficManager.UI {
                     m_Identifier = "TUTORIAL_TITLE",
                     m_Key = GUIDE_KEY_PREFIX + localeKey,
                 };
-                string value1 = "¶" + GUIDE_HEAD_KEY_PREFIX + localeKey;
+                string value1 = TMPE_TITLE_PREFIX + "¶" + GUIDE_HEAD_KEY_PREFIX + localeKey;
                 resetFun?.Invoke(locale, new object[] { key1 });
-                locale.AddLocalizedString(key1, value1);
+                locale.AddLocalizedString(key1,  value1);
             }
             {
                 var key2 = new Locale.Key() {
