@@ -87,7 +87,7 @@ namespace TrafficManager.UI {
             LoadingExtension.TranslationDatabase.tutorialsLookup_;
 
         private Localization.LookupTable guidesLookup_;
-        public static Localization.LookupTable Guide =>
+        public static Localization.LookupTable Guides =>
             LoadingExtension.TranslationDatabase.guidesLookup_;
 
         private Localization.LookupTable aiCitizenLookup_;
