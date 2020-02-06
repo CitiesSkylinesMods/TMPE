@@ -117,7 +117,8 @@ namespace TrafficManager.UI.SubTools {
         private class SegmentLaneMarker {
             internal uint laneID;
             internal int laneIndex;
-            internal Bezier3 bezier;
+            internal Bezier3 raycast_bezier;
+            internal Bezier3 render_bezier;
 
             private Bounds[] bounds;
             private float prev_H;
@@ -134,7 +135,7 @@ namespace TrafficManager.UI.SubTools {
 
 
             private void CalculateBounds(float hitH) {
-                float maxH = Mathf.Max(bezier.a.y, bezier.d.y);
+                float maxH = Mathf.Max(raycast_bezier.a.y, raycast_bezier.d.y);
                 float mouseH = UIBase.GetTrafficManagerTool(false).MousePosition.y;
 
                 if ((hitH == prev_H || hitH == maxH || prev_H == mouseH) && bounds != null) {
@@ -142,7 +143,7 @@ namespace TrafficManager.UI.SubTools {
                     return; 
                 }
 
-                Bezier3 bezier0 = bezier;
+                Bezier3 bezier0 = raycast_bezier;
                 if (hitH < mouseH - max_hit_error) {
                     // For Metros use projection on the terrain.
                     bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = mouseH;
@@ -185,13 +186,13 @@ namespace TrafficManager.UI.SubTools {
             }
 
             internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge=false) {
-                float minH = Mathf.Min(bezier.a.y, bezier.d.y);
-                float maxH = Mathf.Max(bezier.a.y, bezier.d.y);
+                float minH = Mathf.Min(render_bezier.a.y, render_bezier.d.y);
+                float maxH = Mathf.Max(render_bezier.a.y, render_bezier.d.y);
                 RenderManager.instance.OverlayEffect.DrawBezier(
                     cameraInfo,
                     color,
-                    bezier,
-                    enlarge ? 1.6f : 1.1f,
+                    render_bezier,
+                    enlarge ? 1.55f : 1.1f,
                     0,
                     0,
                     minH - 100f,
@@ -788,7 +789,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 NetSegment[] segmentsBuffer = NetManager.instance.m_segments.m_buffer;
-                bool isEndNode = segmentsBuffer[segmentId].m_endNode == nodeId;
+                bool startNode = segmentsBuffer[segmentId].m_startNode == nodeId;
                 Vector3 offset = segmentsBuffer[segmentId]
                                      .FindDirection(segmentId, nodeId) * offsetMultiplier;
                 NetInfo.Lane[] lanes = segmentsBuffer[segmentId].Info.m_lanes;
@@ -802,7 +803,7 @@ namespace TrafficManager.UI.SubTools {
                             != VehicleInfo.VehicleType.None)) {
                         if (connManager.GetLaneEndPoint(
                             segmentId,
-                            !isEndNode,
+                            startNode,
                             laneIndex,
                             laneId,
                             laneInfo,
@@ -821,16 +822,21 @@ namespace TrafficManager.UI.SubTools {
                                       ? COLOR_CHOICES[nodeMarkerColorIndex % COLOR_CHOICES.Length]
                                       : default; // or black (not used while rendering)
 
+
                             NetLane lane = NetManager.instance.m_lanes.m_buffer[laneId];
-
-                            // cut the remainder of bezier after the 'node marker circle'
-                            float diameter = 2 * NodeLaneMarker.Radius;
-                            float portion = (offset.magnitude + diameter) / segmentsBuffer[segmentId].m_averageLength;
-
-                            var bezier = lane.m_bezier.Cut(portion, 1 - portion);
+                            Bezier3 bezier = lane.m_bezier;
+                            Bezier3 bezier2 = bezier; // raycast bezier is a bit smaller to avoid flickering.
+                            if (startNode) {
+                                bezier.a = (Vector3)pos;
+                                bezier2.a = bezier.a + offset.normalized * NodeLaneMarker.Radius;
+                            } else {
+                                bezier.d = (Vector3)pos;
+                                bezier2.d = bezier.d + offset.normalized * NodeLaneMarker.Radius;
+                            }
 
                             SegmentLaneMarker segmentLaneMarker = new SegmentLaneMarker {
-                                bezier = bezier,
+                                render_bezier = bezier,
+                                raycast_bezier = bezier2,
                                 laneID = laneId,
                                 laneIndex = laneIndex,
                             };
@@ -840,7 +846,7 @@ namespace TrafficManager.UI.SubTools {
                                     SegmentId = segmentId,
                                     LaneId = laneId,
                                     NodeId = nodeId,
-                                    StartNode = !isEndNode,
+                                    StartNode = startNode,
                                     Position = finalPos,
                                     SecondaryPosition = (Vector3)pos,
                                     Color = nodeMarkerColor,
