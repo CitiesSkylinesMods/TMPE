@@ -829,10 +829,10 @@ namespace TrafficManager.UI {
                 lock (Lock) {
                     guide = Guide;
                     action = Action;
-                    if (action != ActionMode.None) {
+                    if (Action != ActionMode.None) {
                         //consume action
                         Guide = null;
-                        action = ActionMode.None;
+                        Action = ActionMode.None;
                     }
                 }
 

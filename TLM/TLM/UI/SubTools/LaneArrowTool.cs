@@ -57,13 +57,14 @@ namespace TrafficManager.UI.SubTools {
             SetLaneArrowError res = SetLaneArrowError.Success;
             if (altDown) {
                 LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId, out res);
+                HandleResult(res);
             } else if (ctrlDown) {
                 LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId, out res);
+                HandleResult(res);
             } else if (HasHoverLaneArrows()) {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
             }
-            HandleResult(res);
         }
 
         public override void OnSecondaryClickOverlay() {
