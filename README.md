@@ -31,7 +31,7 @@ Official releases:
 - Fixed: Junction Manager not resetting on level unload (thanks kianzarrin!) (#637, #636)
 - Fixed: Stay in lane always assumed segment0 exists (thans kianzarrin!) (#619, #618)
 - Updated: Added 2 x Traffic Manager Plus and 1 x Traffic Manager as incompatible (#627)
-- Updated: Added 'Trees Respiration' mod as incompatible (depends on load order) (#614, #611)
+- Updated: Added 'Trees Respiration' mod as incompatible (depends on load order) (#614, #611, #563)
 - Updated: Replaced imports with fully qualified alphabetically sorted imports (#620)
 - Updated: Organised resource images in to folders (#641)
 - Meta: Old STABLE workshop page (LinuxFan - v10.20) is now obsolete and no longer maintained
