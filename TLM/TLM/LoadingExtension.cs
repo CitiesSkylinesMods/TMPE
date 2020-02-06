@@ -24,7 +24,7 @@ namespace TrafficManager {
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
         internal static LoadingExtension Instance = null;
 
-        internal bool HotReload { get; private set; } = false;
+        internal bool InGameHotReload { get; private set; } = false;
 
         internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
 
@@ -288,7 +288,7 @@ namespace TrafficManager {
             RegisterCustomManagers();
 
             Instance = this;
-            HotReload = InGame();
+            InGameHotReload = InGame();
         }
 
         private void RegisterCustomManagers() {
@@ -366,7 +366,7 @@ namespace TrafficManager {
 
                 Log.Info("Removing Controls from UI.");
                 if (BaseUI != null) {
-                    BaseUI.Close();
+                    BaseUI.Close(); // Hide the UI ASAP
                     Object.Destroy(BaseUI);
                     Log._Debug("removed UIBase instance.");
                     BaseUI = null;

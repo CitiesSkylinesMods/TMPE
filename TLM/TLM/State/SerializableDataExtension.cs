@@ -24,7 +24,7 @@ namespace TrafficManager.State {
 
             Log._Debug("SerializableDataExtension.OnCreated() called");
 
-            if (LoadingExtension.Instance.HotReload) {
+            if (LoadingExtension.Instance.InGameHotReload) {
                 Log._Debug("HOT RELOAD ...");
                 OnLoadData();
                 LoadingExtension.Instance.OnLevelLoaded(LoadMode.LoadGame);
