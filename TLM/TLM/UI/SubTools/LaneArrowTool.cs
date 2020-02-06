@@ -367,8 +367,9 @@ namespace TrafficManager.UI.SubTools {
             GUILayout.EndHorizontal();
 
             if (CanReset(SelectedSegmentId, (bool)startNode)) {
+                string reset = Translation.LaneRouting.Get("Button:Reset");
                 if (GUILayout.Button(
-                    "     Reset     ", // intentionally big to avoid confusion
+                    reset.CenterString(15), // intentionally big to avoid confusion
                     style1,
                     GUILayout.Width(135), 
                     GUILayout.Height(25)

@@ -36,5 +36,10 @@ namespace TrafficManager.Util {
             (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 
         internal static Func<bool, int> Int = (bool b) => b ? 1 : 0;
+
+        internal static string CenterString(this string stringToCenter, int totalLength) {
+            int leftPadding = ((totalLength - stringToCenter.Length) / 2) + stringToCenter.Length;
+            return stringToCenter.PadLeft(leftPadding).PadRight(totalLength);
+        }
     }
 }
