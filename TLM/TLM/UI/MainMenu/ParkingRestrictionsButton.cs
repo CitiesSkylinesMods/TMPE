@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State;
 
-    public class ParkingRestrictionsButton : MenuToolModeButton {
+    public class ParkingRestrictionsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.ParkingRestrictions;
 
         protected override ButtonFunction Function => ButtonFunction.ParkingRestrictions;

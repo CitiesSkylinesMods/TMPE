@@ -2,7 +2,7 @@
     using ColossalFramework.UI;
     using TrafficManager.Manager.Impl;
 
-    public class ClearTrafficButton : MenuButton {
+    public class ClearTrafficButton : BaseMenuButton {
         public override bool Active => false;
 
         protected override ButtonFunction Function => ButtonFunction.ClearTraffic;
@@ -21,7 +21,7 @@
                             () => { UtilityManager.Instance.ClearTraffic(); });
                     }
 
-                    UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
+                    ModUI.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
                 });
         }
     }

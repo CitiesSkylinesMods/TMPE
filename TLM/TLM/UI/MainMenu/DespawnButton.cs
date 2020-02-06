@@ -2,7 +2,7 @@
     using ColossalFramework.UI;
     using TrafficManager.State;
 
-    public class DespawnButton : MenuButton {
+    public class DespawnButton : BaseMenuButton {
         public override bool Active => false;
 
         protected override ButtonFunction Function => Options.disableDespawning
@@ -17,7 +17,7 @@
         public override bool Visible => true;
 
         public override void OnClickInternal(UIMouseEventParameter p) {
-            UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
+            ModUI.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
             OptionsGameplayTab.SetDisableDespawning(!Options.disableDespawning);
         }
     }

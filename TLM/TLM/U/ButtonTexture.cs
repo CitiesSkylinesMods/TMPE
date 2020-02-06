@@ -106,7 +106,7 @@ namespace TrafficManager.U {
             // Now that the names for background/foreground are defined, create an atlas from
             // source texture which is expected to have button images in the appropriate order.
             return TextureUtil.GenerateLinearAtlas(
-                "TMPE_" + buttonName + "Atlas",
+                "TMPE_UButton_" + buttonName + "Atlas",
                 atlasTexture,
                 textureIds.Length,
                 textureIds);

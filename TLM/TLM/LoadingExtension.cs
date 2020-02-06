@@ -73,7 +73,7 @@ namespace TrafficManager {
         /// </summary>
         public static Translation TranslationDatabase = new Translation();
 
-        public static UIBase BaseUI { get; private set; }
+        public static ModUI ModUi { get; private set; }
 
         public static UITransportDemand TransportDemandUI { get; private set; }
 
@@ -368,10 +368,10 @@ namespace TrafficManager {
                 }
 
                 Log.Info("Removing Controls from UI.");
-                if (BaseUI != null) {
-                    BaseUI.Close(); // Hide the UI ASAP
-                    Object.Destroy(BaseUI);
-                    BaseUI = null;
+                if (ModUi != null) {
+                    ModUi.Close(); // Hide the UI ASAP
+                    Object.Destroy(ModUi);
+                    ModUi = null;
                     Log._Debug("removed UIBase instance.");
                 }
 
@@ -544,9 +544,9 @@ namespace TrafficManager {
             }
 
             Log.Info("Adding Controls to UI.");
-            if (BaseUI == null) {
+            if (ModUi == null) {
                 Log._Debug("Adding UIBase instance.");
-                BaseUI = ToolsModifierControl.toolController.gameObject.AddComponent<UIBase>();
+                ModUi = ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>();
             }
 
             // Init transport demand UI

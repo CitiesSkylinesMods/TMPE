@@ -246,6 +246,8 @@
     <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />
     <Compile Include="UI\Helpers\SerializableUIOptionBase.cs" />
     <Compile Include="UI\IncompatibleModsPanel.cs" />
+    <Compile Include="UI\MainMenu\BaseMenuButton.cs" />
+    <Compile Include="UI\MainMenu\BaseMenuToolModeButton.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
@@ -260,11 +262,9 @@
     <Compile Include="UI\MainMenu\PrioritySignsButton.cs" />
     <Compile Include="UI\MainMenu\ManualTrafficLightsButton.cs" />
     <Compile Include="UI\MainMenu\LaneArrowsButton.cs" />
-    <Compile Include="UI\MainMenu\MenuToolModeButton.cs" />
     <Compile Include="UI\MainMenu\JunctionRestrictionsButton.cs" />
     <Compile Include="UI\MainMenu\DespawnButton.cs" />
     <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
-    <Compile Include="UI\MainMenu\MenuButton.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
@@ -321,7 +321,7 @@
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />
     <Compile Include="Manager\Impl\TrafficPriorityManager.cs" />
-    <Compile Include="UI\UIBase.cs" />
+    <Compile Include="UI\ModUI.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
     <Compile Include="U\BaseUButton.cs" />
@@ -523,6 +523,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Traffic\Data\" />
+    <Folder Include="U\MainMenu" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Translations\JunctionRestrictions.csv" />

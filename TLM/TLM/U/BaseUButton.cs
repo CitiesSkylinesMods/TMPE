@@ -63,13 +63,22 @@
             m_BackgroundSprites.m_Normal =
                 m_BackgroundSprites.m_Disabled =
                     m_BackgroundSprites.m_Focused =
-                        U.ButtonTexture.GetBackgroundTextureId(ButtonName, ButtonMouseState.Base, active);
+                        U.ButtonTexture.GetBackgroundTextureId(
+                            ButtonName,
+                            ButtonMouseState.Base,
+                            active);
 
             m_BackgroundSprites.m_Hovered =
-                U.ButtonTexture.GetBackgroundTextureId(ButtonName, ButtonMouseState.Hovered, active);
+                U.ButtonTexture.GetBackgroundTextureId(
+                    ButtonName,
+                    ButtonMouseState.Hovered,
+                    active);
 
             m_PressedBgSprite =
-                U.ButtonTexture.GetBackgroundTextureId(ButtonName, ButtonMouseState.MouseDown, active);
+                U.ButtonTexture.GetBackgroundTextureId(
+                    ButtonName,
+                    ButtonMouseState.MouseDown,
+                    active);
 
             m_ForegroundSprites.m_Normal =
                 m_ForegroundSprites.m_Disabled =

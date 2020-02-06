@@ -80,7 +80,7 @@ namespace TrafficManager.UI.MainMenu {
         public const int DEFAULT_MENU_X = 85;
         public const int DEFAULT_MENU_Y = 60;
 
-        public MenuButton[] Buttons { get; private set; }
+        public BaseMenuButton[] Buttons { get; private set; }
 
         public UILabel VersionLabel { get; private set; }
 
@@ -109,9 +109,9 @@ namespace TrafficManager.UI.MainMenu {
             VersionLabel = AddUIComponent<VersionLabel>();
             StatsLabel = AddUIComponent<StatsLabel>();
 
-            Buttons = new MenuButton[MENU_BUTTON_TYPES.Length];
+            Buttons = new BaseMenuButton[MENU_BUTTON_TYPES.Length];
             for (int i = 0; i < MENU_BUTTON_TYPES.Length; ++i) {
-                Buttons[i] = AddUIComponent(MENU_BUTTON_TYPES[i]) as MenuButton;
+                Buttons[i] = AddUIComponent(MENU_BUTTON_TYPES[i]) as BaseMenuButton;
             }
 
             var dragHandler = new GameObject("TMPE_Menu_DragHandler");
@@ -200,7 +200,7 @@ namespace TrafficManager.UI.MainMenu {
                         break;
                     }
 
-                    MenuButton button = Buttons[i];
+                    BaseMenuButton button = Buttons[i];
                     button.relativePosition = new Vector3(x, y);
                     button.width = activeProfile.BUTTON_SIZE;
                     button.height = activeProfile.BUTTON_SIZE;

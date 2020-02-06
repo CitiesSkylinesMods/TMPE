@@ -1,15 +1,16 @@
 ﻿namespace TrafficManager.UI.MainMenu {
-    using ColossalFramework.UI;
     using System;
-    using TrafficManager.UI.Textures;
+    using ColossalFramework.UI;
     using UnityEngine;
 
-    /// <summary>Base class for main menu panel buttons.</summary>
-    public abstract class MenuButton : U.BaseUButton {
+    /// <summary>
+    /// Base class for main menu panel buttons.
+    /// </summary>
+    public abstract class BaseMenuButton : U.BaseUButton {
         /// <summary>
         /// Defines tool types for TM:PE. Modes are exclusive, one can be active at a time.
         /// </summary>
-        public enum ButtonFunction {
+        protected enum ButtonFunction {
             LaneConnector,
             ClearTraffic,
             DespawnDisabled,
@@ -32,7 +33,7 @@
 
         protected override void OnClick(UIMouseEventParameter p) {
             OnClickInternal(p);
-            foreach (MenuButton button in LoadingExtension.BaseUI.MainMenu.Buttons) {
+            foreach (BaseMenuButton button in LoadingExtension.ModUi.MainMenu.Buttons) {
                 button.UpdateProperties();
             }
         }
@@ -62,7 +63,7 @@
             }
         }
 
-        public override Texture2D AtlasTexture => Textures.MainMenu.MainMenuButtons;
+        public override Texture2D AtlasTexture => UI.Textures.MainMenu.MainMenuButtons;
 
         public override int Width => 50;
 

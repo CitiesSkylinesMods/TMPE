@@ -94,7 +94,7 @@ namespace TrafficManager.UI {
         protected override void OnClick(UIMouseEventParameter p) {
             try {
                 Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
-                LoadingExtension.BaseUI.ToggleMainMenu();
+                LoadingExtension.ModUi.ToggleMainMenu();
                 UpdateSprites();
             }
             catch (Exception e) {
@@ -121,7 +121,7 @@ namespace TrafficManager.UI {
         }
 
         internal void UpdateSprites() {
-            if (!LoadingExtension.BaseUI.IsVisible()) {
+            if (!LoadingExtension.ModUi.IsVisible()) {
                 m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
                                                    m_BackgroundSprites.m_Focused =
                                                        MAIN_MENU_BUTTON_BG_BASE;
@@ -167,8 +167,8 @@ namespace TrafficManager.UI {
             if (!UIView.HasModalInput()
                 && !UIView.HasInputFocus()
                 && KeybindSettingsBase.ToggleMainMenu.IsPressed(Event.current)) {
-                if (LoadingExtension.BaseUI != null) {
-                    LoadingExtension.BaseUI.ToggleMainMenu();
+                if (LoadingExtension.ModUi != null) {
+                    LoadingExtension.ModUi.ToggleMainMenu();
                 }
             }
         }

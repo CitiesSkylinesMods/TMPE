@@ -2,7 +2,7 @@
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
 
-    public class JunctionRestrictionsButton : MenuToolModeButton {
+    public class JunctionRestrictionsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.JunctionRestrictions;
 
         protected override ButtonFunction Function => ButtonFunction.JunctionRestrictions;

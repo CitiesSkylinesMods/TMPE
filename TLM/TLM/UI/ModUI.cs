@@ -5,9 +5,19 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.MainMenu;
     using UnityEngine;
 
-    public class UIBase : UICustomControl {
+    /// <summary>
+    /// Globally available UI manager class which contains the main menu button and the panel.
+    /// Access via ThreadingExtension.ModUi.
+    /// </summary>
+    public class ModUI : UICustomControl {
+        /// <summary>
+        /// Gets the floating draggable button which shows and hides TM:PE UI.
+        /// </summary>
         public UIMainMenuButton MainMenuButton { get; }
 
+        /// <summary>
+        /// Gets the floating tool panel with TM:PE tool buttons.
+        /// </summary>
         public MainMenuPanel MainMenu { get; private set; }
 
 #if DEBUG
@@ -32,7 +42,7 @@ namespace TrafficManager.UI {
 
         private bool _uiShown;
 
-        public UIBase() {
+        public ModUI() {
             Log._Debug("##### Initializing UIBase.");
 
             // Get the UIView object. This seems to be the top-level object for most
@@ -52,7 +62,7 @@ namespace TrafficManager.UI {
             ToolMode = TrafficManagerMode.None;
         }
 
-        ~UIBase() {
+        ~ModUI() {
             Log._Debug("UIBase destructor is called.");
             Destroy(MainMenuButton);
             Destroy(MainMenu);
@@ -101,7 +111,7 @@ namespace TrafficManager.UI {
                 Log.Error("Error on Show(): " + e);
             }
 
-            foreach (MenuButton button in GetMenu().Buttons) {
+            foreach (BaseMenuButton button in GetMenu().Buttons) {
                 button.UpdateProperties();
             }
 

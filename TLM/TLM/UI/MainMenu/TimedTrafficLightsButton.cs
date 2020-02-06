@@ -1,7 +1,7 @@
 namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State;
 
-    public class TimedTrafficLightsButton : MenuToolModeButton {
+    public class TimedTrafficLightsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.TimedLightsSelectNode;
 
         protected override ButtonFunction Function => ButtonFunction.TimedTrafficLights;

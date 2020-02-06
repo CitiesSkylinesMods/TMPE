@@ -2,7 +2,7 @@
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
 
-    public class LaneConnectorButton : MenuToolModeButton {
+    public class LaneConnectorButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.LaneConnector;
 
         protected override ButtonFunction Function => ButtonFunction.LaneConnector;

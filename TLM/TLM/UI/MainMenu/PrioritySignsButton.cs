@@ -2,7 +2,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
 
-    public class PrioritySignsButton : MenuToolModeButton {
+    public class PrioritySignsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.AddPrioritySigns;
 
         protected override ButtonFunction Function => ButtonFunction.PrioritySigns;

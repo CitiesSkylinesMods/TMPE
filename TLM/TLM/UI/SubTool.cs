@@ -143,7 +143,7 @@ namespace TrafficManager.UI {
         public virtual void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) { }
 
         public virtual bool IsCursorInPanel() {
-            return LoadingExtension.BaseUI.GetMenu().containsMouse
+            return LoadingExtension.ModUi.GetMenu().containsMouse
 #if DEBUG
                    || LoadingExtension.BaseUI.GetDebugMenu().containsMouse
 #endif

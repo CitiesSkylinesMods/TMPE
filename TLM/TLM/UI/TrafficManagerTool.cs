@@ -371,7 +371,7 @@ namespace TrafficManager.UI {
             }
 
             // check if mouse is inside panel
-            if (LoadingExtension.BaseUI.GetMenu().containsMouse
+            if (LoadingExtension.ModUi.GetMenu().containsMouse
 #if DEBUG
                 || LoadingExtension.BaseUI.GetDebugMenu().containsMouse
 #endif

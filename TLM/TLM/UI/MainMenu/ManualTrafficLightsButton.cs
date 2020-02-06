@@ -1,7 +1,7 @@
 ﻿namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State;
 
-    public class ManualTrafficLightsButton : MenuToolModeButton {
+    public class ManualTrafficLightsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.ManualSwitch;
 
         protected override ButtonFunction Function => ButtonFunction.ManualTrafficLights;

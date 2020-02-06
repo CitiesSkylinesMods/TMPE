@@ -176,7 +176,7 @@ namespace TrafficManager.State {
         private static void OnLockButtonChanged(bool newValue) {
             Log._Debug($"Button lock changed to {newValue}");
             if (Options.IsGameLoaded(false)) {
-                LoadingExtension.BaseUI.MainMenuButton.SetPosLock(newValue);
+                LoadingExtension.ModUi.MainMenuButton.SetPosLock(newValue);
             }
 
             GlobalConfig.Instance.Main.MainMenuButtonPosLocked = newValue;
@@ -186,7 +186,7 @@ namespace TrafficManager.State {
         private static void OnLockMenuChanged(bool newValue) {
             Log._Debug($"Menu lock changed to {newValue}");
             if (Options.IsGameLoaded(false)) {
-                LoadingExtension.BaseUI.MainMenu.SetPosLock(newValue);
+                LoadingExtension.ModUi.MainMenu.SetPosLock(newValue);
             }
 
             GlobalConfig.Instance.Main.MainMenuPosLocked = newValue;

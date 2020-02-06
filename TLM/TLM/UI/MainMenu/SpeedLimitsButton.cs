@@ -2,7 +2,7 @@
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
 
-    public class SpeedLimitsButton : MenuToolModeButton {
+    public class SpeedLimitsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.SpeedLimits;
 
         protected override ButtonFunction Function => ButtonFunction.SpeedLimits;
