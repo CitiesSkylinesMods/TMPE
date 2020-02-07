@@ -98,6 +98,10 @@ namespace TrafficManager.UI {
         public static Localization.LookupTable AICar =>
             LoadingExtension.TranslationDatabase.aiCarLookup_;
 
+        private Localization.LookupTable guideLookup_;
+        public static Localization.LookupTable Guide =>
+            LoadingExtension.TranslationDatabase.guideLookup_;
+
         /// <summary>
         /// Gets or sets a value indicating whether we're currently listening to the event fired when user changes game langauge.
         /// The event is hooked in <see cref="TrafficManagerMod.OnSettingsUI"/> and unhooked in <see cref="TrafficManagerMod.OnDisabled"/>.
@@ -148,6 +152,7 @@ namespace TrafficManager.UI {
             guidesLookup_ = new Localization.LookupTable("Guides");
             aiCitizenLookup_ = new Localization.LookupTable("AI_Citizen");
             aiCarLookup_ = new Localization.LookupTable("AI_Car");
+            guideLookup_ = new Localization.LookupTable("Guide");
         }
 
         public static string GetTranslatedFileName(string filename) {
