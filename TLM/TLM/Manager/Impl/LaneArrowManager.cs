@@ -55,7 +55,7 @@ namespace TrafficManager.Manager.Impl {
         public bool SetLaneArrows(uint laneId,
                                   LaneArrows flags,
                                   bool overrideHighwayArrows = false) {
-            if (Flags.setLaneArrowFlags(laneId, flags, overrideHighwayArrows)) {
+            if (Flags.SetLaneArrowFlags(laneId, flags, overrideHighwayArrows)) {
                 OnLaneChange(laneId);
                 return true;
             }
@@ -164,7 +164,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
-            Flags.resetSegmentArrowFlags(seg.segmentId);
+            Flags.ResetSegmentArrowFlags(seg.segmentId);
         }
 
         protected override void HandleValidSegment(ref ExtSegment seg) { }
