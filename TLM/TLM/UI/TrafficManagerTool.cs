@@ -146,7 +146,7 @@ namespace TrafficManager.UI {
 
         internal void Initialize() {
             Log.Info("TrafficManagerTool: Initialization running now.");
-            Guide = new GuideClass();
+            Guide = new GuideHandler();
 
             SubTool timedLightsTool = new TimedTrafficLightsTool(this);
 
@@ -799,16 +799,16 @@ namespace TrafficManager.UI {
             }
         }
 
-        public GuideClass Guide;
+        public GuideHandler Guide;
 
-        public class GuideClass {
+        public class GuideHandler {
             private Dictionary<string, GuideWrapper> GuideTable = new Dictionary<string, GuideWrapper>();
             private GuideWrapper AddGuide(string localeKey) =>
                 GuideTable[localeKey] = new GuideWrapper(Translation.GUIDE_KEY_PREFIX + localeKey);
 
-            public GuideClass() {
+            public GuideHandler() {
                 foreach (string localeKey in LoadingExtension.TranslationDatabase.GetGuides()) {
-                    Log._Debug($"AddGuide with localeKey={localeKey}");
+                    Log._Debug($"calling AddGuide(localeKey={localeKey}) ...");
                     AddGuide(localeKey);
                 }
             }

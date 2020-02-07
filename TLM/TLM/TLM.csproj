@@ -519,7 +519,6 @@
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
-    <EmbeddedResource Include="Resources\Translations\Guides.csv" />
     <EmbeddedResource Include="Resources\Translations\VehicleRestrictions.csv" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

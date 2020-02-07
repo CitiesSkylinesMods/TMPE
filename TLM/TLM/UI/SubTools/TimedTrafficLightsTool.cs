@@ -109,10 +109,10 @@ namespace TrafficManager.UI.SubTools {
                     string message = null;
                 switch (res) {
                     case AutoTimedTrafficLights.ErrorResult.NotSupported:
-                        MainTool.Guide.Activate("Auto TL no need");
+                        MainTool.Guide.Activate("TimedTrafficLightsTool_Auto TL no need");
                         break;
                     case AutoTimedTrafficLights.ErrorResult.Success:
-                        MainTool.Guide.Deactivate("Auto TL no need");
+                        MainTool.Guide.Deactivate("TimedTrafficLightsTool_Auto TL no need");
                         break;
                     case AutoTimedTrafficLights.ErrorResult.TTLExists:
                         message = "Dialog.Text:Node has timed TL script";

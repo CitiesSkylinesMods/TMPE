@@ -149,7 +149,7 @@ namespace TrafficManager.UI {
             trafficLightsLookup_ = new Localization.LookupTable("TrafficLights");
             vehicleRestrictionsLookup_ = new Localization.LookupTable("VehicleRestrictions");
             tutorialsLookup_ = new Localization.LookupTable("Tutorials");
-            guidesLookup_ = new Localization.LookupTable("Guides");
+            guidesLookup_ = new Localization.LookupTable("Guide");
             aiCitizenLookup_ = new Localization.LookupTable("AI_Citizen");
             aiCarLookup_ = new Localization.LookupTable("AI_Car");
             guideLookup_ = new Localization.LookupTable("Guide");

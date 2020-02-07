@@ -22,16 +22,16 @@ namespace TrafficManager.UI.SubTools {
         private void HandleResult(SetLaneArrowError result) {
             switch (result) {
                 case SetLaneArrowError.HighwayArrows: {
-                        MainTool.Guide.Activate("Disabled due to highway rules");
+                        MainTool.Guide.Activate("LaneArrowTool_Disabled due to highway rules");
                         break;
                     }
                 case SetLaneArrowError.LaneConnection: {
-                        MainTool.Guide.Activate("Disabled due to lane connections");
+                        MainTool.Guide.Activate("LaneArrowTool_Disabled due to lane connections");
                         break;
                     }
                 case SetLaneArrowError.Success:
-                    MainTool.Guide.Deactivate("Disabled due to highway rules");
-                    MainTool.Guide.Deactivate("Disabled due to lane connections");
+                    MainTool.Guide.Deactivate("LaneArrowTool_Disabled due to highway rules");
+                    MainTool.Guide.Deactivate("LaneArrowTool_Disabled due to lane connections");
                     break;
             }
         }
