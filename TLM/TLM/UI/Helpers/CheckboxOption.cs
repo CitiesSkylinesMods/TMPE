@@ -23,7 +23,13 @@ namespace TrafficManager.UI.Helpers {
         public override byte Save() => Value ? (byte)1 : (byte)0;
 
         public override void AddUI(UIHelperBase container) {
-            string T(string key) => Translation.Menu.Get(key);
+            string T(string key) {
+                if (key.StartsWith("Roundabout")) {
+                    // TODO move roundabout option keys to options.csv and remove this
+                    return Translation.Menu.Get(key);
+                }
+                return Translation.Options.Get(key);
+            }
             _ui = container.AddCheckbox(
                 T(Label),
                 Value,
