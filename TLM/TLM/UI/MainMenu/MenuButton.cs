@@ -4,7 +4,11 @@
     using TrafficManager.UI.Textures;
     using UnityEngine;
 
+    /// <summary>Base class for main menu panel buttons.</summary>
     public abstract class MenuButton : LinearSpriteButton {
+        /// <summary>
+        /// Defines tool types for TM:PE. Modes are exclusive, one can be active at a time.
+        /// </summary>
         public enum ButtonFunction {
             LaneConnector,
             ClearTraffic,
@@ -18,9 +22,10 @@
             TimedTrafficLights,
             ToggleTrafficLights,
             VehicleRestrictions,
-            ParkingRestrictions
+            ParkingRestrictions,
         }
 
+        /// <summary>Menu button gameobject name.</summary>
         private const string MENU_BUTTON = "TMPE_MenuButton";
 
         public override void HandleClick(UIMouseEventParameter p) { }
@@ -57,7 +62,7 @@
             }
         }
 
-        public override Texture2D AtlasTexture => TextureResources.MainMenuButtonsTexture2D;
+        public override Texture2D AtlasTexture => Textures.MainMenu.MainMenuButtons;
 
         public override int Width => 50;
 

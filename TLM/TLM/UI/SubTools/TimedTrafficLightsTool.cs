@@ -1650,7 +1650,7 @@ namespace TrafficManager.UI.SubTools {
                                 guiColor.a = TrafficManagerTool.GetHandleAlpha(false);
                                 GUI.DrawTexture(
                                     infoRect,
-                                    RoadUITextures.VehicleInfoSignTextures[
+                                    RoadUI.VehicleInfoSignTextures[
                                         TrafficManagerTool.InfoSignsToDisplay[k]]);
                                 ++numInfos;
                             }
