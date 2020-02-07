@@ -349,7 +349,6 @@ namespace TrafficManager.Custom.AI {
                         nextTargetNodeId,
                         out maxSpeed)) {
                     // NON-STOCK CODE
-                    maxSpeed = 0;
                     return;
                 }
 
