@@ -313,19 +313,21 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
 
-                    foreach (NodeLaneMarker targetLaneMarker in laneMarker.ConnectedMarkers) {
-                        // render lane connection from laneMarker to targetLaneMarker
-                        if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneMarker.LaneId)) {
-                            continue;
-                        }
+                    if (laneMarker != selectedMarker) {
+                        foreach (NodeLaneMarker targetLaneMarker in laneMarker.ConnectedMarkers) {
+                            // render lane connection from laneMarker to targetLaneMarker
+                            if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneMarker.LaneId)) {
+                                continue;
+                            }
 
-                        DrawLaneCurve(
-                            cameraInfo,
-                            laneMarker.Position,
-                            targetLaneMarker.Position,
-                            NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
-                            laneMarker.Color,
-                            Color.black);
+                            DrawLaneCurve(
+                                cameraInfo,
+                                laneMarker.Position,
+                                targetLaneMarker.Position,
+                                NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
+                                laneMarker.Color,
+                                Color.black);
+                        }
                     }
 
                     if (viewOnly || (nodeId != SelectedNodeId)) {
@@ -373,6 +375,26 @@ namespace TrafficManager.UI.SubTools {
                         laneMarker.RenderOverlay(cameraInfo, color, enlarge: highlightMarker);
                     } // if drawMarker
                 } // end foreach lanemarker in node markers
+
+                if (selectedMarker != null) {
+                    // lane curves for selectedMarker will be drawn last to
+                    // be on the top of other lane markers.
+                    foreach (NodeLaneMarker targetLaneMarker in selectedMarker.ConnectedMarkers) {
+                        if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneMarker.LaneId)) {
+                            continue;
+                        }
+
+                        DrawLaneCurve(
+                            cameraInfo,
+                            selectedMarker.Position,
+                            targetLaneMarker.Position,
+                            NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
+                            selectedMarker.Color,
+                            Color.grey,
+                            size: 0.18f // Embolden
+                            );
+                    } // end foreach selectedMarker.ConnectedMarkers
+                } // end if selectedMarker != null
             } // end for node in all nodes
         }
 
@@ -425,7 +447,8 @@ namespace TrafficManager.UI.SubTools {
                         pos,
                         selNodePos,
                         Color.Lerp(selectedMarker.Color, Color.white, 0.33f),
-                        Color.white);
+                        Color.white,
+                        size:0.11f);
 
                 }
 
@@ -958,7 +981,7 @@ namespace TrafficManager.UI.SubTools {
                                    Vector3 middlePoint,
                                    Color color,
                                    Color outlineColor,
-                                   float size = 0.1f) {
+                                   float size = 0.08f) {
             Bezier3 bezier;
             bezier.a = start;
             bezier.d = end;
