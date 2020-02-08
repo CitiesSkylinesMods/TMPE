@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.State {
+namespace TrafficManager.State {
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
@@ -21,6 +21,14 @@
 
         public override void OnCreated(ISerializableData serializableData) {
             _serializableData = serializableData;
+
+            Log._Debug("SerializableDataExtension.OnCreated() called");
+
+            if (LoadingExtension.Instance.InGameHotReload) {
+                Log._Debug("HOT RELOAD ...");
+                OnLoadData();
+                LoadingExtension.Instance.OnLevelLoaded(LoadMode.LoadGame);
+            }
         }
 
         public override void OnReleased() { }

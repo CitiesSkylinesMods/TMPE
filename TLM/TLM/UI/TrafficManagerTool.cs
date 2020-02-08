@@ -55,11 +55,16 @@ namespace TrafficManager.UI {
             ExtVehicleType.Service, ExtVehicleType.RailVehicle
         };
 
-        private static SubTool _activeSubTool;
+        private SubTool _activeSubTool;
 
         private static IDisposable _confDisposable;
 
         static TrafficManagerTool() { }
+
+        protected override void OnDestroy() {
+            Log.Info("TrafficManagerTool.OnDestroy() called");
+            base.OnDestroy();
+        }
 
         internal ToolController GetToolController() {
             return m_toolController;
@@ -175,6 +180,7 @@ namespace TrafficManager.UI {
 
             Log.Info("TrafficManagerTool: Initialization completed.");
         }
+
 
         public void OnUpdate(GlobalConfig config) {
             InitializeSubTools();
