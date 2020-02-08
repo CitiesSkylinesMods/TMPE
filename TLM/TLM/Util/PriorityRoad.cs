@@ -69,6 +69,29 @@ namespace TrafficManager.Util {
             return true;
         }
 
+        private static bool IsStraighOneWay(ushort segmentId0, ushort segmentId1) {
+            ref NetSegment seg0 = ref GetSeg(segmentId0);
+            //ref NetSegment seg1 = ref GetSeg(segmentId1);
+            bool oneway = segMan.CalculateIsOneWay(segmentId0) &&
+                          segMan.CalculateIsOneWay(segmentId1);
+            if (!oneway) {
+                return false;
+            }
+
+            ushort nodeId;
+            if ((nodeId = netService.GetHeadNode(segmentId0)) == netService.GetTailNode(segmentId1)) {
+                if (GetDirection(segmentId0, segmentId1, nodeId) == ArrowDirection.Forward) {
+                    return true;
+                }
+            } else if ((nodeId = netService.GetHeadNode(segmentId1)) == netService.GetTailNode(segmentId0)) {
+                if (GetDirection(segmentId1, segmentId0, nodeId) == ArrowDirection.Forward) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// if the roads form a T shape then try to arrange them like this (if possible)
         /// slot 0: incomming oneway road.
@@ -170,8 +193,13 @@ namespace TrafficManager.Util {
             }
             else {
                 segmentList.Sort(CompareSegments);
+                if (segmentList.Count == 3) {
+                    // case for roundabout where connected road is one way
+                    isSemiRabout = segMan.CalculateIsOneWay(segmentList[2]);
+                    isSemiRabout &= IsStraighOneWay(segmentList[0], segmentList[1]);                    
+                }
             }
-            
+
             if (CompareSegments(segmentList[1], segmentList[2]) == 0) {
                 Log._Debug("FixJunction: cannot determine which road should be treaded as the main road.\n" +
                     "segmentList=" + segmentList.ToSTR());
@@ -192,15 +220,24 @@ namespace TrafficManager.Util {
                         "segmentList=" + segmentList.ToSTR());
 
             for (int i = 0; i < segmentList.Count; ++i) {
+                ushort segmentId = segmentList[i];
                 if (i < 2) {
-                    FixMajorSegmentRules(segmentList[i], nodeId);
+                    if (isSemiRabout) {
+                        RoundaboutMassEdit.FixRulesRAbout(segmentId);
+                    } else {
+                        FixMajorSegmentRules(segmentId, nodeId);
+                    }
                     if(!ignoreLanes) {
-                        FixMajorSegmentLanes(segmentList[i], nodeId);
+                        FixMajorSegmentLanes(segmentId, nodeId);
                     }
                 } else {
-                    FixMinorSegmentRules(segmentList[i], nodeId, segmentList);
+                    if (isSemiRabout) {
+                        RoundaboutMassEdit.FixRulesMinor(segmentId, nodeId);
+                    } else {
+                        FixMinorSegmentRules(segmentId, nodeId, segmentList);
+                    }
                     if (!ignoreLanes) {
-                        FixMinorSegmentLanes(segmentList[i], nodeId, segmentList);
+                        FixMinorSegmentLanes(segmentId, nodeId, segmentList);
                     }
                 }
             } //end for
@@ -238,18 +275,18 @@ namespace TrafficManager.Util {
             }
         }
 
-        private static int CountLanes(ushort segmentId, ushort nodeId, bool outgoing = true) {
+        private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
             return netService.GetSortedLanes(
                                 segmentId,
                                 ref segmentId.ToSegment(),
-                                netService.IsStartNode(segmentId, nodeId) ^ (!outgoing),
+                                netService.IsStartNode(segmentId, nodeId) ^ (!toward),
                                 LaneArrowManager.LANE_TYPES,
                                 LaneArrowManager.VEHICLE_TYPES,
                                 true
                                 ).Count;
         }
-        private static int CountOutgoingLanes(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
-        private static int CountIncomingLanes(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
+        private static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
+        private static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
 
 
         private static bool HasAccelerationLane(List<ushort> segmentList, ushort segmentId, ushort nodeId) {
@@ -262,22 +299,22 @@ namespace TrafficManager.Util {
             }
             ref NetSegment seg = ref segmentId.ToSegment();
 
-            ushort mainIn, mainOut;
+            ushort MainAgainst, MainToward;
             if (lht) {
-                mainOut = seg.GetLeftSegment(nodeId);
-                mainIn = seg.GetRightSegment(nodeId);
+                MainAgainst = seg.GetLeftSegment(nodeId);
+                MainToward = seg.GetRightSegment(nodeId);
             } else {
-                mainOut = seg.GetRightSegment(nodeId);
-                mainIn = seg.GetLeftSegment(nodeId);
+                MainAgainst = seg.GetRightSegment(nodeId);
+                MainToward = seg.GetLeftSegment(nodeId);
             }
 
-            Log._Debug($"HasAccelerationLane: segmentId:{segmentId} mainOut={mainOut} mainIn={mainIn} ");
-            if (IsMain(mainOut) && IsMain(mainIn) ) {
-                int Oy = CountOutgoingLanes(segmentId, nodeId);
-                int Mo = CountOutgoingLanes(mainOut, nodeId);
-                int Mi = CountIncomingLanes(mainIn, nodeId);
-                bool ret = Oy > 0 && Oy == Mo - Mi;
-                Log._Debug($"HasAccelerationLane: Oy={Oy} Mo={Mo} Mi={Mi} ret={ret} = Oy == Mo - Mi ");
+            Log._Debug($"HasAccelerationLane: segmentId:{segmentId} MainToward={MainToward} MainAgainst={MainAgainst} ");
+            if (IsMain(MainToward) && IsMain(MainAgainst) ) {
+                int Yt = CountLanesTowardJunction(segmentId, nodeId); // Yeild Toward.
+                int Mt = CountLanesTowardJunction(MainToward, nodeId); // Main Toward.
+                int Ma = CountLanesAgainstJunction(MainAgainst, nodeId); // Main Against.
+                bool ret = Yt > 0 && Yt + Mt <= Ma;
+                Log._Debug($"HasAccelerationLane: Yt={Yt}  Mt={Mt} Ma={Ma} ret={ret} : Yt + Mt <= Ma ");
                 return ret;
             }
 
