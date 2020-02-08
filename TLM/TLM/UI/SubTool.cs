@@ -11,7 +11,7 @@ namespace TrafficManager.UI {
             get {
                 if (windowTexture_ == null) {
                     windowTexture_ = TrafficManagerTool.AdjustAlpha(
-                        TextureResources.WindowBackgroundTexture2D,
+                        Textures.MainMenu.WindowBackground,
                         TrafficManagerTool.GetWindowAlpha());
                 }
 

@@ -537,7 +537,7 @@
                     }
 
                     bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(
-                        RoadUITextures.VehicleRestrictionTextures[vehicleType][allowed],
+                        RoadUI.VehicleRestrictionTextures[vehicleType][allowed],
                         camPos,
                         zero,
                         f,

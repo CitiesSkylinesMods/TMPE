@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -249,8 +249,9 @@
     <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
-    <Compile Include="UI\Textures\JunctionUITextures.cs" />
-    <Compile Include="UI\Textures\RoadUITextures.cs" />
+    <Compile Include="UI\Textures\JunctionRestrictions.cs" />
+    <Compile Include="UI\Textures\MainMenu.cs" />
+    <Compile Include="UI\Textures\RoadUI.cs" />
     <Compile Include="UI\Textures\SpeedLimitTextures.cs" />
     <Compile Include="UI\Textures\TextureResources.cs" />
     <Compile Include="UI\Textures\TrafficLightTextures.cs" />
@@ -304,51 +305,76 @@
     <Compile Include="Util\SegmentTraverser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\light_1_1.png" />
-    <EmbeddedResource Include="Resources\light_1_2.png" />
-    <EmbeddedResource Include="Resources\light_1_3.png" />
-    <EmbeddedResource Include="Resources\light_2_1.png" />
-    <EmbeddedResource Include="Resources\light_2_2.png" />
-    <EmbeddedResource Include="Resources\light_2_3.png" />
-    <EmbeddedResource Include="Resources\light_3_1.png" />
-    <EmbeddedResource Include="Resources\light_3_2.png" />
-    <EmbeddedResource Include="Resources\light_3_3.png" />
-    <EmbeddedResource Include="Resources\light_4_1.png" />
-    <EmbeddedResource Include="Resources\light_4_2.png" />
-    <EmbeddedResource Include="Resources\light_4_3.png" />
-    <EmbeddedResource Include="Resources\light_5_1.png" />
-    <EmbeddedResource Include="Resources\light_5_2.png" />
-    <EmbeddedResource Include="Resources\light_5_3.png" />
-    <EmbeddedResource Include="Resources\light_6_1.png" />
-    <EmbeddedResource Include="Resources\light_6_2.png" />
-    <EmbeddedResource Include="Resources\light_6_3.png" />
-    <EmbeddedResource Include="Resources\light_counter.png" />
-    <EmbeddedResource Include="Resources\light_mode.png" />
-    <EmbeddedResource Include="Resources\light_yellow.png" />
-    <EmbeddedResource Include="Resources\pedestrian_light_1.png" />
-    <EmbeddedResource Include="Resources\pedestrian_light_2.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\crossing_allowed.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\crossing_forbidden.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\enterblocked_allowed.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\enterblocked_forbidden.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\lanechange_allowed.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\lanechange_forbidden.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\left_on_red_allowed.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\left_on_red_forbidden.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\right_on_red_allowed.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\right_on_red_forbidden.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\uturn_allowed.png" />
+    <EmbeddedResource Include="Resources\JunctionRestrictions\uturn_forbidden.png" />
+    <EmbeddedResource Include="Resources\MainMenu\LegacyButtons.png" />
+    <EmbeddedResource Include="Resources\MainMenu\MenuButton.png" />
+    <EmbeddedResource Include="Resources\MainMenu\noimage.png" />
+    <EmbeddedResource Include="Resources\MainMenu\remove-btn.png" />
+    <EmbeddedResource Include="Resources\MainMenu\WindowBackground.png" />
     <EmbeddedResource Include="Resources\pedestrian_mode_1.png" />
     <EmbeddedResource Include="Resources\pedestrian_mode_2.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\sign_none.png" />
-    <EmbeddedResource Include="Resources\sign_priority.png" />
-    <EmbeddedResource Include="Resources\sign_stop.png" />
-    <EmbeddedResource Include="Resources\sign_yield.png" />
+    <EmbeddedResource Include="Resources\RoadUI\bicycle_infosign.png" />
+    <EmbeddedResource Include="Resources\RoadUI\bus_infosign.png" />
+    <EmbeddedResource Include="Resources\RoadUI\cargotrain_infosign.png" />
+    <EmbeddedResource Include="Resources\RoadUI\cargotruck_infosign.png" />
+    <EmbeddedResource Include="Resources\RoadUI\emergency_infosign.png" />
+    <EmbeddedResource Include="Resources\RoadUI\parking_allowed.png" />
+    <EmbeddedResource Include="Resources\RoadUI\parking_disallowed.png" />
+    <EmbeddedResource Include="Resources\RoadUI\passengercar_infosign.png" />
+    <EmbeddedResource Include="Resources\RoadUI\passengertrain_infosign.png" />
+    <EmbeddedResource Include="Resources\RoadUI\remove_signs.png" />
+    <EmbeddedResource Include="Resources\RoadUI\service_infosign.png" />
+    <EmbeddedResource Include="Resources\RoadUI\sign_none.png" />
+    <EmbeddedResource Include="Resources\RoadUI\sign_priority.png" />
+    <EmbeddedResource Include="Resources\RoadUI\sign_stop.png" />
+    <EmbeddedResource Include="Resources\RoadUI\sign_yield.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\lanechange_allowed.png" />
-    <EmbeddedResource Include="Resources\lanechange_forbidden.png" />
-    <EmbeddedResource Include="Resources\bicycle_infosign.png" />
-    <EmbeddedResource Include="Resources\bus_infosign.png" />
-    <EmbeddedResource Include="Resources\cargotrain_infosign.png" />
-    <EmbeddedResource Include="Resources\cargotruck_infosign.png" />
-    <EmbeddedResource Include="Resources\passengercar_infosign.png" />
-    <EmbeddedResource Include="Resources\passengertrain_infosign.png" />
-    <EmbeddedResource Include="Resources\emergency_infosign.png" />
-    <EmbeddedResource Include="Resources\service_infosign.png" />
-    <EmbeddedResource Include="Resources\taxi_infosign.png" />
-    <EmbeddedResource Include="Resources\tram_infosign.png" />
+    <EmbeddedResource Include="Resources\RoadUI\taxi_infosign.png" />
+    <EmbeddedResource Include="Resources\RoadUI\tram_infosign.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\clock_pause.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\clock_play.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\clock_test.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_1_1.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_1_2.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_1_3.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_2_1.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_2_2.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_2_3.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_3_1.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_3_2.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_3_3.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_4_1.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_4_2.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_4_3.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_5_1.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_5_2.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_5_3.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_6_1.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_6_2.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_6_3.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_counter.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_counter_ja.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_counter_pl.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_mode.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_mode_ja.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_mode_pl.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_yellow.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\pedestrian_light_1.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\pedestrian_light_2.png" />
     <EmbeddedResource Include="Resources\bus_allowed.png" />
     <EmbeddedResource Include="Resources\bus_forbidden.png" />
     <EmbeddedResource Include="Resources\cargotrain_allowed.png" />
@@ -365,29 +391,7 @@
     <EmbeddedResource Include="Resources\service_forbidden.png" />
     <EmbeddedResource Include="Resources\taxi_allowed.png" />
     <EmbeddedResource Include="Resources\taxi_forbidden.png" />
-    <EmbeddedResource Include="Resources\light_counter_pl.png" />
-    <EmbeddedResource Include="Resources\light_mode_pl.png" />
     <EmbeddedResource Include="Resources\pedestrian_mode_2_pl.png" />
-    <EmbeddedResource Include="Resources\light_counter_ja.png" />
-    <EmbeddedResource Include="Resources\light_mode_ja.png" />
-    <EmbeddedResource Include="Resources\clock_pause.png" />
-    <EmbeddedResource Include="Resources\clock_test.png" />
-    <EmbeddedResource Include="Resources\clock_play.png" />
-    <EmbeddedResource Include="Resources\remove_signs.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\crossing_allowed.png" />
-    <EmbeddedResource Include="Resources\crossing_forbidden.png" />
-    <EmbeddedResource Include="Resources\enterblocked_allowed.png" />
-    <EmbeddedResource Include="Resources\enterblocked_forbidden.png" />
-    <EmbeddedResource Include="Resources\uturn_allowed.png" />
-    <EmbeddedResource Include="Resources\uturn_forbidden.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\MenuButton.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\noimage.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\incompatible_mods.txt" />
@@ -413,25 +417,6 @@
       <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
       <Name>TMPE.GenericGameBridge</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\mainmenu-btns.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\parking_allowed.png" />
-    <EmbeddedResource Include="Resources\parking_disallowed.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\remove-btn.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\WindowBackground.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\left_on_red_allowed.png" />
-    <EmbeddedResource Include="Resources\left_on_red_forbidden.png" />
-    <EmbeddedResource Include="Resources\right_on_red_allowed.png" />
-    <EmbeddedResource Include="Resources\right_on_red_forbidden.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -529,14 +514,29 @@
     <EmbeddedResource Include="Resources\TrafficLights\IconJunctionNoTrafficLights.png" />
     <EmbeddedResource Include="Resources\TrafficLights\IconJunctionTrafficLights.png" />
     <EmbeddedResource Include="Resources\TrafficLights\IconJunctionTimedTL.png" />
+    <EmbeddedResource Include="Resources\Translations\Guide.csv" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
     <EmbeddedResource Include="Resources\Translations\VehicleRestrictions.csv" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="PostBuildMacros">
+    <!-- Code from https://superuser.com/questions/82231/how-do-i-do-comments-at-a-windows-command-prompt -->
+    <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
+      <Output TaskParameter="Assemblies" ItemName="Targets" />
+    </GetAssemblyIdentity>
+    <ItemGroup>
+      <VersionNumber Include="@(Targets->'%(Version)')" />
+    </ItemGroup>
+  </Target>
   <PropertyGroup>
-    <PostBuildEvent>rem set "DEPLOYDIR=D:\Games\Steam\steamapps\workshop\content\255710\1637663252\"
+    <PostBuildEventDependsOn>
+      $(PostBuildEventDependsOn);
+      PostBuildMacros;
+    </PostBuildEventDependsOn>
+    <PostBuildEvent>
+rem set "DEPLOYDIR=D:\Games\Steam\steamapps\workshop\content\255710\1637663252\"
 set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
 
 del /Q "%25DEPLOYDIR%25*"
@@ -548,14 +548,12 @@ xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "%25DEPLOYDIR%25"
-
-set DEPLOYDIR=</PostBuildEvent>
+echo THE ASSEMBLY VERSION IS: @(VersionNumber) created at %25time%25
+            
+set DEPLOYDIR=
+    </PostBuildEvent>
   </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
