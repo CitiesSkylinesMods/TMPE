@@ -67,8 +67,6 @@ namespace TrafficManager {
         public static List<Detour> Detours { get; set; }
 
         public static HarmonyInstance HarmonyInst { get; private set; }
-        // public static TrafficManagerMode ToolMode { get; set; }
-        // public static TrafficManagerTool TrafficManagerTool { get; set; }
 
         /// <summary>
         /// Contains loaded languages and lookup functions for text translations
@@ -324,8 +322,6 @@ namespace TrafficManager {
 
         public override void OnReleased() {
             base.OnReleased();
-
-            UIBase.ReleaseTool();
             Instance = null;
         }
 
@@ -359,18 +355,11 @@ namespace TrafficManager {
                 Destroy<RemoveVehicleButtonExtender>();
                 Destroy<RemoveCitizenInstanceButtonExtender>();
 
+                // Custom path manger is destroyed when reloading. That is why the following code
+                // is commented out.
                 //simManager?.Remove(CustomPathManager);
-
                 //Object.Destroy(CustomPathManager);
                 //CustomPathManager = null;
-
-                Log.Info("Removing Controls from UI.");
-                if (BaseUI != null) {
-                    BaseUI.Close(); // Hide the UI ASAP
-                    Object.Destroy(BaseUI);
-                    Log._Debug("removed UIBase instance.");
-                    BaseUI = null;
-                }
 
                 if (TransportDemandUI != null) {
                     UIView uiView = UIView.GetAView();
@@ -378,6 +367,18 @@ namespace TrafficManager {
                     TransportDemandUI = null;
                 }
 
+                var tmTool = UIBase.GetTrafficManagerTool();
+                Log.Info("Removing Controls from UI.");
+                if (BaseUI != null) {
+                    BaseUI.Close(); // Hide the UI ASAP
+                    UIBase.ReleaseTool();
+                    Log._Debug("removed UIBase instance.");
+                    BaseUI = null;
+                }
+
+                if (tmTool != null) {
+                    Object.Destroy(tmTool);
+                }
 #if TRACE
                 Singleton<CodeProfiler>.instance.OnLevelUnloading();
 #endif
