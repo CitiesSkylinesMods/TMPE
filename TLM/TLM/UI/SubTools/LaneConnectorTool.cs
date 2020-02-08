@@ -359,7 +359,6 @@ namespace TrafficManager.UI.SubTools {
                         if (hoveredMarker == null) {
                             float hitH = TrafficManagerTool.GetAccurateHitHeight();
                             markerIsHovered =
-                                laneMarker.IntersectRay(ref mouseRay, hitH) ||
                                 laneMarker.segmentLaneMarker.IntersectRay(ref mouseRay, hitH);
 
                             if (markerIsHovered) {
@@ -368,10 +367,10 @@ namespace TrafficManager.UI.SubTools {
                         }
 
                         bool highlightMarker = laneMarker == selectedMarker || markerIsHovered;
-                        laneMarker.RenderOverlay(cameraInfo, color, enlarge: highlightMarker);
                         if (highlightMarker) {
-                            laneMarker.segmentLaneMarker.RenderOverlay(cameraInfo, color, true);
-                        } // if highlightMarker
+                            laneMarker.segmentLaneMarker.RenderOverlay(cameraInfo, color, enlarge: true);
+                        }
+                        laneMarker.RenderOverlay(cameraInfo, color, enlarge: highlightMarker);
                     } // if drawMarker
                 } // end foreach lanemarker in node markers
             } // end for node in all nodes
@@ -822,21 +821,17 @@ namespace TrafficManager.UI.SubTools {
                                       ? COLOR_CHOICES[nodeMarkerColorIndex % COLOR_CHOICES.Length]
                                       : default; // or black (not used while rendering)
 
-
                             NetLane lane = NetManager.instance.m_lanes.m_buffer[laneId];
                             Bezier3 bezier = lane.m_bezier;
-                            Bezier3 bezier2 = bezier; // raycast bezier is a bit smaller to avoid flickering.
                             if (startNode) {
                                 bezier.a = (Vector3)pos;
-                                bezier2.a = bezier.a + offset.normalized * NodeLaneMarker.Radius;
                             } else {
                                 bezier.d = (Vector3)pos;
-                                bezier2.d = bezier.d + offset.normalized * NodeLaneMarker.Radius;
-                            }
 
+                            }
                             SegmentLaneMarker segmentLaneMarker = new SegmentLaneMarker {
                                 renderBezier = bezier,
-                                raycastBezier = bezier2,
+                                raycastBezier = bezier,
                                 laneID = laneId,
                                 laneIndex = laneIndex,
                             };
