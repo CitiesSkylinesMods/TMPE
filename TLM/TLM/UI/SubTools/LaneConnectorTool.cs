@@ -353,8 +353,6 @@ namespace TrafficManager.UI.SubTools {
 
                     // highlight hovered marker and selected marker
                     if (drawMarker) {
-                        var color = laneMarker.IsTarget ? Color.white : laneMarker.Color;
-
                         bool markerIsHovered = false;
                         if (hoveredMarker == null) {
                             float hitH = TrafficManagerTool.GetAccurateHitHeight();
@@ -366,6 +364,8 @@ namespace TrafficManager.UI.SubTools {
                             }
                         }
 
+                        bool isTarget = selectedMarker != null && laneMarker != selectedMarker;
+                        var color = isTarget ? Color.white : laneMarker.Color;
                         bool highlightMarker = laneMarker == selectedMarker || markerIsHovered;
                         if (highlightMarker) {
                             laneMarker.segmentLaneMarker.RenderOverlay(cameraInfo, color, enlarge: true);
