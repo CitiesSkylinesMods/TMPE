@@ -11,7 +11,6 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.State;
     using TrafficManager.Util.Caching;
     using UnityEngine;
-    using static Util.Shortcuts;
 
     public class LaneConnectorTool : SubTool {
         private enum MarkerSelectionMode {
@@ -27,7 +26,7 @@ namespace TrafficManager.UI.SubTools {
             Backward
         }
 
-        private static float max_hit_error = 2.5f;
+        private const float MAX_HIT_ERROR = 2.5f;
 
         private static readonly Color DefaultNodeMarkerColor = new Color(1f, 1f, 1f, 0.4f);
         private NodeLaneMarker selectedMarker;
@@ -72,14 +71,20 @@ namespace TrafficManager.UI.SubTools {
             internal NetInfo.LaneType LaneType;
             internal VehicleInfo.VehicleType VehicleType;
 
+            /// <summary>
+            ///  Intersects mouse ray with marker bounds.
+            /// </summary>
+            /// <param name="ray"></param>
+            /// <param name="hitH">vertical raycast hit position.</param>
+            /// <returns><c>true</c>if mouse ray intersects with marker <c>false</c> otherwise</returns>
             internal bool IntersectRay(ref Ray ray, float hitH) {
                 Vector3 pos = SecondaryPosition;
                 float mouseH = UIBase.GetTrafficManagerTool(false).MousePosition.y;
-                if(hitH < mouseH - max_hit_error) {
+                if(hitH < mouseH - MAX_HIT_ERROR) {
                     // For metros use projection on the terrain.
                     pos = Position;
                 }
-                else if (hitH - pos.y > max_hit_error) {
+                else if (hitH - pos.y > MAX_HIT_ERROR) {
                     // if marker is projected on road plane above then modify its height
                     pos.y = hitH;
                 }
@@ -89,6 +94,9 @@ namespace TrafficManager.UI.SubTools {
                 return bounds.IntersectRay(ray);
             }
 
+            /// <summary>
+            /// renders node lane marker.
+            /// </summary>
             internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false) {
                 float magnification = enlarge ? 2f : 1f;
                 RenderManager.instance.OverlayEffect.DrawCircle(
@@ -121,8 +129,18 @@ namespace TrafficManager.UI.SubTools {
             internal Bezier3 renderBezier;
 
             private Bounds[] bounds;
+
+            /// <summary>
+            /// previous vertical hit position stored for caching.
+            /// </summary>
             private float prev_H;
 
+            /// <summary>
+            ///  Intersects mouse ray with lane bounds.
+            /// </summary>
+            /// <param name="ray"></param>
+            /// <param name="hitH">vertical hit position of the raycast</param>
+            /// <param name="hitH">vertical raycast hit position.</param>
             internal bool IntersectRay(ref Ray ray, float hitH) {
                 CalculateBounds(hitH);
                 foreach (Bounds bounds in bounds) {
@@ -133,9 +151,14 @@ namespace TrafficManager.UI.SubTools {
                 return false;
             }
 
-
+            /// <summary>
+            /// Initializes/recalculates bezier bounds.
+            /// </summary>
+            /// <param name="hitH">vertical raycast hit position.</param>
             private void CalculateBounds(float hitH) {
+                // maximum vertical postion of the bezier.
                 float maxH = Mathf.Max(raycastBezier.a.y, raycastBezier.d.y);
+
                 float mouseH = UIBase.GetTrafficManagerTool(false).MousePosition.y;
 
                 if ((hitH == prev_H || hitH == maxH || prev_H == mouseH) && bounds != null) {
@@ -144,12 +167,12 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 Bezier3 bezier0 = raycastBezier;
-                if (hitH < mouseH - max_hit_error) {
+                if (hitH < mouseH - MAX_HIT_ERROR) {
                     // For Metros use projection on the terrain.
                     bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = mouseH;
                     prev_H = mouseH;
                 }
-                else if (hitH > maxH + max_hit_error) {
+                else if (hitH > maxH + MAX_HIT_ERROR) {
                     // if marker is projected on another road plane then modify its height
                     bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = hitH;
                     prev_H = hitH;
@@ -185,6 +208,9 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
+            /// <summary>
+            /// Renders lane overlay.
+            /// </summary>
             internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge=false) {
                 float minH = Mathf.Min(renderBezier.a.y, renderBezier.d.y);
                 float maxH = Mathf.Max(renderBezier.a.y, renderBezier.d.y);
@@ -433,7 +459,7 @@ namespace TrafficManager.UI.SubTools {
                         float hitH = TrafficManagerTool.GetAccurateHitHeight();
                         pos.y = hitH; // fix height.
                         float mouseH = MousePosition.y;
-                        if (hitH < mouseH - max_hit_error) {
+                        if (hitH < mouseH - MAX_HIT_ERROR) {
                             // for metros lane curve is projected on the ground.
                             pos = MousePosition;
                         }

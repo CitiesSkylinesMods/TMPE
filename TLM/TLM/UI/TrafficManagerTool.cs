@@ -3,22 +3,22 @@ namespace TrafficManager.UI {
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using API.Manager;
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
-    using API.Util;
+    using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.Util;
     using ColossalFramework;
     using ColossalFramework.Math;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using State;
-    using State.ConfigData;
-    using MainMenu;
-    using SubTools;
-    using SubTools.SpeedLimits;
-    using Util;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.UI.MainMenu;
+    using TrafficManager.UI.SubTools;
+    using TrafficManager.UI.SubTools.SpeedLimits;
+    using TrafficManager.Util;
     using UnityEngine;
 
     [UsedImplicitly]
@@ -991,6 +991,10 @@ namespace TrafficManager.UI {
 
         private static float prev_H = 0f;
         private static float prev_H_Fixed;
+
+        /// <summary>
+        /// Calculates accurate vertical element of raycast hit position.
+        /// </summary>
         internal static float GetAccurateHitHeight() {
             // cache result.
             if (HitPos.y == prev_H) {
