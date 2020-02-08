@@ -11,7 +11,6 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.State;
     using TrafficManager.Util.Caching;
     using UnityEngine;
-    using System.Text.RegularExpressions;
 
     public class LaneConnectorTool : SubTool {
         private enum MarkerSelectionMode {
@@ -775,17 +774,6 @@ namespace TrafficManager.UI.SubTools {
             return nodeMarkers;
         }
 
-        public const string CSUR_REGEX = "CSUR(-(T|R|S))? ([[1-9]?[0-9]D?(L|S|C|R)[1-9]*P?)+(=|-)?([[1-9]?[0-9]D?(L|S|C|R)[1-9]*P?)*";
-
-        public static bool IsCSUR(NetInfo asset) {
-            if (asset == null || (asset.m_netAI.GetType() != typeof(RoadAI) && asset.m_netAI.GetType() != typeof(RoadBridgeAI) && asset.m_netAI.GetType() != typeof(RoadTunnelAI))) {
-                return false;
-            }
-            string savenameStripped = asset.name.Substring(asset.name.IndexOf('.') + 1);
-            Match m = Regex.Match(savenameStripped, CSUR_REGEX, RegexOptions.IgnoreCase);
-            return m.Success;
-        }
-
         /// <summary>
         /// Checks if the turning angle between two segments at the given node is within bounds.
         /// </summary>
@@ -805,9 +793,6 @@ namespace TrafficManager.UI.SubTools {
             NetManager netManager = Singleton<NetManager>.instance;
             NetInfo sourceSegmentInfo = netManager.m_segments.m_buffer[sourceSegmentId].Info;
             NetInfo targetSegmentInfo = netManager.m_segments.m_buffer[targetSegmentId].Info;
-
-            if (IsCSUR(sourceSegmentInfo) || IsCSUR(targetSegmentInfo))
-                return true;
 
             float turningAngle = 0.01f - Mathf.Min(
                                      sourceSegmentInfo.m_maxTurnAngleCos,

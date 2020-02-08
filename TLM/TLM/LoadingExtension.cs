@@ -321,8 +321,8 @@ namespace TrafficManager {
         }
 
         public override void OnReleased() {
-            base.OnReleased();
             Instance = null;
+            base.OnReleased();
         }
 
         public override void OnLevelUnloading() {
@@ -367,18 +367,14 @@ namespace TrafficManager {
                     TransportDemandUI = null;
                 }
 
-                var tmTool = UIBase.GetTrafficManagerTool();
                 Log.Info("Removing Controls from UI.");
                 if (BaseUI != null) {
                     BaseUI.Close(); // Hide the UI ASAP
-                    UIBase.ReleaseTool();
-                    Log._Debug("removed UIBase instance.");
+                    Object.Destroy(BaseUI);
                     BaseUI = null;
+                    Log._Debug("removed UIBase instance.");
                 }
 
-                if (tmTool != null) {
-                    Object.Destroy(tmTool);
-                }
 #if TRACE
                 Singleton<CodeProfiler>.instance.OnLevelUnloading();
 #endif
