@@ -53,8 +53,10 @@ namespace TrafficManager.UI {
         }
 
         ~UIBase() {
-            UnityEngine.Object.Destroy(MainMenuButton);
-            UnityEngine.Object.Destroy(MainMenu);
+            Log._Debug("UIBase destructor is called.");
+            Destroy(MainMenuButton);
+            Destroy(MainMenu);
+            ReleaseTool();
         }
 
         public bool IsVisible() {
@@ -162,29 +164,27 @@ namespace TrafficManager.UI {
 
         public static void DisableTool() {
             Log._Debug("LoadingExtension.DisableTool: called");
-            ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
-            ToolsModifierControl.SetTool<DefaultTool>();
-        }
-
-        internal static void ReleaseTool() {
-            if (ToolMode != TrafficManagerMode.None) {
-                ToolMode = TrafficManagerMode.None;
-                DestroyTool();
-            }
-        }
-
-        private static void DestroyTool() {
             if (ToolsModifierControl.toolController != null) {
                 ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
                 ToolsModifierControl.SetTool<DefaultTool>();
-
-                if (tool != null) {
-                    UnityEngine.Object.Destroy(tool);
-                    tool = null;
-                }
             } else {
-                Log.Warning("LoadingExtensions.DestroyTool: ToolsModifierControl.toolController is null!");
+                Log.Warning("LoadingExtensions.DisableTool: ToolsModifierControl.toolController is null!");
             }
+    }
+
+
+        internal static void ReleaseTool() {
+            ToolMode = TrafficManagerMode.None;
+            DestroyTool();
         }
+
+        private static void DestroyTool() {
+            DisableTool();
+            if (tool != null) {
+                Log.Info("Removing Traffic Manager Tool.");
+                UnityEngine.Object.Destroy(tool);
+                tool = null;
+            } // end if
+        } // end DestroyTool()
     }
 }
