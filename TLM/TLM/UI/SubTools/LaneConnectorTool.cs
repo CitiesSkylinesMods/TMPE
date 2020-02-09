@@ -400,27 +400,27 @@ namespace TrafficManager.UI.SubTools {
                         }
                         laneMarker.RenderOverlay(cameraInfo, color, enlarge: highlightMarker);
                     } // if drawMarker
+
+                    if (selectedMarker != null) {
+                        // lane curves for selectedMarker will be drawn last to
+                        // be on the top of other lane markers.
+                        foreach (NodeLaneMarker targetLaneMarker in selectedMarker.ConnectedMarkers) {
+                            if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneMarker.LaneId)) {
+                                continue;
+                            }
+
+                            DrawLaneCurve(
+                                cameraInfo,
+                                selectedMarker.Position,
+                                targetLaneMarker.Position,
+                                NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
+                                selectedMarker.Color,
+                                Color.grey,
+                                size: 0.18f // Embolden
+                                );
+                        } // end foreach selectedMarker.ConnectedMarkers
+                    } // end if selectedMarker != null
                 } // end foreach lanemarker in node markers
-
-                if (selectedMarker != null) {
-                    // lane curves for selectedMarker will be drawn last to
-                    // be on the top of other lane markers.
-                    foreach (NodeLaneMarker targetLaneMarker in selectedMarker.ConnectedMarkers) {
-                        if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneMarker.LaneId)) {
-                            continue;
-                        }
-
-                        DrawLaneCurve(
-                            cameraInfo,
-                            selectedMarker.Position,
-                            targetLaneMarker.Position,
-                            NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
-                            selectedMarker.Color,
-                            Color.grey,
-                            size: 0.18f // Embolden
-                            );
-                    } // end foreach selectedMarker.ConnectedMarkers
-                } // end if selectedMarker != null
             } // end for node in all nodes
         }
 
