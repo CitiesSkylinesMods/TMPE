@@ -28,8 +28,8 @@ namespace TrafficManager {
 
         public static string VersionString => ModVersion.ToString(2);
 
+        // Use SharedAssemblyInfo.cs to modify this version.
         public static Version ModVersion => typeof(TrafficManagerMod).Assembly.GetName().Version;
-
 
         public static readonly string ModName = "TM:PE " + VersionString + " " + BRANCH;
 
