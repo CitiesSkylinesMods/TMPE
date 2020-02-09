@@ -12,6 +12,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Util.Caching;
     using UnityEngine;
     using System.Text.RegularExpressions;
+    using static TrafficManager.Util.Shortcuts;
 
     public class LaneConnectorTool : SubTool {
         private enum MarkerSelectionMode {
@@ -204,24 +205,23 @@ namespace TrafficManager.UI.SubTools {
                     // bounds.IntersectRay(mouseRay);
                     bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay);
 
-                    // draw source marker in source selection mode,
-                    // draw target marker (if segment turning angles are within bounds) and
-                    // selected source marker in target selection mode
-                    bool drawMarker
-                        = ((GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource)
-                           && laneMarker.IsSource)
-                          || ((GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget)
-                              && ((laneMarker.IsTarget
-                                   && ((laneMarker.VehicleType & selectedMarker.VehicleType)
-                                       != VehicleInfo.VehicleType.None)
-                                   && CheckSegmentsTurningAngle(
-                                       selectedMarker.SegmentId,
-                                       ref netManager.m_segments.m_buffer[selectedMarker.SegmentId],
-                                       selectedMarker.StartNode,
-                                       laneMarker.SegmentId,
-                                       ref netManager.m_segments.m_buffer[laneMarker.SegmentId],
-                                       laneMarker.StartNode))
-                                  || (laneMarker == selectedMarker)));
+                    bool drawMarker = false;
+                    if (GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource &&
+                        laneMarker.IsSource) {
+                        // draw source marker in source selection mode,
+                        // make exception for markers that have no targe:
+                        foreach(var targetMarker in nodeMarkers) {
+                            if (CanConnect(laneMarker, targetMarker)){
+                                drawMarker = true;
+                                break;
+                            }
+                        }
+                    } else if (GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget) {
+                        // selected source marker in target selection mode
+                        drawMarker =
+                            laneMarker == selectedMarker ||
+                            CanConnect(selectedMarker, laneMarker);
+                    }
 
                     // highlight hovered marker and selected marker
                     bool highlightMarker =
@@ -775,16 +775,35 @@ namespace TrafficManager.UI.SubTools {
             return nodeMarkers;
         }
 
-        public const string CSUR_REGEX = "CSUR(-(T|R|S))? ([[1-9]?[0-9]D?(L|S|C|R)[1-9]*P?)+(=|-)?([[1-9]?[0-9]D?(L|S|C|R)[1-9]*P?)*";
+        /// <summary>
+        /// Uninitialized object used by Reflection to check if issue #649 is fixed.
+        /// TODO remove when older versions of TMPE has been depricated.
+        /// </summary>
+        public static object Fixed649;
 
-        public static bool IsCSUR(NetInfo asset) {
-            if (asset == null || (asset.m_netAI.GetType() != typeof(RoadAI) && asset.m_netAI.GetType() != typeof(RoadBridgeAI) && asset.m_netAI.GetType() != typeof(RoadTunnelAI))) {
-                return false;
-            }
-            string savenameStripped = asset.name.Substring(asset.name.IndexOf('.') + 1);
-            Match m = Regex.Match(savenameStripped, CSUR_REGEX, RegexOptions.IgnoreCase);
-            return m.Success;
+        private bool CanConnect(NodeLaneMarker source, NodeLaneMarker target) {
+            bool ret = source != target && source.IsSource && target.IsTarget;
+            ret &= (target.VehicleType & source.VehicleType) != 0;
+
+            bool IsRoad(NodeLaneMarker marker) =>
+                (marker.LaneType & LaneArrowManager.LANE_TYPES) != 0 &&
+                (marker.VehicleType & LaneArrowManager.VEHICLE_TYPES) != 0;
+
+            // turning angle does not apply to roads.
+            bool isRoad = IsRoad(source) && IsRoad(target);
+
+            // checktrack turning angles are within bounds
+            ret &= isRoad || CheckSegmentsTurningAngle(
+                    source.SegmentId,
+                    ref GetSeg(source.SegmentId),
+                    source.StartNode,
+                    target.SegmentId,
+                    ref GetSeg(target.SegmentId),
+                    target.StartNode);
+
+            return ret;
         }
+
 
         /// <summary>
         /// Checks if the turning angle between two segments at the given node is within bounds.
@@ -805,9 +824,6 @@ namespace TrafficManager.UI.SubTools {
             NetManager netManager = Singleton<NetManager>.instance;
             NetInfo sourceSegmentInfo = netManager.m_segments.m_buffer[sourceSegmentId].Info;
             NetInfo targetSegmentInfo = netManager.m_segments.m_buffer[targetSegmentId].Info;
-
-            if (IsCSUR(sourceSegmentInfo) || IsCSUR(targetSegmentInfo))
-                return true;
 
             float turningAngle = 0.01f - Mathf.Min(
                                      sourceSegmentInfo.m_maxTurnAngleCos,
