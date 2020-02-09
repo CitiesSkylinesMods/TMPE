@@ -813,50 +813,32 @@ namespace TrafficManager.UI {
                 }
             }
 
-            private object Lock = new object();
-            private GuideWrapper Guide;
+            public void HandleDispatchedAction() {
+                if (Action != null) {
+                    lock (ActionLock) {
+                        Action.Execute();
+                    }
+                }
+            }
+
             private enum ActionMode {
-                None,
                 Activate,
                 Deactivate,
                 DeactivateAll,
             }
-            private ActionMode Action = ActionMode.None;
 
-            public void HandleDispatchedActions() {
-                GuideWrapper guide;
-                ActionMode action = ActionMode.None;
-                lock (Lock) {
-                    guide = Guide;
-                    action = Action;
-                    if (Action != ActionMode.None) {
-                        //consume action
-                        Guide = null;
-                        Action = ActionMode.None;
-                    }
-                }
-
-                switch (action) {
-                    case ActionMode.Activate:
-                        guide?.Activate();
-                        break;
-                    case ActionMode.Deactivate:
-                        guide?.Deactivate();
-                        break;
-                    case ActionMode.DeactivateAll:
-                        foreach (var item in GuideTable) {
-                            item.Value.Deactivate();
-                        }
-                        break;
-                }
-            }
+            AsyncAction Action = null;
+            object ActionLock = new object();
 
             private void Dispatch(string localeKey, ActionMode action) {
                 if(action == ActionMode.DeactivateAll) {
-                    lock (Lock) {
-                        Guide = null;
-                        Action = ActionMode.DeactivateAll;
-                    }
+                    lock (ActionLock) {
+                        Action = Singleton<SimulationManager>.instance.AddAction(delegate () {
+                            foreach (var item in GuideTable) {
+                                item.Value.Deactivate();
+                            } // end foreach
+                        }); // end AddAction()
+                    } // end lock
                     return;
                 }
                 if (!GuideTable.TryGetValue(localeKey, out GuideWrapper guide)) {
@@ -864,10 +846,16 @@ namespace TrafficManager.UI {
                     LoadingExtension.TranslationDatabase.AddMissingGuideString(localeKey);
                     guide = AddGuide(localeKey);
                 }
-                lock (Lock) {
-                    Guide = guide;
-                    Action = action;
-                }
+                lock (ActionLock) {
+                    Action = Singleton<SimulationManager>.instance.AddAction(delegate () {
+                        if (action == ActionMode.Activate) {
+                            guide.Activate();
+                        } else {
+                            guide.Deactivate();
+                        }
+                    }); // end AddAction()
+                } // end lock
+
             }
 
             public void Activate(string localeKey) => Dispatch(localeKey, ActionMode.Activate);
@@ -875,9 +863,7 @@ namespace TrafficManager.UI {
             public void Deactivate(string localeKey) => Dispatch(localeKey, ActionMode.Deactivate);
 
             public void DeactivateAll() => Dispatch(null, ActionMode.DeactivateAll);
-
         }
-
 
         public override void SimulationStep() {
             base.SimulationStep();
@@ -896,7 +882,7 @@ namespace TrafficManager.UI {
             //                tooltipWorldPos = null;
             //        }
             // }
-            Guide.HandleDispatchedActions();
+            Guide.HandleDispatchedAction();
         }
 
         public bool DoRayCast(RaycastInput input, out RaycastOutput output) {
