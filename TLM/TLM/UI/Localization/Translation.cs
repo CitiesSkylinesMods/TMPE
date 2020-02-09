@@ -86,9 +86,9 @@ namespace TrafficManager.UI {
         public static Localization.LookupTable Tutorials =>
             LoadingExtension.TranslationDatabase.tutorialsLookup_;
 
-        private Localization.LookupTable guidesLookup_;
-        public static Localization.LookupTable Guides =>
-            LoadingExtension.TranslationDatabase.guidesLookup_;
+        private Localization.LookupTable guideLookup_;
+        public static Localization.LookupTable Guide =>
+            LoadingExtension.TranslationDatabase.guideLookup_;
 
         private Localization.LookupTable aiCitizenLookup_;
         public static Localization.LookupTable AICitizen =>
@@ -145,7 +145,7 @@ namespace TrafficManager.UI {
             trafficLightsLookup_ = new Localization.LookupTable("TrafficLights");
             vehicleRestrictionsLookup_ = new Localization.LookupTable("VehicleRestrictions");
             tutorialsLookup_ = new Localization.LookupTable("Tutorials");
-            guidesLookup_ = new Localization.LookupTable("Guide");
+            guideLookup_ = new Localization.LookupTable("Guide");
             aiCitizenLookup_ = new Localization.LookupTable("AI_Citizen");
             aiCarLookup_ = new Localization.LookupTable("AI_Car");
         }
@@ -250,7 +250,7 @@ namespace TrafficManager.UI {
 
         public IEnumerable<string> GetGuides() {
             string lang = GetCurrentLanguage();
-            foreach (KeyValuePair<string, string> entry in guidesLookup_.AllLanguages[lang]) {
+            foreach (KeyValuePair<string, string> entry in guideLookup_.AllLanguages[lang]) {
                 if (entry.Key.StartsWith(GUIDE_HEAD_KEY_PREFIX)) {
                     yield return entry.Key.Substring(GUIDE_HEAD_KEY_PREFIX.Length);
                 }
@@ -266,7 +266,7 @@ namespace TrafficManager.UI {
 
             string lang = GetCurrentLanguage();
 
-            foreach (KeyValuePair<string, string> entry in guidesLookup_.AllLanguages[lang]) {
+            foreach (KeyValuePair<string, string> entry in guideLookup_.AllLanguages[lang]) {
                 if (!entry.Key.StartsWith(GUIDE_KEY_PREFIX)) {
                     continue;
                 }
