@@ -65,8 +65,8 @@
 
         public override Texture2D AtlasTexture => UI.Textures.MainMenu.MainMenuButtons;
 
-        public override int Width => 50;
+        public override int GetWidth() => 50;
 
-        public override int Height => 50;
+        public override int GetHeight() => 50;
     }
 }

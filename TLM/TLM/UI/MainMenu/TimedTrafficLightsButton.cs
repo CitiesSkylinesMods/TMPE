@@ -6,8 +6,8 @@ namespace TrafficManager.UI.MainMenu {
 
         protected override ButtonFunction Function => ButtonFunction.TimedTrafficLights;
 
-        public override string Tooltip => Translation.Menu.Get("Tooltip:Timed traffic lights") + "\n" + Translation.Menu.Get("Tooltip.Keybinds:Auto TL");
+        public override string GetTooltip() => Translation.Menu.Get("Tooltip:Timed traffic lights") + "\n" + Translation.Menu.Get("Tooltip.Keybinds:Auto TL");
 
-        public override bool Visible => Options.timedLightsEnabled;
+        public override bool IsVisible() => Options.timedLightsEnabled;
     }
 }

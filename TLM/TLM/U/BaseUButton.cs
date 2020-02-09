@@ -22,9 +22,9 @@
 
         public abstract Texture2D AtlasTexture { get; }
 
-        public abstract int Width { get; }
+        public abstract int GetWidth();
 
-        public abstract int Height { get; }
+        public abstract int GetHeight();
 
         public override void Start() {
             atlas = U.ButtonTexture.CreateAtlas(
@@ -39,11 +39,21 @@
             playAudioEvents = true;
         }
 
-        public abstract bool Active { get; }
+        /// <summary>
+        /// Override this to return true when the button is activated and should be highlighted.
+        /// </summary>
+        public abstract bool IsActive();
 
-        public abstract string Tooltip { get; }
+        /// <summary>
+        /// Override this to return localized string for the tooltip.
+        /// </summary>
+        public abstract string GetTooltip();
 
-        public abstract bool Visible { get; }
+        /// <summary>
+        /// Override this to define whether the button should be visible on tool panel.
+        /// </summary>
+        /// <returns>Is the button visible?</returns>
+        public abstract bool IsVisible();
 
         public abstract void HandleClick(UIMouseEventParameter p);
 
@@ -58,7 +68,7 @@
         }
 
         internal void UpdateProperties() {
-            bool active = CanActivate() && Active;
+            bool active = CanActivate() && IsActive();
 
             m_BackgroundSprites.m_Normal =
                 m_BackgroundSprites.m_Disabled =
@@ -90,9 +100,9 @@
                     U.ButtonTexture.GetForegroundTextureId(ButtonName, FunctionName, true);
 
             string shortcutText = GetShortcutTooltip();
-            tooltip = Tooltip + shortcutText;
+            tooltip = GetTooltip() + shortcutText;
 
-            isVisible = Visible;
+            this.isVisible = IsVisible();
             this.Invalidate();
         }
 

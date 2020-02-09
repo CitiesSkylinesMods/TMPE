@@ -6,9 +6,9 @@
 
         protected override ButtonFunction Function => ButtonFunction.ToggleTrafficLights;
 
-        public override string Tooltip => Translation.Menu.Get("Tooltip:Switch traffic lights");
+        public override string GetTooltip() => Translation.Menu.Get("Tooltip:Switch traffic lights");
 
-        public override bool Visible => true;
+        public override bool IsVisible() => true;
 
         public override KeybindSetting ShortcutKey => KeybindSettingsBase.ToggleTrafficLightTool;
     }

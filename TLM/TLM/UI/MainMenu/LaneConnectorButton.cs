@@ -7,9 +7,9 @@
 
         protected override ButtonFunction Function => ButtonFunction.LaneConnector;
 
-        public override string Tooltip => Translation.Menu.Get("Tooltip:Lane connector");
+        public override string GetTooltip() => Translation.Menu.Get("Tooltip:Lane connector");
 
-        public override bool Visible => Options.laneConnectorEnabled;
+        public override bool IsVisible() => Options.laneConnectorEnabled;
 
         public override KeybindSetting ShortcutKey => KeybindSettingsBase.LaneConnectionsTool;
     }

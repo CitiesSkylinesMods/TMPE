@@ -3,13 +3,13 @@
     using TrafficManager.Manager.Impl;
 
     public class ClearTrafficButton : BaseMenuButton {
-        public override bool Active => false;
+        public override bool IsActive() => false;
 
         protected override ButtonFunction Function => ButtonFunction.ClearTraffic;
 
-        public override string Tooltip => Translation.Menu.Get("Tooltip:Clear traffic");
+        public override string GetTooltip() => Translation.Menu.Get("Tooltip:Clear traffic");
 
-        public override bool Visible => true;
+        public override bool IsVisible() => true;
 
         public override void OnClickInternal(UIMouseEventParameter p) {
             ConfirmPanel.ShowModal(

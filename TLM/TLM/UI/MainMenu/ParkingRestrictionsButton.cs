@@ -6,8 +6,8 @@
 
         protected override ButtonFunction Function => ButtonFunction.ParkingRestrictions;
 
-        public override string Tooltip => Translation.Menu.Get("Tooltip:Parking restrictions");
+        public override string GetTooltip() => Translation.Menu.Get("Tooltip:Parking restrictions");
 
-        public override bool Visible => Options.parkingRestrictionsEnabled;
+        public override bool IsVisible() => Options.parkingRestrictionsEnabled;
     }
 }

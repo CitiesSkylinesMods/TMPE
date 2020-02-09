@@ -7,11 +7,11 @@ namespace TrafficManager.UI.MainMenu {
 
         protected override ButtonFunction Function => ButtonFunction.PrioritySigns;
 
-        public override string Tooltip =>
+        public override string GetTooltip() =>
             Translation.Menu.Get("Tooltip:Add priority signs") + "\n" +
             Translation.Menu.Get("Tooltip.Keybinds:Add priority signs");
 
-        public override bool Visible => Options.prioritySignsEnabled;
+        public override bool IsVisible() => Options.prioritySignsEnabled;
 
         public override KeybindSetting ShortcutKey => KeybindSettingsBase.PrioritySignsTool;
     }

@@ -73,6 +73,7 @@ namespace TrafficManager {
         /// </summary>
         public static Translation TranslationDatabase = new Translation();
 
+        /// <summary>Root object for TMPE mod UI (main menu and main button).</summary>
         public static ModUI ModUi { get; private set; }
 
         public static UITransportDemand TransportDemandUI { get; private set; }
