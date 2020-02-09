@@ -221,6 +221,7 @@
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
+    <Compile Include="UI\Helpers\GuideHandler.cs" />
     <Compile Include="UI\Helpers\GuideWrapper.cs" />
     <Compile Include="UI\Helpers\CheckboxOption.cs" />
     <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />
@@ -554,7 +555,7 @@ echo THE ASSEMBLY VERSION IS: @(VersionNumber) created at %25time%25
 set DEPLOYDIR=
     </PostBuildEvent>
   </PropertyGroup>
-    <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

@@ -21,8 +21,8 @@ namespace TrafficManager.UI {
         }
 
         private bool CheckStack() {
-            if (!Environment.StackTrace.Contains("SimulationStep")) {
-                Log.Error("Guide should be handled from simulation step. stack is:\n");
+            if (System.Threading.Thread.CurrentThread.Name != "Simulation") {
+                Log.Error("Guide should be handled from Simulation thread.");
                 return false;
             }
             return true;

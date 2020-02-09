@@ -20,12 +20,15 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.SubTools;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.UI.Helpers;
 
     [UsedImplicitly]
     public class TrafficManagerTool
         : DefaultTool,
           IObserver<GlobalConfig>
     {
+        public GuideHandler Guide;
+
         private ToolMode toolMode_;
         private NetTool _netTool;
 
@@ -805,72 +808,6 @@ namespace TrafficManager.UI {
             }
         }
 
-        public GuideHandler Guide;
-
-        public class GuideHandler {
-            private Dictionary<string, GuideWrapper> GuideTable = new Dictionary<string, GuideWrapper>();
-            private GuideWrapper AddGuide(string localeKey) =>
-                GuideTable[localeKey] = new GuideWrapper(Translation.GUIDE_KEY_PREFIX + localeKey);
-
-            public GuideHandler() {
-                foreach (string localeKey in LoadingExtension.TranslationDatabase.GetGuides()) {
-                    Log._Debug($"calling AddGuide(localeKey={localeKey}) ...");
-                    AddGuide(localeKey);
-                }
-            }
-
-            public void HandleDispatchedAction() {
-                if (Action != null) {
-                    lock (ActionLock) {
-                        Action.Execute();
-                    }
-                }
-            }
-
-            private enum ActionMode {
-                Activate,
-                Deactivate,
-                DeactivateAll,
-            }
-
-            AsyncAction Action = null;
-            object ActionLock = new object();
-
-            private void Dispatch(string localeKey, ActionMode action) {
-                if(action == ActionMode.DeactivateAll) {
-                    lock (ActionLock) {
-                        Action = Singleton<SimulationManager>.instance.AddAction(delegate () {
-                            foreach (var item in GuideTable) {
-                                item.Value.Deactivate();
-                            } // end foreach
-                        }); // end AddAction()
-                    } // end lock
-                    return;
-                }
-                if (!GuideTable.TryGetValue(localeKey, out GuideWrapper guide)) {
-                    Log.Error($"Guide {localeKey} does not exists");
-                    LoadingExtension.TranslationDatabase.AddMissingGuideString(localeKey);
-                    guide = AddGuide(localeKey);
-                }
-                lock (ActionLock) {
-                    Action = Singleton<SimulationManager>.instance.AddAction(delegate () {
-                        if (action == ActionMode.Activate) {
-                            guide.Activate();
-                        } else {
-                            guide.Deactivate();
-                        }
-                    }); // end AddAction()
-                } // end lock
-
-            }
-
-            public void Activate(string localeKey) => Dispatch(localeKey, ActionMode.Activate);
-
-            public void Deactivate(string localeKey) => Dispatch(localeKey, ActionMode.Deactivate);
-
-            public void DeactivateAll() => Dispatch(null, ActionMode.DeactivateAll);
-        }
-
         public override void SimulationStep() {
             base.SimulationStep();
 
@@ -888,7 +825,6 @@ namespace TrafficManager.UI {
             //                tooltipWorldPos = null;
             //        }
             // }
-            Guide.HandleDispatchedAction();
         }
 
         public bool DoRayCast(RaycastInput input, out RaycastOutput output) {
