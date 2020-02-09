@@ -26,9 +26,12 @@ namespace TrafficManager {
         public const uint GAME_VERSION_C = 3u;
         public const uint GAME_VERSION_BUILD = 2u;
 
-        public const string VERSION = "11.0";
+        public static string VersionString => ModVersion.ToString(2);
 
-        public static readonly string ModName = "TM:PE " + VERSION + " " + BRANCH;
+        public static Version ModVersion => typeof(TrafficManagerMod).Assembly.GetName().Version;
+
+
+        public static readonly string ModName = "TM:PE " + VersionString + " " + BRANCH;
 
         public string Name => ModName;
 
@@ -38,7 +41,7 @@ namespace TrafficManager {
         public void OnEnabled() {
             Log.InfoFormat(
                 "TM:PE enabled. Version {0}, Build {1} {2} for game version {3}.{4}.{5}-f{6}",
-                VERSION,
+                VersionString,
                 Assembly.GetExecutingAssembly().GetName().Version,
                 BRANCH,
                 GAME_VERSION_A,
