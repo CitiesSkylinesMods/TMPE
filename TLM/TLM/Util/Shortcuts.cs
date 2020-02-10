@@ -61,5 +61,23 @@ namespace TrafficManager.Util {
             Log._Debug(m + a);
             return a;
         }
+
+        internal static string CenterString(this string stringToCenter, int totalLength) {
+            int leftPadding = ((totalLength - stringToCenter.Length) / 2) + stringToCenter.Length;
+            return stringToCenter.PadLeft(leftPadding).PadRight(totalLength);
+        }
+
+        internal static string ToSTR<T>(this IEnumerable<T> segmentList) {
+            string ret = "{ ";
+            foreach (T segmentId in segmentList) {
+                ret += $"{segmentId}, ";
+            }
+            ret.Remove(ret.Length - 2, 2);
+            ret += " }";
+            return ret;
+        }
+
+        internal static string ToSTR(this List<LanePos> laneList) =>
+            (from lanePos in laneList select lanePos.laneId).ToSTR();
     }
 }

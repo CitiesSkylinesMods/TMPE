@@ -1,4 +1,4 @@
-﻿// #define DEBUGFLAGS
+// #define DEBUGFLAGS
 
 namespace TrafficManager.State {
     using ColossalFramework;
@@ -10,6 +10,7 @@ namespace TrafficManager.State {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
+    using static TrafficManager.Util.Shortcuts;
 
     [Obsolete]
     public class Flags {
@@ -166,7 +167,7 @@ namespace TrafficManager.State {
         }
 
         [Obsolete]
-        public static bool setNodeTrafficLight(ushort nodeId, bool flag) {
+        public static bool SetNodeTrafficLight(ushort nodeId, bool flag) {
             if (nodeId <= 0) {
                 return false;
             }
@@ -206,7 +207,7 @@ namespace TrafficManager.State {
         [Obsolete]
         [UsedImplicitly]
         // Not used
-        internal static bool isNodeTrafficLight(ushort nodeId) {
+        internal static bool IsNodeTrafficLight(ushort nodeId) {
             if (nodeId <= 0) {
                 return false;
             }
@@ -513,7 +514,7 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void removeLaneSpeedLimit(uint laneId) {
+        public static void RemoveLaneSpeedLimit(uint laneId) {
             SetLaneSpeedLimit(laneId, null);
         }
 
@@ -614,7 +615,7 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void setLaneAllowedVehicleTypes(uint laneId, ExtVehicleType vehicleTypes) {
+        public static void SetLaneAllowedVehicleTypes(uint laneId, ExtVehicleType vehicleTypes) {
             if (laneId <= 0) {
                 return;
             }
@@ -642,7 +643,7 @@ namespace TrafficManager.State {
 
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
                 if (curLaneId == laneId) {
-                    setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, vehicleTypes);
+                    SetLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, vehicleTypes);
                     return;
                 }
 
@@ -651,7 +652,7 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void setLaneAllowedVehicleTypes(ushort segmentId,
+        public static void SetLaneAllowedVehicleTypes(ushort segmentId,
                                                       uint laneIndex,
                                                       uint laneId,
                                                       ExtVehicleType vehicleTypes)
@@ -696,7 +697,7 @@ namespace TrafficManager.State {
             laneAllowedVehicleTypesArray[segmentId][laneIndex] = vehicleTypes;
         }
 
-        public static void resetSegmentVehicleRestrictions(ushort segmentId) {
+        public static void ResetSegmentVehicleRestrictions(ushort segmentId) {
             if (segmentId <= 0) {
                 return;
             }
@@ -707,7 +708,7 @@ namespace TrafficManager.State {
             laneAllowedVehicleTypesArray[segmentId] = null;
         }
 
-        public static void resetSegmentArrowFlags(ushort segmentId) {
+        public static void ResetSegmentArrowFlags(ushort segmentId) {
             if (segmentId <= 0) {
                 return;
             }
@@ -732,7 +733,24 @@ namespace TrafficManager.State {
             }
         }
 
-        public static bool setLaneArrowFlags(uint laneId,
+        /// <summary>
+        /// removes the custom lane arrow flags. requires post recalculation.
+        /// </summary>
+        /// <param name="laneId"></param>
+        /// <returns><c>true</c>on success, <c>false</c> otherwise</returns>
+        public static bool ResetLaneArrowFlags(uint laneId) {
+#if DEBUGFLAGS
+            Log._Debug($"Flags.resetLaneArrowFlags: Resetting lane arrows of lane {laneId}.");
+#endif
+            if (LaneConnectionManager.Instance.HasConnections(laneId)) {
+                return false;
+            }
+
+            laneArrowFlags[laneId] = null;
+            return true;
+        }
+
+        public static bool SetLaneArrowFlags(uint laneId,
                                              LaneArrows flags,
                                              bool overrideHighwayArrows = false) {
 #if DEBUGFLAGS
@@ -1079,7 +1097,7 @@ namespace TrafficManager.State {
             }
         }
 
-        internal static void removeHighwayLaneArrowFlagsAtSegment(ushort segmentId) {
+        internal static void RemoveHighwayLaneArrowFlagsAtSegment(ushort segmentId) {
             NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
             if ((segmentsBuffer[segmentId].m_flags &

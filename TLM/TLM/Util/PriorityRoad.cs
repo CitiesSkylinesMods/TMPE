@@ -20,19 +20,6 @@ namespace TrafficManager.Util {
             list[i2] = temp;
         }
 
-        private static string ToSTR<T>(this IEnumerable<T> segmentList) {
-            string ret = "{ ";
-            foreach(T segmentId in segmentList) {
-                ret += $"{segmentId}, ";
-            }
-            ret.Remove(ret.Length - 2, 2);
-            ret += " }";
-            return ret;
-        }
-
-        private static string ToSTR(this List<LanePos> laneList) =>
-            (from lanePos in laneList select lanePos.laneId).ToSTR();
-
 
         private static LaneArrows ToLaneArrows(ArrowDirection dir) {
             switch (dir) {

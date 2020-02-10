@@ -395,7 +395,7 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                Flags.removeLaneSpeedLimit(laneId);
+                Flags.RemoveLaneSpeedLimit(laneId);
             }
         }
 

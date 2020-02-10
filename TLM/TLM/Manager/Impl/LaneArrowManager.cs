@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using TrafficManager.Util;
     using UnityEngine;
+    using static TrafficManager.Util.Shortcuts;
 
     public class LaneArrowManager
         : AbstractGeometryObservingManager,
@@ -54,7 +55,7 @@ namespace TrafficManager.Manager.Impl {
         public bool SetLaneArrows(uint laneId,
                                   LaneArrows flags,
                                   bool overrideHighwayArrows = false) {
-            if (Flags.setLaneArrowFlags(laneId, flags, overrideHighwayArrows)) {
+            if (Flags.SetLaneArrowFlags(laneId, flags, overrideHighwayArrows)) {
                 OnLaneChange(laneId);
                 return true;
             }
@@ -111,6 +112,43 @@ namespace TrafficManager.Manager.Impl {
             return false;
         }
 
+        /// <summary>
+        /// Resets lane arrows to their default value for the given segment end.
+        /// </summary>
+        /// <param name="segmentId">segment to reset</param>
+        /// <param name="startNode">determines the segment end to reset. if <c>null</c>
+        /// both ends are reset</param>
+        public void ResetLaneArrows(ushort segmentId, bool? startNode = null) {
+            foreach (var lane in netService.GetSortedLanes(
+                segmentId,
+                ref GetSeg(segmentId),
+                startNode,
+                LANE_TYPES,
+                VEHICLE_TYPES)) {
+                ResetLaneArrows(lane.laneId);
+            }
+        }
+
+        /// <summary>
+        /// Resets lane arrows to their default value for the given lane
+        /// </summary>
+        public void ResetLaneArrows(uint laneId) {
+            if (Flags.ResetLaneArrowFlags(laneId)) {
+                RecalculateFlags(laneId);
+                OnLaneChange(laneId);
+            }
+        }
+
+        private static void RecalculateFlags(uint laneId) {
+            NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
+            ushort segmentId = laneBuffer[laneId].m_segment;
+            NetAI ai = GetSeg(segmentId).Info.m_netAI;
+#if DEBUGFLAGS
+            Log._Debug($"Flags.RecalculateFlags: Recalculateing lane arrows of segment {segmentId}.");
+#endif
+            ai.UpdateLanes(segmentId, ref GetSeg(segmentId), true);
+        }
+
         private void OnLaneChange(uint laneId) {
             Services.NetService.ProcessLane(
                 laneId,
@@ -126,7 +164,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
-            Flags.resetSegmentArrowFlags(seg.segmentId);
+            Flags.ResetSegmentArrowFlags(seg.segmentId);
         }
 
         protected override void HandleValidSegment(ref ExtSegment seg) { }

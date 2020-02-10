@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
     using UnityEngine;
+    using static TrafficManager.Util.Shortcuts;
 
     public class LaneConnectionManager
         : AbstractGeometryObservingManager,
@@ -59,6 +60,35 @@ namespace TrafficManager.Manager.Impl {
             return connectedLanes != null
                    && connectedLanes.Any(laneId => laneId == targetLaneId);
         }
+
+
+        /// <summary>
+        /// determines whether or not the input lane is heading toward a start node.
+        /// </summary>
+        /// <returns>true if heading toward and start node.</returns>
+        private bool IsHeadingTowardsStartNode(uint sourceLaneId) {
+            NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
+            ushort segmentId = laneBuffer[sourceLaneId].m_segment;
+            NetSegment segment = GetSeg(segmentId);
+            uint laneId = segment.m_lanes;
+            bool inverted = (segment.m_flags & NetSegment.Flags.Invert) != 0;
+
+            foreach (var laneInfo in segment.Info.m_lanes) {
+                if (laneId == sourceLaneId) {
+                    return (laneInfo.m_direction == NetInfo.Direction.Forward) ^ !inverted;
+                }
+                laneId = laneBuffer[laneId].m_nextLane;
+            }
+            throw new Exception($"Unreachable code. sourceLaneId:{sourceLaneId}, segmentId:{segmentId} ");
+        }
+
+        public bool HasConnections(uint sourceLaneId) {
+            if (!Options.laneConnectorEnabled) {
+                return false;
+            }
+            return HasConnections(sourceLaneId, IsHeadingTowardsStartNode(sourceLaneId));
+        }
+
 
         /// <summary>
         /// Determines if the given lane has outgoing connections
