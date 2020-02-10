@@ -207,20 +207,21 @@ namespace TrafficManager.UI.SubTools {
                     bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay);
 
                     bool drawMarker = false;
-                    if (GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource &&
-                        laneMarker.IsSource) {
+                    bool SourceMode = GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource;
+                    bool TargetMode = GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget;
+                    if ( SourceMode & laneMarker.IsSource) {
                         // draw source marker in source selection mode,
-                        // make exception for markers that have no targe:
+                        // make exception for markers that have no target:
                         foreach(var targetMarker in nodeMarkers) {
                             if (CanConnect(laneMarker, targetMarker)){
                                 drawMarker = true;
                                 break;
                             }
                         }
-                    } else if (GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget) {
+                    } else if (TargetMode) {
                         // selected source marker in target selection mode
                         drawMarker =
-                            laneMarker == selectedMarker ||
+                            selectedMarker == laneMarker ||
                             CanConnect(selectedMarker, laneMarker);
                     }
 
