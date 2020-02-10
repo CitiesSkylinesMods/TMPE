@@ -1,23 +1,23 @@
 namespace TrafficManager.UI {
-    using ColossalFramework.Math;
-    using ColossalFramework.UI;
-    using ColossalFramework;
-    using CSUtil.Commons;
-    using JetBrains.Annotations;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using System;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.Util;
+    using ColossalFramework;
+    using ColossalFramework.Math;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using JetBrains.Annotations;
     using TrafficManager.Manager.Impl;
-    using TrafficManager.State.ConfigData;
     using TrafficManager.State;
+    using TrafficManager.State.ConfigData;
     using TrafficManager.UI.MainMenu;
-    using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.UI.SubTools;
+    using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
 
@@ -31,6 +31,8 @@ namespace TrafficManager.UI {
 
         internal static ushort HoveredNodeId;
         internal static ushort HoveredSegmentId;
+        internal static Vector3 HitPos;
+        internal Vector3 MousePosition => m_mousePosition; //expose protected member.
 
         private static bool _mouseClickProcessed;
 
@@ -826,9 +828,18 @@ namespace TrafficManager.UI {
             return RayCast(input, out output);
         }
 
-        private bool DetermineHoveredElements() {
+        private static Vector3 prev_mousePosition;
+        private bool DetermineHoveredElements() {            
+            if(prev_mousePosition == m_mousePosition) {
+                // if mouse ray is not changing use cached results.
+                // the assumption is that its practically impossible to change mouse ray
+                // without changing m_mousePosition.
+                return HoveredNodeId != 0 || HoveredSegmentId != 0;
+            }
+
             HoveredSegmentId = 0;
             HoveredNodeId = 0;
+            HitPos = m_mousePosition;
 
             bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible &&
                                  (_activeSubTool == null || !_activeSubTool.IsCursorInPanel());
@@ -922,6 +933,10 @@ namespace TrafficManager.UI {
                         }
                     }
                 }
+                
+                if(HoveredSegmentId != 0) {
+                    HitPos = segmentOutput.m_hitPos;
+                }
 
                 if (HoveredNodeId <= 0 && HoveredSegmentId > 0) {
                     // alternative way to get a node hit: check distance to start and end nodes
@@ -974,7 +989,29 @@ namespace TrafficManager.UI {
             return minSegId;
         }
 
-         /// <summary>
+        private static float prev_H = 0f;
+        private static float prev_H_Fixed;
+
+        /// <summary>
+        /// Calculates accurate vertical element of raycast hit position.
+        /// </summary>
+        internal static float GetAccurateHitHeight() {
+            // cache result.
+            if (HitPos.y == prev_H) {
+                return prev_H_Fixed;
+            }
+            prev_H = HitPos.y;
+
+            if (Shortcuts.GetSeg(HoveredSegmentId).GetClosestLanePosition(
+                HitPos, NetInfo.LaneType.All, VehicleInfo.VehicleType.All,
+                out Vector3 pos, out uint laneID, out int laneIndex, out float laneOffset)) {
+                
+                return prev_H_Fixed = pos.y;
+            }
+            return prev_H_Fixed = HitPos.y + 0.5f;
+        }
+
+        /// <summary>
         /// Displays lane ids over lanes
         /// </summary>
         private void GuiDisplayLanes(ushort segmentId,
