@@ -378,7 +378,7 @@
             allowedTypes &= GetBaseMask(
                 segmentInfo.m_lanes[laneIndex],
                 VehicleRestrictionsMode.Configured); // ensure default base mask
-            Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
+            Flags.SetLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
 
             NotifyStartEndNode(segmentId);
 
@@ -424,7 +424,7 @@
             allowedTypes &= GetBaseMask(
                 segmentInfo.m_lanes[laneIndex],
                 VehicleRestrictionsMode.Configured); // ensure default base mask
-            Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
+            Flags.SetLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
             NotifyStartEndNode(segmentId);
 
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
@@ -467,7 +467,7 @@
             allowedTypes &= GetBaseMask(
                 segmentInfo.m_lanes[laneIndex],
                 VehicleRestrictionsMode.Configured); // ensure default base mask
-            Flags.setLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
+            Flags.SetLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
             NotifyStartEndNode(segmentId);
 
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
@@ -744,7 +744,7 @@
         }
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
-            Flags.resetSegmentVehicleRestrictions(seg.segmentId);
+            Flags.ResetSegmentVehicleRestrictions(seg.segmentId);
             ClearCache(seg.segmentId);
         }
 
@@ -773,7 +773,7 @@
                     $"{laneVehicleTypes.vehicleTypes}, masked = {maskedType}");
 #endif
                     if (maskedType != baseMask) {
-                        Flags.setLaneAllowedVehicleTypes(laneVehicleTypes.laneId, maskedType);
+                        Flags.SetLaneAllowedVehicleTypes(laneVehicleTypes.laneId, maskedType);
                     } else {
 #if DEBUGLOAD
                         Log._Debug($"Masked type does not differ from base type. Ignoring.");

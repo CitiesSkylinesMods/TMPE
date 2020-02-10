@@ -90,7 +90,7 @@ namespace TrafficManager.Util {
             } // end if
         }
 
-        private static void FixRulesRAbout(ushort segmentId) {
+        internal static void FixRulesRAbout(ushort segmentId) {
             foreach (bool startNode in Constants.ALL_BOOL) {
                 if (OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns) {
                     TrafficPriorityManager.Instance.SetPrioritySign(
@@ -118,7 +118,7 @@ namespace TrafficManager.Util {
             }
         }
 
-        private static void FixRulesMinor(ushort segmentId, ushort nodeId) {
+        internal static void FixRulesMinor(ushort segmentId, ushort nodeId) {
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
             bool isHighway = ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId);
 
