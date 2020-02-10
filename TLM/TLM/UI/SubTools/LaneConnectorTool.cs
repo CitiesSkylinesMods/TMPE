@@ -775,12 +775,6 @@ namespace TrafficManager.UI.SubTools {
             return nodeMarkers;
         }
 
-        /// <summary>
-        /// Uninitialized object used by Reflection to check if issue #649 is fixed.
-        /// TODO remove when older versions of TMPE has been depricated.
-        /// </summary>
-        public static object Fixed649;
-
         private bool CanConnect(NodeLaneMarker source, NodeLaneMarker target) {
             bool ret = source != target && source.IsSource && target.IsTarget;
             ret &= (target.VehicleType & source.VehicleType) != 0;
@@ -803,7 +797,6 @@ namespace TrafficManager.UI.SubTools {
 
             return ret;
         }
-
 
         /// <summary>
         /// Checks if the turning angle between two segments at the given node is within bounds.
