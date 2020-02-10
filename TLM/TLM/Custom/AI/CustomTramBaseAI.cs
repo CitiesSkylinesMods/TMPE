@@ -319,7 +319,8 @@
                             ref netManager.m_nodes.m_buffer[prevSourceNodeId],
                             prevLaneId,
                             ref nextPosition,
-                            prevTargetNodeId)) {
+                            prevTargetNodeId,
+                            out maxSpeed)) {
                         maxSpeed = 0;
                         return;
                     }
