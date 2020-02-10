@@ -107,6 +107,7 @@ namespace TrafficManager.UI {
 
             GetMenu().Show();
             LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
+            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
             TrafficManagerTool.ShowAdvisor("MainMenu");
 #if DEBUG
             GetDebugMenu().Show();

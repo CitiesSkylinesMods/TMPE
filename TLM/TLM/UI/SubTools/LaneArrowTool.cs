@@ -38,6 +38,23 @@ namespace TrafficManager.UI.SubTools {
             return base.IsCursorInPanel() || cursorInSecondaryPanel_;
         }
 
+        private void HandleResult(SetLaneArrowError result) {
+            switch (result) {
+                case SetLaneArrowError.HighwayArrows: {
+                        MainTool.Guide.Activate("LaneArrowTool_Disabled due to highway rules");
+                        break;
+                    }
+                case SetLaneArrowError.LaneConnection: {
+                        MainTool.Guide.Activate("LaneArrowTool_Disabled due to lane connections");
+                        break;
+                    }
+                case SetLaneArrowError.Success:
+                    MainTool.Guide.Deactivate("LaneArrowTool_Disabled due to highway rules");
+                    MainTool.Guide.Deactivate("LaneArrowTool_Disabled due to lane connections");
+                    break;
+            }
+        }
+
         public override void OnPrimaryClickOverlay() {
             if ((HoveredNodeId == 0) || (HoveredSegmentId == 0)) return;
 
@@ -59,26 +76,14 @@ namespace TrafficManager.UI.SubTools {
             SetLaneArrowError res = SetLaneArrowError.Success;
             if (altDown) {
                 LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId, out res);
+                HandleResult(res);
             } else if (ctrlDown) {
                 LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId, out res);
+                HandleResult(res);
             } else if (HasHoverLaneArrows()) {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
             }
-            switch (res) {
-                case SetLaneArrowError.HighwayArrows: {
-                     MainTool.ShowError(
-                        Translation.LaneRouting.Get("Dialog.Text:Disabled due to highway rules"));
-                        break;
-                }
-
-                case SetLaneArrowError.LaneConnection: {
-                    MainTool.ShowError(
-                       Translation.LaneRouting.Get("Dialog.Text:Disabled due to manual connection"));
-                        break;
-                    }
-            }
-
         }
 
         public override void OnSecondaryClickOverlay() {
@@ -353,19 +358,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 if (buttonClicked) {
-                    switch (res) {
-                        case SetLaneArrowError.HighwayArrows: {
-                            MainTool.ShowError(
-                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to highway rules"));
-                            break;
-                        }
-
-                        case SetLaneArrowError.LaneConnection: {
-                            MainTool.ShowError(
-                                Translation.LaneRouting.Get("Dialog.Text:Disabled due to manual connection"));
-                            break;
-                        }
-                    }
+                    HandleResult(res);
                 }
 
                 GUILayout.EndHorizontal();

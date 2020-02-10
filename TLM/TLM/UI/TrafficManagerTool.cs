@@ -20,12 +20,15 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.UI.Helpers;
 
     [UsedImplicitly]
     public class TrafficManagerTool
         : DefaultTool,
           IObserver<GlobalConfig>
     {
+        public GuideHandler Guide;
+
         private ToolMode toolMode_;
         private NetTool _netTool;
 
@@ -153,6 +156,7 @@ namespace TrafficManager.UI {
 
         internal void Initialize() {
             Log.Info("TrafficManagerTool: Initialization running now.");
+            Guide = new GuideHandler();
 
             SubTool timedLightsTool = new TimedTrafficLightsTool(this);
 
@@ -277,6 +281,7 @@ namespace TrafficManager.UI {
 
                 if (realToolChange) {
                     ShowAdvisor(_activeSubTool.GetTutorialKey());
+                    Guide.DeactivateAll();
                 }
             }
         }
