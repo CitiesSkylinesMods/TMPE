@@ -28,10 +28,12 @@ namespace TrafficManager {
         public const uint GAME_VERSION_C = 3u;
         public const uint GAME_VERSION_BUILD = 2u;
 
-        public static string VersionString => ModVersion.ToString(2);
-
-        // Use SharedAssemblyInfo.cs to modify this version.
+        // Use SharedAssemblyInfo.cs to modify TM:PE version
+        // External mods (eg. CSUR Toolbox) reference the versioning for compatibility purposes
         public static Version ModVersion => typeof(TrafficManagerMod).Assembly.GetName().Version;
+
+        // used for in-game display
+        public static string VersionString => ModVersion.ToString(3);
 
         public static readonly string ModName = "TM:PE " + VersionString + " " + BRANCH;
 
