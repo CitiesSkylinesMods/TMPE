@@ -126,7 +126,6 @@ namespace TrafficManager.UI.SubTools {
             int height = 50;
             bool startNode = (bool)netService.IsStartNode(SelectedSegmentId, SelectedNodeId);
             if (CanReset(SelectedSegmentId, startNode)) {
-                Log._Debug("Expanding height");
                 height += 40;
             }
 
