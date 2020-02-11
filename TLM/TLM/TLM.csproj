@@ -79,14 +79,10 @@
     <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
-    <SteamPath >~/Library/Application Support/Steam/</SteamPath>
+    <SteamPath>~/Library/Application Support/Steam/</SteamPath>
     <SteamPath Condition="! Exists ('$(SteamPath)')">$(ProgramFiles)\Steam</SteamPath>
     <SteamPath Condition="! Exists ('$(SteamPath)')">$(Registry:HKEY_CURRENT_USER\Software\Valve\Steam@SteamPath)</SteamPath>
     <CSPath>$(SteamPath)\steamapps\common\Cities_Skylines</CSPath>
-    <Message Text="+++ Justin Dearing +++"/>
-    <CSPath Condition="! Exists ('$(CSPath)')">
-      $("Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 255710@InstallLocation")
-    </CSPath>
     <MangedDLLPath>$(CSPath)\Cities_Data\Managed</MangedDLLPath>
     <MangedDLLPath Condition="!  Exists ('$(MangedDLLPath)')">..\dependencies</MangedDLLPath>
   </PropertyGroup>
@@ -95,11 +91,12 @@
       <HintPath>RedirectionFramework\lib\0TMPE.Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\dependencies\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(MangedDLLPath)\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ColossalManaged">
-      <HintPath>..\dependencies\ColossalManaged.dll</HintPath>
+      <HintPath>$(MangedDLLPath)\ColossalManaged.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="ICities">
       <HintPath>$(MangedDLLPath)\ICities.dll</HintPath>
@@ -107,18 +104,21 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
-      <HintPath>..\dependencies\System.Core.dll</HintPath>
+      <HintPath>$(MangedDLLPath)\System.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>..\dependencies\UnityEngine.dll</HintPath>
+      <HintPath>$(MangedDLLPath)\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.Networking">
-      <HintPath>..\dependencies\UnityEngine.Networking.dll</HintPath>
+      <HintPath>$(MangedDLLPath)\UnityEngine.Networking.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\dependencies\UnityEngine.UI.dll</HintPath>
+      <HintPath>$(MangedDLLPath)\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
