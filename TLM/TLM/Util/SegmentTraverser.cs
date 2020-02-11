@@ -65,16 +65,23 @@ namespace TrafficManager.Util {
             /// </summary>
             public bool Initial;
 
+            /// <summary>
+            /// List of segments
+            /// </summary>
+            public List<ushort> SegmentList;
+
             public SegmentVisitData(ref ExtSegment prevSeg,
                                     ref ExtSegment curSeg,
                                     bool viaInitialStartNode,
                                     bool viaStartNode,
-                                    bool initial) {
+                                    bool initial,
+                                    List<ushort> segmentList=null) {
                 PrevSeg = prevSeg;
                 CurSeg = curSeg;
                 ViaInitialStartNode = viaInitialStartNode;
                 ViaStartNode = viaStartNode;
                 Initial = initial;
+                SegmentList = segmentList;
             }
         }
 
