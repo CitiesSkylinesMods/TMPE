@@ -15,8 +15,9 @@ namespace TrafficManager.Util {
 
     public static class PriorityRoad {
         public static void FixPrioritySigns(PrioritySignsMassEditMode massEditMode, List<ushort> segmentList) {
-            if (segmentList == null || segmentList.Count == 0)
+            if (segmentList == null || segmentList.Count == 0) {
                 return;
+            }
 
             var primaryPrioType = PriorityType.None;
             var secondaryPrioType = PriorityType.None;
@@ -49,38 +50,38 @@ namespace TrafficManager.Util {
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
-            bool VisitorFun(SegmentVisitData data) {
-                foreach (bool startNode in Constants.ALL_BOOL) {
-                    ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[
-                        segEndMan.GetIndex(data.CurSeg.segmentId, startNode)];
-                    TrafficPriorityManager.Instance.SetPrioritySign(
-                        data.CurSeg.segmentId,
-                        startNode,
-                        primaryPrioType);
+            void ApplyPrioritySigns(ushort segmentId, bool startNode) {
+                ushort nodeId = netService.GetSegmentNodeId(
+                    segmentId,
+                    startNode);
 
-                    ushort nodeId = netService.GetSegmentNodeId(
-                        data.CurSeg.segmentId,
-                        startNode);
-                    for (int i = 0; i < 8; ++i) {
-                        ushort otherSegmentId = nodeId.ToNode().GetSegment(i);
-                        if (otherSegmentId == 0 ||
-                            otherSegmentId == data.CurSeg.segmentId ||
-                            data.SegmentList.Contains(otherSegmentId)) {
-                            continue;
-                        }
+                TrafficPriorityManager.Instance.SetPrioritySign(
+                    segmentId,
+                    startNode,
+                    primaryPrioType);
 
-                        TrafficPriorityManager.Instance.SetPrioritySign(
-                            otherSegmentId,
-                            (bool)netService.IsStartNode(otherSegmentId, nodeId),
-                            secondaryPrioType);
+                for (int i = 0; i < 8; ++i) {
+                    ushort otherSegmentId = nodeId.ToNode().GetSegment(i);
+                    if (otherSegmentId == 0 ||
+                        otherSegmentId == segmentId ||
+                        segmentList.Contains(otherSegmentId)) {
+                        continue;
                     }
-                }
 
-                return true;
+                    TrafficPriorityManager.Instance.SetPrioritySign(
+                        otherSegmentId,
+                        (bool)netService.IsStartNode(otherSegmentId, nodeId),
+                        secondaryPrioType);
+                }
             }
 
-            SegmentTraverser.Traverse(segmentList, VisitorFun);
+            foreach(ushort segId in segmentList) {
+                foreach(bool bStartNode in Constants.ALL_BOOL) {
+                    ApplyPrioritySigns(segId, bStartNode);
+                }
+            }
         }
+
 
         private static void Swap(this List<ushort> list, int i1, int i2) {
             ushort temp = list[i1];

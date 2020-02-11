@@ -566,10 +566,7 @@ namespace TrafficManager {
             UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
 
             new Util.RoadSelection();
-
-            // add quick edit panels:
             UIView.GetAView().gameObject.AddComponent<RoadSelectionPanels>();
-
 
             InitDetours();
 

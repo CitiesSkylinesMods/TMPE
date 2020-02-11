@@ -55,7 +55,7 @@ namespace TrafficManager.Util {
         internal static Func<bool, int> Int = (bool b) => b ? 1 : 0;
 
         /// <summary>
-        /// useful for easily debugin inline functions
+        /// useful for easily debuggin inline functions
         /// to be used like this example:
         /// TYPE inlinefunctionname(...) => expression
         /// TYPE inlinefunctionname(...) => expression.LogRet("messege");

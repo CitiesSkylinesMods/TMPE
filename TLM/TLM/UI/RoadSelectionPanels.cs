@@ -50,8 +50,8 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// Enable overrlay for various traffic rules influenced by road selection pannel.
-        /// this enables Traffic manager tool.
+        /// Enable and refreshes overrlay for various traffic rules influenced by road selection pannel.
+        /// Also enables Traffic manager tool.
         /// </summary>
         private void ShowMassEditOverlay() {
             UIBase.EnableTool();
@@ -110,7 +110,7 @@ namespace TrafficManager.UI {
         }
 
         private static void RefreshOnEvent() =>
-            Instance.Refresh(reset: true);
+            Instance?.Refresh(reset: true);
 
         // Create a road selection panel. Multiple instances are allowed.
         private PanelExt AddPanel(UIComponent container) {

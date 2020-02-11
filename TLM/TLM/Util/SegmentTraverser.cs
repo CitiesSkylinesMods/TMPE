@@ -65,56 +65,17 @@ namespace TrafficManager.Util {
             /// </summary>
             public bool Initial;
 
-            /// <summary>
-            /// List of segments
-            /// </summary>
-            public List<ushort> SegmentList;
-
             public SegmentVisitData(ref ExtSegment prevSeg,
                                     ref ExtSegment curSeg,
                                     bool viaInitialStartNode,
                                     bool viaStartNode,
-                                    bool initial,
-                                    List<ushort> segmentList=null) {
+                                    bool initial) {
                 PrevSeg = prevSeg;
                 CurSeg = curSeg;
                 ViaInitialStartNode = viaInitialStartNode;
                 ViaStartNode = viaStartNode;
                 Initial = initial;
-                SegmentList = segmentList;
             }
-        }
-
-        public static void Traverse(List<ushort> segmentList, SegmentVisitor visitorFun) {
-            if (segmentList == null) {
-                return;
-            }
-            ushort prevSegId = 0;
-            ExtSegment[] extSegment_buffer = Constants.ManagerFactory.ExtSegmentManager.ExtSegments;
-            NetSegment[] segment_buffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            foreach (var segId in segmentList) {
-                SegmentTraverser.SegmentVisitData data;
-                if (prevSegId == 0) {
-                    data = new SegmentVisitData(
-                        ref extSegment_buffer[segId],
-                        ref extSegment_buffer[segId],
-                        false,
-                        false,
-                        true);
-                } else {
-                    data = new SegmentVisitData(
-                        ref extSegment_buffer[prevSegId],
-                        ref extSegment_buffer[segId],
-                        true,
-                        segment_buffer[prevSegId].m_endNode == segment_buffer[segId].m_startNode,
-                        false);
-                }
-                if (!visitorFun(data)) {
-                    break;
-                }
-                prevSegId = segId;
-            }
-
         }
 
         /// <summary>

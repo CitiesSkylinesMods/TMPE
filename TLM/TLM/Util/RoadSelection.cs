@@ -89,7 +89,9 @@ namespace TrafficManager.Util {
                     Log._Debug("RoadSelection.Threading.OnUpdate() road selection changed");
                     prev_length = len;
                     prev_segmentID = segmentID;
-                    Instance.OnChanged.Invoke();
+                    UnityEngine.Debug.Log("POINT BEFORE Instance.OnChanged.Invoke()");
+                    Instance.OnChanged?.Invoke();
+                    UnityEngine.Debug.Log("POINT AFTER Instance.OnChanged.Invoke()");
                 }
             }
         }
