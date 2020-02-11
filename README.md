@@ -16,6 +16,24 @@ Official releases:
 * [Download Binaries](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/releases) (for non-Steam users)
 * [Installation Guide](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Installation) (for all users)
 
+#### TM:PE V11 LABS [11.1.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/11.0...11.1.0), 03/02/2020
+
+- Added: Quick setup of priority roads (`Ctrl+Click junction`, `Shift+Ctrl+Click road`) (#621, #541, #542, #568, #577, #7)
+- Added: `Delete` key resets junction restrictions for selected junction (#639, #623, #568, #6)
+- Added: "Reset" button and `Delete` key to reset lane arrows for a segment (#638, #632, #623, #568, #41)
+- Improved: Much better lane connectors interaction model (#543, #635, #625, #626, #41)
+- Improved: Use guide manager for less obtrusive in-game warnings/hints (#653, #660, #593)
+- Improved: Vastly improved in-game hotloading support (#640, #211)
+- Improved: Centralised versioning in to `SharedAssemblyInfo.cs` (#680, #678, #649)
+- Updated: Translations - Dutch (thanks Headspike!) (#660, #631)
+- Updated: Translations - Turkish - Tayfun [Typhoon] (thanks Koopr) (#660, #631)
+- Updated: Translations - Chinese Simplified - Golden (thanks goldenjin!) (#660, #631)
+- Updated: Translations - Portuguese - BlackScout (thanks BS_BlackScout!) (#660, #631)
+- Updated: Translations - Spanish (thanks Aimarekin!) (#660, #631)
+- Updated: Translations - English (thanks kian.zarrin!) (#660, #631)
+- Fixed: Vehicles should not stop at Yield signs (#662, #655, #650)
+- Meta: New WIP website: https://tmpe.me (#642, #643)
+
 #### TM:PE V11 STABLE [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), 03/02/2020
 
 - Contains ~100 improvements from TM:PE v11 ALPHA versions, including:
