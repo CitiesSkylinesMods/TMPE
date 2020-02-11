@@ -80,12 +80,16 @@
   </PropertyGroup>
   <PropertyGroup>
     <SteamPath >~/Library/Application Support/Steam/</SteamPath>
-    <SteamPath Condition="! Exists ('$(SteamPath)')">$(ProgramFiles)\Steam\</SteamPath>
+    <SteamPath Condition="! Exists ('$(SteamPath)')">$(ProgramFiles)\Steam</SteamPath>
     <SteamPath Condition="! Exists ('$(SteamPath)')">$(Registry:HKEY_CURRENT_USER\Software\Valve\Steam@SteamPath)</SteamPath>
-    <CSDLLPath>$(SteamPath)\steamapps\common\Cities_Skylines\Cities_Data\Managed</CSDLLPath>
-    <CSDLLPath Condition="!  Exists ('$(CSDLLPath)')">..\dependencies</CSDLLPath>
+    <CSPath>$(SteamPath)\steamapps\common\Cities_Skylines</CSPath>
+    <Message Text="+++ Justin Dearing +++"/>
+    <CSPath Condition="! Exists ('$(CSPath)')">
+      $("Registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 255710@InstallLocation")
+    </CSPath>
+    <MangedDLLPath>$(CSPath)\Cities_Data\Managed</MangedDLLPath>
+    <MangedDLLPath Condition="!  Exists ('$(MangedDLLPath)')">..\dependencies</MangedDLLPath>
   </PropertyGroup>
- 
   <ItemGroup>
     <Reference Include="0TMPE.Harmony">
       <HintPath>RedirectionFramework\lib\0TMPE.Harmony.dll</HintPath>
@@ -98,7 +102,7 @@
       <HintPath>..\dependencies\ColossalManaged.dll</HintPath>
     </Reference>
     <Reference Include="ICities">
-      <HintPath>$(CSDLLPath)\ICities.dll</HintPath>
+      <HintPath>$(MangedDLLPath)\ICities.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -562,7 +566,7 @@ xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "%25DEPLOYDIR%25"
 echo THE ASSEMBLY VERSION IS: @(VersionNumber) created at %25time%25
             
 set DEPLOYDIR=
-</PostBuildEvent>
+  </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
