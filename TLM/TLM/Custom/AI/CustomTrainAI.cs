@@ -1059,7 +1059,8 @@
                         ref nextPosition,
                         refTargetNodeId,
                         ref netManager.m_nodes.m_buffer[refTargetNodeId],
-                        nextLaneId)) {
+                        nextLaneId,
+                        out maxSpeed)) {
 #if DEBUG
                     if (logLogic) {
                         Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}): " +

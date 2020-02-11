@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Data {
+namespace TrafficManager.API.Traffic.Data {
     using System;
     using CSUtil.Commons;
 
@@ -56,28 +56,28 @@
                        : TernaryBoolUtil.ToBool(pedestrianCrossingAllowed);
         }
 
-        public void SetUturnAllowed(bool value) {
-            uturnAllowed = TernaryBoolUtil.ToTernaryBool(value);
+        public void SetUturnAllowed(TernaryBool value) {
+            uturnAllowed = value;
         }
 
-        public void SetNearTurnOnRedAllowed(bool value) {
-            nearTurnOnRedAllowed = TernaryBoolUtil.ToTernaryBool(value);
+        public void SetNearTurnOnRedAllowed(TernaryBool value) {
+            nearTurnOnRedAllowed = value;
         }
 
-        public void SetFarTurnOnRedAllowed(bool value) {
-            farTurnOnRedAllowed = TernaryBoolUtil.ToTernaryBool(value);
+        public void SetFarTurnOnRedAllowed(TernaryBool value) {
+            farTurnOnRedAllowed = value;
         }
 
-        public void SetLaneChangingAllowedWhenGoingStraight(bool value) {
-            straightLaneChangingAllowed = TernaryBoolUtil.ToTernaryBool(value);
+        public void SetLaneChangingAllowedWhenGoingStraight(TernaryBool value) {
+            straightLaneChangingAllowed = value;
         }
 
-        public void SetEnteringBlockedJunctionAllowed(bool value) {
-            enterWhenBlockedAllowed = TernaryBoolUtil.ToTernaryBool(value);
+        public void SetEnteringBlockedJunctionAllowed(TernaryBool value) {
+            enterWhenBlockedAllowed = value;
         }
 
-        public void SetPedestrianCrossingAllowed(bool value) {
-            pedestrianCrossingAllowed = TernaryBoolUtil.ToTernaryBool(value);
+        public void SetPedestrianCrossingAllowed(TernaryBool value) {
+            pedestrianCrossingAllowed = value;
         }
 
         public bool IsDefault() {

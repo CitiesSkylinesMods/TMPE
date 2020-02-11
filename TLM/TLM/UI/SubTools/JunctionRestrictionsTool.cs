@@ -8,6 +8,8 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.State;
     using TrafficManager.UI.Textures;
     using UnityEngine;
+    using TrafficManager.State.Keybinds;
+    using static TrafficManager.Util.Shortcuts;
 
     public class JunctionRestrictionsTool : SubTool {
         private readonly HashSet<ushort> currentRestrictedNodeIds;
@@ -24,6 +26,18 @@ namespace TrafficManager.UI.SubTools {
             //        overlayHandleHovered = false;
             // }
             // ShowSigns(false);
+
+            // handle delete
+            if (KeybindSettingsBase.LaneConnectorDelete.KeyDown(e)) {
+                netService.IterateNodeSegments(
+                    SelectedNodeId,
+                    (ushort segmmentId, ref NetSegment segment) => {
+                        // TODO: #568 provide unified delete key for all managers.
+                        bool startNode = (bool)netService.IsStartNode(segmmentId, SelectedNodeId);
+                        JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmmentId, startNode);
+                        return true;
+                    });
+            }
         }
 
         public override void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }

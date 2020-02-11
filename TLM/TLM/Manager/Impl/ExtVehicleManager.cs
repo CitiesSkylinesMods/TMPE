@@ -617,8 +617,6 @@
                 extVehicle.nextLaneIndex = nextPos.m_lane;
             }
 
-            bool startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
-
             if (extVehicle.currentSegmentId != segEnd.segmentId ||
                 extVehicle.currentStartNode != segEnd.startNode ||
                 extVehicle.currentLaneIndex != curPos.m_lane) {
@@ -836,7 +834,7 @@
             extVehicle.dlsReady = true;
         }
 
-        [UsedImplicitly]
+        // [UsedImplicitly]
         private static ushort GetTransitNodeId(ref PathUnit.Position curPos,
                                                ref PathUnit.Position nextPos) {
             bool startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);

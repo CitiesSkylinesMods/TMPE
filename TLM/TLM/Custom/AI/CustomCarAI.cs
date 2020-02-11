@@ -346,9 +346,9 @@ namespace TrafficManager.Custom.AI {
                         ref netManager.m_nodes.m_buffer[nextSourceNodeId],
                         nextLaneId,
                         ref nextNextPosition,
-                        nextTargetNodeId)) {
+                        nextTargetNodeId,
+                        out maxSpeed)) {
                     // NON-STOCK CODE
-                    maxSpeed = 0;
                     return;
                 }
 

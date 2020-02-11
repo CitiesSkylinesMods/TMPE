@@ -122,6 +122,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="CodeProfiler.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Custom\AI\CustomBuildingAI.cs" />
@@ -235,6 +238,8 @@
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
+    <Compile Include="UI\Helpers\GuideHandler.cs" />
+    <Compile Include="UI\Helpers\GuideWrapper.cs" />
     <Compile Include="UI\Helpers\CheckboxOption.cs" />
     <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />
     <Compile Include="UI\Helpers\SerializableUIOptionBase.cs" />

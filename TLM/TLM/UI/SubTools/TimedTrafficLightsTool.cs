@@ -106,19 +106,22 @@ namespace TrafficManager.UI.SubTools {
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             if(ctrlDown) {
                 AutoTimedTrafficLights.ErrorResult res = AutoTimedTrafficLights.Setup(HoveredNodeId);
-                if (res != AutoTimedTrafficLights.ErrorResult.Success) {
-                    string message;
-                    switch (res) {
-                        case AutoTimedTrafficLights.ErrorResult.NotSupported:
-                            message = "Dialog.Text:Auto TL no need";
-                            break;
-                        case AutoTimedTrafficLights.ErrorResult.TTLExists:
-                            message = "Dialog.Text:Node has timed TL script";
-                            break;
-                        default: //Unreachable code
-                            message = $"error = {res}";
-                            break;
-                    }
+                    string message = null;
+                switch (res) {
+                    case AutoTimedTrafficLights.ErrorResult.NotSupported:
+                        MainTool.Guide.Activate("TimedTrafficLightsTool_Auto TL no need");
+                        break;
+                    case AutoTimedTrafficLights.ErrorResult.Success:
+                        MainTool.Guide.Deactivate("TimedTrafficLightsTool_Auto TL no need");
+                        break;
+                    case AutoTimedTrafficLights.ErrorResult.TTLExists:
+                        message = "Dialog.Text:Node has timed TL script";
+                        break;
+                    default: //Unreachable code
+                        message = $"error = {res}";
+                        break;
+                }
+                if (message != null) {
                     message =
                         Translation.TrafficLights.Get("Dialog.Text:Auto TL create failed because") +
                         "\n" +
@@ -129,7 +132,6 @@ namespace TrafficManager.UI.SubTools {
                 RefreshCurrentTimedNodeIds(HoveredNodeId);
                 MainTool.SetToolMode(ToolMode.TimedLightsShowLights);
             }
-
 
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 

@@ -95,9 +95,28 @@ namespace TrafficManager.State.Keybinds {
             return result + Keybind.ToLocalizedString(AlternateKey);
         }
 
+        /// <param name="e"></param>
+        /// <returns>true for as long as user holds the key</returns>
         public bool IsPressed(Event e) {
             return Key.IsPressed(e)
                    || (AlternateKey != null && AlternateKey.IsPressed(e));
+        }
+
+        private bool prev_value = false;
+
+        /// <summary>
+        /// Determines when user first presses the key. the event is consumed first time
+        /// this function is called.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns>true once when user presses the key.</returns>
+        public bool KeyDown(Event e) {
+            bool value = Key.IsPressed(e);
+            bool ret = value && !prev_value;
+            if (ret || !value) {
+                prev_value = value; 
+            }
+            return ret;
         }
 
         /// <summary>
