@@ -9,7 +9,6 @@ namespace TrafficManager.Util {
     using UnityEngine;
     using static TrafficManager.Util.SegmentTraverser;
     using State;
-    using System.Linq;
     using static TrafficManager.Util.Shortcuts;
     using static TrafficManager.UI.SubTools.PrioritySignsTool;
     using TrafficManager.API.Manager;
@@ -576,12 +575,12 @@ namespace TrafficManager.Util {
             ref NetSegment seg2 = ref GetSeg(seg2Id);
             int diff = (int)Math.Ceiling(seg2.Info.m_halfWidth - seg1.Info.m_halfWidth);
             if (diff == 0) {
-                diff = CountCarLanes(seg2Id) - CountCarLanes(seg1Id);
+                diff = CountRoadVehicleLanes(seg2Id) - CountRoadVehicleLanes(seg1Id);
             }
             return diff;
         }
 
-        private static int CountCarLanes(ushort segmentId) {
+        private static int CountRoadVehicleLanes(ushort segmentId) {
             ref NetSegment segment = ref segmentId.ToSegment();
             int forward = 0, backward = 0;
             segment.CountLanes(
@@ -591,6 +590,31 @@ namespace TrafficManager.Util {
                         ref forward,
                         ref backward);
             return forward + backward;
+        }
+
+        public static void ClearNode(ushort nodeId) {
+            LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
+            netService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment seg) => {
+                ref NetNode node = ref GetNode(nodeId);
+                bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+                TPMan.SetPrioritySign(segmentId, startNode, PriorityType.None);
+                JPMan.SetPedestrianCrossingAllowed(segmentId, startNode, TernaryBool.Undefined);
+                JPMan.SetEnteringBlockedJunctionAllowed(segmentId, startNode, TernaryBool.Undefined);
+                if (ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId)) {
+                    JPMan.SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, TernaryBool.Undefined);
+                }
+                LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
+                return true;
+            });
+        }
+
+        public static void ClearRabout(List<ushort> segmentList) {
+            foreach (ushort segmentId in segmentList) {
+                foreach (bool startNode in Constants.ALL_BOOL) {
+                    ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
+                    ClearNode(nodeId);
+                }
+            }
         }
     } //end class
 }

@@ -3,8 +3,7 @@ namespace TrafficManager.Util {
     using GenericGameBridge.Service;
     using static Manager.Impl.LaneArrowManager.SeparateTurningLanes;
     using static UI.SubTools.LaneConnectorTool;
-    using static TrafficManager.Util.ClearUtil;
-    using static Util.Shortcuts;
+    using static TrafficManager.Util.Shortcuts;
     using System.Collections.Generic;
     using System;
     using TrafficManager.API.Traffic.Data;
@@ -352,22 +351,18 @@ namespace TrafficManager.Util {
             return false;
         }
 
-        static TrafficPriorityManager TPMan = TrafficPriorityManager.Instance;
-
-        public static void ClearNode(ushort nodeId) {
-            LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
+        public void ClearNode(ushort nodeId) {
+            PriorityRoad.ClearNode(nodeId);
             netService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment seg) => {
-                ref NetNode node = ref GetNode(nodeId);
-                bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
-                TPMan.SetPrioritySign(segmentId, startNode, PriorityType.None);
-                ClearPedestrianCrossingAllowed(segmentId, startNode, ref node);
-                ClearEnteringBlockedJunctionAllowed(segmentId, startNode, ref node);
-                //ClearLaneChangingAllowedWhenGoingStraight(segmentId, startNode, ref node);
+                if (!HasJunctionFlag(nodeId)) {
+                    // clear stay in lane.
+                    LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
+                }
                 return true;
             });
         }
 
-        public void UndoRabout(List<ushort> segmentList) {
+        public void ClearRabout(List<ushort> segmentList) {
             foreach (ushort segmentId in segmentList) {
                 foreach (bool startNode in Constants.ALL_BOOL) {
                     ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);

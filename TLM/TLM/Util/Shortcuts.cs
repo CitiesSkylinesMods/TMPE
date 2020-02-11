@@ -7,6 +7,7 @@ namespace TrafficManager.Util {
     using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Manager.Impl;
     using static Constants;
 
     internal static class Shortcuts {
@@ -23,11 +24,14 @@ namespace TrafficManager.Util {
 
         private static ExtSegmentEnd[] _segEndBuff => segEndMan.ExtSegmentEnds;
 
-        internal static IExtSegmentEndManager segEndMan => ManagerFactory.ExtSegmentEndManager;
+        internal static IExtSegmentEndManager segEndMan => Constants.ManagerFactory.ExtSegmentEndManager;
 
-        internal static IExtSegmentManager segMan => ManagerFactory.ExtSegmentManager;
+        internal static IExtSegmentManager segMan => Constants.ManagerFactory.ExtSegmentManager;
 
         internal static INetService netService => ServiceFactory.NetService;
+
+        internal static TrafficPriorityManager TPMan => Constants.ManagerFactory.TrafficPriorityManager as TrafficPriorityManager;
+        internal static IJunctionRestrictionsManager JPMan => Constants.ManagerFactory.JunctionRestrictionsManager;
 
         internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
 

@@ -64,7 +64,7 @@ namespace TrafficManager.UI.SubTools {
                         (_)=>true);
                 }
 
-                FixPrioritySigns(massEditMode,segmentList);
+                PriorityRoad.FixPrioritySigns(massEditMode,segmentList);
 
                 // cycle mass edit mode
                 massEditMode =

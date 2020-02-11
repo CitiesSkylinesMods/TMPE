@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -282,7 +282,6 @@
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
     <Compile Include="Util\Caching\CameraTransformValue.cs" />
     <Compile Include="Util\Caching\GenericArrayCache.cs" />
-    <Compile Include="Util\ClearOnMass.cs" />
     <Compile Include="Util\PriorityRoad.cs" />
     <Compile Include="Util\Shortcuts.cs" />
     <Compile Include="Util\FloatUtil.cs" />
