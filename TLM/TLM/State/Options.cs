@@ -124,6 +124,7 @@ namespace TrafficManager.State {
                 }
 
                 LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
+                LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
             } else {
                 Log._Debug("Rebuilding the TM:PE menu: ignored, BaseUI is null");
             }

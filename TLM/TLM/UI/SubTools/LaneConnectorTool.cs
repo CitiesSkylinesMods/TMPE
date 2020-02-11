@@ -26,6 +26,8 @@ namespace TrafficManager.UI.SubTools {
             Backward
         }
 
+        private const float MAX_HIT_ERROR = 2.5f;
+
         private static readonly Color DefaultNodeMarkerColor = new Color(1f, 1f, 1f, 0.4f);
         private NodeLaneMarker selectedMarker;
         private NodeLaneMarker hoveredMarker;
@@ -54,19 +56,176 @@ namespace TrafficManager.UI.SubTools {
             internal ushort SegmentId;
             internal ushort NodeId;
             internal bool StartNode;
-            internal Vector3 Position;
-            internal Vector3 SecondaryPosition;
+            internal Vector3 Position; /// projected on terrain
+            internal Vector3 SecondaryPosition; /// original height.
             internal bool IsSource;
             internal bool IsTarget;
             internal uint LaneId;
             internal int InnerSimilarLaneIndex;
             internal int SegmentIndex;
-            internal float Radius = 1f;
+            static internal float Radius = 1f;
             internal Color Color;
             internal readonly List<NodeLaneMarker> ConnectedMarkers = new List<NodeLaneMarker>();
+            internal SegmentLaneMarker segmentLaneMarker;
             [UsedImplicitly]
             internal NetInfo.LaneType LaneType;
             internal VehicleInfo.VehicleType VehicleType;
+
+            /// <summary>
+            ///  Intersects mouse ray with marker bounds.
+            /// </summary>
+            /// <param name="ray"></param>
+            /// <param name="hitH">vertical raycast hit position.</param>
+            /// <returns><c>true</c>if mouse ray intersects with marker <c>false</c> otherwise</returns>
+            internal bool IntersectRay(ref Ray ray, float hitH) {
+                Vector3 pos = SecondaryPosition;
+                float mouseH = UIBase.GetTrafficManagerTool(false).MousePosition.y;
+                if(hitH < mouseH - MAX_HIT_ERROR) {
+                    // For metros use projection on the terrain.
+                    pos = Position;
+                }
+                else if (hitH - pos.y > MAX_HIT_ERROR) {
+                    // if marker is projected on road plane above then modify its height
+                    pos.y = hitH;
+                }
+                Bounds bounds = new Bounds(Vector3.zero, Vector3.one * Radius) {
+                    center = pos,
+                };
+                return bounds.IntersectRay(ray);
+            }
+
+            /// <summary>
+            /// renders node lane marker.
+            /// </summary>
+            internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false) {
+                float magnification = enlarge ? 2f : 1f;
+                RenderManager.instance.OverlayEffect.DrawCircle(
+                    cameraInfo,
+                    color,
+                    Position,
+                    Radius * magnification,
+                    Position.y - 100f, // through all the geometry -100..100
+                    Position.y + 100f,
+                    false,
+                    true);
+                RenderManager.instance.OverlayEffect.DrawCircle(
+                    cameraInfo,
+                    Color.black,
+                    Position,
+                    Radius * 0.75f * magnification, // inner black
+                    Position.y - 100f, // through all the geometry -100..100
+                    Position.y + 100f,
+                    false,
+                    false);
+            }
+
+        }
+
+        // code revived from the old Traffic++ mod : https://github.com/joaofarias/csl-traffic/blob/a4c5609e030c5bde91811796b9836aad60ddde20/CSL-Traffic/Tools/RoadCustomizerTool.cs
+        private class SegmentLaneMarker {
+            internal uint laneID;
+            internal int laneIndex;
+            internal Bezier3 raycastBezier;
+            internal Bezier3 renderBezier;
+
+            private Bounds[] bounds;
+
+            /// <summary>
+            /// previous vertical hit position stored for caching.
+            /// </summary>
+            private float prev_H;
+
+            /// <summary>
+            ///  Intersects mouse ray with lane bounds.
+            /// </summary>
+            /// <param name="ray"></param>
+            /// <param name="hitH">vertical hit position of the raycast</param>
+            /// <param name="hitH">vertical raycast hit position.</param>
+            internal bool IntersectRay(ref Ray ray, float hitH) {
+                CalculateBounds(hitH);
+                foreach (Bounds bounds in bounds) {
+                    if (bounds.IntersectRay(ray))
+                        return true;
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Initializes/recalculates bezier bounds.
+            /// </summary>
+            /// <param name="hitH">vertical raycast hit position.</param>
+            private void CalculateBounds(float hitH) {
+                // maximum vertical postion of the bezier.
+                float maxH = Mathf.Max(raycastBezier.a.y, raycastBezier.d.y);
+
+                float mouseH = UIBase.GetTrafficManagerTool(false).MousePosition.y;
+
+                if ((hitH == prev_H || hitH == maxH || prev_H == mouseH) && bounds != null) {
+                    // use cached results if mouse has not moved or hitH is ignored.
+                    return; 
+                }
+
+                Bezier3 bezier0 = raycastBezier;
+                if (hitH < mouseH - MAX_HIT_ERROR) {
+                    // For Metros use projection on the terrain.
+                    bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = mouseH;
+                    prev_H = mouseH;
+                }
+                else if (hitH > maxH + MAX_HIT_ERROR) {
+                    // if marker is projected on another road plane then modify its height
+                    bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = hitH;
+                    prev_H = hitH;
+                } else {
+                    // ignore hitH
+                    prev_H = maxH; 
+                }
+
+                float angle = Vector3.Angle(bezier0.a, bezier0.b);
+                if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
+                    angle = Vector3.Angle(bezier0.b, bezier0.c);
+                    if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
+                        angle = Vector3.Angle(bezier0.c, bezier0.d);
+                        if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
+                            // linear bezier
+                            Bounds bounds = bezier0.GetBounds();
+                            bounds.Expand(0.4f);
+                            this.bounds = new Bounds[] { bounds };
+                            return;
+                        }
+                    }
+                }
+
+                // split bezier in 10 parts to correctly raycast curves
+                int n = 10;
+                bounds = new Bounds[n];
+                float size = 1f / n;
+                for (int i = 0; i < n; i++) {
+                    Bezier3 bezier = bezier0.Cut(i * size, (i + 1) * size);
+                    Bounds bounds = bezier.GetBounds();
+                    bounds.Expand(1f);
+                    this.bounds[i] = bounds;
+                }
+            }
+
+            /// <summary>
+            /// Renders lane overlay.
+            /// </summary>
+            internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge=false) {
+                float minH = Mathf.Min(renderBezier.a.y, renderBezier.d.y);
+                float maxH = Mathf.Max(renderBezier.a.y, renderBezier.d.y);
+                RenderManager.instance.OverlayEffect.DrawBezier(
+                    cameraInfo,
+                    color,
+                    renderBezier,
+                    enlarge ? 1.55f : 1.1f,
+                    0,
+                    0,
+                    minH - 100f,
+                    maxH+ 100f,
+                    true,
+                    false);
+            }
         }
 
         public LaneConnectorTool(TrafficManagerTool mainTool)
@@ -181,28 +340,26 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
 
-                    foreach (NodeLaneMarker targetLaneMarker in laneMarker.ConnectedMarkers) {
-                        // render lane connection from laneMarker to targetLaneMarker
-                        if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneMarker.LaneId)) {
-                            continue;
-                        }
+                    if (laneMarker != selectedMarker) {
+                        foreach (NodeLaneMarker targetLaneMarker in laneMarker.ConnectedMarkers) {
+                            // render lane connection from laneMarker to targetLaneMarker
+                            if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneMarker.LaneId)) {
+                                continue;
+                            }
 
-                        DrawLaneCurve(
-                            cameraInfo,
-                            laneMarker.Position,
-                            targetLaneMarker.Position,
-                            NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
-                            laneMarker.Color,
-                            Color.black);
+                            DrawLaneCurve(
+                                cameraInfo,
+                                laneMarker.Position,
+                                targetLaneMarker.Position,
+                                NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
+                                laneMarker.Color,
+                                Color.black);
+                        }
                     }
 
                     if (viewOnly || (nodeId != SelectedNodeId)) {
                         continue;
                     }
-
-                    // bounds.center = laneMarker.position;
-                    // bounds.IntersectRay(mouseRay);
-                    bool markerIsHovered = IsLaneMarkerHovered(laneMarker, ref mouseRay);
 
                     // draw source marker in source selection mode,
                     // draw target marker (if segment turning angles are within bounds) and
@@ -224,58 +381,48 @@ namespace TrafficManager.UI.SubTools {
                                   || (laneMarker == selectedMarker)));
 
                     // highlight hovered marker and selected marker
-                    bool highlightMarker =
-                        drawMarker && ((laneMarker == selectedMarker) || markerIsHovered);
-
                     if (drawMarker) {
-                        laneMarker.Radius = highlightMarker ? 2f : 1f;
-                    } else {
-                        markerIsHovered = false;
-                    }
+                        bool markerIsHovered = false;
+                        if (hoveredMarker == null) {
+                            float hitH = TrafficManagerTool.GetAccurateHitHeight();
+                            markerIsHovered =
+                                laneMarker.segmentLaneMarker.IntersectRay(ref mouseRay, hitH);
 
-                    if (markerIsHovered) {
-                        hoveredMarker = laneMarker;
-                    }
+                            if (markerIsHovered) {
+                                hoveredMarker = laneMarker;
+                            }
+                        }
 
-                    var circleColor = laneMarker.IsTarget ? Color.white : laneMarker.Color;
+                        bool isTarget = selectedMarker != null && laneMarker != selectedMarker;
+                        var color = isTarget ? Color.white : laneMarker.Color;
+                        bool highlightMarker = laneMarker == selectedMarker || markerIsHovered;
+                        if (highlightMarker) {
+                            laneMarker.segmentLaneMarker.RenderOverlay(cameraInfo, color, enlarge: true);
+                        }
+                        laneMarker.RenderOverlay(cameraInfo, color, enlarge: highlightMarker);
+                    } // if drawMarker
 
-                    if (drawMarker) {
-                        RenderManager.instance.OverlayEffect.DrawCircle(
-                            cameraInfo,
-                            circleColor,
-                            laneMarker.Position,
-                            laneMarker.Radius,
-                            laneMarker.Position.y - 100f, // through all the geometry -100..100
-                            laneMarker.Position.y + 100f,
-                            false,
-                            true);
-                        RenderManager.instance.OverlayEffect.DrawCircle(
-                            cameraInfo,
-                            Color.black,
-                            laneMarker.Position,
-                            laneMarker.Radius * 0.75f, // inner black
-                            laneMarker.Position.y - 100f, // through all the geometry -100..100
-                            laneMarker.Position.y + 100f,
-                            false,
-                            false);
-                    }
+                    if (selectedMarker != null) {
+                        // lane curves for selectedMarker will be drawn last to
+                        // be on the top of other lane markers.
+                        foreach (NodeLaneMarker targetLaneMarker in selectedMarker.ConnectedMarkers) {
+                            if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneMarker.LaneId)) {
+                                continue;
+                            }
+
+                            DrawLaneCurve(
+                                cameraInfo,
+                                selectedMarker.Position,
+                                targetLaneMarker.Position,
+                                NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
+                                selectedMarker.Color,
+                                Color.grey,
+                                size: 0.18f // Embolden
+                                );
+                        } // end foreach selectedMarker.ConnectedMarkers
+                    } // end if selectedMarker != null
                 } // end foreach lanemarker in node markers
             } // end for node in all nodes
-        }
-
-        private bool IsLaneMarkerHovered(NodeLaneMarker laneMarker, ref Ray mouseRay) {
-            Bounds bounds = new Bounds(Vector3.zero, Vector3.one) {
-                center = laneMarker.Position
-            };
-
-            if (bounds.IntersectRay(mouseRay)) {
-                return true;
-            }
-
-            bounds = new Bounds(Vector3.zero, Vector3.one) {
-                center = laneMarker.SecondaryPosition
-            };
-            return bounds.IntersectRay(mouseRay);
         }
 
         /// <summary>
@@ -307,17 +454,29 @@ namespace TrafficManager.UI.SubTools {
                     Vector3 selNodePos =
                         NetManager.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
 
-                    ToolBase.RaycastOutput output;
                     // Draw a currently dragged curve
-                    if (RayCastSegmentAndNode(out output)) {
-                        DrawLaneCurve(
-                            cameraInfo,
-                            selectedMarker.Position,
-                            output.m_hitPos,
-                            selNodePos,
-                            Color.Lerp(selectedMarker.Color, Color.white, 0.33f),
-                            Color.white);
+                    var pos = HitPos;
+                    if (hoveredMarker == null) {
+                        float hitH = TrafficManagerTool.GetAccurateHitHeight();
+                        pos.y = hitH; // fix height.
+                        float mouseH = MousePosition.y;
+                        if (hitH < mouseH - MAX_HIT_ERROR) {
+                            // for metros lane curve is projected on the ground.
+                            pos = MousePosition;
+                        }
+                    } else {
+                        // snap to hovered:
+                        pos = hoveredMarker.SecondaryPosition;
                     }
+                    DrawLaneCurve(
+                        cameraInfo,
+                        selectedMarker.Position,
+                        pos,
+                        selNodePos,
+                        Color.Lerp(selectedMarker.Color, Color.white, 0.33f),
+                        Color.white,
+                        size:0.11f);
+
                 }
 
                 bool deleteAll =
@@ -681,7 +840,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 NetSegment[] segmentsBuffer = NetManager.instance.m_segments.m_buffer;
-                bool isEndNode = segmentsBuffer[segmentId].m_endNode == nodeId;
+                bool startNode = segmentsBuffer[segmentId].m_startNode == nodeId;
                 Vector3 offset = segmentsBuffer[segmentId]
                                      .FindDirection(segmentId, nodeId) * offsetMultiplier;
                 NetInfo.Lane[] lanes = segmentsBuffer[segmentId].Info.m_lanes;
@@ -695,7 +854,7 @@ namespace TrafficManager.UI.SubTools {
                             != VehicleInfo.VehicleType.None)) {
                         if (connManager.GetLaneEndPoint(
                             segmentId,
-                            !isEndNode,
+                            startNode,
                             laneIndex,
                             laneId,
                             laneInfo,
@@ -714,12 +873,27 @@ namespace TrafficManager.UI.SubTools {
                                       ? COLOR_CHOICES[nodeMarkerColorIndex % COLOR_CHOICES.Length]
                                       : default; // or black (not used while rendering)
 
+                            NetLane lane = NetManager.instance.m_lanes.m_buffer[laneId];
+                            Bezier3 bezier = lane.m_bezier;
+                            if (startNode) {
+                                bezier.a = (Vector3)pos;
+                            } else {
+                                bezier.d = (Vector3)pos;
+
+                            }
+                            SegmentLaneMarker segmentLaneMarker = new SegmentLaneMarker {
+                                renderBezier = bezier,
+                                raycastBezier = bezier,
+                                laneID = laneId,
+                                laneIndex = laneIndex,
+                            };
+
                             nodeMarkers.Add(
                                 new NodeLaneMarker {
                                     SegmentId = segmentId,
                                     LaneId = laneId,
                                     NodeId = nodeId,
-                                    StartNode = !isEndNode,
+                                    StartNode = startNode,
                                     Position = finalPos,
                                     SecondaryPosition = (Vector3)pos,
                                     Color = nodeMarkerColor,
@@ -732,7 +906,8 @@ namespace TrafficManager.UI.SubTools {
                                             ? laneInfo.m_similarLaneIndex
                                             : laneInfo.m_similarLaneCount -
                                               laneInfo.m_similarLaneIndex - 1,
-                                    SegmentIndex = i
+                                    SegmentIndex = i,
+                                    segmentLaneMarker = segmentLaneMarker,
                                 });
 
                             if (isSource) {
@@ -835,7 +1010,7 @@ namespace TrafficManager.UI.SubTools {
                                    Vector3 middlePoint,
                                    Color color,
                                    Color outlineColor,
-                                   float size = 0.1f) {
+                                   float size = 0.08f) {
             Bezier3 bezier;
             bezier.a = start;
             bezier.d = end;
@@ -874,20 +1049,6 @@ namespace TrafficManager.UI.SubTools {
                 1280f,
                 false,
                 true);
-        }
-
-        private bool RayCastSegmentAndNode(out ToolBase.RaycastOutput output) {
-            ToolBase.RaycastInput input = new ToolBase.RaycastInput(
-                Camera.main.ScreenPointToRay(Input.mousePosition),
-                Camera.main.farClipPlane);
-
-            input.m_netService.m_service = ItemClass.Service.Road;
-            input.m_netService.m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels;
-            input.m_ignoreSegmentFlags = NetSegment.Flags.None;
-            input.m_ignoreNodeFlags = NetNode.Flags.None;
-            input.m_ignoreTerrain = true;
-
-            return MainTool.DoRayCast(input, out output);
         }
 
         /// <summary>

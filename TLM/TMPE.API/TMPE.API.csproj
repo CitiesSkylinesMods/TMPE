@@ -59,6 +59,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Geometry\ISegmentEndGeometry.cs" />
     <Compile Include="Geometry\INodeGeometry.cs" />
     <Compile Include="Geometry\ISegmentGeometry.cs" />

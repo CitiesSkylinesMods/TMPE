@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Data {
+namespace TrafficManager.API.Traffic.Data {
     using System;
     using CSUtil.Commons;
 
@@ -79,7 +79,7 @@
                        : endNodeFlags.pedestrianCrossingAllowed;
         }
 
-        public void SetUturnAllowed(bool startNode, bool value) {
+        public void SetUturnAllowed(bool startNode, TernaryBool value) {
             if (startNode) {
                 startNodeFlags.SetUturnAllowed(value);
             } else {
@@ -87,7 +87,7 @@
             }
         }
 
-        public void SetNearTurnOnRedAllowed(bool startNode, bool value) {
+        public void SetNearTurnOnRedAllowed(bool startNode, TernaryBool value) {
             if (startNode) {
                 startNodeFlags.SetNearTurnOnRedAllowed(value);
             } else {
@@ -95,7 +95,7 @@
             }
         }
 
-        public void SetFarTurnOnRedAllowed(bool startNode, bool value) {
+        public void SetFarTurnOnRedAllowed(bool startNode, TernaryBool value) {
             if (startNode) {
                 startNodeFlags.SetFarTurnOnRedAllowed(value);
             } else {
@@ -103,7 +103,7 @@
             }
         }
 
-        public void SetLaneChangingAllowedWhenGoingStraight(bool startNode, bool value) {
+        public void SetLaneChangingAllowedWhenGoingStraight(bool startNode, TernaryBool value) {
             if (startNode) {
                 startNodeFlags.SetLaneChangingAllowedWhenGoingStraight(value);
             } else {
@@ -111,7 +111,7 @@
             }
         }
 
-        public void SetEnteringBlockedJunctionAllowed(bool startNode, bool value) {
+        public void SetEnteringBlockedJunctionAllowed(bool startNode, TernaryBool value) {
             if (startNode) {
                 startNodeFlags.SetEnteringBlockedJunctionAllowed(value);
             } else {
@@ -119,7 +119,7 @@
             }
         }
 
-        public void SetPedestrianCrossingAllowed(bool startNode, bool value) {
+        public void SetPedestrianCrossingAllowed(bool startNode, TernaryBool value) {
             if (startNode) {
                 startNodeFlags.SetPedestrianCrossingAllowed(value);
             } else {
