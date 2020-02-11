@@ -191,7 +191,7 @@ namespace TrafficManager.UI {
                 public override FunctionMode Function => FunctionMode.Clear;
                 public override bool Active => false; // Clear funtionality can't be undone. #568
                 public override void Do() => // TODO delete all rules as part of #568
-                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, RoadSelection.Instance.Selection);
+                    PriorityRoad.ClearRoad(RoadSelection.Instance.Selection);
                 public override void Undo() => throw new Exception("Unreachable code");
             }
             public class StopButtton : ButtonExt {
@@ -214,10 +214,9 @@ namespace TrafficManager.UI {
                 public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
                 public override FunctionMode Function => FunctionMode.HighPrioirty;
                 public override void Do() =>
-                    PriorityRoad.FixRoad()
-
-                    throw new NotImplementedException("blocked by #541");
-                public override void Undo() => throw new NotImplementedException("blocked by #541 #568");
+                    PriorityRoad.FixRoad(RoadSelection.Instance.Selection);
+                public override void Undo() =>
+                    PriorityRoad.ClearRoad(RoadSelection.Instance.Selection);
             }
 
             public class RAboutButtton : ButtonExt {

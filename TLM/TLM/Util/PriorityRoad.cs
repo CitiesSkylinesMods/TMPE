@@ -608,7 +608,7 @@ namespace TrafficManager.Util {
             });
         }
 
-        public static void ClearRabout(List<ushort> segmentList) {
+        public static void ClearRoad(List<ushort> segmentList) {
             foreach (ushort segmentId in segmentList) {
                 foreach (bool startNode in Constants.ALL_BOOL) {
                     ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
