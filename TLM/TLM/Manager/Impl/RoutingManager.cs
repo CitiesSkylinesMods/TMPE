@@ -2166,7 +2166,7 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"RoutingManager.HandleInvalidSegment({seg.segmentId}) called.");
             }
 
-            Flags.removeHighwayLaneArrowFlagsAtSegment(seg.segmentId);
+            Flags.RemoveHighwayLaneArrowFlagsAtSegment(seg.segmentId);
             ResetRoutingData(seg.segmentId);
         }
 

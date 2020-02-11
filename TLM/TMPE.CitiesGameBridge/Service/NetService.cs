@@ -408,6 +408,7 @@ namespace CitiesGameBridge.Service {
         public ushort GetHeadNode(ref NetSegment segment) {
             // tail node>-------->head node
             bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+            invert = invert ^ SimulationService.Instance.TrafficDrivesOnLeft;
             if (invert) {
                 return segment.m_startNode;
             } else {
@@ -420,6 +421,7 @@ namespace CitiesGameBridge.Service {
 
         public ushort GetTailNode(ref NetSegment segment) {
             bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+            invert = invert ^ SimulationService.Instance.TrafficDrivesOnLeft;
             if (!invert) {
                 return segment.m_startNode;
             } else {

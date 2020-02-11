@@ -103,7 +103,8 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void ShowOverlay(bool viewOnly, RenderManager.CameraInfo cameraInfo) {
-            if (viewOnly && !(Options.connectedLanesOverlay || PrioritySignsTool.showMassEditOverlay)) {
+            if (viewOnly && !(Options.connectedLanesOverlay ||
+                PrioritySignsTool.MassEditOVerlay.IsActive)) {
                 return;
             }
 
@@ -649,7 +650,8 @@ namespace TrafficManager.UI.SubTools {
         public override void Initialize() {
             base.Initialize();
             Cleanup();
-            if (Options.connectedLanesOverlay || PrioritySignsTool.showMassEditOverlay) {
+            if (Options.connectedLanesOverlay ||
+                PrioritySignsTool.MassEditOVerlay.IsActive) {
                 RefreshCurrentNodeMarkers();
             } else {
                 currentNodeMarkers.Clear();

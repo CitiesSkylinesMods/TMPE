@@ -8,12 +8,31 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using UnityEngine;
+    using static TrafficManager.Util.Shortcuts;
 
     public class LaneArrowTool : SubTool {
         private bool cursorInSecondaryPanel_;
 
         public LaneArrowTool(TrafficManagerTool mainTool)
             : base(mainTool) { }
+
+        /// <summary>
+        /// if the segment has at least one lane without outgoing lane connections, then it can be reset.
+        /// </summary>
+        /// <returns>true if the segemnt can be reset.</returns>
+        private static bool CanReset(ushort segmentId, bool startNode) {
+            foreach (var lanePos in netService.GetSortedLanes(
+                segmentId,
+                ref GetSeg(segmentId),
+                startNode,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES)) {
+                if (!LaneConnectionManager.Instance.HasConnections(lanePos.laneId)) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         public override bool IsCursorInPanel() {
             return base.IsCursorInPanel() || cursorInSecondaryPanel_;
@@ -104,7 +123,13 @@ namespace TrafficManager.UI.SubTools {
             }
 
             int width = numLanes * 128;
-            var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, 50);
+            int height = 50;
+            bool startNode = (bool)netService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+            if (CanReset(SelectedSegmentId, startNode)) {
+                height += 40;
+            }
+
+            var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, height);
             GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, BorderlessStyle);
             cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
         }
@@ -245,18 +270,28 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
+            GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
-
+            var style1 = new GUIStyle("button");
+            var style2 = new GUIStyle("button") {
+                normal = { textColor = new Color32(255, 0, 0, 255) },
+                hover = { textColor = new Color32(255, 0, 0, 255) },
+                focused = { textColor = new Color32(255, 0, 0, 255) }
+            };
+            var style3 = new GUIStyle("button") {
+                focused = { textColor = Color.green },
+                alignment = TextAnchor.MiddleCenter,
+            };
+            var style4 = new GUIStyle("button") {
+                // I could not change background texture so instead I change color to green.
+                normal = { textColor = Color.green },
+                hover = { textColor = Color.green },
+                focused = { textColor = Color.green },
+                alignment = TextAnchor.MiddleCenter,
+            };
             for (var i = 0; i < laneList.Count; i++) {
                 var flags = (NetLane.Flags)Singleton<NetManager>
                                            .instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
-
-                var style1 = new GUIStyle("button");
-                var style2 = new GUIStyle("button") {
-                    normal = { textColor = new Color32(255, 0, 0, 255) },
-                    hover = { textColor = new Color32(255, 0, 0, 255) },
-                    focused = { textColor = new Color32(255, 0, 0, 255) }
-                };
 
                 var laneStyle = new GUIStyle { contentOffset = new Vector2(12f, 0f) };
 
@@ -340,6 +375,25 @@ namespace TrafficManager.UI.SubTools {
             }
 
             GUILayout.EndHorizontal();
+
+            if (CanReset(SelectedSegmentId, (bool)startNode)) {
+                string reset = Translation.LaneRouting.Get("Button:Reset");
+                reset += " [del] "; // hotkey
+                var hotkey = KeyCode.Delete;
+                if (GUILayout.Button(
+                    reset,
+                    Input.GetKey(hotkey) ? style4 : style3,
+                    GUILayout.Width(135), // intentionally big to avoid confusion
+                    GUILayout.Height(25)) ||
+                    Input.GetKeyDown(hotkey)) { 
+                    Log._Debug("deleting lane arrows: " +
+                        $"SelectedSegmentId={SelectedSegmentId} SelectedNodeId={SelectedNodeId} startNode={startNode}");
+                    LaneArrowManager.Instance.ResetLaneArrows(SelectedSegmentId, startNode);
+                }
+            }
+
+            GUILayout.EndVertical();
+
         }
     }
 }

@@ -257,7 +257,7 @@
                         continue;
                     }
 
-                    Flags.setNodeTrafficLight(nodeId, flag > 0);
+                    Flags.SetNodeTrafficLight(nodeId, flag > 0);
                 } catch (Exception e) {
                     // ignore as it's probably bad save data.
                     Log.Error($"Error setting the NodeTrafficLights: " + e.ToString());

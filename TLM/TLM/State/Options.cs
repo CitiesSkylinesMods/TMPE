@@ -103,6 +103,11 @@ namespace TrafficManager.State {
             RoundAboutQuickFix_NoCrossYieldR = false,
             RoundAboutQuickFix_PrioritySigns = true;
 
+        public static bool
+            PriorityRoad_CrossMainR = false,
+            PriorityRoad_AllowLeftTurns = false,
+            PriorityRoad_EnterBlockedYeild = false,
+            PriorityRoad_StopAtEntry = false;
 
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for

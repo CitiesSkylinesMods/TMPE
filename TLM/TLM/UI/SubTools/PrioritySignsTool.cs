@@ -40,23 +40,18 @@ namespace TrafficManager.UI.SubTools {
                 SelectedNodeId = 0;
             }
 
-            //TODO provide revert/clear mode  issue #568
+            // TODO provide revert/clear mode issue #568
             if (ctrlDown && shiftDown) {
                 bool isRAbout = RoundaboutMassEdit.Instance.FixRabout(HoveredSegmentId);
-                //if (!isRAbout) {
-                //    // TODO uncomment as part of issue #541
-                //    //PriorityRoad.FixRoad(HoveredSegmentId);
-                //}
-                if (isRAbout) {
-                    RefreshMassEditOverlay();
-                    return;
+                if (!isRAbout) {
+                    PriorityRoad.FixRoad(HoveredSegmentId);
                 }
-                // TODO uncomment as part of issue #541
-                //} else if (ctrlDown) {
-                //
-                //    //PriorityRoad.FixJunction(HoveredNodeId);
-                //    RefreshMassEditOverlay();
-                //    return;
+                RefreshMassEditOverlay();
+                return;
+            } else if (ctrlDown) {
+                PriorityRoad.FixJunction(HoveredNodeId);
+                RefreshMassEditOverlay();
+                return;
             }
             if (shiftDown) {
                 bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
@@ -174,18 +169,84 @@ namespace TrafficManager.UI.SubTools {
         public override void OnToolGUI(Event e) { }
 
         /// <summary>
-        /// show overlay for other subtools influced by mass edit.
+        /// Thread safe handling of mass edit overlay.
         /// </summary>
-        public static bool showMassEditOverlay = false;
+        public static class MassEditOVerlay {
+            private static object _lock = new object();
+
+            private static bool _show = false;
+            public static bool Show {
+                get {
+                    lock (_lock) {
+                        return _show;
+                    }
+                }
+                set {
+                    lock (_lock) {
+                        _show = value;
+                    }
+                }
+            }
+
+            private static DateTime _timer = DateTime.MinValue;
+
+            /// <summary>
+            /// show mass edit over lay for the input duration.
+            /// overrides MassEditOVerlay.Show when it is set to a UTC time in future.
+            /// seconds is
+            /// seconds is
+            /// </summary>
+            /// <param name="seconds"> duration.
+            /// negative => never
+            /// float.MaxValue => always
+            /// </param>
+            public static void SetTimer(float seconds) {
+                DateTime dt;
+                if (seconds == float.MaxValue) {
+                    dt = DateTime.MaxValue;
+                } else {
+                    dt = DateTime.UtcNow + TimeSpan.FromSeconds(seconds);
+                }
+                lock (_lock) {
+                    _timer = dt;
+                }
+            }
+
+            /// <summary>
+            /// show overlay for other subtools influced by mass edit.
+            /// </summary>
+            public static bool IsActive {
+                get {
+                    bool show;
+                    DateTime timer;
+                    lock (_lock) {
+                        show = _show;
+                        timer = _timer;
+                    }
+                    return show || DateTime.UtcNow < timer;
+                }
+            }
+        }
 
         /// <summary>
         /// refreshes all subtools incflucned by mass edit.
+        /// the mass edit overlay active while processing
+        /// and remains active for one extra second so that
         /// </summary>
         private void RefreshMassEditOverlay() {
-            showMassEditOverlay = true;
+            // processing takes while.
+            // Keep mass edit overlay active so that user has visual feedaback
+            // that something is happening.
+            // this is also to make sure overlay is refresshed
+            // even when the user lets go of the mass edit overlay hotkey.
+            MassEditOVerlay.SetTimer(float.MaxValue);
+
             UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
             RefreshCurrentPriorityNodeIds();
-            showMassEditOverlay = false;
+
+            // keep active for one more second so that the user
+            // has a chance to see the new traffic rules.
+            MassEditOVerlay.SetTimer(1);
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -196,11 +257,10 @@ namespace TrafficManager.UI.SubTools {
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
+            MassEditOVerlay.Show = ctrlDown;
+
             if (ctrlDown) {
-                showMassEditOverlay = true;
                 massEditMode = PrioritySignsMassEditMode.MainYield;
-            } else {
-                showMassEditOverlay = false;
             }
 
             if (HoveredSegmentId == 0) {
@@ -239,12 +299,10 @@ namespace TrafficManager.UI.SubTools {
                         });
                 }
                 return;
+            } else if (ctrlDown) {
+                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                return;
             }
-            //else if (ctrlDown) {
-            //    // TODO uncomment as part of issue #541
-            //    MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
-            //    return;
-            //}
 
             massEditMode = PrioritySignsMassEditMode.MainYield;
 
@@ -296,7 +354,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !(Options.prioritySignsOverlay || showMassEditOverlay)) {
+            if (viewOnly && !(Options.prioritySignsOverlay || MassEditOVerlay.IsActive )) {
                 return;
             }
 
@@ -526,7 +584,7 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
 
-            if (Options.prioritySignsOverlay || showMassEditOverlay) {
+            if (Options.prioritySignsOverlay || MassEditOVerlay.IsActive) {
                 RefreshCurrentPriorityNodeIds();
             } else {
                 currentPriorityNodeIds.Clear();
