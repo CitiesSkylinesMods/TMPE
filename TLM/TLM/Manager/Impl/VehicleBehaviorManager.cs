@@ -1015,8 +1015,8 @@ namespace TrafficManager.Manager.Impl {
                                      ref PathUnit.Position position,
                                      ushort targetNodeId,
                                      ref NetNode targetNode,
-                                     uint laneID)
-        {
+                                     uint laneID,
+                                     out float maxSpeed) {
             VehicleJunctionTransitState transitState = MayChangeSegment(
                 frontVehicleId,
                 ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[frontVehicleId],
@@ -1031,7 +1031,8 @@ namespace TrafficManager.Manager.Impl {
                 ref targetNode,
                 laneID,
                 ref DUMMY_POS,
-                0);
+                0,
+                out maxSpeed);
 
             Constants.ManagerFactory.ExtVehicleManager.SetJunctionTransitState(
                 ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[frontVehicleId],
@@ -1071,7 +1072,8 @@ namespace TrafficManager.Manager.Impl {
                                      ref NetNode targetNode,
                                      uint laneID,
                                      ref PathUnit.Position nextPosition,
-                                     ushort nextTargetNodeId) {
+                                     ushort nextTargetNodeId,
+                                     out float maxSpeed) {
             VehicleJunctionTransitState transitState = MayChangeSegment(
                 frontVehicleId,
                 ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[frontVehicleId],
@@ -1086,7 +1088,8 @@ namespace TrafficManager.Manager.Impl {
                 ref targetNode,
                 laneID,
                 ref nextPosition,
-                nextTargetNodeId);
+                nextTargetNodeId,
+                out maxSpeed);
 
             Constants.ManagerFactory.ExtVehicleManager.SetJunctionTransitState(
                 ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[frontVehicleId],
@@ -1110,7 +1113,8 @@ namespace TrafficManager.Manager.Impl {
             ref NetNode targetNode,
             uint laneId,
             ref PathUnit.Position nextPosition,
-            ushort nextTargetNodeId)
+            ushort nextTargetNodeId,
+            out float maxSpeed)
         {
 #if DEBUG
             bool logPriority = DebugSwitch.PriorityRules.Get() &&
@@ -1118,6 +1122,7 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
+            maxSpeed = 0;
             if (prevTargetNodeId != targetNodeId
                 || (vehicleData.m_blockCounter == 255
                     && !Instance.MayDespawn(ref vehicleData)) // NON-STOCK CODE
@@ -1595,6 +1600,8 @@ namespace TrafficManager.Manager.Impl {
                             () => $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
                                   $"Vehicle has not yet reached yield speed (sqrVelocity={sqrVelocity})");
 
+                        //slow down to target speed
+                        maxSpeed = GlobalConfig.Instance.PriorityRules.MaxYieldVelocity;
                         // vehicle has not yet reached yield speed
                         return VehicleJunctionTransitState.Stop;
                     }
