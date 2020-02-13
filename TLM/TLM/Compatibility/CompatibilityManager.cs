@@ -7,6 +7,7 @@ namespace TrafficManager.Compatibility {
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+    using System.Text;
     using static ColossalFramework.Plugins.PluginManager;
 
     /// <summary>
@@ -35,11 +36,14 @@ namespace TrafficManager.Compatibility {
         /// </summary>
         static CompatibilityManager() {
             // Store current launcher auto-continue flag
-            AutoLoadLastSave = LauncherLoginData.instance.m_continue;
-
-            // Prevent vanilla auto-continue
-            // We might need to show dialogs on main menu screen and auto-continue breaks that
-            LauncherLoginData.instance.m_continue = false;
+            try {
+                AutoLoadLastSave = LauncherLoginData.instance.m_continue;
+                LauncherLoginData.instance.m_continue = false;
+            }
+            catch {
+                Log.Info("");
+                AutoLoadLastSave = false;
+            }
 
             // Translate current game verison in to Version instance
             CurrentGameVersion = new Version(
@@ -157,6 +161,13 @@ namespace TrafficManager.Compatibility {
         }
 
         /// <summary>
+        /// Log status of relevant DLCs (content and music packs are ignored).
+        /// </summary>
+        internal static void LogRelevantDLC() {
+            StringBuilder sb = new StringBuilder("DLC Activation:\n\n", 50);
+        }
+
+        /// <summary>
         /// If no compatibility issues are found, check to see if the auto-load last game
         /// setting was active and if so load the last savegame.
         /// </summary>
@@ -184,6 +195,8 @@ namespace TrafficManager.Compatibility {
             Log.InfoFormat(
                 "CompatibilityManager.PerformChecks() GUID = {0}",
                 SelfGuid);
+
+            LogRelevantDLC();
 
             if (HasMultipleAssemblies()) {
                 ShowAssemblyChooser();

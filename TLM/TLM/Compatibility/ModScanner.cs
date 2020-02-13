@@ -8,6 +8,7 @@ namespace TrafficManager.Compatibility {
     using System.IO;
     using System;
     using TrafficManager.State;
+    using System.Text;
 
     /// <summary>
     /// Scans for known incompatible mods as defined by <see cref="IncompatibleMods.List"/>.
@@ -50,7 +51,16 @@ namespace TrafficManager.Compatibility {
             bool scanDisabled = !GlobalConfig.Instance.Main.IgnoreDisabledMods;
 
             // batch all logging in to a single log message
-            string logStr = $"Scanning Mods (scanMinor={scanMinor}, scanDisabled={scanDisabled}):\n\n";
+            // 6000 chars is roughly 120 mods worth of logging
+            StringBuilder sb = new StringBuilder(6000);
+
+            sb.AppendFormat(
+                "Scanning Mods (scanMinor={0}, scanDisabled={1}):\n\n",
+                scanMinor,
+                scanDisabled);
+
+            // log entry format
+            string entryFormat = "{0} {1} {2} {3}\n";
 
             // Variables for log file entries
             string logEnabled;
@@ -117,24 +127,30 @@ namespace TrafficManager.Compatibility {
 
                         }
 
-                        logStr += $"{logIncompatible} {logEnabled} {logWorkshopId.PadRight(12)} {modName}\n";
+                        sb.AppendFormat(
+                            entryFormat,
+                            logIncompatible,
+                            logEnabled,
+                            logWorkshopId.PadRight(12),
+                            modName);
                     }
 
                 } catch (Exception e) {
                     Log.ErrorFormat(
-                        "Error scanning mod '{0}', workshopId {1}\n{2}",
+                        "Error scanning mod '{0}', workshopId {1}:\n{2}",
                         mod.name,
                         mod.publishedFileID.AsUInt64,
                         e.ToString());
                 }
             }
 
-            Log.Info(logStr);
-            Log.InfoFormat(
+            sb.AppendFormat(
                 "Scan complete: {0} [C]ritical, {1} [M]ajor, {2} [m]inor; [*] = Enabled",
                 critical.Count,
                 major.Count,
                 minor.Count);
+
+            Log.Info(sb.ToString());
 
             return detected;
         }
