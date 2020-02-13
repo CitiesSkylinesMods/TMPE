@@ -1,0 +1,196 @@
+namespace TrafficManager.Compatibility {
+    using ColossalFramework.Plugins;
+    using ColossalFramework;
+    using CSUtil.Commons;
+    using ICities;
+    using static ColossalFramework.Plugins.PluginManager;
+    using System.Collections.Generic;
+    using System.IO;
+    using System;
+    using TrafficManager.State;
+
+    /// <summary>
+    /// Scans for known incompatible mods as defined by <see cref="IncompatibleMods.List"/>.
+    /// </summary>
+    public class ModScanner {
+
+        /// <summary>
+        /// Game always uses ulong.MaxValue to depict local mods.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "RAS0002:Readonly field for a non-readonly struct", Justification = "Rarely used.")]
+        internal static readonly ulong Local = ulong.MaxValue;
+
+        /// <summary>
+        /// Scans installed mods (local and workshop) looking for known incompatibilities.
+        /// </summary>
+        /// 
+        /// <param name="critical">A dictionary of critical incompatibilities.</param>
+        /// <param name="major">A dictionary of major incompatibilities.</param>
+        /// <param name="minor">A dictionary of minor incompatibilities.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if incompatible mods detected, otherwise <c>false</c>.</returns>
+        public static bool DetectIncompatibleMods(
+            out Dictionary<PluginInfo, string> critical,
+            out Dictionary<PluginInfo, string> major,
+            out Dictionary<PluginInfo, string> minor) {
+
+            Log.Info("ModScanner.DetectIncompatibleMods()");
+
+            critical = new Dictionary<PluginInfo, string>();
+            major = new Dictionary<PluginInfo, string>();
+            minor = new Dictionary<PluginInfo, string>();
+
+            // did we detect any incompatible mods yet?
+            bool detected = false;
+
+            // check minor severity incompatibilities?
+            bool scanMinor = GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup;
+
+            // check disabled mods? note: Critical incompatibilities are always processed
+            bool scanDisabled = !GlobalConfig.Instance.Main.IgnoreDisabledMods;
+
+            // batch all logging in to a single log message
+            string logStr = $"Scanning Mods (scanMinor={scanMinor}, scanDisabled={scanDisabled}):\n\n";
+
+            // Variables for log file entries
+            string logEnabled;
+            string logWorkshopId;
+            string logIncompatible;
+
+            // Common strings
+            string asterisk = "*";
+            string space = " ";
+            string local = "(local)";
+            string strCritical = "C";
+            string strMajor = "M";
+            string strMinor = "m";
+
+            // iterate plugins
+            foreach (PluginInfo mod in Singleton<PluginManager>.instance.GetPluginsInfo()) {
+
+                try {
+                    // filter out bundled and camera script mods
+                    if (!mod.isBuiltin && !mod.isCameraScript) {
+
+                        // basic details
+                        string modName = GetModName(mod);
+                        ulong workshopId = mod.publishedFileID.AsUInt64;
+                        bool isLocal = workshopId == Local;
+
+                        // Values for log file entry
+                        logEnabled = mod.isEnabled ? asterisk : space;
+                        logWorkshopId = isLocal ? local : workshopId.ToString();
+                        logIncompatible = space;
+
+                        if (isLocal) {
+
+                            if (IsLocalModIncompatible(modName) && GetModGuid(mod) != CompatibilityManager.SelfGuid) {
+                                logIncompatible = strCritical;
+                                detected = true;
+                                critical.Add(mod, modName);
+                            }
+                            modName += $" /{Path.GetFileName(mod.modPath)}";
+
+                        } else if (IncompatibleMods.List.TryGetValue(workshopId, out Severity severity)) {
+
+                            switch (severity) {
+                                case Severity.Critical:
+                                    logIncompatible = strCritical;
+                                    detected = true;
+                                    critical.Add(mod, modName);
+                                    break;
+                                case Severity.Major:
+                                    logIncompatible = strMajor;
+                                    if (mod.isEnabled || scanDisabled) {
+                                        detected = true;
+                                        major.Add(mod, modName);
+                                    }
+                                    break;
+                                case Severity.Minor:
+                                    logIncompatible = strMinor;
+                                    if (scanMinor && (mod.isEnabled || scanDisabled)) {
+                                        detected = true;
+                                        minor.Add(mod, modName);
+                                    }
+                                    break;
+                            }
+
+                        }
+
+                        logStr += $"{logIncompatible} {logEnabled} {logWorkshopId.PadRight(12)} {modName}\n";
+                    }
+
+                } catch (Exception e) {
+                    Log.ErrorFormat(
+                        "Error scanning mod '{0}', workshopId {1}\n{2}",
+                        mod.name,
+                        mod.publishedFileID.AsUInt64,
+                        e.ToString());
+                }
+            }
+
+            Log.Info(logStr);
+            Log.InfoFormat(
+                "Scan complete: {0} [C]ritical, {1} [M]ajor, {2} [m]inor; [*] = Enabled",
+                critical.Count,
+                major.Count,
+                minor.Count);
+
+            return detected;
+        }
+
+        /// <summary>
+        /// Identify problematic local mods by name.
+        /// </summary>
+        /// 
+        /// <param name="name">Name of the mod.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if incompatible, otheriwse <c>false</c>.</returns>
+        internal static bool IsLocalModIncompatible(string name) {
+            return name.Contains("Traffic Manager") || name.Contains("TM:PE") || name.Contains("Traffic++");
+        }
+
+        /// <summary>
+        /// Returns <see cref="IUserMod.Name"/> or <see cref="PluginInfo.name"/> (assembly name) for a mod.
+        /// </summary>
+        /// 
+        /// <param name="mod">The mods' <see cref="PluginInfo"/>.</param>
+        /// 
+        /// <returns>The name of the specified mod.</returns>
+        internal static string GetModName(PluginInfo mod) {
+            string name;
+            try {
+                name = ((IUserMod)mod.userModInstance).Name;
+            } catch {
+                Log.ErrorFormat(
+                    "Unable to get userModInstrance.Name for '{0}', workshopId {1}.",
+                    mod.name,
+                    mod.publishedFileID.AsUInt64);
+                name = mod.name;
+            }
+            return name;
+        }
+
+        /// <summary>
+        /// Returns the <see cref="Guid"/> for a mod.
+        /// </summary>
+        /// 
+        /// <param name="mod">The mods' <see cref="PluginInfo"/>.</param>
+        /// 
+        /// <returns>The <see cref="Guid"/> of the mod.</returns>
+        internal static Guid GetModGuid(PluginInfo mod) {
+            Guid id;
+            try {
+                id = mod.userModInstance.GetType().Assembly.ManifestModule.ModuleVersionId;
+            } catch {
+                Log.ErrorFormat(
+                    "Unable to get Guid for '{0}', workshopId {1}.",
+                    mod.name,
+                    mod.publishedFileID.AsUInt64);
+                id = Guid.Empty;
+            }
+            return id;
+        }
+
+    }
+}

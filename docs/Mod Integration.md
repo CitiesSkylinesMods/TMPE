@@ -15,3 +15,11 @@ if (TMPE_Version < new Version(11)) {
    // Version 11.1.0 and above all have correct assembly version in form M.m.b.* (Major, minor, build, *)
 }
 ```
+
+## Local mod flagged as incompatible
+
+TM:PE will flag local mods as critically incompatible if they contain any of the following strings in their mod name:
+
+* `TM:PE` (use `TMPE` instead)
+* `Traffic Manager`
+* `Traffic++`
