@@ -8,6 +8,7 @@ namespace TrafficManager.Compatibility {
     using System.Collections.Generic;
     using System.Reflection;
     using System.Text;
+    using UnityEngine.SceneManagement;
     using static ColossalFramework.Plugins.PluginManager;
 
     /// <summary>
@@ -32,6 +33,12 @@ namespace TrafficManager.Compatibility {
         internal static bool AutoLoadLastSave;
 
         /// <summary>
+        /// If true we can do stuff even if it looks like something is being loaded.
+        /// Get's set to false after first use or if the logo screens have already finished.
+        /// </summary>
+        internal static bool RunOnStartup = true;
+
+        /// <summary>
         /// Initializes static members of the <see cref="CompatibilityManager"/> class.
         /// </summary>
         static CompatibilityManager() {
@@ -39,9 +46,9 @@ namespace TrafficManager.Compatibility {
             try {
                 AutoLoadLastSave = LauncherLoginData.instance.m_continue;
                 LauncherLoginData.instance.m_continue = false;
+                Log.Info($"CompatibilityManager.ctor(): AutoLoadLastSave = {AutoLoadLastSave}");
             }
             catch {
-                Log.Info("");
                 AutoLoadLastSave = false;
             }
 
@@ -62,10 +69,13 @@ namespace TrafficManager.Compatibility {
         public static void Activate() {
             if (UIView.GetAView() != null) {
                 // TM:PE enabled via Main Menu > Content Manager so run now
+                Log.Info("CompatibilityManager.Activate()");
+                RunOnStartup = false;
                 PerformChecks();
             } else {
                 // TM:PE was already enabled on game load, or via mod autoenabler;
                 // we must wait for main menu before doing anything else
+                Log.Info("CompatibilityManager.Activate(): Waiting for main menu...");
                 LoadingManager.instance.m_introLoaded += PerformChecks;
             }
         }
@@ -74,6 +84,7 @@ namespace TrafficManager.Compatibility {
         /// Removes any event listeners rendering the compatibility manager inactive.
         /// </summary>
         public static void Deactivate() {
+            Log.Info("CompatibilityManager.Deactivate()");
             LoadingManager.instance.m_introLoaded -= PerformChecks;
             Singleton<PluginManager>.instance.eventPluginsChanged -= PerformChecks;
         }
@@ -83,6 +94,11 @@ namespace TrafficManager.Compatibility {
         /// </summary>
         /// <returns>Returns <c>true</c> if wrong game version, otherwise <c>false</c>.</returns>
         internal static bool IsUnexpectedGameVersion() {
+            Log.InfoFormat(
+                "CompatibilityManager.IsUnexpectedGameVersion(): Expect: {0}, Actual: {1}",
+                TrafficManagerMod.ExpectedGameVersion.ToString(3),
+                CurrentGameVersion.ToString(3));
+
             return CurrentGameVersion != TrafficManagerMod.ExpectedGameVersion;
         }
 
@@ -95,6 +111,7 @@ namespace TrafficManager.Compatibility {
         /// <returns>Returns <c>true</c> if multiple assemblies, otherwise <c>false</c>.</returns>
         internal static bool HasMultipleAssemblies() {
             // todo
+            Log.Info("CompatibilityManager.HasMultipleAssemblies()");
             return false;
         }
 
@@ -104,6 +121,7 @@ namespace TrafficManager.Compatibility {
         /// </summary>
         internal static void ShowAssemblyChooser() {
             // todo
+            Log.Info("CompatibilityManager.ShowAssemblyChooser()");
         }
 
         /// <summary>
@@ -118,12 +136,14 @@ namespace TrafficManager.Compatibility {
                 Dictionary<PluginInfo, string> major,
                 Dictionary<PluginInfo, string> minor) {
             // todo
+            Log.Info("CompatibilityManager.ShowModRemoverDialog()");
         }
 
         /// <summary>
         /// Adds listener for plugin manager subscription change event.
         /// </summary>
         internal static void ListenForSubscriptionChange() {
+            Log.Info("CompatibilityManager.ListenForSubscriptionChange()");
             // clear old listener if present (is this necessary? don't know enough about C# events)
             Singleton<PluginManager>.instance.eventPluginsChanged -= PerformChecks;
             // add listener
@@ -136,15 +156,21 @@ namespace TrafficManager.Compatibility {
         /// 
         /// <returns>Returns <c>true</c> if safe to run tests, otherwise <c>false</c>.</returns>
         internal static bool CanWeDoStuff() {
+            //if (SceneManager.
+
             // make sure we're not loading a game/asset/etc
             if (Singleton<LoadingManager>.instance.m_currentlyLoading) {
+                Log.Info("CompatibilityManager.CanWeDoStuff()? No; currently loading");
                 return false;
             }
 
             // make sure we're not exiting to desktop
             if (Singleton<LoadingManager>.instance.m_applicationQuitting) {
+                Log.Info("CompatibilityManager.CanWeDoStuff()? No; currently quitting");
                 return false;
             }
+
+            Log.Info($"CompatibilityManager.CanWeDoStuff()? {LoadingExtension.NotInGameOrEditor}");
 
             return LoadingExtension.NotInGameOrEditor;
         }
@@ -187,8 +213,10 @@ namespace TrafficManager.Compatibility {
         /// Note: This method is either invoked directly, or via an event, hence being static.
         /// </summary>
         private static void PerformChecks() {
-            // Skip checks if we're in-game
-            if (!CanWeDoStuff()) {
+            if (RunOnStartup) {
+                RunOnStartup = false;
+                LoadingManager.instance.m_introLoaded -= PerformChecks;
+            } else if (!CanWeDoStuff()) {
                 return;
             }
 
@@ -198,7 +226,9 @@ namespace TrafficManager.Compatibility {
 
             LogRelevantDLC();
 
-            if (HasMultipleAssemblies()) {
+            if (IsUnexpectedGameVersion()) {
+                //todo
+            } else if (HasMultipleAssemblies()) {
                 ShowAssemblyChooser();
             } else if (ModScanner.DetectIncompatibleMods(
                 out Dictionary<PluginInfo, string> critical,

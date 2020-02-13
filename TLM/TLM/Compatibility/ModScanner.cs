@@ -145,7 +145,7 @@ namespace TrafficManager.Compatibility {
             }
 
             sb.AppendFormat(
-                "Scan complete: {0} [C]ritical, {1} [M]ajor, {2} [m]inor; [*] = Enabled",
+                "\nScan complete: {0} [C]ritical, {1} [M]ajor, {2} [m]inor; [*] = Enabled",
                 critical.Count,
                 major.Count,
                 minor.Count);

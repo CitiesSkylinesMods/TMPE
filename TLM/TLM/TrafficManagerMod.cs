@@ -77,7 +77,7 @@ namespace TrafficManager {
             }
 
             // Run pre-flight compatibility checks
-            CompatibilityManager.Instance.Activate();
+            CompatibilityManager.Activate();
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace TrafficManager {
         [UsedImplicitly]
         public void OnDisabled() {
             Log.Info("TM:PE disabled.");
-            CompatibilityManager.Instance.Deactivate();
+            CompatibilityManager.Deactivate();
             LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
             Translation.IsListeningToGameLocaleChanged = false; // is this necessary?
 
