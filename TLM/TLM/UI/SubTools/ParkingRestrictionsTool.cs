@@ -58,9 +58,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnActivate() { }
 
-        public override void OnPrimaryClickOverlay() {
-
-        }
+        public override void OnPrimaryClickOverlay() { }
 
         private SegmentLaneMarker GetLaneMarker(ushort segmentId, NetInfo.Direction direction) {
             Bezier3 bezier = default(Bezier3);
@@ -211,6 +209,7 @@ namespace TrafficManager.UI.SubTools {
 
             bool hovered = false;
             bool clicked = !viewOnly && MainTool.CheckClicked();
+
             for (int segmentIdIndex = CachedVisibleSegmentIds.Size - 1;
                  segmentIdIndex >= 0;
                  segmentIdIndex--)
