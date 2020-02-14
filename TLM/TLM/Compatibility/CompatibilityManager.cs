@@ -8,6 +8,7 @@ namespace TrafficManager.Compatibility {
     using System.Collections.Generic;
     using System.Reflection;
     using System.Text;
+    using TrafficManager.Compatibility.Checks;
     using UnityEngine.SceneManagement;
     using static ColossalFramework.Plugins.PluginManager;
 
@@ -233,6 +234,14 @@ namespace TrafficManager.Compatibility {
         }
 
         /// <summary>
+        /// Hides main menu by moving background image to top layer (same as vanilla game does).
+        /// </summary>
+        internal static void HideMainMenu() {
+            
+            //MainMenu.m_BackgroundImage.zOrder = int.MaxValue;
+        }
+
+        /// <summary>
         /// Runs through entire compatibility checker sequence
         ///
         /// Note: This method is either invoked directly, or via an event, hence being static.
@@ -242,13 +251,13 @@ namespace TrafficManager.Compatibility {
                 "CompatibilityManager.PerformChecks() GUID = {0}",
                 SelfGuid);
 
-            DlcScanner.Scan();
+            CheckDLCs.Scan();
 
             if (!CheckGameVersion()) {
                 //todo
-            } else if (AssemblyScanner.Scan()) {
+            } else if (CheckAssemblies.Scan()) {
                 ShowAssemblyChooser();
-            } else if (ModScanner.Scan(
+            } else if (CheckMods.Scan(
                 out Dictionary<PluginInfo, string> critical,
                 out Dictionary<PluginInfo, string> major,
                 out Dictionary<PluginInfo, string> minor)) {

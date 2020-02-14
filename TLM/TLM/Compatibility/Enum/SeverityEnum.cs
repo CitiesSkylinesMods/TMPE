@@ -1,4 +1,4 @@
-namespace TrafficManager.Compatibility {
+namespace TrafficManager.Compatibility.Enum {
 
     /// <summary>
     /// The severity of a mod conflict.

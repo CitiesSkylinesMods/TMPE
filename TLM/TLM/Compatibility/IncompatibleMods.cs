@@ -1,5 +1,6 @@
 namespace TrafficManager.Compatibility {
     using System.Collections.Generic;
+    using TrafficManager.Compatibility.Enum;
 
     /// <summary>
     /// A list of incompatible mods.

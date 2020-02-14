@@ -1,4 +1,4 @@
-namespace TrafficManager.Compatibility {
+namespace TrafficManager.Compatibility.UI {
     using ColossalFramework.IO;
     using ColossalFramework.PlatformServices;
     using ColossalFramework.UI;

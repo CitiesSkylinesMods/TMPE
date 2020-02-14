@@ -1,4 +1,4 @@
-namespace TrafficManager.Compatibility {
+namespace TrafficManager.Compatibility.Checks {
     using ColossalFramework.PlatformServices;
     using CSUtil.Commons;
     using System.Collections.Generic;
@@ -7,7 +7,7 @@ namespace TrafficManager.Compatibility {
     /// <summary>
     /// Scans for transit-affecting DLCs.
     /// </summary>
-    public class DlcScanner {
+    public class CheckDLCs {
 
         /// <summary>
         /// Scan for DLCs and log whether they are installed or not.
@@ -23,6 +23,7 @@ namespace TrafficManager.Compatibility {
                     { SteamHelper.kParksDLCAppID, "Park Life" },
                     { SteamHelper.kIndustryDLCAppID, "Industries" },
                     { SteamHelper.kGreenDLCAppID, "Green Cities" },
+                    { SteamHelper.kFootballAppID, "Match Day" },
                 };
 
                 StringBuilder sb = new StringBuilder(500);
@@ -32,12 +33,12 @@ namespace TrafficManager.Compatibility {
                 string formatStr = " {0} {1}\n";
                 string strAsterisk = "*";
                 string strSpace = " ";
-
-                foreach (KeyValuePair<uint, string> item in DLCs) {
+                
+                foreach (KeyValuePair<uint, string> dlc in DLCs) {
                     sb.AppendFormat(
                         formatStr,
-                        PlatformService.IsDlcInstalled(item.Key) ? strAsterisk : strSpace,
-                        item.Value);
+                        PlatformService.IsDlcInstalled(dlc.Key) ? strAsterisk : strSpace,
+                        dlc.Value);
                 }
 
                 Log.Info(sb.ToString());

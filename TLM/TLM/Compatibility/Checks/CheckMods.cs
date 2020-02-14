@@ -1,4 +1,4 @@
-namespace TrafficManager.Compatibility {
+namespace TrafficManager.Compatibility.Checks {
     using ColossalFramework.Plugins;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -9,11 +9,12 @@ namespace TrafficManager.Compatibility {
     using System;
     using TrafficManager.State;
     using System.Text;
+    using TrafficManager.Compatibility.Enum;
 
     /// <summary>
     /// Scans for known incompatible mods as defined by <see cref="IncompatibleMods.List"/>.
     /// </summary>
-    public class ModScanner {
+    public class CheckMods {
 
         /// <summary>
         /// Game always uses ulong.MaxValue to depict local mods.

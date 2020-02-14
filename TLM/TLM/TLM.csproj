@@ -112,10 +112,10 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CodeProfiler.cs" />
-    <Compile Include="Compatibility\AssemblyScanner.cs" />
-    <Compile Include="Compatibility\DlcScanner.cs" />
+    <Compile Include="Compatibility\Checks\CheckAssemblies.cs" />
+    <Compile Include="Compatibility\Checks\CheckDLCs.cs" />
     <Compile Include="Compatibility\IncompatibleMods.cs" />
-    <Compile Include="Compatibility\SeverityEnum.cs" />
+    <Compile Include="Compatibility\Enum\SeverityEnum.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Custom\AI\CustomBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomBusAI.cs" />
@@ -234,7 +234,7 @@
     <Compile Include="UI\Helpers\CheckboxOption.cs" />
     <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />
     <Compile Include="UI\Helpers\SerializableUIOptionBase.cs" />
-    <Compile Include="Compatibility\IncompatibleModsPanel.cs" />
+    <Compile Include="Compatibility\UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
@@ -293,7 +293,7 @@
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\LoopUtil.cs" />
-    <Compile Include="Compatibility\ModScanner.cs" />
+    <Compile Include="Compatibility\Checks\CheckMods.cs" />
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />

@@ -1,4 +1,4 @@
-namespace TrafficManager.Compatibility {
+namespace TrafficManager.Compatibility.Checks {
     using ColossalFramework;
     using ColossalFramework.Plugins;
     using CSUtil.Commons;
@@ -9,7 +9,7 @@ namespace TrafficManager.Compatibility {
     using System.Text;
     using static ColossalFramework.Plugins.PluginManager;
 
-    public class AssemblyScanner {
+    public class CheckAssemblies {
 
         public static bool Scan(/*out Dictionary<Assembly,Guid> results*/) {
             Version v11 = new Version(11, 1, 0);
