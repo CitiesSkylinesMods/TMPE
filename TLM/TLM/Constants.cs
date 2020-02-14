@@ -1,4 +1,4 @@
-﻿namespace TrafficManager {
+namespace TrafficManager {
     using GenericGameBridge.Factory;
     using JetBrains.Annotations;
     using TrafficManager.API.Manager;
@@ -40,5 +40,8 @@
         }
 
         public static IManagerFactory ManagerFactory => Manager.Impl.ManagerFactory.Instance;
+
+        public  const float MAX_HIT_ERROR = 2.5f;
+
     }
 }
