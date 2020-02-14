@@ -113,6 +113,7 @@
     </Compile>
     <Compile Include="CodeProfiler.cs" />
     <Compile Include="Compatibility\AssemblyScanner.cs" />
+    <Compile Include="Compatibility\DlcScanner.cs" />
     <Compile Include="Compatibility\IncompatibleMods.cs" />
     <Compile Include="Compatibility\SeverityEnum.cs" />
     <Compile Include="Constants.cs" />

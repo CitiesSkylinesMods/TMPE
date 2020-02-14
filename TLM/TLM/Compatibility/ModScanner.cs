@@ -30,12 +30,12 @@ namespace TrafficManager.Compatibility {
         /// <param name="minor">A dictionary of minor incompatibilities.</param>
         /// 
         /// <returns>Returns <c>true</c> if incompatible mods detected, otherwise <c>false</c>.</returns>
-        public static bool DetectIncompatibleMods(
+        public static bool Scan(
             out Dictionary<PluginInfo, string> critical,
             out Dictionary<PluginInfo, string> major,
             out Dictionary<PluginInfo, string> minor) {
 
-            Log.Info("ModScanner.DetectIncompatibleMods()");
+            Log.Info("ModScanner.Scan()");
 
             critical = new Dictionary<PluginInfo, string>();
             major = new Dictionary<PluginInfo, string>();

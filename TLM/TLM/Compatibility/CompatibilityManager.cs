@@ -115,6 +115,9 @@ namespace TrafficManager.Compatibility {
         /// Triggered when scene changes.
         ///
         /// Pause the compatibility checker if scene is not "MainMenu".
+        ///
+        /// Note: Game does not trigger the event between intro screen
+        ///       and first display of main menu.
         /// </summary>
         /// 
         /// <param name="current">The current <see cref="Scene"/>.</param>
@@ -213,20 +216,16 @@ namespace TrafficManager.Compatibility {
         }
 
         /// <summary>
-        /// Log status of relevant DLCs (content and music packs are ignored).
-        /// </summary>
-        internal static void LogRelevantDLC() {
-            StringBuilder sb = new StringBuilder("DLC Activation:\n\n", 50);
-        }
-
-        /// <summary>
         /// If no compatibility issues are found, check to see if the auto-load last game
         /// setting was active and if so load the last savegame.
         /// </summary>
         internal static void LoadLastSaveGame() {
+            Log.Info("CompatibilityManager.LoadLastSaveGame()");
+
             // Make sure we don't auto-load again
             AutoLoadLastSave = false;
-            // Don't auto-load if we're in-game!
+
+            // Don't auto-load if we're somehow in-game!
             if (!CanWeDoStuff()) {
                 return;
             }
@@ -243,17 +242,19 @@ namespace TrafficManager.Compatibility {
                 "CompatibilityManager.PerformChecks() GUID = {0}",
                 SelfGuid);
 
-            LogRelevantDLC();
+            DlcScanner.Scan();
 
             if (!CheckGameVersion()) {
                 //todo
             } else if (AssemblyScanner.Scan()) {
                 ShowAssemblyChooser();
-            } else if (ModScanner.DetectIncompatibleMods(
+            } else if (ModScanner.Scan(
                 out Dictionary<PluginInfo, string> critical,
                 out Dictionary<PluginInfo, string> major,
                 out Dictionary<PluginInfo, string> minor)) {
                 ShowModRemoverDialog(critical, major, minor);
+            } else if (AutoLoadLastSave) {
+                LoadLastSaveGame();
             } else {
                 ListenForSubscriptionChange();
             }
