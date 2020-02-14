@@ -55,12 +55,9 @@ namespace TrafficManager.Compatibility {
             StringBuilder sb = new StringBuilder(6000);
 
             sb.AppendFormat(
-                "Scanning Mods (scanMinor={0}, scanDisabled={1}):\n\n",
+                "Scanning (scanMinor={0}, scanDisabled={1})...\n\n",
                 scanMinor,
                 scanDisabled);
-
-            // log entry format
-            string entryFormat = "{0} {1} {2} {3}\n";
 
             // Variables for log file entries
             string logEnabled;
@@ -68,9 +65,10 @@ namespace TrafficManager.Compatibility {
             string logIncompatible;
 
             // Common strings
-            string asterisk = "*";
-            string space = " ";
-            string local = "(local)";
+            string entryFormat = "{0} {1} {2} {3}\n";
+            string strAsterisk = "*";
+            string strSpace = " ";
+            string strLocal = "(local)";
             string strCritical = "C";
             string strMajor = "M";
             string strMinor = "m";
@@ -88,9 +86,9 @@ namespace TrafficManager.Compatibility {
                         bool isLocal = workshopId == Local;
 
                         // Values for log file entry
-                        logEnabled = mod.isEnabled ? asterisk : space;
-                        logWorkshopId = isLocal ? local : workshopId.ToString();
-                        logIncompatible = space;
+                        logEnabled = mod.isEnabled ? strAsterisk : strSpace;
+                        logWorkshopId = isLocal ? strLocal : workshopId.ToString();
+                        logIncompatible = strSpace;
 
                         if (isLocal) {
 
@@ -137,9 +135,8 @@ namespace TrafficManager.Compatibility {
 
                 } catch (Exception e) {
                     Log.ErrorFormat(
-                        "Error scanning mod '{0}', workshopId {1}:\n{2}",
-                        mod.name,
-                        mod.publishedFileID.AsUInt64,
+                        "Error scanning mod {0}:\n{1}",
+                        mod.modPath,
                         e.ToString());
                 }
             }

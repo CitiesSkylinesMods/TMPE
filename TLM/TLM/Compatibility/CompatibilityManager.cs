@@ -33,10 +33,9 @@ namespace TrafficManager.Compatibility {
         internal static bool AutoLoadLastSave;
 
         /// <summary>
-        /// If true we can do stuff even if it looks like something is being loaded.
-        /// Get's set to false after first use or if the logo screens have already finished.
+        /// Is the compatibility checker paused? We pause it when active scene is not "MainMenu".
         /// </summary>
-        internal static bool RunOnStartup = true;
+        internal static bool Paused = true;
 
         /// <summary>
         /// Initializes static members of the <see cref="CompatibilityManager"/> class.
@@ -47,8 +46,7 @@ namespace TrafficManager.Compatibility {
                 AutoLoadLastSave = LauncherLoginData.instance.m_continue;
                 LauncherLoginData.instance.m_continue = false;
                 Log.Info($"CompatibilityManager.ctor(): AutoLoadLastSave = {AutoLoadLastSave}");
-            }
-            catch {
+            } catch {
                 AutoLoadLastSave = false;
             }
 
@@ -67,16 +65,21 @@ namespace TrafficManager.Compatibility {
         /// checks when applicable.
         /// </summary>
         public static void Activate() {
+            // Pause the compatibility checker if scene changes to something other than "MainMenu"
+            SceneManager.activeSceneChanged += OnSceneChange;
+
+            // todo: avoid checks when hotloading in-game
             if (UIView.GetAView() != null) {
                 // TM:PE enabled via Main Menu > Content Manager so run now
                 Log.Info("CompatibilityManager.Activate()");
-                RunOnStartup = false;
+                Paused = false;
                 PerformChecks();
             } else {
                 // TM:PE was already enabled on game load, or via mod autoenabler;
                 // we must wait for main menu before doing anything else
                 Log.Info("CompatibilityManager.Activate(): Waiting for main menu...");
-                LoadingManager.instance.m_introLoaded += PerformChecks;
+                Paused = true;
+                LoadingManager.instance.m_introLoaded += OnIntroLoaded;
             }
         }
 
@@ -86,20 +89,55 @@ namespace TrafficManager.Compatibility {
         public static void Deactivate() {
             Log.Info("CompatibilityManager.Deactivate()");
             LoadingManager.instance.m_introLoaded -= PerformChecks;
-            Singleton<PluginManager>.instance.eventPluginsChanged -= PerformChecks;
+            Singleton<PluginManager>.instance.eventPluginsChanged -= OnPluginsChanged;
+            SceneManager.activeSceneChanged -= OnSceneChange;
+        }
+
+        /// <summary>
+        /// Triggered when app intro screens have finished.
+        /// </summary>
+        private static void OnIntroLoaded() {
+            LoadingManager.instance.m_introLoaded -= OnIntroLoaded;
+            Paused = false;
+            PerformChecks();
+        }
+
+        /// <summary>
+        /// Triggered when plugins change.
+        /// </summary>
+        private static void OnPluginsChanged() {
+            if (!Paused) {
+                PerformChecks();
+            }
+        }
+
+        /// <summary>
+        /// Triggered when scene changes.
+        ///
+        /// Pause the compatibility checker if scene is not "MainMenu".
+        /// </summary>
+        /// 
+        /// <param name="current">The current <see cref="Scene"/>.</param>
+        /// <param name="next">The <see cref="Scene"/> being transitioned to.</param>
+        private static void OnSceneChange(Scene current, Scene next) {
+            Log.InfoFormat(
+                "CompatibilityManager.OnSceneChange('{1}')",
+                next.name);
+            Paused = next.name != "MainMenu";
         }
 
         /// <summary>
         /// Checks to see current game version is the one TM:PE is expecting.
         /// </summary>
+        /// 
         /// <returns>Returns <c>true</c> if wrong game version, otherwise <c>false</c>.</returns>
-        internal static bool IsUnexpectedGameVersion() {
+        internal static bool CheckGameVersion() {
             Log.InfoFormat(
-                "CompatibilityManager.IsUnexpectedGameVersion(): Expect: {0}, Actual: {1}",
+                "CompatibilityManager.CheckGameVersion(): Expect: {0}, Actual: {1}",
                 TrafficManagerMod.ExpectedGameVersion.ToString(3),
                 CurrentGameVersion.ToString(3));
 
-            return CurrentGameVersion != TrafficManagerMod.ExpectedGameVersion;
+            return CurrentGameVersion == TrafficManagerMod.ExpectedGameVersion;
         }
 
         /// <summary>
@@ -156,7 +194,10 @@ namespace TrafficManager.Compatibility {
         /// 
         /// <returns>Returns <c>true</c> if safe to run tests, otherwise <c>false</c>.</returns>
         internal static bool CanWeDoStuff() {
-            //if (SceneManager.
+            if (SceneManager.GetActiveScene().name == "MainMenu") {
+                Log.Info("CompatibilityManager.CanWeDoStuff()? Yes, 'MainMenu' scene");
+                return true;
+            }
 
             // make sure we're not loading a game/asset/etc
             if (Singleton<LoadingManager>.instance.m_currentlyLoading) {
@@ -170,9 +211,7 @@ namespace TrafficManager.Compatibility {
                 return false;
             }
 
-            Log.Info($"CompatibilityManager.CanWeDoStuff()? {LoadingExtension.NotInGameOrEditor}");
-
-            return LoadingExtension.NotInGameOrEditor;
+            return !Paused;
         }
 
         /// <summary>
@@ -207,26 +246,26 @@ namespace TrafficManager.Compatibility {
             //MainMenu.Invoke("AutoContinue", 2.5f);
         }
 
+        internal static void LogScenes() {
+            foreach (Scene scene in SceneManager.GetAllScenes()) {
+                Log.Info($"Scene: {scene.name}");
+            }
+        }
+
         /// <summary>
         /// Runs through entire compatibility checker sequence
         ///
         /// Note: This method is either invoked directly, or via an event, hence being static.
         /// </summary>
         private static void PerformChecks() {
-            if (RunOnStartup) {
-                RunOnStartup = false;
-                LoadingManager.instance.m_introLoaded -= PerformChecks;
-            } else if (!CanWeDoStuff()) {
-                return;
-            }
-
             Log.InfoFormat(
                 "CompatibilityManager.PerformChecks() GUID = {0}",
                 SelfGuid);
 
             LogRelevantDLC();
+            LogScenes();
 
-            if (IsUnexpectedGameVersion()) {
+            if (!CheckGameVersion()) {
                 //todo
             } else if (HasMultipleAssemblies()) {
                 ShowAssemblyChooser();

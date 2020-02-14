@@ -1,6 +1,6 @@
 namespace TrafficManager {
     using ColossalFramework.Globalization;
-    using ColossalFramework.UI;
+    //using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
@@ -9,21 +9,40 @@ namespace TrafficManager {
     using TrafficManager.Compatibility;
     using TrafficManager.State;
     using TrafficManager.UI;
-    using static TrafficManager.Util.Shortcuts;
-    using ColossalFramework;
+    //using static TrafficManager.Util.Shortcuts;
+    //using ColossalFramework;
+    using UnityEngine.SceneManagement;
 
     /// <summary>
     /// The main class of the mod, which gets instantiated by the game engine.
     /// </summary>
     public class TrafficManagerMod : IUserMod {
+#if LABS
+        /// <summary>
+        /// Build configuration <c>RELEASE LABS</c>.
+        /// </summary>
+        public const string BRANCH = "LABS";
+#elif DEBUG
+        /// <summary>
+        /// Build configuration <c>DEBUG</c>.
+        /// </summary>
+        public const string BRANCH = "DEBUG";
+#else
+        /// <summary>
+        /// Build configuration <c>RELEASE</c>.
+        /// </summary>
+        public const string BRANCH = "STABLE";
+#endif
+
         /// <summary>
         /// Defines the game version that this version of TM:PE is expecting.
-        /// See <see cref="CompatibilityManager"/> for more info.
+        /// Update when necessary. See <see cref="CompatibilityManager"/> for more info.
         /// </summary>
         public static readonly Version ExpectedGameVersion = new Version(1, 12, 3);
 
         /// <summary>
         /// Gets the mod version as defined by <c>SharedAssemblyInfo.cs</c>.
+        /// Update with each release to workshop.
         /// </summary>
         public static Version ModVersion => typeof(TrafficManagerMod).Assembly.GetName().Version;
 
@@ -31,14 +50,6 @@ namespace TrafficManager {
         /// Gets the string represetnation of <see cref="ModVersion"/>.
         /// </summary>
         public static string VersionString => ModVersion.ToString(3);
-
-#if LABS
-        public const string BRANCH = "LABS";
-#elif DEBUG
-        public const string BRANCH = "DEBUG";
-#else
-        public const string BRANCH = "STABLE";
-#endif
 
         /// <summary>
         /// The full mod name including version number and branch. This is also shown on the TM:PE toolbar in-game.
@@ -65,6 +76,10 @@ namespace TrafficManager {
                 ModName,
                 ExpectedGameVersion.ToString(3));
 
+            Log.InfoFormat(
+                "TrafficManagerMod.OnEnabled(): Active scene = {0}",
+                SceneManager.GetActiveScene().name);
+
             // Log Mono version
             Type monoRt = Type.GetType("Mono.Runtime");
             if (monoRt != null) {
@@ -85,8 +100,12 @@ namespace TrafficManager {
         /// </summary>
         [UsedImplicitly]
         public void OnDisabled() {
-            Log.Info("TM:PE disabled.");
+            Log.InfoFormat(
+                "TrafficManagerMod.OnEnabled(): Active scene = {0}",
+                SceneManager.GetActiveScene().name);
+
             CompatibilityManager.Deactivate();
+
             LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
             Translation.IsListeningToGameLocaleChanged = false; // is this necessary?
 
@@ -103,6 +122,10 @@ namespace TrafficManager {
         /// <param name="helper">A helper for creating UI components.</param>
         [UsedImplicitly]
         public void OnSettingsUI(UIHelperBase helper) {
+            Log.InfoFormat(
+                "TrafficManagerMod.OnSettingsUI(): Active scene: {0}",
+                SceneManager.GetActiveScene().name);
+
             // Note: This bugs out if done in OnEnabled(), hence doing it here instead.
             if (!Translation.IsListeningToGameLocaleChanged) {
                 Translation.IsListeningToGameLocaleChanged = true;

@@ -22,11 +22,6 @@ namespace TrafficManager {
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {
 
-        /// <summary>
-        /// Used by <see cref="Compatibility.CompatibilityManager"/> to detetermine if safe to do compatibility checks.
-        /// </summary>
-        public static bool NotInGameOrEditor { get; private set; } = true;
-
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
         internal static LoadingExtension Instance = null;
 
@@ -279,13 +274,10 @@ namespace TrafficManager {
         }
 
         public override void OnCreated(ILoading loading) {
-            Log._Debug("LoadingExtension.OnCreated() called");
+            Log._Debug("LoadingExtension.OnCreated()");
 
             // SelfDestruct.DestructOldInstances(this);
             base.OnCreated(loading);
-
-            NotInGameOrEditor = false;
-            Log.Info("LoadingExension.OnCreated(): NotInGameOrEditor = false");
 
             Detours = new List<Detour>();
             RegisteredManagers = new List<ICustomManager>();
@@ -330,19 +322,14 @@ namespace TrafficManager {
         }
 
         public override void OnReleased() {
+            Log.Info("LoadingExension.OnReleased()");
             Instance = null;
             base.OnReleased();
-
-            NotInGameOrEditor = true;
-            Log.Info("LoadingExension.OnReleased(): NotInGameOrEditor = true");
         }
 
         public override void OnLevelUnloading() {
-            Log.Info("OnLevelUnloading");
+            Log.Info("LoadingExtension.OnLevelUnloading()");
             base.OnLevelUnloading();
-
-            NotInGameOrEditor = true;
-            Log.Info("LoadingExension.OnLevelUnloading: NotInGameOrEditor = true");
 
             CustomPathManager._instance.WaitForAllPaths();
 
