@@ -1,6 +1,5 @@
 namespace TrafficManager {
     using ColossalFramework.Globalization;
-    //using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
@@ -9,8 +8,6 @@ namespace TrafficManager {
     using TrafficManager.Compatibility;
     using TrafficManager.State;
     using TrafficManager.UI;
-    //using static TrafficManager.Util.Shortcuts;
-    //using ColossalFramework;
     using UnityEngine.SceneManagement;
 
     /// <summary>

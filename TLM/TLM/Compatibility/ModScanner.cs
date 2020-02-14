@@ -176,9 +176,8 @@ namespace TrafficManager.Compatibility {
                 name = ((IUserMod)mod.userModInstance).Name;
             } catch {
                 Log.ErrorFormat(
-                    "Unable to get userModInstrance.Name for '{0}', workshopId {1}.",
-                    mod.name,
-                    mod.publishedFileID.AsUInt64);
+                    "Unable to get userModInstrance.Name for {0}",
+                    mod.modPath);
                 name = mod.name;
             }
             return name;
@@ -197,9 +196,8 @@ namespace TrafficManager.Compatibility {
                 id = mod.userModInstance.GetType().Assembly.ManifestModule.ModuleVersionId;
             } catch {
                 Log.ErrorFormat(
-                    "Unable to get Guid for '{0}', workshopId {1}.",
-                    mod.name,
-                    mod.publishedFileID.AsUInt64);
+                    "Unable to get Guid for {0}",
+                    mod.modPath);
                 id = Guid.Empty;
             }
             return id;

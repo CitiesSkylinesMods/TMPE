@@ -141,19 +141,6 @@ namespace TrafficManager.Compatibility {
         }
 
         /// <summary>
-        /// Checks to see if there are multiple TM:PE assemblies loaded in RAM, which can
-        /// cause severe save/load issues.
-        /// See: <c>krzychu124/Cities-Skylines-Traffic-Manager-President-Edition #608 and #211</c>.
-        /// </summary>
-        /// 
-        /// <returns>Returns <c>true</c> if multiple assemblies, otherwise <c>false</c>.</returns>
-        internal static bool HasMultipleAssemblies() {
-            // todo
-            Log.Info("CompatibilityManager.HasMultipleAssemblies()");
-            return false;
-        }
-
-        /// <summary>
         /// Displays a panel allowing user to choose which assembly they want to use.
         /// A game restart is required to make changes take effect.
         /// </summary>
@@ -246,12 +233,6 @@ namespace TrafficManager.Compatibility {
             //MainMenu.Invoke("AutoContinue", 2.5f);
         }
 
-        internal static void LogScenes() {
-            foreach (Scene scene in SceneManager.GetAllScenes()) {
-                Log.Info($"Scene: {scene.name}");
-            }
-        }
-
         /// <summary>
         /// Runs through entire compatibility checker sequence
         ///
@@ -263,11 +244,10 @@ namespace TrafficManager.Compatibility {
                 SelfGuid);
 
             LogRelevantDLC();
-            LogScenes();
 
             if (!CheckGameVersion()) {
                 //todo
-            } else if (HasMultipleAssemblies()) {
+            } else if (AssemblyScanner.Scan()) {
                 ShowAssemblyChooser();
             } else if (ModScanner.DetectIncompatibleMods(
                 out Dictionary<PluginInfo, string> critical,
