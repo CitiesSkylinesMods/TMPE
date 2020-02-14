@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
     using static Util.SegmentLaneTraverser;
     using System.Collections.Generic;
@@ -8,12 +8,36 @@
     using TrafficManager.Util.Caching;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.UI.Helpers;
+    using static TrafficManager.Util.Shortcuts;
+    using ColossalFramework.Math;
+    using CSUtil.Commons;
 
     public class ParkingRestrictionsTool : SubTool {
+        private ParkingRestrictionsManager parkingManager => ParkingRestrictionsManager.Instance;
+
+
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir
             = new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
 
         private const float SIGN_SIZE = 80f;
+
+        private struct GUIHoverInfo {
+            internal NetInfo.Direction direction;
+            internal ushort segmentId;
+
+            public static bool operator ==(GUIHoverInfo a, GUIHoverInfo b) =>
+                a.segmentId == b.segmentId && a.direction == b.direction;
+
+            public static bool operator !=(GUIHoverInfo a, GUIHoverInfo b) =>
+                !(a == b);
+
+        }
+        private SegmentLaneMarker LaneMarker;
+        private uint HoveredLaneId;
+        private GUIHoverInfo Hover;
+        private GUIHoverInfo CachedHover;
+
 
         /// <summary>
         /// Stores potentially visible segment ids while the camera did not move
@@ -34,9 +58,97 @@
 
         public override void OnActivate() { }
 
-        public override void OnPrimaryClickOverlay() { }
+        public override void OnPrimaryClickOverlay() {
 
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) { }
+        }
+
+        private SegmentLaneMarker GetLaneMarker(ushort segmentId, NetInfo.Direction direction) {
+            Bezier3 bezier = default(Bezier3);
+            netService.IterateSegmentLanes(
+                segmentId,
+                (uint laneId,
+                ref NetLane lane,
+                NetInfo.Lane laneInfo,
+                ushort _,
+                ref NetSegment segment,
+                byte laneIndex) => {
+                    bool isParking = laneInfo.m_laneType.IsFlagSet(NetInfo.LaneType.Parking);
+                    if (isParking && laneInfo.m_direction == direction) {
+                        bezier = lane.m_bezier;
+                        return false;
+                    }
+                    return true;
+                });
+            return new SegmentLaneMarker(bezier);
+        }
+
+        private bool IsSameDirection(ushort segmentId1, ushort segmentId2) {
+            bool invert1 = segmentId1.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+            bool invert2 = segmentId2.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+            return invert1 == invert2;
+        } 
+
+        private void RenderRoadParking(RenderManager.CameraInfo cameraInfo) {
+            NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
+            bool LaneVisitor(SegmentLaneVisitData data) {
+                ushort segmentId = data.SegVisitData.CurSeg.segmentId;
+                int laneIndex = data.CurLanePos.laneIndex;
+                NetInfo.Lane laneInfo = segmentId.ToSegment().Info.m_lanes[laneIndex];
+
+                NetInfo.Direction direction = laneInfo.m_direction;
+                if(!IsSameDirection(segmentId, Hover.segmentId)) {
+                    direction = NetInfo.InvertDirection(direction);
+                }
+                if (direction == Hover.direction) {
+                    bool pressed = Input.GetMouseButton(0);
+                    Color color = MainTool.GetToolColor(pressed, false);
+                    uint otherLaneId = data.CurLanePos.laneId;
+                    var laneMarker = new SegmentLaneMarker(laneBuffer[otherLaneId].m_bezier);
+                    laneMarker.RenderOverlay(cameraInfo, color, enlarge: pressed);
+                }
+
+                return true;
+            }
+
+            SegmentLaneTraverser.Traverse(
+                Hover.segmentId,
+                SegmentTraverser.TraverseDirection.AnyDirection,
+                SegmentTraverser.TraverseSide.AnySide,
+                SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                SegmentTraverser.SegmentStopCriterion.Junction,
+                ParkingRestrictionsManager.LANE_TYPES,
+                ParkingRestrictionsManager.VEHICLE_TYPES,
+                LaneVisitor);
+        }
+
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+            if(Hover.segmentId == 0) {
+                return;
+            }
+            bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            if (shift) {
+                RenderRoadParking(cameraInfo);
+                return;
+            }
+
+            bool allowed = parkingManager.IsParkingAllowed(Hover.segmentId, Hover.direction);
+            bool pressed = Input.GetMouseButton(0);
+            Color color;
+            if (pressed) {
+                color = MainTool.GetToolColor(true, false);
+            } else if(allowed){
+                color = Color.green;
+            } else {
+                color = Color.red;
+            }
+
+            if(Hover != CachedHover) {
+                CachedHover = Hover;
+                LaneMarker = GetLaneMarker(Hover.segmentId,Hover.direction);
+            }
+
+            LaneMarker.RenderOverlay(cameraInfo, color, enlarge: pressed);
+        }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
             if (viewOnly && !Options.parkingRestrictionsOverlay) {
@@ -58,7 +170,6 @@
 
         private void ShowSigns(bool viewOnly) {
             NetManager netManager = Singleton<NetManager>.instance;
-            ParkingRestrictionsManager parkingManager = ParkingRestrictionsManager.Instance;
 
             var currentCamera = new CameraTransformValue(Camera.main);
             Transform currentCameraTransform = Camera.main.transform;
@@ -98,8 +209,8 @@
                 } // end for all segments
             }
 
+            bool hovered = false;
             bool clicked = !viewOnly && MainTool.CheckClicked();
-
             for (int segmentIdIndex = CachedVisibleSegmentIds.Size - 1;
                  segmentIdIndex >= 0;
                  segmentIdIndex--)
@@ -115,27 +226,36 @@
                 }
 
                 // no parking restrictions overlay on selected segment when in vehicle restrictions mode
-                DrawParkingRestrictionHandles(
+                var dir = DrawParkingRestrictionHandles(
                     segmentId,
                     clicked,
                     ref netManager.m_segments.m_buffer[segmentId],
                     viewOnly,
                     ref camPos);
+                if (dir != NetInfo.Direction.None) {
+                    Hover.segmentId = segmentId;
+                    Hover.direction = dir;
+                    hovered = true;
+                } 
+            }
+            if (!hovered) {
+                Hover.segmentId = 0;
+                Hover.direction = NetInfo.Direction.None;
             }
         }
 
-        private bool DrawParkingRestrictionHandles(ushort segmentId,
+        private NetInfo.Direction DrawParkingRestrictionHandles(ushort segmentId,
                                                    bool clicked,
                                                    ref NetSegment segment,
                                                    bool viewOnly,
                                                    ref Vector3 camPos) {
             if (viewOnly && !Options.parkingRestrictionsOverlay) {
-                return false;
+                return NetInfo.Direction.None;
             }
 
             NetManager netManager = Singleton<NetManager>.instance;
             ParkingRestrictionsManager parkingManager = ParkingRestrictionsManager.Instance;
-            bool hovered = false;
+            NetInfo.Direction hoveredDirection = NetInfo.Direction.None;
 
             // draw parking restriction signs over mean middle points of lane beziers
             if (!segmentCenterByDir.TryGetValue(
@@ -178,14 +298,14 @@
 
                 if (hoveredHandle) {
                     // mouse hovering over sign
-                    hovered = true;
+                    hoveredDirection = e.Key;
                 }
 
                 GUI.color = guiColor;
                 GUI.DrawTexture(boundingBox, RoadUI.ParkingRestrictionTextures[allowed]);
 
                 if (hoveredHandle && clicked && !IsCursorInPanel() &&
-                    parkingManager.ToggleParkingAllowed(segmentId, e.Key)) {
+                    parkingManager.ToggleParkingAllowed(segmentId, hoveredDirection)) {
                     allowed = !allowed;
 
                     if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
@@ -243,7 +363,7 @@
                 GUI.color = guiColor;
             }
 
-            return hovered;
+            return hoveredDirection;
         }
     }
 }
