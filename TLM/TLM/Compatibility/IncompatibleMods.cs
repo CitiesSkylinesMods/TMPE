@@ -68,6 +68,7 @@ namespace TrafficManager.Compatibility {
                 { 929114228u,  Severity.Critical }, // New Roads for Network Extensions
 
                 // Other game-breaking mods
+                { 411095553u,  Severity.Critical }, // Terraform Tool v0.9 (just sick of seeing this break games!)
                 { 414702884u,  Severity.Critical }, // Zoneable Pedestrian Paths
                 { 417926819u,  Severity.Critical }, // Road Assistant
                 { 422554572u,  Severity.Critical }, // 81 Tiles Updated
@@ -77,6 +78,7 @@ namespace TrafficManager.Compatibility {
                 { 658653260u,  Severity.Critical }, // Network Nodes Editor [Experimental]
                 { 912329352u,  Severity.Critical }, // Building Anarchy (just sick of seeing this break games!)
                 { 1072157697u, Severity.Critical }, // Cargo Info
+                { 1767246646u, Severity.Critical }, // AutoLineBudget (PropVehCount errors, using .Net Framework 2, published as camera script?!!)
 
                 // Incompatible with TM:PE (patch conflicts or does not fire events)
                 { 512341354u,  Severity.Major }, // Central Services Dispatcher (WtM)

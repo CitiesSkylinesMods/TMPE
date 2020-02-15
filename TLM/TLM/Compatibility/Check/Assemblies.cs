@@ -37,13 +37,10 @@ namespace TrafficManager.Compatibility.Check {
             foreach (Assembly asm in assemblies) {
                 AssemblyName details = asm.GetName();
                 if (details.Name.Contains("TrafficManager")) {
-                    Version ver;
-                    string build;
-
-                    ExtractVersionDetails(asm, out ver, out build);
+                    ExtractVersionDetails(asm, out Version ver, out string build);
 
                     Log.InfoFormat(
-                        "{0} v{1} {2}",
+                        "-- {0} v{1} {2}",
                         details.Name,
                         ver.ToString(3),
                         build);
@@ -54,15 +51,9 @@ namespace TrafficManager.Compatibility.Check {
 
         internal static void ExtractVersionDetails(Assembly asm, out Version ver, out string build) {
 
-            Type tmMod = asm.GetType();
+            Type mod = asm.GetType("TrafficManager.TrafficManagerMod");
 
             Log.Info("----------------------------------");
-            try {
-                Log.Info(tmMod.ToString());
-            }
-            catch (Exception e) {
-                Log.Error(e.ToString());
-            }
 
             ver = asm.GetName().Version;
 
@@ -70,12 +61,19 @@ namespace TrafficManager.Compatibility.Check {
                 try {
                     // get dirty version string, which may include stuff like ` hotfix`, `-alpha1`, etc.
 
-                    Log.Info($"{tmMod.GetProperty("Version", PUBLIC_STATIC)}");
+                    string dirty;
+                    try {
+                        dirty = mod
+                            .GetField("Version", PUBLIC_STATIC)
+                            .GetValue(mod)
+                            .ToString();
+                    } catch {
+                        dirty = mod
+                            .GetProperty("Version", PUBLIC_STATIC)
+                            .GetValue(mod, null)
+                            .ToString();
+                    }
 
-                    string dirty = tmMod
-                        .GetProperty("Version", PUBLIC_STATIC)
-                        .GetValue(asm, null)
-                        .ToString();
                     Log.Info("Raw string: "+dirty);
 
                     // clean the raw string in to something that resembles a verison number
@@ -94,9 +92,9 @@ namespace TrafficManager.Compatibility.Check {
             build = OBSOLETE;
 
             try {
-                build = tmMod
+                build = mod
                     .GetField("BRANCH", PUBLIC_STATIC)
-                    .GetValue(asm)
+                    .GetValue(mod)
                     .ToString();
             } catch {
                 // treat as obsolete
