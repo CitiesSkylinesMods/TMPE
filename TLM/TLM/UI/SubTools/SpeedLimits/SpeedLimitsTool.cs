@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
+namespace TrafficManager.UI.SubTools.SpeedLimits {
     using ColossalFramework.UI;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -10,8 +10,10 @@
     using TrafficManager.State;
     using TrafficManager.Traffic;
     using TrafficManager.UI.Textures;
+    using TrafficManager.UI.Helpers;
     using TrafficManager.Util.Caching;
     using TrafficManager.Util;
+    using static TrafficManager.Util.Shortcuts;
     using UnityEngine;
 
     public class SpeedLimitsTool : SubTool {
@@ -73,6 +75,16 @@
         private Texture2D roadTexture;
         private bool showLimitsPerLane;
 
+        private struct RenderData {
+            internal ushort segmentId;
+            internal uint laneId;
+            internal byte laneIndex;
+            internal NetInfo.Lane laneInfo;
+            internal NetInfo.Direction direction;
+            internal bool showPerLane;
+        }
+        private RenderData renderData;
+
         public SpeedLimitsTool(TrafficManagerTool mainTool)
             : base(mainTool)
         {
@@ -128,7 +140,100 @@
             // ShowSigns(false);
         }
 
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) { }
+        private static NetLane[] laneBuffer => NetManager.instance.m_lanes.m_buffer;
+
+        private void RenderLaneOverlay(RenderManager.CameraInfo cameraInfo, uint laneId) {
+            var marker = new SegmentLaneMarker(laneBuffer[laneId].m_bezier);
+            if (!renderData.showPerLane) {
+                marker.size = 3f;
+            }
+            bool pressed = Input.GetMouseButton(0);
+            Color color = pressed ? Color.yellow : Color.white;
+            marker.RenderOverlay(cameraInfo, color, pressed);
+        }
+
+        private bool IsSameDirection(ushort segmentId1, ushort segmentId2) {
+            bool invert1 = segmentId1.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+            bool invert2 = segmentId2.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+            return invert1 == invert2;
+        }
+
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+            if (renderData.segmentId == 0) {
+                return;
+            }
+
+            bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+            if (shift) {
+                if (!renderData.showPerLane) {
+                    //multi lane mode.
+                    SegmentLaneTraverser.Traverse(
+                        renderData.segmentId,
+                        SegmentTraverser.TraverseDirection.AnyDirection,
+                        SegmentTraverser.TraverseSide.AnySide,
+                        SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                        SegmentTraverser.SegmentStopCriterion.Junction,
+                        SpeedLimitManager.LANE_TYPES,
+                        SpeedLimitManager.VEHICLE_TYPES,
+                        data => {
+                            ushort segmentId = data.SegVisitData.CurSeg.segmentId;
+                            int laneIndex = data.CurLanePos.laneIndex;
+                            NetInfo.Lane laneInfo = segmentId.ToSegment().Info.m_lanes[laneIndex];
+                            NetInfo.Direction direction = laneInfo.m_direction;
+                            if (!IsSameDirection(segmentId, renderData.segmentId)) {
+                                direction = NetInfo.InvertDirection(direction);
+                            }
+                            if (renderData.direction == direction) {
+                                RenderLaneOverlay(cameraInfo, data.CurLanePos.laneId);
+                            }
+                            return true;
+                        });
+
+                } else {
+                    int initialSortedLaneIndex = -1;
+                    SegmentLaneTraverser.Traverse(
+                        renderData.segmentId,
+                        SegmentTraverser.TraverseDirection.AnyDirection,
+                        SegmentTraverser.TraverseSide.AnySide,
+                        SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                        SegmentTraverser.SegmentStopCriterion.Junction,
+                        SpeedLimitManager.LANE_TYPES,
+                        SpeedLimitManager.VEHICLE_TYPES,
+                        data => {
+                            if (data.SegVisitData.Initial &&
+                                data.CurLanePos.laneIndex == renderData.laneIndex) {
+                                initialSortedLaneIndex = data.SortedLaneIndex;
+                            }
+                            if (initialSortedLaneIndex == data.SortedLaneIndex) {
+                                RenderLaneOverlay(cameraInfo, data.CurLanePos.laneId);
+                            }
+                            return true;
+                        });
+                }
+            } else {
+                if (renderData.showPerLane) {
+                    RenderLaneOverlay(cameraInfo, renderData.laneId);
+                } else {
+                    netService.IterateSegmentLanes(
+                        renderData.segmentId,
+                        (uint laneId,
+                        ref NetLane lane,
+                        NetInfo.Lane laneInfo,
+                        ushort segmentId,
+                        ref NetSegment segment,
+                        byte laneIndex) => {
+                            bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
+                            render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
+                            render &= laneInfo.m_direction == renderData.direction;
+                            if (render) {
+                                RenderLaneOverlay(cameraInfo, laneId);
+                            }
+                            return true;
+                        });
+                }
+            }
+        }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
             if (viewOnly && !Options.speedLimitsOverlay) {
@@ -188,6 +293,7 @@
                 } // end for all segments
             }
 
+            bool hover = false;
             for (int segmentIdIndex = CachedVisibleSegmentIds.Size - 1;
                  segmentIdIndex >= 0;
                  segmentIdIndex--)
@@ -200,11 +306,14 @@
                 }
 
                 // no speed limit overlay on selected segment when in vehicle restrictions mode
-                DrawSpeedLimitHandles(
+                hover|= DrawSpeedLimitHandles(
                     segmentId,
                     ref netManager.m_segments.m_buffer[segmentId],
                     viewOnly,
                     ref camPos);
+            }
+            if (!hover) {
+                renderData.segmentId = 0;
             }
         }
 
@@ -546,14 +655,14 @@
             GUILayout.EndVertical();
         }
 
-        private void DrawSpeedLimitHandles(ushort segmentId,
+        private bool DrawSpeedLimitHandles(ushort segmentId,
                                            ref NetSegment segment,
                                            bool viewOnly,
-                                           ref Vector3 camPos)
-        {
+                                           ref Vector3 camPos) {
             if (viewOnly && !Options.speedLimitsOverlay) {
-                return;
+                return false;
             }
+            bool ret = false;
 
             Vector3 center = segment.m_bounds.center;
             NetManager netManager = Singleton<NetManager>.instance;
@@ -570,6 +679,8 @@
 
             // US signs are rectangular, all other are round
             float speedLimitSignVerticalScale = GetVerticalTextureScale();
+
+            renderData.showPerLane = showPerLane;
 
             if (showPerLane) {
                 // show individual speed limit handle per lane
@@ -663,9 +774,14 @@
                             speedLimitSignSize);
                     }
 
-                    if (hoveredHandle) { }
-
-                    if (hoveredHandle && Input.GetMouseButton(0) && !IsCursorInPanel()) {
+                    if (hoveredHandle) {
+                        renderData.segmentId = segmentId;
+                        renderData.laneId = laneId;
+                        renderData.laneIndex = laneIndex;
+                        renderData.laneInfo = laneInfo;
+                        ret = true;
+                    }
+                    if (hoveredHandle && Input.GetMouseButtonDown(0) && !IsCursorInPanel()) {
                         SpeedLimitManager.Instance.SetSpeedLimit(
                             segmentId,
                             laneIndex,
@@ -745,9 +861,6 @@
 
                     guiColor.a = TrafficManagerTool.GetHandleAlpha(hoveredHandle);
 
-                    if (hoveredHandle) {
-                        // mouse hovering over sign
-                    }
 
                     // Draw something right here, the road sign texture
                     GUI.color = guiColor;
@@ -757,7 +870,12 @@
 
                     GUI.DrawTexture(boundingBox, tex);
 
-                    if (hoveredHandle && Input.GetMouseButton(0) && !IsCursorInPanel()) {
+                    if (hoveredHandle) {
+                        renderData.segmentId = segmentId;
+                        renderData.direction = e.Key;
+                        ret = true;
+                    }
+                    if (hoveredHandle && Input.GetMouseButtonDown(0) && !IsCursorInPanel()) {
                         // change the speed limit to the selected one
                         // Log._Debug($"Setting speed limit of segment {segmentId}, dir {e.Key.ToString()}
                         //     to {speedLimitToSet}");
@@ -820,6 +938,7 @@
                     GUI.color = guiColor;
                 }
             }
+            return ret;
         }
 
         public static string ToMphPreciseString(SpeedValue speed) {
