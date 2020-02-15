@@ -37,6 +37,8 @@ namespace TrafficManager.Compatibility.Check {
             foreach (Assembly asm in assemblies) {
                 AssemblyName details = asm.GetName();
                 if (details.Name.Contains("TrafficManager")) {
+                    Log.Info("--------------------------- extracting ver info ---------------");
+
                     ExtractVersionDetails(asm, out Version ver, out string build);
 
                     Log.InfoFormat(
@@ -53,35 +55,46 @@ namespace TrafficManager.Compatibility.Check {
 
             Type mod = asm.GetType("TrafficManager.TrafficManagerMod");
 
-            Log.Info("----------------------------------");
-
             ver = asm.GetName().Version;
 
             if (ver < VersionedByAssembly) {
                 try {
                     // get dirty version string, which may include stuff like ` hotfix`, `-alpha1`, etc.
 
-                    string dirty;
-                    try {
-                        dirty = mod
-                            .GetField("Version", PUBLIC_STATIC)
-                            .GetValue(mod)
-                            .ToString();
-                    } catch {
-                        dirty = mod
-                            .GetProperty("Version", PUBLIC_STATIC)
-                            .GetValue(mod, null)
-                            .ToString();
+                    string dirty = string.Empty;
+
+                    MemberInfo[] results = mod
+                        .GetMember("Version", PUBLIC_STATIC);
+
+                    if (results.Length > 0) {
+                        MemberInfo result = results[0];
+
+                        if (result.MemberType == MemberTypes.Property) {
+                            dirty = mod
+                                .GetProperty("Version", PUBLIC_STATIC)
+                                .GetValue(mod, null)
+                                .ToString();
+                        } else if (result.MemberType == MemberTypes.Field) {
+                            dirty = mod
+                                .GetField("Version", PUBLIC_STATIC)
+                                .GetValue(mod)
+                                .ToString();
+                        } else if (result.MemberType == MemberTypes.Method) {
+                            dirty = mod
+                                .GetMethod("Version", PUBLIC_STATIC)
+                                .Invoke(null, null)
+                                .ToString();
+                        }
                     }
 
-                    Log.Info("Raw string: "+dirty);
-
-                    // clean the raw string in to something that resembles a verison number
-                    string clean = Regex.Match(dirty, @"[0-9]+(?:\.[0-9]+)+").Value;
-                    Log.Info("clean string: " + clean);
-
-                    // parse in to Version instance
-                    ver = new Version(clean);
+                    if (!string.IsNullOrEmpty(dirty)) {
+                        Log.Info("Raw string: " + dirty);
+                        // clean the raw string in to something that resembles a verison number
+                        string clean = Regex.Match(dirty, @"[0-9]+(?:\.[0-9]+)+").Value;
+                        Log.Info("clean string: " + clean);
+                        // parse in to Version instance
+                        ver = new Version(clean);
+                    }
                 }
                 catch (Exception e) {
                     Log.Error(e.ToString());
