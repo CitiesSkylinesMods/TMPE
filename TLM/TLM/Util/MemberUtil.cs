@@ -45,6 +45,8 @@ namespace TrafficManager.Util {
         /// Type type = asm.GetType("TrafficManager.TrafficManagerMod");
         /// object instance = Activator.CreateInstance(type);
         ///
+        /// string branch;
+        /// 
         /// if (TryGetMemberValue<string>(type, instance, "BRANCH", out string val)) {
         ///     branch = val;
         /// }
