@@ -5,30 +5,36 @@ namespace TrafficManager.Compatibility.Check {
     using ICities;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using System.Text;
     using System.Text.RegularExpressions;
     using static ColossalFramework.Plugins.PluginManager;
+    using TrafficManager.Util;
 
     public class Assemblies {
-
-        /// <summary>
-        /// Used to retrieve <c>Version</c> property.
-        /// </summary>
-        internal const BindingFlags PUBLIC_STATIC = BindingFlags.Public | BindingFlags.Static;
 
         /// <summary>
         /// Default build string if we can't determine LABS, STABLE, or DEBUG.
         /// </summary>
         internal const string OBSOLETE = "OBSOLETE";
 
+        internal const string STABLE = "STABLE";
+
+        internal const string BROKEN = "BROKEN";
+
+        internal const string TMMOD = "TrafficManager.TrafficManagerMod";
+
         internal static readonly Version VersionedByAssembly;
+
+        internal static readonly Version LinuxFanVersion;
 
         /// <summary>
         /// Initializes static members of the <see cref="Assemblies"/> class.
         /// </summary>
         static Assemblies() {
             VersionedByAssembly = new Version(11, 1, 0);
+            LinuxFanVersion = new Version(10, 20);
         }
 
         public static bool Verify(/*out Dictionary<Assembly,Guid> results*/) {
@@ -43,7 +49,7 @@ namespace TrafficManager.Compatibility.Check {
 
                         if (ExtractVersionDetails(asm, out Version ver, out string build)) {
                             Log.InfoFormat(
-                                "-- {0} v{1} {2}",
+                                "Assembly: {0} v{1} {2}",
                                 details.Name,
                                 ver.Build == -1 ? ver.ToString(2) : ver.ToString(3),
                                 build);
@@ -58,107 +64,44 @@ namespace TrafficManager.Compatibility.Check {
             return true; // to do
         }
 
-        internal static MemberTypes GetMemberType(Type mod, string memberName) {
-            MemberInfo[] results = mod
-                .GetMember(memberName, PUBLIC_STATIC);
-
-            if (results.Length == 0) {
-                return MemberTypes.Custom; // couldn't think of anything better to use
-            } else {
-                return results[0].MemberType;
-            }
-        }
-
         internal static bool ExtractVersionDetails(Assembly asm, out Version ver, out string branch) {
 
-            Type mod = asm.GetType("TrafficManager.TrafficManagerMod");
+            ver = asm.GetName().Version;
+            branch = OBSOLETE;
 
-            if (mod == null) {
-                ver = new Version(0, 0, 0);
-                branch = "BROKEN";
-                return false;
-            } else {
-                ver = asm.GetName().Version;
-                branch = OBSOLETE;
-            }
-
-            MemberTypes memberType;
+            Type type = asm.GetType(TMMOD);
+            object instance = Activator.CreateInstance(type);
 
             if (ver < VersionedByAssembly) {
                 try {
-                    // get dirty version string, which may include stuff like ` hotfix`, `-alpha1`, etc.
-
-                    string dirty = string.Empty;
-
-                    memberType = GetMemberType(mod, "Version");
-
-                    if (memberType == MemberTypes.Property) {
-                        //Log.Info("It's a property");
-                        dirty = mod
-                            .GetProperty("Version", PUBLIC_STATIC)
-                            .GetValue(mod, null)
-                            .ToString();
-                    } else if (memberType == MemberTypes.Field) {
-                        //Log.Info("It's a field");
-                        dirty = mod
-                            .GetField("Version", PUBLIC_STATIC)
-                            .GetValue(mod)
-                            .ToString();
-                    } else if (memberType == MemberTypes.Method) {
-                        //Log.Info("It's a method");
-                        dirty = mod
-                            .GetMethod("Version", PUBLIC_STATIC)
-                            .Invoke(null, null)
-                            .ToString();
-                    } else {
-                        //Log.Info("Version: Unsupported member type or not found");
-                    }
-
-                    if (!string.IsNullOrEmpty(dirty)) {
+                    if (MemberUtil.TryGetMemberValue<string>(type, instance, "Version", out string dirty)) {
                         //Log.Info("Raw string: " + dirty);
+
                         // clean the raw string in to something that resembles a verison number
                         string clean = Regex.Match(dirty, @"[0-9]+(?:\.[0-9]+)+").Value;
                         //Log.Info("clean string: " + clean);
+
                         // parse in to Version instance
                         ver = new Version(clean);
                     }
-                } catch (Exception e) {
-                    Log.Info("version failed ----------");
-                    Log.Error(e.ToString());
-                    // use the assembly version we already have
+                }
+                catch {
+                    Log.Warning("Unable to retrieve or parse 'Version' member");
                 }
             }
 
             try {
-                memberType = GetMemberType(mod, "BRANCH");
-
-                if (memberType == MemberTypes.Property) {
-                    //Log.Info("It's a property");
-                    branch = mod
-                        .GetProperty("BRANCH", PUBLIC_STATIC)
-                        .GetValue(mod, null)
-                        .ToString();
-                } else if (memberType == MemberTypes.Field) {
-                    //Log.Info("It's a field");
-                    branch = mod
-                        .GetField("BRANCH", PUBLIC_STATIC)
-                        .GetValue(mod)
-                        .ToString();
-                } else if (memberType == MemberTypes.Method) {
-                    //Log.Info("It's a method");
-                    branch = mod
-                        .GetMethod("BRANCH", PUBLIC_STATIC)
-                        .Invoke(null, null)
-                        .ToString();
-                } else {
-                    //Log.Info("BRANCH: Unsupported member type or not found");
+                if (MemberUtil.TryGetMemberValue<string>(type, instance, "BRANCH", out string val)) {
+                    branch = val;
+                } else if (ver == LinuxFanVersion) { // temporary
+                    branch = STABLE;
                 }
-
-            } catch (Exception e) {
-                Log.Info("branch failed ----------");
-                Log.Error(e.ToString());
-                // treat as obsolete
             }
+            catch {
+                Log.Warning("Unable to retrieve or parse 'BRANCH' member");
+            }
+
+            (instance as IDisposable)?.Dispose();
 
             return true;
         }

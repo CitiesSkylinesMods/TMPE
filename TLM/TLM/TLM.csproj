@@ -287,6 +287,7 @@
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
     <Compile Include="Util\Caching\CameraTransformValue.cs" />
     <Compile Include="Util\Caching\GenericArrayCache.cs" />
+    <Compile Include="Util\MemberUtil.cs" />
     <Compile Include="Util\PriorityRoad.cs" />
     <Compile Include="Util\Shortcuts.cs" />
     <Compile Include="Util\FloatUtil.cs" />
