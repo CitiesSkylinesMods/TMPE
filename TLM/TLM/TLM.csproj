@@ -112,8 +112,9 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CodeProfiler.cs" />
-    <Compile Include="Compatibility\Checks\CheckAssemblies.cs" />
-    <Compile Include="Compatibility\Checks\CheckDLCs.cs" />
+    <Compile Include="Compatibility\Check\Assemblies.cs" />
+    <Compile Include="Compatibility\Check\DLCs.cs" />
+    <Compile Include="Compatibility\Check\Versions.cs" />
     <Compile Include="Compatibility\IncompatibleMods.cs" />
     <Compile Include="Compatibility\Enum\SeverityEnum.cs" />
     <Compile Include="Constants.cs" />
@@ -293,7 +294,7 @@
     <Compile Include="Util\GenericUnsubscriber.cs" />
     <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\LoopUtil.cs" />
-    <Compile Include="Compatibility\Checks\CheckMods.cs" />
+    <Compile Include="Compatibility\Check\Mods.cs" />
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TextureUtil.cs" />

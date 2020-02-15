@@ -8,7 +8,6 @@ namespace TrafficManager.Compatibility {
     using System.Collections.Generic;
     using System.Reflection;
     using System.Text;
-    using TrafficManager.Compatibility.Checks;
     using UnityEngine.SceneManagement;
     using static ColossalFramework.Plugins.PluginManager;
 
@@ -131,20 +130,6 @@ namespace TrafficManager.Compatibility {
         }
 
         /// <summary>
-        /// Checks to see current game version is the one TM:PE is expecting.
-        /// </summary>
-        /// 
-        /// <returns>Returns <c>true</c> if wrong game version, otherwise <c>false</c>.</returns>
-        internal static bool CheckGameVersion() {
-            Log.InfoFormat(
-                "CompatibilityManager.CheckGameVersion(): Expect: {0}, Actual: {1}",
-                TrafficManagerMod.ExpectedGameVersion.ToString(3),
-                CurrentGameVersion.ToString(3));
-
-            return CurrentGameVersion == TrafficManagerMod.ExpectedGameVersion;
-        }
-
-        /// <summary>
         /// Displays a panel allowing user to choose which assembly they want to use.
         /// A game restart is required to make changes take effect.
         /// </summary>
@@ -251,21 +236,24 @@ namespace TrafficManager.Compatibility {
                 "CompatibilityManager.PerformChecks() GUID = {0}",
                 SelfGuid);
 
-            CheckDLCs.Scan();
-
-            if (!CheckGameVersion()) {
+            if (Check.Versions.Verify(TrafficManagerMod.ExpectedGameVersion, CurrentGameVersion)) {
                 //todo
-            } else if (CheckAssemblies.Scan()) {
+            }
+
+            if (Check.Assemblies.Verify()) {
                 ShowAssemblyChooser();
-            } else if (CheckMods.Scan(
+            } else if (Check.Mods.Verify(
                 out Dictionary<PluginInfo, string> critical,
                 out Dictionary<PluginInfo, string> major,
                 out Dictionary<PluginInfo, string> minor)) {
                 ShowModRemoverDialog(critical, major, minor);
-            } else if (AutoLoadLastSave) {
-                LoadLastSaveGame();
             } else {
-                ListenForSubscriptionChange();
+                Check.DLCs.Verify();
+                if (AutoLoadLastSave) {
+                    LoadLastSaveGame();
+                } else {
+                    ListenForSubscriptionChange();
+                }
             }
         }
     }

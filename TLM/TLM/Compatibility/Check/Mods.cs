@@ -1,4 +1,4 @@
-namespace TrafficManager.Compatibility.Checks {
+namespace TrafficManager.Compatibility.Check {
     using ColossalFramework.Plugins;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -14,7 +14,7 @@ namespace TrafficManager.Compatibility.Checks {
     /// <summary>
     /// Scans for known incompatible mods as defined by <see cref="IncompatibleMods.List"/>.
     /// </summary>
-    public class CheckMods {
+    public class Mods {
 
         /// <summary>
         /// Game always uses ulong.MaxValue to depict local mods.
@@ -31,19 +31,19 @@ namespace TrafficManager.Compatibility.Checks {
         /// <param name="minor">A dictionary of minor incompatibilities.</param>
         /// 
         /// <returns>Returns <c>true</c> if incompatible mods detected, otherwise <c>false</c>.</returns>
-        public static bool Scan(
+        public static bool Verify(
             out Dictionary<PluginInfo, string> critical,
             out Dictionary<PluginInfo, string> major,
             out Dictionary<PluginInfo, string> minor) {
 
-            Log.Info("ModScanner.Scan()");
+            Log.Info("Compatibility.Check.Mods.Scan()");
 
             critical = new Dictionary<PluginInfo, string>();
             major = new Dictionary<PluginInfo, string>();
             minor = new Dictionary<PluginInfo, string>();
 
-            // did we detect any incompatible mods yet?
-            bool detected = false;
+            // current verification state
+            bool verified = true;
 
             // check minor severity incompatibilities?
             bool scanMinor = GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup;
@@ -95,7 +95,7 @@ namespace TrafficManager.Compatibility.Checks {
 
                             if (IsLocalModIncompatible(modName) && GetModGuid(mod) != CompatibilityManager.SelfGuid) {
                                 logIncompatible = strCritical;
-                                detected = true;
+                                verified = false;
                                 critical.Add(mod, modName);
                             }
                             modName += $" /{Path.GetFileName(mod.modPath)}";
@@ -105,20 +105,20 @@ namespace TrafficManager.Compatibility.Checks {
                             switch (severity) {
                                 case Severity.Critical:
                                     logIncompatible = strCritical;
-                                    detected = true;
+                                    verified = false;
                                     critical.Add(mod, modName);
                                     break;
                                 case Severity.Major:
                                     logIncompatible = strMajor;
                                     if (mod.isEnabled || scanDisabled) {
-                                        detected = true;
+                                        verified = false;
                                         major.Add(mod, modName);
                                     }
                                     break;
                                 case Severity.Minor:
                                     logIncompatible = strMinor;
                                     if (scanMinor && (mod.isEnabled || scanDisabled)) {
-                                        detected = true;
+                                        verified = false;
                                         minor.Add(mod, modName);
                                     }
                                     break;
@@ -150,7 +150,7 @@ namespace TrafficManager.Compatibility.Checks {
 
             Log.Info(sb.ToString());
 
-            return detected;
+            return verified;
         }
 
         /// <summary>
