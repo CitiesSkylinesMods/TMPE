@@ -11,6 +11,8 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.State;
     using TrafficManager.Util.Caching;
     using UnityEngine;
+    using System.Text.RegularExpressions;
+    using static TrafficManager.Util.Shortcuts;
 
     public class LaneConnectorTool : SubTool {
         private enum MarkerSelectionMode {
@@ -361,24 +363,24 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
 
-                    // draw source marker in source selection mode,
-                    // draw target marker (if segment turning angles are within bounds) and
-                    // selected source marker in target selection mode
-                    bool drawMarker
-                        = ((GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource)
-                           && laneMarker.IsSource)
-                          || ((GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget)
-                              && ((laneMarker.IsTarget
-                                   && ((laneMarker.VehicleType & selectedMarker.VehicleType)
-                                       != VehicleInfo.VehicleType.None)
-                                   && CheckSegmentsTurningAngle(
-                                       selectedMarker.SegmentId,
-                                       ref netManager.m_segments.m_buffer[selectedMarker.SegmentId],
-                                       selectedMarker.StartNode,
-                                       laneMarker.SegmentId,
-                                       ref netManager.m_segments.m_buffer[laneMarker.SegmentId],
-                                       laneMarker.StartNode))
-                                  || (laneMarker == selectedMarker)));
+                    bool drawMarker = false;
+                    bool SourceMode = GetMarkerSelectionMode() == MarkerSelectionMode.SelectSource;
+                    bool TargetMode = GetMarkerSelectionMode() == MarkerSelectionMode.SelectTarget;
+                    if ( SourceMode & laneMarker.IsSource) {
+                        // draw source marker in source selection mode,
+                        // make exception for markers that have no target:
+                        foreach(var targetMarker in nodeMarkers) {
+                            if (CanConnect(laneMarker, targetMarker)){
+                                drawMarker = true;
+                                break;
+                            }
+                        }
+                    } else if (TargetMode) {
+                        // selected source marker in target selection mode
+                        drawMarker =
+                            selectedMarker == laneMarker ||
+                            CanConnect(selectedMarker, laneMarker);
+                    }
 
                     // highlight hovered marker and selected marker
                     if (drawMarker) {
@@ -949,6 +951,29 @@ namespace TrafficManager.UI.SubTools {
             }
 
             return nodeMarkers;
+        }
+
+        private bool CanConnect(NodeLaneMarker source, NodeLaneMarker target) {
+            bool ret = source != target && source.IsSource && target.IsTarget;
+            ret &= (target.VehicleType & source.VehicleType) != 0;
+
+            bool IsRoad(NodeLaneMarker marker) =>
+                (marker.LaneType & LaneArrowManager.LANE_TYPES) != 0 &&
+                (marker.VehicleType & LaneArrowManager.VEHICLE_TYPES) != 0;
+
+            // turning angle does not apply to roads.
+            bool isRoad = IsRoad(source) && IsRoad(target);
+
+            // checktrack turning angles are within bounds
+            ret &= isRoad || CheckSegmentsTurningAngle(
+                    source.SegmentId,
+                    ref GetSeg(source.SegmentId),
+                    source.StartNode,
+                    target.SegmentId,
+                    ref GetSeg(target.SegmentId),
+                    target.StartNode);
+
+            return ret;
         }
 
         /// <summary>
