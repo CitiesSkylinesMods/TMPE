@@ -1,4 +1,4 @@
-﻿namespace TrafficManager {
+namespace TrafficManager {
     using GenericGameBridge.Factory;
     using JetBrains.Annotations;
     using TrafficManager.API.Manager;
