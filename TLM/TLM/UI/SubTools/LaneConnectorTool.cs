@@ -398,6 +398,9 @@ namespace TrafficManager.UI.SubTools {
                         // Prevent confusion if all roads are the same.
                         MatchingTCase = PriorityRoad.CompareSegments(segList[1], segList[2]) != 0;
 
+                        // same sized one way roads are supported.
+                        MatchingTCase |= segMan.CalculateIsOneWay(segList[0]) && segMan.CalculateIsOneWay(segList[1]);
+
                         // check one way toward junction:
                         MatchingTCase &= CivilizedJunction(SelectedNodeId, segList[2], checkOnly: true);
                     }
@@ -484,7 +487,8 @@ namespace TrafficManager.UI.SubTools {
             int SimilarIndex(LaneEnd laneEnd) {
                 if(connectedFromInside)
                     return laneEnd.InnerSimilarLaneIndex;
-                else return laneEnd.OuterSimilarLaneIndex;
+                else
+                    return laneEnd.OuterSimilarLaneIndex;
             }
 
             int Yt = PriorityRoad.CountLanesTowardJunction(segmentId, nodeId); // Yeild Toward.
@@ -508,7 +512,8 @@ namespace TrafficManager.UI.SubTools {
                 foreach (LaneEnd targetLaneEnd in laneEnds) {
                     if (!targetLaneEnd.IsTarget ||
                         targetLaneEnd.SegmentId == sourceLaneEnd.SegmentId ||
-                        targetLaneEnd.SegmentId == MainToward
+                        targetLaneEnd.SegmentId == MainToward ||
+                        !CanConnect(sourceLaneEnd, targetLaneEnd)
                         ) {
                         continue;
                     }
@@ -572,8 +577,9 @@ namespace TrafficManager.UI.SubTools {
                         }
 
                         foreach (LaneEnd targetLaneEnd in laneEnds) {
-                            if (!targetLaneEnd.IsTarget || (targetLaneEnd.SegmentId ==
-                                                               sourceLaneEnd.SegmentId)) {
+                            if (!targetLaneEnd.IsTarget ||
+                                targetLaneEnd.SegmentId == sourceLaneEnd.SegmentId ||
+                                !CanConnect(sourceLaneEnd, targetLaneEnd)) {
                                 continue;
                             }
 
@@ -967,7 +973,7 @@ namespace TrafficManager.UI.SubTools {
             return laneEnds;
         }
 
-        private bool CanConnect(LaneEnd source, LaneEnd target) {
+        private static bool CanConnect(LaneEnd source, LaneEnd target) {
             bool ret = source != target && source.IsSource && target.IsTarget;
             ret &= (target.VehicleType & source.VehicleType) != 0;
 
@@ -978,7 +984,7 @@ namespace TrafficManager.UI.SubTools {
             // turning angle does not apply to roads.
             bool isRoad = IsRoad(source) && IsRoad(target);
 
-            // checktrack turning angles are within bounds
+            // check track turning angles are within bounds
             ret &= isRoad || CheckSegmentsTurningAngle(
                     source.SegmentId,
                     ref GetSeg(source.SegmentId),
@@ -1000,7 +1006,7 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="targetSegment"></param>
         /// <param name="targetStartNode"></param>
         /// <returns></returns>
-        private bool CheckSegmentsTurningAngle(ushort sourceSegmentId,
+        private static bool CheckSegmentsTurningAngle(ushort sourceSegmentId,
                                                ref NetSegment sourceSegment,
                                                bool sourceStartNode,
                                                ushort targetSegmentId,
