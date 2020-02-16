@@ -53,11 +53,11 @@ namespace TrafficManager.UI.Helpers {
             }
 
             Bezier3 bezier0 = Bezier;
-            if (hitH < mouseH - Constants.MAX_HIT_ERROR) {
+            if (hitH < mouseH - TrafficManagerTool.MAX_HIT_ERROR) {
                 // For Metros use projection on the terrain.
                 bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = mouseH;
                 prev_H = mouseH;
-            } else if (hitH > maxH + Constants.MAX_HIT_ERROR) {
+            } else if (hitH > maxH + TrafficManagerTool.MAX_HIT_ERROR) {
                 // if marker is projected on another road plane then modify its height
                 bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = hitH;
                 prev_H = hitH;

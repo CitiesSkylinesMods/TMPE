@@ -40,8 +40,5 @@ namespace TrafficManager {
         }
 
         public static IManagerFactory ManagerFactory => Manager.Impl.ManagerFactory.Instance;
-
-        public  const float MAX_HIT_ERROR = 2.5f;
-
     }
 }

@@ -18,10 +18,10 @@ namespace TrafficManager.UI.Helpers {
 
             Vector3 pos = Position;
             float mouseH = UIBase.GetTrafficManagerTool(false).MousePosition.y;
-            if (hitH < mouseH - Constants.MAX_HIT_ERROR) {
+            if (hitH < mouseH - TrafficManagerTool.MAX_HIT_ERROR) {
                 // For metros use projection on the terrain.
                 pos = TerrainPosition;
-            } else if (hitH - pos.y > Constants.MAX_HIT_ERROR) {
+            } else if (hitH - pos.y > TrafficManagerTool.MAX_HIT_ERROR) {
                 // if marker is projected on road plane above then modify its height
                 pos.y = hitH;
             }
