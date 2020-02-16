@@ -395,8 +395,11 @@ namespace TrafficManager.UI.SubTools {
                             segList.Sort(PriorityRoad.CompareSegments);
                         }
 
+                        // Prevent confusion if all roads are the same.
+                        MatchingTCase = PriorityRoad.CompareSegments(segList[1], segList[2]) != 0;
+
                         // check one way toward junction:
-                        MatchingTCase = CivilizedJunction(SelectedNodeId, segList[2], checkOnly: true);
+                        MatchingTCase &= CivilizedJunction(SelectedNodeId, segList[2], checkOnly: true);
                     }
 
                     // only in the case of stay in lane two way roads, state machine is 4 states.
