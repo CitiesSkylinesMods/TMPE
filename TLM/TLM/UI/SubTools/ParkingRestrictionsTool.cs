@@ -16,28 +16,23 @@ namespace TrafficManager.UI.SubTools {
     public class ParkingRestrictionsTool : SubTool {
         private ParkingRestrictionsManager parkingManager => ParkingRestrictionsManager.Instance;
 
-
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir
             = new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
 
         private const float SIGN_SIZE = 80f;
 
-        private struct GUIHoverInfo {
+        private struct RenderInfo {
             internal NetInfo.Direction direction;
             internal ushort segmentId;
 
-            public static bool operator ==(GUIHoverInfo a, GUIHoverInfo b) =>
+            public static bool operator ==(RenderInfo a, RenderInfo b) =>
                 a.segmentId == b.segmentId && a.direction == b.direction;
 
-            public static bool operator !=(GUIHoverInfo a, GUIHoverInfo b) =>
+            public static bool operator !=(RenderInfo a, RenderInfo b) =>
                 !(a == b);
-
         }
         private SegmentLaneMarker LaneMarker;
-        private uint HoveredLaneId;
-        private GUIHoverInfo Hover;
-        private GUIHoverInfo CachedHover;
-
+        private RenderInfo renderInfo;
 
         /// <summary>
         /// Stores potentially visible segment ids while the camera did not move
@@ -60,10 +55,21 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnPrimaryClickOverlay() { }
 
-        private SegmentLaneMarker GetLaneMarker(ushort segmentId, NetInfo.Direction direction) {
-            Bezier3 bezier = default(Bezier3);
+        private void RenderSegmentParkings(RenderManager.CameraInfo cameraInfo) {
+            bool allowed = parkingManager.IsParkingAllowed(renderInfo.segmentId, renderInfo.direction);
+            bool pressed = Input.GetMouseButton(0);
+            Color color;
+            if (pressed) {
+                color = MainTool.GetToolColor(true, false);
+            } else if (allowed) {
+                color = Color.green;
+            } else {
+                color = Color.red;
+            }
+
+            Bezier3 bezier = default;
             netService.IterateSegmentLanes(
-                segmentId,
+                renderInfo.segmentId,
                 (uint laneId,
                 ref NetLane lane,
                 NetInfo.Lane laneInfo,
@@ -71,22 +77,16 @@ namespace TrafficManager.UI.SubTools {
                 ref NetSegment segment,
                 byte laneIndex) => {
                     bool isParking = laneInfo.m_laneType.IsFlagSet(NetInfo.LaneType.Parking);
-                    if (isParking && laneInfo.m_direction == direction) {
+                    if (isParking && laneInfo.m_direction == renderInfo.direction) {
                         bezier = lane.m_bezier;
-                        return false;
+                        LaneMarker = new SegmentLaneMarker(bezier);
+                        LaneMarker.RenderOverlay(cameraInfo, color, enlarge: pressed);
                     }
                     return true;
                 });
-            return new SegmentLaneMarker(bezier);
         }
 
-        private bool IsSameDirection(ushort segmentId1, ushort segmentId2) {
-            bool invert1 = segmentId1.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-            bool invert2 = segmentId2.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-            return invert1 == invert2;
-        } 
-
-        private void RenderRoadParking(RenderManager.CameraInfo cameraInfo) {
+        private void RenderRoadParkings(RenderManager.CameraInfo cameraInfo) {
             NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
             bool LaneVisitor(SegmentLaneVisitData data) {
                 ushort segmentId = data.SegVisitData.CurSeg.segmentId;
@@ -94,10 +94,21 @@ namespace TrafficManager.UI.SubTools {
                 NetInfo.Lane laneInfo = segmentId.ToSegment().Info.m_lanes[laneIndex];
 
                 NetInfo.Direction direction = laneInfo.m_direction;
-                if(!IsSameDirection(segmentId, Hover.segmentId)) {
-                    direction = NetInfo.InvertDirection(direction);
+
+                if (!data.SegVisitData.Initial) {
+                    bool reverse =
+                        data.SegVisitData.ViaStartNode ==
+                        data.SegVisitData.ViaInitialStartNode;
+
+                    bool invert1 = segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+                    bool invert2 = renderInfo.segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+                    bool invert = invert1 != invert2;
+
+                    if (reverse ^ invert) {
+                        direction = NetInfo.InvertDirection(direction);
+                    }
                 }
-                if (direction == Hover.direction) {
+                if (direction == renderInfo.direction) {
                     bool pressed = Input.GetMouseButton(0);
                     Color color = MainTool.GetToolColor(pressed, false);
                     uint otherLaneId = data.CurLanePos.laneId;
@@ -109,7 +120,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             SegmentLaneTraverser.Traverse(
-                Hover.segmentId,
+                renderInfo.segmentId,
                 SegmentTraverser.TraverseDirection.AnyDirection,
                 SegmentTraverser.TraverseSide.AnySide,
                 SegmentLaneTraverser.LaneStopCriterion.LaneCount,
@@ -120,32 +131,15 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
-            if(Hover.segmentId == 0) {
+            if(renderInfo.segmentId == 0) {
                 return;
             }
             bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             if (shift) {
-                RenderRoadParking(cameraInfo);
-                return;
-            }
-
-            bool allowed = parkingManager.IsParkingAllowed(Hover.segmentId, Hover.direction);
-            bool pressed = Input.GetMouseButton(0);
-            Color color;
-            if (pressed) {
-                color = MainTool.GetToolColor(true, false);
-            } else if(allowed){
-                color = Color.green;
+                RenderRoadParkings(cameraInfo);
             } else {
-                color = Color.red;
+                RenderSegmentParkings(cameraInfo);
             }
-
-            if(Hover != CachedHover) {
-                CachedHover = Hover;
-                LaneMarker = GetLaneMarker(Hover.segmentId,Hover.direction);
-            }
-
-            LaneMarker.RenderOverlay(cameraInfo, color, enlarge: pressed);
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
@@ -232,14 +226,14 @@ namespace TrafficManager.UI.SubTools {
                     viewOnly,
                     ref camPos);
                 if (dir != NetInfo.Direction.None) {
-                    Hover.segmentId = segmentId;
-                    Hover.direction = dir;
+                    renderInfo.segmentId = segmentId;
+                    renderInfo.direction = dir;
                     hovered = true;
                 } 
             }
             if (!hovered) {
-                Hover.segmentId = 0;
-                Hover.direction = NetInfo.Direction.None;
+                renderInfo.segmentId = 0;
+                renderInfo.direction = NetInfo.Direction.None;
             }
         }
 
