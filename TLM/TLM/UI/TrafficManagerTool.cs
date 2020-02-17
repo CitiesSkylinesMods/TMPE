@@ -32,8 +32,18 @@ namespace TrafficManager.UI {
         private ToolMode toolMode_;
         private NetTool _netTool;
 
+
+        /// <summary>
+        /// Maximum error of HitPos field.
+        /// </summary>
+        internal const float MAX_HIT_ERROR = 2.5f;
+
         internal static ushort HoveredNodeId;
         internal static ushort HoveredSegmentId;
+
+        /// <summary>
+        /// the hit position of the mouse raycast in meters.
+        /// </summary>
         internal static Vector3 HitPos;
         internal Vector3 MousePosition => m_mousePosition; //expose protected member.
 

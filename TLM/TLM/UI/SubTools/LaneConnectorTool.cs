@@ -12,6 +12,8 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Util.Caching;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
+    using System.Text.RegularExpressions;
+    using static TrafficManager.Util.Shortcuts;
 
     public class LaneConnectorTool : SubTool {
         private enum SelectionMode {
@@ -179,7 +181,7 @@ namespace TrafficManager.UI.SubTools {
                 var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
 
                 bool hasMarkers = currentLaneEnds.TryGetValue((ushort)nodeId, out List<LaneEnd> laneEnds);
-                if (!viewOnly && (GetMarkerSelectionMode() == SelectionMode.None)) {
+                if (!viewOnly && (GetSelectionMode() == SelectionMode.None)) {
                     MainTool.DrawNodeCircle(
                         cameraInfo,
                         (ushort)nodeId,
@@ -217,24 +219,24 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
 
-                    // draw source marker in source selection mode,
-                    // draw target marker (if segment turning angles are within bounds) and
-                    // selected source marker in target selection mode
-                    bool drawMarker
-                        = ((GetMarkerSelectionMode() == SelectionMode.SelectSource)
-                           && laneEnd.IsSource)
-                          || ((GetMarkerSelectionMode() == SelectionMode.SelectTarget)
-                              && ((laneEnd.IsTarget
-                                   && ((laneEnd.VehicleType & selectedLaneEnd.VehicleType)
-                                       != VehicleInfo.VehicleType.None)
-                                   && CheckSegmentsTurningAngle(
-                                       selectedLaneEnd.SegmentId,
-                                       ref netManager.m_segments.m_buffer[selectedLaneEnd.SegmentId],
-                                       selectedLaneEnd.StartNode,
-                                       laneEnd.SegmentId,
-                                       ref netManager.m_segments.m_buffer[laneEnd.SegmentId],
-                                       laneEnd.StartNode))
-                                  || (laneEnd == selectedLaneEnd)));
+                    bool drawMarker = false;
+                    bool SourceMode = GetSelectionMode() == SelectionMode.SelectSource;
+                    bool TargetMode = GetSelectionMode() == SelectionMode.SelectTarget;
+                    if ( SourceMode & laneEnd.IsSource) {
+                        // draw source marker in source selection mode,
+                        // make exception for markers that have no target:
+                        foreach(var targetLaneEnd in laneEnds) {
+                            if (CanConnect(laneEnd, targetLaneEnd)){
+                                drawMarker = true;
+                                break;
+                            }
+                        }
+                    } else if (TargetMode) {
+                        // selected source marker in target selection mode
+                        drawMarker =
+                            selectedLaneEnd == laneEnd ||
+                            CanConnect(selectedLaneEnd, laneEnd);
+                    }
 
                     // highlight hovered marker and selected marker
                     if (drawMarker) {
@@ -303,7 +305,7 @@ namespace TrafficManager.UI.SubTools {
 
             // draw bezier from source marker to mouse position in target marker selection
             if (SelectedNodeId != 0) {
-                if (GetMarkerSelectionMode() == SelectionMode.SelectTarget) {
+                if (GetSelectionMode() == SelectionMode.SelectTarget) {
                     Vector3 selNodePos =
                         NetManager.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
 
@@ -313,7 +315,7 @@ namespace TrafficManager.UI.SubTools {
                         float hitH = TrafficManagerTool.GetAccurateHitHeight();
                         pos.y = hitH; // fix height.
                         float mouseH = MousePosition.y;
-                        if (hitH < mouseH - Constants.MAX_HIT_ERROR) {
+                        if (hitH < mouseH - TrafficManagerTool.MAX_HIT_ERROR) {
                             // for metros lane curve is projected on the ground.
                             pos = MousePosition;
                         }
@@ -386,7 +388,7 @@ namespace TrafficManager.UI.SubTools {
                 } // if stay in lane
             } // if selected node
 
-            if ((GetMarkerSelectionMode() == SelectionMode.None) && (HoveredNodeId != 0)) {
+            if ((GetSelectionMode() == SelectionMode.None) && (HoveredNodeId != 0)) {
                 // draw hovered node
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
             }
@@ -451,7 +453,7 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            if (GetMarkerSelectionMode() == SelectionMode.None) {
+            if (GetSelectionMode() == SelectionMode.None) {
                 if (HoveredNodeId != 0) {
                     Log._DebugIf(
                         logLaneConn,
@@ -513,16 +515,16 @@ namespace TrafficManager.UI.SubTools {
 
             Log._DebugIf(
                 logLaneConn,
-                () => $"LaneConnectorTool: hoveredMarker != null. selMode={GetMarkerSelectionMode()}");
+                () => $"LaneConnectorTool: hoveredMarker != null. selMode={GetSelectionMode()}");
 
             // hovered marker has been clicked
-            if (GetMarkerSelectionMode() == SelectionMode.SelectSource) {
+            if (GetSelectionMode() == SelectionMode.SelectSource) {
                 // select source marker
                 selectedLaneEnd = hoveredLaneEnd;
                 Log._DebugIf(
                     logLaneConn,
                     () => "LaneConnectorTool: set selected marker");
-            } else if (GetMarkerSelectionMode() == SelectionMode.SelectTarget) {
+            } else if (GetSelectionMode() == SelectionMode.SelectTarget) {
                 // select target marker
                 // bool success = false;
                 if (LaneConnectionManager.Instance.RemoveLaneConnection(
@@ -572,7 +574,7 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            switch (GetMarkerSelectionMode()) {
+            switch (GetSelectionMode()) {
                 // also: case MarkerSelectionMode.None:
                 default: {
                         Log._DebugIf(
@@ -646,7 +648,7 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
-        private SelectionMode GetMarkerSelectionMode() {
+        private SelectionMode GetSelectionMode() {
             if (SelectedNodeId == 0) {
                 return SelectionMode.None;
             }
@@ -798,6 +800,29 @@ namespace TrafficManager.UI.SubTools {
             }
 
             return laneEnds;
+        }
+
+        private bool CanConnect(LaneEnd source, LaneEnd target) {
+            bool ret = source != target && source.IsSource && target.IsTarget;
+            ret &= (target.VehicleType & source.VehicleType) != 0;
+
+            bool IsRoad(LaneEnd laneEnd) =>
+                (laneEnd.LaneType & LaneArrowManager.LANE_TYPES) != 0 &&
+                (laneEnd.VehicleType & LaneArrowManager.VEHICLE_TYPES) != 0;
+
+            // turning angle does not apply to roads.
+            bool isRoad = IsRoad(source) && IsRoad(target);
+
+            // checktrack turning angles are within bounds
+            ret &= isRoad || CheckSegmentsTurningAngle(
+                    source.SegmentId,
+                    ref GetSeg(source.SegmentId),
+                    source.StartNode,
+                    target.SegmentId,
+                    ref GetSeg(target.SegmentId),
+                    target.StartNode);
+
+            return ret;
         }
 
         /// <summary>
