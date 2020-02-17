@@ -255,5 +255,9 @@ namespace TrafficManager.UI.MainMenu {
                 }
             }
         }
+
+        // TODO: Scale with screen size in a smart way
+        public static float GetButtonWidth() => 50f;
+        public static float GetButtonHeight() => 50f;
     }
 }

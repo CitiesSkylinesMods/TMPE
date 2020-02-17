@@ -28,7 +28,7 @@ namespace TrafficManager.State.Keybinds {
             ToggleMainMenu.OnKeyChanged(() => {
                 if (LoadingExtension.ModUi != null &&
                     LoadingExtension.ModUi.MainMenuButton != null) {
-                    LoadingExtension.ModUi.MainMenuButton.UpdateTooltip();
+                    LoadingExtension.ModUi.MainMenuButton.UpdateButtonImageAndTooltip();
                 }
             });
 

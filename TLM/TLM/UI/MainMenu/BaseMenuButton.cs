@@ -16,7 +16,7 @@
         protected override void OnClick(UIMouseEventParameter p) {
             OnClickInternal(p);
             foreach (BaseMenuButton button in LoadingExtension.ModUi.MainMenu.Buttons) {
-                button.UpdateProperties();
+                button.UpdateButtonImageAndTooltip();
             }
         }
 
@@ -29,26 +29,5 @@
         }
 
         public override string ButtonName => MENU_BUTTON;
-
-        public override string FunctionName => Function.Name;
-
-        // public override string[] FunctionNames {
-        //     get {
-        //         Array functions = Enum.GetValues(typeof(ButtonFunction.ButtonFunctionEnum));
-        //         var ret = new string[functions.Length];
-        //
-        //         for (int i = 0; i < functions.Length; ++i) {
-        //             ret[i] = functions.GetValue(i).ToString();
-        //         }
-        //
-        //         return ret;
-        //     }
-        // }
-
-        // public override Texture2D AtlasTexture => UI.Textures.MainMenu.MainMenuButtons;
-
-        public override int GetWidth() => 50;
-
-        public override int GetHeight() => 50;
     }
 }

@@ -6,10 +6,11 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
+    using TrafficManager.U.Button;
     using UnityEngine;
 
     public class UIMainMenuButton
-        : UIButton,
+        : BaseUButton,
           IObserver<GlobalConfig>
     {
         // private const string MAIN_MENU_BUTTON_BG_BASE = "TMPE_MainMenuButtonBgBase";
@@ -33,6 +34,10 @@ namespace TrafficManager.UI.MainMenu {
 
         private IDisposable confDisposable_;
 
+        public override bool CanActivate() => true;
+
+        public override string ButtonName => "TMPE_MainMenu";
+
         public override void Start() {
             // Place the button.
             OnUpdate(GlobalConfig.Instance);
@@ -55,17 +60,15 @@ namespace TrafficManager.UI.MainMenu {
             //     spriteNames);
 
             // Let the mainmenu atlas know we need this texture and assign it to self.atlas
-            this.atlas = TextureUtil.CreateAtlas(
-                "TMPE_U_MainButton_Atlas",
-                "MainMenu",
-                new[] {
-                          ATLASKEY_BG_NORMAL, ATLASKEY_BG_HOVERED, ATLASKEY_BG_ACTIVE,
-                          ATLASKEY_FG_NORMAL, ATLASKEY_FG_HOVERED, ATLASKEY_FG_ACTIVE,
-                      },
-                50,
-                50,
-                256);
-            UpdateSprites();
+            this.Skin = new ButtonSkin {
+                                           Prefix = "MainMenuButton",
+                                           BackgroundHovered = true,
+                                           BackgroundActive = true,
+                                           ForegroundHovered = true,
+                                           ForegroundActive = true,
+                                       };
+            this.atlas = this.Skin.CreateAtlas("MainMenu", 50, 50, 256);
+            UpdateButtonImageAndTooltip();
 
             // Set the button dimensions.
             width = BUTTON_WIDTH;
@@ -88,16 +91,10 @@ namespace TrafficManager.UI.MainMenu {
             if (uiView != null) {
                 m_TooltipBox = uiView.defaultTooltipBox;
             }
-
-            UpdateTooltip();
         }
 
-        /// <summary>
-        /// Reset the tooltip (or set for the first time), or if keybinding has changed
-        /// </summary>
-        public void UpdateTooltip() {
-            tooltip = Translation.Menu.Get("Tooltip:Toggle Main Menu")
-                      + GetTooltip();
+        public override bool IsActive() {
+            return LoadingExtension.ModUi.IsVisible();
         }
 
         public override void OnDestroy() {
@@ -106,17 +103,6 @@ namespace TrafficManager.UI.MainMenu {
 
         internal void SetPosLock(bool lck) {
             Drag.enabled = !lck;
-        }
-
-        protected override void OnClick(UIMouseEventParameter p) {
-            try {
-                Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
-                LoadingExtension.ModUi.ToggleMainMenu();
-                UpdateSprites();
-            }
-            catch (Exception e) {
-                Log.Error($"Toggle mainmenu failed {e}");
-            }
         }
 
         protected override void OnPositionChanged() {
@@ -137,35 +123,35 @@ namespace TrafficManager.UI.MainMenu {
             base.OnPositionChanged();
         }
 
-        internal void UpdateSprites() {
-            if (!LoadingExtension.ModUi.IsVisible()) {
-                m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
-                                                   m_BackgroundSprites.m_Focused =
-                                                       ATLASKEY_BG_NORMAL;
-                m_BackgroundSprites.m_Hovered = ATLASKEY_BG_HOVERED;
-                m_PressedBgSprite = ATLASKEY_BG_ACTIVE;
-
-                m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
-                                                   m_ForegroundSprites.m_Focused =
-                                                       ATLASKEY_FG_NORMAL;
-                m_ForegroundSprites.m_Hovered = ATLASKEY_FG_HOVERED;
-                m_PressedFgSprite = ATLASKEY_FG_ACTIVE;
-            } else {
-                m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
-                                                   m_BackgroundSprites.m_Focused =
-                                                       m_BackgroundSprites.m_Hovered =
-                                                           ATLASKEY_BG_ACTIVE;
-                m_PressedBgSprite = ATLASKEY_BG_HOVERED;
-
-                m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
-                                                   m_ForegroundSprites.m_Focused =
-                                                       m_ForegroundSprites.m_Hovered =
-                                                           ATLASKEY_FG_ACTIVE;
-                m_PressedFgSprite = ATLASKEY_FG_HOVERED;
-            }
-
-            this.Invalidate();
-        }
+        // internal void UpdateSprites() {
+        //     if (!LoadingExtension.ModUi.IsVisible()) {
+        //         m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
+        //                                            m_BackgroundSprites.m_Focused =
+        //                                                ATLASKEY_BG_NORMAL;
+        //         m_BackgroundSprites.m_Hovered = ATLASKEY_BG_HOVERED;
+        //         m_PressedBgSprite = ATLASKEY_BG_ACTIVE;
+        //
+        //         m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
+        //                                            m_ForegroundSprites.m_Focused =
+        //                                                ATLASKEY_FG_NORMAL;
+        //         m_ForegroundSprites.m_Hovered = ATLASKEY_FG_HOVERED;
+        //         m_PressedFgSprite = ATLASKEY_FG_ACTIVE;
+        //     } else {
+        //         m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
+        //                                            m_BackgroundSprites.m_Focused =
+        //                                                m_BackgroundSprites.m_Hovered =
+        //                                                    ATLASKEY_BG_ACTIVE;
+        //         m_PressedBgSprite = ATLASKEY_BG_HOVERED;
+        //
+        //         m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
+        //                                            m_ForegroundSprites.m_Focused =
+        //                                                m_ForegroundSprites.m_Hovered =
+        //                                                    ATLASKEY_FG_ACTIVE;
+        //         m_PressedFgSprite = ATLASKEY_FG_HOVERED;
+        //     }
+        //
+        //     this.Invalidate();
+        // }
 
         public void OnUpdate(GlobalConfig config) {
             UpdatePosition(new Vector2(config.Main.MainMenuButtonX, config.Main.MainMenuButtonY));
@@ -190,8 +176,23 @@ namespace TrafficManager.UI.MainMenu {
             }
         }
 
-        private string GetTooltip() {
-            return KeybindSettingsBase.ToggleMainMenu.ToLocalizedString("\n");
+        public override string GetTooltip() {
+            return Translation.Menu.Get("Tooltip:Toggle Main Menu");
+            // return KeybindSettingsBase.ToggleMainMenu.ToLocalizedString("\n");
+        }
+
+        public override KeybindSetting ShortcutKey => KeybindSettingsBase.ToggleMainMenu;
+
+        public override bool IsVisible() => true;
+
+        public override void HandleClick(UIMouseEventParameter p) {
+            try {
+                Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
+                LoadingExtension.ModUi.ToggleMainMenu();
+            }
+            catch (Exception e) {
+                Log.Error($"Toggle mainmenu failed {e}");
+            }
         }
     }
 }

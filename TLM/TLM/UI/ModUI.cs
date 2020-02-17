@@ -133,7 +133,7 @@ namespace TrafficManager.UI {
             }
 
             foreach (BaseMenuButton button in GetMenu().Buttons) {
-                button.UpdateProperties();
+                button.UpdateButtonImageAndTooltip();
             }
 
             GetMenu().Show();
@@ -145,7 +145,7 @@ namespace TrafficManager.UI {
 #endif
             SetToolMode(TrafficManagerMode.Activated);
             _uiShown = true;
-            MainMenuButton.UpdateSprites();
+            MainMenuButton.UpdateButtonImageAndTooltip();
             UIView.SetFocus(MainMenu);
         }
 
@@ -161,7 +161,7 @@ namespace TrafficManager.UI {
 
             SetToolMode(TrafficManagerMode.None);
             _uiShown = false;
-            MainMenuButton.UpdateSprites();
+            MainMenuButton.UpdateButtonImageAndTooltip();
         }
 
         internal MainMenuPanel GetMenu() {

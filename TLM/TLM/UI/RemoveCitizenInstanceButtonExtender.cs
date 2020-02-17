@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using TrafficManager.U;
     using TrafficManager.U.Button;
+    using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.Textures;
     using UnityEngine;
 
@@ -54,8 +55,8 @@
         public class RemoveCitizenInstanceButton : BaseUButton {
             public override void Start() {
                 base.Start();
-                width = GetWidth();
-                height = GetHeight();
+                width = MainMenuPanel.GetButtonWidth();
+                height = MainMenuPanel.GetButtonHeight();
             }
 
             public override void HandleClick(UIMouseEventParameter p) {
@@ -88,7 +89,7 @@
 
             public override string ButtonName => "RemoveCitizenInstance";
 
-            public override string FunctionName => "RemoveCitizenInstanceNow";
+            // public override string FunctionName => "RemoveCitizenInstanceNow";
 
             // public override string[] FunctionNames => new[] { "RemoveCitizenInstanceNow" };
 
@@ -96,10 +97,6 @@
                 Translation.Menu.Get("Button:Remove this citizen");
 
             public override bool IsVisible() => true;
-
-            public override int GetWidth() => 30;
-
-            public override int GetHeight() => 30;
 
             public override bool CanActivate() {
                 return false;

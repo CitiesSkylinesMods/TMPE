@@ -12,21 +12,18 @@
     /// This is an abstract base class for buttons.
     /// </summary>
     public abstract class BaseUButton : UIButton {
+        /// <summary>Defines how the button looks, hovers and activates.</summary>
+        public U.Button.ButtonSkin Skin;
+
+        /// <summary>Checks whether a button can ever be "activated", i.e. stays highlighted.</summary>
+        /// <returns>Whether a button can toggle-activate.</returns>
         public abstract bool CanActivate();
 
         public abstract string ButtonName { get; }
 
-        public abstract string FunctionName { get; }
-
-        // public abstract string[] FunctionNames { get; }
-
-        public abstract int GetWidth();
-
-        public abstract int GetHeight();
-
         public override void Start() {
             m_ForegroundSpriteMode = UIForegroundSpriteMode.Scale;
-            UpdateProperties();
+            UpdateButtonImageAndTooltip();
 
             // Enable button sounds.
             playAudioEvents = true;
@@ -37,15 +34,11 @@
         /// </summary>
         public abstract bool IsActive();
 
-        /// <summary>
-        /// Override this to return localized string for the tooltip.
-        /// </summary>
+        /// <summary>Override this to return localized string for the tooltip.</summary>
         public abstract string GetTooltip();
 
-        /// <summary>
-        /// Override this to define whether the button should be visible on tool panel.
-        /// </summary>
-        /// <returns>Is the button visible?</returns>
+        /// <summary>Override this to define whether the button should be visible on tool panel.</summary>
+        /// <returns>Whether the button visible.</returns>
         public abstract bool IsVisible();
 
         public abstract void HandleClick(UIMouseEventParameter p);
@@ -57,41 +50,51 @@
 
         protected override void OnClick(UIMouseEventParameter p) {
             HandleClick(p);
-            UpdateProperties();
+            UpdateButtonImageAndTooltip();
         }
 
-        internal void UpdateProperties() {
-            bool active = CanActivate() && IsActive();
+        internal void UpdateButtonImageAndTooltip() {
+            if (this.Skin == null) {
+                // No skin, no textures, nothing to be updated
+                return;
+            }
+            ControlActiveState activeState = CanActivate() && IsActive() ?
+                ControlActiveState.Active : ControlActiveState.Normal;
+            ControlEnabledState enabledState =
+                this.enabled ? ControlEnabledState.Enabled : ControlEnabledState.Disabled;
 
-            m_BackgroundSprites.m_Normal =
-                m_BackgroundSprites.m_Disabled =
-                    m_BackgroundSprites.m_Focused =
-                        U.ButtonTexture.GetBackgroundTextureId(
-                            ButtonName,
-                            ButtonMouseState.Base,
-                            active);
-
-            m_BackgroundSprites.m_Hovered =
-                U.ButtonTexture.GetBackgroundTextureId(
-                    ButtonName,
-                    ButtonMouseState.Hovered,
-                    active);
-
-            m_PressedBgSprite =
-                U.ButtonTexture.GetBackgroundTextureId(
-                    ButtonName,
-                    ButtonMouseState.MouseDown,
-                    active);
+            m_BackgroundSprites.m_Normal
+                = m_BackgroundSprites.m_Disabled =
+                      m_BackgroundSprites.m_Focused =
+                          Skin.GetBackgroundTextureId(
+                              enabledState,
+                              ControlHoveredState.Normal,
+                              activeState);
+            m_BackgroundSprites.m_Hovered
+                = Skin.GetBackgroundTextureId(
+                    enabledState,
+                    ControlHoveredState.Hovered,
+                    activeState);
+            m_PressedBgSprite = Skin.GetBackgroundTextureId(
+                enabledState,
+                ControlHoveredState.Normal,
+                ControlActiveState.Active);
 
             m_ForegroundSprites.m_Normal =
                 m_ForegroundSprites.m_Disabled =
                     m_ForegroundSprites.m_Focused =
-                        U.ButtonTexture.GetForegroundTextureId(ButtonName, FunctionName, active);
+                        Skin.GetForegroundTextureId(
+                            enabledState,
+                            ControlHoveredState.Normal,
+                            activeState);
+            m_ForegroundSprites.m_Hovered
+                = m_PressedFgSprite
+                      = Skin.GetForegroundTextureId(
+                          enabledState,
+                          ControlHoveredState.Hovered,
+                          activeState);
 
-            m_ForegroundSprites.m_Hovered =
-                m_PressedFgSprite =
-                    U.ButtonTexture.GetForegroundTextureId(ButtonName, FunctionName, true);
-
+            // Update localized tooltip with shortcut key if available
             string shortcutText = GetShortcutTooltip();
             tooltip = GetTooltip() + shortcutText;
 

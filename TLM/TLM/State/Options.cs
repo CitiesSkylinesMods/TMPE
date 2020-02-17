@@ -120,7 +120,7 @@ namespace TrafficManager.State {
 
                 // TM:PE main button also needs to be uidated
                 if (LoadingExtension.ModUi.MainMenuButton != null) {
-                    LoadingExtension.ModUi.MainMenuButton.UpdateTooltip();
+                    LoadingExtension.ModUi.MainMenuButton.UpdateButtonImageAndTooltip();
                 }
 
                 LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();

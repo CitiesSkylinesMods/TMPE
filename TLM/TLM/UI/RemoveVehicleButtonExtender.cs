@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using TrafficManager.U;
     using TrafficManager.U.Button;
+    using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.Textures;
     using UnityEngine;
 
@@ -62,8 +63,8 @@
         public class RemoveVehicleButton : BaseUButton {
             public override void Start() {
                 base.Start();
-                width = GetWidth();
-                height = GetHeight();
+                width = MainMenuPanel.GetButtonWidth();
+                height = MainMenuPanel.GetButtonHeight();
             }
 
             public override void HandleClick(UIMouseEventParameter p) {
@@ -85,18 +86,10 @@
 
             public override string ButtonName => "RemoveVehicle";
 
-            public override string FunctionName => "RemoveVehicleNow";
-
-            // public override string[] FunctionNames => new[] { "RemoveVehicleNow" };
-
             public override string GetTooltip() =>
                 Translation.Menu.Get("Button:Remove this vehicle");
 
             public override bool IsVisible() => true;
-
-            public override int GetWidth() => 30;
-
-            public override int GetHeight() => 30;
 
             public override bool CanActivate() {
                 return false;

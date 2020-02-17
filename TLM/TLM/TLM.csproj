@@ -323,10 +323,12 @@
     <Compile Include="UI\ModUI.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
-    <Compile Include="U\ButtonMouseState.cs" />
-    <Compile Include="U\ButtonTexture.cs" />
+    <Compile Include="U\ControlActiveState.cs" />
+    <Compile Include="U\ControlHoveredState.cs" />
+    <Compile Include="U\ControlEnabledState.cs" />
     <Compile Include="U\Button\BaseUButton.cs" />
     <Compile Include="U\Button\ButtonFunction.cs" />
+    <Compile Include="U\Button\ButtonSkin.cs" />
     <Compile Include="U\TextureUtil.cs" />
   </ItemGroup>
   <ItemGroup>
