@@ -330,6 +330,7 @@
     <Compile Include="U\Button\ButtonFunction.cs" />
     <Compile Include="U\Button\ButtonSkin.cs" />
     <Compile Include="U\TextureUtil.cs" />
+    <Compile Include="U\UIScaler.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\JunctionRestrictions\crossing_allowed.png" />

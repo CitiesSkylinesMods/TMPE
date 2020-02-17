@@ -13,23 +13,6 @@ namespace TrafficManager.UI.MainMenu {
         : BaseUButton,
           IObserver<GlobalConfig>
     {
-        // private const string MAIN_MENU_BUTTON_BG_BASE = "TMPE_MainMenuButtonBgBase";
-        // private const string MAIN_MENU_BUTTON_BG_HOVERED = "TMPE_MainMenuButtonBgHovered";
-        // private const string MAIN_MENU_BUTTON_BG_ACTIVE = "TMPE_MainMenuButtonBgActive";
-        // private const string MAIN_MENU_BUTTON_FG_BASE = "TMPE_MainMenuButtonFgBase";
-        // private const string MAIN_MENU_BUTTON_FG_HOVERED = "TMPE_MainMenuButtonFgHovered";
-        // private const string MAIN_MENU_BUTTON_FG_ACTIVE = "TMPE_MainMenuButtonFgActive";
-
-        const string ATLASKEY_BG_NORMAL = "MainMenuButton-bg-normal";
-        const string ATLASKEY_BG_HOVERED = "MainMenuButton-bg-hovered";
-        const string ATLASKEY_BG_ACTIVE = "MainMenuButton-bg-active";
-        const string ATLASKEY_FG_NORMAL = "MainMenuButton-fg-normal";
-        const string ATLASKEY_FG_HOVERED = "MainMenuButton-fg-hovered";
-        const string ATLASKEY_FG_ACTIVE = "MainMenuButton-fg-active";
-
-        private const int BUTTON_WIDTH = 50;
-        private const int BUTTON_HEIGHT = 50;
-
         private UIDragHandle Drag { get; set; }
 
         private IDisposable confDisposable_;
@@ -44,22 +27,7 @@ namespace TrafficManager.UI.MainMenu {
 
             confDisposable_ = GlobalConfig.Instance.Subscribe(this);
 
-            // Set the atlas and background/foreground
-            // var spriteNames = new[] {
-            //     MAIN_MENU_BUTTON_BG_BASE,
-            //     MAIN_MENU_BUTTON_BG_HOVERED,
-            //     MAIN_MENU_BUTTON_BG_ACTIVE,
-            //     MAIN_MENU_BUTTON_FG_BASE,
-            //     MAIN_MENU_BUTTON_FG_HOVERED,
-            //     MAIN_MENU_BUTTON_FG_ACTIVE,
-            // };
-            // atlas = TextureUtil.GenerateLinearAtlas(
-            //     "TMPE_MainMenuButtonAtlas",
-            //     Textures.MainMenu.MainMenuButton,
-            //     6,
-            //     spriteNames);
-
-            // Let the mainmenu atlas know we need this texture and assign it to self.atlas
+            // Let the mainmenu atlas know we need this texture and assign it to self.atlas.
             this.Skin = new ButtonSkin {
                                            Prefix = "MainMenuButton",
                                            BackgroundHovered = true,
@@ -67,12 +35,17 @@ namespace TrafficManager.UI.MainMenu {
                                            ForegroundHovered = true,
                                            ForegroundActive = true,
                                        };
-            this.atlas = this.Skin.CreateAtlas("MainMenu", 50, 50, 256);
+            this.atlas = this.Skin.CreateAtlas(
+                "MainMenu",
+                50,
+                50,
+                256,
+                this.Skin.CreateAtlasKeysList());
             UpdateButtonImageAndTooltip();
 
-            // Set the button dimensions.
-            width = BUTTON_WIDTH;
-            height = BUTTON_HEIGHT;
+            // Set the button dimensions to smallest of 2.6% of screen width or 4.6% of screen height
+            // Which approximately equals to 50 pixels in 1080p.
+            width = height = GetButtonDimensions();
 
             // Enable button sounds.
             playAudioEvents = true;
@@ -91,6 +64,10 @@ namespace TrafficManager.UI.MainMenu {
             if (uiView != null) {
                 m_TooltipBox = uiView.defaultTooltipBox;
             }
+        }
+
+        private static float GetButtonDimensions() {
+            return U.UIScaler.ScreenSizeSmallestFraction(0.026f, 0.046f);
         }
 
         public override bool IsActive() {
@@ -158,11 +135,14 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         public void UpdatePosition(Vector2 pos) {
-            Rect rect = new Rect(pos.x, pos.y, BUTTON_WIDTH, BUTTON_HEIGHT);
+            float size = GetButtonDimensions();
+            Rect rect = new Rect(pos.x, pos.y, size, size);
             Vector2 resolution = UIView.GetAView().GetScreenResolution();
+
             VectorUtil.ClampRectToScreen(ref rect, resolution);
             Log.Info($"Setting main menu button position to [{pos.x},{pos.y}]");
             absolutePosition = rect.position;
+
             Invalidate();
         }
 

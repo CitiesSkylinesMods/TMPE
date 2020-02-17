@@ -18,7 +18,12 @@ namespace TrafficManager.U.Button {
     ///
     /// </summary>
     public class ButtonSkin {
+        /// <summary>Foreground sprites are loaded with this prefix.</summary>
         public string Prefix;
+
+        /// <summary>Background sprites are loaded with prefix taken from this field, allows
+        /// multiple buttons sharing same background sprites within the same atlas.</summary>
+        public string BackgroundPrefix = string.Empty;
 
         public bool BackgroundDisabled = false;
         public bool BackgroundHovered = false;
@@ -28,15 +33,9 @@ namespace TrafficManager.U.Button {
         public bool ForegroundHovered = false;
         public bool ForegroundActive = false;
 
-        /// <summary>Following the settings in the Skin fields, load sprites into an UI atlas.</summary>
-        /// <param name="loadingPath">Path inside Resources. directory (dot separated).</param>
-        /// <param name="spriteWidth">When loading assume this width.</param>
-        /// <param name="spriteHeight">When loading assume this height.</param>
-        /// <param name="hintAtlasTextureSize">Square atlas of this size is created.</param>
-        /// <returns>New UI atlas.</returns>
-        public UITextureAtlas CreateAtlas(string loadingPath, int spriteWidth, int spriteHeight, int hintAtlasTextureSize) {
+        public List<string> CreateAtlasKeysList() {
             // Two normal textures (bg and fg) are always assumed to exist.
-            List<string> names = new List<string> { $"{Prefix}-bg-normal", $"{Prefix}-fg-normal" };
+            var names = new List<string> { $"{Prefix}-bg-normal", $"{Prefix}-fg-normal" };
 
             if (BackgroundDisabled) {
                 names.Add($"{Prefix}-bg-disabled");
@@ -57,10 +56,27 @@ namespace TrafficManager.U.Button {
                 names.Add($"{Prefix}-fg-active");
             }
 
+            return names;
+        }
+
+        /// <summary>Following the settings in the Skin fields, load sprites into an UI atlas.
+        /// Longer list of atlas keys can be loaded into one atlas.</summary>
+        /// <param name="loadingPath">Path inside Resources. directory (dot separated).</param>
+        /// <param name="spriteWidth">When loading assume this width.</param>
+        /// <param name="spriteHeight">When loading assume this height.</param>
+        /// <param name="hintAtlasTextureSize">Square atlas of this size is created.</param>
+        /// <param name="atlasKeysList">List of atlas keys to load under the loadingPath. Created by
+        /// calling CreateAtlasKeysList() on a ButtonSkin.</param>
+        /// <returns>New UI atlas.</returns>
+        public UITextureAtlas CreateAtlas(string loadingPath,
+                                          int spriteWidth,
+                                          int spriteHeight,
+                                          int hintAtlasTextureSize,
+                                          List<string> atlasKeysList) {
             return TextureUtil.CreateAtlas(
                 $"TMPE_U_{Prefix}_Atlas",
                 loadingPath,
-                names.ToArray(),
+                atlasKeysList.ToArray(),
                 spriteWidth,
                 spriteHeight,
                 hintAtlasTextureSize);
@@ -74,7 +90,10 @@ namespace TrafficManager.U.Button {
         internal string GetBackgroundTextureId(ControlEnabledState enabledState,
                                                ControlHoveredState hoveredState,
                                                ControlActiveState activeState) {
-            string ret = Prefix + "-bg";
+            string chosenPrefix = string.IsNullOrEmpty(BackgroundPrefix)
+                                      ? Prefix
+                                      : BackgroundPrefix;
+            string ret = chosenPrefix + "-bg";
 
             if (enabledState == ControlEnabledState.Disabled) {
                 return BackgroundDisabled ? ret + "-disabled" : ret + "-normal";
