@@ -548,6 +548,54 @@ namespace TrafficManager.UI {
                 alpha);
         }
 
+        /// <summary>
+        /// similar to NetTool.RenderOverlay()
+        /// but with additional control over alphaBlend.
+        /// </summary>
+        internal static void DrawSegmentOverlay(
+            RenderManager.CameraInfo cameraInfo,
+            ushort segmentId,
+            Color color,
+            bool alphaBlend) {
+            if (segmentId == 0) {
+                return;
+            }
+
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            float width = segment.Info.m_halfWidth;
+
+            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            bool IsMiddle(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
+
+            Bezier3 bezier;
+            bezier.a = GetNodePos(segment.m_startNode);
+            bezier.d = GetNodePos(segment.m_endNode);
+
+            NetSegment.CalculateMiddlePoints(
+                bezier.a,
+                segment.m_startDirection,
+                bezier.d,
+                segment.m_endDirection,
+                IsMiddle(segment.m_startNode),
+                IsMiddle(segment.m_endNode),
+                out bezier.b,
+                out bezier.c);
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
+                cameraInfo,
+                color,
+                bezier,
+                width * 2f,
+                0,
+                0,
+                -1f,
+                1280f,
+                false,
+                alphaBlend);
+
+        }
+
         [UsedImplicitly]
         private void DrawOverlayCircle(RenderManager.CameraInfo cameraInfo,
                                        Color color,
@@ -1786,6 +1834,11 @@ namespace TrafficManager.UI {
             return boundingBox.Contains(Event.current.mousePosition);
         }
 
+
+        /// <summary>
+        /// Sometimes (eg when clicking overlay sprites - TODO why?) this method should
+        /// be used instead of Input.GetMouseButtonDown(0)
+        /// </summary>
         internal bool CheckClicked() {
             if (Input.GetMouseButtonDown(0) && !_mouseClickProcessed) {
                 _mouseClickProcessed = true;

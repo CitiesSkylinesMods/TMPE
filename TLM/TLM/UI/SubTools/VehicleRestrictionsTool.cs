@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
     using GenericGameBridge.Service;
     using static Util.SegmentLaneTraverser;
@@ -9,6 +9,8 @@
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.UI.Helpers;
+    using CSUtil.Commons;
 
     public class VehicleRestrictionsTool : SubTool {
         private static readonly ExtVehicleType[] RoadVehicleTypes = {
@@ -26,9 +28,27 @@
 
         private bool overlayHandleHovered;
 
+        private bool _roadMode = false;
+        private bool roadMode => shift || _roadMode;
+
         private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 620, 100));
 
         private HashSet<ushort> currentRestrictedSegmentIds;
+
+        private static string T(string m) => Translation.VehicleRestrictions.Get(m);
+
+        private struct RenderData {
+            internal ushort segmentId;
+            internal uint laneId;
+            internal byte laneIndex;
+            internal NetInfo.Lane laneInfo;
+            internal bool GUIButtonHovered;
+        }
+        private RenderData renderData;
+
+        private static Color roadModeColor = Color.yellow;
+        private static bool shift => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
 
         public VehicleRestrictionsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -47,17 +67,18 @@
                 currentRestrictedSegmentIds.Remove(forceSegmentId);
             }
 
-            for (uint segmentId = forceSegmentId == 0 ? 1u : forceSegmentId;
+            for (ushort segmentId = forceSegmentId == 0 ? (ushort)1 : forceSegmentId;
                  segmentId <= (forceSegmentId == 0
                                    ? NetManager.MAX_SEGMENT_COUNT - 1
                                    : forceSegmentId);
                  ++segmentId) {
-                if (!Constants.ServiceFactory.NetService.IsSegmentValid((ushort)segmentId)) {
+                if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
                     continue;
                 }
 
-                if (VehicleRestrictionsManager.Instance.HasSegmentRestrictions((ushort)segmentId)) {
-                    currentRestrictedSegmentIds.Add((ushort)segmentId);
+                if (segmentId == SelectedSegmentId ||
+                    VehicleRestrictionsManager.Instance.HasSegmentRestrictions(segmentId)) {
+                    currentRestrictedSegmentIds.Add(segmentId);
                 }
             }
         }
@@ -91,7 +112,6 @@
 
             SelectedSegmentId = HoveredSegmentId;
             currentRestrictedSegmentIds.Add(SelectedSegmentId);
-            MainTool.CheckClicked(); // TODO do we need that?
         }
 
         public override void OnSecondaryClickOverlay() {
@@ -110,7 +130,7 @@
                     255,
                     windowRect,
                     GuiVehicleRestrictionsWindow,
-                    Translation.VehicleRestrictions.Get("Dialog.Title:Vehicle restrictions"),
+                   T("Dialog.Title:Vehicle restrictions"),
                     WindowStyle);
                 cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
 
@@ -120,15 +140,61 @@
             // ShowSigns(false);
         }
 
+        private static NetLane[] laneBuffer => NetManager.instance.m_lanes.m_buffer;
+
+        /// <summary>
+        /// highlights the given lane according.
+        /// the highlight is emboldened if mouse click is pressed.
+        /// </summary>
+        private void RenderLaneOverlay(RenderManager.CameraInfo cameraInfo, uint laneId) {
+            var marker = new SegmentLaneMarker(laneBuffer[laneId].m_bezier);
+            bool pressed = Input.GetMouseButton(0);
+            Color color = roadMode ? roadModeColor : Color.white;
+            color = pressed ? Color.magenta : color;
+            marker.RenderOverlay(cameraInfo, color, pressed);
+        }
+
+        /// <summary>
+        /// highlitghts all the lanes with the same sorted index as the current lane.
+        /// </summary>
+        private void RenderRoadLane(RenderManager.CameraInfo cameraInfo) {
+            int initialSortedLaneIndex = -1;
+            SegmentLaneTraverser.Traverse(
+                renderData.segmentId,
+                SegmentTraverser.TraverseDirection.AnyDirection,
+                SegmentTraverser.TraverseSide.AnySide,
+                SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                SegmentTraverser.SegmentStopCriterion.Junction,
+                SpeedLimitManager.LANE_TYPES,
+                SpeedLimitManager.VEHICLE_TYPES,
+                data => {
+                    if (data.SegVisitData.Initial &&
+                        data.CurLanePos.laneIndex == renderData.laneIndex) {
+                        initialSortedLaneIndex = data.SortedLaneIndex;
+                    }
+                    if (initialSortedLaneIndex == data.SortedLaneIndex) {
+                        RenderLaneOverlay(cameraInfo, data.CurLanePos.laneId);
+                    }
+                    return true;
+                });
+        }
+
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             // Log._Debug($"Restrictions overlay {_cursorInSecondaryPanel} {HoveredNodeId} {SelectedNodeId} {HoveredSegmentId} {SelectedSegmentId}");
-
             if (SelectedSegmentId != 0) {
-                NetTool.RenderOverlay(
-                    cameraInfo,
-                    ref Singleton<NetManager>.instance.m_segments.m_buffer[SelectedSegmentId],
-                    MainTool.GetToolColor(true, false),
-                    MainTool.GetToolColor(true, false));
+                Color color = MainTool.GetToolColor(true, false);
+                // continues lane highlight requires lane alphaBlend == false.
+                // for such lane highlight to be on the top of segment highlight,
+                // the alphaBlend of segment highlight needs to be true.
+                TrafficManagerTool.DrawSegmentOverlay(cameraInfo, SelectedSegmentId, color, true);
+
+                if (overlayHandleHovered) {
+                    if (!roadMode) {
+                        RenderLaneOverlay(cameraInfo, renderData.laneId);
+                    } else {
+                        RenderRoadLane(cameraInfo);
+                    }
+                }
             }
 
             if (cursorInSecondaryPanel) {
@@ -198,148 +264,137 @@
         }
 
         private void GuiVehicleRestrictionsWindow(int num) {
-            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-
-            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button:Invert"))) {
-                // invert pattern
-                NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
-
-                // TODO does not need to be sorted, but every lane should be a vehicle lane
-                IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
-                    SelectedSegmentId,
-                    ref segmentsBuffer[SelectedSegmentId],
-                    null,
-                    VehicleRestrictionsManager.LANE_TYPES,
-                    VehicleRestrictionsManager.VEHICLE_TYPES);
-
-                foreach (LanePos laneData in sortedLanes) {
-                    uint laneId = laneData.laneId;
-                    byte laneIndex = laneData.laneIndex;
-                    NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
-
-                    ExtVehicleType baseMask =
-                        VehicleRestrictionsManager.Instance.GetBaseMask(
-                            laneInfo,
-                            VehicleRestrictionsMode.Configured);
-
-                    if (baseMask == ExtVehicleType.None) {
-                        continue;
-                    }
-
-                    ExtVehicleType allowedTypes =
-                        VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
-                            SelectedSegmentId,
-                            selectedSegmentInfo,
-                            laneIndex,
-                            laneInfo,
-                            VehicleRestrictionsMode.Configured);
-
-                    allowedTypes = ~(allowedTypes & VehicleRestrictionsManager.EXT_VEHICLE_TYPES) &
-                                   baseMask;
-
-                    VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(
-                        SelectedSegmentId,
-                        selectedSegmentInfo,
-                        laneIndex,
-                        laneInfo,
-                        laneId,
-                        allowedTypes);
-                }
-
-                RefreshCurrentRestrictedSegmentIds(SelectedSegmentId);
+            GUILayout.BeginHorizontal();
+            Color oldColor = GUI.color;
+            if (shift) {
+                GUI.color = roadModeColor;
             }
 
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button(
-                Translation.VehicleRestrictions.Get("Button:Allow all vehicles")))
-            {
-                // allow all vehicle types
-                NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
-
-                // TODO does not need to be sorted, but every lane should be a vehicle lane
-                IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
-                    SelectedSegmentId,
-                    ref segmentsBuffer[SelectedSegmentId],
-                    null,
-                    VehicleRestrictionsManager.LANE_TYPES,
-                    VehicleRestrictionsManager.VEHICLE_TYPES);
-
-                foreach (LanePos laneData in sortedLanes) {
-                    uint laneId = laneData.laneId;
-                    byte laneIndex = laneData.laneIndex;
-                    NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
-
-                    ExtVehicleType baseMask =
-                        VehicleRestrictionsManager.Instance.GetBaseMask(
-                            laneInfo,
-                            VehicleRestrictionsMode.Configured);
-
-                    if (baseMask == ExtVehicleType.None) {
-                        continue;
-                    }
-
-                    VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(
+            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button:Invert"))) {
+                if (!shift) {
+                    AllVehiclesFunc(AllVehiclesFuncMode.Invert, SelectedSegmentId);
+                } else {
+                    SegmentTraverser.Traverse(
                         SelectedSegmentId,
-                        selectedSegmentInfo,
-                        laneIndex,
-                        laneInfo,
-                        laneId,
-                        baseMask);
+                        SegmentTraverser.TraverseDirection.AnyDirection,
+                        SegmentTraverser.TraverseSide.AnySide,
+                        SegmentTraverser.SegmentStopCriterion.Junction,
+                        data => {
+                            Log._Debug($"KIAN: segmentId={data.CurSeg.segmentId}");
+                            AllVehiclesFunc(
+                                AllVehiclesFuncMode.Invert,
+                                data.CurSeg.segmentId);
+                            return true;
+                        });
                 }
+            }
 
-                RefreshCurrentRestrictedSegmentIds(SelectedSegmentId);
+            // use yellow color when shift is pressed.
+            {
+                // uses pressed sprite when delete is pressed
+                // uses yellow color when shift is pressed.
+                bool delete = Input.GetKey(KeyCode.Delete);
+                GUIStyle style = new GUIStyle("button");
+                if(delete) style.normal.background = style.active.background;
+
+                if (GUILayout.Button(
+                   T("Button:Allow all vehicles") + " [delete]",
+                   style) || delete) {
+                    AllVehiclesFunc(AllVehiclesFuncMode.Allow, SelectedSegmentId);
+                    if (shift) {
+                        ApplyRestrictionsToAllSegments();
+                    }
+                }
             }
 
             if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button:Ban all vehicles"))) {
-                // ban all vehicle types
-                NetInfo selectedSegmentInfo = segmentsBuffer[SelectedSegmentId].Info;
-
-                // TODO does not need to be sorted, but every lane should be a vehicle lane
-                IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
-                    SelectedSegmentId,
-                    ref segmentsBuffer[SelectedSegmentId],
-                    null,
-                    VehicleRestrictionsManager.LANE_TYPES,
-                    VehicleRestrictionsManager.VEHICLE_TYPES);
-
-                foreach (LanePos laneData in sortedLanes) {
-                    uint laneId = laneData.laneId;
-                    byte laneIndex = laneData.laneIndex;
-                    NetInfo.Lane laneInfo = selectedSegmentInfo.m_lanes[laneIndex];
-
-                    ExtVehicleType baseMask =
-                        VehicleRestrictionsManager.Instance.GetBaseMask(
-                            laneInfo,
-                            VehicleRestrictionsMode.Configured);
-
-                    if (baseMask == ExtVehicleType.None) {
-                        continue;
-                    }
-
-                    VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(
-                        SelectedSegmentId,
-                        selectedSegmentInfo,
-                        laneIndex,
-                        laneInfo,
-                        laneId,
-                        ~VehicleRestrictionsManager.EXT_VEHICLE_TYPES &
-                        baseMask);
+                AllVehiclesFunc(AllVehiclesFuncMode.Ban, SelectedSegmentId);
+                if (shift) {
+                    ApplyRestrictionsToAllSegments();
                 }
-
-                RefreshCurrentRestrictedSegmentIds(SelectedSegmentId);
             }
 
             GUILayout.EndHorizontal();
+            
+            GUI.color = oldColor;
+            {
+                GUIStyle style = new GUIStyle("button");
+                if (roadMode) style.normal.background = style.active.background;
+                if (GUILayout.Button(
+                    T("Button:Road mode") + " [shift]")) {
+                    _roadMode = !roadMode;
+                }
+            }
 
             if (GUILayout.Button(
-                Translation.VehicleRestrictions.Get("Button:Apply to entire road"))) {
+               T("Button:Apply to entire road"))) {
                 ApplyRestrictionsToAllSegments();
             }
 
             DragWindow(ref windowRect);
         }
 
-        private void ApplyRestrictionsToAllSegments(int? sortedLaneIndex = null) {
+        private enum AllVehiclesFuncMode {
+            Allow,
+            Ban,
+            Invert,
+        }
+        private void AllVehiclesFunc(AllVehiclesFuncMode mode, ushort segmentId) {
+            // allow all vehicle types
+            NetInfo segmentInfo = segmentId.ToSegment().Info;
+
+            // TODO does not need to be sorted, but every lane should be a vehicle lane
+            IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+                segmentId,
+                ref segmentId.ToSegment(),
+                null,
+                VehicleRestrictionsManager.LANE_TYPES,
+                VehicleRestrictionsManager.VEHICLE_TYPES);
+
+            foreach (LanePos laneData in sortedLanes) {
+                uint laneId = laneData.laneId;
+                byte laneIndex = laneData.laneIndex;
+                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+                ExtVehicleType allowedTypes;
+                if ( mode == AllVehiclesFuncMode.Invert) {
+                    ExtVehicleType mask =
+                        VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
+                            segmentId,
+                            segmentInfo,
+                            laneIndex,
+                            laneInfo,
+                            VehicleRestrictionsMode.Configured);
+                    allowedTypes = ~mask;
+                } else if (mode == AllVehiclesFuncMode.Ban) {
+                    allowedTypes = ExtVehicleType.None;
+                } else {
+                    allowedTypes = VehicleRestrictionsManager.EXT_VEHICLE_TYPES;
+                }
+
+                VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(
+                    segmentId,
+                    segmentInfo,
+                    laneIndex,
+                    laneInfo,
+                    laneId,
+                    allowedTypes);
+            }
+
+            RefreshCurrentRestrictedSegmentIds(segmentId);
+        }
+
+        /// <summary>
+        /// coppies vehicle restrictions of the current segment
+        /// and applies them to all segments until the next junction.
+        /// </summary>
+        /// <param name="sortedLaneIndex">if provided only current lane is considered</param>
+        /// <param name="vehicleTypes">
+        /// if provided only bits for which vehicleTypes is set are considered.
+        /// </param>
+        private void ApplyRestrictionsToAllSegments(
+            int? sortedLaneIndex = null,
+            ExtVehicleType ?vehicleTypes = null) {
             NetManager netManager = Singleton<NetManager>.instance;
 
             NetInfo selectedSegmentInfo = netManager.m_segments.m_buffer[SelectedSegmentId].Info;
@@ -363,25 +418,29 @@
                 byte laneIndex = data.CurLanePos.laneIndex;
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
-                ExtVehicleType baseMask = VehicleRestrictionsManager.Instance.GetBaseMask(
-                    laneInfo,
-                    VehicleRestrictionsMode.Configured);
-                if (baseMask == ExtVehicleType.None) {
-                    return true;
-                }
-
                 // apply restrictions of selected segment & lane
-                ExtVehicleType
-                    mask = ~VehicleRestrictionsManager.EXT_VEHICLE_TYPES &
-                           baseMask; // ban all possible controllable vehicles
-                // allow all enabled and controllable vehicles
-                mask |= VehicleRestrictionsManager.EXT_VEHICLE_TYPES &
+                ExtVehicleType mask =
+                    VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
+                        SelectedSegmentId,
+                        selectedSegmentInfo,
+                        selectedLaneIndex,
+                        selectedLaneInfo,
+                        VehicleRestrictionsMode.Configured); ;
+                if (vehicleTypes != null) {
+                    ExtVehicleType currentMask =
                         VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
-                            SelectedSegmentId,
-                            selectedSegmentInfo,
-                            selectedLaneIndex,
-                            selectedLaneInfo,
+                            segmentId,
+                            segmentInfo,
+                            laneIndex,
+                            laneInfo,
                             VehicleRestrictionsMode.Configured);
+
+                    // only apply changes where types is 1. that means:
+                    // for bits where types is 0, use currentMask,
+                    // for bits where types is 1, use initial mask.
+                    ExtVehicleType types2 = (ExtVehicleType)vehicleTypes; //cast
+                    mask = (types2 & mask) | (~types2 & currentMask);
+                }
 
                 VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(
                     segmentId,
@@ -550,9 +609,14 @@
 
                     if (hoveredHandle) {
                         hovered = true;
+                        renderData.segmentId = segmentId;
+                        renderData.laneId = laneId;
+                        renderData.laneIndex = laneIndex;
+                        renderData.laneInfo = laneInfo;
+
                     }
 
-                    if (hoveredHandle && MainTool.CheckClicked()) {
+                    if (hoveredHandle && MainTool.CheckClicked() ) {
                         // toggle vehicle restrictions
                         // Log._Debug($"Setting vehicle restrictions of segment {segmentId}, lane
                         //     idx {laneIndex}, {vehicleType.ToString()} to {!allowed}");
@@ -566,8 +630,8 @@
                             !allowed);
                         stateUpdated = true;
 
-                        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
-                            ApplyRestrictionsToAllSegments(sortedLaneIndex);
+                        if (roadMode) {
+                            ApplyRestrictionsToAllSegments(sortedLaneIndex, vehicleType);
                         }
                     }
 
