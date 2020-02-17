@@ -73,8 +73,8 @@ namespace TrafficManager.UI.MainMenu {
                     BUTTON_SIZE = 50,
 
                     MENU_WIDTH = 335,
-                    MENU_HEIGHT = 135
-                }
+                    MENU_HEIGHT = 135,
+                },
             };
 
         public const int DEFAULT_MENU_X = 85;

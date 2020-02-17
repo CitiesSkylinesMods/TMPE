@@ -1,24 +1,30 @@
-namespace TrafficManager.UI {
+namespace TrafficManager.UI.MainMenu {
+    using System;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using System;
     using TrafficManager.API.Util;
-    using TrafficManager.State.Keybinds;
     using TrafficManager.State;
-    using TrafficManager.UI.Textures;
-    using TrafficManager.Util;
+    using TrafficManager.State.Keybinds;
+    using TrafficManager.U;
     using UnityEngine;
 
     public class UIMainMenuButton
         : UIButton,
           IObserver<GlobalConfig>
     {
-        private const string MAIN_MENU_BUTTON_BG_BASE = "TMPE_MainMenuButtonBgBase";
-        private const string MAIN_MENU_BUTTON_BG_HOVERED = "TMPE_MainMenuButtonBgHovered";
-        private const string MAIN_MENU_BUTTON_BG_ACTIVE = "TMPE_MainMenuButtonBgActive";
-        private const string MAIN_MENU_BUTTON_FG_BASE = "TMPE_MainMenuButtonFgBase";
-        private const string MAIN_MENU_BUTTON_FG_HOVERED = "TMPE_MainMenuButtonFgHovered";
-        private const string MAIN_MENU_BUTTON_FG_ACTIVE = "TMPE_MainMenuButtonFgActive";
+        // private const string MAIN_MENU_BUTTON_BG_BASE = "TMPE_MainMenuButtonBgBase";
+        // private const string MAIN_MENU_BUTTON_BG_HOVERED = "TMPE_MainMenuButtonBgHovered";
+        // private const string MAIN_MENU_BUTTON_BG_ACTIVE = "TMPE_MainMenuButtonBgActive";
+        // private const string MAIN_MENU_BUTTON_FG_BASE = "TMPE_MainMenuButtonFgBase";
+        // private const string MAIN_MENU_BUTTON_FG_HOVERED = "TMPE_MainMenuButtonFgHovered";
+        // private const string MAIN_MENU_BUTTON_FG_ACTIVE = "TMPE_MainMenuButtonFgActive";
+
+        const string ATLASKEY_BG_NORMAL = "MainMenuButton-bg-normal";
+        const string ATLASKEY_BG_HOVERED = "MainMenuButton-bg-hovered";
+        const string ATLASKEY_BG_ACTIVE = "MainMenuButton-bg-active";
+        const string ATLASKEY_FG_NORMAL = "MainMenuButton-fg-normal";
+        const string ATLASKEY_FG_HOVERED = "MainMenuButton-fg-hovered";
+        const string ATLASKEY_FG_ACTIVE = "MainMenuButton-fg-active";
 
         private const int BUTTON_WIDTH = 50;
         private const int BUTTON_HEIGHT = 50;
@@ -34,20 +40,31 @@ namespace TrafficManager.UI {
             confDisposable_ = GlobalConfig.Instance.Subscribe(this);
 
             // Set the atlas and background/foreground
-            var spriteNames = new[] {
-                MAIN_MENU_BUTTON_BG_BASE,
-                MAIN_MENU_BUTTON_BG_HOVERED,
-                MAIN_MENU_BUTTON_BG_ACTIVE,
-                MAIN_MENU_BUTTON_FG_BASE,
-                MAIN_MENU_BUTTON_FG_HOVERED,
-                MAIN_MENU_BUTTON_FG_ACTIVE,
-            };
-            atlas = TextureUtil.GenerateLinearAtlas(
-                "TMPE_MainMenuButtonAtlas",
-                Textures.MainMenu.MainMenuButton,
-                6,
-                spriteNames);
+            // var spriteNames = new[] {
+            //     MAIN_MENU_BUTTON_BG_BASE,
+            //     MAIN_MENU_BUTTON_BG_HOVERED,
+            //     MAIN_MENU_BUTTON_BG_ACTIVE,
+            //     MAIN_MENU_BUTTON_FG_BASE,
+            //     MAIN_MENU_BUTTON_FG_HOVERED,
+            //     MAIN_MENU_BUTTON_FG_ACTIVE,
+            // };
+            // atlas = TextureUtil.GenerateLinearAtlas(
+            //     "TMPE_MainMenuButtonAtlas",
+            //     Textures.MainMenu.MainMenuButton,
+            //     6,
+            //     spriteNames);
 
+            // Let the mainmenu atlas know we need this texture and assign it to self.atlas
+            this.atlas = TextureUtil.CreateAtlas(
+                "TMPE_U_MainButton_Atlas",
+                "MainMenu",
+                new[] {
+                          ATLASKEY_BG_NORMAL, ATLASKEY_BG_HOVERED, ATLASKEY_BG_ACTIVE,
+                          ATLASKEY_FG_NORMAL, ATLASKEY_FG_HOVERED, ATLASKEY_FG_ACTIVE,
+                      },
+                50,
+                50,
+                256);
             UpdateSprites();
 
             // Set the button dimensions.
@@ -124,27 +141,27 @@ namespace TrafficManager.UI {
             if (!LoadingExtension.ModUi.IsVisible()) {
                 m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
                                                    m_BackgroundSprites.m_Focused =
-                                                       MAIN_MENU_BUTTON_BG_BASE;
-                m_BackgroundSprites.m_Hovered = MAIN_MENU_BUTTON_BG_HOVERED;
-                m_PressedBgSprite = MAIN_MENU_BUTTON_BG_ACTIVE;
+                                                       ATLASKEY_BG_NORMAL;
+                m_BackgroundSprites.m_Hovered = ATLASKEY_BG_HOVERED;
+                m_PressedBgSprite = ATLASKEY_BG_ACTIVE;
 
                 m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
                                                    m_ForegroundSprites.m_Focused =
-                                                       MAIN_MENU_BUTTON_FG_BASE;
-                m_ForegroundSprites.m_Hovered = MAIN_MENU_BUTTON_FG_HOVERED;
-                m_PressedFgSprite = MAIN_MENU_BUTTON_FG_ACTIVE;
+                                                       ATLASKEY_FG_NORMAL;
+                m_ForegroundSprites.m_Hovered = ATLASKEY_FG_HOVERED;
+                m_PressedFgSprite = ATLASKEY_FG_ACTIVE;
             } else {
                 m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
                                                    m_BackgroundSprites.m_Focused =
                                                        m_BackgroundSprites.m_Hovered =
-                                                           MAIN_MENU_BUTTON_BG_ACTIVE;
-                m_PressedBgSprite = MAIN_MENU_BUTTON_BG_HOVERED;
+                                                           ATLASKEY_BG_ACTIVE;
+                m_PressedBgSprite = ATLASKEY_BG_HOVERED;
 
                 m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
                                                    m_ForegroundSprites.m_Focused =
                                                        m_ForegroundSprites.m_Hovered =
-                                                           MAIN_MENU_BUTTON_FG_ACTIVE;
-                m_PressedFgSprite = MAIN_MENU_BUTTON_FG_HOVERED;
+                                                           ATLASKEY_FG_ACTIVE;
+                m_PressedFgSprite = ATLASKEY_FG_HOVERED;
             }
 
             this.Invalidate();

@@ -1,13 +1,13 @@
 ﻿namespace TrafficManager.UI.MainMenu {
     using ColossalFramework.UI;
     using TrafficManager.State;
+    using TrafficManager.U.Button;
 
     public class DespawnButton : BaseMenuButton {
         public override bool IsActive() => false;
 
-        protected override ButtonFunction Function => Options.disableDespawning
-                                                       ? ButtonFunction.DespawnDisabled
-                                                       : ButtonFunction.DespawnEnabled;
+        protected override ButtonFunction Function =>
+            new ButtonFunction("Despawn", !Options.disableDespawning);
 
         public override string GetTooltip() =>
             Options.disableDespawning

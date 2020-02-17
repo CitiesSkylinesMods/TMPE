@@ -3,6 +3,7 @@
     using CSUtil.Commons;
     using System.Collections.Generic;
     using TrafficManager.U;
+    using TrafficManager.U.Button;
     using TrafficManager.UI.Textures;
     using UnityEngine;
 
@@ -80,13 +81,13 @@
 
             public override bool IsActive() => false;
 
-            public override Texture2D AtlasTexture => Textures.MainMenu.RemoveButton;
+            // public override Texture2D AtlasTexture => Textures.MainMenu.RemoveButton;
 
             public override string ButtonName => "RemoveVehicle";
 
             public override string FunctionName => "RemoveVehicleNow";
 
-            public override string[] FunctionNames => new[] { "RemoveVehicleNow" };
+            // public override string[] FunctionNames => new[] { "RemoveVehicleNow" };
 
             public override string GetTooltip() =>
                 Translation.Menu.Get("Button:Remove this vehicle");

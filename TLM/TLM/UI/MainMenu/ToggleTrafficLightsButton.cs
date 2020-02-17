@@ -1,10 +1,11 @@
 ﻿namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State.Keybinds;
+    using TrafficManager.U.Button;
 
     public class ToggleTrafficLightsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.SwitchTrafficLight;
 
-        protected override ButtonFunction Function => ButtonFunction.ToggleTrafficLights;
+        protected override ButtonFunction Function => new ButtonFunction("ToggleTrafficLights");
 
         public override string GetTooltip() => Translation.Menu.Get("Tooltip:Switch traffic lights");
 

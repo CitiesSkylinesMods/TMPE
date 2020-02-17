@@ -1,9 +1,9 @@
-﻿namespace TrafficManager.U {
-    using System;
+﻿namespace TrafficManager.U.Button {
+    using System.Collections.Generic;
     using ColossalFramework.UI;
-    using CSUtil.Commons;
+    using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State.Keybinds;
-    using TrafficManager.Util;
+    using TrafficManager.UI.Textures;
     using UnityEngine;
 
     /// <summary>
@@ -18,20 +18,13 @@
 
         public abstract string FunctionName { get; }
 
-        public abstract string[] FunctionNames { get; }
-
-        public abstract Texture2D AtlasTexture { get; }
+        // public abstract string[] FunctionNames { get; }
 
         public abstract int GetWidth();
 
         public abstract int GetHeight();
 
         public override void Start() {
-            atlas = U.ButtonTexture.CreateAtlas(
-                ButtonName,
-                FunctionNames,
-                CanActivate(),
-                AtlasTexture);
             m_ForegroundSpriteMode = UIForegroundSpriteMode.Scale;
             UpdateProperties();
 

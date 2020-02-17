@@ -6,6 +6,8 @@ namespace TrafficManager.U {
     using UnityEngine;
 
     public static class ButtonTexture {
+        private const int BUTTON_SPRITE_WIDTH = 64;
+
         private const string MENU_BUTTON_BACKGROUND = "Bg";
         private const string MENU_BUTTON_FOREGROUND = "Fg";
 
@@ -70,46 +72,46 @@ namespace TrafficManager.U {
             return ret;
         }
 
-        /// <summary>Part of button start sequence: Creating atlas of textures for that button.</summary>
-        /// <param name="buttonName">Name of the button to set up the atlas.</param>
-        /// <param name="functionNames">List of function names this button will be performing.
-        ///     One string usually.</param>
-        /// <param name="canActivate">Whether the button can be in active state.</param>
-        /// <param name="atlasTexture">Source texture to take pixels from.</param>
-        /// <returns>A new atlas with each sprite having a name from U.ButtonTexture.</returns>
-        public static UITextureAtlas CreateAtlas(string buttonName,
-                                                 string[] functionNames,
-                                                 bool canActivate,
-                                                 Texture2D atlasTexture) {
-            int textureCount =
-                (Enum.GetValues(typeof(ButtonMouseState)).Length * (canActivate ? 2 : 1))
-                + (functionNames.Length * 2);
-            string[] textureIds = new string[textureCount];
-            int i = 0;
-
-            foreach (ButtonMouseState mouseState in EnumUtil.GetValues<ButtonMouseState>()) {
-                if (canActivate) {
-                    textureIds[i++] = GetBackgroundTextureId(buttonName, mouseState, true);
-                }
-
-                textureIds[i++] = GetBackgroundTextureId(buttonName, mouseState, false);
-            }
-
-            foreach (string function in functionNames) {
-                textureIds[i++] = GetForegroundTextureId(buttonName, function, false);
-            }
-
-            foreach (string function in functionNames) {
-                textureIds[i++] = GetForegroundTextureId(buttonName, function, true);
-            }
-
-            // Now that the names for background/foreground are defined, create an atlas from
-            // source texture which is expected to have button images in the appropriate order.
-            return TextureUtil.GenerateLinearAtlas(
-                "TMPE_UButton_" + buttonName + "Atlas",
-                atlasTexture,
-                textureIds.Length,
-                textureIds);
-        }
+        // /// <summary>Part of button start sequence: Creating atlas of textures for that button.</summary>
+        // /// <param name="buttonName">Name of the button to set up the atlas.</param>
+        // /// <param name="functionNames">List of function names this button will be performing.
+        // ///     One string usually.</param>
+        // /// <param name="canActivate">Whether the button can be in active state.</param>
+        // /// <param name="atlasTexture">Source texture to take pixels from.</param>
+        // /// <returns>A new atlas with each sprite having a name from U.ButtonTexture.</returns>
+        // public static UITextureAtlas CreateAtlas(string buttonName,
+        //                                          string[] functionNames,
+        //                                          bool canActivate) {
+        //     int textureCount =
+        //         (Enum.GetValues(typeof(ButtonMouseState)).Length * (canActivate ? 2 : 1))
+        //         + (functionNames.Length * 2);
+        //     string[] textureIds = new string[textureCount];
+        //     int i = 0;
+        //
+        //     foreach (ButtonMouseState mouseState in EnumUtil.GetValues<ButtonMouseState>()) {
+        //         if (canActivate) {
+        //             textureIds[i++] = GetBackgroundTextureId(buttonName, mouseState, true);
+        //         }
+        //
+        //         textureIds[i++] = GetBackgroundTextureId(buttonName, mouseState, false);
+        //     }
+        //
+        //     foreach (string function in functionNames) {
+        //         textureIds[i++] = GetForegroundTextureId(buttonName, function, false);
+        //     }
+        //
+        //     foreach (string function in functionNames) {
+        //         textureIds[i++] = GetForegroundTextureId(buttonName, function, true);
+        //     }
+        //
+        //     // Now that the names for background/foreground are defined, create an atlas from
+        //     // source texture which is expected to have button images in the appropriate order.
+        //     return TextureUtil.Generate2DAtlas(
+        //         "TMPE_UButton_" + buttonName + "Atlas",
+        //         (int)(4096 / BUTTON_SPRITE_WIDTH),
+        //         textureIds.Length,
+        //         textureIds,
+        //         );
+        // }
     } // end class
 }

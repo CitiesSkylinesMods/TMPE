@@ -2,6 +2,8 @@ namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System;
+    using System.Collections.Generic;
+    using TrafficManager.U;
     using TrafficManager.UI.MainMenu;
     using UnityEngine;
 
@@ -10,6 +12,25 @@ namespace TrafficManager.UI {
     /// Access via ThreadingExtension.ModUi.
     /// </summary>
     public class ModUI : UICustomControl {
+        /// <summary>
+        /// List of main menu button functions, used for loading textures.
+        /// </summary>
+        public List<string> ButtonList = new List<string> {
+                                                              "LaneConnector",
+                                                              "ClearTraffic",
+                                                              "DespawnDisabled",
+                                                              "DespawnEnabled",
+                                                              "JunctionRestrictions",
+                                                              "LaneArrows",
+                                                              "ManualTrafficLights",
+                                                              "PrioritySigns",
+                                                              "SpeedLimits",
+                                                              "TimedTrafficLights",
+                                                              "ToggleTrafficLights",
+                                                              "VehicleRestrictions",
+                                                              "ParkingRestrictions",
+                                                          };
+
         /// <summary>
         /// Gets the floating draggable button which shows and hides TM:PE UI.
         /// </summary>
