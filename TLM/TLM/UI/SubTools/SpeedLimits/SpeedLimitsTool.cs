@@ -148,14 +148,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 marker.size = 3f;
             }
             bool pressed = Input.GetMouseButton(0);
-            Color color = pressed ? Color.yellow : Color.white;
+            Color color = MainTool.GetToolColor(pressed,false);
             marker.RenderOverlay(cameraInfo, color, pressed);
-        }
-
-        private bool IsSameDirection(ushort segmentId1, ushort segmentId2) {
-            bool invert1 = segmentId1.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-            bool invert2 = segmentId2.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-            return invert1 == invert2;
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -181,9 +175,21 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                             int laneIndex = data.CurLanePos.laneIndex;
                             NetInfo.Lane laneInfo = segmentId.ToSegment().Info.m_lanes[laneIndex];
                             NetInfo.Direction direction = laneInfo.m_direction;
-                            if (!IsSameDirection(segmentId, renderData.segmentId)) {
-                                direction = NetInfo.InvertDirection(direction);
+
+                            if (!data.SegVisitData.Initial) {
+                                bool reverse =
+                                    data.SegVisitData.ViaStartNode ==
+                                    data.SegVisitData.ViaInitialStartNode;
+
+                                bool invert1 = segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+                                bool invert2 = renderData.segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+                                bool invert = invert1 != invert2;
+
+                                if (reverse ^ invert) {
+                                    direction = NetInfo.InvertDirection(direction);
+                                }
                             }
+
                             if (renderData.direction == direction) {
                                 RenderLaneOverlay(cameraInfo, data.CurLanePos.laneId);
                             }
