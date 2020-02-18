@@ -20,9 +20,6 @@ namespace TrafficManager.State {
         [UsedImplicitly]
         private static UICheckBox _lockMenuToggle;
 
-        [UsedImplicitly]
-        private static UICheckBox _tinyMenuToggle;
-
         private static UISlider _guiTransparencySlider;
         private static UISlider _overlayTransparencySlider;
 
@@ -82,10 +79,6 @@ namespace TrafficManager.State {
                                   T("General.Checkbox:Lock main menu window position"),
                                   GlobalConfig.Instance.Main.MainMenuPosLocked,
                                   OnLockMenuChanged) as UICheckBox;
-            _tinyMenuToggle = generalGroup.AddCheckbox(
-                                  T("General.Checkbox:Compact main menu"),
-                                  GlobalConfig.Instance.Main.TinyMainMenu,
-                                  OnCompactMainMenuChanged) as UICheckBox;
             _guiTransparencySlider = generalGroup.AddSlider(
                                         T("General.Slider:Window transparency") + ":",
                                         0,
@@ -190,13 +183,6 @@ namespace TrafficManager.State {
             }
 
             GlobalConfig.Instance.Main.MainMenuPosLocked = newValue;
-            GlobalConfig.WriteConfig();
-        }
-
-        private static void OnCompactMainMenuChanged(bool newValue) {
-            Log._Debug($"Compact main menu changed to {newValue}");
-            GlobalConfig.Instance.Main.TinyMainMenu = newValue;
-            GlobalConfig.Instance.NotifyObservers(GlobalConfig.Instance);
             GlobalConfig.WriteConfig();
         }
 

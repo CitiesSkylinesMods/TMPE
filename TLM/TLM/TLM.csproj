@@ -558,6 +558,13 @@
     <EmbeddedResource Include="Resources\MainMenu\Tool\ManualTL-fg-normal.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\TimedTL-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\TimedTL-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\GreenButton-bg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\GreenButton-bg-hovered.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\GreenButton-bg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\LaneArrows-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\LaneArrows-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\LaneConnector-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\LaneConnector-fg-normal.png" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
