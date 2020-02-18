@@ -80,7 +80,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             internal uint laneId;
             internal byte laneIndex;
             internal NetInfo.Lane laneInfo;
-            internal NetInfo.Direction direction;
+            internal NetInfo.Direction finalDirection;
             internal bool showPerLane;
         }
         private RenderData renderData;
@@ -174,7 +174,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                             ushort segmentId = data.SegVisitData.CurSeg.segmentId;
                             int laneIndex = data.CurLanePos.laneIndex;
                             NetInfo.Lane laneInfo = segmentId.ToSegment().Info.m_lanes[laneIndex];
-                            NetInfo.Direction direction = laneInfo.m_direction;
+                            NetInfo.Direction direction = laneInfo.m_finalDirection;
 
                             if (!data.SegVisitData.Initial) {
                                 bool reverse =
@@ -190,7 +190,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                 }
                             }
 
-                            if (renderData.direction == direction) {
+                            if (renderData.finalDirection == direction) {
                                 RenderLaneOverlay(cameraInfo, data.CurLanePos.laneId);
                             }
                             return true;
@@ -231,7 +231,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                         byte laneIndex) => {
                             bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
                             render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
-                            render &= laneInfo.m_direction == renderData.direction;
+                            render &= laneInfo.m_finalDirection == renderData.finalDirection;
                             if (render) {
                                 RenderLaneOverlay(cameraInfo, laneId);
                             }
@@ -878,7 +878,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
                     if (hoveredHandle) {
                         renderData.segmentId = segmentId;
-                        renderData.direction = e.Key;
+                        renderData.finalDirection = e.Key;
                         ret = true;
                     }
                     if (hoveredHandle && Input.GetMouseButtonDown(0) && !IsCursorInPanel()) {
