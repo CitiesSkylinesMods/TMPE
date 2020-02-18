@@ -8,8 +8,8 @@
 
         public override void Start() {
             size = new Vector2(
-                MainMenuPanel.GetScaledMenuWidth() / 2f,
-                MainMenuPanel.GetScaledTitlebarHeight());
+                MainMenuPanel.ScaledSize.GetWidth() / 2f,
+                MainMenuPanel.ScaledSize.GetTitlebarHeight());
             text = "0";
             suffix = " PFs";
             textColor = Color.green;

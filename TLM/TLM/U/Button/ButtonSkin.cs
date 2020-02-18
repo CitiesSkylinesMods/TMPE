@@ -41,20 +41,21 @@ namespace TrafficManager.U.Button {
         public List<string> CreateAtlasKeysList() {
             // Two normal textures (bg and fg) are always assumed to exist.
             var names = new List<string>();
-            if (!string.IsNullOrEmpty(BackgroundPrefix)) {
+            bool haveBackgroundPrefix = !string.IsNullOrEmpty(BackgroundPrefix);
+            if (haveBackgroundPrefix) {
                 names.Add($"{BackgroundPrefix}-bg-normal");
             }
 
             if (ForegroundNormal) {
                 names.Add($"{Prefix}-fg-normal");
             }
-            if (BackgroundDisabled) {
+            if (BackgroundDisabled && haveBackgroundPrefix) {
                 names.Add($"{BackgroundPrefix}-bg-disabled");
             }
-            if (BackgroundHovered) {
+            if (BackgroundHovered && haveBackgroundPrefix) {
                 names.Add($"{BackgroundPrefix}-bg-hovered");
             }
-            if (BackgroundActive) {
+            if (BackgroundActive && haveBackgroundPrefix) {
                 names.Add($"{BackgroundPrefix}-bg-active");
             }
             if (ForegroundDisabled) {

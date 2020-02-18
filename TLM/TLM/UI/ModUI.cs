@@ -2,8 +2,6 @@ namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System;
-    using System.Collections.Generic;
-    using TrafficManager.U;
     using TrafficManager.UI.MainMenu;
     using UnityEngine;
 
@@ -12,34 +10,11 @@ namespace TrafficManager.UI {
     /// Access via ThreadingExtension.ModUi.
     /// </summary>
     public class ModUI : UICustomControl {
-        /// <summary>
-        /// List of main menu button functions, used for loading textures.
-        /// </summary>
-        public List<string> ButtonList = new List<string> {
-                                                              "LaneConnector",
-                                                              "ClearTraffic",
-                                                              "DespawnDisabled",
-                                                              "DespawnEnabled",
-                                                              "JunctionRestrictions",
-                                                              "LaneArrows",
-                                                              "ManualTrafficLights",
-                                                              "PrioritySigns",
-                                                              "SpeedLimits",
-                                                              "TimedTrafficLights",
-                                                              "ToggleTrafficLights",
-                                                              "VehicleRestrictions",
-                                                              "ParkingRestrictions",
-                                                          };
+        /// <summary>Gets the floating draggable button which shows and hides TM:PE UI.</summary>
+        public UI.MainMenu.MainMenuButton MainMenuButton { get; }
 
-        /// <summary>
-        /// Gets the floating draggable button which shows and hides TM:PE UI.
-        /// </summary>
-        public UIMainMenuButton MainMenuButton { get; }
-
-        /// <summary>
-        /// Gets the floating tool panel with TM:PE tool buttons.
-        /// </summary>
-        public MainMenuPanel MainMenu { get; private set; }
+        /// <summary>Gets the floating tool panel with TM:PE tool buttons.</summary>
+        public UI.MainMenu.MainMenuPanel MainMenu { get; private set; }
 
 #if DEBUG
         public DebugMenuPanel DebugMenu { get; private set; }
@@ -71,7 +46,7 @@ namespace TrafficManager.UI {
             UIView uiView = UIView.GetAView();
 
             // Add a new button to the view.
-            MainMenuButton = (UIMainMenuButton)uiView.AddUIComponent(typeof(UIMainMenuButton));
+            MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
 
             // add the menu
             MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));

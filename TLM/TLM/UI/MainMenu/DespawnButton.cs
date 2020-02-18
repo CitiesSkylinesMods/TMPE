@@ -5,8 +5,6 @@
     using TrafficManager.U.Button;
 
     public class DespawnButton : BaseMenuButton {
-        public override bool IsActive() => false;
-
         protected override ButtonFunction Function =>
             new ButtonFunction("Despawn", !Options.disableDespawning);
 
@@ -17,10 +15,22 @@
 
         public override bool IsVisible() => true;
 
+        public override bool IsActive() => Options.disableDespawning;
+
         public override void SetupButtonSkin(List<string> atlasKeys) {
+            // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
+            this.Skin = new U.Button.ButtonSkin() {
+                                                      Prefix = "TrafficDespawning",
+                                                      BackgroundPrefix = "RoundButton",
+                                                      BackgroundHovered = true,
+                                                      BackgroundActive = true,
+                                                      ForegroundActive = true,
+                                                  };
+            atlasKeys.AddRange(this.Skin.CreateAtlasKeysList());
         }
 
         public override void OnClickInternal(UIMouseEventParameter p) {
+            // Immediately unclick the tool button, but toggle the option
             ModUI.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
             OptionsGameplayTab.SetDisableDespawning(!Options.disableDespawning);
         }

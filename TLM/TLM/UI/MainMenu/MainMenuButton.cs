@@ -9,7 +9,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.U.Button;
     using UnityEngine;
 
-    public class UIMainMenuButton
+    public class MainMenuButton
         : BaseUButton,
           IObserver<GlobalConfig>
     {

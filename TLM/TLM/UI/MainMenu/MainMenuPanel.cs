@@ -22,13 +22,13 @@ namespace TrafficManager.UI.MainMenu {
                 typeof(LaneConnectorButton),
                 typeof(LaneArrowsButton),
                 typeof(DespawnButton),
-                typeof(ClearTrafficButton),
                 // second row
                 typeof(PrioritySignsButton),
                 typeof(JunctionRestrictionsButton),
                 typeof(SpeedLimitsButton),
                 typeof(VehicleRestrictionsButton),
                 typeof(ParkingRestrictionsButton),
+                typeof(ClearTrafficButton),
             };
 
         public const int DEFAULT_MENU_X = 85;
@@ -67,7 +67,7 @@ namespace TrafficManager.UI.MainMenu {
             // And also each button will have a chance to add their own atlas keys for loading.
             var tmpSkin = new U.Button.ButtonSkin() {
                                                         Prefix = "MainMenuPanel",
-                                                        BackgroundPrefix = "RedButton",
+                                                        BackgroundPrefix = "RoundButton",
                                                         ForegroundNormal = false,
                                                         BackgroundHovered = true,
                                                         BackgroundActive = true,
@@ -87,8 +87,8 @@ namespace TrafficManager.UI.MainMenu {
             // Create atlas and give it to all buttons
             allButtonsAtlas_ = tmpSkin.CreateAtlas(
                                    "MainMenu.Tool",
-                                   80,
-                                   80,
+                                   50,
+                                   50,
                                    512,
                                    atlasKeysList);
 
@@ -155,41 +155,44 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private void UpdateSize() {
-            float buttonSize = GetScaledButtonSize();
+            float buttonSize = ScaledSize.GetButtonSize();
             // 6 buttons horizontal row, 2 rows + titlebar
-            width = GetScaledMenuWidth();
-            height = GetScaledMenuHeight();
+            width = ScaledSize.GetWidth();
+            height = ScaledSize.GetHeight();
         }
 
-        internal static float GetScaledMenuWidth() {
-            // 6 buttons + 7 button spacings (each 1/8 of a button)
-            return GetScaledButtonSize() * (6f + (7 * 0.125f));
-        }
+        /// <summary>Calculates button and panel sizes based on the screen resolution.</summary>
+        internal class ScaledSize {
+            internal static float GetWidth() {
+                // 6 buttons + 7 button spacings (each 1/8 of a button)
+                return GetButtonSize() * (6f + (7 * 0.125f));
+            }
 
-        internal static float GetScaledMenuHeight() {
-            // 2 button rows + spacing (1/8th) + titlebar
-            return (GetScaledButtonSize() * 2.125f) + GetScaledTitlebarHeight();
-        }
+            internal static float GetHeight() {
+                // 2 button rows + spacing (1/8th) + titlebar
+                return (GetButtonSize() * 2.125f) + GetTitlebarHeight();
+            }
 
-        /// <summary>Define size as smallest of 2.08% of width or 3.7% of height (40 px at 1080p).</summary>
-        /// <returns>Button size for current screen resolution.</returns>
-        internal static float GetScaledButtonSize() {
-            return U.UIScaler.ScreenSizeSmallestFraction(0.0208f, 0.037f);
-        }
+            /// <summary>Define size as smallest of 2.08% of width or 3.7% of height (40 px at 1080p).</summary>
+            /// <returns>Button size for current screen resolution.</returns>
+            internal static float GetButtonSize() {
+                return U.UIScaler.ScreenSizeSmallestFraction(0.0208f, 0.037f);
+            }
 
-        internal static float GetScaledTitlebarHeight() {
-            return GetScaledButtonSize() * 0.66f;
+            internal static float GetTitlebarHeight() {
+                return GetButtonSize() * 0.66f;
+            }
         }
 
         private void UpdateDragSize() {
             Drag.width = width;
-            Drag.height = GetScaledTitlebarHeight();
+            Drag.height = ScaledSize.GetTitlebarHeight();
         }
 
         private void UpdateButtons() {
             int i = 0;
-            int y = (int)GetScaledTitlebarHeight();
-            float buttonSize = GetScaledButtonSize();
+            int y = (int)ScaledSize.GetTitlebarHeight();
+            float buttonSize = ScaledSize.GetButtonSize();
             const int numRows = 2;
             const int numCols = 6;
             float spacing = buttonSize / 8f;
@@ -216,7 +219,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         public void UpdatePosition(Vector2 pos) {
-            Rect rect = new Rect(pos.x, pos.y, GetScaledMenuWidth(), GetScaledMenuHeight());
+            Rect rect = new Rect(pos.x, pos.y, ScaledSize.GetWidth(), ScaledSize.GetHeight());
             Vector2 resolution = UIView.GetAView().GetScreenResolution();
             VectorUtil.ClampRectToScreen(ref rect, resolution);
             Log.Info($"Setting main menu position to [{pos.x},{pos.y}]");

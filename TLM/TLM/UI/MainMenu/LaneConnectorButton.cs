@@ -11,7 +11,7 @@
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
             this.Skin = new U.Button.ButtonSkin() {
                                                       Prefix = "LaneConnector",
-                                                      BackgroundPrefix = "GreenButton",
+                                                      BackgroundPrefix = "RoundButton",
                                                       BackgroundHovered = true,
                                                       BackgroundActive = true,
                                                       ForegroundActive = true,

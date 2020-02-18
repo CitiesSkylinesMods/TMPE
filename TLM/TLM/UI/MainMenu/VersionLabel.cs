@@ -7,8 +7,8 @@ namespace TrafficManager.UI.MainMenu {
         public override void Start() {
             // TODO use current size profile
             size = new Vector2(
-                MainMenuPanel.GetScaledMenuWidth(),
-                MainMenuPanel.GetScaledTitlebarHeight());
+                MainMenuPanel.ScaledSize.GetWidth(),
+                MainMenuPanel.ScaledSize.GetTitlebarHeight());
             text = TrafficManagerMod.ModName;
 
             if(LoadingExtension.Instance.InGameHotReload) {

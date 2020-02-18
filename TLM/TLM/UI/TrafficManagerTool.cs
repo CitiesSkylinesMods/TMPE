@@ -90,7 +90,7 @@ namespace TrafficManager.UI {
             // y := main menu y + main menu height + rect.y
             return new Rect(
                 MainMenuPanel.DEFAULT_MENU_X + rect.x,
-                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.GetScaledMenuHeight() + rect.y,
+                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.ScaledSize.GetHeight() + rect.y,
                 rect.width,
                 rect.height);
         }
