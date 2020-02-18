@@ -21,18 +21,18 @@ namespace TrafficManager.UI.SubTools {
 
         private const float SIGN_SIZE = 80f;
 
-        private struct RenderInfo {
-            internal NetInfo.Direction direction;
+        private struct RenderData {
+            internal NetInfo.Direction finalDirection;
             internal ushort segmentId;
 
-            public static bool operator ==(RenderInfo a, RenderInfo b) =>
-                a.segmentId == b.segmentId && a.direction == b.direction;
+            public static bool operator ==(RenderData a, RenderData b) =>
+                a.segmentId == b.segmentId && a.finalDirection == b.finalDirection;
 
-            public static bool operator !=(RenderInfo a, RenderInfo b) =>
+            public static bool operator !=(RenderData a, RenderData b) =>
                 !(a == b);
         }
         private SegmentLaneMarker LaneMarker;
-        private RenderInfo renderInfo;
+        private RenderData renderInfo;
 
         /// <summary>
         /// Stores potentially visible segment ids while the camera did not move
@@ -56,7 +56,7 @@ namespace TrafficManager.UI.SubTools {
         public override void OnPrimaryClickOverlay() { }
 
         private void RenderSegmentParkings(RenderManager.CameraInfo cameraInfo) {
-            bool allowed = parkingManager.IsParkingAllowed(renderInfo.segmentId, renderInfo.direction);
+            bool allowed = parkingManager.IsParkingAllowed(renderInfo.segmentId, renderInfo.finalDirection);
             bool pressed = Input.GetMouseButton(0);
             Color color;
             if (pressed) {
@@ -77,7 +77,7 @@ namespace TrafficManager.UI.SubTools {
                 ref NetSegment segment,
                 byte laneIndex) => {
                     bool isParking = laneInfo.m_laneType.IsFlagSet(NetInfo.LaneType.Parking);
-                    if (isParking && laneInfo.m_direction == renderInfo.direction) {
+                    if (isParking && laneInfo.m_finalDirection == renderInfo.finalDirection) {
                         bezier = lane.m_bezier;
                         LaneMarker = new SegmentLaneMarker(bezier);
                         LaneMarker.RenderOverlay(cameraInfo, color, enlarge: pressed);
@@ -93,7 +93,7 @@ namespace TrafficManager.UI.SubTools {
                 int laneIndex = data.CurLanePos.laneIndex;
                 NetInfo.Lane laneInfo = segmentId.ToSegment().Info.m_lanes[laneIndex];
 
-                NetInfo.Direction direction = laneInfo.m_direction;
+                NetInfo.Direction finalDirection = laneInfo.m_finalDirection;
 
                 if (!data.SegVisitData.Initial) {
                     bool reverse =
@@ -105,10 +105,10 @@ namespace TrafficManager.UI.SubTools {
                     bool invert = invert1 != invert2;
 
                     if (reverse ^ invert) {
-                        direction = NetInfo.InvertDirection(direction);
+                        finalDirection = NetInfo.InvertDirection(finalDirection);
                     }
                 }
-                if (direction == renderInfo.direction) {
+                if (finalDirection == renderInfo.finalDirection) {
                     bool pressed = Input.GetMouseButton(0);
                     Color color = MainTool.GetToolColor(pressed, false);
                     uint otherLaneId = data.CurLanePos.laneId;
@@ -227,13 +227,13 @@ namespace TrafficManager.UI.SubTools {
                     ref camPos);
                 if (dir != NetInfo.Direction.None) {
                     renderInfo.segmentId = segmentId;
-                    renderInfo.direction = dir;
+                    renderInfo.finalDirection = dir;
                     hovered = true;
                 } 
             }
             if (!hovered) {
                 renderInfo.segmentId = 0;
-                renderInfo.direction = NetInfo.Direction.None;
+                renderInfo.finalDirection = NetInfo.Direction.None;
             }
         }
 
