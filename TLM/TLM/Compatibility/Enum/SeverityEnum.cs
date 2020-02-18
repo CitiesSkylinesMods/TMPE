@@ -5,6 +5,16 @@ namespace TrafficManager.Compatibility.Enum {
     /// </summary>
     public enum Severity {
         /// <summary>
+        /// No known issues.
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Non-obsolete TM:PE mod candidate; if more than one user has to choose which one to use.
+        /// </summary>
+        Candidate,
+
+        /// <summary>
         /// Minor annoyance
         /// </summary>
         Minor,

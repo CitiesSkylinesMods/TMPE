@@ -8,6 +8,7 @@ namespace TrafficManager.Compatibility {
     using System.Collections.Generic;
     using System.Reflection;
     using System.Text;
+    using TrafficManager.Compatibility.Struct;
     using UnityEngine.SceneManagement;
     using static ColossalFramework.Plugins.PluginManager;
 
@@ -28,11 +29,6 @@ namespace TrafficManager.Compatibility {
         internal static readonly Version CurrentGameVersion;
 
         /// <summary>
-        /// Keeps track of whether we need to auto-load the last save if no compatibility issues found.
-        /// </summary>
-        internal static bool AutoLoadLastSave;
-
-        /// <summary>
         /// Is the compatibility checker paused? We pause it when active scene is not "MainMenu".
         /// </summary>
         internal static bool Paused = true;
@@ -41,15 +37,6 @@ namespace TrafficManager.Compatibility {
         /// Initializes static members of the <see cref="CompatibilityManager"/> class.
         /// </summary>
         static CompatibilityManager() {
-            // Store current launcher auto-continue flag
-            try {
-                AutoLoadLastSave = LauncherLoginData.instance.m_continue;
-                LauncherLoginData.instance.m_continue = false;
-                Log.Info($"CompatibilityManager.ctor(): AutoLoadLastSave = {AutoLoadLastSave}");
-            } catch {
-                AutoLoadLastSave = false;
-            }
-
             // Translate current game verison in to Version instance
             CurrentGameVersion = new Version(
                 Convert.ToInt32(BuildConfig.APPLICATION_VERSION_A),
@@ -201,29 +188,11 @@ namespace TrafficManager.Compatibility {
             Singleton<LoadingManager>.instance.QuitApplication();
         }
 
-        /// <summary>
-        /// If no compatibility issues are found, check to see if the auto-load last game
-        /// setting was active and if so load the last savegame.
-        /// </summary>
-        internal static void LoadLastSaveGame() {
-            Log.Info("CompatibilityManager.LoadLastSaveGame()");
-
-            // Make sure we don't auto-load again
-            AutoLoadLastSave = false;
-
-            // Don't auto-load if we're somehow in-game!
-            if (!CanWeDoStuff()) {
-                return;
+        internal static void HaltAutoLoad() {
+            try {
+                LauncherLoginData.instance.m_continue = false;
             }
-            //MainMenu.Invoke("AutoContinue", 2.5f);
-        }
-
-        /// <summary>
-        /// Hides main menu by moving background image to top layer (same as vanilla game does).
-        /// </summary>
-        internal static void HideMainMenu() {
-            
-            //MainMenu.m_BackgroundImage.zOrder = int.MaxValue;
+            catch { }
         }
 
         /// <summary>
@@ -236,25 +205,23 @@ namespace TrafficManager.Compatibility {
                 "CompatibilityManager.PerformChecks() GUID = {0}",
                 SelfGuid);
 
-            if (Check.Versions.Verify(TrafficManagerMod.ExpectedGameVersion, CurrentGameVersion)) {
-                //todo
+            if (!Check.Versions.Verify(TrafficManagerMod.ExpectedGameVersion, CurrentGameVersion)) {
+                HaltAutoLoad();
+                //todo: show warning about game version
             }
 
-            if (Check.Assemblies.Verify()) {
-                ShowAssemblyChooser();
-            } else if (Check.Mods.Verify(
-                out Dictionary<PluginInfo, string> critical,
-                out Dictionary<PluginInfo, string> major,
-                out Dictionary<PluginInfo, string> minor)) {
-                ShowModRemoverDialog(critical, major, minor);
-            } else {
-                Check.DLCs.Verify();
-                if (AutoLoadLastSave) {
-                    LoadLastSaveGame();
-                } else {
-                    ListenForSubscriptionChange();
-                }
+            if (!Check.Assemblies.Verify()) {
+                HaltAutoLoad();
+                // todo: show warning about settings loss
             }
+
+            if (!Check.Mods.Verify(out Dictionary<PluginInfo, ModDescriptor> results)) {
+                HaltAutoLoad();
+                // todo: deal with incompatibilities
+            }
+
+            Check.DLCs.Verify();
+            ListenForSubscriptionChange();
         }
     }
 }

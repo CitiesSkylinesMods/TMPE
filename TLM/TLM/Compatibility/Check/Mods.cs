@@ -10,37 +10,37 @@ namespace TrafficManager.Compatibility.Check {
     using TrafficManager.State;
     using System.Text;
     using TrafficManager.Compatibility.Enum;
+    using TrafficManager.Compatibility.Struct;
+    using System.Reflection;
 
     /// <summary>
     /// Scans for known incompatible mods as defined by <see cref="IncompatibleMods.List"/>.
     /// </summary>
     public class Mods {
 
-        /// <summary>
-        /// Game always uses ulong.MaxValue to depict local mods.
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "RAS0002:Readonly field for a non-readonly struct", Justification = "Rarely used.")]
-        internal static readonly ulong Local = ulong.MaxValue;
+        // Strings for log entries
+        internal const string LOG_ENTRY_FORMAT = "{0} {1} {2} {3}\n";
+        internal const string MARKER_ENABLED = "*";
+        internal const string MARKER_BLANK = " ";
+        internal const string MARKER_TMPE = ">";
+        internal const string MARKER_CRITICAL = "C";
+        internal const string MARKER_MAJOR = "M";
+        internal const string MARKER_MINOR = "m";
+
+        internal const string LOCAL_MOD_STR = "(local)";
 
         /// <summary>
         /// Scans installed mods (local and workshop) looking for known incompatibilities.
         /// </summary>
         /// 
-        /// <param name="critical">A dictionary of critical incompatibilities.</param>
-        /// <param name="major">A dictionary of major incompatibilities.</param>
-        /// <param name="minor">A dictionary of minor incompatibilities.</param>
+        /// <param name="results">A dictionary issues found (will be empty if no issues).</param>
         /// 
         /// <returns>Returns <c>true</c> if incompatible mods detected, otherwise <c>false</c>.</returns>
-        public static bool Verify(
-            out Dictionary<PluginInfo, string> critical,
-            out Dictionary<PluginInfo, string> major,
-            out Dictionary<PluginInfo, string> minor) {
+        public static bool Verify(out Dictionary<PluginInfo, ModDescriptor> results) {
 
             Log.Info("Compatibility.Check.Mods.Scan()");
 
-            critical = new Dictionary<PluginInfo, string>();
-            major = new Dictionary<PluginInfo, string>();
-            minor = new Dictionary<PluginInfo, string>();
+            results = new Dictionary<PluginInfo, ModDescriptor>();
 
             // current verification state
             bool verified = true;
@@ -61,77 +61,70 @@ namespace TrafficManager.Compatibility.Check {
                 scanDisabled);
 
             // Variables for log file entries
-            string logEnabled;
             string logWorkshopId;
             string logIncompatible;
-
-            // Common strings
-            string entryFormat = "{0} {1} {2} {3}\n";
-            string strAsterisk = "*";
-            string strSpace = " ";
-            string strLocal = "(local)";
-            string strCritical = "C";
-            string strMajor = "M";
-            string strMinor = "m";
+            int minor = 0,
+                major = 0,
+                critical = 0;
 
             // iterate plugins
             foreach (PluginInfo mod in Singleton<PluginManager>.instance.GetPluginsInfo()) {
 
                 try {
-                    // filter out bundled and camera script mods
-                    if (!mod.isBuiltin && !mod.isCameraScript) {
+                    // Filter out bundled mods
+                    // Note: Need to check camera scripts as one incompatible mod is published as a camera script!
+                    if (!mod.isBuiltin) {
 
-                        // basic details
-                        string modName = GetModName(mod);
-                        ulong workshopId = mod.publishedFileID.AsUInt64;
-                        bool isLocal = workshopId == Local;
+                        ModDescriptor descriptor = mod;
 
-                        // Values for log file entry
-                        logEnabled = mod.isEnabled ? strAsterisk : strSpace;
-                        logWorkshopId = isLocal ? strLocal : workshopId.ToString();
-                        logIncompatible = strSpace;
+                        logWorkshopId = descriptor.ModIsLocal
+                            ? LOCAL_MOD_STR
+                            : descriptor.ModWorkshopId.ToString();
 
-                        if (isLocal) {
-
-                            if (IsLocalModIncompatible(modName) && GetModGuid(mod) != CompatibilityManager.SelfGuid) {
-                                logIncompatible = strCritical;
-                                verified = false;
-                                critical.Add(mod, modName);
-                            }
-                            modName += $" /{Path.GetFileName(mod.modPath)}";
-
-                        } else if (IncompatibleMods.List.TryGetValue(workshopId, out Severity severity)) {
-
-                            switch (severity) {
-                                case Severity.Critical:
-                                    logIncompatible = strCritical;
+                        switch (descriptor.Incompatibility) {
+                            case Severity.None:
+                                logIncompatible = MARKER_BLANK;
+                                break;
+                            case Severity.Candidate:
+                                logIncompatible = MARKER_TMPE;
+                                if (descriptor.AssemblyGuid != CompatibilityManager.SelfGuid) {
                                     verified = false;
-                                    critical.Add(mod, modName);
-                                    break;
-                                case Severity.Major:
-                                    logIncompatible = strMajor;
-                                    if (mod.isEnabled || scanDisabled) {
-                                        verified = false;
-                                        major.Add(mod, modName);
-                                    }
-                                    break;
-                                case Severity.Minor:
-                                    logIncompatible = strMinor;
-                                    if (scanMinor && (mod.isEnabled || scanDisabled)) {
-                                        verified = false;
-                                        minor.Add(mod, modName);
-                                    }
-                                    break;
-                            }
-
+                                    results.Add(mod, descriptor);
+                                }
+                                break;
+                            case Severity.Minor:
+                                logIncompatible = MARKER_MINOR;
+                                if (scanMinor && (mod.isEnabled || scanDisabled)) {
+                                    verified = false;
+                                    ++minor;
+                                    results.Add(mod, descriptor);
+                                }
+                                break;
+                            case Severity.Major:
+                                logIncompatible = MARKER_MAJOR;
+                                if (mod.isEnabled || scanDisabled) {
+                                    verified = false;
+                                    ++major;
+                                    results.Add(mod, descriptor);
+                                }
+                                break;
+                            case Severity.Critical:
+                                logIncompatible = MARKER_CRITICAL;
+                                verified = false;
+                                ++critical;
+                                results.Add(mod, descriptor);
+                                break;
+                            default:
+                                logIncompatible = MARKER_BLANK;
+                                break;
                         }
 
                         sb.AppendFormat(
-                            entryFormat,
+                            LOG_ENTRY_FORMAT,
                             logIncompatible,
-                            logEnabled,
+                            mod.isEnabled ? MARKER_ENABLED : MARKER_BLANK,
                             logWorkshopId.PadRight(12),
-                            modName);
+                            descriptor.ModName);
                     }
 
                 } catch (Exception e) {
@@ -144,65 +137,25 @@ namespace TrafficManager.Compatibility.Check {
 
             sb.AppendFormat(
                 "\nScan complete: {0} [C]ritical, {1} [M]ajor, {2} [m]inor; [*] = Enabled",
-                critical.Count,
-                major.Count,
-                minor.Count);
+                critical,
+                major,
+                minor);
 
             Log.Info(sb.ToString());
 
             return verified;
         }
 
-        /// <summary>
-        /// Identify problematic local mods by name.
-        /// </summary>
-        /// 
-        /// <param name="name">Name of the mod.</param>
-        /// 
-        /// <returns>Returns <c>true</c> if incompatible, otheriwse <c>false</c>.</returns>
-        internal static bool IsLocalModIncompatible(string name) {
-            return name.Contains("Traffic Manager") || name.Contains("TM:PE") || name.Contains("Traffic++");
+
+
+        internal static bool IsTrafficManager(string name) {
+            return name.Contains("Traffic Manager")
+                || name.Contains("TM:PE")
+                || name.Contains("TrafficManager");
         }
 
-        /// <summary>
-        /// Returns <see cref="IUserMod.Name"/> or <see cref="PluginInfo.name"/> (assembly name) for a mod.
-        /// </summary>
-        /// 
-        /// <param name="mod">The mods' <see cref="PluginInfo"/>.</param>
-        /// 
-        /// <returns>The name of the specified mod.</returns>
-        internal static string GetModName(PluginInfo mod) {
-            string name;
-            try {
-                name = ((IUserMod)mod.userModInstance).Name;
-            } catch {
-                Log.ErrorFormat(
-                    "Unable to get userModInstrance.Name for {0}",
-                    mod.modPath);
-                name = mod.name;
-            }
-            return name;
-        }
 
-        /// <summary>
-        /// Returns the <see cref="Guid"/> for a mod.
-        /// </summary>
-        /// 
-        /// <param name="mod">The mods' <see cref="PluginInfo"/>.</param>
-        /// 
-        /// <returns>The <see cref="Guid"/> of the mod.</returns>
-        internal static Guid GetModGuid(PluginInfo mod) {
-            Guid id;
-            try {
-                id = mod.userModInstance.GetType().Assembly.ManifestModule.ModuleVersionId;
-            } catch {
-                Log.ErrorFormat(
-                    "Unable to get Guid for {0}",
-                    mod.modPath);
-                id = Guid.Empty;
-            }
-            return id;
-        }
+
 
     }
 }

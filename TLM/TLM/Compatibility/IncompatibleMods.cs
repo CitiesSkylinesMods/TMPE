@@ -1,4 +1,5 @@
 namespace TrafficManager.Compatibility {
+    using CSUtil.Commons;
     using System.Collections.Generic;
     using TrafficManager.Compatibility.Enum;
 
@@ -6,15 +7,19 @@ namespace TrafficManager.Compatibility {
     /// A list of incompatible mods.
     /// </summary>
     public class IncompatibleMods {
+        private static IncompatibleMods instance;
+
+        public static IncompatibleMods Instance => instance ?? (instance = new IncompatibleMods());
+
         /// <summary>
         /// The list of incompatible mods.
         /// </summary>
-        public static readonly Dictionary<ulong, Severity> List;
+        public readonly Dictionary<ulong, Severity> List;
 
         /// <summary>
-        /// Initializes static members of the <see cref="IncompatibleMods"/> class.
+        /// Initializes a new instance of the <see cref="IncompatibleMods"/> class.
         /// </summary>
-        static IncompatibleMods() {
+        public IncompatibleMods() {
             List = new Dictionary<ulong, Severity>() {
                 // Note: TM:PE v10.20 not currently listed as lots of users still use it
                 // It will be picked up by duplicate assemblies detector
@@ -25,16 +30,16 @@ namespace TrafficManager.Compatibility {
                 { 1546870472u, Severity.Critical }, // Traffic Manager: President Edition (Industries Compatible)
                 { 1348361731u, Severity.Critical }, // Traffic Manager: President Edition ALPHA/DEBUG
 
-                // Traffic Manager + Traffic++ AI
+                // Traffic Manager + Traffic++ AI (obsolete; game breaking)
                 { 498363759u, Severity.Critical }, // Traffic Manager + Improved AI
                 { 563720449u, Severity.Critical }, // Traffic Manager + Improved AI (Japanese Ver.)
 
-                // Traffic++
+                // Traffic++ (obsolete; game breaking)
                 { 492391912u, Severity.Critical }, // Improved AI (Traffic++)
                 { 409184143u, Severity.Critical }, // Traffic++
                 { 626024868u, Severity.Critical }, // Traffic++ V2
 
-                // Extremely old verisons of Traffic Manager (now game breaking)
+                // Extremely old verisons of Traffic Manager (obsolete; game breaking)
                 { 427585724u, Severity.Critical }, // Traffic Manager
                 { 481786333u, Severity.Critical }, // Traffic Manager Plus
                 { 568443446u, Severity.Critical }, // Traffic Manager Plus 1.2.0
@@ -107,6 +112,9 @@ namespace TrafficManager.Compatibility {
                 { 726005715u, Severity.Minor }, // Roads United Core+
                 { 680748394u, Severity.Minor }, // Roads United: North America
             };
+            Log.InfoFormat(
+                "Compatibility.IncompatibleMods.List  {0}",
+                List.Count);
         }
     }
 }

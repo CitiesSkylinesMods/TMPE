@@ -74,7 +74,7 @@ namespace TrafficManager.Compatibility.Check {
 
             if (ver < VersionedByAssembly) {
                 try {
-                    if (MemberUtil.TryGetMemberValue<string>(type, instance, "Version", out string dirty)) {
+                    if (MemberValue.TryGetMemberValue<string>(type, instance, "Version", out string dirty)) {
                         //Log.Info("Raw string: " + dirty);
 
                         // clean the raw string in to something that resembles a verison number
@@ -91,7 +91,7 @@ namespace TrafficManager.Compatibility.Check {
             }
 
             try {
-                if (MemberUtil.TryGetMemberValue<string>(type, instance, "BRANCH", out string val)) {
+                if (MemberValue.TryGetMemberValue<string>(type, instance, "BRANCH", out string val)) {
                     branch = val;
                 } else if (ver == LinuxFanVersion) { // temporary
                     branch = STABLE;

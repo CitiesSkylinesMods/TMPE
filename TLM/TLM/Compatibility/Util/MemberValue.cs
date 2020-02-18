@@ -7,7 +7,7 @@ namespace TrafficManager.Util {
     /// A nicer way to retrieve values of class instance members.
     /// Derived from: https://stackoverflow.com/questions/60236067/
     /// </summary>
-    public class MemberUtil {
+    public class MemberValue {
         /// <summary>
         /// Retrieves the value from a field/method/property member of an object.
         /// </summary>
@@ -19,8 +19,7 @@ namespace TrafficManager.Util {
         /// 
         /// <returns>Returns the value of the <paramref name="member"/>, if found, otherwise the <c>default</c> value for <typeparamref name="T"/>.</returns>
         public static T GetValue<T>(object instance, MemberInfo member) {
-            return member.MemberType switch
-            {
+            return member.MemberType switch {
                 MemberTypes.Field => (T)(member as FieldInfo)?.GetValue(instance),
                 MemberTypes.Method => (T)(member as MethodInfo)?.Invoke(instance, null),
                 MemberTypes.Property => (T)(member as PropertyInfo)?.GetValue(instance, null),

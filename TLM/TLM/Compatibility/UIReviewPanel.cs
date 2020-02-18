@@ -11,7 +11,7 @@ namespace TrafficManager.Compatibility.UI {
     using UnityEngine;
     using TrafficManager.UI;
 
-    public class IncompatibleModsPanel : UIPanel {
+    public class UIReviewPanel : UIPanel {
         private const ulong LOCAL_MOD = ulong.MaxValue;
 
         private UILabel title_;
