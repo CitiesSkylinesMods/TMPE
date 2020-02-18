@@ -17,14 +17,14 @@ namespace TrafficManager.UI.MainMenu {
             = {
                 // first row
                 typeof(ToggleTrafficLightsButton),
+                typeof(TimedTrafficLightsButton),
                 typeof(ManualTrafficLightsButton),
-                typeof(LaneArrowsButton),
                 typeof(LaneConnectorButton),
+                typeof(LaneArrowsButton),
                 typeof(DespawnButton),
                 typeof(ClearTrafficButton),
                 // second row
                 typeof(PrioritySignsButton),
-                typeof(TimedTrafficLightsButton),
                 typeof(JunctionRestrictionsButton),
                 typeof(SpeedLimitsButton),
                 typeof(VehicleRestrictionsButton),
@@ -67,7 +67,7 @@ namespace TrafficManager.UI.MainMenu {
             // And also each button will have a chance to add their own atlas keys for loading.
             var tmpSkin = new U.Button.ButtonSkin() {
                                                         Prefix = "MainMenuPanel",
-                                                        BackgroundPrefix = "DefaultRound",
+                                                        BackgroundPrefix = "RedButton",
                                                         ForegroundNormal = false,
                                                         BackgroundHovered = true,
                                                         BackgroundActive = true,
@@ -87,9 +87,8 @@ namespace TrafficManager.UI.MainMenu {
             // Create atlas and give it to all buttons
             allButtonsAtlas_ = tmpSkin.CreateAtlas(
                                    "MainMenu.Tool",
-                                   50,
-                                   50,
-                                   // 32 sprites for 12 UI buttons, to nearest highest power of 2
+                                   80,
+                                   80,
                                    512,
                                    atlasKeysList);
 
