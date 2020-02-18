@@ -72,6 +72,8 @@ namespace GenericGameBridge.Service {
         /// <param name="vehicleTypeFilter">vehicle type filter, lanes must match this filter mask</param>
         /// <param name="reverse">if true, lanes are ordered from right to left (relative to the
         ///     segment's start node / the given node), otherwise from left to right</param>
+        /// <param name="sort">if false, no sorting takes place
+        ///     regardless of <paramref name="reverse"/></param>
         /// <returns>sorted list of lanes for the given segment</returns>
         IList<LanePos> GetSortedLanes(ushort segmentId,
                                       ref NetSegment segment,
@@ -79,7 +81,8 @@ namespace GenericGameBridge.Service {
                                       NetInfo.LaneType? laneTypeFilter = default,
                                       VehicleInfo.VehicleType? vehicleTypeFilter =
                                           default,
-                                      bool reverse = false);
+                                      bool reverse = false,
+                                      bool sort = true);
 
         bool IsLaneValid(uint laneId);
 

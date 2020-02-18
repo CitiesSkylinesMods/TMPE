@@ -28,10 +28,10 @@ namespace TrafficManager.UI.SubTools {
 
         private bool overlayHandleHovered;
 
-        private bool _roadMode = false;
-        private bool roadMode => shift || _roadMode;
+        private static Color roadModeColor = Color.yellow;
+        private static bool roadMode => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
-        private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 620, 100));
+        private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 200, 100));
 
         private HashSet<ushort> currentRestrictedSegmentIds;
 
@@ -46,8 +46,7 @@ namespace TrafficManager.UI.SubTools {
         }
         private RenderData renderData;
 
-        private static Color roadModeColor = Color.yellow;
-        private static bool shift => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
 
 
         public VehicleRestrictionsTool(TrafficManagerTool mainTool)
@@ -264,67 +263,38 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void GuiVehicleRestrictionsWindow(int num) {
-            GUILayout.BeginHorizontal();
+            // use yellow color when shift is pressed.
             Color oldColor = GUI.color;
-            if (shift) {
+            if (roadMode) {
                 GUI.color = roadModeColor;
             }
 
-            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button:Invert"))) {
-                if (!shift) {
-                    AllVehiclesFunc(AllVehiclesFuncMode.Invert, SelectedSegmentId);
-                } else {
-                    SegmentTraverser.Traverse(
-                        SelectedSegmentId,
-                        SegmentTraverser.TraverseDirection.AnyDirection,
-                        SegmentTraverser.TraverseSide.AnySide,
-                        SegmentTraverser.SegmentStopCriterion.Junction,
-                        data => {
-                            Log._Debug($"KIAN: segmentId={data.CurSeg.segmentId}");
-                            AllVehiclesFunc(
-                                AllVehiclesFuncMode.Invert,
-                                data.CurSeg.segmentId);
-                            return true;
-                        });
-                }
-            }
-
-            // use yellow color when shift is pressed.
             {
                 // uses pressed sprite when delete is pressed
                 // uses yellow color when shift is pressed.
-                bool delete = Input.GetKey(KeyCode.Delete);
+                KeyCode hotkey = KeyCode.Delete;
                 GUIStyle style = new GUIStyle("button");
-                if(delete) style.normal.background = style.active.background;
-
+                if (Input.GetKey(hotkey)) {
+                    style.normal.background = style.active.background;
+                }
                 if (GUILayout.Button(
                    T("Button:Allow all vehicles") + " [delete]",
-                   style) || delete) {
-                    AllVehiclesFunc(AllVehiclesFuncMode.Allow, SelectedSegmentId);
-                    if (shift) {
+                   style) || Input.GetKeyDown(hotkey)) {
+                    AllVehiclesFunc(true);
+                    if (roadMode) {
                         ApplyRestrictionsToAllSegments();
                     }
                 }
             }
 
             if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button:Ban all vehicles"))) {
-                AllVehiclesFunc(AllVehiclesFuncMode.Ban, SelectedSegmentId);
-                if (shift) {
+                AllVehiclesFunc(false);
+                if (roadMode) {
                     ApplyRestrictionsToAllSegments();
                 }
             }
-
-            GUILayout.EndHorizontal();
-            
+          
             GUI.color = oldColor;
-            {
-                GUIStyle style = new GUIStyle("button");
-                if (roadMode) style.normal.background = style.active.background;
-                if (GUILayout.Button(
-                    T("Button:Road mode") + " [shift]")) {
-                    _roadMode = !roadMode;
-                }
-            }
 
             if (GUILayout.Button(
                T("Button:Apply to entire road"))) {
@@ -334,46 +304,31 @@ namespace TrafficManager.UI.SubTools {
             DragWindow(ref windowRect);
         }
 
-        private enum AllVehiclesFuncMode {
-            Allow,
-            Ban,
-            Invert,
-        }
-        private void AllVehiclesFunc(AllVehiclesFuncMode mode, ushort segmentId) {
-            // allow all vehicle types
-            NetInfo segmentInfo = segmentId.ToSegment().Info;
 
-            // TODO does not need to be sorted, but every lane should be a vehicle lane
-            IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
-                segmentId,
-                ref segmentId.ToSegment(),
+        private void AllVehiclesFunc(bool allow) {
+            // allow all vehicle types
+            NetInfo segmentInfo = SelectedSegmentId.ToSegment().Info;
+
+            IList<LanePos> lanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+                SelectedSegmentId,
+                ref SelectedSegmentId.ToSegment(),
                 null,
                 VehicleRestrictionsManager.LANE_TYPES,
-                VehicleRestrictionsManager.VEHICLE_TYPES);
+                VehicleRestrictionsManager.VEHICLE_TYPES,
+                sort:false);
 
-            foreach (LanePos laneData in sortedLanes) {
+            foreach (LanePos laneData in lanes) {
                 uint laneId = laneData.laneId;
                 byte laneIndex = laneData.laneIndex;
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
 
-                ExtVehicleType allowedTypes;
-                if ( mode == AllVehiclesFuncMode.Invert) {
-                    ExtVehicleType mask =
-                        VehicleRestrictionsManager.Instance.GetAllowedVehicleTypes(
-                            segmentId,
-                            segmentInfo,
-                            laneIndex,
-                            laneInfo,
-                            VehicleRestrictionsMode.Configured);
-                    allowedTypes = ~mask;
-                } else if (mode == AllVehiclesFuncMode.Ban) {
-                    allowedTypes = ExtVehicleType.None;
-                } else {
-                    allowedTypes = VehicleRestrictionsManager.EXT_VEHICLE_TYPES;
-                }
+                ExtVehicleType allowedTypes =
+                    allow ?
+                    VehicleRestrictionsManager.EXT_VEHICLE_TYPES :
+                    ExtVehicleType.None;
 
                 VehicleRestrictionsManager.Instance.SetAllowedVehicleTypes(
-                    segmentId,
+                    SelectedSegmentId,
                     segmentInfo,
                     laneIndex,
                     laneInfo,
@@ -381,7 +336,7 @@ namespace TrafficManager.UI.SubTools {
                     allowedTypes);
             }
 
-            RefreshCurrentRestrictedSegmentIds(segmentId);
+            RefreshCurrentRestrictedSegmentIds(SelectedSegmentId);
         }
 
         /// <summary>
