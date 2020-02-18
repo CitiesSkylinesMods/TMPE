@@ -31,52 +31,6 @@ namespace TrafficManager.UI.MainMenu {
                 typeof(ParkingRestrictionsButton),
             };
 
-        // public class SizeProfile {
-        //     public int NUM_BUTTONS_PER_ROW { get; set; }
-        //
-        //     public int NUM_ROWS { get; set; }
-        //
-        //     public int VSPACING { get; set; }
-        //
-        //     public int HSPACING { get; set; }
-        //
-        //     public int TOP_BORDER { get; set; }
-        //
-        //     public int BUTTON_SIZE { get; set; }
-        //
-        //     public int MENU_WIDTH { get; set; }
-        //
-        //     public int MENU_HEIGHT { get; set; }
-        // }
-
-        // public static readonly SizeProfile[] SIZE_PROFILES
-        //     = {
-        //         new SizeProfile {
-        //             NUM_BUTTONS_PER_ROW = 6,
-        //             NUM_ROWS = 2,
-        //
-        //             VSPACING = 5,
-        //             HSPACING = 5,
-        //             TOP_BORDER = 25,
-        //             BUTTON_SIZE = 30,
-        //
-        //             MENU_WIDTH = 215,
-        //             MENU_HEIGHT = 95
-        //         },
-        //         new SizeProfile {
-        //             NUM_BUTTONS_PER_ROW = 6,
-        //             NUM_ROWS = 2,
-        //
-        //             VSPACING = 5,
-        //             HSPACING = 5,
-        //             TOP_BORDER = 25,
-        //             BUTTON_SIZE = 50,
-        //
-        //             MENU_WIDTH = 335,
-        //             MENU_HEIGHT = 135,
-        //         },
-        //     };
-
         public const int DEFAULT_MENU_X = 85;
         public const int DEFAULT_MENU_Y = 60;
 
@@ -90,7 +44,9 @@ namespace TrafficManager.UI.MainMenu {
 
         IDisposable confDisposable;
 
-        private bool started;
+        private bool isStarted_;
+
+        private UITextureAtlas allButtonsAtlas_;
 
         public override void Start() {
             GlobalConfig conf = GlobalConfig.Instance;
@@ -107,9 +63,38 @@ namespace TrafficManager.UI.MainMenu {
             VersionLabel = AddUIComponent<VersionLabel>();
             StatsLabel = AddUIComponent<StatsLabel>();
 
+            // Create and populate list of background atlas keys, used by all buttons
+            // And also each button will have a chance to add their own atlas keys for loading.
+            var tmpSkin = new U.Button.ButtonSkin() {
+                                                        Prefix = "MainMenuPanel",
+                                                        BackgroundPrefix = "DefaultRound",
+                                                        ForegroundNormal = false,
+                                                        BackgroundHovered = true,
+                                                        BackgroundActive = true,
+                                                    };
+            // By default the atlas will include backgrounds: DefaultRound-bg-normal
+            var atlasKeysList = tmpSkin.CreateAtlasKeysList();
+
             Buttons = new BaseMenuButton[MENU_BUTTON_TYPES.Length];
             for (int i = 0; i < MENU_BUTTON_TYPES.Length; ++i) {
+                // Create and populate the panel with buttons
                 Buttons[i] = AddUIComponent(MENU_BUTTON_TYPES[i]) as BaseMenuButton;
+
+                // Also ask each button what sprites they need
+                Buttons[i].SetupButtonSkin(atlasKeysList);
+            }
+
+            // Create atlas and give it to all buttons
+            allButtonsAtlas_ = tmpSkin.CreateAtlas(
+                                   "MainMenu.Tool",
+                                   50,
+                                   50,
+                                   // 32 sprites for 12 UI buttons, to nearest highest power of 2
+                                   512,
+                                   atlasKeysList);
+
+            for (int i = 0; i < MENU_BUTTON_TYPES.Length; ++i) {
+                Buttons[i].atlas = allButtonsAtlas_;
             }
 
             var dragHandler = new GameObject("TMPE_Menu_DragHandler");
@@ -120,7 +105,7 @@ namespace TrafficManager.UI.MainMenu {
 
             UpdateAllSizes();
             eventVisibilityChanged += OnVisibilityChanged;
-            started = true;
+            isStarted_ = true;
         }
 
         private void OnVisibilityChanged(UIComponent component, bool value) {
@@ -158,7 +143,7 @@ namespace TrafficManager.UI.MainMenu {
         public void OnUpdate(GlobalConfig config) {
             UpdatePosition(new Vector2(config.Main.MainMenuX, config.Main.MainMenuY));
 
-            if (started) {
+            if (isStarted_) {
                 UpdateAllSizes();
                 Invalidate();
             }

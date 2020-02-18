@@ -1,4 +1,5 @@
 ﻿namespace TrafficManager.UI.MainMenu {
+    using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.Manager.Impl;
     using TrafficManager.U.Button;
@@ -11,6 +12,9 @@
         public override string GetTooltip() => Translation.Menu.Get("Tooltip:Clear traffic");
 
         public override bool IsVisible() => true;
+
+        public override void SetupButtonSkin(List<string> atlasKeys) {
+        }
 
         public override void OnClickInternal(UIMouseEventParameter p) {
             ConfirmPanel.ShowModal(

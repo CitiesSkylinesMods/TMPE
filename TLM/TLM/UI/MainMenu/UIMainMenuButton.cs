@@ -29,6 +29,7 @@ namespace TrafficManager.UI.MainMenu {
 
             // Let the mainmenu atlas know we need this texture and assign it to self.atlas.
             this.Skin = new ButtonSkin {
+                                           BackgroundPrefix = "MainMenuButton",
                                            Prefix = "MainMenuButton",
                                            BackgroundHovered = true,
                                            BackgroundActive = true,

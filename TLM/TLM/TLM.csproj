@@ -549,6 +549,10 @@
     <EmbeddedResource Include="Resources\MainMenu\MainMenuButton-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\MainMenuButton-fg-hovered.png" />
     <EmbeddedResource Include="Resources\MainMenu\MainMenuButton-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\DefaultRound-bg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\DefaultRound-bg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\DefaultRound-bg-hovered.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\ToggleTL-fg-normal.png" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />

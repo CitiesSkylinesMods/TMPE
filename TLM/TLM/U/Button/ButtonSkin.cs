@@ -29,22 +29,33 @@ namespace TrafficManager.U.Button {
         public bool BackgroundHovered = false;
         public bool BackgroundActive = false;
 
+        /// <summary>
+        /// Allows loading foreground-normal sprite. Set this to false to only load backgrounds.
+        /// </summary>
+        public bool ForegroundNormal = true;
+
         public bool ForegroundDisabled = false;
         public bool ForegroundHovered = false;
         public bool ForegroundActive = false;
 
         public List<string> CreateAtlasKeysList() {
             // Two normal textures (bg and fg) are always assumed to exist.
-            var names = new List<string> { $"{Prefix}-bg-normal", $"{Prefix}-fg-normal" };
+            var names = new List<string>();
+            if (!string.IsNullOrEmpty(BackgroundPrefix)) {
+                names.Add($"{BackgroundPrefix}-bg-normal");
+            }
 
+            if (ForegroundNormal) {
+                names.Add($"{Prefix}-fg-normal");
+            }
             if (BackgroundDisabled) {
-                names.Add($"{Prefix}-bg-disabled");
+                names.Add($"{BackgroundPrefix}-bg-disabled");
             }
             if (BackgroundHovered) {
-                names.Add($"{Prefix}-bg-hovered");
+                names.Add($"{BackgroundPrefix}-bg-hovered");
             }
             if (BackgroundActive) {
-                names.Add($"{Prefix}-bg-active");
+                names.Add($"{BackgroundPrefix}-bg-active");
             }
             if (ForegroundDisabled) {
                 names.Add($"{Prefix}-fg-disabled");
@@ -122,15 +133,15 @@ namespace TrafficManager.U.Button {
             string ret = Prefix + "-fg";
 
             if (enabledState == ControlEnabledState.Disabled) {
-                return BackgroundDisabled ? ret + "-disabled" : ret + "-normal";
+                return ForegroundDisabled ? ret + "-disabled" : ret + "-normal";
             }
 
             if (activeState == ControlActiveState.Active) {
-                return BackgroundActive ? ret + "-active" : ret + "-normal";
+                return ForegroundActive ? ret + "-active" : ret + "-normal";
             }
 
             if (hoveredState == ControlHoveredState.Hovered) {
-                return BackgroundHovered ? ret + "-hovered" : ret + "-normal";
+                return ForegroundHovered ? ret + "-hovered" : ret + "-normal";
             }
 
             return ret + "-normal";

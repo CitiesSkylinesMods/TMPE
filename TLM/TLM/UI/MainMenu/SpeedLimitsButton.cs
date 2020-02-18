@@ -1,10 +1,14 @@
 ﻿namespace TrafficManager.UI.MainMenu {
+    using System.Collections.Generic;
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U.Button;
 
     public class SpeedLimitsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.SpeedLimits;
+
+        public override void SetupButtonSkin(List<string> atlasKeys) {
+        }
 
         protected override ButtonFunction Function => new ButtonFunction("SpeedLimits");
 

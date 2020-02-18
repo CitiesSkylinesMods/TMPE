@@ -1,4 +1,5 @@
 ﻿namespace TrafficManager.UI.MainMenu {
+    using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.State;
     using TrafficManager.U.Button;
@@ -15,6 +16,9 @@
                 : Translation.Menu.Get("Tooltip:Disable despawning");
 
         public override bool IsVisible() => true;
+
+        public override void SetupButtonSkin(List<string> atlasKeys) {
+        }
 
         public override void OnClickInternal(UIMouseEventParameter p) {
             ModUI.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
