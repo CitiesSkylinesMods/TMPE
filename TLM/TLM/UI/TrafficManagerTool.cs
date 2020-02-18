@@ -1695,7 +1695,8 @@ namespace TrafficManager.UI {
 
         internal static void CalculateSegmentCenterByDir(
             ushort segmentId,
-            Dictionary<NetInfo.Direction, Vector3> segmentCenterByDir)
+            Dictionary<NetInfo.Direction, Vector3> segmentCenterByDir,
+            float minDistance = 0)
         {
             segmentCenterByDir.Clear();
             NetManager netManager = Singleton<NetManager>.instance;
@@ -1732,6 +1733,19 @@ namespace TrafficManager.UI {
 
             foreach (KeyValuePair<NetInfo.Direction, int> e in numCentersByDir) {
                 segmentCenterByDir[e.Key] /= (float)e.Value;
+            }
+
+            if(minDistance>0) {
+                int numDirs = segmentCenterByDir.Count;
+                
+                bool b1 = segmentCenterByDir.TryGetValue(NetInfo.Direction.Forward, out Vector3 pos1);
+                bool b2 = segmentCenterByDir.TryGetValue(NetInfo.Direction.Backward, out Vector3 pos2);
+                if (b1 && b2 && (pos1 - pos2).sqrMagnitude < minDistance) {
+                    var move = (pos1 - pos2).normalized;
+                    move *= minDistance * (numDirs - 1) / 2;
+                    segmentCenterByDir[NetInfo.Direction.Forward] = pos1 + move;
+                    segmentCenterByDir[NetInfo.Direction.Backward] = pos2 - move;
+                }
             }
         }
 

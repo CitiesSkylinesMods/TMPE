@@ -257,7 +257,7 @@ namespace TrafficManager.UI.SubTools {
             {
                 segCenter = new Dictionary<NetInfo.Direction, Vector3>();
                 segmentCenterByDir.Add(segmentId, segCenter);
-                TrafficManagerTool.CalculateSegmentCenterByDir(segmentId, segCenter);
+                TrafficManagerTool.CalculateSegmentCenterByDir(segmentId, segCenter, SIGN_SIZE);
             }
 
             foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {
@@ -281,7 +281,7 @@ namespace TrafficManager.UI.SubTools {
                     size,
                     size);
 
-                if (Options.speedLimitsOverlay) {
+                if (viewOnly && Options.speedLimitsOverlay) {
                     boundingBox.y -= size + 10f;
                 }
 
