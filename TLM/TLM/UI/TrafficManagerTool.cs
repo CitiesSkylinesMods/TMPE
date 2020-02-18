@@ -88,10 +88,9 @@ namespace TrafficManager.UI {
         internal static Rect MoveGUI(Rect rect) {
             // x := main menu x + rect.x
             // y := main menu y + main menu height + rect.y
-            // TODO use current size profile
             return new Rect(
                 MainMenuPanel.DEFAULT_MENU_X + rect.x,
-                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.SIZE_PROFILES[1].MENU_HEIGHT + rect.y,
+                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.GetScaledMenuHeight() + rect.y,
                 rect.width,
                 rect.height);
         }

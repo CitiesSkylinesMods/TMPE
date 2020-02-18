@@ -7,10 +7,9 @@
         private uint _previousValue = 0;
 
         public override void Start() {
-            // TODO use current size profile
             size = new Vector2(
-                MainMenuPanel.SIZE_PROFILES[0].MENU_WIDTH / 2f,
-                MainMenuPanel.SIZE_PROFILES[0].TOP_BORDER);
+                MainMenuPanel.GetScaledMenuWidth() / 2f,
+                MainMenuPanel.GetScaledTitlebarHeight());
             text = "0";
             suffix = " PFs";
             textColor = Color.green;

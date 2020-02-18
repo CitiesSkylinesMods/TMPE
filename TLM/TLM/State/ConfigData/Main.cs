@@ -1,4 +1,5 @@
 ﻿namespace TrafficManager.State.ConfigData {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.UI.MainMenu;
@@ -29,9 +30,8 @@
         /// </summary>
         public bool EnableTutorial = true;
 
-        /// <summary>
-        /// Determines if the main menu shall be displayed in a tiny format
-        /// </summary>
+        /// <summary>Determines if the main menu shall be displayed in a tiny format.</summary>
+        [Obsolete("Main Menu now scales based on screen size")]
         public bool TinyMainMenu = true;
 
         /// <summary>

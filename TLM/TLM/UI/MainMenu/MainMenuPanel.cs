@@ -31,51 +31,51 @@ namespace TrafficManager.UI.MainMenu {
                 typeof(ParkingRestrictionsButton),
             };
 
-        public class SizeProfile {
-            public int NUM_BUTTONS_PER_ROW { get; set; }
+        // public class SizeProfile {
+        //     public int NUM_BUTTONS_PER_ROW { get; set; }
+        //
+        //     public int NUM_ROWS { get; set; }
+        //
+        //     public int VSPACING { get; set; }
+        //
+        //     public int HSPACING { get; set; }
+        //
+        //     public int TOP_BORDER { get; set; }
+        //
+        //     public int BUTTON_SIZE { get; set; }
+        //
+        //     public int MENU_WIDTH { get; set; }
+        //
+        //     public int MENU_HEIGHT { get; set; }
+        // }
 
-            public int NUM_ROWS { get; set; }
-
-            public int VSPACING { get; set; }
-
-            public int HSPACING { get; set; }
-
-            public int TOP_BORDER { get; set; }
-
-            public int BUTTON_SIZE { get; set; }
-
-            public int MENU_WIDTH { get; set; }
-
-            public int MENU_HEIGHT { get; set; }
-        }
-
-        public static readonly SizeProfile[] SIZE_PROFILES
-            = {
-                new SizeProfile {
-                    NUM_BUTTONS_PER_ROW = 6,
-                    NUM_ROWS = 2,
-
-                    VSPACING = 5,
-                    HSPACING = 5,
-                    TOP_BORDER = 25,
-                    BUTTON_SIZE = 30,
-
-                    MENU_WIDTH = 215,
-                    MENU_HEIGHT = 95
-                },
-                new SizeProfile {
-                    NUM_BUTTONS_PER_ROW = 6,
-                    NUM_ROWS = 2,
-
-                    VSPACING = 5,
-                    HSPACING = 5,
-                    TOP_BORDER = 25,
-                    BUTTON_SIZE = 50,
-
-                    MENU_WIDTH = 335,
-                    MENU_HEIGHT = 135,
-                },
-            };
+        // public static readonly SizeProfile[] SIZE_PROFILES
+        //     = {
+        //         new SizeProfile {
+        //             NUM_BUTTONS_PER_ROW = 6,
+        //             NUM_ROWS = 2,
+        //
+        //             VSPACING = 5,
+        //             HSPACING = 5,
+        //             TOP_BORDER = 25,
+        //             BUTTON_SIZE = 30,
+        //
+        //             MENU_WIDTH = 215,
+        //             MENU_HEIGHT = 95
+        //         },
+        //         new SizeProfile {
+        //             NUM_BUTTONS_PER_ROW = 6,
+        //             NUM_ROWS = 2,
+        //
+        //             VSPACING = 5,
+        //             HSPACING = 5,
+        //             TOP_BORDER = 25,
+        //             BUTTON_SIZE = 50,
+        //
+        //             MENU_WIDTH = 335,
+        //             MENU_HEIGHT = 135,
+        //         },
+        //     };
 
         public const int DEFAULT_MENU_X = 85;
         public const int DEFAULT_MENU_Y = 60;
@@ -90,12 +90,10 @@ namespace TrafficManager.UI.MainMenu {
 
         IDisposable confDisposable;
 
-        private SizeProfile activeProfile;
         private bool started;
 
         public override void Start() {
             GlobalConfig conf = GlobalConfig.Instance;
-            DetermineProfile(conf);
 
             OnUpdate(conf);
 
@@ -161,15 +159,9 @@ namespace TrafficManager.UI.MainMenu {
             UpdatePosition(new Vector2(config.Main.MainMenuX, config.Main.MainMenuY));
 
             if (started) {
-                DetermineProfile(config);
                 UpdateAllSizes();
                 Invalidate();
             }
-        }
-
-        private void DetermineProfile(GlobalConfig conf) {
-            int profileIndex = conf.Main.TinyMainMenu ? 0 : 1;
-            activeProfile = SIZE_PROFILES[profileIndex];
         }
 
         public void UpdateAllSizes() {
@@ -179,42 +171,68 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private void UpdateSize() {
-            width = activeProfile.MENU_WIDTH;
-            height = activeProfile.MENU_HEIGHT;
+            float buttonSize = GetScaledButtonSize();
+            // 6 buttons horizontal row, 2 rows + titlebar
+            width = GetScaledMenuWidth();
+            height = GetScaledMenuHeight();
+        }
+
+        internal static float GetScaledMenuWidth() {
+            // 6 buttons + 7 button spacings (each 1/8 of a button)
+            return GetScaledButtonSize() * (6f + (7 * 0.125f));
+        }
+
+        internal static float GetScaledMenuHeight() {
+            // 2 button rows + spacing (1/8th) + titlebar
+            return (GetScaledButtonSize() * 2.125f) + GetScaledTitlebarHeight();
+        }
+
+        /// <summary>Define size as smallest of 2.08% of width or 3.7% of height (40 px at 1080p).</summary>
+        /// <returns>Button size for current screen resolution.</returns>
+        internal static float GetScaledButtonSize() {
+            return U.UIScaler.ScreenSizeSmallestFraction(0.0208f, 0.037f);
+        }
+
+        internal static float GetScaledTitlebarHeight() {
+            return GetScaledButtonSize() * 0.66f;
         }
 
         private void UpdateDragSize() {
             Drag.width = width;
-            Drag.height = activeProfile.TOP_BORDER;
+            Drag.height = GetScaledTitlebarHeight();
         }
 
         private void UpdateButtons() {
             int i = 0;
-            int y = activeProfile.TOP_BORDER;
+            int y = (int)GetScaledTitlebarHeight();
+            float buttonSize = GetScaledButtonSize();
+            const int numRows = 2;
+            const int numCols = 6;
+            float spacing = buttonSize / 8f;
 
-            for (int row = 0; row < activeProfile.NUM_ROWS; ++row) {
-                int x = activeProfile.HSPACING;
+            for (int row = 0; row < numRows; ++row) {
+                int x = (int)spacing;
 
-                for (int col = 0; col < activeProfile.NUM_BUTTONS_PER_ROW; ++col) {
+                for (int col = 0; col < numCols; ++col) {
                     if (i >= Buttons.Length) {
                         break;
                     }
 
                     BaseMenuButton button = Buttons[i];
                     button.relativePosition = new Vector3(x, y);
-                    button.width = activeProfile.BUTTON_SIZE;
-                    button.height = activeProfile.BUTTON_SIZE;
+                    button.width = buttonSize;
+                    button.height = buttonSize;
                     button.Invalidate();
                     Buttons[i++] = button;
-                    x += activeProfile.BUTTON_SIZE + activeProfile.HSPACING;
+                    x += (int)(buttonSize + spacing);
                 }
 
-                y += activeProfile.BUTTON_SIZE + activeProfile.VSPACING;
+                y += (int)(buttonSize + spacing);
             }
         }
 
         public void UpdatePosition(Vector2 pos) {
-            Rect rect = new Rect(pos.x, pos.y, activeProfile.MENU_WIDTH, activeProfile.MENU_HEIGHT);
+            Rect rect = new Rect(pos.x, pos.y, GetScaledMenuWidth(), GetScaledMenuHeight());
             Vector2 resolution = UIView.GetAView().GetScreenResolution();
             VectorUtil.ClampRectToScreen(ref rect, resolution);
             Log.Info($"Setting main menu position to [{pos.x},{pos.y}]");
