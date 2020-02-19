@@ -179,10 +179,12 @@ namespace TrafficManager.UI.MainMenu {
                 return (GetButtonSize() * 2.125f) + GetTitlebarHeight();
             }
 
-            /// <summary>Define size as smallest of 2.08% of width or 3.7% of height (40 px at 1080p).</summary>
+            /// <summary>Define size as smallest of 2.08% of width or 3.7% of height (40 px at 1080p).
+            /// The button cannot be smaller than 40px.</summary>
             /// <returns>Button size for current screen resolution.</returns>
             internal static float GetButtonSize() {
-                return U.UIScaler.ScreenSizeSmallestFraction(0.0208f, 0.037f);
+                var scaledSize = U.UIScaler.ScreenSizeSmallestFraction(0.0208f, 0.037f);
+                return Mathf.Max(scaledSize, 40f);
             }
 
             internal static float GetTitlebarHeight() {

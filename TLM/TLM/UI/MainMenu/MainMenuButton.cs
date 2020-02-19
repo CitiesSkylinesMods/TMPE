@@ -68,7 +68,11 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private static float GetButtonDimensions() {
-            return U.UIScaler.ScreenSizeSmallestFraction(0.026f, 0.046f);
+            // The new behaviour, scales with screen size but never less than 50px
+            // var scaledSize = U.UIScaler.ScreenSizeSmallestFraction(0.026f, 0.046f);
+            // return Mathf.Max(scaledSize, 50f);
+
+            return 50f; // always 50px the original behaviour
         }
 
         public override bool IsActive() {
