@@ -163,9 +163,15 @@ namespace TrafficManager.UI.MainMenu {
 
         /// <summary>Calculates button and panel sizes based on the screen resolution.</summary>
         internal class ScaledSize {
+            internal const int NUM_ROWS = 2;
+            internal const int NUM_COLS = 6;
+
+            /// <summary>Calculate width of main menu panel, based on button width and spacings.</summary>
+            /// <returns>Width of the panel.</returns>
             internal static float GetWidth() {
-                // 6 buttons + 7 button spacings (each 1/8 of a button)
-                return GetButtonSize() * (6f + (7 * 0.125f));
+                // 6 buttons + spacings (each 1/8 of a button)
+                const float ALL_SPACINGS = NUM_COLS * 0.125f;
+                return GetButtonSize() * (6f + ALL_SPACINGS);
             }
 
             internal static float GetHeight() {
@@ -191,16 +197,14 @@ namespace TrafficManager.UI.MainMenu {
 
         private void UpdateButtons() {
             int i = 0;
-            int y = (int)ScaledSize.GetTitlebarHeight();
+            float y = ScaledSize.GetTitlebarHeight();
             float buttonSize = ScaledSize.GetButtonSize();
-            const int numRows = 2;
-            const int numCols = 6;
             float spacing = buttonSize / 8f;
 
-            for (int row = 0; row < numRows; ++row) {
-                int x = (int)spacing;
+            for (int row = 0; row < ScaledSize.NUM_ROWS; ++row) {
+                float x = spacing;
 
-                for (int col = 0; col < numCols; ++col) {
+                for (int col = 0; col < ScaledSize.NUM_COLS; ++col) {
                     if (i >= Buttons.Length) {
                         break;
                     }
