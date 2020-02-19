@@ -78,12 +78,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private bool ShowLimitsPerLane => showLimitsPerLane_ || ControlIsPressed;
 
         private struct RenderData {
-            internal ushort segmentId;
-            internal uint laneId;
-            internal byte laneIndex;
-            internal NetInfo.Lane laneInfo;
-            internal NetInfo.Direction finalDirection;
-            internal bool showPerLane;
+            internal ushort SegmentId;
+            internal uint LaneId;
+            internal byte LaneIndex;
+            internal NetInfo.Lane LaneInfo;
+            internal NetInfo.Direction FinalDirection;
         }
         private RenderData renderData;
 
@@ -155,7 +154,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
-            if (renderData.segmentId == 0) {
+            if (renderData.SegmentId == 0) {
                 return;
             }
 
@@ -165,7 +164,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 if (!renderData.showPerLane) {
                     //multi lane mode.
                     SegmentLaneTraverser.Traverse(
-                        renderData.segmentId,
+                        renderData.SegmentId,
                         SegmentTraverser.TraverseDirection.AnyDirection,
                         SegmentTraverser.TraverseSide.AnySide,
                         SegmentLaneTraverser.LaneStopCriterion.LaneCount,
@@ -184,7 +183,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                     data.SegVisitData.ViaInitialStartNode;
 
                                 bool invert1 = segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-                                bool invert2 = renderData.segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+                                bool invert2 = renderData.SegmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
                                 bool invert = invert1 != invert2;
 
                                 if (reverse ^ invert) {
@@ -192,7 +191,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                 }
                             }
 
-                            if (renderData.finalDirection == direction) {
+                            if (renderData.FinalDirection == direction) {
                                 RenderLaneOverlay(cameraInfo, data.CurLanePos.laneId);
                             }
                             return true;
@@ -201,7 +200,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 } else {
                     int initialSortedLaneIndex = -1;
                     SegmentLaneTraverser.Traverse(
-                        renderData.segmentId,
+                        renderData.SegmentId,
                         SegmentTraverser.TraverseDirection.AnyDirection,
                         SegmentTraverser.TraverseSide.AnySide,
                         SegmentLaneTraverser.LaneStopCriterion.LaneCount,
@@ -210,7 +209,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                         SpeedLimitManager.VEHICLE_TYPES,
                         data => {
                             if (data.SegVisitData.Initial &&
-                                data.CurLanePos.laneIndex == renderData.laneIndex) {
+                                data.CurLanePos.laneIndex == renderData.LaneIndex) {
                                 initialSortedLaneIndex = data.SortedLaneIndex;
                             }
                             if (initialSortedLaneIndex == data.SortedLaneIndex) {
@@ -221,10 +220,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 }
             } else {
                 if (renderData.showPerLane) {
-                    RenderLaneOverlay(cameraInfo, renderData.laneId);
+                    RenderLaneOverlay(cameraInfo, renderData.LaneId);
                 } else {
                     netService.IterateSegmentLanes(
-                        renderData.segmentId,
+                        renderData.SegmentId,
                         (uint laneId,
                         ref NetLane lane,
                         NetInfo.Lane laneInfo,
@@ -233,7 +232,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                         byte laneIndex) => {
                             bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
                             render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
-                            render &= laneInfo.m_finalDirection == renderData.finalDirection;
+                            render &= laneInfo.m_finalDirection == renderData.FinalDirection;
                             if (render) {
                                 RenderLaneOverlay(cameraInfo, laneId);
                             }
@@ -321,7 +320,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     ref camPos);
             }
             if (!hover) {
-                renderData.segmentId = 0;
+                renderData.SegmentId = 0;
             }
         }
 
@@ -783,10 +782,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     }
 
                     if (hoveredHandle) {
-                        renderData.segmentId = segmentId;
-                        renderData.laneId = laneId;
-                        renderData.laneIndex = laneIndex;
-                        renderData.laneInfo = laneInfo;
+                        renderData.SegmentId = segmentId;
+                        renderData.LaneId = laneId;
+                        renderData.LaneIndex = laneIndex;
+                        renderData.LaneInfo = laneInfo;
                         ret = true;
                     }
                     if (hoveredHandle && Input.GetMouseButtonDown(0) && !IsCursorInPanel()) {
@@ -879,8 +878,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     GUI.DrawTexture(boundingBox, tex);
 
                     if (hoveredHandle) {
-                        renderData.segmentId = segmentId;
-                        renderData.finalDirection = e.Key;
+                        renderData.SegmentId = segmentId;
+                        renderData.FinalDirection = e.Key;
                         ret = true;
                     }
                     if (hoveredHandle && Input.GetMouseButtonDown(0) && !IsCursorInPanel()) {
