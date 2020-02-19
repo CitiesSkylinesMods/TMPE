@@ -73,7 +73,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         private Texture2D roadTexture;
-        private bool showLimitsPerLane;
+        private bool showLimitsPerLane_;
+
+        private bool ShowLimitsPerLane => showLimitsPerLane_ || ControlIsPressed;
 
         private struct RenderData {
             internal ushort segmentId;
@@ -606,9 +608,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             //---------------------
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            showLimitsPerLane = GUILayout.Toggle(
-                showLimitsPerLane,
-                Translation.SpeedLimits.Get("Checkbox:Show lane-wise speed limits"));
+            showLimitsPerLane_ = GUILayout.Toggle(
+                ShowLimitsPerLane,
+                Translation.SpeedLimits.Get("Checkbox:Show lane-wise speed limits") + " [ctrl]");
 
             GUILayout.FlexibleSpace();
 
