@@ -135,6 +135,8 @@ namespace TrafficManager.UI {
             return Screen.height / 1200f;
         }
 
+        internal const float MAX_ZOOM = 0.04f;
+
         internal static float GetWindowAlpha() {
             return TransparencyToAlpha(GlobalConfig.Instance.Main.GuiTransparency);
         }
@@ -1693,10 +1695,17 @@ namespace TrafficManager.UI {
             return numLanes;
         }
 
+        /// <summary>
+        /// Calculates the center of each group of lanes in the same directions.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="segmentCenterByDir">output dictionary of (direction,center) pairs</param>
+        /// <param name="minDistance">minimum distance allowed between
+        /// centers of forward and backward directions.
         internal static void CalculateSegmentCenterByDir(
             ushort segmentId,
             Dictionary<NetInfo.Direction, Vector3> segmentCenterByDir,
-            float minDistance = 0)
+            float minDistance=0f)
         {
             segmentCenterByDir.Clear();
             NetManager netManager = Singleton<NetManager>.instance;
@@ -1734,14 +1743,13 @@ namespace TrafficManager.UI {
             foreach (KeyValuePair<NetInfo.Direction, int> e in numCentersByDir) {
                 segmentCenterByDir[e.Key] /= (float)e.Value;
             }
-
-            if(minDistance>0) {
+            if (minDistance > 0) {
                 bool b1 = segmentCenterByDir.TryGetValue(NetInfo.Direction.Forward, out Vector3 pos1);
                 bool b2 = segmentCenterByDir.TryGetValue(NetInfo.Direction.Backward, out Vector3 pos2);
-                if (b1 && b2 && (pos1 - pos2).sqrMagnitude < minDistance) {
-                    var move = (pos1 - pos2).normalized;
-                    move *= minDistance / 2;
-                    //move *= (segmentCenterByDir.Count - 1) / 2;
+                Vector3 diff = pos1 - pos2;
+                float distance = diff.magnitude;
+                if (b1 && b2 && distance < minDistance) {
+                    Vector3 move = diff * (0.5f * minDistance / distance);
                     segmentCenterByDir[NetInfo.Direction.Forward] = pos1 + move;
                     segmentCenterByDir[NetInfo.Direction.Backward] = pos2 - move;
                 }

@@ -21,18 +21,21 @@ namespace TrafficManager.UI.SubTools {
 
         private const float SIGN_SIZE = 80f;
 
+        private SegmentLaneMarker laneMarker_;
+
+        private RenderData renderInfo_;
+
         private struct RenderData {
-            internal NetInfo.Direction finalDirection;
-            internal ushort segmentId;
+            internal NetInfo.Direction FinalDirection;
+            internal ushort SegmentId;
 
             public static bool operator ==(RenderData a, RenderData b) =>
-                a.segmentId == b.segmentId && a.finalDirection == b.finalDirection;
+                a.SegmentId == b.SegmentId && a.FinalDirection == b.FinalDirection;
 
             public static bool operator !=(RenderData a, RenderData b) =>
                 !(a == b);
         }
-        private SegmentLaneMarker LaneMarker;
-        private RenderData renderInfo;
+
 
         /// <summary>
         /// Stores potentially visible segment ids while the camera did not move
@@ -56,7 +59,7 @@ namespace TrafficManager.UI.SubTools {
         public override void OnPrimaryClickOverlay() { }
 
         private void RenderSegmentParkings(RenderManager.CameraInfo cameraInfo) {
-            bool allowed = parkingManager.IsParkingAllowed(renderInfo.segmentId, renderInfo.finalDirection);
+            bool allowed = parkingManager.IsParkingAllowed(renderInfo_.SegmentId, renderInfo_.FinalDirection);
             bool pressed = Input.GetMouseButton(0);
             Color color;
             if (pressed) {
@@ -69,7 +72,7 @@ namespace TrafficManager.UI.SubTools {
 
             Bezier3 bezier = default;
             netService.IterateSegmentLanes(
-                renderInfo.segmentId,
+                renderInfo_.SegmentId,
                 (uint laneId,
                 ref NetLane lane,
                 NetInfo.Lane laneInfo,
@@ -77,10 +80,10 @@ namespace TrafficManager.UI.SubTools {
                 ref NetSegment segment,
                 byte laneIndex) => {
                     bool isParking = laneInfo.m_laneType.IsFlagSet(NetInfo.LaneType.Parking);
-                    if (isParking && laneInfo.m_finalDirection == renderInfo.finalDirection) {
+                    if (isParking && laneInfo.m_finalDirection == renderInfo_.FinalDirection) {
                         bezier = lane.m_bezier;
-                        LaneMarker = new SegmentLaneMarker(bezier);
-                        LaneMarker.RenderOverlay(cameraInfo, color, enlarge: pressed);
+                        laneMarker_ = new SegmentLaneMarker(bezier);
+                        laneMarker_.RenderOverlay(cameraInfo, color, enlarge: pressed);
                     }
                     return true;
                 });
@@ -101,14 +104,14 @@ namespace TrafficManager.UI.SubTools {
                         data.SegVisitData.ViaInitialStartNode;
 
                     bool invert1 = segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-                    bool invert2 = renderInfo.segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+                    bool invert2 = renderInfo_.SegmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
                     bool invert = invert1 != invert2;
 
                     if (reverse ^ invert) {
                         finalDirection = NetInfo.InvertDirection(finalDirection);
                     }
                 }
-                if (finalDirection == renderInfo.finalDirection) {
+                if (finalDirection == renderInfo_.FinalDirection) {
                     bool pressed = Input.GetMouseButton(0);
                     Color color = MainTool.GetToolColor(pressed, false);
                     uint otherLaneId = data.CurLanePos.laneId;
@@ -120,7 +123,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             SegmentLaneTraverser.Traverse(
-                renderInfo.segmentId,
+                renderInfo_.SegmentId,
                 SegmentTraverser.TraverseDirection.AnyDirection,
                 SegmentTraverser.TraverseSide.AnySide,
                 SegmentLaneTraverser.LaneStopCriterion.LaneCount,
@@ -131,7 +134,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
-            if(renderInfo.segmentId == 0) {
+            if(renderInfo_.SegmentId == 0) {
                 return;
             }
             bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
@@ -226,14 +229,14 @@ namespace TrafficManager.UI.SubTools {
                     viewOnly,
                     ref camPos);
                 if (dir != NetInfo.Direction.None) {
-                    renderInfo.segmentId = segmentId;
-                    renderInfo.finalDirection = dir;
+                    renderInfo_.SegmentId = segmentId;
+                    renderInfo_.FinalDirection = dir;
                     hovered = true;
                 } 
             }
             if (!hovered) {
-                renderInfo.segmentId = 0;
-                renderInfo.finalDirection = NetInfo.Direction.None;
+                renderInfo_.SegmentId = 0;
+                renderInfo_.FinalDirection = NetInfo.Direction.None;
             }
         }
 
@@ -257,7 +260,10 @@ namespace TrafficManager.UI.SubTools {
             {
                 segCenter = new Dictionary<NetInfo.Direction, Vector3>();
                 segmentCenterByDir.Add(segmentId, segCenter);
-                TrafficManagerTool.CalculateSegmentCenterByDir(segmentId, segCenter, SIGN_SIZE);
+                TrafficManagerTool.CalculateSegmentCenterByDir(
+                    segmentId,
+                    segCenter,
+                    SIGN_SIZE * TrafficManagerTool.MAX_ZOOM);
             }
 
             foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {
@@ -281,7 +287,7 @@ namespace TrafficManager.UI.SubTools {
                     size,
                     size);
 
-                if (viewOnly && Options.speedLimitsOverlay) {
+                if (Options.speedLimitsOverlay) {
                     boundingBox.y -= size + 10f;
                 }
 
