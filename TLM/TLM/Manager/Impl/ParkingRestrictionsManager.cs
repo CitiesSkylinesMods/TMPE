@@ -1,9 +1,10 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State.ConfigData;
 
     public class ParkingRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -82,6 +83,13 @@
         }
 
         protected int GetDirIndex(NetInfo.Direction dir) {
+#if DEBUG
+            if(DebugSwitch.BasicParkingAILog.Get() &&
+                dir != NetInfo.Direction.Forward &&
+                dir != NetInfo.Direction.Backward) {
+                Log.Error($"bad direction: {dir} expected forward or backward");
+            }
+#endif
             return dir == NetInfo.Direction.Backward ? 1 : 0;
         }
 

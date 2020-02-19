@@ -135,7 +135,7 @@ namespace TrafficManager.UI {
             return Screen.height / 1200f;
         }
 
-        internal const float MAX_ZOOM = 0.04f;
+        internal const float MAX_ZOOM = 0.05f;
 
         internal static float GetWindowAlpha() {
             return TransparencyToAlpha(GlobalConfig.Instance.Main.GuiTransparency);
