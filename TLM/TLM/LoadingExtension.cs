@@ -73,9 +73,6 @@ namespace TrafficManager {
         /// </summary>
         public static Translation TranslationDatabase = new Translation();
 
-        /// <summary>Root object for TMPE mod UI (main menu and main button).</summary>
-        public static ModUI ModUi { get; private set; }
-
         public static UITransportDemand TransportDemandUI { get; private set; }
 
         public static List<ICustomManager> RegisteredManagers { get; private set; }
@@ -369,10 +366,10 @@ namespace TrafficManager {
                 }
 
                 Log.Info("Removing Controls from UI.");
-                if (ModUi != null) {
-                    ModUi.Close(); // Hide the UI ASAP
-                    Object.Destroy(ModUi);
-                    ModUi = null;
+                if (ModUI.Instance != null) {
+                    ModUI.Instance.Close(); // Hide the UI ASAP
+                    Object.Destroy(ModUI.Instance);
+                    ModUI.SetSingletonInstance(null);
                     Log._Debug("removed UIBase instance.");
                 }
 
@@ -545,9 +542,10 @@ namespace TrafficManager {
             }
 
             Log.Info("Adding Controls to UI.");
-            if (ModUi == null) {
+            if (ModUI.Instance == null) {
                 Log._Debug("Adding UIBase instance.");
-                ModUi = ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>();
+                ModUI.SetSingletonInstance(
+                    ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>());
             }
 
             // Init transport demand UI

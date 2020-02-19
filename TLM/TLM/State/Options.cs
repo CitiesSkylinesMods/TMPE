@@ -114,13 +114,13 @@ namespace TrafficManager.State {
         /// a new language. Takes a second, very slow.
         /// </summary>
         internal static void RebuildMenu() {
-            if (LoadingExtension.ModUi != null) {
+            if (ModUI.Instance != null) {
                 Log._Debug("Rebuilding the TM:PE menu...");
-                LoadingExtension.ModUi.RebuildMenu();
+                ModUI.Instance.RebuildMenu();
 
                 // TM:PE main button also needs to be uidated
-                if (LoadingExtension.ModUi.MainMenuButton != null) {
-                    LoadingExtension.ModUi.MainMenuButton.UpdateButtonImageAndTooltip();
+                if (ModUI.Instance.MainMenuButton != null) {
+                    ModUI.Instance.MainMenuButton.UpdateButtonImageAndTooltip();
                 }
 
                 LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();

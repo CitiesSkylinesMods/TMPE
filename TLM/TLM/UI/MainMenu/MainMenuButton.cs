@@ -72,7 +72,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         public override bool IsActive() {
-            return LoadingExtension.ModUi.IsVisible();
+            return ModUI.Instance.IsVisible();
         }
 
         public override void OnDestroy() {
@@ -102,7 +102,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         // internal void UpdateSprites() {
-        //     if (!LoadingExtension.ModUi.IsVisible()) {
+        //     if (!ModUI.Instance.IsVisible()) {
         //         m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
         //                                            m_BackgroundSprites.m_Focused =
         //                                                ATLASKEY_BG_NORMAL;
@@ -151,8 +151,8 @@ namespace TrafficManager.UI.MainMenu {
             if (!UIView.HasModalInput()
                 && !UIView.HasInputFocus()
                 && KeybindSettingsBase.ToggleMainMenu.IsPressed(Event.current)) {
-                if (LoadingExtension.ModUi != null) {
-                    LoadingExtension.ModUi.ToggleMainMenu();
+                if (ModUI.Instance != null) {
+                    ModUI.Instance.ToggleMainMenu();
                 }
             }
         }
@@ -169,7 +169,7 @@ namespace TrafficManager.UI.MainMenu {
         public override void HandleClick(UIMouseEventParameter p) {
             try {
                 Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
-                LoadingExtension.ModUi.ToggleMainMenu();
+                ModUI.Instance.ToggleMainMenu();
             }
             catch (Exception e) {
                 Log.Error($"Toggle mainmenu failed {e}");

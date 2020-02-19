@@ -19,7 +19,7 @@
 
         protected override void OnClick(UIMouseEventParameter p) {
             OnClickInternal(p);
-            foreach (BaseMenuButton button in LoadingExtension.ModUi.MainMenu.Buttons) {
+            foreach (BaseMenuButton button in ModUI.Instance.MainMenu.Buttons) {
                 button.UpdateButtonImageAndTooltip();
             }
         }

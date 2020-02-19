@@ -10,6 +10,18 @@ namespace TrafficManager.UI {
     /// Access via ThreadingExtension.ModUi.
     /// </summary>
     public class ModUI : UICustomControl {
+        /// <summary>Singleton storage.</summary>
+        public static ModUI instance_;
+
+        /// <summary>Singleton accessor.</summary>
+        public static ModUI Instance {
+            get => instance_;
+        }
+
+        public static void SetSingletonInstance(ModUI newInstance) {
+            instance_ = newInstance;
+        }
+
         /// <summary>Gets the floating draggable button which shows and hides TM:PE UI.</summary>
         public UI.MainMenu.MainMenuButton MainMenuButton { get; }
 
