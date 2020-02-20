@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Util {
+namespace TrafficManager.Util {
     using System;
     using System.Collections.Generic;
     using GenericGameBridge.Service;
@@ -50,7 +50,11 @@
                 CurLanePos = curLanePos;
                 InitLanePos = initLanePos;
             }
-        }
+
+            public NetInfo.Lane CurLaneInfo =>
+                SegVisitData.CurSegmentInfo.m_lanes[CurLanePos.laneIndex];
+
+    }
 
         public static void Traverse(ushort initialSegmentId,
                                     TraverseDirection direction,
