@@ -4,13 +4,14 @@ namespace TrafficManager.UI.MainMenu {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System;
+    using System.Collections.Generic;
     using TrafficManager.API.Util;
     using TrafficManager.State.Keybinds;
     using TrafficManager.State;
     using UnityEngine;
 
     public class MainMenuPanel
-        : UIPanel,
+        : U.Panel.BaseUWindowPanel,
           IObserver<GlobalConfig>
     {
         private static readonly Type[] MENU_BUTTON_TYPES
@@ -102,7 +103,7 @@ namespace TrafficManager.UI.MainMenu {
             Drag = dragHandler.AddComponent<UIDragHandle>();
             Drag.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
 
-            UpdateAllSizes();
+            this.OnRescaleRequested();
             eventVisibilityChanged += OnVisibilityChanged;
             isStarted_ = true;
         }
@@ -143,22 +144,23 @@ namespace TrafficManager.UI.MainMenu {
             UpdatePosition(new Vector2(config.Main.MainMenuX, config.Main.MainMenuY));
 
             if (isStarted_) {
-                UpdateAllSizes();
-                Invalidate();
+                this.OnRescaleRequested();
+                this.Invalidate();
             }
         }
 
-        public void UpdateAllSizes() {
-            UpdateSize();
-            UpdateDragSize();
-            UpdateButtons();
-        }
-
-        private void UpdateSize() {
-            float buttonSize = ScaledSize.GetButtonSize();
-            // 6 buttons horizontal row, 2 rows + titlebar
+        public override void OnRescaleRequested() {
+            // Update size
+            //--------------
             width = ScaledSize.GetWidth();
             height = ScaledSize.GetHeight();
+
+            // Update drag size
+            //-------------------
+            Drag.width = width;
+            Drag.height = ScaledSize.GetTitlebarHeight();
+
+            RescaleToolButtons();
         }
 
         /// <summary>Calculates button and panel sizes based on the screen resolution.</summary>
@@ -170,13 +172,13 @@ namespace TrafficManager.UI.MainMenu {
             /// <returns>Width of the panel.</returns>
             internal static float GetWidth() {
                 // 6 buttons + spacings (each 1/8 of a button)
-                const float ALL_SPACINGS = NUM_COLS * 0.125f;
+                const float ALL_SPACINGS = (NUM_COLS + 1) * 0.125f;
                 return GetButtonSize() * (6f + ALL_SPACINGS);
             }
 
             internal static float GetHeight() {
-                // 2 button rows + spacing (1/8th) + titlebar
-                return (GetButtonSize() * 2.125f) + GetTitlebarHeight();
+                // 2 button rows + 2 spacings (1/8th) + titlebar
+                return (GetButtonSize() * (2 + (2 * 0.125f))) + GetTitlebarHeight();
             }
 
             /// <summary>Define size as smallest of 2.08% of width or 3.7% of height (40 px at 1080p).
@@ -192,12 +194,9 @@ namespace TrafficManager.UI.MainMenu {
             }
         }
 
-        private void UpdateDragSize() {
-            Drag.width = width;
-            Drag.height = ScaledSize.GetTitlebarHeight();
-        }
-
-        private void UpdateButtons() {
+        /// <summary>Reset sizes and positions for UI buttons.</summary>
+        private void RescaleToolButtons() {
+            // Recreate tool buttons
             int i = 0;
             float y = ScaledSize.GetTitlebarHeight();
             float buttonSize = ScaledSize.GetButtonSize();
