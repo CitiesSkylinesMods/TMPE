@@ -32,8 +32,18 @@ namespace TrafficManager.UI {
         private ToolMode toolMode_;
         private NetTool _netTool;
 
+
+        /// <summary>
+        /// Maximum error of HitPos field.
+        /// </summary>
+        internal const float MAX_HIT_ERROR = 2.5f;
+
         internal static ushort HoveredNodeId;
         internal static ushort HoveredSegmentId;
+
+        /// <summary>
+        /// the hit position of the mouse raycast in meters.
+        /// </summary>
         internal static Vector3 HitPos;
         internal Vector3 MousePosition => m_mousePosition; //expose protected member.
 
@@ -124,6 +134,8 @@ namespace TrafficManager.UI {
         internal float GetBaseZoom() {
             return Screen.height / 1200f;
         }
+
+        internal const float MAX_ZOOM = 0.05f;
 
         internal static float GetWindowAlpha() {
             return TransparencyToAlpha(GlobalConfig.Instance.Main.GuiTransparency);
@@ -1683,9 +1695,17 @@ namespace TrafficManager.UI {
             return numLanes;
         }
 
+        /// <summary>
+        /// Calculates the center of each group of lanes in the same directions.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="segmentCenterByDir">output dictionary of (direction,center) pairs</param>
+        /// <param name="minDistance">minimum distance allowed between
+        /// centers of forward and backward directions.
         internal static void CalculateSegmentCenterByDir(
             ushort segmentId,
-            Dictionary<NetInfo.Direction, Vector3> segmentCenterByDir)
+            Dictionary<NetInfo.Direction, Vector3> segmentCenterByDir,
+            float minDistance=0f)
         {
             segmentCenterByDir.Clear();
             NetManager netManager = Singleton<NetManager>.instance;
@@ -1722,6 +1742,17 @@ namespace TrafficManager.UI {
 
             foreach (KeyValuePair<NetInfo.Direction, int> e in numCentersByDir) {
                 segmentCenterByDir[e.Key] /= (float)e.Value;
+            }
+            if (minDistance > 0) {
+                bool b1 = segmentCenterByDir.TryGetValue(NetInfo.Direction.Forward, out Vector3 pos1);
+                bool b2 = segmentCenterByDir.TryGetValue(NetInfo.Direction.Backward, out Vector3 pos2);
+                Vector3 diff = pos1 - pos2;
+                float distance = diff.magnitude;
+                if (b1 && b2 && distance < minDistance) {
+                    Vector3 move = diff * (0.5f * minDistance / distance);
+                    segmentCenterByDir[NetInfo.Direction.Forward] = pos1 + move;
+                    segmentCenterByDir[NetInfo.Direction.Backward] = pos2 - move;
+                }
             }
         }
 
