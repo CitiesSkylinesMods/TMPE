@@ -528,14 +528,19 @@ namespace TrafficManager.UI {
             }
 
             // move the bezier to the center of the segment side.
-            Vector3 startDisplacement = segment.m_startDirection;
-            Vector3 endDisplacement = segment.m_endDirection;
-            if(finalDirection == NetInfo.Direction.Forward) {
-                startDisplacement = RotateRight(startDisplacement);
-                endDisplacement = RotateLeft(endDisplacement);
+            Vector3 startDisplacement;
+            Vector3 endDisplacement;
+
+            bool right = finalDirection == NetInfo.Direction.Forward;
+            right = right ^ Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
+            right = right ^ segment.m_flags.IsFlagSet(NetSegment.Flags.Invert);
+
+            if (right) {
+                startDisplacement = RotateRight(segment.m_startDirection);
+                endDisplacement = RotateLeft(segment.m_endDirection);
             } else {
-                startDisplacement = RotateLeft(startDisplacement);
-                endDisplacement = RotateRight(endDisplacement);
+                startDisplacement = RotateLeft(segment.m_startDirection);
+                endDisplacement = RotateRight(segment.m_endDirection);
             }
             float length = halfWidth * 0.5f;
             bezier.a += startDisplacement * length;

@@ -80,16 +80,19 @@ namespace TrafficManager.Util {
             public NetInfo CurSegmentInfo => CurSeg.segmentId.ToSegment().Info;
 
             /// <summary>
-            /// Determines if input segment is in reverse direction WRT current segment.
+            /// Determines if input segment is in reverse direction WRT initial segment.
             /// takes into account invert flag and start/end nodes.
             /// </summary>
             /// <param name="initialSegmentId"></param>
             /// <returns></returns>
             public bool IsReversed(ushort initialSegmentId) {
-                    bool reverse = ViaStartNode == ViaInitialStartNode;
-                    bool invert1 = CurSeg.segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-                    bool invert2 = initialSegmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-                    return reverse ^ invert1 ^ invert2;
+                if (Initial) {
+                    return false;
+                }
+                bool reverse = ViaStartNode == ViaInitialStartNode;
+                bool invert1 = CurSeg.segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+                bool invert2 = initialSegmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+                return reverse ^ invert1 ^ invert2;
             }
         }
 
