@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
+namespace TrafficManager.UI.SubTools.SpeedLimits {
     using ColossalFramework.UI;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -724,7 +724,10 @@
                         out Dictionary<NetInfo.Direction, Vector3> segCenter)) {
                     segCenter = new Dictionary<NetInfo.Direction, Vector3>();
                     segmentCenterByDir.Add(segmentId, segCenter);
-                    TrafficManagerTool.CalculateSegmentCenterByDir(segmentId, segCenter);
+                    TrafficManagerTool.CalculateSegmentCenterByDir(
+                        segmentId,
+                        segCenter,
+                        speedLimitSignSize*TrafficManagerTool.MAX_ZOOM);
                 }
 
                 foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {

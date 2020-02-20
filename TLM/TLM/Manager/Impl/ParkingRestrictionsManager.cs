@@ -1,9 +1,12 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
+    using ColossalFramework;
 
     public class ParkingRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -46,6 +49,23 @@
         }
 
         public bool SetParkingAllowed(ushort segmentId, NetInfo.Direction finalDir, bool flag) {
+#if DEBUG
+            if (DebugSwitch.BasicParkingAILog.Get()) {
+                if (finalDir != NetInfo.Direction.Forward &&
+                finalDir != NetInfo.Direction.Backward) {
+                    Log.Error($"bad parking direction: {finalDir} expected forward or backward");
+                }
+                foreach(var lane in segmentId.ToSegment().Info.m_lanes) {
+                    if (lane.m_laneType.IsFlagSet(NetInfo.LaneType.Parking) &&
+                        lane.m_finalDirection != NetInfo.Direction.Forward &&
+                        lane.m_finalDirection != NetInfo.Direction.Backward) {
+                        Log.Error($"parking lane with bad m_finalDirection:{lane.m_finalDirection}, expected forward or backward");
+                    }
+                }
+
+            }
+#endif
+
             if (!MayHaveParkingRestriction(segmentId)) {
                 return false;
             }
