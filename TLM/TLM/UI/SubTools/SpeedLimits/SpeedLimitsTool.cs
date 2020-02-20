@@ -688,7 +688,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // For MPH setting display KM/H below, for KM/H setting display MPH
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Label("Clear [del]");
+            GUILayout.Label(Translation.SpeedLimits.Get("CheckBox:Default") + " [del]");
 
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();

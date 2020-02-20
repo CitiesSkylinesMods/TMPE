@@ -8,7 +8,7 @@ namespace TrafficManager.UI.Textures {
     /// <summary>UI Textures for controlling road segments.</summary>
     public static class RoadUI {
         public static readonly IDictionary<PriorityType, Texture2D> PrioritySignTextures;
-        public static readonly Texture2D SignRemove;
+        public static readonly Texture2D SignClear;
         public static readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
         public static readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
         public static readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
@@ -23,7 +23,7 @@ namespace TrafficManager.UI.Textures {
             };
 
             // delete priority sign
-            SignRemove = LoadDllResource("RoadUI.remove_signs.png", 256, 256);
+            SignClear = LoadDllResource("clear.png", 256, 256);
 
             VehicleRestrictionTextures =
                 new TinyDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> {
