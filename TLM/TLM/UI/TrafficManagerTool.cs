@@ -496,6 +496,80 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
+        /// Highlights only one side of the segment.
+        /// </summary>
+        public void DrawSegmentSide(
+            RenderManager.CameraInfo cameraInfo,
+                       ushort segmentId,
+                       NetInfo.Direction finalDirection,
+                       Color color,
+                       bool alpha = false) {
+            if (segmentId == 0) {
+                return;
+            }
+            ref NetSegment segment = ref segmentId.ToSegment();
+            float halfWidth = segment.Info.m_halfWidth;
+
+            Bezier3 bezier;
+            bezier.a = GetNodePos(segment.m_startNode);
+            bezier.d = GetNodePos(segment.m_endNode);
+
+            Vector3 RotateRight(Vector3 v) {
+                Vector3 ret = v;
+                ret.x = v.z;
+                ret.z = -v.x;
+                return ret;
+            }
+            Vector3 RotateLeft(Vector3 v) {
+                Vector3 ret = v;
+                ret.x = -v.z;
+                ret.z = v.x;
+                return ret;
+            }
+
+            // move the bezier to the center of the segment side.
+            Vector3 startDisplacement;
+            Vector3 endDisplacement;
+
+            bool right = finalDirection == NetInfo.Direction.Forward;
+            right = right ^ Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
+            right = right ^ segment.m_flags.IsFlagSet(NetSegment.Flags.Invert);
+
+            if (right) {
+                startDisplacement = RotateRight(segment.m_startDirection);
+                endDisplacement = RotateLeft(segment.m_endDirection);
+            } else {
+                startDisplacement = RotateLeft(segment.m_startDirection);
+                endDisplacement = RotateRight(segment.m_endDirection);
+            }
+            float length = halfWidth * 0.5f;
+            bezier.a += startDisplacement * length;
+            bezier.d += endDisplacement * length;
+            NetSegment.CalculateMiddlePoints(
+                bezier.a,
+                segment.m_startDirection,
+                bezier.d,
+                segment.m_endDirection,
+                true,
+                true,
+                out bezier.b,
+                out bezier.c);
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
+                cameraInfo,
+                color,
+                bezier,
+                halfWidth,
+                0,
+                0,
+                -1f,
+                1280f,
+                false,
+                alpha);
+        }
+
+        /// <summary>
         /// Draws a half sausage at segment end.
         /// </summary>
         /// <param name="segmentId"></param>

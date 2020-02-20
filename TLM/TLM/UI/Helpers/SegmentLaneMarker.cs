@@ -9,6 +9,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         internal Bezier3 Bezier;
+        internal float size = 1.1f;
 
         private Bounds[] bounds;
 
@@ -103,7 +104,7 @@ namespace TrafficManager.UI.Helpers {
                 cameraInfo,
                 color,
                 Bezier,
-                enlarge ? 1.55f : 1.1f,
+                enlarge ? size * 1.41f : size,
                 0,
                 0,
                 minH - 100f,
