@@ -1,3 +1,4 @@
+/*
 namespace TrafficManager.Compatibility.GUI {
     using ColossalFramework.IO;
     using ColossalFramework.PlatformServices;
@@ -345,3 +346,4 @@ namespace TrafficManager.Compatibility.GUI {
         }
     }
 }
+*/

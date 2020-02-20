@@ -1,16 +1,15 @@
 namespace TrafficManager.Compatibility {
     using ColossalFramework;
     using ColossalFramework.Plugins;
+    using static ColossalFramework.Plugins.PluginManager;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using ICities;
     using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using System.Text;
     using TrafficManager.Compatibility.Struct;
+    using UnityEngine;
     using UnityEngine.SceneManagement;
-    using static ColossalFramework.Plugins.PluginManager;
 
     /// <summary>
     /// Manages pre-flight checks for known incompatible mods.
@@ -31,15 +30,25 @@ namespace TrafficManager.Compatibility {
         /// <summary>
         /// Is the compatibility checker paused? We pause it when active scene is not "MainMenu".
         /// </summary>
-        internal static bool Paused = true;
+        private static bool paused_ = true;
 
-        internal static bool RestartRequired = false;
+        /// <summary>
+        /// Tracks if a game restart is required (eg. after disabling/unsubscribing mods).
+        /// </summary>
+        private static bool restartRequired_ = false;
+
+        /// <summary>
+        /// Stores the original value of <see cref="LauncherLoginData.instance.m_continue"/>.
+        /// </summary>
+        private static bool autoContinue_ = false;
 
         /// <summary>
         /// Initializes static members of the <see cref="CompatibilityManager"/> class.
         /// </summary>
         static CompatibilityManager() {
-            LauncherLoginData.instance.m_continue = false;
+            // Prevent vanilla autoloading last savegame
+            PreventAutoContinue();
+
             // Translate current game verison in to Version instance
             CurrentGameVersion = new Version(
                 Convert.ToInt32(BuildConfig.APPLICATION_VERSION_A),
@@ -55,22 +64,24 @@ namespace TrafficManager.Compatibility {
         /// checks when applicable.
         /// </summary>
         public static void Activate() {
-            // Pause the compatibility checker if scene changes to something other than "MainMenu"
-            SceneManager.activeSceneChanged += OnSceneChange;
+            // Abort if this is an in-game hotload
+            // todo
 
-            // todo: avoid checks when hotloading in-game
             if (UIView.GetAView() != null) {
                 // TM:PE enabled via Main Menu > Content Manager so run now
                 Log.Info("CompatibilityManager.Activate()");
-                Paused = false;
+                paused_ = false;
                 PerformChecks();
             } else {
                 // TM:PE was already enabled on game load, or via mod autoenabler;
                 // we must wait for main menu before doing anything else
                 Log.Info("CompatibilityManager.Activate(): Waiting for main menu...");
-                Paused = true;
+                paused_ = true;
                 LoadingManager.instance.m_introLoaded += OnIntroLoaded;
             }
+
+            // Pause the compatibility checker if scene changes to something other than "MainMenu"
+            SceneManager.activeSceneChanged += OnSceneChange;
         }
 
         /// <summary>
@@ -88,7 +99,7 @@ namespace TrafficManager.Compatibility {
         /// </summary>
         private static void OnIntroLoaded() {
             LoadingManager.instance.m_introLoaded -= OnIntroLoaded;
-            Paused = false;
+            paused_ = false;
             PerformChecks();
         }
 
@@ -96,7 +107,7 @@ namespace TrafficManager.Compatibility {
         /// Triggered when plugins change.
         /// </summary>
         private static void OnPluginsChanged() {
-            if (!Paused) {
+            if (!paused_) {
                 PerformChecks();
             }
         }
@@ -110,43 +121,19 @@ namespace TrafficManager.Compatibility {
         ///       and first display of main menu.
         /// </summary>
         /// 
-        /// <param name="current">The current <see cref="Scene"/>.</param>
+        /// <param name="current">The current <see cref="Scene"/> (seems to always be empty).</param>
         /// <param name="next">The <see cref="Scene"/> being transitioned to.</param>
         private static void OnSceneChange(Scene current, Scene next) {
             Log.InfoFormat(
                 "CompatibilityManager.OnSceneChange('{1}')",
                 next.name);
-            Paused = next.name != "MainMenu";
-        }
-
-        /// <summary>
-        /// Displays a panel allowing user to choose which assembly they want to use.
-        /// A game restart is required to make changes take effect.
-        /// </summary>
-        internal static void ShowAssemblyChooser() {
-            // todo
-            Log.Info("CompatibilityManager.ShowAssemblyChooser()");
-        }
-
-        /// <summary>
-        /// Displays a panel allowing users to remove/disable incompatible mods.
-        /// </summary>
-        /// 
-        /// <param name="critical">A dictionary of critical incompatibilities.</param>
-        /// <param name="major">A dictionary of major incompatibilities.</param>
-        /// <param name="minor">A dictionary of minor incompatibilities.</param>
-        internal static void ShowModRemoverDialog(
-                Dictionary<PluginInfo, string> critical,
-                Dictionary<PluginInfo, string> major,
-                Dictionary<PluginInfo, string> minor) {
-            // todo
-            Log.Info("CompatibilityManager.ShowModRemoverDialog()");
+            paused_ = next.name != "MainMenu";
         }
 
         /// <summary>
         /// Adds listener for plugin manager subscription change event.
         /// </summary>
-        internal static void ListenForSubscriptionChange() {
+        private static void ListenForSubscriptionChange() {
             Log.Info("CompatibilityManager.ListenForSubscriptionChange()");
             // clear old listener if present (is this necessary? don't know enough about C# events)
             Singleton<PluginManager>.instance.eventPluginsChanged -= PerformChecks;
@@ -159,7 +146,7 @@ namespace TrafficManager.Compatibility {
         /// </summary>
         /// 
         /// <returns>Returns <c>true</c> if safe to run tests, otherwise <c>false</c>.</returns>
-        internal static bool CanWeDoStuff() {
+        private static bool CanWeDoStuff() {
             if (SceneManager.GetActiveScene().name == "MainMenu") {
                 Log.Info("CompatibilityManager.CanWeDoStuff()? Yes, 'MainMenu' scene");
                 return true;
@@ -177,17 +164,24 @@ namespace TrafficManager.Compatibility {
                 return false;
             }
 
-            return !Paused;
+            return !paused_;
         }
 
         /// <summary>
-        /// Exits the game to desktop after a very short delay.
+        /// Exits the game to desktop.
         /// </summary>
-        internal static void ExitToDesktop() {
+        private static void ExitToDesktop() {
             // Don't exit to desktop if we're in-game!
-            if (!CanWeDoStuff()) {
+            if (paused_) {
                 return;
             }
+            paused_ = true;
+
+            // Check we're not already quitting
+            if (Singleton<LoadingManager>.instance.m_applicationQuitting) {
+                return;
+            }
+
             Singleton<LoadingManager>.instance.QuitApplication();
         }
 
@@ -195,13 +189,35 @@ namespace TrafficManager.Compatibility {
         /// Attempt to halt the Paradox Launcher autoload sequence.
         /// Otherwise the user will not see any compatibility warnings.
         /// </summary>
-        internal static void HaltAutoLoad() {
-            Log.Info("CompatibilityManager.HaltAutoLoad()");
+        private static void PreventAutoContinue() {
+            Log.Info("CompatibilityManager.PreventAutoContinue()");
             try {
+                autoContinue_ = LauncherLoginData.instance.m_continue;
                 LauncherLoginData.instance.m_continue = false;
             }
             catch {
                 Log.Warning(" - Failed!");
+            }
+        }
+
+        /// <summary>
+        /// If tests pass with no issues, we can resume launcher auto-continue
+        /// if applicable.
+        /// </summary>
+        private static void ResumeAutoContinue() {
+            if (autoContinue_) {
+                Log.Info("CompatibilityManager.ResumeAutoContinue()");
+                autoContinue_ = false;
+
+                try {
+                    MainMenu menu = GameObject.FindObjectOfType<MainMenu>();
+                    if (menu != null) {
+                        menu.m_BackgroundImage.zOrder = int.MaxValue;
+                        menu.Invoke("AutoContinue", 2.5f);
+                    }
+                }
+                catch {
+                }
             }
         }
 
@@ -228,23 +244,28 @@ namespace TrafficManager.Compatibility {
                 out int critical,
                 out int candidate)) {
 
-                RestartRequired = major > 0 || critical > 0 || candidate > 1;
+                restartRequired_ = major > 0 || critical > 0 || candidate > 1;
 
                 // todo: deal with incompatibilities
             }
 
             // If a restart is not yet required, check for zombie assemblies
             // which are the main cause of save/load issues.
-            if (!RestartRequired && !Check.Assemblies.Verify()) {
+            if (!restartRequired_ && !Check.Assemblies.Verify()) {
 
-                RestartRequired = true;
+                restartRequired_ = true;
 
                 // todo: show warning about settings loss
             }
 
-
             Check.DLCs.Verify();
-            ListenForSubscriptionChange();
+
+            if (restartRequired_) {
+            } else {
+                autoContinue_ = false;
+                ListenForSubscriptionChange();
+                ResumeAutoContinue();
+            }
         }
     }
 }

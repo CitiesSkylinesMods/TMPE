@@ -42,7 +42,9 @@ namespace TrafficManager.Compatibility.Check {
                 }
 
                 Log.Info(sb.ToString());
-            } catch { }
+            }
+            catch {
+            }
         }
     }
 }
