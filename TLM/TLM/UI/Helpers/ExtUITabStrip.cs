@@ -63,7 +63,7 @@ namespace TrafficManager.UI.Helpers {
             scrollablePanel.autoLayoutPadding = new RectOffset(10, 10, 0, 16);
             scrollablePanel.autoLayoutStart = LayoutStart.TopLeft;
             scrollablePanel.wrapLayout = true;
-            scrollablePanel.size = new Vector2(panel.size.x - 50, panel.size.y + 35);
+            scrollablePanel.size = new Vector2(panel.size.x - 28, panel.size.y + 35);
             scrollablePanel.autoLayoutDirection = LayoutDirection.Horizontal; //Vertical does not work but why?
 
             UIScrollbar verticalScrollbar = CreateVerticalScrollbar(panel, scrollablePanel);
@@ -103,12 +103,13 @@ namespace TrafficManager.UI.Helpers {
         public static ExtUITabstrip Create(UIHelperBase helperBase) {
             UIHelper actualHelper = helperBase as UIHelper;
             UIComponent container = actualHelper.self as UIComponent;
+            container.size = new Vector2(container.size.x + 10, container.size.y);
 
             ExtUITabstrip tabStrip = container.AddUIComponent<ExtUITabstrip>();
             tabStrip.relativePosition = new Vector3(0, 0);
-            tabStrip.size = new Vector2(container.width - 20, 40);
+            tabStrip.size = new Vector2(container.width - 10, 40);
 
-            float h = container.height - tabStrip.height * 2 - 40;
+            float h = container.height - tabStrip.height * 2;
             UITabContainer tabContainer = container.AddUIComponent<UITabContainer>();
             tabContainer.relativePosition = new Vector3(0, 80);
             tabContainer.width = tabStrip.width;
