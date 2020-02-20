@@ -1,4 +1,4 @@
-namespace TrafficManager.Compatibility.UI {
+namespace TrafficManager.Compatibility.GUI {
     using ColossalFramework.IO;
     using ColossalFramework.PlatformServices;
     using ColossalFramework.UI;
@@ -10,10 +10,14 @@ namespace TrafficManager.Compatibility.UI {
     using TrafficManager.State;
     using UnityEngine;
     using TrafficManager.UI;
+    using TrafficManager.Compatibility.Struct;
 
-    public class UIReviewPanel : UIPanel {
-        private const ulong LOCAL_MOD = ulong.MaxValue;
-
+    /// <summary>
+    /// I literally hate CO UI. It's not just designed by someone who merely didn't like UI,
+    /// it's designed by someone who wanted to punish anyone who does like UI. It is a form
+    /// of unwelcome and non-consensual sadism that must be purged from the universe.
+    /// </summary>
+    public class ProcessIncompatibleMods : UIPanel {
         private UILabel title_;
         private UIButton closeButton_;
         private UISprite warningIcon_;
@@ -22,10 +26,9 @@ namespace TrafficManager.Compatibility.UI {
         private UIComponent blurEffect_;
 
         /// <summary>
-        /// Gets or sets list of incompatible mods from
-        /// <see cref="TrafficManager.Util.ModsCompatibilityChecker"/>.
+        /// Gets or sets list of incompatible mods.
         /// </summary>
-        public Dictionary<PluginInfo, string> IncompatibleMods { get; set; }
+        public Dictionary<PluginInfo, ModDescriptor> Issues { get; set; }
 
         /// <summary>
         /// Initialises the dialog, populates it with list of incompatible mods, and adds it to the modal stack.

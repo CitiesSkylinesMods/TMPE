@@ -1,12 +1,10 @@
 namespace TrafficManager.Compatibility.Struct {
+    using static ColossalFramework.Plugins.PluginManager;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
+    using System.IO;
     using System.Reflection;
-    using System.Text;
     using TrafficManager.Compatibility.Enum;
     using TrafficManager.Compatibility.Util;
-    using static ColossalFramework.Plugins.PluginManager;
 
     /// <summary>
     /// Descriptor for subscribed/local mods.
@@ -66,6 +64,7 @@ namespace TrafficManager.Compatibility.Struct {
             ulong modId,
             bool modLocal,
             Severity sev) {
+
             AssemblyName = asmName;
             AssemblyVersion = asmVer;
             AssemblyGuid = asmGuid;
@@ -81,42 +80,49 @@ namespace TrafficManager.Compatibility.Struct {
         /// 
         /// <param name="mod">The <see cref="PluginInfo"/> to inspect.</param>
         public static implicit operator ModDescriptor(PluginInfo mod) {
-            return GetModDescriptorFrom(mod);
+            return From(mod);
         }
 
-        private static ModDescriptor GetModDescriptorFrom(PluginInfo mod) {
+        private static ModDescriptor From(PluginInfo mod) {
             Assembly asm = ModInspector.GetModAssembly(mod);
-
-            // Assembly values
 
             string asmName = ModInspector.GetAssemblyName(asm);
 
             Guid asmGuid = ModInspector.GetAssemblyGuid(asm);
-
-            Version asmVer = ModInspector.GetAssemblyVersion(asm);
-
-            // Mod values
-
-            string modName = ModInspector.GetModName(mod);
 
             ulong modId = mod?.publishedFileID.AsUInt64 ?? 0;
 
             // If workshop id is ulong.MaxValue, it's a locally installed mod
             bool modLocal = modId == ulong.MaxValue;
 
+            string modName = modLocal
+                ? $"{ModInspector.GetModName(mod)} /{Path.GetFileName(mod.modPath)}"
+                : ModInspector.GetModName(mod);
+
             Severity severity;
 
             if (IncompatibleMods.Instance.List.TryGetValue(modId, out Severity s)) {
                 severity = s;
             } else if (asmName == "TrafficManager") {
-                severity = Severity.Candidate;
+                // Detect currently unknown or local builds of TM:PE.
+                // Assume anything newer than v11 LABS (aubergine18) is safe,
+                // anything older is rogue or obsolete.
+                // Local builds are treated as newer due to ulong.MaxValue id.
+                severity = modId > 1806963141u
+                    ? Severity.TMPE
+                    : Severity.Critical;
             } else {
                 severity = Severity.None;
             }
 
+            // Show Guid for potentially valid TM:PE mods.
+            if (severity == Severity.TMPE) {
+                modName += $" - {asmGuid}";
+            }
+
             return new ModDescriptor(
                 asmName,
-                asmVer,
+                ModInspector.GetAssemblyVersion(asm),
                 asmGuid,
 
                 modName,

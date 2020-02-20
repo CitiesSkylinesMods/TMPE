@@ -33,10 +33,13 @@ namespace TrafficManager.Compatibility {
         /// </summary>
         internal static bool Paused = true;
 
+        internal static bool RestartRequired = false;
+
         /// <summary>
         /// Initializes static members of the <see cref="CompatibilityManager"/> class.
         /// </summary>
         static CompatibilityManager() {
+            LauncherLoginData.instance.m_continue = false;
             // Translate current game verison in to Version instance
             CurrentGameVersion = new Version(
                 Convert.ToInt32(BuildConfig.APPLICATION_VERSION_A),
@@ -188,37 +191,57 @@ namespace TrafficManager.Compatibility {
             Singleton<LoadingManager>.instance.QuitApplication();
         }
 
+        /// <summary>
+        /// Attempt to halt the Paradox Launcher autoload sequence.
+        /// Otherwise the user will not see any compatibility warnings.
+        /// </summary>
         internal static void HaltAutoLoad() {
+            Log.Info("CompatibilityManager.HaltAutoLoad()");
             try {
                 LauncherLoginData.instance.m_continue = false;
             }
-            catch { }
+            catch {
+                Log.Warning(" - Failed!");
+            }
         }
 
         /// <summary>
         /// Runs through entire compatibility checker sequence
-        ///
-        /// Note: This method is either invoked directly, or via an event, hence being static.
         /// </summary>
         private static void PerformChecks() {
             Log.InfoFormat(
                 "CompatibilityManager.PerformChecks() GUID = {0}",
                 SelfGuid);
 
+            // Check game version is what we expect it to be.
             if (!Check.Versions.Verify(TrafficManagerMod.ExpectedGameVersion, CurrentGameVersion)) {
-                HaltAutoLoad();
                 //todo: show warning about game version
             }
 
-            if (!Check.Assemblies.Verify()) {
-                HaltAutoLoad();
+            // Verify that there are no mod incompatibilites which could
+            // break the game, conflict with TM:PE, or cause minor problems.
+            // Also check if there are multiple TM:PE.
+            if (!Check.Mods.Verify(
+                out Dictionary<PluginInfo, ModDescriptor> results,
+                out int minor,
+                out int major,
+                out int critical,
+                out int candidate)) {
+
+                RestartRequired = major > 0 || critical > 0 || candidate > 1;
+
+                // todo: deal with incompatibilities
+            }
+
+            // If a restart is not yet required, check for zombie assemblies
+            // which are the main cause of save/load issues.
+            if (!RestartRequired && !Check.Assemblies.Verify()) {
+
+                RestartRequired = true;
+
                 // todo: show warning about settings loss
             }
 
-            if (!Check.Mods.Verify(out Dictionary<PluginInfo, ModDescriptor> results)) {
-                HaltAutoLoad();
-                // todo: deal with incompatibilities
-            }
 
             Check.DLCs.Verify();
             ListenForSubscriptionChange();

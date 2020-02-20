@@ -237,7 +237,7 @@
     <Compile Include="UI\Helpers\CheckboxOption.cs" />
     <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />
     <Compile Include="UI\Helpers\SerializableUIOptionBase.cs" />
-    <Compile Include="Compatibility\UIReviewPanel.cs" />
+    <Compile Include="Compatibility\GUI\ProcessIncompatibleMods.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />

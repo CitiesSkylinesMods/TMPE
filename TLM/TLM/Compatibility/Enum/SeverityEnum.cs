@@ -10,22 +10,23 @@ namespace TrafficManager.Compatibility.Enum {
         None,
 
         /// <summary>
-        /// Non-obsolete TM:PE mod candidate; if more than one user has to choose which one to use.
+        /// An instance of TM:PE which is not otherwise marked as incompatible.
+        /// If there is more than one TMPE active, user must choose only one.
         /// </summary>
-        Candidate,
+        TMPE,
 
         /// <summary>
-        /// Minor annoyance
+        /// Minor annoyance or glitch that player can choose to live with if they want.
         /// </summary>
         Minor,
 
         /// <summary>
-        /// Loss of functionality.
+        /// Loss of functionality, such as a mod that directly conflicts with TM:PE.
         /// </summary>
         Major,
 
         /// <summary>
-        /// Game-breaking.
+        /// Game-breaking, must be removed even if not using TM:PE.
         /// </summary>
         Critical,
     }

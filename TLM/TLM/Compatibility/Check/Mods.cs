@@ -2,16 +2,13 @@ namespace TrafficManager.Compatibility.Check {
     using ColossalFramework.Plugins;
     using ColossalFramework;
     using CSUtil.Commons;
-    using ICities;
     using static ColossalFramework.Plugins.PluginManager;
-    using System.Collections.Generic;
-    using System.IO;
     using System;
-    using TrafficManager.State;
+    using System.Collections.Generic;
     using System.Text;
     using TrafficManager.Compatibility.Enum;
     using TrafficManager.Compatibility.Struct;
-    using System.Reflection;
+    using TrafficManager.State;
 
     /// <summary>
     /// Scans for known incompatible mods as defined by <see cref="IncompatibleMods.List"/>.
@@ -28,17 +25,25 @@ namespace TrafficManager.Compatibility.Check {
         internal const string MARKER_MINOR = "m";
 
         internal const string LOCAL_MOD_STR = "(local)";
+        internal const string BUNDLED_MOD_STR = "(bundled)";
 
         /// <summary>
         /// Scans installed mods (local and workshop) looking for known incompatibilities.
         /// </summary>
         /// 
         /// <param name="results">A dictionary issues found (will be empty if no issues).</param>
+        /// <param name="critical">Number of critical incompatibilities.</param>
+        /// <param name="major">Number of major incompatibilities.</param>
+        /// <param name="minor">Number of minor incompatibilities.</param>
+        /// <param name="tmpe">Number of non-obsolete TM:PE mods.</param>
         /// 
         /// <returns>Returns <c>true</c> if incompatible mods detected, otherwise <c>false</c>.</returns>
-        public static bool Verify(out Dictionary<PluginInfo, ModDescriptor> results) {
-
-            Log.Info("Compatibility.Check.Mods.Scan()");
+        public static bool Verify(
+            out Dictionary<PluginInfo, ModDescriptor> results,
+            out int minor,
+            out int major,
+            out int critical,
+            out int tmpe) {
 
             results = new Dictionary<PluginInfo, ModDescriptor>();
 
@@ -53,109 +58,111 @@ namespace TrafficManager.Compatibility.Check {
 
             // batch all logging in to a single log message
             // 6000 chars is roughly 120 mods worth of logging
-            StringBuilder sb = new StringBuilder(6000);
+            StringBuilder log = new StringBuilder(6000);
 
-            sb.AppendFormat(
-                "Scanning (scanMinor={0}, scanDisabled={1})...\n\n",
+            log.AppendFormat(
+                "Compatibility.Check.Mods.Verify() scanMinor={0}, scanDisabled={1}\n\n",
                 scanMinor,
                 scanDisabled);
 
             // Variables for log file entries
             string logWorkshopId;
             string logIncompatible;
-            int minor = 0,
-                major = 0,
-                critical = 0;
+
+            // problem counters
+            minor = major = critical = tmpe = 0;
+
+            PluginManager manager = Singleton<PluginManager>.instance;
+
+            List<PluginInfo> mods = new List<PluginInfo>(manager.modCount);
+
+            mods.AddRange(manager.GetPluginsInfo()); // normal mods
+            mods.AddRange(manager.GetCameraPluginInfos()); // camera scripts
 
             // iterate plugins
-            foreach (PluginInfo mod in Singleton<PluginManager>.instance.GetPluginsInfo()) {
+            foreach (PluginInfo mod in mods) {
 
                 try {
-                    // Filter out bundled mods
-                    // Note: Need to check camera scripts as one incompatible mod is published as a camera script!
-                    if (!mod.isBuiltin) {
+                    // Generate descriptor for the mod
+                    ModDescriptor descriptor = mod;
 
-                        ModDescriptor descriptor = mod;
-
-                        logWorkshopId = descriptor.ModIsLocal
+                    // String to log for workshop id
+                    logWorkshopId = mod.isBuiltin
+                        ? BUNDLED_MOD_STR
+                        : descriptor.ModIsLocal
                             ? LOCAL_MOD_STR
                             : descriptor.ModWorkshopId.ToString();
 
-                        switch (descriptor.Incompatibility) {
-                            case Severity.None:
-                                logIncompatible = MARKER_BLANK;
-                                break;
-                            case Severity.Candidate:
-                                logIncompatible = MARKER_TMPE;
-                                if (descriptor.AssemblyGuid != CompatibilityManager.SelfGuid) {
-                                    verified = false;
-                                    results.Add(mod, descriptor);
-                                }
-                                break;
-                            case Severity.Minor:
-                                logIncompatible = MARKER_MINOR;
-                                if (scanMinor && (mod.isEnabled || scanDisabled)) {
-                                    verified = false;
-                                    ++minor;
-                                    results.Add(mod, descriptor);
-                                }
-                                break;
-                            case Severity.Major:
-                                logIncompatible = MARKER_MAJOR;
-                                if (mod.isEnabled || scanDisabled) {
-                                    verified = false;
-                                    ++major;
-                                    results.Add(mod, descriptor);
-                                }
-                                break;
-                            case Severity.Critical:
-                                logIncompatible = MARKER_CRITICAL;
-                                verified = false;
-                                ++critical;
-                                results.Add(mod, descriptor);
-                                break;
-                            default:
-                                logIncompatible = MARKER_BLANK;
-                                break;
-                        }
+                    switch (descriptor.Incompatibility) {
 
-                        sb.AppendFormat(
-                            LOG_ENTRY_FORMAT,
-                            logIncompatible,
-                            mod.isEnabled ? MARKER_ENABLED : MARKER_BLANK,
-                            logWorkshopId.PadRight(12),
-                            descriptor.ModName);
+                        case Severity.Critical:
+                            logIncompatible = MARKER_CRITICAL;
+                            verified = false;
+                            ++critical;
+                            results.Add(mod, descriptor);
+                            break;
+
+                        case Severity.Major:
+                            logIncompatible = MARKER_MAJOR;
+                            if (mod.isEnabled || scanDisabled) {
+                                verified = false;
+                                ++major;
+                                results.Add(mod, descriptor);
+                            }
+                            break;
+
+                        case Severity.Minor:
+                            logIncompatible = MARKER_MINOR;
+                            if (scanMinor && (mod.isEnabled || scanDisabled)) {
+                                verified = false;
+                                ++minor;
+                                results.Add(mod, descriptor);
+                            }
+                            break;
+
+                        case Severity.TMPE:
+                            logIncompatible = MARKER_TMPE;
+                            ++tmpe;
+                            if (descriptor.AssemblyGuid != CompatibilityManager.SelfGuid) {
+                                verified = false;
+                                results.Add(mod, descriptor);
+                            }
+                            break;
+
+                        default:
+                        case Severity.None:
+                            logIncompatible = MARKER_BLANK;
+                            break;
                     }
+
+                    log.AppendFormat(
+                        LOG_ENTRY_FORMAT,
+                        logIncompatible,
+                        mod.isEnabled ? MARKER_ENABLED : MARKER_BLANK,
+                        logWorkshopId.PadRight(12),
+                        descriptor.ModName);
 
                 } catch (Exception e) {
                     Log.ErrorFormat(
-                        "Error scanning mod {0}:\n{1}",
+                        "Error scanning {0}:\n{1}",
                         mod.modPath,
                         e.ToString());
                 }
-            }
 
-            sb.AppendFormat(
-                "\nScan complete: {0} [C]ritical, {1} [M]ajor, {2} [m]inor; [*] = Enabled",
+            } // foreach
+
+            log.AppendFormat(
+                "\n{0} Mod(s), *{1} enabled: {2} [C]ritical, {3} [M]ajor, {4} [m]inor, {5} > TM:PE\n",
+                manager.modCount,
+                manager.enabledModCount,
                 critical,
                 major,
-                minor);
+                minor,
+                tmpe);
 
-            Log.Info(sb.ToString());
+            Log.Info(log.ToString());
 
             return verified;
         }
-
-
-
-        internal static bool IsTrafficManager(string name) {
-            return name.Contains("Traffic Manager")
-                || name.Contains("TM:PE")
-                || name.Contains("TrafficManager");
-        }
-
-
-
-
     }
 }

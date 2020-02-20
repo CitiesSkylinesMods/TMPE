@@ -9,6 +9,9 @@ namespace TrafficManager.Compatibility {
     public class IncompatibleMods {
         private static IncompatibleMods instance;
 
+        /// <summary>
+        /// Gets the instance of the incompatible mods list.
+        /// </summary>
         public static IncompatibleMods Instance => instance ?? (instance = new IncompatibleMods());
 
         /// <summary>
@@ -23,6 +26,13 @@ namespace TrafficManager.Compatibility {
             List = new Dictionary<ulong, Severity>() {
                 // Note: TM:PE v10.20 not currently listed as lots of users still use it
                 // It will be picked up by duplicate assemblies detector
+
+                // Valid versions of TM:PE
+                // If more than one is found, user will have to choose only one and the
+                // others will be removed to prevent zombie assembly save/load issues.
+                { 583429740u,  Severity.TMPE }, // v10.20 STABLE (will become obsolete after next game update)
+                { 1637663252u, Severity.TMPE }, // v11 STABLE
+                { 1806963141u, Severity.TMPE }, // v11 LABS
 
                 // Obsolete & rogue versions of TM:PE
                 { 1957033250u, Severity.Critical }, // Traffic Manager: President Edition (Industries Compatible)
@@ -113,7 +123,7 @@ namespace TrafficManager.Compatibility {
                 { 680748394u, Severity.Minor }, // Roads United: North America
             };
             Log.InfoFormat(
-                "Compatibility.IncompatibleMods.List  {0}",
+                "Compatibility.IncompatibleMods.List contains {0} item(s)",
                 List.Count);
         }
     }

@@ -98,7 +98,7 @@ namespace TrafficManager {
         [UsedImplicitly]
         public void OnDisabled() {
             Log.InfoFormat(
-                "TrafficManagerMod.OnEnabled(): Active scene = {0}",
+                "TrafficManagerMod.OnDisabled(): Active scene = {0}",
                 SceneManager.GetActiveScene().name);
 
             CompatibilityManager.Deactivate();
