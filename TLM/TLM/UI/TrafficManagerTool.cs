@@ -32,7 +32,6 @@ namespace TrafficManager.UI {
         private ToolMode toolMode_;
         private NetTool _netTool;
 
-
         /// <summary>
         /// Maximum error of HitPos field.
         /// </summary>

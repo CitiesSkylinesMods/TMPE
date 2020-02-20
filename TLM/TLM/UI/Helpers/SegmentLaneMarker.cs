@@ -100,6 +100,8 @@ namespace TrafficManager.UI.Helpers {
         internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false) {
             float minH = Mathf.Min(Bezier.a.y, Bezier.d.y);
             float maxH = Mathf.Max(Bezier.a.y, Bezier.d.y);
+
+            ColossalFramework.Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             RenderManager.instance.OverlayEffect.DrawBezier(
                 cameraInfo,
                 color,

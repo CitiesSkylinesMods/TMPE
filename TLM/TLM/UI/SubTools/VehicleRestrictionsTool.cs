@@ -11,6 +11,8 @@ namespace TrafficManager.UI.SubTools {
     using UnityEngine;
     using TrafficManager.UI.Helpers;
     using CSUtil.Commons;
+    using static TrafficManager.Util.Shortcuts;
+
 
     public class VehicleRestrictionsTool : SubTool {
         private static readonly ExtVehicleType[] RoadVehicleTypes = {
@@ -28,8 +30,8 @@ namespace TrafficManager.UI.SubTools {
 
         private bool overlayHandleHovered;
 
-        private static Color roadModeColor = Color.yellow;
-        private static bool roadMode => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        private Color HighlightColor => MainTool.GetToolColor(false, false);
+        private static bool RoadMode => ShiftIsPressed;
 
         private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 200, 100));
 
@@ -42,12 +44,10 @@ namespace TrafficManager.UI.SubTools {
             internal uint laneId;
             internal byte laneIndex;
             internal NetInfo.Lane laneInfo;
+            internal int SortedLaneIndex;
             internal bool GUIButtonHovered;
         }
-        private RenderData renderData;
-
-
-
+        private RenderData renderData_;
 
         public VehicleRestrictionsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -148,7 +148,7 @@ namespace TrafficManager.UI.SubTools {
         private void RenderLaneOverlay(RenderManager.CameraInfo cameraInfo, uint laneId) {
             var marker = new SegmentLaneMarker(laneBuffer[laneId].m_bezier);
             bool pressed = Input.GetMouseButton(0);
-            Color color = roadMode ? roadModeColor : Color.white;
+            Color color = HighlightColor;
             color = pressed ? Color.magenta : color;
             marker.RenderOverlay(cameraInfo, color, pressed);
         }
@@ -157,9 +157,8 @@ namespace TrafficManager.UI.SubTools {
         /// highlitghts all the lanes with the same sorted index as the current lane.
         /// </summary>
         private void RenderRoadLane(RenderManager.CameraInfo cameraInfo) {
-            int initialSortedLaneIndex = -1;
             SegmentLaneTraverser.Traverse(
-                renderData.segmentId,
+                renderData_.segmentId,
                 SegmentTraverser.TraverseDirection.AnyDirection,
                 SegmentTraverser.TraverseSide.AnySide,
                 SegmentLaneTraverser.LaneStopCriterion.LaneCount,
@@ -167,11 +166,7 @@ namespace TrafficManager.UI.SubTools {
                 SpeedLimitManager.LANE_TYPES,
                 SpeedLimitManager.VEHICLE_TYPES,
                 data => {
-                    if (data.SegVisitData.Initial &&
-                        data.CurLanePos.laneIndex == renderData.laneIndex) {
-                        initialSortedLaneIndex = data.SortedLaneIndex;
-                    }
-                    if (initialSortedLaneIndex == data.SortedLaneIndex) {
+                    if (renderData_.SortedLaneIndex == data.SortedLaneIndex) {
                         RenderLaneOverlay(cameraInfo, data.CurLanePos.laneId);
                     }
                     return true;
@@ -188,10 +183,11 @@ namespace TrafficManager.UI.SubTools {
                 TrafficManagerTool.DrawSegmentOverlay(cameraInfo, SelectedSegmentId, color, true);
 
                 if (overlayHandleHovered) {
-                    if (!roadMode) {
-                        RenderLaneOverlay(cameraInfo, renderData.laneId);
-                    } else {
+                    if (RoadMode) {
                         RenderRoadLane(cameraInfo);
+                    } else {
+                        RenderLaneOverlay(cameraInfo, renderData_.laneId);
+                        
                     }
                 }
             }
@@ -263,15 +259,15 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void GuiVehicleRestrictionsWindow(int num) {
-            // use yellow color when shift is pressed.
+            // use blue color when shift is pressed.
             Color oldColor = GUI.color;
-            if (roadMode) {
-                GUI.color = roadModeColor;
+            if (RoadMode) {
+                GUI.color = HighlightColor;
             }
 
             {
                 // uses pressed sprite when delete is pressed
-                // uses yellow color when shift is pressed.
+                // uses blue color when shift is pressed.
                 KeyCode hotkey = KeyCode.Delete;
                 GUIStyle style = new GUIStyle("button");
                 if (Input.GetKey(hotkey)) {
@@ -281,7 +277,7 @@ namespace TrafficManager.UI.SubTools {
                    T("Button:Allow all vehicles") + " [delete]",
                    style) || Input.GetKeyDown(hotkey)) {
                     AllVehiclesFunc(true);
-                    if (roadMode) {
+                    if (RoadMode) {
                         ApplyRestrictionsToAllSegments();
                     }
                 }
@@ -289,7 +285,7 @@ namespace TrafficManager.UI.SubTools {
 
             if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button:Ban all vehicles"))) {
                 AllVehiclesFunc(false);
-                if (roadMode) {
+                if (RoadMode) {
                     ApplyRestrictionsToAllSegments();
                 }
             }
@@ -564,11 +560,11 @@ namespace TrafficManager.UI.SubTools {
 
                     if (hoveredHandle) {
                         hovered = true;
-                        renderData.segmentId = segmentId;
-                        renderData.laneId = laneId;
-                        renderData.laneIndex = laneIndex;
-                        renderData.laneInfo = laneInfo;
-
+                        renderData_.segmentId = segmentId;
+                        renderData_.laneId = laneId;
+                        renderData_.laneIndex = laneIndex;
+                        renderData_.laneInfo = laneInfo;
+                        renderData_.SortedLaneIndex = sortedLaneIndex;
                     }
 
                     if (hoveredHandle && MainTool.CheckClicked() ) {
@@ -585,7 +581,7 @@ namespace TrafficManager.UI.SubTools {
                             !allowed);
                         stateUpdated = true;
 
-                        if (roadMode) {
+                        if (RoadMode) {
                             ApplyRestrictionsToAllSegments(sortedLaneIndex, vehicleType);
                         }
                     }
