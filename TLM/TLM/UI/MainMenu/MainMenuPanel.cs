@@ -185,7 +185,9 @@ namespace TrafficManager.UI.MainMenu {
             /// The button cannot be smaller than 40px.</summary>
             /// <returns>Button size for current screen resolution.</returns>
             internal static float GetButtonSize() {
-                var scaledSize = U.UIScaler.ScreenSizeSmallestFraction(0.0208f, 0.037f);
+                var scaledSize
+                    = U.UIScaler.ScreenSizeSmallestFraction(0.0208f, 0.037f) *
+                      U.UIScaler.GetUIScale();
                 return Mathf.Max(scaledSize, 40f);
             }
 

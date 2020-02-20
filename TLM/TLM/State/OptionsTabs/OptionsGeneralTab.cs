@@ -21,6 +21,7 @@ namespace TrafficManager.State {
         private static UICheckBox _lockMenuToggle;
 
         private static UISlider _guiTransparencySlider;
+        private static UISlider _guiScaleSlider;
         private static UISlider _overlayTransparencySlider;
 
         [UsedImplicitly]
@@ -41,7 +42,6 @@ namespace TrafficManager.State {
         }
 
         internal static void MakeSettings_General(ExtUITabstrip tabStrip) {
-
             UIHelper panelHelper = tabStrip.AddTabPage(T("Tab:General"));
 
             UIHelperBase generalGroup = panelHelper.AddGroup(
@@ -79,6 +79,16 @@ namespace TrafficManager.State {
                                   T("General.Checkbox:Lock main menu window position"),
                                   GlobalConfig.Instance.Main.MainMenuPosLocked,
                                   OnLockMenuChanged) as UICheckBox;
+
+            _guiScaleSlider = generalGroup.AddSlider(
+                                        T("General.Slider:GUI scale") + ":",
+                                        65,
+                                        200,
+                                        5,
+                                        GlobalConfig.Instance.Main.GuiScale,
+                                        OnGuiScaleChanged) as UISlider;
+            _guiScaleSlider.parent.Find<UILabel>("Label").width = 500;
+
             _guiTransparencySlider = generalGroup.AddSlider(
                                         T("General.Slider:Window transparency") + ":",
                                         0,
@@ -87,6 +97,7 @@ namespace TrafficManager.State {
                                         GlobalConfig.Instance.Main.GuiTransparency,
                                         OnGuiTransparencyChanged) as UISlider;
             _guiTransparencySlider.parent.Find<UILabel>("Label").width = 500;
+
             _overlayTransparencySlider = generalGroup.AddSlider(
                                              T("General.Slider:Overlay transparency") + ":",
                                             0,
@@ -224,6 +235,17 @@ namespace TrafficManager.State {
             Log._Debug($"GuiTransparency changed to {GlobalConfig.Instance.Main.GuiTransparency}");
         }
 
+        private static void OnGuiScaleChanged(float newVal) {
+            SetGuiScale(newVal);
+            _guiScaleSlider.tooltip
+                = string.Format(
+                    T("General.Tooltip.Format:GUI scale: {0}%"),
+                    GlobalConfig.Instance.Main.GuiScale);
+
+            GlobalConfig.WriteConfig();
+            Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScale}");
+        }
+
         private static void OnOverlayTransparencyChanged(float newVal) {
             if (!Options.IsGameLoaded()) {
                 return;
@@ -297,6 +319,16 @@ namespace TrafficManager.State {
 
             if (changed && _guiTransparencySlider != null) {
                 _guiTransparencySlider.value = val;
+            }
+        }
+
+        public static void SetGuiScale(float val) {
+            bool changed = (int)val != (int)GlobalConfig.Instance.Main.GuiScale;
+            GlobalConfig.Instance.Main.GuiScale = val;
+
+            if (changed && _guiScaleSlider != null) {
+                _guiScaleSlider.value = val;
+                ModUI.Instance.NotifyGuiScaleChanged();
             }
         }
 

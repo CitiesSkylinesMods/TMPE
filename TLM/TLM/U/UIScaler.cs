@@ -1,4 +1,5 @@
 namespace TrafficManager.U {
+    using TrafficManager.State;
     using UnityEngine;
 
     public static class UIScaler {
@@ -24,6 +25,10 @@ namespace TrafficManager.U {
             return Mathf.Min(
                 ScreenWidthFraction(widthFrac),
                 ScreenHeightFraction(heightFrac));
+        }
+
+        public static float GetUIScale() {
+            return GlobalConfig.Instance.Main.GuiScale * 0.01f;
         }
     }
 }

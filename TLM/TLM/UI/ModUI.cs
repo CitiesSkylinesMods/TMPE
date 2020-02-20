@@ -207,5 +207,11 @@ namespace TrafficManager.UI {
                 tool = null;
             } // end if
         } // end DestroyTool()
+
+        /// <summary>Called from settings window, when windows need rescaling because GUI scale
+        /// slider has changed.</summary>
+        public void NotifyGuiScaleChanged() {
+            MainMenu.OnRescaleRequested();
+        }
     }
 }
