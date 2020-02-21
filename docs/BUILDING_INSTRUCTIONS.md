@@ -106,7 +106,7 @@ If you have any problems, let us know!
 
 #### Managed DLLs
 
-> You only need to do this once, and only if your IDE wasn't able to find the required managed `.dll` files.
+> If you have installed Cities Skylines, the build system can locate the dlls automatically. Otherwise you will need setup dll references manually. You only need to do this once, and only if your IDE wasn't able to find the required managed `.dll` files.
 
 TM:PE requires references to several "managed" `.dll` files that are bundled with the game; it should automatically find the files, but if not you'll have to do some additional setup...
 
@@ -114,6 +114,8 @@ First, locate your `Steam` folder. It is normally found in:
 
 * **Windows:** `C:\Program Files (x86)\Steam\`
 * **Mac OS X:** `~/Library/Application Support/Steam/`
+
+On Steam client you can check Steam->settings->Download->Steam Library Folders.
 
 The managed `.dll` files are usually located within the following sub-folder: `\steamapps\common\Cities_Skylines\Cities_Data\Managed\`.
 
