@@ -354,9 +354,8 @@ namespace TrafficManager {
                     }
                 }
 
-                Destroy<RemoveVehicleButtonExtender>();
-                Util.RoadSelection.Release();
                 Destroy<RoadSelectionPanels>();
+                Destroy<RemoveVehicleButtonExtender>();
                 Destroy<RemoveCitizenInstanceButtonExtender>();
 
                 // Custom path manger is destroyed when reloading. That is why the following code
@@ -565,7 +564,6 @@ namespace TrafficManager {
             // add "remove citizen instance" button
             UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
 
-            new Util.RoadSelection();
             UIView.GetAView().gameObject.AddComponent<RoadSelectionPanels>();
 
             InitDetours();

@@ -11,12 +11,13 @@ namespace TrafficManager.UI {
     using static Textures.TextureResources;
 
     public class RoadSelectionPanels : MonoBehaviour {
-        public static RoadSelectionPanels Instance { get; private set; } = null;
-        public RoadSelectionPanels() : base() { Instance = this; }
+        private RoadSelectionUtil roadSelectionUtil_;
 
+        public static RoadSelectionPanels Root { get; private set; } = null;
+        
         public enum FunctionMode {
             Clear = 0, /// Indicates No button is in active state.
-            Stop,
+            Stop, 
             Yield,
             HighPrioirty,
             Rabout,
@@ -54,19 +55,26 @@ namespace TrafficManager.UI {
         /// Also enables Traffic manager tool.
         /// </summary>
         private void ShowMassEditOverlay() {
+            var tmTool = UIBase.GetTrafficManagerTool(true);
+            if(tmTool == null) {
+                Log.Error("UIBase.GetTrafficManagerTool(true) returned null");
+                return;
+            }
             UIBase.EnableTool();
             MassEditOVerlay.Show = true;
-            UIBase.GetTrafficManagerTool()?.InitializeSubTools();
+            tmTool.InitializeSubTools();
         }
-
 
         private void MassEditOverlayOnEvent(UIComponent component, bool value) {
             if (value) {
                 ShowMassEditOverlay();
             } else {
                 MassEditOVerlay.Show = false;
-                UIBase.GetTrafficManagerTool()?.InitializeSubTools();
-                UIBase.DisableTool();
+                var tmTool = UIBase.GetTrafficManagerTool(false);
+                if (tmTool) {
+                    tmTool.InitializeSubTools();
+                    UIBase.DisableTool();
+                }
             }
         }
 
@@ -81,9 +89,44 @@ namespace TrafficManager.UI {
         /// </summary>
         private IList<PanelExt> panels;
         private UIComponent priorityRoadToggle;
-        public void Start() {
-            Function = FunctionMode.Clear;
 
+        public void OnDestroy() {
+            vlog("OnDestroy() RoadSelectionPanels ...");
+            if (roadSelectionUtil_ != null) {
+                roadSelectionUtil_ = null;
+                RoadSelectionUtil.Release();
+            }
+
+            if (priorityRoadToggle != null) {
+                priorityRoadToggle.eventVisibilityChanged -= HidePriorityRoadToggle;
+            }
+
+            if (panels != null) {
+                foreach (UIPanel panel in panels) {
+                    if (panel != null) {
+                        //panel.eventVisibilityChanged -= ShowAdvisorOnEvent;
+                        Destroy(panel);
+                    }
+                }
+                panels.Clear();
+                panels = null; 
+            }
+        }
+
+        ~RoadSelectionPanels() {
+            Root = null;
+            _function = FunctionMode.Clear;
+        }
+
+        public void Awake() {
+            vlog("Awake() RoadSelectionPanels ...");
+            Root = this;
+            _function = FunctionMode.Clear;
+        }
+
+        public void Start() {
+            vlog("Start() RoadSelectionPanels ...");
+            return;
             panels = new List<PanelExt>();
 
             // attach an instance of road selection panel to RoadWorldInfoPanel.
@@ -91,8 +134,10 @@ namespace TrafficManager.UI {
             if (roadWorldInfoPanel != null) {
                 PanelExt panel = AddPanel(roadWorldInfoPanel.component);
                 panel.relativePosition += new Vector3(-10f, -10f);
-                priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
-                priorityRoadToggle.eventVisibilityChanged += HidePriorityRoadToggle;
+                //priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
+                if (priorityRoadToggle != null) {
+                    priorityRoadToggle.eventVisibilityChanged += HidePriorityRoadToggle;
+                }
 
                 panel.eventVisibilityChanged += ShowAdvisorOnEvent;
             }
@@ -106,11 +151,14 @@ namespace TrafficManager.UI {
             }
 
             // every time user changes the road selection, all buttons will go back to inactive state.
-            RoadSelection.Instance.OnChanged += RefreshOnEvent;
+            //roadSelectionUtil_ = new RoadSelectionUtil();
+            if (roadSelectionUtil_ != null) { 
+                roadSelectionUtil_.OnChanged += RefreshOnEvent;
+            }
         }
 
         private static void RefreshOnEvent() =>
-            Instance?.Refresh(reset: true);
+            Root?.Refresh(reset: true);
 
         // Create a road selection panel. Multiple instances are allowed.
         private PanelExt AddPanel(UIComponent container) {
@@ -125,15 +173,10 @@ namespace TrafficManager.UI {
             return panel;
         }
 
-        public void OnDestroy() {
-            RoadSelection.Instance.OnChanged -= RefreshOnEvent;
-            priorityRoadToggle.eventVisibilityChanged -= HidePriorityRoadToggle;
-
-            foreach (UIPanel panel in panels ?? Enumerable.Empty<PanelExt>()) {
-                panel.eventVisibilityChanged -= ShowAdvisorOnEvent;
-                Destroy(panel);
-            }
-            Instance = null;
+        static void vlog(string m) {
+            m = "KIAN DEBUG> " + m + Environment.StackTrace;
+            //Debug.Log(m);
+            Log._Debug(m);
         }
 
         /// <summary>
@@ -181,9 +224,14 @@ namespace TrafficManager.UI {
             }
 
             public void OnDestroy() {
+                vlog("A2");
                 foreach (UIButton button in buttons ?? Enumerable.Empty<ButtonExt>()) {
                     Destroy(button);
                 }
+                vlog("B2");
+                buttons.Clear();
+                buttons = null;
+                vlog("C2");
             }
 
             public class ClearButtton : ButtonExt {
@@ -191,49 +239,48 @@ namespace TrafficManager.UI {
                 public override FunctionMode Function => FunctionMode.Clear;
                 public override bool Active => false; // Clear funtionality can't be undone. #568
                 public override void Do() => // TODO delete all rules as part of #568
-                    PriorityRoad.ClearRoad(RoadSelection.Instance.Selection);
+                    PriorityRoad.ClearRoad(Selection);
                 public override void Undo() => throw new Exception("Unreachable code");
             }
             public class StopButtton : ButtonExt {
                 public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
                 public override FunctionMode Function => FunctionMode.Stop;
                 public override void Do() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainStop, RoadSelection.Instance.Selection);
+                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainStop, Selection);
                 public override void Undo() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, RoadSelection.Instance.Selection);
+                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, Selection);
             }
             public class YieldButton : ButtonExt {
                 public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
                 public override FunctionMode Function => FunctionMode.Yield;
                 public override void Do() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainYield, RoadSelection.Instance.Selection);
+                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainYield, Selection);
                 public override void Undo() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, RoadSelection.Instance.Selection);
+                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, Selection);
             }
             public class HighPrioirtyButtton : ButtonExt {
                 public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
                 public override FunctionMode Function => FunctionMode.HighPrioirty;
                 public override void Do() =>
-                    PriorityRoad.FixRoad(RoadSelection.Instance.Selection);
+                    PriorityRoad.FixRoad(Selection);
                 public override void Undo() =>
-                    PriorityRoad.ClearRoad(RoadSelection.Instance.Selection);
+                    PriorityRoad.ClearRoad(Selection);
             }
 
             public class RAboutButtton : ButtonExt {
                 public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
                 public override FunctionMode Function => FunctionMode.Rabout;
                 public override void Do() =>
-                    RoundaboutMassEdit.Instance.FixRabout(RoadSelection.Instance.Selection);
+                    RoundaboutMassEdit.Instance.FixRabout(Selection);
                 public override void Undo() =>
-                    RoundaboutMassEdit.Instance.ClearRabout(RoadSelection.Instance.Selection);
+                    RoundaboutMassEdit.Instance.ClearRabout(Selection);
 
                 public override bool ShouldDisable {
                     get {
-                        Log._Debug("RAboutButtton.IsDisabled() called" + Environment.StackTrace);
-                        if (RoadSelection.Instance.Length <= 1) {
+                        if (Length <= 1) {
                             return true;
                         }
-                        var segmentList = RoadSelection.Instance.Selection;
+                        var segmentList = Selection;
                         bool isRabout = RoundaboutMassEdit.IsRabout(segmentList, semi: true);
                         if (!isRabout) {
                             segmentList.Reverse();
@@ -277,7 +324,11 @@ namespace TrafficManager.UI {
                     }
                 }
 
-                public RoadSelectionPanels Root => RoadSelectionPanels.Instance;
+                public RoadSelectionPanels Root => RoadSelectionPanels.Root;
+
+                public List<ushort> Selection => Root?.roadSelectionUtil_?.Selection;
+
+                public int Length => Root?.roadSelectionUtil_?.Length ?? 0;
 
                 public override bool CanActivate() => true;
 
@@ -285,7 +336,7 @@ namespace TrafficManager.UI {
 
                 public override bool CanDisable => true;
 
-                public override bool ShouldDisable => RoadSelection.Instance.Length == 0;
+                public override bool ShouldDisable => Length == 0;
 
                 public abstract FunctionMode Function { get; }
 

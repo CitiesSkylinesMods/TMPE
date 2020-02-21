@@ -4,15 +4,16 @@ using System.Collections.Generic;
 using System.Reflection;
 
 namespace TrafficManager.Util {
-    public class RoadSelection {
+    public class RoadSelectionUtil {
         /// instance of singleton
-        public static RoadSelection Instance { get; private set; }
+        public static RoadSelectionUtil Instance { get; private set; }
 
-        public RoadSelection() : base() {
+        public RoadSelectionUtil() : base() {
             Instance = this;
         }
 
         public static void Release() {
+            Instance.OnChanged = null;
             Instance = null;
         }
 

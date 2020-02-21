@@ -165,7 +165,7 @@ namespace TrafficManager.UI {
 
         public static void DisableTool() {
             Log._Debug("LoadingExtension.DisableTool: called");
-            if (ToolsModifierControl.toolController != null) {
+            if (ToolsModifierControl.toolController == tool) {
                 ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
                 ToolsModifierControl.SetTool<DefaultTool>();
             } else {
