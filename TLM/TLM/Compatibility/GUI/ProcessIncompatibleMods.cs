@@ -1,18 +1,23 @@
-namespace TrafficManager.UI {
+namespace TrafficManager.Compatibility.GUI {
+    using ColossalFramework;
     using ColossalFramework.IO;
     using ColossalFramework.PlatformServices;
-    using ColossalFramework.UI;
-    using ColossalFramework;
-    using CSUtil.Commons;
     using static ColossalFramework.Plugins.PluginManager;
-    using System.Collections.Generic;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
     using System;
+    using System.Collections.Generic;
+    using TrafficManager.Compatibility.Struct;
     using TrafficManager.State;
+    using TrafficManager.UI;
     using UnityEngine;
 
-    public class IncompatibleModsPanel : UIPanel {
-        private const ulong LOCAL_MOD = ulong.MaxValue;
-
+    /// <summary>
+    /// I literally hate CO UI. It's not just designed by someone who merely didn't like UI,
+    /// it's designed by someone who wanted to punish anyone who does like UI. It is a form
+    /// of unwelcome and non-consensual sadism that must be purged from the universe.
+    /// </summary>
+    public class ProcessIncompatibleMods : UIPanel {
         private UILabel title_;
         private UIButton closeButton_;
         private UISprite warningIcon_;
@@ -21,10 +26,9 @@ namespace TrafficManager.UI {
         private UIComponent blurEffect_;
 
         /// <summary>
-        /// Gets or sets list of incompatible mods from
-        /// <see cref="TrafficManager.Util.ModsCompatibilityChecker"/>.
+        /// Gets or sets list of incompatible mods.
         /// </summary>
-        public Dictionary<PluginInfo, string> IncompatibleMods { get; set; }
+        public Dictionary<PluginInfo, ModDescriptor> Issues { get; set; }
 
         /// <summary>
         /// Initialises the dialog, populates it with list of incompatible mods, and adds it to the modal stack.
@@ -50,26 +54,14 @@ namespace TrafficManager.UI {
             relativePosition = new Vector3((resolution.x / 2) - 300, resolution.y / 3);
             mainPanel_.relativePosition = Vector3.zero;
 
-            warningIcon_ = mainPanel_.AddUIComponent<UISprite>();
-            warningIcon_.size = new Vector2(40f, 40f);
-            warningIcon_.spriteName = "IconWarning";
-            warningIcon_.relativePosition = new Vector3(15, 15);
-            warningIcon_.zOrder = 0;
+            warningIcon_ = AddWarningIcon(mainPanel_);
 
-            title_ = mainPanel_.AddUIComponent<UILabel>();
-            title_.autoSize = true;
-            title_.padding = new RectOffset(10, 10, 15, 15);
-            title_.relativePosition = new Vector2(60, 12);
+            title_ = AddTitle(
+                mainPanel_,
+                TrafficManagerMod.ModName + " " +
+                Translation.ModConflicts.Get("Window.Title:Detected incompatible mods"));
 
-            title_.text = TrafficManagerMod.ModName + " " +
-                         Translation.ModConflicts.Get("Window.Title:Detected incompatible mods");
-
-            closeButton_ = mainPanel_.AddUIComponent<UIButton>();
-            closeButton_.eventClick += CloseButtonClick;
-            closeButton_.relativePosition = new Vector3(width - closeButton_.width - 45, 15f);
-            closeButton_.normalBgSprite = "buttonclose";
-            closeButton_.hoveredBgSprite = "buttonclosehover";
-            closeButton_.pressedBgSprite = "buttonclosepressed";
+            closeButton_ = AddCloseButton(mainPanel_, CloseButtonClick);
 
             UIPanel panel = mainPanel_.AddUIComponent<UIPanel>();
             panel.relativePosition = new Vector2(20, 70);
@@ -125,48 +117,85 @@ namespace TrafficManager.UI {
             thumb.relativePosition = Vector3.zero;
             verticalScroll.thumbObject = thumb;
 
-            // Add blur effect if applicable
-            blurEffect_ = GameObject.Find("ModalEffect").GetComponent<UIComponent>();
-            AttachUIComponent(blurEffect_.gameObject);
-            blurEffect_.size = new Vector2(resolution.x, resolution.y);
-            blurEffect_.absolutePosition = new Vector3(0, 0);
-            blurEffect_.SendToBack();
-            blurEffect_.eventPositionChanged += OnBlurEffectPositionChange;
-            blurEffect_.eventZOrderChanged += OnBlurEffectZOrderChange;
-            blurEffect_.opacity = 0;
-            blurEffect_.isVisible = true;
-            ValueAnimator.Animate(
-                "ModalEffect",
-                val => blurEffect_.opacity = val,
-                new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
+            blurEffect_ = AddBlurEffect(resolution);
 
-            // Make sure modal dialog is in front of all other UI
             BringToFront();
         }
 
+        private UISprite AddWarningIcon(UIPanel panel) {
+            UISprite sprite = panel.AddUIComponent<UISprite>();
+
+            sprite.spriteName = "IconWarning";
+            sprite.size = new Vector2(40f, 40f);
+            sprite.relativePosition = new Vector3(15, 15);
+            sprite.zOrder = 0;
+
+            return sprite;
+        }
+
+        private UILabel AddTitle(UIPanel panel, string titleStr) {
+            UILabel label = panel.AddUIComponent<UILabel>();
+
+            label.autoSize = true;
+            label.padding = new RectOffset(10, 10, 15, 15);
+            label.relativePosition = new Vector2(60, 12);
+            label.text = titleStr;
+
+            return label;
+        }
+
+        private UIButton AddCloseButton(UIPanel panel, MouseEventHandler onClick) {
+            UIButton btn = panel.AddUIComponent<UIButton>();
+
+            btn.eventClick += onClick;
+            btn.relativePosition = new Vector3(width - btn.width - 45, 15f);
+            btn.normalBgSprite = "buttonclose";
+            btn.hoveredBgSprite = "buttonclosehover";
+            btn.pressedBgSprite = "buttonclosepressed";
+
+            return btn;
+        }
+
+        private UIComponent AddBlurEffect(Vector2 resolution) {
+            UIComponent blur = GameObject.Find("ModalEffect").GetComponent<UIComponent>();
+
+            AttachUIComponent(blur.gameObject);
+            blur.size = resolution;
+            blur.absolutePosition = Vector3.zero;
+            blur.SendToBack();
+            blur.eventPositionChanged += OnBlurEffectPositionChange;
+            blur.eventZOrderChanged += OnBlurEffectZOrderChange;
+            blur.opacity = 0;
+            blur.isVisible = true;
+
+            ValueAnimator.Animate(
+                "ModalEffect",
+                val => blur.opacity = val,
+                new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
+
+            return blur;
+        }
+
         private void OnBlurEffectPositionChange(UIComponent component, Vector2 position) {
-            blurEffect_.absolutePosition = Vector3.zero;
+            component.absolutePosition = Vector3.zero;
         }
 
         private void OnBlurEffectZOrderChange(UIComponent component, int value) {
-            blurEffect_.zOrder = 0;
-            mainPanel_.zOrder = 1000;
+            component.SendToBack();
         }
 
         /// <summary>
         /// Allows the user to press "Esc" to close the dialog.
         /// </summary>
         ///
-        /// <param name="p">Details about the key press.</param>
-        protected override void OnKeyDown(UIKeyEventParameter p) {
+        /// <param name="eventparam">Details about the key press.</param>
+        protected override void OnKeyDown(UIKeyEventParameter eventparam) {
             if (Input.GetKey(KeyCode.Escape) || Input.GetKey(KeyCode.Return)) {
-                TryPopModal();
-                p.Use();
-                Hide();
-                Unfocus();
+                eventparam.Use();
+                CloseDialog();
             }
 
-            base.OnKeyDown(p);
+            base.OnKeyDown(eventparam);
         }
 
         /// <summary>
@@ -186,18 +215,37 @@ namespace TrafficManager.UI {
         /// <param name="component">Handle to the close button UI component (not used).</param>
         /// <param name="eventparam">Details about the click event.</param>
         private void CloseButtonClick(UIComponent component, UIMouseEventParameter eventparam) {
-            CloseDialog();
             eventparam.Use();
+            CloseDialog();
         }
 
         /// <summary>
         /// Pops the popup dialog off the modal stack.
         /// </summary>
         private void CloseDialog() {
+            // remove event listeners
             closeButton_.eventClick -= CloseButtonClick;
-            TryPopModal();
+            blurEffect_.eventPositionChanged += OnBlurEffectPositionChange;
+            blurEffect_.eventZOrderChanged += OnBlurEffectZOrderChange;
+
+            UIView.PopModal();
+
+            if (UIView.HasModalInput()) {
+                UIComponent component = UIView.GetModalComponent();
+                if (component != null) {
+                    UIView.SetFocus(component);
+                }
+            } else {
+                ValueAnimator.Animate(
+                    "ModalEffect",
+                    val => blurEffect_.opacity = val,
+                    new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut),
+                    () => blurEffect_.Hide());
+            }
             Hide();
             Unfocus();
+
+            // should really destroy the dialog and all child components here
         }
 
         /// <summary>
@@ -314,30 +362,6 @@ namespace TrafficManager.UI {
             button.text = text;
             button.relativePosition = new Vector3(x, y);
             button.eventClick += eventClick;
-        }
-
-        /// <summary>
-        /// Pops the dialog from the modal stack. If no more modal dialogs are present, the
-        /// background blur effect is also removed.
-        /// </summary>
-        private void TryPopModal() {
-            if (UIView.HasModalInput()) {
-                UIView.PopModal();
-                UIComponent component = UIView.GetModalComponent();
-                if (component != null) {
-                    UIView.SetFocus(component);
-                }
-            }
-
-            if (blurEffect_ != null && UIView.ModalInputCount() == 0) {
-                blurEffect_.eventPositionChanged -= OnBlurEffectPositionChange;
-                blurEffect_.eventZOrderChanged -= OnBlurEffectZOrderChange;
-                ValueAnimator.Animate(
-                    "ModalEffect",
-                    val => blurEffect_.opacity = val,
-                    new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut),
-                    () => blurEffect_.Hide());
-            }
         }
     }
 }
