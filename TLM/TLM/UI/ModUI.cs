@@ -102,7 +102,7 @@ namespace TrafficManager.UI {
 #if DEBUG
                  UnityEngine.Object.Destroy(DebugMenu);
 #endif
-                MainMenu.OnRescaleRequested();
+                 MainMenu.OnRescaleRequested();
             }
 
             // UIView uiView = UIView.GetAView();
@@ -110,6 +110,7 @@ namespace TrafficManager.UI {
             // MainMenu.gameObject.AddComponent<CustomKeyHandler>();
 
 #if DEBUG
+            UIView uiView = UIView.GetAView();
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
 #endif
         }
