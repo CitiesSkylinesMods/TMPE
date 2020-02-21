@@ -41,40 +41,33 @@ namespace TrafficManager.Compatibility {
         /// Initializes static members of the <see cref="CompatibilityManager"/> class.
         /// </summary>
         static CompatibilityManager() {
-            // Prevent vanilla autoloading last savegame, but remember if user wanted to
             StopLauncherAutoContinue();
 
-            // GUID for currently executing assembly
             SelfGuid = Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId;
         }
 
         /// <summary>
-        /// Activates the Compatibility Manager which will trigger compatibility
-        /// checks when applicable.
+        /// Run checks when possible to do so.
         /// </summary>
         public static void Activate() {
             // Abort if this is an in-game hotload
             // todo
 
             if (UIView.GetAView() != null) {
-                // TM:PE enabled via Main Menu > Content Manager so run now
                 Log.Info("CompatibilityManager.Activate()");
                 paused_ = false;
                 PerformChecks();
             } else {
-                // TM:PE was already enabled on game load, or via mod autoenabler;
-                // we must wait for main menu before doing anything else
                 Log.Info("CompatibilityManager.Activate(): Waiting for main menu...");
                 paused_ = true;
                 LoadingManager.instance.m_introLoaded += OnIntroLoaded;
             }
 
-            // Pause the compatibility checker if scene changes to something other than "MainMenu"
             SceneManager.activeSceneChanged += OnSceneChanged;
         }
 
         /// <summary>
-        /// Removes any event listeners rendering the compatibility manager inactive.
+        /// Remove event listeners.
         /// </summary>
         public static void Deactivate() {
             Log.Info("CompatibilityManager.Deactivate()");
@@ -91,14 +84,13 @@ namespace TrafficManager.Compatibility {
         /// * Incompatible mods
         /// * Multiple TM:PE versions
         /// * Zombie assemblies
-        /// * Traffic-affecting DLCs
+        /// * Traffic-affecting DLCs.
         /// </summary>
         private static void PerformChecks() {
             Log.InfoFormat(
                 "CompatibilityManager.PerformChecks() GUID = {0}",
                 SelfGuid);
 
-            // Check game version is what we expect it to be.
             if (!Check.Versions.Verify(
                 TrafficManagerMod.ExpectedGameVersion,
                 Check.Versions.GetGameVersion())) {
@@ -108,9 +100,6 @@ namespace TrafficManager.Compatibility {
                 //todo: show warning about game version
             }
 
-            // Verify that there are no mod incompatibilites which could
-            // break the game, conflict with TM:PE, or cause minor problems.
-            // Also check if there are multiple TM:PE.
             if (!Check.Mods.Verify(
                 out Dictionary<PluginInfo, ModDescriptor> results,
                 out int minor,
@@ -152,7 +141,7 @@ namespace TrafficManager.Compatibility {
         }
 
         /// <summary>
-        /// Triggered when plugins change.
+        /// Triggered by plugin subscription/state change.
         /// </summary>
         private static void OnPluginsChanged() {
             if (!paused_) {
@@ -161,7 +150,7 @@ namespace TrafficManager.Compatibility {
         }
 
         /// <summary>
-        /// Triggered when scene changes.
+        /// Triggered by scene changes.
         /// </summary>
         /// 
         /// <param name="current">The current <see cref="Scene"/> (seems to always be empty).</param>
@@ -191,11 +180,6 @@ namespace TrafficManager.Compatibility {
         }
 
         /*
-        /// <summary>
-        /// Does some checks to ensure we're not in-game or in-map editor or loading or quitting.
-        /// </summary>
-        /// 
-        /// <returns>Returns <c>true</c> if safe to run tests, otherwise <c>false</c>.</returns>
         private static bool CanWeDoStuff() {
             if (SceneManager.GetActiveScene().name == "MainMenu") {
                 Log.Info("CompatibilityManager.CanWeDoStuff()? Yes, 'MainMenu' scene");
@@ -261,16 +245,16 @@ namespace TrafficManager.Compatibility {
         /// Exits the game to desktop.
         /// </summary>
         private static void ExitToDesktop() {
-            // Don't exit to desktop if we're in-game!
             if (paused_) {
                 return;
             }
-            paused_ = true;
 
             // Check we're not already quitting
             if (Singleton<LoadingManager>.instance.m_applicationQuitting) {
                 return;
             }
+
+            paused_ = true;
 
             Singleton<LoadingManager>.instance.QuitApplication();
         }
