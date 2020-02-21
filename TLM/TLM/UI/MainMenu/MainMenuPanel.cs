@@ -225,13 +225,13 @@ namespace TrafficManager.UI.MainMenu {
                     x += buttonSize + spacing;
 
                     placedInARow++;
+                    layout.MaxCols = Math.Max(layout.MaxCols, placedInARow);
+
                     if (layout.IsRowBreak(placedInARow, ScaledSize.NUM_COLS)) {
                         y += buttonSize + spacing;
                         x = spacing; // reset to the left side of the button area
                         placedInARow = 0;
                         layout.Rows++;
-                    } else {
-                        layout.MaxCols = Math.Max(layout.MaxCols, placedInARow);
                     }
                 } else {
                     button.Hide();
@@ -243,6 +243,12 @@ namespace TrafficManager.UI.MainMenu {
                 button.height = buttonSize;
                 button.Invalidate();
             } // foreach button
+
+            // Special case when new row was broken but no buttons placed on it, reduce Rows count
+            // happens when button count is even
+            if (x <= 2 * spacing) {
+                layout.Rows--;
+            }
 
             return layout;
         }
