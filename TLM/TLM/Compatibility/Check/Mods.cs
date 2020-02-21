@@ -123,9 +123,9 @@ namespace TrafficManager.Compatibility.Check {
                         case Severity.TMPE:
                             logIncompatible = MARKER_TMPE;
                             ++tmpe;
+                            results.Add(mod, descriptor);
                             if (descriptor.AssemblyGuid != CompatibilityManager.SelfGuid) {
                                 verified = false;
-                                results.Add(mod, descriptor);
                             }
                             break;
 

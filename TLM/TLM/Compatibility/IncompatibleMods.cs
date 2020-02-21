@@ -83,6 +83,7 @@ namespace TrafficManager.Compatibility {
                 { 929114228u,  Severity.Critical }, // New Roads for Network Extensions
 
                 // Other game-breaking mods
+                { 408092246u,  Severity.Critical }, // Traffic Report Tool 2.0
                 { 411095553u,  Severity.Critical }, // Terraform Tool v0.9 (just sick of seeing this break games!)
                 { 414702884u,  Severity.Critical }, // Zoneable Pedestrian Paths
                 { 417926819u,  Severity.Critical }, // Road Assistant
@@ -110,17 +111,20 @@ namespace TrafficManager.Compatibility {
                 { 631930385u,  Severity.Major }, // Realistic Vehicle Speeds
                 { 1628112268u, Severity.Major }, // RightTurnNoStop
 
+                // Breaks toll booths
+                { 726005715u, Severity.Minor }, // Roads United Core+
+                { 680748394u, Severity.Minor }, // Roads United: North America
+
+                // Reported to cause lane usage issues in TM:PE
+                { 810858473u, Severity.Minor }, // Traffic Report Mod: Updated
+
                 // Obsolete by vanilla game functionality (also, does not fire events we need to maintain state)
                 { 631694768u, Severity.Minor }, // Extended Road Upgrade
                 { 408209297u, Severity.Minor }, // Extended Road Upgrade
 
-                // Oudated
+                // Obsolete & outdated - use vanilla functionality, or Improved Stop Selection mod
                 { 532863263u, Severity.Minor }, // Multi-track Station Enabler
                 { 442957897u, Severity.Minor }, // Multi-track Station Enabler
-
-                // Breaks toll booths
-                { 726005715u, Severity.Minor }, // Roads United Core+
-                { 680748394u, Severity.Minor }, // Roads United: North America
             };
             Log.InfoFormat(
                 "Compatibility.IncompatibleMods.List contains {0} item(s)",

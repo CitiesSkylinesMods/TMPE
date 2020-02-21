@@ -23,22 +23,17 @@ namespace TrafficManager.Compatibility {
         public static readonly Guid SelfGuid;
 
         /// <summary>
-        /// The current game version as a <see cref="Version"/> instance.
-        /// </summary>
-        internal static readonly Version CurrentGameVersion;
-
-        /// <summary>
-        /// Is the compatibility checker paused? We pause it when active scene is not "MainMenu".
+        /// When <c>true</c>, don't perform checks or show UI.
         /// </summary>
         private static bool paused_ = true;
 
         /// <summary>
-        /// Tracks if a game restart is required (eg. after disabling/unsubscribing mods).
+        /// When <c>true</c>, a game restart is required.
         /// </summary>
         private static bool restartRequired_ = false;
 
         /// <summary>
-        /// Stores the original value of <see cref="LauncherLoginData.instance.m_continue"/>.
+        /// When <c>true</c>, user wants to auto-load most recent save.
         /// </summary>
         private static bool autoContinue_ = false;
 
@@ -46,14 +41,8 @@ namespace TrafficManager.Compatibility {
         /// Initializes static members of the <see cref="CompatibilityManager"/> class.
         /// </summary>
         static CompatibilityManager() {
-            // Prevent vanilla autoloading last savegame
-            PreventAutoContinue();
-
-            // Translate current game verison in to Version instance
-            CurrentGameVersion = new Version(
-                Convert.ToInt32(BuildConfig.APPLICATION_VERSION_A),
-                Convert.ToInt32(BuildConfig.APPLICATION_VERSION_B),
-                Convert.ToInt32(BuildConfig.APPLICATION_VERSION_C));
+            // Prevent vanilla autoloading last savegame, but remember if user wanted to
+            StopLauncherAutoContinue();
 
             // GUID for currently executing assembly
             SelfGuid = Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId;
@@ -89,141 +78,20 @@ namespace TrafficManager.Compatibility {
         /// </summary>
         public static void Deactivate() {
             Log.Info("CompatibilityManager.Deactivate()");
+            SceneManager.activeSceneChanged -= OnSceneChanged;
             LoadingManager.instance.m_introLoaded -= OnIntroLoaded;
             Singleton<PluginManager>.instance.eventPluginsChanged -= OnPluginsChanged;
-            SceneManager.activeSceneChanged -= OnSceneChanged;
+            Singleton<PluginManager>.instance.eventPluginsStateChanged -= OnPluginsChanged;
         }
 
         /// <summary>
-        /// Triggered when app intro screens have finished.
-        /// </summary>
-        private static void OnIntroLoaded() {
-            LoadingManager.instance.m_introLoaded -= OnIntroLoaded;
-            paused_ = false;
-            PerformChecks();
-        }
-
-        /// <summary>
-        /// Triggered when plugins change.
-        /// </summary>
-        private static void OnPluginsChanged() {
-            if (!paused_) {
-                PerformChecks();
-            }
-        }
-
-        /// <summary>
-        /// Triggered when scene changes.
-        ///
-        /// Pause the compatibility checker if scene is not "MainMenu".
-        ///
-        /// Note: Game does not trigger the event between intro screen
-        ///       and first display of main menu.
-        /// </summary>
+        /// Checks and logs:
         /// 
-        /// <param name="current">The current <see cref="Scene"/> (seems to always be empty).</param>
-        /// <param name="next">The <see cref="Scene"/> being transitioned to.</param>
-        private static void OnSceneChanged(Scene current, Scene next) {
-            Log.InfoFormat(
-                "CompatibilityManager.OnSceneChange('{1}')",
-                next.name);
-            paused_ = next.name != "MainMenu";
-        }
-
-        /// <summary>
-        /// Adds listener for plugin manager subscription change event.
-        /// </summary>
-        private static void ListenForSubscriptionChange() {
-            Log.Info("CompatibilityManager.ListenForSubscriptionChange()");
-            // clear old listener if present (is this necessary? don't know enough about C# events)
-            Singleton<PluginManager>.instance.eventPluginsChanged -= PerformChecks;
-            // add listener
-            Singleton<PluginManager>.instance.eventPluginsChanged += PerformChecks;
-        }
-
-        /// <summary>
-        /// Does some checks to ensure we're not in-game or in-map editor or loading or quitting.
-        /// </summary>
-        /// 
-        /// <returns>Returns <c>true</c> if safe to run tests, otherwise <c>false</c>.</returns>
-        private static bool CanWeDoStuff() {
-            if (SceneManager.GetActiveScene().name == "MainMenu") {
-                Log.Info("CompatibilityManager.CanWeDoStuff()? Yes, 'MainMenu' scene");
-                return true;
-            }
-
-            // make sure we're not loading a game/asset/etc
-            if (Singleton<LoadingManager>.instance.m_currentlyLoading) {
-                Log.Info("CompatibilityManager.CanWeDoStuff()? No; currently loading");
-                return false;
-            }
-
-            // make sure we're not exiting to desktop
-            if (Singleton<LoadingManager>.instance.m_applicationQuitting) {
-                Log.Info("CompatibilityManager.CanWeDoStuff()? No; currently quitting");
-                return false;
-            }
-
-            return !paused_;
-        }
-
-        /// <summary>
-        /// Exits the game to desktop.
-        /// </summary>
-        private static void ExitToDesktop() {
-            // Don't exit to desktop if we're in-game!
-            if (paused_) {
-                return;
-            }
-            paused_ = true;
-
-            // Check we're not already quitting
-            if (Singleton<LoadingManager>.instance.m_applicationQuitting) {
-                return;
-            }
-
-            Singleton<LoadingManager>.instance.QuitApplication();
-        }
-
-        /// <summary>
-        /// Attempt to halt the Paradox Launcher autoload sequence.
-        /// Otherwise the user will not see any compatibility warnings.
-        /// </summary>
-        private static void PreventAutoContinue() {
-            Log.Info("CompatibilityManager.PreventAutoContinue()");
-            try {
-                autoContinue_ = LauncherLoginData.instance.m_continue;
-                LauncherLoginData.instance.m_continue = false;
-            }
-            catch {
-                Log.Info(" - Failed!");
-            }
-        }
-
-        /// <summary>
-        /// If tests pass with no issues, we can resume launcher auto-continue
-        /// if applicable.
-        /// </summary>
-        private static void ResumeAutoContinue() {
-            if (autoContinue_) {
-                Log.Info("CompatibilityManager.ResumeAutoContinue()");
-                autoContinue_ = false;
-
-                try {
-                    MainMenu menu = GameObject.FindObjectOfType<MainMenu>();
-                    if (menu != null) {
-                        menu.m_BackgroundImage.zOrder = int.MaxValue;
-                        menu.Invoke("AutoContinue", 2.5f);
-                    }
-                }
-                catch {
-                    Log.Info(" - Failed!");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Runs through entire compatibility checker sequence
+        /// * Game version
+        /// * Incompatible mods
+        /// * Multiple TM:PE versions
+        /// * Zombie assemblies
+        /// * Traffic-affecting DLCs
         /// </summary>
         private static void PerformChecks() {
             Log.InfoFormat(
@@ -231,7 +99,12 @@ namespace TrafficManager.Compatibility {
                 SelfGuid);
 
             // Check game version is what we expect it to be.
-            if (!Check.Versions.Verify(TrafficManagerMod.ExpectedGameVersion, CurrentGameVersion)) {
+            if (!Check.Versions.Verify(
+                TrafficManagerMod.ExpectedGameVersion,
+                Check.Versions.GetGameVersion())) {
+
+                autoContinue_ = false;
+
                 //todo: show warning about game version
             }
 
@@ -264,9 +137,142 @@ namespace TrafficManager.Compatibility {
             if (restartRequired_) {
                 autoContinue_ = false;
             } else {
-                ListenForSubscriptionChange();
-                ResumeAutoContinue();
+                ListenForPluginChanges();
+                ResumeLauncherAutoContinue();
             }
+        }
+
+        /// <summary>
+        /// Triggered when app intro screens have finished.
+        /// </summary>
+        private static void OnIntroLoaded() {
+            LoadingManager.instance.m_introLoaded -= OnIntroLoaded;
+            paused_ = false;
+            PerformChecks();
+        }
+
+        /// <summary>
+        /// Triggered when plugins change.
+        /// </summary>
+        private static void OnPluginsChanged() {
+            if (!paused_) {
+                PerformChecks();
+            }
+        }
+
+        /// <summary>
+        /// Triggered when scene changes.
+        /// </summary>
+        /// 
+        /// <param name="current">The current <see cref="Scene"/> (seems to always be empty).</param>
+        /// <param name="next">The <see cref="Scene"/> being transitioned to.</param>
+        private static void OnSceneChanged(Scene current, Scene next) {
+            Log.InfoFormat(
+                "CompatibilityManager.OnSceneChange('{0}','{1}')",
+                current.name,
+                next.name);
+
+            paused_ = next.name != "MainMenu";
+        }
+
+        /// <summary>
+        /// Adds listener for plugin manager subscription/state change events.
+        /// </summary>
+        private static void ListenForPluginChanges() {
+            Log.Info("CompatibilityManager.ListenForSubscriptionChange()");
+
+            // clear old listener if present (is this necessary? don't know enough about C# events)
+            Singleton<PluginManager>.instance.eventPluginsChanged -= OnPluginsChanged;
+            Singleton<PluginManager>.instance.eventPluginsStateChanged -= OnPluginsChanged;
+
+            // add listener
+            Singleton<PluginManager>.instance.eventPluginsChanged += OnPluginsChanged;
+            Singleton<PluginManager>.instance.eventPluginsStateChanged += OnPluginsChanged;
+        }
+
+        /*
+        /// <summary>
+        /// Does some checks to ensure we're not in-game or in-map editor or loading or quitting.
+        /// </summary>
+        /// 
+        /// <returns>Returns <c>true</c> if safe to run tests, otherwise <c>false</c>.</returns>
+        private static bool CanWeDoStuff() {
+            if (SceneManager.GetActiveScene().name == "MainMenu") {
+                Log.Info("CompatibilityManager.CanWeDoStuff()? Yes, 'MainMenu' scene");
+                return true;
+            }
+
+            // make sure we're not loading a game/asset/etc
+            if (Singleton<LoadingManager>.instance.m_currentlyLoading) {
+                Log.Info("CompatibilityManager.CanWeDoStuff()? No; currently loading");
+                return false;
+            }
+
+            // make sure we're not exiting to desktop
+            if (Singleton<LoadingManager>.instance.m_applicationQuitting) {
+                Log.Info("CompatibilityManager.CanWeDoStuff()? No; currently quitting");
+                return false;
+            }
+
+            return !paused_;
+        }
+        */
+
+        /// <summary>
+        /// Halt the Paradox Launcher 
+        /// Otherwise the user will not see any compatibility warnings.
+        /// </summary>
+        private static void StopLauncherAutoContinue() {
+            Log.Info("CompatibilityManager.PreventAutoContinue()");
+            try {
+                autoContinue_ = LauncherLoginData.instance.m_continue;
+                LauncherLoginData.instance.m_continue = false;
+            }
+            catch {
+                Log.Info(" - Failed!");
+            }
+        }
+
+        /// <summary>
+        /// Auto-load most recent save if the launcher was set to autocontinue.
+        /// </summary>
+        private static void ResumeLauncherAutoContinue() {
+            Log.InfoFormat(
+                "CompatibilityManager.ResumeAutoContinue() {0}",
+                autoContinue_);
+
+            if (autoContinue_) {
+                autoContinue_ = false;
+
+                try {
+                    MainMenu menu = GameObject.FindObjectOfType<MainMenu>();
+                    if (menu != null) {
+                        menu.m_BackgroundImage.zOrder = int.MaxValue;
+                        menu.Invoke("AutoContinue", 2.5f);
+                    }
+                }
+                catch {
+                    Log.Info(" - Failed!");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Exits the game to desktop.
+        /// </summary>
+        private static void ExitToDesktop() {
+            // Don't exit to desktop if we're in-game!
+            if (paused_) {
+                return;
+            }
+            paused_ = true;
+
+            // Check we're not already quitting
+            if (Singleton<LoadingManager>.instance.m_applicationQuitting) {
+                return;
+            }
+
+            Singleton<LoadingManager>.instance.QuitApplication();
         }
     }
 }

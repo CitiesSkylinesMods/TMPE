@@ -25,5 +25,17 @@ namespace TrafficManager.Compatibility.Check {
 
             return expected == actual;
         }
+
+        /// <summary>
+        /// Returns the game version as a <see cref="Version"/> instance.
+        /// </summary>
+        /// 
+        /// <returns>Game version.</returns>
+        public static Version GetGameVersion() {
+            return new Version(
+                Convert.ToInt32(BuildConfig.APPLICATION_VERSION_A),
+                Convert.ToInt32(BuildConfig.APPLICATION_VERSION_B),
+                Convert.ToInt32(BuildConfig.APPLICATION_VERSION_C));
+        }
     }
 }

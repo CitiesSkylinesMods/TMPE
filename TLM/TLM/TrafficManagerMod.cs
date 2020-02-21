@@ -21,7 +21,7 @@ namespace TrafficManager {
         public const string BRANCH = "LABS";
 #elif DEBUG
         /// <summary>
-        /// Build configuration <c>DEBUG</c>.
+        /// Build configuration <c>DEBUG</c>, <c>TRACE</c>, etc.
         /// </summary>
         public const string BRANCH = "DEBUG";
 #else
@@ -33,9 +33,15 @@ namespace TrafficManager {
 
         /// <summary>
         /// Defines the game version that this version of TM:PE is expecting.
-        /// Update when necessary. See <see cref="CompatibilityManager"/> for more info.
+        /// See <see cref="CompatibilityManager.PerformChecks()"/> for more info.
+        /// Update when necessary.
         /// </summary>
         public static readonly Version ExpectedGameVersion = new Version(1, 12, 3);
+
+        /// <summary>
+        /// The full mod name including version number and branch. This is also shown on the TM:PE toolbar in-game.
+        /// </summary>
+        public static readonly string ModName = "TM:PE " + VersionString + " " + BRANCH;
 
         /// <summary>
         /// Gets the mod version as defined by <c>SharedAssemblyInfo.cs</c>.
@@ -47,11 +53,6 @@ namespace TrafficManager {
         /// Gets the string represetnation of <see cref="ModVersion"/>.
         /// </summary>
         public static string VersionString => ModVersion.ToString(3);
-
-        /// <summary>
-        /// The full mod name including version number and branch. This is also shown on the TM:PE toolbar in-game.
-        /// </summary>
-        public static readonly string ModName = "TM:PE " + VersionString + " " + BRANCH;
 
         /// <summary>
         /// Gets the mod name, which is shown in Content Manager > Mods, and also Options > Mod Settings.
@@ -74,7 +75,7 @@ namespace TrafficManager {
                 ExpectedGameVersion.ToString(3));
 
             Log.InfoFormat(
-                "TrafficManagerMod.OnEnabled(): Active scene = {0}",
+                "TrafficManagerMod.OnEnabled() Scene = {0}",
                 SceneManager.GetActiveScene().name);
 
             // Log Mono version
@@ -98,7 +99,7 @@ namespace TrafficManager {
         [UsedImplicitly]
         public void OnDisabled() {
             Log.InfoFormat(
-                "TrafficManagerMod.OnDisabled(): Active scene = {0}",
+                "TrafficManagerMod.OnDisabled() Scene = {0}",
                 SceneManager.GetActiveScene().name);
 
             CompatibilityManager.Deactivate();
@@ -120,7 +121,7 @@ namespace TrafficManager {
         [UsedImplicitly]
         public void OnSettingsUI(UIHelperBase helper) {
             Log.InfoFormat(
-                "TrafficManagerMod.OnSettingsUI(): Active scene: {0}",
+                "TrafficManagerMod.OnSettingsUI() Scene = {0}",
                 SceneManager.GetActiveScene().name);
 
             // Note: This bugs out if done in OnEnabled(), hence doing it here instead.
