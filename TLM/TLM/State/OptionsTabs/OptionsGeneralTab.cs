@@ -100,11 +100,11 @@ namespace TrafficManager.State {
 
             _overlayTransparencySlider = generalGroup.AddSlider(
                                              T("General.Slider:Overlay transparency") + ":",
-                                            0,
-                                            90,
-                                            5,
-                                            GlobalConfig.Instance.Main.OverlayTransparency,
-                                            OnOverlayTransparencyChanged) as UISlider;
+                                             0,
+                                             90,
+                                             5,
+                                             GlobalConfig.Instance.Main.OverlayTransparency,
+                                             OnOverlayTransparencyChanged) as UISlider;
             _overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
             _enableTutorialToggle = generalGroup.AddCheckbox(
                                         T("General.Checkbox:Enable tutorials"),
@@ -145,7 +145,7 @@ namespace TrafficManager.State {
             string[] mphThemeOptions = {
                 Translation.SpeedLimits.Get("General.Theme.Option:Square US"),
                 Translation.SpeedLimits.Get("General.Theme.Option:Round UK"),
-                Translation.SpeedLimits.Get("General.Theme.Option:Round German")
+                Translation.SpeedLimits.Get("General.Theme.Option:Round German"),
             };
             _roadSignMphStyleInt = (int)GlobalConfig.Instance.Main.MphRoadSignStyle;
             _roadSignsMphThemeDropdown

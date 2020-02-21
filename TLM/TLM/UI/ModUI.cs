@@ -90,23 +90,25 @@ namespace TrafficManager.UI {
         }
 
         internal void RebuildMenu() {
-            Close();
+            // Close();
 
             if (MainMenu != null) {
-                CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
-                if(keyHandler != null) {
-                    UnityEngine.Object.Destroy(keyHandler);
-                }
-
-                UnityEngine.Object.Destroy(MainMenu);
+//                 CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
+//                 if (keyHandler != null) {
+//                     UnityEngine.Object.Destroy(keyHandler);
+//                 }
+//
+//                 UnityEngine.Object.Destroy(MainMenu);
 #if DEBUG
-                UnityEngine.Object.Destroy(DebugMenu);
+                 UnityEngine.Object.Destroy(DebugMenu);
 #endif
+                MainMenu.OnRescaleRequested();
             }
 
-            UIView uiView = UIView.GetAView();
-            MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
-            MainMenu.gameObject.AddComponent<CustomKeyHandler>();
+            // UIView uiView = UIView.GetAView();
+            // MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
+            // MainMenu.gameObject.AddComponent<CustomKeyHandler>();
+
 #if DEBUG
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
 #endif

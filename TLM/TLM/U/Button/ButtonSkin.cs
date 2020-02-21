@@ -1,5 +1,6 @@
 namespace TrafficManager.U.Button {
     using System.Collections.Generic;
+    using System.Linq;
     using ColossalFramework.UI;
 
     /// <summary>
@@ -38,9 +39,9 @@ namespace TrafficManager.U.Button {
         public bool ForegroundHovered = false;
         public bool ForegroundActive = false;
 
-        public List<string> CreateAtlasKeysList() {
+        public HashSet<string> CreateAtlasKeyset() {
             // Two normal textures (bg and fg) are always assumed to exist.
-            var names = new List<string>();
+            var names = new HashSet<string>();
             bool haveBackgroundPrefix = !string.IsNullOrEmpty(BackgroundPrefix);
             if (haveBackgroundPrefix) {
                 names.Add($"{BackgroundPrefix}-bg-normal");
@@ -77,18 +78,18 @@ namespace TrafficManager.U.Button {
         /// <param name="spriteWidth">When loading assume this width.</param>
         /// <param name="spriteHeight">When loading assume this height.</param>
         /// <param name="hintAtlasTextureSize">Square atlas of this size is created.</param>
-        /// <param name="atlasKeysList">List of atlas keys to load under the loadingPath. Created by
+        /// <param name="atlasKeyset">List of atlas keys to load under the loadingPath. Created by
         /// calling CreateAtlasKeysList() on a ButtonSkin.</param>
         /// <returns>New UI atlas.</returns>
         public UITextureAtlas CreateAtlas(string loadingPath,
                                           int spriteWidth,
                                           int spriteHeight,
                                           int hintAtlasTextureSize,
-                                          List<string> atlasKeysList) {
+                                          HashSet<string> atlasKeyset) {
             return TextureUtil.CreateAtlas(
                 $"TMPE_U_{Prefix}_Atlas",
                 loadingPath,
-                atlasKeysList.ToArray(),
+                atlasKeyset.ToArray(),
                 spriteWidth,
                 spriteHeight,
                 hintAtlasTextureSize);

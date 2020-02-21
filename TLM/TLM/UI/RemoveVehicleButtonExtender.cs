@@ -63,8 +63,7 @@
         public class RemoveVehicleButton : BaseUButton {
             public override void Start() {
                 base.Start();
-                width = MainMenuPanel.GetButtonWidth();
-                height = MainMenuPanel.GetButtonHeight();
+                width = height = MainMenuPanel.ScaledSize.GetButtonSize();
             }
 
             public override void HandleClick(UIMouseEventParameter p) {

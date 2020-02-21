@@ -10,10 +10,12 @@
         /// <summary>Menu button gameobject name.</summary>
         private const string MENU_BUTTON = "TMPE_MenuButton";
 
-        /// <summary>When creating the main panel, texture atlas is created for all buttons. Here
-        /// each button is given a chance to add their own required sprites to that atlas.</summary>
+        /// <summary>
+        /// When creating the main panel, texture atlas is created for all buttons. Here
+        /// each button is given a chance to add their own required sprites to that atlas.
+        /// </summary>
         /// <param name="atlasKeys">List to modify.</param>
-        public abstract void SetupButtonSkin(List<string> atlasKeys);
+        public abstract void SetupButtonSkin(HashSet<string> atlasKeys);
 
         public override void HandleClick(UIMouseEventParameter p) { }
 

@@ -5,6 +5,7 @@ namespace TrafficManager.UI.MainMenu {
     using CSUtil.Commons;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using TrafficManager.API.Util;
     using TrafficManager.State.Keybinds;
     using TrafficManager.State;
@@ -74,7 +75,7 @@ namespace TrafficManager.UI.MainMenu {
                                                         BackgroundActive = true,
                                                     };
             // By default the atlas will include backgrounds: DefaultRound-bg-normal
-            var atlasKeysList = tmpSkin.CreateAtlasKeysList();
+            var atlasKeysSet = tmpSkin.CreateAtlasKeyset();
 
             Buttons = new BaseMenuButton[MENU_BUTTON_TYPES.Length];
             for (int i = 0; i < MENU_BUTTON_TYPES.Length; ++i) {
@@ -82,7 +83,7 @@ namespace TrafficManager.UI.MainMenu {
                 Buttons[i] = AddUIComponent(MENU_BUTTON_TYPES[i]) as BaseMenuButton;
 
                 // Also ask each button what sprites they need
-                Buttons[i].SetupButtonSkin(atlasKeysList);
+                Buttons[i].SetupButtonSkin(atlasKeysSet);
             }
 
             // Create atlas and give it to all buttons
@@ -91,7 +92,7 @@ namespace TrafficManager.UI.MainMenu {
                                    50,
                                    50,
                                    512,
-                                   atlasKeysList);
+                                   atlasKeysSet);
 
             for (int i = 0; i < MENU_BUTTON_TYPES.Length; ++i) {
                 Buttons[i].atlas = allButtonsAtlas_;
@@ -152,15 +153,15 @@ namespace TrafficManager.UI.MainMenu {
         public override void OnRescaleRequested() {
             // Update size
             //--------------
-            width = ScaledSize.GetWidth();
-            height = ScaledSize.GetHeight();
+            int buttonsCount = RepositionToolButtons();
+            int usedRows = buttonsCount > ScaledSize.NUM_COLS ? 2 : 1;
+            this.width = ScaledSize.GetWidth();
+            this.height = ScaledSize.GetHeight(usedRows);
 
             // Update drag size
             //-------------------
-            Drag.width = width;
-            Drag.height = ScaledSize.GetTitlebarHeight();
-
-            RescaleToolButtons();
+            this.Drag.width = this.width;
+            this.Drag.height = ScaledSize.GetTitlebarHeight();
         }
 
         /// <summary>Calculates button and panel sizes based on the screen resolution.</summary>
@@ -176,9 +177,12 @@ namespace TrafficManager.UI.MainMenu {
                 return GetButtonSize() * (6f + ALL_SPACINGS);
             }
 
-            internal static float GetHeight() {
-                // 2 button rows + 2 spacings (1/8th) + titlebar
-                return (GetButtonSize() * (2 + (2 * 0.125f))) + GetTitlebarHeight();
+            internal static float GetHeight() => GetHeight(NUM_ROWS);
+
+            internal static float GetHeight(int rows) {
+                // Count height for `Rows` button rows + `Rows` spacings (1/8th) + titlebar
+                return (GetButtonSize() * (rows + (rows * 0.125f)))
+                       + GetTitlebarHeight();
             }
 
             /// <summary>Define size as smallest of 2.08% of width or 3.7% of height (40 px at 1080p).
@@ -197,32 +201,49 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         /// <summary>Reset sizes and positions for UI buttons.</summary>
-        private void RescaleToolButtons() {
+        /// <returns>Visible buttons count.</returns>
+        private int RepositionToolButtons() {
             // Recreate tool buttons
-            int i = 0;
             float y = ScaledSize.GetTitlebarHeight();
             float buttonSize = ScaledSize.GetButtonSize();
             float spacing = buttonSize / 8f;
 
-            for (int row = 0; row < ScaledSize.NUM_ROWS; ++row) {
-                float x = spacing;
+            // Let's count buttons which are enabled, to decide window sizing
+            int enabledButtonCount = 0;
+            foreach (var b in Buttons) {
+                if (b.IsVisible()) {
+                    enabledButtonCount++;
+                }
+            }
 
-                for (int col = 0; col < ScaledSize.NUM_COLS; ++col) {
-                    if (i >= Buttons.Length) {
-                        break;
-                    }
+            int placedInARow = 0;
+            float x = spacing;
 
-                    BaseMenuButton button = Buttons[i];
+            foreach (BaseMenuButton button in Buttons) {
+                if (button.IsVisible()) {
+                    button.Show();
                     button.relativePosition = new Vector3(x, y);
-                    button.width = buttonSize;
-                    button.height = buttonSize;
-                    button.Invalidate();
-                    Buttons[i++] = button;
-                    x += (int)(buttonSize + spacing);
+
+                    x += buttonSize + spacing;
+
+                    placedInARow++;
+                    if (placedInARow >= ScaledSize.NUM_COLS) {
+                        y += buttonSize + spacing;
+                        x = spacing; // reset to the left side of the button area
+                        placedInARow = 0;
+                    }
+                } else {
+                    button.Hide();
+                    // to avoid window upsizing to fit an invisible button
+                    button.relativePosition = Vector3.zero;
                 }
 
-                y += (int)(buttonSize + spacing);
-            }
+                button.width = buttonSize;
+                button.height = buttonSize;
+                button.Invalidate();
+            } // foreach button
+
+            return enabledButtonCount;
         }
 
         public void UpdatePosition(Vector2 pos) {
@@ -267,9 +288,5 @@ namespace TrafficManager.UI.MainMenu {
                 }
             }
         }
-
-        // TODO: Scale with screen size in a smart way
-        public static float GetButtonWidth() => 50f;
-        public static float GetButtonHeight() => 50f;
     }
 }

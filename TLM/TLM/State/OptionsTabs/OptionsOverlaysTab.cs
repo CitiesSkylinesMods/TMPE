@@ -29,16 +29,16 @@ namespace TrafficManager.State {
 
             _prioritySignsOverlayToggle = panelHelper.AddCheckbox(
                                               Translation.Options.Get("Checkbox:Priority signs"),
-                                             Options.prioritySignsOverlay,
-                                             OnPrioritySignsOverlayChanged) as UICheckBox;
+                                              Options.prioritySignsOverlay,
+                                              OnPrioritySignsOverlayChanged) as UICheckBox;
             _timedLightsOverlayToggle = panelHelper.AddCheckbox(
                                            Translation.Options.Get("Checkbox:Timed traffic lights"),
                                            Options.timedLightsOverlay,
                                            OnTimedLightsOverlayChanged) as UICheckBox;
             _speedLimitsOverlayToggle = panelHelper.AddCheckbox(
                                             Translation.Options.Get("Checkbox:Speed limits"),
-                                           Options.speedLimitsOverlay,
-                                           OnSpeedLimitsOverlayChanged) as UICheckBox;
+                                            Options.speedLimitsOverlay,
+                                            OnSpeedLimitsOverlayChanged) as UICheckBox;
             _vehicleRestrictionsOverlayToggle
                 = panelHelper.AddCheckbox(
                       Translation.Options.Get("Checkbox:Vehicle restrictions"),

@@ -1,12 +1,13 @@
 namespace TrafficManager.UI.MainMenu {
     using System.Collections.Generic;
+    using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
     using TrafficManager.U.Button;
 
     public class TimedTrafficLightsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.TimedLightsSelectNode;
 
-        public override void SetupButtonSkin(List<string> atlasKeys) {
+        public override void SetupButtonSkin(HashSet<string> atlasKeys) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
             this.Skin = new U.Button.ButtonSkin() {
                                                       Prefix = "TimedTL",
@@ -15,7 +16,7 @@ namespace TrafficManager.UI.MainMenu {
                                                       BackgroundActive = true,
                                                       ForegroundActive = true,
                                                   };
-            atlasKeys.AddRange(this.Skin.CreateAtlasKeysList());
+            atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
         protected override ButtonFunction Function => new ButtonFunction("TimedTrafficLights");

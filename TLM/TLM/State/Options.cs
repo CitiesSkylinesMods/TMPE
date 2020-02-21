@@ -94,20 +94,16 @@ namespace TrafficManager.State {
 
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
-
-        public static bool
-            RoundAboutQuickFix_DedicatedExitLanes = true,
-            RoundAboutQuickFix_StayInLaneMainR = true,
-            RoundAboutQuickFix_StayInLaneNearRabout = true,
-            RoundAboutQuickFix_NoCrossMainR = true,
-            RoundAboutQuickFix_NoCrossYieldR = false,
-            RoundAboutQuickFix_PrioritySigns = true;
-
-        public static bool
-            PriorityRoad_CrossMainR = false,
-            PriorityRoad_AllowLeftTurns = false,
-            PriorityRoad_EnterBlockedYeild = false,
-            PriorityRoad_StopAtEntry = false;
+        public static bool RoundAboutQuickFix_DedicatedExitLanes = true;
+        public static bool RoundAboutQuickFix_StayInLaneMainR = true;
+        public static bool RoundAboutQuickFix_StayInLaneNearRabout = true;
+        public static bool RoundAboutQuickFix_NoCrossMainR = true;
+        public static bool RoundAboutQuickFix_NoCrossYieldR = false;
+        public static bool RoundAboutQuickFix_PrioritySigns = true;
+        public static bool PriorityRoad_CrossMainR = false;
+        public static bool PriorityRoad_AllowLeftTurns = false;
+        public static bool PriorityRoad_EnterBlockedYeild = false;
+        public static bool PriorityRoad_StopAtEntry = false;
 
         /// <summary>
         /// Invoked on options change to refresh the main menu and possibly update the labels for

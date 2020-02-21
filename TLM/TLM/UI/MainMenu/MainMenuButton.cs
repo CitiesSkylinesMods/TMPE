@@ -41,7 +41,7 @@ namespace TrafficManager.UI.MainMenu {
                 50,
                 50,
                 256,
-                this.Skin.CreateAtlasKeysList());
+                this.Skin.CreateAtlasKeyset());
             UpdateButtonImageAndTooltip();
 
             // Set the button dimensions to smallest of 2.6% of screen width or 4.6% of screen height
