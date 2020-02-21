@@ -1,6 +1,10 @@
 ﻿namespace TrafficManager.API.Traffic.Enums {
     using System;
 
+    /// <summary>
+    /// Warning: Renaming these will also affect loading textures in
+    /// <seealso cref="TrafficManager.UI.Textures.RoadUI"/>
+    /// </summary>
     [Flags]
     public enum ExtVehicleType {
         None = 0,

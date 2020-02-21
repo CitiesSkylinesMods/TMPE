@@ -17,7 +17,7 @@ namespace TrafficManager.UI.Helpers {
             float hitH = TrafficManagerTool.GetAccurateHitHeight();
 
             Vector3 pos = Position;
-            float mouseH = UIBase.GetTrafficManagerTool(false).MousePosition.y;
+            float mouseH = ModUI.GetTrafficManagerTool(false).MousePosition.y;
             if (hitH < mouseH - TrafficManagerTool.MAX_HIT_ERROR) {
                 // For metros use projection on the terrain.
                 pos = TerrainPosition;

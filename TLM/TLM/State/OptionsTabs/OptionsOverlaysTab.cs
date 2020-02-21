@@ -29,16 +29,16 @@ namespace TrafficManager.State {
 
             _prioritySignsOverlayToggle = panelHelper.AddCheckbox(
                                               Translation.Options.Get("Checkbox:Priority signs"),
-                                             Options.prioritySignsOverlay,
-                                             OnPrioritySignsOverlayChanged) as UICheckBox;
+                                              Options.prioritySignsOverlay,
+                                              OnPrioritySignsOverlayChanged) as UICheckBox;
             _timedLightsOverlayToggle = panelHelper.AddCheckbox(
                                            Translation.Options.Get("Checkbox:Timed traffic lights"),
                                            Options.timedLightsOverlay,
                                            OnTimedLightsOverlayChanged) as UICheckBox;
             _speedLimitsOverlayToggle = panelHelper.AddCheckbox(
                                             Translation.Options.Get("Checkbox:Speed limits"),
-                                           Options.speedLimitsOverlay,
-                                           OnSpeedLimitsOverlayChanged) as UICheckBox;
+                                            Options.speedLimitsOverlay,
+                                            OnSpeedLimitsOverlayChanged) as UICheckBox;
             _vehicleRestrictionsOverlayToggle
                 = panelHelper.AddCheckbox(
                       Translation.Options.Get("Checkbox:Vehicle restrictions"),
@@ -90,7 +90,7 @@ namespace TrafficManager.State {
                 _prioritySignsOverlayToggle.isChecked = newPrioritySignsOverlay;
             }
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
                 public static void SetTimedLightsOverlay(bool newTimedLightsOverlay) {
@@ -100,7 +100,7 @@ namespace TrafficManager.State {
                 _timedLightsOverlayToggle.isChecked = newTimedLightsOverlay;
             }
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         public static void SetSpeedLimitsOverlay(bool newSpeedLimitsOverlay) {
@@ -110,7 +110,7 @@ namespace TrafficManager.State {
                 _speedLimitsOverlayToggle.isChecked = newSpeedLimitsOverlay;
             }
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         public static void SetVehicleRestrictionsOverlay(bool newVehicleRestrictionsOverlay) {
@@ -120,7 +120,7 @@ namespace TrafficManager.State {
                 _vehicleRestrictionsOverlayToggle.isChecked = newVehicleRestrictionsOverlay;
             }
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         public static void SetParkingRestrictionsOverlay(bool newParkingRestrictionsOverlay) {
@@ -130,7 +130,7 @@ namespace TrafficManager.State {
                 _parkingRestrictionsOverlayToggle.isChecked = newParkingRestrictionsOverlay;
             }
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         public static void SetJunctionRestrictionsOverlay(bool newValue) {
@@ -140,7 +140,7 @@ namespace TrafficManager.State {
                 _junctionRestrictionsOverlayToggle.isChecked = newValue;
             }
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         public static void SetConnectedLanesOverlay(bool newValue) {
@@ -158,7 +158,7 @@ namespace TrafficManager.State {
                 _nodesOverlayToggle.isChecked = newNodesOverlay;
             }
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         public static void SetVehicleOverlay(bool newVal) {
@@ -177,7 +177,7 @@ namespace TrafficManager.State {
             Log._Debug($"prioritySignsOverlay changed to {newPrioritySignsOverlay}");
             Options.prioritySignsOverlay = newPrioritySignsOverlay;
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         private static void OnTimedLightsOverlayChanged(bool newTimedLightsOverlay) {
@@ -188,7 +188,7 @@ namespace TrafficManager.State {
             Log._Debug($"timedLightsOverlay changed to {newTimedLightsOverlay}");
             Options.timedLightsOverlay = newTimedLightsOverlay;
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         private static void OnSpeedLimitsOverlayChanged(bool newSpeedLimitsOverlay) {
@@ -199,7 +199,7 @@ namespace TrafficManager.State {
             Log._Debug($"speedLimitsOverlay changed to {newSpeedLimitsOverlay}");
             Options.speedLimitsOverlay = newSpeedLimitsOverlay;
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         private static void OnVehicleRestrictionsOverlayChanged(bool newVehicleRestrictionsOverlay) {
@@ -210,7 +210,7 @@ namespace TrafficManager.State {
             Log._Debug($"vehicleRestrictionsOverlay changed to {newVehicleRestrictionsOverlay}");
             Options.vehicleRestrictionsOverlay = newVehicleRestrictionsOverlay;
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         private static void OnParkingRestrictionsOverlayChanged(bool newParkingRestrictionsOverlay) {
@@ -221,7 +221,7 @@ namespace TrafficManager.State {
             Log._Debug($"parkingRestrictionsOverlay changed to {newParkingRestrictionsOverlay}");
             Options.parkingRestrictionsOverlay = newParkingRestrictionsOverlay;
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         private static void OnJunctionRestrictionsOverlayChanged(bool newValue) {
@@ -232,7 +232,7 @@ namespace TrafficManager.State {
             Log._Debug($"junctionRestrictionsOverlay changed to {newValue}");
             Options.junctionRestrictionsOverlay = newValue;
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         private static void OnConnectedLanesOverlayChanged(bool newValue) {
@@ -243,7 +243,7 @@ namespace TrafficManager.State {
             Log._Debug($"connectedLanesOverlay changed to {newValue}");
             Options.connectedLanesOverlay = newValue;
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         private static void onNodesOverlayChanged(bool newNodesOverlay) {

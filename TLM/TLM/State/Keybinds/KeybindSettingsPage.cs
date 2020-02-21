@@ -26,9 +26,9 @@ namespace TrafficManager.State.Keybinds {
             AddKeybindRowUI(Translation.Options.Get("Keybind:Toggle Main Menu"),
                             ToggleMainMenu);
             ToggleMainMenu.OnKeyChanged(() => {
-                if (LoadingExtension.BaseUI != null &&
-                    LoadingExtension.BaseUI.MainMenuButton != null) {
-                    LoadingExtension.BaseUI.MainMenuButton.UpdateTooltip();
+                if (ModUI.Instance != null &&
+                    ModUI.Instance.MainMenuButton != null) {
+                    ModUI.Instance.MainMenuButton.UpdateButtonImageAndTooltip();
                 }
             });
 
