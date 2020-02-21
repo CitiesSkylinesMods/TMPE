@@ -566,8 +566,6 @@
 rem set "DEPLOYDIR=D:\Games\Steam\steamapps\workshop\content\255710\1637663252\"
 set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
 
-del /Q "%25DEPLOYDIR%25*"
-xcopy /y "$(TargetDir)TrafficManager.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.API.dll" "%25DEPLOYDIR%25"
@@ -575,10 +573,13 @@ xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "%25DEPLOYDIR%25"
+
+del  "%25DEPLOYDIR%25TrafficManager.dll"
+xcopy /y "$(TargetDir)TrafficManager.dll" "%25DEPLOYDIR%25"       
+
 echo THE ASSEMBLY VERSION IS: @(VersionNumber) created at %25time%25
-            
 set DEPLOYDIR=
-  </PostBuildEvent>
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

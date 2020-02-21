@@ -91,7 +91,6 @@ namespace TrafficManager.UI {
         private UIComponent priorityRoadToggle;
 
         public void OnDestroy() {
-            vlog("OnDestroy() RoadSelectionPanels ...");
             if (roadSelectionUtil_ != null) {
                 roadSelectionUtil_ = null;
                 RoadSelectionUtil.Release();
@@ -119,14 +118,11 @@ namespace TrafficManager.UI {
         }
 
         public void Awake() {
-            vlog("Awake() RoadSelectionPanels ...");
             Root = this;
             _function = FunctionMode.Clear;
         }
 
         public void Start() {
-            vlog("Start() RoadSelectionPanels ...");
-            return;
             panels = new List<PanelExt>();
 
             // attach an instance of road selection panel to RoadWorldInfoPanel.
@@ -139,8 +135,10 @@ namespace TrafficManager.UI {
                     priorityRoadToggle.eventVisibilityChanged += HidePriorityRoadToggle;
                 }
 
-                panel.eventVisibilityChanged += ShowAdvisorOnEvent;
+                //panel.eventVisibilityChanged += ShowAdvisorOnEvent;
             }
+            return;
+
 
             // attach another instance of road selection panel to AdjustRoad tab.
             UIPanel roadAdjustPanel = UIView.Find<UIPanel>("AdjustRoad");
@@ -173,12 +171,6 @@ namespace TrafficManager.UI {
             return panel;
         }
 
-        static void vlog(string m) {
-            m = "KIAN DEBUG> " + m + Environment.StackTrace;
-            //Debug.Log(m);
-            Log._Debug(m);
-        }
-
         /// <summary>
         /// Refreshes all butons in all panels according to state indicated by FunctionMode
         /// </summary>
@@ -209,7 +201,8 @@ namespace TrafficManager.UI {
             /// list of buttons contained in this panel.
             public IList<ButtonExt> buttons;
 
-            public void Start() {
+            public override void Start() {
+                base.Start();
                 autoLayout = true;
                 autoLayoutDirection = LayoutDirection.Horizontal;
                 padding = new RectOffset(1, 1, 1, 1);
@@ -224,14 +217,15 @@ namespace TrafficManager.UI {
             }
 
             public void OnDestroy() {
-                vlog("A2");
-                foreach (UIButton button in buttons ?? Enumerable.Empty<ButtonExt>()) {
-                    Destroy(button);
+                if (buttons != null) {
+                    foreach (UIButton button in buttons) {
+                        if (button != null) {
+                            Destroy(button);
+                        }
+                    }
+                    buttons.Clear();
+                    buttons = null;
                 }
-                vlog("B2");
-                buttons.Clear();
-                buttons = null;
-                vlog("C2");
             }
 
             public class ClearButtton : ButtonExt {

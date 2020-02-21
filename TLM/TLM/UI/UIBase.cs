@@ -168,10 +168,10 @@ namespace TrafficManager.UI {
             if (ToolsModifierControl.toolController == tool) {
                 ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
                 ToolsModifierControl.SetTool<DefaultTool>();
-            } else {
+            } else if(ToolsModifierControl.toolController == null) {
                 Log.Warning("LoadingExtensions.DisableTool: ToolsModifierControl.toolController is null!");
             }
-    }
+        }
 
 
         internal static void ReleaseTool() {
