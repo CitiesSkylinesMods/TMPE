@@ -8,7 +8,7 @@
 
         public override void Start() {
             size = new Vector2(
-                MainMenuPanel.ScaledSize.GetWidth() / 2f,
+                ModUI.Instance.MainMenu.width / 2f,
                 MainMenuPanel.ScaledSize.GetTitlebarHeight());
             text = "0";
             suffix = " PFs";

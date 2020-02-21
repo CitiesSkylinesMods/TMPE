@@ -50,6 +50,9 @@ namespace TrafficManager.UI.MainMenu {
 
         private UITextureAtlas allButtonsAtlas_;
 
+        /// <summary>Defines button placement on the main menu since last layout reset.</summary>
+        private MainMenuLayout menuLayout_;
+
         public override void Start() {
             GlobalConfig conf = GlobalConfig.Instance;
 
@@ -75,7 +78,7 @@ namespace TrafficManager.UI.MainMenu {
                                                         BackgroundActive = true,
                                                     };
             // By default the atlas will include backgrounds: DefaultRound-bg-normal
-            var atlasKeysSet = tmpSkin.CreateAtlasKeyset();
+            HashSet<string> atlasKeysSet = tmpSkin.CreateAtlasKeyset();
 
             Buttons = new BaseMenuButton[MENU_BUTTON_TYPES.Length];
             for (int i = 0; i < MENU_BUTTON_TYPES.Length; ++i) {
@@ -153,10 +156,9 @@ namespace TrafficManager.UI.MainMenu {
         public override void OnRescaleRequested() {
             // Update size
             //--------------
-            int buttonsCount = RepositionToolButtons();
-            int usedRows = buttonsCount > ScaledSize.NUM_COLS ? 2 : 1;
-            this.width = ScaledSize.GetWidth();
-            this.height = ScaledSize.GetHeight(usedRows);
+            menuLayout_ = RepositionToolButtons();
+            this.width = ScaledSize.GetWidth(menuLayout_.MaxCols);
+            this.height = ScaledSize.GetHeight(menuLayout_.Rows);
 
             // Update drag size
             //-------------------
@@ -171,10 +173,10 @@ namespace TrafficManager.UI.MainMenu {
 
             /// <summary>Calculate width of main menu panel, based on button width and spacings.</summary>
             /// <returns>Width of the panel.</returns>
-            internal static float GetWidth() {
+            internal static float GetWidth(int cols) {
                 // 6 buttons + spacings (each 1/8 of a button)
-                const float ALL_SPACINGS = (NUM_COLS + 1) * 0.125f;
-                return GetButtonSize() * (6f + ALL_SPACINGS);
+                float allSpacings = (cols + 1) * 0.125f;
+                return GetButtonSize() * (cols + allSpacings);
             }
 
             internal static float GetHeight() => GetHeight(NUM_ROWS);
@@ -202,19 +204,15 @@ namespace TrafficManager.UI.MainMenu {
 
         /// <summary>Reset sizes and positions for UI buttons.</summary>
         /// <returns>Visible buttons count.</returns>
-        private int RepositionToolButtons() {
+        private MainMenuLayout RepositionToolButtons() {
+            MainMenuLayout layout = new MainMenuLayout();
+
             // Recreate tool buttons
             float y = ScaledSize.GetTitlebarHeight();
             float buttonSize = ScaledSize.GetButtonSize();
             float spacing = buttonSize / 8f;
 
-            // Let's count buttons which are enabled, to decide window sizing
-            int enabledButtonCount = 0;
-            foreach (var b in Buttons) {
-                if (b.IsVisible()) {
-                    enabledButtonCount++;
-                }
-            }
+            layout.CountEnabledButtons(Buttons);
 
             int placedInARow = 0;
             float x = spacing;
@@ -227,10 +225,13 @@ namespace TrafficManager.UI.MainMenu {
                     x += buttonSize + spacing;
 
                     placedInARow++;
-                    if (placedInARow >= ScaledSize.NUM_COLS) {
+                    if (layout.IsRowBreak(placedInARow, ScaledSize.NUM_COLS)) {
                         y += buttonSize + spacing;
                         x = spacing; // reset to the left side of the button area
                         placedInARow = 0;
+                        layout.Rows++;
+                    } else {
+                        layout.MaxCols = Math.Max(layout.MaxCols, placedInARow);
                     }
                 } else {
                     button.Hide();
@@ -243,11 +244,15 @@ namespace TrafficManager.UI.MainMenu {
                 button.Invalidate();
             } // foreach button
 
-            return enabledButtonCount;
+            return layout;
         }
 
         public void UpdatePosition(Vector2 pos) {
-            Rect rect = new Rect(pos.x, pos.y, ScaledSize.GetWidth(), ScaledSize.GetHeight());
+            Rect rect = new Rect(
+                pos.x,
+                pos.y,
+                ModUI.Instance.MainMenu.width,
+                ScaledSize.GetHeight());
             Vector2 resolution = UIView.GetAView().GetScreenResolution();
             VectorUtil.ClampRectToScreen(ref rect, resolution);
             Log.Info($"Setting main menu position to [{pos.x},{pos.y}]");
