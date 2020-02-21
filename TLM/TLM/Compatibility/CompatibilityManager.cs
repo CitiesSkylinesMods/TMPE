@@ -81,7 +81,7 @@ namespace TrafficManager.Compatibility {
             }
 
             // Pause the compatibility checker if scene changes to something other than "MainMenu"
-            SceneManager.activeSceneChanged += OnSceneChange;
+            SceneManager.activeSceneChanged += OnSceneChanged;
         }
 
         /// <summary>
@@ -89,9 +89,9 @@ namespace TrafficManager.Compatibility {
         /// </summary>
         public static void Deactivate() {
             Log.Info("CompatibilityManager.Deactivate()");
-            LoadingManager.instance.m_introLoaded -= PerformChecks;
+            LoadingManager.instance.m_introLoaded -= OnIntroLoaded;
             Singleton<PluginManager>.instance.eventPluginsChanged -= OnPluginsChanged;
-            SceneManager.activeSceneChanged -= OnSceneChange;
+            SceneManager.activeSceneChanged -= OnSceneChanged;
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace TrafficManager.Compatibility {
         /// 
         /// <param name="current">The current <see cref="Scene"/> (seems to always be empty).</param>
         /// <param name="next">The <see cref="Scene"/> being transitioned to.</param>
-        private static void OnSceneChange(Scene current, Scene next) {
+        private static void OnSceneChanged(Scene current, Scene next) {
             Log.InfoFormat(
                 "CompatibilityManager.OnSceneChange('{1}')",
                 next.name);
@@ -196,7 +196,7 @@ namespace TrafficManager.Compatibility {
                 LauncherLoginData.instance.m_continue = false;
             }
             catch {
-                Log.Warning(" - Failed!");
+                Log.Info(" - Failed!");
             }
         }
 
@@ -217,6 +217,7 @@ namespace TrafficManager.Compatibility {
                     }
                 }
                 catch {
+                    Log.Info(" - Failed!");
                 }
             }
         }
@@ -261,8 +262,8 @@ namespace TrafficManager.Compatibility {
             Check.DLCs.Verify();
 
             if (restartRequired_) {
-            } else {
                 autoContinue_ = false;
+            } else {
                 ListenForSubscriptionChange();
                 ResumeAutoContinue();
             }

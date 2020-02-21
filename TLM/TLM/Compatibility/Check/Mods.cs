@@ -152,7 +152,7 @@ namespace TrafficManager.Compatibility.Check {
             } // foreach
 
             log.AppendFormat(
-                "\n{0} Mod(s), *{1} enabled: {2} [C]ritical, {3} [M]ajor, {4} [m]inor, {5} > TM:PE\n",
+                "\n{0} Mod(s): {1} [*] enabled, {2} [C]ritical, {3} [M]ajor, {4} [m]inor, {5} [>] TM:PE\n",
                 manager.modCount,
                 manager.enabledModCount,
                 critical,
