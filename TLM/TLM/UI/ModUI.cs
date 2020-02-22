@@ -51,7 +51,7 @@ namespace TrafficManager.UI {
         private bool _uiShown;
 
         public ModUI() {
-            Log._Debug("##### Initializing UIBase.");
+            Log._Debug("##### Initializing ModUI.");
 
             // Get the UIView object. This seems to be the top-level object for most
             // of the UI.
@@ -71,7 +71,7 @@ namespace TrafficManager.UI {
         }
 
         ~ModUI() {
-            Log._Debug("UIBase destructor is called.");
+            Log._Debug("ModUI destructor is called.");
             Destroy(MainMenuButton);
             Destroy(MainMenu);
             ReleaseTool();
@@ -179,7 +179,7 @@ namespace TrafficManager.UI {
         }
 
         public static void EnableTool() {
-            Log._Debug("LoadingExtension.EnableTool: called");
+            Log._Debug("ModUI.EnableTool: called");
             TrafficManagerTool tmTool = GetTrafficManagerTool(true);
 
             ToolsModifierControl.toolController.CurrentTool = tmTool;
@@ -187,15 +187,18 @@ namespace TrafficManager.UI {
         }
 
         public static void DisableTool() {
-            Log._Debug("LoadingExtension.DisableTool: called");
-            if (ToolsModifierControl.toolController != null) {
+            Log._Debug("ModUI.DisableTool: called");
+            if (ToolsModifierControl.toolController == null) {
+                Log.Warning("ModUI.DisableTool: ToolsModifierControl.toolController is null!");
+            } else if (tool == null) {
+                Log.Warning("ModUI.DisableTool: tool is null!");
+            } else if (ToolsModifierControl.toolController.CurrentTool != tool) {
+                Log.Info("ModUI.DisableTool: CurrentTool is not traffic manager tool!");
+            } else {
                 ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
                 ToolsModifierControl.SetTool<DefaultTool>();
-            } else {
-                Log.Warning("LoadingExtensions.DisableTool: ToolsModifierControl.toolController is null!");
             }
-    }
-
+        }
 
         internal static void ReleaseTool() {
             ToolMode = TrafficManagerMode.None;
