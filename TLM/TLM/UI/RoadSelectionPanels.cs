@@ -11,6 +11,7 @@ namespace TrafficManager.UI {
     using static Textures.TextureResources;
     using TrafficManager.UI.MainMenu;
     using TrafficManager.U.Button;
+    using TrafficManager.RedirectionFramework;
 
     public class RoadSelectionPanels : MonoBehaviour {
         private RoadSelectionUtil roadSelectionUtil_;
@@ -116,12 +117,12 @@ namespace TrafficManager.UI {
 
         ~RoadSelectionPanels() {
             Root = null;
-            _function = FunctionMode.Clear;
+            _function = null;
         }
 
         public void Awake() {
             Root = this;
-            _function = FunctionMode.Clear;
+            _function = null;
         }
 
         public void Start() {
@@ -193,7 +194,7 @@ namespace TrafficManager.UI {
         public class PanelExt : UIPanel {
             public void Refresh() {
                 foreach (var button in buttons ?? Enumerable.Empty<ButtonExt>()) {
-                    button.UpdateButtonImageAndTooltip();
+                    button.Refresh();
                 }
             }
 
@@ -202,6 +203,8 @@ namespace TrafficManager.UI {
 
             /// list of buttons contained in this panel.
             public IList<ButtonExt> buttons;
+
+            UITextureAtlas allButtonsAtlas_;
 
             public override void Start() {
                 base.Start();
@@ -216,62 +219,92 @@ namespace TrafficManager.UI {
                 buttons.Add(AddUIComponent<YieldButton>());
                 buttons.Add(AddUIComponent<HighPrioirtyButtton>());
                 buttons.Add(AddUIComponent<RAboutButtton>());
+                SetupAtlas();
+            }
+
+            private void SetupAtlas() {
+                // Create and populate list of background atlas keys, used by all buttons
+                // And also each button will have a chance to add their own atlas keys for loading.
+                var tmpSkin = new ButtonSkin() {
+                    Prefix = "RoadSelection",
+                    BackgroundPrefix = "RoundButton",
+                    ForegroundNormal = false,
+                    BackgroundHovered = true,
+                    BackgroundActive = true,
+                    BackgroundDisabled = true,
+                };
+
+                // By default the atlas will include backgrounds: DefaultRound-bg-normal
+                HashSet<string> atlasKeysSet = tmpSkin.CreateAtlasKeyset();
+
+                foreach (var button in buttons ?? Enumerable.Empty<ButtonExt>()) {
+                    button.SetupButtonSkin(atlasKeysSet);
+                }
+
+                // Create atlas and give it to all buttons
+                allButtonsAtlas_ = tmpSkin.CreateAtlas(
+                                       "RoadSelectionPanel",
+                                       50,
+                                       50,
+                                       512,
+                                       atlasKeysSet);
+
+                foreach (var button in buttons ?? Enumerable.Empty<ButtonExt>()) {
+                    button.atlas = allButtonsAtlas_;
+                }
             }
 
             public class ClearButtton : ButtonExt {
-                public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
-                public override FunctionMode Function => FunctionMode.Clear;
-                public override bool Active => false; // Clear funtionality can't be undone. #568
+                public override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
+                protected override ButtonFunction Function => new ButtonFunction("Clear");
+                public override bool IsActive() => false; // Clear funtionality can't be undone. #568
                 public override void Do() => // TODO delete all rules as part of #568
                     PriorityRoad.ClearRoad(Selection);
                 public override void Undo() => throw new Exception("Unreachable code");
             }
             public class StopButtton : ButtonExt {
-                public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
-                public override FunctionMode Function => FunctionMode.Stop;
+                public override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
+                protected override ButtonFunction Function => new ButtonFunction("Stop");
                 public override void Do() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainStop, Selection);
                 public override void Undo() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, Selection);
             }
             public class YieldButton : ButtonExt {
-                public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
-                public override FunctionMode Function => FunctionMode.Yield;
+                public override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
+                protected override ButtonFunction Function => new ButtonFunction("Yield");
                 public override void Do() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainYield, Selection);
                 public override void Undo() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, Selection);
             }
             public class HighPrioirtyButtton : ButtonExt {
-                public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
-                public override FunctionMode Function => FunctionMode.HighPrioirty;
+                public override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
+                protected override ButtonFunction Function => new ButtonFunction("HighPrioirty");
                 public override void Do() =>
                     PriorityRoad.FixRoad(Selection);
                 public override void Undo() =>
                     PriorityRoad.ClearRoad(Selection);
             }
-
             public class RAboutButtton : ButtonExt {
-                public override string Tooltip => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
-                public override FunctionMode Function => FunctionMode.Rabout;
+                public override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
+                protected override ButtonFunction Function => new ButtonFunction("Roundabout");
                 public override void Do() =>
                     RoundaboutMassEdit.Instance.FixRabout(Selection);
                 public override void Undo() =>
                     RoundaboutMassEdit.Instance.ClearRabout(Selection);
 
-                public override bool ShouldDisable {
-                    get {
-                        if (Length <= 1) {
-                            return true;
-                        }
-                        var segmentList = Selection;
-                        bool isRabout = RoundaboutMassEdit.IsRabout(segmentList, semi: true);
-                        if (!isRabout) {
-                            segmentList.Reverse();
-                            isRabout = RoundaboutMassEdit.IsRabout(segmentList, semi: true);
-                        }
-                        return !isRabout;
+                public override bool ShouldDisable() {
+                    if (Length <= 1) {
+                        return true;
                     }
+                    var segmentList = Selection;
+                    bool isRabout = RoundaboutMassEdit.IsRabout(segmentList, semi: true);
+                    if (!isRabout) {
+                        segmentList.Reverse();
+                        isRabout = RoundaboutMassEdit.IsRabout(segmentList, semi: true);
+                    }
+                    return !isRabout;
                 }
             }
 
@@ -282,10 +315,31 @@ namespace TrafficManager.UI {
                     RoadQuickEditButtons.name = "TMPE_RoadQuickEdit";
                 }
 
+                public override void Awake() {
+                    base.Awake();
+                    Skin = new U.Button.ButtonSkin() {
+                        Prefix = SkinPrefix,
+
+                        BackgroundPrefix = "RoundButton",
+                        BackgroundHovered = true,
+                        BackgroundActive = true,
+                        BackgroundDisabled = true,
+
+                        ForegroundNormal = true,
+                        ForegroundHovered = false,
+                        ForegroundActive = false,
+                        ForegroundDisabled = true,
+                    };
+                }
+
                 public override void Start() {
                     base.Start();
                     width = Width;
                     height = Height;
+                }
+
+                public override void SetupButtonSkin(HashSet<string> atlasKeys) {
+                    atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
                 }
 
                 public override void OnClickInternal(UIMouseEventParameter p) =>
@@ -309,6 +363,11 @@ namespace TrafficManager.UI {
                     }
                 }
 
+                public void Refresh() {
+                    isEnabled = !ShouldDisable();
+                    UpdateButtonImageAndTooltip();
+                }
+
                 public RoadSelectionPanels Root => RoadSelectionPanels.Root;
 
                 public List<ushort> Selection => Root?.roadSelectionUtil_?.Selection;
@@ -319,18 +378,17 @@ namespace TrafficManager.UI {
 
                 public override bool IsActive() => Root.Function == this.Function;
 
-                public override bool ShouldDisable => Length == 0;
-
+                public virtual bool ShouldDisable() => Length == 0;
 
                 public override string ButtonName => "RoadQuickEdit_" + this.GetType().ToString();
 
-                public override skin
+                public override bool IsVisible() => true;
 
-                public override bool Visible => true;
+                public virtual string SkinPrefix => Function.Name;
 
-                public override int Width => 40;
+                public int Width => 40;
 
-                public override int Height => 40;
+                public int Height => 40;
             } // end class QuickEditButton
         } // end class PanelExt
     } // end AdjustRoadSelectPanelExt

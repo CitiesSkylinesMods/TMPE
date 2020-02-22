@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -450,9 +450,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\road-edit-btns.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -588,6 +585,22 @@
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
     <EmbeddedResource Include="Resources\Translations\VehicleRestrictions.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Clear-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Clear-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPrioirty-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPrioirty-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-active.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-hovered.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Yield-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Yield-fg-normal.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">

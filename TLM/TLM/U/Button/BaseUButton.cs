@@ -35,11 +35,6 @@ namespace TrafficManager.U.Button {
         /// </summary>
         public abstract bool IsActive();
 
-        /// <summary>
-        /// Override this to return true when the button is disabled and unusable.
-        /// </summary>
-        public virtual bool ShouldDisable() => false;
-
         /// <summary>Override this to return localized string for the tooltip.</summary>
         public abstract string GetTooltip();
 
@@ -64,6 +59,7 @@ namespace TrafficManager.U.Button {
                 // No skin, no textures, nothing to be updated
                 return;
             }
+
             ControlActiveState activeState = CanActivate() && IsActive() ?
                 ControlActiveState.Active : ControlActiveState.Normal;
             ControlEnabledState enabledState =
