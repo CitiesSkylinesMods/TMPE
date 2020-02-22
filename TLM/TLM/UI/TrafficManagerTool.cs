@@ -32,31 +32,31 @@ namespace TrafficManager.UI {
         public GuideHandler Guide;
 
         private ToolMode toolMode_;
-        private NetTool _netTool;
 
-        /// <summary>
-        /// Maximum error of HitPos field.
-        /// </summary>
+        private NetTool netTool_;
+
+        /// <summary>Maximum error of HitPos field.</summary>
         internal const float MAX_HIT_ERROR = 2.5f;
 
         internal static ushort HoveredNodeId;
+
         internal static ushort HoveredSegmentId;
 
-        /// <summary>
-        /// the hit position of the mouse raycast in meters.
-        /// </summary>
+        /// <summary>The hit position of the mouse raycast.</summary>
         internal static Vector3 HitPos;
+
         internal Vector3 MousePosition => m_mousePosition; //expose protected member.
 
         private static bool _mouseClickProcessed;
 
         public const float DEBUG_CLOSE_LOD = 300f;
-        /// <summary>
-        /// Square of the distance, where overlays are not rendered
-        /// </summary>
+
+        /// <summary>Square of the distance, where overlays are not rendered.</summary>
         public const float MAX_OVERLAY_DISTANCE_SQR = 450f * 450f;
 
-        private IDictionary<ToolMode, SubTool> subTools_;
+        private IDictionary<ToolMode, LegacySubTool> legacySubTools_;
+
+        private IDictionary<ToolMode, TrafficManagerSubTool> subTools_;
 
         public static ushort SelectedNodeId { get; internal set; }
 
@@ -68,10 +68,11 @@ namespace TrafficManager.UI {
         internal static ExtVehicleType[] InfoSignsToDisplay = {
             ExtVehicleType.PassengerCar, ExtVehicleType.Bicycle, ExtVehicleType.Bus,
             ExtVehicleType.Taxi, ExtVehicleType.Tram, ExtVehicleType.CargoTruck,
-            ExtVehicleType.Service, ExtVehicleType.RailVehicle
+            ExtVehicleType.Service, ExtVehicleType.RailVehicle,
         };
 
-        private SubTool _activeSubTool;
+        private LegacySubTool activeLegacySubTool_;
+        private TrafficManagerSubTool activeSubTool_;
 
         private static IDisposable _confDisposable;
 
@@ -86,7 +87,13 @@ namespace TrafficManager.UI {
             return m_toolController;
         }
 
-        internal static Rect MoveGUI(Rect rect) {
+        /// <summary>
+        /// Defines initial screen location for tool Rect, based on default menu x and y,
+        /// whatever tools need them for.
+        /// </summary>
+        /// <param name="rect">A rect to place.</param>
+        /// <returns>New rect moved around screen.</returns>
+        internal static Rect GetDefaultScreenPositionForRect(Rect rect) {
             // x := main menu x + rect.x
             // y := main menu y + main menu height + rect.y
             return new Rect(
@@ -96,7 +103,8 @@ namespace TrafficManager.UI {
                 rect.height);
         }
 
-        internal bool IsNodeWithinViewDistance(ushort nodeId) {
+        // TODO: Move to UI.Helpers
+        internal static bool IsNodeWithinViewDistance(ushort nodeId) {
             bool ret = false;
             Constants.ServiceFactory.NetService.ProcessNode(
                 nodeId,
@@ -108,8 +116,9 @@ namespace TrafficManager.UI {
         }
 
         // Not used
+        // TODO: Move to UI.Helpers
         [UsedImplicitly]
-        internal bool IsSegmentWithinViewDistance(ushort segmentId) {
+        internal static bool IsSegmentWithinViewDistance(ushort segmentId) {
             bool ret = false;
             Constants.ServiceFactory.NetService.ProcessSegment(
                 segmentId,
@@ -121,16 +130,13 @@ namespace TrafficManager.UI {
             return ret;
         }
 
-        internal bool IsPosWithinOverlayDistance(Vector3 position) {
+        // TODO: Move to UI.Helpers
+        internal static bool IsPosWithinOverlayDistance(Vector3 position) {
             return (position - Singleton<SimulationManager>.instance.m_simulationView.m_position)
                    .sqrMagnitude <= MAX_OVERLAY_DISTANCE_SQR;
         }
 
-        internal static float AdaptWidth(float originalWidth) {
-            return originalWidth;
-            // return originalWidth * ((float)Screen.width / 1920f);
-        }
-
+        [Obsolete("Use U.UIScaler")]
         internal float GetBaseZoom() {
             return Screen.height / 1200f;
         }
@@ -151,14 +157,15 @@ namespace TrafficManager.UI {
             return TransparencyToAlpha(transparency);
         }
 
+        /// <summary>Gives convenient access to NetTool from the original game.</summary>
         internal NetTool NetTool {
             get {
-                if (_netTool == null) {
+                if (netTool_ == null) {
                     Log._Debug("NetTool field value is null. Searching for instance...");
-                    _netTool = ToolsModifierControl.toolController.Tools.OfType<NetTool>().FirstOrDefault();
+                    netTool_ = ToolsModifierControl.toolController.Tools.OfType<NetTool>().FirstOrDefault();
                 }
 
-                return _netTool;
+                return netTool_;
             }
         }
 
@@ -170,9 +177,12 @@ namespace TrafficManager.UI {
             Log.Info("TrafficManagerTool: Initialization running now.");
             Guide = new GuideHandler();
 
-            SubTool timedLightsTool = new TimedTrafficLightsTool(this);
+            LegacySubTool timedLightsTool = new TimedTrafficLightsTool(this);
 
-            subTools_ = new TinyDictionary<ToolMode, SubTool> {
+            subTools_ = new TinyDictionary<ToolMode, TrafficManagerSubTool> {
+                [ToolMode.LaneChange] = new LaneArrowTool(this),
+            };
+            legacySubTools_ = new TinyDictionary<ToolMode, LegacySubTool> {
                 [ToolMode.SwitchTrafficLight] = new ToggleTrafficLightsTool(this),
                 [ToolMode.AddPrioritySigns] = new PrioritySignsTool(this),
                 [ToolMode.ManualSwitch] = new ManualTrafficLightsTool(this),
@@ -183,10 +193,9 @@ namespace TrafficManager.UI {
                 [ToolMode.TimedLightsCopyLights] = timedLightsTool,
                 [ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this),
                 [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
-                [ToolMode.LaneChange] = new LaneArrowTool(this),
                 [ToolMode.LaneConnector] = new LaneConnectorTool(this),
                 [ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this),
-                [ToolMode.ParkingRestrictions] = new ParkingRestrictionsTool(this)
+                [ToolMode.ParkingRestrictions] = new ParkingRestrictionsTool(this),
             };
 
             InitializeSubTools();
@@ -205,7 +214,7 @@ namespace TrafficManager.UI {
         }
 
         internal void InitializeSubTools() {
-            foreach (KeyValuePair<ToolMode, SubTool> e in subTools_) {
+            foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
                 e.Value.Initialize();
             }
         }
@@ -215,8 +224,9 @@ namespace TrafficManager.UI {
             base.Awake();
         }
 
-        public SubTool GetSubTool(ToolMode mode) {
-            if (subTools_.TryGetValue(mode, out SubTool ret)) {
+        /// <summary>Only used from CustomRoadBaseAI.</summary>
+        public LegacySubTool GetSubTool(ToolMode mode) {
+            if (legacySubTools_.TryGetValue(mode, out LegacySubTool ret)) {
                 return ret;
             }
 
@@ -230,79 +240,99 @@ namespace TrafficManager.UI {
         public void SetToolMode(ToolMode mode) {
             Log._Debug($"SetToolMode: {mode}");
 
-            bool toolModeChanged = (mode != toolMode_);
-            ToolMode oldToolMode = toolMode_;
-            subTools_.TryGetValue(oldToolMode, out SubTool oldSubTool);
-            toolMode_ = mode;
+            // Handle tool deactivation right here
+            if (mode == ToolMode.None && (activeLegacySubTool_ != null || activeSubTool_ != null)) {
+                activeLegacySubTool_?.Cleanup();
+                activeLegacySubTool_ = null;
 
-            if (!subTools_.TryGetValue(toolMode_, out _activeSubTool)) {
-                _activeSubTool = null;
+                activeSubTool_?.DeactivateTool();
+                activeSubTool_ = null;
+                return;
             }
 
-            bool realToolChange = toolModeChanged;
+            // ToolModeChanged does not count timed traffic light submodes as a same tool
+            bool toolModeChanged = mode != toolMode_;
+            ToolMode oldToolMode = toolMode_;
 
-            if (oldSubTool != null) {
-                if (oldToolMode == ToolMode.TimedLightsSelectNode
-                    || oldToolMode == ToolMode.TimedLightsShowLights
-                    || oldToolMode == ToolMode.TimedLightsAddNode
-                    || oldToolMode == ToolMode.TimedLightsRemoveNode
-                    || oldToolMode == ToolMode.TimedLightsCopyLights) {
+            legacySubTools_.TryGetValue(oldToolMode, out LegacySubTool oldLegacySubtool);
+
+            toolMode_ = mode;
+
+            // Try figure out whether legacy subtool or a new subtool is selected
+            if (!legacySubTools_.TryGetValue(toolMode_, out activeLegacySubTool_)
+                && !subTools_.TryGetValue(toolMode_, out activeSubTool_)) {
+                activeLegacySubTool_ = null;
+                activeSubTool_ = null;
+            }
+
+            // Tool Changed counts timed traffic light submodes as a single tool
+            bool toolChanged = toolModeChanged;
+
+            //---------------------------------------------------
+            // Special handling for Timed Traffic Lights submodes
+            // Does not count as subtool change if old and new belong to the same mode
+            //---------------------------------------------------
+            if (oldLegacySubtool != null) {
+                if (IsTimedTrafficLightsSubtool(oldToolMode)) {
                     // TODO refactor to SubToolMode
-                    if (mode != ToolMode.TimedLightsSelectNode
-                        && mode != ToolMode.TimedLightsShowLights
-                        && mode != ToolMode.TimedLightsAddNode
-                        && mode != ToolMode.TimedLightsRemoveNode
-                        && mode != ToolMode.TimedLightsCopyLights) {
-                        oldSubTool.Cleanup();
+                    if (!IsTimedTrafficLightsSubtool(mode)) {
+                        oldLegacySubtool.Cleanup();
                     }
                 } else {
-                    oldSubTool.Cleanup();
+                    oldLegacySubtool.Cleanup();
                 }
             }
 
-            if (toolModeChanged && _activeSubTool != null) {
-                if (oldToolMode == ToolMode.TimedLightsSelectNode
-                    || oldToolMode == ToolMode.TimedLightsShowLights
-                    || oldToolMode == ToolMode.TimedLightsAddNode
-                    || oldToolMode == ToolMode.TimedLightsRemoveNode
-                    || oldToolMode == ToolMode.TimedLightsCopyLights) {
+            if (toolModeChanged && (activeLegacySubTool_ != null || activeSubTool_ != null)) {
+                if (IsTimedTrafficLightsSubtool(oldToolMode)) {
                     // TODO refactor to SubToolMode
-                    if (mode != ToolMode.TimedLightsSelectNode
-                        && mode != ToolMode.TimedLightsShowLights
-                        && mode != ToolMode.TimedLightsAddNode
-                        && mode != ToolMode.TimedLightsRemoveNode
-                        && mode != ToolMode.TimedLightsCopyLights) {
-                        _activeSubTool.Cleanup();
+                    if (!IsTimedTrafficLightsSubtool(mode)) {
+                        activeLegacySubTool_?.Cleanup();
+                        activeSubTool_?.DeactivateTool();
                     } else {
-                        realToolChange = false;
+                        toolChanged = false;
                     }
                 } else {
-                    _activeSubTool.Cleanup();
+                    activeLegacySubTool_?.Cleanup();
+                    activeSubTool_?.DeactivateTool();
                 }
             }
 
             SelectedNodeId = 0;
             SelectedSegmentId = 0;
 
-            // Log._Debug($"Getting activeSubTool for mode {_toolMode} {subTools.Count}");
-            // subTools.TryGetValue((int)_toolMode, out activeSubTool);
-            // Log._Debug($"activeSubTool is now {activeSubTool}");
+            if (toolModeChanged && (activeLegacySubTool_ != null || activeSubTool_ != null)) {
+                activeLegacySubTool_?.OnActivate();
+                activeSubTool_?.ActivateTool();
 
-            if (toolModeChanged && _activeSubTool != null) {
-                _activeSubTool.OnActivate();
-
-                if (realToolChange) {
-                    ShowAdvisor(_activeSubTool.GetTutorialKey());
+                if (toolChanged && activeLegacySubTool_ != null) {
+                    ShowAdvisor(activeLegacySubTool_.GetTutorialKey());
                     Guide.DeactivateAll();
                 }
             }
         }
 
+        private static bool IsTimedTrafficLightsSubtool(ToolMode a) {
+            return a == ToolMode.TimedLightsSelectNode
+                   || a == ToolMode.TimedLightsShowLights
+                   || a == ToolMode.TimedLightsAddNode
+                   || a == ToolMode.TimedLightsRemoveNode
+                   || a == ToolMode.TimedLightsCopyLights;
+        }
+
+        private static bool IsSameSubtool(ToolMode a, ToolMode b) {
+            // All timed traffic lights submodes are one mode
+            if (IsTimedTrafficLightsSubtool(a) && IsTimedTrafficLightsSubtool(b)) {
+                return true;
+            }
+            return a == b;
+        }
+
         // Overridden to disable base class behavior
         protected override void OnEnable() {
-            if (subTools_ != null) {
+            if (legacySubTools_ != null) {
                 Log._Debug("TrafficManagerTool.OnEnable(): Performing cleanup");
-                foreach (KeyValuePair<ToolMode, SubTool> e in subTools_) {
+                foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
                     e.Value.Cleanup();
                 }
             }
@@ -330,14 +360,15 @@ namespace TrafficManager.UI {
             }
 
             // Log._Debug($"Rendering overlay in {_toolMode}");
-            _activeSubTool?.RenderOverlay(cameraInfo);
+            activeLegacySubTool_?.RenderOverlay(cameraInfo);
 
-            foreach (KeyValuePair<ToolMode, SubTool> e in subTools_) {
+            // For all _other_ subtools let them render something too
+            foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
                 if (e.Key == GetToolMode()) {
                     continue;
                 }
 
-                e.Value.RenderInfoOverlay(cameraInfo);
+                e.Value.RenderOverlayForOtherTools(cameraInfo);
             }
         }
 
@@ -360,7 +391,7 @@ namespace TrafficManager.UI {
             }
             ToolCursor = null;
             bool elementsHovered = DetermineHoveredElements();
-            if (_activeSubTool != null && NetTool != null && elementsHovered) {
+            if (activeLegacySubTool_ != null && NetTool != null && elementsHovered) {
                 ToolCursor = NetTool.m_upgradeCursor;
             }
 
@@ -384,7 +415,7 @@ namespace TrafficManager.UI {
             }
 
             // !elementsHovered ||
-            if (_activeSubTool != null && _activeSubTool.IsCursorInPanel()) {
+            if (activeLegacySubTool_ != null && activeLegacySubTool_.IsCursorInPanel()) {
                 Log._Debug("TrafficManagerTool: OnToolUpdate: Subtool contains mouse. Ignoring click.");
 
                 // Log.Message("inside ui: " + m_toolController.IsInsideUI + " visible: "
@@ -397,13 +428,13 @@ namespace TrafficManager.UI {
             //        return;
             // }
 
-            if (_activeSubTool != null) {
+            if (activeLegacySubTool_ != null) {
                 if (primaryMouseClicked) {
-                    _activeSubTool.OnPrimaryClickOverlay();
+                    activeLegacySubTool_.OnPrimaryClickOverlay();
                 }
 
                 if (secondaryMouseClicked) {
-                    _activeSubTool.OnSecondaryClickOverlay();
+                    activeLegacySubTool_.OnSecondaryClickOverlay();
                 }
             }
         }
@@ -431,7 +462,7 @@ namespace TrafficManager.UI {
                     GuiDisplayBuildings();
                 }
 
-                foreach (KeyValuePair<ToolMode, SubTool> en in subTools_) {
+                foreach (KeyValuePair<ToolMode, LegacySubTool> en in legacySubTools_) {
                     en.Value.ShowGUIOverlay(en.Key, en.Key != GetToolMode());
                 }
 
@@ -439,8 +470,8 @@ namespace TrafficManager.UI {
                 guiColor.a = 1f;
                 GUI.color = guiColor;
 
-                if (_activeSubTool != null) {
-                    _activeSubTool.OnToolGUI(e);
+                if (activeLegacySubTool_ != null) {
+                    activeLegacySubTool_.OnToolGUI(e);
                 } else {
                     base.OnToolGUI(e);
                 }
@@ -906,7 +937,7 @@ namespace TrafficManager.UI {
             HitPos = m_mousePosition;
 
             bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible &&
-                                 (_activeSubTool == null || !_activeSubTool.IsCursorInPanel());
+                                 (activeLegacySubTool_ == null || !activeLegacySubTool_.IsCursorInPanel());
 
             if (mouseRayValid) {
                 // find currently hovered node
@@ -1706,12 +1737,12 @@ namespace TrafficManager.UI {
             HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
 
             if (nodeId != null) {
-                NetInfo.Direction? dir = (netManager.m_segments.m_buffer[segmentId].m_startNode == nodeId)
+                NetInfo.Direction? dir = netManager.m_segments.m_buffer[segmentId].m_startNode == nodeId
                                              ? NetInfo.Direction.Backward
                                              : NetInfo.Direction.Forward;
                 dir2 =
-                    ((netManager.m_segments.m_buffer[segmentId].m_flags &
-                      NetSegment.Flags.Invert) == NetSegment.Flags.None)
+                    (netManager.m_segments.m_buffer[segmentId].m_flags &
+                     NetSegment.Flags.Invert) == NetSegment.Flags.None
                         ? dir
                         : NetInfo.InvertDirection((NetInfo.Direction)dir);
 
@@ -1722,9 +1753,9 @@ namespace TrafficManager.UI {
             var numLanes = 0;
 
             while (laneIndex < info.m_lanes.Length && curLaneId != 0u) {
-                if (((info.m_lanes[laneIndex].m_laneType &
-                      (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None
-                     && (info.m_lanes[laneIndex].m_vehicleType & vehicleTypeFilter) != VehicleInfo.VehicleType.None)
+                if ((info.m_lanes[laneIndex].m_laneType &
+                     (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None
+                    && (info.m_lanes[laneIndex].m_vehicleType & vehicleTypeFilter) != VehicleInfo.VehicleType.None
                     && (dir2 == null || info.m_lanes[laneIndex].m_finalDirection == dir2))
                 {
                     if (!directions.Contains(info.m_lanes[laneIndex].m_finalDirection)) {
@@ -1874,7 +1905,7 @@ namespace TrafficManager.UI {
         /// <summary>
         /// Displays a warning prompt in center of the screen.
         /// </summary>
-        /// 
+        ///
         /// <param name="message">The localized body text of the prompt.</param>
         public void WarningPrompt(string message) {
             if (string.IsNullOrEmpty(message)) {

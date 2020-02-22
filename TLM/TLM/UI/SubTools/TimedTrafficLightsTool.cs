@@ -14,14 +14,14 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Util;
     using UnityEngine;
 
-    public class TimedTrafficLightsTool : SubTool {
+    public class TimedTrafficLightsTool : LegacySubTool {
         private readonly GUIStyle _counterStyle = new GUIStyle();
         private readonly int[] _hoveredButton = new int[2];
         private bool nodeSelectionLocked;
         private List<ushort> selectedNodeIds = new List<ushort>();
         private bool _cursorInSecondaryPanel;
-        private Rect _windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 480, 350));
-        private Rect _windowRect2 = TrafficManagerTool.MoveGUI(new Rect(0, 0, 300, 150));
+        private Rect _windowRect = TrafficManagerTool.GetDefaultScreenPositionForRect(new Rect(0, 0, 480, 350));
+        private Rect _windowRect2 = TrafficManagerTool.GetDefaultScreenPositionForRect(new Rect(0, 0, 300, 150));
         private bool _timedPanelAdd;
         private int _timedEditStep = -1;
         private ushort _hoveredNode;

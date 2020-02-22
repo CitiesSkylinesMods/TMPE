@@ -282,7 +282,7 @@
     <Compile Include="UI\TrafficManagerMode.cs" />
     <Compile Include="UI\Localization\LookupTable.cs" />
     <Compile Include="UI\Localization\Translation.cs" />
-    <Compile Include="UI\SubTool.cs" />
+    <Compile Include="UI\LegacySubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
     <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
@@ -294,6 +294,7 @@
     <Compile Include="State\Options.cs" />
     <Compile Include="Manager\Impl\SpeedLimitManager.cs" />
     <Compile Include="State\Flags.cs" />
+    <Compile Include="UI\TrafficManagerSubTool.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />

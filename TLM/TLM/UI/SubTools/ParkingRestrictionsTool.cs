@@ -13,7 +13,7 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework.Math;
     using CSUtil.Commons;
 
-    public class ParkingRestrictionsTool : SubTool {
+    public class ParkingRestrictionsTool : LegacySubTool {
         private ParkingRestrictionsManager parkingManager => ParkingRestrictionsManager.Instance;
 
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir
@@ -232,7 +232,7 @@ namespace TrafficManager.UI.SubTools {
                     renderInfo_.SegmentId = segmentId;
                     renderInfo_.FinalDirection = dir;
                     hovered = true;
-                } 
+                }
             }
             if (!hovered) {
                 renderInfo_.SegmentId = 0;

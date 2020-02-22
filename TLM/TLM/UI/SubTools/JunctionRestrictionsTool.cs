@@ -11,7 +11,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.State.Keybinds;
     using static TrafficManager.Util.Shortcuts;
 
-    public class JunctionRestrictionsTool : SubTool {
+    public class JunctionRestrictionsTool : LegacySubTool {
         private readonly HashSet<ushort> currentRestrictedNodeIds;
         private bool overlayHandleHovered;
         private readonly float junctionRestrictionsSignSize = 80f;
@@ -40,7 +40,7 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
-        public override void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
+        public override void RenderOverlayForOtherTools(RenderManager.CameraInfo cameraInfo) { }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             if (SelectedNodeId != 0) {

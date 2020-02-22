@@ -3,14 +3,16 @@ namespace TrafficManager.UI.SubTools {
     using CSUtil.Commons;
     using GenericGameBridge.Service;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
+    using Debug = UnityEngine.Debug;
 
-    public class LaneArrowTool : SubTool {
+    public class LaneArrowTool : TrafficManagerSubTool {
         private bool cursorInSecondaryPanel_;
 
         public LaneArrowTool(TrafficManagerTool mainTool)
@@ -34,11 +36,25 @@ namespace TrafficManager.UI.SubTools {
             return false;
         }
 
-        public override bool IsCursorInPanel() {
-            return base.IsCursorInPanel() || cursorInSecondaryPanel_;
+        /// <summary>Resets tool into its initial state for new use.</summary>
+        public override void ActivateTool() {
+            Log._Debug("LaneArrow: Activated tool");
         }
 
-        private void HandleResult(SetLaneArrowError result) {
+        /// <summary>Cleans up when tool is deactivated or user switched to another tool.</summary>
+        public override void DeactivateTool() {
+            Log._Debug("LaneArrow: Deactivated tool");
+        }
+
+        // public override bool IsCursorInPanel() {
+        //     return base.IsCursorInPanel() || cursorInSecondaryPanel_;
+        // }
+
+        /// <summary>
+        /// If Lane Arrow operation ended with failure, pop up a guide box with an explanation.
+        /// </summary>
+        /// <param name="result">Result coming out of LaneArrowManager function call.</param>
+        private void InformUserAboutPossibleFailure(SetLaneArrowError result) {
             switch (result) {
                 case SetLaneArrowError.HighwayArrows: {
                         MainTool.Guide.Activate("LaneArrowTool_Disabled due to highway rules");
@@ -55,7 +71,8 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
-        public override void OnPrimaryClickOverlay() {
+        [Conditional("OBSOLETE_LANEARROW_IMGUI")]
+        public void OnPrimaryClickOverlay() {
             if ((HoveredNodeId == 0) || (HoveredSegmentId == 0)) return;
 
             NetNode.Flags netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
@@ -76,24 +93,28 @@ namespace TrafficManager.UI.SubTools {
             SetLaneArrowError res = SetLaneArrowError.Success;
             if (altDown) {
                 LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId, out res);
-                HandleResult(res);
+                InformUserAboutPossibleFailure(res);
             } else if (ctrlDown) {
                 LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId, out res);
-                HandleResult(res);
+                InformUserAboutPossibleFailure(res);
             } else if (HasHoverLaneArrows()) {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
             }
         }
 
-        public override void OnSecondaryClickOverlay() {
+        [Conditional("OBSOLETE_LANEARROW_IMGUI")]
+        public void OnSecondaryClickOverlay() {
+            bool IsCursorInPanel() => false;
+
             if (!IsCursorInPanel()) {
                 SelectedSegmentId = 0;
                 SelectedNodeId = 0;
             }
         }
 
-        public override void OnToolGUI(Event e) {
+        [Conditional("OBSOLETE_LANEARROW_IMGUI")]
+        public void OnToolGUI(Event e) {
             // base.OnToolGUI(e);
             cursorInSecondaryPanel_ = false;
 
@@ -135,7 +156,8 @@ namespace TrafficManager.UI.SubTools {
             }
 
             var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, height);
-            GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, BorderlessStyle);
+            var legacyBorderlessStyle = new GUIStyle();
+            GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, legacyBorderlessStyle);
             cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
         }
 
@@ -145,7 +167,7 @@ namespace TrafficManager.UI.SubTools {
         private bool HasHoverLaneArrows() => HasSegmentEndLaneArrows(HoveredSegmentId, HoveredNodeId);
 
         /// <summary>
-        /// determines whether or not the given segment end has lane arrows.
+        /// Determines whether or not the given segment end has lane arrows.
         /// </summary>
         private bool HasSegmentEndLaneArrows(ushort segmentId, ushort nodeId) {
             if(nodeId == 0 || segmentId == 0) {
@@ -348,7 +370,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 if (buttonClicked) {
-                    HandleResult(res);
+                    InformUserAboutPossibleFailure(res);
                 }
 
                 GUILayout.EndHorizontal();
@@ -372,7 +394,7 @@ namespace TrafficManager.UI.SubTools {
                     style,
                     GUILayout.Width(135), // intentionally big to avoid confusion
                     GUILayout.Height(25)) ||
-                    Input.GetKeyDown(hotkey)) { 
+                    Input.GetKeyDown(hotkey)) {
                     Log._Debug("deleting lane arrows: " +
                         $"SelectedSegmentId={SelectedSegmentId} SelectedNodeId={SelectedNodeId} startNode={startNode}");
                     LaneArrowManager.Instance.ResetLaneArrows(SelectedSegmentId, startNode);

@@ -13,7 +13,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Util;
     using UnityEngine;
 
-    public class PrioritySignsTool : SubTool {
+    public class PrioritySignsTool : LegacySubTool {
         private enum PrioritySignsMassEditMode {
             MainYield = 0,
             MainStop = 1,
@@ -376,7 +376,7 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
 
-                    if (!MainTool.IsNodeWithinViewDistance(nodeId)) {
+                    if (!TrafficManagerTool.IsNodeWithinViewDistance(nodeId)) {
                         continue;
                     }
 

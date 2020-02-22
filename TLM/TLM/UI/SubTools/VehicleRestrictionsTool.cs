@@ -14,7 +14,7 @@ namespace TrafficManager.UI.SubTools {
     using static TrafficManager.Util.Shortcuts;
 
 
-    public class VehicleRestrictionsTool : SubTool {
+    public class VehicleRestrictionsTool : LegacySubTool {
         private static readonly ExtVehicleType[] RoadVehicleTypes = {
             ExtVehicleType.PassengerCar, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.CargoTruck,
             ExtVehicleType.Service, ExtVehicleType.Emergency
@@ -33,7 +33,7 @@ namespace TrafficManager.UI.SubTools {
         private Color HighlightColor => MainTool.GetToolColor(false, false);
         private static bool RoadMode => ShiftIsPressed;
 
-        private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 200, 100));
+        private Rect windowRect = TrafficManagerTool.GetDefaultScreenPositionForRect(new Rect(0, 0, 620, 100));
 
         private HashSet<ushort> currentRestrictedSegmentIds;
 
@@ -188,7 +188,7 @@ namespace TrafficManager.UI.SubTools {
                         RenderRoadLane(cameraInfo);
                     } else {
                         RenderLaneOverlay(cameraInfo, renderData_.laneId);
-                        
+
                     }
                 }
             }
@@ -285,7 +285,7 @@ namespace TrafficManager.UI.SubTools {
                     ApplyRestrictionsToAllSegments();
                 }
             }
-          
+
             GUI.color = oldColor;
 
             if (GUILayout.Button(

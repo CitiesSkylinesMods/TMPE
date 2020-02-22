@@ -16,7 +16,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using static TrafficManager.Util.Shortcuts;
     using UnityEngine;
 
-    public class SpeedLimitsTool : SubTool {
+    public class SpeedLimitsTool : LegacySubTool {
         public const int
             BREAK_PALETTE_COLUMN_KMPH = 8; // palette shows N in a row, then break and another row
 
@@ -48,9 +48,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
 
         private Rect paletteWindowRect =
-            TrafficManagerTool.MoveGUI(new Rect(0, 0, 10 * (GUI_SPEED_SIGN_SIZE + 5), 150));
+            TrafficManagerTool.GetDefaultScreenPositionForRect(new Rect(0, 0, 10 * (GUI_SPEED_SIGN_SIZE + 5), 150));
 
-        private Rect defaultsWindowRect = TrafficManagerTool.MoveGUI(new Rect(0, 80, 50, 50));
+        private Rect defaultsWindowRect = TrafficManagerTool.GetDefaultScreenPositionForRect(new Rect(0, 80, 50, 50));
 
         /// <summary>
         /// Stores potentially visible segment ids while the camera did not move
@@ -664,7 +664,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            float signSize = TrafficManagerTool.AdaptWidth(GUI_SPEED_SIGN_SIZE);
+            float signSize = GUI_SPEED_SIGN_SIZE;
             if (GUILayout.Button(
                 SpeedLimitTextures.GetSpeedLimitTexture(speedLimit),
                 GUILayout.Width(signSize),

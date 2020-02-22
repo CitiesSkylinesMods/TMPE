@@ -1,9 +1,11 @@
 namespace TrafficManager.UI {
+    using System;
     using ColossalFramework.UI;
     using JetBrains.Annotations;
     using UnityEngine;
 
-    public abstract class SubTool {
+    [Obsolete("Refactor tools to the new TrafficManagerSubTool class instead of LegacySubTool")]
+    public abstract class LegacySubTool {
         protected TrafficManagerTool MainTool { get; }
 
         private Texture2D WindowTexture {
@@ -24,7 +26,7 @@ namespace TrafficManager.UI {
             windowStyle_ ?? (windowStyle_ = new GUIStyle {
                                     normal = {
                                         background = WindowTexture,
-                                        textColor = Color.white
+                                        textColor = Color.white,
                                     },
                                     alignment = TextAnchor.UpperCenter,
                                     fontSize = 20,
@@ -32,18 +34,18 @@ namespace TrafficManager.UI {
                                         left = 4,
                                         top = 41,
                                         right = 4,
-                                        bottom = 8
+                                        bottom = 8,
                                     },
                                     overflow = {
                                         bottom = 0,
                                         top = 0,
                                         right = 12,
-                                        left = 12
+                                        left = 12,
                                     },
                                     contentOffset = new Vector2(0, -44),
                                     padding = {
-                                        top = 55
-                                    }
+                                        top = 55,
+                                    },
                                 });
 
         private GUIStyle windowStyle_;
@@ -71,8 +73,8 @@ namespace TrafficManager.UI {
                                             bottom = 2,
                                             top = 2,
                                             right = 2,
-                                            left = 2
-                                        }
+                                            left = 2,
+                                        },
                                     });
 
         private GUIStyle borderlessStyle_;
@@ -101,7 +103,7 @@ namespace TrafficManager.UI {
             set => TrafficManagerTool.SelectedSegmentId = value;
         }
 
-        public SubTool(TrafficManagerTool mainTool) {
+        public LegacySubTool(TrafficManagerTool mainTool) {
             MainTool = mainTool;
         }
 
@@ -138,7 +140,12 @@ namespace TrafficManager.UI {
 
         public virtual void OnActivate() { }
 
-        public virtual void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
+        /// <summary>
+        /// Renders current situation overlay, called while the tool is not active to assist
+        /// other tools.
+        /// </summary>
+        /// <param name="cameraInfo">The camera.</param>
+        public virtual void RenderOverlayForOtherTools(RenderManager.CameraInfo cameraInfo) { }
 
         public virtual void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) { }
 

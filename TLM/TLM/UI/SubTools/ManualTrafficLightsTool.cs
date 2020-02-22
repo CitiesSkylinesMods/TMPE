@@ -9,7 +9,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.Textures;
     using UnityEngine;
 
-    public class ManualTrafficLightsTool : SubTool {
+    public class ManualTrafficLightsTool : LegacySubTool {
         private readonly int[] hoveredButton = new int[2];
         private readonly GUIStyle counterStyle = new GUIStyle();
 
