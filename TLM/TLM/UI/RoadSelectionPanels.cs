@@ -90,7 +90,7 @@ namespace TrafficManager.UI {
         private IList<PanelExt> panels;
         private UIComponent priorityRoadToggle;
 
-        public void OnDestroy() {
+        public void OnDestroy() { 
             if (roadSelectionUtil_ != null) {
                 roadSelectionUtil_ = null;
                 RoadSelectionUtil.Release();
@@ -104,7 +104,7 @@ namespace TrafficManager.UI {
                 foreach (UIPanel panel in panels) {
                     if (panel != null) {
                         //panel.eventVisibilityChanged -= ShowAdvisorOnEvent;
-                        Destroy(panel);
+                        Destroy(panel.gameObject); 
                     }
                 }
                 panels.Clear();
@@ -127,6 +127,7 @@ namespace TrafficManager.UI {
 
             // attach an instance of road selection panel to RoadWorldInfoPanel.
             RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
+            return;
             if (roadWorldInfoPanel != null) {
                 PanelExt panel = AddPanel(roadWorldInfoPanel.component);
                 panel.relativePosition += new Vector3(-10f, -10f);
@@ -216,7 +217,8 @@ namespace TrafficManager.UI {
                 buttons.Add(AddUIComponent<RAboutButtton>());
             }
 
-            public void OnDestroy() {
+            public override void OnDestroy() {
+                Log._Debug("KIAN DEBUG> PanelExt.OnDestroy() called");
                 if (buttons != null) {
                     foreach (UIButton button in buttons) {
                         if (button != null) {
@@ -226,6 +228,7 @@ namespace TrafficManager.UI {
                     buttons.Clear();
                     buttons = null;
                 }
+				base.OnDestroy();
             }
 
             public class ClearButtton : ButtonExt {
