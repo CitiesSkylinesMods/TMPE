@@ -76,7 +76,7 @@ namespace TrafficManager.UI {
 
             if (MainMenu != null) {
                 CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
-                if(keyHandler != null) {
+                if (keyHandler != null) {
                     UnityEngine.Object.Destroy(keyHandler);
                 }
 
@@ -156,7 +156,7 @@ namespace TrafficManager.UI {
         }
 
         public static void EnableTool() {
-            Log._Debug("LoadingExtension.EnableTool: called");
+            Log._Debug("UIBase.EnableTool: called");
             TrafficManagerTool tmTool = GetTrafficManagerTool(true);
 
             ToolsModifierControl.toolController.CurrentTool = tmTool;
@@ -164,12 +164,14 @@ namespace TrafficManager.UI {
         }
 
         public static void DisableTool() {
-            Log._Debug("LoadingExtension.DisableTool: called");
+            Log._Debug("UIBase.DisableTool: called");
             if (ToolsModifierControl.toolController == null) {
-                Log.Warning("LoadingExtensions.DisableTool: ToolsModifierControl.toolController is null!");
+                Log.Warning("UIBase.DisableTool: ToolsModifierControl.toolController is null!");
             } else if (tool == null) {
-                Log.Warning("LoadingExtensions.DisableTool: tool is null!");
-            } else if (ToolsModifierControl.toolController != tool) {
+                Log.Warning("UIBase.DisableTool: tool is null!");
+            } else if (ToolsModifierControl.toolController.CurrentTool != tool) {
+                Log.Info("UIBase.DisableTool: CurrentTool is not traffic manager tool!");
+            } else {
                 ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
                 ToolsModifierControl.SetTool<DefaultTool>();
             }
