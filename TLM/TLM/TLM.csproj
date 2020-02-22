@@ -557,8 +557,7 @@
       $(PostBuildEventDependsOn);
       PostBuildMacros;
     </PostBuildEventDependsOn>
-    <PostBuildEvent>rem set "DEPLOYDIR=D:\Games\Steam\steamapps\workshop\content\255710\1637663252\"
-set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
+    <PostBuildEvent>set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
 xcopy /y "$(TargetDir)TrafficManager.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "%25DEPLOYDIR%25"
@@ -568,8 +567,8 @@ xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "%25DEPLOYDIR%25"
 
-REM to avoid double hot reload, TrafficManager.dll must be replaced last and fast. 
-REM Once TrafficManager.dll is re-loaded, all other dlls will be reloaded as well
+rem To avoid double hot reload, TrafficManager.dll must be replaced last and fast. 
+rem Once TrafficManager.dll is re-loaded, all other dlls will be reloaded as well
 del  "%25DEPLOYDIR%25TrafficManager.dll"
 xcopy /y "$(TargetDir)TrafficManager.dll" "%25DEPLOYDIR%25"    
 
