@@ -20,10 +20,6 @@ namespace TrafficManager.U.Button {
         /// <returns>Whether a button can toggle-activate.</returns>
         public abstract bool CanActivate();
 
-        /// <summary>Checks whether a button can ever be "disabled", i.e. stay unusable.</summary>
-        /// <returns>Whether a button can toggle disable.</returns>
-        public virtual bool CanDisable() => false;
-
         public abstract string ButtonName { get; }
 
         public override void Start() {

@@ -9,6 +9,8 @@ namespace TrafficManager.UI {
     using TrafficManager.Util;
     using static UI.SubTools.PrioritySignsTool;
     using static Textures.TextureResources;
+    using TrafficManager.UI.MainMenu;
+    using TrafficManager.U.Button;
 
     public class RoadSelectionPanels : MonoBehaviour {
         private RoadSelectionUtil roadSelectionUtil_;
@@ -23,9 +25,9 @@ namespace TrafficManager.UI {
             Rabout,
         }
 
-        private FunctionMode _function;
+        private ButtonFunction _function;
 
-        public FunctionMode Function {
+        public ButtonFunction Function {
             /// returns which button is in active state
             get => _function;
 
@@ -55,12 +57,12 @@ namespace TrafficManager.UI {
         /// Also enables Traffic manager tool.
         /// </summary>
         private void ShowMassEditOverlay() {
-            var tmTool = UIBase.GetTrafficManagerTool(true);
+            var tmTool = ModUI.GetTrafficManagerTool(true);
             if(tmTool == null) {
-                Log.Error("UIBase.GetTrafficManagerTool(true) returned null");
+                Log.Error("ModUI.GetTrafficManagerTool(true) returned null");
                 return;
             }
-            UIBase.EnableTool();
+            ModUI.EnableTool();
             MassEditOVerlay.Show = true;
             tmTool.InitializeSubTools();
         }
@@ -70,10 +72,10 @@ namespace TrafficManager.UI {
                 ShowMassEditOverlay();
             } else {
                 MassEditOVerlay.Show = false;
-                var tmTool = UIBase.GetTrafficManagerTool(false);
+                var tmTool = ModUI.GetTrafficManagerTool(false);
                 if (tmTool) {
                     tmTool.InitializeSubTools();
-                    UIBase.DisableTool();
+                    ModUI.DisableTool();
                 }
             }
         }
@@ -177,10 +179,11 @@ namespace TrafficManager.UI {
         public void Refresh(bool reset = false) {
             Log._Debug($"Refresh called Function mode is {Function}\n");
             if (reset) {
-                _function = FunctionMode.Clear;
-            }
-            foreach (var panel in panels ?? Enumerable.Empty<PanelExt>()) {
-                panel.Refresh();
+                _function = null;
+            } else {
+                foreach (var panel in panels ?? Enumerable.Empty<PanelExt>()) {
+                    panel.Refresh();
+                }
             }
         }
 
@@ -190,7 +193,7 @@ namespace TrafficManager.UI {
         public class PanelExt : UIPanel {
             public void Refresh() {
                 foreach (var button in buttons ?? Enumerable.Empty<ButtonExt>()) {
-                    button.UpdateProperties();
+                    button.UpdateButtonImageAndTooltip();
                 }
             }
 
@@ -272,7 +275,7 @@ namespace TrafficManager.UI {
                 }
             }
 
-            public abstract class ButtonExt : LinearSpriteButton {
+            public abstract class ButtonExt : BaseMenuButton {
                 public static readonly Texture2D RoadQuickEditButtons;
                 static ButtonExt() {
                     RoadQuickEditButtons = LoadDllResource("road-edit-btns.png", 22 * 50, 50);
@@ -285,7 +288,8 @@ namespace TrafficManager.UI {
                     height = Height;
                 }
 
-                public override void HandleClick(UIMouseEventParameter p) { throw new Exception("Unreachable code"); }
+                public override void OnClickInternal(UIMouseEventParameter p) =>
+                    throw new Exception("Unreachable code");
 
                 // Handles button click on activation. Apply traffic rules here.
                 public abstract void Do();
@@ -294,12 +298,12 @@ namespace TrafficManager.UI {
                 public abstract void Undo();
 
                 protected override void OnClick(UIMouseEventParameter p) {
-                    if (!Active) {
+                    if (!IsActive()) {
                         Root.Function = this.Function;
                         Do();
                         Root.ShowMassEditOverlay();
                     } else {
-                        Root.Function = FunctionMode.Clear;
+                        Root.Function = null;
                         Undo();
                         Root.ShowMassEditOverlay();
                     }
@@ -313,21 +317,14 @@ namespace TrafficManager.UI {
 
                 public override bool CanActivate() => true;
 
-                public override bool Active => Root.Function == this.Function;
-
-                public override bool CanDisable => true;
+                public override bool IsActive() => Root.Function == this.Function;
 
                 public override bool ShouldDisable => Length == 0;
 
-                public abstract FunctionMode Function { get; }
-
-                public override string FunctionName => Function.ToString();
-
-                public override string[] FunctionNames => Enum.GetNames(typeof(FunctionMode));
 
                 public override string ButtonName => "RoadQuickEdit_" + this.GetType().ToString();
 
-                public override Texture2D AtlasTexture => RoadQuickEditButtons;
+                public override skin
 
                 public override bool Visible => true;
 
