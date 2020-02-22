@@ -165,14 +165,15 @@ namespace TrafficManager.UI {
 
         public static void DisableTool() {
             Log._Debug("LoadingExtension.DisableTool: called");
-            if (ToolsModifierControl.toolController != null) {
+            if (ToolsModifierControl.toolController == null) {
+                Log.Warning("LoadingExtensions.DisableTool: ToolsModifierControl.toolController is null!");
+            } else if (tool == null) {
+                Log.Warning("LoadingExtensions.DisableTool: tool is null!");
+            } else if (ToolsModifierControl.toolController != tool) {
                 ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
                 ToolsModifierControl.SetTool<DefaultTool>();
-            } else {
-                Log.Warning("LoadingExtensions.DisableTool: ToolsModifierControl.toolController is null!");
             }
-    }
-
+        }
 
         internal static void ReleaseTool() {
             ToolMode = TrafficManagerMode.None;
