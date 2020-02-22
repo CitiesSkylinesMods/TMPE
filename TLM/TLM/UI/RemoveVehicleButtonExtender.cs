@@ -2,6 +2,9 @@
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System.Collections.Generic;
+    using TrafficManager.U;
+    using TrafficManager.U.Button;
+    using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.Textures;
     using UnityEngine;
 
@@ -57,11 +60,10 @@
             return button;
         }
 
-        public class RemoveVehicleButton : LinearSpriteButton {
+        public class RemoveVehicleButton : BaseUButton {
             public override void Start() {
                 base.Start();
-                width = Width;
-                height = Height;
+                width = height = MainMenuPanel.ScaledSize.GetButtonSize();
             }
 
             public override void HandleClick(UIMouseEventParameter p) {
@@ -77,23 +79,16 @@
                 }
             }
 
-            public override bool Active => false;
+            public override bool IsActive() => false;
 
-            public override Texture2D AtlasTexture => Textures.MainMenu.RemoveButton;
+            // public override Texture2D AtlasTexture => Textures.MainMenu.RemoveButton;
 
             public override string ButtonName => "RemoveVehicle";
 
-            public override string FunctionName => "RemoveVehicleNow";
+            public override string GetTooltip() =>
+                Translation.Menu.Get("Button:Remove this vehicle");
 
-            public override string[] FunctionNames => new[] { "RemoveVehicleNow" };
-
-            public override string Tooltip => Translation.Menu.Get("Button:Remove this vehicle");
-
-            public override bool Visible => true;
-
-            public override int Width => 30;
-
-            public override int Height => 30;
+            public override bool IsVisible() => true;
 
             public override bool CanActivate() {
                 return false;

@@ -5,10 +5,28 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.MainMenu;
     using UnityEngine;
 
-    public class UIBase : UICustomControl {
-        public UIMainMenuButton MainMenuButton { get; }
+    /// <summary>
+    /// Globally available UI manager class which contains the main menu button and the panel.
+    /// Access via ThreadingExtension.ModUi.
+    /// </summary>
+    public class ModUI : UICustomControl {
+        /// <summary>Singleton storage.</summary>
+        public static ModUI instance_;
 
-        public MainMenuPanel MainMenu { get; private set; }
+        /// <summary>Singleton accessor.</summary>
+        public static ModUI Instance {
+            get => instance_;
+        }
+
+        public static void SetSingletonInstance(ModUI newInstance) {
+            instance_ = newInstance;
+        }
+
+        /// <summary>Gets the floating draggable button which shows and hides TM:PE UI.</summary>
+        public UI.MainMenu.MainMenuButton MainMenuButton { get; }
+
+        /// <summary>Gets the floating tool panel with TM:PE tool buttons.</summary>
+        public UI.MainMenu.MainMenuPanel MainMenu { get; private set; }
 
 #if DEBUG
         public DebugMenuPanel DebugMenu { get; private set; }
@@ -32,7 +50,7 @@ namespace TrafficManager.UI {
 
         private bool _uiShown;
 
-        public UIBase() {
+        public ModUI() {
             Log._Debug("##### Initializing UIBase.");
 
             // Get the UIView object. This seems to be the top-level object for most
@@ -40,7 +58,7 @@ namespace TrafficManager.UI {
             UIView uiView = UIView.GetAView();
 
             // Add a new button to the view.
-            MainMenuButton = (UIMainMenuButton)uiView.AddUIComponent(typeof(UIMainMenuButton));
+            MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
 
             // add the menu
             MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
@@ -52,7 +70,7 @@ namespace TrafficManager.UI {
             ToolMode = TrafficManagerMode.None;
         }
 
-        ~UIBase() {
+        ~ModUI() {
             Log._Debug("UIBase destructor is called.");
             Destroy(MainMenuButton);
             Destroy(MainMenu);
@@ -72,24 +90,27 @@ namespace TrafficManager.UI {
         }
 
         internal void RebuildMenu() {
-            Close();
+            // Close();
 
             if (MainMenu != null) {
-                CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
-                if (keyHandler != null) {
-                    UnityEngine.Object.Destroy(keyHandler);
-                }
-
-                UnityEngine.Object.Destroy(MainMenu);
+//                 CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
+//                 if (keyHandler != null) {
+//                     UnityEngine.Object.Destroy(keyHandler);
+//                 }
+//
+//                 UnityEngine.Object.Destroy(MainMenu);
 #if DEBUG
-                UnityEngine.Object.Destroy(DebugMenu);
+                 UnityEngine.Object.Destroy(DebugMenu);
 #endif
+                 MainMenu.OnRescaleRequested();
             }
 
-            UIView uiView = UIView.GetAView();
-            MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
-            MainMenu.gameObject.AddComponent<CustomKeyHandler>();
+            // UIView uiView = UIView.GetAView();
+            // MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
+            // MainMenu.gameObject.AddComponent<CustomKeyHandler>();
+
 #if DEBUG
+            UIView uiView = UIView.GetAView();
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
 #endif
         }
@@ -101,8 +122,8 @@ namespace TrafficManager.UI {
                 Log.Error("Error on Show(): " + e);
             }
 
-            foreach (MenuButton button in GetMenu().Buttons) {
-                button.UpdateProperties();
+            foreach (BaseMenuButton button in GetMenu().Buttons) {
+                button.UpdateButtonImageAndTooltip();
             }
 
             GetMenu().Show();
@@ -114,7 +135,7 @@ namespace TrafficManager.UI {
 #endif
             SetToolMode(TrafficManagerMode.Activated);
             _uiShown = true;
-            MainMenuButton.UpdateSprites();
+            MainMenuButton.UpdateButtonImageAndTooltip();
             UIView.SetFocus(MainMenu);
         }
 
@@ -130,7 +151,7 @@ namespace TrafficManager.UI {
 
             SetToolMode(TrafficManagerMode.None);
             _uiShown = false;
-            MainMenuButton.UpdateSprites();
+            MainMenuButton.UpdateButtonImageAndTooltip();
         }
 
         internal MainMenuPanel GetMenu() {
@@ -144,7 +165,9 @@ namespace TrafficManager.UI {
 #endif
 
         public static void SetToolMode(TrafficManagerMode mode) {
-            if (mode == ToolMode) return;
+            if (mode == ToolMode) {
+                return;
+            }
 
             ToolMode = mode;
 
@@ -190,5 +213,11 @@ namespace TrafficManager.UI {
                 tool = null;
             } // end if
         } // end DestroyTool()
+
+        /// <summary>Called from settings window, when windows need rescaling because GUI scale
+        /// slider has changed.</summary>
+        public void NotifyGuiScaleChanged() {
+            MainMenu.OnRescaleRequested();
+        }
     }
 }
