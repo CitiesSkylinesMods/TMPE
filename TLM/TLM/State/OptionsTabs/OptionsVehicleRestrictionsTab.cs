@@ -277,7 +277,7 @@ namespace TrafficManager.State {
             Log._Debug($"banRegularTrafficOnBusLanes changed to {newValue}");
             Options.banRegularTrafficOnBusLanes = newValue;
             VehicleRestrictionsManager.Instance.ClearCache();
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         private static void OnHighwayRulesChanged(bool newHighwayRules) {
@@ -322,7 +322,7 @@ namespace TrafficManager.State {
             }
 
             Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
 
@@ -360,7 +360,7 @@ namespace TrafficManager.State {
             }
 
             Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         public static void SetAllowNearTurnOnRed(bool newValue) {
@@ -371,7 +371,7 @@ namespace TrafficManager.State {
             }
 
             Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         public static void SetAllowFarTurnOnRed(bool newValue) {
@@ -382,7 +382,7 @@ namespace TrafficManager.State {
             }
 
             Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         public static void SetAllowLaneChangesWhileGoingStraight(bool value) {
@@ -390,7 +390,7 @@ namespace TrafficManager.State {
             if (_allowLaneChangesWhileGoingStraightToggle != null)
                 _allowLaneChangesWhileGoingStraightToggle.isChecked = value;
             Constants.ManagerFactory.JunctionRestrictionsManager.UpdateAllDefaults();
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         public static void SetRelaxedBusses(bool newRelaxedBusses) {
@@ -453,7 +453,7 @@ namespace TrafficManager.State {
             }
 
             VehicleRestrictionsManager.Instance.ClearCache();
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
         public static void SetAddTrafficLightsIfApplicable(bool value) {

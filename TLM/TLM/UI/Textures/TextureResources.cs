@@ -17,8 +17,9 @@ namespace TrafficManager.UI.Textures {
 #endif
             try {
 #if DEBUG
-                if (debug)
+                if (debug) {
                     Log._Debug($"Loading DllResource {resourceName}");
+                }
 #endif
                 var myAssembly = Assembly.GetExecutingAssembly();
                 var myStream = myAssembly.GetManifestResourceStream("TrafficManager.Resources." + resourceName);

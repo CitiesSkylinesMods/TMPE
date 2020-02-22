@@ -247,6 +247,10 @@
     <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />
     <Compile Include="UI\Helpers\SerializableUIOptionBase.cs" />
     <Compile Include="UI\IncompatibleModsPanel.cs" />
+    <Compile Include="UI\MainMenu\BaseMenuButton.cs" />
+    <Compile Include="UI\MainMenu\BaseMenuToolModeButton.cs" />
+    <Compile Include="UI\MainMenu\MainMenuButton.cs" />
+    <Compile Include="UI\MainMenu\MainMenuLayout.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
@@ -261,12 +265,9 @@
     <Compile Include="UI\MainMenu\PrioritySignsButton.cs" />
     <Compile Include="UI\MainMenu\ManualTrafficLightsButton.cs" />
     <Compile Include="UI\MainMenu\LaneArrowsButton.cs" />
-    <Compile Include="UI\MainMenu\MenuToolModeButton.cs" />
     <Compile Include="UI\MainMenu\JunctionRestrictionsButton.cs" />
     <Compile Include="UI\MainMenu\DespawnButton.cs" />
     <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
-    <Compile Include="UI\MainMenu\MenuButton.cs" />
-    <Compile Include="UI\LinearSpriteButton.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
@@ -280,7 +281,6 @@
     <Compile Include="UI\TrafficManagerMode.cs" />
     <Compile Include="UI\Localization\LookupTable.cs" />
     <Compile Include="UI\Localization\Translation.cs" />
-    <Compile Include="UI\UIMainMenuButton.cs" />
     <Compile Include="UI\SubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
@@ -309,7 +309,6 @@
     <Compile Include="Util\RoadSelectionUtil.cs" />
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
-    <Compile Include="Util\TextureUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
     <Compile Include="State\SerializableDataExtension.cs" />
     <Compile Include="ThreadingExtension.cs" />
@@ -324,9 +323,18 @@
     <Compile Include="TrafficManagerMod.cs" />
     <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />
     <Compile Include="Manager\Impl\TrafficPriorityManager.cs" />
-    <Compile Include="UI\UIBase.cs" />
+    <Compile Include="UI\ModUI.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
+    <Compile Include="U\ControlActiveState.cs" />
+    <Compile Include="U\ControlHoveredState.cs" />
+    <Compile Include="U\ControlEnabledState.cs" />
+    <Compile Include="U\Button\BaseUButton.cs" />
+    <Compile Include="U\Button\ButtonFunction.cs" />
+    <Compile Include="U\Button\ButtonSkin.cs" />
+    <Compile Include="U\Panel\BaseUWindowPanel.cs" />
+    <Compile Include="U\TextureUtil.cs" />
+    <Compile Include="U\UIScaler.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\JunctionRestrictions\crossing_allowed.png" />
@@ -342,7 +350,6 @@
     <EmbeddedResource Include="Resources\JunctionRestrictions\uturn_allowed.png" />
     <EmbeddedResource Include="Resources\JunctionRestrictions\uturn_forbidden.png" />
     <EmbeddedResource Include="Resources\MainMenu\LegacyButtons.png" />
-    <EmbeddedResource Include="Resources\MainMenu\MenuButton.png" />
     <EmbeddedResource Include="Resources\MainMenu\noimage.png" />
     <EmbeddedResource Include="Resources\MainMenu\remove-btn.png" />
     <EmbeddedResource Include="Resources\MainMenu\WindowBackground.png" />
@@ -526,6 +533,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Traffic\Data\" />
+    <Folder Include="U\MainMenu" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Translations\JunctionRestrictions.csv" />
@@ -542,6 +550,40 @@
     <EmbeddedResource Include="Resources\TrafficLights\IconJunctionTrafficLights.png" />
     <EmbeddedResource Include="Resources\TrafficLights\IconJunctionTimedTL.png" />
     <EmbeddedResource Include="Resources\Translations\Guide.csv" />
+    <EmbeddedResource Include="Resources\MainMenu\MainMenuButton-bg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\MainMenuButton-bg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\MainMenuButton-bg-hovered.png" />
+    <EmbeddedResource Include="Resources\MainMenu\MainMenuButton-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\MainMenuButton-fg-hovered.png" />
+    <EmbeddedResource Include="Resources\MainMenu\MainMenuButton-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\ToggleTL-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\ToggleTL-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\ManualTL-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\ManualTL-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\TimedTL-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\TimedTL-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\LaneArrows-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\LaneArrows-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\LaneConnector-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\LaneConnector-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\ClearTraffic-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\ClearTraffic-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\RoundButton-bg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\RoundButton-bg-disabled.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\RoundButton-bg-hovered.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\RoundButton-bg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\TrafficDespawning-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\TrafficDespawning-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\ParkingRestrictions-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\ParkingRestrictions-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\SpeedLimits-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\SpeedLimits-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\JunctionRestrictions-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\JunctionRestrictions-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\PrioritySigns-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\PrioritySigns-fg-normal.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\VehicleRestrictions-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\VehicleRestrictions-fg-normal.png" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />

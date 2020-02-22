@@ -8,13 +8,17 @@ namespace TrafficManager.UI.Helpers {
     using ColossalFramework.UI;
 
     public sealed class ExtUITabstrip : UITabstrip {
+
+        public const float V_SCROLLBAR_WIDTH = 18f;
+        public const float TAB_STRIP_HEIGHT = 40f;
+
         private UIScrollbar CreateVerticalScrollbar(UIPanel panel, UIScrollablePanel scrollablePanel) {
             UIScrollbar verticalScrollbar = panel.AddUIComponent<UIScrollbar>();
             verticalScrollbar.name = "VerticalScrollbar";
-            verticalScrollbar.width = 20f;
+            verticalScrollbar.width = V_SCROLLBAR_WIDTH;
             verticalScrollbar.height = tabPages.height;
             verticalScrollbar.orientation = UIOrientation.Vertical;
-            verticalScrollbar.pivot = UIPivotPoint.TopRight;
+            verticalScrollbar.pivot = UIPivotPoint.TopLeft;
             verticalScrollbar.AlignTo(panel, UIAlignAnchor.TopRight);
             verticalScrollbar.minValue = 0;
             verticalScrollbar.value = 0;
@@ -33,7 +37,7 @@ namespace TrafficManager.UI.Helpers {
             thumbSprite.relativePosition = Vector2.zero;
             thumbSprite.fillDirection = UIFillDirection.Vertical;
             thumbSprite.autoSize = true;
-            thumbSprite.width = thumbSprite.parent.width - 8;
+            thumbSprite.width = thumbSprite.parent.width;
             thumbSprite.spriteName = "ScrollbarThumb";
             verticalScrollbar.thumbObject = thumbSprite;
 
@@ -63,7 +67,7 @@ namespace TrafficManager.UI.Helpers {
             scrollablePanel.autoLayoutPadding = new RectOffset(10, 10, 0, 16);
             scrollablePanel.autoLayoutStart = LayoutStart.TopLeft;
             scrollablePanel.wrapLayout = true;
-            scrollablePanel.size = new Vector2(panel.size.x - 50, panel.size.y + 35);
+            scrollablePanel.size = new Vector2(panel.size.x - V_SCROLLBAR_WIDTH, panel.size.y);
             scrollablePanel.autoLayoutDirection = LayoutDirection.Horizontal; //Vertical does not work but why?
 
             UIScrollbar verticalScrollbar = CreateVerticalScrollbar(panel, scrollablePanel);
@@ -102,17 +106,21 @@ namespace TrafficManager.UI.Helpers {
 
         public static ExtUITabstrip Create(UIHelperBase helperBase) {
             UIHelper actualHelper = helperBase as UIHelper;
-            UIComponent container = actualHelper.self as UIComponent;
+            UIComponent optionsContainer = actualHelper.self as UIComponent;
+            float orgOptsContainerWidth = optionsContainer.height;
+            float orgOptsContainerHeight = optionsContainer.width;
 
-            ExtUITabstrip tabStrip = container.AddUIComponent<ExtUITabstrip>();
+            int paddingRight = 10;//Options container is Scrollable panel itself(reserves space for scroll - which we don't use)
+            optionsContainer.size = new Vector2(orgOptsContainerWidth + paddingRight, orgOptsContainerHeight);
+
+            ExtUITabstrip tabStrip = optionsContainer.AddUIComponent<ExtUITabstrip>();
             tabStrip.relativePosition = new Vector3(0, 0);
-            tabStrip.size = new Vector2(container.width - 20, 40);
+            tabStrip.size = new Vector2(orgOptsContainerWidth, TAB_STRIP_HEIGHT);
 
-            float h = container.height - tabStrip.height * 2 - 40;
-            UITabContainer tabContainer = container.AddUIComponent<UITabContainer>();
-            tabContainer.relativePosition = new Vector3(0, 80);
-            tabContainer.width = tabStrip.width;
-            tabContainer.height = h;
+            UITabContainer tabContainer = optionsContainer.AddUIComponent<UITabContainer>();
+            tabContainer.relativePosition = new Vector3(0, TAB_STRIP_HEIGHT);
+            tabContainer.width = (orgOptsContainerWidth + paddingRight) - V_SCROLLBAR_WIDTH;
+            tabContainer.height = optionsContainer.height - (TAB_STRIP_HEIGHT - /*padding-top*/10 - /*margin-top*/ 10);
             tabStrip.tabPages = tabContainer;
 
             return tabStrip;

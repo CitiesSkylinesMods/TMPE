@@ -163,7 +163,7 @@ namespace TrafficManager.UI.SubTools {
             // even when the user lets go of the mass edit overlay hotkey.
             MassEditOVerlay.SetTimer(float.MaxValue);
 
-            UIBase.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
             RefreshCurrentPriorityNodeIds();
 
             // keep active for one more second so that the user
@@ -280,7 +280,7 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            if (UIBase.GetTrafficManagerTool(false)?.GetToolMode()
+            if (ModUI.GetTrafficManagerTool(false)?.GetToolMode()
                 == ToolMode.JunctionRestrictions)
             {
                 return;

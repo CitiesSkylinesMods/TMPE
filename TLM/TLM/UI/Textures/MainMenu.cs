@@ -4,7 +4,7 @@ namespace TrafficManager.UI.Textures {
 
     /// <summary>Textures for main menu button and main menu panel.</summary>
     public static class MainMenu {
-        public static readonly Texture2D MainMenuButton;
+        // public static readonly Texture2D MainMenuButton;
         public static readonly Texture2D MainMenuButtons;
         public static readonly Texture2D NoImage;
         public static readonly Texture2D RemoveButton;
@@ -15,8 +15,8 @@ namespace TrafficManager.UI.Textures {
             NoImage = LoadDllResource("MainMenu.noimage.png", 64, 64);
 
             // main menu icon
-            MainMenuButton = LoadDllResource("MainMenu.MenuButton.png", 300, 50);
-            MainMenuButton.name = "TMPE_MainMenuButtonIcon";
+            // MainMenuButton = LoadDllResource("MainMenu.MenuButton.png", 300, 50);
+            // MainMenuButton.name = "TMPE_MainMenuButtonIcon";
 
             // Main menu backgrounds, buttons, and highlighted buttons
             MainMenuButtons = LoadDllResource("MainMenu.LegacyButtons.png", 960, 50);

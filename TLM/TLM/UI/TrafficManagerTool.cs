@@ -88,10 +88,9 @@ namespace TrafficManager.UI {
         internal static Rect MoveGUI(Rect rect) {
             // x := main menu x + rect.x
             // y := main menu y + main menu height + rect.y
-            // TODO use current size profile
             return new Rect(
                 MainMenuPanel.DEFAULT_MENU_X + rect.x,
-                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.SIZE_PROFILES[1].MENU_HEIGHT + rect.y,
+                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.ScaledSize.GetHeight() + rect.y,
                 rect.width,
                 rect.height);
         }
@@ -373,9 +372,9 @@ namespace TrafficManager.UI {
             }
 
             // check if mouse is inside panel
-            if (LoadingExtension.BaseUI.GetMenu().containsMouse
+            if (ModUI.Instance.GetMenu().containsMouse
 #if DEBUG
-                || LoadingExtension.BaseUI.GetDebugMenu().containsMouse
+                || ModUI.Instance.GetDebugMenu().containsMouse
 #endif
             ) {
                 Log._Debug(
@@ -398,7 +397,6 @@ namespace TrafficManager.UI {
             // }
 
             if (_activeSubTool != null) {
-
                 if (primaryMouseClicked) {
                     _activeSubTool.OnPrimaryClickOverlay();
                 }
@@ -846,7 +844,7 @@ namespace TrafficManager.UI {
         }
 
         private static Vector3 prev_mousePosition;
-        private bool DetermineHoveredElements() {            
+        private bool DetermineHoveredElements() {
             if(prev_mousePosition == m_mousePosition) {
                 // if mouse ray is not changing use cached results.
                 // the assumption is that its practically impossible to change mouse ray
@@ -950,7 +948,7 @@ namespace TrafficManager.UI {
                         }
                     }
                 }
-                
+
                 if(HoveredSegmentId != 0) {
                     HitPos = segmentOutput.m_hitPos;
                 }
@@ -1022,7 +1020,7 @@ namespace TrafficManager.UI {
             if (Shortcuts.GetSeg(HoveredSegmentId).GetClosestLanePosition(
                 HitPos, NetInfo.LaneType.All, VehicleInfo.VehicleType.All,
                 out Vector3 pos, out uint laneID, out int laneIndex, out float laneOffset)) {
-                
+
                 return prev_H_Fixed = pos.y;
             }
             return prev_H_Fixed = HitPos.y + 0.5f;

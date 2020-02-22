@@ -45,7 +45,7 @@ namespace TrafficManager.UI.Helpers {
             // maximum vertical postion of the bezier.
             float maxH = Mathf.Max(Bezier.a.y, Bezier.d.y);
 
-            float mouseH = UIBase.GetTrafficManagerTool(false).MousePosition.y;
+            float mouseH = ModUI.GetTrafficManagerTool(false).MousePosition.y;
 
             if ((hitH == prev_H || hitH == maxH || prev_H == mouseH) && bounds != null) {
                 // use cached results if mouse has not moved or hitH is ignored.
