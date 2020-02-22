@@ -90,7 +90,9 @@ namespace TrafficManager.UI {
         private IList<PanelExt> panels;
         private UIComponent priorityRoadToggle;
 
-        public void OnDestroy() { 
+        public void OnDestroy() {
+            Log._Debug("PanelExt OnDestroy() called");
+
             if (roadSelectionUtil_ != null) {
                 roadSelectionUtil_ = null;
                 RoadSelectionUtil.Release();
@@ -107,8 +109,6 @@ namespace TrafficManager.UI {
                         Destroy(panel.gameObject); 
                     }
                 }
-                panels.Clear();
-                panels = null; 
             }
         }
 
@@ -123,23 +123,21 @@ namespace TrafficManager.UI {
         }
 
         public void Start() {
+            Log._Debug("PanelExt Start() called");
             panels = new List<PanelExt>();
 
             // attach an instance of road selection panel to RoadWorldInfoPanel.
             RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
-            return;
             if (roadWorldInfoPanel != null) {
                 PanelExt panel = AddPanel(roadWorldInfoPanel.component);
                 panel.relativePosition += new Vector3(-10f, -10f);
-                //priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
+                priorityRoadToggle = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
                 if (priorityRoadToggle != null) {
                     priorityRoadToggle.eventVisibilityChanged += HidePriorityRoadToggle;
                 }
 
-                //panel.eventVisibilityChanged += ShowAdvisorOnEvent;
+                panel.eventVisibilityChanged += ShowAdvisorOnEvent;
             }
-            return;
-
 
             // attach another instance of road selection panel to AdjustRoad tab.
             UIPanel roadAdjustPanel = UIView.Find<UIPanel>("AdjustRoad");
@@ -150,7 +148,7 @@ namespace TrafficManager.UI {
             }
 
             // every time user changes the road selection, all buttons will go back to inactive state.
-            //roadSelectionUtil_ = new RoadSelectionUtil();
+            roadSelectionUtil_ = new RoadSelectionUtil();
             if (roadSelectionUtil_ != null) { 
                 roadSelectionUtil_.OnChanged += RefreshOnEvent;
             }
@@ -163,7 +161,7 @@ namespace TrafficManager.UI {
         private PanelExt AddPanel(UIComponent container) {
             UIView uiview = UIView.GetAView();
             PanelExt panel = uiview.AddUIComponent(typeof(PanelExt)) as PanelExt;
-            panel.TopContainer = this;
+            panel.Root = this;
             panel.width = 210;
             panel.height = 50;
             panel.AlignTo(container, UIAlignAnchor.BottomLeft);
@@ -197,7 +195,7 @@ namespace TrafficManager.UI {
             }
 
             /// Container of this panel.
-            public RoadSelectionPanels TopContainer;
+            public RoadSelectionPanels Root;
 
             /// list of buttons contained in this panel.
             public IList<ButtonExt> buttons;
@@ -215,20 +213,6 @@ namespace TrafficManager.UI {
                 buttons.Add(AddUIComponent<YieldButton>());
                 buttons.Add(AddUIComponent<HighPrioirtyButtton>());
                 buttons.Add(AddUIComponent<RAboutButtton>());
-            }
-
-            public override void OnDestroy() {
-                Log._Debug("KIAN DEBUG> PanelExt.OnDestroy() called");
-                if (buttons != null) {
-                    foreach (UIButton button in buttons) {
-                        if (button != null) {
-                            Destroy(button);
-                        }
-                    }
-                    buttons.Clear();
-                    buttons = null;
-                }
-				base.OnDestroy();
             }
 
             public class ClearButtton : ButtonExt {

@@ -9,8 +9,6 @@ namespace TrafficManager.UI {
         private IList<UIButton> buttons;
 
         public void Start() {
-            Log._Debug("KIAN DEBUG> RemoveVehicleButtonExtender.Start() called");
-
             buttons = new List<UIButton>();
 
             var citizenVehicleInfoPanel
@@ -39,7 +37,6 @@ namespace TrafficManager.UI {
         }
 
         public void OnDestroy() {
-            Log._Debug("KIAN DEBUG> RemoveVehicleButtonExtender.OnDestroy() called");
             if (buttons == null) {
                 return;
             }
