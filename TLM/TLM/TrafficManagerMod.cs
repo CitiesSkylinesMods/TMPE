@@ -57,11 +57,13 @@ namespace TrafficManager {
         /// <summary>
         /// Gets the mod name, which is shown in Content Manager > Mods, and also Options > Mod Settings.
         /// </summary>
+        [UsedImplicitly]
         public string Name => ModName;
 
         /// <summary>
         /// Gets the description of the mod shown in Content Manager > Mods.
         /// </summary>
+        [UsedImplicitly]
         public string Description => "Manage your city's traffic";
 
         /// <summary>

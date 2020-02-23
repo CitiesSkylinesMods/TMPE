@@ -13,9 +13,8 @@ namespace TrafficManager.Compatibility.GUI {
     using UnityEngine;
 
     /// <summary>
-    /// I literally hate CO UI. It's not just designed by someone who merely didn't like UI,
-    /// it's designed by someone who wanted to punish anyone who does like UI. It is a form
-    /// of unwelcome and non-consensual sadism that must be purged from the universe.
+    /// Given a list of problem mods, this handles the UI to resolve those issues by
+    /// unsubscribing, disabling, etc.
     /// </summary>
     public class ProcessIncompatibleMods : UIPanel {
         private UILabel title_;
@@ -24,6 +23,7 @@ namespace TrafficManager.Compatibility.GUI {
         private UIPanel mainPanel_;
         private UICheckBox runModsCheckerOnStartup_;
         private UIComponent blurEffect_;
+        private UIScrollablePanel scrollPanel_;
 
         /// <summary>
         /// Gets or sets list of incompatible mods.
@@ -67,55 +67,18 @@ namespace TrafficManager.Compatibility.GUI {
             panel.relativePosition = new Vector2(20, 70);
             panel.size = new Vector2(565, 320);
 
+            /*
             UIHelper helper = new UIHelper(mainPanel_);
             string checkboxLabel = Translation.ModConflicts.Get("Checkbox:Scan for known incompatible mods on startup");
             runModsCheckerOnStartup_ = helper.AddCheckbox(
                                           checkboxLabel,
                                           GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,
                                           RunModsCheckerOnStartup_eventCheckChanged) as UICheckBox;
+
             runModsCheckerOnStartup_.relativePosition = new Vector3(20, height - 30f);
+            */
 
-            UIScrollablePanel scrollablePanel = panel.AddUIComponent<UIScrollablePanel>();
-            scrollablePanel.backgroundSprite = string.Empty;
-            scrollablePanel.size = new Vector2(550, 340);
-            scrollablePanel.relativePosition = new Vector3(0, 0);
-            scrollablePanel.clipChildren = true;
-            scrollablePanel.autoLayoutStart = LayoutStart.TopLeft;
-            scrollablePanel.autoLayoutDirection = LayoutDirection.Vertical;
-            scrollablePanel.autoLayout = true;
-
-            // Populate list of incompatible mods
-            if (IncompatibleMods.Count != 0) {
-                IncompatibleMods.ForEach(
-                    pair => { CreateEntry(ref scrollablePanel, pair.Value, pair.Key); });
-            }
-
-            scrollablePanel.FitTo(panel);
-            scrollablePanel.scrollWheelDirection = UIOrientation.Vertical;
-            scrollablePanel.builtinKeyNavigation = true;
-
-            UIScrollbar verticalScroll = panel.AddUIComponent<UIScrollbar>();
-            verticalScroll.stepSize = 1;
-            verticalScroll.relativePosition = new Vector2(panel.width - 15, 0);
-            verticalScroll.orientation = UIOrientation.Vertical;
-            verticalScroll.size = new Vector2(20, 320);
-            verticalScroll.incrementAmount = 25;
-            verticalScroll.scrollEasingType = EasingType.BackEaseOut;
-
-            scrollablePanel.verticalScrollbar = verticalScroll;
-
-            UISlicedSprite track = verticalScroll.AddUIComponent<UISlicedSprite>();
-            track.spriteName = "ScrollbarTrack";
-            track.relativePosition = Vector3.zero;
-            track.size = new Vector2(16, 320);
-
-            verticalScroll.trackObject = track;
-
-            UISlicedSprite thumb = track.AddUIComponent<UISlicedSprite>();
-            thumb.spriteName = "ScrollbarThumb";
-            thumb.autoSize = true;
-            thumb.relativePosition = Vector3.zero;
-            verticalScroll.thumbObject = thumb;
+            scrollPanel_ = AddScrollPanel(panel);
 
             blurEffect_ = AddBlurEffect(resolution);
 
@@ -154,6 +117,54 @@ namespace TrafficManager.Compatibility.GUI {
             btn.pressedBgSprite = "buttonclosepressed";
 
             return btn;
+        }
+
+        private UIScrollablePanel AddScrollPanel(UIPanel panel) {
+            UIScrollablePanel scroll = panel.AddUIComponent<UIScrollablePanel>();
+            scroll.backgroundSprite = string.Empty;
+            scroll.size = new Vector2(550, 340);
+            scroll.relativePosition = new Vector3(0, 0);
+            scroll.clipChildren = true;
+            scroll.autoLayoutStart = LayoutStart.TopLeft;
+            scroll.autoLayoutDirection = LayoutDirection.Vertical;
+            scroll.autoLayout = true;
+
+            /*
+            if (IncompatibleMods.Count != 0) {
+                IncompatibleMods.ForEach(
+                    pair => { CreateEntry(ref scrollablePanel, pair.Value, pair.Key); });
+            }
+            */
+
+            scroll.FitTo(panel);
+            scroll.scrollWheelDirection = UIOrientation.Vertical;
+            scroll.builtinKeyNavigation = true;
+
+            UIScrollbar verticalScroll = panel.AddUIComponent<UIScrollbar>();
+            verticalScroll.stepSize = 1;
+            verticalScroll.relativePosition = new Vector2(panel.width - 15, 0);
+            verticalScroll.orientation = UIOrientation.Vertical;
+            verticalScroll.size = new Vector2(20, 320);
+            verticalScroll.incrementAmount = 25;
+            verticalScroll.scrollEasingType = EasingType.BackEaseOut;
+
+            scroll.verticalScrollbar = verticalScroll;
+
+            UISlicedSprite track = verticalScroll.AddUIComponent<UISlicedSprite>();
+            track.spriteName = "ScrollbarTrack";
+            track.relativePosition = Vector3.zero;
+            track.size = new Vector2(16, 320);
+
+            verticalScroll.trackObject = track;
+
+            UISlicedSprite thumb = track.AddUIComponent<UISlicedSprite>();
+            thumb.spriteName = "ScrollbarThumb";
+            thumb.autoSize = true;
+            thumb.relativePosition = Vector3.zero;
+
+            verticalScroll.thumbObject = thumb;
+
+            return scroll;
         }
 
         private UIComponent AddBlurEffect(Vector2 resolution) {
@@ -196,16 +207,6 @@ namespace TrafficManager.Compatibility.GUI {
             }
 
             base.OnKeyDown(eventparam);
-        }
-
-        /// <summary>
-        /// Hnadles click of the "Run incompatible check on startup" checkbox and updates game options accordingly.
-        /// </summary>
-        ///
-        /// <param name="value">The new value of the checkbox; <c>true</c> if checked, otherwise <c>false</c>.</param>
-        private void RunModsCheckerOnStartup_eventCheckChanged(bool value) {
-            Log._Debug("Incompatible mods checker run on game launch changed to " + value);
-            OptionsGeneralTab.SetScanForKnownIncompatibleMods(value);
         }
 
         /// <summary>

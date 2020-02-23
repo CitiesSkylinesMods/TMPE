@@ -14,12 +14,11 @@ namespace TrafficManager.Compatibility {
     /// <summary>
     /// Manages pre-flight checks for known incompatible mods.
     /// </summary>
-    public static class CompatibilityManager {
+    public class CompatibilityManager {
 
         /// <summary>
         /// The Guid of the executing assembly (used to filter self from incompatibility checks).
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "RAS0002:Readonly field for a non-readonly struct", Justification = "Rarely used.")]
         public static readonly Guid SelfGuid;
 
         /// <summary>
@@ -50,31 +49,54 @@ namespace TrafficManager.Compatibility {
         /// Run checks when possible to do so.
         /// </summary>
         public static void Activate() {
-            // Abort if this is an in-game hotload
-            // todo
-
-            if (UIView.GetAView() != null) {
-                Log.Info("CompatibilityManager.Activate()");
-                paused_ = false;
-                PerformChecks();
-            } else {
-                Log.Info("CompatibilityManager.Activate(): Waiting for main menu...");
+            // Abort if this is an in-game hot reload
+            if (SceneManager.GetActiveScene().name == "Game") {
                 paused_ = true;
-                LoadingManager.instance.m_introLoaded += OnIntroLoaded;
+                return;
             }
 
-            SceneManager.activeSceneChanged += OnSceneChanged;
+            Log._Debug("CompatibilityManager.Activate()");
+
+            paused_ = UIView.GetAView() == null;
+
+            if (paused_) {
+                Log._Debug("- Waiting for main menu...");
+            } else {
+                PerformChecks();
+            }
+
+            SetEvents(true);
         }
 
         /// <summary>
         /// Remove event listeners.
         /// </summary>
         public static void Deactivate() {
-            Log.Info("CompatibilityManager.Deactivate()");
+            Log._Debug("CompatibilityManager.Deactivate()");
+
+            paused_ = true;
+
+            SetEvents(false);
+        }
+
+        /// <summary>
+        /// Removes all event listeners and, optionally, add all event listeners.
+        /// </summary>
+        /// 
+        /// <param name="active">If <c>true</c> then event listeners are added.</param>
+        private static void SetEvents(bool active) {
+
             SceneManager.activeSceneChanged -= OnSceneChanged;
             LoadingManager.instance.m_introLoaded -= OnIntroLoaded;
             Singleton<PluginManager>.instance.eventPluginsChanged -= OnPluginsChanged;
             Singleton<PluginManager>.instance.eventPluginsStateChanged -= OnPluginsChanged;
+
+            if (active) {
+                SceneManager.activeSceneChanged += OnSceneChanged;
+                LoadingManager.instance.m_introLoaded += OnIntroLoaded;
+                Singleton<PluginManager>.instance.eventPluginsChanged += OnPluginsChanged;
+                Singleton<PluginManager>.instance.eventPluginsStateChanged += OnPluginsChanged;
+            }
         }
 
         /// <summary>
@@ -126,7 +148,6 @@ namespace TrafficManager.Compatibility {
             if (restartRequired_) {
                 autoContinue_ = false;
             } else {
-                ListenForPluginChanges();
                 ResumeLauncherAutoContinue();
             }
         }
@@ -135,6 +156,8 @@ namespace TrafficManager.Compatibility {
         /// Triggered when app intro screens have finished.
         /// </summary>
         private static void OnIntroLoaded() {
+            Log._Debug("CompatibilityManager.OnIntroLoaded()");
+
             LoadingManager.instance.m_introLoaded -= OnIntroLoaded;
             paused_ = false;
             PerformChecks();
@@ -144,6 +167,8 @@ namespace TrafficManager.Compatibility {
         /// Triggered by plugin subscription/state change.
         /// </summary>
         private static void OnPluginsChanged() {
+            Log._Debug("CompatibilityManager.OnPluginsChanged()");
+
             if (!paused_) {
                 PerformChecks();
             }
@@ -153,48 +178,30 @@ namespace TrafficManager.Compatibility {
         /// Triggered by scene changes.
         /// </summary>
         /// 
-        /// <param name="current">The current <see cref="Scene"/> (seems to always be empty).</param>
+        /// <param name="current">The current <see cref="Scene"/> (usually empty).</param>
         /// <param name="next">The <see cref="Scene"/> being transitioned to.</param>
         private static void OnSceneChanged(Scene current, Scene next) {
-            Log.InfoFormat(
-                "CompatibilityManager.OnSceneChange('{0}','{1}')",
+            Log._DebugFormat(
+                "CompatibilityManager.OnSceneChanged('{0}','{1}')",
                 current.name,
                 next.name);
 
             paused_ = next.name != "MainMenu";
         }
 
-        /// <summary>
-        /// Adds listener for plugin manager subscription/state change events.
-        /// </summary>
-        private static void ListenForPluginChanges() {
-            Log.Info("CompatibilityManager.ListenForSubscriptionChange()");
-
-            // clear old listener if present (is this necessary? don't know enough about C# events)
-            Singleton<PluginManager>.instance.eventPluginsChanged -= OnPluginsChanged;
-            Singleton<PluginManager>.instance.eventPluginsStateChanged -= OnPluginsChanged;
-
-            // add listener
-            Singleton<PluginManager>.instance.eventPluginsChanged += OnPluginsChanged;
-            Singleton<PluginManager>.instance.eventPluginsStateChanged += OnPluginsChanged;
-        }
-
         /*
         private static bool CanWeDoStuff() {
             if (SceneManager.GetActiveScene().name == "MainMenu") {
-                Log.Info("CompatibilityManager.CanWeDoStuff()? Yes, 'MainMenu' scene");
                 return true;
             }
 
             // make sure we're not loading a game/asset/etc
             if (Singleton<LoadingManager>.instance.m_currentlyLoading) {
-                Log.Info("CompatibilityManager.CanWeDoStuff()? No; currently loading");
                 return false;
             }
 
             // make sure we're not exiting to desktop
             if (Singleton<LoadingManager>.instance.m_applicationQuitting) {
-                Log.Info("CompatibilityManager.CanWeDoStuff()? No; currently quitting");
                 return false;
             }
 
@@ -207,7 +214,8 @@ namespace TrafficManager.Compatibility {
         /// Otherwise the user will not see any compatibility warnings.
         /// </summary>
         private static void StopLauncherAutoContinue() {
-            Log.Info("CompatibilityManager.PreventAutoContinue()");
+            Log._Debug("CompatibilityManager.StopLauncherAutoContinue()");
+
             try {
                 autoContinue_ = LauncherLoginData.instance.m_continue;
                 LauncherLoginData.instance.m_continue = false;
@@ -221,8 +229,8 @@ namespace TrafficManager.Compatibility {
         /// Auto-load most recent save if the launcher was set to autocontinue.
         /// </summary>
         private static void ResumeLauncherAutoContinue() {
-            Log.InfoFormat(
-                "CompatibilityManager.ResumeAutoContinue() {0}",
+            Log._DebugFormat(
+                "CompatibilityManager.ResumeLauncherAutoContinue() {0}",
                 autoContinue_);
 
             if (autoContinue_) {
@@ -245,16 +253,15 @@ namespace TrafficManager.Compatibility {
         /// Exits the game to desktop.
         /// </summary>
         private static void ExitToDesktop() {
-            if (paused_) {
+            if (paused_ || Singleton<LoadingManager>.instance.m_applicationQuitting) {
                 return;
             }
 
-            // Check we're not already quitting
-            if (Singleton<LoadingManager>.instance.m_applicationQuitting) {
-                return;
-            }
+            Log._Debug("CompatibilityManager.ExitToDesktop()");
 
             paused_ = true;
+
+            SetEvents(false);
 
             Singleton<LoadingManager>.instance.QuitApplication();
         }

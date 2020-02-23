@@ -1,5 +1,7 @@
 namespace TrafficManager.Compatibility {
     using CSUtil.Commons;
+    using JetBrains.Annotations;
+    using System;
     using System.Collections.Generic;
     using TrafficManager.Compatibility.Enum;
 
@@ -7,12 +9,12 @@ namespace TrafficManager.Compatibility {
     /// A list of incompatible mods.
     /// </summary>
     public class IncompatibleMods {
-        private static IncompatibleMods instance;
+        private static IncompatibleMods instance_;
 
         /// <summary>
         /// Gets the instance of the incompatible mods list.
         /// </summary>
-        public static IncompatibleMods Instance => instance ?? (instance = new IncompatibleMods());
+        public static IncompatibleMods Instance => instance_ ?? (instance_ = new IncompatibleMods());
 
         /// <summary>
         /// The list of incompatible mods.
@@ -23,6 +25,13 @@ namespace TrafficManager.Compatibility {
         /// Initializes a new instance of the <see cref="IncompatibleMods"/> class.
         /// </summary>
         public IncompatibleMods() {
+
+            Version csl_1_12_3 = new Version(1, 12, 3);
+
+            Severity severity_10_20 = Check.Versions.GetGameVersion().Equals(csl_1_12_3)
+                ? Severity.TMPE
+                : Severity.Critical;
+
             List = new Dictionary<ulong, Severity>() {
                 // Note: TM:PE v10.20 not currently listed as lots of users still use it
                 // It will be picked up by duplicate assemblies detector
@@ -30,7 +39,7 @@ namespace TrafficManager.Compatibility {
                 // Valid versions of TM:PE
                 // If more than one is found, user will have to choose only one and the
                 // others will be removed to prevent zombie assembly save/load issues.
-                { 583429740u,  Severity.TMPE }, // v10.20 STABLE (will become obsolete after next game update)
+                { 583429740u , severity_10_20 }, // v10.20 STABLE
                 { 1637663252u, Severity.TMPE }, // v11 STABLE
                 { 1806963141u, Severity.TMPE }, // v11 LABS
 
@@ -126,9 +135,15 @@ namespace TrafficManager.Compatibility {
                 { 532863263u, Severity.Minor }, // Multi-track Station Enabler
                 { 442957897u, Severity.Minor }, // Multi-track Station Enabler
             };
+
             Log.InfoFormat(
                 "Compatibility.IncompatibleMods.List contains {0} item(s)",
                 List.Count);
+        }
+
+        [UsedImplicitly]
+        ~IncompatibleMods() {
+            List.Clear();
         }
     }
 }
