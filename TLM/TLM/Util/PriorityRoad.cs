@@ -594,6 +594,8 @@ namespace TrafficManager.Util {
         }
 
         public static void ClearNode(ushort nodeId) {
+            TrafficPriorityManager TPMan = Constants.ManagerFactory.TrafficPriorityManager as TrafficPriorityManager;
+            IJunctionRestrictionsManager JPMan = Constants.ManagerFactory.JunctionRestrictionsManager;
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
             netService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment seg) => {
                 ref NetNode node = ref GetNode(nodeId);

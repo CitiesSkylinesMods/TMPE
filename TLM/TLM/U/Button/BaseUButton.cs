@@ -1,11 +1,10 @@
-namespace TrafficManager.U.Button {
+﻿namespace TrafficManager.U.Button {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State.Keybinds;
     using TrafficManager.UI.Textures;
     using UnityEngine;
-    using TrafficManager.State.ConfigData;
 
     /// <summary>
     /// A smart button which can change its foreground and background textures based on its state,
@@ -59,7 +58,6 @@ namespace TrafficManager.U.Button {
                 // No skin, no textures, nothing to be updated
                 return;
             }
-
             ControlActiveState activeState = CanActivate() && IsActive() ?
                 ControlActiveState.Active : ControlActiveState.Normal;
             ControlEnabledState enabledState =

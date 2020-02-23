@@ -343,12 +343,11 @@ namespace TrafficManager {
 
                 var gameObject = UIView.GetAView().gameObject;
 
-                void Destroy<T>()
-                    where T : MonoBehaviour
+                void Destroy<T>() where T : MonoBehaviour
                 {
                     Object obj = (Object)gameObject.GetComponent<T>();
                     if (obj != null) {
-                        Object.Destroy(obj, 10f);
+                        Object.Destroy(obj);
                     }
                 }
 
