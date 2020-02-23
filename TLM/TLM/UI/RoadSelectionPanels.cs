@@ -212,7 +212,6 @@ namespace TrafficManager.UI {
                 autoLayoutDirection = LayoutDirection.Horizontal;
                 padding = new RectOffset(1, 1, 1, 1);
                 autoLayoutPadding = new RectOffset(5, 5, 5, 5);
-
                 buttons = new List<ButtonExt>();
                 buttons.Add(AddUIComponent<ClearButtton>());
                 buttons.Add(AddUIComponent<StopButtton>());
@@ -309,14 +308,13 @@ namespace TrafficManager.UI {
             }
 
             public abstract class ButtonExt : BaseMenuButton {
-                public static readonly Texture2D RoadQuickEditButtons;
-                static ButtonExt() {
-                    RoadQuickEditButtons = LoadDllResource("road-edit-btns.png", 22 * 50, 50);
-                    RoadQuickEditButtons.name = "TMPE_RoadQuickEdit";
+                public override void Start() {
+                    base.Start();
+                    width = Width;
+                    height = Height;
                 }
 
-                public override void Awake() {
-                    base.Awake();
+                public override void SetupButtonSkin(HashSet<string> atlasKeys) {
                     Skin = new U.Button.ButtonSkin() {
                         Prefix = SkinPrefix,
 
@@ -330,15 +328,6 @@ namespace TrafficManager.UI {
                         ForegroundActive = false,
                         ForegroundDisabled = true,
                     };
-                }
-
-                public override void Start() {
-                    base.Start();
-                    width = Width;
-                    height = Height;
-                }
-
-                public override void SetupButtonSkin(HashSet<string> atlasKeys) {
                     atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
                 }
 
@@ -386,6 +375,10 @@ namespace TrafficManager.UI {
 
                 public virtual string SkinPrefix => Function.Name;
 
+
+                public override void Awake() {
+                    base.Awake();
+                }
                 public int Width => 40;
 
                 public int Height => 40;
