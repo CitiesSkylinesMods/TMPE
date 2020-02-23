@@ -128,5 +128,29 @@
 
             return atlas;
         }
+
+        /// <summary>Creates new texture with changed alpha transparency for every pixel.</summary>
+        /// <param name="tex">Copy from.</param>
+        /// <param name="alpha">New alpha.</param>
+        /// <returns>New texture.</returns>
+        public static Texture2D AdjustAlpha(Texture2D tex, float alpha) {
+            Color[] texColors = tex.GetPixels();
+            Color[] retPixels = new Color[texColors.Length];
+
+            for (int i = 0; i < texColors.Length; ++i) {
+                retPixels[i] = new Color(
+                    texColors[i].r,
+                    texColors[i].g,
+                    texColors[i].b,
+                    texColors[i].a * alpha);
+            }
+
+            Texture2D ret = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
+
+            ret.SetPixels(retPixels);
+            ret.Apply();
+
+            return ret;
+        }
     } // end class
 }

@@ -2,6 +2,7 @@ namespace TrafficManager.UI {
     using System;
     using ColossalFramework.UI;
     using JetBrains.Annotations;
+    using TrafficManager.U;
     using UnityEngine;
 
     [Obsolete("Refactor tools to the new TrafficManagerSubTool class instead of LegacySubTool")]
@@ -11,7 +12,7 @@ namespace TrafficManager.UI {
         private Texture2D WindowTexture {
             get {
                 if (windowTexture_ == null) {
-                    windowTexture_ = TrafficManagerTool.AdjustAlpha(
+                    windowTexture_ = TextureUtil.AdjustAlpha(
                         Textures.MainMenu.WindowBackground,
                         TrafficManagerTool.GetWindowAlpha());
                 }
@@ -113,10 +114,13 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// Called whenever the
+        /// Called whenever the mouse left click happened on the world, while the tool was active.
         /// </summary>
         public abstract void OnPrimaryClickOverlay();
 
+        /// <summary>
+        /// Called whenever the mouse right click happened on the world, while the tool was active.
+        /// </summary>
         public virtual void OnSecondaryClickOverlay() { }
 
         public virtual void OnToolGUI(Event e) {

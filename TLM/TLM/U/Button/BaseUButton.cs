@@ -1,10 +1,6 @@
 ﻿namespace TrafficManager.U.Button {
-    using System.Collections.Generic;
     using ColossalFramework.UI;
-    using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State.Keybinds;
-    using TrafficManager.UI.Textures;
-    using UnityEngine;
 
     /// <summary>
     /// A smart button which can change its foreground and background textures based on its state,

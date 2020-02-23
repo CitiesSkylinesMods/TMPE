@@ -44,5 +44,15 @@ namespace TrafficManager.UI {
         /// <summary>Called every frame to display tool-specific overlay.</summary>
         /// <param name="cameraInfo">Camera.</param>
         public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo);
+
+        /// <summary>
+        /// Called whenever the mouse left click happened on the world, while the tool was active.
+        /// </summary>
+        public abstract void OnToolLeftClick();
+
+        /// <summary>
+        /// Called whenever the mouse right click happened on the world, while the tool was active.
+        /// </summary>
+        public abstract void OnToolRightClick();
     }
 }

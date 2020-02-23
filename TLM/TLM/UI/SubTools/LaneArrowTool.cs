@@ -1,9 +1,11 @@
 namespace TrafficManager.UI.SubTools {
+    using System;
     using ColossalFramework;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using ColossalFramework.UI;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
@@ -13,10 +15,133 @@ namespace TrafficManager.UI.SubTools {
     using Debug = UnityEngine.Debug;
 
     public class LaneArrowTool : TrafficManagerSubTool {
+        /// <summary>Tool states.</summary>
+        private enum State {
+            /// <summary>Waiting for user to select a half segment.</summary>
+            Select,
+
+            /// <summary>Showing GUI for the lane arrows and letting user click.</summary>
+            EditLaneArrows,
+
+            /// <summary>The tool is switched off.</summary>
+            ToolDisabled,
+        }
+
+        /// <summary>Events which trigger state transitions.</summary>
+        private enum Trigger {
+            SegmentClick,
+            RightMouseClick,
+            EscapeKey,
+        }
+
+        /// <summary>Finite State machine for the tool.</summary>
+        private Util.GenericFsm<State, Trigger> fsm_;
+
+        [Obsolete("Avoid using, replace with different logic")]
         private bool cursorInSecondaryPanel_;
 
+        /// <summary>If exists, contains tool panel floating on the selected node.</summary>
+        private U.Panel.BaseUWindowPanel ToolWindow { get; set; }
+
         public LaneArrowTool(TrafficManagerTool mainTool)
-            : base(mainTool) { }
+            : base(mainTool) {
+            fsm_ = new Util.GenericFsm<State, Trigger>(State.Select);
+        }
+
+
+        /// <summary>
+        /// Creates FSM ready to begin editing. Or recreates it when ESC is pressed
+        /// and the tool is canceled.
+        /// </summary>
+        /// <returns>The new FSM in the initial state.</returns>
+        private Util.GenericFsm<State, Trigger> InitFiniteStateMachine() {
+            var fsm = new Util.GenericFsm<State, Trigger>(State.Select);
+
+            // From Select mode, user can either click a segment, or Esc/rightclick to quit
+            fsm.Configure(State.Select)
+               .OnEntry(
+                   () => {
+                       SelectedNodeId = 0;
+                       SelectedSegmentId = 0;
+                   })
+               .Permit(Trigger.SegmentClick, State.EditLaneArrows)
+               .Permit(Trigger.RightMouseClick, State.ToolDisabled)
+               .Permit(Trigger.EscapeKey, State.ToolDisabled);
+
+            fsm.Configure(State.EditLaneArrows)
+               .OnEntry(this.OnEnterEditorState)
+               .OnLeave(this.OnLeaveEditorState)
+               .Permit(Trigger.RightMouseClick, State.Select)
+               .Permit(Trigger.EscapeKey, State.Select);
+
+            fsm.Configure(State.ToolDisabled)
+               .OnEntry(
+                   () => {
+                       // We are done here, leave the tool.
+                       // This will result in this.DeactivateTool being called.
+                       // MainTool.SetToolMode(ToolMode.None);
+                       ModUI.Instance.MainMenu.ClickToolButton(ToolMode.LaneArrows);
+                   });
+
+            return fsm;
+        }
+
+        /// <summary>Called from GenericFsm when a segment is clicked to show lane arrows GUI.</summary>
+        private void OnEnterEditorState() {
+            int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(
+                SelectedSegmentId,
+                SelectedNodeId,
+                out int numDirections,
+                LaneArrowManager.VEHICLE_TYPES);
+
+            if (numLanes <= 0) {
+                SelectedNodeId = 0;
+                SelectedSegmentId = 0;
+                return;
+            }
+
+            Vector3 nodePos = Singleton<NetManager>
+                              .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
+
+            // Hide if node position is off-screen
+
+            bool visible = MainTool.WorldToScreenPoint(nodePos, out Vector3 screenPos);
+
+            // if (!visible) {
+                // return;
+            // }
+
+            Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+            Vector3 diff = nodePos - camPos;
+
+            if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
+                return; // do not draw if too distant
+            }
+
+            int width = numLanes * 128;
+            int height = 50;
+            bool startNode = (bool)netService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+            if (CanReset(SelectedSegmentId, startNode)) {
+                height += 40;
+            }
+
+            //------------------------------------------
+            // Create tool window on the selected node
+            //------------------------------------------
+            // var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, height);
+
+            UIView uiView = UIView.GetAView();
+            ToolWindow = (U.Panel.BaseUWindowPanel)uiView.AddUIComponent(typeof(U.Panel.BaseUWindowPanel));
+
+            // var legacyBorderlessStyle = new GUIStyle();
+            // GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, legacyBorderlessStyle);
+            // cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
+        }
+
+        /// <summary>Called from GenericFsm when user leaves lane arrow editor, to hide the GUI.</summary>
+        private void OnLeaveEditorState() {
+            Log._Debug("LaneArrow: leaving GUI state, hide GUI");
+        }
 
         /// <summary>
         /// if the segment has at least one lane without outgoing lane connections, then it can be reset.
@@ -39,11 +164,15 @@ namespace TrafficManager.UI.SubTools {
         /// <summary>Resets tool into its initial state for new use.</summary>
         public override void ActivateTool() {
             Log._Debug("LaneArrow: Activated tool");
+            fsm_ = InitFiniteStateMachine();
         }
 
         /// <summary>Cleans up when tool is deactivated or user switched to another tool.</summary>
         public override void DeactivateTool() {
             Log._Debug("LaneArrow: Deactivated tool");
+            SelectedNodeId = 0;
+            SelectedSegmentId = 0;
+            fsm_ = null;
         }
 
         // public override bool IsCursorInPanel() {
@@ -71,46 +200,75 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
-        [Conditional("OBSOLETE_LANEARROW_IMGUI")]
-        public void OnPrimaryClickOverlay() {
-            if ((HoveredNodeId == 0) || (HoveredSegmentId == 0)) return;
+        /// <inheritdoc/>
+        public override void OnToolLeftClick() {
+            Log._Debug($"LaneArrow({fsm_.State}): left click");
+            switch (fsm_.State) {
+                case State.Select:
+                    OnToolLeftClick_Select();
+                    break;
+                case State.EditLaneArrows:
+                    break;
+            }
+        }
 
-            NetNode.Flags netFlags = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
+        private void OnToolLeftClick_Select() {
+            if (HoveredNodeId == 0 || HoveredSegmentId == 0) {
+                return;
+            }
 
+            // Clicked on something which was hovered
+            NetNode.Flags netFlags =
+                Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
+
+            // Not interested in clicking anything other than a junction
             if ((netFlags & NetNode.Flags.Junction) == NetNode.Flags.None) {
                 return;
             }
 
+            // Not interested in segments which don't start at the hovered node
             NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
-            if ((segmentsBuffer[HoveredSegmentId].m_startNode != HoveredNodeId) &&
-                (segmentsBuffer[HoveredSegmentId].m_endNode != HoveredNodeId)) {
+            if (segmentsBuffer[HoveredSegmentId].m_startNode != HoveredNodeId &&
+                segmentsBuffer[HoveredSegmentId].m_endNode != HoveredNodeId) {
                 return;
             }
 
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-            SetLaneArrowError res = SetLaneArrowError.Success;
+
             if (altDown) {
-                LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId, out res);
+                // Holding Alt will set separate lanes for selected segment
+                LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(
+                    HoveredSegmentId,
+                    HoveredNodeId,
+                    out var res);
                 InformUserAboutPossibleFailure(res);
             } else if (ctrlDown) {
-                LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId, out res);
+                // Holding Ctrl will set separate lanes for node
+                LaneArrowManager.SeparateTurningLanes.SeparateNode(
+                    HoveredNodeId,
+                    out var res);
                 InformUserAboutPossibleFailure(res);
             } else if (HasHoverLaneArrows()) {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
+                fsm_.SendTrigger(Trigger.SegmentClick);
             }
         }
 
-        [Conditional("OBSOLETE_LANEARROW_IMGUI")]
-        public void OnSecondaryClickOverlay() {
-            bool IsCursorInPanel() => false;
+        public override void OnToolRightClick() {
+            Log._Debug($"LaneArrow({fsm_.State}): right click");
 
-            if (!IsCursorInPanel()) {
-                SelectedSegmentId = 0;
-                SelectedNodeId = 0;
-            }
+            // FSM will either cancel the edit mode, or switch off the tool.
+
+            // if (!IsCursorInPanel()) {
+            SelectedSegmentId = 0;
+            SelectedNodeId = 0;
+            // }
+
+            fsm_.SendTrigger(Trigger.RightMouseClick);
+            Log._Debug($"LaneArrow new state={fsm_.State}");
         }
 
         [Conditional("OBSOLETE_LANEARROW_IMGUI")]
@@ -118,7 +276,7 @@ namespace TrafficManager.UI.SubTools {
             // base.OnToolGUI(e);
             cursorInSecondaryPanel_ = false;
 
-            if ((SelectedNodeId == 0) || (SelectedSegmentId == 0)) return;
+            if (SelectedNodeId == 0 || SelectedSegmentId == 0) return;
 
             int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(
                 SelectedSegmentId,
@@ -239,36 +397,61 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+            switch (fsm_.State) {
+                case State.Select:
+                    RenderOverlay_Select(cameraInfo);
+                    break;
+                case State.EditLaneArrows:
+                    RenderOverlay_EditLaneArrows(cameraInfo);
+                    break;
+            }
+        }
+
+        /// <summary>Render info overlay for active tool, when UI is in Select state.</summary>
+        /// <param name="cameraInfo">The camera.</param>
+        private void RenderOverlay_Select(RenderManager.CameraInfo cameraInfo) {
             NetManager netManager = Singleton<NetManager>.instance;
 
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-            bool PrimaryDown = Input.GetMouseButton(0);
-            if (ctrlDown && !cursorInSecondaryPanel_ && (HoveredNodeId != 0)) {
-                // draw hovered node
+
+            // If CTRL is held, and hovered something: Draw hovered node
+            if (ctrlDown && !cursorInSecondaryPanel_ && HoveredNodeId != 0) {
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 return;
             }
 
+            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            bool leftMouseDown = Input.GetMouseButton(0);
+
             // Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
+
+            // If hovered something which has hover lane arrows, and it is not the same as selected
+            // Then: Draw alternative selection variant with different color, to be clicked by the user
             if (!cursorInSecondaryPanel_
                 && HasHoverLaneArrows()
-                && (HoveredSegmentId != 0)
-                && (HoveredNodeId != 0)
-                && ((HoveredSegmentId != SelectedSegmentId)
-                    || (HoveredNodeId != SelectedNodeId)))
+                && HoveredSegmentId != 0
+                && HoveredNodeId != 0
+                && (HoveredSegmentId != SelectedSegmentId
+                    || HoveredNodeId != SelectedNodeId))
             {
                 NetNode.Flags nodeFlags = netManager.m_nodes.m_buffer[HoveredNodeId].m_flags;
 
-                if (((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId)
-                     || (netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId))
-                    && ((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)) {
+                if ((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId
+                     || netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId)
+                    && (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)
+                {
                     bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(HoveredSegmentId, HoveredNodeId);
-                    Color color = MainTool.GetToolColor(PrimaryDown, false);
+                    Color color = MainTool.GetToolColor(leftMouseDown, false);
                     bool alpha = !altDown;
                     DrawSegmentEnd(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
                 }
             }
+        }
+
+        /// <summary>Render info overlay for active tool, when UI is in Edit Lane Arrows state.</summary>
+        /// <param name="cameraInfo">The camera.</param>
+        private void RenderOverlay_EditLaneArrows(RenderManager.CameraInfo cameraInfo) {
+            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 
             if (SelectedSegmentId != 0) {
                 Color color = MainTool.GetToolColor(true, false);
@@ -332,7 +515,7 @@ namespace TrafficManager.UI.SubTools {
 
                 if (GUILayout.Button(
                     "←",
-                    ((flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2),
+                    (flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2,
                     GUILayout.Width(35),
                     GUILayout.Height(25))) {
                     buttonClicked = true;
@@ -345,7 +528,7 @@ namespace TrafficManager.UI.SubTools {
 
                 if (GUILayout.Button(
                     "↑",
-                    ((flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2),
+                    (flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2,
                     GUILayout.Width(25),
                     GUILayout.Height(35))) {
                     buttonClicked = true;
@@ -358,7 +541,7 @@ namespace TrafficManager.UI.SubTools {
 
                 if (GUILayout.Button(
                     "→",
-                    ((flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2),
+                    (flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2,
                     GUILayout.Width(35),
                     GUILayout.Height(25))) {
                     buttonClicked = true;

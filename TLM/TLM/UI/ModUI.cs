@@ -33,18 +33,19 @@ namespace TrafficManager.UI {
 #endif
 
         public static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired = true) {
-            if (tool == null && createIfRequired) {
+            if (trafficManagerTool_ == null && createIfRequired) {
                 Log.Info("Initializing traffic manager tool...");
                 GameObject toolModControl = ToolsModifierControl.toolController.gameObject;
-                tool = toolModControl.GetComponent<TrafficManagerTool>()
-                       ?? toolModControl.AddComponent<TrafficManagerTool>();
-                tool.Initialize();
+                trafficManagerTool_ =
+                    toolModControl.GetComponent<TrafficManagerTool>()
+                    ?? toolModControl.AddComponent<TrafficManagerTool>();
+                trafficManagerTool_.Initialize();
             }
 
-            return tool;
+            return trafficManagerTool_;
         }
 
-        private static TrafficManagerTool tool;
+        private static TrafficManagerTool trafficManagerTool_;
 
         public static TrafficManagerMode ToolMode { get; set; }
 
@@ -207,10 +208,10 @@ namespace TrafficManager.UI {
 
         private static void DestroyTool() {
             DisableTool();
-            if (tool != null) {
+            if (trafficManagerTool_ != null) {
                 Log.Info("Removing Traffic Manager Tool.");
-                UnityEngine.Object.Destroy(tool);
-                tool = null;
+                UnityEngine.Object.Destroy(trafficManagerTool_);
+                trafficManagerTool_ = null;
             } // end if
         } // end DestroyTool()
 

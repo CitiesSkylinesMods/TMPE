@@ -5,13 +5,19 @@ namespace TrafficManager.UI {
         None = 0,
 
         /// <summary>Traffic light on/off tool.</summary>
-        SwitchTrafficLight = 1,
+        ToggleTrafficLight = 1,
 
         /// <summary>Priority/yield tool.</summary>
         AddPrioritySigns = 2,
 
         /// <summary>Traffic light manual control tool.</summary>
         ManualSwitch = 3,
+
+        /// <summary>
+        /// This key is not an actual tool mode, it is used by MainMenu to key the UI button for
+        /// timed traffic lights.
+        /// </summary>
+        TimedLightsButton,
 
         /// <summary>Timed traffic light submode.</summary>
         TimedLightsSelectNode = 4,
@@ -20,7 +26,7 @@ namespace TrafficManager.UI {
         TimedLightsShowLights = 5,
 
         /// <summary>Lane Arrows tool is active.</summary>
-        LaneChange = 6,
+        LaneArrows = 6,
 
         /// <summary>Timed traffic light submode.</summary>
         TimedLightsAddNode = 7,
@@ -45,5 +51,15 @@ namespace TrafficManager.UI {
 
         /// <summary>No parking tool.</summary>
         ParkingRestrictions = 14,
+
+        /// <summary>
+        /// This key is not an actual tool mode, it is used by MainMenu to key the UI button.
+        /// </summary>
+        DespawnButton,
+
+        /// <summary>
+        /// This key is not an actual tool mode, it is used by MainMenu to key the UI button.
+        /// </summary>
+        ClearTrafficButton,
     }
 }
