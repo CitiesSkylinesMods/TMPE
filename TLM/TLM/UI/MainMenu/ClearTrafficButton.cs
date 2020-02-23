@@ -1,4 +1,4 @@
-namespace TrafficManager.UI.MainMenu {
+﻿namespace TrafficManager.UI.MainMenu {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.Manager.Impl;

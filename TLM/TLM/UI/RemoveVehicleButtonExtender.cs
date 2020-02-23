@@ -1,4 +1,4 @@
-namespace TrafficManager.UI {
+﻿namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System.Collections.Generic;
