@@ -25,7 +25,6 @@ namespace TrafficManager.UI.Helpers {
             if (guide == null) {
                 Log.Error("guide is null");
             } else {
-                Log._Debug("Activate guide st: " + System.Environment.StackTrace);
                 Singleton<SimulationManager>.instance.AddAction(delegate () {
                     guide.Activate();
                 });
@@ -37,7 +36,6 @@ namespace TrafficManager.UI.Helpers {
                 if (guide == null) {
                     Log.Error("Unreachable code.");
                 } else {
-                    Log._Debug("Deactivate guide st: " + System.Environment.StackTrace);
                     Singleton<SimulationManager>.instance.AddAction(delegate () {
                         guide.Deactivate();
                     });
