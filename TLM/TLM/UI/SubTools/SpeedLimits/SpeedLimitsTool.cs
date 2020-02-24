@@ -613,7 +613,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             {
                 bool toggled = MultiSegmentMode != GUILayout.Toggle(
                     MultiSegmentMode,
-                    Translation.SpeedLimits.Get("Checkbox:Apply to enitre road") + " [shift]");
+                    Translation.SpeedLimits.Get("Checkbox:Apply to entire road") + " [shift]");
                 if (toggled) {
                     multiSegmentMode_ = !multiSegmentMode_;
                 }
@@ -707,7 +707,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // For MPH setting display KM/H below, for KM/H setting display MPH
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Label(Translation.SpeedLimits.Get("CheckBox:Default") + " [del]");
+            GUILayout.Label(Translation.SpeedLimits.Get("Button:Default") + " [del]");
 
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
