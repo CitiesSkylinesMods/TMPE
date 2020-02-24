@@ -21,6 +21,8 @@ namespace TrafficManager.UI {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
+    using GenericGameBridge.Service;
+    using CitiesGameBridge.Service;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -87,10 +89,9 @@ namespace TrafficManager.UI {
         internal static Rect MoveGUI(Rect rect) {
             // x := main menu x + rect.x
             // y := main menu y + main menu height + rect.y
-            // TODO use current size profile
             return new Rect(
                 MainMenuPanel.DEFAULT_MENU_X + rect.x,
-                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.SIZE_PROFILES[1].MENU_HEIGHT + rect.y,
+                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.ScaledSize.GetHeight() + rect.y,
                 rect.width,
                 rect.height);
         }
@@ -372,9 +373,9 @@ namespace TrafficManager.UI {
             }
 
             // check if mouse is inside panel
-            if (LoadingExtension.BaseUI.GetMenu().containsMouse
+            if (ModUI.Instance.GetMenu().containsMouse
 #if DEBUG
-                || LoadingExtension.BaseUI.GetDebugMenu().containsMouse
+                || ModUI.Instance.GetDebugMenu().containsMouse
 #endif
             ) {
                 Log._Debug(
@@ -397,7 +398,6 @@ namespace TrafficManager.UI {
             // }
 
             if (_activeSubTool != null) {
-
                 if (primaryMouseClicked) {
                     _activeSubTool.OnPrimaryClickOverlay();
                 }
@@ -492,80 +492,6 @@ namespace TrafficManager.UI {
             float r = CalculateNodeRadius(nodeId);
             Vector3 pos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
             DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha);
-        }
-
-        /// <summary>
-        /// Highlights only one side of the segment.
-        /// </summary>
-        public void DrawSegmentSide(
-            RenderManager.CameraInfo cameraInfo,
-                       ushort segmentId,
-                       NetInfo.Direction finalDirection,
-                       Color color,
-                       bool alpha = false) {
-            if (segmentId == 0) {
-                return;
-            }
-            ref NetSegment segment = ref segmentId.ToSegment();
-            float halfWidth = segment.Info.m_halfWidth;
-
-            Bezier3 bezier;
-            bezier.a = GetNodePos(segment.m_startNode);
-            bezier.d = GetNodePos(segment.m_endNode);
-
-            Vector3 RotateRight(Vector3 v) {
-                Vector3 ret = v;
-                ret.x = v.z;
-                ret.z = -v.x;
-                return ret;
-            }
-            Vector3 RotateLeft(Vector3 v) {
-                Vector3 ret = v;
-                ret.x = -v.z;
-                ret.z = v.x;
-                return ret;
-            }
-
-            // move the bezier to the center of the segment side.
-            Vector3 startDisplacement;
-            Vector3 endDisplacement;
-
-            bool right = finalDirection == NetInfo.Direction.Forward;
-            right = right ^ Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
-            right = right ^ segment.m_flags.IsFlagSet(NetSegment.Flags.Invert);
-
-            if (right) {
-                startDisplacement = RotateRight(segment.m_startDirection);
-                endDisplacement = RotateLeft(segment.m_endDirection);
-            } else {
-                startDisplacement = RotateLeft(segment.m_startDirection);
-                endDisplacement = RotateRight(segment.m_endDirection);
-            }
-            float length = halfWidth * 0.5f;
-            bezier.a += startDisplacement * length;
-            bezier.d += endDisplacement * length;
-            NetSegment.CalculateMiddlePoints(
-                bezier.a,
-                segment.m_startDirection,
-                bezier.d,
-                segment.m_endDirection,
-                true,
-                true,
-                out bezier.b,
-                out bezier.c);
-
-            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
-            Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
-                cameraInfo,
-                color,
-                bezier,
-                halfWidth,
-                0,
-                0,
-                -1f,
-                1280f,
-                false,
-                alpha);
         }
 
         /// <summary>
@@ -967,7 +893,7 @@ namespace TrafficManager.UI {
         }
 
         private static Vector3 prev_mousePosition;
-        private bool DetermineHoveredElements() {            
+        private bool DetermineHoveredElements() {
             if(prev_mousePosition == m_mousePosition) {
                 // if mouse ray is not changing use cached results.
                 // the assumption is that its practically impossible to change mouse ray
@@ -1071,7 +997,7 @@ namespace TrafficManager.UI {
                         }
                     }
                 }
-                
+
                 if(HoveredSegmentId != 0) {
                     HitPos = segmentOutput.m_hitPos;
                 }
@@ -1143,7 +1069,7 @@ namespace TrafficManager.UI {
             if (Shortcuts.GetSeg(HoveredSegmentId).GetClosestLanePosition(
                 HitPos, NetInfo.LaneType.All, VehicleInfo.VehicleType.All,
                 out Vector3 pos, out uint laneID, out int laneIndex, out float laneOffset)) {
-                
+
                 return prev_H_Fixed = pos.y;
             }
             return prev_H_Fixed = HitPos.y + 0.5f;

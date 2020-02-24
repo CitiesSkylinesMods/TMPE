@@ -140,19 +140,23 @@ namespace TrafficManager.State.Keybinds {
             btn.eventKeyDown += OnBindingKeyDown;
             btn.eventMouseDown += OnBindingMouseDown;
             btn.objectUserData
-                = new KeybindSetting.Editable {Target = setting, TargetKey = editKey};
+                = new KeybindSetting.Editable { Target = setting, TargetKey = editKey };
 
-            AddXButton(parent, editKey, btn);
+            AddXButton(parent, editKey, btn, setting);
         }
 
         /// <summary>
         /// Add X button to the right of another button
         /// </summary>
-        /// <param name="parent">The panel to host the new button</param>
-        /// <param name="editKey">The key to be cleared on click</param>
-        /// <param name="alignTo">Align X button to the right of this</param>
-        private static void AddXButton(UIPanel parent, SavedInputKey editKey, UIButton alignTo) {
-            var btnX = parent.AddUIComponent<UIButton>();
+        /// <param name="parent">The panel to host the new button.</param>
+        /// <param name="editKey">The key to be cleared on click.</param>
+        /// <param name="alignTo">Align X button to the right of this.</param>
+        /// <param name="setting">KeybindSetting to notify that key was cleared.</param>
+        private static void AddXButton(UIPanel parent,
+                                       SavedInputKey editKey,
+                                       UIButton alignTo,
+                                       KeybindSetting setting) {
+            UIButton btnX = parent.AddUIComponent<UIButton>();
             btnX.autoSize = false;
             btnX.size = new Vector2(ROW_HEIGHT, ROW_HEIGHT);
             btnX.normalBgSprite = "buttonclose";
@@ -161,6 +165,7 @@ namespace TrafficManager.State.Keybinds {
             btnX.eventClicked += (component, eventParam) => {
                 editKey.value = SavedInputKey.Empty;
                 alignTo.text = Keybind.ToLocalizedString(editKey);
+                setting.NotifyKeyChanged();
             };
         }
 
@@ -214,7 +219,7 @@ namespace TrafficManager.State.Keybinds {
                         var message = Translation.Options.Get("Keybinds.Dialog.Text:Keybind conflict")
                                       + "\n\n" + maybeConflict;
                         Log.Info($"Keybind conflict: {message}");
-                    UIView.library
+                        UIView.library
                           .ShowModal<ExceptionPanel>("ExceptionPanel")
                           .SetMessage("Key Conflict", message, false);
                     } else {

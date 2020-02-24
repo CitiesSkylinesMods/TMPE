@@ -37,7 +37,7 @@ namespace TrafficManager.UI.Helpers {
                     Log.Error("Unreachable code.");
                 } else {
                     Singleton<SimulationManager>.instance.AddAction(delegate () {
-                        guide.Activate();
+                        guide.Deactivate();
                     });
                 }
             }

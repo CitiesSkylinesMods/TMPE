@@ -155,16 +155,37 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             var marker = new SegmentLaneMarker(laneBuffer[laneId].m_bezier);
             bool pressed = Input.GetMouseButton(0);
             Color color = MainTool.GetToolColor(pressed,false);
+            if (!ShowLimitsPerLane) {
+                marker.Size = 3f; // lump the lanes together.
+            }
             marker.RenderOverlay(cameraInfo, color, pressed);
         }
 
-        private void RenderSegmentSideOverlay(
+        private int RenderSegmentSideOverlay(
             RenderManager.CameraInfo cameraInfo,
             ushort segmentId,
             NetInfo.Direction finalDirection) {
+            int count = 0;
             bool pressed = Input.GetMouseButton(0);
             Color color = MainTool.GetToolColor(pressed, false);
-            MainTool.DrawSegmentSide(cameraInfo, segmentId, finalDirection,  color, pressed);
+            netService.IterateSegmentLanes(
+                segmentId,
+                (uint laneId,
+                ref NetLane lane,
+                NetInfo.Lane laneInfo,
+                ushort _,
+                ref NetSegment segment,
+                byte laneIndex) => {
+                    bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
+                    render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
+                    render &= laneInfo.m_finalDirection == finalDirection;
+                    if (render) {
+                        RenderLaneOverlay(cameraInfo, laneId);
+                        count++;
+                    }
+                    return true;
+                });
+            return count;
         }
 
         private void RenderLanes(RenderManager.CameraInfo cameraInfo) {
@@ -202,8 +223,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                         NetInfo.Direction finalDirection = renderData_.FinalDirection;
                         if (data.IsReversed(renderData_.SegmentId)) {
                             finalDirection = NetInfo.InvertDirection(finalDirection);
-                            Log._Debug($"{data.CurSeg.segmentId} is reversed, " +
-                                $"final direction changed to {finalDirection}");
                         }
                         RenderSegmentSideOverlay(cameraInfo, data.CurSeg.segmentId, finalDirection);
                         return true;
@@ -594,7 +613,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             {
                 bool toggled = MultiSegmentMode != GUILayout.Toggle(
                     MultiSegmentMode,
-                    Translation.SpeedLimits.Get("Checkbox:Apply to enitre road") + " [shift]");
+                    Translation.SpeedLimits.Get("Checkbox:Apply to entire road") + " [shift]");
                 if (toggled) {
                     multiSegmentMode_ = !multiSegmentMode_;
                 }
@@ -688,7 +707,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // For MPH setting display KM/H below, for KM/H setting display MPH
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Label(Translation.SpeedLimits.Get("CheckBox:Default") + " [del]");
+            GUILayout.Label(Translation.SpeedLimits.Get("Button:Default") + " [del]");
 
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();

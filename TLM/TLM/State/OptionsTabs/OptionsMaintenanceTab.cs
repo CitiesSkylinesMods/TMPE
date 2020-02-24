@@ -188,8 +188,8 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.RebuildMenu();
             Options.prioritySignsEnabled = val;
+            Options.RebuildMenu();
 
             if (!val) {
                 OptionsOverlaysTab.SetPrioritySignsOverlay(false);
@@ -202,8 +202,8 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.RebuildMenu();
             Options.timedLightsEnabled = val;
+            Options.RebuildMenu();
 
             if (!val) {
                 OptionsOverlaysTab.SetTimedLightsOverlay(false);
@@ -216,8 +216,8 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.RebuildMenu();
             Options.customSpeedLimitsEnabled = val;
+            Options.RebuildMenu();
 
             if (!val) {
                 OptionsOverlaysTab.SetSpeedLimitsOverlay(false);
@@ -229,8 +229,9 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.RebuildMenu();
             Options.vehicleRestrictionsEnabled = val;
+            Options.RebuildMenu();
+
             if (!val) {
                 OptionsOverlaysTab.SetVehicleRestrictionsOverlay(false);
             }
@@ -241,8 +242,8 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.RebuildMenu();
             Options.parkingRestrictionsEnabled = val;
+            Options.RebuildMenu();
 
             if (!val) {
                 OptionsOverlaysTab.SetParkingRestrictionsOverlay(false);
@@ -254,8 +255,8 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.RebuildMenu();
             Options.junctionRestrictionsEnabled = val;
+            Options.RebuildMenu();
 
             if (!val) {
                 OptionsVehicleRestrictionsTab.SetAllowUTurns(false);
@@ -285,8 +286,9 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Options.RebuildMenu();
             Options.laneConnectorEnabled = val;
+            Options.RebuildMenu();
+
             RoutingManager.Instance.RequestFullRecalculation();
 
             if (!val) {
@@ -295,8 +297,8 @@ namespace TrafficManager.State {
         }
 
         public static void SetCustomSpeedLimitsEnabled(bool newValue) {
-            Options.RebuildMenu();
             Options.customSpeedLimitsEnabled = newValue;
+            Options.RebuildMenu();
 
             if (_enableCustomSpeedLimitsToggle != null) {
                 _enableCustomSpeedLimitsToggle.isChecked = newValue;
@@ -308,8 +310,8 @@ namespace TrafficManager.State {
         }
 
         public static void SetVehicleRestrictionsEnabled(bool newValue) {
-            Options.RebuildMenu();
             Options.vehicleRestrictionsEnabled = newValue;
+            Options.RebuildMenu();
 
             if (_enableVehicleRestrictionsToggle != null) {
                 _enableVehicleRestrictionsToggle.isChecked = newValue;
@@ -321,8 +323,8 @@ namespace TrafficManager.State {
         }
 
         public static void SetParkingRestrictionsEnabled(bool newValue) {
-            Options.RebuildMenu();
             Options.parkingRestrictionsEnabled = newValue;
+            Options.RebuildMenu();
 
             if (_enableParkingRestrictionsToggle != null) {
                 _enableParkingRestrictionsToggle.isChecked = newValue;
@@ -334,8 +336,8 @@ namespace TrafficManager.State {
         }
 
         public static void SetJunctionRestrictionsEnabled(bool newValue) {
-            Options.RebuildMenu();
             Options.junctionRestrictionsEnabled = newValue;
+            Options.RebuildMenu();
 
             if (_enableJunctionRestrictionsToggle != null) {
                 _enableJunctionRestrictionsToggle.isChecked = newValue;
@@ -360,8 +362,8 @@ namespace TrafficManager.State {
         }
 
         public static void SetLaneConnectorEnabled(bool newValue) {
-            Options.RebuildMenu();
             Options.laneConnectorEnabled = newValue;
+            Options.RebuildMenu();
 
             if (_enableLaneConnectorToggle != null) {
                 _enableLaneConnectorToggle.isChecked = newValue;

@@ -1,14 +1,29 @@
 ﻿namespace TrafficManager.UI.MainMenu {
+    using System.Collections.Generic;
+    using TrafficManager.RedirectionFramework;
     using TrafficManager.State.Keybinds;
+    using TrafficManager.U.Button;
 
-    public class ToggleTrafficLightsButton : MenuToolModeButton {
+    public class ToggleTrafficLightsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.SwitchTrafficLight;
 
-        protected override ButtonFunction Function => ButtonFunction.ToggleTrafficLights;
+        public override void SetupButtonSkin(HashSet<string> atlasKeys) {
+            // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
+            this.Skin = new U.Button.ButtonSkin() {
+                                                      Prefix = "ToggleTL",
+                                                      BackgroundPrefix = "RoundButton",
+                                                      BackgroundHovered = true,
+                                                      BackgroundActive = true,
+                                                      ForegroundActive = true,
+                                                  };
+            atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
+        }
 
-        public override string Tooltip => Translation.Menu.Get("Tooltip:Switch traffic lights");
+        protected override ButtonFunction Function => new ButtonFunction("ToggleTrafficLights");
 
-        public override bool Visible => true;
+        public override string GetTooltip() => Translation.Menu.Get("Tooltip:Switch traffic lights");
+
+        public override bool IsVisible() => true;
 
         public override KeybindSetting ShortcutKey => KeybindSettingsBase.ToggleTrafficLightTool;
     }
