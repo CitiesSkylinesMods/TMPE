@@ -8,12 +8,12 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
+#if DEBUG
+    using TrafficManager.State.ConfigData;
+#endif
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
-#if DEBUG
-    using State.ConfigData;
-#endif
 
     public class SpeedLimitManager
         : AbstractGeometryObservingManager,
@@ -874,10 +874,11 @@ namespace TrafficManager.Manager.Impl {
 
                     if (IsValidRange(customSpeedLimit)) {
                         // lane speed limit differs from default speed limit
+#if DEBUG
                         Log._DebugIf(DebugSwitch.SpeedLimits.Get(), () =>
                             "SpeedLimitManager.LoadData: Loading lane speed limit: " +
                             $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit} km/h");
-
+#endif
                         float kmph = laneSpeedLimit.speedLimit /
                                      Constants.SPEED_TO_KMPH; // convert to game units
 
