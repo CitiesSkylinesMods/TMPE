@@ -21,6 +21,8 @@ namespace TrafficManager.UI {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
+    using GenericGameBridge.Service;
+    using CitiesGameBridge.Service;
 
     [UsedImplicitly]
     public class TrafficManagerTool
