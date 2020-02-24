@@ -1,6 +1,7 @@
-﻿namespace TrafficManager.U.Button {
+namespace TrafficManager.U.Button {
     using System.Collections.Generic;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State.Keybinds;
     using TrafficManager.UI.Textures;
@@ -61,7 +62,7 @@
             ControlActiveState activeState = CanActivate() && IsActive() ?
                 ControlActiveState.Active : ControlActiveState.Normal;
             ControlEnabledState enabledState =
-                this.enabled ? ControlEnabledState.Enabled : ControlEnabledState.Disabled;
+                this.isEnabled ? ControlEnabledState.Enabled : ControlEnabledState.Disabled;
 
             m_BackgroundSprites.m_Normal
                 = m_BackgroundSprites.m_Disabled =

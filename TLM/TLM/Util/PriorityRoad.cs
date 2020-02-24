@@ -13,6 +13,9 @@ namespace TrafficManager.Util {
     using static TrafficManager.UI.SubTools.PrioritySignsTool;
     using TrafficManager.API.Manager;
 
+    /// <summary>
+    /// Utility for mass edit of prioirty roads.
+    /// </summary>
     public static class PriorityRoad {
         public static void FixPrioritySigns(PrioritySignsMassEditMode massEditMode, List<ushort> segmentList) {
             if (segmentList == null || segmentList.Count == 0) {
@@ -75,10 +78,10 @@ namespace TrafficManager.Util {
                 }
             }
 
+            // TODO avoid settin up the same node two times.s
             foreach(ushort segId in segmentList) {
-                foreach(bool bStartNode in Constants.ALL_BOOL) {
-                    ApplyPrioritySigns(segId, bStartNode);
-                }
+                ApplyPrioritySigns(segId, true);
+                ApplyPrioritySigns(segId, false);
             }
         }
 
@@ -119,21 +122,16 @@ namespace TrafficManager.Util {
             ushort segmentId = data.CurSeg.segmentId;
             foreach (bool startNode in Constants.ALL_BOOL) {
                 ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
-                FixHighPrioirtyJunction(nodeId);
+                FixHighPriorityJunction(nodeId);
             }
             return true;
         }
 
-        /// <summary>
-        /// returns the node of <paramref name="segmentId"/> that is not shared 
-        /// with <paramref name="otherSegmentId"/> .
-        /// </summary>
-        /// <param name="segmentId"></param>
-        /// <param name="otherSegmentId"></param>
-        /// <returns></returns>
-        private static ushort GetUnsharedNode(ushort segmentId, ushort otherSegmentId) {
+        /// <returns>the node of <paramref name="segmentId"/> that is not shared 
+        /// with <paramref name="otherSegmentId"/> .</returns>
+        private static ushort GetSharedOrOtherNode(ushort segmentId, ushort otherSegmentId, out ushort sharedNodeId) {
             ref NetSegment segment = ref segmentId.ToSegment();
-            ushort sharedNodeId = segment.GetSharedNode(otherSegmentId);
+            sharedNodeId = segment.GetSharedNode(otherSegmentId);
             if (sharedNodeId == 0)
                 return 0;
             return segment.GetOtherNode(sharedNodeId);
@@ -144,9 +142,9 @@ namespace TrafficManager.Util {
         /// the input segment traversing straight.
         /// </summary>
         public static void FixRoad(List<ushort> segmentList) {
-            ushort firstNodeId = GetUnsharedNode(segmentList[0], segmentList[1]);
+            ushort firstNodeId = GetSharedOrOtherNode(segmentList[0], segmentList[1], out _);
             int last = segmentList.Count - 1;
-            ushort lastNodeId = GetUnsharedNode(segmentList[last], segmentList[last-1]);
+            ushort lastNodeId = GetSharedOrOtherNode(segmentList[last], segmentList[last-1], out _);
             if(firstNodeId == lastNodeId) {
                 firstNodeId = lastNodeId = 0;
             }
@@ -156,9 +154,9 @@ namespace TrafficManager.Util {
                     ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
                     bool isEndNode = nodeId == firstNodeId || nodeId == lastNodeId;
                     if (isEndNode) {
-                        FixHighPrioirtyJunction(nodeId);
+                        FixHighPriorityJunction(nodeId);
                     } else {
-                        FixHighPrioirtyJunction(nodeId, segmentList);
+                        FixHighPriorityJunction(nodeId, segmentList);
                     }
                 }
             }
@@ -257,7 +255,7 @@ namespace TrafficManager.Util {
         ///  - semi-roundabout
         ///  - split avenue into 2 oneway roads (only applicable to first or last node).
         /// </summary>
-        public static void FixHighPrioirtyJunction(ushort nodeId, List<ushort> segmentList) {
+        public static void FixHighPriorityJunction(ushort nodeId, List<ushort> segmentList) {
             if (nodeId == 0) {
                 return;
             }
@@ -276,22 +274,22 @@ namespace TrafficManager.Util {
             }
 
             if (nodeSegments.Count < 3) {
-                Log._Debug("FixJunction: This is not a junction.");
+                Log._Debug("FixJunction: This is not a junction. nodeID=" + nodeId);
                 return;
             }
 
-            FixHighPrioirtyJunctionHelper(nodeId, nodeSegments);
+            FixHighPriorityJunctionHelper(nodeId, nodeSegments);
         } // end method
 
         /// <summary>
         /// Quick-setups the given junction as priority junction.
-        /// The two biggest roads are considererd prioirty road.
+        /// The two biggest roads are considererd priority road.
         /// all other roads are considered minor road.
         /// Also detects:
         ///  - split avenue into 2 oneway roads
         ///  - semi-roundabout
         /// </summary>
-        public static void FixHighPrioirtyJunction(ushort nodeId) {
+        public static void FixHighPriorityJunction(ushort nodeId) {
             if (nodeId == 0) {
                 return;
             }
@@ -305,16 +303,16 @@ namespace TrafficManager.Util {
             }
 
             if (nodeSegments.Count < 3) {
-                Log._Debug("FixJunction: This is not a junction.");
+                Log._Debug("FixJunction: This is not a junction. nodeID=" + nodeId);
                 return;
             }
 
             if (ArrangeT(nodeSegments)) {
-                bool isSemiRabout = GetDirection(nodeSegments[0], nodeSegments[1], nodeId) == ArrowDirection.Forward;
-                // isSemiRabout if one of these shapes: |- \- /-
+                bool isSemiRoundabout = GetDirection(nodeSegments[0], nodeSegments[1], nodeId) == ArrowDirection.Forward;
+                // isSemiRoundabout if one of these shapes: |- \- /-
                 // split avenue if one of these shapes: >-  <-
                 // they are all T shaped the difference is the angle.
-                if (!isSemiRabout) {
+                if (!isSemiRoundabout) {
                     HandleSplitAvenue(nodeSegments, nodeId);
                     return;
                 }
@@ -328,7 +326,7 @@ namespace TrafficManager.Util {
                 return;
             }
 
-            FixHighPrioirtyJunctionHelper(nodeId, nodeSegments);
+            FixHighPriorityJunctionHelper(nodeId, nodeSegments);
         }
 
         /// <summary>
@@ -339,8 +337,8 @@ namespace TrafficManager.Util {
         /// <param name="nodeId">Junction to apply rules</param>
         /// <param name="nodeSegments">list of segments. The first two elements are main/roundabout,
         /// all other semenets are minor</param>
-        private static void FixHighPrioirtyJunctionHelper(ushort nodeId, List<ushort> nodeSegments) {
-            bool isSemiRabout =
+        private static void FixHighPriorityJunctionHelper(ushort nodeId, List<ushort> nodeSegments) {
+            bool isSemiRoundabout =
                 nodeSegments.Count == 3 &&
                 IsStraighOneWay(nodeSegments[0], nodeSegments[1]);
 
@@ -354,14 +352,14 @@ namespace TrafficManager.Util {
             ignoreLanes &= dir != ArrowDirection.Forward;
             ignoreLanes |= OptionsMassEditTab.PriorityRoad_AllowLeftTurns;
 
-            Log._Debug($"ignorelanes={ignoreLanes} isSemiRabout={isSemiRabout}\n" +
-                        "segmentList=" + nodeSegments.ToSTR());
+            //Log._Debug($"ignorelanes={ignoreLanes} isSemiRoundabout={isSemiRoundabout}\n" +
+            //            "segmentList=" + nodeSegments.ToSTR());
 
             for (int i = 0; i < nodeSegments.Count; ++i) {
                 ushort segmentId = nodeSegments[i];
                 if (i < 2) {
-                    if (isSemiRabout) {
-                        RoundaboutMassEdit.FixRulesRAbout(segmentId);
+                    if (isSemiRoundabout) {
+                        RoundaboutMassEdit.FixRulesRoundabout(segmentId);
                     } else {
                         FixMajorSegmentRules(segmentId, nodeId);
                     }
@@ -369,7 +367,7 @@ namespace TrafficManager.Util {
                         FixMajorSegmentLanes(segmentId, nodeId);
                     }
                 } else {
-                    if (isSemiRabout) {
+                    if (isSemiRoundabout) {
                         RoundaboutMassEdit.FixRulesMinor(segmentId, nodeId);
                     } else {
                         FixMinorSegmentRules(segmentId, nodeId, nodeSegments);
@@ -593,6 +591,10 @@ namespace TrafficManager.Util {
             return forward + backward;
         }
 
+        /// <summary>
+        /// Clears all rules put by PriorityRoad.FixJunction()
+        /// </summary>
+        /// <param name="segmentList"></param>
         public static void ClearNode(ushort nodeId) {
             TrafficPriorityManager TPMan = Constants.ManagerFactory.TrafficPriorityManager as TrafficPriorityManager;
             IJunctionRestrictionsManager JPMan = Constants.ManagerFactory.JunctionRestrictionsManager;
@@ -611,6 +613,10 @@ namespace TrafficManager.Util {
             });
         }
 
+        /// <summary>
+        /// Clears all rules put by PriorityRoad.FixJunction()
+        /// </summary>
+        /// <param name="segmentList"></param>
         public static void ClearRoad(List<ushort> segmentList) {
             foreach (ushort segmentId in segmentList) {
                 foreach (bool startNode in Constants.ALL_BOOL) {

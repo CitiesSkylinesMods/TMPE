@@ -42,20 +42,20 @@ namespace TrafficManager.UI.SubTools {
 
             // TODO provide revert/clear mode issue #568
             if (ctrlDown && shiftDown) {
-                bool isRAbout = RoundaboutMassEdit.Instance.FixRabout(HoveredSegmentId);
-                if (!isRAbout) {
+                bool isRoundabout = RoundaboutMassEdit.Instance.FixRoundabout(HoveredSegmentId);
+                if (!isRoundabout) {
                     PriorityRoad.FixRoad(HoveredSegmentId);
                 }
                 RefreshMassEditOverlay();
                 return;
             } else if (ctrlDown) {
-                PriorityRoad.FixHighPrioirtyJunction(HoveredNodeId);
+                PriorityRoad.FixHighPriorityJunction(HoveredNodeId);
                 RefreshMassEditOverlay();
                 return;
             }
             if (shiftDown) {
-                bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
-                if (!isRAbout) {
+                bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+                if (!isRoundabout) {
                     segmentList = SegmentTraverser.Traverse(
                         HoveredSegmentId,
                         TraverseDirection.AnyDirection,
@@ -193,9 +193,9 @@ namespace TrafficManager.UI.SubTools {
             }
 
             if (shiftDown) {
-                bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+                bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
-                if (isRAbout) {
+                if (isRoundabout) {
                     foreach (uint segmentId in segmentList) {
                         ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                         NetTool.RenderOverlay(

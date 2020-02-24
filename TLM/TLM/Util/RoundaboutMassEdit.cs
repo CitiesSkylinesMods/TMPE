@@ -20,7 +20,7 @@ namespace TrafficManager.Util {
 
         private List<ushort> segmentList = null;
 
-        private static void FixLanesRAbout(ushort segmentId, ushort nextSegmentId) {
+        private static void FixLanesRoundabout(ushort segmentId, ushort nextSegmentId) {
             ushort nodeId = netService.GetHeadNode(segmentId);
 
             if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
@@ -90,7 +90,7 @@ namespace TrafficManager.Util {
             } // end if
         }
 
-        internal static void FixRulesRAbout(ushort segmentId) {
+        internal static void FixRulesRoundabout(ushort segmentId) {
             foreach (bool startNode in Constants.ALL_BOOL) {
                 if (OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns) {
                     TrafficPriorityManager.Instance.SetPrioritySign(
@@ -173,27 +173,27 @@ namespace TrafficManager.Util {
         /// </summary>
         /// <param name="segmentId"></param>
         /// <returns></returns>
-        public bool FixRabout(ushort initialSegmentId) {
-            bool isRAbout = TraverseLoop(initialSegmentId, out var segmentList);
-            if (!isRAbout) {
+        public bool FixRoundabout(ushort initialSegmentId) {
+            bool isRoundabout = TraverseLoop(initialSegmentId, out var segmentList);
+            if (!isRoundabout) {
                 Log._Debug($"segment {initialSegmentId} not a roundabout.");
                 return false;
             }
             int count = segmentList.Count;
             Log._Debug($"\n segmentId={initialSegmentId} seglist.count={count}\n");
 
-            FixRabout(segmentList);
+            FixRoundabout(segmentList);
             return true;
         }
 
-        public void FixRabout(List<ushort> segmentList) {
+        public void FixRoundabout(List<ushort> segmentList) {
             this.segmentList = segmentList;
             int count = segmentList?.Count ?? 0;
             for (int i = 0; i < count; ++i) {
                 ushort segId = segmentList[i];
                 ushort nextSegId = segmentList[(i + 1) % count];
-                FixLanesRAbout(segId, nextSegId);
-                FixRulesRAbout(segId);
+                FixLanesRoundabout(segId, nextSegId);
+                FixRulesRoundabout(segId);
                 FixMinor(netService.GetHeadNode(segId));
             }
         }
@@ -221,7 +221,7 @@ namespace TrafficManager.Util {
             return ret;
         }
 
-        public static bool IsRabout(List<ushort> segList, bool semi = false) {
+        public static bool IsRoundabout(List<ushort> segList, bool semi = false) {
             try {
                 int n = segList?.Count ?? 0;
                 if (n <= 1)
@@ -231,8 +231,8 @@ namespace TrafficManager.Util {
                     ushort prevSegmentID = segList[i];
                     ushort nextSegmentID = segList[(i + 1) % n];
                     ushort headNodeID = netService.GetHeadNode(prevSegmentID);
-                    bool isRAbout = IsPartofRoundabout(nextSegmentID, prevSegmentID, headNodeID);
-                    if (!isRAbout) {
+                    bool isRoundabout = IsPartofRoundabout(nextSegmentID, prevSegmentID, headNodeID);
+                    if (!isRoundabout) {
                         //Log._Debug($"segments {prevSegmentID} and {nextSegmentID} with node:{headNodeID} are not part of a roundabout");
                         return false;
                     }
@@ -253,15 +253,15 @@ namespace TrafficManager.Util {
             var segments = GetSortedSegments( segmentId);
 
             foreach (var nextSegmentId in segments) {
-                bool isRAbout = false;
+                bool isRoundabout = false;
                 if (nextSegmentId == segmentList[0]) {
-                    isRAbout = true;
+                    isRoundabout = true;
                 } else if (Contains(nextSegmentId)) {
-                    isRAbout = false;
+                    isRoundabout = false;
                 } else {
-                    isRAbout = TraverseAroundRecursive(nextSegmentId);
+                    isRoundabout = TraverseAroundRecursive(nextSegmentId);
                 }
-                if (isRAbout) {
+                if (isRoundabout) {
                     return true;
                 } //end if
             }// end foreach
@@ -351,6 +351,10 @@ namespace TrafficManager.Util {
             return false;
         }
 
+        /// <summary>
+        /// Clears all rules put by RoundAboutMassEdit.FixRoundabout()
+        /// </summary>
+        /// <param name="segmentList"></param>
         public void ClearNode(ushort nodeId) {
             PriorityRoad.ClearNode(nodeId);
             netService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment seg) => {
@@ -362,7 +366,11 @@ namespace TrafficManager.Util {
             });
         }
 
-        public void ClearRabout(List<ushort> segmentList) {
+        /// <summary>
+        /// Clears all rules put by RoundAboutMassEdit.FixRoundabout()
+        /// </summary>
+        /// <param name="segmentList"></param>
+        public void ClearRoundabout(List<ushort> segmentList) {
             foreach (ushort segmentId in segmentList) {
                 foreach (bool startNode in Constants.ALL_BOOL) {
                     ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);

@@ -530,7 +530,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Traffic\Data\" />
-    <Folder Include="U\MainMenu" />
+    <Folder Include="U\MainMenu\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Translations\JunctionRestrictions.csv" />
@@ -589,8 +589,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Clear-fg-disabled.png" />
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Clear-fg-normal.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPrioirty-fg-disabled.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPrioirty-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPriority-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPriority-fg-normal.png" />
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout-fg-disabled.png" />
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout-fg-normal.png" />
     <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-active.png" />
