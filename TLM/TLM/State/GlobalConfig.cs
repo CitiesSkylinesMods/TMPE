@@ -33,10 +33,10 @@
         //private object ObserverLock = new object();
 
         /// <summary>
-        /// Holds a list of observers which are being notified as soon as the configuration is updated
+        /// Initializes static members of the <see cref="GlobalConfig"/> class.
+        /// Holds a list of observers which are being notified as soon as the configuration is updated.
         /// </summary>
         //private List<IObserver<GlobalConfig>> observers = new List<IObserver<GlobalConfig>>();
-
         static GlobalConfig() {
             Reload();
         }

@@ -1,15 +1,30 @@
 ﻿namespace TrafficManager.UI.MainMenu {
+    using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.RedirectionFramework;
+    using TrafficManager.U.Button;
 
-    public class ClearTrafficButton : MenuButton {
-        public override bool Active => false;
+    public class ClearTrafficButton : BaseMenuButton {
+        public override bool IsActive() => false;
 
-        protected override ButtonFunction Function => ButtonFunction.ClearTraffic;
+        protected override ButtonFunction Function => new ButtonFunction("ClearTraffic");
 
-        public override string Tooltip => Translation.Menu.Get("Tooltip:Clear traffic");
+        public override string GetTooltip() => Translation.Menu.Get("Tooltip:Clear traffic");
 
-        public override bool Visible => true;
+        public override bool IsVisible() => true;
+
+        public override void SetupButtonSkin(HashSet<string> atlasKeys) {
+            // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
+            this.Skin = new U.Button.ButtonSkin() {
+                                                      Prefix = "ClearTraffic",
+                                                      BackgroundPrefix = "RoundButton",
+                                                      BackgroundHovered = true,
+                                                      BackgroundActive = true,
+                                                      ForegroundActive = true,
+                                                  };
+            atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
+        }
 
         public override void OnClickInternal(UIMouseEventParameter p) {
             ConfirmPanel.ShowModal(
@@ -21,7 +36,7 @@
                             () => { UtilityManager.Instance.ClearTraffic(); });
                     }
 
-                    UIBase.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
+                    ModUI.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
                 });
         }
     }
