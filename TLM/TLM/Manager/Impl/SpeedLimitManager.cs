@@ -851,13 +851,13 @@ namespace TrafficManager.Manager.Impl {
             bool success = true;
             Log.Info($"Loading lane speed limit data. {data.Count} elements");
 #if DEBUG
-            bool debugLogging = DebugSwitch.SpeedLimits.Get();
+            bool debugSpeedLimits = DebugSwitch.SpeedLimits.Get();
 #endif
             foreach (Configuration.LaneSpeedLimit laneSpeedLimit in data) {
                 try {
                     if (!Services.NetService.IsLaneValid(laneSpeedLimit.laneId)) {
 #if DEBUG
-                        Log._DebugIf(debugLogging, () =>
+                        Log._DebugIf(debugSpeedLimits, () =>
                             $"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: Lane is invalid");
 #endif
                         continue;
@@ -871,7 +871,7 @@ namespace TrafficManager.Manager.Impl {
                                    .instance.m_segments.m_buffer[segmentId].Info;
                     float customSpeedLimit = GetCustomNetInfoSpeedLimit(info);
 #if DEBUG
-                    Log._DebugIf(debugLogging, () =>
+                    Log._DebugIf(debugSpeedLimits, () =>
                         $"SpeedLimitManager.LoadData: Handling lane {laneSpeedLimit.laneId}: " +
                         $"Custom speed limit of segment {segmentId} info ({info}, name={info?.name}, " +
                         $"lanes={info?.m_lanes} is {customSpeedLimit}");
@@ -880,7 +880,7 @@ namespace TrafficManager.Manager.Impl {
                     if (IsValidRange(customSpeedLimit)) {
                         // lane speed limit differs from default speed limit
 #if DEBUG
-                        Log._DebugIf(debugLogging, () =>
+                        Log._DebugIf(debugSpeedLimits, () =>
                             "SpeedLimitManager.LoadData: Loading lane speed limit: " +
                             $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit} km/h");
 #endif
@@ -890,7 +890,7 @@ namespace TrafficManager.Manager.Impl {
                         Flags.SetLaneSpeedLimit(laneSpeedLimit.laneId, kmph);
                     } else {
 #if DEBUG
-                    Log._DebugIf(debugLogging, () =>
+                    Log._DebugIf(debugSpeedLimits, () =>
                         "SpeedLimitManager.LoadData: " +
                         $"Skipping lane speed limit of lane {laneSpeedLimit.laneId} " +
                         $"({laneSpeedLimit.speedLimit} km/h)");
