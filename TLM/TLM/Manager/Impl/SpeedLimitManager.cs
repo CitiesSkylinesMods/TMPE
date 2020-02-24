@@ -874,16 +874,13 @@ namespace TrafficManager.Manager.Impl {
 
                     if (IsValidRange(customSpeedLimit)) {
                         // lane speed limit differs from default speed limit
-#if DEBUGLOAD
-                        Log._Debug($"SpeedLimitManager.LoadData: Loading lane speed limit: lane "+
-                            $"{laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
-#endif
-                        Flags.SetLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
-                        Log._Debug(
-                            $"SpeedLimitManager.LoadData: Loading lane speed limit: " +
+                        Log._DebugIf(DebugSwitch.SpeedLimits.Get(), () =>
+                            "SpeedLimitManager.LoadData: Loading lane speed limit: " +
                             $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit} km/h");
+
                         float kmph = laneSpeedLimit.speedLimit /
                                      Constants.SPEED_TO_KMPH; // convert to game units
+
                         Flags.SetLaneSpeedLimit(laneSpeedLimit.laneId, kmph);
                     } else {
 #if DEBUGLOAD
