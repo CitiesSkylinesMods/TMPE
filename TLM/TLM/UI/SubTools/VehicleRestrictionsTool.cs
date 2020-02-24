@@ -283,7 +283,7 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
-            if (GUILayout.Button(Translation.VehicleRestrictions.Get("Button:Ban all vehicles"))) {
+            if (GUILayout.Button(T("Button:Ban all vehicles"))) {
                 AllVehiclesFunc(false);
                 if (RoadMode) {
                     ApplyRestrictionsToAllSegments();
