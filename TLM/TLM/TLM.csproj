@@ -351,8 +351,6 @@
     <EmbeddedResource Include="Resources\MainMenu\noimage.png" />
     <EmbeddedResource Include="Resources\MainMenu\remove-btn.png" />
     <EmbeddedResource Include="Resources\MainMenu\WindowBackground.png" />
-    <EmbeddedResource Include="Resources\pedestrian_mode_1.png" />
-    <EmbeddedResource Include="Resources\pedestrian_mode_2.png" />
     <EmbeddedResource Include="Resources\clear.png" />
   </ItemGroup>
   <ItemGroup>
