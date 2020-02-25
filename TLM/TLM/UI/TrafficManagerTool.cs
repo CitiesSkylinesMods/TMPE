@@ -1860,6 +1860,7 @@ namespace TrafficManager.UI {
         /// This is because Input.GetMouseButtonDown(0) is consumed by OnToolUpdate()
         /// to call OnPrimaryClickOverlay().
         /// You should call this method from OnPrimaryClickOverlay() once click is handled. consume the click.
+        /// TODO [issue #740] improve this.
         /// </summary>
         internal bool CheckClicked() {
             if (Input.GetMouseButtonDown(0) && !_mouseClickProcessed) {
