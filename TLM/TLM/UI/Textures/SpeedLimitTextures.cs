@@ -12,7 +12,7 @@ namespace TrafficManager.UI.Textures {
         public static readonly IDictionary<int, Texture2D> TexturesKmph;
         public static readonly IDictionary<int, Texture2D> TexturesMphUS;
         public static readonly IDictionary<int, Texture2D> TexturesMphUK;
-
+        public static readonly Texture2D Clear;
         static SpeedLimitTextures() {
             // TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
             TexturesKmph = new TinyDictionary<int, Texture2D>();
@@ -34,6 +34,7 @@ namespace TrafficManager.UI.Textures {
                 var resourceUk = LoadDllResource($"SpeedLimits.Mph_UK.{speedLimit}.png", 200, 200);
                 TexturesMphUK.Add(speedLimit, resourceUk ?? TexturesMphUK[5]);
             }
+            Clear = LoadDllResource($"clear.png", 256, 256);
         }
 
         /// <summary>

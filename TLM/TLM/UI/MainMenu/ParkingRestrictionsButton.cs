@@ -23,7 +23,7 @@ namespace TrafficManager.UI.MainMenu {
 
         public override string GetTooltip() =>
             Translation.Menu.Get("Tooltip:Parking restrictions") + "\n" +
-            Translation.Menu.Get("Tooltip.Keybinds:Parking restrictions");
+            "[Shift]: " + Translation.Menu.Get("Tooltip.Keybinds:Parking restrictions");
 
         public override bool IsVisible() => Options.parkingRestrictionsEnabled;
     }

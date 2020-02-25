@@ -414,7 +414,7 @@ namespace TrafficManager.UI.SubTools {
                     // draw remove button and handle click
                     if (showRemoveButton
                         && MainTool.DrawHoverableSquareOverlayTexture(
-                            RoadUI.SignRemove,
+                            RoadUI.SignClear,
                             camPos,
                             nodePos,
                             90f)

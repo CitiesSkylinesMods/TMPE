@@ -7,6 +7,7 @@ namespace TrafficManager.Util {
     using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using UnityEngine;
 
     internal static class Shortcuts {
         /// <summary>
@@ -77,5 +78,13 @@ namespace TrafficManager.Util {
 
         internal static string ToSTR(this List<LanePos> laneList) =>
             (from lanePos in laneList select lanePos.laneId).ToSTR();
+
+
+        internal static bool ShiftIsPressed => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+        internal static bool ControlIsPressed => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+
+        internal static bool AltIsPressed => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+
     }
 }
