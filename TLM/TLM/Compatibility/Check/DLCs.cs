@@ -1,6 +1,7 @@
 namespace TrafficManager.Compatibility.Check {
     using ColossalFramework.PlatformServices;
     using CSUtil.Commons;
+    using System;
     using System.Collections.Generic;
     using System.Text;
 
@@ -43,7 +44,8 @@ namespace TrafficManager.Compatibility.Check {
 
                 Log.Info(sb.ToString());
             }
-            catch {
+            catch (Exception e) {
+                Log.ErrorFormat("Error logging DLC\n{0}", e.ToString());
             }
         }
     }
