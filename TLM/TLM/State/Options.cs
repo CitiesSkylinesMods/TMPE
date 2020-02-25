@@ -66,6 +66,7 @@ namespace TrafficManager.State {
         public static bool trafficLightPriorityRules;
         public static bool banRegularTrafficOnBusLanes;
         public static bool advancedAI;
+        public static SimulationAccuracy simulationAccuracy;
         public static bool realisticPublicTransport;
         public static byte altLaneSelectionRatio;
         public static bool highwayRules;
