@@ -367,12 +367,14 @@ namespace TrafficManager.UI {
                 /// The button cannot be smaller than 40px.</summary>
                 /// <returns>Button size for current screen resolution.</returns>
                 internal static float GetButtonSize() {
+                    const float REFERENCE_SIZE = 40f;
+                    const float FRAC_X = REFERENCE_SIZE / 1920f;
+                    const float FRAC_Y = REFERENCE_SIZE / 1080f;
                     var scaledSize
-                        = U.UIScaler.ScreenSizeSmallestFraction(0.0208f, 0.037f) *
+                        = U.UIScaler.ScreenSizeSmallestFraction(FRAC_X, FRAC_Y) *
                           U.UIScaler.GetUIScale();
-                    return Mathf.Max(scaledSize, 40f);
+                    return Mathf.Max(scaledSize, REFERENCE_SIZE);
                 }
-
 
                 public RoadSelectionPanels Root => RoadSelectionPanels.Root;
 
