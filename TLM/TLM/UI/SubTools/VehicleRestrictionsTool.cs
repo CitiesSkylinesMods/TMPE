@@ -111,6 +111,7 @@ namespace TrafficManager.UI.SubTools {
 
             SelectedSegmentId = HoveredSegmentId;
             currentRestrictedSegmentIds.Add(SelectedSegmentId);
+            MainTool.CheckClicked(); // consume click.
         }
 
         public override void OnSecondaryClickOverlay() {

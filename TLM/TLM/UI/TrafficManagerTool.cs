@@ -1856,8 +1856,10 @@ namespace TrafficManager.UI {
 
 
         /// <summary>
-        /// Sometimes (eg when clicking overlay sprites - TODO why?) this method should
-        /// be used instead of Input.GetMouseButtonDown(0)
+        /// this method should be used in OnToolGUI() instead of Input.GetMouseButtonDown(0).
+        /// This is because Input.GetMouseButtonDown(0) is consumed by OnToolUpdate()
+        /// to call OnPrimaryClickOverlay().
+        /// You should call this method from OnPrimaryClickOverlay() once click is handled. consume the click.
         /// </summary>
         internal bool CheckClicked() {
             if (Input.GetMouseButtonDown(0) && !_mouseClickProcessed) {
