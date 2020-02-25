@@ -21,7 +21,6 @@ namespace TrafficManager.Compatibility.GUI {
         private UIButton closeButton_;
         private UISprite warningIcon_;
         private UIPanel mainPanel_;
-        private UICheckBox runModsCheckerOnStartup_;
         private UIComponent blurEffect_;
         private UIScrollablePanel scrollPanel_;
 
@@ -201,12 +200,14 @@ namespace TrafficManager.Compatibility.GUI {
         ///
         /// <param name="eventparam">Details about the key press.</param>
         protected override void OnKeyDown(UIKeyEventParameter eventparam) {
-            if (Input.GetKey(KeyCode.Escape) || Input.GetKey(KeyCode.Return)) {
+            if (Input.GetKey(KeyCode.Escape)) {
                 eventparam.Use();
                 CloseDialog();
+            } else if (Input.GetKey(KeyCode.Return)) {
+                // todo: default action
+            } else {
+                base.OnKeyDown(eventparam);
             }
-
-            base.OnKeyDown(eventparam);
         }
 
         /// <summary>
@@ -231,6 +232,9 @@ namespace TrafficManager.Compatibility.GUI {
 
             UIView.PopModal();
 
+            Hide();
+            Unfocus();
+
             if (UIView.HasModalInput()) {
                 UIComponent component = UIView.GetModalComponent();
                 if (component != null) {
@@ -243,126 +247,28 @@ namespace TrafficManager.Compatibility.GUI {
                     new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut),
                     () => blurEffect_.Hide());
             }
-            Hide();
-            Unfocus();
 
             // should really destroy the dialog and all child components here
         }
 
         /// <summary>
-        /// Creates a panel representing the mod and adds it to the <paramref name="parent"/> UI component.
+        /// Deletes a locally installed mod.
         /// </summary>
-        ///
-        /// <param name="parent">The parent UI component that the panel will be added to.</param>
-        /// <param name="modName">The name of the mod, which is displayed to user.</param>
-        /// <param name="mod">The <see cref="PluginInfo"/> instance of the incompatible mod.</param>
-        private void CreateEntry(ref UIScrollablePanel parent, string modName, PluginInfo mod) {
-            string caption = mod.publishedFileID.AsUInt64 == LOCAL_MOD
-                                 ? Translation.ModConflicts.Get("Button:Delete mod")
-                                 : Translation.ModConflicts.Get("Button:Unsubscribe mod");
-
-            UIPanel panel = parent.AddUIComponent<UIPanel>();
-            panel.size = new Vector2(560, 50);
-            panel.backgroundSprite = "ContentManagerItemBackground";
-
-            UILabel label = panel.AddUIComponent<UILabel>();
-            label.text = modName;
-            label.textAlignment = UIHorizontalAlignment.Left;
-            label.relativePosition = new Vector2(10, 15);
-
-            CreateButton(
-                panel,
-                caption,
-                (int)panel.width - 170,
-                10,
-                (component, param) => UnsubscribeClick(component, param, mod));
-        }
-
-        /// <summary>
-        /// Handles click of "Unsubscribe" or "Delete" button; removes the associated mod and updates UI.
-        ///
-        /// Once all incompatible mods are removed, the dialog will be closed automatically.
-        /// </summary>
-        ///
-        /// <param name="component">A handle to the UI button that was clicked.</param>
-        /// <param name="eventparam">Details of the click event.</param>
-        /// <param name="mod">The <see cref="PluginInfo"/> instance of the mod to remove.</param>
-        private void UnsubscribeClick(UIComponent component,
-                                      UIMouseEventParameter eventparam,
-                                      PluginInfo mod) {
-            eventparam.Use();
-            bool success;
-
-            // disable button to prevent accidental clicks
-            component.isEnabled = false;
-            Log.Info($"Removing incompatible mod '{mod.name}' from {mod.modPath}");
-
-            success = mod.publishedFileID.AsUInt64 == LOCAL_MOD
-                          ? DeleteLocalTMPE(mod)
-                          : PlatformService.workshop.Unsubscribe(mod.publishedFileID);
-
-            if (success) {
-                IncompatibleMods.Remove(mod);
-                component.parent.Disable();
-                component.isVisible = false;
-
-                // automatically close the dialog if no more mods to remove
-                if (IncompatibleMods.Count == 0) {
-                    CloseDialog();
-                }
-            } else {
-                Log.Warning($"Failed to remove mod '{mod.name}'");
-                component.isEnabled = true;
-            }
-        }
-
-        /// <summary>
-        /// Deletes a locally installed TM:PE mod.
-        /// </summary>
+        /// 
         /// <param name="mod">The <see cref="PluginInfo"/> associated with the mod that needs deleting.</param>
+        /// 
         /// <returns>Returns <c>true</c> if successfully deleted, otherwise <c>false</c>.</returns>
-        private bool DeleteLocalTMPE(PluginInfo mod) {
+        private bool DeleteLocalMod(PluginInfo mod) {
             try {
-                Log._Debug($"Deleting local TM:PE from {mod.modPath}");
-                // mod.Unload();
+                Log.InfoFormat("Deleting local mod from {0}", mod.modPath);
+                // mod.Unload(); // this caused crash
                 DirectoryUtils.DeleteDirectory(mod.modPath);
                 return true;
             }
             catch (Exception e) {
+                Log.InfoFormat("- Failed:\n{0}", e.ToString());
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Creates an `Unsubscribe` or `Delete` button (as applicable to mod location) and attaches
-        ///     it to the <paramref name="parent"/> UI component.
-        /// </summary>
-        /// <param name="parent">The parent UI component which the button will be attached to.</param>
-        /// <param name="text">The translated text to display on the button.</param>
-        /// <param name="x">The x position of the top-left corner of the button, relative to
-        ///     <paramref name="parent"/>.</param>
-        /// <param name="y">The y position of the top-left corner of the button, relative to
-        ///     <paramref name="parent"/>.</param>
-        /// <param name="eventClick">The event handler for when the button is clicked.</param>
-        private void CreateButton(UIComponent parent,
-                                  string text,
-                                  int x,
-                                  int y,
-                                  MouseEventHandler eventClick) {
-            var button = parent.AddUIComponent<UIButton>();
-            button.textScale = 0.8f;
-            button.width = 150f;
-            button.height = 30;
-            button.normalBgSprite = "ButtonMenu";
-            button.disabledBgSprite = "ButtonMenuDisabled";
-            button.hoveredBgSprite = "ButtonMenuHovered";
-            button.focusedBgSprite = "ButtonMenu";
-            button.pressedBgSprite = "ButtonMenuPressed";
-            button.textColor = new Color32(255, 255, 255, 255);
-            button.playAudioEvents = true;
-            button.text = text;
-            button.relativePosition = new Vector3(x, y);
-            button.eventClick += eventClick;
         }
     }
 }

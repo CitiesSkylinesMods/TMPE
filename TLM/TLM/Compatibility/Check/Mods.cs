@@ -86,6 +86,8 @@ namespace TrafficManager.Compatibility.Check {
                     // Generate descriptor for the mod
                     ModDescriptor descriptor = mod;
 
+                    results.Add(mod, descriptor);
+
                     // String to log for workshop id
                     logWorkshopId = mod.isBuiltin
                         ? BUNDLED_MOD_STR
@@ -97,33 +99,29 @@ namespace TrafficManager.Compatibility.Check {
 
                         case Severity.Critical:
                             logIncompatible = MARKER_CRITICAL;
-                            verified = false;
                             ++critical;
-                            results.Add(mod, descriptor);
+                            verified = false;
                             break;
 
                         case Severity.Major:
                             logIncompatible = MARKER_MAJOR;
+                            ++major;
                             if (mod.isEnabled || scanDisabled) {
                                 verified = false;
-                                ++major;
-                                results.Add(mod, descriptor);
                             }
                             break;
 
                         case Severity.Minor:
                             logIncompatible = MARKER_MINOR;
+                            ++minor;
                             if (scanMinor && (mod.isEnabled || scanDisabled)) {
                                 verified = false;
-                                ++minor;
-                                results.Add(mod, descriptor);
                             }
                             break;
 
                         case Severity.TMPE:
                             logIncompatible = MARKER_TMPE;
                             ++tmpe;
-                            results.Add(mod, descriptor);
                             if (descriptor.AssemblyGuid != CompatibilityManager.SelfGuid) {
                                 verified = false;
                             }

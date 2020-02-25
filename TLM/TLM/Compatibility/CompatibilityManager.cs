@@ -49,32 +49,37 @@ namespace TrafficManager.Compatibility {
         /// Run checks when possible to do so.
         /// </summary>
         public static void Activate() {
+            Log._DebugFormat(
+                "CompatibilityManager.Activate() Scene = {0}",
+                SceneManager.GetActiveScene().name);
+
             // Abort if this is an in-game hot reload
             if (SceneManager.GetActiveScene().name == "Game") {
+                Log._Debug("- Skipping due to in-game hot reload");
                 paused_ = true;
                 return;
             }
-
-            Log._Debug("CompatibilityManager.Activate()");
 
             paused_ = UIView.GetAView() == null;
 
             if (paused_) {
                 Log._Debug("- Waiting for main menu...");
+                LoadingManager.instance.m_introLoaded += OnIntroLoaded;
             } else {
                 PerformChecks();
+                SetEvents(true);
             }
-
-            SetEvents(true);
         }
 
         /// <summary>
-        /// Remove event listeners.
+        /// Deactivates the compatibility checker.
         /// </summary>
         public static void Deactivate() {
             Log._Debug("CompatibilityManager.Deactivate()");
 
             paused_ = true;
+
+            // todo: destroy IncompatibleMods.Instance.List
 
             SetEvents(false);
         }
@@ -93,7 +98,6 @@ namespace TrafficManager.Compatibility {
 
             if (active) {
                 SceneManager.activeSceneChanged += OnSceneChanged;
-                LoadingManager.instance.m_introLoaded += OnIntroLoaded;
                 Singleton<PluginManager>.instance.eventPluginsChanged += OnPluginsChanged;
                 Singleton<PluginManager>.instance.eventPluginsStateChanged += OnPluginsChanged;
             }
@@ -129,7 +133,7 @@ namespace TrafficManager.Compatibility {
                 out int critical,
                 out int candidate)) {
 
-                restartRequired_ = major > 0 || critical > 0 || candidate > 1;
+                restartRequired_ = true;
 
                 // todo: deal with incompatibilities
             }
@@ -158,9 +162,9 @@ namespace TrafficManager.Compatibility {
         private static void OnIntroLoaded() {
             Log._Debug("CompatibilityManager.OnIntroLoaded()");
 
-            LoadingManager.instance.m_introLoaded -= OnIntroLoaded;
             paused_ = false;
             PerformChecks();
+            SetEvents(true);
         }
 
         /// <summary>
@@ -220,8 +224,8 @@ namespace TrafficManager.Compatibility {
                 autoContinue_ = LauncherLoginData.instance.m_continue;
                 LauncherLoginData.instance.m_continue = false;
             }
-            catch {
-                Log.Info(" - Failed!");
+            catch (Exception e) {
+                Log.ErrorFormat(" - Stop AutoContinue Failed:\n{0}", e.ToString());
             }
         }
 
@@ -233,7 +237,12 @@ namespace TrafficManager.Compatibility {
                 "CompatibilityManager.ResumeLauncherAutoContinue() {0}",
                 autoContinue_);
 
+            if (paused_ || Singleton<LoadingManager>.instance.m_applicationQuitting) {
+                return;
+            }
+
             if (autoContinue_) {
+                paused_ = true;
                 autoContinue_ = false;
 
                 try {
@@ -243,8 +252,8 @@ namespace TrafficManager.Compatibility {
                         menu.Invoke("AutoContinue", 2.5f);
                     }
                 }
-                catch {
-                    Log.Info(" - Failed!");
+                catch (Exception e) {
+                    Log.ErrorFormat(" - Resume AutoContinue Failed:\n{0}", e.ToString());
                 }
             }
         }
@@ -253,13 +262,14 @@ namespace TrafficManager.Compatibility {
         /// Exits the game to desktop.
         /// </summary>
         private static void ExitToDesktop() {
+            Log._Debug("CompatibilityManager.ExitToDesktop()");
+
             if (paused_ || Singleton<LoadingManager>.instance.m_applicationQuitting) {
                 return;
             }
 
-            Log._Debug("CompatibilityManager.ExitToDesktop()");
-
             paused_ = true;
+            autoContinue_ = false;
 
             SetEvents(false);
 

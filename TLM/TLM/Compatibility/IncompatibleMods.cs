@@ -141,6 +141,9 @@ namespace TrafficManager.Compatibility {
                 List.Count);
         }
 
+        /// <summary>
+        /// Finalizes an instance of the <see cref="IncompatibleMods"/> class.
+        /// </summary>
         [UsedImplicitly]
         ~IncompatibleMods() {
             List.Clear();
