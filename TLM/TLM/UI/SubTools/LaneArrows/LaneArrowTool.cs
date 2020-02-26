@@ -10,6 +10,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.UI.MainMenu;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using Debug = UnityEngine.Debug;
@@ -41,7 +42,7 @@ namespace TrafficManager.UI.SubTools {
         private bool cursorInSecondaryPanel_;
 
         /// <summary>If exists, contains tool panel floating on the selected node.</summary>
-        private U.Panel.BaseUWindowPanel ToolWindow { get; set; }
+        private LaneArrowToolWindow ToolWindow { get; set; }
 
         public LaneArrowTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -100,38 +101,70 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            Vector3 nodePos = Singleton<NetManager>
-                              .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
-
-            // Hide if node position is off-screen
-
-            bool visible = MainTool.WorldToScreenPoint(nodePos, out Vector3 screenPos);
-
-            // if (!visible) {
-                // return;
+            // Vector3 nodePos = Singleton<NetManager>
+            //                   .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
+            //
+            // // Hide if node position is off-screen
+            //
+            // bool visible = MainTool.WorldToScreenPoint(nodePos, out Vector3 screenPos);
+            //
+            // // if (!visible) {
+            //     // return;
+            // // }
+            //
+            // Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+            // Vector3 diff = nodePos - camPos;
+            //
+            // if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
+            //     return; // do not draw if too distant
             // }
+            CreateLaneArrowsWindow(numLanes);
+        }
 
-            Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-            Vector3 diff = nodePos - camPos;
-
-            if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
-                return; // do not draw if too distant
+        private class ScaledSize {
+            /// <summary>
+            /// Base lane group height scaled to screen size, from it the window height is derived.</summary>
+            /// <returns>Height of one lane button group.</returns>
+            internal static float GetLaneGroupHeight() {
+                // At 1920x1080 the width should be 50 px, can shrink or grow with screen size
+                const float REFERENCE_HEIGHT = 50f;
+                const float X_FRAC = REFERENCE_HEIGHT / 1920f;
+                const float Y_FRAC = REFERENCE_HEIGHT / 1080f;
+                return U.UIScaler.ScreenSizeSmallestFraction(X_FRAC, Y_FRAC)
+                       * U.UIScaler.GetUIScale();
             }
 
-            int width = numLanes * 128;
-            int height = 50;
-            bool startNode = (bool)netService.IsStartNode(SelectedSegmentId, SelectedNodeId);
-            if (CanReset(SelectedSegmentId, startNode)) {
-                height += 40;
+            internal static float GetLaneGroupWidth() {
+                // For 50 px reference height, the width will be about 2.5x more, 125px
+                return GetLaneGroupHeight() * 2.5f;
             }
+        }
+
+        private void CreateLaneArrowsWindow(int numLanes) {
+            float laneGroupWidth = ScaledSize.GetLaneGroupWidth();
+            float height = ScaledSize.GetLaneGroupHeight();
+            float spacing = height / 8f;
+
+            var parent = ModUI.Instance.MainMenu;
+            ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
+            ToolWindow.autoLayout = false;
+
+            // A spacing on each window side
+            float windowWidth = numLanes * ((2 * spacing) + laneGroupWidth);
+            ToolWindow.size = new Vector2(windowWidth, height + (2 * spacing));
+
+            ToolWindow.SetupControls(
+                numLanes,
+                new Vector2(laneGroupWidth, height),
+                spacing);
 
             //------------------------------------------
             // Create tool window on the selected node
             //------------------------------------------
             // var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, height);
 
-            UIView uiView = UIView.GetAView();
-            ToolWindow = (U.Panel.BaseUWindowPanel)uiView.AddUIComponent(typeof(U.Panel.BaseUWindowPanel));
+            // UIView uiView = UIView.GetAView();
+            // ToolWindow = (U.Panel.BaseUWindowPanel)uiView.AddUIComponent(typeof(U.Panel.BaseUWindowPanel));
 
             // var legacyBorderlessStyle = new GUIStyle();
             // GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, legacyBorderlessStyle);
@@ -140,7 +173,10 @@ namespace TrafficManager.UI.SubTools {
 
         /// <summary>Called from GenericFsm when user leaves lane arrow editor, to hide the GUI.</summary>
         private void OnLeaveEditorState() {
-            Log._Debug("LaneArrow: leaving GUI state, hide GUI");
+            if (ToolWindow) {
+                UnityEngine.Object.Destroy(ToolWindow);
+                ToolWindow = null;
+            }
         }
 
         /// <summary>
@@ -267,8 +303,10 @@ namespace TrafficManager.UI.SubTools {
             SelectedNodeId = 0;
             // }
 
-            fsm_.SendTrigger(Trigger.RightMouseClick);
-            Log._Debug($"LaneArrow new state={fsm_.State}");
+            if (fsm_ != null) {
+                fsm_.SendTrigger(Trigger.RightMouseClick);
+                Log._Debug($"LaneArrow new state={fsm_.State}");
+            }
         }
 
         [Conditional("OBSOLETE_LANEARROW_IMGUI")]

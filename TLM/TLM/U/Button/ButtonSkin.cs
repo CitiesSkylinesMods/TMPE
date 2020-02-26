@@ -7,16 +7,22 @@ namespace TrafficManager.U.Button {
     /// Struct defines button atlas keys for button states.
     /// Atlas is loaded when the button is created.
     /// Some fields can be set to true to indicate that sprites exist and should be loaded and used.
-    /// Skin setup example. In button constructor write:
+    /// Skin setup example.
+    /// -------------------------------------------------------------------------------
+    /// In button constructor write:
     /// this.Skin = new ButtonSkin {
-    ///                                Prefix = "MainMenuButton",
-    ///                                BackgroundHovered = true,
-    ///                                BackgroundActive = true,
-    ///                                ForegroundHovered = true,
-    ///                                ForegroundActive = true,
-    ///                            };
-    /// this.atlas = this.Skin.CreateAtlas("MainMenu", 50, 50, 256);
-    ///
+    ///     Prefix = "MainMenuButton",
+    ///     BackgroundPrefix = "MainMenuButton", // this also loads the *-bg-normal
+    ///     BackgroundHovered = true,
+    ///     BackgroundActive = true,
+    ///     ForegroundHovered = true,
+    ///     ForegroundActive = true,
+    /// };
+    /// this.atlas = this.Skin.CreateAtlas("MainMenu", 50, 50, 256, Skin.CreateAtlasKeyset());
+    /// -------------------------------------------------------------------------------
+    /// Background is always loaded if "BackgroundPrefix" is not empty.
+    /// Foreground Normal is always loaded.
+    /// Rest of the skin sprites you can control using the boolean variables provided.
     /// </summary>
     public class ButtonSkin {
         /// <summary>Foreground sprites are loaded with this prefix.</summary>

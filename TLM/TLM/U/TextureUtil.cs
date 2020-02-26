@@ -34,7 +34,9 @@
                     $"{resourcePrefix}.{spriteName}.png",
                     spriteWidth,
                     spriteHeight);
-                textures.Add(loadedSprite);
+                if (loadedSprite) {
+                    textures.Add(loadedSprite);
+                }
             }
 
             var regions = texture2D.PackTextures(textures.ToArray(), 2, hintAtlasTextureSize);
@@ -151,6 +153,18 @@
             ret.Apply();
 
             return ret;
+        }
+
+        public static UITextureAtlas FindAtlas(string name) {
+            UITextureAtlas[] atlases =
+                Resources.FindObjectsOfTypeAll(typeof(UITextureAtlas)) as UITextureAtlas[];
+            for (int i = 0; i < atlases.Length; i++) {
+                if (atlases[i].name == name) {
+                    return atlases[i];
+                }
+            }
+
+            return UIView.GetAView().defaultAtlas;
         }
     } // end class
 }

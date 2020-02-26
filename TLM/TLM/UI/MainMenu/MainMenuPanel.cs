@@ -14,6 +14,10 @@ namespace TrafficManager.UI.MainMenu {
     public class MainMenuPanel
         : U.Panel.BaseUWindowPanel,
           IObserver<GlobalConfig> {
+        public const int DEFAULT_MENU_X = 85;
+        public const int DEFAULT_MENU_Y = 60;
+        private const string GAMEOBJECT_NAME = "TMPE_MainMenuPanel";
+
         private struct MenuButtonDef {
             public ToolMode Mode;
             public Type ButtonType;
@@ -71,9 +75,6 @@ namespace TrafficManager.UI.MainMenu {
                                     },
               };
 
-        public const int DEFAULT_MENU_X = 85;
-        public const int DEFAULT_MENU_Y = 60;
-
         /// <summary>List of buttons stores created UIButtons in order. </summary>
         public List<BaseMenuButton> Buttons { get; private set; }
 
@@ -96,6 +97,8 @@ namespace TrafficManager.UI.MainMenu {
         private MainMenuLayout menuLayout_;
 
         public override void Start() {
+            U.UIUtil.MakeUniqueAndSetName(this.gameObject, GAMEOBJECT_NAME);
+
             GlobalConfig conf = GlobalConfig.Instance;
 
             OnUpdate(conf);
@@ -237,8 +240,12 @@ namespace TrafficManager.UI.MainMenu {
             /// The button cannot be smaller than 40px.</summary>
             /// <returns>Button size for current screen resolution.</returns>
             internal static float GetButtonSize() {
+                // At 1920x1080 the size should be 40 px, also capped from below to be min 40 px
+                const float REFERENCE_WIDTH = 40f;
+                const float X_FRAC = REFERENCE_WIDTH / 1920f;
+                const float Y_FRAC = REFERENCE_WIDTH / 1080f;
                 var scaledSize
-                    = U.UIScaler.ScreenSizeSmallestFraction(0.0208f, 0.037f) *
+                    = U.UIScaler.ScreenSizeSmallestFraction(X_FRAC, Y_FRAC) *
                       U.UIScaler.GetUIScale();
                 return Mathf.Max(scaledSize, 40f);
             }
