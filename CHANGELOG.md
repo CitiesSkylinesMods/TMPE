@@ -44,6 +44,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Improved: Organised lane markers/highlighters in to distinct classes (#701, #630)
 - Improved: Better reference dll hint paths for Mac and Windows developers (#664, #663)
 - Improved: Faster and more reliable hot-reloads of dev builds (#725, #717, #718)
+- Fixed: Vehicle Restrictions error: `HashSet have been modified` (#746, #744, #721)
 - Updated: Translations - Dutch (thanks Headspike) (#723, #742)
 - Updated: Translations - Spanish (thanks Nithox, obv) (#723, #742)
 - Updated: Translations - Chinese Simplified (thanks 田七不甜 / TianQiBuTian) (#723)
