@@ -136,18 +136,18 @@ namespace TrafficManager {
             base.OnUpdate(realTimeDelta, simulationTimeDelta);
 
             using (var bm = Benchmark.MaybeCreateBenchmark()) {
-                if (ToolsModifierControl.toolController == null || BaseUI == null) {
+                if (ToolsModifierControl.toolController == null || ModUI.Instance == null) {
                     return;
                 }
 
-                TrafficManagerTool tmTool = UIBase.GetTrafficManagerTool(false);
+                TrafficManagerTool tmTool = ModUI.GetTrafficManagerTool(false);
                 if (tmTool != null && ToolsModifierControl.toolController.CurrentTool != tmTool &&
-                    BaseUI.IsVisible()) {
-                    BaseUI.Close();
+                    ModUI.Instance.IsVisible()) {
+                    ModUI.Instance.Close();
                 }
 
                 if (Input.GetKeyDown(KeyCode.Escape)) {
-                    BaseUI.Close();
+                    ModUI.Instance.Close();
                 }
             } // end benchmark
         }

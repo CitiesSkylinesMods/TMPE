@@ -2,17 +2,16 @@ root=true
 
 [*.cs]
 max_line_length=100
-tab_width=8
 insert_final_newline=true
 trim_trailing_whitespace=true
 indent_style=space
-indent_size=4
 
 [*]
 charset=utf-8
 end_of_line=crlf
 indent_style=space
 indent_size=4
+tab_width=8
 
 # Microsoft .NET properties
 csharp_new_line_before_else=false
@@ -87,7 +86,7 @@ indent_size=4
 
 [{*.csproj,*.ccproj,*.androidproj}]
 indent_style=space
-indent_size=4
+indent_size=2
 
 [*.ruleset]
 indent_style=space
@@ -97,7 +96,7 @@ indent_size=4
 indent_style=space
 indent_size=4
 
-[*.{appxmanifest,asax,ascx,aspx,build,config,cshtml,csproj,dbml,discomap,dtd,htm,html,jsproj,lsproj,master,njsproj,nuspec,proj,props,razor,resw,resx,skin,StyleCop,targets,tasks,vb,vbproj,xaml,xamlx,xml,xoml,xsd}]
+[*.{appxmanifest,asax,ascx,aspx,build,config,cshtml,dbml,discomap,dtd,htm,html,jsproj,lsproj,master,njsproj,nuspec,proj,props,razor,resw,resx,skin,StyleCop,targets,tasks,vb,vbproj,xaml,xamlx,xml,xoml,xsd}]
 indent_style=space
 indent_size=4
-tab_width=4
+tab_width=8

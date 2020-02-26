@@ -21,6 +21,8 @@ namespace TrafficManager.UI {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
+    using GenericGameBridge.Service;
+    using CitiesGameBridge.Service;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -88,10 +90,9 @@ namespace TrafficManager.UI {
         internal static Rect MoveGUI(Rect rect) {
             // x := main menu x + rect.x
             // y := main menu y + main menu height + rect.y
-            // TODO use current size profile
             return new Rect(
                 MainMenuPanel.DEFAULT_MENU_X + rect.x,
-                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.SIZE_PROFILES[1].MENU_HEIGHT + rect.y,
+                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.ScaledSize.GetHeight() + rect.y,
                 rect.width,
                 rect.height);
         }
@@ -134,6 +135,8 @@ namespace TrafficManager.UI {
         internal float GetBaseZoom() {
             return Screen.height / 1200f;
         }
+
+        internal const float MAX_ZOOM = 0.05f;
 
         internal static float GetWindowAlpha() {
             return TransparencyToAlpha(GlobalConfig.Instance.Main.GuiTransparency);
@@ -371,9 +374,9 @@ namespace TrafficManager.UI {
             }
 
             // check if mouse is inside panel
-            if (LoadingExtension.BaseUI.GetMenu().containsMouse
+            if (ModUI.Instance.GetMenu().containsMouse
 #if DEBUG
-                || LoadingExtension.BaseUI.GetDebugMenu().containsMouse
+                || ModUI.Instance.GetDebugMenu().containsMouse
 #endif
             ) {
                 Log._Debug(
@@ -396,7 +399,6 @@ namespace TrafficManager.UI {
             // }
 
             if (_activeSubTool != null) {
-
                 if (primaryMouseClicked) {
                     _activeSubTool.OnPrimaryClickOverlay();
                 }
@@ -844,7 +846,7 @@ namespace TrafficManager.UI {
         }
 
         private static Vector3 prev_mousePosition;
-        private bool DetermineHoveredElements() {            
+        private bool DetermineHoveredElements() {
             if(prev_mousePosition == m_mousePosition) {
                 // if mouse ray is not changing use cached results.
                 // the assumption is that its practically impossible to change mouse ray
@@ -948,7 +950,7 @@ namespace TrafficManager.UI {
                         }
                     }
                 }
-                
+
                 if(HoveredSegmentId != 0) {
                     HitPos = segmentOutput.m_hitPos;
                 }
@@ -1020,7 +1022,7 @@ namespace TrafficManager.UI {
             if (Shortcuts.GetSeg(HoveredSegmentId).GetClosestLanePosition(
                 HitPos, NetInfo.LaneType.All, VehicleInfo.VehicleType.All,
                 out Vector3 pos, out uint laneID, out int laneIndex, out float laneOffset)) {
-                
+
                 return prev_H_Fixed = pos.y;
             }
             return prev_H_Fixed = HitPos.y + 0.5f;
@@ -1693,9 +1695,17 @@ namespace TrafficManager.UI {
             return numLanes;
         }
 
+        /// <summary>
+        /// Calculates the center of each group of lanes in the same directions.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="segmentCenterByDir">output dictionary of (direction,center) pairs</param>
+        /// <param name="minDistance">minimum distance allowed between
+        /// centers of forward and backward directions.
         internal static void CalculateSegmentCenterByDir(
             ushort segmentId,
-            Dictionary<NetInfo.Direction, Vector3> segmentCenterByDir)
+            Dictionary<NetInfo.Direction, Vector3> segmentCenterByDir,
+            float minDistance=0f)
         {
             segmentCenterByDir.Clear();
             NetManager netManager = Singleton<NetManager>.instance;
@@ -1732,6 +1742,17 @@ namespace TrafficManager.UI {
 
             foreach (KeyValuePair<NetInfo.Direction, int> e in numCentersByDir) {
                 segmentCenterByDir[e.Key] /= (float)e.Value;
+            }
+            if (minDistance > 0) {
+                bool b1 = segmentCenterByDir.TryGetValue(NetInfo.Direction.Forward, out Vector3 pos1);
+                bool b2 = segmentCenterByDir.TryGetValue(NetInfo.Direction.Backward, out Vector3 pos2);
+                Vector3 diff = pos1 - pos2;
+                float distance = diff.magnitude;
+                if (b1 && b2 && distance < minDistance) {
+                    Vector3 move = diff * (0.5f * minDistance / distance);
+                    segmentCenterByDir[NetInfo.Direction.Forward] = pos1 + move;
+                    segmentCenterByDir[NetInfo.Direction.Backward] = pos2 - move;
+                }
             }
         }
 

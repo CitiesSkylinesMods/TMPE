@@ -7,9 +7,9 @@ namespace TrafficManager.Util {
     using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using UnityEngine;
     using static Constants;
 
-    //TODO should I rename this to Extensions or Helpers?
     internal static class Shortcuts {
         /// <summary>
         /// returns a new calling Clone() on all items.
@@ -97,5 +97,12 @@ namespace TrafficManager.Util {
                 Log.Error("Assertion failed: " + m);
             }
         }
+
+        internal static bool ShiftIsPressed => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+        internal static bool ControlIsPressed => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+
+        internal static bool AltIsPressed => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+
     }
 }

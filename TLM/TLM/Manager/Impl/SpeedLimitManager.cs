@@ -8,12 +8,12 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
+#if DEBUG
+    using TrafficManager.State.ConfigData;
+#endif
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
-#if DEBUG
-    using State.ConfigData;
-#endif
 
     public class SpeedLimitManager
         : AbstractGeometryObservingManager,
@@ -546,18 +546,18 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="laneIndex"></param>
         /// <param name="laneInfo"></param>
         /// <param name="laneId"></param>
-        /// <param name="speedLimit">Game speed units, 0=unlimited</param>
+        /// <param name="speedLimit">Game speed units, 0=unlimited, null=default</param>
         /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
         public bool SetSpeedLimit(ushort segmentId,
                                   uint laneIndex,
                                   NetInfo.Lane laneInfo,
                                   uint laneId,
-                                  float speedLimit) {
+                                  float ?speedLimit) {
             if (!MayHaveCustomSpeedLimits(laneInfo)) {
                 return false;
             }
 
-            if (!IsValidRange(speedLimit)) {
+            if (speedLimit != null && !IsValidRange((float)speedLimit)) {
                 return false;
             }
 
@@ -565,7 +565,11 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
+            if (speedLimit != null) {
+                Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
+            } else {
+                Flags.RemoveLaneSpeedLimit(laneId);
+            }
             return true;
         }
 
@@ -574,16 +578,16 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="segmentId"></param>
         /// <param name="finalDir"></param>
-        /// <param name="speedLimit"></param>
+        /// <param name="speedLimit">Game speed units, 0=unlimited, null=default</param>
         /// <returns></returns>
-        public bool SetSpeedLimit(ushort segmentId, NetInfo.Direction finalDir, float speedLimit) {
+        public bool SetSpeedLimit(ushort segmentId, NetInfo.Direction finalDir, float ?speedLimit) {
             if (!MayHaveCustomSpeedLimits(
                     segmentId,
                     ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId])) {
                 return false;
             }
 
-            if (!IsValidRange(speedLimit)) {
+            if (speedLimit != null && !IsValidRange((float)speedLimit)) {
                 return false;
             }
 
@@ -599,7 +603,7 @@ namespace TrafficManager.Manager.Impl {
 
             if (segmentInfo.m_lanes == null) {
 #if DEBUG
-                Log.Warning($"SpeedLimitManager.SetSpeedLimit: info.name is null!");
+                Log.Warning($"SpeedLimitManager.SetSpeedLimit: info.m_lanes is null!");
 #endif
                 return false;
             }
@@ -617,12 +621,18 @@ namespace TrafficManager.Manager.Impl {
                 if (!MayHaveCustomSpeedLimits(laneInfo)) {
                     goto nextIter;
                 }
-#if DEBUG
-                Log._Debug(
-                    $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
-                    $"to {speedLimit * Constants.SPEED_TO_KMPH}");
-#endif
-                Flags.SetLaneSpeedLimit(curLaneId, speedLimit);
+
+                if (speedLimit != null) {
+                    Log._Debug(
+                        $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
+                        $"to {speedLimit * Constants.SPEED_TO_KMPH}");
+                    Flags.SetLaneSpeedLimit(curLaneId, speedLimit);
+                } else {
+                    Log._Debug(
+                        $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
+                        $"to default");
+                    Flags.RemoveLaneSpeedLimit(curLaneId);
+                }
 
             nextIter:
                 curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
@@ -850,11 +860,15 @@ namespace TrafficManager.Manager.Impl {
         public bool LoadData(List<Configuration.LaneSpeedLimit> data) {
             bool success = true;
             Log.Info($"Loading lane speed limit data. {data.Count} elements");
+#if DEBUG
+            bool debugSpeedLimits = DebugSwitch.SpeedLimits.Get();
+#endif
             foreach (Configuration.LaneSpeedLimit laneSpeedLimit in data) {
                 try {
                     if (!Services.NetService.IsLaneValid(laneSpeedLimit.laneId)) {
-#if DEBUGLOAD
-                        Log._Debug($"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: Lane is invalid");
+#if DEBUG
+                        Log._DebugIf(debugSpeedLimits, () =>
+                            $"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: Lane is invalid");
 #endif
                         continue;
                     }
@@ -866,28 +880,28 @@ namespace TrafficManager.Manager.Impl {
                     NetInfo info = Singleton<NetManager>
                                    .instance.m_segments.m_buffer[segmentId].Info;
                     float customSpeedLimit = GetCustomNetInfoSpeedLimit(info);
-#if DEBUGLOAD
-                    Log._Debug($"SpeedLimitManager.LoadData: Handling lane {laneSpeedLimit.laneId}: " +
+#if DEBUG
+                    Log._DebugIf(debugSpeedLimits, () =>
+                        $"SpeedLimitManager.LoadData: Handling lane {laneSpeedLimit.laneId}: " +
                         $"Custom speed limit of segment {segmentId} info ({info}, name={info?.name}, " +
                         $"lanes={info?.m_lanes} is {customSpeedLimit}");
 #endif
 
                     if (IsValidRange(customSpeedLimit)) {
                         // lane speed limit differs from default speed limit
-#if DEBUGLOAD
-                        Log._Debug($"SpeedLimitManager.LoadData: Loading lane speed limit: lane "+
-                            $"{laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit}");
-#endif
-                        Flags.SetLaneSpeedLimit(laneSpeedLimit.laneId, laneSpeedLimit.speedLimit);
-                        Log._Debug(
-                            $"SpeedLimitManager.LoadData: Loading lane speed limit: " +
+#if DEBUG
+                        Log._DebugIf(debugSpeedLimits, () =>
+                            "SpeedLimitManager.LoadData: Loading lane speed limit: " +
                             $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit} km/h");
+#endif
                         float kmph = laneSpeedLimit.speedLimit /
                                      Constants.SPEED_TO_KMPH; // convert to game units
+
                         Flags.SetLaneSpeedLimit(laneSpeedLimit.laneId, kmph);
                     } else {
-#if DEBUGLOAD
-                    Log._Debug($"SpeedLimitManager.LoadData: " +
+#if DEBUG
+                    Log._DebugIf(debugSpeedLimits, () =>
+                        "SpeedLimitManager.LoadData: " +
                         $"Skipping lane speed limit of lane {laneSpeedLimit.laneId} " +
                         $"({laneSpeedLimit.speedLimit} km/h)");
 #endif

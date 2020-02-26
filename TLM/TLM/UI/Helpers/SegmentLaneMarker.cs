@@ -9,6 +9,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         internal Bezier3 Bezier;
+        internal float Size = 1.1f;
 
         private Bounds[] bounds;
 
@@ -45,7 +46,7 @@ namespace TrafficManager.UI.Helpers {
             // maximum vertical postion of the bezier.
             float maxH = Mathf.Max(Bezier.a.y, Bezier.d.y);
 
-            float mouseH = UIBase.GetTrafficManagerTool(false).MousePosition.y;
+            float mouseH = ModUI.GetTrafficManagerTool(false).MousePosition.y;
 
             if ((hitH == prev_H || hitH == maxH || prev_H == mouseH) && bounds != null) {
                 // use cached results if mouse has not moved or hitH is ignored.
@@ -103,7 +104,7 @@ namespace TrafficManager.UI.Helpers {
                 cameraInfo,
                 color,
                 Bezier,
-                enlarge ? 1.55f : 1.1f,
+                enlarge ? Size * 1.41f : Size,
                 0,
                 0,
                 minH - 100f,
