@@ -10,6 +10,11 @@ namespace TrafficManager.Compatibility.Check {
     /// </summary>
     public class DLCs {
 
+        // Strings for log entries
+        internal const string LOG_ENTRY_FORMAT = " {0} {1}\n";
+        internal const string MARKER_ENABLED = "*";
+        internal const string MARKER_BLANK = " ";
+
         /// <summary>
         /// Scan for DLCs and log whether they are installed or not.
         /// </summary>
@@ -31,14 +36,10 @@ namespace TrafficManager.Compatibility.Check {
 
                 sb.Append("Transit-affecting DLCs [*] = Installed:\n\n");
 
-                string formatStr = " {0} {1}\n";
-                string strAsterisk = "*";
-                string strSpace = " ";
-                
                 foreach (KeyValuePair<uint, string> dlc in DLCs) {
                     sb.AppendFormat(
-                        formatStr,
-                        PlatformService.IsDlcInstalled(dlc.Key) ? strAsterisk : strSpace,
+                        LOG_ENTRY_FORMAT,
+                        PlatformService.IsDlcInstalled(dlc.Key) ? MARKER_ENABLED : MARKER_BLANK,
                         dlc.Value);
                 }
 

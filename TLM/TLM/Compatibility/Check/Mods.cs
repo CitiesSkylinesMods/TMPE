@@ -32,9 +32,9 @@ namespace TrafficManager.Compatibility.Check {
         /// </summary>
         /// 
         /// <param name="results">A dictionary issues found (will be empty if no issues).</param>
-        /// <param name="critical">Number of critical incompatibilities.</param>
-        /// <param name="major">Number of major incompatibilities.</param>
         /// <param name="minor">Number of minor incompatibilities.</param>
+        /// <param name="major">Number of major incompatibilities.</param>
+        /// <param name="critical">Number of critical incompatibilities.</param>
         /// <param name="tmpe">Number of non-obsolete TM:PE mods.</param>
         /// 
         /// <returns>Returns <c>true</c> if incompatible mods detected, otherwise <c>false</c>.</returns>
