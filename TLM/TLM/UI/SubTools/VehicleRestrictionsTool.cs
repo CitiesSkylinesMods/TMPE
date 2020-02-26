@@ -242,11 +242,11 @@ namespace TrafficManager.UI.SubTools {
                     segmentId,
                     ref netManager.m_segments.m_buffer[segmentId],
                     viewOnly || segmentId != SelectedSegmentId,
-                    out bool update)) {
+                    out bool updated)) {
                     handleHovered = true;
                 }
 
-                if (update) {
+                if (updated) {
                     break;
                 }
             }
