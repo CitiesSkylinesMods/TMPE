@@ -218,7 +218,6 @@ namespace TrafficManager.UI.SubTools {
         private void ShowSigns(bool viewOnly) {
             Vector3 camPos = Camera.main.transform.position;
             NetManager netManager = Singleton<NetManager>.instance;
-            ushort updatedSegmentId = 0;
             bool handleHovered = false;
 
             foreach (ushort segmentId in currentRestrictedSegmentIds) {
@@ -248,15 +247,11 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 if (update) {
-                    updatedSegmentId = segmentId;
+                    break;
                 }
             }
 
             overlayHandleHovered = handleHovered;
-
-            if (updatedSegmentId != 0) {
-                RefreshCurrentRestrictedSegmentIds(updatedSegmentId);
-            }
         }
 
         private void GuiVehicleRestrictionsWindow(int num) {
@@ -581,7 +576,7 @@ namespace TrafficManager.UI.SubTools {
                             vehicleType,
                             !allowed);
                         stateUpdated = true;
-
+                        RefreshCurrentRestrictedSegmentIds(segmentId);
                         if (RoadMode) {
                             ApplyRestrictionsToAllSegments(sortedLaneIndex, vehicleType);
                         }
