@@ -52,7 +52,7 @@ Official releases:
 - Fixed: Bug in guide manager that activated guide when trying to deactivate (#729)
 - Fixed: Double setting of lane speeds on game load, and debug log spamming (#736, #735)
 - Fixed: Scrollbar position corrected in mod options (#722, #742)
-- Improved: Cleaned up UI panels in Vehicle Restrictions and Speed Limits tools (#721, #709)
+- Improved: Cleaned up UI panels in Vehicle Restrictions and Speed Limits tools (#721, #709, #657)
 - Improved: Toolbar UI code overhauled, updated and polished (#656, #523)
 - Improved: Compatibility with CSUR Reloaded (#684, #649, #687, CSURToolBox#1, CSURToolBox#2)
 - Improved: Organised lane markers/highlighters in to distinct classes (#701, #630)
