@@ -263,25 +263,13 @@ namespace CitiesGameBridge.Service {
             return ret;
         }
 
-        /// <summary>
-        /// Assembles a geometrically sorted list of lanes for the given segment.
-        /// If the <paramref name="startNode"/> parameter is set only lanes supporting traffic to
-        /// flow towards the given node are added to the list, otherwise all matched lanes are added.
-        /// </summary>
-        /// <param name="segmentId">segment id</param>
-        /// <param name="segment">segment data</param>
-        /// <param name="startNode">reference node (optional)</param>
-        /// <param name="laneTypeFilter">lane type filter, lanes must match this filter mask</param>
-        /// <param name="vehicleTypeFilter">vehicle type filter, lanes must match this filter mask</param>
-        /// <param name="reverse">if true, lanes are ordered from right to left (relative to the
-        /// segment's start node / the given node), otherwise from left to right</param>
-        /// <returns>sorted list of lanes for the given segment</returns>
         public IList<LanePos> GetSortedLanes(ushort segmentId,
                                              ref NetSegment segment,
                                              bool? startNode,
                                              NetInfo.LaneType? laneTypeFilter = null,
                                              VehicleInfo.VehicleType? vehicleTypeFilter = null,
-                                             bool reverse = false) {
+                                             bool reverse = false,
+                                             bool sort=true) {
             // TODO refactor together with getSegmentNumVehicleLanes, especially the vehicle type and lane type checks
             NetManager netManager = Singleton<NetManager>.instance;
             var laneList = new List<LanePos>();
@@ -333,48 +321,48 @@ namespace CitiesGameBridge.Service {
                 ++laneIndex;
             }
 
-            int CompareLanePositionsFun(LanePos x, LanePos y) {
-                bool fwd = sortDir == NetInfo.Direction.Forward;
-                if (Math.Abs(x.position - y.position) < 1e-12) {
-                    if (x.position > 0) {
-                        // mirror type-bound lanes (e.g. for coherent disply of lane-wise speed limits)
-                        fwd = !fwd;
-                    }
-
-                    if (x.laneType == y.laneType) {
-                        if (x.vehicleType == y.vehicleType) {
-                            return 0;
+            if (sort) {
+                int CompareLanePositionsFun(LanePos x, LanePos y) {
+                    bool fwd = sortDir == NetInfo.Direction.Forward;
+                    if (Math.Abs(x.position - y.position) < 1e-12) {
+                        if (x.position > 0) {
+                            // mirror type-bound lanes (e.g. for coherent disply of lane-wise speed limits)
+                            fwd = !fwd;
                         }
 
-                        if ((x.vehicleType < y.vehicleType) == fwd) {
+                        if (x.laneType == y.laneType) {
+                            if (x.vehicleType == y.vehicleType) {
+                                return 0;
+                            }
+
+                            if ((x.vehicleType < y.vehicleType) == fwd) {
+                                return -1;
+                            }
+
+                            return 1;
+                        }
+
+                        if ((x.laneType < y.laneType) == fwd) {
                             return -1;
                         }
 
                         return 1;
                     }
 
-                    if ((x.laneType < y.laneType) == fwd) {
+                    if (x.position < y.position == fwd) {
                         return -1;
                     }
 
                     return 1;
                 }
 
-                if (x.position < y.position == fwd) {
-                    return -1;
-                }
-
-                return 1;
+                laneList.Sort(CompareLanePositionsFun);
             }
-
-            laneList.Sort(CompareLanePositionsFun);
             return laneList;
         }
 
         public void PublishSegmentChanges(ushort segmentId) {
-#if DEBUG
-            Log.Warning($"NetService.PublishSegmentChanges({segmentId}) called.");
-#endif
+            Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
             ISimulationService simService = SimulationService.Instance;
 
             ProcessSegment(

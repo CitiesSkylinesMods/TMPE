@@ -282,17 +282,7 @@ namespace TrafficManager.UI.SubTools {
                 hover = { textColor = new Color32(255, 0, 0, 255) },
                 focused = { textColor = new Color32(255, 0, 0, 255) }
             };
-            var style3 = new GUIStyle("button") {
-                focused = { textColor = Color.green },
-                alignment = TextAnchor.MiddleCenter,
-            };
-            var style4 = new GUIStyle("button") {
-                // I could not change background texture so instead I change color to green.
-                normal = { textColor = Color.green },
-                hover = { textColor = Color.green },
-                focused = { textColor = Color.green },
-                alignment = TextAnchor.MiddleCenter,
-            };
+
             for (var i = 0; i < laneList.Count; i++) {
                 var flags = (NetLane.Flags)Singleton<NetManager>
                                            .instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
@@ -372,9 +362,14 @@ namespace TrafficManager.UI.SubTools {
                 string reset = Translation.LaneRouting.Get("Button:Reset");
                 reset += " [del] "; // hotkey
                 var hotkey = KeyCode.Delete;
+                var style = new GUIStyle("button");
+                if (Input.GetKey(hotkey)) {
+                    style.normal.background = style.active.background;
+                }
+
                 if (GUILayout.Button(
                     reset,
-                    Input.GetKey(hotkey) ? style4 : style3,
+                    style,
                     GUILayout.Width(135), // intentionally big to avoid confusion
                     GUILayout.Height(25)) ||
                     Input.GetKeyDown(hotkey)) { 
