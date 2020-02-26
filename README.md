@@ -11,49 +11,70 @@
 ## Releases
 
 Official releases:
+
 * [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) (fully tested releases)
 * [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141) (latest beta test releases)
 * [Download Binaries](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/releases) (for non-Steam users)
 * [Installation Guide](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Installation) (for all users)
 
-#### TM:PE V11 LABS [11.1.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/11.0...11.1.0), 03/02/2020
+#### TM:PE V[11.1.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/11.0...11.1.0) STABLE, date
 
 - Added: Quick setup of priority roads (`Ctrl+Click junction`, `Shift+Ctrl+Click road`) (#621, #541, #542, #568, #577, #7)
 - Added: `Delete` key resets junction restrictions for selected junction (#639, #623, #568, #6)
-- Added: "Reset" button and `Delete` key to reset lane arrows for a segment (#638, #632, #623, #568, #41)
+- Added: "Reset" button and `Delete` key resets lane arrows for a segment (#638, #632, #623, #568, #41)
 - Improved: Much better lane connectors interaction model (#543, #635, #625, #626, #41)
 - Improved: Use guide manager for less obtrusive in-game warnings/hints (#653, #660, #593)
 - Improved: Vastly improved in-game hotloading support (#640, #211)
 - Improved: Centralised versioning in to `SharedAssemblyInfo.cs` (#680, #678, #649)
 - Updated: Translations - Dutch (thanks Headspike!) (#660, #631)
-- Updated: Translations - Turkish - Tayfun [Typhoon] (thanks Koopr) (#660, #631)
-- Updated: Translations - Chinese Simplified - Golden (thanks goldenjin!) (#660, #631)
-- Updated: Translations - Portuguese - BlackScout (thanks BS_BlackScout!) (#660, #631)
+- Updated: Translations - Turkish (thanks Tayfun [Typhoon] / Koopr) (#660, #631)
+- Updated: Translations - Chinese Simplified (thanks Golden / goldenjin!) (#660, #631)
+- Updated: Translations - Portuguese (thanks BlackScout / BS_BlackScout!) (#660, #631)
 - Updated: Translations - Spanish (thanks Aimarekin!) (#660, #631)
 - Updated: Translations - English (thanks kian.zarrin!) (#660, #631)
 - Fixed: Vehicles should not stop at Yield signs (#662, #655, #650)
 - Meta: New WIP website: https://tmpe.me (#642, #643)
+- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V11 STABLE [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), 03/02/2020
+#### TM:PE V[11.1.1](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/11.1.0...11.1.1) LABS, date
 
-- Contains ~100 improvements from TM:PE v11 ALPHA versions, including:
-    - Timed traffic lights: Add default sequence (Ctrl+Click a junction)
-    - Lane arrows: Turning lanes (Ctrl+Click a junction, or Alt+Click a segment)
-    - Vanilla traffic lights: Remove or Disable auto-placed traffic lights (buttons in mod options)
-    - New [languages](https://crowdin.com/project/tmpe): Hungarian, Turkish, Ukrainian; all other languages updated!
-    - Migration to Harmony for improved compatibility
-- Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
-- Improved: Better segment hovering when mouse on node (thanks kianzarrin!) (#615, #538, #594, #616, #576)
-- Fixed: Lane arrow tool sometimes selects wrong node (thanks kianzarrin!) (#616)
-- Fixed: Show error dialog can get caught in loop (thanks kianzarrin!) (#594)
-- Fixed: Junction Manager not resetting on level unload (thanks kianzarrin!) (#637, #636)
-- Fixed: Stay in lane always assumed segment0 exists (thans kianzarrin!) (#619, #618)
-- Updated: Added 2 x Traffic Manager Plus and 1 x Traffic Manager as incompatible (#627)
-- Updated: Added 'Trees Respiration' mod as incompatible (depends on load order) (#614, #611, #563)
-- Updated: Replaced imports with fully qualified alphabetically sorted imports (#620)
-- Updated: Organised resource images in to folders (#641)
-- Meta: Old STABLE workshop page (LinuxFan - v10.20) is now obsolete and no longer maintained
-- Meta: Renamed workshop pages; LABS -> V11 STABLE, and ALPHA -> V11 LABS
+- Added: The `Simulation Accuracy` option has been revived! (#742, #707)
+- Added: `Shift` key applies a setting to entire route + lane highlight (#138, #721, #709, #708, #667, #33)
+- Added: Lane highlighting in Vehicle Restrictions tool (#721, #681, #667, #42, #33)
+- Added: Lane highlighting in Parking Restrictions tool (#708, #702, #667, #47, #33)
+- Added: Lane highlighting in Speed Limits tool (#709, #682, #667, #84, #52, #33)
+- Added: Button to reset speed limit to default added to speeds palette (#709)
+- Added: UI scaling slider in mod options "General" tab (#656)
+- Fixed: Only selected vehicle restriction, not all, should be applied to route (#721)
+- Fixed: Lane connector can't make U-turns on roads with monorails (#293)
+- Fixed: Lane connectors could connect tracks disconnected by `MaxTurnAngle` (#684, #649)
+- Fixed: Wrong texture paths for timed traffic lights (thanks t1a2l for reporting!) (#732, #704, #714)
+- Fixed: Bug in guide manager that activated guide when trying to deactivate (#729)
+- Fixed: Double setting of lane speeds on game load, and debug log spamming (#736, #735)
+- Fixed: Scrollbar position corrected in mod options (#722, #742)
+- Improved: Cleaned up UI panels in Vehicle Restrictions and Speed Limits tools (#721, #709)
+- Improved: Toolbar UI code overhauled, updated and polished (#656, #523)
+- Improved: Compatibility with CSUR Reloaded (#684, #649, #687, CSURToolBox#1, CSURToolBox#2)
+- Improved: Organised lane markers/highlighters in to distinct classes (#701, #630)
+- Improved: Better reference dll hint paths for Mac and Windows developers (#664, #663)
+- Improved: Faster and more reliable hot-reloads of dev builds (#725, #717, #718)
+- Updated: Translations - Dutch (thanks Headspike) (#723, #742)
+- Updated: Translations - Spanish (thanks Nithox, obv) (#723, #742)
+- Updated: Translations - Chinese Simplified (thanks 田七不甜 / TianQiBuTian) (#723)
+- Updated: Translations - Chinese Traditional (thanks jrthsr700tmax) (#723)
+- Updated: Translations - Korean (thanks neinnew) (#723, #742)
+- Updated: Translations - Portuguese (thanks BlackScout / BS_BlackScout) (#723)
+- Updated: Translations - Turkish (thanks Tayfun [Typhoon] / Koopr) (#723)
+- Updated: Translations - Italian (thanks cianecollazzo / azzo94) (#723)
+- Updated: Translations - English (thanks kian.zarrin, Dmytro Lytovchenko / kvakvs) (#723, #742)
+- Updated: Translations - Ukrainian (thanks Dmytro Lytovchenko / kvakvs) (#723)
+- Updated: Translations - Russian (thanks Dmytro Lytovchenko / kvakvs) (#723)
+- Updated: Translations - Polish (thanks krzychu124) (#723)
+- Updated: Translations - Hungarian (thanks Krisztián Melich / StummeH) (#742)
+- Meta: Thanks to CSUR Reloaded team for collaboration with #684! (#649, #503)
+- Meta: Basic mod integration guide started (#696)
+- Meta: Build guide updated to include note on Windows 10 ASLR, and reference hint paths (#693)
+- Meta: New home for code repository: https://github.com/CitiesSkylinesMods/TMPE
 
 See [Full Changelog](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/CHANGELOG.md) for details of earlier releases and LABS releases.
 
