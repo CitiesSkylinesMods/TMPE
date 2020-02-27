@@ -2,16 +2,14 @@ namespace TrafficManager.UI {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using ColossalFramework;
     using ColossalFramework.UI;
     using UnityEngine;
     using CSUtil.Commons;
-    using TrafficManager.UI.Textures;
     using TrafficManager.Util;
-    using static UI.SubTools.PrioritySignsTool;
-    using static Textures.TextureResources;
-    using TrafficManager.UI.MainMenu;
     using TrafficManager.U.Button;
     using TrafficManager.RedirectionFramework;
+    using static UI.SubTools.PrioritySignsTool;
 
     public class RoadSelectionPanels : MonoBehaviour {
         private RoadSelectionUtil roadSelectionUtil_;
@@ -84,7 +82,9 @@ namespace TrafficManager.UI {
 
         private void ShowAdvisorOnEvent(UIComponent component, bool value) {
             if (value) {
-                TrafficManagerTool.ShowAdvisor("RoadSelection");
+                Singleton<SimulationManager>.instance.AddAction(delegate () {
+                    TrafficManagerTool.ShowAdvisor("RoadSelection");
+                });
             }
         }
 
@@ -202,12 +202,10 @@ namespace TrafficManager.UI {
 
             public override void Awake() {
                 base.Awake();
-                float buttonSize = ButtonExt.GetButtonSize();
-                int p = (int)(buttonSize / 8f);
                 padding = new RectOffset(1, 1, 1, 1);
-                autoLayoutPadding = new RectOffset(p, p, p, p);
-                height = buttonSize + (p * 2) + 2;
-                width = (buttonSize * 5) + (p * 10) + 10;
+                autoLayoutPadding = new RectOffset(5, 5, 5, 5);
+                width = 210;
+                height = 50;
             }
 
             public override void Start() {
@@ -326,6 +324,7 @@ namespace TrafficManager.UI {
                         ForegroundActive = false,
                         ForegroundDisabled = true,
                     };
+                    width = height = REFERENCE_SIZE; //TODO move to start?
                 }
 
                 public override void Start() {
@@ -359,22 +358,10 @@ namespace TrafficManager.UI {
                 public void Refresh() {
                     isEnabled = !ShouldDisable();
                     UpdateButtonImageAndTooltip();
-                    width = height = GetButtonSize();
                     Show();
                 }
 
-                /// <summary>Define size as smallest of 2.08% of width or 3.7% of height (40 px at 1080p).
-                /// The button cannot be smaller than 40px.</summary>
-                /// <returns>Button size for current screen resolution.</returns>
-                internal static float GetButtonSize() {
-                    const float REFERENCE_SIZE = 40f;
-                    const float FRAC_X = REFERENCE_SIZE / 1920f;
-                    const float FRAC_Y = REFERENCE_SIZE / 1080f;
-                    var scaledSize
-                        = U.UIScaler.ScreenSizeSmallestFraction(FRAC_X, FRAC_Y) *
-                          U.UIScaler.GetUIScale();
-                    return Mathf.Max(scaledSize, REFERENCE_SIZE);
-                }
+                const float REFERENCE_SIZE = 40f;
 
                 public RoadSelectionPanels Root => RoadSelectionPanels.Root;
 

@@ -806,6 +806,7 @@ namespace TrafficManager.UI {
             }
 
             if (!Translation.Tutorials.HasString(Translation.TUTORIAL_BODY_KEY_PREFIX + localeKey)) {
+                Log.Warning($"ShowAdvisor: localeKey:{localeKey} does not exist");
                 return;
             }
 
