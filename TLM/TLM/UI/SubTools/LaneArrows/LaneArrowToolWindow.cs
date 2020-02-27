@@ -5,6 +5,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.RedirectionFramework;
     using TrafficManager.U;
     using TrafficManager.U.Button;
+    using TrafficManager.UI.SubTools.LaneArrows;
     using UnityEngine;
 
     /// <summary>
@@ -13,6 +14,10 @@ namespace TrafficManager.UI.SubTools {
     public class LaneArrowToolWindow : U.Panel.BaseUWindowPanel {
         private const string GAMEOBJECT_NAME = "TMPE_LaneArrow_ToolPanel";
 
+        /// <summary>
+        /// Contains atlas with button backgrounds and arrows.
+        /// Static to prevent reloading on every window creation.
+        /// </summary>
         private static UITextureAtlas laneArrowButtonAtlas_ = null;
 
         /// <summary>Default skin setup copied to all Lane Arrow buttons on creation.</summary>
@@ -29,12 +34,11 @@ namespace TrafficManager.UI.SubTools {
                                  ForegroundDisabled = false,
                              };
 
-        public List<UButton> Buttons { get; set; }
+        public List<LaneArrowButton> Buttons { get; set; }
 
         public override void Start() {
             UIUtil.MakeUniqueAndSetName(gameObject, GAMEOBJECT_NAME);
 
-            this.autoSize = true;
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(64, 64, 64, 240);
         }
@@ -65,8 +69,15 @@ namespace TrafficManager.UI.SubTools {
             return laneArrowButtonAtlas_;
         }
 
+        /// <summary>
+        /// Create button triples for number of lanes.
+        /// Buttons are linked to lanes later by LaneArrowTool class.
+        /// </summary>
+        /// <param name="numLanes">How many lane groups.</param>
+        /// <param name="groupSize">Size in pixels for each group (vertical).</param>
+        /// <param name="spacing">Spacing between groups and around window edges.</param>
         public void SetupControls(int numLanes, Vector2 groupSize, float spacing) {
-            Buttons = new List<UButton>();
+            Buttons = new List<LaneArrowButton>();
             var formBuilder = new UIBuilder(this);
             formBuilder.AutoLayoutHorizontal((int)spacing);
 
@@ -98,25 +109,31 @@ namespace TrafficManager.UI.SubTools {
                           }).AutoLayoutHorizontal();
 
                 // Create and populate the panel with buttons
-                buttonPanelBuilder.Button<UButton>(
+                buttonPanelBuilder.Button<LaneArrowButton>(
                     b => {
                         b.atlas = GetAtlas();
-                        b.Skin = laneArrowButtonSkin_;
+                        b.Skin = laneArrowButtonSkin_.Clone(); // cloning to change prefix
+                        b.Skin.Prefix = "LaneArrowLeft";
                         b.size = new Vector2(groupSize.x / 3f, groupSize.y);
+                        Buttons.Add(b);
                     });
 
-                buttonPanelBuilder.Button<UButton>(
+                buttonPanelBuilder.Button<LaneArrowButton>(
                     b => {
                         b.atlas = GetAtlas();
-                        b.Skin = laneArrowButtonSkin_;
+                        b.Skin = laneArrowButtonSkin_.Clone(); // cloning to change prefix
+                        b.Skin.Prefix = "LaneArrowForward";
                         b.size = new Vector2(groupSize.x / 3f, groupSize.y);
+                        Buttons.Add(b);
                     });
 
-                buttonPanelBuilder.Button<UButton>(
+                buttonPanelBuilder.Button<LaneArrowButton>(
                     b => {
                         b.atlas = GetAtlas();
-                        b.Skin = laneArrowButtonSkin_;
+                        b.Skin = laneArrowButtonSkin_.Clone(); // cloning to change prefix
+                        b.Skin.Prefix = "LaneArrowRight";
                         b.size = new Vector2(groupSize.x / 3f, groupSize.y);
+                        Buttons.Add(b);
                     });
             }
 

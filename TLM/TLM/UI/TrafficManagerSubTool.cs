@@ -54,5 +54,7 @@ namespace TrafficManager.UI {
         /// Called whenever the mouse right click happened on the world, while the tool was active.
         /// </summary>
         public abstract void OnToolRightClick();
+
+        public abstract void UpdateEveryFrame();
     }
 }

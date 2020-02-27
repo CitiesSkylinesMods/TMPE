@@ -50,12 +50,25 @@
         }
 
         internal void UpdateButtonImageAndTooltip() {
+            UpdateButtonImage();
+
+            // Update localized tooltip with shortcut key if available
+            string shortcutText = GetShortcutTooltip();
+            tooltip = GetTooltip() + shortcutText;
+
+            this.isVisible = IsVisible();
+            this.Invalidate();
+        }
+
+        private void UpdateButtonImage() {
             if (this.Skin == null) {
                 // No skin, no textures, nothing to be updated
                 return;
             }
-            ControlActiveState activeState = CanActivate() && IsActive() ?
-                ControlActiveState.Active : ControlActiveState.Normal;
+
+            ControlActiveState activeState = CanActivate() && IsActive()
+                                                 ? ControlActiveState.Active
+                                                 : ControlActiveState.Normal;
             ControlEnabledState enabledState =
                 this.enabled ? ControlEnabledState.Enabled : ControlEnabledState.Disabled;
 
@@ -89,15 +102,7 @@
                           enabledState,
                           ControlHoveredState.Hovered,
                           activeState);
-
-            // Update localized tooltip with shortcut key if available
-            string shortcutText = GetShortcutTooltip();
-            tooltip = GetTooltip() + shortcutText;
-
-            this.isVisible = IsVisible();
-            this.Invalidate();
         }
-
 
         /// <summary>
         /// If shortcut key was set to a non-empty something, then form a text tooltip,

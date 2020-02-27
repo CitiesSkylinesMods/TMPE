@@ -1,16 +1,16 @@
-namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools.LaneArrows {
     using System;
-    using ColossalFramework;
-    using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using ColossalFramework;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
+    using GenericGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
-    using TrafficManager.UI.MainMenu;
+    using TrafficManager.U.Button;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using Debug = UnityEngine.Debug;
@@ -119,6 +119,7 @@ namespace TrafficManager.UI.SubTools {
             //     return; // do not draw if too distant
             // }
             CreateLaneArrowsWindow(numLanes);
+            SetupLaneArrowsWindowButtons();
         }
 
         private class ScaledSize {
@@ -126,8 +127,8 @@ namespace TrafficManager.UI.SubTools {
             /// Base lane group height scaled to screen size, from it the window height is derived.</summary>
             /// <returns>Height of one lane button group.</returns>
             internal static float GetLaneGroupHeight() {
-                // At 1920x1080 the width should be 50 px, can shrink or grow with screen size
-                const float REFERENCE_HEIGHT = 50f;
+                // At 1920x1080 the width should be 40 px, can shrink or grow with screen size
+                const float REFERENCE_HEIGHT = 40f;
                 const float X_FRAC = REFERENCE_HEIGHT / 1920f;
                 const float Y_FRAC = REFERENCE_HEIGHT / 1080f;
                 return U.UIScaler.ScreenSizeSmallestFraction(X_FRAC, Y_FRAC)
@@ -135,8 +136,8 @@ namespace TrafficManager.UI.SubTools {
             }
 
             internal static float GetLaneGroupWidth() {
-                // For 50 px reference height, the width will be about 2.5x more, 125px
-                return GetLaneGroupHeight() * 2.5f;
+                // For 40 px reference height, the width will be 3x more
+                return GetLaneGroupHeight() * 3f;
             }
         }
 
@@ -148,15 +149,71 @@ namespace TrafficManager.UI.SubTools {
             var parent = ModUI.Instance.MainMenu;
             ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
             ToolWindow.autoLayout = false;
+            ToolWindow.autoSize = false;
 
             // A spacing on each window side
             float windowWidth = numLanes * ((2 * spacing) + laneGroupWidth);
-            ToolWindow.size = new Vector2(windowWidth, height + (2 * spacing));
+            float titleHeight = 18f; // Default font height
+            ToolWindow.size = new Vector2(
+                windowWidth,
+                height + (2 * spacing) + titleHeight);
 
             ToolWindow.SetupControls(
                 numLanes,
                 new Vector2(laneGroupWidth, height),
                 spacing);
+        }
+
+        /// <summary>
+        /// Given the tool window already created with its buttons set up,
+        /// go through them and assign click events, disable some, activate some etc.
+        /// </summary>
+        private void SetupLaneArrowsWindowButtons() {
+            // Calculate lanes and arrows
+            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(
+                SelectedSegmentId,
+                ref segmentsBuffer[SelectedSegmentId],
+                segmentsBuffer[SelectedSegmentId].m_startNode == SelectedNodeId,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES,
+                true);
+
+            bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+            if (startNode == null) {
+                Log.Error(
+                    $"LaneArrowTool._guiLaneChangeWindow: Segment {SelectedSegmentId} " +
+                    $"is not connected to node {SelectedNodeId}");
+                return;
+            }
+
+            // For all lanes, go through our buttons and update their onClick, etc.
+            NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
+
+            for (var i = 0; i < laneList.Count; i++) {
+                uint laneId = laneList[i].laneId;
+
+                LaneArrowButton buttonLeft = ToolWindow.Buttons[i * 3];
+                buttonLeft.LaneId = laneId;
+                buttonLeft.NetlaneFlagsMask = NetLane.Flags.Left;
+                buttonLeft.StartNode = (bool)startNode;
+                buttonLeft.ToggleFlag = API.Traffic.Enums.LaneArrows.Left;
+                buttonLeft.UpdateButtonImageAndTooltip();
+
+                LaneArrowButton buttonForward = ToolWindow.Buttons[(i * 3) + 1];
+                buttonForward.LaneId = laneId;
+                buttonForward.NetlaneFlagsMask = NetLane.Flags.Forward;
+                buttonForward.StartNode = (bool)startNode;
+                buttonForward.ToggleFlag = API.Traffic.Enums.LaneArrows.Forward;
+                buttonForward.UpdateButtonImageAndTooltip();
+
+                LaneArrowButton buttonRight = ToolWindow.Buttons[(i * 3) + 2];
+                buttonRight.LaneId = laneId;
+                buttonRight.NetlaneFlagsMask = NetLane.Flags.Right;
+                buttonRight.StartNode = (bool)startNode;
+                buttonRight.ToggleFlag = API.Traffic.Enums.LaneArrows.Right;
+                buttonRight.UpdateButtonImageAndTooltip();
+            }
 
             //------------------------------------------
             // Create tool window on the selected node
@@ -173,6 +230,10 @@ namespace TrafficManager.UI.SubTools {
 
         /// <summary>Called from GenericFsm when user leaves lane arrow editor, to hide the GUI.</summary>
         private void OnLeaveEditorState() {
+            DestroyToolWindow();
+        }
+
+        private void DestroyToolWindow() {
             if (ToolWindow) {
                 UnityEngine.Object.Destroy(ToolWindow);
                 ToolWindow = null;
@@ -206,6 +267,7 @@ namespace TrafficManager.UI.SubTools {
         /// <summary>Cleans up when tool is deactivated or user switched to another tool.</summary>
         public override void DeactivateTool() {
             Log._Debug("LaneArrow: Deactivated tool");
+            DestroyToolWindow();
             SelectedNodeId = 0;
             SelectedSegmentId = 0;
             fsm_ = null;
@@ -307,6 +369,24 @@ namespace TrafficManager.UI.SubTools {
                 fsm_.SendTrigger(Trigger.RightMouseClick);
                 Log._Debug($"LaneArrow new state={fsm_.State}");
             }
+        }
+
+        public override void UpdateEveryFrame() {
+            // The following code only works if tool window exists and state is when we edit arrows
+            if (ToolWindow == null ||
+                fsm_ == null ||
+                fsm_.State != State.EditLaneArrows)
+            {
+                return;
+            }
+
+            Vector3 nodePos = Singleton<NetManager>
+                              .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
+
+            // Cast to screen and center the window on node
+            MainTool.WorldToScreenPoint(nodePos, out Vector3 screenPos);
+            ToolWindow.absolutePosition =
+                screenPos - new Vector3(ToolWindow.size.x * 0.5f, ToolWindow.size.y * 0.5f, 0f);
         }
 
         [Conditional("OBSOLETE_LANEARROW_IMGUI")]
@@ -534,7 +614,7 @@ namespace TrafficManager.UI.SubTools {
 
                 var laneTitleStyle = new GUIStyle {
                     contentOffset = new Vector2(36f, 2f),
-                    normal = { textColor = new Color(1f, 1f, 1f) }
+                    normal = { textColor = new Color(1f, 1f, 1f) },
                 };
 
                 GUILayout.BeginVertical(laneStyle);
@@ -623,7 +703,6 @@ namespace TrafficManager.UI.SubTools {
             }
 
             GUILayout.EndVertical();
-
         }
     }
 }

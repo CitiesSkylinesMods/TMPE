@@ -269,6 +269,7 @@
     <Compile Include="UI\MainMenu\JunctionRestrictionsButton.cs" />
     <Compile Include="UI\MainMenu\DespawnButton.cs" />
     <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowButton.cs" />
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool.cs" />
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowToolWindow.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />

@@ -141,14 +141,14 @@ namespace TrafficManager.UI {
         }
 
         public void Close() {
+            // Before hiding the menu, shut down the active tool
+            GetTrafficManagerTool(false)?.SetToolMode(UI.ToolMode.None);
+
+            // Main menu is going invisible
             GetMenu().Hide();
 #if DEBUG
             GetDebugMenu().Hide();
 #endif
-            TrafficManagerTool tmTool = GetTrafficManagerTool(false);
-            if (tmTool != null) {
-                tmTool.SetToolMode(UI.ToolMode.None);
-            }
 
             SetToolMode(TrafficManagerMode.None);
             _uiShown = false;

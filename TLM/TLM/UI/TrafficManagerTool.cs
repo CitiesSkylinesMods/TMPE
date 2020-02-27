@@ -23,6 +23,7 @@ namespace TrafficManager.UI {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
+    using TrafficManager.UI.SubTools.LaneArrows;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -465,6 +466,8 @@ namespace TrafficManager.UI {
 
                 if (activeLegacySubTool_ != null) {
                     activeLegacySubTool_.OnToolGUI(e);
+                } else if (activeSubTool_ != null) {
+                    activeSubTool_.UpdateEveryFrame();
                 } else {
                     base.OnToolGUI(e);
                 }
