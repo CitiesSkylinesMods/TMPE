@@ -1,8 +1,8 @@
-﻿# Cities: Skylines - Traffic Manager: _President Edition_ [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
+﻿# Cities: Skylines - Traffic Manager: _President Edition_
 
 # Changelog
 
-Current: [TM:PE 11.1.0 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) | [TM:PE 11.1.1 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141) | [Download Binaries](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/releases) | [Installation Guide](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Installation)
+<a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=stable&color=7cc17b&logo=steam&logoColor=F5F5F5" /></a> <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?include_prereleases&label=labs&color=f7b73c&logo=steam&logoColor=F5F5F5" /></a> <a href="https://github.com/CitiesSkylinesMods/TMPE/releases"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=downloads&include_prereleases&logo=ipfs&logoColor=F5F5F5" /></a> <a href="https://github.com/CitiesSkylinesMods/TMPE/wiki/Installation"><img src="https://img.shields.io/badge/install%20guide-wiki-blue?logo=koding&logoColor=F5F5F5" /></a> <a href="https://discord.gg/faKUnST"><img src="https://img.shields.io/discord/545065285862948894?color=7289DA&label=chat&logo=discord" /></a>
 
 This changelog includes all versions and major variants of the mod going all the way back to March 2015, just 4 days after Cities: Skylines was released!
 
@@ -22,7 +22,7 @@ This changelog includes all versions and major variants of the mod going all the
 > * **TPP** = Traffic++
 > * **TM** = Traffic Manager
 
-#### TM:PE V[11.1.1](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/11.1.0...11.1.1) LABS, date
+#### TM:PE V[11.1.1](https://github.com/CitesSkylinesMods/TMPE/compare/11.1.0...11.1.1) LABS, date
 
 - Added: The `Simulation Accuracy` option has been revived! (#742, #707)
 - Added: `Shift` key applies a setting to entire route + lane highlight (#138, #721, #709, #708, #667, #33)
@@ -65,7 +65,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 - GitHub: [CitiesSkylinesMods/TMPE](https://github.com/CitiesSkylinesMods/TMPE)
 
-#### TM:PE V[11.1.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/11.0...11.1.0) STABLE, date
+#### TM:PE V[11.1.0](https://github.com/CitesSkylinesMods/TMPE/compare/11.0...11.1.0) STABLE, date
 
 - Added: Quick setup of priority roads (`Ctrl+Click junction`, `Shift+Ctrl+Click road`) (#621, #541, #542, #568, #577, #7)
 - Added: `Delete` key resets junction restrictions for selected junction (#639, #623, #568, #6)
@@ -84,7 +84,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Meta: New WIP website: https://tmpe.me (#642, #643)
 - Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V[11.1.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/11.0...11.1.0) LABS, 03/02/2020
+#### TM:PE V[11.1.0](https://github.com/CitesSkylinesMods/TMPE/compare/11.0...11.1.0) LABS, 03/02/2020
 
 - Added: Quick setup of priority roads (`Ctrl+Click junction`, `Shift+Ctrl+Click road`) (#621, #541, #542, #568, #577, #7)
 - Added: `Delete` key resets junction restrictions for selected junction (#639, #623, #568, #6)
@@ -103,7 +103,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Meta: New WIP website: https://tmpe.me (#642, #643)
 - Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
-### TM:PE V[11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0) STABLE, 03/02/2020
+### TM:PE V[11.0](https://github.com/CitesSkylinesMods/TMPE/compare/10.21.1...11.0) STABLE, 03/02/2020
 
 - Contains ~100 improvements from TM:PE v11 ALPHA previews, including:
     - Timed traffic lights: Add default sequence (Ctrl+Click a junction)
@@ -124,7 +124,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Meta: Renamed LABS and ALPHA workshop pages to V11 STABLE and V11 LABS respectively
 - Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-### TM:PE V[11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0) LABS, 03/02/2020
+### TM:PE V[11.0](https://github.com/CitesSkylinesMods/TMPE/compare/10.21.1...11.0) LABS, 03/02/2020
 
 - Contains ~100 improvements from TM:PE v11 ALPHA previews, including:
     - Timed traffic lights: Add default sequence (Ctrl+Click a junction)
@@ -291,13 +291,13 @@ This changelog includes all versions and major variants of the mod going all the
 - Maintainer: aubergine18 (GitHub user aubergine10)
 - GitHub: [krzychu124/Cities-Skylines-Traffic-Manager-President-Edition](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition)
 
-### TM:PE LABS [10.21.1 hotfix](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21...10.21.1), 06/07/2019
+### TM:PE LABS [10.21.1 hotfix](https://github.com/CitesSkylinesMods/TMPE/compare/10.21...10.21.1), 06/07/2019
 
 - Fixed: Speed panel tanks fps if train tracks on screen (thanks rlas & DaEgi01!) (#411, #413)
 - Meta: Main changelog refactored (#412)
 - Steam: [Traffic Manager: President Edition (LABS)](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-### TM:PE LABS [10.21](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.20...10.21), 02/07/2019
+### TM:PE LABS [10.21](https://github.com/CitesSkylinesMods/TMPE/compare/10.20...10.21), 02/07/2019
 
 - Added: Cims have individual driving styles to determine lane changes and driving speed (#263 #334)
 - Added: Miles Per Hour option for speed limits (thanks kvakvs) (#384)
