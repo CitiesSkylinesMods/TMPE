@@ -240,81 +240,68 @@ namespace TrafficManager.UI {
             return toolMode_;
         }
 
+        /// <summary>Deactivate current active tool. Set new active tool.</summary>
+        /// <param name="newToolMode">New mode.</param>
         public void SetToolMode(ToolMode newToolMode) {
-            Log._Debug($"SetToolMode: {newToolMode}");
             ToolMode oldToolMode = toolMode_;
 
-            // Handle tool deactivation right here
-            if (newToolMode == ToolMode.None
-                && (activeLegacySubTool_ != null || activeSubTool_ != null))
-            {
+            // ToolModeChanged does not count timed traffic light submodes as a same tool
+            bool toolModeChanged = newToolMode != toolMode_;
+            if (IsTimedTrafficLightsSubtool(oldToolMode)
+                && IsTimedTrafficLightsSubtool(newToolMode)) {
+                toolModeChanged = false;
+            }
+
+            if (!toolModeChanged) {
+                Log._Debug($"SetToolMode: not changed old={oldToolMode} new={newToolMode}");
+                return;
+            }
+
+            SetToolMode_DeactivateTool();
+
+            // Try figure out whether legacy subtool or a new subtool is selected
+            if (!legacySubTools_.TryGetValue(newToolMode, out activeLegacySubTool_)
+                && !subTools_.TryGetValue(newToolMode, out activeSubTool_)) {
+                activeLegacySubTool_ = null;
+                activeSubTool_ = null;
+                toolMode_ = ToolMode.None;
+
+                Log._Debug($"SetToolMode: reset because toolmode not found {newToolMode}");
+                return;
+            }
+
+            SetToolMode_Activate(newToolMode);
+            Log._Debug($"SetToolMode: changed old={oldToolMode} new={newToolMode}");
+        }
+
+        /// <summary>Resets the tool and calls deactivate on it.</summary>
+        private void SetToolMode_DeactivateTool() {
+            if (activeLegacySubTool_ != null || activeSubTool_ != null) {
                 activeLegacySubTool_?.Cleanup();
                 activeLegacySubTool_ = null;
 
                 activeSubTool_?.DeactivateTool();
                 activeSubTool_ = null;
                 toolMode_ = ToolMode.None;
-                return;
             }
+        }
 
-            // ToolModeChanged does not count timed traffic light submodes as a same tool
-            bool toolModeChanged = newToolMode != toolMode_;
-
-            legacySubTools_.TryGetValue(oldToolMode, out LegacySubTool oldLegacySubtool);
-
+        /// <summary>
+        /// Sets new active tool. Resets selected segment and node. Calls activate on tools.
+        /// Also shows advisor.
+        /// </summary>
+        /// <param name="newToolMode">New mode.</param>
+        private void SetToolMode_Activate(ToolMode newToolMode) {
             toolMode_ = newToolMode;
-
-            // Try figure out whether legacy subtool or a new subtool is selected
-            if (!legacySubTools_.TryGetValue(toolMode_, out activeLegacySubTool_)
-                && !subTools_.TryGetValue(toolMode_, out activeSubTool_)) {
-                activeLegacySubTool_ = null;
-                activeSubTool_ = null;
-            }
-
-            // Tool Changed counts timed traffic light submodes as a single tool
-            bool toolChanged = toolModeChanged;
-
-            //---------------------------------------------------
-            // Special handling for Timed Traffic Lights submodes
-            // Does not count as subtool change if old and new belong to the same mode
-            //---------------------------------------------------
-            if (oldLegacySubtool != null) {
-                if (IsTimedTrafficLightsSubtool(oldToolMode)) {
-                    // TODO refactor to SubToolMode
-                    if (!IsTimedTrafficLightsSubtool(newToolMode)) {
-                        oldLegacySubtool.Cleanup();
-                    }
-                } else {
-                    oldLegacySubtool.Cleanup();
-                }
-            }
-
-            if (toolModeChanged && (activeLegacySubTool_ != null || activeSubTool_ != null)) {
-                if (IsTimedTrafficLightsSubtool(oldToolMode)) {
-                    // TODO refactor to SubToolMode
-                    if (!IsTimedTrafficLightsSubtool(newToolMode)) {
-                        activeLegacySubTool_?.Cleanup();
-                        activeSubTool_?.DeactivateTool();
-                    } else {
-                        toolChanged = false;
-                    }
-                } else {
-                    activeLegacySubTool_?.Cleanup();
-                    activeSubTool_?.DeactivateTool();
-                }
-            }
-
             SelectedNodeId = 0;
             SelectedSegmentId = 0;
 
-            if (toolModeChanged && (activeLegacySubTool_ != null || activeSubTool_ != null)) {
-                activeLegacySubTool_?.OnActivate();
-                activeSubTool_?.ActivateTool();
+            activeLegacySubTool_?.OnActivate();
+            activeSubTool_?.ActivateTool();
 
-                if (toolChanged && activeLegacySubTool_ != null) {
-                    ShowAdvisor(activeLegacySubTool_.GetTutorialKey());
-                    Guide.DeactivateAll();
-                }
+            if (activeLegacySubTool_ != null) {
+                ShowAdvisor(activeLegacySubTool_.GetTutorialKey());
+                Guide.DeactivateAll();
             }
         }
 
