@@ -20,20 +20,6 @@ namespace TrafficManager.UI.SubTools {
         /// </summary>
         private static UITextureAtlas laneArrowButtonAtlas_ = null;
 
-        /// <summary>Default skin setup copied to all Lane Arrow buttons on creation.</summary>
-        private readonly ButtonSkin laneArrowButtonSkin_
-            = new ButtonSkin {
-                                 BackgroundPrefix = "LaneArrow", // filename prefix
-
-                                 BackgroundHovered = true,
-                                 BackgroundActive = true,
-                                 BackgroundDisabled = true,
-
-                                 ForegroundNormal = false,
-                                 ForegroundHovered = false,
-                                 ForegroundDisabled = false,
-                             };
-
         public List<LaneArrowButton> Buttons { get; set; }
 
         public override void Start() {
@@ -48,25 +34,45 @@ namespace TrafficManager.UI.SubTools {
                 return laneArrowButtonAtlas_;
             }
 
-            // Create base atlas with backgrounds and no foregrounds
-            HashSet<string> atlasKeysSet = laneArrowButtonSkin_.CreateAtlasKeyset();
+            var skin = CreateDefaultButtonSkin();
 
-            laneArrowButtonSkin_.ForegroundNormal = true;
+            // Create base atlas with backgrounds and no foregrounds
+            skin.ForegroundNormal = false;
+            skin.ForegroundActive = false;
+            HashSet<string> atlasKeysSet = skin.CreateAtlasKeyset();
+
+            // Merge names of all foreground sprites for 3 directions into atlasKeySet
+            skin.ForegroundNormal = true;
+            skin.ForegroundActive = true;
             foreach (string prefix in new[]
                                       { "LaneArrowLeft", "LaneArrowRight", "LaneArrowForward" }) {
-                laneArrowButtonSkin_.Prefix = prefix;
+                skin.Prefix = prefix;
 
                 // Create keysets for lane arrow button icons and merge to the shared atlas
-                atlasKeysSet.AddRange(laneArrowButtonSkin_.CreateAtlasKeyset());
+                atlasKeysSet.AddRange(skin.CreateAtlasKeyset());
             }
 
-            laneArrowButtonAtlas_ = laneArrowButtonSkin_.CreateAtlas(
+            // Load actual graphics into an atlas
+            laneArrowButtonAtlas_ = skin.CreateAtlas(
                 "LaneArrows",
                 64,
                 64,
                 256, // 4x4 atlas
                 atlasKeysSet);
             return laneArrowButtonAtlas_;
+        }
+
+        private static ButtonSkin CreateDefaultButtonSkin() {
+            return new ButtonSkin {
+                                      BackgroundPrefix = "LaneArrow", // filename prefix
+
+                                      BackgroundHovered = true,
+                                      BackgroundActive = true,
+                                      BackgroundDisabled = true,
+
+                                      ForegroundNormal = true,
+                                      ForegroundActive = true,
+                                  };
         }
 
         /// <summary>
@@ -112,7 +118,7 @@ namespace TrafficManager.UI.SubTools {
                 buttonPanelBuilder.Button<LaneArrowButton>(
                     b => {
                         b.atlas = GetAtlas();
-                        b.Skin = laneArrowButtonSkin_.Clone(); // cloning to change prefix
+                        b.Skin = CreateDefaultButtonSkin();
                         b.Skin.Prefix = "LaneArrowLeft";
                         b.size = new Vector2(groupSize.x / 3f, groupSize.y);
                         Buttons.Add(b);
@@ -121,7 +127,7 @@ namespace TrafficManager.UI.SubTools {
                 buttonPanelBuilder.Button<LaneArrowButton>(
                     b => {
                         b.atlas = GetAtlas();
-                        b.Skin = laneArrowButtonSkin_.Clone(); // cloning to change prefix
+                        b.Skin = CreateDefaultButtonSkin();
                         b.Skin.Prefix = "LaneArrowForward";
                         b.size = new Vector2(groupSize.x / 3f, groupSize.y);
                         Buttons.Add(b);
@@ -130,7 +136,7 @@ namespace TrafficManager.UI.SubTools {
                 buttonPanelBuilder.Button<LaneArrowButton>(
                     b => {
                         b.atlas = GetAtlas();
-                        b.Skin = laneArrowButtonSkin_.Clone(); // cloning to change prefix
+                        b.Skin = CreateDefaultButtonSkin();
                         b.Skin.Prefix = "LaneArrowRight";
                         b.size = new Vector2(groupSize.x / 3f, groupSize.y);
                         Buttons.Add(b);

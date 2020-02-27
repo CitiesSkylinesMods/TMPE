@@ -595,6 +595,9 @@
     <EmbeddedResource Include="Resources\LaneArrows\LaneArrowForward-fg-normal.png" />
     <EmbeddedResource Include="Resources\LaneArrows\LaneArrowLeft-fg-normal.png" />
     <EmbeddedResource Include="Resources\LaneArrows\LaneArrowRight-fg-normal.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrowForward-fg-active.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrowLeft-fg-active.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrowRight-fg-active.png" />
     <EmbeddedResource Include="Resources\Clear\Clear-bg-active.png" />
     <EmbeddedResource Include="Resources\Clear\Clear-bg-normal.png" />
     <EmbeddedResource Include="Resources\Clear\Clear-bg-hovered.png" />

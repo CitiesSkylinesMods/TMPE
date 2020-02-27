@@ -45,20 +45,6 @@ namespace TrafficManager.U.Button {
         public bool ForegroundHovered = false;
         public bool ForegroundActive = false;
 
-        public ButtonSkin Clone() {
-            return new ButtonSkin {
-                                      Prefix = this.Prefix,
-                                      BackgroundPrefix = this.BackgroundPrefix,
-                                      BackgroundDisabled = this.BackgroundDisabled,
-                                      BackgroundHovered = this.BackgroundHovered,
-                                      BackgroundActive = this.BackgroundActive,
-                                      ForegroundNormal = this.ForegroundNormal,
-                                      ForegroundDisabled = this.ForegroundDisabled,
-                                      ForegroundHovered = this.ForegroundHovered,
-                                      ForegroundActive = this.ForegroundActive,
-                                  };
-        }
-
         public HashSet<string> CreateAtlasKeyset() {
             // Two normal textures (bg and fg) are always assumed to exist.
             var names = new HashSet<string>();

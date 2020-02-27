@@ -2,6 +2,7 @@
     using System;
     using System.Collections.Generic;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
     using TrafficManager.UI.Textures;
     using UnityEngine;
 
@@ -26,20 +27,24 @@
                 hintAtlasTextureSize,
                 TextureFormat.ARGB32,
                 false);
-            var textures = new List<Texture2D>(spriteNames.Length);
+
+            var loadedTextures = new List<Texture2D>(spriteNames.Length);
+            var loadedSpriteNames = new List<string>();
 
             // Load separate sprites and then pack it in a texture together
             foreach (string spriteName in spriteNames) {
+                Log._Debug($"TextureUtil: Loading sprite {resourcePrefix}.{spriteName}.png");
                 Texture2D loadedSprite = TextureResources.LoadDllResource(
                     $"{resourcePrefix}.{spriteName}.png",
                     spriteWidth,
                     spriteHeight);
                 if (loadedSprite) {
-                    textures.Add(loadedSprite);
+                    loadedTextures.Add(loadedSprite);
+                    loadedSpriteNames.Add(spriteName); // only take those which are loaded
                 }
             }
 
-            var regions = texture2D.PackTextures(textures.ToArray(), 2, hintAtlasTextureSize);
+            var regions = texture2D.PackTextures(loadedTextures.ToArray(), 2, hintAtlasTextureSize);
 
             // Now using loaded and packed textures, create the atlas with sprites
             UITextureAtlas newAtlas = ScriptableObject.CreateInstance<UITextureAtlas>();
@@ -52,8 +57,8 @@
 
             for (int i = 0; i < spriteNames.Length; i++) {
                 var item = new UITextureAtlas.SpriteInfo {
-                                                             name = spriteNames[i],
-                                                             texture = textures[i],
+                                                             name = loadedSpriteNames[i],
+                                                             texture = loadedTextures[i],
                                                              region = regions[i],
                                                          };
 
