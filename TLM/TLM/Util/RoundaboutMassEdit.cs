@@ -1,7 +1,6 @@
 namespace TrafficManager.Util {
     using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using static Manager.Impl.LaneArrowManager.SeparateTurningLanes;
     using static UI.SubTools.LaneConnectorTool;
     using static Util.Shortcuts;
     using System.Collections.Generic;
@@ -33,8 +32,9 @@ namespace TrafficManager.Util {
 
             if (OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes &&
                 HasJunctionFlag(nodeId) &&
-                CanChangeLanes(segmentId, nodeId) == SetLaneArrowError.Success &&
-                isStraight) {
+                SeparateTurningLanesUtil.CanChangeLanes(
+                    segmentId, nodeId) == SetLaneArrowError.Success &&
+                    isStraight) {
                 bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
                 IList<LanePos> laneList =
                     netService.GetSortedLanes(

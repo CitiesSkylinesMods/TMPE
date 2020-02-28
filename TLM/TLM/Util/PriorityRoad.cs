@@ -310,7 +310,7 @@ namespace TrafficManager.Util {
 
         private static void FixMajorSegmentLanes(ushort segmentId, ushort nodeId) {
             Log._Debug($"FixMajorSegmentLanes({segmentId}, {nodeId}) was called");
-            if (LaneArrowManager.SeparateTurningLanes.CanChangeLanes(segmentId, nodeId) != SetLaneArrowError.Success) {
+            if (SeparateTurningLanesUtil.CanChangeLanes(segmentId, nodeId) != SetLaneArrowError.Success) {
                 Log._Debug("FixMajorSegmentLanes: can't change lanes");
                 return;
             }
@@ -363,7 +363,7 @@ namespace TrafficManager.Util {
 
         private static void FixMinorSegmentLanes(ushort segmentId, ushort nodeId, List<ushort> segmentList) {
             Log._Debug($"FixMinorSegmentLanes({segmentId}, {nodeId}, segmentList) was called");
-            if (LaneArrowManager.SeparateTurningLanes.CanChangeLanes(segmentId, nodeId) != SetLaneArrowError.Success) {
+            if (SeparateTurningLanesUtil.CanChangeLanes(segmentId, nodeId) != SetLaneArrowError.Success) {
                 Debug.Log("FixMinorSegmentLanes(): can't change lanes");
                 return;
             }
