@@ -119,6 +119,8 @@ On Steam client you can check Steam->settings->Download->Steam Library Folders.
 
 The managed `.dll` files are usually located within the following sub-folder: `\steamapps\common\Cities_Skylines\Cities_Data\Managed\`.
 
+If you're using Origin Access instead of Steam to play Cities Skylines, look for the managed '.dll' files in [InstalledDrive]\Program Files (x86)\Origin Games\Cities Skylines\Cities_Data\Managed.
+
 You'll have to link the dependencies using _only one_ of the following methods:
 
 * Create a `\TLM\dependencies` folder (in the TM:PE repository folder) and copy in the `.dll` files
