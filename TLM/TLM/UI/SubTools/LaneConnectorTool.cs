@@ -281,48 +281,6 @@ namespace TrafficManager.UI.SubTools {
             } // end for node in all nodes
         }
 
-        /// <summary>
-        /// Finds the first index for which node.GetSegment(index) != 0 (its possible node.m_segment0 == 0)
-        /// </summary>
-        private static int GetFirstSegmentIndex(NetNode node) {
-            for (int i = 0; i < 8; ++i) {
-                if (node.GetSegment(i) != 0) {
-                    return i;
-                }
-            }
-            Log.Error("GetFirstSegmentIndex: Node does not have any segments");
-            return 0;
-        }
-
-        bool SegmentLanesMatch(ushort segmentId0, ushort segmentId1) {
-            int forward0 = 0, backward0 = 0, forward1 = 0, backward1 = 0;
-            segmentId0.ToSegment().CountLanes(
-                segmentId0,
-                LaneConnectionManager.LANE_TYPES,
-                LaneConnectionManager.VEHICLE_TYPES,
-                ref forward0,
-                ref backward0);
-
-            segmentId1.ToSegment().CountLanes(
-                segmentId1,
-                LaneConnectionManager.LANE_TYPES,
-                LaneConnectionManager.VEHICLE_TYPES,
-                ref forward1,
-                ref backward1);
-
-            bool sameDir =
-                netService.GetHeadNode(segmentId0) == netService.GetTailNode(segmentId1) ||
-                netService.GetHeadNode(segmentId1) == netService.GetTailNode(segmentId0);
-
-            Log._Debug($"forward0:{forward0} forward1:{forward1} backward0:{backward0} backward1:{backward1} sameDir:{sameDir}");
-            if (!sameDir) {
-                return forward0 == backward1 && backward0 == forward1;
-            } else {
-                return forward0 == forward1 && backward0 == backward1;
-            }
-        }
-
-
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             // Log._Debug($"LaneConnectorTool: RenderOverlay. SelectedNodeId={SelectedNodeId}
             //     SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId}
@@ -383,32 +341,11 @@ namespace TrafficManager.UI.SubTools {
                     selectedLaneEnd = null;
                     ref NetNode node = ref SelectedNodeId.ToNode();
 
-                    bool stayInLane = false;
-                    var segList = PriorityRoad.GetNodeSegments(SelectedNodeId);
-                    if (segList.Count == 2) {
-                        stayInLane = SegmentLanesMatch(segList[0], segList[1]);
-                    }
-
-                    bool MatchingTCase = false;
-                    if (segList.Count == 3) {
-                        if (!PriorityRoad.ArrangeT(segList)) {
-                            segList.Sort(PriorityRoad.CompareSegments);
-                        }
-
-                        // Prevent confusion if all roads are the same.
-                        MatchingTCase = PriorityRoad.CompareSegments(segList[1], segList[2]) != 0;
-
-                        // same sized one way roads are supported.
-                        MatchingTCase |= segMan.CalculateIsOneWay(segList[0]) && segMan.CalculateIsOneWay(segList[1]);
-
-                        // check one way toward junction:
-                        MatchingTCase &= StayInLaneTJunction(SelectedNodeId, segList[2], checkOnly: true);
-                    }
-
+                    bool stayInLane = GetSoredtedSegments(SelectedNodeId, out List<ushort> segList) ;
                     bool oneway = segMan.CalculateIsOneWay(segList[0]) || segMan.CalculateIsOneWay(segList[1]);
                     bool fourStates = !oneway;
 
-                    if (stayInLane || MatchingTCase) {
+                    if (stayInLane) {
                         // "stay in lane"
                         switch (stayInLaneMode) {
                             case StayInLaneMode.None: {
@@ -435,20 +372,18 @@ namespace TrafficManager.UI.SubTools {
                                     break;
                                 }
                         }
-                        MainTool.Guide.Deactivate("LaneConnectorTool:Stay in lane is not supported for this setup.");
+                        MainTool.Guide.Deactivate("LaneConnectorTool:quick-setup is not supported for this junction setup.");
                     } else {
-                        MainTool.Guide.Activate("LaneConnectorTool:quick-setup is not supported for this junction setup."); //Note that for T junctions, lane arithmatic must work
+                        MainTool.Guide.Activate("LaneConnectorTool:quick-setup is not supported for this junction setup.");
                     }
 
-                    Log._Debug($"stayInLane:{stayInLane} MatchingTCase={MatchingTCase} stayInLaneMode:{stayInLaneMode}\n" +
+                    Log._Debug($"stayInLane:{stayInLane} stayInLaneMode:{stayInLaneMode}\n" +
                         $"GetMarkerSelectionMode()={GetSelectionMode()} SelectedNodeId={SelectedNodeId}");
 
                     if (stayInLane) {
                         StayInLane(SelectedNodeId, stayInLaneMode);
-                    } else if (MatchingTCase) {
-                        StayInLaneTJunction(SelectedNodeId, segList[2], checkOnly: false, mode:stayInLaneMode);
+                        RefreshCurrentNodeMarkers(SelectedNodeId);
                     } // end if stay in lane
-                    RefreshCurrentNodeMarkers(SelectedNodeId);
                 } // end if quick setup
             } // end if selected node
 
@@ -456,6 +391,36 @@ namespace TrafficManager.UI.SubTools {
                 // draw hovered node
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
             }
+        }
+
+        public static bool GetSoredtedSegments(ushort nodeId, out List<ushort> segments) {
+            segments = PriorityRoad.GetNodeSegments(nodeId);
+            bool ret = false;
+            int n = segments.Count;
+            if (n == 2) {
+                segments.Add(0);
+                segments.Add(0);
+                ret = true;
+            } else if (n == 3) {
+                if (!PriorityRoad.ArrangeT(segments)) {
+                    segments.Sort(PriorityRoad.CompareSegments);
+                }
+
+                // Prevent confusion if all roads are the same.
+                ret = PriorityRoad.CompareSegments(segments[1], segments[2]) != 0;
+
+                // same sized one way roads are supported.
+                ret |= segMan.CalculateIsOneWay(segments[0]) && segMan.CalculateIsOneWay(segments[1]);
+
+                segments.Add(0);
+            } else if(n == 4) {
+                segments.Sort(PriorityRoad.CompareSegments);
+
+                // Prevent confusion if all roads are the same.
+                ret = PriorityRoad.CompareSegments(segments[1], segments[2]) != 0;
+            }
+
+            return ret;
         }
 
         /// <summary>
@@ -468,185 +433,116 @@ namespace TrafficManager.UI.SubTools {
         /// if <c>false</c> the assumpton is that lane arithmatic works.</param>
         /// <param name="mode">determines which side to connect lanes.</param>
         /// <returns>if lane arithmatic works (when <paramref name="checkOnly"/> is <c>true</c>) </returns>
-        public static bool StayInLaneTJunction(ushort nodeId, ushort segmentId, bool checkOnly, StayInLaneMode mode = StayInLaneMode.None) {
-            ref NetSegment segment = ref segmentId.ToSegment();
-            ref NetNode node = ref nodeId.ToNode();
-            ushort MainAgainst, MainToward;
+        public static void StayInLane(ushort nodeId, StayInLaneMode mode = StayInLaneMode.None) {
+            LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
+
+            GetSoredtedSegments(nodeId, out List<ushort> segments);
+            ushort mainAgainst, mainToward;
             bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
-            if (lht) {
-                MainAgainst = segment.GetLeftSegment(nodeId);
-                MainToward = segment.GetRightSegment(nodeId);
+            ref NetNode node = ref nodeId.ToNode();
+            ushort outerSegment = segments[2];
+
+            if (outerSegment != 0) {
+                ref NetSegment segment = ref outerSegment.ToSegment();
+                if (lht) {
+                    mainAgainst = segment.GetLeftSegment(nodeId);
+                    mainToward = segment.GetRightSegment(nodeId);
+                } else {
+                    mainAgainst = segment.GetRightSegment(nodeId);
+                    mainToward = segment.GetLeftSegment(nodeId);
+                }
             } else {
-                MainAgainst = segment.GetRightSegment(nodeId);
-                MainToward = segment.GetLeftSegment(nodeId);
+                mainToward = segments[0];
+                mainAgainst = segments[1];
             }
-            bool oneway0 = segMan.CalculateIsOneWay(MainAgainst);
-            bool oneway1 = segMan.CalculateIsOneWay(MainToward);
-            bool oneway = segMan.CalculateIsOneWay(segmentId);
+            if (mode == StayInLaneMode.Both || mode == StayInLaneMode.Forward) {
+                StayInLane(nodeId, mainToward, mainAgainst, outerSegment);
+            }
+            if(mode == StayInLaneMode.Both || mode == StayInLaneMode.Backward) {
+                StayInLane(nodeId, mainAgainst, mainToward, segments[3]);
+            }
+
+        }
+
+        private static void StayInLane(ushort nodeId, ushort mainToward, ushort mainAgainst, ushort outerSegment) {
+            ref NetSegment segment = ref outerSegment.ToSegment();
+            ref NetNode node = ref nodeId.ToNode();
+            bool oneway0 = segMan.CalculateIsOneWay(mainAgainst);
+            bool oneway1 = segMan.CalculateIsOneWay(mainToward);
+            bool oneway = outerSegment != 0 ? segMan.CalculateIsOneWay(outerSegment) : false;
             bool connectedFromInside =
                 oneway0 && oneway1 && oneway &&
-                netService.GetHeadNode(MainAgainst) == nodeId;
+                netService.GetHeadNode(mainAgainst) == nodeId;
             if (connectedFromInside) {
-                ushort temp = MainToward;
-                MainToward = MainAgainst;
-                MainAgainst = temp;
+                ushort temp = mainToward;
+                mainToward = mainAgainst;
+                mainAgainst = temp;
             }
 
             int SimilarIndex(LaneEnd laneEnd) {
-                if(connectedFromInside)
+                if (connectedFromInside)
                     return laneEnd.InnerSimilarLaneIndex;
                 else
                     return laneEnd.OuterSimilarLaneIndex;
             }
 
-            int Yt = PriorityRoad.CountLanesTowardJunction(segmentId, nodeId); // Yeild Toward.
-            int Ya = PriorityRoad.CountLanesAgainstJunction(segmentId, nodeId); // Yeild Against.
-            int Mt = PriorityRoad.CountLanesTowardJunction(MainToward, nodeId); // Main Toward.
-            int Ma = PriorityRoad.CountLanesAgainstJunction(MainAgainst, nodeId); // Main Against.
-            bool ret = Mt - Ya == Ma - Yt && Mt - Ya >= 0;
-            Log._Debug($"CivilizedJunction: Yt={Yt} Ya={Ya} Mt={Mt} Ma={Ma} ret={ret} : return Mt - Ya == Ma - Yt && Mt-Ya >=0");
-            if(checkOnly) {
-                return ret;
-            } else {
-                Assert(ret, "Lane arithmatic is wrong.");
-            }
+            int Yt = outerSegment == 0 ? 0 : PriorityRoad.CountLanesTowardJunction(outerSegment, nodeId); // Yeild Toward.
+            int Ya = outerSegment == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(outerSegment, nodeId); // Yeild Against.
+            int Mt = PriorityRoad.CountLanesTowardJunction(mainToward, nodeId); // Main Toward.
+            int Ma = PriorityRoad.CountLanesAgainstJunction(mainAgainst, nodeId); // Main Against.
+            bool laneArithmaticWorks = Mt - Ya == Ma - Yt && Mt - Ya >= 0;
+            Log._Debug($"StayInLane: Yt={Yt} Ya={Ya} Mt={Mt} Ma={Ma} lane arithmatic works={laneArithmaticWorks} Mt - Ya == Ma - Yt && Mt-Ya >=0");
 
-            LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
             List<LaneEnd> laneEnds = GetLaneEnds(nodeId, ref node);
-            if (mode == StayInLaneMode.Forward || mode == StayInLaneMode.Both) {
-                foreach (LaneEnd sourceLaneEnd in laneEnds) {
-                    if (!sourceLaneEnd.IsSource ||
-                        sourceLaneEnd.SegmentId == MainAgainst) {
-                        continue;
-                    }
-                    foreach (LaneEnd targetLaneEnd in laneEnds) {
-                        if (!targetLaneEnd.IsTarget ||
-                            targetLaneEnd.SegmentId == sourceLaneEnd.SegmentId ||
-                            targetLaneEnd.SegmentId == MainToward ||
-                            !CanConnect(sourceLaneEnd, targetLaneEnd)
-                            ) {
-                            continue;
-                        }
-                        bool connect = false;
-                        if (
-                            sourceLaneEnd.SegmentId == MainToward &&
-                            targetLaneEnd.SegmentId == segmentId &&
-                            SimilarIndex(sourceLaneEnd) == SimilarIndex(targetLaneEnd)) {
-                            Log._Debug("Lane Connector: connect Main to Minor");
-                            connect = true;
-                        } else if (
-                            sourceLaneEnd.SegmentId == segmentId &&
-                            targetLaneEnd.SegmentId == MainAgainst &&
-                            SimilarIndex(sourceLaneEnd) == SimilarIndex(targetLaneEnd)) {
-                            Log._Debug("Lane Connector: connect Minor to Main");
-                            connect = true;
-                        } else if (
-                            sourceLaneEnd.SegmentId == MainToward &&
-                            targetLaneEnd.SegmentId == MainAgainst &&
-                            SimilarIndex(sourceLaneEnd) - Ya == SimilarIndex(targetLaneEnd) - Yt &&
-                            SimilarIndex(sourceLaneEnd) - Ya >= 0
-                            ) {
-                            Log._Debug("Lane Connector: connect Main to Main");
-                            connect = true;
-                        }
-
-                        if (connect) {
-                            Log._Debug(
-                                $"Adding lane connection {sourceLaneEnd.LaneId} -> " +
-                                $"{targetLaneEnd.LaneId}");
-                            LaneConnectionManager.Instance.AddLaneConnection(
-                                sourceLaneEnd.LaneId,
-                                targetLaneEnd.LaneId,
-                                sourceLaneEnd.StartNode);
-                        }
-                    } // foreach
-                }// foreach
-            } // if mode is forward or both
-
-            if (mode == StayInLaneMode.Backward || mode == StayInLaneMode.Both) {
-                {
-                    // fix other side of the road. swap road sides
-                    var temp = MainToward;
-                    MainToward = MainAgainst;
-                    MainAgainst = temp;
+            foreach (LaneEnd sourceLaneEnd in laneEnds) {
+                if (!sourceLaneEnd.IsSource ||
+                    sourceLaneEnd.SegmentId == mainAgainst) {
+                    continue;
                 }
-                foreach (LaneEnd sourceLaneEnd in laneEnds) {
-                    if (!sourceLaneEnd.IsSource ||
-                        sourceLaneEnd.SegmentId != MainToward) {
+                foreach (LaneEnd targetLaneEnd in laneEnds) {
+                    if (!targetLaneEnd.IsTarget ||
+                        targetLaneEnd.SegmentId == sourceLaneEnd.SegmentId ||
+                        targetLaneEnd.SegmentId == mainToward ||
+                        !CanConnect(sourceLaneEnd, targetLaneEnd)
+                        ) {
                         continue;
                     }
-                    foreach (LaneEnd targetLaneEnd in laneEnds) {
-                        if (!targetLaneEnd.IsTarget ||
-                            targetLaneEnd.SegmentId != MainAgainst ||
-                            !CanConnect(sourceLaneEnd, targetLaneEnd)) {
-                            continue;
-                        }
-                        bool connect = false;
-                        if (SimilarIndex(sourceLaneEnd) == SimilarIndex(targetLaneEnd)) {
-                            Log._Debug("Lane Connector: connect other side");
-                            connect = true;
-                        }
+                    bool connect = false;
+                    if (
+                        sourceLaneEnd.SegmentId == mainToward &&
+                        targetLaneEnd.SegmentId == outerSegment &&
+                        SimilarIndex(sourceLaneEnd) == SimilarIndex(targetLaneEnd)) {
+                        Log._Debug("Lane Connector: connect Main to Minor");
+                        connect = true;
+                    } else if (
+                        sourceLaneEnd.SegmentId == outerSegment &&
+                        targetLaneEnd.SegmentId == mainAgainst &&
+                        SimilarIndex(sourceLaneEnd) == SimilarIndex(targetLaneEnd)) {
+                        Log._Debug("Lane Connector: connect Minor to Main");
+                        connect = true;
+                    } else if (
+                        sourceLaneEnd.SegmentId == mainToward &&
+                        targetLaneEnd.SegmentId == mainAgainst &&
+                        SimilarIndex(sourceLaneEnd) - Ya == SimilarIndex(targetLaneEnd) - Yt &&
+                        SimilarIndex(sourceLaneEnd) - Ya >= 0
+                        ) {
+                        Log._Debug("Lane Connector: connect Main to Main");
+                        connect = true;
+                    }
 
-                        if (connect) {
-                            Log._Debug(
-                                $"Adding lane connection {sourceLaneEnd.LaneId} -> " +
-                                $"{targetLaneEnd.LaneId}");
-                            LaneConnectionManager.Instance.AddLaneConnection(
-                                sourceLaneEnd.LaneId,
-                                targetLaneEnd.LaneId,
-                                sourceLaneEnd.StartNode);
-                        }
-                    } // foreach
-                }// foreach
-            } // if mode is backward or both
-            return ret;
+                    if (connect) {
+                        Log._Debug(
+                            $"Adding lane connection {sourceLaneEnd.LaneId} -> " +
+                            $"{targetLaneEnd.LaneId}");
+                        LaneConnectionManager.Instance.AddLaneConnection(
+                            sourceLaneEnd.LaneId,
+                            targetLaneEnd.LaneId,
+                            sourceLaneEnd.StartNode);
+                    }
+                } // foreach
+            }// foreach
         }
-
-        public static void StayInLane(ushort nodeId, StayInLaneMode stayInLaneMode = StayInLaneMode.Both) {
-            LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
-            if (stayInLaneMode != StayInLaneMode.None) {
-                NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-                List<LaneEnd> laneEnds = GetLaneEnds(
-                    nodeId,
-                    ref nodesBuffer[nodeId]);
-
-                if (laneEnds != null) {
-                    int forwardSegmentIndex = GetFirstSegmentIndex(nodesBuffer[nodeId]);
-                    foreach (LaneEnd sourceLaneEnd in laneEnds) {
-                        if (!sourceLaneEnd.IsSource) {
-                            continue;
-                        }
-                        if ((stayInLaneMode == StayInLaneMode.Forward) ||
-                            (stayInLaneMode == StayInLaneMode.Backward)) {
-                            if ((sourceLaneEnd.SegmentIndex == forwardSegmentIndex)
-                                ^ (stayInLaneMode == StayInLaneMode.Backward)) {
-                                continue;
-                            }
-                        }
-
-                        foreach (LaneEnd targetLaneEnd in laneEnds) {
-                            if (!targetLaneEnd.IsTarget ||
-                                targetLaneEnd.SegmentId == sourceLaneEnd.SegmentId ||
-                                !CanConnect(sourceLaneEnd, targetLaneEnd)) {
-                                continue;
-                            }
-
-                            if (targetLaneEnd.InnerSimilarLaneIndex
-                                == sourceLaneEnd.InnerSimilarLaneIndex) {
-                                Log._Debug(
-                                    $"Adding lane connection {sourceLaneEnd.LaneId} -> " +
-                                    $"{targetLaneEnd.LaneId}");
-                                LaneConnectionManager.Instance.AddLaneConnection(
-                                    sourceLaneEnd.LaneId,
-                                    targetLaneEnd.LaneId,
-                                    sourceLaneEnd.StartNode);
-                            } // end if
-                        } // end foreach
-                    } // end foreach
-                } // end if
-            } // end if
-        }
-
+   
         public override void OnPrimaryClickOverlay() {
 #if DEBUG
             bool logLaneConn = DebugSwitch.LaneConnections.Get();
