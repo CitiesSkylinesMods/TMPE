@@ -17,7 +17,7 @@ The following software is required...
 
 * IDE (Integrated Development Environment), either:
     * [Visual Studio Community](https://visualstudio.microsoft.com/vs/) (free)
-        * Important: [2019 version](https://docs.microsoft.com/en-us/visualstudio/releases/2019/release-notes) (or later) must be used ([why?](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/pull/463))
+        * Important: [2019 version](https://docs.microsoft.com/en-us/visualstudio/releases/2019/release-notes) (or later) must be used ([why?](https://github.com/CitiesSkylinesMods/TMPE/pull/463))
     * [JetBrains Rider](https://www.jetbrains.com/rider/) (paid)
 * GitHub client, either:
     * [GitHub Desktop](https://desktop.github.com/) (recommended if you are not used to working with GitHub)
@@ -52,7 +52,7 @@ The only known workaround is to exclude all executables in `\resources\app\git\`
 
 * Open the inbuilt console
 * Use `git clone https://github.com/CitiesSkylinesMods/TMPE` clone repository locally
-* Then `cd Cities-Skylines-Traffic-Manager-President-Edition`
+* Then `cd TMPE`
 * Then `git submodule update --init --recursive` to fetch dependencies
 
 ## Environment
