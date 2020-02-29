@@ -22,7 +22,7 @@ This changelog includes all versions and major variants of the mod going all the
 > * **TPP** = Traffic++
 > * **TM** = Traffic Manager
 
-#### TM:PE V[11.1.1](https://github.com/CitesSkylinesMods/TMPE/compare/11.1.0...11.1.1) LABS, date
+#### TM:PE V[11.1.1](https://github.com/CitesSkylinesMods/TMPE/compare/11.1.0...11.1.1) LABS, 29/02/2020
 
 - Added: The `Simulation Accuracy` option has been revived! (#742, #707)
 - Added: `Shift` key applies a setting to entire route + lane highlight (#138, #721, #709, #708, #667, #388, #33)
@@ -67,7 +67,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 - GitHub: [CitiesSkylinesMods/TMPE](https://github.com/CitiesSkylinesMods/TMPE)
 
-#### TM:PE V[11.1.0](https://github.com/CitesSkylinesMods/TMPE/compare/11.0...11.1.0) STABLE, date
+#### TM:PE V[11.1.0](https://github.com/CitesSkylinesMods/TMPE/compare/11.0...11.1.0) STABLE, 29/02/2020
 
 - Added: Quick setup of priority roads (`Ctrl+Click junction`, `Shift+Ctrl+Click road`) (#621, #541, #542, #568, #577, #7)
 - Added: `Delete` key resets junction restrictions for selected junction (#639, #623, #568, #6)
