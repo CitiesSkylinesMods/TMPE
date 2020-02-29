@@ -8,9 +8,15 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using UnityEngine;
+    using TrafficManager.Util;
     using static TrafficManager.Util.Shortcuts;
+    using System.Linq;
 
     public class LaneArrowTool : SubTool {
+        const bool DEFAULT_ALT_MODE = true;
+        private bool alternativeMode_ = DEFAULT_ALT_MODE;
+        private int framesSeparateTurningLanesModeActivated = 0;
+
         private bool cursorInSecondaryPanel_;
 
         public LaneArrowTool(TrafficManagerTool mainTool)
@@ -33,6 +39,9 @@ namespace TrafficManager.UI.SubTools {
             }
             return false;
         }
+
+        bool SeparateSegmentLanesModifierIsPressed => AltIsPressed;
+        bool SeparateNodeLanesModifierIsPressed => ControlIsPressed;
 
         public override bool IsCursorInPanel() {
             return base.IsCursorInPanel() || cursorInSecondaryPanel_;
@@ -71,18 +80,31 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            if (Time.frameCount - framesSeparateTurningLanesModeActivated > 80) {
+                // the mode resets after 2 seconds.
+                alternativeMode_ = DEFAULT_ALT_MODE;
+            }
+
             SetLaneArrowError res = SetLaneArrowError.Success;
-            if (altDown) {
-                LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(HoveredSegmentId, HoveredNodeId, out res);
+
+            if (SeparateSegmentLanesModifierIsPressed) {
+                SeparateTurningLanesUtil.SeparateSegmentLanes(
+                    HoveredSegmentId, HoveredNodeId, out res, alternativeMode: alternativeMode_);
                 HandleResult(res);
-            } else if (ctrlDown) {
-                LaneArrowManager.SeparateTurningLanes.SeparateNode(HoveredNodeId, out res);
+            } else if (SeparateNodeLanesModifierIsPressed) {
+                SeparateTurningLanesUtil.SeparateNode(HoveredNodeId, out res, alternativeMode: alternativeMode_);
                 HandleResult(res);
+                NetInfo.LaneType f;
+
             } else if (HasHoverLaneArrows()) {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
+                alternativeMode_ = DEFAULT_ALT_MODE;
+            }
+
+            if (SeparateSegmentLanesModifierIsPressed || SeparateNodeLanesModifierIsPressed) {
+                framesSeparateTurningLanesModeActivated = Time.frameCount;
+                alternativeMode_ = !alternativeMode_;
             }
         }
 
@@ -219,10 +241,8 @@ namespace TrafficManager.UI.SubTools {
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             NetManager netManager = Singleton<NetManager>.instance;
 
-            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-            bool PrimaryDown = Input.GetMouseButton(0);
-            if (ctrlDown && !cursorInSecondaryPanel_ && (HoveredNodeId != 0)) {
+            bool PrimaryPressed = Input.GetMouseButton(0);
+            if (SeparateNodeLanesModifierIsPressed && !cursorInSecondaryPanel_ && (HoveredNodeId != 0)) {
                 // draw hovered node
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 return;
@@ -242,8 +262,8 @@ namespace TrafficManager.UI.SubTools {
                      || (netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId))
                     && ((nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)) {
                     bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(HoveredSegmentId, HoveredNodeId);
-                    Color color = MainTool.GetToolColor(PrimaryDown, false);
-                    bool alpha = !altDown;
+                    Color color = MainTool.GetToolColor(PrimaryPressed, false);
+                    bool alpha = !SeparateSegmentLanesModifierIsPressed;
                     DrawSegmentEnd(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
                 }
             }
@@ -251,7 +271,7 @@ namespace TrafficManager.UI.SubTools {
             if (SelectedSegmentId != 0) {
                 Color color = MainTool.GetToolColor(true, false);
                 bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
-                bool alpha = !altDown && HoveredSegmentId == SelectedSegmentId;
+                bool alpha = !SeparateSegmentLanesModifierIsPressed && HoveredSegmentId == SelectedSegmentId;
                 DrawSegmentEnd(cameraInfo, SelectedSegmentId, bStartNode, color, alpha);
             }
         }

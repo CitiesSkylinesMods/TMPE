@@ -7,8 +7,9 @@ namespace TrafficManager.Util {
     using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
     using UnityEngine;
-    using static Constants;
 
     //TODO should I rename this to Extensions or Helpers?
     internal static class Shortcuts {
@@ -25,11 +26,11 @@ namespace TrafficManager.Util {
 
         private static ExtSegmentEnd[] _segEndBuff => segEndMan.ExtSegmentEnds;
 
-        internal static IExtSegmentEndManager segEndMan => ManagerFactory.ExtSegmentEndManager;
+        internal static IExtSegmentEndManager segEndMan => Constants.ManagerFactory.ExtSegmentEndManager;
 
-        internal static IExtSegmentManager segMan => ManagerFactory.ExtSegmentManager;
+        internal static IExtSegmentManager segMan => Constants.ManagerFactory.ExtSegmentManager;
 
-        internal static INetService netService => ServiceFactory.NetService;
+        internal static INetService netService => Constants.ServiceFactory.NetService;
 
         internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
 
@@ -88,5 +89,17 @@ namespace TrafficManager.Util {
 
         internal static bool AltIsPressed => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 
+        #region directions
+        internal static bool lht => LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
+        internal static bool rht => !lht;
+
+        internal static LaneArrows LaneArrows_Near => rht ? LaneArrows.Right : LaneArrows.Left;
+        internal static LaneArrows LaneArrows_Far  => rht ? LaneArrows.Left  : LaneArrows.Right;
+        internal static LaneArrows LaneArrows_NearForward => LaneArrows_Near | LaneArrows.Forward;
+        internal static LaneArrows LaneArrows_FarForward  => LaneArrows_Far  | LaneArrows.Forward;
+
+        internal static ArrowDirection ArrowDirection_Near => rht ? ArrowDirection.Right : ArrowDirection.Left;
+        internal static ArrowDirection ArrowDirection_Far  => rht ? ArrowDirection.Left  : ArrowDirection.Right;
+        #endregion
     }
 }
