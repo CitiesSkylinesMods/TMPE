@@ -1,4 +1,4 @@
-namespace TrafficManager.Manager.Impl {
+﻿namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System;
     using TrafficManager.API.Manager;
@@ -18,13 +18,31 @@ namespace TrafficManager.Manager.Impl {
             Log.NotImpl("InternalPrintDebugInfo for OptionsManager");
         }
 
+        /// <summary>
+        /// Converts value to SimulationAccuracy
+        /// </summary>
+        /// <param name="value">Old value</param>
+        /// <returns>SimulationAccuracy value</returns>
+        private static SimulationAccuracy ConvertToSimulationAccuracy(byte value) {
+            return SimulationAccuracy.MaxValue - value;
+        }
+
+        /// <summary>
+        /// Converts SimulationAccuracy to SimulationAccuracy
+        /// </summary>
+        /// <param name="value">SimulationAccuracy value</param>
+        /// <returns>byte representation of value (backward compatible)</returns>
+        private static byte ConvertFromSimulationAccuracy(SimulationAccuracy value) {
+            return (byte)(SimulationAccuracy.MaxValue - value);
+        }
+
         public bool MayPublishSegmentChanges() {
             return Options.instantEffects && !SerializableDataExtension.StateLoading;
         }
 
         public bool LoadData(byte[] data) {
             if (data.Length >= 1) {
-                // Options.setSimAccuracy(data[0]);
+                OptionsGeneralTab.SetSimulationAccuracy(ConvertToSimulationAccuracy(data[0]));
             }
 
             if (data.Length >= 2) {
@@ -223,7 +241,7 @@ namespace TrafficManager.Manager.Impl {
 
         public byte[] SaveData(ref bool success) {
             return new byte[] {
-                0, // Options.simAccuracy,
+                ConvertFromSimulationAccuracy(Options.simulationAccuracy),
                 0, // Options.laneChangingRandomization,
                 (byte)Options.recklessDrivers,
                 (byte)(Options.relaxedBusses ? 1 : 0),
