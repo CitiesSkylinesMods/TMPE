@@ -4,6 +4,7 @@ namespace TrafficManager.API.Traffic.Enums {
         Low = 1,
         Medium = 2,
         High = 3,
-        VeryHigh = 4
+        VeryHigh = 4,
+        MaxValue = 4
     }
 }

@@ -1,4 +1,4 @@
-namespace TrafficManager.Manager.Impl {
+﻿namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System;
     using TrafficManager.API.Manager;
@@ -24,7 +24,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="value">Old value</param>
         /// <returns>SimulationAccuracy value</returns>
         private static SimulationAccuracy ConvertToSimulationAccuracy(byte value) {
-            return (SimulationAccuracy)Math.Abs(value - 4);
+            return SimulationAccuracy.MaxValue - value;
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="value">SimulationAccuracy value</param>
         /// <returns>byte representation of value (backward compatible)</returns>
         private static byte ConvertFromSimulationAccuracy(SimulationAccuracy value) {
-            return (byte)Math.Abs((int)value - 4);
+            return (byte)(SimulationAccuracy.MaxValue - value);
         }
 
         public bool MayPublishSegmentChanges() {
