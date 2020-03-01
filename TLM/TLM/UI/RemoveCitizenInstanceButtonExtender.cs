@@ -47,15 +47,30 @@
                     RemoveCitizenInstanceButton;
 
             button.AlignTo(panel.component, UIAlignAnchor.TopRight);
-            button.relativePosition += new Vector3(-button.width - 80f, 50f);
-
+            button.relativePosition += new Vector3(-button.width - 90f, 47f);
             return button;
         }
 
         public class RemoveCitizenInstanceButton : BaseUButton {
             public override void Start() {
                 base.Start();
+                this.Skin = new ButtonSkin {
+                    BackgroundPrefix = "Clear",
+                    Prefix = "Clear",
+                    BackgroundHovered = true,
+                    BackgroundActive = true,
+                    ForegroundHovered = true,
+                    ForegroundActive = true
+                };
+                this.atlas = this.Skin.CreateAtlas(
+                    "Clear",
+                    50,
+                    50,
+                    256,
+                    this.Skin.CreateAtlasKeyset());
+                UpdateButtonImageAndTooltip();
                 width = height = MainMenuPanel.ScaledSize.GetButtonSize();
+
             }
 
             public override void HandleClick(UIMouseEventParameter p) {

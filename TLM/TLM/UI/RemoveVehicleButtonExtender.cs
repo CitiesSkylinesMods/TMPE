@@ -55,7 +55,7 @@
                       .AddUIComponent(typeof(RemoveVehicleButton)) as RemoveVehicleButton;
 
             button.AlignTo(panel.component, UIAlignAnchor.TopRight);
-            button.relativePosition += new Vector3(-button.width - 80f, 50f);
+            button.relativePosition += new Vector3(-button.width - 60f, 50f);
 
             return button;
         }
@@ -63,6 +63,21 @@
         public class RemoveVehicleButton : BaseUButton {
             public override void Start() {
                 base.Start();
+                this.Skin = new ButtonSkin {
+                    BackgroundPrefix = "Clear",
+                    Prefix = "Clear",
+                    BackgroundHovered = true,
+                    BackgroundActive = true,
+                    ForegroundHovered = true,
+                    ForegroundActive = true
+                };
+                this.atlas = this.Skin.CreateAtlas(
+                    "Clear",
+                    50,
+                    50,
+                    256,
+                    this.Skin.CreateAtlasKeyset());
+                UpdateButtonImageAndTooltip();
                 width = height = MainMenuPanel.ScaledSize.GetButtonSize();
             }
 
