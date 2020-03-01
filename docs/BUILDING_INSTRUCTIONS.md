@@ -17,13 +17,13 @@ The following software is required...
 
 * IDE (Integrated Development Environment), either:
     * [Visual Studio Community](https://visualstudio.microsoft.com/vs/) (free)
-        * Important: [2019 version](https://docs.microsoft.com/en-us/visualstudio/releases/2019/release-notes) (or later) must be used ([why?](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/pull/463))
+        * Important: [2019 version](https://docs.microsoft.com/en-us/visualstudio/releases/2019/release-notes) (or later) must be used ([why?](https://github.com/CitiesSkylinesMods/TMPE/pull/463))
     * [JetBrains Rider](https://www.jetbrains.com/rider/) (paid)
 * GitHub client, either:
     * [GitHub Desktop](https://desktop.github.com/) (recommended if you are not used to working with GitHub)
     * [Git for Windows](https://gitforwindows.org/)
 
-If desired, there are some [additional tools listed in the wiki](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Dev-Tools).
+If desired, there are some [additional tools listed in the wiki](https://github.com/CitiesSkylinesMods/TMPE/wiki/Dev-Tools).
 
 ## Clone
 
@@ -44,15 +44,15 @@ The only known workaround is to exclude all executables in `\resources\app\git\`
 
 #### GitHub Desktop:
 
-* Go to [the online repository](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition)
+* Go to [the online repository](https://github.com/CitiesSkylinesMods/TMPE)
 * Click the green **Clone or Download** button and choose **Open in Desktop**
 * Follow on-screen instructions (dependencies will be handled automatically)
 
 #### Git for Windows:
 
 * Open the inbuilt console
-* Use `git clone https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition` clone repository locally
-* Then `cd Cities-Skylines-Traffic-Manager-President-Edition`
+* Use `git clone https://github.com/CitiesSkylinesMods/TMPE` clone repository locally
+* Then `cd TMPE`
 * Then `git submodule update --init --recursive` to fetch dependencies
 
 ## Environment
@@ -61,7 +61,7 @@ The only known workaround is to exclude all executables in `\resources\app\git\`
 
 This is only required for the JetBrains Rider IDE:
 
-* [Activate Roslyn Analyzers](https://www.jetbrains.com/help/rider/Settings_Roslyn_Analyzers.html) ([why?](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/pull/463))
+* [Activate Roslyn Analyzers](https://www.jetbrains.com/help/rider/Settings_Roslyn_Analyzers.html) ([why?](https://github.com/CitiesSkylinesMods/TMPE/pull/463))
 
 ## Build
 
@@ -106,30 +106,37 @@ If you have any problems, let us know!
 
 #### Managed DLLs
 
-> If you have installed Cities Skylines, the build system can locate the dlls automatically. Otherwise you will need setup dll references manually. You only need to do this once, and only if your IDE wasn't able to find the required managed `.dll` files.
+> If you have installed Cities Skylines, the build system will try to locate the dlls automatically. If it can't find them you will need setup dll references manually. You only need to do this once, and only if your IDE wasn't able to find the required managed `.dll` files.
 
 TM:PE requires references to several "managed" `.dll` files that are bundled with the game; it should automatically find the files, but if not you'll have to do some additional setup...
 
-First, locate your `Steam` folder. It is normally found in:
+Steam:
 
-* **Windows:** `C:\Program Files (x86)\Steam\`
-* **Mac OS X:** `~/Library/Application Support/Steam/`
+* First, locate your `Steam` folder. It is normally found in:
+    * **Windows:** `C:\Program Files (x86)\Steam\`
+    * **Mac OS X:** `~/Library/Application Support/Steam/`
+    * On Steam client you can check **Steam > settings > Download > Steam Library Folders**
+* The managed `.dll` files should be in the subfolder: `\steamapps\common\Cities_Skylines\Cities_Data\Managed\`.
 
-On Steam client you can check Steam->settings->Download->Steam Library Folders.
+EA Origin:
 
-The managed `.dll` files are usually located within the following sub-folder: `\steamapps\common\Cities_Skylines\Cities_Data\Managed\`.
+* First, locate your `Origin Games` folder. It's normally found in:
+    * **Windows:** `C:\Program Files (x86)\Origin Games`
+* The managed `.dll` files should be in the subfolder: `\Cities Skylines\Cities_Data\Managed`.
 
-You'll have to link the dependencies using _only one_ of the following methods:
+Now you'll need to let your IDE know about the folder or the files:
 
-* Create a `\TLM\dependencies` folder (in the TM:PE repository folder) and copy in the `.dll` files
-* Or, create a `\TLM\dependencies` symlink to the `...\Managed` folder shown above
-* Or, manually add reference paths to each project in the solution.
+* Locate your local `TMPE` GitHub repository clone
+* Do _only one_ of the following:
+    * create a `\TLM\dependencies` folder, then copy in the `.dll` files _(simple, but you'll need to repeat the task each game update)_
+    * or, create a `\TLM\dependencies` [symlink](https://github.com/git-for-windows/git/wiki/Symbolic-Links) to the `...\Managed` folder you located earlier
+    * or, manually add the reference path to each project in the solution _(process depends on IDE see below...)_
 
 If you choose the latter option, the procedure depends on your IDE.
 
 In Visual Studio:
 
-* Open `\TLM\TMPL.sln` in your IDE, then...
+* Open `\TLM\TMPE.sln` in your IDE, then...
 * For each project listed in the **Solution Explorer** (right sidebar):
     1. Right-click the project, then choose **Properties**
     2. Select **Reference Paths** on the left
