@@ -1547,9 +1547,9 @@ namespace TrafficManager.Manager.Impl {
                             * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity ||
                             Options.simulationAccuracy >= SimulationAccuracy.Medium) {
                             if (logPriority) {
-                                Log._Debug(
-                                    $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
-                                    $"{sign} sign. waittime={extVehicle.waitTime}");
+                                Log._DebugFormat(
+                                    "VehicleBehaviorManager.MayChangeSegment({0}): {1} sign. waittime={2}",
+                                    frontVehicleId, sign, extVehicle.waitTime);
                             }
 
                             //skip checking of priority if simAccuracy on lowest settings
