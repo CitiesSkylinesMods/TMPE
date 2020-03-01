@@ -11,6 +11,7 @@ namespace TrafficManager {
     using TrafficManager.Util;
     using static TrafficManager.Util.Shortcuts;
     using ColossalFramework;
+    using UnityEngine.SceneManagement;
 
     public class TrafficManagerMod : IUserMod {
 #if LABS
@@ -45,16 +46,7 @@ namespace TrafficManager {
 
         internal bool InGameHotReload { get; private set; } = false;
 
-        internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
-
-        internal static bool InGame() {
-            try {
-                return currentMode == AppMode.Game;
-            }
-            catch {
-                return false;
-            }
-        }
+        internal static bool InGame() => SceneManager.GetActiveScene().name == "Game";
 
         [UsedImplicitly]
         public void OnEnabled() {
