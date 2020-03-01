@@ -23,6 +23,7 @@ namespace TrafficManager.State {
             Log._Debug("SerializableDataExtension.OnCreated() called");
             if(LoadingExtension.IsGameLoaded) {
                 Log._Debug("Hot reload of another mod detected. Skipping SerializableDataExtension.OnCreated() ...");
+                return;
             }
             _serializableData = serializableData;
 

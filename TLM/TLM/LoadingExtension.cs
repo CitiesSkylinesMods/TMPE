@@ -265,6 +265,7 @@ namespace TrafficManager {
             if(IsGameLoaded) {
                 // When another mod is detected, OnCreated is called again for god - or CS team - knows what reason!
                 Log._Debug("Hot reload of another mod detected. Skipping LoadingExtension.OnCreated() ...");
+                return;
             }
 
             Detours = new List<Detour>();
