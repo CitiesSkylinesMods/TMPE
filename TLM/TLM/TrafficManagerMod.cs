@@ -41,6 +41,21 @@ namespace TrafficManager {
 
         public string Description => "Manage your city's traffic";
 
+        internal static TrafficManagerMod Instance = null;
+
+        internal bool InGameHotReload { get; private set; } = false;
+
+        internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
+
+        internal static bool InGame() {
+            try {
+                return currentMode == AppMode.Game;
+            }
+            catch {
+                return false;
+            }
+        }
+
         [UsedImplicitly]
         public void OnEnabled() {
             Log.InfoFormat(
@@ -75,6 +90,9 @@ namespace TrafficManager {
                     Log.InfoFormat("Mono version: {0}", displayName.Invoke(null, null));
                 }
             }
+
+            Instance = this;
+            InGameHotReload = InGame();
         }
 
         [UsedImplicitly]
@@ -84,11 +102,12 @@ namespace TrafficManager {
             LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
             Translation.IsListeningToGameLocaleChanged = false; // is this necessary?
 
-            if (LoadingExtension.InGame() && LoadingExtension.Instance != null) {
+            if (InGame() && LoadingExtension.Instance != null) {
                 //Hot reload Unloading
                 LoadingExtension.Instance.OnLevelUnloading();
                 LoadingExtension.Instance.OnReleased();
             }
+            Instance = null;
         }
 
         [UsedImplicitly]

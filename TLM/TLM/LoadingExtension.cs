@@ -24,22 +24,9 @@ namespace TrafficManager {
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
         internal static LoadingExtension Instance = null;
 
-        internal bool InGameHotReload { get; private set; } = false;
-
-        internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
-
-        internal static bool InGame() {
-            try {
-                return currentMode == AppMode.Game;
-            } catch {
-                return false;
-            }
-        }
-
         FastList<ISimulationManager> simManager =>
             typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
                 ?.GetValue(null) as FastList<ISimulationManager>;
-
 
         public class Detour {
             public MethodInfo OriginalMethod;
@@ -284,7 +271,6 @@ namespace TrafficManager {
             RegisterCustomManagers();
 
             Instance = this;
-            InGameHotReload = InGame();
         }
 
         private void RegisterCustomManagers() {
