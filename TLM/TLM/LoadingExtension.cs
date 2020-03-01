@@ -262,6 +262,10 @@ namespace TrafficManager {
 
             // SelfDestruct.DestructOldInstances(this);
             base.OnCreated(loading);
+            if(IsGameLoaded) {
+                // When another mod is detected, OnCreated is called again for god - or CS team - knows what reason!
+                Log._Debug("Hot reload of another mod detected. Skipping LoadingExtension.OnCreated() ...");
+            }
 
             Detours = new List<Detour>();
             RegisteredManagers = new List<ICustomManager>();
