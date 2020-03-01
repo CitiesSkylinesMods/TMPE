@@ -44,7 +44,7 @@ namespace TrafficManager {
 
         internal static TrafficManagerMod Instance = null;
 
-        internal bool InGameHotReload { get; private set; } = false;
+        internal bool InGameHotReload { get; set; } = false;
 
         internal static bool InGame() => SceneManager.GetActiveScene().name == "Game";
 

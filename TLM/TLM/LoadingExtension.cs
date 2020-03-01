@@ -310,6 +310,7 @@ namespace TrafficManager {
         }
 
         public override void OnReleased() {
+            TrafficManagerMod.Instance.InGameHotReload = false;
             Instance = null;
             base.OnReleased();
         }
