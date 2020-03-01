@@ -56,6 +56,12 @@ Official releases:
 - Meta: New WIP website: https://tmpe.me (#642, #643)
 - Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
+#### TM:PE V[11.1.1-hotfix1](https://github.com/CitesSkylinesMods/TMPE/compare/11.1.1...11.1.1-hotfix1) LABS, 01/03/2020
+
+- Fixed: Missing despawn buttons on cim and vehicle info panels (#765, #763, #759)
+- Fixed: Vehicles stopping at Yield signs (#761, #756)
+- Updated: Docs - Reference paths for EA Origin deployed game (thanks DannyDannyDan) ( #751)
+
 #### TM:PE V[11.1.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.0...11.1.1) LABS, 29/02/2020
 
 - Added: The `Simulation Accuracy` option has been revived! (#742, #707)
