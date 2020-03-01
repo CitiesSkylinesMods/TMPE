@@ -19,7 +19,7 @@
                                    .GetComponent<CitizenWorldInfoPanel>();
 
             if (citizenInfoPanel != null) {
-                buttons.Add(AddRemoveCitizenInstanceButton(citizenInfoPanel));
+                buttons.Add(AddRemoveCitizenInstanceButton(citizenInfoPanel, "Citizen"));
             }
 
             var touristInfoPanel = GameObject
@@ -27,7 +27,7 @@
                                    .GetComponent<TouristWorldInfoPanel>();
 
             if (touristInfoPanel != null) {
-                buttons.Add(AddRemoveCitizenInstanceButton(touristInfoPanel));
+                buttons.Add(AddRemoveCitizenInstanceButton(touristInfoPanel, "Tourist"));
             }
         }
 
@@ -41,10 +41,8 @@
             }
         }
 
-        private UIButton AddRemoveCitizenInstanceButton(WorldInfoPanel panel) {
-            UIButton button =
-                UIView.GetAView().AddUIComponent(typeof(RemoveCitizenInstanceButton)) as
-                    RemoveCitizenInstanceButton;
+        private UIButton AddRemoveCitizenInstanceButton(WorldInfoPanel panel, string cimInstanceType) {
+            UIButton button = new GameObject($"Remove{cimInstanceType}InstanceButton").AddComponent<RemoveCitizenInstanceButton>();
 
             button.AlignTo(panel.component, UIAlignAnchor.TopRight);
             button.relativePosition += new Vector3(-button.width - 80f, 50f);
