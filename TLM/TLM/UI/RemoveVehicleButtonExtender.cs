@@ -55,7 +55,7 @@
                       .AddUIComponent(typeof(RemoveVehicleButton)) as RemoveVehicleButton;
 
             button.AlignTo(panel.component, UIAlignAnchor.TopRight);
-            button.relativePosition += new Vector3(-button.width - 60f, 50f);
+            button.relativePosition += new Vector3(-button.width - 55f, 50f);
 
             return button;
         }
@@ -78,7 +78,7 @@
                     256,
                     this.Skin.CreateAtlasKeyset());
                 UpdateButtonImageAndTooltip();
-                width = height = MainMenuPanel.ScaledSize.GetButtonSize();
+                width = height = 30f;
             }
 
             public override void HandleClick(UIMouseEventParameter p) {
