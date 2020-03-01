@@ -93,6 +93,7 @@
                             () => Constants
                                   .ServiceFactory.CitizenService
                                   .ReleaseCitizenInstance(citizenInstanceId));
+                        WorldInfoPanel.Hide<CitizenWorldInfoPanel>();
                     }
                 }
             }
