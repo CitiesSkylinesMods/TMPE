@@ -50,9 +50,8 @@
         }
 
         protected UIButton AddRemoveVehicleButton(WorldInfoPanel panel) {
-            UIButton button =
-                UIView.GetAView()
-                      .AddUIComponent(typeof(RemoveVehicleButton)) as RemoveVehicleButton;
+            UIButton button = new GameObject("RemoveVehicleInstanceButton")
+                .AddComponent<RemoveVehicleButton>();
 
             button.AlignTo(panel.component, UIAlignAnchor.TopRight);
             button.relativePosition += new Vector3(-button.width - 55f, 50f);

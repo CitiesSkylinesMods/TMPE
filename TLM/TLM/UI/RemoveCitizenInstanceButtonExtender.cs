@@ -42,7 +42,8 @@
         }
 
         private UIButton AddRemoveCitizenInstanceButton(WorldInfoPanel panel, string cimInstanceType) {
-            UIButton button = new GameObject($"Remove{cimInstanceType}InstanceButton").AddComponent<RemoveCitizenInstanceButton>();
+            UIButton button = new GameObject($"Remove{cimInstanceType}InstanceButton")
+                .AddComponent<RemoveCitizenInstanceButton>();
 
             button.AlignTo(panel.component, UIAlignAnchor.TopRight);
             button.relativePosition += new Vector3(-button.width - 80f, 50f);
@@ -87,11 +88,18 @@
                     Log._Debug(
                         $"Current citizen: {instance.Citizen} Instance: {citizenInstanceId}");
                     if (citizenInstanceId != 0) {
+                        bool isTourist = CitizenManager.instance.m_instances.m_buffer[citizenInstanceId].Info.m_citizenAI is TouristAI;
                         Constants.ServiceFactory.SimulationService.AddAction(
                             () => Constants
                                   .ServiceFactory.CitizenService
                                   .ReleaseCitizenInstance(citizenInstanceId));
-                        WorldInfoPanel.Hide<CitizenWorldInfoPanel>();
+                        // InfoPanel needs to be closed manually because method responsible for hiding it testing against type Citizen instead of CitizenInstance
+                        // We are not removing Citizen but only instance
+                        if (isTourist) {
+                            WorldInfoPanel.Hide<TouristWorldInfoPanel>();
+                        } else {
+                            WorldInfoPanel.Hide<CitizenWorldInfoPanel>();
+                        }
                     }
                 }
             }
