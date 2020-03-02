@@ -14,6 +14,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Util;
     using TrafficManager.UI.Helpers;
     using static TrafficManager.Util.Shortcuts;
+    using System;
 
     public class LaneConnectorTool : SubTool {
         private enum SelectionMode {
@@ -428,10 +429,7 @@ namespace TrafficManager.UI.SubTools {
         /// lane arithmatic must work for the side of the road which has a segment connection.
         /// </summary>
         /// <param name="nodeId"></param>
-        /// <param name="segmentId">connected segment</param>
-        /// <param name="checkOnly">don't connect any lanes. just check if lane arithmatic works.
-        /// if <c>false</c> the assumpton is that lane arithmatic works.</param>
-        /// <param name="mode">determines which side to connect lanes.</param>
+        /// <param name="mode">determines for which side to connect lanes.</param>
         /// <returns>if lane arithmatic works (when <paramref name="checkOnly"/> is <c>true</c>) </returns>
         public static void StayInLane(ushort nodeId, StayInLaneMode mode = StayInLaneMode.None) {
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
@@ -461,7 +459,6 @@ namespace TrafficManager.UI.SubTools {
             if(mode == StayInLaneMode.Both || mode == StayInLaneMode.Backward) {
                 StayInLane(nodeId, mainAgainst, mainToward, segments[3]);
             }
-
         }
 
         private static void StayInLane(ushort nodeId, ushort mainToward, ushort mainAgainst, ushort outerSegment) {
@@ -480,7 +477,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             int SimilarIndex(LaneEnd laneEnd) {
-                if (connectedFromInside)
+                if (connectedFromInside || outerSegment == 0)
                     return laneEnd.InnerSimilarLaneIndex;
                 else
                     return laneEnd.OuterSimilarLaneIndex;
@@ -490,6 +487,7 @@ namespace TrafficManager.UI.SubTools {
             int Ya = outerSegment == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(outerSegment, nodeId); // Yeild Against.
             int Mt = PriorityRoad.CountLanesTowardJunction(mainToward, nodeId); // Main Toward.
             int Ma = PriorityRoad.CountLanesAgainstJunction(mainAgainst, nodeId); // Main Against.
+            int laneArithmaticDifference = (Mt - Ya) - (Ma - Yt);
             bool laneArithmaticWorks = Mt - Ya == Ma - Yt && Mt - Ya >= 0;
             Log._Debug($"StayInLane: Yt={Yt} Ya={Ya} Mt={Mt} Ma={Ma} lane arithmatic works={laneArithmaticWorks} Mt - Ya == Ma - Yt && Mt-Ya >=0");
 
@@ -528,6 +526,18 @@ namespace TrafficManager.UI.SubTools {
                         ) {
                         Log._Debug("Lane Connector: connect Main to Main");
                         connect = true;
+                    }else if (
+                        Math.Abs(laneArithmaticDifference) == 1 &&
+                        sourceLaneEnd.SegmentId == mainToward &&
+                        targetLaneEnd.SegmentId == mainAgainst &&
+                        SimilarIndex(sourceLaneEnd) == Mt &&
+                        SimilarIndex(targetLaneEnd) == Ma &&
+                        Mt >= Ya &&
+                        Ma >= Yt
+                        ) {
+                        // connect final lane on the main road in case number of lanes changing by +/-1
+                        Log._Debug("Lane Connector: connect Main to Main ... final lane");
+                        connect = true;
                     }
 
                     if (connect) {
@@ -540,7 +550,7 @@ namespace TrafficManager.UI.SubTools {
                             sourceLaneEnd.StartNode);
                     }
                 } // foreach
-            }// foreach
+            } // foreach
         }
    
         public override void OnPrimaryClickOverlay() {
