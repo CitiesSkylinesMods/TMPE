@@ -56,7 +56,7 @@ Official releases:
 - Meta: New WIP website: https://tmpe.me (#642, #643)
 - Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-#### TM:PE V[11.1.1-hotfix2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.1-hotfix1...11.1.1-hotfix2) LABS, 02/03/2020
+#### TM:PE V[11.1.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.1-hotfix1...11.1.2) LABS, 02/03/2020
 
 - Fixed: One-click traffic lights wrong way on RHT maps, murdering pedestrians (#770, #769, #690)
 
