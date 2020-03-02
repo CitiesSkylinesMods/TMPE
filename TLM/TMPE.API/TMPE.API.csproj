@@ -154,6 +154,7 @@
     <Compile Include="Traffic\Enums\EmergencyBehavior.cs" />
     <Compile Include="Traffic\Enums\SetLaneArrowError.cs" />
     <Compile Include="Traffic\Enums\SetPrioritySignError.cs" />
+    <Compile Include="Traffic\Enums\SimulationAccuracy.cs" />
     <Compile Include="Traffic\Enums\StepChangeMetric.cs" />
     <Compile Include="Traffic\Enums\ToggleTrafficLightError.cs" />
     <Compile Include="Traffic\Enums\TrafficLightSimulationType.cs" />

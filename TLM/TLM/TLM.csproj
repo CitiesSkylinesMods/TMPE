@@ -579,6 +579,12 @@
     <EmbeddedResource Include="Resources\MainMenu\Tool\PrioritySigns-fg-normal.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\VehicleRestrictions-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\VehicleRestrictions-fg-normal.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-bg-active.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-bg-normal.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-bg-hovered.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-fg-normal.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-fg-hovered.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-fg-active.png" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />

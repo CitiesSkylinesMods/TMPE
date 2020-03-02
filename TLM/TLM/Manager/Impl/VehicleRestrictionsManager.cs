@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
     using ExtVehicleType = global::TrafficManager.API.Traffic.Enums.ExtVehicleType;
@@ -375,9 +375,13 @@
                 return false;
             }
 
-            allowedTypes &= GetBaseMask(
+            ExtVehicleType baseMask  = GetBaseMask(
                 segmentInfo.m_lanes[laneIndex],
-                VehicleRestrictionsMode.Configured); // ensure default base mask
+                VehicleRestrictionsMode.Configured);
+            if (baseMask == ExtVehicleType.None) {
+                return false;
+            }
+            allowedTypes &= baseMask; // ensure default base mask
             Flags.SetLaneAllowedVehicleTypes(segmentId, laneIndex, laneId, allowedTypes);
 
             NotifyStartEndNode(segmentId);
