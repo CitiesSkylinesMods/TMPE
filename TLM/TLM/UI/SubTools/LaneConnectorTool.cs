@@ -477,7 +477,8 @@ namespace TrafficManager.UI.SubTools {
             }
 
             int SimilarIndex(LaneEnd laneEnd) {
-                if (connectedFromInside || outerSegment == 0)
+                if (connectedFromInside //|| outerSegment == 0
+                    )
                     return laneEnd.InnerSimilarLaneIndex;
                 else
                     return laneEnd.OuterSimilarLaneIndex;
@@ -530,8 +531,8 @@ namespace TrafficManager.UI.SubTools {
                         Math.Abs(laneArithmaticDifference) == 1 &&
                         sourceLaneEnd.SegmentId == mainToward &&
                         targetLaneEnd.SegmentId == mainAgainst &&
-                        SimilarIndex(sourceLaneEnd) == Mt &&
-                        SimilarIndex(targetLaneEnd) == Ma &&
+                        SimilarIndex(sourceLaneEnd)+1 == Mt &&
+                        SimilarIndex(targetLaneEnd)+1 == Ma &&
                         Mt >= Ya &&
                         Ma >= Yt
                         ) {
