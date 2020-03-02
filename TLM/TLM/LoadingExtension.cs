@@ -24,22 +24,9 @@ namespace TrafficManager {
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
         internal static LoadingExtension Instance = null;
 
-        internal bool InGameHotReload { get; private set; } = false;
-
-        internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
-
-        internal static bool InGame() {
-            try {
-                return currentMode == AppMode.Game;
-            } catch {
-                return false;
-            }
-        }
-
         FastList<ISimulationManager> simManager =>
             typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
                 ?.GetValue(null) as FastList<ISimulationManager>;
-
 
         public class Detour {
             public MethodInfo OriginalMethod;
@@ -275,6 +262,11 @@ namespace TrafficManager {
 
             // SelfDestruct.DestructOldInstances(this);
             base.OnCreated(loading);
+            if(IsGameLoaded) {
+                // When another mod is detected, OnCreated is called again for god - or CS team - knows what reason!
+                Log._Debug("Hot reload of another mod detected. Skipping LoadingExtension.OnCreated() ...");
+                return;
+            }
 
             Detours = new List<Detour>();
             RegisteredManagers = new List<ICustomManager>();
@@ -284,7 +276,6 @@ namespace TrafficManager {
             RegisterCustomManagers();
 
             Instance = this;
-            InGameHotReload = InGame();
         }
 
         private void RegisterCustomManagers() {
@@ -319,6 +310,7 @@ namespace TrafficManager {
         }
 
         public override void OnReleased() {
+            TrafficManagerMod.Instance.InGameHotReload = false;
             Instance = null;
             base.OnReleased();
         }

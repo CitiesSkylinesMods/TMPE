@@ -11,7 +11,7 @@ namespace TrafficManager.UI.MainMenu {
                 MainMenuPanel.ScaledSize.GetTitlebarHeight());
             text = TrafficManagerMod.ModName;
 
-            if(LoadingExtension.Instance.InGameHotReload) {
+            if(TrafficManagerMod.Instance.InGameHotReload) {
                 // make it easier to Identify Hot reload.
                 text += " HOT RELOAD " +
                     Assembly.GetExecutingAssembly().GetName().Version;
