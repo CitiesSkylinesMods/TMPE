@@ -22,6 +22,10 @@ This changelog includes all versions and major variants of the mod going all the
 > * **TPP** = Traffic++
 > * **TM** = Traffic Manager
 
+#### TM:PE V[11.1.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.1-hotfix1...11.1.2) LABS, 02/03/2020
+
+- Fixed: One-click traffic lights wrong way on RHT maps, murdering pedestrians (#770, #769, #690)
+
 #### TM:PE V[11.1.1-hotfix1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.1...11.1.1-hotfix1) LABS, 01/03/2020
 
 - Fixed: Vehicles stopping at Yield signs (#761, #756)
