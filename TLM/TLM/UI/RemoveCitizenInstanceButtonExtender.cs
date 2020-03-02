@@ -19,7 +19,7 @@
                                    .GetComponent<CitizenWorldInfoPanel>();
 
             if (citizenInfoPanel != null) {
-                buttons.Add(AddRemoveCitizenInstanceButton(citizenInfoPanel));
+                buttons.Add(AddRemoveCitizenInstanceButton(citizenInfoPanel, "Citizen"));
             }
 
             var touristInfoPanel = GameObject
@@ -27,7 +27,7 @@
                                    .GetComponent<TouristWorldInfoPanel>();
 
             if (touristInfoPanel != null) {
-                buttons.Add(AddRemoveCitizenInstanceButton(touristInfoPanel));
+                buttons.Add(AddRemoveCitizenInstanceButton(touristInfoPanel, "Tourist"));
             }
         }
 
@@ -41,21 +41,35 @@
             }
         }
 
-        private UIButton AddRemoveCitizenInstanceButton(WorldInfoPanel panel) {
-            UIButton button =
-                UIView.GetAView().AddUIComponent(typeof(RemoveCitizenInstanceButton)) as
-                    RemoveCitizenInstanceButton;
+        private UIButton AddRemoveCitizenInstanceButton(WorldInfoPanel panel, string cimInstanceType) {
+            UIButton button = new GameObject($"Remove{cimInstanceType}InstanceButton")
+                .AddComponent<RemoveCitizenInstanceButton>();
 
             button.AlignTo(panel.component, UIAlignAnchor.TopRight);
             button.relativePosition += new Vector3(-button.width - 80f, 50f);
-
             return button;
         }
 
         public class RemoveCitizenInstanceButton : BaseUButton {
             public override void Start() {
                 base.Start();
-                width = height = MainMenuPanel.ScaledSize.GetButtonSize();
+                this.Skin = new ButtonSkin {
+                    BackgroundPrefix = "Clear",
+                    Prefix = "Clear",
+                    BackgroundHovered = true,
+                    BackgroundActive = true,
+                    ForegroundHovered = true,
+                    ForegroundActive = true
+                };
+                this.atlas = this.Skin.CreateAtlas(
+                    "Clear",
+                    50,
+                    50,
+                    256,
+                    this.Skin.CreateAtlasKeyset());
+                UpdateButtonImageAndTooltip();
+                width = height = 30;
+
             }
 
             public override void HandleClick(UIMouseEventParameter p) {
@@ -74,10 +88,18 @@
                     Log._Debug(
                         $"Current citizen: {instance.Citizen} Instance: {citizenInstanceId}");
                     if (citizenInstanceId != 0) {
+                        bool isTourist = CitizenManager.instance.m_instances.m_buffer[citizenInstanceId].Info.m_citizenAI is TouristAI;
                         Constants.ServiceFactory.SimulationService.AddAction(
                             () => Constants
                                   .ServiceFactory.CitizenService
                                   .ReleaseCitizenInstance(citizenInstanceId));
+                        // InfoPanel needs to be closed manually because method responsible for hiding it testing against type Citizen instead of CitizenInstance
+                        // We are not removing Citizen but only instance
+                        if (isTourist) {
+                            WorldInfoPanel.Hide<TouristWorldInfoPanel>();
+                        } else {
+                            WorldInfoPanel.Hide<CitizenWorldInfoPanel>();
+                        }
                     }
                 }
             }
