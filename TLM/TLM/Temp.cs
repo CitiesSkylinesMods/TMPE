@@ -1,4 +1,6 @@
 namespace TrafficManager {
+    using ColossalFramework;
+    using ColossalFramework.UI;
     using CSUtil.Commons;
     using System;
     using System.Reflection;
@@ -69,6 +71,79 @@ namespace TrafficManager {
             ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
             mcc.PerformModCheck();
             return true; // ideally this would return false if there are compatibility issues (#699 will sort that)
+        }
+
+        /// <summary>
+        /// Checks to see if game version is what TMPE expects, and if not warns users.
+        ///
+        /// This will be replaced as part of #699.
+        /// </summary>
+        public static void CheckGameVersion() {
+            if (BuildConfig.applicationVersion != BuildConfig.VersionToString(
+        TrafficManagerMod.GAME_VERSION,
+        false)) {
+                string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
+                string[] versionElms = majorVersionElms[0].Split('.');
+                uint versionA = Convert.ToUInt32(versionElms[0]);
+                uint versionB = Convert.ToUInt32(versionElms[1]);
+                uint versionC = Convert.ToUInt32(versionElms[2]);
+
+                Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
+
+                bool isModTooOld = TrafficManagerMod.GAME_VERSION_A < versionA ||
+                                   (TrafficManagerMod.GAME_VERSION_A == versionA &&
+                                    TrafficManagerMod.GAME_VERSION_B < versionB);
+                // || (TrafficManagerMod.GameVersionA == versionA
+                // && TrafficManagerMod.GameVersionB == versionB
+                // && TrafficManagerMod.GameVersionC < versionC);
+
+                bool isModNewer = TrafficManagerMod.GAME_VERSION_A < versionA ||
+                                  (TrafficManagerMod.GAME_VERSION_A == versionA &&
+                                   TrafficManagerMod.GAME_VERSION_B > versionB);
+                // || (TrafficManagerMod.GameVersionA == versionA
+                // && TrafficManagerMod.GameVersionB == versionB
+                // && TrafficManagerMod.GameVersionC > versionC);
+
+                if (isModTooOld) {
+                    string msg = string.Format(
+                        "Traffic Manager: President Edition detected that you are running " +
+                        "a newer game version ({0}) than TM:PE has been built for ({1}). " +
+                        "Please be aware that TM:PE has not been updated for the newest game " +
+                        "version yet and thus it is very likely it will not work as expected.",
+                        BuildConfig.applicationVersion,
+                        BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false));
+
+                    Log.Error(msg);
+                    Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
+                            () => {
+                                UIView.library
+                                      .ShowModal<ExceptionPanel>("ExceptionPanel")
+                                      .SetMessage(
+                                          "TM:PE has not been updated yet",
+                                          msg,
+                                          false);
+                            });
+                } else if (isModNewer) {
+                    string msg = string.Format(
+                        "Traffic Manager: President Edition has been built for game version {0}. " +
+                        "You are running game version {1}. Some features of TM:PE will not " +
+                        "work with older game versions. Please let Steam update your game.",
+                        BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false),
+                        BuildConfig.applicationVersion);
+
+                    Log.Error(msg);
+                    Singleton<SimulationManager>
+                        .instance.m_ThreadingWrapper.QueueMainThread(
+                            () => {
+                                UIView.library
+                                      .ShowModal<ExceptionPanel>("ExceptionPanel")
+                                      .SetMessage(
+                                          "Your game should be updated",
+                                          msg,
+                                          false);
+                            });
+                }
+            }
         }
 
     }

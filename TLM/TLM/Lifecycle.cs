@@ -73,6 +73,7 @@ namespace TrafficManager {
         public void OnSettings(UIHelperBase helper, bool inGame) {
             // todo: instead of `inGame` bool, should we use an enum (or whatever) to
             // differentiate between in-game, in scneario, in editor, etc?
+            // or have separate methods, eg. OnMainSettings(), OnGameSettings(), OnEditorSettings()?
             Options.MakeSettings(helper);
         }
 
@@ -91,6 +92,7 @@ namespace TrafficManager {
             // todo: should we pass in game version as a `Version`?
             return Temp.CheckCompatibility();
         }
+
 
         /// <summary>
         /// Called when the mod is disabled in one of the following ways:
