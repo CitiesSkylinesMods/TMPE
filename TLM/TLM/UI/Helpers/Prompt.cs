@@ -1,6 +1,7 @@
 namespace TrafficManager.UI.Helpers {
     using ColossalFramework;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
     using System;
     using UnityEngine.SceneManagement;
 
@@ -66,20 +67,22 @@ namespace TrafficManager.UI.Helpers {
         /// <param name="message">Dialog body text.</param>
         /// <param name="isError">If <c>true</c>, the dialog is styled as an error.</param>
         internal static void ExceptionPanel(string title, string message, bool isError) {
-            // if in-game, queue in main thread, otherwise display immediately
-            // note: I have no idea if this is good way to do it!
-            Action show = 
-            if (SceneManager.GetActiveScene().name == "Game") {
-                Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
-                    () => {
-                        UIView.library
-                            .ShowModal<ExceptionPanel>("ExceptionPanel")
-                            .SetMessage(title, message, isError);
-                    });
-            } else {
+            Action prompt = () => {
                 UIView.library
                     .ShowModal<ExceptionPanel>("ExceptionPanel")
                     .SetMessage(title, message, isError);
+            };
+
+            try {
+                if (SceneManager.GetActiveScene().name == "Game") {
+                    Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(prompt);
+                } else {
+                    prompt();
+                }
+            } catch (Exception e) {
+                Log.ErrorFormat(
+                    "Error displaying a Prompt:\n{0}",
+                    e.ToString());
             }
         }
     }
