@@ -20,12 +20,34 @@ namespace TrafficManager.UI.Helpers {
         }
 
         /// <summary>
+        /// Display a warning prompt in the center of the screen.
+        /// </summary>
+        /// 
+        /// <param name="title">Dialog title.</param>
+        /// <param name="messageFormat">Dialog body text format.</param>
+        /// <param name="args">Values to put in the <paramref name="messageFormat"/>.</param>
+        public static void WarningFormat(string title, string messageFormat, params object[] args) {
+            ExceptionPanel(title, string.Format(messageFormat, args), false);
+        }
+
+        /// <summary>
         /// Display an error prompt in the centre of the screen.
         /// </summary>
         /// <param name="title">Dialog title.</param>
         /// <param name="message">Dialog body text.</param>
         public static void Error(string title, string message) {
             ExceptionPanel(title, message, true);
+        }
+
+        /// <summary>
+        /// Display an error prompt in the center of the screen.
+        /// </summary>
+        /// 
+        /// <param name="title">Dialog title.</param>
+        /// <param name="messageFormat">Dialog body text format.</param>
+        /// <param name="args">Values to put in the <paramref name="messageFormat"/>.</param>
+        public static void ErrorFormat(string title, string messageFormat, params object[] args) {
+            ExceptionPanel(title, string.Format(messageFormat, args), true);
         }
 
         /// <summary>
