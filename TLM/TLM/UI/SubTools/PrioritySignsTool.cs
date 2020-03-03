@@ -591,7 +591,7 @@ namespace TrafficManager.UI.SubTools {
                 // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not
                 //     allow priority signs: {reason}");
                 if (reason == SetPrioritySignError.HasTimedLight) {
-                    MainTool.ShowError(
+                    MainTool.WarningPrompt(
                         Translation.TrafficLights.Get("Dialog.Text:Node has timed TL script"));
                 }
 
