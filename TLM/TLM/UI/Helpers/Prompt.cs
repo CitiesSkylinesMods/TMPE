@@ -1,11 +1,18 @@
 namespace TrafficManager.UI.Helpers {
     using ColossalFramework;
     using ColossalFramework.UI;
+    using System;
+    using UnityEngine.SceneManagement;
 
     /// <summary>
-    /// Use this class to display small dialog prompts to the user.
+    /// Use this class to display small but annoying dialog prompts to the user.
     ///
-    /// Currently this is only tested for use in `LoadingExtension.OnLevelLoaded()`.
+    /// TODO: At some point add more panels, such as:
+    /// * ConfirmPanel
+    /// * ExitConfirmPanel
+    /// * MessageBoxPanel
+    /// * TutorialPanel
+    /// * TutorialAdvisorPanel
     /// </summary>
     public class Prompt {
 
@@ -20,7 +27,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         /// <summary>
-        /// Display a warning prompt in the center of the screen.
+        /// Display a formatted warning prompt in the center of the screen.
         /// </summary>
         /// 
         /// <param name="title">Dialog title.</param>
@@ -40,7 +47,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         /// <summary>
-        /// Display an error prompt in the center of the screen.
+        /// Display an formatted error prompt in the center of the screen.
         /// </summary>
         /// 
         /// <param name="title">Dialog title.</param>
@@ -59,18 +66,21 @@ namespace TrafficManager.UI.Helpers {
         /// <param name="message">Dialog body text.</param>
         /// <param name="isError">If <c>true</c>, the dialog is styled as an error.</param>
         internal static void ExceptionPanel(string title, string message, bool isError) {
-            // todo: make sure it works everywhere:
-            // * from main menu
-            // * while a city is loading
-            // * while in a city (in-game)
-            // * while a city is unloading.
-
-            Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
-                () => {
-                    UIView.library
-                        .ShowModal<ExceptionPanel>("ExceptionPanel")
-                        .SetMessage(title, message, isError);
-                });
+            // if in-game, queue in main thread, otherwise display immediately
+            // note: I have no idea if this is good way to do it!
+            Action show = 
+            if (SceneManager.GetActiveScene().name == "Game") {
+                Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
+                    () => {
+                        UIView.library
+                            .ShowModal<ExceptionPanel>("ExceptionPanel")
+                            .SetMessage(title, message, isError);
+                    });
+            } else {
+                UIView.library
+                    .ShowModal<ExceptionPanel>("ExceptionPanel")
+                    .SetMessage(title, message, isError);
+            }
         }
     }
 }
