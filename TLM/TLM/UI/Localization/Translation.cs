@@ -99,12 +99,6 @@ namespace TrafficManager.UI {
             LoadingExtension.TranslationDatabase.aiCarLookup_;
 
         /// <summary>
-        /// Gets or sets a value indicating whether we're currently listening to the event fired when user changes game langauge.
-        /// The event is hooked in <see cref="TrafficManagerMod.OnSettingsUI"/> and unhooked in <see cref="TrafficManagerMod.OnDisabled"/>.
-        /// </summary>
-        public static bool IsListeningToGameLocaleChanged { get; set; } = false;
-
-        /// <summary>
         /// Gets or sets a value indicating the current lanugage to use for translations.
         /// Note: Don't access directly, instead use <see cref="GetCurrentLanguage()"/>.
         /// </summary>
