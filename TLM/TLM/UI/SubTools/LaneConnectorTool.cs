@@ -476,21 +476,49 @@ namespace TrafficManager.UI.SubTools {
                 mainAgainst = temp;
             }
 
+            int Yt = outerSegment == 0 ? 0 : PriorityRoad.CountLanesTowardJunction(outerSegment, nodeId); // Yeild Toward.
+            int Ya = outerSegment == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(outerSegment, nodeId); // Yeild Against.
+            int Mt = PriorityRoad.CountLanesTowardJunction(mainToward, nodeId); // Main Toward.
+            int Ma = PriorityRoad.CountLanesAgainstJunction(mainAgainst, nodeId); // Main Against.
+            bool laneArithmaticWorks = Mt - Ya == Ma - Yt && Mt - Ya >= 0;
+            Log._Debug($"StayInLane: Yt={Yt} Ya={Ya} Mt={Mt} Ma={Ma} lane arithmatic works={laneArithmaticWorks} Mt - Ya == Ma - Yt && Mt-Ya >=0");
+
+            // No lane connections necessry.
+            if((Yt + Mt) == 1 || (Ya + Ma) == 1) {
+                return;
+            }
+
+            // when there is +-1 mistmatch:
+            //   - on 1-way roads, the outer lane splits/merges.
+            //   - on 2-way roads, the inner lane splits/merges.
+            bool onewayroad = oneway0 && oneway1 && outerSegment == 0;
+
             int SimilarIndex(LaneEnd laneEnd) {
-                if (connectedFromInside //|| outerSegment == 0
-                    )
+                if (connectedFromInside || onewayroad)
                     return laneEnd.InnerSimilarLaneIndex;
                 else
                     return laneEnd.OuterSimilarLaneIndex;
             }
 
-            int Yt = outerSegment == 0 ? 0 : PriorityRoad.CountLanesTowardJunction(outerSegment, nodeId); // Yeild Toward.
-            int Ya = outerSegment == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(outerSegment, nodeId); // Yeild Against.
-            int Mt = PriorityRoad.CountLanesTowardJunction(mainToward, nodeId); // Main Toward.
-            int Ma = PriorityRoad.CountLanesAgainstJunction(mainAgainst, nodeId); // Main Against.
-            int laneArithmaticDifference = (Mt - Ya) - (Ma - Yt);
-            bool laneArithmaticWorks = Mt - Ya == Ma - Yt && Mt - Ya >= 0;
-            Log._Debug($"StayInLane: Yt={Yt} Ya={Ya} Mt={Mt} Ma={Ma} lane arithmatic works={laneArithmaticWorks} Mt - Ya == Ma - Yt && Mt-Ya >=0");
+            // checks if value is in [InclusiveLowerBound,ExclusiveUpperBound)
+            // Note: float to integer conversions are rounded down.
+            bool InRange(int InclusiveLowerBound, int ExclusiveUpperBound, int value) =>
+                InclusiveLowerBound <= value && value < ExclusiveUpperBound;
+
+            bool ShouldConnectHelper(int idx1, int idx2, float r) =>
+                InRange((int)(idx1 * r), (int)((idx1 + 1) * r), idx2);
+
+            float ratio = (float)(Ya + Ma) / (float)(Yt + Mt);
+            bool ShouldConnect(int sourceIdx, int targetIdx) =>
+                ratio >= 1 ?
+                ShouldConnectHelper(sourceIdx, targetIdx, ratio + float.Epsilon) :
+                ShouldConnectHelper(targetIdx, sourceIdx, (1f / ratio) + float.Epsilon);
+
+            for (int i=0;i< Yt + Mt ; ++i)
+                for (int j = 0; j < Ya + Ma; ++j)
+                    Log._Debug($"ratio:{ratio} sourceIdx:{i}=>" +
+                        $"bounds=[{Mathf.FloorToInt(i * ratio)},{Mathf.FloorToInt((i+1)*ratio)})=>" +
+                        $"ShouldConnect({i},{j})={ShouldConnect(i,j)}");
 
             List<LaneEnd> laneEnds = GetLaneEnds(nodeId, ref node);
             foreach (LaneEnd sourceLaneEnd in laneEnds) {
@@ -506,45 +534,25 @@ namespace TrafficManager.UI.SubTools {
                         ) {
                         continue;
                     }
-                    bool connect = false;
-                    if (
-                        sourceLaneEnd.SegmentId == mainToward &&
-                        targetLaneEnd.SegmentId == outerSegment &&
-                        SimilarIndex(sourceLaneEnd) == SimilarIndex(targetLaneEnd)) {
-                        Log._Debug("Lane Connector: connect Main to Minor");
-                        connect = true;
-                    } else if (
-                        sourceLaneEnd.SegmentId == outerSegment &&
-                        targetLaneEnd.SegmentId == mainAgainst &&
-                        SimilarIndex(sourceLaneEnd) == SimilarIndex(targetLaneEnd)) {
-                        Log._Debug("Lane Connector: connect Minor to Main");
-                        connect = true;
-                    } else if (
-                        sourceLaneEnd.SegmentId == mainToward &&
-                        targetLaneEnd.SegmentId == mainAgainst &&
-                        SimilarIndex(sourceLaneEnd) - Ya == SimilarIndex(targetLaneEnd) - Yt &&
-                        SimilarIndex(sourceLaneEnd) - Ya >= 0
-                        ) {
-                        Log._Debug("Lane Connector: connect Main to Main");
-                        connect = true;
-                    }else if (
-                        Math.Abs(laneArithmaticDifference) == 1 &&
-                        sourceLaneEnd.SegmentId == mainToward &&
-                        targetLaneEnd.SegmentId == mainAgainst &&
-                        SimilarIndex(sourceLaneEnd)+1 == Mt &&
-                        SimilarIndex(targetLaneEnd)+1 == Ma &&
-                        Mt >= Ya &&
-                        Ma >= Yt
-                        ) {
-                        // connect final lane on the main road in case number of lanes changing by +/-1
-                        Log._Debug("Lane Connector: connect Main to Main ... final lane");
-                        connect = true;
+
+                    /* to calculate indexes imagine T junction is like a straight oneway road where
+                     * Incomming lanes toward the junctin =
+                     *      [incomming lanes from outer segment  ] +
+                     *      [incomming lanes from main road]
+                     * outgoing lanes from the junctin =
+                     *      [outgoing lanes from outer segment  ] +
+                     *      [outgoing lanes from main road]
+                     */
+                    int sourceIndex = SimilarIndex(sourceLaneEnd);
+                    int targetIndex = SimilarIndex(targetLaneEnd);
+                    if (sourceLaneEnd.SegmentId == mainToward) {
+                        sourceIndex += Yt;
+                    }
+                    if (targetLaneEnd.SegmentId == mainAgainst) {
+                        targetIndex += Ya;
                     }
 
-                    if (connect) {
-                        Log._Debug(
-                            $"Adding lane connection {sourceLaneEnd.LaneId} -> " +
-                            $"{targetLaneEnd.LaneId}");
+                    if (ShouldConnect(sourceIndex, targetIndex)) {
                         LaneConnectionManager.Instance.AddLaneConnection(
                             sourceLaneEnd.LaneId,
                             targetLaneEnd.LaneId,
@@ -553,7 +561,7 @@ namespace TrafficManager.UI.SubTools {
                 } // foreach
             } // foreach
         }
-   
+    
         public override void OnPrimaryClickOverlay() {
 #if DEBUG
             bool logLaneConn = DebugSwitch.LaneConnections.Get();
