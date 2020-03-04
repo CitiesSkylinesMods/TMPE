@@ -545,6 +545,7 @@ This changelog includes all versions and major variants of the mod going all the
 ### TM:PE 1.10.11-hotfix, 22/07/2018
 
 - Updated: Bus lines render U-turn where they should not (#207)
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.10.11, 21/07/2018
 
@@ -644,6 +645,12 @@ This changelog includes all versions and major variants of the mod going all the
 
 - Fixed: Minor bugs
 
+### TM:PE 1.10.5-hotfix, 07/01/2018
+
+- Fixed: Monorail traffic lights do not show up (thanks merlineandrews for reporting)
+- Improved: Moved "Removew this vehicle button"
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
 ### TM:PE 1.10.5, 06/01/2018
 
 - Added: Randomization for lane changing costs
@@ -676,6 +683,11 @@ This changelog includes all versions and major variants of the mod going all the
 - Added: Possibility to add priority signs at multiple junctions at once (press Shift)
 - Added: Tutorials (can be disabled in the options window globally)
 - Updated: Compatible with C:SL 1.9.0-f5
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.10.3-hotfix, 19/10/2017
+
+- Fixed: Vehicle-separated traffic lights do not show up for bus lanes (thanks to Dafydd for reporting)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### C:SL 1.9.0-f5 (Green Cities), 19/10/2017
