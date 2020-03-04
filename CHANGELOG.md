@@ -521,7 +521,16 @@ This changelog includes all versions and major variants of the mod going all the
 - Meta: Roads United Core also breaks toll booths
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TM:PE 1.10.12, 08/12/2018
+### C:SL 1.11.0-f3 (Industries), 23/10/2018
+
+- Added: Toll booths
+- Added: Postal service, vans and trucks
+- Added: Additional industry vehicles
+- Added: Cargo airport and planes
+- Added: Warehouses and storage buildings
+- Fixed: Bugs in various DLCs
+
+### TM:PE 1.10.12, 12/08/2018
 
 - Added: Allow/disallow vehicles to enter a blocked junction at transition and pedestrian crossing nodes (#195)
 - Fixed: Emergency vehicles pass closed barriers at level crossings
@@ -533,14 +542,9 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Russian translation (thanks to vitalii2011 for translating)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### C:SL 1.11.0-f3 (Industries), 23/10/2018
+### TM:PE 1.10.11-hotfix, 22/07/2018
 
-- Added: Toll booths
-- Added: Postal service, vans and trucks
-- Added: Additional industry vehicles
-- Added: Cargo airport and planes
-- Added: Warehouses and storage buildings
-- Fixed: Bugs in various DLCs
+- Updated: Bus lines render U-turn where they should not (#207)
 
 ### TM:PE 1.10.11, 21/07/2018
 
