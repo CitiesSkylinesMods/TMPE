@@ -31,6 +31,7 @@ namespace TrafficManager.UI.SubTools {
             Backward
         }
 
+        private static bool verbose => true | DebugSwitch.LaneConnections.Get();
         private static readonly Color DefaultLaneEndColor = new Color(1f, 1f, 1f, 0.4f);
         private LaneEnd selectedLaneEnd;
         private LaneEnd hoveredLaneEnd;
@@ -189,7 +190,7 @@ namespace TrafficManager.UI.SubTools {
                         cameraInfo,
                         (ushort)nodeId,
                         DefaultLaneEndColor,
-                        true);
+                        false);
                 }
 
                 if (!hasMarkers) {
@@ -420,8 +421,6 @@ namespace TrafficManager.UI.SubTools {
             return ret;
         }
 
-
-
         /// <summary>
         /// connects lanes in a T junction such that each lane is connected to one other lane.
         /// lane arithmatic must work for the side of the road which has a segment connection.
@@ -438,12 +437,10 @@ namespace TrafficManager.UI.SubTools {
             ushort minor1 = segments[2];
             ushort minor2 = 0;
 
-            Log._Debug("KIAN POINT A");
             if (segments[2] != 0) {
                 ref NetSegment segment2 = ref segments[2].ToSegment();
                 mainAgainst = segment2.GetFarSegment(nodeId);
                 mainToward = segment2.GetNearSegment(nodeId);
-                Log._Debug("KIAN POINT B3");
                 bool oneway0 = segMan.CalculateIsOneWay(mainAgainst);
                 bool oneway1 = segMan.CalculateIsOneWay(mainToward);
                 bool oneway = oneway0 && oneway1;
@@ -469,7 +466,9 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private static void StayInLane(ushort nodeId, ushort mainTowardId, ushort mainAgainstId, ushort minorId, ushort minor2Id) {
-            Log._Debug("KIAN POINT 0");
+            Log._Debug($"StayInLane(nodeId:{nodeId}, " +
+                $"mainTowardId:{mainTowardId}, mainAgainstId:{mainAgainstId}, " +
+                $"minorId{minorId}, minor2Id:{minor2Id})");
 
             ref NetSegment segment = ref minorId.ToSegment();
             ref NetNode node = ref nodeId.ToNode();
@@ -491,9 +490,10 @@ namespace TrafficManager.UI.SubTools {
             int totalAgainst = nMinorAgainst + nMainAgainst +nMinor2Against;
 
             bool laneArithmaticWorks = totalToward == totalAgainst && nMainToward - nMinorAgainst >= 0;
-            Log._Debug($"StayInLane: nMinorToward={nMinorToward} nMinorAgainst={nMinorAgainst} nMainToward={nMainAgainst} nMainAgainst={nMainAgainst}" +
-                $"nMinorToward={nMinorToward} nMinorAgainst={nMinorAgainst} totalToward={totalToward} totalAgainst={totalAgainst}");
-
+            Log._Debug($"StayInLane: nMinorToward={nMinorToward} nMinorAgainst={nMinorAgainst} nMainToward={nMainAgainst} nMainAgainst={nMainAgainst} " +
+                $"nMinor2Toward={nMinor2Toward} nMinor2Against={nMinor2Against} totalToward={totalToward} totalAgainst={totalAgainst}");
+            Log._Debug($"StayInLane: nMinorToward={nMinorToward} nMinorAgainst={nMinorAgainst} nMainToward={nMainAgainst} nMainAgainst={nMainAgainst} " +
+                     $"nMinor2Toward={nMinor2Toward} nMinor2Against={nMinor2Against} totalToward={totalToward} totalAgainst={totalAgainst}");
             // No lane connections necessry.
             if (totalToward <= 1 || totalAgainst <= 1) {
                 return;
@@ -515,13 +515,13 @@ namespace TrafficManager.UI.SubTools {
                 IndexesMatchHelper(sourceIdx, targetIdx, ratio + float.Epsilon) :
                 IndexesMatchHelper(targetIdx, sourceIdx, (1f / ratio) + float.Epsilon);
 
-            Log._Debug($"outer segment Id = {minorId}");
-
-            for (int i=0;i< totalToward; ++i)
-                for (int j = 0; j < totalAgainst; ++j)
-                    Log._Debug($"ratio:{ratio} sourceIdx:{i}=>" +
-                        $"bounds=[{Mathf.FloorToInt(i * ratio)},{Mathf.FloorToInt((i+1)*ratio)})=>" +
-                        $"ShouldConnect({i},{j})={IndexesMatch(i,j)}");
+            if (verbose) {
+                for (int i = 0; i < totalToward; ++i)
+                    for (int j = 0; j < totalAgainst; ++j)
+                        Log._Debug($"ratio:{ratio} sourceIdx:{i}=>" +
+                            $"bounds=[{Mathf.FloorToInt(i * ratio)},{Mathf.FloorToInt((i + 1) * ratio)})=>" +
+                            $"IndexesMatch({i},{j})={IndexesMatch(i, j)}");
+            }
 
             List<LaneEnd> laneEnds = GetLaneEnds(nodeId, ref node);
             foreach (LaneEnd sourceLaneEnd in laneEnds) {
@@ -537,7 +537,12 @@ namespace TrafficManager.UI.SubTools {
                         ) {
                         continue;
                     }
+                    if (verbose) {
+                        Log._Debug($"Calculating lanes: source=(segment:{sourceLaneEnd.SegmentId} laneIdx:{sourceLaneEnd.OuterSimilarLaneIndex}) " +
+                        $"target=(segment:{targetLaneEnd.SegmentId} laneIdx:{targetLaneEnd.OuterSimilarLaneIndex}) ");
+                    }
                     bool connect = false;
+                    Log._Debug("Lane Connector: connect Main to Minor");
                     if (
                         sourceLaneEnd.SegmentId == mainTowardId &&
                         targetLaneEnd.SegmentId == minorId &&
@@ -553,7 +558,7 @@ namespace TrafficManager.UI.SubTools {
                     } else if (
                         sourceLaneEnd.SegmentId == mainTowardId &&
                         targetLaneEnd.SegmentId == mainAgainstId &&
-                        IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex + nMinorToward, targetLaneEnd.OuterSimilarLaneIndex + nMainAgainst)
+                        IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex + nMinorToward, targetLaneEnd.OuterSimilarLaneIndex + nMinorAgainst)
                         ) {
                         Log._Debug("Lane Connector: connect Main to Main");
                         connect = true;
@@ -563,7 +568,7 @@ namespace TrafficManager.UI.SubTools {
                         IndexesMatch(
                             sourceLaneEnd.OuterSimilarLaneIndex + nMinorToward,
                             targetLaneEnd.OuterSimilarLaneIndex + nMinorAgainst + nMainAgainst)) {
-                        Log._Debug("Lane Connector: connect Main to Minor");
+                        Log._Debug("Lane Connector: connect Main to Minor2");
                         connect = true;
                     } else if (
                         sourceLaneEnd.SegmentId == minor2Id &&
@@ -571,7 +576,7 @@ namespace TrafficManager.UI.SubTools {
                         IndexesMatch(
                             sourceLaneEnd.OuterSimilarLaneIndex + nMinorToward + nMainToward,
                             targetLaneEnd.OuterSimilarLaneIndex + nMinorAgainst)) {
-                        Log._Debug("Lane Connector: connect Minor to Main");
+                        Log._Debug("Lane Connector: connect Minor2 to Main");
                         connect = true;
                     }
 
