@@ -439,8 +439,8 @@ namespace TrafficManager.UI.SubTools {
 
             if (segments[2] != 0) {
                 ref NetSegment segment2 = ref segments[2].ToSegment();
-                mainAgainst = segment2.GetFarSegment(nodeId);
-                mainToward = segment2.GetNearSegment(nodeId);
+                mainAgainst = segment2.GetNearSegment(nodeId);
+                mainToward = segment2.GetFarSegment(nodeId);
                 bool oneway0 = segMan.CalculateIsOneWay(mainAgainst);
                 bool oneway1 = segMan.CalculateIsOneWay(mainToward);
                 bool oneway = oneway0 && oneway1;
@@ -468,7 +468,7 @@ namespace TrafficManager.UI.SubTools {
         private static void StayInLane(ushort nodeId, ushort mainTowardId, ushort mainAgainstId, ushort minorId, ushort minor2Id) {
             Log._Debug($"StayInLane(nodeId:{nodeId}, " +
                 $"mainTowardId:{mainTowardId}, mainAgainstId:{mainAgainstId}, " +
-                $"minorId{minorId}, minor2Id:{minor2Id})");
+                $"minorId:{minorId}, minor2Id:{minor2Id})");
 
             ref NetSegment segment = ref minorId.ToSegment();
             ref NetNode node = ref nodeId.ToNode();
@@ -476,7 +476,8 @@ namespace TrafficManager.UI.SubTools {
             bool oneway1 = segMan.CalculateIsOneWay(mainTowardId);
             bool oneway = oneway0 && oneway1;
 
-            bool splitMiddle = oneway && minorId!=0 && minor2Id !=0;
+            // which lanes should split/merge in case of lane mismatch:
+            bool splitMiddle = oneway && minorId !=0 && minor2Id != 0;
             bool splitOuter = oneway && minorId != 0 && minor2Id == 0;
             bool splitInner = !splitMiddle && !splitOuter;
 
@@ -489,31 +490,29 @@ namespace TrafficManager.UI.SubTools {
             int totalToward = nMinorToward + nMainToward + nMinor2Toward;
             int totalAgainst = nMinorAgainst + nMainAgainst +nMinor2Against;
 
-            bool laneArithmaticWorks = totalToward == totalAgainst && nMainToward - nMinorAgainst >= 0;
+            bool laneArithmaticWorks = totalToward == totalAgainst && nMainToward == nMinorAgainst;
             Log._Debug($"StayInLane: nMinorToward={nMinorToward} nMinorAgainst={nMinorAgainst} nMainToward={nMainAgainst} nMainAgainst={nMainAgainst} " +
                 $"nMinor2Toward={nMinor2Toward} nMinor2Against={nMinor2Against} totalToward={totalToward} totalAgainst={totalAgainst}");
-            Log._Debug($"StayInLane: nMinorToward={nMinorToward} nMinorAgainst={nMinorAgainst} nMainToward={nMainAgainst} nMainAgainst={nMainAgainst} " +
-                     $"nMinor2Toward={nMinor2Toward} nMinor2Against={nMinor2Against} totalToward={totalToward} totalAgainst={totalAgainst}");
-            // No lane connections necessry.
+
             if (totalToward <= 1 || totalAgainst <= 1) {
-                return;
+                return; // No lane connections are necessry.
             }
-
-            // TODO update description
-            // 1way road: checks if value is in [InclusiveLowerBound,ExclusiveUpperBound)
-            // 2way road: checks if value is in (InclusiveLowerBound,ExclusiveUpperBound]
-            // Note: float to integer conversions are rounded down.
-            bool InRange(int lowerBound, int upperBound, int value) =>
-                lowerBound <= value && value < upperBound;
-
-            bool IndexesMatchHelper(int idx1, int idx2, float r) =>
-                InRange((int)(idx1 * r), (int)((idx1 + 1) * r), idx2);
 
             float ratio = totalAgainst/ (float)totalToward;
             bool IndexesMatch(int sourceIdx, int targetIdx) =>
                 ratio >= 1 ?
-                IndexesMatchHelper(sourceIdx, targetIdx, ratio + float.Epsilon) :
-                IndexesMatchHelper(targetIdx, sourceIdx, (1f / ratio) + float.Epsilon);
+                IndexesMatchHelper(sourceIdx, targetIdx, ratio ) :
+                IndexesMatchHelper(targetIdx, sourceIdx, (1f / ratio));
+
+            int LowerBound(int idx, float r) => Round(idx * r);
+            int UpperBound(int idx, float r) => Round((idx + 1) * r);
+
+            bool IndexesMatchHelper(int idx1, int idx2, float r) =>
+                InBound(LowerBound(idx1, r), UpperBound(idx1, r), idx2);
+
+            // checks if value is in [InclusiveLowerBound,ExclusiveUpperBound)
+            bool InBound(int InclusiveLowerBound, int ExclusiveUpperBound, int value) =>
+                InclusiveLowerBound <= value && value < ExclusiveUpperBound;
 
             if (verbose) {
                 for (int i = 0; i < totalToward; ++i)
@@ -521,6 +520,17 @@ namespace TrafficManager.UI.SubTools {
                         Log._Debug($"ratio:{ratio} sourceIdx:{i}=>" +
                             $"bounds=[{Mathf.FloorToInt(i * ratio)},{Mathf.FloorToInt((i + 1) * ratio)})=>" +
                             $"IndexesMatch({i},{j})={IndexesMatch(i, j)}");
+            }
+
+            const float EPSILON = 1e-10f;
+            // rounding approach helps us control which lanes will split/merge in case of lane mismatch.
+            int Round(float f) {
+                if (splitInner)
+                    return Mathf.FloorToInt(f + EPSILON);
+                else if (splitOuter)
+                    return Mathf.CeilToInt(f - EPSILON);
+                else
+                    return Mathf.RoundToInt(f);
             }
 
             List<LaneEnd> laneEnds = GetLaneEnds(nodeId, ref node);
@@ -537,46 +547,43 @@ namespace TrafficManager.UI.SubTools {
                         ) {
                         continue;
                     }
-                    if (verbose) {
-                        Log._Debug($"Calculating lanes: source=(segment:{sourceLaneEnd.SegmentId} laneIdx:{sourceLaneEnd.OuterSimilarLaneIndex}) " +
-                        $"target=(segment:{targetLaneEnd.SegmentId} laneIdx:{targetLaneEnd.OuterSimilarLaneIndex}) ");
-                    }
                     bool connect = false;
-                    Log._Debug("Lane Connector: connect Main to Minor");
                     if (
                         sourceLaneEnd.SegmentId == mainTowardId &&
                         targetLaneEnd.SegmentId == minorId &&
                         IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex, targetLaneEnd.OuterSimilarLaneIndex)) {
-                        Log._Debug("Lane Connector: connect Main to Minor");
                         connect = true;
                     } else if (
                         sourceLaneEnd.SegmentId == minorId &&
                         targetLaneEnd.SegmentId == mainAgainstId &&
                         IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex, targetLaneEnd.OuterSimilarLaneIndex)) {
-                        Log._Debug("Lane Connector: connect Minor to Main");
                         connect = true;
                     } else if (
                         sourceLaneEnd.SegmentId == mainTowardId &&
                         targetLaneEnd.SegmentId == mainAgainstId &&
+                        //TODO [issue does not exist] replace with subtraction from bound.
+                        !IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex, nMinorAgainst-1) &&
+                        !IndexesMatch(targetLaneEnd.OuterSimilarLaneIndex, nMinorToward-1) &&
                         IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex + nMinorToward, targetLaneEnd.OuterSimilarLaneIndex + nMinorAgainst)
                         ) {
-                        Log._Debug("Lane Connector: connect Main to Main");
                         connect = true;
                     } else if (
                         sourceLaneEnd.SegmentId == mainTowardId &&
                         targetLaneEnd.SegmentId == minor2Id &&
+                        !IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex, nMinorAgainst - 1) &&
+                        !IndexesMatch(targetLaneEnd.OuterSimilarLaneIndex, nMinorToward + nMainToward - 1) &&
                         IndexesMatch(
                             sourceLaneEnd.OuterSimilarLaneIndex + nMinorToward,
                             targetLaneEnd.OuterSimilarLaneIndex + nMinorAgainst + nMainAgainst)) {
-                        Log._Debug("Lane Connector: connect Main to Minor2");
                         connect = true;
                     } else if (
                         sourceLaneEnd.SegmentId == minor2Id &&
                         targetLaneEnd.SegmentId == mainAgainstId &&
+                        !IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex, nMinorAgainst + nMainAgainst - 1) &&
+                        !IndexesMatch(targetLaneEnd.OuterSimilarLaneIndex, nMinorToward - 1) &&
                         IndexesMatch(
                             sourceLaneEnd.OuterSimilarLaneIndex + nMinorToward + nMainToward,
                             targetLaneEnd.OuterSimilarLaneIndex + nMinorAgainst)) {
-                        Log._Debug("Lane Connector: connect Minor2 to Main");
                         connect = true;
                     }
 
