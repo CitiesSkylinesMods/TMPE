@@ -788,6 +788,7 @@ This changelog includes all versions and major variants of the mod going all the
 ### TM:PE 1.9.6-hotfix, 28/05/2017
 
 - Fixed: Cable cars are unable to turn around at end-of-line stations
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.9.6, 28/05/2017
 
@@ -812,6 +813,7 @@ This changelog includes all versions and major variants of the mod going all the
 ### TM:PE 1.9.4-hotfix, 23/05/2017
 
 - Fixed: Cable cars despawn at end-of-line stations
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.9.4, 23/05/2017
 
@@ -861,6 +863,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 - Improved: Removed an unnecessary error message log
 - Fixed: Highway specific rules are broken (thanks Ronjoe for reporting)
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.9.0, 18/05/2017
 
@@ -916,6 +919,11 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Smaller outside connection capacity for smaller roads
 - Updated: Upgraded to Unity 5.5.3f1
 
+### TM:PE 1.8.16-hotfix, 21/03/2017
+
+- Fixed: Trams were using regular roads.
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
 ### TM:PE 1.8.16, 20/03/2017
 
 - Improved: lane selection for busses if the option "Busses may ignore lane arrows" is activated
@@ -950,6 +958,11 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Helicopter not used if building has no road connection
 - Fixed: Various other game bugs
 
+### TM:PE 1.8.14-hotfix, 07/01/2017
+
+- Fixed: Manual traffic lights do not work properly (thanks dpitch40 for reporting)
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
 ### TM:PE 1.8.14, 07/01/2017
 
 - Added: Tram lanes can now be customized by using the lane connector tool
@@ -980,7 +993,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TM:PE 1.8.11, 02/01/2017
 
-- Fixed: Speed limits for elevated/underground road segments are sometimes not correctly loaded (thanks to Pirazel and [P.A.N] Uf0 for reporting this issue)
+- Fixed: Speed limits for elevated/underground road segments are sometimes not correctly loaded (thanks to Pirazel and \[P.A.N] Uf0 for reporting this issue)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.8.10, 31/12/2016
@@ -1006,6 +1019,11 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Taxis are not being used
 - Fixed: Prohibiting U-turns with the junction restriction tool does not work (thanks to Kisoe for reporting this issue)
 - Fixed: Cars are sometimes floating across the map while trying to park (thanks to [Delta ²k5] for reporting this issue)
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.8.7-hotfix, 24/12/2016
+
+- Fixed: Taxis are not being used
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.8.7, 24/12/2016
@@ -1085,13 +1103,18 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: translations: Polish, Chinese (simplified)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TPP2 2.0.12, 10/06/2016
+### TPP2 2.0.12, 30/11/2016
 
 - Updated: Compatible with C:SL 1.6.0-f4
 - Meta: This was the final release of TPP2
 - Meta: TM:PE continued as the main traffic mod for the game
 - Meta: The TPP/TPP2 can still be found in the Network Extensions 2 project
 - Steam: [Traffic++ V2](https://steamcommunity.com/sharedfiles/filedetails/?id=626024868)
+
+### TM:PE 1.8.0-hotfix, 29/11/2016
+
+- Updated: Reactivated Rush Hour interoperability
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.8.0, 29/11/2016
 
@@ -1156,6 +1179,18 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Compatible with C:SL 1.5.1-f3
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
+### TM:PE 1.7.10-hotfix2, 01/09/2016
+
+- Fixed: Manual pedestrian traffic light states were not correctly handled
+- Fixed: Junction restrictions overlay did not show all restricted junctions
+- Fixed: Setting up vehicle restrictions affects trams (thanks chem for reporting)
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.7.10-hotfix1, 31/08/2016
+
+- Improved: Rainfall compatibility
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
 ### TM:PE 1.7.10, 31/08/2016
 
 - Added: Players can now disable spawning of pocket cars
@@ -1166,6 +1201,12 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Manual pedestrian traffic light states were not correctly handled
 - Fixed: Junction restrictions overlay did not show all restricted junctions
 - Updated: Chinese (simplified) translation
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.7.9-hotfix, 22/08/2016
+
+- Fixed: Cims were not using public transport
+- Fixed: Cims are not moving in
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.7.9, 22/08/2016
