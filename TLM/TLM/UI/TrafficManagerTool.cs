@@ -14,15 +14,15 @@ namespace TrafficManager.UI {
     using JetBrains.Annotations;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+#if DEBUG
     using TrafficManager.State.ConfigData;
+#endif
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.SubTools;
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
-    using GenericGameBridge.Service;
-    using CitiesGameBridge.Service;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -1871,16 +1871,17 @@ namespace TrafficManager.UI {
             return false;
         }
 
-        /// <summary>Displays modal popup with an error</summary>
-        /// <param name="text">The localized message</param>
-        public void ShowError(string text) {
-            if (text == null) {
+        /// <summary>
+        /// Displays a warning prompt in center of the screen.
+        /// </summary>
+        /// 
+        /// <param name="message">The localized body text of the prompt.</param>
+        public void WarningPrompt(string message) {
+            if (string.IsNullOrEmpty(message)) {
                 return;
             }
 
-            UIView.library
-                  .ShowModal<ExceptionPanel>("ExceptionPanel")
-                  .SetMessage("Info", text, false);
+            Prompt.Warning("Warning", message);
         }
     }
 }
