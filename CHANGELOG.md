@@ -16,7 +16,7 @@ This changelog includes all versions and major variants of the mod going all the
 >     * TM:PE LABS - TM:PE versions 10.14 to 10.21.1 (later renamed to TM:PE v11 STABLE)
 >     * TM:PE STABLE - TM:PE versions 10.14 to 10.20
 > * **TPP2** = Traffic++ V2
-> * **TMIAI** = Traffic Manager + Improved AI
+> * **TM:IAI** = Traffic Manager + Improved AI
 > * **TMPlus** = Traffic Manager Plus
 > * **TPP:AI** - Traffic++ Improved AI
 > * **TPP** = Traffic++
@@ -777,13 +777,17 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Double clicking creating multiple stops at the same place
 - Fixed: Various other bugs
 
-### TMIAI 1.3.9, 05/03/2017
+### TM:IAI 1.3.9-final, 29/05/2017
 
 - Fixed: Traffic flow statistics
 - Fixed: Monorail pathfinding
 - Fixed: Save/load lane connector data
-- Meta: This was the final release of TMIAI
+- Meta: This was the final release of TM:IAI
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
+
+### TM:PE 1.9.6-hotfix, 28/05/2017
+
+- Fixed: Cable cars are unable to turn around at end-of-line stations
 
 ### TM:PE 1.9.6, 28/05/2017
 
@@ -804,6 +808,10 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Compatible with C:SL 1.7.1-f1
 - Updated: Polish, Korean and Italian translation
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.9.4-hotfix, 23/05/2017
+
+- Fixed: Cable cars despawn at end-of-line stations
 
 ### TM:PE 1.9.4, 23/05/2017
 
@@ -831,7 +839,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Removed: Disabled notification of route recalculating because some players report crashes
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TMIAI 1.3.9, 21/05/2017
+### TM:IAI 1.3.9, 21/05/2017
 
 - Fixed: Compatibility with C:SL 1.7.0-f5
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
@@ -848,6 +856,11 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: AI - More car traffic and less public transportation present than in vanilla
 - Updated: French, Dutch and Korean translation
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.9.0-hotfix, 18/05/2017
+
+- Improved: Removed an unnecessary error message log
+- Fixed: Highway specific rules are broken (thanks Ronjoe for reporting)
 
 ### TM:PE 1.9.0, 18/05/2017
 
@@ -912,17 +925,17 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Lane connections can now also be removed by pressing the backspace key
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TMIAI 1.3.8, 05/03/2017
+### TM:IAI 1.3.8, 05/03/2017
 
 - Improved: Removed another unnecessary file
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.3.7, 05/03/2017
+### TM:IAI 1.3.7, 05/03/2017
 
 - Improved: Code clean-up, removed unnecessary files
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.3.6, 05/03/2017
+### TM:IAI 1.3.6, 05/03/2017
 
 - Improved: Moved buttons away from Natural Disasters panel
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
@@ -1375,7 +1388,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: The size of signs and symbols in the overlay is determined by screen resolution height, not by width
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TMIAI 1.3.5, 05/03/2016
+### TM:IAI 1.3.5, 05/03/2016
 
 - Fixed: Issues with tram lines
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
@@ -1407,7 +1420,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Compatibility with C:SL 1.3.2-f1
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TMIAI 1.3.4, 02/03/2016
+### TM:IAI 1.3.4, 02/03/2016
 
 - Fixed: Compatibility with C:SL 1.3.2-f1
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
@@ -1551,7 +1564,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Compatible with C:SL 1.3.0-f4
 - Steam: [Traffic++ V2](https://steamcommunity.com/sharedfiles/filedetails/?id=626024868)
 
-### TMIAI 1.3.3, 19/02/2016
+### TM:IAI 1.3.3, 19/02/2016
 
 - Fixed: Compatibility with C:SL 1.3.0-f4
 - Improved: Various things
@@ -1924,7 +1937,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Maintainer: iMarbot (GitHub user iMarbot)
 - GitHub: [iMarbot/Skylines-Traffic-Manager-Plus](https://github.com/iMarbot/Skylines-Traffic-Manager-Plus)
 
-### TMIAI 1.3.2, 02/12/2015
+### TM:IAI 1.3.2, 02/12/2015
 
 - Fixed: Update to use limits introduced in C:SL 1.2.2-f2
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
@@ -1989,28 +2002,28 @@ This changelog includes all versions and major variants of the mod going all the
 - Added: Prison Vans
 - Added: Taxis
 
-### TMIAI 1.3.1, 18/09/2015
+### TM:IAI 1.3.1, 18/09/2015
 
 - Improved: File size optimisation
 - Fixed: Numerous bugs
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.3, 17/09/2015
+### TM:IAI 1.3, 17/09/2015
 
 - Added: Intersection editor from TPP (by jfarias)
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.2.2, 03/09/2015
+### TM:IAI 1.2.2, 03/09/2015
 
 - Fixed: Timed node groups not being saved
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.2.1, 02/09/2015
+### TM:IAI 1.2.1, 02/09/2015
 
 - Fixed: Null reference error when saving a city
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.2, 02/09/2015
+### TM:IAI 1.2, 02/09/2015
 
 - Added: GUI for changing parameters in-game
 - Added: Toggle for TM and IAI lane interaction
@@ -2018,13 +2031,13 @@ This changelog includes all versions and major variants of the mod going all the
 - Improved: Verify data loaded from save game
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.1, 16/08/2015
+### TM:IAI 1.1, 16/08/2015
 
 - Fixed: But that prevented U-turns
 - Improved: Compatibility with Mod Tools
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.0, 12/08/2015
+### TM:IAI 1.0, 12/08/2015
 
 - Added: TM 1.0.6 features (by CBeThaX)
 - Added: Improved AI from TPP:AI 1.0.0 (by jfarias).
