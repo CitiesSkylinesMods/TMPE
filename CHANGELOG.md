@@ -1308,7 +1308,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Rewritten and simplified vehicle position tracking near timed traffic lights and priority signs for performance reasons
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TM:PE 1.6.22, 29/06/2016:
+### TM:PE 1.6.22-hotfix, 29/06/2016:
 
 - Fixed: Traffic measurement at timed traffic lights was incorrect
 - Updated: AI - Taxis now may not ignore lane arrows and are using bus lanes whenever possible (thanks to Cochy for pointing out this issue)
@@ -1476,7 +1476,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 - Improved: Performance
 - Updated: Vehicle AIs
-- Updated: Code from TM:PE 1.16 merged in to TPP2
+- Updated: Code from TM:PE 1.6.7 merged in to TPP2
 - Steam: [Traffic++ V2](https://steamcommunity.com/sharedfiles/filedetails/?id=626024868)
 
 ### TM:PE 1.6.8, 01/03/2016
