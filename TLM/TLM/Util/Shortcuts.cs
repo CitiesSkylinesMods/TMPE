@@ -39,6 +39,8 @@ namespace TrafficManager.Util {
 
         private static NetSegment[] _segBuffer => Singleton<NetManager>.instance.m_segments.m_buffer;
 
+        public static NetLane[] laneBuffer => NetManager.instance.m_lanes.m_buffer;
+
         private static ExtSegmentEnd[] _segEndBuff => segEndMan.ExtSegmentEnds;
 
         internal static IExtSegmentEndManager segEndMan => Constants.ManagerFactory.ExtSegmentEndManager;
@@ -50,6 +52,8 @@ namespace TrafficManager.Util {
         internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
 
         internal static ref NetNode ToNode(this ushort nodeId) => ref GetNode(nodeId);
+
+        public static ref NetLane ToLane(this uint laneId) => ref laneBuffer[laneId];
 
         internal static ref NetSegment GetSeg(ushort segmentId) => ref _segBuffer[segmentId];
 
@@ -67,6 +71,16 @@ namespace TrafficManager.Util {
             (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
 
         internal static Func<bool, int> Int = (bool b) => b ? 1 : 0;
+
+        public static void SetBit(this ref byte b, int idx) => b |= (byte)(1 << idx);
+        public static void ClearBit(this ref byte b, int idx) => b &= ((byte)~(1 << idx));
+        public static bool GetBit(this byte b, int idx) => (b | (byte)(1 << idx)) != 0;
+        public static void SetBit(this ref byte b, int idx, bool value) {
+            if (value)
+                b.SetBit(idx);
+            else
+                b.ClearBit(idx);
+        }
 
         /// <summary>
         /// useful for easily debugin inline functions

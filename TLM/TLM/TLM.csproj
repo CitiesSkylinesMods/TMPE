@@ -149,6 +149,10 @@
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="Patch\_NetNode\checkTracksCommons.cs" />
+    <Compile Include="Patch\_NetNode\RenderInstancePatch.cs" />
+    <Compile Include="Patch\TranspilerUtils.cs" />
+    <Compile Include="Util\Caching\DirectConnectCache.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
     <Compile Include="UI\Helpers\SegmentLaneMarker.cs" />
     <Compile Include="UI\Helpers\ExtUITabStrip.cs" />
@@ -297,6 +301,7 @@
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
     <Compile Include="Util\Caching\CameraTransformValue.cs" />
     <Compile Include="Util\Caching\GenericArrayCache.cs" />
+    <Compile Include="Util\DirectConnectUtil.cs" />
     <Compile Include="Util\PriorityRoad.cs" />
     <Compile Include="Util\Shortcuts.cs" />
     <Compile Include="Util\FloatUtil.cs" />

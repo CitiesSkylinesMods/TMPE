@@ -4,6 +4,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.Util.Caching;
 
     public class ExtSegmentManager
         : AbstractCustomManager,
@@ -38,6 +39,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void Recalculate(ushort segmentId) {
             Recalculate(ref ExtSegments[segmentId]);
+            DirectConnectCache.OnUpdateSegment(segmentId);
         }
 
         private void Recalculate(ref ExtSegment extSegment) {
