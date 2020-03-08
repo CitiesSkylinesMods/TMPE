@@ -498,21 +498,22 @@ namespace TrafficManager.UI.SubTools {
                 return; // No lane connections are necessry.
             }
 
+
+            int LowerBound(int idx, float r) => Round(idx * r);
+            int UpperBound(int idx, float r) => Round((idx + 1) * r);
+
+            // checks if value is in [InclusiveLowerBound,ExclusiveUpperBound)
+            bool InBound(int InclusiveLowerBound, int ExclusiveUpperBound, int value) =>
+                InclusiveLowerBound <= value && value < ExclusiveUpperBound;
+
+            bool IndexesMatchHelper(int idx1, int idx2, float r) =>
+                InBound(LowerBound(idx1, r), UpperBound(idx1, r), idx2);
+
             float ratio = totalAgainst/ (float)totalToward;
             bool IndexesMatch(int sourceIdx, int targetIdx) =>
                 ratio >= 1 ?
                 IndexesMatchHelper(sourceIdx, targetIdx, ratio ) :
                 IndexesMatchHelper(targetIdx, sourceIdx, (1f / ratio));
-
-            int LowerBound(int idx, float r) => Round(idx * r);
-            int UpperBound(int idx, float r) => Round((idx + 1) * r);
-
-            bool IndexesMatchHelper(int idx1, int idx2, float r) =>
-                InBound(LowerBound(idx1, r), UpperBound(idx1, r), idx2);
-
-            // checks if value is in [InclusiveLowerBound,ExclusiveUpperBound)
-            bool InBound(int InclusiveLowerBound, int ExclusiveUpperBound, int value) =>
-                InclusiveLowerBound <= value && value < ExclusiveUpperBound;
 
             if (verbose) {
                 for (int i = 0; i < totalToward; ++i)
@@ -531,6 +532,22 @@ namespace TrafficManager.UI.SubTools {
                     return Mathf.CeilToInt(f - EPSILON);
                 else
                     return Mathf.RoundToInt(f);
+            }
+
+            // determines wheather the lanes on the main road should be
+            // connected to minorId.
+            bool ConnectToMinor(int sourceIdx, int targetIdx) {
+                return totalToward >= totalAgainst ?
+                       sourceIdx < UpperBound(nMinorAgainst - 1, ratio) :
+                       targetIdx < UpperBound(nMinorToward - 1, ratio);
+            }
+
+            // determines wheather the lanes on the main road should be
+            // connected to minor2Id.
+            bool ConnectToMinor2(int sourceIdx, int targetIdx) {
+                return totalToward >= totalAgainst ?
+                       sourceIdx >= LowerBound(totalAgainst - nMinor2Against, ratio) :
+                       targetIdx >= LowerBound(totalToward - nMinor2Toward, ratio);
             }
 
             List<LaneEnd> laneEnds = GetLaneEnds(nodeId, ref node);
@@ -561,17 +578,14 @@ namespace TrafficManager.UI.SubTools {
                     } else if (
                         sourceLaneEnd.SegmentId == mainTowardId &&
                         targetLaneEnd.SegmentId == mainAgainstId &&
-                        //TODO [issue does not exist] replace with subtraction from bound.
-                        !IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex, nMinorAgainst-1) &&
-                        !IndexesMatch(targetLaneEnd.OuterSimilarLaneIndex, nMinorToward-1) &&
-                        IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex + nMinorToward, targetLaneEnd.OuterSimilarLaneIndex + nMinorAgainst)
+                        !ConnectToMinor(sourceLaneEnd.OuterSimilarLaneIndex, targetLaneEnd.OuterSimilarLaneIndex) &&
+                        !ConnectToMinor2(sourceLaneEnd.OuterSimilarLaneIndex, targetLaneEnd.OuterSimilarLaneIndex) &&
+                        IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex + nMinorToward, targetLaneEnd.OuterSimilarLaneIndex + nMinorAgainst) 
                         ) {
                         connect = true;
                     } else if (
                         sourceLaneEnd.SegmentId == mainTowardId &&
                         targetLaneEnd.SegmentId == minor2Id &&
-                        !IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex, nMinorAgainst - 1) &&
-                        !IndexesMatch(targetLaneEnd.OuterSimilarLaneIndex, nMinorToward + nMainToward - 1) &&
                         IndexesMatch(
                             sourceLaneEnd.OuterSimilarLaneIndex + nMinorToward,
                             targetLaneEnd.OuterSimilarLaneIndex + nMinorAgainst + nMainAgainst)) {
@@ -579,8 +593,6 @@ namespace TrafficManager.UI.SubTools {
                     } else if (
                         sourceLaneEnd.SegmentId == minor2Id &&
                         targetLaneEnd.SegmentId == mainAgainstId &&
-                        !IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex, nMinorAgainst + nMainAgainst - 1) &&
-                        !IndexesMatch(targetLaneEnd.OuterSimilarLaneIndex, nMinorToward - 1) &&
                         IndexesMatch(
                             sourceLaneEnd.OuterSimilarLaneIndex + nMinorToward + nMainToward,
                             targetLaneEnd.OuterSimilarLaneIndex + nMinorAgainst)) {
