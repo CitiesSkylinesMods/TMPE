@@ -27,6 +27,8 @@ namespace TrafficManager.Manager.Impl {
             for (uint i = 0; i < ExtSegments.Length; ++i) {
                 ExtSegments[i] = new ExtSegment((ushort)i);
             }
+
+            DirectConnectCache.Init();
         }
 
         public bool IsValid(ushort segmentId) {
@@ -39,7 +41,6 @@ namespace TrafficManager.Manager.Impl {
 
         public void Recalculate(ushort segmentId) {
             Recalculate(ref ExtSegments[segmentId]);
-            DirectConnectCache.OnUpdateSegment(segmentId);
         }
 
         private void Recalculate(ref ExtSegment extSegment) {
@@ -214,6 +215,7 @@ namespace TrafficManager.Manager.Impl {
                 ExtSegments[i].valid = false;
                 Reset(ref ExtSegments[i]);
             }
+            DirectConnectCache.Load();
         }
 
         public override void OnBeforeLoadData() {

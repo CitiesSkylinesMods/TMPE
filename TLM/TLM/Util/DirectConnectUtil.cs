@@ -51,10 +51,10 @@ namespace TrafficManager.Util {
             ushort nodeId,
             int nodeInfoIDX) {
             NetInfo.Node nodeInfo = segmentId1.ToSegment().Info.m_nodes[nodeInfoIDX];
-            VehicleInfo.VehicleType vehicleType = DirectConnectUtil.GetVehicleType(nodeInfo, nodeInfo.m_connectGroup);
+            VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo, nodeInfo.m_connectGroup);
             if (vehicleType == 0)
                 return true;
-            return DirectConnectUtil.HasDirectConnect(
+            return HasDirectConnect(
                 segmentId1,
                 segmentId2,
                 nodeId,

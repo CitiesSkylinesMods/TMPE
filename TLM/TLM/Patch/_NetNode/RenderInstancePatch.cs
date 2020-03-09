@@ -13,11 +13,11 @@ namespace TrafficManager.Patch._NetNode {
             CSUtil.Commons.Log.Info("NetNode_RenderInstance Transpiler: " + m);
 
         // RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, Flags flags, ref uint instanceIndex, ref RenderManager.Instance data)
-        static MethodInfo Target =>
+        public static MethodInfo Target =>
             typeof(global::NetNode).
             GetMethod("RenderInstance", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        static MethodBase TargetMethod() {
+        public static MethodBase TargetMethod() {
             var ret = Target;
             Shortcuts.Assert(ret != null, "did not manage to find original function to patch");
             Log("aquired method " + ret);

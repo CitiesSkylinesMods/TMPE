@@ -41,7 +41,7 @@ namespace TrafficManager {
         }
 
         public class ManualHarmonyPatch {
-            public MethodInfo method;
+            public MethodBase method;
             public HarmonyMethod prefix;
             public HarmonyMethod transpiler = null;
             public HarmonyMethod postfix = null;
@@ -72,6 +72,12 @@ namespace TrafficManager {
         public static IList<ManualHarmonyPatch> ManualHarmonyPatches { get; } =
             new List<ManualHarmonyPatch> {
                 new ManualHarmonyPatch() {
+                    method = Patch._NetNode.RenderInstancePatch.TargetMethod(),
+                    transpiler = new HarmonyMethod(
+                        typeof(Patch._NetNode.RenderInstancePatch).
+                        GetMethod("Transpiler")),
+                },
+                new ManualHarmonyPatch() {
                     method = typeof(CommonBuildingAI).GetMethod(
                         "SimulationStep",
                         BindingFlags.Public | BindingFlags.Instance,
@@ -79,7 +85,7 @@ namespace TrafficManager {
                         new[] { typeof(ushort), typeof(Building).MakeByRefType() },
                         null),
                     prefix = new HarmonyMethod(
-                        typeof(Patch._CommonBuildingAI.SimulationStepPatch).GetMethod("Prefix"))
+                        typeof(Patch._CommonBuildingAI.SimulationStepPatch).GetMethod("Prefix")),
                 },
                 new ManualHarmonyPatch() {
                     method = typeof(RoadBaseAI).GetMethod(
@@ -90,7 +96,7 @@ namespace TrafficManager {
                         null),
                     prefix = new HarmonyMethod(
                         typeof(Patch._RoadBaseAI.TrafficLightSimulationStepPatch).GetMethod(
-                            "Prefix"))
+                            "Prefix")),
                 },
                 new ManualHarmonyPatch() {
                     method = typeof(TrainTrackBaseAI).GetMethod(
@@ -101,7 +107,7 @@ namespace TrafficManager {
                         null),
                     prefix = new HarmonyMethod(
                         typeof(Patch._TrainTrackBase.LevelCrossingSimulationStepPatch).GetMethod(
-                            "Prefix"))
+                            "Prefix")),
                 },
                 new ManualHarmonyPatch() {
                     method = typeof(RoadBaseAI).GetMethod(
@@ -111,8 +117,8 @@ namespace TrafficManager {
                         new[] { typeof(ushort), typeof(NetSegment).MakeByRefType() },
                         null),
                     prefix = new HarmonyMethod(
-                        typeof(Patch._RoadBaseAI.SegmentSimulationStepPatch).GetMethod("Prefix"))
-                }
+                        typeof(Patch._RoadBaseAI.SegmentSimulationStepPatch).GetMethod("Prefix")),
+                },
             };
 
         /// <summary>

@@ -13,6 +13,7 @@ namespace TrafficManager.Patch._NetNode {
             ushort nodeId,
             int nodeInfoIDX,
             ref RenderManager.Instance data) {
+            //CSUtil.Commons.Log._Debug("CheckTracksCommons.ShouldConnectTracks()");
             ushort sourceSegmentID = nodeId.ToNode().GetSegment(data.m_dataInt0 & 7);
             int targetSegmentIDX = data.m_dataInt0 >> 4;
             return DirectConnectCache.GetShouldConnectTracks(
@@ -54,14 +55,14 @@ namespace TrafficManager.Patch._NetNode {
             //seek to <ldarg.s cameraInfo> instruction:
             index = SearchInstruction(codes, GetLDArg(method, "cameraInfo"), index, counter: occurance, dir:-1); 
 
-            Label ContinueIndex = GetContinueLabel(codes, index, dir: -1); // IL_029d: br IL_0570
+            Label continueLabel = GetContinueLabel(codes, index, dir: -1); // IL_029d: br IL_0570
             {
                 var newInstructions = new[]{
                     LDArg_NodeID, 
                     LDLoc_NodeInfoIDX, 
                     LDArg_data, 
                     new CodeInstruction(OpCodes.Call, ShouldConnectTracks_),
-                    new CodeInstruction(OpCodes.Brfalse, ContinueIndex), // if returned value is false then continue to the next iteration of for loop;
+                    new CodeInstruction(OpCodes.Brfalse, continueLabel), // if returned value is false then continue to the next iteration of for loop;
                 };
 
                 InsertInstructions(codes, newInstructions, index, true);

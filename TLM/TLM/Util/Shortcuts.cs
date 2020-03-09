@@ -74,7 +74,7 @@ namespace TrafficManager.Util {
 
         public static void SetBit(this ref byte b, int idx) => b |= (byte)(1 << idx);
         public static void ClearBit(this ref byte b, int idx) => b &= ((byte)~(1 << idx));
-        public static bool GetBit(this byte b, int idx) => (b | (byte)(1 << idx)) != 0;
+        public static bool GetBit(this byte b, int idx) => (b & (byte)(1 << idx)) != 0;
         public static void SetBit(this ref byte b, int idx, bool value) {
             if (value)
                 b.SetBit(idx);
@@ -124,10 +124,12 @@ namespace TrafficManager.Util {
         }
 
         internal static void Assert(bool con, string m = "") {
-            if (!con) {
+#if DEBUG
+            if(!con) {
                 Log.Error("Assertion failed: " + m);
             }
-        }
+#endif 
+    }
 
         internal static bool ShiftIsPressed => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
