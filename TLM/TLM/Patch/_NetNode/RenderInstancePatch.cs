@@ -1,4 +1,4 @@
-using Harmony;
+using HarmonyLib;
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace TrafficManager.Patch._NetNode {
     using TrafficManager.Util;
 
-    // [Harmony] Manually patched because struct references are used
+    [Harmony] // [issue #783] does not work on harmony 1.2.1
     public static class RenderInstancePatch {
         static void Log(string m) =>
             CSUtil.Commons.Log.Info("NetNode_RenderInstance Transpiler: " + m);

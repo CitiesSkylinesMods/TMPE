@@ -215,7 +215,7 @@ namespace TrafficManager.Manager.Impl {
                 ExtSegments[i].valid = false;
                 Reset(ref ExtSegments[i]);
             }
-            DirectConnectCache.Load();
+            DirectConnectCache.Relase();
         }
 
         public override void OnBeforeLoadData() {
@@ -228,6 +228,11 @@ namespace TrafficManager.Manager.Impl {
             }
 
             Log._Debug($"ExtSegmentManager.OnBeforeLoadData: Calculation finished.");
+        }
+
+        public override void OnAfterLoadData() {
+            base.OnAfterLoadData();
+            DirectConnectCache.Load();
         }
     }
 }

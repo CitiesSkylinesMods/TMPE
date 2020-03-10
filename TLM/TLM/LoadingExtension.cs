@@ -53,7 +53,7 @@ namespace TrafficManager {
 
         public static List<Detour> Detours { get; set; }
 
-        public static Harmony  HarmonyInst { get; private set; }
+        public static Harmony HarmonyInst { get; private set; }
 
         /// <summary>
         /// Contains loaded languages and lookup functions for text translations
@@ -71,12 +71,6 @@ namespace TrafficManager {
         /// </summary>
         public static IList<ManualHarmonyPatch> ManualHarmonyPatches { get; } =
             new List<ManualHarmonyPatch> {
-                new ManualHarmonyPatch() {
-                    method = Patch._NetNode.RenderInstancePatch.TargetMethod(),
-                    transpiler = new HarmonyMethod(
-                        typeof(Patch._NetNode.RenderInstancePatch).
-                        GetMethod("Transpiler")),
-                },
                 new ManualHarmonyPatch() {
                     method = typeof(CommonBuildingAI).GetMethod(
                         "SimulationStep",

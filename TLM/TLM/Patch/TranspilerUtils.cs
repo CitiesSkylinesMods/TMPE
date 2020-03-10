@@ -2,7 +2,7 @@ namespace TrafficManager.Patch {
     using System;
     using System.Collections.Generic;
     using System.Reflection.Emit;
-    using Harmony;
+    using HarmonyLib;
 
     using System.Reflection;
     using TrafficManager.Util;
