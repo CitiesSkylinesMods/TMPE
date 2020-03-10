@@ -306,7 +306,7 @@ namespace TrafficManager {
             RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
 
             // depends on LaneConnectionManager
-            RegisteredManagers.Add(new DirectConnectCacheManger());
+            RegisteredManagers.Add(DirectConnectCacheManger.Instance);
 
             // depends on TurnOnRedManager, TrafficLightManager, TrafficLightSimulationManager
             RegisteredManagers.Add(JunctionRestrictionsManager.Instance);
