@@ -2,7 +2,7 @@ namespace TrafficManager {
     using ColossalFramework.UI;
     using ColossalFramework;
     using CSUtil.Commons;
-    using Harmony;
+    using HarmonyLib;
     using ICities;
     using JetBrains.Annotations;
     using Object = UnityEngine.Object;
@@ -53,7 +53,7 @@ namespace TrafficManager {
 
         public static List<Detour> Detours { get; set; }
 
-        public static HarmonyInstance HarmonyInst { get; private set; }
+        public static Harmony  HarmonyInst { get; private set; }
 
         /// <summary>
         /// Contains loaded languages and lookup functions for text translations
@@ -180,7 +180,7 @@ namespace TrafficManager {
             try {
                 Log.Info("Deploying Harmony patches");
 #if DEBUG
-                HarmonyInstance.DEBUG = true;
+                Harmony.DEBUG = true;
 #endif
                 Assembly assembly = Assembly.GetExecutingAssembly();
 
@@ -188,7 +188,7 @@ namespace TrafficManager {
 
                 // Harmony attribute-driven patching
                 Log.Info($"Performing Harmony attribute-driven patching");
-                HarmonyInst = HarmonyInstance.Create(HARMONY_ID);
+                HarmonyInst = new Harmony(HARMONY_ID);
                 HarmonyInst.PatchAll(assembly);
 
                 foreach (Type type in assembly.GetTypes()) {

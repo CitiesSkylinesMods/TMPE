@@ -154,6 +154,7 @@
     <Compile Include="Patch\TranspilerUtils.cs" />
     <Compile Include="Util\Caching\DirectConnectCache.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
+    <Compile Include="UI\Helpers\Prompt.cs" />
     <Compile Include="UI\Helpers\SegmentLaneMarker.cs" />
     <Compile Include="UI\Helpers\ExtUITabStrip.cs" />
     <Compile Include="Manager\Impl\SegmentEndManager.cs" />
@@ -611,7 +612,6 @@
       PostBuildMacros;
     </PostBuildEventDependsOn>
     <PostBuildEvent>set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
-xcopy /y "$(TargetDir)TrafficManager.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.API.dll" "%25DEPLOYDIR%25"
