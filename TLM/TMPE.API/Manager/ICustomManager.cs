@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     using GenericGameBridge.Factory;
 
     public interface ICustomManager {
@@ -11,5 +11,6 @@
         void OnLevelLoading();
         void OnLevelUnloading();
         void PrintDebugInfo();
+        void OnReleased();
     }
 }

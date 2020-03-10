@@ -275,7 +275,6 @@ namespace TrafficManager {
             CustomPathManager = new CustomPathManager();
 
             RegisterCustomManagers();
-            DirectConnectCache.Init();
 
             Instance = this;
         }
@@ -305,13 +304,22 @@ namespace TrafficManager {
             RegisteredManagers.Add(TrafficPriorityManager.Instance);
             RegisteredManagers.Add(UtilityManager.Instance);
             RegisteredManagers.Add(VehicleRestrictionsManager.Instance);
-            RegisteredManagers.Add(ExtVehicleManager.Instance);
+
+            // depends on LaneConnectionManager
+            RegisteredManagers.Add(new DirectConnectCacheManger());
 
             // depends on TurnOnRedManager, TrafficLightManager, TrafficLightSimulationManager
             RegisteredManagers.Add(JunctionRestrictionsManager.Instance);
         }
 
         public override void OnReleased() {
+            var reverseManagers = new List<ICustomManager>(RegisteredManagers);
+            reverseManagers.Reverse();
+            foreach (ICustomManager manager in reverseManagers) {
+                Log.Info($"OnReleased: {manager.GetType().Name}");
+                manager.OnReleased();
+            }
+
             TrafficManagerMod.Instance.InGameHotReload = false;
             Instance = null;
             base.OnReleased();
@@ -378,7 +386,6 @@ namespace TrafficManager {
             }
 
             RevertDetours();
-            DirectConnectCache.Relase();
             IsGameLoaded = false;
         }
 
@@ -555,7 +562,7 @@ namespace TrafficManager {
             // add "remove citizen instance" button
             UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
 
-            DirectConnectCache.Load();
+            DirectConnectCacheManger.Load();
             InitDetours();
 
             // Log.Info("Fixing non-created nodes with problems...");

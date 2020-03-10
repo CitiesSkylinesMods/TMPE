@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
 
     public class ManagerFactory : IManagerFactory {
@@ -67,5 +67,8 @@
 
         public IVehicleRestrictionsManager VehicleRestrictionsManager =>
             Impl.VehicleRestrictionsManager.Instance;
+
+        internal Impl.DirectConnectCacheManger DirectConnectCacheManger => 
+            Impl.DirectConnectCacheManger.Instance;
     }
 }

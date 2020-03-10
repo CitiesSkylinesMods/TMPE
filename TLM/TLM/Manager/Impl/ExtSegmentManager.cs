@@ -39,7 +39,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void Recalculate(ushort segmentId) {
             Recalculate(ref ExtSegments[segmentId]);
-            DirectConnectCache.OnUpdateSegment(segmentId);
+            DirectConnectCacheManger.Instance.OnUpdateSegment(segmentId);
         }
 
         private void Recalculate(ref ExtSegment extSegment) {

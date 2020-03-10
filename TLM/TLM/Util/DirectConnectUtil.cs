@@ -151,16 +151,15 @@ namespace TrafficManager.Util {
                 out bool isTarget2,
                 out _);
 
-            if (isSource1 && isTarget2) {
+            if ((isSource1 && isTarget2)) {
 
                 bool b1 = LCMan.HasConnections(laneId1, startNode1);
-                bool b2 = LCMan.AreLanesConnected(laneId1, laneId2, startNode2);
+                bool b2 = LCMan.AreLanesConnected(laneId1, laneId2, startNode1);
                 return !b1 || b2;
             } else if (isTarget1 && isSource2) {
-                return AreLanesConnected(
-                    segmentId2, laneId2, laneIndex2,
-                    segmentId1, laneId1, laneIndex1,
-                    nodeId);
+                bool b1 = LCMan.HasConnections(laneId2, startNode2);
+                bool b2 = LCMan.AreLanesConnected(laneId2, laneId1, startNode2);
+                return !b1 || b2;
             } else {
                 return false;
             }

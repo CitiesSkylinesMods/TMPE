@@ -7,6 +7,7 @@ namespace TrafficManager.Patch._NetNode {
     using static TranspilerUtils;
     using TrafficManager.Util;
     using TrafficManager.Util.Caching;
+    using TrafficManager.Manager.Impl;
 
     public static class CheckTracksCommons {
         public static bool ShouldConnectTracks(
@@ -16,7 +17,7 @@ namespace TrafficManager.Patch._NetNode {
             //CSUtil.Commons.Log._Debug("CheckTracksCommons.ShouldConnectTracks()");
             ushort sourceSegmentID = nodeId.ToNode().GetSegment(data.m_dataInt0 & 7);
             int targetSegmentIDX = data.m_dataInt0 >> 4;
-            return DirectConnectCache.GetShouldConnectTracks(
+            return DirectConnectCacheManger.Instance.GetShouldConnectTracks(
                 sourceSegmentID,
                 targetSegmentIDX,
                 nodeId,

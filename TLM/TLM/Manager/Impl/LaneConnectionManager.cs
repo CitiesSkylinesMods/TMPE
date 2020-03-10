@@ -258,7 +258,7 @@ namespace TrafficManager.Manager.Impl {
 
             RecalculateLaneArrows(laneId1, commonNodeId, startNode1);
             RecalculateLaneArrows(laneId2, commonNodeId, startNode2);
-            Util.Caching.DirectConnectCache.OnUpdateNode(commonNodeId);
+            DirectConnectCacheManger.Instance.OnUpdateNode(commonNodeId);
 
             RoutingManager.Instance.RequestRecalculation(segmentId1, false);
             RoutingManager.Instance.RequestRecalculation(segmentId2, false);
@@ -437,7 +437,7 @@ namespace TrafficManager.Manager.Impl {
 
             RecalculateLaneArrows(sourceLaneId, commonNodeId, sourceStartNode);
             RecalculateLaneArrows(targetLaneId, commonNodeId, targetStartNode);
-            Util.Caching.DirectConnectCache.OnUpdateNode(commonNodeId);
+            DirectConnectCacheManger.Instance.OnUpdateNode(commonNodeId);
 
             NetManager netManager = Singleton<NetManager>.instance;
 

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager {
+namespace TrafficManager.Manager {
     using CSUtil.Commons;
     using GenericGameBridge.Factory;
     using TrafficManager.API.Manager;
@@ -72,6 +72,14 @@
         public virtual void OnLevelUnloading() {
 
         }
+
+        /// <summary>
+        /// Performs actions after game has ended. 
+        /// </summary>
+        public virtual void OnReleased() {
+
+        }
+
 
         /// <summary>
         /// Prints information for debugging purposes

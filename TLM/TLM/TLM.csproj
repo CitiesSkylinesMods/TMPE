@@ -152,7 +152,7 @@
     <Compile Include="Patch\_NetNode\checkTracksCommons.cs" />
     <Compile Include="Patch\_NetNode\RenderInstancePatch.cs" />
     <Compile Include="Patch\TranspilerUtils.cs" />
-    <Compile Include="Util\Caching\DirectConnectCache.cs" />
+    <Compile Include="Manager\Impl\DirectConnectCacheManger.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
     <Compile Include="UI\Helpers\SegmentLaneMarker.cs" />

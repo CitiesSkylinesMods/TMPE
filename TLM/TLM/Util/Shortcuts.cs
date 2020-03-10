@@ -10,8 +10,6 @@ namespace TrafficManager.Util {
     using UnityEngine;
 
     internal static class Shortcuts {
-        
-
         /// <summary>
         /// returns a new calling Clone() on all items.
         /// </summary>
@@ -125,6 +123,14 @@ namespace TrafficManager.Util {
             }
         }
 
+        internal static void AssertNotNull<T>(T a, string varName) {
+#if DEBUG
+            if (a==null) {
+                Log.Error($"Assertion failed. Expected {varName} != null");
+            }
+#endif
+        }
+
         internal static void Assert(bool con, string m = "") {
 #if DEBUG
             if(!con) {
@@ -133,12 +139,13 @@ namespace TrafficManager.Util {
 #endif 
     }
 
+        internal static string StackTrace => System.Environment.StackTrace;
+
         internal static bool ShiftIsPressed => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         internal static bool ControlIsPressed => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
         internal static bool AltIsPressed => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-
 
         internal static bool InSimulationThread() =>
             System.Threading.Thread.CurrentThread == SimulationManager.instance.m_simulationThread;
@@ -154,7 +161,5 @@ namespace TrafficManager.Util {
             LHT ? segment.GetRightSegment(nodeId) : segment.GetLeftSegment(nodeId);
 
         #endregion
-
-
     }
 }
