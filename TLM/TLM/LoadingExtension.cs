@@ -18,6 +18,7 @@ namespace TrafficManager {
     using TrafficManager.UI;
     using static TrafficManager.Util.Shortcuts;
     using UnityEngine;
+    using TrafficManager.Util.Caching;
 
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {
@@ -274,6 +275,7 @@ namespace TrafficManager {
             CustomPathManager = new CustomPathManager();
 
             RegisterCustomManagers();
+            DirectConnectCache.Init();
 
             Instance = this;
         }
@@ -376,6 +378,7 @@ namespace TrafficManager {
             }
 
             RevertDetours();
+            DirectConnectCache.Relase();
             IsGameLoaded = false;
         }
 
@@ -552,6 +555,7 @@ namespace TrafficManager {
             // add "remove citizen instance" button
             UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
 
+            DirectConnectCache.Load();
             InitDetours();
 
             // Log.Info("Fixing non-created nodes with problems...");

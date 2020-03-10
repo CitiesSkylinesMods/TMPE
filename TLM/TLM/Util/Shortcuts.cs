@@ -10,6 +10,8 @@ namespace TrafficManager.Util {
     using UnityEngine;
 
     internal static class Shortcuts {
+        
+
         /// <summary>
         /// returns a new calling Clone() on all items.
         /// </summary>
@@ -136,6 +138,10 @@ namespace TrafficManager.Util {
         internal static bool ControlIsPressed => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
         internal static bool AltIsPressed => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+
+
+        internal static bool InSimulationThread() =>
+            System.Threading.Thread.CurrentThread == SimulationManager.instance.m_simulationThread;
 
         #region directions
         internal static bool LHT => Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;

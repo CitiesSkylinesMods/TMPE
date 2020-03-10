@@ -1,10 +1,12 @@
 namespace TrafficManager.Util {
     using CSUtil.Commons;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.State.ConfigData;
     using static TrafficManager.Util.Shortcuts;
 
     public static class DirectConnectUtil {
         static LaneConnectionManager LCMan => LaneConnectionManager.Instance;
+        static bool verbose_ => DebugSwitch.LaneConnections.Get();
 
         internal static VehicleInfo.VehicleType GetVehicleType(NetInfo.Node nodeInfo, NetInfo.ConnectGroup flags) {
             VehicleInfo.VehicleType ret = 0;
@@ -107,17 +109,61 @@ namespace TrafficManager.Util {
                         (targetLaneInfos[targetLaneIndex].m_vehicleType & vehicleType) == 0) {
                         continue;
                     }
-                    bool b1 = LCMan.HasConnections(sourceLaneId, sourceStartNode);
-                    bool b2 = LCMan.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
-                    Log._Debug($"sourceLaneId={sourceLaneId} targetLaneId={targetLaneId} sourceStartNode={sourceStartNode} b1={b1} b2={b2}");
 
-                    if (!b1 || b2) {
+                    bool connected = AreLanesConnected(
+                        sourceSegmentId, sourceLaneId, (byte)sourceLaneIndex,
+                        targetSegmentId, targetLaneId, (byte)targetLaneIndex,
+                        nodeId);
+
+                    if(verbose_)
+                        Log._Debug($"sourceLaneId={sourceLaneId} targetLaneId={targetLaneId} sourceStartNode={sourceStartNode} connected={connected}");
+                    if (connected) {
                         return true;
                     }
+
                 }
             }
             return false;
         }
 
+        static bool AreLanesConnected(
+            ushort segmentId1, uint laneId1, byte laneIndex1,
+            ushort segmentId2, uint laneId2, byte laneIndex2,
+            ushort nodeId) {
+            bool startNode1 = (bool)netService.IsStartNode(segmentId1, nodeId);
+            bool startNode2 = (bool)netService.IsStartNode(segmentId2, nodeId);
+            LCMan.GetLaneEndPoint(
+                segmentId1,
+                startNode1,
+                laneIndex1,
+                laneId1,
+                segmentId1.ToSegment().Info.m_lanes[laneIndex1],
+                out bool isSource1,
+                out bool isTarget1,
+                out _);
+            LCMan.GetLaneEndPoint(
+                segmentId2,
+                startNode2,
+                laneIndex2,
+                laneId2,
+                segmentId2.ToSegment().Info.m_lanes[laneIndex2],
+                out bool isSource2,
+                out bool isTarget2,
+                out _);
+
+            if (isSource1 && isTarget2) {
+
+                bool b1 = LCMan.HasConnections(laneId1, startNode1);
+                bool b2 = LCMan.AreLanesConnected(laneId1, laneId2, startNode2);
+                return !b1 || b2;
+            } else if (isTarget1 && isSource2) {
+                return AreLanesConnected(
+                    segmentId2, laneId2, laneIndex2,
+                    segmentId1, laneId1, laneIndex1,
+                    nodeId);
+            } else {
+                return false;
+            }
+        }
     }
 }
