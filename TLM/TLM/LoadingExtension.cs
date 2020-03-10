@@ -562,7 +562,6 @@ namespace TrafficManager {
             // add "remove citizen instance" button
             UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
 
-            DirectConnectCacheManger.Load();
             InitDetours();
 
             // Log.Info("Fixing non-created nodes with problems...");
