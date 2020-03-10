@@ -53,7 +53,7 @@ namespace TrafficManager {
 
         public static List<Detour> Detours { get; set; }
 
-        public static Harmony HarmonyInst { get; private set; }
+        public static Harmony  HarmonyInst { get; private set; }
 
         /// <summary>
         /// Contains loaded languages and lookup functions for text translations
