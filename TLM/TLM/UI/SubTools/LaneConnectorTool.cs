@@ -471,7 +471,12 @@ namespace TrafficManager.UI.SubTools {
         }
 
         /// <summary>
-        /// connects lanes such that cars will stay on lane
+        /// connects lanes such that cars will stay on lane.
+        ///
+        /// if segments are connected from inside and/or outside, then some lane connections
+        /// are diverted toward those segments such that there is no criss-cross and cars stay on
+        /// their respective lanes.
+        /// 
         /// if the number of lanes does not match:
         ///  - if the main road is two ways then we prefer to merge/split inner lanes.
         ///  - else if <paramref name="minorSegmentId"/> == 0 then
@@ -581,7 +586,7 @@ namespace TrafficManager.UI.SubTools {
                 IndexesMatchHelper(targetIdx, sourceIdx);
 
             const float EPSILON = 1e-10f;
-            // rounding approach helps us control which lanes will split/merge in case of lane mismatch.
+            // rounding approach controls which lanes will split/merge in case totoalSource != totalTarget.
             int Round(float f) {
                 if (splitInner)
                     return Mathf.FloorToInt(f + EPSILON);
@@ -591,7 +596,7 @@ namespace TrafficManager.UI.SubTools {
                     return Mathf.RoundToInt(f);
             }
 
-            // determines wheather the lanes on the main road should be
+            // determines if the lanes on the main road should be
             // connected to minorSegmentId.
             bool ConnectToMinor(int sourceIdx, int targetIdx) {
                 return totalSource >= totalTarget ?
