@@ -396,6 +396,77 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
+
+        // special case where all segments are oneway.
+        private static bool ArrangeOneWay(ushort nodeId, List<ushort> segments) {
+            foreach( var segmentId in segments) {
+                if (!segMan.CalculateIsOneWay(segmentId))
+                    return false;
+            }
+            int numSource = segments
+                .Where(segmentId => segmentId!=0 && netService.GetHeadNode(segmentId) == nodeId)
+                .Count();
+
+            int numTarget = segments
+                .Where(segmentId => segmentId != 0 && netService.GetTailNode(segmentId) == nodeId)
+                .Count();
+
+            if (numSource == 1) {
+                for (int i = 0; i < segments.Count; ++i) {
+                    if (segments[i] != 0 && netService.GetHeadNode(segments[i]) == nodeId) {
+                        segments.Swap(0, i);
+                        break;
+                    }
+                }
+                for (int i = 1; i < segments.Count; ++i) {
+                    ushort segmentId = segments[i];
+                    if (segmentId == 0)
+                        continue;
+                    var innerSegment = segmentId.ToSegment().GetNearSegment(nodeId);
+                    var outerSegment = segmentId.ToSegment().GetFarSegment(nodeId);
+                    bool middleSegment = outerSegment != segments[0];
+                    if (segments[3] != 0) {
+                        middleSegment &= innerSegment != segments[0];
+                    }
+                    if (middleSegment) {
+                        segments[2] = segmentId;
+                        segments[1] = outerSegment;
+                        segments[3] = innerSegment;
+                        return true;
+                    }
+                }
+            }
+            else if (numTarget == 1) {
+                for (int i = 0; i < segments.Count; ++i) {
+                    if (segments[i] != 0 && netService.GetTailNode(segments[i]) == nodeId) {
+                        // found target segment
+                        segments.Swap(0, i);
+                        break;
+                    }
+                }
+                for (int i = 1; i < segments.Count; ++i) {
+                    ushort segmentId = segments[i];
+                    if (segmentId == 0)
+                        continue;
+                    var outerSegment = segmentId.ToSegment().GetNearSegment(nodeId);
+                    var innerSegment = segmentId.ToSegment().GetFarSegment(nodeId);
+                    bool middleSegment = outerSegment != segments[0];
+                    if (segments[3] != 0) {
+                        middleSegment &= innerSegment != segments[0];
+                    }
+                    if (middleSegment) {
+                        //found middle source segment.
+                        segments[2] = segmentId;
+                        segments[1] = outerSegment;
+                        segments[3] = innerSegment;
+                        return true;
+                    }
+                }
+            } else {
+                return false;
+            }
+        }
+
         public static bool GetSoredtedSegments(ushort nodeId, out List<ushort> segments) {
             segments = PriorityRoad.GetNodeSegments(nodeId);
             bool ret = false;
@@ -421,6 +492,8 @@ namespace TrafficManager.UI.SubTools {
 
                 // Prevent confusion if all roads are the same.
                 ret = PriorityRoad.CompareSegments(segments[1], segments[2]) != 0;
+            } else {
+
             }
 
             return ret;
