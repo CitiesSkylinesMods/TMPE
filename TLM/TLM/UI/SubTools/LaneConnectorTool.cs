@@ -31,7 +31,7 @@ namespace TrafficManager.UI.SubTools {
             Backward
         }
 
-        private static bool verbose_ => true | DebugSwitch.LaneConnections.Get();
+        private static bool verbose_ => true | DebugSwitch.LaneConnections.Get(); 
         private static readonly Color DefaultLaneEndColor = new Color(1f, 1f, 1f, 0.4f);
         private LaneEnd selectedLaneEnd;
         private LaneEnd hoveredLaneEnd;
