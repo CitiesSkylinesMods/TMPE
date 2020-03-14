@@ -8,6 +8,7 @@ namespace TrafficManager.State.Keybinds {
     using System;
     using TrafficManager.UI;
     using UnityEngine;
+    using TrafficManager.UI.Helpers;
 
     /// <summary>
     /// Helper for creating keyboard bindings Settings page.
@@ -219,9 +220,7 @@ namespace TrafficManager.State.Keybinds {
                         var message = Translation.Options.Get("Keybinds.Dialog.Text:Keybind conflict")
                                       + "\n\n" + maybeConflict;
                         Log.Info($"Keybind conflict: {message}");
-                        UIView.library
-                          .ShowModal<ExceptionPanel>("ExceptionPanel")
-                          .SetMessage("Key Conflict", message, false);
+                        Prompt.Warning("Key Conflict", message);
                     } else {
                         editedBinding.Value.TargetKey.value = inputKey;
                         editedBinding.Value.Target.NotifyKeyChanged();
@@ -257,9 +256,7 @@ namespace TrafficManager.State.Keybinds {
                     var message = Translation.Options.Get("Keybinds.Dialog.Text:Keybind conflict")
                                   + "\n\n" + maybeConflict;
                     Log.Info($"Keybind conflict: {message}");
-                    UIView.library
-                          .ShowModal<ExceptionPanel>("ExceptionPanel")
-                          .SetMessage("Key Conflict", message, false);
+                    Prompt.Warning("Key Conflict", message);
                 } else {
                     editedBinding.Value.TargetKey.value = inputKey;
                     editedBinding.Value.Target.NotifyKeyChanged();

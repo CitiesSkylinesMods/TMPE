@@ -13,6 +13,7 @@ namespace TrafficManager {
     using TrafficManager.State;
     using TrafficManager.UI;
     using UnityEngine;
+    using TrafficManager.UI.Helpers;
 
     [UsedImplicitly]
     public sealed class ThreadingExtension : ThreadingExtensionBase {
@@ -98,16 +99,7 @@ namespace TrafficManager {
                     Log.Info(log);
 
                     if (GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage) {
-                        Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
-                            () => {
-                                UIView
-                                    .library
-                                    .ShowModal<ExceptionPanel>(
-                                        "ExceptionPanel").SetMessage(
-                                        "Incompatibility Issue",
-                                        error,
-                                        true);
-                            });
+                        Prompt.Error("TM:PE Incompatibility Issue", error);
                     }
                 }
             }
