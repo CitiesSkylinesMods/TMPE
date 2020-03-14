@@ -168,6 +168,11 @@
                 extVehicleType = ExtVehicleType.CableCar;
             }
 
+            if ((vehicleType & VehicleInfo.VehicleType.Trolleybus) != VehicleInfo.VehicleType.None) {
+                Debug.Log("TransportLine Trolleybus");
+                extVehicleType = ExtVehicleType.Trolleybus;
+            }
+
             // Log._Debug($"Transport line. extVehicleType={extVehicleType}");
             // NON-STOCK CODE START
             PathCreationArgs args;

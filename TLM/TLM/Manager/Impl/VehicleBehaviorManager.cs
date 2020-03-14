@@ -1193,7 +1193,8 @@ namespace TrafficManager.Manager.Impl {
                                               NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction)
                 {
                     if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram ||
-                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train)
+                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train ||
+                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Trolleybus)
                     {
                         if ((vehicleData.m_flags2 & Vehicle.Flags2.Yielding) == 0)
                         {
@@ -1460,7 +1461,8 @@ namespace TrafficManager.Manager.Impl {
                             "JunctionTransitState to STOP");
 
                         if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram ||
-                            vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train)
+                            vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train ||
+                            vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Trolleybus)
                         {
                             vehicleData.m_flags2 |= Vehicle.Flags2.Yielding;
                             vehicleData.m_waitCounter = 0;
@@ -1476,7 +1478,8 @@ namespace TrafficManager.Manager.Impl {
                               $"Setting JunctionTransitState to LEAVE ({vehicleLightState})");
 
                     if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram ||
-                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train)
+                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train ||
+                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Trolleybus)
                     {
                         vehicleData.m_flags2 &= ~Vehicle.Flags2.Yielding;
                         vehicleData.m_waitCounter = 0;
