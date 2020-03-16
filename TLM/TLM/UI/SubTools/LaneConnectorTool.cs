@@ -349,7 +349,7 @@ namespace TrafficManager.UI.SubTools {
                     selectedLaneEnd = null;
                     ref NetNode node = ref SelectedNodeId.ToNode();
 
-                    bool stayInLane = GetSoredtedSegments(SelectedNodeId, out List<ushort> segList) ;
+                    bool stayInLane = GetSortedSegments(SelectedNodeId, out List<ushort> segList) ;
                     bool oneway = segMan.CalculateIsOneWay(segList[0]) || segMan.CalculateIsOneWay(segList[1]);
 
                     if (stayInLane) {
@@ -475,7 +475,7 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="segments">arranged list of segments. the size will be 4.
         /// if there are only 3 segmetns last elemnt will be 0</param>
         /// <returns><c>true</c> if sucessful</returns>
-        public static bool GetSoredtedSegments(ushort nodeId, out List<ushort> segments) {
+        public static bool GetSortedSegments(ushort nodeId, out List<ushort> segments) {
             segments = PriorityRoad.GetNodeSegments(nodeId);
             bool ret = false;
             int n = segments.Count;
@@ -505,21 +505,24 @@ namespace TrafficManager.UI.SubTools {
                     bool oneway = segMan.CalculateIsOneWay(segments[0]) &&
                                   segMan.CalculateIsOneWay(segments[1]);
                     if (oneway) {
-                        var nearSegment = segments[2].ToSegment().GetNearSegment(nodeId);
+                        if (netService.GetTailNode(segments[0]) == nodeId) {
+                            segments.Swap(0, 1);
+                        }
 
                         // if the near side segment to segments[2] is going toward the junction
                         // then we know segment[2] is connected from inside.
+                        var nearSegment = segments[2].ToSegment().GetNearSegment(nodeId);
                         bool connectedFromInside =
                             netService.GetHeadNode(nearSegment) == nodeId;
                         if (connectedFromInside) {
                             segments.Swap(2, 3);
                         }
-                    }
-
-                    // ensure segments[0] is comming toward the junction (is to the far side of segments[2]
-                    // segments[1] is going against the junction (is to the near side of segments[2]
-                    if (segments[2] != segments[2].ToSegment().GetNearSegment(nodeId)) {
-                        segments.Swap(0, 1);
+                    } else {
+                        // ensure segments[0] is comming toward the junction (is to the far side of segments[2])
+                        // and segments[1] is going against the junction (is to the near side of segments[2])
+                        if (segments[1] != segments[2].ToSegment().GetNearSegment(nodeId)) {
+                            segments.Swap(0, 1);
+                        }
                     }
                 }
             } else {
@@ -542,7 +545,7 @@ namespace TrafficManager.UI.SubTools {
         public static bool StayInLane(ushort nodeId, StayInLaneMode mode = StayInLaneMode.None) {
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
 
-            GetSoredtedSegments(nodeId, out List<ushort> segments);
+            GetSortedSegments(nodeId, out List<ushort> segments);
             ushort innerMinor = 0;
             bool oneway = segMan.CalculateIsOneWay(segments[0]) &&
                           segMan.CalculateIsOneWay(segments[1]);
@@ -617,22 +620,23 @@ namespace TrafficManager.UI.SubTools {
             int laneCountMinorTarget = minorSegmentId == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(minorSegmentId, nodeId); 
             int laneCountMinor2Source = minorSegment2Id == 0 ? 0 : PriorityRoad.CountLanesTowardJunction(minorSegment2Id, nodeId); 
             int laneCountMinor2Target = minorSegment2Id == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(minorSegment2Id, nodeId); 
-            int laneCountMainToward = PriorityRoad.CountLanesTowardJunction(mainSegmentSourceId, nodeId); 
-            int laneCountMainAgainst = PriorityRoad.CountLanesAgainstJunction(mainSegmentTargetId, nodeId); 
-            int totalSource = laneCountMinorSource + laneCountMainToward + laneCountMinor2Source;
-            int totalTarget = laneCountMinorTarget + laneCountMainAgainst + laneCountMinor2Target;
+            int laneCountMainSource = PriorityRoad.CountLanesTowardJunction(mainSegmentSourceId, nodeId); 
+            int laneCountMainTarget = PriorityRoad.CountLanesAgainstJunction(mainSegmentTargetId, nodeId); 
+            int totalSource = laneCountMinorSource + laneCountMainSource + laneCountMinor2Source;
+            int totalTarget = laneCountMinorTarget + laneCountMainTarget + laneCountMinor2Target;
 
-            bool laneArithmaticWorks = totalSource == totalTarget && laneCountMainToward == laneCountMinorTarget;
             if (verbose_) {
+                bool laneArithmaticWorks = totalSource == totalTarget && laneCountMainSource >= laneCountMinorTarget;
                 Log._Debug($"StayInLane: " +
-                    $"laneCountMinorToward={laneCountMinorSource} " +
-                    $"laneCountMinorAgainst={laneCountMinorTarget} " +
-                    $"laneCountMainToward={laneCountMainAgainst} " +
-                    $"laneCountMainAgainst={laneCountMainAgainst} " +
-                    $"laneCountMinor2Toward={laneCountMinor2Source} " +
-                    $"laneCountMinor2Against={laneCountMinor2Target} " +
-                    $"totalToward={totalSource} " +
-                    $"totalAgainst={totalTarget}");
+                    $"laneCountMinorSource={laneCountMinorSource} " +
+                    $"laneCountMinorTarget={laneCountMinorTarget} " +
+                    $"laneCountMainSource={laneCountMainSource} " +
+                    $"laneCountMainTarget={laneCountMainTarget} " +
+                    $"laneCountMinor2Source={laneCountMinor2Source} " +
+                    $"laneCountMinor2Target={laneCountMinor2Target} " +
+                    $"totalSource={totalSource} " +
+                    $"totalTarget={totalTarget} " +
+                    $"laneArithmaticWorks={laneArithmaticWorks}");
             }
             if (totalSource <= 1 || totalTarget <= 1) {
                 return false; // No lane connections are necessry.
@@ -640,7 +644,7 @@ namespace TrafficManager.UI.SubTools {
 
             float ratio =
                 totalSource >= totalTarget ?
-                totalSource/ (float)totalTarget :
+                totalSource / (float)totalTarget :
                 totalTarget / (float)totalSource;
 
             /* here we are trying to create bounds based on the ratio of source VS target lanes.
@@ -736,13 +740,13 @@ namespace TrafficManager.UI.SubTools {
                         targetLaneEnd.SegmentId == minorSegment2Id &&
                         IndexesMatch(
                             sourceLaneEnd.OuterSimilarLaneIndex + laneCountMinorSource,
-                            targetLaneEnd.OuterSimilarLaneIndex + laneCountMinorTarget + laneCountMainAgainst)) {
+                            targetLaneEnd.OuterSimilarLaneIndex + laneCountMinorTarget + laneCountMainTarget)) {
                         connect = true;
                     } else if (
                         sourceLaneEnd.SegmentId == minorSegment2Id &&
                         targetLaneEnd.SegmentId == mainSegmentTargetId &&
                         IndexesMatch(
-                            sourceLaneEnd.OuterSimilarLaneIndex + laneCountMinorSource + laneCountMainToward,
+                            sourceLaneEnd.OuterSimilarLaneIndex + laneCountMinorSource + laneCountMainSource,
                             targetLaneEnd.OuterSimilarLaneIndex + laneCountMinorTarget)) {
                         connect = true;
                     }
