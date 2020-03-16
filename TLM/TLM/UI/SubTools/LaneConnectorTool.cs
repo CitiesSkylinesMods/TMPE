@@ -353,10 +353,9 @@ namespace TrafficManager.UI.SubTools {
                     bool oneway = segMan.CalculateIsOneWay(segList[0]) || segMan.CalculateIsOneWay(segList[1]);
 
                     if (stayInLane) {
-                        // "stay in lane"
                         switch (stayInLaneMode) {
                             case StayInLaneMode.None: {
-                                    stayInLaneMode = !oneway? StayInLaneMode.Both:StayInLaneMode.Forward;
+                                    stayInLaneMode = !oneway ? StayInLaneMode.Both : StayInLaneMode.Forward;
                                     break;
                                 }
 
@@ -375,18 +374,22 @@ namespace TrafficManager.UI.SubTools {
                                     break;
                                 }
                         }
-                        MainTool.Guide.Deactivate("LaneConnectorTool:quick-setup is not supported for this setup.");
-                    } else {
-                        MainTool.Guide.Activate("LaneConnectorTool:quick-setup is not supported for this setup.");
                     }
 
                     Log._Debug($"stayInLane:{stayInLane} stayInLaneMode:{stayInLaneMode}\n" +
                         $"GetMarkerSelectionMode()={GetSelectionMode()} SelectedNodeId={SelectedNodeId}");
 
                     if (stayInLane) {
-                        StayInLane(SelectedNodeId, stayInLaneMode);
+                        stayInLane = StayInLane(SelectedNodeId, stayInLaneMode);
                         RefreshCurrentNodeMarkers(SelectedNodeId);
                     } // end if stay in lane
+
+                    if (stayInLane) {
+                        MainTool.Guide.Deactivate("LaneConnectorTool:quick-setup is not supported for this setup.");
+                    } else {
+                        MainTool.Guide.Activate("LaneConnectorTool:quick-setup is not supported for this setup.");
+                    }
+
                 } // end if quick setup
             } // end if selected node
 
@@ -535,8 +538,8 @@ namespace TrafficManager.UI.SubTools {
         /// </summary>
         /// <param name="nodeId"></param>
         /// <param name="mode">determines for which side to connect lanes.</param>
-        /// <returns>if lane arithmatic works (when <paramref name="checkOnly"/> is <c>true</c>) </returns>
-        public static void StayInLane(ushort nodeId, StayInLaneMode mode = StayInLaneMode.None) {
+        /// <returns><c>false</c> if there is only one incomming/outgoing lane, <c>true</c> otherwise</returns>
+        public static bool StayInLane(ushort nodeId, StayInLaneMode mode = StayInLaneMode.None) {
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
 
             GetSoredtedSegments(nodeId, out List<ushort> segments);
@@ -548,12 +551,14 @@ namespace TrafficManager.UI.SubTools {
                 innerMinor = segments[3];
             }
 
+            bool ret = false;
             if (mode == StayInLaneMode.Both || mode == StayInLaneMode.Forward) {
-                StayInLane(nodeId, segments[0], segments[1], segments[2], innerMinor);
+                ret |= StayInLane(nodeId, segments[0], segments[1], segments[2], innerMinor);
             }
             if(mode == StayInLaneMode.Both || mode == StayInLaneMode.Backward) {
-                StayInLane(nodeId, segments[1], segments[0], segments[3], 0);
+                ret |= StayInLane(nodeId, segments[1], segments[0], segments[3], 0);
             }
+            return ret;
         }
 
         /// <summary>
@@ -578,19 +583,18 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="minorSegmentId">minor segment attached from the outer side to the main road</param>
         /// <param name="minorSegment2Id">only valid where main road is oneway.
         /// this is the segment that is attached from the inner side to the main road.</param>
-        private static void StayInLane(
+        /// <returns><c>false</c> if there is only one incomming/outgoing lane, <c>true</c> otherwise</returns>
+        private static bool StayInLane(
             ushort nodeId,
             ushort mainSegmentSourceId, 
             ushort mainSegmentTargetId, 
             ushort minorSegmentId,
             ushort minorSegment2Id) {
-#if DEBUG
             if (verbose_) {
                 Log._Debug($"StayInLane(nodeId:{nodeId}, " +
                     $"mainSegmentSourceId:{mainSegmentSourceId}, mainSegmentTargetId:{mainSegmentTargetId}, " +
                     $"minorSegmentId:{minorSegmentId}, minorSegment2Id:{minorSegment2Id})");
             }
-#endif
             ref NetSegment segment = ref minorSegmentId.ToSegment();
             ref NetNode node = ref nodeId.ToNode();
             bool oneway0 = segMan.CalculateIsOneWay(mainSegmentTargetId);
@@ -601,13 +605,11 @@ namespace TrafficManager.UI.SubTools {
             bool splitMiddle = oneway && minorSegmentId != 0 && minorSegment2Id != 0;
             bool splitOuter = oneway && minorSegmentId == 0 && minorSegment2Id != 0;
             bool splitInner = !splitMiddle && !splitOuter;
-#if DEBUG
             if (verbose_) {
                 Log._Debug($"splitOuter={splitOuter}  " +
                     $"splitInner={splitInner} " +
                     $"splitMiddle={splitMiddle}");
             }
-#endif
 
             // count relavent source(going toward the junction) lanes and
             // target (going aginst the junction) lanes on each segment.
@@ -621,7 +623,6 @@ namespace TrafficManager.UI.SubTools {
             int totalTarget = laneCountMinorTarget + laneCountMainAgainst + laneCountMinor2Target;
 
             bool laneArithmaticWorks = totalSource == totalTarget && laneCountMainToward == laneCountMinorTarget;
-#if DEBUG
             if (verbose_) {
                 Log._Debug($"StayInLane: " +
                     $"laneCountMinorToward={laneCountMinorSource} " +
@@ -633,9 +634,8 @@ namespace TrafficManager.UI.SubTools {
                     $"totalToward={totalSource} " +
                     $"totalAgainst={totalTarget}");
             }
-#endif
             if (totalSource <= 1 || totalTarget <= 1) {
-                return; // No lane connections are necessry.
+                return false; // No lane connections are necessry.
             }
 
             float ratio =
@@ -755,6 +755,7 @@ namespace TrafficManager.UI.SubTools {
                     }
                 } // foreach
             } // foreach
+            return true;
         }
 
         public override void OnPrimaryClickOverlay() {
