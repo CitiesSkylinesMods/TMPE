@@ -86,7 +86,8 @@ namespace TrafficManager.UI {
         /// Also enables Traffic manager tool.
         /// </summary>
         private void ShowMassEditOverlay() {
-            return; // TODO [issue #789] fix mass edit overlay bug and remove this
+            if (!ModUI.ToolHasBeenEnabled)
+                return;
             var tmTool = ModUI.GetTrafficManagerTool(true);
             if (tmTool == null) {
                 Log.Error("ModUI.GetTrafficManagerTool(true) returned null");
@@ -98,7 +99,8 @@ namespace TrafficManager.UI {
         }
 
         private void HideMassEditOverlay() {
-            return; // TODO [issue #789] remove this
+            if (!ModUI.ToolHasBeenEnabled)
+                return;
             MassEditOVerlay.Show = false;
             var tmTool = ModUI.GetTrafficManagerTool(false);
             if (tmTool) {

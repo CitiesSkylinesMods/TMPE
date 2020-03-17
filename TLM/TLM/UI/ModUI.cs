@@ -178,7 +178,13 @@ namespace TrafficManager.UI {
             }
         }
 
+        /// <summary>
+        /// indicates if ModUI.EnableTool() tool has ever been called.
+        /// TODO [issue #789] remove this work around when fixing #789.
+        /// </summary>
+        public static bool ToolHasBeenEnabled = false; 
         public static void EnableTool() {
+            ToolHasBeenEnabled = true;
             Log._Debug("ModUI.EnableTool: called");
             TrafficManagerTool tmTool = GetTrafficManagerTool(true);
 
