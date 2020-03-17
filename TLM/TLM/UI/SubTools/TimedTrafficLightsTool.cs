@@ -106,7 +106,8 @@ namespace TrafficManager.UI.SubTools {
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             if(ctrlDown) {
                 AutoTimedTrafficLights.ErrorResult res = AutoTimedTrafficLights.Setup(HoveredNodeId);
-                    string message = null;
+                string message = null;
+
                 switch (res) {
                     case AutoTimedTrafficLights.ErrorResult.NotSupported:
                         MainTool.Guide.Activate("TimedTrafficLightsTool_Auto TL no need");
@@ -126,7 +127,7 @@ namespace TrafficManager.UI.SubTools {
                         Translation.TrafficLights.Get("Dialog.Text:Auto TL create failed because") +
                         "\n" +
                         Translation.TrafficLights.Get(message);
-                    MainTool.ShowError(message);
+                    MainTool.WarningPrompt(message);
                     return;
                 }
                 RefreshCurrentTimedNodeIds(HoveredNodeId);
@@ -160,7 +161,7 @@ namespace TrafficManager.UI.SubTools {
                                 MainTool.SetToolMode(ToolMode.TimedLightsShowLights);
                             }
                         } else {
-                            MainTool.ShowError(T("Dialog.Text:Node has timed TL script"));
+                            MainTool.WarningPrompt(T("Dialog.Text:Node has timed TL script"));
                         }
                     }
 
@@ -242,14 +243,14 @@ namespace TrafficManager.UI.SubTools {
                                             .CountSegments();
 
                     if (numSourceSegments != numTargetSegments) {
-                        MainTool.ShowError(
+                        MainTool.WarningPrompt(
                             T("Dialog.Text:Incompatible traffic light script"));
                         return;
                     }
 
                     // check for existing simulation
                     if (tlsMan.HasTimedSimulation(HoveredNodeId)) {
-                        MainTool.ShowError(
+                        MainTool.WarningPrompt(
                             T("Dialog.Text:Node has timed TL script"));
                         return;
                     }

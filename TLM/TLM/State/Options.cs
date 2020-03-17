@@ -66,6 +66,7 @@ namespace TrafficManager.State {
         public static bool trafficLightPriorityRules;
         public static bool banRegularTrafficOnBusLanes;
         public static bool advancedAI;
+        public static SimulationAccuracy simulationAccuracy;
         public static bool realisticPublicTransport;
         public static byte altLaneSelectionRatio;
         public static bool highwayRules;
@@ -163,11 +164,10 @@ namespace TrafficManager.State {
             }
 
             if (warn) {
-                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
+                Prompt.Warning(
                     "Nope!",
                     Translation.Options.Get("Dialog.Text:Settings are stored in savegame")
-                    + " https://www.viathinksoft.de/tmpe/#options",
-                    false);
+                    + " https://github.com/CitiesSkylinesMods/TMPE/wiki/Settings");
             }
 
             return false;

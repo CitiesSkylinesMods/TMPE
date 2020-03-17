@@ -130,6 +130,12 @@ namespace TrafficManager.Traffic.Impl {
                         return true;
                     });
 
+                if ((Options.simulationAccuracy <= SimulationAccuracy.Low && numProcessed >= 3) ||
+                    (Options.simulationAccuracy == SimulationAccuracy.Medium && numProcessed >= 5) ||
+                    (Options.simulationAccuracy == SimulationAccuracy.High && numProcessed >= 10)) {
+                    break;
+                }
+
                 vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 
                 if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {

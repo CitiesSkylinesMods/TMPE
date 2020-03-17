@@ -14,15 +14,15 @@ namespace TrafficManager.UI {
     using JetBrains.Annotations;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+#if DEBUG
     using TrafficManager.State.ConfigData;
+#endif
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.SubTools;
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
-    using GenericGameBridge.Service;
-    using CitiesGameBridge.Service;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -33,7 +33,6 @@ namespace TrafficManager.UI {
 
         private ToolMode toolMode_;
         private NetTool _netTool;
-
 
         /// <summary>
         /// Maximum error of HitPos field.
@@ -548,6 +547,54 @@ namespace TrafficManager.UI {
                 1280f,
                 false,
                 alpha);
+        }
+
+        /// <summary>
+        /// similar to NetTool.RenderOverlay()
+        /// but with additional control over alphaBlend.
+        /// </summary>
+        internal static void DrawSegmentOverlay(
+            RenderManager.CameraInfo cameraInfo,
+            ushort segmentId,
+            Color color,
+            bool alphaBlend) {
+            if (segmentId == 0) {
+                return;
+            }
+
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            float width = segment.Info.m_halfWidth;
+
+            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            bool IsMiddle(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
+
+            Bezier3 bezier;
+            bezier.a = GetNodePos(segment.m_startNode);
+            bezier.d = GetNodePos(segment.m_endNode);
+
+            NetSegment.CalculateMiddlePoints(
+                bezier.a,
+                segment.m_startDirection,
+                bezier.d,
+                segment.m_endDirection,
+                IsMiddle(segment.m_startNode),
+                IsMiddle(segment.m_endNode),
+                out bezier.b,
+                out bezier.c);
+
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
+                cameraInfo,
+                color,
+                bezier,
+                width * 2f,
+                0,
+                0,
+                -1f,
+                1280f,
+                false,
+                alphaBlend);
+
         }
 
         [UsedImplicitly]
@@ -1808,6 +1855,14 @@ namespace TrafficManager.UI {
             return boundingBox.Contains(Event.current.mousePosition);
         }
 
+
+        /// <summary>
+        /// this method should be used in OnToolGUI() instead of Input.GetMouseButtonDown(0).
+        /// This is because Input.GetMouseButtonDown(0) is consumed by OnToolUpdate()
+        /// to call OnPrimaryClickOverlay().
+        /// You should call this method from OnPrimaryClickOverlay() once click is handled. consume the click.
+        /// TODO [issue #740] improve this.
+        /// </summary>
         internal bool CheckClicked() {
             if (Input.GetMouseButtonDown(0) && !_mouseClickProcessed) {
                 _mouseClickProcessed = true;
@@ -1817,16 +1872,17 @@ namespace TrafficManager.UI {
             return false;
         }
 
-        /// <summary>Displays modal popup with an error</summary>
-        /// <param name="text">The localized message</param>
-        public void ShowError(string text) {
-            if (text == null) {
+        /// <summary>
+        /// Displays a warning prompt in center of the screen.
+        /// </summary>
+        /// 
+        /// <param name="message">The localized body text of the prompt.</param>
+        public void WarningPrompt(string message) {
+            if (string.IsNullOrEmpty(message)) {
                 return;
             }
 
-            UIView.library
-                  .ShowModal<ExceptionPanel>("ExceptionPanel")
-                  .SetMessage("Info", text, false);
+            Prompt.Warning("Warning", message);
         }
     }
 }

@@ -50,12 +50,11 @@
         }
 
         protected UIButton AddRemoveVehicleButton(WorldInfoPanel panel) {
-            UIButton button =
-                UIView.GetAView()
-                      .AddUIComponent(typeof(RemoveVehicleButton)) as RemoveVehicleButton;
+            UIButton button = new GameObject("RemoveVehicleInstanceButton")
+                .AddComponent<RemoveVehicleButton>();
 
             button.AlignTo(panel.component, UIAlignAnchor.TopRight);
-            button.relativePosition += new Vector3(-button.width - 80f, 50f);
+            button.relativePosition += new Vector3(-button.width - 55f, 50f);
 
             return button;
         }
@@ -63,7 +62,22 @@
         public class RemoveVehicleButton : BaseUButton {
             public override void Start() {
                 base.Start();
-                width = height = MainMenuPanel.ScaledSize.GetButtonSize();
+                this.Skin = new ButtonSkin {
+                    BackgroundPrefix = "Clear",
+                    Prefix = "Clear",
+                    BackgroundHovered = true,
+                    BackgroundActive = true,
+                    ForegroundHovered = true,
+                    ForegroundActive = true
+                };
+                this.atlas = this.Skin.CreateAtlas(
+                    "Clear",
+                    50,
+                    50,
+                    256,
+                    this.Skin.CreateAtlasKeyset());
+                UpdateButtonImageAndTooltip();
+                width = height = 30f;
             }
 
             public override void HandleClick(UIMouseEventParameter p) {

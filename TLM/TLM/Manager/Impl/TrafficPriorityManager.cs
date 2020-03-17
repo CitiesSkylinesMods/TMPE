@@ -456,14 +456,17 @@ namespace TrafficManager.Manager.Impl {
             // }
 
             // calculate approx. time after which the transit node will be reached
-            Vector3 targetToNode = transitNode.m_position - vehicle.GetLastFramePosition();
-            Vector3 targetVel = vehicle.GetLastFrameVelocity();
-            float targetSpeed = targetVel.magnitude;
-            float targetDistanceToTransitNode = targetToNode.magnitude;
+            float targetTimeToTransitNode = float.NaN;
+            if (Options.simulationAccuracy >= SimulationAccuracy.High) {
+                Vector3 targetToNode = transitNode.m_position - vehicle.GetLastFramePosition();
+                Vector3 targetVel = vehicle.GetLastFrameVelocity();
+                float targetSpeed = targetVel.magnitude;
+                float targetDistanceToTransitNode = targetToNode.magnitude;
 
-            float targetTimeToTransitNode = targetSpeed > 0
-                                                ? targetDistanceToTransitNode / targetSpeed
-                                                : 0;
+                targetTimeToTransitNode = targetSpeed > 0
+                                              ? targetDistanceToTransitNode / targetSpeed
+                                              : 0;
+            }
 
             Log._DebugIf(
                 logPriority,

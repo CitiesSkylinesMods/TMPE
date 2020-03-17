@@ -1,31 +1,87 @@
-﻿# Cities: Skylines - Traffic Manager: *President Edition* [![Discord](https://img.shields.io/discord/545065285862948894.svg)](https://discord.gg/faKUnST)
+﻿# Cities: Skylines - Traffic Manager: _President Edition_
 
 # Changelog
 
-Current versions of TM:PE are:
+<a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=stable&color=7cc17b&logo=steam&logoColor=F5F5F5" /></a> <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?include_prereleases&label=labs&color=f7b73c&logo=steam&logoColor=F5F5F5" /></a> <a href="https://github.com/CitiesSkylinesMods/TMPE/releases"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=downloads&include_prereleases&logo=ipfs&logoColor=F5F5F5" /></a> <a href="https://github.com/CitiesSkylinesMods/TMPE/wiki/Installation"><img src="https://img.shields.io/badge/install%20guide-wiki-blue?logo=koding&logoColor=F5F5F5" /></a> <a href="https://discord.gg/faKUnST"><img src="https://img.shields.io/discord/545065285862948894?color=7289DA&label=chat&logo=discord" /></a>
 
-* [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
-* [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141) (test releases)
-
-This changelog includes all versions and major variants of the mod going all the way back to March 2015, just 4 days after the first release of C:SL!
+This changelog includes all versions and major variants of the mod going all the way back to March 2015, just 4 days after Cities: Skylines was released!
 
 > **Legend:**
 >  
 > * **C:SL** = Cities: Skylines game updates (for reference)
 > * **TM:PE** = Traffic Manager: President Edition
->     * TM:PE STABLE - TM:PE versions 10.14 to 10.20
->     * TM:PE LABS - TM:PE versions 10.14 to 10.21.1 (later renamed to TM:PE v11 STABLE)
->     * TM:PE v11 ALPHA - TM:PE versions 11.0-alpha1 to 11.0-alpha12 (later renamed to TM:PE v11 LABS)
 >     * TM:PE v11 STABLE - TM:PE versions 11.0 and above (stable releases)
 >     * TM:PE v11 LABS - TM:PE versions 11.0 and above (test releases)
+>     * TM:PE v11 ALPHA - TM:PE versions 11.0-alpha1 to 11.0-alpha12 (later renamed to TM:PE v11 LABS)
+>     * TM:PE LABS - TM:PE versions 10.14 to 10.21.1 (later renamed to TM:PE v11 STABLE)
+>     * TM:PE STABLE - TM:PE versions 10.14 to 10.20
 > * **TPP2** = Traffic++ V2
-> * **TMIAI** = Traffic Manager + Improved AI
+> * **TM:IAI** = Traffic Manager + Improved AI
 > * **TMPlus** = Traffic Manager Plus
 > * **TPP:AI** - Traffic++ Improved AI
 > * **TPP** = Traffic++
 > * **TM** = Traffic Manager
+> * **CSLT** = Cities Skylines Traffic (later renamed to Traffic++)
+> * **TLM** = Taffic Lights Manager (later renamed to Traffic Manager)
 
-#### TM:PE V11 LABS [11.1.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/11.0...11.1.0), 03/02/2020
+### TM:PE V[11.1.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.1-hotfix1...11.1.2) LABS, 02/03/2020
+
+- Fixed: One-click traffic lights wrong way on RHT maps, murdering pedestrians (#770, #769, #690)
+
+### TM:PE V[11.1.1-hotfix1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.1...11.1.1-hotfix1) LABS, 01/03/2020
+
+- Fixed: Vehicles stopping at Yield signs (#761, #756)
+- Fixed: Missing despawn buttons on cim and vehicle info panels (#765, #763, #759)
+- Fixed: Info panel not closing after despawning a cim or tourist (#765)
+- Fixed: Faulty UI on tourist despawn button (#765)
+- Updated: Docs - Reference paths for EA Origin deployed game (thanks DannyDannyDan) ( #751)
+
+### TM:PE V[11.1.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.0...11.1.1) LABS, 29/02/2020
+
+- Added: The `Simulation Accuracy` option has been revived! (#742, #707)
+- Added: `Shift` key applies a setting to entire route + lane highlight (#138, #721, #709, #708, #667, #388, #33)
+- Added: Lane highlighting - Vehicle Restrictions tool (#721, #681, #667, #42, #33)
+- Added: Lane highlighting - Parking Restrictions tool (#708, #702, #667, #47, #33)
+- Added: Lane highlighting - Speed Limits tool (#709, #682, #667, #388, #84, #52, #33)
+- Added: Button to reset speed limit to default added to speeds palette (#709)
+- Added: UI scaling slider in mod options "General" tab (#656)
+- Removed: Drag along road to set speed limits, due to performance issues (#388)
+- Fixed: Only selected vehicle restriction, not all, should be applied to route (#721)
+- Fixed: Lane connector can't make U-turns on roads with monorails (#293)
+- Fixed: Lane connectors could connect tracks disconnected by `MaxTurnAngle` (#684, #649)
+- Fixed: Wrong texture paths for timed traffic lights (thanks t1a2l for reporting!) (#732, #704, #714)
+- Fixed: Bug in guide manager that activated guide when trying to deactivate (#729)
+- Fixed: Double setting of lane speeds on game load, and debug log spamming (#736, #735)
+- Fixed: Scrollbar position corrected in mod options (#722, #742)
+- Fixed: Vehicle Restrictions error: `HashSet have been modified` (#746, #744, #721)
+- Improved: Cleaned up UI panels in Vehicle Restrictions and Speed Limits tools (#721, #709, #657)
+- Improved: Toolbar UI code overhauled, updated and polished (#656, #523)
+- Improved: Compatibility with CSUR Reloaded (#684, #649, #687, CSURToolBox#1, CSURToolBox#2)
+- Improved: Organised lane markers/highlighters in to distinct classes (#701, #630)
+- Improved: Better reference `.dll` hint paths for Mac and Windows developers (#664, #663)
+- Improved: Faster and more reliable hot-reloads of dev builds (#725, #717, #718)
+- Improved: Reduced memalloc and gc in SpeedLimitsManager.OnBeforeData() logging (#753)
+- Updated: Translations - Chinese Simplified (thanks 田七不甜 / TianQiBuTian) (#723)
+- Updated: Translations - Chinese Traditional (thanks jrthsr700tmax) (#723)
+- Updated: Translations - Dutch (thanks Headspike) (#723, #742)
+- Updated: Translations - English (thanks kian.zarrin, Dmytro Lytovchenko / kvakvs) (#723, #742)
+- Updated: Translations - Hungarian (thanks Krisztián Melich / StummeH) (#742)
+- Updated: Translations - Italian (thanks cianecollazzo / azzo94) (#723)
+- Updated: Translations - Korean (thanks neinnew) (#723, #742)
+- Updated: Translations - Polish (thanks krzychu124) (#723)
+- Updated: Translations - Portuguese (thanks BlackScout / BS_BlackScout) (#723)
+- Updated: Translations - Russian (thanks Dmytro Lytovchenko / kvakvs) (#723)
+- Updated: Translations - Spanish (thanks Nithox, obv) (#723, #742)
+- Updated: Translations - Turkish (thanks Tayfun [Typhoon] / Koopr) (#723)
+- Updated: Translations - Ukrainian (thanks Dmytro Lytovchenko / kvakvs) (#723)
+- Meta: Thanks to CSUR Reloaded team for collaboration with #684! (#649, #503)
+- Meta: Basic mod integration guide started (#696)
+- Meta: Build guide updated to include note on Windows 10 ASLR, and reference hint paths (#693)
+- Meta: Created GitHub org (`CitiesSkylinesMods`) and moved repo to it (`TMPE`) (#673)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
+- GitHub: [CitiesSkylinesMods/TMPE](https://github.com/CitiesSkylinesMods/TMPE)
+
+### TM:PE V[11.1.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.0...11.1.0) STABLE, 29/02/2020
 
 - Added: Quick setup of priority roads (`Ctrl+Click junction`, `Shift+Ctrl+Click road`) (#621, #541, #542, #568, #577, #7)
 - Added: `Delete` key resets junction restrictions for selected junction (#639, #623, #568, #6)
@@ -35,16 +91,35 @@ This changelog includes all versions and major variants of the mod going all the
 - Improved: Vastly improved in-game hotloading support (#640, #211)
 - Improved: Centralised versioning in to `SharedAssemblyInfo.cs` (#680, #678, #649)
 - Updated: Translations - Dutch (thanks Headspike!) (#660, #631)
-- Updated: Translations - Turkish - Tayfun [Typhoon] (thanks Koopr) (#660, #631)
-- Updated: Translations - Chinese Simplified - Golden (thanks goldenjin!) (#660, #631)
-- Updated: Translations - Portuguese - BlackScout (thanks BS_BlackScout!) (#660, #631)
+- Updated: Translations - Turkish (thanks Tayfun [Typhoon] / Koopr) (#660, #631)
+- Updated: Translations - Chinese Simplified (thanks Golden / goldenjin!) (#660, #631)
+- Updated: Translations - Portuguese (thanks BlackScout / BS_BlackScout!) (#660, #631)
+- Updated: Translations - Spanish (thanks Aimarekin!) (#660, #631)
+- Updated: Translations - English (thanks kian.zarrin!) (#660, #631)
+- Fixed: Vehicles should not stop at Yield signs (#662, #655, #650)
+- Meta: New WIP website: https://tmpe.me (#642, #643)
+- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
+### TM:PE V[11.1.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.0...11.1.0) LABS, 11/02/2020
+
+- Added: Quick setup of priority roads (`Ctrl+Click junction`, `Shift+Ctrl+Click road`) (#621, #541, #542, #568, #577, #7)
+- Added: `Delete` key resets junction restrictions for selected junction (#639, #623, #568, #6)
+- Added: "Reset" button and `Delete` key resets lane arrows for a segment (#638, #632, #623, #568, #41)
+- Improved: Much better lane connectors interaction model (#543, #635, #625, #626, #41)
+- Improved: Use guide manager for less obtrusive in-game warnings/hints (#653, #660, #593)
+- Improved: Vastly improved in-game hotloading support (#640, #211)
+- Improved: Centralised versioning in to `SharedAssemblyInfo.cs` (#680, #678, #649)
+- Updated: Translations - Dutch (thanks Headspike!) (#660, #631)
+- Updated: Translations - Turkish (thanks Tayfun [Typhoon] / Koopr) (#660, #631)
+- Updated: Translations - Chinese Simplified (thanks Golden / goldenjin!) (#660, #631)
+- Updated: Translations - Portuguese (thanks BlackScout / BS_BlackScout!) (#660, #631)
 - Updated: Translations - Spanish (thanks Aimarekin!) (#660, #631)
 - Updated: Translations - English (thanks kian.zarrin!) (#660, #631)
 - Fixed: Vehicles should not stop at Yield signs (#662, #655, #650)
 - Meta: New WIP website: https://tmpe.me (#642, #643)
 - Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
-### TM:PE V11 STABLE [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), 03/02/2020
+### TM:PE V[11.0](https://github.com/CitiesSkylinesMods/TMPE/compare/10.21.1...11.0) STABLE, 03/02/2020
 
 - Contains ~100 improvements from TM:PE v11 ALPHA previews, including:
     - Timed traffic lights: Add default sequence (Ctrl+Click a junction)
@@ -65,7 +140,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Meta: Renamed LABS and ALPHA workshop pages to V11 STABLE and V11 LABS respectively
 - Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-### TM:PE V11 LABS [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), 03/02/2020
+### TM:PE V[11.0](https://github.com/CitiesSkylinesMods/TMPE/compare/10.21.1...11.0) LABS, 03/02/2020
 
 - Contains ~100 improvements from TM:PE v11 ALPHA previews, including:
     - Timed traffic lights: Add default sequence (Ctrl+Click a junction)
@@ -89,6 +164,7 @@ This changelog includes all versions and major variants of the mod going all the
 ### C:SL 1.12.3-f2 ("Paradox Launcher"), 22/01/2020
 
 - Paradox Launcher app added
+- Pain.
 
 ### TM:PE V11 ALPHA 11.0-alpha12, 12/01/2020
 
@@ -231,13 +307,13 @@ This changelog includes all versions and major variants of the mod going all the
 - Maintainer: aubergine18 (GitHub user aubergine10)
 - GitHub: [krzychu124/Cities-Skylines-Traffic-Manager-President-Edition](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition)
 
-### TM:PE LABS [10.21.1 hotfix](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21...10.21.1), 06/07/2019
+### TM:PE LABS [10.21.1 hotfix](https://github.com/CitiesSkylinesMods/TMPE/compare/10.21...10.21.1), 06/07/2019
 
 - Fixed: Speed panel tanks fps if train tracks on screen (thanks rlas & DaEgi01!) (#411, #413)
 - Meta: Main changelog refactored (#412)
 - Steam: [Traffic Manager: President Edition (LABS)](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
-### TM:PE LABS [10.21](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.20...10.21), 02/07/2019
+### TM:PE LABS [10.21](https://github.com/CitiesSkylinesMods/TMPE/compare/10.20...10.21), 02/07/2019
 
 - Added: Cims have individual driving styles to determine lane changes and driving speed (#263 #334)
 - Added: Miles Per Hour option for speed limits (thanks kvakvs) (#384)
@@ -447,7 +523,16 @@ This changelog includes all versions and major variants of the mod going all the
 - Meta: Roads United Core also breaks toll booths
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TM:PE 1.10.12, 08/12/2018
+### C:SL 1.11.0-f3 (Industries), 23/10/2018
+
+- Added: Toll booths
+- Added: Postal service, vans and trucks
+- Added: Additional industry vehicles
+- Added: Cargo airport and planes
+- Added: Warehouses and storage buildings
+- Fixed: Bugs in various DLCs
+
+### TM:PE 1.10.12, 12/08/2018
 
 - Added: Allow/disallow vehicles to enter a blocked junction at transition and pedestrian crossing nodes (#195)
 - Fixed: Emergency vehicles pass closed barriers at level crossings
@@ -459,14 +544,10 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Russian translation (thanks to vitalii2011 for translating)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### C:SL 1.11.0-f3 (Industries), 23/10/2018
+### TM:PE 1.10.11-hotfix, 22/07/2018
 
-- Added: Toll booths
-- Added: Postal service, vans and trucks
-- Added: Additional industry vehicles
-- Added: Cargo airport and planes
-- Added: Warehouses and storage buildings
-- Fixed: Bugs in various DLCs
+- Updated: Bus lines render U-turn where they should not (#207)
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.10.11, 21/07/2018
 
@@ -566,6 +647,12 @@ This changelog includes all versions and major variants of the mod going all the
 
 - Fixed: Minor bugs
 
+### TM:PE 1.10.5-hotfix, 07/01/2018
+
+- Fixed: Monorail traffic lights do not show up (thanks merlineandrews for reporting)
+- Improved: Moved "Removew this vehicle button"
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
 ### TM:PE 1.10.5, 06/01/2018
 
 - Added: Randomization for lane changing costs
@@ -598,6 +685,11 @@ This changelog includes all versions and major variants of the mod going all the
 - Added: Possibility to add priority signs at multiple junctions at once (press Shift)
 - Added: Tutorials (can be disabled in the options window globally)
 - Updated: Compatible with C:SL 1.9.0-f5
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.10.3-hotfix, 19/10/2017
+
+- Fixed: Vehicle-separated traffic lights do not show up for bus lanes (thanks to Dafydd for reporting)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### C:SL 1.9.0-f5 (Green Cities), 19/10/2017
@@ -687,13 +779,18 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Double clicking creating multiple stops at the same place
 - Fixed: Various other bugs
 
-### TMIAI 1.3.9, 05/03/2017
+### TM:IAI 1.3.9-final, 29/05/2017
 
 - Fixed: Traffic flow statistics
 - Fixed: Monorail pathfinding
 - Fixed: Save/load lane connector data
-- Meta: This was the final release of TMIAI
+- Meta: This was the final release of TM:IAI
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
+
+### TM:PE 1.9.6-hotfix, 28/05/2017
+
+- Fixed: Cable cars are unable to turn around at end-of-line stations
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.9.6, 28/05/2017
 
@@ -713,6 +810,11 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Hotfix - Cable cars despawn at end-of-line stations
 - Updated: Compatible with C:SL 1.7.1-f1
 - Updated: Polish, Korean and Italian translation
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.9.4-hotfix, 23/05/2017
+
+- Fixed: Cable cars despawn at end-of-line stations
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.9.4, 23/05/2017
@@ -741,7 +843,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Removed: Disabled notification of route recalculating because some players report crashes
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TMIAI 1.3.9, 21/05/2017
+### TM:IAI 1.3.9, 21/05/2017
 
 - Fixed: Compatibility with C:SL 1.7.0-f5
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
@@ -757,6 +859,12 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Using the vanilla traffic light toggling feature crashes the game if TMPE's main menu has not been opened at least once
 - Fixed: AI - More car traffic and less public transportation present than in vanilla
 - Updated: French, Dutch and Korean translation
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.9.0-hotfix, 18/05/2017
+
+- Improved: Removed an unnecessary error message log
+- Fixed: Highway specific rules are broken (thanks Ronjoe for reporting)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.9.0, 18/05/2017
@@ -813,6 +921,11 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Smaller outside connection capacity for smaller roads
 - Updated: Upgraded to Unity 5.5.3f1
 
+### TM:PE 1.8.16-hotfix, 21/03/2017
+
+- Fixed: Trams were using regular roads.
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
 ### TM:PE 1.8.16, 20/03/2017
 
 - Improved: lane selection for busses if the option "Busses may ignore lane arrows" is activated
@@ -822,17 +935,17 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Lane connections can now also be removed by pressing the backspace key
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TMIAI 1.3.8, 05/03/2017
+### TM:IAI 1.3.8, 05/03/2017
 
 - Improved: Removed another unnecessary file
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.3.7, 05/03/2017
+### TM:IAI 1.3.7, 05/03/2017
 
 - Improved: Code clean-up, removed unnecessary files
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.3.6, 05/03/2017
+### TM:IAI 1.3.6, 05/03/2017
 
 - Improved: Moved buttons away from Natural Disasters panel
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
@@ -846,6 +959,11 @@ This changelog includes all versions and major variants of the mod going all the
 
 - Fixed: Helicopter not used if building has no road connection
 - Fixed: Various other game bugs
+
+### TM:PE 1.8.14-hotfix, 07/01/2017
+
+- Fixed: Manual traffic lights do not work properly (thanks dpitch40 for reporting)
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.8.14, 07/01/2017
 
@@ -877,7 +995,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TM:PE 1.8.11, 02/01/2017
 
-- Fixed: Speed limits for elevated/underground road segments are sometimes not correctly loaded (thanks to Pirazel and [P.A.N] Uf0 for reporting this issue)
+- Fixed: Speed limits for elevated/underground road segments are sometimes not correctly loaded (thanks to Pirazel and \[P.A.N] Uf0 for reporting this issue)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.8.10, 31/12/2016
@@ -903,6 +1021,11 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Taxis are not being used
 - Fixed: Prohibiting U-turns with the junction restriction tool does not work (thanks to Kisoe for reporting this issue)
 - Fixed: Cars are sometimes floating across the map while trying to park (thanks to [Delta ²k5] for reporting this issue)
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.8.7-hotfix, 24/12/2016
+
+- Fixed: Taxis are not being used
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.8.7, 24/12/2016
@@ -982,13 +1105,18 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: translations: Polish, Chinese (simplified)
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TPP2 2.0.12, 10/06/2016
+### TPP2 2.0.12, 30/11/2016
 
 - Updated: Compatible with C:SL 1.6.0-f4
 - Meta: This was the final release of TPP2
 - Meta: TM:PE continued as the main traffic mod for the game
 - Meta: The TPP/TPP2 can still be found in the Network Extensions 2 project
 - Steam: [Traffic++ V2](https://steamcommunity.com/sharedfiles/filedetails/?id=626024868)
+
+### TM:PE 1.8.0-hotfix, 29/11/2016
+
+- Updated: Reactivated Rush Hour interoperability
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.8.0, 29/11/2016
 
@@ -1053,6 +1181,18 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Compatible with C:SL 1.5.1-f3
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
+### TM:PE 1.7.10-hotfix2, 01/09/2016
+
+- Fixed: Manual pedestrian traffic light states were not correctly handled
+- Fixed: Junction restrictions overlay did not show all restricted junctions
+- Fixed: Setting up vehicle restrictions affects trams (thanks chem for reporting)
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.7.10-hotfix1, 31/08/2016
+
+- Improved: Rainfall compatibility
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
 ### TM:PE 1.7.10, 31/08/2016
 
 - Added: Players can now disable spawning of pocket cars
@@ -1063,6 +1203,12 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Manual pedestrian traffic light states were not correctly handled
 - Fixed: Junction restrictions overlay did not show all restricted junctions
 - Updated: Chinese (simplified) translation
+- Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
+
+### TM:PE 1.7.9-hotfix, 22/08/2016
+
+- Fixed: Cims were not using public transport
+- Fixed: Cims are not moving in
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
 ### TM:PE 1.7.9, 22/08/2016
@@ -1164,7 +1310,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Rewritten and simplified vehicle position tracking near timed traffic lights and priority signs for performance reasons
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TM:PE 1.6.22, 29/06/2016:
+### TM:PE 1.6.22-hotfix, 29/06/2016:
 
 - Fixed: Traffic measurement at timed traffic lights was incorrect
 - Updated: AI - Taxis now may not ignore lane arrows and are using bus lanes whenever possible (thanks to Cochy for pointing out this issue)
@@ -1285,7 +1431,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: The size of signs and symbols in the overlay is determined by screen resolution height, not by width
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TMIAI 1.3.5, 05/03/2016
+### TM:IAI 1.3.5, 05/03/2016
 
 - Fixed: Issues with tram lines
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
@@ -1317,7 +1463,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Compatibility with C:SL 1.3.2-f1
 - Steam: [Traffic Manager: President Edition](https://steamcommunity.com/sharedfiles/filedetails/?id=583429740)
 
-### TMIAI 1.3.4, 02/03/2016
+### TM:IAI 1.3.4, 02/03/2016
 
 - Fixed: Compatibility with C:SL 1.3.2-f1
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
@@ -1332,7 +1478,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 - Improved: Performance
 - Updated: Vehicle AIs
-- Updated: Code from TM:PE 1.16 merged in to TPP2
+- Updated: Code from TM:PE 1.6.7 merged in to TPP2
 - Steam: [Traffic++ V2](https://steamcommunity.com/sharedfiles/filedetails/?id=626024868)
 
 ### TM:PE 1.6.8, 01/03/2016
@@ -1461,7 +1607,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Compatible with C:SL 1.3.0-f4
 - Steam: [Traffic++ V2](https://steamcommunity.com/sharedfiles/filedetails/?id=626024868)
 
-### TMIAI 1.3.3, 19/02/2016
+### TM:IAI 1.3.3, 19/02/2016
 
 - Fixed: Compatibility with C:SL 1.3.0-f4
 - Improved: Various things
@@ -1570,8 +1716,8 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TM:PE 1.4.8, 25/01/2016
 
-- Added: translation to Polish (thanks to Krzychu1245 for working on this!)
-- Added: translation to Russian (thanks to FireGames for working on this!)
+- Added: Polish language (thanks to Krzychu1245 for working on this!)
+- Added: Russian language (thanks to FireGames for working on this!)
 - Improved: AI - Parameters have been tuned
 - Improved: AI - Added traffic density measurements
 - Improved: Performance improvements
@@ -1583,7 +1729,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 ### TM:PE 1.4.7, 22/01/2016
 
-- Added: Translation to Portuguese (thanks to igordeeoliveira for working on this!)
+- Added: Portuguese language added (thanks to igordeeoliveira for working on this!)
 - Improved: Reduced file size (thanks to GordonDry for reporting this problem)
 - Fixed: Freight ships/trains were not coming in (thanks to Mas71 and clus for reporting this problem)
 - Fixed: The toggle "Vehicles may enter blocked junctions" did not work properly (thanks for exxonic for reporting this problem)
@@ -1834,7 +1980,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Maintainer: iMarbot (GitHub user iMarbot)
 - GitHub: [iMarbot/Skylines-Traffic-Manager-Plus](https://github.com/iMarbot/Skylines-Traffic-Manager-Plus)
 
-### TMIAI 1.3.2, 02/12/2015
+### TM:IAI 1.3.2, 02/12/2015
 
 - Fixed: Update to use limits introduced in C:SL 1.2.2-f2
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
@@ -1899,28 +2045,28 @@ This changelog includes all versions and major variants of the mod going all the
 - Added: Prison Vans
 - Added: Taxis
 
-### TMIAI 1.3.1, 18/09/2015
+### TM:IAI 1.3.1, 18/09/2015
 
 - Improved: File size optimisation
 - Fixed: Numerous bugs
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.3, 17/09/2015
+### TM:IAI 1.3, 17/09/2015
 
 - Added: Intersection editor from TPP (by jfarias)
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.2.2, 03/09/2015
+### TM:IAI 1.2.2, 03/09/2015
 
 - Fixed: Timed node groups not being saved
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.2.1, 02/09/2015
+### TM:IAI 1.2.1, 02/09/2015
 
 - Fixed: Null reference error when saving a city
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.2, 02/09/2015
+### TM:IAI 1.2, 02/09/2015
 
 - Added: GUI for changing parameters in-game
 - Added: Toggle for TM and IAI lane interaction
@@ -1928,13 +2074,13 @@ This changelog includes all versions and major variants of the mod going all the
 - Improved: Verify data loaded from save game
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.1, 16/08/2015
+### TM:IAI 1.1, 16/08/2015
 
 - Fixed: But that prevented U-turns
 - Improved: Compatibility with Mod Tools
 - Steam: [Traffic Manager + Improved AI](https://steamcommunity.com/sharedfiles/filedetails/?id=498363759)
 
-### TMIAI 1.0, 12/08/2015
+### TM:IAI 1.0, 12/08/2015
 
 - Added: TM 1.0.6 features (by CBeThaX)
 - Added: Improved AI from TPP:AI 1.0.0 (by jfarias).
@@ -2043,7 +2189,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Added debug logs to the game's F7 Debug Panel (thanks Nefarion!)
 - Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
-### TM 1.0.4, 29/05/2015
+### TM 1.0.4-hotfix2, 29/05/2015
 
 - Fixed: Negative timers (thanks XaBBoK!)
 - Improved: Pathfinder clean-up (thanks dornathal!)
@@ -2070,7 +2216,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Few more bugs
 - Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
-### TPP 1.4.0 hotfix, 23/05/2015
+### TPP 1.4.0 hotfix1, 23/05/2015
 
 - Fixed: Wrong lane usage in highways
 - Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
@@ -2088,17 +2234,17 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Train tracks should not be selectable
 - Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
-### TPP 1.3.2 hotfix, 20/05/2015
+### TPP 1.3.2-hotfix2, 20/05/2015
 
 - Improved: Compatibility with C:SL 1.1.0b
 - Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
-### TPP 1.3.2 hotfix, 19/05/2015
+### TPP 1.3.2-hotfix1, 19/05/2015
 
 - Updated: Compatible with C:SL 1.1.0b
 - Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
-### TM 1.0.4 hotfix, 19/05/2015
+### TM 1.0.4-hotfix1, 19/05/2015
 
 - Fixed: Support for tunnels in AIs and pathfinder
 - Updated: Compatible with C:SL 1.1.0b
@@ -2115,7 +2261,7 @@ This changelog includes all versions and major variants of the mod going all the
 
 - Added: Ability to set restrictions lane by lane
 - Added: Ability to customise multiple lanes at same time
-- Fixed: But that prevented settings saving
+- Fixed: Bug that prevented settings saving
 - Fixed: Bug that prevented short roads being selected
 - Fixed: Vehicle restrictions now show correctly on all resolutions
 - Updated: Road customiser tool button moved
@@ -2166,7 +2312,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Meta: Released as version 1.0rc
 - Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
-### TM 0.9.0, 21/04/2015
+### TLM 0.9.0, 21/04/2015
 
 - Fixed: Cars and service stop working
 - Fixed: Wrong lane use
@@ -2176,39 +2322,39 @@ This changelog includes all versions and major variants of the mod going all the
 - Added: Thumbnail to workshop page
 - Meta: New save id
 - Meta: Released as version 0.9b
-- Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+- Steam: [Traffic Lights Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
-### TM 0.8.5, 19/04/2015
+### TLM 0.8.5, 19/04/2015
 
 - Fixed lane merges in Left Hand Traffic maps
 - Meta: Versions 0.8.3 and 0.8.4 were skipped
-- Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+- Steam: [Traffic Lights Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
-### TM 0.8.2, 19/04/2015
+### TLM 0.8.2, 19/04/2015
 
 - Updated: Rename 'Manual Control' to 'Manual Traffic Lights'
-- Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+- Steam: [Traffic Lights Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
-### TM 0.8.1, 19/04/2015
+### TLM 0.8.1, 19/04/2015
 
 - Added: Tool - Toggle Traffic Lights
 - Updated: No more deleting trains on 'clear traffic'
 - Fixed: Null exception timed traffic lights on node upgrade
 - Fixed: UI position on different resolutions
 - Meta: Released as version 0.8b
-- Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+- Steam: [Traffic Lights Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
-### TM 0.8.0, 19/04/2015
+### TLM 0.8.0, 19/04/2015
 
 - Fixed: Can now load game from pause menu
-- Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+- Steam: [Traffic Lights Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
-### TM 0.7.1, 18/04/2015
+### TLM 0.7.1, 18/04/2015
 
 - Improved: Tuned car wait on non-priority road
-- Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+- Steam: [Traffic Lights Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
-### TM 0.7.0, 18/04/2015
+### TLM 0.7.0, 18/04/2015
 
 - Fixed: Lanes on save/load in Left Hand traffic maps
 - Fixed: Lane positions
@@ -2217,17 +2363,17 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Traffic Manager load on multiple game loads
 - Fixed: Multiple saves on one save game
 - Updated: Moved UI button
-- Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+- Steam: [Traffic Lights Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
-### TM 0.6.1, 18/04/2015
+### TLM 0.6.1, 18/04/2015
 
 - Fixed: Cars coming form wrong lane in Left Hand Traffic maps
 - Fixed: Not being able to save on new game
 - Fixed: Errors when pressing Esc before opening menu
 - Meta: Released as version 0.61b
-- Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+- Steam: [Traffic Lights Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
-### TM 0.6.0, 18/04/2015
+### TLM 0.6.0, 18/04/2015
 
 - Added: Tool - Manual Control (traffic lights)
 - Added: Tool - Priority Signs
@@ -2242,7 +2388,12 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Custom Road AI
 - Updated: Better traffic light UI
 - Meta: Using cities-skylines-detour by cope (sschoener on github)
-- Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+- Steam: [Traffic Lights Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+
+### TPP 1.2.1, 16/04/2015
+
+- Fixed: Bugs introduced by previous version
+- Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
 ### TPP 1.2.0, 14/04/2015
 
@@ -2255,11 +2406,6 @@ This changelog includes all versions and major variants of the mod going all the
 ### C:SL 1.0.7c, 07/04/2015
 
 - Fixed: Lots of stuff
-
-### TPP 1.2.1, 06/04/2015
-
-- Fixed: Bugs introduced by previous version
-- Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
 ### TPP 1.1.8, 05/04/2015
 
@@ -2316,26 +2462,26 @@ This changelog includes all versions and major variants of the mod going all the
 - Meta: Renamed to "Traffic++"
 - Steam: [Traffic++](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
-### TPP 1.0.5, 24/03/2015
+### CSLT 1.0.5, 24/03/2015
 
 - Fixed: Options panel bug
 - Steam: [CSL-Traffic](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
-### TPP 1.0.4, 23/03/2015
+### CSLT 1.0.4, 23/03/2015
 
 - Fixed: Various bugs
 - Steam: [CSL-Traffic](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
-### TM 0.5.0, 22/03/2015
+### TLM 0.5.0, 22/03/2015
 
 - Added: Tool - Traffic Lights Editor
 - Added: Tool - Lane Changer
 - Added: Toolbar for mod features
 - Added: Log file
 - Updated: Compatible with C:SL 1.0.6
-- Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+- Steam: [Traffic Lights Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 
-### TPP 1.0.3, 20/03/2015
+### CSLT 1.0.3, 20/03/2015
 
 - Added: Option to toggle which vehicles can use pedestrian roads
 - Added: Ghost mode to disable most of mod but still allow maps to load
@@ -2347,18 +2493,18 @@ This changelog includes all versions and major variants of the mod going all the
 
 - Fixed: Lots of stuff
 
-### TPP 1.0.2, 18/03/2015
+### CSLT 1.0.2, 18/03/2015
 
 - Improved: Some interface improvements
 - Steam: [CSL-Traffic](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
-### TPP 1.0.1, 17/03/2015
+### CSLT 1.0.1, 17/03/2015
 
 - Fixed: Mod could only be used once per gaming session
 - Fixed: Various bugs
 - Steam: [CSL-Traffic](https://steamcommunity.com/sharedfiles/filedetails/?id=409184143)
 
-### TPP 1.0.0, 16/03/2015
+### CSLT 1.0.0, 16/03/2015
 
 - Added: Pedestrian zoneable road
 - Meta: Traffic++ project starts, but under its original name "CSL-Traffic"
@@ -2366,10 +2512,10 @@ This changelog includes all versions and major variants of the mod going all the
 - Maintainer: jfarias (GitHub user joaofarias)
 - GitHub: [joaofarias/csl-traffic](https://github.com/joaofarias/csl-traffic)
 
-### TM 0.4.0, 14/03/2015
+### TLM 0.4.0, 14/03/2015
 
 - Meta: Traffic Manager project starts
-- Steam: [Traffic Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
+- Steam: [Traffic Lights Manager](https://steamcommunity.com/sharedfiles/filedetails/?id=427585724)
 - Maintainer: CBeTHaX (GitHub user SvetlozarValchev)
 - GitHub: [SvetlozarValchev/Skylines-Traffic-Manager](https://github.com/SvetlozarValchev/Skylines-Traffic-Manager)
 
