@@ -86,21 +86,24 @@ namespace TrafficManager.UI {
         /// Also enables Traffic manager tool.
         /// </summary>
         private void ShowMassEditOverlay() {
+            return; // TODO [issue #789] fix mass edit overlay bug and remove this
             var tmTool = ModUI.GetTrafficManagerTool(true);
             if (tmTool == null) {
                 Log.Error("ModUI.GetTrafficManagerTool(true) returned null");
                 return;
             }
             MassEditOVerlay.Show = true;
-            tmTool.SetToolMode(ToolMode.None);
             tmTool.InitializeSubTools();
+            tmTool.SetToolMode(ToolMode.None);
         }
 
         private void HideMassEditOverlay() {
+            return; // TODO [issue #789] remove this
             MassEditOVerlay.Show = false;
             var tmTool = ModUI.GetTrafficManagerTool(false);
             if (tmTool) {
                 tmTool.InitializeSubTools();
+                tmTool.SetToolMode(ToolMode.None);
                 ModUI.DisableTool();
             }
         }
@@ -109,7 +112,6 @@ namespace TrafficManager.UI {
             if (value) {
                 EnqueueAction(ShowMassEditOverlay);
             } else {
-                Log.Warning($"Hiding mass edit everlay component={component?.name} value={value}");
                 EnqueueAction(HideMassEditOverlay);
             }
         }
