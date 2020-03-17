@@ -79,7 +79,7 @@ namespace TrafficManager.Util {
 
                 if (changed && len == prev_length) {
                     // this part is not so performance critical anymore.
-                    // fix caveat A: changing center of selection is not recognised as
+                    // caveat A is addressed here: changing center of selection is not recognised as
                     // selection changed.
                     for (int i = 0; i < len; ++i) {
                         if (prev_segmentID == path.m_buffer[i])
@@ -89,11 +89,9 @@ namespace TrafficManager.Util {
                 if (changed) {
                     Log._Debug("RoadSelection.Threading.OnUpdate() road selection changed");
                     prev_length = len;
-                    prev_segmentID = segmentID;
-                    UnityEngine.Debug.Log("POINT BEFORE Instance.OnChanged.Invoke()");
                     Instance.OnChanged?.Invoke();
-                    UnityEngine.Debug.Log("POINT AFTER Instance.OnChanged.Invoke()");
                 }
+                prev_segmentID = segmentID;
             }
         }
     } // end class

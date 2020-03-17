@@ -40,7 +40,36 @@ namespace TrafficManager.UI {
             }
         }
 
-        private void HidePriorityRoadToggle(UIComponent component, bool value) =>
+        #region Event handling
+        List<Action> actions = new List<Action>();
+        const int DELAY = 1;
+        int counter = DELAY;
+        public void EnqueueAction(Action action) {
+            if (action == null) return;
+            lock (actions) {
+                actions.Add(action);
+            }
+        }
+
+        void PerfromAction() {
+            if (actions == null) return;
+            lock (actions) {
+                if (actions.Count > 0) {
+                    if (--counter <= 0) {
+                        actions[0]?.Invoke();
+                        actions.RemoveAt(0);
+                        counter = DELAY;
+                    }
+                }
+            }
+        }
+
+        void OnGUI() {
+            //ShowWithDelay();
+            PerfromAction();
+        }
+
+        private void HidePriorityRoadToggleEvent(UIComponent component, bool value) =>
              component.isVisible = false;
 
         private void HideRoadAdjustPanelElements(UIPanel roadAdjustPanel) {
@@ -58,35 +87,45 @@ namespace TrafficManager.UI {
         /// </summary>
         private void ShowMassEditOverlay() {
             var tmTool = ModUI.GetTrafficManagerTool(true);
-            if(tmTool == null) {
+            if (tmTool == null) {
                 Log.Error("ModUI.GetTrafficManagerTool(true) returned null");
                 return;
             }
-            ModUI.EnableTool();
             MassEditOVerlay.Show = true;
+            tmTool.SetToolMode(ToolMode.None);
             tmTool.InitializeSubTools();
+        }
+
+        private void HideMassEditOverlay() {
+            MassEditOVerlay.Show = false;
+            var tmTool = ModUI.GetTrafficManagerTool(false);
+            if (tmTool) {
+                tmTool.InitializeSubTools();
+                ModUI.DisableTool();
+            }
         }
 
         private void MassEditOverlayOnEvent(UIComponent component, bool value) {
             if (value) {
-                ShowMassEditOverlay();
+                EnqueueAction(ShowMassEditOverlay);
             } else {
-                MassEditOVerlay.Show = false;
-                var tmTool = ModUI.GetTrafficManagerTool(false);
-                if (tmTool) {
-                    tmTool.InitializeSubTools();
-                    ModUI.DisableTool();
-                }
+                Log.Warning($"Hiding mass edit everlay component={component?.name} value={value}");
+                EnqueueAction(HideMassEditOverlay);
             }
         }
 
         private void ShowAdvisorOnEvent(UIComponent component, bool value) {
             if (value) {
-                Singleton<SimulationManager>.instance.AddAction(delegate () {
+                EnqueueAction(delegate () {
                     TrafficManagerTool.ShowAdvisor("RoadSelection");
                 });
             }
         }
+
+        private void RefreshOnEvent() =>
+            EnqueueAction(delegate () { Root?.Refresh(reset: true); });
+
+        #endregion
 
         /// <summary>
         ///  list all instances of road selection panels.
@@ -94,6 +133,7 @@ namespace TrafficManager.UI {
         private IList<PanelExt> panels_;
         private UIComponent priorityRoadToggle_;
 
+        #region Unload
         public void OnDestroy() {
             if (roadSelectionUtil_ != null) {
                 roadSelectionUtil_ = null;
@@ -101,14 +141,15 @@ namespace TrafficManager.UI {
             }
 
             if (priorityRoadToggle_ != null) {
-                priorityRoadToggle_.eventVisibilityChanged -= HidePriorityRoadToggle;
+                priorityRoadToggle_.eventVisibilityChanged -= HidePriorityRoadToggleEvent;
             }
 
             if (panels_ != null) {
                 foreach (UIPanel panel in panels_) {
                     if (panel != null) {
-                        //panel.eventVisibilityChanged -= ShowAdvisorOnEvent;
-                        Destroy(panel.gameObject); 
+                        panel.eventVisibilityChanged -= ShowAdvisorOnEvent;
+                        panel.eventVisibilityChanged -= MassEditOverlayOnEvent;
+                        Destroy(panel.gameObject);
                     }
                 }
             }
@@ -118,7 +159,9 @@ namespace TrafficManager.UI {
             Root = null;
             _function = FunctionModes.None;
         }
+        #endregion Unload
 
+        #region Load
         public void Awake() {
             Root = this;
             _function = FunctionModes.None;
@@ -134,7 +177,7 @@ namespace TrafficManager.UI {
                 panel.relativePosition += new Vector3(-10f, -10f);
                 priorityRoadToggle_ = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
                 if (priorityRoadToggle_ != null) {
-                    priorityRoadToggle_.eventVisibilityChanged += HidePriorityRoadToggle;
+                    priorityRoadToggle_.eventVisibilityChanged += HidePriorityRoadToggleEvent;
                 }
 
                 panel.eventVisibilityChanged += ShowAdvisorOnEvent;
@@ -150,24 +193,23 @@ namespace TrafficManager.UI {
 
             // every time user changes the road selection, all buttons will go back to inactive state.
             roadSelectionUtil_ = new RoadSelectionUtil();
-            if (roadSelectionUtil_ != null) { 
+            if (roadSelectionUtil_ != null) {
                 roadSelectionUtil_.OnChanged += RefreshOnEvent;
             }
         }
-
-        private static void RefreshOnEvent() =>
-            Root?.Refresh(reset: true);
 
         // Create a road selection panel. Multiple instances are allowed.
         private PanelExt AddPanel(UIComponent container) {
             UIView uiview = UIView.GetAView();
             PanelExt panel = uiview.AddUIComponent(typeof(PanelExt)) as PanelExt;
-            panel.Root = this;
+            panel.Container = this;
             panel.AlignTo(container, UIAlignAnchor.BottomLeft);
             panel.relativePosition += new Vector3(70, -10);
             panels_.Add(panel);
             return panel;
         }
+
+        #endregion
 
         /// <summary>
         /// Refreshes all butons in all panels according to state indicated by FunctionMode
@@ -176,7 +218,7 @@ namespace TrafficManager.UI {
         public void Refresh(bool reset = false) {
             if (reset) {
                 _function = FunctionModes.None;
-            } 
+            }
             foreach (var panel in panels_ ?? Enumerable.Empty<PanelExt>()) {
                 panel.Refresh();
             }
@@ -193,7 +235,7 @@ namespace TrafficManager.UI {
             }
 
             /// Container of this panel.
-            public RoadSelectionPanels Root;
+            public RoadSelectionPanels Container;
 
             /// list of buttons contained in this panel.
             private IList<ButtonExt> buttons_;
@@ -333,7 +375,7 @@ namespace TrafficManager.UI {
                 }
 
                 public HashSet<string> GetAtlasKeys => this.Skin.CreateAtlasKeyset();
-                
+
                 public override void HandleClick(UIMouseEventParameter p) =>
                     throw new Exception("Unreachable code");
 
