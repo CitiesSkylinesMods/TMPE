@@ -4,6 +4,7 @@ namespace TrafficManager.UI.SubTools {
     using CSUtil.Commons;
     using TrafficManager.RedirectionFramework;
     using TrafficManager.U;
+    using TrafficManager.U.Autosize;
     using TrafficManager.U.Button;
     using TrafficManager.UI.SubTools.LaneArrows;
     using UnityEngine;
@@ -13,6 +14,7 @@ namespace TrafficManager.UI.SubTools {
     /// </summary>
     public class LaneArrowToolWindow : U.Panel.BaseUWindowPanel {
         private const string GAMEOBJECT_NAME = "TMPE_LaneArrow_ToolPanel";
+        private const float LABEL_HEIGHT = 18f; // a normal font label
 
         /// <summary>
         /// Contains atlas with button backgrounds and arrows.
@@ -84,31 +86,65 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="spacing">Spacing between groups and around window edges.</param>
         public void SetupControls(int numLanes, Vector2 groupSize, float spacing) {
             Buttons = new List<LaneArrowButton>();
-            var formBuilder = new UIBuilder(this);
-            formBuilder.AutoLayoutHorizontal((int)spacing);
+            // LaneArrowsPanel [
+            //     Panel "Outer" [
+            //         Panel (repeated) "Group of label and 3 buttons" [
+            //             Label [ Lane 1 ]
+            //             Panel "3 Buttons" [
+            //                 Button [ <- ]
+            //                 Button [ Forward ]
+            //                 Button [ -> ]
+            //             ]
+            //         ]
+            //     ]
+            //    Delete Label and button
+            // ]
 
-            // float offset = spacing;
+            // Create horizontal panel which will hold 3-button panels
+            // new Vector2(
+            //     (groupSize.x * numLanes) + (spacing * (numLanes + 1)),
+            //     LABEL_HEIGHT),
+            var outerB = new UIBuilder(this)
+                         .AutoLayoutVertical((int)spacing)
+                         .NestedPanel<U.Panel.UPanel>(
+                             p => {
+                                 p.name = "TMPE_ButtonRow";
+                                 SetupControls_CreateButtonRow(p, numLanes, groupSize, spacing);
+                             })
+                         .Width(USizeRule.ReferenceSizeAt1080p, 40f)
+                         .Height(USizeRule.MultipleOfWidth, 3f);
+            // And add another line: "Delete" action
+            outerB.NestedPanel<U.Panel.UPanel>(
+                      p => {
+                          p.name = "TMPE_DeleteLabelContainer";
+                      })
+                  .Width(USizeRule.FitChildren, 4f)
+                  .Height(USizeRule.FitChildren, 4f)
+                  .Label<UILabel>("Reset to default [Delete]");
+        }
+
+        private void SetupControls_CreateButtonRow(UIPanel rowPanel,
+                                                   int numLanes,
+                                                   Vector2 groupSize,
+                                                   float spacing) {
             for (var i = 0; i < numLanes; i++) {
                 // Create a subpanel with title and buttons subpanel
-                // LaneArrowsPanel [
-                //     Nested Panel [
-                //         Label [ Lane 1 ]
-                //         Panel [
-                //             Button [ <- ]
-                //             Button [ Forward ]
-                //             Button [ -> ]
-                //         ]
-                //     ]
-                var groupPanelBuilder
-                    = formBuilder
-                      .NestedPanel<UIPanel>((p) => { p.size = groupSize; })
+                UIBuilder groupPanelBuilder
+                    = new UIBuilder(rowPanel)
+                      .NestedPanel<UIPanel>(
+                          p => {
+                              p.name = "TMPE_LaneLabelContainer";
+                              p.size = groupSize;
+                          })
                       .AutoLayoutVertical()
                       .Label<UILabel>(
                           Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1));
 
-                var buttonPanelBuilder = groupPanelBuilder
+                UIBuilder buttonPanelBuilder
+                    = groupPanelBuilder
                       .NestedPanel<UIPanel>(
                           (p) => {
+                              p.name = "TMPE_ButtonGroup";
                               p.atlas = TextureUtil.FindAtlas("Ingame");
                               p.backgroundSprite = "GenericPanel";
                               p.size = groupSize;
@@ -142,11 +178,6 @@ namespace TrafficManager.UI.SubTools {
                         Buttons.Add(b);
                     });
             }
-
-            // bool startNode = (bool)netService.IsStartNode(SelectedSegmentId, SelectedNodeId);
-            // if (CanReset(SelectedSegmentId, startNode)) {
-            //     height += 40;
-            // }
         }
 
         public override void OnRescaleRequested() { }

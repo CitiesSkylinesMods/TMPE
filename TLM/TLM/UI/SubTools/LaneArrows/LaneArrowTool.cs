@@ -15,6 +15,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using static TrafficManager.Util.Shortcuts;
     using Debug = UnityEngine.Debug;
 
+    /// <summary>
+    /// LaneArrow Tool creates ToolWindow for lane arrow buttons.
+    /// </summary>
     public class LaneArrowTool : TrafficManagerSubTool {
         /// <summary>Tool states.</summary>
         private enum State {
@@ -118,8 +121,26 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             // if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
             //     return; // do not draw if too distant
             // }
-            CreateLaneArrowsWindow(numLanes);
-            SetupLaneArrowsWindowButtons();
+            // Calculate lanes and arrows
+            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(
+                SelectedSegmentId,
+                ref segmentsBuffer[SelectedSegmentId],
+                segmentsBuffer[SelectedSegmentId].m_startNode == SelectedNodeId,
+                LaneArrowManager.LANE_TYPES,
+                LaneArrowManager.VEHICLE_TYPES,
+                true);
+
+            bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+            if (startNode == null) {
+                Log.Error(
+                    $"LaneArrowTool._guiLaneChangeWindow: Segment {SelectedSegmentId} " +
+                    $"is not connected to node {SelectedNodeId}");
+                return;
+            }
+
+            CreateLaneArrowsWindow(laneList.Count);
+            SetupLaneArrowsWindowButtons(laneList, (bool)startNode);
         }
 
         private class ScaledSize {
@@ -141,12 +162,16 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
         }
 
+        /// <summary>
+        /// Create floating tool window for Lane Arrow controls and adds a delete hint.
+        /// </summary>
+        /// <param name="numLanes">How many groups of buttons.</param>
         private void CreateLaneArrowsWindow(int numLanes) {
             float laneGroupWidth = ScaledSize.GetLaneGroupWidth();
             float height = ScaledSize.GetLaneGroupHeight();
             float spacing = height / 8f;
 
-            var parent = ModUI.Instance.MainMenu;
+            var parent = UIView.GetAView();
             ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
             ToolWindow.autoLayout = false;
             ToolWindow.autoSize = false;
@@ -168,64 +193,32 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// Given the tool window already created with its buttons set up,
         /// go through them and assign click events, disable some, activate some etc.
         /// </summary>
-        private void SetupLaneArrowsWindowButtons() {
-            // Calculate lanes and arrows
-            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(
-                SelectedSegmentId,
-                ref segmentsBuffer[SelectedSegmentId],
-                segmentsBuffer[SelectedSegmentId].m_startNode == SelectedNodeId,
-                LaneArrowManager.LANE_TYPES,
-                LaneArrowManager.VEHICLE_TYPES,
-                true);
-
-            bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
-            if (startNode == null) {
-                Log.Error(
-                    $"LaneArrowTool._guiLaneChangeWindow: Segment {SelectedSegmentId} " +
-                    $"is not connected to node {SelectedNodeId}");
-                return;
-            }
-
+        private void SetupLaneArrowsWindowButtons(IList<LanePos> laneList, bool startNode) {
             // For all lanes, go through our buttons and update their onClick, etc.
-            NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-
             for (var i = 0; i < laneList.Count; i++) {
                 uint laneId = laneList[i].laneId;
 
                 LaneArrowButton buttonLeft = ToolWindow.Buttons[i * 3];
                 buttonLeft.LaneId = laneId;
                 buttonLeft.NetlaneFlagsMask = NetLane.Flags.Left;
-                buttonLeft.StartNode = (bool)startNode;
+                buttonLeft.StartNode = startNode;
                 buttonLeft.ToggleFlag = API.Traffic.Enums.LaneArrows.Left;
                 buttonLeft.UpdateButtonImageAndTooltip();
 
                 LaneArrowButton buttonForward = ToolWindow.Buttons[(i * 3) + 1];
                 buttonForward.LaneId = laneId;
                 buttonForward.NetlaneFlagsMask = NetLane.Flags.Forward;
-                buttonForward.StartNode = (bool)startNode;
+                buttonForward.StartNode = startNode;
                 buttonForward.ToggleFlag = API.Traffic.Enums.LaneArrows.Forward;
                 buttonForward.UpdateButtonImageAndTooltip();
 
                 LaneArrowButton buttonRight = ToolWindow.Buttons[(i * 3) + 2];
                 buttonRight.LaneId = laneId;
                 buttonRight.NetlaneFlagsMask = NetLane.Flags.Right;
-                buttonRight.StartNode = (bool)startNode;
+                buttonRight.StartNode = startNode;
                 buttonRight.ToggleFlag = API.Traffic.Enums.LaneArrows.Right;
                 buttonRight.UpdateButtonImageAndTooltip();
             }
-
-            //------------------------------------------
-            // Create tool window on the selected node
-            //------------------------------------------
-            // var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, height);
-
-            // UIView uiView = UIView.GetAView();
-            // ToolWindow = (U.Panel.BaseUWindowPanel)uiView.AddUIComponent(typeof(U.Panel.BaseUWindowPanel));
-
-            // var legacyBorderlessStyle = new GUIStyle();
-            // GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, legacyBorderlessStyle);
-            // cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
         }
 
         /// <summary>Called from GenericFsm when user leaves lane arrow editor, to hide the GUI.</summary>
@@ -356,18 +349,16 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         }
 
         public override void OnToolRightClick() {
-            Log._Debug($"LaneArrow({fsm_.State}): right click");
-
             // FSM will either cancel the edit mode, or switch off the tool.
-
-            // if (!IsCursorInPanel()) {
             SelectedSegmentId = 0;
             SelectedNodeId = 0;
-            // }
 
             if (fsm_ != null) {
+                State oldState = fsm_.State;
                 fsm_.SendTrigger(Trigger.RightMouseClick);
-                Log._Debug($"LaneArrow new state={fsm_.State}");
+                Log._Debug($"LaneArrow right click state={oldState}, new={fsm_.State}");
+            } else {
+                Log._Debug($"LaneArrow(fsm=null): right click");
             }
         }
 
