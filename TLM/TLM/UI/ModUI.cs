@@ -191,9 +191,9 @@ namespace TrafficManager.UI {
             Log._Debug("ModUI.DisableTool: called");
             if (ToolsModifierControl.toolController == null) {
                 Log.Warning("ModUI.DisableTool: ToolsModifierControl.toolController is null!");
-            } else if (tool == null) {
+            } else if (trafficManagerTool_ == null) {
                 Log.Warning("ModUI.DisableTool: tool is null!");
-            } else if (ToolsModifierControl.toolController.CurrentTool != tool) {
+            } else if (ToolsModifierControl.toolController.CurrentTool != trafficManagerTool_) {
                 Log.Info("ModUI.DisableTool: CurrentTool is not traffic manager tool!");
             } else {
                 ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();

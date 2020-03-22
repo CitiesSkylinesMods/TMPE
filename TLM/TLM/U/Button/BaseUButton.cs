@@ -1,13 +1,26 @@
 ﻿namespace TrafficManager.U.Button {
     using ColossalFramework.UI;
     using TrafficManager.State.Keybinds;
+    using TrafficManager.U.Autosize;
 
     /// <summary>
     /// A smart button which can change its foreground and background textures based on its state,
     /// also has a localised tooltip.
     /// This is an abstract base class for buttons.
     /// </summary>
-    public abstract class BaseUButton : UIButton {
+    public abstract class BaseUButton : UIButton, USizePositionInterface {
+        private USizePosition sizePosition_;
+
+        public USizePosition SizePosition {
+            get {
+                if (sizePosition_ == null) {
+                    sizePosition_ = new USizePosition();
+                }
+
+                return sizePosition_;
+            }
+        }
+
         /// <summary>Defines how the button looks, hovers and activates.</summary>
         public U.Button.ButtonSkin Skin;
 

@@ -120,7 +120,7 @@ namespace TrafficManager.UI.SubTools {
                       })
                   .Width(USizeRule.FitChildren, 4f)
                   .Height(USizeRule.FitChildren, 4f)
-                  .Label<UILabel>("Reset to default [Delete]");
+                  .Label<U.Label.ULabel>("Reset to default [Delete]");
         }
 
         private void SetupControls_CreateButtonRow(UIPanel rowPanel,
@@ -131,18 +131,18 @@ namespace TrafficManager.UI.SubTools {
                 // Create a subpanel with title and buttons subpanel
                 UIBuilder groupPanelBuilder
                     = new UIBuilder(rowPanel)
-                      .NestedPanel<UIPanel>(
+                      .NestedPanel<U.Panel.UPanel>(
                           p => {
                               p.name = "TMPE_LaneLabelContainer";
                               p.size = groupSize;
                           })
                       .AutoLayoutVertical()
-                      .Label<UILabel>(
+                      .Label<U.Label.ULabel>(
                           Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1));
 
                 UIBuilder buttonPanelBuilder
                     = groupPanelBuilder
-                      .NestedPanel<UIPanel>(
+                      .NestedPanel<U.Panel.UPanel>(
                           (p) => {
                               p.name = "TMPE_ButtonGroup";
                               p.atlas = TextureUtil.FindAtlas("Ingame");

@@ -340,6 +340,7 @@
     <Compile Include="U\Button\BaseUButton.cs" />
     <Compile Include="U\Button\ButtonFunction.cs" />
     <Compile Include="U\Button\ButtonSkin.cs" />
+    <Compile Include="U\Label\ULabel.cs" />
     <Compile Include="U\Panel\BaseUWindowPanel.cs" />
     <Compile Include="U\Panel\UPanel.cs" />
     <Compile Include="U\TextureUtil.cs" />

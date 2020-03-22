@@ -82,12 +82,14 @@ namespace TrafficManager.U {
             USizePosition sz = GetCurrentSizePosition();
             sz.widthRule = rule;
             sz.widthValue = value;
+            return this;
         }
 
         public UIBuilder Height(USizeRule rule, float value) {
             USizePosition sz = GetCurrentSizePosition();
             sz.heightRule = rule;
             sz.heightValue = value;
+            return this;
         }
     }
 }

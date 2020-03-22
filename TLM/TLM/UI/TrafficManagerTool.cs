@@ -139,7 +139,13 @@ namespace TrafficManager.UI {
                    .sqrMagnitude <= MAX_OVERLAY_DISTANCE_SQR;
         }
 
-        [Obsolete("Use U.UIScaler")]
+        [Obsolete("Use U.UIScaler and U size and position logic")]
+        internal static float AdaptWidth(float originalWidth) {
+            return originalWidth;
+            // return originalWidth * ((float)Screen.width / 1920f);
+        }
+
+        [Obsolete("Use U.UIScaler and U size and position logic")]
         internal float GetBaseZoom() {
             return Screen.height / 1200f;
         }
