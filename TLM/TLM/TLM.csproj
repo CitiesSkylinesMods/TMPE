@@ -330,9 +330,11 @@
     <Compile Include="UI\ModUI.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
+    <Compile Include="U\Autosize\UBoundingBox.cs" />
     <Compile Include="U\Autosize\USizePosition.cs" />
     <Compile Include="U\Autosize\USizePositionInterface.cs" />
     <Compile Include="U\Autosize\USizeRule.cs" />
+    <Compile Include="U\Autosize\UValue.cs" />
     <Compile Include="U\Button\UButton.cs" />
     <Compile Include="U\ControlActiveState.cs" />
     <Compile Include="U\ControlHoveredState.cs" />

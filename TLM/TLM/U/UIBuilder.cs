@@ -78,18 +78,29 @@ namespace TrafficManager.U {
             return new UIBuilder(newPanel);
         }
 
-        public UIBuilder Width(USizeRule rule, float value) {
+        public UIBuilder Width(UValue v) {
             USizePosition sz = GetCurrentSizePosition();
-            sz.widthRule = rule;
-            sz.widthValue = value;
+            sz.Width = v;
             return this;
         }
 
-        public UIBuilder Height(USizeRule rule, float value) {
+        public UIBuilder Height(UValue v) {
             USizePosition sz = GetCurrentSizePosition();
-            sz.heightRule = rule;
-            sz.heightValue = value;
+            sz.Height = v;
             return this;
+        }
+
+        /// <summary>
+        /// When form building is finished, recalculates all nested sizes and places stuff
+        /// according to sizes and positions configured in USizePosition members of form controls.
+        /// </summary>
+        public void Done() {
+            if (this.current_ is USizePositionInterface currentAsSizePos) {
+                USizePosition pos = currentAsSizePos.SizePosition;
+                pos.UpdateControl(this.current_);
+            } else {
+                Log.Error("Trying to finalize size for component which doesn't impl USizePositionInterface");
+            }
         }
     }
 }

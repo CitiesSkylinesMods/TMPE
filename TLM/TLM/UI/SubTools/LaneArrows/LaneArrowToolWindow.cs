@@ -111,16 +111,16 @@ namespace TrafficManager.UI.SubTools {
                                  p.name = "TMPE_ButtonRow";
                                  SetupControls_CreateButtonRow(p, numLanes, groupSize, spacing);
                              })
-                         .Width(USizeRule.ReferenceSizeAt1080p, 40f)
-                         .Height(USizeRule.MultipleOfWidth, 3f);
+                         .Width(UValue.ReferenceWidthAt1080P(40f))
+                         .Height(UValue.MultipleOfWidth(3f));
             // And add another line: "Delete" action
-            outerB.NestedPanel<U.Panel.UPanel>(
-                      p => {
-                          p.name = "TMPE_DeleteLabelContainer";
-                      })
-                  .Width(USizeRule.FitChildren, 4f)
-                  .Height(USizeRule.FitChildren, 4f)
+            outerB.NestedPanel<U.Panel.UPanel>(p => { p.name = "TMPE_DeleteLabelContainer"; })
+                  .Width(UValue.FitChildrenWidth(4f))
+                  .Height(UValue.FitChildrenHeight(4f))
                   .Label<U.Label.ULabel>("Reset to default [Delete]");
+
+            // Resize everything correctly
+            outerB.Done();
         }
 
         private void SetupControls_CreateButtonRow(UIPanel rowPanel,
