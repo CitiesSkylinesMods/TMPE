@@ -22,12 +22,12 @@ namespace TrafficManager.Manager.Impl {
 
         public const VehicleInfo.VehicleType VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram
-            | VehicleInfo.VehicleType.Monorail;
+            | VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
 
         public const ExtVehicleType EXT_VEHICLE_TYPES =
             ExtVehicleType.PassengerTrain | ExtVehicleType.CargoTrain | ExtVehicleType.PassengerCar
             | ExtVehicleType.Bus | ExtVehicleType.Taxi | ExtVehicleType.CargoTruck
-            | ExtVehicleType.Service | ExtVehicleType.Emergency;
+            | ExtVehicleType.Service | ExtVehicleType.Emergency | ExtVehicleType.Trolleybus;
 
         public static readonly float[] PATHFIND_PENALTIES = { 10f, 100f, 1000f };
 

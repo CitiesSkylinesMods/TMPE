@@ -781,7 +781,7 @@
                     255f);
 #if PARKINGAI
                 PathUnits.m_buffer[unit].m_laneTypes = (byte)finalBufferItem.LanesUsed;
-                PathUnits.m_buffer[unit].m_vehicleTypes = (ushort)finalBufferItem.VehiclesUsed;
+                PathUnits.m_buffer[unit].m_vehicleTypes = (uint)finalBufferItem.VehiclesUsed;
 #endif
 
                 uint currentPathUnitId = unit;
@@ -1960,7 +1960,7 @@
 #endif
 
                     if (exploreUturn
-                        && (vehicleTypes_ & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None)
+                        && (vehicleTypes_ & (VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Trolleybus)) == VehicleInfo.VehicleType.None)
                     {
                         if (isLogEnabled) {
                             DebugLog(
@@ -2553,9 +2553,11 @@
             bool acuteTurningAngle = false;
             if (prevLaneType == NetInfo.LaneType.Vehicle &&
                 (prevVehicleType & VehicleInfo.VehicleType.Car) == VehicleInfo.VehicleType.None) {
-                float turningAngle = 0.01f - Mathf.Min(
-                                       nextSegmentInfo.m_maxTurnAngleCos,
-                                       prevSegmentInfo.m_maxTurnAngleCos);
+                float turningAngle = !nextSegment.m_overridePathFindDirectionLimit
+                                         ? (0.01f - Mathf.Min(
+                                                nextSegmentInfo.m_maxTurnAngleCos,
+                                                prevSegmentInfo.m_maxTurnAngleCos))
+                                         : 1f;
                 if (turningAngle < 1f) {
                     Vector3 vector = nextNodeId != prevSegment.m_startNode
                                      ? prevSegment.m_endDirection
@@ -3652,7 +3654,7 @@
              */
             bool isUturnAllowedHere = false; // is u-turn allowed at this place?
             if ((vehicleTypes_ &
-                 (VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Monorail)) ==
+                 (VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus)) ==
                 VehicleInfo.VehicleType.None) {
                 // is vehicle able to perform a u-turn?
                 bool isStockUturnPoint = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
@@ -4060,6 +4062,7 @@
             if (!Options.vehicleRestrictionsEnabled ||
                 queueItem_.vehicleType == ExtVehicleType.None ||
                 queueItem_.vehicleType == ExtVehicleType.Tram ||
+                queueItem_.vehicleType == ExtVehicleType.Trolleybus ||
                 (laneInfo.m_vehicleType &
                  (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train)) ==
                 VehicleInfo.VehicleType.None) {

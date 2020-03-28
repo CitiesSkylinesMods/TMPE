@@ -998,6 +998,10 @@
                 case VehicleInfo.VehicleType.CableCar: {
                     return ExtVehicleType.CableCar;
                 }
+
+                case VehicleInfo.VehicleType.Trolleybus: {
+                    return ExtVehicleType.Trolleybus;
+                }
             }
 
 #if DEBUGVSTATE

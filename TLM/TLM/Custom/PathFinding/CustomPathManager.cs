@@ -235,7 +235,7 @@ namespace TrafficManager.Custom.PathFinding {
             m_pathUnits.m_buffer[unit].m_position03 = args.endPosB;
             m_pathUnits.m_buffer[unit].m_position11 = args.vehiclePosition;
             m_pathUnits.m_buffer[unit].m_laneTypes = (byte)args.laneTypes;
-            m_pathUnits.m_buffer[unit].m_vehicleTypes = (ushort)args.vehicleTypes;
+            m_pathUnits.m_buffer[unit].m_vehicleTypes = (uint)args.vehicleTypes;
             m_pathUnits.m_buffer[unit].m_length = args.maxLength;
             m_pathUnits.m_buffer[unit].m_positionCount = 20;
 
