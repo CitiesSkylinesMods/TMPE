@@ -27,7 +27,7 @@
         PassengerFerry = 1 << 16,
         PassengerBlimp = 1 << 17,
         CargoPlane = 1 << 18,
-        Trolleybus = 1 << 20,
+        Trolleybus = 1 << 19,
         Plane = PassengerPlane | CargoPlane,
         Ship = PassengerShip | CargoShip,
         CargoVehicle = CargoTruck | CargoTrain | CargoShip | CargoPlane,
