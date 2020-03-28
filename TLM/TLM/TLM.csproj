@@ -195,7 +195,7 @@
     <Compile Include="Manager\Impl\JunctionRestrictionsManager.cs" />
     <Compile Include="Manager\Impl\UtilityManager.cs" />
     <Compile Include="Manager\Impl\ExtCitizenInstanceManager.cs" />
-    <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
+    <Compile Include="Patch\_DefaultTool\RenderOverlayPatch.cs" />
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenInstancePatch.cs" />
     <Compile Include="Patch\_NetManager\UpdateSegmentPatch.cs" />
     <Compile Include="Patch\_NetManager\FinalizeSegmentPatch.cs" />

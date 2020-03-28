@@ -98,11 +98,6 @@ namespace TrafficManager.UI.SubTools {
 
             private static bool _show = false;
             public static bool Show {
-                get {
-                    lock (_lock) {
-                        return _show;
-                    }
-                }
                 set {
                     lock (_lock) {
                         _show = value;

@@ -94,20 +94,14 @@ namespace TrafficManager.UI {
                 return;
             }
             MassEditOVerlay.Show = true;
-            tmTool.InitializeSubTools();
             tmTool.SetToolMode(ToolMode.None);
+            tmTool.InitializeSubTools();
+            Log._Debug("Mass edit overlay enabled");
         }
 
         private void HideMassEditOverlay() {
-            if (!ModUI.ToolHasBeenEnabled)
-                return;
             MassEditOVerlay.Show = false;
-            var tmTool = ModUI.GetTrafficManagerTool(false);
-            if (tmTool) {
-                tmTool.InitializeSubTools();
-                tmTool.SetToolMode(ToolMode.None);
-                ModUI.DisableTool();
-            }
+            Log._Debug("Mass edit overlay disabled");
         }
 
         private void MassEditOverlayOnEvent(UIComponent component, bool value) {
@@ -121,7 +115,7 @@ namespace TrafficManager.UI {
         private void ShowAdvisorOnEvent(UIComponent component, bool value) {
             if (value) {
                 EnqueueAction(delegate () {
-                    TrafficManagerTool.ShowAdvisor("RoadSelection");
+                    //TrafficManagerTool.ShowAdvisor("RoadSelection"); // TODO uncomment
                 });
             }
         }
@@ -393,11 +387,11 @@ namespace TrafficManager.UI {
                     if (!IsActive()) {
                         Root.Function = this.Function;
                         Do();
-                        Root.ShowMassEditOverlay();
+                        Root.EnqueueAction(Root.ShowMassEditOverlay);
                     } else {
                         Root.Function = FunctionModes.None;
                         Undo();
-                        Root.ShowMassEditOverlay();
+                        Root.EnqueueAction(Root.ShowMassEditOverlay);
                     }
                 }
 
