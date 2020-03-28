@@ -104,23 +104,36 @@ namespace TrafficManager.UI.SubTools {
             // new Vector2(
             //     (groupSize.x * numLanes) + (spacing * (numLanes + 1)),
             //     LABEL_HEIGHT),
-            var outerB = new UIBuilder(this)
-                         .AutoLayoutVertical((int)spacing)
-                         .NestedPanel<U.Panel.UPanel>(
-                             p => {
-                                 p.name = "TMPE_ButtonRow";
-                                 SetupControls_CreateButtonRow(p, numLanes, groupSize, spacing);
-                             })
-                         .Width(UValue.ReferenceWidthAt1080P(40f))
-                         .Height(UValue.MultipleOfWidth(3f));
-            // And add another line: "Delete" action
-            outerB.NestedPanel<U.Panel.UPanel>(p => { p.name = "TMPE_DeleteLabelContainer"; })
-                  .Width(UValue.FitChildrenWidth(4f))
-                  .Height(UValue.FitChildrenHeight(4f))
-                  .Label<U.Label.ULabel>("Reset to default [Delete]");
+            using (var outerB = new UIBuilder(this)) {
+                outerB.AutoLayoutVertical((int)spacing);
 
-            // Resize everything correctly
-            outerB.Done();
+                using (UIBuilder buttonRowBuilder = outerB.ChildPanel<U.Panel.UPanel>(
+                    setupFn: p => {
+                        p.name = "TMPE_ButtonRow";
+                        SetupControls_CreateButtonRow(p, numLanes, groupSize, spacing);
+                    })) {
+                    buttonRowBuilder.ResizeFunction(
+                        r => {
+                            r.Width(UValue.ReferenceWidthAt1080P(40f))
+                             .Height(UValue.MultipleOfWidth(3f));
+                        });
+                }
+
+                // And add another line: "Delete" action
+                using (UIBuilder deleteLabelContainer = outerB.ChildPanel<U.Panel.UPanel>(
+                        p => { p.name = "TMPE_DeleteLabelContainer"; }))
+                {
+                    deleteLabelContainer.Label<U.Label.ULabel>("Reset to default [Delete]");
+                    deleteLabelContainer.ResizeFunction(
+                        r => {
+                            r.Width(UValue.FitChildrenWidth(padding: 4f))
+                             .Height(UValue.FitChildrenHeight(padding: 4f));
+                        });
+                }
+
+                // Resize everything correctly
+                outerB.Done();
+            }
         }
 
         private void SetupControls_CreateButtonRow(UIPanel rowPanel,
@@ -129,54 +142,60 @@ namespace TrafficManager.UI.SubTools {
                                                    float spacing) {
             for (var i = 0; i < numLanes; i++) {
                 // Create a subpanel with title and buttons subpanel
-                UIBuilder groupPanelBuilder
-                    = new UIBuilder(rowPanel)
-                      .NestedPanel<U.Panel.UPanel>(
-                          p => {
-                              p.name = "TMPE_LaneLabelContainer";
-                              p.size = groupSize;
-                          })
-                      .AutoLayoutVertical()
-                      .Label<U.Label.ULabel>(
-                          Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1));
+                using (UIBuilder groupPanelBuilder = new UIBuilder(rowPanel)) {
+                    using (UIBuilder laneLabelBuilder =
+                        groupPanelBuilder.ChildPanel<U.Panel.UPanel>(
+                            setupFn: p => {
+                                p.name = "TMPE_LaneLabelContainer";
+                                p.size = groupSize;
+                            })) {
+                        laneLabelBuilder
+                            .AutoLayoutVertical()
+                            .Label<U.Label.ULabel>(Translation.LaneRouting.Get("Format.Label:Lane")
+                                                   + " " + (i + 1));
+                        // TODO: Label can be localized in a more flexible way
+                    }
 
-                UIBuilder buttonPanelBuilder
-                    = groupPanelBuilder
-                      .NestedPanel<U.Panel.UPanel>(
-                          (p) => {
-                              p.name = "TMPE_ButtonGroup";
-                              p.atlas = TextureUtil.FindAtlas("Ingame");
-                              p.backgroundSprite = "GenericPanel";
-                              p.size = groupSize;
-                          }).AutoLayoutHorizontal();
+                    using (UIBuilder buttonPanelBuilder
+                        = groupPanelBuilder.ChildPanel<U.Panel.UPanel>(
+                            setupFn: p => {
+                                p.name = "TMPE_ButtonGroup";
+                                p.atlas = TextureUtil.FindAtlas("Ingame");
+                                p.backgroundSprite = "GenericPanel";
+                                p.size = groupSize;
+                            }))
+                    {
+                        buttonPanelBuilder.AutoLayoutHorizontal();
 
-                // Create and populate the panel with buttons
-                buttonPanelBuilder.Button<LaneArrowButton>(
-                    b => {
-                        b.atlas = GetAtlas();
-                        b.Skin = CreateDefaultButtonSkin();
-                        b.Skin.Prefix = "LaneArrowLeft";
-                        b.size = new Vector2(groupSize.x / 3f, groupSize.y);
-                        Buttons.Add(b);
-                    });
+                        // Create and populate the panel with buttons
+                        buttonPanelBuilder.Button<LaneArrowButton>(
+                            setupFn: b => {
+                                b.atlas = GetAtlas();
+                                b.Skin = CreateDefaultButtonSkin();
+                                b.Skin.Prefix = "LaneArrowLeft";
+                                b.size = new Vector2(groupSize.x / 3f, groupSize.y);
+                                Buttons.Add(b);
+                            });
 
-                buttonPanelBuilder.Button<LaneArrowButton>(
-                    b => {
-                        b.atlas = GetAtlas();
-                        b.Skin = CreateDefaultButtonSkin();
-                        b.Skin.Prefix = "LaneArrowForward";
-                        b.size = new Vector2(groupSize.x / 3f, groupSize.y);
-                        Buttons.Add(b);
-                    });
+                        buttonPanelBuilder.Button<LaneArrowButton>(
+                            setupFn: b => {
+                                b.atlas = GetAtlas();
+                                b.Skin = CreateDefaultButtonSkin();
+                                b.Skin.Prefix = "LaneArrowForward";
+                                b.size = new Vector2(groupSize.x / 3f, groupSize.y);
+                                Buttons.Add(b);
+                            });
 
-                buttonPanelBuilder.Button<LaneArrowButton>(
-                    b => {
-                        b.atlas = GetAtlas();
-                        b.Skin = CreateDefaultButtonSkin();
-                        b.Skin.Prefix = "LaneArrowRight";
-                        b.size = new Vector2(groupSize.x / 3f, groupSize.y);
-                        Buttons.Add(b);
-                    });
+                        buttonPanelBuilder.Button<LaneArrowButton>(
+                            setupFn: b => {
+                                b.atlas = GetAtlas();
+                                b.Skin = CreateDefaultButtonSkin();
+                                b.Skin.Prefix = "LaneArrowRight";
+                                b.size = new Vector2(groupSize.x / 3f, groupSize.y);
+                                Buttons.Add(b);
+                            });
+                    } // end button panel
+                } // end group panel
             }
         }
 

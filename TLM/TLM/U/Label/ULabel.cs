@@ -2,17 +2,14 @@ namespace TrafficManager.U.Label {
     using ColossalFramework.UI;
     using TrafficManager.U.Autosize;
 
-    public class ULabel: UILabel, USizePositionInterface {
-        private USizePosition sizePosition_;
+    public class ULabel: UILabel, ISmartSizableControl {
+        private UResizerConfig resizerConfig_;
 
-        public USizePosition SizePosition {
-            get {
-                if (sizePosition_ == null) {
-                    sizePosition_ = new USizePosition();
-                }
-
-                return sizePosition_;
+        public UResizerConfig GetResizerInfo() {
+            if (resizerConfig_ == null) {
+                resizerConfig_ = new UResizerConfig();
             }
+            return resizerConfig_;
         }
     }
 }

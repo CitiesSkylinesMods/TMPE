@@ -9,11 +9,11 @@ namespace TrafficManager.U {
     /// Create an UI builder to populate a panel with good things: buttons, sub-panels, create a
     /// drag handle and other controls.
     /// </summary>
-    public class UIBuilder {
+    public class UIBuilder : IDisposable {
         private readonly UIComponent current_;
 
-        private USizePosition GetCurrentSizePosition() {
-            return (current_ as USizePositionInterface).SizePosition;
+        private UResizerConfig GetCurrentResizerInfo() {
+            return ((ISmartSizableControl)current_).GetResizerInfo();
         }
 
         public UIBuilder(UIComponent curr) {
@@ -55,7 +55,7 @@ namespace TrafficManager.U {
         }
 
         public UIBuilder Button<T>(Action<T> setupFn)
-            where T : UIButton, USizePositionInterface
+            where T : UIButton, ISmartSizableControl
         {
             var newButton = current_.AddUIComponent(typeof(T)) as T;
             setupFn(newButton);
@@ -63,30 +63,24 @@ namespace TrafficManager.U {
         }
 
         public UIBuilder Label<T>(string t)
-            where T : UILabel, USizePositionInterface
+            where T : UILabel, ISmartSizableControl
         {
             var newLabel = current_.AddUIComponent(typeof(T)) as T;
             newLabel.text = t;
             return this;
         }
 
-        public UIBuilder NestedPanel<T>(Action<T> setupFn)
-            where T : UIPanel, USizePositionInterface
+        public UIBuilder ChildPanel<T>(Action<T> setupFn)
+            where T : UIPanel, ISmartSizableControl
         {
             var newPanel = current_.AddUIComponent(typeof(T)) as T;
             setupFn(newPanel);
             return new UIBuilder(newPanel);
         }
 
-        public UIBuilder Width(UValue v) {
-            USizePosition sz = GetCurrentSizePosition();
-            sz.Width = v;
-            return this;
-        }
-
-        public UIBuilder Height(UValue v) {
-            USizePosition sz = GetCurrentSizePosition();
-            sz.Height = v;
+        public UIBuilder ResizeFunction(Action<UResizer> resizeFn) {
+            UResizerConfig sz = GetCurrentResizerInfo();
+            sz.OnResize = resizeFn;
             return this;
         }
 
@@ -95,12 +89,11 @@ namespace TrafficManager.U {
         /// according to sizes and positions configured in USizePosition members of form controls.
         /// </summary>
         public void Done() {
-            if (this.current_ is USizePositionInterface currentAsSizePos) {
-                USizePosition pos = currentAsSizePos.SizePosition;
-                pos.UpdateControl(this.current_);
-            } else {
-                Log.Error("Trying to finalize size for component which doesn't impl USizePositionInterface");
-            }
+            UResizer.UpdateHierarchy(this.current_);
+        }
+
+        /// <summary>End of `using (var x = ...) {}` statement.</summary>
+        public void Dispose() {
         }
     }
 }

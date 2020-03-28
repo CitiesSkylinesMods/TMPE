@@ -1,4 +1,5 @@
 namespace TrafficManager.U.Autosize {
+    using ColossalFramework.UI;
     using UnityEngine;
 
     /// <summary>A simple Axis Aligned Bounding Box (aabb) similar to Unity's Bounds.</summary>
@@ -9,6 +10,11 @@ namespace TrafficManager.U.Autosize {
         public UBoundingBox(Vector2 a, Vector2 b) {
             this.A = a;
             this.B = b;
+        }
+
+        public UBoundingBox(UIComponent control) {
+            this.A = control.position;
+            this.B = this.A + control.size;
         }
 
         /// <summary>Gets box size.</summary>
@@ -22,6 +28,10 @@ namespace TrafficManager.U.Autosize {
 
             B.x = Mathf.Max(B.x, box.B.x);
             B.y = Mathf.Max(B.y, box.B.y);
+        }
+
+        public override string ToString() {
+            return $"UBBox{{a={A}, b={B}}}";
         }
     }
 }

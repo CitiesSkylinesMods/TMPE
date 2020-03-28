@@ -1,5 +1,5 @@
 namespace TrafficManager.U.Autosize {
-    public enum USizeRule {
+    public enum URule {
         /// <summary>Do not produce any value.</summary>
         Ignore,
 
@@ -25,15 +25,35 @@ namespace TrafficManager.U.Autosize {
         ReferenceHeightAt1080P,
 
         /// <summary>
-        /// Size the control to max width of its children. The float value in <see cref="USizePosition"/>
+        /// Size the control to max width of its children. The float value in <see cref="UResizer"/>
         /// defines the padding.
         /// </summary>
         FitChildrenWidth,
 
         /// <summary>
-        /// Size the control to max height of its children. The float value in <see cref="USizePosition"/>
+        /// Size the control to max height of its children. The float value in <see cref="UResizer"/>
         /// defines the padding.
         /// </summary>
         FitChildrenHeight,
     }
+
+    // /// <summary>Field which can be affected and modified by a rule.</summary>
+    // public enum UDstField {
+    //     Left,
+    //     Top,
+    //     Width,
+    //     Height,
+    // }
+    //
+    // /// <summary>Field which can be serve as a source for a rule.</summary>
+    // public enum USrcField {
+    //     Left,
+    //     Top,
+    //     Width,
+    //     Height,
+    //     ScreenWidth,
+    //     ScreenHeight,
+    //     ReferenceWidthAt1080P,
+    //     ReferenceHeightAt1080P,
+    // }
 }

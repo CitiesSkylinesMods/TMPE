@@ -8,17 +8,14 @@
     /// also has a localised tooltip.
     /// This is an abstract base class for buttons.
     /// </summary>
-    public abstract class BaseUButton : UIButton, USizePositionInterface {
-        private USizePosition sizePosition_;
+    public abstract class BaseUButton : UIButton, ISmartSizableControl {
+        private UResizerConfig resizerConfig_;
 
-        public USizePosition SizePosition {
-            get {
-                if (sizePosition_ == null) {
-                    sizePosition_ = new USizePosition();
-                }
-
-                return sizePosition_;
+        public UResizerConfig GetResizerInfo() {
+            if (resizerConfig_ == null) {
+                resizerConfig_ = new UResizerConfig();
             }
+            return resizerConfig_;
         }
 
         /// <summary>Defines how the button looks, hovers and activates.</summary>

@@ -3,17 +3,14 @@ namespace TrafficManager.U.Panel {
     using TrafficManager.U.Autosize;
 
     /// <summary>Base panel for smart sizeable panels.</summary>
-    public class UPanel : UIPanel, USizePositionInterface {
-        private USizePosition sizePosition_;
+    public class UPanel : UIPanel, ISmartSizableControl {
+        private UResizerConfig resizerConfig_;
 
-        public USizePosition SizePosition {
-            get {
-                if (sizePosition_ == null) {
-                    sizePosition_ = new USizePosition();
-                }
-
-                return sizePosition_;
+        public UResizerConfig GetResizerInfo() {
+            if (resizerConfig_ == null) {
+                resizerConfig_ = new UResizerConfig();
             }
+            return resizerConfig_;
         }
     }
 }
