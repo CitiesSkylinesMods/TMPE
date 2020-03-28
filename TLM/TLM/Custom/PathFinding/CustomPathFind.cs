@@ -491,7 +491,7 @@
             bool detourMissing =
                 (vehicleTypes_ & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train |
                                   VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Monorail |
-                                  VehicleInfo.VehicleType.Metro)) != VehicleInfo.VehicleType.None &&
+                                  VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Trolleybus)) != VehicleInfo.VehicleType.None &&
                 !queueItem_.queued;
 
             if (detourMissing) {

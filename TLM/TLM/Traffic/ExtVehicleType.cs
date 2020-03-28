@@ -38,6 +38,7 @@
         PassengerFerry = 1 << 16,
         PassengerBlimp = 1 << 17,
         CargoPlane = 1 << 18,
+        TrolleyBus = 1 << 19,
 
         [UsedImplicitly]
         Plane = PassengerPlane | CargoPlane,
@@ -47,7 +48,7 @@
 
         [UsedImplicitly]
         CargoVehicle = CargoTruck | CargoTrain | CargoShip | CargoPlane,
-        PublicTransport = Bus | Taxi | Tram | PassengerTrain,
+        PublicTransport = Bus | Taxi | Tram | PassengerTrain | TrolleyBus,
 
         [UsedImplicitly]
         RoadPublicTransport = Bus | Taxi,

@@ -20,10 +20,10 @@
         private const int STATE_UPDATE_SHIFT = 6;
         public const int JUNCTION_RECHECK_SHIFT = 4;
 
-        private const VehicleInfo.VehicleType VEHICLE_TYPES =
+        public const VehicleInfo.VehicleType VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train |
             VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro |
-            VehicleInfo.VehicleType.Monorail;
+            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
 
         /// <summary>
         /// Known vehicles and their current known positions. Index: vehicle id
