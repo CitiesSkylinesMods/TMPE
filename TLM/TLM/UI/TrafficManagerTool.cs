@@ -23,6 +23,7 @@ namespace TrafficManager.UI {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
+    using static TrafficManager.UI.SubTools.PrioritySignsTool;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -298,7 +299,7 @@ namespace TrafficManager.UI {
             }
         }
 
-        // Overridden to disable base class behavior
+        public void CallOnEnable() => OnEnable();
         protected override void OnEnable() {
             if (subTools_ != null) {
                 Log._Debug("TrafficManagerTool.OnEnable(): Performing cleanup");
@@ -306,10 +307,11 @@ namespace TrafficManager.UI {
                     e.Value.Cleanup();
                 }
             }
+            // disable base class behavior
         }
 
-        // Overridden to disable base class behavior
         protected override void OnDisable() {
+            // Overridden to disable base class behavior
         }
 
         public override void RenderGeometry(RenderManager.CameraInfo cameraInfo) {
@@ -325,7 +327,7 @@ namespace TrafficManager.UI {
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             // Log._Debug($"RenderOverlay");
             // Log._Debug($"RenderOverlay: {_toolMode} {activeSubTool} {this.GetHashCode()}");
-            if (!isActiveAndEnabled) {
+            if (!(isActiveAndEnabled || MassEditOVerlay.IsActive) ) {
                 return;
             }
 
@@ -408,6 +410,7 @@ namespace TrafficManager.UI {
             }
         }
 
+        public void CallOnToolGUI(Event e) => OnToolGUI(e);
         protected override void OnToolGUI(Event e) {
             try {
                 if (!Input.GetMouseButtonDown(0)) {
@@ -441,7 +444,7 @@ namespace TrafficManager.UI {
 
                 if (_activeSubTool != null) {
                     _activeSubTool.OnToolGUI(e);
-                } else {
+                } else if(!PrioritySignsTool.MassEditOVerlay.IsActive) {
                     base.OnToolGUI(e);
                 }
             } catch (Exception ex) {

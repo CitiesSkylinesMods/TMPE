@@ -178,18 +178,23 @@ namespace TrafficManager.UI {
             }
         }
 
-        /// <summary>
-        /// indicates if ModUI.EnableTool() tool has ever been called.
-        /// TODO [issue #789] remove this work around when fixing #789.
-        /// </summary>
-        public static bool ToolHasBeenEnabled = false; 
         public static void EnableTool() {
-            ToolHasBeenEnabled = true;
             Log._Debug("ModUI.EnableTool: called");
             TrafficManagerTool tmTool = GetTrafficManagerTool(true);
 
             ToolsModifierControl.toolController.CurrentTool = tmTool;
             ToolsModifierControl.SetTool<TrafficManagerTool>();
+        }
+
+        public static void OnLevelLoaded() {
+            Log._Debug("ModUI.OnLevelLoaded: called");
+            if (ModUI.Instance == null) {
+                Log._Debug("Adding UIBase instance.");
+                ModUI.SetSingletonInstance(
+                    ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>());
+            }
+            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
+            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
         }
 
         public static void DisableTool() {

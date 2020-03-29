@@ -535,12 +535,7 @@ namespace TrafficManager {
                     });
             }
 
-            Log.Info("Adding Controls to UI.");
-            if (ModUI.Instance == null) {
-                Log._Debug("Adding UIBase instance.");
-                ModUI.SetSingletonInstance(
-                    ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>());
-            }
+            ModUI.OnLevelLoaded();
 
             // Init transport demand UI
             if (TransportDemandUI == null) {

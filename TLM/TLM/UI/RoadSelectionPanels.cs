@@ -46,8 +46,9 @@ namespace TrafficManager.UI {
         int counter = DELAY;
         public void EnqueueAction(Action action) {
             if (action == null) return;
+            SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(action);
             lock (actions) {
-                actions.Add(action);
+                //actions.Add(action);
             }
         }
 
@@ -86,8 +87,6 @@ namespace TrafficManager.UI {
         /// Also enables Traffic manager tool.
         /// </summary>
         private void ShowMassEditOverlay() {
-            if (!ModUI.ToolHasBeenEnabled)
-                return;
             var tmTool = ModUI.GetTrafficManagerTool(true);
             if (tmTool == null) {
                 Log.Error("ModUI.GetTrafficManagerTool(true) returned null");
@@ -105,6 +104,8 @@ namespace TrafficManager.UI {
         }
 
         private void MassEditOverlayOnEvent(UIComponent component, bool value) {
+            foreach (var panel in panels_)
+                value |= panel.isVisible;
             if (value) {
                 EnqueueAction(ShowMassEditOverlay);
             } else {
@@ -115,7 +116,7 @@ namespace TrafficManager.UI {
         private void ShowAdvisorOnEvent(UIComponent component, bool value) {
             if (value) {
                 EnqueueAction(delegate () {
-                    //TrafficManagerTool.ShowAdvisor("RoadSelection"); // TODO uncomment
+                    TrafficManagerTool.ShowAdvisor("RoadSelection");
                 });
             }
         }
@@ -177,7 +178,7 @@ namespace TrafficManager.UI {
                 if (priorityRoadToggle_ != null) {
                     priorityRoadToggle_.eventVisibilityChanged += HidePriorityRoadToggleEvent;
                 }
-
+                panel.eventVisibilityChanged += MassEditOverlayOnEvent;
                 panel.eventVisibilityChanged += ShowAdvisorOnEvent;
             }
 
