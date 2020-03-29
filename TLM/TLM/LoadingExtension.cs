@@ -350,14 +350,6 @@ namespace TrafficManager {
                 Destroy<RemoveVehicleButtonExtender>();
                 Destroy<RemoveCitizenInstanceButtonExtender>();
 
-                if (IsPathManagerReplaced) {
-                    IsPathManagerReplaced = false;
-
-                    simManager?.Remove(CustomPathManager);
-                    Object.Destroy(CustomPathManager);
-                    CustomPathManager = null;
-                }
-
                 //It's MonoBehaviour - comparing to null is wrong
                 if (TransportDemandUI) {
                     Object.Destroy(TransportDemandUI);
@@ -476,7 +468,8 @@ namespace TrafficManager {
                 }
             }
 
-            if (!IsPathManagerReplaced) {
+            //it will replace stock PathManager or already Replaced before HotReload
+            if (!IsPathManagerReplaced || TrafficManagerMod.Instance.InGameHotReload) {
                 try {
                     Log.Info("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
                     FieldInfo pathManagerInstance = typeof(Singleton<PathManager>).GetField(
