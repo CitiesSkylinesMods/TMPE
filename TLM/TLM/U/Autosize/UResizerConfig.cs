@@ -18,13 +18,14 @@ namespace TrafficManager.U.Autosize {
         /// </summary>
         public float Padding;
 
-        public UResizerConfig([CanBeNull] Action<UResizer> onResize, float padding) {
-            onResize_ = onResize;
-            Padding = padding;
+        public UResizerConfig() {
+            onResize_ = null;
+            Padding = 0f;
         }
 
         /// <summary>Calls <see cref="onResize_"/> if it is not null.</summary>
         /// <param name="control">The control which is to be refreshed.</param>
+        /// <param name="previousSibling">Previous sibling if exists, for control stacking.</param>
         /// <param name="childrenBox">The bounding box of all children of that control.</param>
         /// <returns>Updated box for that control.</returns>
         public static UBoundingBox CallOnResize([NotNull] UIComponent control,
@@ -35,8 +36,17 @@ namespace TrafficManager.U.Autosize {
 
                 if (resizerConfig.onResize_ != null) {
                     // Create helper UResizer and run it
-                    UResizer resizer = new UResizer(control, previousSibling, childrenBox);
-                    resizerConfig.onResize_(resizer);
+                    UResizer resizer = new UResizer(
+                        control,
+                        resizerConfig,
+                        previousSibling,
+                        childrenBox);
+                    try {
+                        resizerConfig.onResize_(resizer);
+                    }
+                    catch (Exception e) {
+                        Log.Error($"While calling OnResize on {control.name}: {e}");
+                    }
                 }
             } else {
                 Log._Debug("CallOnResize for a non-ISmartSizableControl");

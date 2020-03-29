@@ -25,6 +25,7 @@ namespace TrafficManager.UI.SubTools {
         public List<LaneArrowButton> Buttons { get; set; }
 
         public override void Start() {
+            base.Start();
             UIUtil.MakeUniqueAndSetName(gameObject, GAMEOBJECT_NAME);
 
             this.backgroundSprite = "GenericPanel";
@@ -88,9 +89,10 @@ namespace TrafficManager.UI.SubTools {
 
             using (var buttonRowBuilder = builder.ChildPanel<U.Panel.UPanel>(
                 setupFn: p => { p.name = "TMPE_ButtonRow"; })) {
+                // buttonRowBuilder.SetPadding(Constants.U_UI_PADDING);
                 buttonRowBuilder.ResizeFunction(
                     r => {
-                        r.StackVertical();
+                        r.StackVertical(Constants.UIPADDING);
                         r.FitToChildren();
                     });
 
@@ -109,14 +111,16 @@ namespace TrafficManager.UI.SubTools {
                             }))
                     {
                         int i1 = i; // copy of the loop variable, for the resizeFunction below
+
+                        buttonGroupBuilder.SetPadding(Constants.UIPADDING);
                         buttonGroupBuilder.ResizeFunction(
                             r => {
                                 if (i1 == 0) {
                                     // attach below "Lane #" label
-                                    r.StackVertical();
+                                    r.StackVertical(Constants.UIPADDING);
                                 } else {
                                     // attach to the right of the previous button group
-                                    r.StackHorizontal();
+                                    r.StackHorizontal(Constants.UIPADDING);
                                 }
 
                                 r.FitToChildren();
@@ -152,14 +156,17 @@ namespace TrafficManager.UI.SubTools {
                                         // under the "Lane #" label, while 2nd and 3rd will be
                                         // stacking horizontal
                                         if (prefix == "LaneArrowLeft") {
-                                            r.StackVertical();
+                                            r.StackVertical(Constants.UIPADDING);
                                         } else {
-                                            r.StackHorizontal();
+                                            r.StackHorizontal(Constants.UIPADDING);
                                         }
 
-                                        float buttonSize = UIScaler.ScreenSizeSmallestFraction(40f / 1920f, 40f / 1080f);
-                                        r.Width(new UValue(URule.FixedSize, buttonSize));
-                                        r.Height(new UValue(URule.FixedSize, buttonSize));
+                                        float btnSize =
+                                            UIScaler.ScreenSizeSmallestFraction(40f / 1920f, 40f / 1080f)
+                                            * UIScaler.GetUIScale();
+
+                                        r.Width(UValue.FixedSize(btnSize));
+                                        r.Height(UValue.FixedSize(btnSize));
                                     });
                             }
                         } // for each button
@@ -172,7 +179,7 @@ namespace TrafficManager.UI.SubTools {
                 builder.Label<U.Label.ULabel>("Reset to default [Delete]")) {
                 deleteLabelBuilder.ResizeFunction(
                     r => {
-                        r.StackVertical();
+                        r.StackVertical(Constants.UIPADDING);
                         // TODO: Need autosize for labels
                         r.Width(UValue.FixedSize(200f));
                         r.Height(UValue.FixedSize(18f));
@@ -180,6 +187,8 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
-        public override void OnRescaleRequested() { }
+        public override void OnRescaleRequested() {
+            UResizer.UpdateControlRecursive(this, null);
+        }
     }
 }

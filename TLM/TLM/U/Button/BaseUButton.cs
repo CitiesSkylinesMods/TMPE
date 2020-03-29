@@ -9,12 +9,9 @@
     /// This is an abstract base class for buttons.
     /// </summary>
     public abstract class BaseUButton : UIButton, ISmartSizableControl {
-        private UResizerConfig resizerConfig_;
+        private UResizerConfig resizerConfig_ = new UResizerConfig();
 
         public UResizerConfig GetResizerConfig() {
-            if (resizerConfig_ == null) {
-                resizerConfig_ = new UResizerConfig(null, 0f);
-            }
             return resizerConfig_;
         }
 

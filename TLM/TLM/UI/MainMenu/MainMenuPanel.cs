@@ -97,6 +97,8 @@ namespace TrafficManager.UI.MainMenu {
         private MainMenuLayout menuLayout_;
 
         public override void Start() {
+            base.Start();
+
             U.UIUtil.MakeUniqueAndSetName(this.gameObject, GAMEOBJECT_NAME);
 
             GlobalConfig conf = GlobalConfig.Instance;

@@ -312,8 +312,9 @@ namespace TrafficManager.State {
         }
 
         private static void OnSimulationAccuracyChanged(int newAccuracy) {
-            if (!Options.IsGameLoaded())
+            if (!Options.IsGameLoaded()) {
                 return;
+            }
 
             Log._Debug($"Simulation accuracy changed to {newAccuracy}");
             Options.simulationAccuracy = (SimulationAccuracy)newAccuracy;
@@ -350,7 +351,8 @@ namespace TrafficManager.State {
 
             if (changed && _guiScaleSlider != null) {
                 _guiScaleSlider.value = val;
-                ModUI.Instance.NotifyGuiScaleChanged();
+                ModUI.Instance.UiScaleObservable.NotifyObservers(
+                    new ModUI.UIScaleNotification { NewScale = val });
             }
         }
 
@@ -365,8 +367,9 @@ namespace TrafficManager.State {
 
         public static void SetSimulationAccuracy(SimulationAccuracy newAccuracy) {
             Options.simulationAccuracy = newAccuracy;
-            if (_simulationAccuracyDropdown != null)
+            if (_simulationAccuracyDropdown != null) {
                 _simulationAccuracyDropdown.selectedIndex = (int)newAccuracy;
+            }
         }
 
         public static void SetInstantEffects(bool value) {

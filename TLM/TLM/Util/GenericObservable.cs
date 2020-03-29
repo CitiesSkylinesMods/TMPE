@@ -45,7 +45,6 @@
 
             foreach (IObserver<T> observer in myObservers) {
                 try {
-                    // Log._Debug($"GenericObserable.NotifyObservers: Notifying observer {observer} of observable {this}");
                     observer.OnUpdate(subject);
                 }
                 catch (Exception e) {

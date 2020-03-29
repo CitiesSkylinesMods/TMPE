@@ -175,7 +175,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             using (var builder = new U.UiBuilder<LaneArrowToolWindow>(ToolWindow)) {
                 builder.ResizeFunction(r => { r.FitToChildren(); });
-                builder.SetPadding(4f);
+                builder.SetPadding(Constants.UIPADDING);
 
                 ToolWindow.SetupControls(builder, numLanes);
 

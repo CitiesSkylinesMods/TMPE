@@ -2,7 +2,10 @@ namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System;
+    using TrafficManager.API.Util;
+    using TrafficManager.U;
     using TrafficManager.UI.MainMenu;
+    using TrafficManager.Util;
     using UnityEngine;
 
     /// <summary>
@@ -51,7 +54,22 @@ namespace TrafficManager.UI {
 
         private bool _uiShown;
 
+        public struct UIScaleNotification {
+            public float NewScale;
+        }
+
+        public class UIScaleObservable : GenericObservable<UIScaleNotification> {
+        }
+
+        /// <summary>
+        /// Subscribe to this to get notifications in your UI about UI scale changes (slider in
+        /// General options tab).
+        /// </summary>
+        public UIScaleObservable UiScaleObservable;
+
         public ModUI() {
+            UiScaleObservable = new UIScaleObservable();
+
             Log._Debug("##### Initializing ModUI.");
 
             // Get the UIView object. This seems to be the top-level object for most
@@ -124,6 +142,7 @@ namespace TrafficManager.UI {
             }
 
             foreach (BaseMenuButton button in GetMenu().Buttons) {
+                // TODO: move this to MainMenu UI classes
                 button.UpdateButtonImageAndTooltip();
             }
 
@@ -214,11 +233,5 @@ namespace TrafficManager.UI {
                 trafficManagerTool_ = null;
             } // end if
         } // end DestroyTool()
-
-        /// <summary>Called from settings window, when windows need rescaling because GUI scale
-        /// slider has changed.</summary>
-        public void NotifyGuiScaleChanged() {
-            MainMenu.OnRescaleRequested();
-        }
     }
 }
