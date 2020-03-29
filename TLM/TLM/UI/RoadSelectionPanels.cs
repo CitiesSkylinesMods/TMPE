@@ -41,33 +41,14 @@ namespace TrafficManager.UI {
         }
 
         #region Event handling
-        List<Action> actions = new List<Action>();
-        const int DELAY = 1;
-        int counter = DELAY;
-        public void EnqueueAction(Action action) {
+
+        // even though we enqueu actions from main thread, we still need to enqueue them to
+        // the main thread in order to introduce some delay. this delay is necessarry to prevent
+        // the CO.UI from crashing.
+        // this wrapper function exists to make it easier to customize the delaying mechanism.
+        private void EnqueueAction(Action action) {
             if (action == null) return;
             SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(action);
-            lock (actions) {
-                //actions.Add(action);
-            }
-        }
-
-        void PerfromAction() {
-            if (actions == null) return;
-            lock (actions) {
-                if (actions.Count > 0) {
-                    if (--counter <= 0) {
-                        actions[0]?.Invoke();
-                        actions.RemoveAt(0);
-                        counter = DELAY;
-                    }
-                }
-            }
-        }
-
-        void OnGUI() {
-            //ShowWithDelay();
-            PerfromAction();
         }
 
         private void HidePriorityRoadToggleEvent(UIComponent component, bool value) =>
