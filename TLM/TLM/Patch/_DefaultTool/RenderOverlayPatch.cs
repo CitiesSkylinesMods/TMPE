@@ -4,7 +4,7 @@ namespace TrafficManager.Patch._DefaultTool {
     using TrafficManager.UI;
     using static TrafficManager.UI.SubTools.PrioritySignsTool;
 
-    [HarmonyPatch(typeof(DefaultTool), "RenderOverlay")]
+    //[HarmonyPatch(typeof(DefaultTool), "RenderOverlay")]
     [UsedImplicitly]
     public static class RenderOverlayPatch {
         /// <summary>

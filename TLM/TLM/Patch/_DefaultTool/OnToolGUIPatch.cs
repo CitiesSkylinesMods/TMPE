@@ -5,7 +5,7 @@ namespace TrafficManager.Patch._DefaultTool {
     using UnityEngine;
     using static TrafficManager.UI.SubTools.PrioritySignsTool;
 
-    [HarmonyPatch(typeof(DefaultTool), "OnToolGUI")]
+    //[HarmonyPatch(typeof(DefaultTool), "OnToolGUI")]
     [UsedImplicitly]
     public static class OnToolGUIPatch {
         /// <summary>
