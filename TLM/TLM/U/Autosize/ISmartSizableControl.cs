@@ -5,6 +5,6 @@ namespace TrafficManager.U.Autosize {
     /// The callback will receive a <see cref="UResizer"/>.
     /// </summary>
     public interface ISmartSizableControl {
-        UResizerConfig GetResizerInfo();
+        UResizerConfig GetResizerConfig();
     }
 }

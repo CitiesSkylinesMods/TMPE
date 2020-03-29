@@ -13,27 +13,39 @@ namespace TrafficManager.U.Autosize {
         [CanBeNull]
         private Action<UResizer> onResize_;
 
-        public UResizerConfig([CanBeNull] Action<UResizer> onResize) {
+        /// <summary>
+        /// Distance from control border to child controls, also affects autosizing.
+        /// </summary>
+        public float Padding;
+
+        public UResizerConfig([CanBeNull] Action<UResizer> onResize, float padding) {
             onResize_ = onResize;
+            Padding = padding;
         }
 
         /// <summary>Calls <see cref="onResize_"/> if it is not null.</summary>
         /// <param name="control">The control which is to be refreshed.</param>
         /// <param name="childrenBox">The bounding box of all children of that control.</param>
         /// <returns>Updated box for that control.</returns>
-        public static UBoundingBox CallOnResize(UIComponent control, UBoundingBox childrenBox) {
+        public static UBoundingBox CallOnResize([NotNull] UIComponent control,
+                                                [CanBeNull] UIComponent previousSibling,
+                                                UBoundingBox childrenBox) {
             if (control is ISmartSizableControl currentAsResizable) {
-                UResizerConfig resizerConfig = currentAsResizable.GetResizerInfo();
+                UResizerConfig resizerConfig = currentAsResizable.GetResizerConfig();
 
                 if (resizerConfig.onResize_ != null) {
                     // Create helper UResizer and run it
-                    UResizer resizer = new UResizer(control, childrenBox);
+                    UResizer resizer = new UResizer(control, previousSibling, childrenBox);
                     resizerConfig.onResize_(resizer);
                 }
             } else {
                 Log._Debug("CallOnResize for a non-ISmartSizableControl");
             }
             return new UBoundingBox(control);
+        }
+
+        public void SetResizeFunction(Action<UResizer> resizeFn) {
+            this.onResize_ = resizeFn;
         }
     }
 }

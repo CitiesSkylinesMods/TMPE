@@ -1,6 +1,8 @@
 namespace TrafficManager.U.Autosize {
+    using System;
     using ColossalFramework.UI;
     using CSUtil.Commons;
+    using JetBrains.Annotations;
     using UnityEngine;
 
     /// <summary>
@@ -13,104 +15,142 @@ namespace TrafficManager.U.Autosize {
         /// <summary>The control which is being resized.</summary>
         public readonly UIComponent Control;
 
+        /// <summary>For stacking purposes, gives previous sibling in a sibling list.</summary>
+        [CanBeNull]
+        public readonly UIComponent PreviousSibling;
+
         /// <summary>Calculated bounding box for child controls.</summary>
         public UBoundingBox ChildrenBox;
 
-        public UResizer(UIComponent control, UBoundingBox childrenBox) {
+        public UResizer(UIComponent control,
+                        [CanBeNull]
+                        UIComponent previousSibling,
+                        UBoundingBox childrenBox) {
             Control = control;
             ChildrenBox = childrenBox;
+            PreviousSibling = previousSibling;
         }
+
+        // /// <summary>
+        // /// Descends recursively into component children to calculate their sizes and positions.
+        // /// For each control: OnResize is called, and then its bounding box is joined with sibling
+        // /// boxes. Then the resulting box is passed one level up to the parent control.
+        // /// </summary>
+        // /// <param name="current">The current component.</param>
+        // public static void UpdateHierarchy(UIComponent current) {
+        //     UBoundingBox childrenBox = UpdateControlRecursive(current, null);
+        //     UResizerConfig.CallOnResize(current, null, childrenBox);
+        //
+        //     // current.relativePosition = currentBox.A;
+        //     // current.size = currentBox.Size;
+        // }
 
         /// <summary>
-        /// Descends recursively into component children to calculate their sizes and positions.
-        /// For each control: OnResize is called, and then its bounding box is joined with sibling
-        /// boxes. Then the resulting box is passed one level up to the parent control.
+        /// Recursively descends down the GUI controls tree and calls OnResize on <see cref="ISmartSizableControl"/>
+        /// implementors, then allows parents to adjust their size to the contents and so on.
         /// </summary>
-        /// <param name="current">The current component.</param>
-        public static void UpdateHierarchy(UIComponent current) {
-            UBoundingBox childrenBox = UpdateControlRecursive(current);
-            UBoundingBox currentBox = UResizerConfig.CallOnResize(current, childrenBox);
-
-            current.position = currentBox.A;
-            current.size = currentBox.Size;
-        }
-
         /// <returns>The bounding box.</returns>
-        private static UBoundingBox UpdateControlRecursive(UIComponent current) {
+        /// <param name="current">The control being updated.</param>
+        /// <param name="previousSibling">If not null, points to previous sibling for control stacking.</param>
+        internal static UBoundingBox UpdateControlRecursive([NotNull] UIComponent current,
+                                                            [CanBeNull] UIComponent previousSibling) {
+            Log._Debug($"before UpdateControlRec: {current.name}");
+
             // Create an empty bounding box update it with all children bounding boxes
             UBoundingBox allChildrenBox = default;
 
             // For all children visit their resize functions and update allChildrenBox
-            for (int i = 0; i < current.transform.childCount - 1; i++) {
+            UIComponent previousChild = null;
+            for (int i = 0; i < current.transform.childCount; i++) {
                 Transform child = current.transform.GetChild(i);
                 UIComponent childUiComponent = child.gameObject.GetComponent<UIComponent>();
-                UBoundingBox childBox = UpdateControlRecursive(childUiComponent);
+                UBoundingBox childBox = UpdateControlRecursive(
+                    childUiComponent,
+                    previousChild);
                 allChildrenBox.ExpandToFit(childBox);
+
+                previousChild = childUiComponent;
             }
 
-            UBoundingBox currentBox = UResizerConfig.CallOnResize(current, allChildrenBox);
-            // current.position = CalculateControlPosition(current, current.position);
-            // current.size = CalculateControlSize(current, current.size, allChildrenBox.Size);
-            Log._Debug($"UpdateControlRec: {current.name} currentBox={currentBox} pos={current.position} size={current.size}");
+            UBoundingBox currentBox = UResizerConfig.CallOnResize(
+                current,
+                previousSibling,
+                allChildrenBox);
+            Log._Debug(
+                $"after UpdateControlRec: {current.name} currentBox={currentBox} "
+                + $"relPos={current.relativePosition} size={current.size}");
             return currentBox;
         }
 
-        private Vector2 CalculateControlSize(UIComponent self,
-                                             Vector2 size,
-                                             Vector2 allChildrenBox) {
-            switch (this.Width.Rule) {
+        /// <summary>Calculates value based on the UI component.</summary>
+        /// <param name="self">The UI component.</param>
+        /// <returns>The calculated value.</returns>
+        public float Calculate(UValue val, UIComponent self) {
+            switch (val.Rule) {
                 case URule.Ignore:
-                    break;
+                    return 0f;
+                case URule.FixedSize:
+                    return val.Value;
+                case URule.FractionScreenWidth:
+                    return Screen.width * val.Value;
+                case URule.MultipleOfWidth:
+                    return self.width * val.Value;
+                case URule.FractionScreenHeight:
+                    return Screen.height * val.Value;
+                case URule.MultipleOfHeight:
+                    return self.height * val.Value;
+                case URule.ReferenceWidthAt1080P:
+                    return UIScaler.ScreenWidthFraction(val.Value / 1920f);
+                case URule.ReferenceHeightAt1080P:
+                    return UIScaler.ScreenHeightFraction(val.Value / 1080f);
                 case URule.FitChildrenWidth:
-                    size.x = allChildrenBox.x;
-                    break;
-                default:
-                    size.x = this.Width.Calculate(self);
-                    break;
-            }
-
-            switch (this.Height.Rule) {
-                case URule.Ignore:
-                    break;
+                    return this.ChildrenBox.B.x;
                 case URule.FitChildrenHeight:
-                    size.y = allChildrenBox.y;
-                    break;
-                default:
-                    size.y = this.Height.Calculate(self);
-                    break;
+                    return this.ChildrenBox.B.y;
             }
 
-            return size;
+            throw new ArgumentOutOfRangeException();
         }
 
-        private Vector3 CalculateControlPosition(UIComponent self, Vector3 pos) {
-            switch (this.Left.Rule) {
-                case URule.Ignore:
-                    break;
-                default:
-                    pos.x = this.Left.Calculate(self);
-                    break;
-            }
-
-            switch (this.Top.Rule) {
-                case URule.Ignore:
-                    break;
-                default:
-                    pos.y = this.Top.Calculate(self);
-                    break;
-            }
-
-            return pos;
+        /// <summary>Set width based on various rules.</summary>
+        /// <param name="val">The rule to be used.</param>
+        public void Width(UValue val) {
+            Control.width = this.Calculate(val, Control);
         }
 
-        public UResizer Width(UValue val) {
-            Control.width = val.Calculate(Control);
-            return this;
+        /// <summary>Set height based on various rules.</summary>
+        /// <param name="val">The rule to be used.</param>
+        public void Height(UValue val) {
+            Control.height = this.Calculate(val, Control);
         }
 
-        public UResizer Height(UValue val) {
-            Control.height = val.Calculate(Control);
-            return this;
+        /// <summary>Automatically defines control size to wrap around child controls.</summary>
+        public void FitToChildren() {
+            // value 0f is ignored, the padding is to be set in UResizerConfig
+            this.Width(new UValue(URule.FitChildrenWidth, 0f));
+            this.Height(new UValue(URule.FitChildrenHeight, 0f));
+        }
+
+        /// <summary>Instructs U UI to place the control vertically below the previous sibling.</summary>
+        public void StackVertical() {
+            Vector3 pos = this.PreviousSibling == null
+                              ? Vector3.zero
+                              : this.PreviousSibling.relativePosition + new Vector3(
+                                    0f,
+                                    this.PreviousSibling.height,
+                                    0f);
+            this.Control.relativePosition = pos;
+        }
+
+        /// <summary>Instructs U UI to place the control to the right of the previous sibling.</summary>
+        public void StackHorizontal() {
+            Vector3 pos = this.PreviousSibling == null
+                              ? Vector3.zero
+                              : this.PreviousSibling.relativePosition + new Vector3(
+                                    this.PreviousSibling.width,
+                                    0f,
+                                    0f);
+            this.Control.relativePosition = pos;
         }
     }
 }

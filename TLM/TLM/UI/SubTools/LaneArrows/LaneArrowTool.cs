@@ -10,6 +10,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.U.Autosize;
     using TrafficManager.U.Button;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
@@ -19,6 +20,11 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     /// LaneArrow Tool creates ToolWindow for lane arrow buttons.
     /// </summary>
     public class LaneArrowTool : TrafficManagerSubTool {
+        /// <summary>
+        /// Finite State machine for the tool. Represents current UI state for Lane Arrows.
+        /// </summary>
+        private Util.GenericFsm<State, Trigger> fsm_;
+
         /// <summary>Tool states.</summary>
         private enum State {
             /// <summary>Waiting for user to select a half segment.</summary>
@@ -37,9 +43,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             RightMouseClick,
             EscapeKey,
         }
-
-        /// <summary>Finite State machine for the tool.</summary>
-        private Util.GenericFsm<State, Trigger> fsm_;
 
         [Obsolete("Avoid using, replace with different logic")]
         private bool cursorInSecondaryPanel_;
@@ -68,15 +71,15 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                        SelectedNodeId = 0;
                        SelectedSegmentId = 0;
                    })
-               .Permit(Trigger.SegmentClick, State.EditLaneArrows)
-               .Permit(Trigger.RightMouseClick, State.ToolDisabled)
-               .Permit(Trigger.EscapeKey, State.ToolDisabled);
+               .TransitionOnEvent(Trigger.SegmentClick, State.EditLaneArrows)
+               .TransitionOnEvent(Trigger.RightMouseClick, State.ToolDisabled)
+               .TransitionOnEvent(Trigger.EscapeKey, State.ToolDisabled);
 
             fsm.Configure(State.EditLaneArrows)
                .OnEntry(this.OnEnterEditorState)
                .OnLeave(this.OnLeaveEditorState)
-               .Permit(Trigger.RightMouseClick, State.Select)
-               .Permit(Trigger.EscapeKey, State.Select);
+               .TransitionOnEvent(Trigger.RightMouseClick, State.Select)
+               .TransitionOnEvent(Trigger.EscapeKey, State.Select);
 
             fsm.Configure(State.ToolDisabled)
                .OnEntry(
@@ -143,7 +146,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             SetupLaneArrowsWindowButtons(laneList, (bool)startNode);
         }
 
-        private class ScaledSize {
+        private static class ScaledSize {
             /// <summary>
             /// Base lane group height scaled to screen size, from it the window height is derived.</summary>
             /// <returns>Height of one lane button group.</returns>
@@ -163,30 +166,22 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         }
 
         /// <summary>
-        /// Create floating tool window for Lane Arrow controls and adds a delete hint.
+        /// Creates floating tool window for Lane Arrow controls and adds keyboard hints too.
         /// </summary>
         /// <param name="numLanes">How many groups of buttons.</param>
         private void CreateLaneArrowsWindow(int numLanes) {
-            float laneGroupWidth = ScaledSize.GetLaneGroupWidth();
-            float height = ScaledSize.GetLaneGroupHeight();
-            float spacing = height / 8f;
-
             var parent = UIView.GetAView();
             ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
-            ToolWindow.autoLayout = false;
-            ToolWindow.autoSize = false;
 
-            // A spacing on each window side
-            float windowWidth = numLanes * ((2 * spacing) + laneGroupWidth);
-            float titleHeight = 18f; // Default font height
-            ToolWindow.size = new Vector2(
-                windowWidth,
-                height + (2 * spacing) + titleHeight);
+            using (var builder = new U.UiBuilder<LaneArrowToolWindow>(ToolWindow)) {
+                builder.ResizeFunction(r => { r.FitToChildren(); });
+                builder.SetPadding(4f);
 
-            ToolWindow.SetupControls(
-                numLanes,
-                new Vector2(laneGroupWidth, height),
-                spacing);
+                ToolWindow.SetupControls(builder, numLanes);
+
+                // Resize everything correctly
+                builder.Done();
+            }
         }
 
         /// <summary>

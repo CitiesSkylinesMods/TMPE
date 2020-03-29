@@ -12,8 +12,6 @@ namespace TrafficManager.U {
         /// <param name="obj">Object to become unique.</param>
         /// <param name="name">Object name.</param>
         public static void MakeUniqueAndSetName(GameObject obj, string name) {
-            var uiView = UIView.GetAView();
-
             GameObject found = GameObject.Find(name);
             if (found != null) {
                 UnityEngine.Object.Destroy(found);

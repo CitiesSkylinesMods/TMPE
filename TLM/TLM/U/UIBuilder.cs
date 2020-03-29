@@ -9,79 +9,44 @@ namespace TrafficManager.U {
     /// Create an UI builder to populate a panel with good things: buttons, sub-panels, create a
     /// drag handle and other controls.
     /// </summary>
-    public class UIBuilder : IDisposable {
-        private readonly UIComponent current_;
+    /// <typeparam name="T">The UI Component and ISmartSizableControl we're placing into the UI.</typeparam>
+    public class UiBuilder<TControl> : IDisposable
+        where TControl : UIComponent, ISmartSizableControl
+    {
+        public readonly TControl Control;
 
-        private UResizerConfig GetCurrentResizerInfo() {
-            return ((ISmartSizableControl)current_).GetResizerInfo();
+        public UiBuilder(TControl curr) {
+            Control = curr;
         }
 
-        public UIBuilder(UIComponent curr) {
-            current_ = curr;
+        /// <summary>
+        /// Create a button as a child of current UIBuilder. A new UIBuilder is returned.
+        /// </summary>
+        /// <typeparam name="TButton">The type of UIButton and ISmartSizableControl.</typeparam>
+        /// <returns>New UIBuilder.</returns>
+        public UiBuilder<TButton> Button<TButton>()
+            where TButton : UIButton, ISmartSizableControl {
+            var newButton = Control.AddUIComponent(typeof(TButton)) as TButton;
+
+            return new UiBuilder<TButton>(newButton);
         }
 
-        /// <summary>Enables horizontal stacking autolayout for panel's children.</summary>
-        /// <param name="padding">Padding inside the panel.</param>
-        /// <returns>Self.</returns>
-        public UIBuilder AutoLayoutHorizontal(int padding = 0) {
-            var p = current_ as UIPanel;
-            if (p == null) {
-                Log.Error($"UIBuilder: Gameobject of type {current_.GetType()} is not a UIPanel");
-                return this;
-            }
-            // Right padding set to 0 assuming thata the autolayout padding will appear there
-            p.padding = new RectOffset(padding, 0, padding, padding);
-            p.autoLayoutPadding = new RectOffset(0, padding, 0, 0);
-            p.autoLayoutDirection = LayoutDirection.Horizontal;
-            p.autoLayout = true;
-            return this;
-        }
-
-        /// <summary>Enables vertical stacking autolayout for panel's children.</summary>
-        /// <param name="padding">Padding inside the panel.</param>
-        /// <returns>Self.</returns>
-        public UIBuilder AutoLayoutVertical(int padding = 0) {
-            var p = current_ as UIPanel;
-            if (p == null) {
-                Log.Error($"UIBuilder: Gameobject of type {current_.GetType()} is not a UIPanel");
-                return this;
-            }
-            // Right padding set to 0 assuming thata the autolayout padding will appear there
-            p.padding = new RectOffset(padding, padding, 0, padding);
-            p.autoLayoutPadding = new RectOffset(0, 0, 0, padding);
-            p.autoLayoutDirection = LayoutDirection.Vertical;
-            p.autoLayout = true;
-            return this;
-        }
-
-        public UIBuilder Button<T>(Action<T> setupFn)
-            where T : UIButton, ISmartSizableControl
-        {
-            var newButton = current_.AddUIComponent(typeof(T)) as T;
-            setupFn(newButton);
-            return this;
-        }
-
-        public UIBuilder Label<T>(string t)
-            where T : UILabel, ISmartSizableControl
-        {
-            var newLabel = current_.AddUIComponent(typeof(T)) as T;
+        public UiBuilder<TLabel> Label<TLabel>(string t)
+            where TLabel : UILabel, ISmartSizableControl {
+            var newLabel = Control.AddUIComponent(typeof(TLabel)) as TLabel;
             newLabel.text = t;
-            return this;
+            return new UiBuilder<TLabel>(newLabel);
         }
 
-        public UIBuilder ChildPanel<T>(Action<T> setupFn)
-            where T : UIPanel, ISmartSizableControl
-        {
-            var newPanel = current_.AddUIComponent(typeof(T)) as T;
+        public UiBuilder<TPanel> ChildPanel<TPanel>(Action<TPanel> setupFn)
+            where TPanel : UIPanel, ISmartSizableControl {
+            var newPanel = Control.AddUIComponent(typeof(TPanel)) as TPanel;
             setupFn(newPanel);
-            return new UIBuilder(newPanel);
+            return new UiBuilder<TPanel>(newPanel);
         }
 
-        public UIBuilder ResizeFunction(Action<UResizer> resizeFn) {
-            UResizerConfig sz = GetCurrentResizerInfo();
-            sz.OnResize = resizeFn;
-            return this;
+        public void ResizeFunction(Action<UResizer> resizeFn) {
+            Control.GetResizerConfig().SetResizeFunction(resizeFn);
         }
 
         /// <summary>
@@ -89,11 +54,15 @@ namespace TrafficManager.U {
         /// according to sizes and positions configured in USizePosition members of form controls.
         /// </summary>
         public void Done() {
-            UResizer.UpdateHierarchy(this.current_);
+            // UResizer.UpdateHierarchy(this.Control);
+            UResizer.UpdateControlRecursive(this.Control, null);
         }
 
         /// <summary>End of `using (var x = ...) {}` statement.</summary>
-        public void Dispose() {
+        public void Dispose() { }
+
+        public void SetPadding(float f) {
+            Control.GetResizerConfig().Padding = f;
         }
     }
 }

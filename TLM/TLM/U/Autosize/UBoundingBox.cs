@@ -13,7 +13,7 @@ namespace TrafficManager.U.Autosize {
         }
 
         public UBoundingBox(UIComponent control) {
-            this.A = control.position;
+            this.A = control.relativePosition;
             this.B = this.A + control.size;
         }
 

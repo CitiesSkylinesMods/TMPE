@@ -6,9 +6,9 @@ namespace TrafficManager.U.Panel {
     public class UPanel : UIPanel, ISmartSizableControl {
         private UResizerConfig resizerConfig_;
 
-        public UResizerConfig GetResizerInfo() {
+        public UResizerConfig GetResizerConfig() {
             if (resizerConfig_ == null) {
-                resizerConfig_ = new UResizerConfig();
+                resizerConfig_ = new UResizerConfig(null, 0f);
             }
             return resizerConfig_;
         }

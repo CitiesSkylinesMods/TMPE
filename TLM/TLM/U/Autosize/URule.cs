@@ -25,14 +25,14 @@ namespace TrafficManager.U.Autosize {
         ReferenceHeightAt1080P,
 
         /// <summary>
-        /// Size the control to max width of its children. The float value in <see cref="UResizer"/>
-        /// defines the padding.
+        /// Size the control to max width of its children. The float value is ignored.
+        /// Padding can be set in the <see cref="UResizerConfig"/>
         /// </summary>
         FitChildrenWidth,
 
         /// <summary>
-        /// Size the control to max height of its children. The float value in <see cref="UResizer"/>
-        /// defines the padding.
+        /// Size the control to max height of its children. The float value is ignored.
+        /// Padding can be set in the <see cref="UResizerConfig"/>
         /// </summary>
         FitChildrenHeight,
     }

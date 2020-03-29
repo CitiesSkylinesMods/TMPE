@@ -81,121 +81,102 @@ namespace TrafficManager.UI.SubTools {
         /// Create button triples for number of lanes.
         /// Buttons are linked to lanes later by LaneArrowTool class.
         /// </summary>
+        /// <param name="builder">The UI Builder.</param>
         /// <param name="numLanes">How many lane groups.</param>
-        /// <param name="groupSize">Size in pixels for each group (vertical).</param>
-        /// <param name="spacing">Spacing between groups and around window edges.</param>
-        public void SetupControls(int numLanes, Vector2 groupSize, float spacing) {
+        public void SetupControls(UiBuilder<LaneArrowToolWindow> builder, int numLanes) {
             Buttons = new List<LaneArrowButton>();
-            // LaneArrowsPanel [
-            //     Panel "Outer" [
-            //         Panel (repeated) "Group of label and 3 buttons" [
-            //             Label [ Lane 1 ]
-            //             Panel "3 Buttons" [
-            //                 Button [ <- ]
-            //                 Button [ Forward ]
-            //                 Button [ -> ]
-            //             ]
-            //         ]
-            //     ]
-            //    Delete Label and button
-            // ]
 
-            // Create horizontal panel which will hold 3-button panels
-            // new Vector2(
-            //     (groupSize.x * numLanes) + (spacing * (numLanes + 1)),
-            //     LABEL_HEIGHT),
-            using (var outerB = new UIBuilder(this)) {
-                outerB.AutoLayoutVertical((int)spacing);
+            using (var buttonRowBuilder = builder.ChildPanel<U.Panel.UPanel>(
+                setupFn: p => { p.name = "TMPE_ButtonRow"; })) {
+                buttonRowBuilder.ResizeFunction(
+                    r => {
+                        r.StackVertical();
+                        r.FitToChildren();
+                    });
 
-                using (UIBuilder buttonRowBuilder = outerB.ChildPanel<U.Panel.UPanel>(
-                    setupFn: p => {
-                        p.name = "TMPE_ButtonRow";
-                        SetupControls_CreateButtonRow(p, numLanes, groupSize, spacing);
-                    })) {
-                    buttonRowBuilder.ResizeFunction(
-                        r => {
-                            r.Width(UValue.ReferenceWidthAt1080P(40f))
-                             .Height(UValue.MultipleOfWidth(3f));
-                        });
-                }
-
-                // And add another line: "Delete" action
-                using (UIBuilder deleteLabelContainer = outerB.ChildPanel<U.Panel.UPanel>(
-                        p => { p.name = "TMPE_DeleteLabelContainer"; }))
-                {
-                    deleteLabelContainer.Label<U.Label.ULabel>("Reset to default [Delete]");
-                    deleteLabelContainer.ResizeFunction(
-                        r => {
-                            r.Width(UValue.FitChildrenWidth(padding: 4f))
-                             .Height(UValue.FitChildrenHeight(padding: 4f));
-                        });
-                }
-
-                // Resize everything correctly
-                outerB.Done();
-            }
-        }
-
-        private void SetupControls_CreateButtonRow(UIPanel rowPanel,
-                                                   int numLanes,
-                                                   Vector2 groupSize,
-                                                   float spacing) {
-            for (var i = 0; i < numLanes; i++) {
-                // Create a subpanel with title and buttons subpanel
-                using (UIBuilder groupPanelBuilder = new UIBuilder(rowPanel)) {
-                    using (UIBuilder laneLabelBuilder =
-                        groupPanelBuilder.ChildPanel<U.Panel.UPanel>(
+                // -----------------------------------
+                // Create a row of button groups
+                //      [ Lane 1      ] [ Lane 2 ] [ Lane 3 ] ...
+                //      [ [←] [↑] [→] ] [...     ] [ ...    ]
+                // -----------------------------------
+                for (var i = 0; i < numLanes; i++) {
+                    string buttonName = $"TMPE_LaneArrow_ButtonGroup{i + 1}";
+                    using (var buttonGroupBuilder = buttonRowBuilder.ChildPanel<U.Panel.UPanel>(
                             setupFn: p => {
-                                p.name = "TMPE_LaneLabelContainer";
-                                p.size = groupSize;
-                            })) {
-                        laneLabelBuilder
-                            .AutoLayoutVertical()
-                            .Label<U.Label.ULabel>(Translation.LaneRouting.Get("Format.Label:Lane")
-                                                   + " " + (i + 1));
-                        // TODO: Label can be localized in a more flexible way
-                    }
-
-                    using (UIBuilder buttonPanelBuilder
-                        = groupPanelBuilder.ChildPanel<U.Panel.UPanel>(
-                            setupFn: p => {
-                                p.name = "TMPE_ButtonGroup";
+                                p.name = buttonName;
                                 p.atlas = TextureUtil.FindAtlas("Ingame");
                                 p.backgroundSprite = "GenericPanel";
-                                p.size = groupSize;
                             }))
                     {
-                        buttonPanelBuilder.AutoLayoutHorizontal();
+                        int i1 = i; // copy of the loop variable, for the resizeFunction below
+                        buttonGroupBuilder.ResizeFunction(
+                            r => {
+                                if (i1 == 0) {
+                                    // attach below "Lane #" label
+                                    r.StackVertical();
+                                } else {
+                                    // attach to the right of the previous button group
+                                    r.StackHorizontal();
+                                }
+
+                                r.FitToChildren();
+                            });
+
+                        // Create a label with "Lane #" title
+                        string labelText = Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1);
+                        using (var laneLabel = buttonGroupBuilder.Label<U.Label.ULabel>(labelText))
+                        {
+                            // The label will be repositioned to the top of the parent
+                            laneLabel.ResizeFunction(r => { r.StackVertical(); });
+                        }
 
                         // Create and populate the panel with buttons
-                        buttonPanelBuilder.Button<LaneArrowButton>(
-                            setupFn: b => {
-                                b.atlas = GetAtlas();
-                                b.Skin = CreateDefaultButtonSkin();
-                                b.Skin.Prefix = "LaneArrowLeft";
-                                b.size = new Vector2(groupSize.x / 3f, groupSize.y);
-                                Buttons.Add(b);
-                            });
+                        // 3 buttons are created [←] [↑] [→],
+                        // The click event is assigned outside in LaneArrowTool.cs
+                        foreach (string prefix in new[] {
+                                                            "LaneArrowLeft",
+                                                            "LaneArrowForward",
+                                                            "LaneArrowRight",
+                                                        }) {
+                            using (UiBuilder<LaneArrowButton> buttonBuilder =
+                                buttonGroupBuilder.Button<LaneArrowButton>())
+                            {
+                                buttonBuilder.Control.atlas = GetAtlas();
+                                buttonBuilder.Control.Skin = CreateDefaultButtonSkin();
+                                buttonBuilder.Control.Skin.Prefix = prefix;
+                                Buttons.Add(buttonBuilder.Control);
 
-                        buttonPanelBuilder.Button<LaneArrowButton>(
-                            setupFn: b => {
-                                b.atlas = GetAtlas();
-                                b.Skin = CreateDefaultButtonSkin();
-                                b.Skin.Prefix = "LaneArrowForward";
-                                b.size = new Vector2(groupSize.x / 3f, groupSize.y);
-                                Buttons.Add(b);
-                            });
+                                buttonBuilder.ResizeFunction(
+                                    r => {
+                                        // First button in the group will be stacking vertical
+                                        // under the "Lane #" label, while 2nd and 3rd will be
+                                        // stacking horizontal
+                                        if (prefix == "LaneArrowLeft") {
+                                            r.StackVertical();
+                                        } else {
+                                            r.StackHorizontal();
+                                        }
 
-                        buttonPanelBuilder.Button<LaneArrowButton>(
-                            setupFn: b => {
-                                b.atlas = GetAtlas();
-                                b.Skin = CreateDefaultButtonSkin();
-                                b.Skin.Prefix = "LaneArrowRight";
-                                b.size = new Vector2(groupSize.x / 3f, groupSize.y);
-                                Buttons.Add(b);
-                            });
-                    } // end button panel
-                } // end group panel
+                                        float buttonSize = UIScaler.ScreenSizeSmallestFraction(40f / 1920f, 40f / 1080f);
+                                        r.Width(new UValue(URule.FixedSize, buttonSize));
+                                        r.Height(new UValue(URule.FixedSize, buttonSize));
+                                    });
+                            }
+                        } // for each button
+                    } // end button group panel
+                } // end button loop, for each lane
+            } // end button row
+
+            // And add another line: "Delete" action
+            using (var deleteLabelBuilder =
+                builder.Label<U.Label.ULabel>("Reset to default [Delete]")) {
+                deleteLabelBuilder.ResizeFunction(
+                    r => {
+                        r.StackVertical();
+                        // TODO: Need autosize for labels
+                        r.Width(UValue.FixedSize(200f));
+                        r.Height(UValue.FixedSize(18f));
+                    });
             }
         }
 
