@@ -37,80 +37,41 @@ Official releases:
 * [Download Binaries](https://github.com/CitiesSkylinesMods/TMPE/releases) (for non-Steam users)
 * [Installation Guide](https://github.com/CitiesSkylinesMods/TMPE/wiki/Installation) (for all users)
 
-#### TM:PE V[11.1.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.0...11.1.0) STABLE, 29/02/2020
+Recent updates:
 
-- Added: Quick setup of priority roads (`Ctrl+Click junction`, `Shift+Ctrl+Click road`) (#621, #541, #542, #568, #577, #7)
-- Added: `Delete` key resets junction restrictions for selected junction (#639, #623, #568, #6)
-- Added: "Reset" button and `Delete` key resets lane arrows for a segment (#638, #632, #623, #568, #41)
-- Improved: Much better lane connectors interaction model (#543, #635, #625, #626, #41)
-- Improved: Use guide manager for less obtrusive in-game warnings/hints (#653, #660, #593)
-- Improved: Vastly improved in-game hotloading support (#640, #211)
-- Improved: Centralised versioning in to `SharedAssemblyInfo.cs` (#680, #678, #649)
-- Updated: Translations - Dutch (thanks Headspike!) (#660, #631)
-- Updated: Translations - Turkish (thanks Tayfun [Typhoon] / Koopr) (#660, #631)
-- Updated: Translations - Chinese Simplified (thanks Golden / goldenjin!) (#660, #631)
-- Updated: Translations - Portuguese (thanks BlackScout / BS_BlackScout!) (#660, #631)
-- Updated: Translations - Spanish (thanks Aimarekin!) (#660, #631)
-- Updated: Translations - English (thanks kian.zarrin!) (#660, #631)
-- Fixed: Vehicles should not stop at Yield signs (#662, #655, #650)
-- Meta: New WIP website: https://tmpe.me (#642, #643)
-- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+#### TM:PE V[11.2.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.0...11.2.1) STABLE, 26/03/2020
 
-#### TM:PE V[11.1.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.1-hotfix1...11.1.2) LABS, 02/03/2020
+- Fixed: CustomPathManager nullpointer on exit from asset/map editor (#794)
+- Fixed: Add missing Trolleybus vehicle category (#794)
+- Fixed: CustomPathManager NullPointerException on second load (#794)
 
-- Fixed: One-click traffic lights wrong way on RHT maps, murdering pedestrians (#770, #769, #690)
+#### TM:PE V[11.2.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.0...11.2.1) LABS, 29/03/2020
 
-#### TM:PE V[11.1.1-hotfix1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.1...11.1.1-hotfix1) LABS, 01/03/2020
+- Fixed: CustomPathManager nullpointer on exit from asset/map editor (#794)
+- Fixed: Add missing Trolleybus vehicle category (#794)
+- Fixed: CustomPathManager NullPointerException on second load (#794)
 
-- Fixed: Vehicles stopping at Yield signs (#761, #756)
-- Fixed: Missing despawn buttons on cim and vehicle info panels (#765, #763, #759)
-- Fixed: Info panel not closing after despawning a cim or tourist (#765)
-- Fixed: Faulty UI on tourist despawn button (#765)
-- Updated: Docs - Reference paths for EA Origin deployed game (thanks DannyDannyDan) ( #751)
+#### TM:PE V[11.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.2...11.2.0) LABS, 26/03/2020
 
-#### TM:PE V[11.1.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.0...11.1.1) LABS, 29/02/2020
-
-- Added: The `Simulation Accuracy` option has been revived! (#742, #707)
-- Added: `Shift` key applies a setting to entire route + lane highlight (#138, #721, #709, #708, #667, #388, #33)
-- Added: Lane highlighting - Vehicle Restrictions tool (#721, #681, #667, #42, #33)
-- Added: Lane highlighting - Parking Restrictions tool (#708, #702, #667, #47, #33)
-- Added: Lane highlighting - Speed Limits tool (#709, #682, #667, #388, #84, #52, #33)
-- Added: Button to reset speed limit to default added to speeds palette (#709)
-- Added: UI scaling slider in mod options "General" tab (#656)
-- Removed: Drag along road to set speed limits, due to performance issues (#388)
-- Fixed: Only selected vehicle restriction, not all, should be applied to route (#721)
-- Fixed: Lane connector can't make U-turns on roads with monorails (#293)
-- Fixed: Lane connectors could connect tracks disconnected by `MaxTurnAngle` (#684, #649)
-- Fixed: Wrong texture paths for timed traffic lights (thanks t1a2l for reporting!) (#732, #704, #714)
-- Fixed: Bug in guide manager that activated guide when trying to deactivate (#729)
-- Fixed: Double setting of lane speeds on game load, and debug log spamming (#736, #735)
-- Fixed: Scrollbar position corrected in mod options (#722, #742)
-- Fixed: Vehicle Restrictions error: `HashSet have been modified` (#746, #744, #721)
-- Improved: Cleaned up UI panels in Vehicle Restrictions and Speed Limits tools (#721, #709, #657)
-- Improved: Toolbar UI code overhauled, updated and polished (#656, #523)
-- Improved: Compatibility with CSUR Reloaded (#684, #649, #687, CSURToolBox#1, CSURToolBox#2)
-- Improved: Organised lane markers/highlighters in to distinct classes (#701, #630)
-- Improved: Better reference `.dll` hint paths for Mac and Windows developers (#664, #663)
-- Improved: Faster and more reliable hot-reloads of dev builds (#725, #717, #718)
-- Improved: Reduced memalloc and gc in SpeedLimitsManager.OnBeforeData() logging (#753)
-- Updated: Translations - Chinese Simplified (thanks 田七不甜 / TianQiBuTian) (#723)
-- Updated: Translations - Chinese Traditional (thanks jrthsr700tmax) (#723)
-- Updated: Translations - Dutch (thanks Headspike) (#723, #742)
-- Updated: Translations - English (thanks kian.zarrin, Dmytro Lytovchenko / kvakvs) (#723, #742)
-- Updated: Translations - Hungarian (thanks Krisztián Melich / StummeH) (#742)
-- Updated: Translations - Italian (thanks cianecollazzo / azzo94) (#723)
-- Updated: Translations - Korean (thanks neinnew) (#723, #742)
-- Updated: Translations - Polish (thanks krzychu124) (#723)
-- Updated: Translations - Portuguese (thanks BlackScout / BS_BlackScout) (#723)
-- Updated: Translations - Russian (thanks Dmytro Lytovchenko / kvakvs) (#723)
-- Updated: Translations - Spanish (thanks Nithox, obv) (#723, #742)
-- Updated: Translations - Turkish (thanks Tayfun [Typhoon] / Koopr) (#723)
-- Updated: Translations - Ukrainian (thanks Dmytro Lytovchenko / kvakvs) (#723)
-- Meta: Thanks to CSUR Reloaded team for collaboration with #684! (#649, #503)
-- Meta: Basic mod integration guide started (#696)
-- Meta: Build guide updated to include note on Windows 10 ASLR, and reference hint paths (#693)
-- Meta: Created GitHub org (`CitiesSkylinesMods`) and moved repo to it (`TMPE`) (#673)
+- Added: Trolleybus AI (#794)
+- Fixed: `PathUnits.m_vehicleTypes` error after Sunset Harbor game update (#794)
+- Fixed: Priority signs for trolleybuses (#794)
+- Fixed: Build process deployed TrafficManager.dll twice ( #776, #775)
+- Improved: Performance of hot-reloads of dev builds (#764, #730)
+- Improved: Consolidate error prompts in to helper class (#774)
+- Updated: Add missing entries and fix typos in changelog (#777, #779)
 - Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
+
+#### TM:PE V[11.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.0...11.2.0) STABLE, 26/03/2020
+
+- Added: Trolleybus AI (#794)
+- Fixed: `PathUnits.m_vehicleTypes` error after Sunset Harbor game update (#794)
+- Fixed: Priority signs for trolleybuses (#794)
+- Fixed: Build process deployed TrafficManager.dll twice ( #776, #775)
+- Improved: Performance of hot-reloads of dev builds (#764, #730)
+- Improved: Consolidate error prompts in to helper class (#774)
+- Updated: Add missing entries and fix typos in changelog (#777, #779)
+- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 - GitHub: [CitiesSkylinesMods/TMPE](https://github.com/CitiesSkylinesMods/TMPE)
 
 See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
