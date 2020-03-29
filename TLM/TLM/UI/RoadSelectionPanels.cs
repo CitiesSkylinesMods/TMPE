@@ -153,14 +153,15 @@ namespace TrafficManager.UI {
             // attach an instance of road selection panel to RoadWorldInfoPanel.
             RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
             if (roadWorldInfoPanel != null) {
-                PanelExt panel = AddPanel(roadWorldInfoPanel.component);
-                panel.relativePosition += new Vector3(-10f, -10f);
+                // TODO [issue #710] add panel when able to get road by name.
+                //PanelExt panel = AddPanel(roadWorldInfoPanel.component);
+                //panel.relativePosition += new Vector3(-10f, -10f);
                 priorityRoadToggle_ = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
                 if (priorityRoadToggle_ != null) {
                     priorityRoadToggle_.eventVisibilityChanged += HidePriorityRoadToggleEvent;
                 }
-                panel.eventVisibilityChanged += MassEditOverlayOnEvent;
-                panel.eventVisibilityChanged += ShowAdvisorOnEvent;
+                //panel.eventVisibilityChanged += MassEditOverlayOnEvent;
+                //panel.eventVisibilityChanged += ShowAdvisorOnEvent;
             }
 
             // attach another instance of road selection panel to AdjustRoad tab.
