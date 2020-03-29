@@ -25,7 +25,8 @@ namespace TrafficManager.Manager.Impl {
                                                              | VehicleInfo.VehicleType.Train
                                                              | VehicleInfo.VehicleType.Tram
                                                              | VehicleInfo.VehicleType.Metro
-                                                             | VehicleInfo.VehicleType.Monorail;
+                                                             | VehicleInfo.VehicleType.Monorail
+                                                             | VehicleInfo.VehicleType.Trolleybus;
 
         public static LaneConnectionManager Instance { get; }
 

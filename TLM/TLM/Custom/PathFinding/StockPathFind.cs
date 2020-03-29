@@ -613,7 +613,7 @@ namespace TrafficManager.Custom.PathFinding {
 						nextSegmentId = netManager.m_segments.m_buffer[nextSegmentId].GetRightSegment(nextNodeId);
 					}
 
-					if (isUturnAllowedHere && (m_vehicleTypes & VehicleInfo.VehicleType.Tram) == VehicleInfo.VehicleType.None) {
+					if (isUturnAllowedHere && (m_vehicleTypes & VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Trolleybus) == VehicleInfo.VehicleType.None) {
 						nextSegmentId = item.m_position.m_segment;
 						ProcessItemCosts(item, nextNodeId, nextSegmentId, ref netManager.m_segments.m_buffer[nextSegmentId], ref prevRelSimilarLaneIndex, connectOffset, true, false);
 					}

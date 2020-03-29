@@ -975,7 +975,7 @@
 
                 byte laneTypes = CustomPathManager
                                 ._instance.m_pathUnits.m_buffer[instanceData.m_path].m_laneTypes;
-                ushort vehicleTypes = CustomPathManager
+                uint vehicleTypes = CustomPathManager
                                    ._instance.m_pathUnits.m_buffer[instanceData.m_path]
                                    .m_vehicleTypes;
                 bool usesPublicTransport =
