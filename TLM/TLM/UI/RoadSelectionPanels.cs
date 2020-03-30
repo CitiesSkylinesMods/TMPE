@@ -152,26 +152,25 @@ namespace TrafficManager.UI {
 
         public void Start() {
             Root = this;
-
             // this code prevents a rare bug that RoadWorldInfoPanel some times does not show.
-            ModUI.EnableTool();
-            ModUI.DisableTool();
+            EnqueueAction(ModUI.Instance.Show);
+            EnqueueAction(ModUI.Instance.Close);
 
             panels_ = new List<PanelExt>();
 
-            //// attach an instance of road selection panel to RoadWorldInfoPanel.
-            //RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
-            //if (roadWorldInfoPanel != null) {
-            //    // TODO [issue #710] add panel when able to get road by name.
-            //    //PanelExt panel = AddPanel(roadWorldInfoPanel.component);
-            //    //panel.relativePosition += new Vector3(-10f, -10f);
-            //    priorityRoadToggle_ = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
-            //    if (priorityRoadToggle_ != null) {
-            //        priorityRoadToggle_.eventVisibilityChanged += HidePriorityRoadToggleEvent;
-            //    }
-            //    //panel.eventVisibilityChanged += MassEditOverlayOnEvent;
-            //    //panel.eventVisibilityChanged += ShowAdvisorOnEvent;
-            //}
+            // attach an instance of road selection panel to RoadWorldInfoPanel.
+            RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
+            if (roadWorldInfoPanel != null) {
+                // TODO [issue #710] add panel when able to get road by name.
+                PanelExt panel = AddPanel(roadWorldInfoPanel.component);
+                panel.relativePosition += new Vector3(-10f, -10f);
+                priorityRoadToggle_ = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
+                if (priorityRoadToggle_ != null) {
+                    priorityRoadToggle_.eventVisibilityChanged += HidePriorityRoadToggleEvent;
+                }
+                panel.eventVisibilityChanged += MassEditOverlayOnEvent;
+                panel.eventVisibilityChanged += ShowAdvisorOnEvent;
+            }
 
             // attach another instance of road selection panel to AdjustRoad tab.
             UIPanel roadAdjustPanel = UIView.Find<UIPanel>("AdjustRoad");

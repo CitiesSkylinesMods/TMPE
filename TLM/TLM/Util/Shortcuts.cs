@@ -2,6 +2,8 @@ namespace TrafficManager.Util {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
+    using System.Diagnostics;
     using ColossalFramework;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
@@ -61,6 +63,21 @@ namespace TrafficManager.Util {
             return a;
         }
 
+#if DEBUG
+        private static int[] _frameCounts=  new int[100];
+        internal static void LogAndWait(string m, int waitFrames, ushort ID) {
+            int frameCount = Time.frameCount;
+            int diff = frameCount - _frameCounts[ID];
+            if (diff<0 || diff > waitFrames) {
+                Log._Debug(m);
+                _frameCounts[ID] = frameCount;
+            }
+        }
+#else
+        internal static void LogAndWait(string m, ushort ID) {
+            
+        }
+#endif
         internal static string CenterString(this string stringToCenter, int totalLength) {
             int leftPadding = ((totalLength - stringToCenter.Length) / 2) + stringToCenter.Length;
             return stringToCenter.PadLeft(leftPadding).PadRight(totalLength);
