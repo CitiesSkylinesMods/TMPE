@@ -3,6 +3,7 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using TrafficManager.RedirectionFramework;
+    using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
     using TrafficManager.U.Button;
@@ -86,6 +87,7 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="numLanes">How many lane groups.</param>
         public void SetupControls(UiBuilder<LaneArrowToolWindow> builder, int numLanes) {
             Buttons = new List<LaneArrowButton>();
+
 
             using (var buttonRowBuilder = builder.ChildPanel<U.Panel.UPanel>(
                 setupFn: p => { p.name = "TMPE_ButtonRow"; })) {
@@ -175,14 +177,20 @@ namespace TrafficManager.UI.SubTools {
             } // end button row
 
             // And add another line: "Delete" action
-            using (var deleteLabelBuilder =
-                builder.Label<U.Label.ULabel>("Reset to default [Delete]")) {
-                deleteLabelBuilder.ResizeFunction(
+            using (var shortcutBuilder =
+                builder.ShortcutLabel(KeybindSettingsBase.LaneConnectorDelete)) {
+                shortcutBuilder.ResizeFunction(
                     r => {
                         r.StackVertical(Constants.UIPADDING);
-                        // TODO: Need autosize for labels
-                        r.Width(UValue.FixedSize(200f));
-                        r.Height(UValue.FixedSize(18f));
+                    });
+            }
+
+            string deleteLabelText = Translation.LaneRouting.Get("LaneConnector.Label:Reset to default");
+            using (var deleteLabelBuilder =
+                builder.Label<U.Label.ULabel>(deleteLabelText)) {
+                deleteLabelBuilder.ResizeFunction(
+                    r => {
+                        r.StackHorizontal(Constants.UIPADDING * 2f); // double space
                     });
             }
         }

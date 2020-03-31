@@ -133,33 +133,41 @@ namespace TrafficManager.U.Autosize {
 
         /// <summary>Instructs U UI to place the control vertically below the previous sibling.</summary>
         /// <param name="spacing">Step away from the control above but not from the form top.</param>
-        public void StackVertical(float spacing = 0f) {
+        /// <param name="stackUnder">Some sibling whose position will be used (must be
+        /// inserted into the form before the current control.</param>
+        public void StackVertical(float spacing = 0f, UIComponent stackUnder = null) {
             var padding = 0f;
             if (this.Control.parent.GetComponent<UIComponent>() is ISmartSizableControl parent) {
                 padding = parent.GetResizerConfig().Padding;
             }
-
-            Vector3 pos = this.PreviousSibling == null
+            if (stackUnder == null) {
+                stackUnder = this.PreviousSibling;
+            }
+            Vector3 pos = stackUnder == null
                               ? new Vector3(padding, padding, 0f)
-                              : this.PreviousSibling.relativePosition + new Vector3(
+                              : stackUnder.relativePosition + new Vector3(
                                     0f,
-                                    this.PreviousSibling.height + spacing,
+                                    stackUnder.height + spacing,
                                     0f);
             this.Control.relativePosition = pos;
         }
 
         /// <summary>Instructs U UI to place the control to the right of the previous sibling.</summary>
         /// <param name="spacing">Step away from the control to the left but not from the form left.</param>
-        public void StackHorizontal(float spacing = 0f) {
+        /// <param name="stackUnder">Some sibling whose position will be used (must be
+        /// inserted into the form before the current control.</param>
+        public void StackHorizontal(float spacing = 0f, UIComponent stackUnder = null) {
             var padding = 0f;
             if (this.Control.parent.GetComponent<UIComponent>() is ISmartSizableControl parent) {
                 padding = parent.GetResizerConfig().Padding;
             }
-
-            Vector3 pos = this.PreviousSibling == null
+            if (stackUnder == null) {
+                stackUnder = this.PreviousSibling;
+            }
+            Vector3 pos = stackUnder == null
                               ? new Vector3(padding, padding, 0f)
-                              : this.PreviousSibling.relativePosition + new Vector3(
-                                    this.PreviousSibling.width + spacing,
+                              : stackUnder.relativePosition + new Vector3(
+                                    stackUnder.width + spacing,
                                     0f,
                                     0f);
             this.Control.relativePosition = pos;

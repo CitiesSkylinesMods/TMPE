@@ -2,6 +2,7 @@ namespace TrafficManager.U {
     using System;
     using ColossalFramework.UI;
     using CSUtil.Commons;
+    using TrafficManager.State.Keybinds;
     using TrafficManager.U.Autosize;
     using UnityEngine;
 
@@ -36,6 +37,21 @@ namespace TrafficManager.U {
             var newLabel = Control.AddUIComponent(typeof(TLabel)) as TLabel;
             newLabel.text = t;
             return new UiBuilder<TLabel>(newLabel);
+        }
+
+        private static readonly Color SHORTCUT_DESCR_TEXT = new Color(.75f, .75f, .75f, 1f);
+        public static readonly Color SHORTCUT_KEYBIND_TEXT = new Color(.8f, .6f, .3f, 1f);
+
+        /// <summary>Add a colored label for a keyboard or mouse shortcut.</summary>
+        /// <returns>New UI Builder with the keybind label created.</returns>
+        public UiBuilder<U.Label.ULabel> ShortcutLabel(KeybindSetting ks) {
+            var shortcutLabel = Control.AddUIComponent(typeof(U.Label.ULabel)) as U.Label.ULabel;
+
+            shortcutLabel.backgroundSprite = "GenericPanelDark";
+            shortcutLabel.textColor = SHORTCUT_KEYBIND_TEXT;
+            shortcutLabel.text = $" {ks.ToLocalizedString()} ";
+
+            return new UiBuilder<U.Label.ULabel>(shortcutLabel);
         }
 
         public UiBuilder<TPanel> ChildPanel<TPanel>(Action<TPanel> setupFn)
