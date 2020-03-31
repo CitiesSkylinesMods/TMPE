@@ -103,10 +103,10 @@ namespace TrafficManager.U.Autosize {
                            * UIScaler.GetUIScale();
 
                 case URule.FitChildrenWidth:
-                    return this.ChildrenBox.B.x + (2 * this.Config.Padding);
+                    return this.ChildrenBox.B.x + this.Config.Padding;
 
                 case URule.FitChildrenHeight:
-                    return this.ChildrenBox.B.y + (2 * this.Config.Padding);
+                    return this.ChildrenBox.B.y + this.Config.Padding;
             }
 
             throw new ArgumentOutOfRangeException();

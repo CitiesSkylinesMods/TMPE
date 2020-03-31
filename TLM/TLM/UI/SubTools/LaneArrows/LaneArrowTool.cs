@@ -10,6 +10,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.State.Keybinds;
     using TrafficManager.U.Autosize;
     using TrafficManager.U.Button;
     using UnityEngine;
@@ -146,25 +147,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             SetupLaneArrowsWindowButtons(laneList, (bool)startNode);
         }
 
-        private static class ScaledSize {
-            /// <summary>
-            /// Base lane group height scaled to screen size, from it the window height is derived.</summary>
-            /// <returns>Height of one lane button group.</returns>
-            internal static float GetLaneGroupHeight() {
-                // At 1920x1080 the width should be 40 px, can shrink or grow with screen size
-                const float REFERENCE_HEIGHT = 40f;
-                const float X_FRAC = REFERENCE_HEIGHT / 1920f;
-                const float Y_FRAC = REFERENCE_HEIGHT / 1080f;
-                return U.UIScaler.ScreenSizeSmallestFraction(X_FRAC, Y_FRAC)
-                       * U.UIScaler.GetUIScale();
-            }
-
-            internal static float GetLaneGroupWidth() {
-                // For 40 px reference height, the width will be 3x more
-                return GetLaneGroupHeight() * 3f;
-            }
-        }
-
         /// <summary>
         /// Creates floating tool window for Lane Arrow controls and adds keyboard hints too.
         /// </summary>
@@ -178,6 +160,13 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 builder.SetPadding(Constants.UIPADDING);
 
                 ToolWindow.SetupControls(builder, numLanes);
+
+                // On Delete being pressed
+                ToolWindow.eventKeyDown += (component, param) => {
+                    if (KeybindSettingsBase.LaneConnectorDelete.IsPressed(param)) {
+                        OnResetToDefaultPressed();
+                    }
+                };
 
                 // Resize everything correctly
                 builder.Done();
@@ -213,6 +202,13 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonRight.StartNode = startNode;
                 buttonRight.ToggleFlag = API.Traffic.Enums.LaneArrows.Right;
                 buttonRight.UpdateButtonImageAndTooltip();
+            }
+        }
+
+        private void UpdateAllButtons() {
+            // For all lanes, go through our buttons and update states
+            foreach (LaneArrowButton b in ToolWindow.Buttons) {
+                b.UpdateButtonImageAndTooltip();
             }
         }
 
@@ -375,53 +371,53 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 screenPos - new Vector3(ToolWindow.size.x * 0.5f, ToolWindow.size.y * 0.5f, 0f);
         }
 
-        [Conditional("OBSOLETE_LANEARROW_IMGUI")]
-        public void OnToolGUI(Event e) {
-            // base.OnToolGUI(e);
-            cursorInSecondaryPanel_ = false;
-
-            if (SelectedNodeId == 0 || SelectedSegmentId == 0) return;
-
-            int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(
-                SelectedSegmentId,
-                SelectedNodeId,
-                out int numDirections,
-                LaneArrowManager.VEHICLE_TYPES);
-
-            if (numLanes <= 0) {
-                SelectedNodeId = 0;
-                SelectedSegmentId = 0;
-                return;
-            }
-
-            Vector3 nodePos = Singleton<NetManager>
-                              .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
-
-            bool visible = MainTool.WorldToScreenPoint(nodePos, out Vector3 screenPos);
-
-            if (!visible) {
-                return;
-            }
-
-            Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-            Vector3 diff = nodePos - camPos;
-
-            if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
-                return; // do not draw if too distant
-            }
-
-            int width = numLanes * 128;
-            int height = 50;
-            bool startNode = (bool)netService.IsStartNode(SelectedSegmentId, SelectedNodeId);
-            if (CanReset(SelectedSegmentId, startNode)) {
-                height += 40;
-            }
-
-            var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, height);
-            var legacyBorderlessStyle = new GUIStyle();
-            GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, legacyBorderlessStyle);
-            cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
-        }
+        // [Obsolete("OBSOLETE_LANEARROW_IMGUI")]
+        // public void OnToolGUI(Event e) {
+        //     // base.OnToolGUI(e);
+        //     cursorInSecondaryPanel_ = false;
+        //
+        //     if (SelectedNodeId == 0 || SelectedSegmentId == 0) return;
+        //
+        //     int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(
+        //         SelectedSegmentId,
+        //         SelectedNodeId,
+        //         out int numDirections,
+        //         LaneArrowManager.VEHICLE_TYPES);
+        //
+        //     if (numLanes <= 0) {
+        //         SelectedNodeId = 0;
+        //         SelectedSegmentId = 0;
+        //         return;
+        //     }
+        //
+        //     Vector3 nodePos = Singleton<NetManager>
+        //                       .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
+        //
+        //     bool visible = MainTool.WorldToScreenPoint(nodePos, out Vector3 screenPos);
+        //
+        //     if (!visible) {
+        //         return;
+        //     }
+        //
+        //     Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
+        //     Vector3 diff = nodePos - camPos;
+        //
+        //     if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
+        //         return; // do not draw if too distant
+        //     }
+        //
+        //     int width = numLanes * 128;
+        //     int height = 50;
+        //     bool startNode = (bool)netService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+        //     if (CanReset(SelectedSegmentId, startNode)) {
+        //         height += 40;
+        //     }
+        //
+        //     var windowRect3 = new Rect(screenPos.x - (width / 2), screenPos.y - 70, width, height);
+        //     var legacyBorderlessStyle = new GUIStyle();
+        //     GUILayout.Window(250, windowRect3, GuiLaneChangeWindow, string.Empty, legacyBorderlessStyle);
+        //     cursorInSecondaryPanel_ = windowRect3.Contains(Event.current.mousePosition);
+        // }
 
         /// <summary>
         /// Determines whether or not the hovered segment end has lane arrows.
@@ -565,130 +561,146 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
         }
 
-        private void GuiLaneChangeWindow(int num) {
-            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(
-                SelectedSegmentId,
-                ref segmentsBuffer[SelectedSegmentId],
-                segmentsBuffer[SelectedSegmentId].m_startNode == SelectedNodeId,
-                LaneArrowManager.LANE_TYPES,
-                LaneArrowManager.VEHICLE_TYPES,
-                true);
+        // [Obsolete("Legacy UI code deprecated")]
+        // private void GuiLaneChangeWindow(int num) {
+        //     NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+        //     IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(
+        //         SelectedSegmentId,
+        //         ref segmentsBuffer[SelectedSegmentId],
+        //         segmentsBuffer[SelectedSegmentId].m_startNode == SelectedNodeId,
+        //         LaneArrowManager.LANE_TYPES,
+        //         LaneArrowManager.VEHICLE_TYPES,
+        //         true);
+        //
+        //     bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+        //     if (startNode == null) {
+        //         Log.Error(
+        //             $"LaneArrowTool._guiLaneChangeWindow: Segment {SelectedSegmentId} " +
+        //             $"is not connected to node {SelectedNodeId}");
+        //         return;
+        //     }
+        //
+        //     GUILayout.BeginVertical();
+        //     GUILayout.BeginHorizontal();
+        //     var style1 = new GUIStyle("button");
+        //     var style2 = new GUIStyle("button") {
+        //         normal = { textColor = new Color32(255, 0, 0, 255) },
+        //         hover = { textColor = new Color32(255, 0, 0, 255) },
+        //         focused = { textColor = new Color32(255, 0, 0, 255) }
+        //     };
+        //
+        //     for (var i = 0; i < laneList.Count; i++) {
+        //         var flags = (NetLane.Flags)Singleton<NetManager>
+        //                                    .instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
+        //
+        //         var laneStyle = new GUIStyle { contentOffset = new Vector2(12f, 0f) };
+        //
+        //         var laneTitleStyle = new GUIStyle {
+        //             contentOffset = new Vector2(36f, 2f),
+        //             normal = { textColor = new Color(1f, 1f, 1f) },
+        //         };
+        //
+        //         GUILayout.BeginVertical(laneStyle);
+        //         GUILayout.Label(
+        //             Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1),
+        //             laneTitleStyle);
+        //         GUILayout.BeginVertical();
+        //         GUILayout.BeginHorizontal();
+        //
+        //         if (!Flags.ApplyLaneArrowFlags(laneList[i].laneId)) {
+        //             Flags.RemoveLaneArrowFlags(laneList[i].laneId);
+        //         }
+        //
+        //         SetLaneArrowError res = SetLaneArrowError.Invalid;
+        //         bool buttonClicked = false;
+        //
+        //         if (GUILayout.Button(
+        //             "←",
+        //             (flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2,
+        //             GUILayout.Width(35),
+        //             GUILayout.Height(25))) {
+        //             buttonClicked = true;
+        //             LaneArrowManager.Instance.ToggleLaneArrows(
+        //                 laneList[i].laneId,
+        //                 (bool)startNode,
+        //                 LaneArrows.Left,
+        //                 out res);
+        //         }
+        //
+        //         if (GUILayout.Button(
+        //             "↑",
+        //             (flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2,
+        //             GUILayout.Width(25),
+        //             GUILayout.Height(35))) {
+        //             buttonClicked = true;
+        //             LaneArrowManager.Instance.ToggleLaneArrows(
+        //                 laneList[i].laneId,
+        //                 (bool)startNode,
+        //                 LaneArrows.Forward,
+        //                 out res);
+        //         }
+        //
+        //         if (GUILayout.Button(
+        //             "→",
+        //             (flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2,
+        //             GUILayout.Width(35),
+        //             GUILayout.Height(25))) {
+        //             buttonClicked = true;
+        //             LaneArrowManager.Instance.ToggleLaneArrows(
+        //                 laneList[i].laneId,
+        //                 (bool)startNode,
+        //                 LaneArrows.Right,
+        //                 out res);
+        //         }
+        //
+        //         if (buttonClicked) {
+        //             InformUserAboutPossibleFailure(res);
+        //         }
+        //
+        //         GUILayout.EndHorizontal();
+        //         GUILayout.EndVertical();
+        //         GUILayout.EndVertical();
+        //     }
+        //
+        //     GUILayout.EndHorizontal();
+        //
+        //     if (CanReset(SelectedSegmentId, (bool)startNode)) {
+        //         string reset = Translation.LaneRouting.Get("Button:Reset");
+        //         reset += " [del] "; // hotkey
+        //         var hotkey = KeyCode.Delete;
+        //         var style = new GUIStyle("button");
+        //         if (Input.GetKey(hotkey)) {
+        //             style.normal.background = style.active.background;
+        //         }
+        //
+        //         if (GUILayout.Button(
+        //             reset,
+        //             style,
+        //             GUILayout.Width(135), // intentionally big to avoid confusion
+        //             GUILayout.Height(25)) ||
+        //             Input.GetKeyDown(hotkey)) {
+        //             Log._Debug("deleting lane arrows: " +
+        //                 $"SelectedSegmentId={SelectedSegmentId} SelectedNodeId={SelectedNodeId} startNode={startNode}");
+        //             LaneArrowManager.Instance.ResetLaneArrows(SelectedSegmentId, startNode);
+        //         }
+        //     }
+        //
+        //     GUILayout.EndVertical();
+        // }
 
+        private void OnResetToDefaultPressed() {
             bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
-            if (startNode == null) {
-                Log.Error(
-                    $"LaneArrowTool._guiLaneChangeWindow: Segment {SelectedSegmentId} " +
-                    $"is not connected to node {SelectedNodeId}");
+            if (!CanReset(SelectedSegmentId, (bool)startNode)) {
                 return;
             }
 
-            GUILayout.BeginVertical();
-            GUILayout.BeginHorizontal();
-            var style1 = new GUIStyle("button");
-            var style2 = new GUIStyle("button") {
-                normal = { textColor = new Color32(255, 0, 0, 255) },
-                hover = { textColor = new Color32(255, 0, 0, 255) },
-                focused = { textColor = new Color32(255, 0, 0, 255) }
-            };
+            Log._Debug(
+                "deleting lane arrows: " +
+                $"SelectedSegmentId={SelectedSegmentId} SelectedNodeId={SelectedNodeId} startNode={startNode}");
+            LaneArrowManager.Instance.ResetLaneArrows(SelectedSegmentId, startNode);
 
-            for (var i = 0; i < laneList.Count; i++) {
-                var flags = (NetLane.Flags)Singleton<NetManager>
-                                           .instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
-
-                var laneStyle = new GUIStyle { contentOffset = new Vector2(12f, 0f) };
-
-                var laneTitleStyle = new GUIStyle {
-                    contentOffset = new Vector2(36f, 2f),
-                    normal = { textColor = new Color(1f, 1f, 1f) },
-                };
-
-                GUILayout.BeginVertical(laneStyle);
-                GUILayout.Label(
-                    Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1),
-                    laneTitleStyle);
-                GUILayout.BeginVertical();
-                GUILayout.BeginHorizontal();
-
-                if (!Flags.ApplyLaneArrowFlags(laneList[i].laneId)) {
-                    Flags.RemoveLaneArrowFlags(laneList[i].laneId);
-                }
-
-                SetLaneArrowError res = SetLaneArrowError.Invalid;
-                bool buttonClicked = false;
-
-                if (GUILayout.Button(
-                    "←",
-                    (flags & NetLane.Flags.Left) == NetLane.Flags.Left ? style1 : style2,
-                    GUILayout.Width(35),
-                    GUILayout.Height(25))) {
-                    buttonClicked = true;
-                    LaneArrowManager.Instance.ToggleLaneArrows(
-                        laneList[i].laneId,
-                        (bool)startNode,
-                        LaneArrows.Left,
-                        out res);
-                }
-
-                if (GUILayout.Button(
-                    "↑",
-                    (flags & NetLane.Flags.Forward) == NetLane.Flags.Forward ? style1 : style2,
-                    GUILayout.Width(25),
-                    GUILayout.Height(35))) {
-                    buttonClicked = true;
-                    LaneArrowManager.Instance.ToggleLaneArrows(
-                        laneList[i].laneId,
-                        (bool)startNode,
-                        LaneArrows.Forward,
-                        out res);
-                }
-
-                if (GUILayout.Button(
-                    "→",
-                    (flags & NetLane.Flags.Right) == NetLane.Flags.Right ? style1 : style2,
-                    GUILayout.Width(35),
-                    GUILayout.Height(25))) {
-                    buttonClicked = true;
-                    LaneArrowManager.Instance.ToggleLaneArrows(
-                        laneList[i].laneId,
-                        (bool)startNode,
-                        LaneArrows.Right,
-                        out res);
-                }
-
-                if (buttonClicked) {
-                    InformUserAboutPossibleFailure(res);
-                }
-
-                GUILayout.EndHorizontal();
-                GUILayout.EndVertical();
-                GUILayout.EndVertical();
-            }
-
-            GUILayout.EndHorizontal();
-
-            if (CanReset(SelectedSegmentId, (bool)startNode)) {
-                string reset = Translation.LaneRouting.Get("Button:Reset");
-                reset += " [del] "; // hotkey
-                var hotkey = KeyCode.Delete;
-                var style = new GUIStyle("button");
-                if (Input.GetKey(hotkey)) {
-                    style.normal.background = style.active.background;
-                }
-
-                if (GUILayout.Button(
-                    reset,
-                    style,
-                    GUILayout.Width(135), // intentionally big to avoid confusion
-                    GUILayout.Height(25)) ||
-                    Input.GetKeyDown(hotkey)) {
-                    Log._Debug("deleting lane arrows: " +
-                        $"SelectedSegmentId={SelectedSegmentId} SelectedNodeId={SelectedNodeId} startNode={startNode}");
-                    LaneArrowManager.Instance.ResetLaneArrows(SelectedSegmentId, startNode);
-                }
-            }
-
-            GUILayout.EndVertical();
+            // Update button states
+            this.UpdateAllButtons();
         }
     }
 }
