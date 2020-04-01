@@ -186,7 +186,6 @@
             args.maxLength = 20000f;
             args.isHeavyVehicle = IsHeavyVehicle();
             args.hasCombustionEngine = CombustionEngine();
-            ;
             args.ignoreBlocked = IgnoreBlocked(vehicleId, ref vehicleData);
             args.ignoreFlooded = false;
             args.randomParking = false;

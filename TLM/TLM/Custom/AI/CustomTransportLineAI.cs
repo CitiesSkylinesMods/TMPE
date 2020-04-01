@@ -169,7 +169,6 @@
             }
 
             if ((vehicleType & VehicleInfo.VehicleType.Trolleybus) != VehicleInfo.VehicleType.None) {
-                Debug.Log("TransportLine Trolleybus");
                 extVehicleType = ExtVehicleType.Trolleybus;
             }
 

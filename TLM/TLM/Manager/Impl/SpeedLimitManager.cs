@@ -28,7 +28,7 @@ namespace TrafficManager.Manager.Impl {
         public const VehicleInfo.VehicleType VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram |
             VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train |
-            VehicleInfo.VehicleType.Monorail;
+            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
 
         /// <summary>Ingame speed units, max possible speed</summary>
         public const float MAX_SPEED = 10f * 2f; // 1000 km/h
@@ -766,7 +766,7 @@ namespace TrafficManager.Manager.Impl {
 
             log.Append("SpeedLimitManager.OnBeforeLoadData: Scan complete.\n");
             Log.Info(log.ToString());
-            
+
             mainNetInfos.Sort(
                 (NetInfo a, NetInfo b) => { // todo: move arrow function somewhere else?
                     bool aRoad = a.m_netAI is RoadBaseAI;
