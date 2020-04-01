@@ -39,7 +39,7 @@ namespace TrafficManager.Custom.AI {
 
                 NetManager netManager = Singleton<NetManager>.instance;
                 NetInfo info = netManager.m_segments.m_buffer[segmentId].Info;
-                if ((info.m_vehicleTypes & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram)) ==
+                if ((info.m_vehicleTypes & (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Trolleybus)) ==
                     VehicleInfo.VehicleType.None) {
                     return;
                 }

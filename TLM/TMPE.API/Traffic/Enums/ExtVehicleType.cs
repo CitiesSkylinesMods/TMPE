@@ -27,15 +27,16 @@
         PassengerFerry = 1 << 16,
         PassengerBlimp = 1 << 17,
         CargoPlane = 1 << 18,
+        Trolleybus = 1 << 19,
         Plane = PassengerPlane | CargoPlane,
         Ship = PassengerShip | CargoShip,
         CargoVehicle = CargoTruck | CargoTrain | CargoShip | CargoPlane,
-        PublicTransport = Bus | Taxi | Tram | PassengerTrain,
-        RoadPublicTransport = Bus | Taxi,
-        RoadVehicle = PassengerCar | Bus | Taxi | CargoTruck | Service | Emergency,
+        PublicTransport = Bus | Taxi | Tram | PassengerTrain | Trolleybus,
+        RoadPublicTransport = Bus | Taxi | Trolleybus,
+        RoadVehicle = PassengerCar | Bus | Taxi | CargoTruck | Service | Emergency,//may perform u-turn
         RailVehicle = PassengerTrain | CargoTrain,
         NonTransportRoadVehicle = RoadVehicle & ~PublicTransport,
         Ferry = PassengerFerry,
-        Blimp = PassengerBlimp
+        Blimp = PassengerBlimp,
     }
 }

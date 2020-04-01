@@ -319,9 +319,7 @@ namespace TrafficManager.Manager.Impl {
                      (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) !=
                     NetInfo.LaneType.None &&
                     (info.m_lanes[laneIndex].m_vehicleType &
-                     (VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Train |
-                      VehicleInfo.VehicleType.Tram | VehicleInfo.VehicleType.Metro |
-                      VehicleInfo.VehicleType.Monorail)) != VehicleInfo.VehicleType.None;
+                     (ExtVehicleManager.VEHICLE_TYPES)) != VehicleInfo.VehicleType.None;
                 // TODO the lane types and vehicle types should be specified to make it clear which lanes we need to check
                 if (validLane) {
                     if ((info.m_lanes[laneIndex].m_finalDirection & dir2) !=
