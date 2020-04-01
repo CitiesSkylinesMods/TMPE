@@ -140,6 +140,7 @@
     <Compile Include="Custom\AI\CustomTouristAI.cs" />
     <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
+    <Compile Include="Custom\AI\CustomTrolleybusAI.cs" />
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Custom\Data\CustomVehicle.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
+    <Compile Include="UI\Helpers\Prompt.cs" />
     <Compile Include="UI\Helpers\SegmentLaneMarker.cs" />
     <Compile Include="UI\Helpers\ExtUITabStrip.cs" />
     <Compile Include="Manager\Impl\SegmentEndManager.cs" />
@@ -580,6 +582,12 @@
     <EmbeddedResource Include="Resources\MainMenu\Tool\PrioritySigns-fg-normal.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\VehicleRestrictions-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\VehicleRestrictions-fg-normal.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-bg-active.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-bg-normal.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-bg-hovered.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-fg-normal.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-fg-hovered.png" />
+    <EmbeddedResource Include="Resources\Clear\Clear-fg-active.png" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
@@ -601,7 +609,6 @@
       PostBuildMacros;
     </PostBuildEventDependsOn>
     <PostBuildEvent>set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
-xcopy /y "$(TargetDir)TrafficManager.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.API.dll" "%25DEPLOYDIR%25"

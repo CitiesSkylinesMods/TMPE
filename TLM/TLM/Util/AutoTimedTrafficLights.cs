@@ -64,7 +64,7 @@ namespace TrafficManager.Util {
         /// <param name="nodeId">the junction</param>
         /// <returns>a list of segments aranged in counter clockwise direction.</returns>
         private static List<ushort> ArrangedSegments(ushort nodeId) {
-            ClockDirection clockDir = RHT ? ClockDirection.CounterClockwise : ClockDirection.CounterClockwise;
+            ClockDirection clockDir = RHT ? ClockDirection.Clockwise : ClockDirection.CounterClockwise;
             List<ushort> segList = new List<ushort>();
             netService.IterateNodeSegments(
                 nodeId,

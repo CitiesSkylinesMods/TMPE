@@ -61,13 +61,13 @@ namespace TrafficManager.UI.SubTools {
                 if (showMessageOnError) {
                     switch (reason) {
                         case ToggleTrafficLightError.HasTimedLight: {
-                            MainTool.ShowError(
+                            MainTool.WarningPrompt(
                                 Translation.TrafficLights.Get("Dialog.Text:Node has timed TL script"));
                             break;
                         }
 
                         case ToggleTrafficLightError.IsLevelCrossing: {
-                            MainTool.ShowError(
+                            MainTool.WarningPrompt(
                                 Translation.TrafficLights.Get("Dialog.Text:Node is level crossing"));
                             break;
                         }

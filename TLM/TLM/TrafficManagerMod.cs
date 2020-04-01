@@ -11,6 +11,7 @@ namespace TrafficManager {
     using TrafficManager.Util;
     using static TrafficManager.Util.Shortcuts;
     using ColossalFramework;
+    using UnityEngine.SceneManagement;
 
     public class TrafficManagerMod : IUserMod {
 #if LABS
@@ -22,11 +23,11 @@ namespace TrafficManager {
 #endif
 
         // These values from `BuildConfig` class (`APPLICATION_VERSION` constants) in game file `Managed/Assembly-CSharp.dll` (use ILSpy to inspect them)
-        public const uint GAME_VERSION = 185066000u;
+        public const uint GAME_VERSION = 188868368U;
         public const uint GAME_VERSION_A = 1u;
-        public const uint GAME_VERSION_B = 12u;
-        public const uint GAME_VERSION_C = 3u;
-        public const uint GAME_VERSION_BUILD = 2u;
+        public const uint GAME_VERSION_B = 13u;
+        public const uint GAME_VERSION_C = 0u;
+        public const uint GAME_VERSION_BUILD = 7u;
 
         // Use SharedAssemblyInfo.cs to modify TM:PE version
         // External mods (eg. CSUR Toolbox) reference the versioning for compatibility purposes
@@ -40,6 +41,12 @@ namespace TrafficManager {
         public string Name => ModName;
 
         public string Description => "Manage your city's traffic";
+
+        internal static TrafficManagerMod Instance = null;
+
+        internal bool InGameHotReload { get; set; } = false;
+
+        internal static bool InGame() => SceneManager.GetActiveScene().name == "Game";
 
         [UsedImplicitly]
         public void OnEnabled() {
@@ -75,6 +82,9 @@ namespace TrafficManager {
                     Log.InfoFormat("Mono version: {0}", displayName.Invoke(null, null));
                 }
             }
+
+            Instance = this;
+            InGameHotReload = InGame();
         }
 
         [UsedImplicitly]
@@ -84,11 +94,12 @@ namespace TrafficManager {
             LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
             Translation.IsListeningToGameLocaleChanged = false; // is this necessary?
 
-            if (LoadingExtension.InGame() && LoadingExtension.Instance != null) {
+            if (InGame() && LoadingExtension.Instance != null) {
                 //Hot reload Unloading
                 LoadingExtension.Instance.OnLevelUnloading();
                 LoadingExtension.Instance.OnReleased();
             }
+            Instance = null;
         }
 
         [UsedImplicitly]

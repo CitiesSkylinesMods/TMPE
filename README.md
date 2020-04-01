@@ -1,68 +1,87 @@
-﻿<p align="center"><img src="https://user-images.githubusercontent.com/16494272/59316295-ee189d00-8c7a-11e9-93a2-266292b6f3e9.png" width="740" height="232" /></p>
-<p align="center">A mod for <strong>Cities: Skylines</strong> that gives you more control over road and rail traffic in your city<br /><br /></p>
-<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252">Steam Workshop</a> • <a href="https://discord.gg/faKUnST">Discord Guild</a> • <a href="https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki">User Guide</a> • <a href="https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Report-a-Bug">Report a Bug</a><br /></p>
-<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252"><img src="https://img.shields.io/endpoint.svg?url=https://shieldsio-steam-workshop.jross.me/583429740" /></a> <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/badge/Game%20Version-1.12.3--f2-brightgreen.svg"></a> <a href="https://discord.gg/faKUnST"><img src="https://img.shields.io/discord/545065285862948894.svg?logo=discord&logoColor=F5F5F5" /></a> <a href="https://crowdin.com/project/tmpe"><img src="https://badges.crowdin.net/tmpe/localized.svg"></a> <a href="https://ci.appveyor.com/project/krzychu124/tmpe/branch/master"><img src="https://ci.appveyor.com/api/projects/status/dehkvuxk8b3h66e7/branch/master?svg=true" /></a></p>
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/16494272/59316295-ee189d00-8c7a-11e9-93a2-266292b6f3e9.png" width="740" height="232" />
+</p>
+<p align="center">A mod for <strong>Cities: Skylines</strong> that gives you more control over road and rail traffic in your city.<br /><br /></p>
+<p align="center">
+    <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252">Steam Workshop</a> •
+    <a href="https://discord.gg/faKUnST">Discord Chat</a> •
+    <a href="https://github.com/CitiesSkylinesMods/TMPE/wiki">User Guide</a> •
+    <a href="https://github.com/CitiesSkylinesMods/TMPE/wiki/Report-a-Bug">Report a Bug</a><br />
+</p>
+<p align="center">
+    <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/static/v1?label=cities:%20skylines&message=v1.13.0-f7&color=01ABF8&logo=unity" /></a>
+    <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=stable&color=7cc17b&logo=steam&logoColor=F5F5F5" /></a>
+    <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?include_prereleases&label=labs&color=f7b73c&logo=steam&logoColor=F5F5F5" /></a>
+    <a href="https://github.com/CitiesSkylinesMods/TMPE/releases/latest"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=origin&color=F56C2D&logo=origin&logoColor=F56C2D" /></a>
+    <a href="https://github.com/CitiesSkylinesMods/TMPE/releases"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=downloads&include_prereleases&logo=ipfs&logoColor=F5F5F5" /></a>
+    <a href="https://discord.gg/faKUnST"><img src="https://img.shields.io/discord/545065285862948894?color=7289DA&label=chat&logo=discord" /></a>
+</p>
+<p align="center">
+    <a href="https://ci.appveyor.com/project/krzychu124/tmpe/branch/master"><img src="https://img.shields.io/appveyor/build/krzychu124/TMPE/master?label=appveyor:master&logo=appveyor&logoColor=F5F5F5" /></a>
+    <a href="https://github.com/CitiesSkylinesMods/TMPE/pulls"><img src="https://img.shields.io/github/issues-pr/CitiesSkylinesMods/TMPE?color=brightgreen&logo=github&logoColor=F5F5F5" /></a>
+    <a href="https://crowdin.com/project/tmpe"><img src="https://badges.crowdin.net/tmpe/localized.svg" /></a>
+    <a href="https://github.com/CitiesSkylinesMods/TMPE/blob/11.0/LICENSE"><img src="https://img.shields.io/github/license/CitiesSkylinesMods/TMPE?color=brightgreen&label=open%20source&logoColor=F5F5F5" /></a>
+</p>
 
 ## Notices
 
 * Use [Broken Node Detector](https://steamcommunity.com/sharedfiles/filedetails/?id=1777173984) to find and fix traffic despawning issues and a few other game bugs
-* Other problems? See: [Troubleshooting Guide](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Troubleshooting)
+* Other problems? See: [Troubleshooting Guide](https://github.com/CitiesSkylinesMods/TMPE/wiki/Troubleshooting)
 
 ## Releases
 
 Official releases:
+
 * [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252) (fully tested releases)
 * [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141) (latest beta test releases)
-* [Download Binaries](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/releases) (for non-Steam users)
-* [Installation Guide](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Installation) (for all users)
+* [Download Binaries](https://github.com/CitiesSkylinesMods/TMPE/releases) (for non-Steam users)
+* [Installation Guide](https://github.com/CitiesSkylinesMods/TMPE/wiki/Installation) (for all users)
 
-#### TM:PE V11 LABS [11.1.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/11.0...11.1.0), 03/02/2020
+Recent updates:
 
-- Added: Quick setup of priority roads (`Ctrl+Click junction`, `Shift+Ctrl+Click road`) (#621, #541, #542, #568, #577, #7)
-- Added: `Delete` key resets junction restrictions for selected junction (#639, #623, #568, #6)
-- Added: "Reset" button and `Delete` key to reset lane arrows for a segment (#638, #632, #623, #568, #41)
-- Improved: Much better lane connectors interaction model (#543, #635, #625, #626, #41)
-- Improved: Use guide manager for less obtrusive in-game warnings/hints (#653, #660, #593)
-- Improved: Vastly improved in-game hotloading support (#640, #211)
-- Improved: Centralised versioning in to `SharedAssemblyInfo.cs` (#680, #678, #649)
-- Updated: Translations - Dutch (thanks Headspike!) (#660, #631)
-- Updated: Translations - Turkish - Tayfun [Typhoon] (thanks Koopr) (#660, #631)
-- Updated: Translations - Chinese Simplified - Golden (thanks goldenjin!) (#660, #631)
-- Updated: Translations - Portuguese - BlackScout (thanks BS_BlackScout!) (#660, #631)
-- Updated: Translations - Spanish (thanks Aimarekin!) (#660, #631)
-- Updated: Translations - English (thanks kian.zarrin!) (#660, #631)
-- Fixed: Vehicles should not stop at Yield signs (#662, #655, #650)
-- Meta: New WIP website: https://tmpe.me (#642, #643)
+#### TM:PE V[11.2.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.0...11.2.1) STABLE, 26/03/2020
 
-#### TM:PE V11 STABLE [11.0](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/compare/10.21.1...11.0), 03/02/2020
+- Fixed: CustomPathManager nullpointer on exit from asset/map editor (#794)
+- Fixed: Add missing Trolleybus vehicle category (#794)
+- Fixed: CustomPathManager NullPointerException on second load (#794)
 
-- Contains ~100 improvements from TM:PE v11 ALPHA versions, including:
-    - Timed traffic lights: Add default sequence (Ctrl+Click a junction)
-    - Lane arrows: Turning lanes (Ctrl+Click a junction, or Alt+Click a segment)
-    - Vanilla traffic lights: Remove or Disable auto-placed traffic lights (buttons in mod options)
-    - New [languages](https://crowdin.com/project/tmpe): Hungarian, Turkish, Ukrainian; all other languages updated!
-    - Migration to Harmony for improved compatibility
-- Improved: Better segment hovering when mouse near segment (thanks kianzarrin!) (#624, #576)
-- Improved: Better segment hovering when mouse on node (thanks kianzarrin!) (#615, #538, #594, #616, #576)
-- Fixed: Lane arrow tool sometimes selects wrong node (thanks kianzarrin!) (#616)
-- Fixed: Show error dialog can get caught in loop (thanks kianzarrin!) (#594)
-- Fixed: Junction Manager not resetting on level unload (thanks kianzarrin!) (#637, #636)
-- Fixed: Stay in lane always assumed segment0 exists (thans kianzarrin!) (#619, #618)
-- Updated: Added 2 x Traffic Manager Plus and 1 x Traffic Manager as incompatible (#627)
-- Updated: Added 'Trees Respiration' mod as incompatible (depends on load order) (#614, #611, #563)
-- Updated: Replaced imports with fully qualified alphabetically sorted imports (#620)
-- Updated: Organised resource images in to folders (#641)
-- Meta: Old STABLE workshop page (LinuxFan - v10.20) is now obsolete and no longer maintained
-- Meta: Renamed workshop pages; LABS -> V11 STABLE, and ALPHA -> V11 LABS
+#### TM:PE V[11.2.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.0...11.2.1) LABS, 29/03/2020
 
-See [Full Changelog](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/CHANGELOG.md) for details of earlier releases and LABS releases.
+- Fixed: CustomPathManager nullpointer on exit from asset/map editor (#794)
+- Fixed: Add missing Trolleybus vehicle category (#794)
+- Fixed: CustomPathManager NullPointerException on second load (#794)
+
+#### TM:PE V[11.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.2...11.2.0) LABS, 26/03/2020
+
+- Added: Trolleybus AI (#794)
+- Fixed: `PathUnits.m_vehicleTypes` error after Sunset Harbor game update (#794)
+- Fixed: Priority signs for trolleybuses (#794)
+- Fixed: Build process deployed TrafficManager.dll twice ( #776, #775)
+- Improved: Performance of hot-reloads of dev builds (#764, #730)
+- Improved: Consolidate error prompts in to helper class (#774)
+- Updated: Add missing entries and fix typos in changelog (#777, #779)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
+
+#### TM:PE V[11.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.0...11.2.0) STABLE, 26/03/2020
+
+- Added: Trolleybus AI (#794)
+- Fixed: `PathUnits.m_vehicleTypes` error after Sunset Harbor game update (#794)
+- Fixed: Priority signs for trolleybuses (#794)
+- Fixed: Build process deployed TrafficManager.dll twice ( #776, #775)
+- Improved: Performance of hot-reloads of dev builds (#764, #730)
+- Improved: Consolidate error prompts in to helper class (#774)
+- Updated: Add missing entries and fix typos in changelog (#777, #779)
+- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+- GitHub: [CitiesSkylinesMods/TMPE](https://github.com/CitiesSkylinesMods/TMPE)
+
+See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
 
 ## Support Policy
 
 Our team is happy to support you if:
 - You are using the latest version of **TM:PE v11 STABLE** or **TM:PE v11 LABS**
 - You are using a properly purchased and latest version of Cities: Skylines
-- You provide useful information when [reporting a bug](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Report-a-Bug)
+- You provide useful information when [reporting a bug](https://github.com/CitiesSkylinesMods/TMPE/wiki/Report-a-Bug)
 
 We will _not_ provide support if:
 - You are using a pirated or old version of Cities: Skylines
@@ -72,8 +91,8 @@ TM:PE is only tested on and updated for the latest version of Cities: Skylines.
 
 ## Contributing
 
-We welcome contributions from the community! See: [Contributing Guide](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/wiki/Contributing)
+We welcome contributions from the community! See: [Contributing Guide](https://github.com/CitiesSkylinesMods/TMPE/wiki/Contributing)
 
 ## License
 
-[MIT License](https://github.com/krzychu124/Cities-Skylines-Traffic-Manager-President-Edition/blob/master/LICENSE) (free, open source)
+[MIT License](https://github.com/CitiesSkylinesMods/TMPE/blob/master/LICENSE) (free, open source)

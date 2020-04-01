@@ -9,7 +9,7 @@ namespace TrafficManager.UI.Helpers {
 
     public sealed class ExtUITabstrip : UITabstrip {
 
-        public const float V_SCROLLBAR_WIDTH = 18f;
+        public const float V_SCROLLBAR_WIDTH = 16f;
         public const float TAB_STRIP_HEIGHT = 40f;
 
         private UIScrollbar CreateVerticalScrollbar(UIPanel panel, UIScrollablePanel scrollablePanel) {
@@ -120,7 +120,7 @@ namespace TrafficManager.UI.Helpers {
             UITabContainer tabContainer = optionsContainer.AddUIComponent<UITabContainer>();
             tabContainer.relativePosition = new Vector3(0, TAB_STRIP_HEIGHT);
             tabContainer.width = (orgOptsContainerWidth + paddingRight) - V_SCROLLBAR_WIDTH;
-            tabContainer.height = optionsContainer.height - (TAB_STRIP_HEIGHT - /*padding-top*/10 - /*margin-top*/ 10);
+            tabContainer.height = optionsContainer.height - (tabStrip.relativePosition.y + tabContainer.relativePosition.y);
             tabStrip.tabPages = tabContainer;
 
             return tabStrip;

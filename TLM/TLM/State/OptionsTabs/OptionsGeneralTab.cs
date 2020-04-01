@@ -1,4 +1,5 @@
 namespace TrafficManager.State {
+    using API.Traffic.Enums;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
@@ -13,6 +14,7 @@ namespace TrafficManager.State {
 
         [UsedImplicitly]
         private static UIDropDown _languageDropdown;
+        private static UIDropDown _simulationAccuracyDropdown;
 
         [UsedImplicitly]
         private static UICheckBox _lockButtonToggle;
@@ -131,6 +133,18 @@ namespace TrafficManager.State {
 
             // General: Simulation
             UIHelperBase simGroup = panelHelper.AddGroup(T("General.Group:Simulation"));
+            _simulationAccuracyDropdown = simGroup.AddDropdown(
+                                       T("General.Dropdown:Simulation accuracy") + ":",
+                                       new[] {
+                                           T("General.Dropdown.Option:Very low"),
+                                           T("General.Dropdown.Option:Low"),
+                                           T("General.Dropdown.Option:Medium"),
+                                           T("General.Dropdown.Option:High"),
+                                           T("General.Dropdown.Option:Very high")
+                                       },
+                                       (int)Options.simulationAccuracy,
+                                       OnSimulationAccuracyChanged) as UIDropDown;
+
             _instantEffectsToggle = simGroup.AddCheckbox(
                                        T("General.Checkbox:Apply AI changes right away"),
                                        Options.instantEffects,
@@ -297,6 +311,14 @@ namespace TrafficManager.State {
             GlobalConfig.Instance.Main.MphRoadSignStyle = newStyle;
         }
 
+        private static void OnSimulationAccuracyChanged(int newAccuracy) {
+            if (!Options.IsGameLoaded())
+                return;
+
+            Log._Debug($"Simulation accuracy changed to {newAccuracy}");
+            Options.simulationAccuracy = (SimulationAccuracy)newAccuracy;
+        }
+
         private static void OnInstantEffectsChanged(bool newValue) {
             if (!Options.IsGameLoaded()) {
                 return;
@@ -339,6 +361,12 @@ namespace TrafficManager.State {
             if (changed && _overlayTransparencySlider != null) {
                 _overlayTransparencySlider.value = val;
             }
+        }
+
+        public static void SetSimulationAccuracy(SimulationAccuracy newAccuracy) {
+            Options.simulationAccuracy = newAccuracy;
+            if (_simulationAccuracyDropdown != null)
+                _simulationAccuracyDropdown.selectedIndex = (int)newAccuracy;
         }
 
         public static void SetInstantEffects(bool value) {

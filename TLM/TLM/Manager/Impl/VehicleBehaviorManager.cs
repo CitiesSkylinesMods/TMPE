@@ -1193,7 +1193,8 @@ namespace TrafficManager.Manager.Impl {
                                               NetNode.Flags.OneWayIn)) == NetNode.Flags.Junction)
                 {
                     if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram ||
-                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train)
+                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train ||
+                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Trolleybus)
                     {
                         if ((vehicleData.m_flags2 & Vehicle.Flags2.Yielding) == 0)
                         {
@@ -1460,7 +1461,8 @@ namespace TrafficManager.Manager.Impl {
                             "JunctionTransitState to STOP");
 
                         if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram ||
-                            vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train)
+                            vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train ||
+                            vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Trolleybus)
                         {
                             vehicleData.m_flags2 |= Vehicle.Flags2.Yielding;
                             vehicleData.m_waitCounter = 0;
@@ -1476,7 +1478,8 @@ namespace TrafficManager.Manager.Impl {
                               $"Setting JunctionTransitState to LEAVE ({vehicleLightState})");
 
                     if (vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Tram ||
-                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train)
+                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Train ||
+                        vehicleData.Info.m_vehicleType == VehicleInfo.VehicleType.Trolleybus)
                     {
                         vehicleData.m_flags2 &= ~Vehicle.Flags2.Yielding;
                         vehicleData.m_waitCounter = 0;
@@ -1544,28 +1547,37 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         if (sqrVelocity <= GlobalConfig.Instance.PriorityRules.MaxYieldVelocity
-                            * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity) {
+                            * GlobalConfig.Instance.PriorityRules.MaxYieldVelocity ||
+                            Options.simulationAccuracy >= SimulationAccuracy.Medium) {
                             if (logPriority) {
-                                Log._Debug(
-                                    $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
-                                      $"{sign} sign. waittime={extVehicle.waitTime}");
+                                Log._DebugFormat(
+                                    "VehicleBehaviorManager.MayChangeSegment({0}): {1} sign. waittime={2}",
+                                    frontVehicleId, sign, extVehicle.waitTime);
                             }
 
-                            if (extVehicle.waitTime < GlobalConfig.Instance.PriorityRules.MaxPriorityWaitTime)
-                            {
+                            //skip checking of priority if simAccuracy on lowest settings
+                            if (Options.simulationAccuracy <= SimulationAccuracy.VeryLow) {
+                                return VehicleJunctionTransitState.Leave;
+                            }
+
+                            if (extVehicle.waitTime <
+                                GlobalConfig.Instance.PriorityRules.MaxPriorityWaitTime) {
                                 extVehicle.waitTime++;
 
                                 Log._DebugIf(
                                     logPriority,
-                                    () => $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
-                                          "Setting JunctionTransitState to STOP (wait)");
+                                    () =>
+                                        $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
+                                        "Setting JunctionTransitState to STOP (wait)");
 
                                 bool hasPriority = prioMan.HasPriority(
                                     frontVehicleId,
                                     ref vehicleData,
                                     ref prevPos,
                                     ref segEndMan.ExtSegmentEnds[
-                                        segEndMan.GetIndex(prevPos.m_segment, isTargetStartNode)],
+                                        segEndMan.GetIndex(
+                                            prevPos.m_segment,
+                                            isTargetStartNode)],
                                     targetNodeId,
                                     isTargetStartNode,
                                     ref position,
@@ -1573,8 +1585,9 @@ namespace TrafficManager.Manager.Impl {
 
                                 Log._DebugIf(
                                     logPriority,
-                                    () => $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
-                                          $"hasPriority: {hasPriority}");
+                                    () =>
+                                        $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
+                                        $"hasPriority: {hasPriority}");
 
                                 if (!hasPriority) {
                                     vehicleData.m_blockCounter = 0;
@@ -1583,15 +1596,17 @@ namespace TrafficManager.Manager.Impl {
 
                                 Log._DebugIf(
                                     logPriority,
-                                    () => $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
-                                          "Setting JunctionTransitState to LEAVE (no conflicting cars)");
+                                    () =>
+                                        $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
+                                        "Setting JunctionTransitState to LEAVE (no conflicting cars)");
                                 return VehicleJunctionTransitState.Leave;
                             }
 
                             Log._DebugIf(
                                 logPriority,
-                                () => $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
-                                      "Setting JunctionTransitState to LEAVE (max wait timeout)");
+                                () =>
+                                    $"VehicleBehaviorManager.MayChangeSegment({frontVehicleId}): " +
+                                    "Setting JunctionTransitState to LEAVE (max wait timeout)");
                             return VehicleJunctionTransitState.Leave;
                         }
 

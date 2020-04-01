@@ -14,19 +14,21 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
+    using System.Text;
 
     public class SpeedLimitManager
         : AbstractGeometryObservingManager,
           ICustomDataManager<List<Configuration.LaneSpeedLimit>>,
           ICustomDataManager<Dictionary<string, float>>,
           ISpeedLimitManager {
+
         public const NetInfo.LaneType LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
         public const VehicleInfo.VehicleType VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram |
             VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train |
-            VehicleInfo.VehicleType.Monorail;
+            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
 
         /// <summary>Ingame speed units, max possible speed</summary>
         public const float MAX_SPEED = 10f * 2f; // 1000 km/h
@@ -80,7 +82,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Determines if custom speed limits may be assigned to the given lane info
+        /// Determines if custom speed limits may be assigned to the given lane info.
         /// </summary>
         /// <param name="laneInfo">The <see cref="NetInfo.Lane"/> that you wish to check.</param>
         /// <returns></returns>
@@ -649,11 +651,16 @@ namespace TrafficManager.Manager.Impl {
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
 
+#if DEBUG
+            bool debugSpeedLimits = DebugSwitch.SpeedLimits.Get();
+#endif
+
             // determine vanilla speed limits and customizable NetInfos
             SteamHelper.DLC_BitMask dlcMask = SteamHelper.GetOwnedDLCMask();
 
             int numLoaded = PrefabCollection<NetInfo>.LoadedCount();
 
+            // todo: move this to a Reset() or Clear() method?
             vanillaLaneSpeedLimitsByNetInfoName.Clear();
             customizableNetInfos.Clear();
             CustomLaneSpeedLimitByNetInfoName.Clear();
@@ -662,11 +669,13 @@ namespace TrafficManager.Manager.Impl {
 
             List<NetInfo> mainNetInfos = new List<NetInfo>();
 
-            // #378: Output some detail either side of null NetInfos to help track down their source
-            string previousNetInfoName = string.Empty; // last non-null netinfo
-            bool previousWasNull = false; // if true, next non-numm netinfo will be output to log
+            // Basic logging to help road/track asset creators see if their netinfo is wrong
+            // 6000 is rougly 120 lines; should be more than enough for most users
+            StringBuilder log = new StringBuilder(6000);
 
-            Log.Info($"SpeedLimitManager.OnBeforeLoadData: {numLoaded} NetInfos loaded. Verifying...");
+            log.AppendFormat(
+                "SpeedLimitManager.OnBeforeLoadData: {0} NetInfos loaded. Verifying...\n",
+                numLoaded);
 
             for (uint i = 0; i < numLoaded; ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
@@ -675,9 +684,9 @@ namespace TrafficManager.Manager.Impl {
 
                 // Something in the workshop has null NetInfos in it...
                 if (info == null) {
-                    Log.Info($"- Pre-null NetInfo (see warning below) was: {previousNetInfoName}");
-                    Log.Warning($"SpeedLimitManager.OnBeforeLoadData: NetInfo @ {i} is null!");
-                    previousWasNull = true;
+                    Log.InfoFormat(
+                        "SpeedLimitManager.OnBeforeLoadData: NetInfo #{0} is null!",
+                        i);
                     continue;
                 }
 
@@ -685,56 +694,67 @@ namespace TrafficManager.Manager.Impl {
 
                 // We need a valid name
                 if (string.IsNullOrEmpty(infoName)) {
-                    Log.Warning($"SpeedLimitManager.OnBeforeLoadData: NetInfo name @ {i} is null or empty!");
+                    log.AppendFormat(
+                        "- Skipped: NetInfo #{0} - name is empty!\n",
+                        i);
                     continue;
-                }
-
-                previousNetInfoName = infoName;
-
-                if (previousWasNull) {
-                    Log.Info($"- Post-null NetInfo (see warning above) is: {infoName}");
-                    previousWasNull = false;
                 }
 
                 // Make sure it's valid AI
                 if (info.m_netAI == null) {
-                    Log.Info($"- Skipped: NetInfo @ {i} ({infoName}) - m_netAI is null.");
+                    log.AppendFormat(
+                        "- Skipped: NetInfo #{0} ({1}) - m_netAI is null.\n",
+                        i,
+                        infoName);
                     continue;
                 }
 
                 // Must be road or track based
                 if (!(info.m_netAI is RoadBaseAI || info.m_netAI is TrainTrackBaseAI || info.m_netAI is MetroTrackAI)) {
-                    // Only outputting these in debug as there are loads of them
 #if DEBUG
-                    Log._DebugIf(DebugSwitch.SpeedLimits.Get(), () => $"- Skipped: NetInfo @ {i} ({infoName}) - m_netAI is not applicable: {info.m_netAI}.");
+                    // Only outputting these in debug as there are loads of them
+                    Log._DebugIf(debugSpeedLimits, () =>
+                        $"- Skipped: NetInfo #{i} ({infoName}) - m_netAI is not applicable: {info.m_netAI}.");
 #endif
                     continue;
                 }
 
                 // If it requires DLC, check the DLC is active
-                if (!(info.m_dlcRequired == 0 || (uint)(info.m_dlcRequired & dlcMask) != 0u)) {
-                    Log.Info($"- Skipped: NetInfo @ {i} ({infoName}) - required DLC not active.");
+                if (info.m_dlcRequired != 0 && (uint)(info.m_dlcRequired & dlcMask) != 0u) {
+                    log.AppendFormat(
+                        "- Skipped: NetInfo #{0} ({1}) - required DLC not active.\n",
+                        i,
+                        infoName);
                     continue;
                 }
 
                 // #510: Filter out decorative networks (`None`) and bike paths (`Bicycle`)
                 if (info.m_vehicleTypes == VehicleInfo.VehicleType.None || info.m_vehicleTypes == VehicleInfo.VehicleType.Bicycle) {
-                    Log.Info($"- Skipped: NetInfo @ {i} ({infoName}) - no vehicle support (decorative network or bike path?)");
+                    log.AppendFormat(
+                        "- Skipped: NetInfo #{0} ({1}) - no vehicle support (decorative or bike path?)\n",
+                        i,
+                        infoName);
                     continue;
                 }
 
                 if (!vanillaLaneSpeedLimitsByNetInfoName.ContainsKey(infoName)) {
                     if (info.m_lanes == null) {
+                        log.AppendFormat(
+                            "- Skipped: NetInfo #{0} ({1}) - m_lanes is null!\n",
+                            i,
+                            infoName);
+
                         Log.Warning(
                             $"SpeedLimitManager.OnBeforeLoadData: NetInfo @ {i} ({infoName}) lanes is null!");
                         continue;
                     }
 
                     Log._Trace($"- Loaded road NetInfo: {infoName}");
+
                     NetInfoByName[infoName] = info;
                     mainNetInfos.Add(info);
 
-                    var vanillaLaneSpeedLimits = new float[info.m_lanes.Length];
+                    float[] vanillaLaneSpeedLimits = new float[info.m_lanes.Length];
 
                     for (var k = 0; k < info.m_lanes.Length; ++k) {
                         vanillaLaneSpeedLimits[k] = info.m_lanes[k].m_speedLimit;
@@ -744,10 +764,11 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            Log.Info("SpeedLimitManager.OnBeforeLoadData: Scan complete");
+            log.Append("SpeedLimitManager.OnBeforeLoadData: Scan complete.\n");
+            Log.Info(log.ToString());
 
             mainNetInfos.Sort(
-                (NetInfo a, NetInfo b) => {
+                (NetInfo a, NetInfo b) => { // todo: move arrow function somewhere else?
                     bool aRoad = a.m_netAI is RoadBaseAI;
                     bool bRoad = b.m_netAI is RoadBaseAI;
 

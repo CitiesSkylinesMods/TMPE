@@ -1,7 +1,6 @@
-﻿namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
     using JetBrains.Annotations;
-    using TrafficLight;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -62,8 +61,7 @@
                 //        }
                 //    }
             } else {
-                MainTool.ShowError(
-                    Translation.TrafficLights.Get("Dialog.Text:Node has timed TL script"));
+                MainTool.WarningPrompt(Translation.TrafficLights.Get("Dialog.Text:Node has timed TL script"));
             }
         }
 

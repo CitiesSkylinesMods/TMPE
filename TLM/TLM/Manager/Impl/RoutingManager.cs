@@ -24,7 +24,7 @@ namespace TrafficManager.Manager.Impl {
         private const VehicleInfo.VehicleType ROUTED_VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Metro |
             VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Tram |
-            VehicleInfo.VehicleType.Monorail;
+            VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
 
         private const VehicleInfo.VehicleType ARROW_VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
