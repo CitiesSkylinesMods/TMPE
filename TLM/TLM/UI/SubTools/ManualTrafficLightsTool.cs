@@ -7,6 +7,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.API.TrafficLight;
     using TrafficManager.Manager.Impl;
     using TrafficManager.UI.Textures;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class ManualTrafficLightsTool : LegacySubTool {
@@ -114,7 +115,7 @@ namespace TrafficManager.UI.SubTools {
                                         junctionRestrictionsManager.IsPedestrianCrossingAllowed(
                                             segmentLights.SegmentId,
                                             segmentLights.StartNode);
-                    bool visible = MainTool.WorldToScreenPoint(position, out Vector3 screenPos);
+                    bool visible = GeometryUtil.WorldToScreenPoint(position, out Vector3 screenPos);
 
                     if (!visible) {
                         continue;

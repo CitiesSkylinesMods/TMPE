@@ -13,6 +13,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.State.Keybinds;
     using TrafficManager.U.Autosize;
     using TrafficManager.U.Button;
+    using TrafficManager.Util;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using Debug = UnityEngine.Debug;
@@ -44,9 +45,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             RightMouseClick,
             EscapeKey,
         }
-
-        [Obsolete("Avoid using, replace with different logic")]
-        private bool cursorInSecondaryPanel_;
 
         /// <summary>If exists, contains tool panel floating on the selected node.</summary>
         private LaneArrowToolWindow ToolWindow { get; set; }
@@ -96,7 +94,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         /// <summary>Called from GenericFsm when a segment is clicked to show lane arrows GUI.</summary>
         private void OnEnterEditorState() {
-            int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(
+            int numLanes = GeometryUtil.GetSegmentNumVehicleLanes(
                 SelectedSegmentId,
                 SelectedNodeId,
                 out int numDirections,
@@ -113,7 +111,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             //
             // // Hide if node position is off-screen
             //
-            // bool visible = MainTool.WorldToScreenPoint(nodePos, out Vector3 screenPos);
+            // bool visible = GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 screenPos);
             //
             // // if (!visible) {
             //     // return;
@@ -287,6 +285,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     OnToolLeftClick_Select();
                     break;
                 case State.EditLaneArrows:
+                    // Allow selecting other segments while doing lane editing
+                    OnToolLeftClick_Select();
                     break;
             }
         }
@@ -370,7 +370,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                               .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
 
             // Cast to screen and center the window on node
-            MainTool.WorldToScreenPoint(nodePos, out Vector3 screenPos);
+            GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 screenPos);
             ToolWindow.absolutePosition =
                 screenPos - new Vector3(ToolWindow.size.x * 0.5f, ToolWindow.size.y * 0.5f, 0f);
         }
@@ -458,6 +458,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     RenderOverlay_Select(cameraInfo);
                     break;
                 case State.EditLaneArrows:
+                    RenderOverlay_Select(cameraInfo); // show potential half-segments to select
                     RenderOverlay_EditLaneArrows(cameraInfo);
                     break;
             }
@@ -471,7 +472,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
             // If CTRL is held, and hovered something: Draw hovered node
-            if (ctrlDown && !cursorInSecondaryPanel_ && HoveredNodeId != 0) {
+            if (ctrlDown && HoveredNodeId != 0) {
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 return;
             }
@@ -483,8 +484,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             // If hovered something which has hover lane arrows, and it is not the same as selected
             // Then: Draw alternative selection variant with different color, to be clicked by the user
-            if (!cursorInSecondaryPanel_
-                && HasHoverLaneArrows()
+            if (HasHoverLaneArrows()
                 && HoveredSegmentId != 0
                 && HoveredNodeId != 0
                 && (HoveredSegmentId != SelectedSegmentId

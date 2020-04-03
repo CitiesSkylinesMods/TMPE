@@ -188,7 +188,7 @@ namespace TrafficManager.UI.SubTools {
                         continue; // do not draw if too distant
                     }
 
-                    bool visible = MainTool.WorldToScreenPoint(
+                    bool visible = GeometryUtil.WorldToScreenPoint(
                         netManager.m_segments.m_buffer[segmentId].m_bounds.center,
                         out Vector3 _);
 
@@ -260,7 +260,7 @@ namespace TrafficManager.UI.SubTools {
             {
                 segCenter = new Dictionary<NetInfo.Direction, Vector3>();
                 segmentCenterByDir.Add(segmentId, segCenter);
-                TrafficManagerTool.CalculateSegmentCenterByDir(
+                GeometryUtil.CalculateSegmentCenterByDir(
                     segmentId,
                     segCenter,
                     SIGN_SIZE * TrafficManagerTool.MAX_ZOOM);
@@ -272,7 +272,7 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                bool visible = MainTool.WorldToScreenPoint(e.Value, out Vector3 screenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(e.Value, out Vector3 screenPos);
 
                 if (!visible) {
                     continue;

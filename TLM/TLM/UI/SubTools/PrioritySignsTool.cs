@@ -422,7 +422,7 @@ namespace TrafficManager.UI.SubTools {
                                 return true;
                             });
 
-                        if (!MainTool.WorldToScreenPoint(signPos, out Vector3 _)) {
+                        if (!GeometryUtil.WorldToScreenPoint(signPos, out Vector3 _)) {
                             continue;
                         }
 

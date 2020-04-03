@@ -1417,7 +1417,7 @@ namespace TrafficManager.UI.SubTools {
 
                 Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
 
-                bool nodeVisible = MainTool.WorldToScreenPoint(nodePos, out Vector3 _);
+                bool nodeVisible = GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 _);
 
                 if (!nodeVisible) {
                     continue;
@@ -1472,7 +1472,7 @@ namespace TrafficManager.UI.SubTools {
                         segmentLightPos.z += segmentsBuffer[srcSegmentId].m_endDirection.z * offset;
                     }
 
-                    bool segmentLightVisible = MainTool.WorldToScreenPoint(
+                    bool segmentLightVisible = GeometryUtil.WorldToScreenPoint(
                         segmentLightPos,
                         out Vector3 screenPos);
 

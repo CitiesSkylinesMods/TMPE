@@ -226,7 +226,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 Vector3 centerPos = netManager.m_segments.m_buffer[segmentId].m_bounds.center;
-                bool visible = MainTool.WorldToScreenPoint(centerPos, out Vector3 _);
+                bool visible = GeometryUtil.WorldToScreenPoint(centerPos, out Vector3 _);
 
                 if (!visible) {
                     continue;
@@ -426,7 +426,7 @@ namespace TrafficManager.UI.SubTools {
 
             Vector3 center = segment.m_bounds.center;
 
-            bool visible = MainTool.WorldToScreenPoint(center, out Vector3 _);
+            bool visible = GeometryUtil.WorldToScreenPoint(center, out Vector3 _);
 
             if (!visible) {
                 return false;
@@ -439,7 +439,7 @@ namespace TrafficManager.UI.SubTools {
                 return false; // do not draw if too distant
             }
 
-            int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(
+            int numLanes = GeometryUtil.GetSegmentNumVehicleLanes(
                 segmentId,
                 null,
                 out int numDirections,
@@ -520,7 +520,7 @@ namespace TrafficManager.UI.SubTools {
                 Vector3 labelCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
 
                 Vector3 labelScreenPos;
-                bool visible = MainTool.WorldToScreenPoint(labelCenter, out labelScreenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(labelCenter, out labelScreenPos);
                 labelScreenPos.y = Screen.height - labelScreenPos.y;
                 diff = labelCenter - camPos;
 
