@@ -175,23 +175,23 @@ namespace TrafficManager.UI.SubTools {
                 } // end button loop, for each lane
             } // end button row
 
-            // And add another line: "Delete" action
-            using (var shortcutBuilder =
-                builder.ShortcutLabel(KeybindSettingsBase.LaneConnectorDelete)) {
-                shortcutBuilder.ResizeFunction(
-                    r => {
-                        r.StackVertical(Constants.UIPADDING);
-                    });
-            }
-
-            string deleteLabelText = Translation.LaneRouting.Get("LaneConnector.Label:Reset to default");
-            using (var deleteLabelBuilder =
-                builder.Label<U.Label.ULabel>(deleteLabelText)) {
-                deleteLabelBuilder.ResizeFunction(
-                    r => {
-                        r.StackHorizontal(Constants.UIPADDING * 2f); // double space
-                    });
-            }
+            // // And add another line: "Delete" action
+            // using (var shortcutBuilder =
+            //     builder.ShortcutLabel(KeybindSettingsBase.LaneConnectorDelete)) {
+            //     shortcutBuilder.ResizeFunction(
+            //         r => {
+            //             r.StackVertical(Constants.UIPADDING);
+            //         });
+            // }
+            //
+            // string deleteLabelText = Translation.LaneRouting.Get("LaneConnector.Label:Reset to default");
+            // using (var deleteLabelBuilder =
+            //     builder.Label<U.Label.ULabel>(deleteLabelText)) {
+            //     deleteLabelBuilder.ResizeFunction(
+            //         r => {
+            //             r.StackHorizontal(Constants.UIPADDING * 2f); // double space
+            //         });
+            // }
         }
 
         public override void OnRescaleRequested() {

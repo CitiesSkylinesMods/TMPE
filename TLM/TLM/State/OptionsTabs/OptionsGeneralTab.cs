@@ -84,7 +84,7 @@ namespace TrafficManager.State {
 
             _guiScaleSlider = generalGroup.AddSlider(
                                         T("General.Slider:GUI scale") + ":",
-                                        65,
+                                        50,
                                         200,
                                         5,
                                         GlobalConfig.Instance.Main.GuiScale,

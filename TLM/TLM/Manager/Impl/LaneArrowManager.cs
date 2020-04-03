@@ -89,7 +89,6 @@ namespace TrafficManager.Manager.Impl {
         public bool RemoveLaneArrows(uint laneId,
                           LaneArrows flags,
                           bool overrideHighwayArrows = false) {
-
             LaneArrows flags2 = GetFinalLaneArrows(laneId);
             return SetLaneArrows(laneId, ~flags & flags2, overrideHighwayArrows);
         }

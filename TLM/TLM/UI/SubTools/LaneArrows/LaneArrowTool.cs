@@ -169,6 +169,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 };
 
                 // Resize everything correctly
+                RepositionWindowToNode();
                 builder.Done();
             }
         }
@@ -351,10 +352,17 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         public override void UpdateEveryFrame() {
             // The following code only works if tool window exists and state is when we edit arrows
-            if (ToolWindow == null ||
-                fsm_ == null ||
+            if (fsm_ == null ||
                 fsm_.State != State.EditLaneArrows)
             {
+                return;
+            }
+
+            RepositionWindowToNode();
+        }
+
+        private void RepositionWindowToNode() {
+            if (ToolWindow == null || SelectedNodeId == 0) {
                 return;
             }
 
