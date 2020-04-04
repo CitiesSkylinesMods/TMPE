@@ -124,14 +124,20 @@ namespace TrafficManager.Util {
         /// <returns>The name of the specified plugin.</returns>
         private string GetModName(PluginInfo plugin) {
             try {
-                return plugin == null
-                    ? "(PluginInfo is null)"
-                    : plugin.userModInstance == null
-                        ? $"(PluginInfo.userModInstance is null for {plugin.publishedFileID.AsUInt64})"
-                        : ((IUserMod)plugin.userModInstance).Name;
+                if (plugin == null) {
+                    return "(PluginInfo is null)";
+                }
+
+                if (plugin.userModInstance == null) {
+                    return string.IsNullOrEmpty(plugin.name)
+                        ? "(userModInstance and name are null)"
+                        : $"({plugin.name})";
+                }
+
+                return ((IUserMod)plugin.userModInstance).Name;
             }
             catch {
-                return $"(Error retreiving PluginInfo.userModInstance.Name for {plugin.publishedFileID.AsUInt64})";
+                return $"(error retreiving Name)";
             }
         }
 
