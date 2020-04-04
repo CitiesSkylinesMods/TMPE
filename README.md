@@ -39,40 +39,17 @@ Official releases:
 
 Recent updates:
 
-#### TM:PE V[11.2.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.0...11.2.1) STABLE, 26/03/2020
+#### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) STABLE, 26/03/2020
 
-- Fixed: CustomPathManager nullpointer on exit from asset/map editor (#794)
-- Fixed: Add missing Trolleybus vehicle category (#794)
-- Fixed: CustomPathManager NullPointerException on second load (#794)
+- Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
+- Updated: Game version badges in readme (#806)
+- Updated: Mod version and changelogs (todo)
 
-#### TM:PE V[11.2.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.0...11.2.1) LABS, 29/03/2020
+#### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) LABS, 26/03/2020
 
-- Fixed: CustomPathManager nullpointer on exit from asset/map editor (#794)
-- Fixed: Add missing Trolleybus vehicle category (#794)
-- Fixed: CustomPathManager NullPointerException on second load (#794)
-
-#### TM:PE V[11.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.2...11.2.0) LABS, 26/03/2020
-
-- Added: Trolleybus AI (#794)
-- Fixed: `PathUnits.m_vehicleTypes` error after Sunset Harbor game update (#794)
-- Fixed: Priority signs for trolleybuses (#794)
-- Fixed: Build process deployed TrafficManager.dll twice ( #776, #775)
-- Improved: Performance of hot-reloads of dev builds (#764, #730)
-- Improved: Consolidate error prompts in to helper class (#774)
-- Updated: Add missing entries and fix typos in changelog (#777, #779)
-- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
-
-#### TM:PE V[11.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.0...11.2.0) STABLE, 26/03/2020
-
-- Added: Trolleybus AI (#794)
-- Fixed: `PathUnits.m_vehicleTypes` error after Sunset Harbor game update (#794)
-- Fixed: Priority signs for trolleybuses (#794)
-- Fixed: Build process deployed TrafficManager.dll twice ( #776, #775)
-- Improved: Performance of hot-reloads of dev builds (#764, #730)
-- Improved: Consolidate error prompts in to helper class (#774)
-- Updated: Add missing entries and fix typos in changelog (#777, #779)
-- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
-- GitHub: [CitiesSkylinesMods/TMPE](https://github.com/CitiesSkylinesMods/TMPE)
+- Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
+- Updated: Game version badges in readme (#806)
+- Updated: Mod version and changelogs (todo)
 
 See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
 
