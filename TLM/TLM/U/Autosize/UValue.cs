@@ -16,10 +16,6 @@ namespace TrafficManager.U.Autosize {
             return new UValue(URule.FixedSize, f);
         }
 
-        public static UValue ReferenceWidthAt1080P(float f) {
-            return new UValue(URule.ReferenceWidthAt1080P, f);
-        }
-
         /// <summary>Returns multiple of current control width times f.</summary>
         /// <param name="f">The multiplier.</param>
         /// <returns>Value.</returns>

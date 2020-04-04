@@ -18,12 +18,6 @@ namespace TrafficManager.U.Autosize {
         /// <summary>The control will be sized to % of control's own height.</summary>
         MultipleOfHeight,
 
-        /// <summary>The control will be sized to % screen width what the value will take at 1920x1080.</summary>
-        ReferenceWidthAt1080P,
-
-        /// <summary>The control will be sized to % screen height what the value will take at 1920x1080.</summary>
-        ReferenceHeightAt1080P,
-
         /// <summary>
         /// Size the control to max width of its children. The float value is ignored.
         /// Padding can be set in the <see cref="UResizerConfig"/>
@@ -36,24 +30,4 @@ namespace TrafficManager.U.Autosize {
         /// </summary>
         FitChildrenHeight,
     }
-
-    // /// <summary>Field which can be affected and modified by a rule.</summary>
-    // public enum UDstField {
-    //     Left,
-    //     Top,
-    //     Width,
-    //     Height,
-    // }
-    //
-    // /// <summary>Field which can be serve as a source for a rule.</summary>
-    // public enum USrcField {
-    //     Left,
-    //     Top,
-    //     Width,
-    //     Height,
-    //     ScreenWidth,
-    //     ScreenHeight,
-    //     ReferenceWidthAt1080P,
-    //     ReferenceHeightAt1080P,
-    // }
 }

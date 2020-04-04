@@ -9,6 +9,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.API.Util;
     using TrafficManager.State.Keybinds;
     using TrafficManager.State;
+    using TrafficManager.U;
     using UnityEngine;
 
     public class MainMenuPanel
@@ -242,15 +243,7 @@ namespace TrafficManager.UI.MainMenu {
             /// The button cannot be smaller than 40px.</summary>
             /// <returns>Button size for current screen resolution.</returns>
             internal static float GetButtonSize() {
-                // At 1920x1080 the size should be 40 px, also capped from below to be min 40 px
-                const float REFERENCE_WIDTH = 40f;
-                const float X_FRAC = REFERENCE_WIDTH / 1920f;
-                const float Y_FRAC = REFERENCE_WIDTH / 1080f;
-                U.UIScaler tmpeUiScaler = ModUI.Instance.UiScaler;
-                var scaledSize
-                    = tmpeUiScaler.ScreenSizeSmallestFraction(X_FRAC, Y_FRAC) *
-                      tmpeUiScaler.GetScale();
-                return Mathf.Max(scaledSize, 40f);
+                return 40f * UIScaler.GetScale();
             }
 
             internal static float GetTitlebarHeight() {

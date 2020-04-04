@@ -16,7 +16,7 @@ namespace TrafficManager.Util {
         /// <returns>Screen point in pixels. Note: For use in UI transform to GUI coords.</returns>
         internal static bool WorldToScreenPoint(Vector3 worldPos, out Vector3 screenPos) {
             screenPos = Camera.main.WorldToScreenPoint(worldPos);
-            screenPos.y = ModUI.Instance.UiScaler.GuiHeight - screenPos.y;
+            screenPos.y = UIScaler.GuiHeight - screenPos.y;
 
             return screenPos.z >= 0;
         }

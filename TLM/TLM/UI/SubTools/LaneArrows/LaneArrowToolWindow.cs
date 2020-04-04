@@ -162,13 +162,8 @@ namespace TrafficManager.UI.SubTools {
                                             r.StackHorizontal(Constants.UIPADDING);
                                         }
 
-                                        UIScaler tmpeUiScaler = ModUI.Instance.UiScaler;
-                                        float btnSize =
-                                            tmpeUiScaler.ScreenSizeSmallestFraction(40f / 1920f, 40f / 1080f)
-                                            * tmpeUiScaler.GetScale();
-
-                                        r.Width(UValue.FixedSize(btnSize));
-                                        r.Height(UValue.FixedSize(btnSize));
+                                        r.Width(UValue.FixedSize(40f));
+                                        r.Height(UValue.FixedSize(40f));
                                     });
                             }
                         } // for each button

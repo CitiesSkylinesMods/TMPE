@@ -76,33 +76,24 @@ namespace TrafficManager.U.Autosize {
         /// <param name="self">The UI component.</param>
         /// <returns>The calculated value.</returns>
         private float Calculate(UValue val, UIComponent self) {
-            UIScaler tmpeUiScaler = ModUI.Instance.UiScaler;
             switch (val.Rule) {
                 case URule.Ignore:
                     return 0f;
 
                 case URule.FixedSize:
-                    return val.Value;
+                    return val.Value * UIScaler.GetScale();
 
                 case URule.FractionScreenWidth:
-                    return tmpeUiScaler.GuiWidth * val.Value * tmpeUiScaler.GetScale();
+                    return UIScaler.GuiWidth * val.Value * UIScaler.GetScale();
 
                 case URule.MultipleOfWidth:
-                    return self.width * val.Value * tmpeUiScaler.GetScale();
+                    return self.width * val.Value * UIScaler.GetScale();
 
                 case URule.FractionScreenHeight:
-                    return tmpeUiScaler.GuiHeight * val.Value * tmpeUiScaler.GetScale();
+                    return UIScaler.GuiHeight * val.Value * UIScaler.GetScale();
 
                 case URule.MultipleOfHeight:
-                    return self.height * val.Value * tmpeUiScaler.GetScale();
-
-                case URule.ReferenceWidthAt1080P:
-                    return tmpeUiScaler.ScreenWidthFraction(val.Value / 1920f)
-                           * tmpeUiScaler.GetScale();
-
-                case URule.ReferenceHeightAt1080P:
-                    return tmpeUiScaler.ScreenHeightFraction(val.Value / 1080f)
-                           * tmpeUiScaler.GetScale();
+                    return self.height * val.Value * UIScaler.GetScale();
 
                 case URule.FitChildrenWidth:
                     return this.ChildrenBox.B.x + this.Config.Padding;

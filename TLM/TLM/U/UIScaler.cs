@@ -1,52 +1,21 @@
 namespace TrafficManager.U {
+    using ColossalFramework;
     using ColossalFramework.UI;
     using TrafficManager.State;
     using UnityEngine;
 
-    public class UIScaler {
-        private UIView uiView_;
-        private Camera uiCamera_;
-
-        public UIScaler(UIView uiView) {
-            uiView_ = uiView;
-            uiCamera_ = uiView.GetComponent<Camera>();
-        }
-
+    public static class UIScaler {
         /// <summary>Screen width for GUI is always fixed at 1920.</summary>
-        public float GuiWidth => uiCamera_.pixelWidth;
+        public static float GuiWidth => Singleton<UIView>.instance.uiCamera.pixelWidth;
 
         /// <summary>Screen height for GUI is always fixed at 1080.</summary>
-        public float GuiHeight => uiCamera_.pixelHeight;
-
-        /// <summary>Calculate size based on screen width fraction.</summary>
-        /// <param name="fraction">Fraction.</param>
-        /// <returns>Value scaled to screen width.</returns>
-        public float ScreenWidthFraction(float fraction) {
-            return fraction * GuiWidth;
-        }
-
-        /// <summary>Calculate size based on screen height fraction.</summary>
-        /// <param name="fraction">Fraction.</param>
-        /// <returns>Value scaled to screen height.</returns>
-        public float ScreenHeightFraction(float fraction) {
-            return fraction * GuiHeight;
-        }
-
-        /// <summary>Based on screen width and screen height, pick the lesser fraction.</summary>
-        /// <param name="widthFrac">Fraction of screen width.</param>
-        /// <param name="heightFrac">Fraction of screen height.</param>
-        /// <returns>Smallest of them two.</returns>
-        public float ScreenSizeSmallestFraction(float widthFrac, float heightFrac) {
-            return Mathf.Min(
-                ScreenWidthFraction(widthFrac),
-                ScreenHeightFraction(heightFrac));
-        }
+        public static float GuiHeight => Singleton<UIView>.instance.uiCamera.pixelHeight;
 
         /// <summary>
         /// Calculate UI scale based on GUI scale slider in options multiplied by uiView's scale.
         /// </summary>
         /// <returns>UI scale combined.</returns>
-        public float GetScale() {
+        public static float GetScale() {
             return GlobalConfig.Instance.Main.GuiScale * 0.01f;
         }
 
