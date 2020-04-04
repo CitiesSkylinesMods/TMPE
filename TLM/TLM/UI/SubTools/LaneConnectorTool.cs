@@ -466,8 +466,8 @@ namespace TrafficManager.UI.SubTools {
 
         /// <summary>
         /// arranges the segments such that
-        /// segments[0] is part of the main road and is going toward the junction.
-        /// segments[1] is part of the main road and is going against the junction.
+        /// segments[0] is part of the main road and is going toward the node/junction.
+        /// segments[1] is part of the main road and is going against the node/junction.
         /// segments[2] is the segments connected to main road from outter side.
         /// segments[3] is the segments connected to main road from the other side.
         /// </summary>
@@ -482,6 +482,9 @@ namespace TrafficManager.UI.SubTools {
             if (n == 2) {
                 segments.Add(0);
                 segments.Add(0);
+                if(netService.GetHeadNode(segments[1]) == netService.GetTailNode(segments[0])) {
+                    segments.Swap(0, 1);
+                }
                 ret = true;
             } else if (n == 3) {
                 if (!PriorityRoad.ArrangeT(segments)) {
