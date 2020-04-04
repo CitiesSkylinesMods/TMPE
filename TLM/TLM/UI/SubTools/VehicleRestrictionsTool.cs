@@ -521,6 +521,7 @@ namespace TrafficManager.UI.SubTools {
 
                 Vector3 labelScreenPos;
                 bool visible = GeometryUtil.WorldToScreenPoint(labelCenter, out labelScreenPos);
+                // BUGBUG: Using screen.height might be wrong, consider U.UIScaler.ScreenHeight (from UIView.fixedHeight)
                 labelScreenPos.y = Screen.height - labelScreenPos.y;
                 diff = labelCenter - camPos;
 

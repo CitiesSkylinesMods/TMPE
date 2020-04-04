@@ -10,6 +10,10 @@ namespace TrafficManager.U {
             uiView_ = uiView;
         }
 
+        public float ScreenWidth => uiView_.fixedWidth;
+
+        public float ScreenHeight => uiView_.fixedHeight;
+
         /// <summary>Calculate size based on screen width fraction.</summary>
         /// <param name="fraction">Fraction.</param>
         /// <returns>Value scaled to screen width.</returns>

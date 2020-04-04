@@ -14,6 +14,7 @@ namespace TrafficManager.Util {
         /// <returns>Screen point.</returns>
         internal static bool WorldToScreenPoint(Vector3 worldPos, out Vector3 screenPos) {
             screenPos = Camera.main.WorldToScreenPoint(worldPos);
+            // BUGBUG: Using screen.height might be wrong, consider U.UIScaler.ScreenHeight (from UIView.fixedHeight)
             screenPos.y = Screen.height - screenPos.y;
 
             return screenPos.z >= 0;
