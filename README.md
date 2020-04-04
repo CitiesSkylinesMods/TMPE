@@ -43,13 +43,13 @@ Recent updates:
 
 - Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
 - Updated: Game version badges in readme (#806)
-- Updated: Mod version and changelogs (todo)
+- Updated: Mod version and changelogs (#816)
 
 #### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) LABS, 26/03/2020
 
 - Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
 - Updated: Game version badges in readme (#806)
-- Updated: Mod version and changelogs (todo)
+- Updated: Mod version and changelogs (#816)
 
 See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
 
