@@ -3,6 +3,7 @@ namespace TrafficManager.U.Autosize {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using JetBrains.Annotations;
+    using TrafficManager.UI;
     using UnityEngine;
 
     /// <summary>
@@ -75,6 +76,7 @@ namespace TrafficManager.U.Autosize {
         /// <param name="self">The UI component.</param>
         /// <returns>The calculated value.</returns>
         private float Calculate(UValue val, UIComponent self) {
+            UIScaler tmpeUiScaler = ModUI.Instance.UiScaler;
             switch (val.Rule) {
                 case URule.Ignore:
                     return 0f;
@@ -83,24 +85,24 @@ namespace TrafficManager.U.Autosize {
                     return val.Value;
 
                 case URule.FractionScreenWidth:
-                    return Screen.width * val.Value * UIScaler.GetUIScale();
+                    return Screen.width * val.Value * tmpeUiScaler.GetScale();
 
                 case URule.MultipleOfWidth:
-                    return self.width * val.Value * UIScaler.GetUIScale();
+                    return self.width * val.Value * tmpeUiScaler.GetScale();
 
                 case URule.FractionScreenHeight:
-                    return Screen.height * val.Value * UIScaler.GetUIScale();
+                    return Screen.height * val.Value * tmpeUiScaler.GetScale();
 
                 case URule.MultipleOfHeight:
-                    return self.height * val.Value * UIScaler.GetUIScale();
+                    return self.height * val.Value * tmpeUiScaler.GetScale();
 
                 case URule.ReferenceWidthAt1080P:
-                    return UIScaler.ScreenWidthFraction(val.Value / 1920f)
-                           * UIScaler.GetUIScale();
+                    return tmpeUiScaler.ScreenWidthFraction(val.Value / 1920f)
+                           * tmpeUiScaler.GetScale();
 
                 case URule.ReferenceHeightAt1080P:
-                    return UIScaler.ScreenHeightFraction(val.Value / 1080f)
-                           * UIScaler.GetUIScale();
+                    return tmpeUiScaler.ScreenHeightFraction(val.Value / 1080f)
+                           * tmpeUiScaler.GetScale();
 
                 case URule.FitChildrenWidth:
                     return this.ChildrenBox.B.x + this.Config.Padding;

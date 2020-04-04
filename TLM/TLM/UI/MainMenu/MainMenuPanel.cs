@@ -246,9 +246,10 @@ namespace TrafficManager.UI.MainMenu {
                 const float REFERENCE_WIDTH = 40f;
                 const float X_FRAC = REFERENCE_WIDTH / 1920f;
                 const float Y_FRAC = REFERENCE_WIDTH / 1080f;
+                U.UIScaler tmpeUiScaler = ModUI.Instance.UiScaler;
                 var scaledSize
-                    = U.UIScaler.ScreenSizeSmallestFraction(X_FRAC, Y_FRAC) *
-                      U.UIScaler.GetUIScale();
+                    = tmpeUiScaler.ScreenSizeSmallestFraction(X_FRAC, Y_FRAC) *
+                      tmpeUiScaler.GetScale();
                 return Mathf.Max(scaledSize, 40f);
             }
 

@@ -162,9 +162,10 @@ namespace TrafficManager.UI.SubTools {
                                             r.StackHorizontal(Constants.UIPADDING);
                                         }
 
+                                        UIScaler tmpeUiScaler = ModUI.Instance.UiScaler;
                                         float btnSize =
-                                            UIScaler.ScreenSizeSmallestFraction(40f / 1920f, 40f / 1080f)
-                                            * UIScaler.GetUIScale();
+                                            tmpeUiScaler.ScreenSizeSmallestFraction(40f / 1920f, 40f / 1080f)
+                                            * tmpeUiScaler.GetScale();
 
                                         r.Width(UValue.FixedSize(btnSize));
                                         r.Height(UValue.FixedSize(btnSize));

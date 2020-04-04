@@ -54,6 +54,8 @@ namespace TrafficManager.UI {
 
         private bool _uiShown;
 
+        public UIScaler UiScaler;
+
         public struct UIScaleNotification {
             public float NewScale;
         }
@@ -75,6 +77,7 @@ namespace TrafficManager.UI {
             // Get the UIView object. This seems to be the top-level object for most
             // of the UI.
             UIView uiView = UIView.GetAView();
+            UiScaler = new UIScaler(uiView);
 
             // Add a new button to the view.
             MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
