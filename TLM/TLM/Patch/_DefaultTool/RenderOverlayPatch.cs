@@ -13,6 +13,7 @@ namespace TrafficManager.Patch._DefaultTool {
         [HarmonyPostfix]
         [UsedImplicitly]
         public static void Postfix(RenderManager.CameraInfo cameraInfo) {
+            RoadSelectionPanels.Root.RenderOverlay();
             if (MassEditOVerlay.IsActive) {
                 var tmTool = ModUI.GetTrafficManagerTool(true);
                 if(ToolsModifierControl.toolController.CurrentTool != tmTool) {

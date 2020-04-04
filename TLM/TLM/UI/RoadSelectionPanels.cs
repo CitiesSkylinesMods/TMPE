@@ -10,6 +10,7 @@ namespace TrafficManager.UI {
     using TrafficManager.U.Button;
     using TrafficManager.RedirectionFramework;
     using static UI.SubTools.PrioritySignsTool;
+    using JetBrains.Annotations;
 
     public class RoadSelectionPanels : MonoBehaviour {
         private RoadSelectionUtil roadSelectionUtil_;
@@ -27,6 +28,8 @@ namespace TrafficManager.UI {
 
         private FunctionModes _function;
 
+
+
         internal FunctionModes Function {
             /// returns which button is in active state
             get => _function;
@@ -40,7 +43,74 @@ namespace TrafficManager.UI {
             }
         }
 
+        UIPanel roadAdjustPanel_;
+
+        UIPanel RoadAdjustPanel {
+            get
+            {
+                if (roadAdjustPanel_ == null)
+                    roadAdjustPanel_ = UIView.Find<UIPanel>("AdjustRoad");
+                return roadAdjustPanel_;
+            }
+        }
+
+        UIPanel roadWorldInfoPanelExt_;
+
         #region Event handling
+
+        [UsedImplicitly]
+        internal void RenderOverlay()
+        {
+            //Log._Debug("Render over lay called st:\n" + Environment.StackTrace);
+            NetManager.instance.NetAdjust.PathVisible = ShouldPathBeVisible();
+            UpdateMassEditOverlay();
+        }
+
+        internal void UpdateMassEditOverlay()
+        {
+            if (ModUI.GetTrafficManagerTool().GetToolMode() == ToolMode.None)
+            {
+                if (!MassEditOVerlay.IsActive)
+                {
+                    if (ShouldShowMassEditOverlay())
+                    {
+                        ShowMassEditOverlay();
+                    }
+                }
+                else
+                {
+                    if (!ShouldShowMassEditOverlay())
+                    {
+                        HideMassEditOverlay();
+                    }
+                }
+            }
+        }
+
+        internal bool HasHoveringButton()
+        {
+            foreach (var panel in panels_ ?? Enumerable.Empty<PanelExt>())
+            {
+                if (panel.HasHoveringButton())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        internal bool ShouldPathBeVisible() =>
+            RoadSelectionUtil.IsNetAdjustMode() || HasHoveringButton();
+
+        internal bool ShouldShowMassEditOverlay()
+        {
+            foreach (var panel in panels_ ?? Enumerable.Empty<PanelExt>())
+            {
+                if (panel.isVisible)
+                    return true;
+            }
+            return NetManager.instance.NetAdjust.PathVisible;
+        }
 
         // even though we enqueu actions from main thread, we still need to enqueue them to
         // the main thread in order to introduce some delay. this delay is necessarry to prevent
@@ -64,8 +134,7 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// Enable and refreshes overrlay for various traffic rules influenced by road selection pannel.
-        /// Also enables Traffic manager tool.
+        /// Enables and refreshes overrlay for various traffic rules influenced by road selection pannel.
         /// </summary>
         private void ShowMassEditOverlay() {
             var tmTool = ModUI.GetTrafficManagerTool(true);
@@ -84,15 +153,7 @@ namespace TrafficManager.UI {
             Log._Debug("Mass edit overlay disabled");
         }
 
-        private void MassEditOverlayOnEvent(UIComponent component, bool value) {
-            foreach (var panel in panels_)
-                value |= panel.isVisible;
-            if (value) {
-                EnqueueAction(ShowMassEditOverlay);
-            } else {
-                EnqueueAction(HideMassEditOverlay);
-            }
-        }
+        //private void MassEditOverlayOnEvent(UIComponent component, bool value) => UpdateMassEditOverlay();
 
         private void ShowAdvisorOnEvent(UIComponent component, bool value) {
             if (value) {
@@ -124,11 +185,18 @@ namespace TrafficManager.UI {
                 priorityRoadToggle_.eventVisibilityChanged -= HidePriorityRoadToggleEvent;
             }
 
+            UIPanel roadAdjustPanel = RoadAdjustPanel;
+            if (roadAdjustPanel != null)
+            {
+                //roadAdjustPanel.eventVisibilityChanged -= MassEditOverlayOnEvent;
+                roadAdjustPanel.eventVisibilityChanged -= ShowAdvisorOnEvent;
+            }
+
             if (panels_ != null) {
                 foreach (UIPanel panel in panels_) {
                     if (panel != null) {
                         panel.eventVisibilityChanged -= ShowAdvisorOnEvent;
-                        panel.eventVisibilityChanged -= MassEditOverlayOnEvent;
+                        //panel.eventVisibilityChanged -= MassEditOverlayOnEvent;
                         Destroy(panel.gameObject);
                     }
                 }
@@ -168,16 +236,19 @@ namespace TrafficManager.UI {
                 if (priorityRoadToggle_ != null) {
                     priorityRoadToggle_.eventVisibilityChanged += HidePriorityRoadToggleEvent;
                 }
-                panel.eventVisibilityChanged += MassEditOverlayOnEvent;
+                //panel.eventVisibilityChanged += MassEditOverlayOnEvent;
                 panel.eventVisibilityChanged += ShowAdvisorOnEvent;
+                roadWorldInfoPanelExt_ = panel;
             }
 
             // attach another instance of road selection panel to AdjustRoad tab.
-            UIPanel roadAdjustPanel = UIView.Find<UIPanel>("AdjustRoad");
+            UIPanel roadAdjustPanel = RoadAdjustPanel;
             if (roadAdjustPanel != null) {
-                PanelExt panel = AddPanel(roadAdjustPanel);
-                panel.eventVisibilityChanged += MassEditOverlayOnEvent;
-                panel.eventVisibilityChanged += ShowAdvisorOnEvent;
+                //PanelExt panel = AddPanel(roadAdjustPanel);
+                //panel.eventVisibilityChanged += MassEditOverlayOnEvent;
+                //panel.eventVisibilityChanged += ShowAdvisorOnEvent;
+                //roadAdjustPanel.eventVisibilityChanged += MassEditOverlayOnEvent;
+                roadAdjustPanel.eventVisibilityChanged += ShowAdvisorOnEvent;
             }
 
             // every time user changes the road selection, all buttons will go back to inactive state.
@@ -220,6 +291,14 @@ namespace TrafficManager.UI {
             public void Refresh() {
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
                     button.Refresh();
+                }
+            }
+            public override void Update()
+            {
+                base.Update();
+                if (this == Root.roadWorldInfoPanelExt_) {
+                    isVisible = InfoManager.instance.CurrentMode ==
+                        InfoManager.InfoMode.None || RoadSelectionUtil.IsNetAdjustMode();
                 }
             }
 
@@ -283,6 +362,16 @@ namespace TrafficManager.UI {
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
                     button.atlas = allButtonsAtlas_;
                 }
+            }
+
+            internal bool HasHoveringButton()
+            {
+                foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>())
+                {
+                    if (button.IsHovered)
+                        return true;
+                }
+                return false;
             }
 
             public class ClearButtton : ButtonExt {
@@ -392,7 +481,10 @@ namespace TrafficManager.UI {
                     Show();
                 }
 
+
                 const float REFERENCE_SIZE = 40f;
+
+                public bool IsHovered => m_IsMouseHovering;
 
                 public RoadSelectionPanels Root => RoadSelectionPanels.Root;
 

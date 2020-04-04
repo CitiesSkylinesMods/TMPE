@@ -24,6 +24,7 @@ namespace TrafficManager.UI {
     using UnityEngine;
     using TrafficManager.UI.Helpers;
     using static TrafficManager.UI.SubTools.PrioritySignsTool;
+    using static TrafficManager.Util.Shortcuts;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -332,7 +333,10 @@ namespace TrafficManager.UI {
             }
 
             // Log._Debug($"Rendering overlay in {_toolMode}");
-            _activeSubTool?.RenderOverlay(cameraInfo);
+            if (_activeSubTool != null)
+                _activeSubTool.RenderOverlay(cameraInfo);
+            else
+                DefaultRenderOverlay(cameraInfo);
 
             foreach (KeyValuePair<ToolMode, SubTool> e in subTools_) {
                 if (e.Key == GetToolMode()) {
@@ -341,6 +345,23 @@ namespace TrafficManager.UI {
 
                 e.Value.RenderInfoOverlay(cameraInfo);
             }
+        }
+
+        void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
+        {
+            if (HoveredSegmentId == 0)
+                return;
+            var netAdjust = NetManager.instance?.NetAdjust;
+            if (netAdjust == null)
+                return;
+
+            // use the same color as in NetAdjust
+            ref NetSegment segment = ref HoveredSegmentId.ToSegment();
+            var color = ToolsModifierControl.toolController.m_validColorInfo;
+            float alpha = 1f;
+            NetTool.CheckOverlayAlpha(ref segment, ref alpha);
+            color.a *= alpha;
+            NetTool.RenderOverlay(cameraInfo, ref segment, color, color);
         }
 
         /// <summary>
@@ -444,14 +465,27 @@ namespace TrafficManager.UI {
 
                 if (_activeSubTool != null) {
                     _activeSubTool.OnToolGUI(e);
-                } else if(!PrioritySignsTool.MassEditOVerlay.IsActive) {
-                    base.OnToolGUI(e);
+                } else {
+                    DefaultOnToolGUI(e);
                 }
             } catch (Exception ex) {
                 Log.Error("GUI Error: " + ex);
             }
         }
 
+        void DefaultOnToolGUI(Event e)
+        {
+            if (e.type == EventType.MouseDown && HoveredSegmentId != 0)
+            {
+                InstanceID instanceID = new InstanceID()
+                {
+                    NetSegment = HoveredSegmentId,
+                };
+                OpenWorldInfoPanel(
+                    instanceID,
+                    HitPos);
+            }
+        }
 
         public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                    ushort nodeId,

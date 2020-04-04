@@ -7,6 +7,7 @@ namespace TrafficManager.Util {
     using ICities;
     using CSUtil.Commons;
     using static TrafficManager.Util.Shortcuts;
+    using static NetAdjust;
 
     public class RoadSelectionUtil {
         /// instance of singleton
@@ -20,6 +21,14 @@ namespace TrafficManager.Util {
             Instance.OnChanged = null;
             Instance = null;
         }
+
+        internal const int NETADJUST_INFO_INDEX = 2;
+        internal static bool IsNetAdjustMode() =>
+            IsNetAdjustMode(InfoManager.instance.CurrentMode, (int)InfoManager.instance.CurrentSubMode);
+
+        internal static bool IsNetAdjustMode(InfoManager.InfoMode mode, int subModeIndex) =>
+            (mode == InfoManager.InfoMode.TrafficRoutes) &
+            (subModeIndex == NETADJUST_INFO_INDEX);
 
         public int Length => GetPath()?.m_size ?? 0;
 
@@ -45,11 +54,11 @@ namespace TrafficManager.Util {
         private NetAdjust netAdjust = NetManager.instance.NetAdjust ??
             throw new Exception("netAdjust not found!");
 
-        private FieldInfo field =
+        private FieldInfo m_tempPath_field =
             typeof(NetAdjust).GetField("m_tempPath", BindingFlags.Instance | BindingFlags.NonPublic);
 
         private FastList<ushort> GetPath() =>
-            (FastList<ushort>)field.GetValue(netAdjust);
+            (FastList<ushort>)m_tempPath_field.GetValue(netAdjust);
 
         private MethodInfo mCalculatePath = typeof(NetAdjust).GetMethod(
             "CalculatePath",
