@@ -42,9 +42,9 @@ namespace TrafficManager.Util {
                         } else {
                             count += backward;
                         }
-                        Log._Debug(
-                            $"dir={dir} startNode={startNode} segmentId={segmentId}\n" +
-                            $"startNode2={startNode2} forward={forward} backward={backward} count={count}");
+                        //Log._Debug(
+                        //    $"dir={dir} startNode={startNode} segmentId={segmentId}\n" +
+                        //    $"startNode2={startNode2} forward={forward} backward={backward} count={count}");
                     }
                     return true;
                 });
@@ -191,7 +191,6 @@ namespace TrafficManager.Util {
             }
 
             if (srcLaneCount == 2 && numdirs == 3) {
-                Log._Debug("KIAN DEBUG: POINT A");
                 if (alt2) {
                     LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows_NearForward);
                     LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows_Far);
@@ -213,14 +212,12 @@ namespace TrafficManager.Util {
                     out forward, out far, out near);
             }
 
-
+            Log._Debug($"near=${near} forward={forward} far={far}");
             for (var i = 0; i < laneList.Count; i++) {
-                var flags = (NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneList[i].laneId].m_flags;
-
-                LaneArrows arrow = LaneArrows.None;
+                LaneArrows arrow;
                 if (i < near) {
                     arrow = LaneArrows_Near;
-                } else if (near <= i && i < far + forward) {
+                } else if (near <= i && i < near + forward) {
                     arrow = LaneArrows.Forward;
                 } else {
                     arrow = LaneArrows_Far;
@@ -251,7 +248,7 @@ namespace TrafficManager.Util {
                 } else if (c == 0) {
                     DistributeLanes2(total, a, b, out x, out y);
                     z = 0;
-                } else { //forwarLanesCount == 0
+                } else { //b == 0
                     DistributeLanes2(total, a, c, out x, out z);
                     y = 0;
                 }
@@ -259,7 +256,7 @@ namespace TrafficManager.Util {
                 Debug.Assert(numdirs == 3 && total >= 3);
                 DistributeLanes3(total, a, b, c, out x, out y, out z);
             }
-            Log._Debug($"DistributeLanes (by prioirty): {a}=>{x} | {b}=>{y} | {c}=>{z}\n");
+            Log._Debug($"DistributeLanes (by prioirty): {a}=>{x} | {b}=>{y} | {c}=>{z}");
 
         }
 
