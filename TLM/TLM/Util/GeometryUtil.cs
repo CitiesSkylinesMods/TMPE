@@ -1,6 +1,8 @@
 namespace TrafficManager.Util {
     using System.Collections.Generic;
     using ColossalFramework;
+    using TrafficManager.U;
+    using TrafficManager.UI;
     using UnityEngine;
 
     /// <summary>
@@ -11,11 +13,10 @@ namespace TrafficManager.Util {
         /// <summary>Transforms a world point into a screen point.</summary>
         /// <param name="worldPos">Position in the world.</param>
         /// <param name="screenPos">2d position on screen.</param>
-        /// <returns>Screen point.</returns>
+        /// <returns>Screen point in pixels. Note: For use in UI transform to GUI coords.</returns>
         internal static bool WorldToScreenPoint(Vector3 worldPos, out Vector3 screenPos) {
             screenPos = Camera.main.WorldToScreenPoint(worldPos);
-            // BUGBUG: Using screen.height might be wrong, consider U.UIScaler.ScreenHeight (from UIView.fixedHeight)
-            screenPos.y = Screen.height - screenPos.y;
+            screenPos.y = ModUI.Instance.UiScaler.GuiHeight - screenPos.y;
 
             return screenPos.z >= 0;
         }

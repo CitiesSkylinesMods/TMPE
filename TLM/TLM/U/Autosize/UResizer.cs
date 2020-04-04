@@ -85,13 +85,13 @@ namespace TrafficManager.U.Autosize {
                     return val.Value;
 
                 case URule.FractionScreenWidth:
-                    return tmpeUiScaler.ScreenWidth * val.Value * tmpeUiScaler.GetScale();
+                    return tmpeUiScaler.GuiWidth * val.Value * tmpeUiScaler.GetScale();
 
                 case URule.MultipleOfWidth:
                     return self.width * val.Value * tmpeUiScaler.GetScale();
 
                 case URule.FractionScreenHeight:
-                    return tmpeUiScaler.ScreenHeight * val.Value * tmpeUiScaler.GetScale();
+                    return tmpeUiScaler.GuiHeight * val.Value * tmpeUiScaler.GetScale();
 
                 case URule.MultipleOfHeight:
                     return self.height * val.Value * tmpeUiScaler.GetScale();

@@ -11,6 +11,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
+    using TrafficManager.U;
     using TrafficManager.U.Autosize;
     using TrafficManager.U.Button;
     using TrafficManager.Util;
@@ -370,9 +371,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                               .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
 
             // Cast to screen and center the window on node
-            GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 screenPos);
+            GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 screenPixelPos);
+            Vector2 guiPosition = UIScaler.ScreenPointToGuiPoint(screenPixelPos);
             ToolWindow.absolutePosition =
-                screenPos - new Vector3(ToolWindow.size.x * 0.5f, ToolWindow.size.y * 0.5f, 0f);
+                guiPosition - new Vector2(ToolWindow.size.x * 0.5f, ToolWindow.size.y * 0.5f);
         }
 
         /// <summary>
