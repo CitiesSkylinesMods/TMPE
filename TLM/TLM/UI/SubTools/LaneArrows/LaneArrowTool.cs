@@ -189,6 +189,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonLeft.StartNode = startNode;
                 buttonLeft.ToggleFlag = API.Traffic.Enums.LaneArrows.Left;
                 buttonLeft.UpdateButtonImageAndTooltip();
+                buttonLeft.ParentTool = this; // to access error reporting function on click
 
                 LaneArrowButton buttonForward = ToolWindow.Buttons[(i * 3) + 1];
                 buttonForward.LaneId = laneId;
@@ -196,6 +197,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonForward.StartNode = startNode;
                 buttonForward.ToggleFlag = API.Traffic.Enums.LaneArrows.Forward;
                 buttonForward.UpdateButtonImageAndTooltip();
+                buttonForward.ParentTool = this; // to access error reporting function on click
 
                 LaneArrowButton buttonRight = ToolWindow.Buttons[(i * 3) + 2];
                 buttonRight.LaneId = laneId;
@@ -203,6 +205,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonRight.StartNode = startNode;
                 buttonRight.ToggleFlag = API.Traffic.Enums.LaneArrows.Right;
                 buttonRight.UpdateButtonImageAndTooltip();
+                buttonRight.ParentTool = this; // to access error reporting function on click
             }
         }
 
@@ -262,7 +265,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// If Lane Arrow operation ended with failure, pop up a guide box with an explanation.
         /// </summary>
         /// <param name="result">Result coming out of LaneArrowManager function call.</param>
-        private void InformUserAboutPossibleFailure(SetLaneArrow_Result result) {
+        internal void InformUserAboutPossibleFailure(SetLaneArrow_Result result) {
             switch (result) {
                 case SetLaneArrow_Result.HighwayArrows: {
                         MainTool.Guide.Activate("LaneArrowTool_Disabled due to highway rules");
@@ -281,6 +284,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         /// <summary>Called from the Main Tool when left mouse button clicked.</summary>
         public override void OnToolLeftClick() {
+            if (ToolWindow != null && ToolWindow.containsMouse) {
+                return; // ignore clicks landing into the window
+            }
+
             Log._Debug($"LaneArrow({fsm_.State}): left click");
             switch (fsm_.State) {
                 case State.Select:

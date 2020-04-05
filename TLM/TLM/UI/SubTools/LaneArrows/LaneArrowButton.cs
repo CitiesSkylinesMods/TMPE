@@ -15,6 +15,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         public bool StartNode;
 
+        internal LaneArrowTool ParentTool;
+
         public LaneArrows ToggleFlag { get; set; }
 
         public override bool IsVisible() => true;
@@ -29,7 +31,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 StartNode,
                 ToggleFlag,
                 out var res);
-            // TODO: Handle res in LaneArrowTool.InformUserAboutPossibleFailure
+            ParentTool.InformUserAboutPossibleFailure(res);
             this.UpdateButtonImageAndTooltip();
         }
 
