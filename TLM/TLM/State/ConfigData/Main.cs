@@ -16,8 +16,8 @@
         /// <summary>
         /// Main menu position
         /// </summary>
-        public int MainMenuX = MainMenuPanel.DEFAULT_MENU_X;
-        public int MainMenuY = MainMenuPanel.DEFAULT_MENU_Y;
+        public int MainMenuX = MainMenuWindow.DEFAULT_MENU_X;
+        public int MainMenuY = MainMenuWindow.DEFAULT_MENU_Y;
         public bool MainMenuPosLocked = false;
 
         /// <summary>

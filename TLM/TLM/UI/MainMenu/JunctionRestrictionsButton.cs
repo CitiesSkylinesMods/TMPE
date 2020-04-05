@@ -25,8 +25,10 @@
         public override string GetTooltip() =>
             Translation.Menu.Get("Tooltip:Junction restrictions");
 
-        public override bool IsVisible() => Options.junctionRestrictionsEnabled;
-
         public override KeybindSetting ShortcutKey => KeybindSettingsBase.JunctionRestrictionsTool;
+
+        public override bool IsVisible() => IsButtonEnabled();
+
+        public static bool IsButtonEnabled() => Options.junctionRestrictionsEnabled;
     }
 }

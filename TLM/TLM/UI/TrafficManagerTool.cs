@@ -100,8 +100,8 @@ namespace TrafficManager.UI {
             // x := main menu x + rect.x
             // y := main menu y + main menu height + rect.y
             return new Rect(
-                MainMenuPanel.DEFAULT_MENU_X + rect.x,
-                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.ScaledSize.GetHeight() + rect.y,
+                MainMenuWindow.DEFAULT_MENU_X + rect.x,
+                MainMenuWindow.DEFAULT_MENU_Y + rect.y + ModUI.Instance.MainMenu.height,
                 rect.width,
                 rect.height);
         }

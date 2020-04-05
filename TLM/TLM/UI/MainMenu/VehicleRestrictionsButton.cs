@@ -23,6 +23,8 @@
 
         public override string GetTooltip() => Translation.Menu.Get("Tooltip:Vehicle restrictions");
 
-        public override bool IsVisible() => Options.vehicleRestrictionsEnabled;
+        public override bool IsVisible() => IsButtonEnabled();
+
+        public static bool IsButtonEnabled() => Options.vehicleRestrictionsEnabled;
     }
 }

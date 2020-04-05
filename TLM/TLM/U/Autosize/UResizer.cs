@@ -36,39 +36,47 @@ namespace TrafficManager.U.Autosize {
             PreviousSibling = previousSibling;
         }
 
+        public static void UpdateControl(UIComponent control) {
+            UpdateControlRecursive(control, null);
+        }
+
         /// <summary>
         /// Recursively descends down the GUI controls tree and calls OnResize on <see cref="ISmartSizableControl"/>
         /// implementors, then allows parents to adjust their size to the contents and so on.
         /// </summary>
-        /// <returns>The bounding box.</returns>
         /// <param name="current">The control being updated.</param>
         /// <param name="previousSibling">If not null, points to previous sibling for control stacking.</param>
-        internal static UBoundingBox UpdateControlRecursive([NotNull]
-                                                            UIComponent current,
-                                                            [CanBeNull]
-                                                            UIComponent previousSibling) {
+        /// <returns>The bounding box or null (if does not contribute to the parent's box).</returns>
+        internal static UBoundingBox? UpdateControlRecursive([NotNull] UIComponent current,
+                                                             [CanBeNull] UIComponent previousSibling) {
+            if (!current || current.transform == null) { // is object valid?
+                return default;
+            }
+
             // Create an empty bounding box update it with all children bounding boxes
             UBoundingBox allChildrenBox = default;
 
             // For all children visit their resize functions and update allChildrenBox
             UIComponent previousChild = null;
 
-            for (int i = 0; i < current.transform.childCount; i++) {
-                Transform child = current.transform.GetChild(i);
+            foreach (Transform child in current.transform) {
                 UIComponent childUiComponent = child.gameObject.GetComponent<UIComponent>();
-                UBoundingBox childBox = UpdateControlRecursive(
+                UBoundingBox? childBox = UpdateControlRecursive(
                     childUiComponent,
                     previousChild);
-                allChildrenBox.ExpandToFit(childBox);
+
+                // if child contributes to our bounding box, we can update our box
+                if (childBox != null) {
+                    allChildrenBox.ExpandToFit(childBox.Value);
+                }
 
                 previousChild = childUiComponent;
             }
 
-            UBoundingBox currentBox = UResizerConfig.CallOnResize(
+            return UResizerConfig.CallOnResize(
                 current,
                 previousSibling,
                 allChildrenBox);
-            return currentBox;
         }
 
         /// <summary>Calculates value based on the UI component.</summary>
@@ -141,6 +149,26 @@ namespace TrafficManager.U.Autosize {
                               : stackUnder.relativePosition + new Vector3(
                                     0f,
                                     stackUnder.height + spacing,
+                                    0f);
+            this.Control.relativePosition = pos;
+        }
+
+        /// <summary>Stacks vertically but starts a new line (resets X position to 0).</summary>
+        /// <param name="spacing">Step down by this many pixels.</param>
+        /// <param name="stackUnder">The control to use as a reference.</param>
+        public void StackVerticalNewRow(float spacing = 0f, UIComponent stackUnder = null) {
+            var padding = 0f;
+            if (this.Control.parent.GetComponent<UIComponent>() is ISmartSizableControl parent) {
+                padding = parent.GetResizerConfig().Padding;
+            }
+            if (stackUnder == null) {
+                stackUnder = this.PreviousSibling;
+            }
+            Vector3 pos = stackUnder == null
+                              ? new Vector3(padding, padding, 0f)
+                              : new Vector3(
+                                    padding,
+                                    stackUnder.relativePosition.y + stackUnder.height + spacing,
                                     0f);
             this.Control.relativePosition = pos;
         }

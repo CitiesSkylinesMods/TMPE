@@ -24,8 +24,10 @@
 
         public override string GetTooltip() => Translation.Menu.Get("Tooltip:Speed limits");
 
-        public override bool IsVisible() => Options.customSpeedLimitsEnabled;
-
         public override KeybindSetting ShortcutKey => KeybindSettingsBase.SpeedLimitsTool;
+
+        public override bool IsVisible() => IsButtonEnabled();
+
+        public static bool IsButtonEnabled() => Options.customSpeedLimitsEnabled;
     }
 }

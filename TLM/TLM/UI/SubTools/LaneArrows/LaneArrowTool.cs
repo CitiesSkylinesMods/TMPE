@@ -1,7 +1,5 @@
 namespace TrafficManager.UI.SubTools.LaneArrows {
-    using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
@@ -9,11 +7,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
-    using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
-    using TrafficManager.U.Autosize;
-    using TrafficManager.U.Button;
     using TrafficManager.Util;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
@@ -284,8 +279,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         /// <summary>Called from the Main Tool when left mouse button clicked.</summary>
         public override void OnToolLeftClick() {
-            if (ToolWindow != null && ToolWindow.containsMouse) {
-                return; // ignore clicks landing into the window
+            if (ToolWindow != null && MainTool.GetToolController().IsInsideUI) {
+                return; // ignore clicks landing into some UI, only consume map clicks
             }
 
             Log._Debug($"LaneArrow({fsm_.State}): left click");

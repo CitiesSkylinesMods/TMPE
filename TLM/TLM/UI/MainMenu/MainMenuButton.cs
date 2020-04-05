@@ -22,6 +22,8 @@ namespace TrafficManager.UI.MainMenu {
         public override string ButtonName => "TMPE_MainMenu";
 
         public override void Start() {
+            U.UIUtil.MakeUniqueAndSetName(this.gameObject, "TMPE_MainMenuButton");
+
             // Place the button.
             OnUpdate(GlobalConfig.Instance);
 

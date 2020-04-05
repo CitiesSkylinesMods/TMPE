@@ -252,13 +252,13 @@
     <Compile Include="UI\MainMenu\BaseMenuToolModeButton.cs" />
     <Compile Include="UI\MainMenu\MainMenuButton.cs" />
     <Compile Include="UI\MainMenu\MainMenuLayout.cs" />
+    <Compile Include="UI\MainMenu\MenuButtonDef.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
-    <Compile Include="UI\MainMenu\MainMenuPanel.cs" />
+    <Compile Include="UI\MainMenu\MainMenuWindow.cs" />
     <Compile Include="UI\MainMenu\StatsLabel.cs" />
     <Compile Include="UI\MainMenu\ParkingRestrictionsButton.cs" />
-    <Compile Include="UI\MainMenu\VersionLabel.cs" />
     <Compile Include="UI\MainMenu\VehicleRestrictionsButton.cs" />
     <Compile Include="UI\MainMenu\ToggleTrafficLightsButton.cs" />
     <Compile Include="UI\MainMenu\TimedTrafficLightsButton.cs" />

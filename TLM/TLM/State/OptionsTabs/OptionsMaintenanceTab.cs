@@ -180,6 +180,7 @@ namespace TrafficManager.State {
 
             Log._Debug($"Show path-find stats changed to {newVal}");
             Options.showPathFindStats = newVal;
+            Options.RebuildMenu();
         }
 #endif
 

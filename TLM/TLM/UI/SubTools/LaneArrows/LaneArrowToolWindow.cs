@@ -1,12 +1,10 @@
-namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools.LaneArrows {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.RedirectionFramework;
-    using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
     using TrafficManager.U.Button;
-    using TrafficManager.UI.SubTools.LaneArrows;
     using UnityEngine;
 
     /// <summary>
@@ -14,7 +12,6 @@ namespace TrafficManager.UI.SubTools {
     /// </summary>
     public class LaneArrowToolWindow : U.Panel.BaseUWindowPanel {
         private const string GAMEOBJECT_NAME = "TMPE_LaneArrow_ToolPanel";
-        private const float LABEL_HEIGHT = 18f; // a normal font label
 
         /// <summary>
         /// Contains atlas with button backgrounds and arrows.
@@ -86,7 +83,6 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="numLanes">How many lane groups.</param>
         public void SetupControls(UiBuilder<LaneArrowToolWindow> builder, int numLanes) {
             Buttons = new List<LaneArrowButton>();
-
 
             using (var buttonRowBuilder = builder.ChildPanel<U.Panel.UPanel>(
                 setupFn: p => { p.name = "TMPE_ButtonRow"; })) {
@@ -188,10 +184,6 @@ namespace TrafficManager.UI.SubTools {
             //             r.StackHorizontal(Constants.UIPADDING * 2f); // double space
             //         });
             // }
-        }
-
-        public override void OnRescaleRequested() {
-            UResizer.UpdateControlRecursive(this, null);
         }
     }
 }

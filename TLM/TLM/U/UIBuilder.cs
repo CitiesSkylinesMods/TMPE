@@ -32,6 +32,17 @@ namespace TrafficManager.U {
             return new UiBuilder<TButton>(newButton);
         }
 
+        /// <summary>Same as Button<T>() but allows custom subtype to be passed to AddUIComponent.</summary>
+        /// <param name="t">The type to pass to AddUIComponent.</param>
+        /// <typeparam name="TButton">The type to cast to.</typeparam>
+        /// <returns>New builder for that button.</returns>
+        public UiBuilder<TButton> Button<TButton>(Type t)
+            where TButton : UIButton, ISmartSizableControl {
+            var newButton = Control.AddUIComponent(t) as TButton;
+
+            return new UiBuilder<TButton>(newButton);
+        }
+
         public UiBuilder<TLabel> Label<TLabel>(string t)
             where TLabel : UILabel, ISmartSizableControl {
             var newLabel = Control.AddUIComponent(typeof(TLabel)) as TLabel;
@@ -70,8 +81,7 @@ namespace TrafficManager.U {
         /// according to sizes and positions configured in USizePosition members of form controls.
         /// </summary>
         public void Done() {
-            // UResizer.UpdateHierarchy(this.Control);
-            UResizer.UpdateControlRecursive(this.Control, null);
+            UResizer.UpdateControl(this.Control);
         }
 
         /// <summary>End of `using (var x = ...) {}` statement.</summary>
