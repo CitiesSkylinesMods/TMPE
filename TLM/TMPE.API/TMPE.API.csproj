@@ -152,7 +152,7 @@
     <Compile Include="Traffic\Enums\ParkingError.cs" />
     <Compile Include="Traffic\Enums\PriorityType.cs" />
     <Compile Include="Traffic\Enums\EmergencyBehavior.cs" />
-    <Compile Include="Traffic\Enums\SetLaneArrowError.cs" />
+    <Compile Include="Traffic\Enums\SetLaneArrow_Result.cs" />
     <Compile Include="Traffic\Enums\SetPrioritySignError.cs" />
     <Compile Include="Traffic\Enums\SimulationAccuracy.cs" />
     <Compile Include="Traffic\Enums\StepChangeMetric.cs" />

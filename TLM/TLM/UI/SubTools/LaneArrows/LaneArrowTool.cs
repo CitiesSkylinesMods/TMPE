@@ -262,24 +262,24 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// If Lane Arrow operation ended with failure, pop up a guide box with an explanation.
         /// </summary>
         /// <param name="result">Result coming out of LaneArrowManager function call.</param>
-        private void InformUserAboutPossibleFailure(SetLaneArrowError result) {
+        private void InformUserAboutPossibleFailure(SetLaneArrow_Result result) {
             switch (result) {
-                case SetLaneArrowError.HighwayArrows: {
+                case SetLaneArrow_Result.HighwayArrows: {
                         MainTool.Guide.Activate("LaneArrowTool_Disabled due to highway rules");
                         break;
                     }
-                case SetLaneArrowError.LaneConnection: {
+                case SetLaneArrow_Result.LaneConnection: {
                         MainTool.Guide.Activate("LaneArrowTool_Disabled due to lane connections");
                         break;
                     }
-                case SetLaneArrowError.Success:
+                case SetLaneArrow_Result.Success:
                     MainTool.Guide.Deactivate("LaneArrowTool_Disabled due to highway rules");
                     MainTool.Guide.Deactivate("LaneArrowTool_Disabled due to lane connections");
                     break;
             }
         }
 
-        /// <inheritdoc/>
+        /// <summary>Called from the Main Tool when left mouse button clicked.</summary>
         public override void OnToolLeftClick() {
             Log._Debug($"LaneArrow({fsm_.State}): left click");
             switch (fsm_.State) {
@@ -339,6 +339,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
         }
 
+        /// <summary>Called from the Main Tool when right mouse button clicked.</summary>
         public override void OnToolRightClick() {
             // FSM will either cancel the edit mode, or switch off the tool.
             SelectedSegmentId = 0;
