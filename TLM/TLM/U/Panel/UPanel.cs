@@ -9,5 +9,7 @@ namespace TrafficManager.U.Panel {
         public UResizerConfig GetResizerConfig() {
             return resizerConfig_;
         }
+
+        public void OnResizerUpdate() { }
     }
 }

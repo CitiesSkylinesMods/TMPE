@@ -8,5 +8,9 @@ namespace TrafficManager.U.Label {
         public UResizerConfig GetResizerConfig() {
             return resizerConfig_;
         }
+
+        public void OnResizerUpdate() {
+            this.textScale = UIScaler.GetScale();
+        }
     }
 }

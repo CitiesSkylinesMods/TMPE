@@ -6,5 +6,10 @@ namespace TrafficManager.U.Autosize {
     /// </summary>
     public interface ISmartSizableControl {
         UResizerConfig GetResizerConfig();
+
+        /// <summary>
+        /// Implement in child controls for extra actions while being updated from <see cref="UResizer"/>.
+        /// </summary>
+        void OnResizerUpdate();
     }
 }

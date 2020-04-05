@@ -28,6 +28,8 @@ namespace TrafficManager.U.Panel {
             return resizerConfig_;
         }
 
+        public void OnResizerUpdate() { }
+
         /// <summary>Called on screen resolution and UI scale change.</summary>
         public abstract void OnRescaleRequested();
 

@@ -15,6 +15,8 @@
             return resizerConfig_;
         }
 
+        public void OnResizerUpdate() { }
+
         /// <summary>Defines how the button looks, hovers and activates.</summary>
         public U.Button.ButtonSkin Skin;
 

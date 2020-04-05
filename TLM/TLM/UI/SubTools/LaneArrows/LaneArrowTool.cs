@@ -153,6 +153,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         private void CreateLaneArrowsWindow(int numLanes) {
             var parent = UIView.GetAView();
             ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
+            RepositionWindowToNode(); // reposition 1st time to avoid visible window jump
 
             using (var builder = new U.UiBuilder<LaneArrowToolWindow>(ToolWindow)) {
                 builder.ResizeFunction(r => { r.FitToChildren(); });
@@ -168,8 +169,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 };
 
                 // Resize everything correctly
-                RepositionWindowToNode();
                 builder.Done();
+                RepositionWindowToNode(); // reposition again 2nd time now that size is known
             }
         }
 
@@ -287,6 +288,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     break;
                 case State.EditLaneArrows:
                     // Allow selecting other segments while doing lane editing
+                    fsm_.SendTrigger(Trigger.RightMouseClick);
                     OnToolLeftClick_Select();
                     break;
             }
@@ -341,10 +343,15 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             // FSM will either cancel the edit mode, or switch off the tool.
             SelectedSegmentId = 0;
             SelectedNodeId = 0;
+            State oldState = State.ToolDisabled;
 
             if (fsm_ != null) {
-                State oldState = fsm_.State;
+                oldState = fsm_.State;
                 fsm_.SendTrigger(Trigger.RightMouseClick);
+            }
+
+            // Right click might reset fsm_ to null, so check again
+            if (fsm_ != null) {
                 Log._Debug($"LaneArrow right click state={oldState}, new={fsm_.State}");
             } else {
                 Log._Debug($"LaneArrow(fsm=null): right click");
