@@ -385,9 +385,9 @@ namespace TrafficManager.UI.SubTools {
                     } // end if stay in lane
 
                     if (stayInLane) {
-                        MainTool.Guide.Deactivate("LaneConnectorTool:quick-setup is not supported for this setup.");
+                        MainTool.Guide.Deactivate("LaneConnectorTool:stay-in-lane is not supported for this setup");
                     } else {
-                        MainTool.Guide.Activate("LaneConnectorTool:quick-setup is not supported for this setup.");
+                        MainTool.Guide.Activate("LaneConnectorTool:stay-in-lane is not supported for this setup");
                     }
 
                 } // end if quick setup
@@ -641,9 +641,13 @@ namespace TrafficManager.UI.SubTools {
                     $"totalTarget={totalTarget} " +
                     $"laneArithmaticWorks={laneArithmaticWorks}");
             }
-            if (totalSource <= 1 || totalTarget <= 1) {
-                return false; // No lane connections are necessry.
+
+            bool ret = totalSource > 0 && totalTarget > 0;
+            if (!nodeId.ToNode().m_flags.IsFlagSet(NetNode.Flags.Junction)) {
+                ret &= totalSource > 1 || totalTarget > 1;
             }
+            if (!ret)
+                return false;
 
             float ratio =
                 totalSource >= totalTarget ?
