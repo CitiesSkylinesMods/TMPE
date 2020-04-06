@@ -8,6 +8,7 @@ namespace TrafficManager.Util {
     using CSUtil.Commons;
     using static TrafficManager.Util.Shortcuts;
     using static NetAdjust;
+    using static SegmentTraverser;
 
     public class RoadSelectionUtil {
         /// instance of singleton
@@ -20,6 +21,32 @@ namespace TrafficManager.Util {
         public static void Release() {
             Instance.OnChanged = null;
             Instance = null;
+        }
+
+        /// <summary>
+        /// Copies road name from <paramref name="sourceSegmentID"/> to <paramref name="targetSegmentID"/>
+        /// This will join target segment to the same road as source segment.
+        /// </summary>
+        public static void CopySegmentName(ushort sourceSegmentID, ushort targetSegmentID) {
+            SimulationManager.instance.AddAction(delegate () {
+                string sourceName = NetManager.instance.GetSegmentName(sourceSegmentID);
+                string targetName = NetManager.instance.GetSegmentName(targetSegmentID);
+                if (sourceName != targetName) {
+                    NetManager.instance.SetSegmentName(targetSegmentID, sourceName);
+                }
+            });
+        }
+
+        /// <summary>
+        /// Joins all segments from <paramref name="segmentIDs"/> to the road
+        /// containing <paramref name="segmentId"/>
+        /// </summary>
+        public static void SetRoad(ushort segmentId, IEnumerable<ushort> segmentIDs) {
+            foreach(var targetSegmentID in segmentIDs) {
+                if(targetSegmentID!= segmentId&& targetSegmentID != 0) {
+                    CopySegmentName(segmentId, targetSegmentID);
+                }
+            }
         }
 
         internal const int NETADJUST_INFO_INDEX = 2;

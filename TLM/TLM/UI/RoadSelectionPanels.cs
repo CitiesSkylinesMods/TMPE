@@ -28,8 +28,6 @@ namespace TrafficManager.UI {
 
         private FunctionModes _function;
 
-
-
         internal FunctionModes Function {
             /// returns which button is in active state
             get => _function;
@@ -58,7 +56,6 @@ namespace TrafficManager.UI {
 
         #region Event handling
 
-        [UsedImplicitly]
         internal void RenderOverlay()
         {
             //Log._Debug("Render over lay called st:\n" + Environment.StackTrace);
@@ -239,6 +236,12 @@ namespace TrafficManager.UI {
                 //panel.eventVisibilityChanged += MassEditOverlayOnEvent;
                 panel.eventVisibilityChanged += ShowAdvisorOnEvent;
                 roadWorldInfoPanelExt_ = panel;
+
+                UISprite icon = roadWorldInfoPanel.Find<UISlicedSprite>("Caption")?.Find<UISprite>("Sprite");
+                if (icon != null) {
+                    icon.spriteName = "ToolbarIconRoads";
+                    icon.Invalidate();
+                }
             }
 
             // attach another instance of road selection panel to AdjustRoad tab.

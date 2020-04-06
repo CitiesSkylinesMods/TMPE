@@ -17,7 +17,7 @@ namespace TrafficManager.Patch._DefaultTool {
             if (MassEditOVerlay.IsActive) {
                 var tmTool = ModUI.GetTrafficManagerTool(true);
                 if(ToolsModifierControl.toolController.CurrentTool != tmTool) {
-                    tmTool.RenderOverlay(cameraInfo);
+                    tmTool.RenderOverlayImpl(cameraInfo);
                 }
             }
         }
