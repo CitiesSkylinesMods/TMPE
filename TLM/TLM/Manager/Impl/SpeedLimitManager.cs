@@ -720,7 +720,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 // If it requires DLC, check the DLC is active
-                if (info.m_dlcRequired != 0 && (uint)(info.m_dlcRequired & dlcMask) != 0u) {
+                if ((info.m_dlcRequired & dlcMask) != info.m_dlcRequired) {
                     log.AppendFormat(
                         "- Skipped: NetInfo #{0} ({1}) - required DLC not active.\n",
                         i,
