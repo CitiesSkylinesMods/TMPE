@@ -14,14 +14,14 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Util;
     using UnityEngine;
 
-    public class TimedTrafficLightsTool : SubTool {
+    public class TimedTrafficLightsTool : LegacySubTool {
         private readonly GUIStyle _counterStyle = new GUIStyle();
         private readonly int[] _hoveredButton = new int[2];
         private bool nodeSelectionLocked;
         private List<ushort> selectedNodeIds = new List<ushort>();
         private bool _cursorInSecondaryPanel;
-        private Rect _windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 480, 350));
-        private Rect _windowRect2 = TrafficManagerTool.MoveGUI(new Rect(0, 0, 300, 150));
+        private Rect _windowRect = TrafficManagerTool.GetDefaultScreenPositionForRect(new Rect(0, 0, 480, 350));
+        private Rect _windowRect2 = TrafficManagerTool.GetDefaultScreenPositionForRect(new Rect(0, 0, 300, 150));
         private bool _timedPanelAdd;
         private int _timedEditStep = -1;
         private ushort _hoveredNode;
@@ -1417,7 +1417,7 @@ namespace TrafficManager.UI.SubTools {
 
                 Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
 
-                bool nodeVisible = MainTool.WorldToScreenPoint(nodePos, out Vector3 _);
+                bool nodeVisible = GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 _);
 
                 if (!nodeVisible) {
                     continue;
@@ -1472,7 +1472,7 @@ namespace TrafficManager.UI.SubTools {
                         segmentLightPos.z += segmentsBuffer[srcSegmentId].m_endDirection.z * offset;
                     }
 
-                    bool segmentLightVisible = MainTool.WorldToScreenPoint(
+                    bool segmentLightVisible = GeometryUtil.WorldToScreenPoint(
                         segmentLightPos,
                         out Vector3 screenPos);
 

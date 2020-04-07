@@ -22,7 +22,7 @@ namespace TrafficManager.Custom.AI {
                 // NON-STOCK CODE START
                 ToggleTrafficLightsTool toggleTool = (ToggleTrafficLightsTool)ModUI
                                                           .GetTrafficManagerTool(true)
-                                                          .GetSubTool(ToolMode.SwitchTrafficLight);
+                                                          .GetSubTool(ToolMode.ToggleTrafficLight);
                 toggleTool.ToggleTrafficLight(nodeId, ref data, false);
 
                 // NON-STOCK CODE END

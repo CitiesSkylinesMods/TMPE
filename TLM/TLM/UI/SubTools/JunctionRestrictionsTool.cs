@@ -9,9 +9,10 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.Textures;
     using UnityEngine;
     using TrafficManager.State.Keybinds;
+    using TrafficManager.Util;
     using static TrafficManager.Util.Shortcuts;
 
-    public class JunctionRestrictionsTool : SubTool {
+    public class JunctionRestrictionsTool : LegacySubTool {
         private readonly HashSet<ushort> currentRestrictedNodeIds;
         private bool overlayHandleHovered;
         private readonly float junctionRestrictionsSignSize = 80f;
@@ -40,7 +41,7 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
-        public override void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) { }
+        public override void RenderOverlayForOtherTools(RenderManager.CameraInfo cameraInfo) { }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             if (SelectedNodeId != 0) {
@@ -99,7 +100,7 @@ namespace TrafficManager.UI.SubTools {
                     continue; // do not draw if too distant
                 }
 
-                bool visible = MainTool.WorldToScreenPoint(nodePos, out Vector3 _);
+                bool visible = GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 _);
 
                 if (!visible) {
                     continue;
@@ -619,7 +620,7 @@ namespace TrafficManager.UI.SubTools {
                               Texture2D signTexture,
                               out bool hoveredHandle) {
             Vector3 signCenter = zero + (f * x * xu) + (f * y * yu); // in game coordinates
-            bool visible = MainTool.WorldToScreenPoint(signCenter, out Vector3 signScreenPos);
+            bool visible = GeometryUtil.WorldToScreenPoint(signCenter, out Vector3 signScreenPos);
 
             if (!visible) {
                 hoveredHandle = false;

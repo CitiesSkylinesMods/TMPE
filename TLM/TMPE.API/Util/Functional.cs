@@ -4,17 +4,14 @@ namespace TrafficManager.API.Util {
 
     /// <summary>
     /// Represents a void return type which may also carry an error.
+    /// Use `return default;` to return OK.
     /// </summary>
-    /// <typeparam name="VALUE">Value type on success</typeparam>
-    /// <typeparam name="TError">Error type if failed</typeparam>
+    /// <typeparam name="VALUE">Value type on success.</typeparam>
+    /// <typeparam name="TError">Error type if failed.</typeparam>
     [UsedImplicitly]
     public class VoidResult<TError> {
         private bool isOk_;
         private TError error_;
-
-        public VoidResult() {
-            isOk_ = true;
-        }
 
         public VoidResult(TError error) {
             isOk_ = false;

@@ -14,7 +14,7 @@ namespace TrafficManager.UI.SubTools {
     using static TrafficManager.Util.Shortcuts;
 
 
-    public class VehicleRestrictionsTool : SubTool {
+    public class VehicleRestrictionsTool : LegacySubTool {
         private static readonly ExtVehicleType[] RoadVehicleTypes = {
             ExtVehicleType.PassengerCar, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.CargoTruck,
             ExtVehicleType.Service, ExtVehicleType.Emergency
@@ -33,7 +33,7 @@ namespace TrafficManager.UI.SubTools {
         private Color HighlightColor => MainTool.GetToolColor(false, false);
         private static bool RoadMode => ShiftIsPressed;
 
-        private Rect windowRect = TrafficManagerTool.MoveGUI(new Rect(0, 0, 200, 100));
+        private Rect windowRect = TrafficManagerTool.GetDefaultScreenPositionForRect(new Rect(0, 0, 620, 100));
 
         private HashSet<ushort> currentRestrictedSegmentIds;
 
@@ -188,7 +188,7 @@ namespace TrafficManager.UI.SubTools {
                         RenderRoadLane(cameraInfo);
                     } else {
                         RenderLaneOverlay(cameraInfo, renderData_.laneId);
-                        
+
                     }
                 }
             }
@@ -226,7 +226,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 Vector3 centerPos = netManager.m_segments.m_buffer[segmentId].m_bounds.center;
-                bool visible = MainTool.WorldToScreenPoint(centerPos, out Vector3 _);
+                bool visible = GeometryUtil.WorldToScreenPoint(centerPos, out Vector3 _);
 
                 if (!visible) {
                     continue;
@@ -285,7 +285,7 @@ namespace TrafficManager.UI.SubTools {
                     ApplyRestrictionsToAllSegments();
                 }
             }
-          
+
             GUI.color = oldColor;
 
             if (GUILayout.Button(
@@ -426,7 +426,7 @@ namespace TrafficManager.UI.SubTools {
 
             Vector3 center = segment.m_bounds.center;
 
-            bool visible = MainTool.WorldToScreenPoint(center, out Vector3 _);
+            bool visible = GeometryUtil.WorldToScreenPoint(center, out Vector3 _);
 
             if (!visible) {
                 return false;
@@ -439,7 +439,7 @@ namespace TrafficManager.UI.SubTools {
                 return false; // do not draw if too distant
             }
 
-            int numLanes = TrafficManagerTool.GetSegmentNumVehicleLanes(
+            int numLanes = GeometryUtil.GetSegmentNumVehicleLanes(
                 segmentId,
                 null,
                 out int numDirections,
@@ -520,7 +520,8 @@ namespace TrafficManager.UI.SubTools {
                 Vector3 labelCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
 
                 Vector3 labelScreenPos;
-                bool visible = MainTool.WorldToScreenPoint(labelCenter, out labelScreenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(labelCenter, out labelScreenPos);
+                // BUGBUG: Using screen.height might be wrong, consider U.UIScaler.ScreenHeight (from UIView.fixedHeight)
                 labelScreenPos.y = Screen.height - labelScreenPos.y;
                 diff = labelCenter - camPos;
 
