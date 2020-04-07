@@ -17,7 +17,7 @@ namespace TrafficManager.UI.SubTools {
     using System;
     using GenericGameBridge.Service;
 
-    public class LaneConnectorTool : SubTool {
+    public class LaneConnectorTool : LegacySubTool {
         private enum SelectionMode {
             None,
             SelectSource,
@@ -127,7 +127,7 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
-        public override void RenderInfoOverlay(RenderManager.CameraInfo cameraInfo) {
+        public override void RenderOverlayForOtherTools(RenderManager.CameraInfo cameraInfo) {
             ShowOverlay(true, cameraInfo);
         }
 

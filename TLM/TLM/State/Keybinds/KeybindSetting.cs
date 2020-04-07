@@ -1,5 +1,6 @@
 namespace TrafficManager.State.Keybinds {
     using ColossalFramework;
+    using ColossalFramework.UI;
     using JetBrains.Annotations;
     using UnityEngine;
 
@@ -102,6 +103,18 @@ namespace TrafficManager.State.Keybinds {
                    || (AlternateKey != null && AlternateKey.IsPressed(e));
         }
 
+        /// <summary>Check whether keyDownEvent matches either of the shortcuts.</summary>
+        /// <param name="kep">Event coming into eventKeyDown.</param>
+        /// <returns>Whether the main key or alternate key is pressed.</returns>
+        public bool IsPressed(UIKeyEventParameter kep) {
+            EventModifiers modifiers = (kep.alt ? EventModifiers.Alt : 0)
+                                       | (kep.control ? EventModifiers.Control : 0)
+                                       | (kep.shift ? EventModifiers.Shift : 0);
+            return Key.IsPressed(EventType.keyDown, kep.keycode, modifiers)
+                   || (AlternateKey != null
+                       && AlternateKey.IsPressed(EventType.keyDown, kep.keycode, modifiers));
+        }
+
         private bool prev_value = false;
 
         /// <summary>
@@ -114,7 +127,7 @@ namespace TrafficManager.State.Keybinds {
             bool value = Key.IsPressed(e);
             bool ret = value && !prev_value;
             if (ret || !value) {
-                prev_value = value; 
+                prev_value = value;
             }
             return ret;
         }

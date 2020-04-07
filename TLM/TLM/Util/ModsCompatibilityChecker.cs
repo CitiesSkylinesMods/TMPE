@@ -123,7 +123,22 @@ namespace TrafficManager.Util {
         /// <param name="plugin">The <see cref="PluginInfo"/> associated with the mod.</param>
         /// <returns>The name of the specified plugin.</returns>
         private string GetModName(PluginInfo plugin) {
-            return ((IUserMod)plugin.userModInstance).Name;
+            try {
+                if (plugin == null) {
+                    return "(PluginInfo is null)";
+                }
+
+                if (plugin.userModInstance == null) {
+                    return string.IsNullOrEmpty(plugin.name)
+                        ? "(userModInstance and name are null)"
+                        : $"({plugin.name})";
+                }
+
+                return ((IUserMod)plugin.userModInstance).Name;
+            }
+            catch {
+                return $"(error retreiving Name)";
+            }
         }
 
         /// <summary>
