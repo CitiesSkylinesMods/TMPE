@@ -18,6 +18,6 @@
 
         [UsedImplicitly]
         ForwardRight = Forward + Right,
-        LeftForwardRight = Left + Forward + Right
+        LeftForwardRight = Left + Forward + Right,
     }
 }

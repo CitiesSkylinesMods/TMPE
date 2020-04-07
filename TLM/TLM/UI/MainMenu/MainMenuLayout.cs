@@ -1,5 +1,6 @@
 namespace TrafficManager.UI.MainMenu {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Controls how buttons are placed on the main menu panel.
@@ -24,7 +25,7 @@ namespace TrafficManager.UI.MainMenu {
             MaxCols = 0;
         }
 
-        public void CountEnabledButtons(BaseMenuButton[] buttons) {
+        public void CountEnabledButtons(List<BaseMenuButton> buttons) {
             // Store the count buttons which are enabled
             Count = 0;
             foreach (var b in buttons) {

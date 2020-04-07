@@ -269,6 +269,9 @@
     <Compile Include="UI\MainMenu\JunctionRestrictionsButton.cs" />
     <Compile Include="UI\MainMenu\DespawnButton.cs" />
     <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowButton.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool.cs" />
+    <Compile Include="UI\SubTools\LaneArrows\LaneArrowToolWindow.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
@@ -282,11 +285,10 @@
     <Compile Include="UI\TrafficManagerMode.cs" />
     <Compile Include="UI\Localization\LookupTable.cs" />
     <Compile Include="UI\Localization\Translation.cs" />
-    <Compile Include="UI\SubTool.cs" />
+    <Compile Include="UI\LegacySubTool.cs" />
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
     <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
-    <Compile Include="UI\SubTools\LaneArrowTool.cs" />
     <Compile Include="UI\SubTools\TimedTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\ManualTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\PrioritySignsTool.cs" />
@@ -294,11 +296,14 @@
     <Compile Include="State\Options.cs" />
     <Compile Include="Manager\Impl\SpeedLimitManager.cs" />
     <Compile Include="State\Flags.cs" />
+    <Compile Include="UI\TrafficManagerSubTool.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
     <Compile Include="Util\Caching\CameraTransformValue.cs" />
     <Compile Include="Util\Caching\GenericArrayCache.cs" />
+    <Compile Include="Util\GenericFsm.cs" />
+    <Compile Include="Util\GeometryUtil.cs" />
     <Compile Include="Util\PriorityRoad.cs" />
     <Compile Include="Util\Shortcuts.cs" />
     <Compile Include="Util\FloatUtil.cs" />
@@ -326,15 +331,26 @@
     <Compile Include="UI\ModUI.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
+    <Compile Include="U\Autosize\UBoundingBox.cs" />
+    <Compile Include="U\Autosize\UResizer.cs" />
+    <Compile Include="U\Autosize\ISmartSizableControl.cs" />
+    <Compile Include="U\Autosize\UResizerConfig.cs" />
+    <Compile Include="U\Autosize\URule.cs" />
+    <Compile Include="U\Autosize\UValue.cs" />
+    <Compile Include="U\Button\UButton.cs" />
     <Compile Include="U\ControlActiveState.cs" />
     <Compile Include="U\ControlHoveredState.cs" />
     <Compile Include="U\ControlEnabledState.cs" />
     <Compile Include="U\Button\BaseUButton.cs" />
     <Compile Include="U\Button\ButtonFunction.cs" />
     <Compile Include="U\Button\ButtonSkin.cs" />
+    <Compile Include="U\Label\ULabel.cs" />
     <Compile Include="U\Panel\BaseUWindowPanel.cs" />
+    <Compile Include="U\Panel\UPanel.cs" />
     <Compile Include="U\TextureUtil.cs" />
+    <Compile Include="U\UIBuilder.cs" />
     <Compile Include="U\UIScaler.cs" />
+    <Compile Include="U\UIUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\JunctionRestrictions\crossing_allowed.png" />
@@ -581,6 +597,16 @@
     <EmbeddedResource Include="Resources\MainMenu\Tool\PrioritySigns-fg-normal.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\VehicleRestrictions-fg-active.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\VehicleRestrictions-fg-normal.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrow-bg-active.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrow-bg-disabled.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrow-bg-hovered.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrow-bg-normal.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrowForward-fg-normal.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrowLeft-fg-normal.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrowRight-fg-normal.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrowForward-fg-active.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrowLeft-fg-active.png" />
+    <EmbeddedResource Include="Resources\LaneArrows\LaneArrowRight-fg-active.png" />
     <EmbeddedResource Include="Resources\Clear\Clear-bg-active.png" />
     <EmbeddedResource Include="Resources\Clear\Clear-bg-normal.png" />
     <EmbeddedResource Include="Resources\Clear\Clear-bg-hovered.png" />
@@ -616,10 +642,10 @@ xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "%25DEPLOYDIR%25"
 
-rem To avoid double hot reload, TrafficManager.dll must be replaced last and fast. 
+rem To avoid double hot reload, TrafficManager.dll must be replaced last and fast.
 rem Once TrafficManager.dll is re-loaded, all other dlls will be reloaded as well
 del  "%25DEPLOYDIR%25TrafficManager.dll"
-xcopy /y "$(TargetDir)TrafficManager.dll" "%25DEPLOYDIR%25"    
+xcopy /y "$(TargetDir)TrafficManager.dll" "%25DEPLOYDIR%25"
 
 echo THE ASSEMBLY VERSION IS: @(VersionNumber) created at %25time%25
 set DEPLOYDIR=
