@@ -11,7 +11,6 @@ namespace TrafficManager.Util {
     using TrafficManager.Manager.Impl;
     using UnityEngine;
 
-    //TODO should I rename this to Extensions or Helpers?
     internal static class Shortcuts {
         /// <summary>
         /// returns a new calling Clone() on all items.
@@ -19,6 +18,24 @@ namespace TrafficManager.Util {
         /// <typeparam name="T">item time must be IClonable</typeparam>
         internal static IList<T> Clone<T>(this IList<T> listToClone) where T : ICloneable =>
             listToClone.Select(item => (T)item.Clone()).ToList();
+
+        internal static void Swap<T>(ref T a, ref T b) {
+            T temp = a;
+            a = b;
+            b = temp;
+        }
+
+        internal static void Swap<T>(this T[] array, int index1, int index2) {
+            T temp = array[index1];
+            array[index1] = array[index2];
+            array[index2] = temp;
+        }
+
+        internal static void Swap<T>(this List<T> list, int index1, int index2) {
+            T temp = list[index1];
+            list[index1] = list[index2];
+            list[index2] = temp;
+        }
 
         private static NetNode[] _nodeBuffer => Singleton<NetManager>.instance.m_nodes.m_buffer;
 
@@ -82,6 +99,23 @@ namespace TrafficManager.Util {
         internal static string ToSTR(this List<LanePos> laneList) =>
             (from lanePos in laneList select lanePos.laneId).ToSTR();
 
+        internal static void AssertEq<T>(T a, T b, string m = "") where T:IComparable {
+            if (a.CompareTo(b) != 0) {
+                Log.Error($"Assertion failed. Expected {a} == {b} | " + m);
+            }
+        }
+
+        internal static void AssertNEq<T>(T a, T b, string m = "") where T : IComparable {
+            if (a.CompareTo(b) == 0) {
+                Log.Error($"Assertion failed. Expected {a} != {b} | " + m);
+            }
+        }
+
+        internal static void Assert(bool con, string m = "") {
+            if (!con) {
+                Log.Error("Assertion failed: " + m);
+            }
+        }
 
         internal static bool ShiftIsPressed => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
@@ -90,16 +124,22 @@ namespace TrafficManager.Util {
         internal static bool AltIsPressed => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 
         #region directions
-        internal static bool lht => LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
-        internal static bool rht => !lht;
+        internal static bool LHT => Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
+        internal static bool RHT => !LHT;
 
-        internal static LaneArrows LaneArrows_Near => rht ? LaneArrows.Right : LaneArrows.Left;
-        internal static LaneArrows LaneArrows_Far  => rht ? LaneArrows.Left  : LaneArrows.Right;
+        internal static LaneArrows LaneArrows_Near => RHT ? LaneArrows.Right : LaneArrows.Left;
+        internal static LaneArrows LaneArrows_Far  => RHT ? LaneArrows.Left  : LaneArrows.Right;
         internal static LaneArrows LaneArrows_NearForward => LaneArrows_Near | LaneArrows.Forward;
         internal static LaneArrows LaneArrows_FarForward  => LaneArrows_Far  | LaneArrows.Forward;
 
-        internal static ArrowDirection ArrowDirection_Near => rht ? ArrowDirection.Right : ArrowDirection.Left;
-        internal static ArrowDirection ArrowDirection_Far  => rht ? ArrowDirection.Left  : ArrowDirection.Right;
+        internal static ArrowDirection ArrowDirection_Near => RHT ? ArrowDirection.Right : ArrowDirection.Left;
+        internal static ArrowDirection ArrowDirection_Far  => RHT ? ArrowDirection.Left  : ArrowDirection.Right;
+
+        internal static ushort GetNearSegment(this ref NetSegment segment, ushort nodeId) =>
+            RHT ? segment.GetRightSegment(nodeId) : segment.GetLeftSegment(nodeId);
+
+        internal static ushort GetFarSegment(this ref NetSegment segment, ushort nodeId) =>
+            LHT ? segment.GetRightSegment(nodeId) : segment.GetLeftSegment(nodeId);
         #endregion
     }
 }

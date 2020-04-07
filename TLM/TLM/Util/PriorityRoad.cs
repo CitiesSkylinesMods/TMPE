@@ -87,7 +87,7 @@ namespace TrafficManager.Util {
         /// altered regardless of return value.
         /// </summary>
         /// <returns>true on sucessful arrangement, false otherwise</returns>
-        private static bool ArrangeT(List<ushort> segmentList) {
+        internal static bool ArrangeT(List<ushort> segmentList) {
             if (segmentList.Count != 3) {
                 return false;
             }
@@ -140,6 +140,17 @@ namespace TrafficManager.Util {
             }
         }
 
+        internal static List<ushort> GetNodeSegments(ushort nodeId) {
+            List<ushort> segmentList = new List<ushort>();
+            for (int i = 0; i < 8; ++i) {
+                ushort segId = nodeId.ToNode().GetSegment(i);
+                if (segId != 0) {
+                    segmentList.Add(segId);
+                }
+            }
+            return segmentList;
+        }
+
         /// <summary>
         /// Quick-setups the given junction as priority junction.
         /// The two biggest roads are considererd prioirty road.
@@ -153,13 +164,7 @@ namespace TrafficManager.Util {
                 return;
             }
 
-            List<ushort> segmentList = new List<ushort>();
-            for (int i = 0; i < 8; ++i) {
-                ushort segId = nodeId.ToNode().GetSegment(i);
-                if (segId != 0) {
-                    segmentList.Add(segId);
-                }
-            }
+            var segmentList = GetNodeSegments(nodeId);
 
             if (segmentList.Count < 3) {
                 Log._Debug("FixJunction: This is not a junction.");
@@ -271,11 +276,11 @@ namespace TrafficManager.Util {
                                 true
                                 ).Count;
         }
-        private static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
-        private static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
+        internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
+        internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
 
 
-        private static bool HasAccelerationLane(List<ushort> segmentList, ushort segmentId, ushort nodeId) {
+        internal static bool HasAccelerationLane(List<ushort> segmentList, ushort segmentId, ushort nodeId) {
             bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
             if (!segMan.CalculateIsOneWay(segmentId)) {
                 return false;
@@ -419,7 +424,7 @@ namespace TrafficManager.Util {
             }
         }
 
-        private static int CompareSegments(ushort seg1Id, ushort seg2Id) {
+        internal static int CompareSegments(ushort seg1Id, ushort seg2Id) {
             ref NetSegment seg1 = ref GetSeg(seg1Id);
             ref NetSegment seg2 = ref GetSeg(seg2Id);
             int diff = (int)Math.Ceiling(seg2.Info.m_halfWidth - seg1.Info.m_halfWidth);

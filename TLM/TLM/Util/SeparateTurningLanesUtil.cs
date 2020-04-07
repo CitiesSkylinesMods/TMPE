@@ -171,7 +171,7 @@ namespace TrafficManager.Util {
                     startNode,
                     laneType,
                     vehicleType,
-                    reverse: lht,
+                    reverse: LHT,
                     sort: true);
             int srcLaneCount = laneList.Count();
             if (srcLaneCount <= 1) {
