@@ -347,6 +347,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
                 alternativeMode_ = DEFAULT_ALT_MODE;
+                fsm_.SendTrigger(Trigger.SegmentClick);
             }
 
             if (SeparateSegmentLanesModifierIsPressed || SeparateNodeLanesModifierIsPressed) {
