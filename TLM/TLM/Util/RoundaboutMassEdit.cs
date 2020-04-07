@@ -33,8 +33,9 @@ namespace TrafficManager.Util {
             if (OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes &&
                 HasJunctionFlag(nodeId) &&
                 SeparateTurningLanesUtil.CanChangeLanes(
-                    segmentId, nodeId) == SetLaneArrowError.Success &&
+                    segmentId, nodeId) == SetLaneArrow_Result.Success &&
                     isStraight) {
+
                 bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
                 IList<LanePos> laneList =
                     netService.GetSortedLanes(

@@ -24,6 +24,18 @@ This changelog includes all versions and major variants of the mod going all the
 > * **CSLT** = Cities Skylines Traffic (later renamed to Traffic++)
 > * **TLM** = Taffic Lights Manager (later renamed to Traffic Manager)
 
+#### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) STABLE, 26/03/2020
+
+- Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
+- Updated: Game version badges in readme (#806)
+- Updated: Mod version and changelogs (#816)
+
+#### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) LABS, 26/03/2020
+
+- Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
+- Updated: Game version badges in readme (#806)
+- Updated: Mod version and changelogs (#816)
+
 #### TM:PE V[11.2.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.0...11.2.1) STABLE, 26/03/2020
 
 - Fixed: CustomPathManager nullpointer on exit from asset/map editor (#794)

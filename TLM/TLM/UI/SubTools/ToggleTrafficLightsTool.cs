@@ -7,7 +7,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Util.Caching;
     using UnityEngine;
 
-    public class ToggleTrafficLightsTool : SubTool {
+    public class ToggleTrafficLightsTool : LegacySubTool {
         /// <summary>
         /// Stores potentially visible ids for nodes while the camera did not move
         /// </summary>

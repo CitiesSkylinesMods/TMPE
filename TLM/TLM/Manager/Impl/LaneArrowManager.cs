@@ -89,7 +89,6 @@ namespace TrafficManager.Manager.Impl {
         public bool RemoveLaneArrows(uint laneId,
                           LaneArrows flags,
                           bool overrideHighwayArrows = false) {
-
             LaneArrows flags2 = GetFinalLaneArrows(laneId);
             return SetLaneArrows(laneId, ~flags & flags2, overrideHighwayArrows);
         }
@@ -103,7 +102,7 @@ namespace TrafficManager.Manager.Impl {
         public bool ToggleLaneArrows(uint laneId,
                                      bool startNode,
                                      LaneArrows flags,
-                                     out SetLaneArrowError res) {
+                                     out SetLaneArrow_Result res) {
             if (Flags.ToggleLaneArrowFlags(laneId, startNode, flags, out res)) {
                 OnLaneChange(laneId);
                 return true;
@@ -311,6 +310,5 @@ namespace TrafficManager.Manager.Impl {
         public static ICustomDataManager<List<Configuration.LaneArrowData>> AsLaneArrowsDM() {
             return Instance;
         }
-
     }
 }

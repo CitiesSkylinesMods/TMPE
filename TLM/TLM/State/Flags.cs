@@ -807,21 +807,21 @@ namespace TrafficManager.State {
         public static bool ToggleLaneArrowFlags(uint laneId,
                                                 bool startNode,
                                                 LaneArrows flags,
-                                                out SetLaneArrowError res) {
+                                                out SetLaneArrow_Result res) {
             if (!CanHaveLaneArrows(laneId)) {
                 RemoveLaneArrowFlags(laneId);
-                res = SetLaneArrowError.Invalid;
+                res = SetLaneArrow_Result.Invalid;
                 return false;
             }
 
             if (highwayLaneArrowFlags[laneId] != null) {
-                res = SetLaneArrowError.HighwayArrows;
+                res = SetLaneArrow_Result.HighwayArrows;
                 return false; // disallow custom lane arrows in highway rule mode
             }
 
             if (LaneConnectionManager.Instance.HasConnections(laneId, startNode)) {
                 // TODO refactor
-                res = SetLaneArrowError.LaneConnection;
+                res = SetLaneArrow_Result.LaneConnection;
                 return false; // custom lane connection present
             }
 
@@ -836,11 +836,11 @@ namespace TrafficManager.State {
             arrows ^= flags;
             laneArrowFlags[laneId] = arrows;
             if (ApplyLaneArrowFlags(laneId, false)) {
-                res = SetLaneArrowError.Success;
+                res = SetLaneArrow_Result.Success;
                 return true;
             }
 
-            res = SetLaneArrowError.Invalid;
+            res = SetLaneArrow_Result.Invalid;
             return false;
         }
 

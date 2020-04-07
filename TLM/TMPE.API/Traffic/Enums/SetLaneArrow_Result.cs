@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.API.Traffic.Enums {
-    public enum SetLaneArrowError {
+    public enum SetLaneArrow_Result {
         Invalid,
         HighwayArrows,
         LaneConnection,

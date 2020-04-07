@@ -13,7 +13,7 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework.Math;
     using CSUtil.Commons;
 
-    public class ParkingRestrictionsTool : SubTool {
+    public class ParkingRestrictionsTool : LegacySubTool {
         private ParkingRestrictionsManager parkingManager => ParkingRestrictionsManager.Instance;
 
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir
@@ -188,7 +188,7 @@ namespace TrafficManager.UI.SubTools {
                         continue; // do not draw if too distant
                     }
 
-                    bool visible = MainTool.WorldToScreenPoint(
+                    bool visible = GeometryUtil.WorldToScreenPoint(
                         netManager.m_segments.m_buffer[segmentId].m_bounds.center,
                         out Vector3 _);
 
@@ -232,7 +232,7 @@ namespace TrafficManager.UI.SubTools {
                     renderInfo_.SegmentId = segmentId;
                     renderInfo_.FinalDirection = dir;
                     hovered = true;
-                } 
+                }
             }
             if (!hovered) {
                 renderInfo_.SegmentId = 0;
@@ -260,7 +260,7 @@ namespace TrafficManager.UI.SubTools {
             {
                 segCenter = new Dictionary<NetInfo.Direction, Vector3>();
                 segmentCenterByDir.Add(segmentId, segCenter);
-                TrafficManagerTool.CalculateSegmentCenterByDir(
+                GeometryUtil.CalculateSegmentCenterByDir(
                     segmentId,
                     segCenter,
                     SIGN_SIZE * TrafficManagerTool.MAX_ZOOM);
@@ -272,7 +272,7 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                bool visible = MainTool.WorldToScreenPoint(e.Value, out Vector3 screenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(e.Value, out Vector3 screenPos);
 
                 if (!visible) {
                     continue;

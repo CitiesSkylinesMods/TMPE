@@ -18,6 +18,6 @@ namespace TrafficManager.API.Traffic.Enums {
 
         [UsedImplicitly]
         ForwardRight = Forward + Right,
-        LeftForwardRight = Left + Forward + Right
+        LeftForwardRight = Left + Forward + Right,
     }
 }

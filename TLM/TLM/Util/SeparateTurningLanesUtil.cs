@@ -63,25 +63,25 @@ namespace TrafficManager.Util {
         /// <summary>
         /// separates turning lanes for all segments attached to nodeId,
         /// </summary>
-        public static void SeparateNode(ushort nodeId, out SetLaneArrowError res, bool alternativeMode = true) {
+        public static void SeparateNode(ushort nodeId, out SetLaneArrow_Result res, bool alternativeMode = true) {
             NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
             if (nodeId == 0) {
-                res = SetLaneArrowError.Invalid;
+                res = SetLaneArrow_Result.Invalid;
                 return;
             }
             if ((node.m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
-                res = SetLaneArrowError.Invalid;
+                res = SetLaneArrow_Result.Invalid;
                 return;
             }
             if (LaneConnectionManager.Instance.HasNodeConnections(nodeId)) {
-                res = SetLaneArrowError.LaneConnection;
+                res = SetLaneArrow_Result.LaneConnection;
                 return;
             }
             if (Options.highwayRules && ExtNodeManager.JunctionHasHighwayRules(nodeId)) {
-                res = SetLaneArrowError.HighwayArrows;
+                res = SetLaneArrow_Result.HighwayArrows;
                 return;
             }
-            res = SetLaneArrowError.Success;
+            res = SetLaneArrow_Result.Success;
 
             for (int i = 0; i < 8; i++) {
                 ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(i);
@@ -90,7 +90,7 @@ namespace TrafficManager.Util {
                 }
                 SeparateSegmentLanes(segmentId, nodeId, out res, alternativeMode);
             }
-            Debug.Assert(res == SetLaneArrowError.Success);
+            Debug.Assert(res == SetLaneArrow_Result.Success);
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace TrafficManager.Util {
         public static void SeparateSegmentLanes(
             ushort segmentId,
             ushort nodeId,
-            out SetLaneArrowError res,
+            out SetLaneArrow_Result res,
             bool alternativeMode = true) {
 
             bool alt2 = alternativeMode; // alt mode for 2 lanes
@@ -149,16 +149,16 @@ namespace TrafficManager.Util {
         private static void SeparateSegmentLanes(
             ushort segmentId,
             ushort nodeId,
-            out SetLaneArrowError res,
+            out SetLaneArrow_Result res,
             NetInfo.LaneType laneType,
             VehicleInfo.VehicleType vehicleType,
             bool alt2 = false,
             bool alt3 = false) {
             res = CanChangeLanes(segmentId, nodeId);
-            if (res != SetLaneArrowError.Success) {
+            if (res != SetLaneArrow_Result.Success) {
                 return;
             }
-            res = SetLaneArrowError.Success;
+            res = SetLaneArrow_Result.Success;
 
             ref NetSegment seg = ref segmentId.ToSegment();
             bool startNode = seg.m_startNode == nodeId;
@@ -343,12 +343,12 @@ namespace TrafficManager.Util {
             return x;
         }
 
-        public static SetLaneArrowError CanChangeLanes(ushort segmentId, ushort nodeId) {
+        public static SetLaneArrow_Result CanChangeLanes(ushort segmentId, ushort nodeId) {
             if (segmentId == 0 || nodeId == 0) {
-                return SetLaneArrowError.Invalid;
+                return SetLaneArrow_Result.Invalid;
             }
             if (Options.highwayRules && ExtNodeManager.JunctionHasHighwayRules(nodeId)) {
-                return SetLaneArrowError.HighwayArrows;
+                return SetLaneArrow_Result.HighwayArrows;
             }
 
             ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
@@ -365,11 +365,11 @@ namespace TrafficManager.Util {
             int srcLaneCount = laneList.Count();
             for (int i = 0; i < srcLaneCount; ++i) {
                 if (LaneConnectionManager.Instance.HasConnections(laneList[i].laneId, startNode)) {
-                    return SetLaneArrowError.LaneConnection; ;
+                    return SetLaneArrow_Result.LaneConnection; ;
                 }
             }
 
-            return SetLaneArrowError.Success;
+            return SetLaneArrow_Result.Success;
         }
 
     }

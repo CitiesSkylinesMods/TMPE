@@ -1,34 +1,33 @@
 namespace TrafficManager.U {
+    using ColossalFramework;
+    using ColossalFramework.UI;
     using TrafficManager.State;
     using UnityEngine;
 
     public static class UIScaler {
-        /// <summary>Calculate size based on screen width fraction.</summary>
-        /// <param name="fraction">Fraction.</param>
-        /// <returns>Value scaled to screen width.</returns>
-        public static float ScreenWidthFraction(float fraction) {
-            return fraction * Screen.width;
-        }
+        /// <summary>Screen width for GUI is always fixed at 1920.</summary>
+        public static float GuiWidth => Singleton<UIView>.instance.uiCamera.pixelWidth;
 
-        /// <summary>Calculate size based on screen height fraction.</summary>
-        /// <param name="fraction">Fraction.</param>
-        /// <returns>Value scaled to screen height.</returns>
-        public static float ScreenHeightFraction(float fraction) {
-            return fraction * Screen.height;
-        }
+        /// <summary>Screen height for GUI is always fixed at 1080.</summary>
+        public static float GuiHeight => Singleton<UIView>.instance.uiCamera.pixelHeight;
 
-        /// <summary>Based on screen width and screen height, pick the lesser fraction.</summary>
-        /// <param name="widthFrac">Fraction of screen width.</param>
-        /// <param name="heightFrac">Fraction of screen height.</param>
-        /// <returns>Smallest of them two.</returns>
-        public static float ScreenSizeSmallestFraction(float widthFrac, float heightFrac) {
-            return Mathf.Min(
-                ScreenWidthFraction(widthFrac),
-                ScreenHeightFraction(heightFrac));
-        }
-
-        public static float GetUIScale() {
+        /// <summary>
+        /// Calculate UI scale based on GUI scale slider in options multiplied by uiView's scale.
+        /// </summary>
+        /// <returns>UI scale combined.</returns>
+        public static float GetScale() {
             return GlobalConfig.Instance.Main.GuiScale * 0.01f;
+        }
+
+        /// <summary>
+        /// Given a position on screen (unit: pixels) convert to GUI position (always 1920x1080).
+        /// </summary>
+        /// <param name="screenPos">Pixel position.</param>
+        /// <returns>GUI space position.</returns>
+        internal static Vector2 ScreenPointToGuiPoint(Vector2 screenPos) {
+            return new Vector2(
+                (screenPos.x * 1920f) / Screen.width,
+                (screenPos.y * 1080f) / Screen.height);
         }
     }
 }
