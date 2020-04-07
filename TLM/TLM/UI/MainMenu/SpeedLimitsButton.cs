@@ -20,8 +20,6 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override ButtonFunction Function => new ButtonFunction("SpeedLimits");
-
         public override string GetTooltip() => Translation.Menu.Get("Tooltip:Speed limits");
 
         public override KeybindSetting ShortcutKey => KeybindSettingsBase.SpeedLimitsTool;

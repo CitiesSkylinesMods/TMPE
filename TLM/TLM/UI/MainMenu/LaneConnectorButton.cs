@@ -20,8 +20,6 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override ButtonFunction Function => new ButtonFunction("LaneConnector");
-
         public override string GetTooltip() => Translation.Menu.Get("Tooltip:Lane connector");
 
         public override KeybindSetting ShortcutKey => KeybindSettingsBase.LaneConnectionsTool;

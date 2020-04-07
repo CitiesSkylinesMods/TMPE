@@ -19,8 +19,6 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override ButtonFunction Function => new ButtonFunction("ToggleTrafficLights");
-
         public override string GetTooltip() => Translation.Menu.Get("Tooltip:Switch traffic lights");
 
         public override bool IsVisible() => true;

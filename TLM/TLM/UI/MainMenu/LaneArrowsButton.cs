@@ -19,8 +19,6 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override ButtonFunction Function => new ButtonFunction("LaneArrows");
-
         public override string GetTooltip() =>
             Translation.Menu.Get("Tooltip:Change lane arrows") + "\n" +
             Translation.Menu.Get("Tooltip.Keybinds:Change lane arrows");

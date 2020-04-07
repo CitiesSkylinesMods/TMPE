@@ -19,8 +19,6 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override ButtonFunction Function => new ButtonFunction("VehicleRestrictions");
-
         public override string GetTooltip() => Translation.Menu.Get("Tooltip:Vehicle restrictions");
 
         public override bool IsVisible() => IsButtonEnabled();

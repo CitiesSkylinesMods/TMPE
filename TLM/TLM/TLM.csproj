@@ -336,13 +336,13 @@
     <Compile Include="U\Autosize\ISmartSizableControl.cs" />
     <Compile Include="U\Autosize\UResizerConfig.cs" />
     <Compile Include="U\Autosize\URule.cs" />
+    <Compile Include="U\Autosize\UStackMode.cs" />
     <Compile Include="U\Autosize\UValue.cs" />
     <Compile Include="U\Button\UButton.cs" />
     <Compile Include="U\ControlActiveState.cs" />
     <Compile Include="U\ControlHoveredState.cs" />
     <Compile Include="U\ControlEnabledState.cs" />
     <Compile Include="U\Button\BaseUButton.cs" />
-    <Compile Include="U\Button\ButtonFunction.cs" />
     <Compile Include="U\Button\ButtonSkin.cs" />
     <Compile Include="U\Label\ULabel.cs" />
     <Compile Include="U\Panel\BaseUWindowPanel.cs" />

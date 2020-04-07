@@ -6,9 +6,6 @@
     using TrafficManager.U.Button;
 
     public class DespawnButton : BaseMenuButton {
-        protected override ButtonFunction Function =>
-            new ButtonFunction("Despawn", !Options.disableDespawning);
-
         public override string GetTooltip() =>
             Options.disableDespawning
                 ? Translation.Menu.Get("Tooltip:Enable despawning")

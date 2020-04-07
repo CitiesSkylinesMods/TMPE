@@ -26,9 +26,6 @@
 
         public abstract void OnClickInternal(UIMouseEventParameter p);
 
-        /// <summary>Used to determine which actual button was clicked by the base class.</summary>
-        protected abstract ButtonFunction Function { get; }
-
         public override bool CanActivate() {
             return true;
         }

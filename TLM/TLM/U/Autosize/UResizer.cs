@@ -134,64 +134,63 @@ namespace TrafficManager.U.Autosize {
 
         /// <summary>Instructs U UI to place the control vertically below the previous sibling.</summary>
         /// <param name="spacing">Step away from the control above but not from the form top.</param>
-        /// <param name="stackUnder">Some sibling whose position will be used (must be
-        /// inserted into the form before the current control.</param>
-        public void StackVertical(float spacing = 0f, UIComponent stackUnder = null) {
+        /// <param name="stackRef">A sibling to use as reference (otherwise the previous sibling).</param>
+        public void Stack(UStackMode mode,
+                          float spacing = 0f,
+                          UIComponent stackRef = null) {
             var padding = 0f;
             if (this.Control.parent.GetComponent<UIComponent>() is ISmartSizableControl parent) {
                 padding = parent.GetResizerConfig().Padding;
             }
-            if (stackUnder == null) {
-                stackUnder = this.PreviousSibling;
-            }
-            Vector3 pos = stackUnder == null
-                              ? new Vector3(padding, padding, 0f)
-                              : stackUnder.relativePosition + new Vector3(
-                                    0f,
-                                    stackUnder.height + spacing,
-                                    0f);
-            this.Control.relativePosition = pos;
-        }
 
-        /// <summary>Stacks vertically but starts a new line (resets X position to 0).</summary>
-        /// <param name="spacing">Step down by this many pixels.</param>
-        /// <param name="stackUnder">The control to use as a reference.</param>
-        public void StackVerticalNewRow(float spacing = 0f, UIComponent stackUnder = null) {
-            var padding = 0f;
-            if (this.Control.parent.GetComponent<UIComponent>() is ISmartSizableControl parent) {
-                padding = parent.GetResizerConfig().Padding;
+            // Stack reference: either what user has provided, or the previous sibling
+            if (stackRef == null) {
+                stackRef = this.PreviousSibling;
             }
-            if (stackUnder == null) {
-                stackUnder = this.PreviousSibling;
-            }
-            Vector3 pos = stackUnder == null
-                              ? new Vector3(padding, padding, 0f)
-                              : new Vector3(
-                                    padding,
-                                    stackUnder.relativePosition.y + stackUnder.height + spacing,
-                                    0f);
-            this.Control.relativePosition = pos;
-        }
 
-        /// <summary>Instructs U UI to place the control to the right of the previous sibling.</summary>
-        /// <param name="spacing">Step away from the control to the left but not from the form left.</param>
-        /// <param name="stackUnder">Some sibling whose position will be used (must be
-        /// inserted into the form before the current control.</param>
-        public void StackHorizontal(float spacing = 0f, UIComponent stackUnder = null) {
-            var padding = 0f;
-            if (this.Control.parent.GetComponent<UIComponent>() is ISmartSizableControl parent) {
-                padding = parent.GetResizerConfig().Padding;
+            Vector3 pos;
+
+            switch (mode) {
+                case UStackMode.Below: {
+                    this.Control.relativePosition =
+                        stackRef == null
+                            ? new Vector3(padding, padding, 0f)
+                            : stackRef.relativePosition + new Vector3(
+                                  0f,
+                                  stackRef.height + spacing,
+                                  0f);
+                    return;
+                }
+                // case UStackMode.Above: {
+                //     break;
+                // }
+                case UStackMode.ToTheRight: {
+                    this.Control.relativePosition =
+                        stackRef == null
+                        ? new Vector3(padding, padding, 0f)
+                        : stackRef.relativePosition + new Vector3(
+                              stackRef.width + spacing,
+                              0f,
+                              0f);
+                    return;
+                }
+                // case UStackMode.ToTheLeft: {
+                //     break;
+                // }
+                case UStackMode.NewRowBelow: {
+                    this.Control.relativePosition =
+                        stackRef == null
+                            ? new Vector3(padding, padding, 0f)
+                            : new Vector3(
+                                padding,
+                                stackRef.relativePosition.y + stackRef.height + spacing,
+                                0f);
+                    return;
+                }
+                default: {
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, "Stack mode not supported");
+                }
             }
-            if (stackUnder == null) {
-                stackUnder = this.PreviousSibling;
-            }
-            Vector3 pos = stackUnder == null
-                              ? new Vector3(padding, padding, 0f)
-                              : stackUnder.relativePosition + new Vector3(
-                                    stackUnder.width + spacing,
-                                    0f,
-                                    0f);
-            this.Control.relativePosition = pos;
         }
     }
 }

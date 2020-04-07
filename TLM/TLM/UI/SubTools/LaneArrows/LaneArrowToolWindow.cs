@@ -89,7 +89,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 // buttonRowBuilder.SetPadding(Constants.U_UI_PADDING);
                 buttonRowBuilder.ResizeFunction(
                     r => {
-                        r.StackVertical(Constants.UIPADDING);
+                        r.Stack(mode: UStackMode.Below,
+                                spacing: Constants.UIPADDING);
                         r.FitToChildren();
                     });
 
@@ -112,14 +113,11 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                         buttonGroupBuilder.SetPadding(Constants.UIPADDING);
                         buttonGroupBuilder.ResizeFunction(
                             r => {
-                                if (i1 == 0) {
-                                    // attach below "Lane #" label
-                                    r.StackVertical(Constants.UIPADDING);
-                                } else {
-                                    // attach to the right of the previous button group
-                                    r.StackHorizontal(Constants.UIPADDING);
-                                }
-
+                                // attach below "Lane #" label,
+                                // else: attach to the right of the previous button group
+                                r.Stack(
+                                    mode: i1 == 0 ? UStackMode.Below : UStackMode.ToTheRight,
+                                    spacing: Constants.UIPADDING);
                                 r.FitToChildren();
                             });
 
@@ -128,7 +126,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                         using (var laneLabel = buttonGroupBuilder.Label<U.Label.ULabel>(labelText))
                         {
                             // The label will be repositioned to the top of the parent
-                            laneLabel.ResizeFunction(r => { r.StackVertical(); });
+                            laneLabel.ResizeFunction(r => { r.Stack(UStackMode.Below); });
                         }
 
                         // Create and populate the panel with buttons
@@ -152,12 +150,11 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                                         // First button in the group will be stacking vertical
                                         // under the "Lane #" label, while 2nd and 3rd will be
                                         // stacking horizontal
-                                        if (prefix == "LaneArrowLeft") {
-                                            r.StackVertical(Constants.UIPADDING);
-                                        } else {
-                                            r.StackHorizontal(Constants.UIPADDING);
-                                        }
-
+                                        r.Stack(
+                                            mode: prefix == "LaneArrowLeft"
+                                                      ? UStackMode.Below
+                                                      : UStackMode.ToTheRight,
+                                            spacing: Constants.UIPADDING);
                                         r.Width(UValue.FixedSize(40f));
                                         r.Height(UValue.FixedSize(40f));
                                     });

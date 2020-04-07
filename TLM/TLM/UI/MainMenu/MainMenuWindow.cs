@@ -7,7 +7,6 @@ namespace TrafficManager.UI.MainMenu {
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using JetBrains.Annotations;
     using TrafficManager.API.Util;
     using TrafficManager.State.Keybinds;
     using TrafficManager.State;
@@ -24,6 +23,9 @@ namespace TrafficManager.UI.MainMenu {
         public const int DEFAULT_MENU_Y = 60;
 
         public UPanel InnerPanel { get; set; }
+
+        /// <summary>Contains keybinds help if not hidden by the user.</summary>
+        public UPanel KeybindsPanel { get; set; }
 
         /// <summary>Tool buttons occupy the left and bigger side of the main menu.</summary>
         private static readonly MenuButtonDef[] TOOL_BUTTON_DEFS
@@ -171,7 +173,7 @@ namespace TrafficManager.UI.MainMenu {
         public void SetupControls(UiBuilder<MainMenuWindow> builder) {
             UILabel versionLabel = null;
             using (var versionLabelB = builder.Label<U.Label.ULabel>(TrafficManagerMod.ModName)) {
-                versionLabelB.ResizeFunction(r => r.StackVertical());
+                versionLabelB.ResizeFunction(r => r.Stack(UStackMode.Below));
                 this.VersionLabel = versionLabel = versionLabelB.Control;
             }
 
@@ -198,7 +200,7 @@ namespace TrafficManager.UI.MainMenu {
                 this.InnerPanel = innerPanelB.Control;
 
                 innerPanelB.ResizeFunction(r => {
-                    r.StackVertical(spacing: 0f, stackUnder: versionLabel);
+                    r.Stack(mode: UStackMode.Below, spacing: 0f, stackRef: versionLabel);
                     r.FitToChildren();
                 });
 
@@ -221,11 +223,34 @@ namespace TrafficManager.UI.MainMenu {
                 b.atlas = allButtonsAtlas_;
             }
 
-            // Stack following two label under this
-            // But since showPathFind stats label is not always visible we track the next thing,
-            // to stack with, in this variable
-            UIComponent stackUnder = this.InnerPanel;
+            // Foldable panel with keybinds, starts hidden below or above the main menu
+            using (var keybindsB = builder.ChildPanel<U.Panel.UPanel>(
+                p => {
+                    p.name = "TMPE_MainMenu_KeybindsPanel";
+                    p.Hide(); // not visible until some tool is activated
+                }))
+            {
+                // The keybinds panel belongs to main menu but does not expand it to fit
+                UResizerConfig.From(keybindsB.Control).ContributeToBoundingBox = false;
+                this.KeybindsPanel = keybindsB.Control;
+                keybindsB.ResizeFunction(
+                    r => {
+                        r.Stack(UStackMode.Below);
+                        r.FitToChildren();
+                    });
 
+                // SetupControls_KeybindsPanel(keybindsB);
+            }
+
+            // Floating labels under TM:PE window
+            SetupControls_DebugLabels(builder, this.InnerPanel);
+        }
+
+        private void SetupControls_KeybindsPanel(UiBuilder<UPanel> builder) {
+        }
+
+        private void SetupControls_DebugLabels(UiBuilder<MainMenuWindow> builder,
+                                               UIComponent stackUnder) {
             // Pathfinder stats label (debug only)
             if (Options.showPathFindStats) {
                 using (var statsLabelB = builder.Label<StatsLabel>(string.Empty)) {
@@ -236,9 +261,10 @@ namespace TrafficManager.UI.MainMenu {
                     statsLabelB.ResizeFunction(
                         r => {
                             // Extra 2x spacing because of form's inner padding
-                            r.StackVertical(
+                            r.Stack(
+                                mode: UStackMode.Below,
                                 spacing: 2f * Constants.UIPADDING,
-                                under);
+                                stackRef: under);
                         });
                     stackUnder = this.StatsLabel = statsLabelB.Control;
                 }
@@ -256,8 +282,10 @@ namespace TrafficManager.UI.MainMenu {
                         r => {
                             // If pathFind stats label above was not visible, we need extra spacing
                             float extraSpacing = Options.showPathFindStats ? Constants.UIPADDING : 0f;
-                            r.StackVertical(spacing: extraSpacing + Constants.UIPADDING,
-                                            stackUnder);
+                            r.Stack(
+                                mode: UStackMode.Below,
+                                spacing: extraSpacing + Constants.UIPADDING,
+                                stackRef: stackUnder);
                         });
                 }
             }
@@ -272,7 +300,7 @@ namespace TrafficManager.UI.MainMenu {
                 }))
             {
                 leftPanelB.ResizeFunction(r => {
-                    r.StackVertical(spacing: 0f);
+                    r.Stack(mode: UStackMode.Below);
                     r.FitToChildren();
                 });
 
@@ -303,7 +331,8 @@ namespace TrafficManager.UI.MainMenu {
             {
                 rightPanelB.ResizeFunction(r => {
                     // Step to the right by 4px
-                    r.StackHorizontal(spacing: Constants.UIPADDING);
+                    r.Stack(mode: UStackMode.ToTheRight,
+                            spacing: Constants.UIPADDING);
                     r.FitToChildren();
                 });
 
@@ -366,16 +395,9 @@ namespace TrafficManager.UI.MainMenu {
 
                 // Count buttons in a row and break the line
                 bool doRowBreak = result.Layout.IsRowBreak(placedInARow, minRowLength, maxRowLength);
-                Log._Debug(
-                    $"MainMenu: placed={placedInARow} rowL={minRowLength}/{maxRowLength} "
-                    + $"doBreak={doRowBreak} t={buttonDef.ButtonType}");
 
                 buttonBuilder.ResizeFunction(r => {
-                    if (doRowBreak) {
-                        r.StackVerticalNewRow(spacing: 0f);
-                    } else {
-                        r.StackHorizontal();
-                    }
+                    r.Stack(doRowBreak ? UStackMode.NewRowBelow : UStackMode.ToTheRight);
                     r.Width(UValue.FixedSize(40f));
                     r.Height(UValue.FixedSize(40f));
                 });
@@ -389,7 +411,9 @@ namespace TrafficManager.UI.MainMenu {
 
                 // Also ask each button what sprites they need
                 buttonBuilder.Control.SetupButtonSkin(atlasKeysSet);
-                buttonBuilder.Control.name = $"TMPE_MainMenuButton_{buttonDef.ButtonType}";
+
+                string buttonName = buttonDef.ButtonType.ToString().Split('.').Last();
+                buttonBuilder.Control.name = $"TMPE_MainMenuButton_{buttonName}";
 
                 ButtonsDict.Add(buttonDef.Mode, buttonBuilder.Control);
                 result.Buttons.Add(buttonBuilder.Control);
