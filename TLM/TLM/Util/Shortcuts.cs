@@ -19,6 +19,24 @@ namespace TrafficManager.Util {
         internal static IList<T> Clone<T>(this IList<T> listToClone) where T : ICloneable =>
             listToClone.Select(item => (T)item.Clone()).ToList();
 
+        internal static void Swap<T>(ref T a, ref T b) {
+            T temp = a;
+            a = b;
+            b = temp;
+        }
+
+        internal static void Swap<T>(this T[] array, int index1, int index2) {
+            T temp = array[index1];
+            array[index1] = array[index2];
+            array[index2] = temp;
+        }
+
+        internal static void Swap<T>(this List<T> list, int index1, int index2) {
+            T temp = list[index1];
+            list[index1] = list[index2];
+            list[index2] = temp;
+        }
+
         private static NetNode[] _nodeBuffer => Singleton<NetManager>.instance.m_nodes.m_buffer;
 
         private static NetSegment[] _segBuffer => Singleton<NetManager>.instance.m_segments.m_buffer;
@@ -96,12 +114,42 @@ namespace TrafficManager.Util {
         internal static string ToSTR(this List<LanePos> laneList) =>
             (from lanePos in laneList select lanePos.laneId).ToSTR();
 
+        internal static void AssertEq<T>(T a, T b, string m = "") where T:IComparable {
+            if (a.CompareTo(b) != 0) {
+                Log.Error($"Assertion failed. Expected {a} == {b} | " + m);
+            }
+        }
+
+        internal static void AssertNEq<T>(T a, T b, string m = "") where T : IComparable {
+            if (a.CompareTo(b) == 0) {
+                Log.Error($"Assertion failed. Expected {a} != {b} | " + m);
+            }
+        }
+
+        internal static void Assert(bool con, string m = "") {
+            if (!con) {
+                Log.Error("Assertion failed: " + m);
+            }
+        }
 
         internal static bool ShiftIsPressed => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         internal static bool ControlIsPressed => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
         internal static bool AltIsPressed => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+
+        #region directions
+        internal static bool LHT => Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
+        internal static bool RHT => !LHT;
+
+        internal static ushort GetNearSegment(this ref NetSegment segment, ushort nodeId) =>
+            RHT ? segment.GetRightSegment(nodeId) : segment.GetLeftSegment(nodeId);
+
+        internal static ushort GetFarSegment(this ref NetSegment segment, ushort nodeId) =>
+            LHT ? segment.GetRightSegment(nodeId) : segment.GetLeftSegment(nodeId);
+
+        #endregion
+
 
     }
 }

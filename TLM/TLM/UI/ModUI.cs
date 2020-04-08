@@ -2,7 +2,10 @@ namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System;
+    using TrafficManager.API.Util;
+    using TrafficManager.U;
     using TrafficManager.UI.MainMenu;
+    using TrafficManager.Util;
     using UnityEngine;
 
     /// <summary>
@@ -33,24 +36,40 @@ namespace TrafficManager.UI {
 #endif
 
         public static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired = true) {
-            if (tool == null && createIfRequired) {
+            if (trafficManagerTool_ == null && createIfRequired) {
                 Log.Info("Initializing traffic manager tool...");
                 GameObject toolModControl = ToolsModifierControl.toolController.gameObject;
-                tool = toolModControl.GetComponent<TrafficManagerTool>()
-                       ?? toolModControl.AddComponent<TrafficManagerTool>();
-                tool.Initialize();
+                trafficManagerTool_ =
+                    toolModControl.GetComponent<TrafficManagerTool>()
+                    ?? toolModControl.AddComponent<TrafficManagerTool>();
+                trafficManagerTool_.Initialize();
             }
 
-            return tool;
+            return trafficManagerTool_;
         }
 
-        private static TrafficManagerTool tool;
+        private static TrafficManagerTool trafficManagerTool_;
 
         public static TrafficManagerMode ToolMode { get; set; }
 
         private bool _uiShown;
 
+        public struct UIScaleNotification {
+            public float NewScale;
+        }
+
+        public class UIScaleObservable : GenericObservable<UIScaleNotification> {
+        }
+
+        /// <summary>
+        /// Subscribe to this to get notifications in your UI about UI scale changes (slider in
+        /// General options tab).
+        /// </summary>
+        public UIScaleObservable UiScaleObservable;
+
         public ModUI() {
+            UiScaleObservable = new UIScaleObservable();
+
             Log._Debug("##### Initializing ModUI.");
 
             // Get the UIView object. This seems to be the top-level object for most
@@ -123,6 +142,7 @@ namespace TrafficManager.UI {
             }
 
             foreach (BaseMenuButton button in GetMenu().Buttons) {
+                // TODO: move this to MainMenu UI classes
                 button.UpdateButtonImageAndTooltip();
             }
 
@@ -140,14 +160,14 @@ namespace TrafficManager.UI {
         }
 
         public void Close() {
+            // Before hiding the menu, shut down the active tool
+            GetTrafficManagerTool(false)?.SetToolMode(UI.ToolMode.None);
+
+            // Main menu is going invisible
             GetMenu().Hide();
 #if DEBUG
             GetDebugMenu().Hide();
 #endif
-            TrafficManagerTool tmTool = GetTrafficManagerTool(false);
-            if (tmTool != null) {
-                tmTool.SetToolMode(UI.ToolMode.None);
-            }
 
             SetToolMode(TrafficManagerMode.None);
             _uiShown = false;
@@ -201,9 +221,9 @@ namespace TrafficManager.UI {
             Log._Debug("ModUI.DisableTool: called");
             if (ToolsModifierControl.toolController == null) {
                 Log.Warning("ModUI.DisableTool: ToolsModifierControl.toolController is null!");
-            } else if (tool == null) {
+            } else if (trafficManagerTool_ == null) {
                 Log.Warning("ModUI.DisableTool: tool is null!");
-            } else if (ToolsModifierControl.toolController.CurrentTool != tool) {
+            } else if (ToolsModifierControl.toolController.CurrentTool != trafficManagerTool_) {
                 Log.Info("ModUI.DisableTool: CurrentTool is not traffic manager tool!");
             } else {
                 ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
@@ -218,17 +238,11 @@ namespace TrafficManager.UI {
 
         private static void DestroyTool() {
             DisableTool();
-            if (tool != null) {
+            if (trafficManagerTool_ != null) {
                 Log.Info("Removing Traffic Manager Tool.");
-                UnityEngine.Object.Destroy(tool);
-                tool = null;
+                UnityEngine.Object.Destroy(trafficManagerTool_);
+                trafficManagerTool_ = null;
             } // end if
         } // end DestroyTool()
-
-        /// <summary>Called from settings window, when windows need rescaling because GUI scale
-        /// slider has changed.</summary>
-        public void NotifyGuiScaleChanged() {
-            MainMenu.OnRescaleRequested();
-        }
     }
 }

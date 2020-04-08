@@ -23,6 +23,8 @@ namespace TrafficManager.UI {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
+    using TrafficManager.UI.SubTools.LaneArrows;
+
     using static TrafficManager.UI.SubTools.PrioritySignsTool;
     using static TrafficManager.Util.Shortcuts;
     using static TrafficManager.Util.SegmentTraverser;
@@ -39,31 +41,31 @@ namespace TrafficManager.UI {
         public GuideHandler Guide;
 
         private ToolMode toolMode_;
-        private NetTool _netTool;
 
-        /// <summary>
-        /// Maximum error of HitPos field.
-        /// </summary>
+        private NetTool netTool_;
+
+        /// <summary>Maximum error of HitPos field.</summary>
         internal const float MAX_HIT_ERROR = 2.5f;
 
         internal static ushort HoveredNodeId;
+
         internal static ushort HoveredSegmentId;
 
-        /// <summary>
-        /// the hit position of the mouse raycast in meters.
-        /// </summary>
+        /// <summary>The hit position of the mouse raycast.</summary>
         internal static Vector3 HitPos;
+
         internal Vector3 MousePosition => m_mousePosition; //expose protected member.
 
         private static bool _mouseClickProcessed;
 
         public const float DEBUG_CLOSE_LOD = 300f;
-        /// <summary>
-        /// Square of the distance, where overlays are not rendered
-        /// </summary>
+
+        /// <summary>Square of the distance, where overlays are not rendered.</summary>
         public const float MAX_OVERLAY_DISTANCE_SQR = 450f * 450f;
 
-        private IDictionary<ToolMode, SubTool> subTools_;
+        private IDictionary<ToolMode, LegacySubTool> legacySubTools_;
+
+        private IDictionary<ToolMode, TrafficManagerSubTool> subTools_;
 
         public static ushort SelectedNodeId { get; internal set; }
 
@@ -75,10 +77,13 @@ namespace TrafficManager.UI {
         internal static ExtVehicleType[] InfoSignsToDisplay = {
             ExtVehicleType.PassengerCar, ExtVehicleType.Bicycle, ExtVehicleType.Bus,
             ExtVehicleType.Taxi, ExtVehicleType.Tram, ExtVehicleType.CargoTruck,
-            ExtVehicleType.Service, ExtVehicleType.RailVehicle
+            ExtVehicleType.Service, ExtVehicleType.RailVehicle,
         };
 
-        private SubTool _activeSubTool;
+        [Obsolete("Convert your legacy tools to new TrafficManagerSubTool style")]
+        private LegacySubTool activeLegacySubTool_;
+
+        private TrafficManagerSubTool activeSubTool_;
 
         private static IDisposable _confDisposable;
 
@@ -93,7 +98,13 @@ namespace TrafficManager.UI {
             return m_toolController;
         }
 
-        internal static Rect MoveGUI(Rect rect) {
+        /// <summary>
+        /// Defines initial screen location for tool Rect, based on default menu x and y,
+        /// whatever tools need them for.
+        /// </summary>
+        /// <param name="rect">A rect to place.</param>
+        /// <returns>New rect moved around screen.</returns>
+        internal static Rect GetDefaultScreenPositionForRect(Rect rect) {
             // x := main menu x + rect.x
             // y := main menu y + main menu height + rect.y
             return new Rect(
@@ -103,7 +114,8 @@ namespace TrafficManager.UI {
                 rect.height);
         }
 
-        internal bool IsNodeWithinViewDistance(ushort nodeId) {
+        // TODO: Move to UI.Helpers
+        internal static bool IsNodeWithinViewDistance(ushort nodeId) {
             bool ret = false;
             Constants.ServiceFactory.NetService.ProcessNode(
                 nodeId,
@@ -115,8 +127,9 @@ namespace TrafficManager.UI {
         }
 
         // Not used
+        // TODO: Move to UI.Helpers
         [UsedImplicitly]
-        internal bool IsSegmentWithinViewDistance(ushort segmentId) {
+        internal static bool IsSegmentWithinViewDistance(ushort segmentId) {
             bool ret = false;
             Constants.ServiceFactory.NetService.ProcessSegment(
                 segmentId,
@@ -128,16 +141,19 @@ namespace TrafficManager.UI {
             return ret;
         }
 
-        internal bool IsPosWithinOverlayDistance(Vector3 position) {
+        // TODO: Move to UI.Helpers
+        internal static bool IsPosWithinOverlayDistance(Vector3 position) {
             return (position - Singleton<SimulationManager>.instance.m_simulationView.m_position)
                    .sqrMagnitude <= MAX_OVERLAY_DISTANCE_SQR;
         }
 
+        [Obsolete("Use U.UIScaler and U size and position logic")]
         internal static float AdaptWidth(float originalWidth) {
             return originalWidth;
             // return originalWidth * ((float)Screen.width / 1920f);
         }
 
+        [Obsolete("Use U.UIScaler and U size and position logic")]
         internal float GetBaseZoom() {
             return Screen.height / 1200f;
         }
@@ -158,14 +174,15 @@ namespace TrafficManager.UI {
             return TransparencyToAlpha(transparency);
         }
 
-        internal NetTool NetTool {
+        /// <summary>Gives convenient access to NetTool from the original game.</summary>
+        private NetTool NetTool {
             get {
-                if (_netTool == null) {
+                if (netTool_ == null) {
                     Log._Debug("NetTool field value is null. Searching for instance...");
-                    _netTool = ToolsModifierControl.toolController.Tools.OfType<NetTool>().FirstOrDefault();
+                    netTool_ = ToolsModifierControl.toolController.Tools.OfType<NetTool>().FirstOrDefault();
                 }
 
-                return _netTool;
+                return netTool_;
             }
         }
 
@@ -177,10 +194,13 @@ namespace TrafficManager.UI {
             Log.Info("TrafficManagerTool: Initialization running now.");
             Guide = new GuideHandler();
 
-            SubTool timedLightsTool = new TimedTrafficLightsTool(this);
+            LegacySubTool timedLightsTool = new TimedTrafficLightsTool(this);
 
-            subTools_ = new TinyDictionary<ToolMode, SubTool> {
-                [ToolMode.SwitchTrafficLight] = new ToggleTrafficLightsTool(this),
+            subTools_ = new TinyDictionary<ToolMode, TrafficManagerSubTool> {
+                [ToolMode.LaneArrows] = new LaneArrowTool(this),
+            };
+            legacySubTools_ = new TinyDictionary<ToolMode, LegacySubTool> {
+                [ToolMode.ToggleTrafficLight] = new ToggleTrafficLightsTool(this),
                 [ToolMode.AddPrioritySigns] = new PrioritySignsTool(this),
                 [ToolMode.ManualSwitch] = new ManualTrafficLightsTool(this),
                 [ToolMode.TimedLightsAddNode] = timedLightsTool,
@@ -190,10 +210,9 @@ namespace TrafficManager.UI {
                 [ToolMode.TimedLightsCopyLights] = timedLightsTool,
                 [ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this),
                 [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
-                [ToolMode.LaneChange] = new LaneArrowTool(this),
                 [ToolMode.LaneConnector] = new LaneConnectorTool(this),
                 [ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this),
-                [ToolMode.ParkingRestrictions] = new ParkingRestrictionsTool(this)
+                [ToolMode.ParkingRestrictions] = new ParkingRestrictionsTool(this),
             };
 
             InitializeSubTools();
@@ -212,7 +231,7 @@ namespace TrafficManager.UI {
         }
 
         internal void InitializeSubTools() {
-            foreach (KeyValuePair<ToolMode, SubTool> e in subTools_) {
+            foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
                 e.Value.Initialize();
             }
         }
@@ -222,8 +241,9 @@ namespace TrafficManager.UI {
             base.Awake();
         }
 
-        public SubTool GetSubTool(ToolMode mode) {
-            if (subTools_.TryGetValue(mode, out SubTool ret)) {
+        /// <summary>Only used from CustomRoadBaseAI.</summary>
+        public LegacySubTool GetSubTool(ToolMode mode) {
+            if (legacySubTools_.TryGetValue(mode, out LegacySubTool ret)) {
                 return ret;
             }
 
@@ -234,82 +254,86 @@ namespace TrafficManager.UI {
             return toolMode_;
         }
 
-        public void SetToolMode(ToolMode mode) {
-            Log._Debug($"SetToolMode: {mode}");
-
-            bool toolModeChanged = (mode != toolMode_);
+        /// <summary>Deactivate current active tool. Set new active tool.</summary>
+        /// <param name="newToolMode">New mode.</param>
+        public void SetToolMode(ToolMode newToolMode) {
             ToolMode oldToolMode = toolMode_;
-            subTools_.TryGetValue(oldToolMode, out SubTool oldSubTool);
-            toolMode_ = mode;
 
-            if (!subTools_.TryGetValue(toolMode_, out _activeSubTool)) {
-                _activeSubTool = null;
+            // ToolModeChanged does not count timed traffic light submodes as a same tool
+            bool toolModeChanged = newToolMode != toolMode_;
+            if (IsTimedTrafficLightsSubtool(oldToolMode)
+                && IsTimedTrafficLightsSubtool(newToolMode)) {
+                toolModeChanged = false;
             }
 
-            bool realToolChange = toolModeChanged;
-
-            if (oldSubTool != null) {
-                if (oldToolMode == ToolMode.TimedLightsSelectNode
-                    || oldToolMode == ToolMode.TimedLightsShowLights
-                    || oldToolMode == ToolMode.TimedLightsAddNode
-                    || oldToolMode == ToolMode.TimedLightsRemoveNode
-                    || oldToolMode == ToolMode.TimedLightsCopyLights) {
-                    // TODO refactor to SubToolMode
-                    if (mode != ToolMode.TimedLightsSelectNode
-                        && mode != ToolMode.TimedLightsShowLights
-                        && mode != ToolMode.TimedLightsAddNode
-                        && mode != ToolMode.TimedLightsRemoveNode
-                        && mode != ToolMode.TimedLightsCopyLights) {
-                        oldSubTool.Cleanup();
-                    }
-                } else {
-                    oldSubTool.Cleanup();
-                }
+            if (!toolModeChanged) {
+                Log._Debug($"SetToolMode: not changed old={oldToolMode} new={newToolMode}");
+                return;
             }
 
-            if (toolModeChanged && _activeSubTool != null) {
-                if (oldToolMode == ToolMode.TimedLightsSelectNode
-                    || oldToolMode == ToolMode.TimedLightsShowLights
-                    || oldToolMode == ToolMode.TimedLightsAddNode
-                    || oldToolMode == ToolMode.TimedLightsRemoveNode
-                    || oldToolMode == ToolMode.TimedLightsCopyLights) {
-                    // TODO refactor to SubToolMode
-                    if (mode != ToolMode.TimedLightsSelectNode
-                        && mode != ToolMode.TimedLightsShowLights
-                        && mode != ToolMode.TimedLightsAddNode
-                        && mode != ToolMode.TimedLightsRemoveNode
-                        && mode != ToolMode.TimedLightsCopyLights) {
-                        _activeSubTool.Cleanup();
-                    } else {
-                        realToolChange = false;
-                    }
-                } else {
-                    _activeSubTool.Cleanup();
-                }
+            SetToolMode_DeactivateTool();
+
+            // Try figure out whether legacy subtool or a new subtool is selected
+            if (!legacySubTools_.TryGetValue(newToolMode, out activeLegacySubTool_)
+                && !subTools_.TryGetValue(newToolMode, out activeSubTool_)) {
+                activeLegacySubTool_ = null;
+                activeSubTool_ = null;
+                toolMode_ = ToolMode.None;
+
+                Log._Debug($"SetToolMode: reset because toolmode not found {newToolMode}");
+                return;
             }
 
-            SelectedNodeId = 0;
-            SelectedSegmentId = 0;
+            SetToolMode_Activate(newToolMode);
+            Log._Debug($"SetToolMode: changed old={oldToolMode} new={newToolMode}");
+        }
 
-            // Log._Debug($"Getting activeSubTool for mode {_toolMode} {subTools.Count}");
-            // subTools.TryGetValue((int)_toolMode, out activeSubTool);
-            // Log._Debug($"activeSubTool is now {activeSubTool}");
+        /// <summary>Resets the tool and calls deactivate on it.</summary>
+        private void SetToolMode_DeactivateTool() {
+            if (activeLegacySubTool_ != null || activeSubTool_ != null) {
+                activeLegacySubTool_?.Cleanup();
+                activeLegacySubTool_ = null;
 
-            if (toolModeChanged && _activeSubTool != null) {
-                _activeSubTool.OnActivate();
-
-                if (realToolChange) {
-                    ShowAdvisor(_activeSubTool.GetTutorialKey());
-                    Guide.DeactivateAll();
-                }
+                activeSubTool_?.DeactivateTool();
+                activeSubTool_ = null;
+                toolMode_ = ToolMode.None;
             }
         }
 
+        /// <summary>
+        /// Sets new active tool. Resets selected segment and node. Calls activate on tools.
+        /// Also shows advisor.
+        /// </summary>
+        /// <param name="newToolMode">New mode.</param>
+        private void SetToolMode_Activate(ToolMode newToolMode) {
+            toolMode_ = newToolMode;
+            SelectedNodeId = 0;
+            SelectedSegmentId = 0;
+
+            activeLegacySubTool_?.OnActivate();
+            activeSubTool_?.ActivateTool();
+
+            if (activeLegacySubTool_ != null) {
+                ShowAdvisor(activeLegacySubTool_.GetTutorialKey());
+                Guide.DeactivateAll();
+            }
+        }
+
+        private static bool IsTimedTrafficLightsSubtool(ToolMode a) {
+            return a == ToolMode.TimedLightsSelectNode
+                   || a == ToolMode.TimedLightsShowLights
+                   || a == ToolMode.TimedLightsAddNode
+                   || a == ToolMode.TimedLightsRemoveNode
+                   || a == ToolMode.TimedLightsCopyLights;
+        }
+
         public void CallOnEnable() => OnEnable();
+
+        // Overridden to disable base class behavior
         protected override void OnEnable() {
-            if (subTools_ != null) {
+            if (legacySubTools_ != null) {
                 Log._Debug("TrafficManagerTool.OnEnable(): Performing cleanup");
-                foreach (KeyValuePair<ToolMode, SubTool> e in subTools_) {
+                foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
                     e.Value.Cleanup();
                 }
             }
@@ -328,7 +352,7 @@ namespace TrafficManager.UI {
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             RenderOverlayImpl(cameraInfo);
-            if (_activeSubTool == null) {
+            if (GetToolMode()==ToolMode.None) {
                 DefaultRenderOverlay(cameraInfo);
             }
         }
@@ -339,22 +363,22 @@ namespace TrafficManager.UI {
         /// Must not call base.RenderOverlay() . Doing so may cause infinite recursion with Postfix of base.RenderOverlay()
         /// </summary>
         public void RenderOverlayImpl(RenderManager.CameraInfo cameraInfo) {
-            // Log._Debug($"RenderOverlay");
-            // Log._Debug($"RenderOverlay: {_toolMode} {activeSubTool} {this.GetHashCode()}");
             if (!(isActiveAndEnabled || MassEditOVerlay.IsActive)) {
                 return;
             }
 
-            // Log._Debug($"Rendering overlay in {_toolMode}");
-            if (_activeSubTool != null)
-                _activeSubTool.RenderOverlay(cameraInfo);
+            activeLegacySubTool_?.RenderOverlay(cameraInfo);
+            activeSubTool_?.RenderOverlay(cameraInfo);
 
-            foreach (KeyValuePair<ToolMode, SubTool> e in subTools_) {
-                if (e.Key == GetToolMode()) {
+            ToolMode currentMode = GetToolMode();
+
+            // For all _other_ legacy subtools let them render something too
+            foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
+                if (e.Key == currentMode) {
                     continue;
                 }
 
-                e.Value.RenderInfoOverlay(cameraInfo);
+                e.Value.RenderOverlayForOtherTools(cameraInfo);
             }
         }
 
@@ -428,7 +452,7 @@ namespace TrafficManager.UI {
             }
             ToolCursor = null;
             bool elementsHovered = DetermineHoveredElements();
-            if (_activeSubTool != null && NetTool != null && elementsHovered) {
+            if (activeLegacySubTool_ != null && NetTool != null && elementsHovered) {
                 ToolCursor = NetTool.m_upgradeCursor;
             }
 
@@ -452,31 +476,28 @@ namespace TrafficManager.UI {
             }
 
             // !elementsHovered ||
-            if (_activeSubTool != null && _activeSubTool.IsCursorInPanel()) {
+            if (activeLegacySubTool_ != null && activeLegacySubTool_.IsCursorInPanel()) {
                 Log._Debug("TrafficManagerTool: OnToolUpdate: Subtool contains mouse. Ignoring click.");
-
-                // Log.Message("inside ui: " + m_toolController.IsInsideUI + " visible: "
-                //     + Cursor.visible + " in secondary panel: " + _cursorInSecondaryPanel);
                 return;
             }
 
-            // if (HoveredSegmentId == 0 && HoveredNodeId == 0) {
-            //        //Log.Message("no hovered segment");
-            //        return;
-            // }
+            if (primaryMouseClicked) {
+                activeLegacySubTool_?.OnPrimaryClickOverlay();
+                activeSubTool_?.OnToolLeftClick();
+            }
 
-            if (_activeSubTool != null) {
-                if (primaryMouseClicked) {
-                    _activeSubTool.OnPrimaryClickOverlay();
-                }
-
-                if (secondaryMouseClicked) {
-                    _activeSubTool.OnSecondaryClickOverlay();
-                }
+            if (secondaryMouseClicked) {
+                activeLegacySubTool_?.OnSecondaryClickOverlay();
+                activeSubTool_?.OnToolRightClick();
             }
         }
 
         public void CallOnToolGUI(Event e) => OnToolGUI(e);
+
+        /// <summary>
+        /// Immediate mode GUI (IMGUI) handler called every frame for input and IMGUI rendering.
+        /// </summary>
+        /// <param name="e">Event to handle.</param>
         protected override void OnToolGUI(Event e) {
             try {
                 if (!Input.GetMouseButtonDown(0)) {
@@ -484,23 +505,23 @@ namespace TrafficManager.UI {
                 }
 
                 if (Options.nodesOverlay) {
-                    GuiDisplaySegments();
-                    GuiDisplayNodes();
+                    DebugGuiDisplaySegments();
+                    DebugGuiDisplayNodes();
                 }
 
                 if (Options.vehicleOverlay) {
-                    GuiDisplayVehicles();
+                    DebugGuiDisplayVehicles();
                 }
 
                 if (Options.citizenOverlay) {
-                    GuiDisplayCitizens();
+                    DebugGuiDisplayCitizens();
                 }
 
                 if (Options.buildingOverlay) {
-                    GuiDisplayBuildings();
+                    DebugGuiDisplayBuildings();
                 }
 
-                foreach (KeyValuePair<ToolMode, SubTool> en in subTools_) {
+                foreach (KeyValuePair<ToolMode, LegacySubTool> en in legacySubTools_) {
                     en.Value.ShowGUIOverlay(en.Key, en.Key != GetToolMode());
                 }
 
@@ -508,8 +529,10 @@ namespace TrafficManager.UI {
                 guiColor.a = 1f;
                 GUI.color = guiColor;
 
-                if (_activeSubTool != null) {
-                    _activeSubTool.OnToolGUI(e);
+                if (activeLegacySubTool_ != null) {
+                    activeLegacySubTool_.OnToolGUI(e);
+                } else if (activeSubTool_ != null) {
+                    activeSubTool_.UpdateEveryFrame();
                 } else {
                     DefaultOnToolGUI(e);
                 }
@@ -569,19 +592,19 @@ namespace TrafficManager.UI {
 
         /// <returns>the average half width of all connected segments</returns>
         private static float CalculateNodeRadius(ushort nodeId) {
-
-            float sum_half_width = 0;
+            float sumHalfWidth = 0;
             int count = 0;
             Constants.ServiceFactory.NetService.IterateNodeSegments(
                 nodeId,
                 (ushort segmentId, ref NetSegment segment) => {
-                    sum_half_width += segment.Info.m_halfWidth;
+                    sumHalfWidth += segment.Info.m_halfWidth;
                     count++;
                     return true;
                 });
-            return sum_half_width / count;
+            return sumHalfWidth / count;
         }
 
+        // TODO: move to UI.Helpers (Highlight)
         public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                    ushort nodeId,
                                    Color color,
@@ -597,6 +620,7 @@ namespace TrafficManager.UI {
         /// <param name="segmentId"></param>
         /// <param name="cut">The lenght of the highlight [0~1] </param>
         /// <param name="bStartNode">Determines the direction of the half sausage.</param>
+        // TODO: move to UI.Helpers (Highlight)
         public void DrawCutSegmentEnd(RenderManager.CameraInfo cameraInfo,
                        ushort segmentId,
                        float cut,
@@ -650,6 +674,7 @@ namespace TrafficManager.UI {
         /// similar to NetTool.RenderOverlay()
         /// but with additional control over alphaBlend.
         /// </summary>
+        // TODO: move to UI.Helpers (Highlight)
         internal static void DrawSegmentOverlay(
             RenderManager.CameraInfo cameraInfo,
             ushort segmentId,
@@ -691,15 +716,15 @@ namespace TrafficManager.UI {
                 1280f,
                 false,
                 alphaBlend);
-
         }
 
         [UsedImplicitly]
-        private void DrawOverlayCircle(RenderManager.CameraInfo cameraInfo,
-                                       Color color,
-                                       Vector3 position,
-                                       float width,
-                                       bool alpha) {
+        // TODO: move to UI.Helpers (Highlight)
+        private static void DrawOverlayCircle(RenderManager.CameraInfo cameraInfo,
+                                              Color color,
+                                              Vector3 position,
+                                              float width,
+                                              bool alpha) {
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(
                 cameraInfo,
@@ -712,6 +737,7 @@ namespace TrafficManager.UI {
                 alpha);
         }
 
+        // TODO: move to UI.Helpers (Highlight)
         public void DrawStaticSquareOverlayGridTexture(Texture2D texture,
                                                        Vector3 camPos,
                                                        Vector3 gridOrigin,
@@ -735,6 +761,7 @@ namespace TrafficManager.UI {
         }
 
         [UsedImplicitly]
+        // TODO: move to UI.Helpers (Highlight)
         public bool DrawHoverableSquareOverlayGridTexture(Texture2D texture,
                                                           Vector3 camPos,
                                                           Vector3 gridOrigin,
@@ -757,6 +784,7 @@ namespace TrafficManager.UI {
                 true);
         }
 
+        // TODO: move to UI.Helpers (Highlight)
         public bool DrawGenericSquareOverlayGridTexture(Texture2D texture,
                                                         Vector3 camPos,
                                                         Vector3 gridOrigin,
@@ -782,6 +810,7 @@ namespace TrafficManager.UI {
                 canHover);
         }
 
+        // TODO: move to UI.Helpers (Highlight)
         public void DrawStaticOverlayGridTexture(Texture2D texture,
                                                  Vector3 camPos,
                                                  Vector3 gridOrigin,
@@ -808,6 +837,8 @@ namespace TrafficManager.UI {
                 false);
         }
 
+        [UsedImplicitly]
+        // TODO: move to UI.Helpers (Highlight)
         public bool DrawHoverableOverlayGridTexture(Texture2D texture,
                                                     Vector3 camPos,
                                                     Vector3 gridOrigin,
@@ -834,6 +865,7 @@ namespace TrafficManager.UI {
                 true);
         }
 
+        // TODO: move to UI.Helpers (Highlight)
         public bool DrawGenericOverlayGridTexture(Texture2D texture,
                                                   Vector3 camPos,
                                                   Vector3 gridOrigin,
@@ -852,6 +884,7 @@ namespace TrafficManager.UI {
             return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, canHover);
         }
 
+        // TODO: move to UI.Helpers (Highlight)
         public void DrawStaticSquareOverlayTexture(Texture2D texture,
                                                    Vector3 camPos,
                                                    Vector3 worldPos,
@@ -859,6 +892,7 @@ namespace TrafficManager.UI {
             DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, false);
         }
 
+        // TODO: move to UI.Helpers (Highlight)
         public bool DrawHoverableSquareOverlayTexture(Texture2D texture,
                                                       Vector3 camPos,
                                                       Vector3 worldPos,
@@ -866,6 +900,7 @@ namespace TrafficManager.UI {
             return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, true);
         }
 
+        // TODO: move to UI.Helpers (Highlight)
         public bool DrawGenericSquareOverlayTexture(Texture2D texture,
                                                     Vector3 camPos,
                                                     Vector3 worldPos,
@@ -874,6 +909,7 @@ namespace TrafficManager.UI {
             return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, canHover);
         }
 
+        // TODO: move to UI.Helpers (Highlight)
         public void DrawStaticOverlayTexture(Texture2D texture,
                                              Vector3 camPos,
                                              Vector3 worldPos,
@@ -883,6 +919,7 @@ namespace TrafficManager.UI {
         }
 
         [UsedImplicitly]
+        // TODO: move to UI.Helpers (Highlight)
         public bool DrawHoverableOverlayTexture(Texture2D texture,
                                                 Vector3 camPos,
                                                 Vector3 worldPos,
@@ -891,6 +928,7 @@ namespace TrafficManager.UI {
             return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, true);
         }
 
+        // TODO: move to UI.Helpers (Highlight)
         public bool DrawGenericOverlayTexture(Texture2D texture,
                                               Vector3 camPos,
                                               Vector3 worldPos,
@@ -898,7 +936,7 @@ namespace TrafficManager.UI {
                                               float height,
                                               bool canHover) {
             // Is point in screen?
-            if (!WorldToScreenPoint(worldPos, out Vector3 screenPos)) {
+            if (!GeometryUtil.WorldToScreenPoint(worldPos, out Vector3 screenPos)) {
                 return false;
             }
 
@@ -927,23 +965,8 @@ namespace TrafficManager.UI {
             return hovered;
         }
 
-        /// <summary>
-        /// Transforms a world point into a screen point
-        /// </summary>
-        /// <param name="worldPos"></param>
-        /// <param name="screenPos"></param>
-        /// <returns></returns>
-        public bool WorldToScreenPoint(Vector3 worldPos, out Vector3 screenPos) {
-            screenPos = Camera.main.WorldToScreenPoint(worldPos);
-            screenPos.y = Screen.height - screenPos.y;
-
-            return screenPos.z >= 0;
-        }
-
-        /// <summary>
-        /// Shows a tutorial message. Must be called by a Unity thread.
-        /// </summary>
-        /// <param name="localeKey"></param>
+        /// <summary>Shows a tutorial message. Must be called by a Unity thread.</summary>
+        /// <param name="localeKey">Tutorial key.</param>
         public static void ShowAdvisor(string localeKey) {
             if (!GlobalConfig.Instance.Main.EnableTutorial) {
                 return;
@@ -967,6 +990,7 @@ namespace TrafficManager.UI {
             }
         }
 
+        // Does nothing
         public override void SimulationStep() {
             base.SimulationStep();
 
@@ -986,13 +1010,14 @@ namespace TrafficManager.UI {
             // }
         }
 
-        public bool DoRayCast(RaycastInput input, out RaycastOutput output) {
-            return RayCast(input, out output);
-        }
+        // public bool DoRayCast(RaycastInput input, out RaycastOutput output) {
+        //     return RayCast(input, out output);
+        // }
 
-        private static Vector3 prev_mousePosition;
+        private static Vector3 prevMousePosition;
+
         private bool DetermineHoveredElements() {
-            if(prev_mousePosition == m_mousePosition) {
+            if (prevMousePosition == m_mousePosition) {
                 // if mouse ray is not changing use cached results.
                 // the assumption is that its practically impossible to change mouse ray
                 // without changing m_mousePosition.
@@ -1004,7 +1029,7 @@ namespace TrafficManager.UI {
             HitPos = m_mousePosition;
 
             bool mouseRayValid = !UIView.IsInsideUI() && Cursor.visible &&
-                                 (_activeSubTool == null || !_activeSubTool.IsCursorInPanel());
+                                 (activeLegacySubTool_ == null || !activeLegacySubTool_.IsCursorInPanel());
 
             if (mouseRayValid) {
                 // find currently hovered node
@@ -1012,10 +1037,10 @@ namespace TrafficManager.UI {
                     m_netService = {
                         // find road nodes
                         m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels,
-                        m_service = ItemClass.Service.Road
+                        m_service = ItemClass.Service.Road,
                     },
                     m_ignoreTerrain = true,
-                    m_ignoreNodeFlags = NetNode.Flags.None
+                    m_ignoreNodeFlags = NetNode.Flags.None,
                 };
 
                 // nodeInput.m_netService2.m_itemLayers = ItemClass.Layer.Default
@@ -1159,30 +1184,33 @@ namespace TrafficManager.UI {
         /// </summary>
         internal static float GetAccurateHitHeight() {
             // cache result.
-            if (HitPos.y == prev_H) {
+            if (FloatUtil.NearlyEqual(HitPos.y, prev_H)) {
                 return prev_H_Fixed;
             }
             prev_H = HitPos.y;
 
             if (Shortcuts.GetSeg(HoveredSegmentId).GetClosestLanePosition(
-                HitPos, NetInfo.LaneType.All, VehicleInfo.VehicleType.All,
-                out Vector3 pos, out uint laneID, out int laneIndex, out float laneOffset)) {
-
+                HitPos,
+                NetInfo.LaneType.All,
+                VehicleInfo.VehicleType.All,
+                out Vector3 pos,
+                out uint laneId,
+                out int laneIndex,
+                out float laneOffset)) {
                 return prev_H_Fixed = pos.y;
             }
             return prev_H_Fixed = HitPos.y + 0.5f;
         }
 
-        /// <summary>
-        /// Displays lane ids over lanes
-        /// </summary>
-        private void GuiDisplayLanes(ushort segmentId,
-                                     ref NetSegment segment,
-                                     ref NetInfo segmentInfo)
+        /// <summary>Displays lane ids over lanes.</summary>
+        // TODO: Extract into a Debug Tool GUI class
+        private void DebugGuiDisplayLanes(ushort segmentId,
+                                          ref NetSegment segment,
+                                          ref NetInfo segmentInfo)
         {
             var _counterStyle = new GUIStyle();
             Vector3 centerPos = segment.m_bounds.center;
-            bool visible = WorldToScreenPoint(centerPos, out Vector3 screenPos);
+            bool visible = GeometryUtil.WorldToScreenPoint(centerPos, out Vector3 screenPos);
 
             if (!visible) {
                 return;
@@ -1348,13 +1376,12 @@ namespace TrafficManager.UI {
             GUI.Label(labelRect, labelStr, _counterStyle);
         }
 
-        /// <summary>
-        /// Displays segment ids over segments
-        /// </summary>
-        private void GuiDisplaySegments() {
+        /// <summary>Displays segment ids over segments.</summary>
+        // TODO: Extract into a Debug Tool GUI class
+        private void DebugGuiDisplaySegments() {
             TrafficMeasurementManager trafficMeasurementManager = TrafficMeasurementManager.Instance;
             NetManager netManager = Singleton<NetManager>.instance;
-            GUIStyle _counterStyle = new GUIStyle();
+            GUIStyle counterStyle = new GUIStyle();
             IExtSegmentEndManager endMan = Constants.ManagerFactory.ExtSegmentEndManager;
             NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
 
@@ -1376,7 +1403,7 @@ namespace TrafficManager.UI {
                 NetInfo segmentInfo = segmentsBuffer[i].Info;
 
                 Vector3 centerPos = segmentsBuffer[i].m_bounds.center;
-                bool visible = WorldToScreenPoint(centerPos, out Vector3 screenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(centerPos, out Vector3 screenPos);
 
                 if (!visible) {
                     continue;
@@ -1390,8 +1417,8 @@ namespace TrafficManager.UI {
                 }
 
                 float zoom = 1.0f / diff.magnitude * 150f;
-                _counterStyle.fontSize = (int)(12f * zoom);
-                _counterStyle.normal.textColor = new Color(1f, 0f, 0f);
+                counterStyle.fontSize = (int)(12f * zoom);
+                counterStyle.normal.textColor = new Color(1f, 0f, 0f);
 
                 var labelSb = new StringBuilder();
                 labelSb.AppendFormat("Segment {0}", i);
@@ -1480,13 +1507,13 @@ namespace TrafficManager.UI {
 #endif
 
                 var labelStr = labelSb.ToString();
-                Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
+                Vector2 dim = counterStyle.CalcSize(new GUIContent(labelStr));
                 Rect labelRect = new Rect(screenPos.x - (dim.x / 2f), screenPos.y, dim.x, dim.y);
 
-                GUI.Label(labelRect, labelStr, _counterStyle);
+                GUI.Label(labelRect, labelStr, counterStyle);
 
                 if (Options.showLanes) {
-                    GuiDisplayLanes(
+                    DebugGuiDisplayLanes(
                         (ushort)i,
                         ref segmentsBuffer[i],
                         ref segmentInfo);
@@ -1494,10 +1521,9 @@ namespace TrafficManager.UI {
             }
         }
 
-        /// <summary>
-        /// Displays node ids over nodes
-        /// </summary>
-        private void GuiDisplayNodes() {
+        /// <summary>Displays node ids over nodes.</summary>
+        // TODO: Extract into a Debug Tool GUI class
+        private void DebugGuiDisplayNodes() {
             var counterStyle = new GUIStyle();
             NetManager netManager = Singleton<NetManager>.instance;
 
@@ -1509,7 +1535,7 @@ namespace TrafficManager.UI {
                 }
 
                 Vector3 pos = netManager.m_nodes.m_buffer[i].m_position;
-                bool visible = WorldToScreenPoint(pos, out Vector3 screenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(pos, out Vector3 screenPos);
 
                 if (!visible) {
                     continue;
@@ -1540,10 +1566,9 @@ namespace TrafficManager.UI {
             }
         }
 
-        /// <summary>
-        /// Displays vehicle ids over vehicles
-        /// </summary>
-        private void GuiDisplayVehicles() {
+        /// <summary>Displays vehicle ids over vehicles.</summary>
+        // TODO: Extract into a Debug Tool GUI class
+        private void DebugGuiDisplayVehicles() {
             GUIStyle _counterStyle = new GUIStyle();
             SimulationManager simManager = Singleton<SimulationManager>.instance;
             ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
@@ -1565,7 +1590,7 @@ namespace TrafficManager.UI {
                 }
 
                 Vector3 vehPos = vehicleManager.m_vehicles.m_buffer[i].GetSmoothPosition((ushort)i);
-                bool visible = WorldToScreenPoint(vehPos, out Vector3 screenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(vehPos, out Vector3 screenPos);
 
                 if (!visible) {
                     continue;
@@ -1642,11 +1667,10 @@ namespace TrafficManager.UI {
             }
         }
 
-        /// <summary>
-        /// Displays debug data over citizens
-        /// </summary>
-        private void GuiDisplayCitizens() {
-            GUIStyle _counterStyle = new GUIStyle();
+        /// <summary>Displays debug data over citizens. </summary>
+        // TODO: Extract into a Debug Tool GUI class
+        private void DebugGuiDisplayCitizens() {
+            GUIStyle counterStyle = new GUIStyle();
             CitizenManager citManager = Singleton<CitizenManager>.instance;
             Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
             VehicleParked[] parkedVehiclesBuffer = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
@@ -1668,7 +1692,7 @@ namespace TrafficManager.UI {
 #endif
 
                 Vector3 pos = citManager.m_instances.m_buffer[i].GetSmoothPosition((ushort)i);
-                bool visible = WorldToScreenPoint(pos, out Vector3 screenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(pos, out Vector3 screenPos);
 
                 if (!visible) {
                     continue;
@@ -1683,8 +1707,8 @@ namespace TrafficManager.UI {
 
                 float zoom = 1.0f / diff.magnitude * 150f;
 
-                _counterStyle.fontSize = (int)(10f * zoom);
-                _counterStyle.normal.textColor = new Color(1f, 0f, 1f);
+                counterStyle.fontSize = (int)(10f * zoom);
+                counterStyle.normal.textColor = new Color(1f, 0f, 1f);
                 // _counterStyle.normal.background = MakeTex(1, 1, new Color(0f, 0f, 0f, 0.4f));
 
 #if DEBUG
@@ -1724,18 +1748,19 @@ namespace TrafficManager.UI {
                 }
 
                 string labelStr = labelSb.ToString();
-                Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
+                Vector2 dim = counterStyle.CalcSize(new GUIContent(labelStr));
                 Rect labelRect = new Rect(
                     screenPos.x - (dim.x / 2f),
                     screenPos.y - dim.y - 50f,
                     dim.x,
                     dim.y);
 
-                GUI.Box(labelRect, labelStr, _counterStyle);
+                GUI.Box(labelRect, labelStr, counterStyle);
             }
         }
 
-        private void GuiDisplayBuildings() {
+        // TODO: Extract into a Debug Tool GUI class
+        private void DebugGuiDisplayBuildings() {
             GUIStyle _counterStyle = new GUIStyle();
             BuildingManager buildingManager = Singleton<BuildingManager>.instance;
 
@@ -1746,7 +1771,7 @@ namespace TrafficManager.UI {
                 }
 
                 Vector3 pos = buildingManager.m_buildings.m_buffer[i].m_position;
-                bool visible = WorldToScreenPoint(pos, out Vector3 screenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(pos, out Vector3 screenPos);
 
                 if (!visible) {
                     continue;
@@ -1758,7 +1783,7 @@ namespace TrafficManager.UI {
                     continue; // do not draw if too distant
                 }
 
-                float zoom = 1.0f / diff.magnitude * 150f;
+                float zoom = 150f / diff.magnitude;
 
                 _counterStyle.fontSize = (int)(10f * zoom);
                 _counterStyle.normal.textColor = new Color(0f, 1f, 0f);
@@ -1786,128 +1811,11 @@ namespace TrafficManager.UI {
             return base.GetToolColor(warning, error);
         }
 
-        internal static int GetSegmentNumVehicleLanes(ushort segmentId,
-                                                      ushort? nodeId,
-                                                      out int numDirections,
-                                                      VehicleInfo.VehicleType vehicleTypeFilter)
-        {
-            NetManager netManager = Singleton<NetManager>.instance;
-
-            NetInfo info = netManager.m_segments.m_buffer[segmentId].Info;
-            uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
-            var laneIndex = 0;
-
-            NetInfo.Direction? dir2 = null;
-            // NetInfo.Direction? dir3 = null;
-
-            numDirections = 0;
-            HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
-
-            if (nodeId != null) {
-                NetInfo.Direction? dir = (netManager.m_segments.m_buffer[segmentId].m_startNode == nodeId)
-                                             ? NetInfo.Direction.Backward
-                                             : NetInfo.Direction.Forward;
-                dir2 =
-                    ((netManager.m_segments.m_buffer[segmentId].m_flags &
-                      NetSegment.Flags.Invert) == NetSegment.Flags.None)
-                        ? dir
-                        : NetInfo.InvertDirection((NetInfo.Direction)dir);
-
-                // dir3 = TrafficPriorityManager.IsLeftHandDrive()
-                //      ? NetInfo.InvertDirection((NetInfo.Direction)dir2) : dir2;
-           }
-
-            var numLanes = 0;
-
-            while (laneIndex < info.m_lanes.Length && curLaneId != 0u) {
-                if (((info.m_lanes[laneIndex].m_laneType &
-                      (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) != NetInfo.LaneType.None
-                     && (info.m_lanes[laneIndex].m_vehicleType & vehicleTypeFilter) != VehicleInfo.VehicleType.None)
-                    && (dir2 == null || info.m_lanes[laneIndex].m_finalDirection == dir2))
-                {
-                    if (!directions.Contains(info.m_lanes[laneIndex].m_finalDirection)) {
-                        directions.Add(info.m_lanes[laneIndex].m_finalDirection);
-                        ++numDirections;
-                    }
-
-                    numLanes++;
-                }
-
-                curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
-                laneIndex++;
-            }
-
-            return numLanes;
-        }
-
-        /// <summary>
-        /// Calculates the center of each group of lanes in the same directions.
-        /// </summary>
-        /// <param name="segmentId"></param>
-        /// <param name="segmentCenterByDir">output dictionary of (direction,center) pairs</param>
-        /// <param name="minDistance">minimum distance allowed between
-        /// centers of forward and backward directions.
-        internal static void CalculateSegmentCenterByDir(
-            ushort segmentId,
-            Dictionary<NetInfo.Direction, Vector3> segmentCenterByDir,
-            float minDistance=0f)
-        {
-            segmentCenterByDir.Clear();
-            NetManager netManager = Singleton<NetManager>.instance;
-
-            NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
-            uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
-            var numCentersByDir =
-                new Dictionary<NetInfo.Direction, int>();
-            uint laneIndex = 0;
-
-            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
-                if ((segmentInfo.m_lanes[laneIndex].m_laneType &
-                     (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) == NetInfo.LaneType.None) {
-                    goto nextIter;
-                }
-
-                NetInfo.Direction dir = segmentInfo.m_lanes[laneIndex].m_finalDirection;
-                Vector3 bezierCenter =
-                    netManager.m_lanes.m_buffer[curLaneId].m_bezier.Position(0.5f);
-
-                if (!segmentCenterByDir.ContainsKey(dir)) {
-                    segmentCenterByDir[dir] = bezierCenter;
-                    numCentersByDir[dir] = 1;
-                } else {
-                    segmentCenterByDir[dir] += bezierCenter;
-                    numCentersByDir[dir]++;
-                }
-
-                nextIter:
-
-                curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
-                laneIndex++;
-            }
-
-            foreach (KeyValuePair<NetInfo.Direction, int> e in numCentersByDir) {
-                segmentCenterByDir[e.Key] /= (float)e.Value;
-            }
-            if (minDistance > 0) {
-                bool b1 = segmentCenterByDir.TryGetValue(NetInfo.Direction.Forward, out Vector3 pos1);
-                bool b2 = segmentCenterByDir.TryGetValue(NetInfo.Direction.Backward, out Vector3 pos2);
-                Vector3 diff = pos1 - pos2;
-                float distance = diff.magnitude;
-                if (b1 && b2 && distance < minDistance) {
-                    Vector3 move = diff * (0.5f * minDistance / distance);
-                    segmentCenterByDir[NetInfo.Direction.Forward] = pos1 + move;
-                    segmentCenterByDir[NetInfo.Direction.Backward] = pos2 - move;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Creates a texture width x height, filled with color
-        /// </summary>
-        /// <param name="width">Size</param>
-        /// <param name="height">Size</param>
-        /// <param name="col">Fill color</param>
-        /// <returns>Texture 2D</returns>
+        /// <summary>Creates a texture width x height, filled with color.</summary>
+        /// <param name="width">Size x.</param>
+        /// <param name="height">Size y.</param>
+        /// <param name="col">Fill color.</param>
+        /// <returns>New solid color Texture2D.</returns>
         public static Texture2D CreateSolidColorTexture(int width, int height, Color col) {
             var pix = new Color[width * height];
 
@@ -1922,32 +1830,6 @@ namespace TrafficManager.UI {
             return result;
         }
 
-        /// <summary>
-        /// Creates new texture with changed alpha transparency for every pixel
-        /// </summary>
-        /// <param name="tex">Copy from</param>
-        /// <param name="alpha">New alpha</param>
-        /// <returns>New texture</returns>
-        public static Texture2D AdjustAlpha(Texture2D tex, float alpha) {
-            Color[] texColors = tex.GetPixels();
-            Color[] retPixels = new Color[texColors.Length];
-
-            for (int i = 0; i < texColors.Length; ++i) {
-                retPixels[i] = new Color(
-                    texColors[i].r,
-                    texColors[i].g,
-                    texColors[i].b,
-                    texColors[i].a * alpha);
-            }
-
-            Texture2D ret = new Texture2D(tex.width, tex.height, TextureFormat.ARGB32, false);
-
-            ret.SetPixels(retPixels);
-            ret.Apply();
-
-            return ret;
-        }
-
         internal static bool IsMouseOver(Rect boundingBox) {
             return boundingBox.Contains(Event.current.mousePosition);
         }
@@ -1960,6 +1842,7 @@ namespace TrafficManager.UI {
         /// You should call this method from OnPrimaryClickOverlay() once click is handled. consume the click.
         /// TODO [issue #740] improve this.
         /// </summary>
+        [Obsolete("Avoid using LegacyTool, Immediate Mode GUI and OnToolGUI, use new U GUI instead.")]
         internal bool CheckClicked() {
             if (Input.GetMouseButtonDown(0) && !_mouseClickProcessed) {
                 _mouseClickProcessed = true;
@@ -1972,7 +1855,7 @@ namespace TrafficManager.UI {
         /// <summary>
         /// Displays a warning prompt in center of the screen.
         /// </summary>
-        /// 
+        ///
         /// <param name="message">The localized body text of the prompt.</param>
         public void WarningPrompt(string message) {
             if (string.IsNullOrEmpty(message)) {

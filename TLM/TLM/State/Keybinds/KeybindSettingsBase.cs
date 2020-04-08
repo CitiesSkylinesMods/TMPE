@@ -1,4 +1,4 @@
-﻿// Based on keymapping module from CS-MoveIt mod
+// Based on keymapping module from CS-MoveIt mod
 // Thanks to https://github.com/Quboid/CS-MoveIt
 namespace TrafficManager.State.Keybinds {
     using System;
@@ -50,7 +50,7 @@ namespace TrafficManager.State.Keybinds {
         public static KeybindSetting LaneConnectorStayInLane = new KeybindSetting(
             "LaneConnector",
             "Key_LaneConnector_StayInLane",
-            SavedInputKey.Encode(KeyCode.S, false, true, false));
+            SavedInputKey.Encode(KeyCode.S, control:true, shift:false, alt:false));
 
         public static KeybindSetting LaneConnectorDelete = new KeybindSetting(
             "LaneConnector",

@@ -9,34 +9,78 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.API.Util;
     using TrafficManager.State.Keybinds;
     using TrafficManager.State;
+    using TrafficManager.U;
     using UnityEngine;
 
     public class MainMenuPanel
         : U.Panel.BaseUWindowPanel,
-          IObserver<GlobalConfig>
-    {
-        private static readonly Type[] MENU_BUTTON_TYPES
-            = {
-                // first row
-                typeof(ToggleTrafficLightsButton),
-                typeof(TimedTrafficLightsButton),
-                typeof(ManualTrafficLightsButton),
-                typeof(LaneConnectorButton),
-                typeof(LaneArrowsButton),
-                typeof(DespawnButton),
-                // second row
-                typeof(PrioritySignsButton),
-                typeof(JunctionRestrictionsButton),
-                typeof(SpeedLimitsButton),
-                typeof(VehicleRestrictionsButton),
-                typeof(ParkingRestrictionsButton),
-                typeof(ClearTrafficButton),
-            };
-
+          IObserver<GlobalConfig> {
         public const int DEFAULT_MENU_X = 85;
         public const int DEFAULT_MENU_Y = 60;
+        private const string GAMEOBJECT_NAME = "TMPE_MainMenuPanel";
 
-        public BaseMenuButton[] Buttons { get; private set; }
+        private struct MenuButtonDef {
+            public ToolMode Mode;
+            public Type ButtonType;
+        }
+
+        private static readonly MenuButtonDef[] MENU_BUTTON_TYPES
+            = {
+                  new MenuButtonDef {
+                                        ButtonType = typeof(ToggleTrafficLightsButton),
+                                        Mode = ToolMode.ToggleTrafficLight,
+                                    },
+                  new MenuButtonDef {
+                                        ButtonType = typeof(TimedTrafficLightsButton),
+                                        Mode = ToolMode.TimedLightsButton,
+                                    },
+                  new MenuButtonDef {
+                                        ButtonType = typeof(ManualTrafficLightsButton),
+                                        Mode = ToolMode.ManualSwitch,
+                                    },
+                  new MenuButtonDef {
+                                        ButtonType = typeof(LaneConnectorButton),
+                                        Mode = ToolMode.LaneConnector,
+                                    },
+                  new MenuButtonDef {
+                                        ButtonType = typeof(LaneArrowsButton),
+                                        Mode = ToolMode.LaneArrows,
+                                    },
+                  new MenuButtonDef {
+                                        ButtonType = typeof(DespawnButton),
+                                        Mode = ToolMode.DespawnButton,
+                                    },
+                  new MenuButtonDef {
+                                        ButtonType = typeof(PrioritySignsButton),
+                                        Mode = ToolMode.AddPrioritySigns,
+                                    },
+                  new MenuButtonDef {
+                                        ButtonType = typeof(JunctionRestrictionsButton),
+                                        Mode = ToolMode.JunctionRestrictions,
+                                    },
+                  new MenuButtonDef {
+                                        ButtonType = typeof(SpeedLimitsButton),
+                                        Mode = ToolMode.SpeedLimits,
+                                    },
+                  new MenuButtonDef {
+                                        ButtonType = typeof(VehicleRestrictionsButton),
+                                        Mode = ToolMode.VehicleRestrictions,
+                                    },
+                  new MenuButtonDef {
+                                        ButtonType = typeof(ParkingRestrictionsButton),
+                                        Mode = ToolMode.ParkingRestrictions,
+                                    },
+                  new MenuButtonDef {
+                                        ButtonType = typeof(ClearTrafficButton),
+                                        Mode = ToolMode.ClearTrafficButton,
+                                    },
+              };
+
+        /// <summary>List of buttons stores created UIButtons in order. </summary>
+        public List<BaseMenuButton> Buttons { get; private set; }
+
+        /// <summary>Dict of buttons allows quick search by toolmode.</summary>
+        private Dictionary<ToolMode, BaseMenuButton> QuickFindButtons;
 
         public UILabel VersionLabel { get; private set; }
 
@@ -54,6 +98,10 @@ namespace TrafficManager.UI.MainMenu {
         private MainMenuLayout menuLayout_;
 
         public override void Start() {
+            base.Start();
+
+            U.UIUtil.MakeUniqueAndSetName(this.gameObject, GAMEOBJECT_NAME);
+
             GlobalConfig conf = GlobalConfig.Instance;
 
             OnUpdate(conf);
@@ -70,23 +118,27 @@ namespace TrafficManager.UI.MainMenu {
 
             // Create and populate list of background atlas keys, used by all buttons
             // And also each button will have a chance to add their own atlas keys for loading.
-            var tmpSkin = new U.Button.ButtonSkin() {
-                                                        Prefix = "MainMenuPanel",
-                                                        BackgroundPrefix = "RoundButton",
-                                                        ForegroundNormal = false,
-                                                        BackgroundHovered = true,
-                                                        BackgroundActive = true,
-                                                    };
+            var tmpSkin = new U.Button.ButtonSkin {
+                                                      Prefix = "MainMenuPanel",
+                                                      BackgroundPrefix = "RoundButton",
+                                                      ForegroundNormal = false,
+                                                      BackgroundHovered = true,
+                                                      BackgroundActive = true,
+                                                  };
             // By default the atlas will include backgrounds: DefaultRound-bg-normal
             HashSet<string> atlasKeysSet = tmpSkin.CreateAtlasKeyset();
 
-            Buttons = new BaseMenuButton[MENU_BUTTON_TYPES.Length];
-            for (int i = 0; i < MENU_BUTTON_TYPES.Length; ++i) {
+            QuickFindButtons = new Dictionary<ToolMode, BaseMenuButton>();
+            Buttons = new List<BaseMenuButton>();
+            foreach (MenuButtonDef buttonDef in MENU_BUTTON_TYPES) {
                 // Create and populate the panel with buttons
-                Buttons[i] = AddUIComponent(MENU_BUTTON_TYPES[i]) as BaseMenuButton;
+                var newButton = AddUIComponent(buttonDef.ButtonType) as BaseMenuButton;
 
                 // Also ask each button what sprites they need
-                Buttons[i].SetupButtonSkin(atlasKeysSet);
+                newButton.SetupButtonSkin(atlasKeysSet);
+
+                QuickFindButtons.Add(buttonDef.Mode, newButton);
+                Buttons.Add(newButton);
             }
 
             // Create atlas and give it to all buttons
@@ -97,8 +149,8 @@ namespace TrafficManager.UI.MainMenu {
                                    512,
                                    atlasKeysSet);
 
-            for (int i = 0; i < MENU_BUTTON_TYPES.Length; ++i) {
-                Buttons[i].atlas = allButtonsAtlas_;
+            foreach (BaseMenuButton b in Buttons) {
+                b.atlas = allButtonsAtlas_;
             }
 
             var dragHandler = new GameObject("TMPE_Menu_DragHandler");
@@ -191,10 +243,7 @@ namespace TrafficManager.UI.MainMenu {
             /// The button cannot be smaller than 40px.</summary>
             /// <returns>Button size for current screen resolution.</returns>
             internal static float GetButtonSize() {
-                var scaledSize
-                    = U.UIScaler.ScreenSizeSmallestFraction(0.0208f, 0.037f) *
-                      U.UIScaler.GetUIScale();
-                return Mathf.Max(scaledSize, 40f);
+                return 40f * UIScaler.GetScale();
             }
 
             internal static float GetTitlebarHeight() {
@@ -275,29 +324,25 @@ namespace TrafficManager.UI.MainMenu {
             // Some safety checks to not trigger while full screen/modals are open
             // Check the key and then click the corresponding button
             if (KeybindSettingsBase.ToggleTrafficLightTool.IsPressed(Event.current)) {
-                ClickToolButton(typeof(ToggleTrafficLightsButton));
+                ClickToolButton(ToolMode.ToggleTrafficLight);
             } else if (KeybindSettingsBase.LaneArrowTool.IsPressed(Event.current)) {
-                ClickToolButton(typeof(LaneArrowsButton));
+                ClickToolButton(ToolMode.LaneArrows);
             } else if (KeybindSettingsBase.LaneConnectionsTool.IsPressed(Event.current)) {
-                ClickToolButton(typeof(LaneConnectorButton));
+                ClickToolButton(ToolMode.LaneConnector);
             } else if (KeybindSettingsBase.PrioritySignsTool.IsPressed(Event.current)) {
-                ClickToolButton(typeof(PrioritySignsButton));
+                ClickToolButton(ToolMode.AddPrioritySigns);
             } else if (KeybindSettingsBase.JunctionRestrictionsTool.IsPressed(Event.current)) {
-                ClickToolButton(typeof(JunctionRestrictionsButton));
+                ClickToolButton(ToolMode.JunctionRestrictions);
             } else if (KeybindSettingsBase.SpeedLimitsTool.IsPressed(Event.current)) {
-                ClickToolButton(typeof(SpeedLimitsButton));
+                ClickToolButton(ToolMode.JunctionRestrictions);
             }
         }
 
-        /// <summary>For given button class type, find it in the tool palette and send click</summary>
-        /// <param name="t">Something like typeof(ToggleTrafficLightsButton)</param>
-        void ClickToolButton(Type t) {
-            for (var i = 0; i < MENU_BUTTON_TYPES.Length; i++) {
-                if (MENU_BUTTON_TYPES[i] == t) {
-                    Buttons[i].SimulateClick();
-                    return;
-                }
+        /// <summary>For given button mode, send click.</summary>
+        internal void ClickToolButton(ToolMode toolMode) {
+            if (QuickFindButtons.TryGetValue(toolMode, out var b)) {
+                b.SimulateClick();
             }
         }
-    }
+    } // end class
 }

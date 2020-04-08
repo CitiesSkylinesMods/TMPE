@@ -5,7 +5,7 @@
     using TrafficManager.U.Button;
 
     public class ToggleTrafficLightsButton : BaseMenuToolModeButton {
-        protected override ToolMode ToolMode => ToolMode.SwitchTrafficLight;
+        protected override ToolMode ToolMode => ToolMode.ToggleTrafficLight;
 
         public override void SetupButtonSkin(HashSet<string> atlasKeys) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
