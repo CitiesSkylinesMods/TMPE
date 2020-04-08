@@ -492,13 +492,21 @@ namespace TrafficManager.UI {
             }
         }
 
-        public void CallOnToolGUI(Event e) => OnToolGUI(e);
+        protected override void OnToolGUI(Event e) {
+            OnToolGUIImpl(e);
+            if (GetToolMode() == ToolMode.None) {
+                DefaultOnToolGUI(e);
+            }
+        }
+
 
         /// <summary>
-        /// Immediate mode GUI (IMGUI) handler called every frame for input and IMGUI rendering.
+        /// Immediate mode GUI (IMGUI) handler called every frame for input and IMGUI rendering (persistent overlay).
+        /// If any subtool is active it calls OnToolGUI for that subtool
+        /// Must not call base.OnToolGUI(). Doing so may cause infinite recursion with Postfix of DefaultTool.OnToolGUI()
         /// </summary>
         /// <param name="e">Event to handle.</param>
-        protected override void OnToolGUI(Event e) {
+        public void OnToolGUIImpl(Event e) {
             try {
                 if (!Input.GetMouseButtonDown(0)) {
                     _mouseClickProcessed = false;
@@ -533,8 +541,6 @@ namespace TrafficManager.UI {
                     activeLegacySubTool_.OnToolGUI(e);
                 } else if (activeSubTool_ != null) {
                     activeSubTool_.UpdateEveryFrame();
-                } else {
-                    DefaultOnToolGUI(e);
                 }
             } catch (Exception ex) {
                 Log.Error("GUI Error: " + ex);
@@ -559,14 +565,19 @@ namespace TrafficManager.UI {
                     }
                     RoadSelectionUtil.SetRoad(HoveredSegmentId, segmentList);
                 }
+
                 InstanceID instanceID = new InstanceID {
                     NetSegment = HoveredSegmentId,
                 };
-                OpenWorldInfoPanel(
-                    instanceID,
-                    HitPos);
+
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(delegate () {
+                    OpenWorldInfoPanel(
+                        instanceID,
+                        HitPos);
+                });
             } else if (e.type == EventType.MouseDown && e.button == 1) {
-                Singleton<RoadWorldInfoPanel>.instance.Hide();
+                // TODO fix [issue #882]: the line bellow functionaly works but puts a ton of null reference exceptions in the output.
+                //SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(Singleton<RoadWorldInfoPanel>.instance.Hide);
             }
         }
 

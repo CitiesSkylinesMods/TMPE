@@ -3,9 +3,6 @@ namespace TrafficManager.Patch._RoadWorldInfoPanel
     using ColossalFramework;
     using Harmony;
     using JetBrains.Annotations;
-    using TrafficManager.Util;
-    using UnityEngine;
-    using static InfoManager;
 
     [HarmonyPatch(typeof(RoadWorldInfoPanel), "OnAdjustRoadButton")]
     [UsedImplicitly]

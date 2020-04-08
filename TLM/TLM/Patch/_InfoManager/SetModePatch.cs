@@ -25,13 +25,16 @@ namespace TrafficManager.Patch._InfoManager
                 // UI to be handled by Default tool
                 ModUI.instance_.Close();
 
-                DefaultTool.OpenWorldInfoPanel(
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(delegate () {
+                    DefaultTool.OpenWorldInfoPanel(
                     Singleton<InstanceManager>.instance.GetSelectedInstance(),
                     Input.mousePosition);
+                });
             }
-            else //if(mode!=InfoMode.None) {
+            else 
             {
-                Singleton<RoadWorldInfoPanel>.instance.Hide();
+                // TODO fix [issue #882]: the line bellow functionaly works but puts a ton of null reference exceptions in the output.
+                //SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(Singleton<RoadWorldInfoPanel>.instance.Hide);
             }
 
         }
