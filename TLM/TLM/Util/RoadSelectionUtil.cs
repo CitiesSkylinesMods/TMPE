@@ -19,8 +19,10 @@ namespace TrafficManager.Util {
         }
 
         public static void Release() {
-            Instance.OnChanged = null;
-            Instance = null;
+            if (Instance != null) {
+                Instance.OnChanged = null;
+                Instance = null;
+            }
         }
 
         /// <summary>
@@ -69,8 +71,7 @@ namespace TrafficManager.Util {
                     FastList<ushort> path = GetPath();
                     List<ushort> ret = new List<ushort>();
                     for (int i = 0; i < Length; ++i) {
-                        ushort segmentId = path.m_buffer[i];
-                        ret.Add(segmentId);
+                        ret.Add(path.m_buffer[i]);
                     }
                     return ret;
                 }
@@ -120,21 +121,21 @@ namespace TrafficManager.Util {
                 if(prev_name != name) {
                     Log._Debug($"name={name} prev_name={prev_name}");
                     prev_name = name;
-                    Instance.CalculatePath(selectedSegmentID, 0);
+                    RoadSelectionUtil.Instance.CalculatePath(selectedSegmentID, 0);
                 }
             }
 
             public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
                 try {
-                    if (Instance == null) {
+                    if (RoadSelectionUtil.Instance == null) {
                         return;
                     }
-                    if (!Instance.netAdjust.PathVisible) {
+                    if (!RoadSelectionUtil.Instance.netAdjust.PathVisible) {
                         // RoadWorldInfoPanel does not update path. therefore we do it manually.
                         UpdatePath();
                     }
                     // Performance critical part of the code:
-                    var path = Instance.GetPath();
+                    var path = RoadSelectionUtil.Instance.GetPath();
                     int len = path?.m_size ?? -1;
                     ushort segmentID = len > 0 ? path.m_buffer[0] : (ushort)0;
 
@@ -161,7 +162,7 @@ namespace TrafficManager.Util {
                     if (changed) {
                         Log._Debug("RoadSelection.Threading.OnUpdate() road selection changed");
                         prev_length = len;
-                        Instance.OnChanged?.Invoke();
+                        RoadSelectionUtil.Instance.OnChanged?.Invoke();
                     }
                     prev_segmentID = segmentID;
                 }catch(Exception e) {

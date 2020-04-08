@@ -13,6 +13,8 @@ namespace TrafficManager.UI {
     using JetBrains.Annotations;
 
     public class RoadSelectionPanels : MonoBehaviour {
+        private const bool CREATE_NET_ADJUST_SUBPANEL = false;
+
         private RoadSelectionUtil roadSelectionUtil_;
 
         public static RoadSelectionPanels Root { get; private set; } = null;
@@ -52,44 +54,151 @@ namespace TrafficManager.UI {
             }
         }
 
-        UIPanel roadWorldInfoPanelExt_;
+        public UIPanel RoadWorldInfoPanelExt;
+
+        /// <summary>
+        ///  list all instances of road selection panels.
+        /// </summary>
+        private IList<PanelExt> panels_;
+        private UIComponent priorityRoadToggle_;
+
+        #region Load
+        public void Awake() {
+            _function = FunctionModes.None;
+        }
+
+        public void Start() {
+            Root = this;
+            // this code prevents a rare bug that RoadWorldInfoPanel some times does not show.
+            EnqueueAction(ModUI.Instance.Show);
+            EnqueueAction(ModUI.Instance.Close);
+
+            panels_ = new List<PanelExt>();
+
+            // attach an instance of road selection panel to RoadWorldInfoPanel.
+            RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
+            if (roadWorldInfoPanel != null) {
+                // TODO [issue #710] add panel when able to get road by name.
+                PanelExt panel = AddPanel(roadWorldInfoPanel.component);
+                panel.relativePosition += new Vector3(-10f, -10f);
+                priorityRoadToggle_ = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
+                if (priorityRoadToggle_ != null) {
+                    priorityRoadToggle_.eventVisibilityChanged += HidePriorityRoadToggleEvent;
+                }
+                panel.eventVisibilityChanged += ShowAdvisorOnEvent;
+                RoadWorldInfoPanelExt = panel;
+
+                UISprite icon = roadWorldInfoPanel.Find<UISlicedSprite>("Caption")?.Find<UISprite>("Sprite");
+                if (icon != null) {
+                    icon.spriteName = "ToolbarIconRoads";
+                    icon.Invalidate();
+                }
+            }
+
+            // attach another instance of road selection panel to AdjustRoad tab.
+            UIPanel roadAdjustPanel = RoadAdjustPanel;
+            if (roadAdjustPanel != null) {
+                if (CREATE_NET_ADJUST_SUBPANEL) {
+                    AddPanel(roadAdjustPanel);
+                }
+                roadAdjustPanel.eventVisibilityChanged += ShowAdvisorOnEvent;
+            }
+
+            // every time user changes the road selection, all buttons will go back to inactive state.
+            roadSelectionUtil_ = new RoadSelectionUtil();
+            if (roadSelectionUtil_ != null) {
+                roadSelectionUtil_.OnChanged += RefreshOnEvent;
+            }
+        }
+
+        // Create a road selection panel. Multiple instances are allowed.
+        private PanelExt AddPanel(UIComponent container) {
+            UIView uiview = UIView.GetAView();
+            PanelExt panel = uiview.AddUIComponent(typeof(PanelExt)) as PanelExt;
+            panel.Container = this;
+            panel.AlignTo(container, UIAlignAnchor.BottomLeft);
+            panel.relativePosition += new Vector3(70, -10);
+            panels_.Add(panel);
+            return panel;
+        }
+        #endregion
+
+        #region Unload
+        public void OnDestroy() {
+            if (roadSelectionUtil_ != null) {
+                roadSelectionUtil_ = null;
+                RoadSelectionUtil.Release();
+            }
+
+            if (priorityRoadToggle_ != null) {
+                priorityRoadToggle_.eventVisibilityChanged -= HidePriorityRoadToggleEvent;
+            }
+
+            UIPanel roadAdjustPanel = RoadAdjustPanel;
+            if (roadAdjustPanel != null) {
+                roadAdjustPanel.eventVisibilityChanged -= ShowAdvisorOnEvent;
+            }
+
+            if (panels_ != null) {
+                foreach (UIPanel panel in panels_) {
+                    if (panel != null) {
+                        panel.eventVisibilityChanged -= ShowAdvisorOnEvent;
+                        Destroy(panel.gameObject);
+                    }
+                }
+            }
+
+            _function = FunctionModes.None;
+
+            // OnDestroy is called with a delay. during reload a new instance of
+            // RoadSelectionPanels could have been created. In that case there is
+            // no need to set it to null
+            if (Root == this)
+                Root = null;
+        }
+        #endregion Unload
 
         #region Event handling
+        /// <summary>
+        /// Refreshes all butons in all panels according to state indicated by FunctionMode.
+        /// this is activated in response to user button click or roadSelectionUtil_.OnChanged
+        /// </summary>
+        /// <param name="reset">if true, deactivates all buttons</param>
+        public void Refresh(bool reset = false) {
+            if (reset) {
+                _function = FunctionModes.None;
+            }
+            foreach (var panel in panels_ ?? Enumerable.Empty<PanelExt>()) {
+                panel.Refresh();
+            }
+        }
 
-        internal void RenderOverlay()
-        {
+        private void RefreshOnEvent() =>
+            EnqueueAction(delegate () { Root?.Refresh(reset: true); });
+
+        internal void RenderOverlay() {
             //Log._Debug("Render over lay called st:\n" + Environment.StackTrace);
             NetManager.instance.NetAdjust.PathVisible = ShouldPathBeVisible();
             UpdateMassEditOverlay();
         }
 
-        internal void UpdateMassEditOverlay()
-        {
-            if (ModUI.GetTrafficManagerTool().GetToolMode() == ToolMode.None)
-            {
-                if (!MassEditOVerlay.IsActive)
-                {
-                    if (ShouldShowMassEditOverlay())
-                    {
+        internal void UpdateMassEditOverlay() {
+            if (ModUI.GetTrafficManagerTool().GetToolMode() == ToolMode.None) {
+                if (!MassEditOVerlay.IsActive) {
+                    if (ShouldShowMassEditOverlay()) {
                         ShowMassEditOverlay();
                     }
-                }
-                else
-                {
-                    if (!ShouldShowMassEditOverlay())
-                    {
+                } else {
+                    if (!ShouldShowMassEditOverlay()) {
                         HideMassEditOverlay();
                     }
                 }
             }
         }
 
-        internal bool HasHoveringButton()
-        {
-            foreach (var panel in panels_ ?? Enumerable.Empty<PanelExt>())
-            {
-                if (panel.HasHoveringButton())
-                {
+        internal bool HasHoveringButton() {
+            foreach (var panel in panels_ ?? Enumerable.Empty<PanelExt>()) {
+                if (panel.HasHoveringButton()) {
                     return true;
                 }
             }
@@ -99,10 +208,8 @@ namespace TrafficManager.UI {
         internal bool ShouldPathBeVisible() =>
             RoadSelectionUtil.IsNetAdjustMode() || HasHoveringButton();
 
-        internal bool ShouldShowMassEditOverlay()
-        {
-            foreach (var panel in panels_ ?? Enumerable.Empty<PanelExt>())
-            {
+        internal bool ShouldShowMassEditOverlay() {
+            foreach (var panel in panels_ ?? Enumerable.Empty<PanelExt>()) {
                 if (panel.isVisible)
                     return true;
             }
@@ -150,8 +257,6 @@ namespace TrafficManager.UI {
             Log._Debug("Mass edit overlay disabled");
         }
 
-        //private void MassEditOverlayOnEvent(UIComponent component, bool value) => UpdateMassEditOverlay();
-
         private void ShowAdvisorOnEvent(UIComponent component, bool value) {
             if (value) {
                 EnqueueAction(delegate () {
@@ -159,152 +264,12 @@ namespace TrafficManager.UI {
                 });
             }
         }
-
-        private void RefreshOnEvent() =>
-            EnqueueAction(delegate () { Root?.Refresh(reset: true); });
-
         #endregion
-
-        /// <summary>
-        ///  list all instances of road selection panels.
-        /// </summary>
-        private IList<PanelExt> panels_;
-        private UIComponent priorityRoadToggle_;
-
-        #region Unload
-        public void OnDestroy() {
-            if (roadSelectionUtil_ != null) {
-                roadSelectionUtil_ = null;
-                RoadSelectionUtil.Release();
-            }
-
-            if (priorityRoadToggle_ != null) {
-                priorityRoadToggle_.eventVisibilityChanged -= HidePriorityRoadToggleEvent;
-            }
-
-            UIPanel roadAdjustPanel = RoadAdjustPanel;
-            if (roadAdjustPanel != null)
-            {
-                //roadAdjustPanel.eventVisibilityChanged -= MassEditOverlayOnEvent;
-                roadAdjustPanel.eventVisibilityChanged -= ShowAdvisorOnEvent;
-            }
-
-            if (panels_ != null) {
-                foreach (UIPanel panel in panels_) {
-                    if (panel != null) {
-                        panel.eventVisibilityChanged -= ShowAdvisorOnEvent;
-                        //panel.eventVisibilityChanged -= MassEditOverlayOnEvent;
-                        Destroy(panel.gameObject);
-                    }
-                }
-            }
-        }
-
-        ~RoadSelectionPanels() {
-            // destructor is called with a delay. during reload a new instance of
-            // RoadSelectionPanels could have been created. In that case there is
-            // no need to set it to null
-            if (Root==this)
-                Root = null;
-            _function = FunctionModes.None;
-        }
-        #endregion Unload
-
-        #region Load
-        public void Awake() {
-            _function = FunctionModes.None;
-        }
-
-        public void Start() {
-            Root = this;
-            // this code prevents a rare bug that RoadWorldInfoPanel some times does not show.
-            EnqueueAction(ModUI.Instance.Show);
-            EnqueueAction(ModUI.Instance.Close);
-
-            panels_ = new List<PanelExt>();
-
-            // attach an instance of road selection panel to RoadWorldInfoPanel.
-            RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
-            if (roadWorldInfoPanel != null) {
-                // TODO [issue #710] add panel when able to get road by name.
-                PanelExt panel = AddPanel(roadWorldInfoPanel.component);
-                panel.relativePosition += new Vector3(-10f, -10f);
-                priorityRoadToggle_ = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
-                if (priorityRoadToggle_ != null) {
-                    priorityRoadToggle_.eventVisibilityChanged += HidePriorityRoadToggleEvent;
-                }
-                //panel.eventVisibilityChanged += MassEditOverlayOnEvent;
-                panel.eventVisibilityChanged += ShowAdvisorOnEvent;
-                roadWorldInfoPanelExt_ = panel;
-
-                UISprite icon = roadWorldInfoPanel.Find<UISlicedSprite>("Caption")?.Find<UISprite>("Sprite");
-                if (icon != null) {
-                    icon.spriteName = "ToolbarIconRoads";
-                    icon.Invalidate();
-                }
-            }
-
-            // attach another instance of road selection panel to AdjustRoad tab.
-            UIPanel roadAdjustPanel = RoadAdjustPanel;
-            if (roadAdjustPanel != null) {
-                //PanelExt panel = AddPanel(roadAdjustPanel);
-                //panel.eventVisibilityChanged += MassEditOverlayOnEvent;
-                //panel.eventVisibilityChanged += ShowAdvisorOnEvent;
-                //roadAdjustPanel.eventVisibilityChanged += MassEditOverlayOnEvent;
-                roadAdjustPanel.eventVisibilityChanged += ShowAdvisorOnEvent;
-            }
-
-            // every time user changes the road selection, all buttons will go back to inactive state.
-            roadSelectionUtil_ = new RoadSelectionUtil();
-            if (roadSelectionUtil_ != null) {
-                roadSelectionUtil_.OnChanged += RefreshOnEvent;
-            }
-        }
-
-        // Create a road selection panel. Multiple instances are allowed.
-        private PanelExt AddPanel(UIComponent container) {
-            UIView uiview = UIView.GetAView();
-            PanelExt panel = uiview.AddUIComponent(typeof(PanelExt)) as PanelExt;
-            panel.Container = this;
-            panel.AlignTo(container, UIAlignAnchor.BottomLeft);
-            panel.relativePosition += new Vector3(70, -10);
-            panels_.Add(panel);
-            return panel;
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Refreshes all butons in all panels according to state indicated by FunctionMode
-        /// </summary>
-        /// <param name="reset">if true, deactivates all buttons</param>
-        public void Refresh(bool reset = false) {
-            if (reset) {
-                _function = FunctionModes.None;
-            }
-            foreach (var panel in panels_ ?? Enumerable.Empty<PanelExt>()) {
-                panel.Refresh();
-            }
-        }
 
         /// <summary>
         /// Panel container for the Road selection UI. Multiple instances are allowed.
         /// </summary>
         public class PanelExt : UIPanel {
-            public void Refresh() {
-                foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
-                    button.Refresh();
-                }
-            }
-            public override void Update()
-            {
-                base.Update();
-                if (this == Root.roadWorldInfoPanelExt_) {
-                    isVisible = InfoManager.instance.CurrentMode ==
-                        InfoManager.InfoMode.None || RoadSelectionUtil.IsNetAdjustMode();
-                }
-            }
-
             /// Container of this panel.
             public RoadSelectionPanels Container;
 
@@ -377,6 +342,12 @@ namespace TrafficManager.UI {
                 return false;
             }
 
+            public void Refresh() {
+                foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
+                    button.Refresh();
+                }
+            }
+
             public class ClearButtton : ButtonExt {
                 public override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
                 internal override FunctionModes Function => FunctionModes.Clear;
@@ -432,6 +403,37 @@ namespace TrafficManager.UI {
             }
 
             public abstract class ButtonExt : BaseUButton {
+                const float REFERENCE_SIZE = 40f;
+
+                public RoadSelectionPanels Root => RoadSelectionPanels.Root;
+
+                public override string ButtonName => "TMPE.RoadSelectionPanel" + this.GetType().ToString();
+
+                public virtual string SkinPrefix => Function.ToString();
+
+                public HashSet<string> GetAtlasKeys => this.Skin.CreateAtlasKeyset();
+
+                public bool IsHovered => m_IsMouseHovering; // exposing the protected member
+
+                public List<ushort> Selection => Root?.roadSelectionUtil_?.Selection;
+
+                public int Length => Root?.roadSelectionUtil_?.Length ?? 0;
+
+                public override bool CanActivate() => true;
+
+                public override bool IsActive() => Root.Function == this.Function;
+
+                public virtual bool ShouldDisable() => Length == 0;
+
+                internal abstract FunctionModes Function { get; }
+
+                public override bool IsVisible() => true;
+
+                public override void Start() {
+                    base.Start();
+                    Refresh();
+                }
+
                 public override void Awake() {
                     base.Awake();
                     Skin = new U.Button.ButtonSkin() {
@@ -450,20 +452,20 @@ namespace TrafficManager.UI {
                     width = height = REFERENCE_SIZE; //TODO move to start?
                 }
 
-                public override void Start() {
-                    base.Start();
-                    Refresh();
+                public void Refresh() {
+                    isEnabled = !ShouldDisable();
+                    UpdateButtonImageAndTooltip();
+                    Show();
                 }
 
-                public HashSet<string> GetAtlasKeys => this.Skin.CreateAtlasKeyset();
-
+                #region related to click
                 public override void HandleClick(UIMouseEventParameter p) =>
                     throw new Exception("Unreachable code");
 
-                // Handles button click on activation. Apply traffic rules here.
+                /// <summary>Handles button click on activation. Apply traffic rules here.</summary> 
                 public abstract void Do();
 
-                // Handles button click on de-activation. Reset/Undo traffic rules here.
+                /// <summary>Handles button click on de-activation. Reset/Undo traffic rules here.</summary> 
                 public abstract void Undo();
 
                 protected override void OnClick(UIMouseEventParameter p) {
@@ -477,37 +479,7 @@ namespace TrafficManager.UI {
                         Root.EnqueueAction(Root.ShowMassEditOverlay);
                     }
                 }
-
-                public void Refresh() {
-                    isEnabled = !ShouldDisable();
-                    UpdateButtonImageAndTooltip();
-                    Show();
-                }
-
-
-                const float REFERENCE_SIZE = 40f;
-
-                public bool IsHovered => m_IsMouseHovering;
-
-                public RoadSelectionPanels Root => RoadSelectionPanels.Root;
-
-                public List<ushort> Selection => Root?.roadSelectionUtil_?.Selection;
-
-                public int Length => Root?.roadSelectionUtil_?.Length ?? 0;
-
-                public override bool CanActivate() => true;
-
-                public override bool IsActive() => Root.Function == this.Function;
-
-                public virtual bool ShouldDisable() => Length == 0;
-
-                public override string ButtonName => "TMPE.RoadSelectionPanel" + this.GetType().ToString();
-
-                internal abstract FunctionModes Function { get; }
-
-                public override bool IsVisible() => true;
-
-                public virtual string SkinPrefix => Function.ToString();
+                #endregion
             } // end class QuickEditButton
         } // end class PanelExt
     } // end class

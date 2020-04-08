@@ -396,7 +396,7 @@ namespace TrafficManager.UI {
                         SegmentStopCriterion.None,
                         (_) => true);
                 }
-                foreach (uint segmentId in segmentList) {
+                foreach (ushort segmentId in segmentList ?? Enumerable.Empty<ushort>()) {
                     ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                     NetTool.RenderOverlay(
                         cameraInfo,
