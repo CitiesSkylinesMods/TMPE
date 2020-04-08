@@ -39,17 +39,13 @@ Official releases:
 
 Recent updates:
 
-#### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) STABLE, 26/03/2020
+#### TM:PE V[11.2.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.2...11.2.3) STABLE, 08/04/2020
 
-- Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
-- Updated: Game version badges in readme (#806)
-- Updated: Mod version and changelogs (#816)
+- Fixed: DLC filter wasn't working, causing some roads to not appear in default speed limit UI (#818).
 
-#### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) LABS, 26/03/2020
+#### TM:PE V[11.2.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.2...11.2.3) STABLE, 08/04/2020
 
-- Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
-- Updated: Game version badges in readme (#806)
-- Updated: Mod version and changelogs (#816)
+- Fixed: DLC filter wasn't working, causing some roads to not appear in default speed limit UI (#818).
 
 See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
 
