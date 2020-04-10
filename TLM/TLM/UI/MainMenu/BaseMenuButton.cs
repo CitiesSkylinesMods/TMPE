@@ -29,7 +29,5 @@
         public override bool CanActivate() {
             return true;
         }
-
-        public override string ButtonName => MENU_BUTTON;
     }
 }

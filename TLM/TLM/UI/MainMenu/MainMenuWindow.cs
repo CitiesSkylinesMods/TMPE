@@ -52,7 +52,7 @@ namespace TrafficManager.UI.MainMenu {
                                         IsEnabledFunc = LaneConnectorButton.IsButtonEnabled,
                                     },
                   new MenuButtonDef {
-                                        ButtonType = typeof(LaneArrowsButton),
+                                        ButtonType = typeof(LaneArrowsMenuButton),
                                         Mode = ToolMode.LaneArrows,
                                         IsEnabledFunc = () => true, // always ON
                                     },

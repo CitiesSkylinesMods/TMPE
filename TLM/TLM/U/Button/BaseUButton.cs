@@ -28,8 +28,6 @@
         /// <returns>Whether a button can toggle-activate.</returns>
         public abstract bool CanActivate();
 
-        public abstract string ButtonName { get; }
-
         public override void Start() {
             m_ForegroundSpriteMode = UIForegroundSpriteMode.Scale;
             UpdateButtonImageAndTooltip();
@@ -41,14 +39,15 @@
         /// <summary>
         /// Override this to return true when the button is activated and should be highlighted.
         /// </summary>
-        public abstract bool IsActive();
+        protected abstract bool IsActive();
 
         /// <summary>Override this to return localized string for the tooltip.</summary>
-        public abstract string GetTooltip();
+        /// <returns>The tooltip for this button.</returns>
+        protected abstract string GetTooltip();
 
         /// <summary>Override this to define whether the button should be visible on tool panel.</summary>
         /// <returns>Whether the button visible.</returns>
-        public abstract bool IsVisible();
+        protected abstract bool IsVisible();
 
         public abstract void HandleClick(UIMouseEventParameter p);
 
@@ -66,8 +65,7 @@
             UpdateButtonImage();
 
             // Update localized tooltip with shortcut key if available
-            string shortcutText = GetShortcutTooltip();
-            tooltip = GetTooltip() + shortcutText;
+            tooltip = GetTooltip() + GetShortcutTooltip();
 
             this.isVisible = IsVisible();
             this.Invalidate();

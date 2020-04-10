@@ -20,13 +20,13 @@ namespace TrafficManager.UI.MainMenu {
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        public override string GetTooltip() =>
+        protected override string GetTooltip() =>
             Translation.Menu.Get("Tooltip:Add priority signs") + "\n" +
             Translation.Menu.Get("Tooltip.Keybinds:Add priority signs");
 
         public override KeybindSetting ShortcutKey => KeybindSettingsBase.PrioritySignsTool;
 
-        public override bool IsVisible() => IsButtonEnabled();
+        protected override bool IsVisible() => IsButtonEnabled();
 
         public static bool IsButtonEnabled() => Options.prioritySignsEnabled;
     }

@@ -93,16 +93,14 @@
                 }
             }
 
-            public override bool IsActive() => false;
+            protected override bool IsActive() => false;
 
             // public override Texture2D AtlasTexture => Textures.MainMenu.RemoveButton;
 
-            public override string ButtonName => "RemoveVehicle";
-
-            public override string GetTooltip() =>
+            protected override string GetTooltip() =>
                 Translation.Menu.Get("Button:Remove this vehicle");
 
-            public override bool IsVisible() => true;
+            protected override bool IsVisible() => true;
 
             public override bool CanActivate() {
                 return false;

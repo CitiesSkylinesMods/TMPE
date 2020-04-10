@@ -8,13 +8,11 @@ namespace TrafficManager.U.Button {
     public class UButton : BaseUButton {
         public override bool CanActivate() => false; // click only
 
-        public override string ButtonName => this.name;
+        protected override bool IsActive() => false;
 
-        public override bool IsActive() => false;
+        protected override string GetTooltip() => string.Empty;
 
-        public override string GetTooltip() => string.Empty;
-
-        public override bool IsVisible() => this.isVisible;
+        protected override bool IsVisible() => this.isVisible;
 
         public override void HandleClick(UIMouseEventParameter p) { }
     }

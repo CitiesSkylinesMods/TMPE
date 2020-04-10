@@ -6,11 +6,11 @@
     using TrafficManager.U.Button;
 
     public class ClearTrafficButton : BaseMenuButton {
-        public override bool IsActive() => false;
+        protected override bool IsActive() => false;
 
-        public override string GetTooltip() => Translation.Menu.Get("Tooltip:Clear traffic");
+        protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Clear traffic");
 
-        public override bool IsVisible() => true;
+        protected override bool IsVisible() => true;
 
         public override void SetupButtonSkin(HashSet<string> atlasKeys) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start

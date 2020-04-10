@@ -19,7 +19,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         public LaneArrows ToggleFlag { get; set; }
 
-        public override bool IsVisible() => true;
+        protected override bool IsVisible() => true;
 
         public override void HandleClick(UIMouseEventParameter p) {
             if (LaneId == 0) {
@@ -39,9 +39,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <returns>True.</returns>
         public override bool CanActivate() => true;
 
-        public override string ButtonName => "TMPE_LaneArrow";
-
-        public override bool IsActive() {
+        protected override bool IsActive() {
             if (LaneId == 0) {
                 Log.Error("LaneArrowButton: LaneId is 0, too bad");
                 return false;
@@ -51,7 +49,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             return (flags & NetlaneFlagsMask) == NetlaneFlagsMask;
         }
 
-        public override string GetTooltip() {
+        protected override string GetTooltip() {
             return string.Empty;
         }
     }

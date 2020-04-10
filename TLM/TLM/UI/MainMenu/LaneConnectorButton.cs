@@ -20,11 +20,11 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        public override string GetTooltip() => Translation.Menu.Get("Tooltip:Lane connector");
+        protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Lane connector");
 
         public override KeybindSetting ShortcutKey => KeybindSettingsBase.LaneConnectionsTool;
 
-        public override bool IsVisible() => IsButtonEnabled();
+        protected override bool IsVisible() => IsButtonEnabled();
 
         public static bool IsButtonEnabled() => Options.laneConnectorEnabled;
     }
