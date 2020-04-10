@@ -41,12 +41,12 @@ Recent updates:
 
 #### TM:PE V[11.3.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.3...11.3.0) LABS, 10/04/2020
 
-- Added: Advanced auto lane connector tool (select a node, then Ctrl + S) (#706, #703)
+- Added: Advanced auto lane connector tool (select a node, then `Ctrl + S`) (#706, #703)
 - Fixed: Stay-in-lane should not connect solitary lanes (#706, #617)
-- Fixed: Lane arrows UI too small on some resolutions (#726, #571)
-- Updated: Lane connector `Shift + S` changed to `Ctrl + S` (customise in mod options) (#706)
+- Fixed: Lane arrows UI too small on some resolutions except at junctions (#726, #571)
+- Updated: Lane connectors: `Shift + S` changed to `Ctrl + S` (see Options > Keybinds tab) (#706)
+- Updated: Lane Arrows UI now respects UI scale slider (see Options > General tab) (#726)
 - Updated: Improved UI for lane arrows tool (#726, #571)
-- Updated: Lane arrows UI can be scaled (in mod options) (#726)
 - Updated: Translations (will add more info later) (#726)
 
 #### TM:PE V[11.2.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.2...11.2.3) STABLE, 08/04/2020
