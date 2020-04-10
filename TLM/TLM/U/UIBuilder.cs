@@ -1,9 +1,12 @@
 namespace TrafficManager.U {
     using System;
+    using System.Collections.Generic;
+    using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U.Autosize;
+    using TrafficManager.UI;
     using UnityEngine;
 
     /// <summary>
@@ -50,10 +53,10 @@ namespace TrafficManager.U {
             return new UiBuilder<TLabel>(newLabel);
         }
 
-        private static readonly Color SHORTCUT_DESCR_TEXT = new Color(.75f, .75f, .75f, 1f);
+        // private static readonly Color SHORTCUT_DESCR_TEXT = new Color(.75f, .75f, .75f, 1f);
         public static readonly Color SHORTCUT_KEYBIND_TEXT = new Color(.8f, .6f, .3f, 1f);
 
-        /// <summary>Add a colored label for a keyboard or mouse shortcut.</summary>
+        /// <summary>Add a colored label for a keyboard shortcut.</summary>
         /// <returns>New UI Builder with the keybind label created.</returns>
         public UiBuilder<U.Label.ULabel> ShortcutLabel(KeybindSetting ks) {
             var shortcutLabel = Control.AddUIComponent(typeof(U.Label.ULabel)) as U.Label.ULabel;
@@ -61,6 +64,33 @@ namespace TrafficManager.U {
             shortcutLabel.backgroundSprite = "GenericPanelDark";
             shortcutLabel.textColor = SHORTCUT_KEYBIND_TEXT;
             shortcutLabel.text = $" {ks.ToLocalizedString()} ";
+
+            return new UiBuilder<U.Label.ULabel>(shortcutLabel);
+        }
+
+        /// <summary>Add a colored label for a mouse shortcut.</summary>
+        /// <returns>New UI Builder with the keybind label created.</returns>
+        public UiBuilder<U.Label.ULabel> ClickLabel(bool shift, bool ctrl, bool alt) {
+            var shortcutLabel = Control.AddUIComponent(typeof(U.Label.ULabel)) as U.Label.ULabel;
+
+            shortcutLabel.backgroundSprite = "GenericPanelDark";
+            shortcutLabel.textColor = SHORTCUT_KEYBIND_TEXT;
+
+            string modifiers = shift
+                                   ? Translation.Options.Get("Shortcut.Modifier:Shift")
+                                   : string.Empty;
+            if (ctrl) {
+                modifiers += string.IsNullOrEmpty(modifiers) ? string.Empty : " + ";
+                modifiers += Translation.Options.Get("Shortcut.Modifier:Ctrl");
+            }
+            if (alt) {
+                modifiers += string.IsNullOrEmpty(modifiers) ? string.Empty : " + ";
+                modifiers += Translation.Options.Get("Shortcut.Modifier:Alt");
+            }
+
+            string click = Translation.Options.Get("Shortcut:Click");
+
+            shortcutLabel.text = $" {modifiers} + {click} ";
 
             return new UiBuilder<U.Label.ULabel>(shortcutLabel);
         }

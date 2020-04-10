@@ -25,6 +25,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             base.Start();
             UIUtil.MakeUniqueAndSetName(gameObject, GAMEOBJECT_NAME);
 
+            // the GenericPanel sprite is silver, make it dark
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(64, 64, 64, 240);
         }
@@ -54,10 +55,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             // Load actual graphics into an atlas
             laneArrowButtonAtlas_ = skin.CreateAtlas(
-                "LaneArrows",
-                64,
-                64,
-                256, // 4x4 atlas
+                loadingPath: "LaneArrows",
+                spriteWidth: 64,
+                spriteHeight: 64,
+                hintAtlasTextureSize: 256, // 4x4 atlas
                 atlasKeysSet);
             return laneArrowButtonAtlas_;
         }
@@ -163,24 +164,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     } // end button group panel
                 } // end button loop, for each lane
             } // end button row
-
-            // // And add another line: "Delete" action
-            // using (var shortcutBuilder =
-            //     builder.ShortcutLabel(KeybindSettingsBase.LaneConnectorDelete)) {
-            //     shortcutBuilder.ResizeFunction(
-            //         r => {
-            //             r.StackVertical(Constants.UIPADDING);
-            //         });
-            // }
-            //
-            // string deleteLabelText = Translation.LaneRouting.Get("LaneConnector.Label:Reset to default");
-            // using (var deleteLabelBuilder =
-            //     builder.Label<U.Label.ULabel>(deleteLabelText)) {
-            //     deleteLabelBuilder.ResizeFunction(
-            //         r => {
-            //             r.StackHorizontal(Constants.UIPADDING * 2f); // double space
-            //         });
-            // }
         }
     }
 }

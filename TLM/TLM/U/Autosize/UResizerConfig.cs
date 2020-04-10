@@ -49,8 +49,8 @@ namespace TrafficManager.U.Autosize {
                 if (resizerConfig.onResize_ != null) {
                     // Create helper UResizer and run it
                     UResizer resizer = new UResizer(
-                        control,
-                        resizerConfig,
+                        control: control,
+                        config: resizerConfig,
                         previousSibling,
                         childrenBox);
                     try {
@@ -74,6 +74,10 @@ namespace TrafficManager.U.Autosize {
 
         public void SetResizeFunction(Action<UResizer> resizeFn) {
             this.onResize_ = resizeFn;
+        }
+
+        public void Destroy() {
+            this.onResize_ = null;
         }
     }
 }

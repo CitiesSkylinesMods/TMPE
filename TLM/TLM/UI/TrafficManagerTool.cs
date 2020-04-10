@@ -282,6 +282,10 @@ namespace TrafficManager.UI {
 
         /// <summary>Resets the tool and calls deactivate on it.</summary>
         private void SetToolMode_DeactivateTool() {
+            // Clear OSD panel with keybinds
+            OnScreenDisplay.Clear();
+            OnScreenDisplay.Done();
+
             if (activeLegacySubTool_ != null || activeSubTool_ != null) {
                 activeLegacySubTool_?.Cleanup();
                 activeLegacySubTool_ = null;

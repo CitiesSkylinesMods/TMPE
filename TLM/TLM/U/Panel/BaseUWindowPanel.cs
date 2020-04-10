@@ -49,7 +49,7 @@ namespace TrafficManager.U.Panel {
         /// Impl. <see cref="IObserver{T}"/> for UI Scale changes.
         /// Called from ModUI when UI scale slider in General tab was modified.
         /// </summary>
-        /// <param name="uiScale">New UI scale</param>
+        /// <param name="uiScale">New UI scale.</param>
         public void OnUpdate(ModUI.UIScaleNotification uiScale) {
             // Call resize on all controls and recalculate again
             UResizer.UpdateControlRecursive(this, null);

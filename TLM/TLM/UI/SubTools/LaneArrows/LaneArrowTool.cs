@@ -9,6 +9,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
+    using TrafficManager.UI.MainMenu;
     using TrafficManager.Util;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
@@ -39,6 +40,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         private enum Trigger {
             SegmentClick,
             RightMouseClick,
+            ReenterSameState,
             EscapeKey,
         }
 
@@ -50,6 +52,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             fsm_ = new Util.GenericFsm<State, Trigger>(State.Select);
         }
 
+        private static string T(string key) {
+            return Translation.LaneRouting.Get(key);
+        }
 
         /// <summary>
         /// Creates FSM ready to begin editing. Or recreates it when ESC is pressed
@@ -58,14 +63,12 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <returns>The new FSM in the initial state.</returns>
         private Util.GenericFsm<State, Trigger> InitFiniteStateMachine() {
             var fsm = new Util.GenericFsm<State, Trigger>(State.Select);
+            this.OnEnterSelectState(); // FSM does not call enter on initial state
 
             // From Select mode, user can either click a segment, or Esc/rightclick to quit
             fsm.Configure(State.Select)
-               .OnEntry(
-                   () => {
-                       SelectedNodeId = 0;
-                       SelectedSegmentId = 0;
-                   })
+               .OnEntry(this.OnEnterSelectState)
+               .OnLeave(this.OnLeaveSelectState)
                .TransitionOnEvent(Trigger.SegmentClick, State.EditLaneArrows)
                .TransitionOnEvent(Trigger.RightMouseClick, State.ToolDisabled)
                .TransitionOnEvent(Trigger.EscapeKey, State.ToolDisabled);
@@ -73,8 +76,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             fsm.Configure(State.EditLaneArrows)
                .OnEntry(this.OnEnterEditorState)
                .OnLeave(this.OnLeaveEditorState)
-               .TransitionOnEvent(Trigger.RightMouseClick, State.Select)
-               .TransitionOnEvent(Trigger.EscapeKey, State.Select);
+               .TransitionOnEvent(Trigger.SegmentClick, State.EditLaneArrows)
+               .TransitionOnEvent(Trigger.RightMouseClick, State.Select);
+            // This transition is ignored because Esc disables the tool
+            //   .TransitionOnEvent(Trigger.EscapeKey, State.Select);
 
             fsm.Configure(State.ToolDisabled)
                .OnEntry(
@@ -86,6 +91,17 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                    });
 
             return fsm;
+        }
+
+        private void OnLeaveSelectState() {
+            OnScreenDisplay.Clear();
+            OnScreenDisplay.Done();
+        }
+
+        private void OnEnterSelectState() {
+            SelectedNodeId = 0;
+            SelectedSegmentId = 0;
+            SetupOnscreenDisplay_SelectState();
         }
 
         /// <summary>Called from GenericFsm when a segment is clicked to show lane arrows GUI.</summary>
@@ -138,7 +154,33 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
 
             CreateLaneArrowsWindow(laneList.Count);
-            SetupLaneArrowsWindowButtons(laneList, (bool)startNode);
+            SetupLaneArrowsWindowButtons(laneList: laneList,
+                                         startNode: (bool)startNode);
+
+            SetupOnscreenDisplay_EditorState();
+        }
+
+        private static void SetupOnscreenDisplay_EditorState() {
+            OnScreenDisplay.Clear();
+            OnScreenDisplay.Shortcut(
+                kbSetting: KeybindSettingsBase.LaneConnectorDelete,
+                localizedText: T("LaneConnector.Label:Reset to default"));
+            OnScreenDisplay.Done();
+        }
+
+        private static void SetupOnscreenDisplay_SelectState() {
+            OnScreenDisplay.Clear();
+            OnScreenDisplay.Click(
+                shift: false,
+                ctrl: true,
+                alt: false,
+                localizedText: T("LaneArrows.Click:Separate lanes for entire junction"));
+            OnScreenDisplay.Click(
+                shift: false,
+                ctrl: false,
+                alt: true,
+                localizedText: T("LaneArrows.Click:Separate lanes for segment"));
+            OnScreenDisplay.Done();
         }
 
         /// <summary>
@@ -213,6 +255,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         /// <summary>Called from GenericFsm when user leaves lane arrow editor, to hide the GUI.</summary>
         private void OnLeaveEditorState() {
+            OnScreenDisplay.Clear();
+            OnScreenDisplay.Done();
+
             DestroyToolWindow();
         }
 
@@ -289,9 +334,11 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     OnToolLeftClick_Select();
                     break;
                 case State.EditLaneArrows:
-                    // Allow selecting other segments while doing lane editing
-                    fsm_.SendTrigger(Trigger.RightMouseClick);
-                    OnToolLeftClick_Select();
+                    if (HoveredSegmentId != 0) {
+                        // Allow selecting other segments while doing lane editing
+                        // fsm_.SendTrigger(Trigger.ReenterSameState);
+                        OnToolLeftClick_Select();
+                    }
                     break;
             }
         }

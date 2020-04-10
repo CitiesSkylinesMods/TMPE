@@ -22,9 +22,10 @@ namespace TrafficManager.UI.MainMenu {
         public const int DEFAULT_MENU_X = 85;
         public const int DEFAULT_MENU_Y = 60;
 
-        public UPanel InnerPanel { get; set; }
-
-        /// <summary>Contains keybinds help if not hidden by the user.</summary>
+        /// <summary>
+        /// Panel floating below the main menu and shows keybinds and mouse shortcuts.
+        /// Panel is hidden if it contains no controls.
+        /// </summary>
         public UPanel KeybindsPanel { get; set; }
 
         /// <summary>Tool buttons occupy the left and bigger side of the main menu.</summary>
@@ -109,7 +110,7 @@ namespace TrafficManager.UI.MainMenu {
 
         public UILabel StatsLabel { get; private set; }
 
-        public UIDragHandle Drag { get; private set; }
+        public UIDragHandle DragHandle { get; private set; }
 
         IDisposable confDisposable;
 
@@ -133,6 +134,10 @@ namespace TrafficManager.UI.MainMenu {
             SetupWindow();
         }
 
+        /// <summary>
+        /// Called from ModUI when need to create or re-create the MainMenu panel.
+        /// </summary>
+        /// <returns>The created panel.</returns>
         internal static MainMenuWindow CreateMainMenuWindow() {
             UIView parent = UIView.GetAView();
             MainMenuWindow window = (MainMenuWindow)parent.AddUIComponent(typeof(MainMenuWindow));
@@ -162,8 +167,8 @@ namespace TrafficManager.UI.MainMenu {
             var dragHandler = new GameObject("TMPE_Menu_DragHandler");
             dragHandler.transform.parent = transform;
             dragHandler.transform.localPosition = Vector3.zero;
-            this.Drag = dragHandler.AddComponent<UIDragHandle>();
-            this.Drag.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
+            this.DragHandle = dragHandler.AddComponent<UIDragHandle>();
+            this.DragHandle.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
 
             this.eventVisibilityChanged += OnVisibilityChanged;
         }
@@ -197,8 +202,6 @@ namespace TrafficManager.UI.MainMenu {
             using (var innerPanelB = builder.ChildPanel<U.Panel.UPanel>(setupFn: p => {
                 p.name = "TMPE_MainMenu_InnerPanel";
             })) {
-                this.InnerPanel = innerPanelB.Control;
-
                 innerPanelB.ResizeFunction(r => {
                     r.Stack(mode: UStackMode.Below, spacing: 0f, stackRef: versionLabel);
                     r.FitToChildren();
@@ -210,10 +213,10 @@ namespace TrafficManager.UI.MainMenu {
 
             // Create atlas and give it to all buttons
             allButtonsAtlas_ = tmpSkin.CreateAtlas(
-                "MainMenu.Tool",
-                50,
-                50,
-                512,
+                loadingPath: "MainMenu.Tool",
+                spriteWidth: 50,
+                spriteHeight: 50,
+                hintAtlasTextureSize: 512,
                 atlasKeysSet);
 
             foreach (BaseMenuButton b in ToolButtonsList) {
@@ -223,27 +226,39 @@ namespace TrafficManager.UI.MainMenu {
                 b.atlas = allButtonsAtlas_;
             }
 
+            //-------------------------------------------------------------------------
             // Foldable panel with keybinds, starts hidden below or above the main menu
+            //-------------------------------------------------------------------------
             using (var keybindsB = builder.ChildPanel<U.Panel.UPanel>(
                 p => {
                     p.name = "TMPE_MainMenu_KeybindsPanel";
-                    p.Hide(); // not visible until some tool is activated
+                    p.isVisible = false;
+
+                    // the GenericPanel sprite is silver, make it dark
+                    p.atlas = TextureUtil.FindAtlas("Ingame");
+                    p.backgroundSprite = "GenericPanel";
+                    p.color = new Color32(64, 64, 64, 240);
                 }))
             {
+                keybindsB.SetPadding(Constants.UIPADDING);
+
                 // The keybinds panel belongs to main menu but does not expand it to fit
                 UResizerConfig.From(keybindsB.Control).ContributeToBoundingBox = false;
                 this.KeybindsPanel = keybindsB.Control;
                 keybindsB.ResizeFunction(
                     r => {
-                        r.Stack(UStackMode.Below);
+                        r.Stack(mode: UStackMode.Below,
+                                spacing: Constants.UIPADDING * 2);
+                        // As the control technically belongs inside the mainmenu, it will respect
+                        // the 4px padding, we want to shift it slightly left to line up with the
+                        // main menu panel.
+                        r.MoveBy(new Vector2(-Constants.UIPADDING, 0f));
                         r.FitToChildren();
                     });
-
-                // SetupControls_KeybindsPanel(keybindsB);
             }
 
             // Floating labels under TM:PE window
-            SetupControls_DebugLabels(builder, this.InnerPanel);
+            SetupControls_DebugLabels(builder, this.KeybindsPanel);
         }
 
         private void SetupControls_KeybindsPanel(UiBuilder<UPanel> builder) {
@@ -353,8 +368,10 @@ namespace TrafficManager.UI.MainMenu {
 
         /// <summary>Called by UResizer for every control to be 'resized'.</summary>
         public override void OnAfterResizerUpdate() {
-            if (this.Drag != null) {
-                this.Drag.size = new Vector2(this.width, this.VersionLabel.height);
+            if (this.DragHandle != null) {
+                // Resize to the window width but remember there's padding on the left
+                this.DragHandle.size = new Vector2(x: this.width - (Constants.UIPADDING * 2f),
+                                                   y: this.VersionLabel.height);
             }
         }
 
@@ -438,7 +455,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         internal void SetPosLock(bool lck) {
-            Drag.enabled = !lck;
+            DragHandle.enabled = !lck;
         }
 
         protected override void OnPositionChanged() {
@@ -475,103 +492,6 @@ namespace TrafficManager.UI.MainMenu {
             //     this.Invalidate();
             // }
         }
-
-        // public override void OnRescaleRequested() {
-        //     // Update size
-        //     //--------------
-        //     menuLayout_ = RepositionToolButtons();
-        //     this.width = ScaledSize.GetWidth(menuLayout_.MaxCols);
-        //     this.height = ScaledSize.GetHeight(menuLayout_.Rows);
-        //
-        //     // Update drag size
-        //     //-------------------
-        //     this.Drag.width = this.width;
-        //     this.Drag.height = ScaledSize.GetTitlebarHeight();
-        // }
-
-        /// <summary>Calculates button and panel sizes based on the screen resolution.</summary>
-        // internal class ScaledSize {
-        //     internal const int NUM_ROWS = 2;
-        //     internal const int NUM_COLS = 6;
-        //
-        //     /// <summary>Calculate width of main menu panel, based on button width and spacings.</summary>
-        //     /// <returns>Width of the panel.</returns>
-        //     internal static float GetWidth(int cols) {
-        //         // 6 buttons + spacings (each 1/8 of a button)
-        //         float allSpacings = (cols + 1) * 0.125f;
-        //         return GetButtonSize() * (cols + allSpacings);
-        //     }
-        //
-        //     internal static float GetHeight() => GetHeight(NUM_ROWS);
-        //
-        //     internal static float GetHeight(int rows) {
-        //         // Count height for `Rows` button rows + `Rows` spacings (1/8th) + titlebar
-        //         return (GetButtonSize() * (rows + (rows * 0.125f)))
-        //                + GetTitlebarHeight();
-        //     }
-        //
-        //     /// <summary>Define size as smallest of 2.08% of width or 3.7% of height (40 px at 1080p).
-        //     /// The button cannot be smaller than 40px.</summary>
-        //     /// <returns>Button size for current screen resolution.</returns>
-        //     internal static float GetButtonSize() {
-        //         return 40f * UIScaler.GetScale();
-        //     }
-        //
-        //     internal static float GetTitlebarHeight() {
-        //         return GetButtonSize() * 0.66f;
-        //     }
-        // }
-
-        // /// <summary>Reset sizes and positions for UI buttons.</summary>
-        // /// <returns>Visible buttons count.</returns>
-        // private MainMenuLayout RepositionToolButtons() {
-        //     MainMenuLayout layout = new MainMenuLayout();
-        //
-        //     // Recreate tool buttons
-        //     float y = ScaledSize.GetTitlebarHeight();
-        //     float buttonSize = ScaledSize.GetButtonSize();
-        //     float spacing = buttonSize / 8f;
-        //
-        //     layout.CountEnabledButtons(ButtonsList);
-        //
-        //     int placedInARow = 0;
-        //     float x = spacing;
-        //
-        //     foreach (BaseMenuButton button in ButtonsList) {
-        //         if (button.IsVisible()) {
-        //             button.Show();
-        //             button.relativePosition = new Vector3(x, y);
-        //
-        //             x += buttonSize + spacing;
-        //
-        //             placedInARow++;
-        //             layout.MaxCols = Math.Max(layout.MaxCols, placedInARow);
-        //
-        //             if (layout.IsRowBreak(placedInARow, ScaledSize.NUM_COLS)) {
-        //                 y += buttonSize + spacing;
-        //                 x = spacing; // reset to the left side of the button area
-        //                 placedInARow = 0;
-        //                 layout.Rows++;
-        //             }
-        //         } else {
-        //             button.Hide();
-        //             // to avoid window upsizing to fit an invisible button
-        //             button.relativePosition = Vector3.zero;
-        //         }
-        //
-        //         button.width = buttonSize;
-        //         button.height = buttonSize;
-        //         button.Invalidate();
-        //     } // foreach button
-        //
-        //     // Special case when new row was broken but no buttons placed on it, reduce Rows count
-        //     // happens when button count is even
-        //     if (x <= 2 * spacing) {
-        //         layout.Rows--;
-        //     }
-        //
-        //     return layout;
-        // }
 
         /// <summary>Always invalidates the main menu, do not call too often!</summary>
         /// <param name="pos">Config main menu position.</param>

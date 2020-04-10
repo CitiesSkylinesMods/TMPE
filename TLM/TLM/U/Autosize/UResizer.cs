@@ -37,7 +37,7 @@ namespace TrafficManager.U.Autosize {
         }
 
         public static void UpdateControl(UIComponent control) {
-            UpdateControlRecursive(control, null);
+            UpdateControlRecursive(current: control, previousSibling: null);
         }
 
         /// <summary>
@@ -49,7 +49,8 @@ namespace TrafficManager.U.Autosize {
         /// <returns>The bounding box or null (if does not contribute to the parent's box).</returns>
         internal static UBoundingBox? UpdateControlRecursive([NotNull] UIComponent current,
                                                              [CanBeNull] UIComponent previousSibling) {
-            if (!current || current.transform == null) { // is object valid?
+            // is object valid? is still attached to something in scene?
+            if (!current.gameObject.activeSelf) {
                 return default;
             }
 
@@ -60,6 +61,10 @@ namespace TrafficManager.U.Autosize {
             UIComponent previousChild = null;
 
             foreach (Transform child in current.transform) {
+                if (!child.gameObject.activeSelf) {
+                    continue; // possibly a destroyed object
+                }
+
                 UIComponent childUiComponent = child.gameObject.GetComponent<UIComponent>();
                 UBoundingBox? childBox = UpdateControlRecursive(
                     childUiComponent,
@@ -74,9 +79,9 @@ namespace TrafficManager.U.Autosize {
             }
 
             return UResizerConfig.CallOnResize(
-                current,
+                control: current,
                 previousSibling,
-                allChildrenBox);
+                childrenBox: allChildrenBox);
         }
 
         /// <summary>Calculates value based on the UI component.</summary>
@@ -116,17 +121,29 @@ namespace TrafficManager.U.Autosize {
         /// <summary>Set width based on various rules.</summary>
         /// <param name="val">The rule to be used.</param>
         public void Width(UValue val) {
+            if (this.Control.gameObject.activeSelf == false) {
+                return; // do nothing on destroyed controls
+            }
+
             Control.width = this.Calculate(val, Control);
         }
 
         /// <summary>Set height based on various rules.</summary>
         /// <param name="val">The rule to be used.</param>
         public void Height(UValue val) {
+            if (this.Control.gameObject.activeSelf == false) {
+                return; // do nothing on destroyed controls
+            }
+
             Control.height = this.Calculate(val, Control);
         }
 
         /// <summary>Automatically defines control size to wrap around child controls.</summary>
         public void FitToChildren() {
+            if (this.Control.gameObject.activeSelf == false) {
+                return; // do nothing on destroyed controls
+            }
+
             // value 0f is ignored, the padding is to be set in UResizerConfig
             this.Width(new UValue(URule.FitChildrenWidth));
             this.Height(new UValue(URule.FitChildrenHeight));
@@ -138,6 +155,10 @@ namespace TrafficManager.U.Autosize {
         public void Stack(UStackMode mode,
                           float spacing = 0f,
                           UIComponent stackRef = null) {
+            if (this.Control.gameObject.activeSelf == false) {
+                return; // do nothing on destroyed controls
+            }
+
             var padding = 0f;
             if (this.Control.parent.GetComponent<UIComponent>() is ISmartSizableControl parent) {
                 padding = parent.GetResizerConfig().Padding;
@@ -191,6 +212,15 @@ namespace TrafficManager.U.Autosize {
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, "Stack mode not supported");
                 }
             }
+        }
+
+        public void MoveBy(Vector2 offset) {
+            if (this.Control.gameObject.activeSelf == false) {
+                return; // do nothing on destroyed controls
+            }
+
+            Vector3 pos = this.Control.relativePosition;
+            this.Control.relativePosition = pos + new Vector3(offset.x, offset.y);
         }
     }
 }
