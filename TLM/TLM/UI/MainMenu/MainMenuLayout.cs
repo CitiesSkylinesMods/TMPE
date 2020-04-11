@@ -37,19 +37,19 @@ namespace TrafficManager.UI.MainMenu {
 
         /// <summary>
         /// Row breaking strategy for main menu tool button layout.
-        /// If total buttons count is 4 or less: use one row, never break.
-        /// If count is more than 4: try form 2 rows but first row will be least 4 up to 6 buttons.
+        /// If total buttons count is 3 or less: use one row, never break.
+        /// If count is more than 3: try split into 2 rows.
         /// </summary>
         /// <param name="placedInARow">Current row build progress.</param>
-        /// <param name="maxRowLength">Max column where the row should be broken no matter what.</param>
-        /// <returns>Whether to break the row right now.</returns>
-        public bool IsRowBreak(int placedInARow, int minRowLength, int maxRowLength) {
+        /// <param name="minRowLength">How many buttons can be placed in a row without needing
+        /// a break (minimum).</returns>
+        public bool IsRowBreak(int placedInARow, int minRowLength) {
             if (count_ <= minRowLength) {
                 return false; // do not break if less than 4 buttons
             }
 
             // Breakpoint will be half of buttons, no less than 4, and no more than MaxRowLength
-            int breakPoint = Math.Min(maxRowLength, Math.Max(minRowLength, (count_ + 1) / 2));
+            int breakPoint = (count_ + 1) / 2;
             return placedInARow >= breakPoint;
         }
     }

@@ -127,7 +127,6 @@ namespace TrafficManager.UI {
         /// which might require rebuilding the main menu buttons.
         /// </summary>
         internal void RebuildMenu() {
-            bool wasOpen = MainMenu.isVisible;
             Close();
 
             if (MainMenu != null) {
@@ -151,9 +150,6 @@ namespace TrafficManager.UI {
             UIView uiView = UIView.GetAView();
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
 #endif
-            if (wasOpen) {
-                Show();
-            }
         }
 
         public void Show() {

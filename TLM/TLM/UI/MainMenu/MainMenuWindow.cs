@@ -207,7 +207,9 @@ namespace TrafficManager.UI.MainMenu {
                     r.FitToChildren();
                 });
 
-                AddButtonsResult toolButtonsResult = SetupControls_ToolPanel(innerPanelB, atlasKeysSet);
+                AddButtonsResult toolButtonsResult
+                    = SetupControls_ToolPanel(innerPanelB, atlasKeysSet);
+
                 SetupControls_ExtraPanel(innerPanelB, atlasKeysSet, toolButtonsResult);
             }
 
@@ -319,13 +321,12 @@ namespace TrafficManager.UI.MainMenu {
                     r.FitToChildren();
                 });
 
-                // Create 2 rows of button objects
+                // Create 1 or 2 rows of button objects
                 var toolButtonsResult = AddButtonsFromButtonDefinitions(
-                    leftPanelB,
-                    atlasKeysSet,
-                    TOOL_BUTTON_DEFS,
-                    minRowLength: 4,
-                    maxRowLength: 5);
+                    builder: leftPanelB,
+                    atlasKeysSet: atlasKeysSet,
+                    buttonDefs: TOOL_BUTTON_DEFS,
+                    minRowLength: 4);
                 ToolButtonsList = toolButtonsResult.Buttons;
 
                 return toolButtonsResult;
@@ -351,17 +352,13 @@ namespace TrafficManager.UI.MainMenu {
                     r.FitToChildren();
                 });
 
-                // Create 1 or 2 rows of button objects
-                // Row count depends on whether tool buttons panel was 2 or 1 rows
-                var rowLength = toolButtonsResult.Layout.Rows == 2
-                                    ? 1
-                                    : EXTRA_BUTTON_DEFS.Length;
+                // Place two extra buttons (despawn & clear traffic).
+                // Use as many rows as in the other panel.
                 var extraButtonsResult = AddButtonsFromButtonDefinitions(
-                    rightPanelB,
-                    atlasKeysSet,
-                    EXTRA_BUTTON_DEFS,
-                    minRowLength: rowLength,
-                    maxRowLength: rowLength);
+                    builder: rightPanelB,
+                    atlasKeysSet: atlasKeysSet,
+                    buttonDefs: EXTRA_BUTTON_DEFS,
+                    minRowLength: toolButtonsResult.Layout.Rows == 2 ? 1 : 2);
                 ExtraButtonsList = extraButtonsResult.Buttons;
             }
         }
@@ -384,14 +381,12 @@ namespace TrafficManager.UI.MainMenu {
         /// <param name="builder">UI builder to use.</param>
         /// <param name="atlasKeysSet">Atlas keys to update for button images.</param>
         /// <param name="buttonDefs">Button defs collection to create from it.</param>
-        /// <param name="minRowLength">Shortest the row can be before breaking.</param>
-        /// <param name="maxRowLength">Longest the row can be before breaking.</param>
+        /// <param name="minRowLength">Longest the row can be without breaking.</param>
         /// <returns>A list of created buttons.</returns>
         private AddButtonsResult AddButtonsFromButtonDefinitions(UiBuilder<UPanel> builder,
-                                                                     HashSet<string> atlasKeysSet,
-                                                                     MenuButtonDef[] buttonDefs,
-                                                                     int minRowLength,
-                                                                     int maxRowLength)
+                                                                 HashSet<string> atlasKeysSet,
+                                                                 MenuButtonDef[] buttonDefs,
+                                                                 int minRowLength)
         {
             AddButtonsResult result;
             result.Buttons = new List<BaseMenuButton>();
@@ -411,7 +406,7 @@ namespace TrafficManager.UI.MainMenu {
                 var buttonBuilder = builder.Button<BaseMenuButton>(buttonDef.ButtonType);
 
                 // Count buttons in a row and break the line
-                bool doRowBreak = result.Layout.IsRowBreak(placedInARow, minRowLength, maxRowLength);
+                bool doRowBreak = result.Layout.IsRowBreak(placedInARow, minRowLength);
 
                 buttonBuilder.ResizeFunction(r => {
                     r.Stack(doRowBreak ? UStackMode.NewRowBelow : UStackMode.ToTheRight);
