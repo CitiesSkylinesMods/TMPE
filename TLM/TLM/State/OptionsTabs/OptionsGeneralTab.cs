@@ -343,7 +343,7 @@ namespace TrafficManager.State {
             if (changed && _guiTransparencySlider != null) {
                 _guiTransparencySlider.value = val;
                 ModUI.Instance.UiTransparencyObservable.NotifyObservers(
-                    new ModUI.UITransparencyNotification() { NewTransparency = val });
+                    new ModUI.UITransparencyNotification { NewTransparency = val });
             }
         }
 

@@ -34,10 +34,10 @@
         [Obsolete("Main Menu now scales based on screen size")]
         public bool TinyMainMenu = true;
 
-        /// <summary>User interface transparency</summary>
-        public byte GuiTransparency = 30;
+        /// <summary>User interface transparency, unit: percents, range: 0..100.</summary>
+        public byte GuiTransparency = 75;
 
-        /// <summary>User interface scale for TM:PE.</summary>
+        /// <summary>User interface scale for TM:PE. Unit: percents, range: 30</summary>
         public float GuiScale = 100f;
 
         /// <summary>

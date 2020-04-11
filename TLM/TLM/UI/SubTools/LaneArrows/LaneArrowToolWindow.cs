@@ -2,6 +2,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.RedirectionFramework;
+    using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
     using TrafficManager.U.Button;
@@ -28,6 +29,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             // the GenericPanel sprite is silver, make it dark
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(64, 64, 64, 240);
+            this.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
         }
 
         private UITextureAtlas GetAtlas() {

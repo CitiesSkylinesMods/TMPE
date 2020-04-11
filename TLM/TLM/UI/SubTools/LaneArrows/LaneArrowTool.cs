@@ -7,6 +7,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.UI.MainMenu;
@@ -197,6 +198,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         private void CreateLaneArrowsWindow(int numLanes) {
             var parent = UIView.GetAView();
             ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
+            ToolWindow.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
+
             RepositionWindowToNode(); // reposition 1st time to avoid visible window jump
 
             using (var builder = new U.UiBuilder<LaneArrowToolWindow>(ToolWindow)) {
@@ -213,6 +216,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 };
 
                 // Resize everything correctly
+                // builder.Control.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
                 builder.Done();
                 RepositionWindowToNode(); // reposition again 2nd time now that size is known
             }

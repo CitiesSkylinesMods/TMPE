@@ -3,6 +3,7 @@ namespace TrafficManager.U.Panel {
     using ColossalFramework.UI;
     using JetBrains.Annotations;
     using TrafficManager.API.Util;
+    using TrafficManager.State;
     using TrafficManager.U.Autosize;
     using TrafficManager.UI;
     using UnityEngine;
@@ -69,11 +70,20 @@ namespace TrafficManager.U.Panel {
         /// </summary>
         /// <param name="uiScale">New UI scale.</param>
         public void OnUpdate(ModUI.UITransparencyNotification optionsEvent) {
-            var modified = this.color;
+            // incoming range: 0..100 convert to 0..1f
+            SetTransparency(optionsEvent.NewTransparency);
+        }
 
-            // incoming range: 0..100
-            // converting to range 0..255
-            modified.a = (byte)(255f * 0.01f * optionsEvent.NewTransparency);
+        /// <summary>
+        /// Rewrite window color to become transparent.
+        /// NOTE: If the call has no effect, look for some other code rewriting the color after your call!
+        /// </summary>
+        /// <param name="guiTransparencyPercent">Range 0..100.</param>
+        internal void SetTransparency(float guiTransparencyPercent) {
+            Color32 modified = this.color;
+
+            // converting range 0..100f to range 0..255
+            modified.a = (byte)(255f * 0.01f * guiTransparencyPercent);
 
             this.color = modified;
         }

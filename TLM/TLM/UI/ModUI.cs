@@ -2,8 +2,6 @@ namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System;
-    using TrafficManager.API.Util;
-    using TrafficManager.U;
     using TrafficManager.UI.MainMenu;
     using TrafficManager.Util;
     using UnityEngine;

@@ -1,5 +1,4 @@
 // #define QUEUEDSTATS
-
 namespace TrafficManager.UI.MainMenu {
     using ColossalFramework.UI;
     using CSUtil.Commons;
@@ -149,6 +148,7 @@ namespace TrafficManager.UI.MainMenu {
                 builder.SetPadding(UConst.UIPADDING);
 
                 window.SetupControls(builder);
+                // window.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
 
                 // Resize everything correctly
                 builder.Done();
@@ -163,6 +163,7 @@ namespace TrafficManager.UI.MainMenu {
             this.isVisible = false;
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(64, 64, 64, 240);
+            this.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
 
             var dragHandler = new GameObject("TMPE_Menu_DragHandler");
             dragHandler.transform.parent = transform;
@@ -236,7 +237,7 @@ namespace TrafficManager.UI.MainMenu {
                     p.name = "TMPE_MainMenu_KeybindsPanel";
                     p.isVisible = false;
 
-                    // the GenericPanel sprite is silver, make it dark
+                    // the GenericPanel sprite is Light Silver, make it dark
                     p.atlas = TextureUtil.FindAtlas("Ingame");
                     p.backgroundSprite = "GenericPanel";
                     p.color = new Color32(64, 64, 64, 240);
@@ -343,6 +344,8 @@ namespace TrafficManager.UI.MainMenu {
                     // Silver background panel
                     p.atlas = TextureUtil.FindAtlas("Ingame");
                     p.backgroundSprite = "GenericPanel";
+                    // The panel will be Dark Silver at 50% dark 100% alpha
+                    p.color = new Color32(128, 128, 128, 255);
                 }))
             {
                 rightPanelB.ResizeFunction(r => {
