@@ -26,6 +26,11 @@ This changelog includes all versions and major variants of the mod going all the
 >  
 > Date format: dd/mm/yyyy
 
+#### TM:PE V[11.3.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.0...11.3.1) LABS, 11/04/2020
+
+- Fixed: Timed Traffic Lights bugs caused by v11.3.0 update (thanks to everyone who reported the bug!) (#828, #824)
+- Updated: Trees Respiration mod is now compatible with TM:PE v11! (Thanks Klyte45!) (#831, #614, #611, #563, #484)
+
 #### TM:PE V[11.3.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.3...11.3.0) LABS, 10/04/2020
 
 - Added: Advanced auto lane connector tool (select a node, then `Ctrl + S`) (#706, #703)
