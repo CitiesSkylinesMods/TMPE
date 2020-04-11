@@ -59,6 +59,7 @@ namespace TrafficManager.U.Autosize {
 
             // For all children visit their resize functions and update allChildrenBox
             UIComponent previousChild = null;
+            (current as ISmartSizableControl)?.OnBeforeResizerUpdate();
 
             foreach (Transform child in current.transform) {
                 if (!child.gameObject.activeSelf) {
@@ -78,10 +79,13 @@ namespace TrafficManager.U.Autosize {
                 previousChild = childUiComponent;
             }
 
-            return UResizerConfig.CallOnResize(
+            UBoundingBox? result = UResizerConfig.CallOnResize(
                 control: current,
                 previousSibling,
                 childrenBox: allChildrenBox);
+
+            (current as ISmartSizableControl)?.OnAfterResizerUpdate();
+            return result;
         }
 
         /// <summary>Calculates value based on the UI component.</summary>

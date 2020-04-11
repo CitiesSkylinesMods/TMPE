@@ -44,7 +44,6 @@ namespace TrafficManager.U.Autosize {
                                                  UBoundingBox childrenBox) {
             if (control is ISmartSizableControl currentAsResizable) {
                 UResizerConfig resizerConfig = currentAsResizable.GetResizerConfig();
-                currentAsResizable.OnBeforeResizerUpdate();
 
                 if (resizerConfig.onResize_ != null) {
                     // Create helper UResizer and run it
@@ -60,8 +59,6 @@ namespace TrafficManager.U.Autosize {
                         Log.Error($"While calling OnResize on {control.name}: {e}");
                     }
                 }
-
-                currentAsResizable.OnAfterResizerUpdate();
 
                 if (!resizerConfig.ContributeToBoundingBox) {
                     return null;

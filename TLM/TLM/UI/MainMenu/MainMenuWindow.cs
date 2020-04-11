@@ -363,6 +363,14 @@ namespace TrafficManager.UI.MainMenu {
             }
         }
 
+        public override void OnBeforeResizerUpdate() {
+            if (this.DragHandle != null) {
+                // Drag handle is manually resized to the form width, but when the form is large,
+                // the handle prevents it from shrinking. So shrink now, size properly after.
+                this.DragHandle.size = Vector2.one;
+            }
+        }
+
         /// <summary>Called by UResizer for every control to be 'resized'.</summary>
         public override void OnAfterResizerUpdate() {
             if (this.DragHandle != null) {
