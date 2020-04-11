@@ -24,6 +24,7 @@ namespace TrafficManager.UI {
     using UnityEngine;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.SubTools.LaneArrows;
+    using TrafficManager.UI.SubTools.TimedTrafficLights;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -195,11 +196,7 @@ namespace TrafficManager.UI {
                 [ToolMode.ToggleTrafficLight] = new ToggleTrafficLightsTool(this),
                 [ToolMode.AddPrioritySigns] = new PrioritySignsTool(this),
                 [ToolMode.ManualSwitch] = new ManualTrafficLightsTool(this),
-                [ToolMode.TimedLightsAddNode] = timedLightsTool,
-                [ToolMode.TimedLightsRemoveNode] = timedLightsTool,
-                [ToolMode.TimedLightsSelectNode] = timedLightsTool,
-                [ToolMode.TimedLightsShowLights] = timedLightsTool,
-                [ToolMode.TimedLightsCopyLights] = timedLightsTool,
+                [ToolMode.TimedTrafficLights] = timedLightsTool,
                 [ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this),
                 [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
                 [ToolMode.LaneConnector] = new LaneConnectorTool(this),
@@ -253,10 +250,6 @@ namespace TrafficManager.UI {
 
             // ToolModeChanged does not count timed traffic light submodes as a same tool
             bool toolModeChanged = newToolMode != toolMode_;
-            if (IsTimedTrafficLightsSubtool(oldToolMode)
-                && IsTimedTrafficLightsSubtool(newToolMode)) {
-                toolModeChanged = false;
-            }
 
             if (!toolModeChanged) {
                 Log._Debug($"SetToolMode: not changed old={oldToolMode} new={newToolMode}");
@@ -313,14 +306,6 @@ namespace TrafficManager.UI {
                 ShowAdvisor(activeLegacySubTool_.GetTutorialKey());
                 Guide.DeactivateAll();
             }
-        }
-
-        private static bool IsTimedTrafficLightsSubtool(ToolMode a) {
-            return a == ToolMode.TimedLightsSelectNode
-                   || a == ToolMode.TimedLightsShowLights
-                   || a == ToolMode.TimedLightsAddNode
-                   || a == ToolMode.TimedLightsRemoveNode
-                   || a == ToolMode.TimedLightsCopyLights;
         }
 
         // Overridden to disable base class behavior
@@ -399,30 +384,27 @@ namespace TrafficManager.UI {
             }
 
             // check if mouse is inside panel
-            if (ModUI.Instance.GetMenu().containsMouse
 #if DEBUG
-                || ModUI.Instance.GetDebugMenu().containsMouse
+            bool mouseInsideAnyPanel = ModUI.Instance.GetMenu().containsMouse
+                                       || ModUI.Instance.GetDebugMenu().containsMouse;
+#else
+            bool mouseInsideAnyPanel = ModUI.Instance.GetMenu().containsMouse;
 #endif
-            ) {
-                Log._Debug(
-                    "TrafficManagerTool: OnToolUpdate: Menu contains mouse. Ignoring click.");
-                return;
-            }
 
             // !elementsHovered ||
-            if (activeLegacySubTool_ != null && activeLegacySubTool_.IsCursorInPanel()) {
-                Log._Debug("TrafficManagerTool: OnToolUpdate: Subtool contains mouse. Ignoring click.");
-                return;
-            }
+            mouseInsideAnyPanel |=
+                activeLegacySubTool_ != null && activeLegacySubTool_.IsCursorInPanel();
 
-            if (primaryMouseClicked) {
-                activeLegacySubTool_?.OnPrimaryClickOverlay();
-                activeSubTool_?.OnToolLeftClick();
-            }
+            if (!mouseInsideAnyPanel) {
+                if (primaryMouseClicked) {
+                    activeLegacySubTool_?.OnPrimaryClickOverlay();
+                    activeSubTool_?.OnToolLeftClick();
+                }
 
-            if (secondaryMouseClicked) {
-                activeLegacySubTool_?.OnSecondaryClickOverlay();
-                activeSubTool_?.OnToolRightClick();
+                if (secondaryMouseClicked) {
+                    activeLegacySubTool_?.OnSecondaryClickOverlay();
+                    activeSubTool_?.OnToolRightClick();
+                }
             }
         }
 

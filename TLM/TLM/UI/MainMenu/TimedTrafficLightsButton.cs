@@ -5,7 +5,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.U.Button;
 
     public class TimedTrafficLightsButton : BaseMenuToolModeButton {
-        protected override ToolMode ToolMode => ToolMode.TimedLightsSelectNode;
+        protected override ToolMode ToolMode => ToolMode.TimedTrafficLights;
 
         public override void SetupButtonSkin(HashSet<string> atlasKeys) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
