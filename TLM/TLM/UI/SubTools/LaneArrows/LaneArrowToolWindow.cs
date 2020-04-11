@@ -91,7 +91,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonRowBuilder.ResizeFunction(
                     r => {
                         r.Stack(mode: UStackMode.Below,
-                                spacing: Constants.UIPADDING);
+                                spacing: UConst.UIPADDING);
                         r.FitToChildren();
                     });
 
@@ -111,14 +111,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     {
                         int i1 = i; // copy of the loop variable, for the resizeFunction below
 
-                        buttonGroupBuilder.SetPadding(Constants.UIPADDING);
+                        buttonGroupBuilder.SetPadding(UConst.UIPADDING);
                         buttonGroupBuilder.ResizeFunction(
                             r => {
                                 // attach below "Lane #" label,
                                 // else: attach to the right of the previous button group
                                 r.Stack(
                                     mode: i1 == 0 ? UStackMode.Below : UStackMode.ToTheRight,
-                                    spacing: Constants.UIPADDING);
+                                    spacing: UConst.UIPADDING);
                                 r.FitToChildren();
                             });
 
@@ -155,7 +155,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                                             mode: prefix == "LaneArrowLeft"
                                                       ? UStackMode.Below
                                                       : UStackMode.ToTheRight,
-                                            spacing: Constants.UIPADDING);
+                                            spacing: UConst.UIPADDING);
                                         r.Width(UValue.FixedSize(40f));
                                         r.Height(UValue.FixedSize(40f));
                                     });

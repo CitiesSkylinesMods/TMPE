@@ -93,8 +93,8 @@ namespace TrafficManager.State {
 
             _guiTransparencySlider = generalGroup.AddSlider(
                                         T("General.Slider:Window transparency") + ":",
-                                        0,
-                                        90,
+                                        10,
+                                        100,
                                         5,
                                         GlobalConfig.Instance.Main.GuiTransparency,
                                         OnGuiTransparencyChanged) as UISlider;
@@ -342,6 +342,8 @@ namespace TrafficManager.State {
 
             if (changed && _guiTransparencySlider != null) {
                 _guiTransparencySlider.value = val;
+                ModUI.Instance.UiTransparencyObservable.NotifyObservers(
+                    new ModUI.UITransparencyNotification() { NewTransparency = val });
             }
         }
 

@@ -146,7 +146,7 @@ namespace TrafficManager.UI.MainMenu {
 
             using (var builder = new U.UiBuilder<MainMenuWindow>(window)) {
                 builder.ResizeFunction(r => { r.FitToChildren(); });
-                builder.SetPadding(Constants.UIPADDING);
+                builder.SetPadding(UConst.UIPADDING);
 
                 window.SetupControls(builder);
 
@@ -240,7 +240,7 @@ namespace TrafficManager.UI.MainMenu {
                     p.color = new Color32(64, 64, 64, 240);
                 }))
             {
-                keybindsB.SetPadding(Constants.UIPADDING);
+                keybindsB.SetPadding(UConst.UIPADDING);
 
                 // The keybinds panel belongs to main menu but does not expand it to fit
                 UResizerConfig.From(keybindsB.Control).ContributeToBoundingBox = false;
@@ -248,11 +248,11 @@ namespace TrafficManager.UI.MainMenu {
                 keybindsB.ResizeFunction(
                     r => {
                         r.Stack(mode: UStackMode.Below,
-                                spacing: Constants.UIPADDING * 2);
+                                spacing: UConst.UIPADDING * 2);
                         // As the control technically belongs inside the mainmenu, it will respect
                         // the 4px padding, we want to shift it slightly left to line up with the
                         // main menu panel.
-                        r.MoveBy(new Vector2(-Constants.UIPADDING, 0f));
+                        r.MoveBy(new Vector2(-UConst.UIPADDING, 0f));
                         r.FitToChildren();
                     });
             }
@@ -278,7 +278,7 @@ namespace TrafficManager.UI.MainMenu {
                             // Extra 2x spacing because of form's inner padding
                             r.Stack(
                                 mode: UStackMode.Below,
-                                spacing: 2f * Constants.UIPADDING,
+                                spacing: 2f * UConst.UIPADDING,
                                 stackRef: under);
                         });
                     stackUnder = this.StatsLabel = statsLabelB.Control;
@@ -296,10 +296,10 @@ namespace TrafficManager.UI.MainMenu {
                     hotReloadB.ResizeFunction(
                         r => {
                             // If pathFind stats label above was not visible, we need extra spacing
-                            float extraSpacing = Options.showPathFindStats ? Constants.UIPADDING : 0f;
+                            float extraSpacing = Options.showPathFindStats ? UConst.UIPADDING : 0f;
                             r.Stack(
                                 mode: UStackMode.Below,
-                                spacing: extraSpacing + Constants.UIPADDING,
+                                spacing: extraSpacing + UConst.UIPADDING,
                                 stackRef: stackUnder);
                         });
                 }
@@ -347,7 +347,7 @@ namespace TrafficManager.UI.MainMenu {
                 rightPanelB.ResizeFunction(r => {
                     // Step to the right by 4px
                     r.Stack(mode: UStackMode.ToTheRight,
-                            spacing: Constants.UIPADDING);
+                            spacing: UConst.UIPADDING);
                     r.FitToChildren();
                 });
 
@@ -370,7 +370,7 @@ namespace TrafficManager.UI.MainMenu {
         public override void OnAfterResizerUpdate() {
             if (this.DragHandle != null) {
                 // Resize to the window width but remember there's padding on the left
-                this.DragHandle.size = new Vector2(x: this.width - (Constants.UIPADDING * 2f),
+                this.DragHandle.size = new Vector2(x: this.width - (UConst.UIPADDING * 2f),
                                                    y: this.VersionLabel.height);
             }
         }

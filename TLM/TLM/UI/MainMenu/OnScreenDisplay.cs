@@ -38,7 +38,7 @@ namespace TrafficManager.UI.MainMenu {
                     r => {
                         r.Stack(
                             mode: UStackMode.ToTheRight,
-                            spacing: Constants.UIPADDING * 2f); // double space
+                            spacing: UConst.UIPADDING * 2f); // double space
                     });
             }
         }
@@ -53,11 +53,18 @@ namespace TrafficManager.UI.MainMenu {
 
             var builder = new UiBuilder<U.Panel.UPanel>(mainMenu.KeybindsPanel);
 
-            using (var shortcutLabel = builder.ClickLabel(
-                shift: shift,
-                ctrl: ctrl,
-                alt: alt)) {
-                shortcutLabel.ResizeFunction(r => { r.Stack(UStackMode.NewRowBelow); });
+            using (var modifierLabel = builder.ModifierLabel(shift, ctrl, alt)) {
+                modifierLabel.ResizeFunction(r => { r.Stack(UStackMode.NewRowBelow); });
+            }
+
+            using (var plusLabel = builder.Label<U.Label.ULabel>("+ ")) {
+                plusLabel.ResizeFunction(r => { r.Stack(UStackMode.ToTheRight); });
+            }
+
+            string clickText = Translation.Options.Get("Shortcut:Click");
+            using (var clickLabel = builder.Label<U.Label.ULabel>(clickText)) {
+                clickLabel.Control.textColor = UConst.SHORTCUT_KEYBIND_TEXT;
+                clickLabel.ResizeFunction(r => { r.Stack(UStackMode.ToTheRight); });
             }
 
             using (var descriptionLabel = builder.Label<U.Label.ULabel>(localizedText)) {
@@ -65,7 +72,7 @@ namespace TrafficManager.UI.MainMenu {
                     r => {
                         r.Stack(
                             mode: UStackMode.ToTheRight,
-                            spacing: Constants.UIPADDING * 2f); // double space
+                            spacing: UConst.UIPADDING * 2f); // double space
                     });
             }
         }

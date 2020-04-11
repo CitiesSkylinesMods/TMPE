@@ -54,9 +54,8 @@ namespace TrafficManager.UI {
 
         private bool _uiShown;
 
-        public struct UIScaleNotification {
-            public float NewScale;
-        }
+        /// <summary>Event to be sent when UI scale changes in the General Options tab.</summary>
+        public struct UIScaleNotification { public float NewScale; }
 
         public class UIScaleObservable : GenericObservable<UIScaleNotification> {
         }
@@ -67,8 +66,21 @@ namespace TrafficManager.UI {
         /// </summary>
         public UIScaleObservable UiScaleObservable;
 
+        /// <summary>Event to be sent when UI transparency changes in the General Options tab.</summary>
+        public struct UITransparencyNotification { public float NewTransparency; }
+
+        public class UITransparencyObservable : GenericObservable<UITransparencyNotification> {
+        }
+
+        /// <summary>
+        /// Subscribe to this to get notifications in your UI about UI transparency changes
+        /// (slider in General options tab).
+        /// </summary>
+        public UITransparencyObservable UiTransparencyObservable;
+
         public ModUI() {
             UiScaleObservable = new UIScaleObservable();
+            UiTransparencyObservable = new UITransparencyObservable();
 
             Log._Debug("##### Initializing ModUI.");
 

@@ -1,13 +1,9 @@
 namespace TrafficManager.U {
     using System;
-    using System.Collections.Generic;
-    using ColossalFramework;
     using ColossalFramework.UI;
-    using CSUtil.Commons;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U.Autosize;
     using TrafficManager.UI;
-    using UnityEngine;
 
     /// <summary>
     /// Create an UI builder to populate a panel with good things: buttons, sub-panels, create a
@@ -53,28 +49,25 @@ namespace TrafficManager.U {
             return new UiBuilder<TLabel>(newLabel);
         }
 
-        // private static readonly Color SHORTCUT_DESCR_TEXT = new Color(.75f, .75f, .75f, 1f);
-        public static readonly Color SHORTCUT_KEYBIND_TEXT = new Color(.8f, .6f, .3f, 1f);
-
         /// <summary>Add a colored label for a keyboard shortcut.</summary>
         /// <returns>New UI Builder with the keybind label created.</returns>
         public UiBuilder<U.Label.ULabel> ShortcutLabel(KeybindSetting ks) {
             var shortcutLabel = Control.AddUIComponent(typeof(U.Label.ULabel)) as U.Label.ULabel;
 
             shortcutLabel.backgroundSprite = "GenericPanelDark";
-            shortcutLabel.textColor = SHORTCUT_KEYBIND_TEXT;
+            shortcutLabel.textColor = UConst.SHORTCUT_KEYBIND_TEXT;
             shortcutLabel.text = $" {ks.ToLocalizedString()} ";
 
             return new UiBuilder<U.Label.ULabel>(shortcutLabel);
         }
 
-        /// <summary>Add a colored label for a mouse shortcut.</summary>
+        /// <summary>Add a colored label for a 'Shift + Ctrl + Alt' modifier key.</summary>
         /// <returns>New UI Builder with the keybind label created.</returns>
-        public UiBuilder<U.Label.ULabel> ClickLabel(bool shift, bool ctrl, bool alt) {
-            var shortcutLabel = Control.AddUIComponent(typeof(U.Label.ULabel)) as U.Label.ULabel;
+        public UiBuilder<U.Label.ULabel> ModifierLabel(bool shift, bool ctrl, bool alt) {
+            var modifierLabel = Control.AddUIComponent(typeof(U.Label.ULabel)) as U.Label.ULabel;
 
-            shortcutLabel.backgroundSprite = "GenericPanelDark";
-            shortcutLabel.textColor = SHORTCUT_KEYBIND_TEXT;
+            modifierLabel.backgroundSprite = "GenericPanelDark";
+            modifierLabel.textColor = UConst.SHORTCUT_KEYBIND_TEXT;
 
             string modifiers = shift
                                    ? Translation.Options.Get("Shortcut.Modifier:Shift")
@@ -88,11 +81,9 @@ namespace TrafficManager.U {
                 modifiers += Translation.Options.Get("Shortcut.Modifier:Alt");
             }
 
-            string click = Translation.Options.Get("Shortcut:Click");
+            modifierLabel.text = $" {modifiers} ";
 
-            shortcutLabel.text = $" {modifiers} + {click} ";
-
-            return new UiBuilder<U.Label.ULabel>(shortcutLabel);
+            return new UiBuilder<U.Label.ULabel>(modifierLabel);
         }
 
         public UiBuilder<TPanel> ChildPanel<TPanel>(Action<TPanel> setupFn)

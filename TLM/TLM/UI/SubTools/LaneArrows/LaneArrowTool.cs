@@ -38,9 +38,16 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         /// <summary>Events which trigger state transitions.</summary>
         private enum Trigger {
+            /// <summary>A segment was hovered and clicked.</summary>
             SegmentClick,
+
+            /// <summary>Right mouse has been clicked.</summary>
             RightMouseClick,
-            ReenterSameState,
+
+            /// <summary>
+            /// Escape has been pressed (this is handled by the MainMenu or ModUI code so might as
+            /// well be a candidate for removal).
+            /// </summary>
             EscapeKey,
         }
 
@@ -194,7 +201,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             using (var builder = new U.UiBuilder<LaneArrowToolWindow>(ToolWindow)) {
                 builder.ResizeFunction(r => { r.FitToChildren(); });
-                builder.SetPadding(Constants.UIPADDING);
+                builder.SetPadding(UConst.UIPADDING);
 
                 ToolWindow.SetupControls(builder, numLanes);
 

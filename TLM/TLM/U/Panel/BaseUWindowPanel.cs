@@ -12,7 +12,10 @@ namespace TrafficManager.U.Panel {
     /// Aware of some things such as rescaling on resolution or UI scale change.
     /// </summary>
     public abstract class BaseUWindowPanel
-        : UIPanel, ISmartSizableControl, IObserver<ModUI.UIScaleNotification>
+        : UIPanel,
+          ISmartSizableControl,
+          IObserver<ModUI.UIScaleNotification>,
+          IObserver<ModUI.UITransparencyNotification>
     {
         private UResizerConfig resizerConfig_ = new UResizerConfig();
 
@@ -20,10 +23,15 @@ namespace TrafficManager.U.Panel {
         [UsedImplicitly]
         private IDisposable uiScaleUnbsubscriber_;
 
+        /// <summary>On destroy this will unsubscribe from the UI Transparency observable.</summary>
+        [UsedImplicitly]
+        private IDisposable uiTransparencyUnbsubscriber_;
+
         /// <summary>Call this from your form constructor to enable tracking UI Scale changes.</summary>
         public override void Start() {
             base.Start();
             uiScaleUnbsubscriber_ = ModUI.Instance.UiScaleObservable.Subscribe(this);
+            uiTransparencyUnbsubscriber_ = ModUI.Instance.UiTransparencyObservable.Subscribe(this);
         }
 
         public UResizerConfig GetResizerConfig() {
@@ -49,10 +57,25 @@ namespace TrafficManager.U.Panel {
         /// Impl. <see cref="IObserver{T}"/> for UI Scale changes.
         /// Called from ModUI when UI scale slider in General tab was modified.
         /// </summary>
-        /// <param name="uiScale">New UI scale.</param>
-        public void OnUpdate(ModUI.UIScaleNotification uiScale) {
+        /// <param name="optionsEvent">New UI scale.</param>
+        public void OnUpdate(ModUI.UIScaleNotification optionsEvent) {
             // Call resize on all controls and recalculate again
             UResizer.UpdateControlRecursive(this, null);
+        }
+
+        /// <summary>
+        /// Impl. <see cref="IObserver{T}"/> for UI Scale changes.
+        /// Called from ModUI when UI scale slider in General tab was modified.
+        /// </summary>
+        /// <param name="uiScale">New UI scale.</param>
+        public void OnUpdate(ModUI.UITransparencyNotification optionsEvent) {
+            var modified = this.color;
+
+            // incoming range: 0..100
+            // converting to range 0..255
+            modified.a = (byte)(255f * 0.01f * optionsEvent.NewTransparency);
+
+            this.color = modified;
         }
     }
 }
