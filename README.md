@@ -39,6 +39,10 @@ Official releases:
 
 Recent updates:
 
+#### TM:PE V[11.3.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.0...11.3.1) LABS, 11/04/2020
+
+- Fixed: Timed Traffic Lights bugs caused by v11.3.0 update (thanks to everyone who reported the bug!) (#828, #824)
+
 #### TM:PE V[11.3.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.3...11.3.0) LABS, 10/04/2020
 
 - Added: Advanced auto lane connector tool (select a node, then `Ctrl + S`) (#706, #703)
