@@ -2,55 +2,37 @@ namespace TrafficManager.UI {
     /// <summary>Current mode of operation for TMPE.</summary>
     public enum ToolMode {
         /// <summary>No tool is active.</summary>
-        None = 0,
+        None,
 
         /// <summary>Traffic light on/off tool.</summary>
-        ToggleTrafficLight = 1,
+        ToggleTrafficLight,
 
         /// <summary>Priority/yield tool.</summary>
-        AddPrioritySigns = 2,
+        AddPrioritySigns,
 
         /// <summary>Traffic light manual control tool.</summary>
-        ManualSwitch = 3,
+        ManualSwitch,
 
-        /// <summary>
-        /// This key is not an actual tool mode, it is used by MainMenu to key the UI button for
-        /// timed traffic lights.
-        /// </summary>
-        TimedLightsButton,
-
-        /// <summary>Timed traffic light submode.</summary>
-        TimedLightsSelectNode = 4,
-
-        /// <summary>Timed traffic light submode.</summary>
-        TimedLightsShowLights = 5,
+        /// <summary>Timed traffic lights.</summary>
+        TimedTrafficLights,
 
         /// <summary>Lane Arrows tool is active.</summary>
-        LaneArrows = 6,
-
-        /// <summary>Timed traffic light submode.</summary>
-        TimedLightsAddNode = 7,
-
-        /// <summary>Timed traffic light submode.</summary>
-        TimedLightsRemoveNode = 8,
-
-        /// <summary>Timed traffic light submode.</summary>
-        TimedLightsCopyLights = 9,
+        LaneArrows,
 
         /// <summary>Speed limits tool.</summary>
-        SpeedLimits = 10,
+        SpeedLimits,
 
         /// <summary>Traffic type restrictions tool.</summary>
-        VehicleRestrictions = 11,
+        VehicleRestrictions,
 
         /// <summary>Lane connecting curves tool.</summary>
-        LaneConnector = 12,
+        LaneConnector,
 
         /// <summary>Junction settings (allow/ban behaviours on junctions) tool.</summary>
-        JunctionRestrictions = 13,
+        JunctionRestrictions,
 
         /// <summary>No parking tool.</summary>
-        ParkingRestrictions = 14,
+        ParkingRestrictions,
 
         /// <summary>
         /// This key is not an actual tool mode, it is used by MainMenu to key the UI button.

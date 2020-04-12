@@ -32,7 +32,7 @@ namespace TrafficManager.UI.MainMenu {
                                     },
                   new MenuButtonDef {
                                         ButtonType = typeof(TimedTrafficLightsButton),
-                                        Mode = ToolMode.TimedLightsButton,
+                                        Mode = ToolMode.TimedTrafficLights,
                                     },
                   new MenuButtonDef {
                                         ButtonType = typeof(ManualTrafficLightsButton),

@@ -281,6 +281,8 @@
     <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
+    <Compile Include="UI\SubTools\TimedTrafficLights\TimedTrafficLightsTool.cs" />
+    <Compile Include="UI\SubTools\TimedTrafficLights\TTLToolMode.cs" />
     <Compile Include="UI\Textures\JunctionRestrictions.cs" />
     <Compile Include="UI\Textures\MainMenu.cs" />
     <Compile Include="UI\Textures\RoadUI.cs" />
@@ -294,7 +296,6 @@
     <Compile Include="UI\SubTools\JunctionRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
     <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
-    <Compile Include="UI\SubTools\TimedTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\ManualTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\ToggleTrafficLightsTool.cs" />

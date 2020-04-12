@@ -9,7 +9,7 @@
     <a href="https://github.com/CitiesSkylinesMods/TMPE/wiki/Report-a-Bug">Report a Bug</a><br />
 </p>
 <p align="center">
-    <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/static/v1?label=cities:%20skylines&message=v1.13.0-f7&color=01ABF8&logo=unity" /></a>
+    <a href="https://store.steampowered.com/app/255710/Cities_Skylines/"><img src="https://img.shields.io/static/v1?label=cities:%20skylines&message=v1.13.0-f8&color=01ABF8&logo=unity" /></a>
     <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=stable&color=7cc17b&logo=steam&logoColor=F5F5F5" /></a>
     <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?include_prereleases&label=labs&color=f7b73c&logo=steam&logoColor=F5F5F5" /></a>
     <a href="https://github.com/CitiesSkylinesMods/TMPE/releases/latest"><img src="https://img.shields.io/github/v/release/CitiesSkylinesMods/TMPE?label=origin&color=F56C2D&logo=origin&logoColor=F56C2D" /></a>
@@ -39,17 +39,28 @@ Official releases:
 
 Recent updates:
 
-#### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) STABLE, 26/03/2020
+#### TM:PE V[11.3.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.0...11.3.1) LABS, 11/04/2020
 
-- Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
-- Updated: Game version badges in readme (#806)
-- Updated: Mod version and changelogs (#816)
+- Fixed: Timed Traffic Lights bugs caused by v11.3.0 update (thanks to everyone who reported the bug!) (#828, #824)
+- Updated: Trees Respiration mod is now compatible with TM:PE v11! (Thanks Klyte45!) (#831, #614, #611, #563, #484)
 
-#### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) LABS, 26/03/2020
+#### TM:PE V[11.3.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.3...11.3.0) LABS, 10/04/2020
 
-- Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
-- Updated: Game version badges in readme (#806)
-- Updated: Mod version and changelogs (#816)
+- Added: Advanced auto lane connector tool (select a node, then `Ctrl + S`) (#706, #703)
+- Fixed: Stay-in-lane should not connect solitary lanes (#706, #617)
+- Fixed: Lane arrows UI too small on some resolutions except at junctions (#726, #571)
+- Updated: Lane connectors: `Shift + S` changed to `Ctrl + S` (see Options > Keybinds tab) (#706)
+- Updated: Lane Arrows UI now respects UI scale slider (see Options > General tab) (#726)
+- Updated: Improved UI for lane arrows tool (#726, #571)
+- Updated: Translations (will add more info later) (#726)
+
+#### TM:PE V[11.2.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.2...11.2.3) STABLE, 08/04/2020
+
+- Fixed: Unable to set default speed limits for roads that need DLCs (#821, #818)
+
+#### TM:PE V[11.2.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.2...11.2.3) LABS, 08/04/2020
+
+- Fixed: Unable to set default speed limits for roads that need DLCs (#821, #818)
 
 See [Full Changelog](https://github.com/CitiesSkylinesMods/TMPE/blob/master/CHANGELOG.md) for details of all releases.
 
