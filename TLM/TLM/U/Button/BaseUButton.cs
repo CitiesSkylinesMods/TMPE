@@ -11,7 +11,7 @@
     /// </summary>
     public abstract class BaseUButton : UIButton, ISmartSizableControl {
         /// <summary>Works for U controls, same as CO.UI eventClick.</summary>
-        public MouseEventHandler uEventClick;
+        public MouseEventHandler uOnClick;
 
         /// <summary>
         /// Set this to avoid subclassing UButton when all you need is a simple active
@@ -61,15 +61,19 @@
         /// <returns>Whether the button visible.</returns>
         protected abstract bool IsVisible();
 
-        public abstract void HandleClick(UIMouseEventParameter p);
+        public virtual void HandleClick(UIMouseEventParameter p) {
+        }
 
         /// <summary>
         /// Override this to return non-null, and it will display a keybind tooltip
         /// </summary>
-        public virtual KeybindSetting ShortcutKey => null;
+        public virtual KeybindSetting GetShortcutKey() {
+            return null;
+        }
 
         protected override void OnClick(UIMouseEventParameter p) {
-            HandleClick(p);
+            this.HandleClick(p);
+            uOnClick?.Invoke(this, p);
             UpdateButtonImageAndTooltip();
         }
 
@@ -133,7 +137,9 @@
         /// </summary>
         /// <returns>Tooltip to append to the main tooltip text, or an empty string</returns>
         private string GetShortcutTooltip() {
-            return ShortcutKey != null ? ShortcutKey.ToLocalizedString("\n") : string.Empty;
+            return GetShortcutKey() != null
+                       ? GetShortcutKey().ToLocalizedString("\n")
+                       : string.Empty;
         }
     }
 }

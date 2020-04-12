@@ -32,13 +32,17 @@
         public bool EnableTutorial = true;
 
         /// <summary>Determines if the main menu shall be displayed in a tiny format.</summary>
-        [Obsolete("Main Menu now scales based on screen size")]
+        [Obsolete("Do not use. Main Menu now scales based on screen size")]
         public bool TinyMainMenu = true;
 
         /// <summary>User interface transparency, unit: percents, range: 0..100.</summary>
+        [Obsolete("Value is not used anymore, use GuiOpacity instead")]
         public byte GuiTransparency = 75;
 
-        /// <summary>User interface scale for TM:PE. Unit: percents, range: 30</summary>
+        /// <summary>User interface opacity, unit: percents, range: 0..100.</summary>
+        public byte GuiOpacity = 75;
+
+        /// <summary>User interface scale for TM:PE. Unit: percents, range: 30..200f.</summary>
         public float GuiScale = 100f;
 
         /// <summary>

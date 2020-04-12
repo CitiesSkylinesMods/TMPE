@@ -173,7 +173,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         private void CreateLaneArrowsWindow(int numLanes) {
             var parent = UIView.GetAView();
             ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
-            ToolWindow.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
+            ToolWindow.SetOpacity(
+                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
 
             RepositionWindowToNode(); // reposition 1st time to avoid visible window jump
 

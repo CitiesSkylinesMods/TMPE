@@ -22,7 +22,7 @@
 
         protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Speed limits");
 
-        public override KeybindSetting ShortcutKey => KeybindSettingsBase.SpeedLimitsTool;
+        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.SpeedLimitsTool;
 
         protected override bool IsVisible() => IsButtonEnabled();
 

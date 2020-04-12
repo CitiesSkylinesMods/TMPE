@@ -166,7 +166,7 @@ namespace TrafficManager.UI.MainMenu {
             // return KeybindSettingsBase.ToggleMainMenu.ToLocalizedString("\n");
         }
 
-        public override KeybindSetting ShortcutKey => KeybindSettingsBase.ToggleMainMenu;
+        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.ToggleMainMenu;
 
         protected override bool IsVisible() => true;
 

@@ -23,6 +23,6 @@
 
         protected override bool IsVisible() => true;
 
-        public override KeybindSetting ShortcutKey => KeybindSettingsBase.ToggleTrafficLightTool;
+        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.ToggleTrafficLightTool;
     }
 }

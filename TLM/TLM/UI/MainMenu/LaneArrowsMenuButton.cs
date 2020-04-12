@@ -23,6 +23,6 @@
 
         protected override bool IsVisible() => true;
 
-        public override KeybindSetting ShortcutKey => KeybindSettingsBase.LaneArrowTool;
+        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.LaneArrowTool;
     }
 }

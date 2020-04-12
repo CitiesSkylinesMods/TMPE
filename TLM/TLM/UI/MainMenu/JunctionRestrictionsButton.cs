@@ -23,7 +23,7 @@
         protected override string GetTooltip() =>
             Translation.Menu.Get("Tooltip:Junction restrictions");
 
-        public override KeybindSetting ShortcutKey => KeybindSettingsBase.JunctionRestrictionsTool;
+        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.JunctionRestrictionsTool;
 
         protected override bool IsVisible() => IsButtonEnabled();
 

@@ -58,8 +58,10 @@ namespace TrafficManager.UI {
         public abstract void UpdateEveryFrame();
 
         /// <summary>
-        /// Ask the tool to push the current click and keybinds help to MainMenu keybinds panel.
+        /// Called from the <see cref="TrafficManagerTool"/> when update for the Keybinds panel
+        /// in MainMenu is requested. Or when we need to change state.
         /// Never call this directly, only as: MainTool.RequestOnscreenDisplayUpdate();
+        /// What should do: Clear the OnscreenDisplay panel or clear and populate with keybinds.
         /// </summary>
         public abstract void UpdateOnscreenDisplayPanel();
     }

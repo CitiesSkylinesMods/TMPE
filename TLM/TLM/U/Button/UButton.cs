@@ -25,9 +25,5 @@ namespace TrafficManager.U.Button {
         protected override string GetTooltip() => string.Empty; // to override in subclass
 
         protected override bool IsVisible() => this.isVisible;
-
-        public override void HandleClick(UIMouseEventParameter p) {
-            uEventClick?.Invoke(this, p);
-        }
     }
 }

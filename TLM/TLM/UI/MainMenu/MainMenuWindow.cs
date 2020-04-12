@@ -170,7 +170,8 @@ namespace TrafficManager.UI.MainMenu {
             this.isVisible = false;
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(64, 64, 64, 240);
-            this.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
+            this.SetOpacity(
+                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
 
             var dragHandler = new GameObject("TMPE_Menu_DragHandler");
             dragHandler.transform.parent = transform;
@@ -238,17 +239,23 @@ namespace TrafficManager.UI.MainMenu {
             //-------------------------------------------------------------------------
             // Foldable panel with keybinds, starts hidden below or above the main menu
             //-------------------------------------------------------------------------
+            SetupControls_KeybindsPanel(builder);
+
+            // Floating labels under TM:PE window
+            SetupControls_DebugLabels(builder, this.KeybindsPanel);
+        }
+
+        private void SetupControls_KeybindsPanel(UiBuilder<MainMenuWindow> builder) {
             using (var keybindsB = builder.ChildPanel<U.Panel.UPanel>(
                 p => {
                     p.name = "TMPE_MainMenu_KeybindsPanel";
-                    p.isVisible = false;
+                    p.isVisible = false; // not visible until needed
 
                     // the GenericPanel sprite is Light Silver, make it dark
                     p.atlas = TextureUtil.FindAtlas("Ingame");
                     p.backgroundSprite = "GenericPanel";
                     p.color = new Color32(64, 64, 64, 240);
-                }))
-            {
+                })) {
                 keybindsB.SetPadding(UConst.UIPADDING);
 
                 // The keybinds panel belongs to main menu but does not expand it to fit
@@ -260,8 +267,9 @@ namespace TrafficManager.UI.MainMenu {
 
                 keybindsB.ResizeFunction(
                     r => {
-                        r.Stack(mode: UStackMode.Below,
-                                spacing: UConst.UIPADDING * 2);
+                        r.Stack(
+                            mode: UStackMode.Below,
+                            spacing: UConst.UIPADDING * 2);
                         // As the control technically belongs inside the mainmenu, it will respect
                         // the 4px padding, we want to shift it slightly left to line up with the
                         // main menu panel.
@@ -269,9 +277,6 @@ namespace TrafficManager.UI.MainMenu {
                         r.FitToChildren();
                     });
             }
-
-            // Floating labels under TM:PE window
-            SetupControls_DebugLabels(builder, this.KeybindsPanel);
         }
 
         private UILabel SetupControls_TopRow(UiBuilder<MainMenuWindow> builder,
@@ -319,21 +324,24 @@ namespace TrafficManager.UI.MainMenu {
                 helpB.Control.uIsActive =
                     c => GlobalConfig.Instance.Main.KeybindsPanelVisible;
 
-                helpB.Control.uEventClick += (component, eventParam) => {
-                    ModUI.Instance.MainMenu.OnHelpButtonClicked();
+                helpB.Control.uOnClick += (component, eventParam) => {
+                    ModUI.Instance.MainMenu.OnHelpButtonClicked(component as U.Button.UButton);
                 };
             }
 
             return versionLabel;
         }
 
-        private void OnHelpButtonClicked() {
+        private void OnHelpButtonClicked(U.Button.UButton button) {
             bool value = !GlobalConfig.Instance.Main.KeybindsPanelVisible;
             GlobalConfig.Instance.Main.KeybindsPanelVisible = value;
             Log._Debug($"Toggle value of KeybindsPanelVisible to {value}");
 
             // Refer to the TrafficManager tool asking it to request help from the current tool
             ModUI.GetTrafficManagerTool().RequestOnscreenDisplayUpdate();
+
+            // The task is delayed till next GUI update frame.
+            // ModUI.GetTrafficManagerTool().InvalidateOnscreenDisplayFlag = true;
         }
 
         private void SetupControls_DebugLabels(UiBuilder<MainMenuWindow> builder,

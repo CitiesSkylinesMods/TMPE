@@ -6,6 +6,12 @@ namespace TrafficManager.U.Autosize {
 
     /// <summary>Stores callback info for a resizable control.</summary>
     public class UResizerConfig {
+        // /// <summary>
+        // /// Set this to true to once attempt to realign the layout of this control and all children.
+        // /// This flag is respected by <see cref="U.Panel.BaseUWindowPanel"/>.
+        // /// </summary>
+        // public bool InvalidateLayoutFlag = false;
+
         /// <summary>
         /// Handler is called at control creation and also when resize is required due to screen
         /// resolution or UI scale change. Can be null, in that case the size is preserved.

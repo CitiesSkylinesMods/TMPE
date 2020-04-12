@@ -4,6 +4,7 @@ namespace TrafficManager.State {
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
+    using TrafficManager.U;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.UI;
@@ -22,7 +23,7 @@ namespace TrafficManager.State {
         [UsedImplicitly]
         private static UICheckBox _lockMenuToggle;
 
-        private static UISlider _guiTransparencySlider;
+        private static UISlider _guiOpacitySlider;
         private static UISlider _guiScaleSlider;
         private static UISlider _overlayTransparencySlider;
 
@@ -83,30 +84,30 @@ namespace TrafficManager.State {
                                   OnLockMenuChanged) as UICheckBox;
 
             _guiScaleSlider = generalGroup.AddSlider(
-                                        T("General.Slider:GUI scale") + ":",
-                                        50,
-                                        200,
-                                        5,
-                                        GlobalConfig.Instance.Main.GuiScale,
-                                        OnGuiScaleChanged) as UISlider;
+                                        text: T("General.Slider:GUI scale") + ":",
+                                        min: 50,
+                                        max: 200,
+                                        step: 5,
+                                        defaultValue: GlobalConfig.Instance.Main.GuiScale,
+                                        eventCallback: OnGuiScaleChanged) as UISlider;
             _guiScaleSlider.parent.Find<UILabel>("Label").width = 500;
 
-            _guiTransparencySlider = generalGroup.AddSlider(
-                                        T("General.Slider:Window transparency") + ":",
-                                        10,
-                                        100,
-                                        5,
-                                        GlobalConfig.Instance.Main.GuiTransparency,
-                                        OnGuiTransparencyChanged) as UISlider;
-            _guiTransparencySlider.parent.Find<UILabel>("Label").width = 500;
+            _guiOpacitySlider = generalGroup.AddSlider(
+                                        text: T("General.Slider:Window transparency") + ":",
+                                        min: 10,
+                                        max: 100,
+                                        step: 5,
+                                        defaultValue: GlobalConfig.Instance.Main.GuiOpacity,
+                                        eventCallback: OnGuiOpacityChanged) as UISlider;
+            _guiOpacitySlider.parent.Find<UILabel>("Label").width = 500;
 
             _overlayTransparencySlider = generalGroup.AddSlider(
-                                             T("General.Slider:Overlay transparency") + ":",
-                                             0,
-                                             90,
-                                             5,
-                                             GlobalConfig.Instance.Main.OverlayTransparency,
-                                             OnOverlayTransparencyChanged) as UISlider;
+                                             text: T("General.Slider:Overlay transparency") + ":",
+                                             min: 0,
+                                             max: 90,
+                                             step: 5,
+                                             defaultValue: GlobalConfig.Instance.Main.OverlayTransparency,
+                                             eventCallback: OnOverlayTransparencyChanged) as UISlider;
             _overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
             _enableTutorialToggle = generalGroup.AddCheckbox(
                                         T("General.Checkbox:Enable tutorials"),
@@ -234,19 +235,19 @@ namespace TrafficManager.State {
             }
         }
 
-        private static void OnGuiTransparencyChanged(float newVal) {
+        private static void OnGuiOpacityChanged(float newVal) {
             if (!Options.IsGameLoaded()) {
                 return;
             }
 
             SetGuiTransparency((byte)Mathf.RoundToInt(newVal));
-            _guiTransparencySlider.tooltip
+            _guiOpacitySlider.tooltip
                 = string.Format(
                     T("General.Tooltip.Format:Window transparency: {0}%"),
-                    GlobalConfig.Instance.Main.GuiTransparency);
+                    GlobalConfig.Instance.Main.GuiOpacity);
 
             GlobalConfig.WriteConfig();
-            Log._Debug($"GuiTransparency changed to {GlobalConfig.Instance.Main.GuiTransparency}");
+            Log._Debug($"GuiTransparency changed to {GlobalConfig.Instance.Main.GuiOpacity}");
         }
 
         private static void OnGuiScaleChanged(float newVal) {
@@ -337,13 +338,17 @@ namespace TrafficManager.State {
         }
 
         public static void SetGuiTransparency(byte val) {
-            bool changed = val != GlobalConfig.Instance.Main.GuiTransparency;
-            GlobalConfig.Instance.Main.GuiTransparency = val;
+            bool isChanged = val != GlobalConfig.Instance.Main.GuiOpacity;
+            GlobalConfig.Instance.Main.GuiOpacity = val;
 
-            if (changed && _guiTransparencySlider != null) {
-                _guiTransparencySlider.value = val;
-                ModUI.Instance.UiTransparencyObservable.NotifyObservers(
-                    new ModUI.UITransparencyNotification { NewTransparency = val });
+            if (isChanged && _guiOpacitySlider != null) {
+                _guiOpacitySlider.value = val;
+
+                U.UOpacityValue opacity = UOpacityValue.FromOpacity(0.01f * val);
+                ModUI.Instance.uiOpacityObservable.NotifyObservers(
+                          new ModUI.UIOpacityNotification {
+                                                              Opacity = opacity,
+                                                          });
             }
         }
 

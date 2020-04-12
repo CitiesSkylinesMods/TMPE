@@ -24,7 +24,7 @@ namespace TrafficManager.UI.MainMenu {
             Translation.Menu.Get("Tooltip:Add priority signs") + "\n" +
             Translation.Menu.Get("Tooltip.Keybinds:Add priority signs");
 
-        public override KeybindSetting ShortcutKey => KeybindSettingsBase.PrioritySignsTool;
+        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.PrioritySignsTool;
 
         protected override bool IsVisible() => IsButtonEnabled();
 

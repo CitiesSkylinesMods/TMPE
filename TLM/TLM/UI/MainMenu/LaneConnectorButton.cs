@@ -22,7 +22,7 @@
 
         protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Lane connector");
 
-        public override KeybindSetting ShortcutKey => KeybindSettingsBase.LaneConnectionsTool;
+        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.LaneConnectionsTool;
 
         protected override bool IsVisible() => IsButtonEnabled();
 

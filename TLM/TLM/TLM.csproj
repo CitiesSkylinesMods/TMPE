@@ -354,6 +354,7 @@
     <Compile Include="U\UIBuilder.cs" />
     <Compile Include="U\UIScaler.cs" />
     <Compile Include="U\UIUtil.cs" />
+    <Compile Include="U\UOpacityValue.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\JunctionRestrictions\crossing_allowed.png" />

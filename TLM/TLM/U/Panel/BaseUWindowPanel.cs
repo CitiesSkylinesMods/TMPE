@@ -16,7 +16,7 @@ namespace TrafficManager.U.Panel {
         : UIPanel,
           ISmartSizableControl,
           IObserver<ModUI.UIScaleNotification>,
-          IObserver<ModUI.UITransparencyNotification>
+          IObserver<ModUI.UIOpacityNotification>
     {
         private UResizerConfig resizerConfig_ = new UResizerConfig();
 
@@ -32,7 +32,7 @@ namespace TrafficManager.U.Panel {
         public override void Start() {
             base.Start();
             uiScaleUnbsubscriber_ = ModUI.Instance.UiScaleObservable.Subscribe(this);
-            uiTransparencyUnbsubscriber_ = ModUI.Instance.UiTransparencyObservable.Subscribe(this);
+            uiTransparencyUnbsubscriber_ = ModUI.Instance.uiOpacityObservable.Subscribe(this);
         }
 
         public UResizerConfig GetResizerConfig() {
@@ -68,23 +68,20 @@ namespace TrafficManager.U.Panel {
         /// Impl. <see cref="IObserver{T}"/> for UI Scale changes.
         /// Called from ModUI when UI scale slider in General tab was modified.
         /// </summary>
-        /// <param name="uiScale">New UI scale.</param>
-        public void OnUpdate(ModUI.UITransparencyNotification optionsEvent) {
+        /// <param name="optionsEvent">Event with the new UI opacity.</param>
+        public void OnUpdate(ModUI.UIOpacityNotification optionsEvent) {
             // incoming range: 0..100 convert to 0..1f
-            SetTransparency(optionsEvent.NewTransparency);
+            SetOpacity(optionsEvent.Opacity);
         }
 
         /// <summary>
-        /// Rewrite window color to become transparent.
+        /// Rewrite window color to become less or more opaque.
         /// NOTE: If the call has no effect, look for some other code rewriting the color after your call!
         /// </summary>
-        /// <param name="guiTransparencyPercent">Range 0..100.</param>
-        internal void SetTransparency(float guiTransparencyPercent) {
+        /// <param name="opacity">Range 0..100, where 100 is solid and 0 invisible.</param>
+        internal void SetOpacity(U.UOpacityValue opacity) {
             Color32 modified = this.color;
-
-            // converting range 0..100f to range 0..255
-            modified.a = (byte)(255f * 0.01f * guiTransparencyPercent);
-
+            modified.a = opacity.GetOpacityByte();
             this.color = modified;
         }
     }

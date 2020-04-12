@@ -33,5 +33,8 @@ namespace TrafficManager.U.Autosize {
         public override string ToString() {
             return $"UBBox{{a={A}, b={B}}}";
         }
+
+        public float Width => this.B.x - this.A.x;
+        public float Height => this.B.y - this.A.y;
     }
 }
