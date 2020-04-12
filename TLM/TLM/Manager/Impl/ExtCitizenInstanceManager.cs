@@ -455,39 +455,32 @@ namespace TrafficManager.Manager.Impl {
             }
             catch (Exception ex) {
 
-                // make sure we have copy of exception in TMPE.log
-                Log.Info(ex.ToString());
+                if (pathFindAdHocDebug == TernaryBool.Undefined) {
+                    // make sure we have copy of exception in TMPE.log
+                    Log.Info(ex.ToString());
 
-                switch (pathFindAdHocDebug) {
+                    // enable debug logging
+                    pathFindAdHocDebug = TernaryBool.True;
 
-                    case TernaryBool.False:
-                        break;
+                    // run the code again, this time with full debug logging
+                    try {
+                        InternalStartPathFind(
+                            instanceID,
+                            ref instanceData,
+                            ref extInstance,
+                            ref extCitizen,
+                            startPos,
+                            endPos,
+                            vehicleInfo,
+                            enableTransport,
+                            ignoreCost);
+                    }
+                    catch {
+                        // ignore
+                    }
 
-                    case TernaryBool.Undefined:
-                        pathFindAdHocDebug = TernaryBool.True;
-
-                        try {
-                            // run the code again, this time with full debug logging
-                            InternalStartPathFind(
-                                instanceID,
-                                ref instanceData,
-                                ref extInstance,
-                                ref extCitizen,
-                                startPos,
-                                endPos,
-                                vehicleInfo,
-                                enableTransport,
-                                ignoreCost);
-                        }
-                        catch {
-                            // ignore
-                        }
-
-                        pathFindAdHocDebug = TernaryBool.False;
-                        break;
-
-                    default:
-                        break;
+                    // prevent future logging
+                    pathFindAdHocDebug = TernaryBool.False;
                 }
 
                 throw;
@@ -528,7 +521,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
             if (logParkingAi) {
-                Log.Warning(
+                Log.Info(
                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): called for citizen " +
                     $"{instanceData.m_citizen}, startPos={startPos}, endPos={endPos}, " +
                     $"sourceBuilding={instanceData.m_sourceBuilding}, " +
