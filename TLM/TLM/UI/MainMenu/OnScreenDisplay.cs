@@ -5,8 +5,13 @@ namespace TrafficManager.UI.MainMenu {
     using UnityEngine;
 
     public static class OnScreenDisplay {
-        /// <summary>On Screen Display feature: Clear and maybe hide the keybind panel.</summary>
         public static void Clear() {
+            Begin();
+            Done();
+        }
+
+        /// <summary>On Screen Display feature: Clear and maybe hide the keybind panel.</summary>
+        public static void Begin() {
             MainMenuWindow mainMenu = ModUI.Instance.MainMenu;
 
             foreach (Transform c in mainMenu.KeybindsPanel.transform) {
@@ -63,6 +68,7 @@ namespace TrafficManager.UI.MainMenu {
 
             string clickText = Translation.Options.Get("Shortcut:Click");
             using (var clickLabel = builder.Label<U.Label.ULabel>(clickText)) {
+                clickLabel.Control.backgroundSprite = "GenericPanelDark";
                 clickLabel.Control.textColor = UConst.SHORTCUT_KEYBIND_TEXT;
                 clickLabel.ResizeFunction(r => { r.Stack(UStackMode.ToTheRight); });
             }

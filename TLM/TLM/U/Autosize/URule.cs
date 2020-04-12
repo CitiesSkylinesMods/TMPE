@@ -3,7 +3,10 @@ namespace TrafficManager.U.Autosize {
         /// <summary>Do not produce any value.</summary>
         Ignore,
 
-        /// <summary>The control will be always sized to the fixed size.</summary>
+        /// <summary>
+        /// The control will be always sized to the fixed size.
+        /// The UI has internal fixed size of 1920x1080 points which is stretched to screen.
+        /// </summary>
         FixedSize,
 
         /// <summary>The control will be sized to % of screen width.</summary>

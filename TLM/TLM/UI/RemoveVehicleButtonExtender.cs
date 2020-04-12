@@ -68,14 +68,15 @@
                     BackgroundHovered = true,
                     BackgroundActive = true,
                     ForegroundHovered = true,
-                    ForegroundActive = true
+                    ForegroundActive = true,
                 };
+                // TODO: This atlas is created multiple times, cache or find by name.
                 this.atlas = this.Skin.CreateAtlas(
-                    "Clear",
-                    50,
-                    50,
-                    256,
-                    this.Skin.CreateAtlasKeyset());
+                    loadingPath: "Clear",
+                    spriteWidth: 50,
+                    spriteHeight: 50,
+                    hintAtlasTextureSize: 256,
+                    atlasKeyset: this.Skin.CreateAtlasKeyset());
                 UpdateButtonImageAndTooltip();
                 width = height = 30f;
             }

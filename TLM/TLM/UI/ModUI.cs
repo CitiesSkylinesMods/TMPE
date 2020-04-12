@@ -97,8 +97,18 @@ namespace TrafficManager.UI {
 
         private void CreateMainMenuButtonAndWindow() {
             UIView uiView = UIView.GetAView();
-            MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
-            MainMenu = MainMenuWindow.CreateMainMenuWindow();
+            try {
+                MainMenu = MainMenuWindow.CreateMainMenuWindow();
+            }
+            catch (Exception e) {
+                Log.Error($"While creating MainMenu: {e}");
+            }
+            try {
+                MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
+            }
+            catch (Exception e) {
+                Log.Error($"While creating MainButton: {e}");
+            }
         }
 
         ~ModUI() {

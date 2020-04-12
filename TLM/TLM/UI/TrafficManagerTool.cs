@@ -276,7 +276,7 @@ namespace TrafficManager.UI {
         /// <summary>Resets the tool and calls deactivate on it.</summary>
         private void SetToolMode_DeactivateTool() {
             // Clear OSD panel with keybinds
-            OnScreenDisplay.Clear();
+            OnScreenDisplay.Begin();
             OnScreenDisplay.Done();
 
             if (activeLegacySubTool_ != null || activeSubTool_ != null) {
@@ -1747,6 +1747,22 @@ namespace TrafficManager.UI {
             }
 
             Prompt.Warning("Warning", message);
+        }
+
+        public void RequestOnscreenDisplayUpdate() {
+            bool visible = !GlobalConfig.Instance.Main.KeybindsPanelVisible;
+            if (!visible) {
+                OnScreenDisplay.Begin();
+                OnScreenDisplay.Done();
+                return;
+            }
+
+            if (this.activeSubTool_ == null) {
+                // No new style subtool available. Old style subtools do not support this.
+                return;
+            }
+
+            this.activeSubTool_.UpdateOnscreenDisplayPanel();
         }
     }
 }

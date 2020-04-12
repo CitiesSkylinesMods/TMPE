@@ -7,10 +7,12 @@ namespace TrafficManager.UI.MainMenu {
     using System.Linq;
     using System.Reflection;
     using TrafficManager.API.Util;
+    using TrafficManager.RedirectionFramework;
     using TrafficManager.State.Keybinds;
     using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
+    using TrafficManager.U.Button;
     using TrafficManager.U.Panel;
     using UnityEngine;
 
@@ -26,6 +28,11 @@ namespace TrafficManager.UI.MainMenu {
         /// Panel is hidden if it contains no controls.
         /// </summary>
         public UPanel KeybindsPanel { get; set; }
+
+        /// <summary>
+        /// Button [?] in the corner which toggles keybinds
+        /// </summary>
+        private UButton helpButton_;
 
         /// <summary>Tool buttons occupy the left and bigger side of the main menu.</summary>
         private static readonly MenuButtonDef[] TOOL_BUTTON_DEFS
@@ -177,12 +184,6 @@ namespace TrafficManager.UI.MainMenu {
         /// <summary>Called from ModUI to setup children for the window.</summary>
         /// <param name="builder">The UI Builder.</param>
         public void SetupControls(UiBuilder<MainMenuWindow> builder) {
-            UILabel versionLabel = null;
-            using (var versionLabelB = builder.Label<U.Label.ULabel>(TrafficManagerMod.ModName)) {
-                versionLabelB.ResizeFunction(r => r.Stack(UStackMode.Below));
-                this.VersionLabel = versionLabel = versionLabelB.Control;
-            }
-
             // Create and populate list of background atlas keys, used by all buttons
             // And also each button will have a chance to add their own atlas keys for loading.
             var tmpSkin = new U.Button.ButtonSkin {
@@ -194,6 +195,10 @@ namespace TrafficManager.UI.MainMenu {
                                                   };
             // By default the atlas will include backgrounds: DefaultRound-bg-normal
             HashSet<string> atlasKeysSet = tmpSkin.CreateAtlasKeyset();
+
+            // Create Version Label and Help button:
+            // [ TM:PE 11.x ] [?]
+            UILabel versionLabel = SetupControls_TopRow(builder, atlasKeysSet);
 
             // Main menu contains 2 panels side by side, one for tool buttons and another for
             // despawn & clear buttons.
@@ -228,6 +233,7 @@ namespace TrafficManager.UI.MainMenu {
             foreach (BaseMenuButton b in ExtraButtonsList) {
                 b.atlas = allButtonsAtlas_;
             }
+            this.helpButton_.atlas = allButtonsAtlas_;
 
             //-------------------------------------------------------------------------
             // Foldable panel with keybinds, starts hidden below or above the main menu
@@ -248,6 +254,10 @@ namespace TrafficManager.UI.MainMenu {
                 // The keybinds panel belongs to main menu but does not expand it to fit
                 UResizerConfig.From(keybindsB.Control).ContributeToBoundingBox = false;
                 this.KeybindsPanel = keybindsB.Control;
+
+                bool keybindsVisible = GlobalConfig.Instance.Main.KeybindsPanelVisible;
+                this.KeybindsPanel.gameObject.SetActive(keybindsVisible);
+
                 keybindsB.ResizeFunction(
                     r => {
                         r.Stack(mode: UStackMode.Below,
@@ -264,7 +274,59 @@ namespace TrafficManager.UI.MainMenu {
             SetupControls_DebugLabels(builder, this.KeybindsPanel);
         }
 
-        private void SetupControls_KeybindsPanel(UiBuilder<UPanel> builder) {
+        private UILabel SetupControls_TopRow(UiBuilder<MainMenuWindow> builder,
+                                             HashSet<string> atlasKeySet) {
+            UILabel versionLabel;
+
+            using (var versionLabelB = builder.Label<U.Label.ULabel>(TrafficManagerMod.ModName)) {
+                versionLabelB.ResizeFunction(r => r.Stack(UStackMode.Below));
+                this.VersionLabel = versionLabel = versionLabelB.Control;
+            }
+
+            using (var helpB = builder.Button<U.Button.UButton>()) {
+                this.helpButton_ = helpB.Control;
+                helpB.Control.atlas = this.allButtonsAtlas_;
+                helpB.Control.name = "TMPE_MainMenu_HelpButton";
+                helpB.Control.isVisible = true;
+
+                // Texture for Help will be included in the `allButtonsAtlas_`
+                ButtonSkin skin = new ButtonSkin {
+                                                     BackgroundPrefix = "RoundButton",
+                                                     Prefix = "Help",
+                                                     BackgroundHovered = true,
+                                                     BackgroundActive = true,
+                                                     ForegroundActive = true,
+                                                 };
+                atlasKeySet.AddRange(skin.CreateAtlasKeyset());
+
+                helpB.Control.Skin = skin;
+
+                // This has to be done later when form setup is done:
+                // helpB.Control.atlas = allButtonsAtlas_;
+
+                helpB.ResizeFunction(
+                    resizeFn: r => {
+                        r.Stack(mode: UStackMode.ToTheRight,
+                                spacing: UConst.UIPADDING * 3f,
+                                stackRef: versionLabel);
+                        r.Width(UValue.FixedSize(18f)); // assume Version label is 18pt high
+                        r.Height(UValue.FixedSize(18f));
+                    });
+
+                helpB.Control.eventClick += (component, eventParam) => {
+                    ModUI.Instance.MainMenu.OnHelpButtonClicked();
+                };
+            }
+
+            return versionLabel;
+        }
+
+        private void OnHelpButtonClicked() {
+            bool value = !GlobalConfig.Instance.Main.KeybindsPanelVisible;
+            GlobalConfig.Instance.Main.KeybindsPanelVisible = value;
+
+            // Refer to the TrafficManager tool asking it to request help from the current tool
+            ModUI.GetTrafficManagerTool().RequestOnscreenDisplayUpdate();
         }
 
         private void SetupControls_DebugLabels(UiBuilder<MainMenuWindow> builder,
@@ -378,8 +440,10 @@ namespace TrafficManager.UI.MainMenu {
         public override void OnAfterResizerUpdate() {
             if (this.DragHandle != null) {
                 // Resize to the window width but remember there's padding on the left
-                this.DragHandle.size = new Vector2(x: this.width - (UConst.UIPADDING * 2f),
-                                                   y: this.VersionLabel.height);
+                // this.DragHandle.size = new Vector2(x: this.width - (UConst.UIPADDING * 2f),
+                //                                    y: this.VersionLabel.height);
+
+                this.DragHandle.size = this.VersionLabel.size;
             }
         }
 

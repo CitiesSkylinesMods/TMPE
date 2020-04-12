@@ -56,5 +56,9 @@ namespace TrafficManager.UI {
         public abstract void OnToolRightClick();
 
         public abstract void UpdateEveryFrame();
+
+        /// <summary>Ask the tool to push the current click and keybinds help to MainMenu keybinds panel.
+        /// </summary>
+        public abstract void UpdateOnscreenDisplayPanel();
     }
 }

@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.SubTools.LaneArrows {
+    using System;
     using System.Collections.Generic;
     using ColossalFramework;
     using ColossalFramework.UI;
@@ -103,13 +104,12 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         private void OnLeaveSelectState() {
             OnScreenDisplay.Clear();
-            OnScreenDisplay.Done();
         }
 
         private void OnEnterSelectState() {
             SelectedNodeId = 0;
             SelectedSegmentId = 0;
-            SetupOnscreenDisplay_SelectState();
+            UpdateOnscreenDisplayPanel();
         }
 
         /// <summary>Called from GenericFsm when a segment is clicked to show lane arrows GUI.</summary>
@@ -164,31 +164,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             CreateLaneArrowsWindow(laneList.Count);
             SetupLaneArrowsWindowButtons(laneList: laneList,
                                          startNode: (bool)startNode);
-
-            SetupOnscreenDisplay_EditorState();
-        }
-
-        private static void SetupOnscreenDisplay_EditorState() {
-            OnScreenDisplay.Clear();
-            OnScreenDisplay.Shortcut(
-                kbSetting: KeybindSettingsBase.LaneConnectorDelete,
-                localizedText: T("LaneConnector.Label:Reset to default"));
-            OnScreenDisplay.Done();
-        }
-
-        private static void SetupOnscreenDisplay_SelectState() {
-            OnScreenDisplay.Clear();
-            OnScreenDisplay.Click(
-                shift: false,
-                ctrl: true,
-                alt: false,
-                localizedText: T("LaneArrows.Click:Separate lanes for entire junction"));
-            OnScreenDisplay.Click(
-                shift: false,
-                ctrl: false,
-                alt: true,
-                localizedText: T("LaneArrows.Click:Separate lanes for segment"));
-            OnScreenDisplay.Done();
+            UpdateOnscreenDisplayPanel();
         }
 
         /// <summary>
@@ -267,8 +243,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <summary>Called from GenericFsm when user leaves lane arrow editor, to hide the GUI.</summary>
         private void OnLeaveEditorState() {
             OnScreenDisplay.Clear();
-            OnScreenDisplay.Done();
-
             DestroyToolWindow();
         }
 
@@ -428,6 +402,44 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
 
             RepositionWindowToNode();
+        }
+
+        /// <summary>
+        /// Called from the <see cref="TrafficManagerTool"/> when update for the Keybinds panel
+        /// in MainMenu is requested. Or when we need to change state.
+        /// </summary>
+        public override void UpdateOnscreenDisplayPanel() {
+            if (fsm_ != null) {
+                OnScreenDisplay.Clear();
+                return;
+            }
+
+            switch (fsm_.State) {
+                case State.Select: {
+                    OnScreenDisplay.Begin();
+                    OnScreenDisplay.Click(
+                        shift: false,
+                        ctrl: true,
+                        alt: false,
+                        localizedText: T("LaneArrows.Click:Separate lanes for entire junction"));
+                    OnScreenDisplay.Click(
+                        shift: false,
+                        ctrl: false,
+                        alt: true,
+                        localizedText: T("LaneArrows.Click:Separate lanes for segment"));
+                    OnScreenDisplay.Done();
+                    return;
+                }
+                case State.EditLaneArrows: {
+                    OnScreenDisplay.Begin();
+                    OnScreenDisplay.Shortcut(
+                        kbSetting: KeybindSettingsBase.LaneConnectorDelete,
+                        localizedText: T("LaneConnector.Label:Reset to default"));
+                    OnScreenDisplay.Done();
+                    return;
+                }
+            }
+            OnScreenDisplay.Clear();
         }
 
         private void RepositionWindowToNode() {
