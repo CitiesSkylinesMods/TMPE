@@ -27,7 +27,7 @@ namespace TrafficManager.Manager.Impl {
         /// * True = error occurred, log next patfind
         /// * False = stop logging and don't do any additional logging.
         /// </summary>
-        private TernaryBool pathFindAdHocDebug = TernaryBool.Undefined;
+        private static TernaryBool pathFindAdHocDebug = TernaryBool.Undefined;
 
         /// <summary>
         /// All additional data for citizen instance. Index: citizen instance id
