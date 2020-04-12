@@ -327,8 +327,6 @@ namespace TrafficManager.UI {
                    || a == ToolMode.TimedLightsCopyLights;
         }
 
-        public void CallOnEnable() => OnEnable();
-
         // Overridden to disable base class behavior
         protected override void OnEnable() {
             if (legacySubTools_ != null) {
