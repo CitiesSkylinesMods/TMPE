@@ -452,18 +452,41 @@ namespace TrafficManager.Manager.Impl {
                     enableTransport,
                     ignoreCost);
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
 
+                // make sure we have copy of exception in TMPE.log
                 Log.Info(ex.ToString());
 
                 switch (pathFindAdHocDebug) {
+
                     case TernaryBool.False:
                         break;
+
                     case TernaryBool.Undefined:
                         pathFindAdHocDebug = TernaryBool.True;
-                        break;
-                    case TernaryBool.True:
+
+                        try {
+                            // run the code again, this time with full debug logging
+                            InternalStartPathFind(
+                                instanceID,
+                                ref instanceData,
+                                ref extInstance,
+                                ref extCitizen,
+                                startPos,
+                                endPos,
+                                vehicleInfo,
+                                enableTransport,
+                                ignoreCost);
+                        }
+                        catch {
+                            // ignore
+                        }
+
                         pathFindAdHocDebug = TernaryBool.False;
+                        break;
+
+                    default:
                         break;
                 }
 
