@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework.Globalization;
     using ColossalFramework;
     using CSUtil.Commons.Benchmark;
@@ -19,6 +19,15 @@
           IExtCitizenInstanceManager
     {
         public static readonly ExtCitizenInstanceManager Instance = new ExtCitizenInstanceManager();
+
+        /// <summary>
+        /// Used to perform ad-hoc logging (only once) should errors occur in <see cref="StartPathFind()"/>:
+        ///
+        /// * Undefined = no error yet
+        /// * True = error occurred, log next patfind
+        /// * False = stop logging and don't do any additional logging.
+        /// </summary>
+        private TernaryBool pathFindAdHocDebug = TernaryBool.Undefined;
 
         /// <summary>
         /// All additional data for citizen instance. Index: citizen instance id
@@ -419,15 +428,60 @@
             return Locale.Get("CITIZEN_STATUS_GOINGTO");
         }
 
-        public bool StartPathFind(ushort instanceID,
-                                  ref CitizenInstance instanceData,
-                                  ref ExtCitizenInstance extInstance,
-                                  ref ExtCitizen extCitizen,
-                                  Vector3 startPos,
-                                  Vector3 endPos,
-                                  VehicleInfo vehicleInfo,
-                                  bool enableTransport,
-                                  bool ignoreCost) {
+        public bool StartPathFind(
+            ushort instanceID,
+            ref CitizenInstance instanceData,
+            ref ExtCitizenInstance extInstance,
+            ref ExtCitizen extCitizen,
+            Vector3 startPos,
+            Vector3 endPos,
+            VehicleInfo vehicleInfo,
+            bool enableTransport,
+            bool ignoreCost) {
+
+            try {
+
+                return InternalStartPathFind(
+                    instanceID,
+                    ref instanceData,
+                    ref extInstance,
+                    ref extCitizen,
+                    startPos,
+                    endPos,
+                    vehicleInfo,
+                    enableTransport,
+                    ignoreCost);
+
+            } catch (Exception ex) {
+
+                Log.Info(ex.ToString());
+
+                switch (pathFindAdHocDebug) {
+                    case TernaryBool.False:
+                        break;
+                    case TernaryBool.Undefined:
+                        pathFindAdHocDebug = TernaryBool.True;
+                        break;
+                    case TernaryBool.True:
+                        pathFindAdHocDebug = TernaryBool.False;
+                        break;
+                }
+
+                throw;
+            }
+        }
+
+        internal bool InternalStartPathFind(
+            ushort instanceID,
+            ref CitizenInstance instanceData,
+            ref ExtCitizenInstance extInstance,
+            ref ExtCitizen extCitizen,
+            Vector3 startPos,
+            Vector3 endPos,
+            VehicleInfo vehicleInfo,
+            bool enableTransport,
+            bool ignoreCost) {
+
             Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
             VehicleParked[] parkedVehiclesBuffer = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
 #if DEBUG
@@ -444,6 +498,12 @@
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
             bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 
+#else
+            bool logParkingAi;
+            bool extendedLogParkingAi;
+            logParkingAi = extendedLogParkingAi = pathFindAdHocDebug == TernaryBool.True;
+#endif
+
             if (logParkingAi) {
                 Log.Warning(
                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): called for citizen " +
@@ -453,10 +513,6 @@
                     $"pathMode={extInstance.pathMode}, enableTransport={enableTransport}, " +
                     $"ignoreCost={ignoreCost}");
             }
-#else
-            const bool logParkingAi = false;
-            const bool extendedLogParkingAi = false;
-#endif
 
             // NON-STOCK CODE START
             Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
