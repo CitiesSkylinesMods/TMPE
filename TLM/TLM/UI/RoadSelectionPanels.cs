@@ -336,7 +336,7 @@ namespace TrafficManager.UI {
             {
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>())
                 {
-                    if (button.IsHovered)
+                    if (button.IsHovered && button.isEnabled)
                         return true;
                 }
                 return false;

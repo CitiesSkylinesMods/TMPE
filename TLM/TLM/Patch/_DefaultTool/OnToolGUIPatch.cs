@@ -14,10 +14,9 @@ namespace TrafficManager.Patch._DefaultTool {
         [HarmonyPostfix]
         [UsedImplicitly]
         public static void Postfix(Event e) {
-            if (MassEditOVerlay.IsActive) {
-                var tmTool = ModUI.GetTrafficManagerTool(true);
-                if(ToolsModifierControl.toolController.CurrentTool != tmTool) {
-                    tmTool.OnToolGUIImpl(e);
+            if(ToolsModifierControl.toolController.CurrentTool.GetType() != typeof(TrafficManagerTool)) {
+                if (MassEditOVerlay.IsActive) {
+                    ModUI.GetTrafficManagerTool(true).OnToolGUIImpl(e);
                 }
             }
         }
