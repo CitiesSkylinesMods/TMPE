@@ -6,14 +6,28 @@ namespace TrafficManager.U.Button {
     /// Basic button, cannot be activated, clickable, no tooltip.
     /// </summary>
     public class UButton : BaseUButton {
-        public override bool CanActivate() => false; // click only
+        public override bool CanActivate() {
+            if (this.uCanActivate != null) {
+                return this.uCanActivate(this);
+            }
 
-        protected override bool IsActive() => false;
+            return false;
+        }
 
-        protected override string GetTooltip() => string.Empty;
+        protected override bool IsActive() {
+            if (this.uIsActive != null) {
+                return this.uIsActive(this);
+            }
+
+            return false;
+        }
+
+        protected override string GetTooltip() => string.Empty; // to override in subclass
 
         protected override bool IsVisible() => this.isVisible;
 
-        public override void HandleClick(UIMouseEventParameter p) { }
+        public override void HandleClick(UIMouseEventParameter p) {
+            uEventClick?.Invoke(this, p);
+        }
     }
 }

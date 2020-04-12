@@ -1,4 +1,5 @@
 ﻿namespace TrafficManager.U.Button {
+    using System;
     using ColossalFramework.UI;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U.Autosize;
@@ -9,6 +10,17 @@
     /// This is an abstract base class for buttons.
     /// </summary>
     public abstract class BaseUButton : UIButton, ISmartSizableControl {
+        /// <summary>Works for U controls, same as CO.UI eventClick.</summary>
+        public MouseEventHandler uEventClick;
+
+        /// <summary>
+        /// Set this to avoid subclassing UButton when all you need is a simple active
+        /// mode toggle.
+        /// NOTE: For this to work, <see cref="uCanActivate"/> must return true.
+        /// </summary>
+        public Func<UIComponent, bool> uIsActive;
+        public Func<UIComponent, bool> uCanActivate;
+
         private UResizerConfig resizerConfig_ = new UResizerConfig();
 
         public UResizerConfig GetResizerConfig() {
@@ -71,7 +83,7 @@
             this.Invalidate();
         }
 
-        private void UpdateButtonImage() {
+        internal void UpdateButtonImage() {
             if (this.Skin == null) {
                 // No skin, no textures, nothing to be updated
                 return;

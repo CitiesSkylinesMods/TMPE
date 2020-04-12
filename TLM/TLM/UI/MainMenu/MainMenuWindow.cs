@@ -287,7 +287,6 @@ namespace TrafficManager.UI.MainMenu {
                 this.helpButton_ = helpB.Control;
                 helpB.Control.atlas = this.allButtonsAtlas_;
                 helpB.Control.name = "TMPE_MainMenu_HelpButton";
-                helpB.Control.isVisible = true;
 
                 // Texture for Help will be included in the `allButtonsAtlas_`
                 ButtonSkin skin = new ButtonSkin {
@@ -300,12 +299,14 @@ namespace TrafficManager.UI.MainMenu {
                 atlasKeySet.AddRange(skin.CreateAtlasKeyset());
 
                 helpB.Control.Skin = skin;
+                helpB.Control.UpdateButtonImage();
 
                 // This has to be done later when form setup is done:
                 // helpB.Control.atlas = allButtonsAtlas_;
 
                 helpB.ResizeFunction(
                     resizeFn: r => {
+                        r.Control.isVisible = true; // not sure why its hidden on create? TODO
                         r.Stack(mode: UStackMode.ToTheRight,
                                 spacing: UConst.UIPADDING * 3f,
                                 stackRef: versionLabel);
@@ -313,7 +314,12 @@ namespace TrafficManager.UI.MainMenu {
                         r.Height(UValue.FixedSize(18f));
                     });
 
-                helpB.Control.eventClick += (component, eventParam) => {
+                helpB.Control.uCanActivate = c => true;
+
+                helpB.Control.uIsActive =
+                    c => GlobalConfig.Instance.Main.KeybindsPanelVisible;
+
+                helpB.Control.uEventClick += (component, eventParam) => {
                     ModUI.Instance.MainMenu.OnHelpButtonClicked();
                 };
             }
@@ -324,6 +330,7 @@ namespace TrafficManager.UI.MainMenu {
         private void OnHelpButtonClicked() {
             bool value = !GlobalConfig.Instance.Main.KeybindsPanelVisible;
             GlobalConfig.Instance.Main.KeybindsPanelVisible = value;
+            Log._Debug($"Toggle value of KeybindsPanelVisible to {value}");
 
             // Refer to the TrafficManager tool asking it to request help from the current tool
             ModUI.GetTrafficManagerTool().RequestOnscreenDisplayUpdate();

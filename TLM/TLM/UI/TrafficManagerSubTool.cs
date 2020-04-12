@@ -57,7 +57,9 @@ namespace TrafficManager.UI {
 
         public abstract void UpdateEveryFrame();
 
-        /// <summary>Ask the tool to push the current click and keybinds help to MainMenu keybinds panel.
+        /// <summary>
+        /// Ask the tool to push the current click and keybinds help to MainMenu keybinds panel.
+        /// Never call this directly, only as: MainTool.RequestOnscreenDisplayUpdate();
         /// </summary>
         public abstract void UpdateOnscreenDisplayPanel();
     }

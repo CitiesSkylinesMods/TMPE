@@ -72,7 +72,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <returns>The new FSM in the initial state.</returns>
         private Util.GenericFsm<State, Trigger> InitFiniteStateMachine() {
             var fsm = new Util.GenericFsm<State, Trigger>(State.Select);
-            this.OnEnterSelectState(); // FSM does not call enter on initial state
 
             // From Select mode, user can either click a segment, or Esc/rightclick to quit
             fsm.Configure(State.Select)
@@ -109,7 +108,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         private void OnEnterSelectState() {
             SelectedNodeId = 0;
             SelectedSegmentId = 0;
-            UpdateOnscreenDisplayPanel();
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         /// <summary>Called from GenericFsm when a segment is clicked to show lane arrows GUI.</summary>
@@ -164,7 +163,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             CreateLaneArrowsWindow(laneList.Count);
             SetupLaneArrowsWindowButtons(laneList: laneList,
                                          startNode: (bool)startNode);
-            UpdateOnscreenDisplayPanel();
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         /// <summary>
@@ -275,6 +274,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         public override void ActivateTool() {
             Log._Debug("LaneArrow: Activated tool");
             fsm_ = InitFiniteStateMachine();
+            this.OnEnterSelectState(); // FSM does not call enter on initial state
         }
 
         /// <summary>Cleans up when tool is deactivated or user switched to another tool.</summary>
@@ -407,9 +407,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <summary>
         /// Called from the <see cref="TrafficManagerTool"/> when update for the Keybinds panel
         /// in MainMenu is requested. Or when we need to change state.
+        /// Never call this directly, only as: MainTool.RequestOnscreenDisplayUpdate();
         /// </summary>
         public override void UpdateOnscreenDisplayPanel() {
-            if (fsm_ != null) {
+            if (fsm_ == null) {
                 OnScreenDisplay.Clear();
                 return;
             }

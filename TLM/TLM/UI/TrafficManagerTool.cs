@@ -1757,12 +1757,7 @@ namespace TrafficManager.UI {
                 return;
             }
 
-            if (this.activeSubTool_ == null) {
-                // No new style subtool available. Old style subtools do not support this.
-                return;
-            }
-
-            this.activeSubTool_.UpdateOnscreenDisplayPanel();
+            activeSubTool_?.UpdateOnscreenDisplayPanel();
         }
     }
 }
