@@ -83,11 +83,12 @@ namespace TrafficManager.Manager.Impl {
                 return Locale.Get("CITIZEN_STATUS_CONFUSED");
             }
 
-            CitizenManager instance = Singleton<CitizenManager>.instance;
             uint citizenId = data.m_citizen;
             ushort vehicleId = 0;
+
             if (citizenId != 0u) {
-                vehicleId = instance.m_citizens.m_buffer[citizenId].m_vehicle;
+                Citizen citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId];
+                vehicleId = citizen.m_vehicle;
             }
 
             if ((data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0) {
@@ -212,20 +213,19 @@ namespace TrafficManager.Manager.Impl {
                 return Locale.Get("CITIZEN_STATUS_CONFUSED");
             }
 
-            CitizenManager citMan = Singleton<CitizenManager>.instance;
             uint citizenId = data.m_citizen;
+            Citizen citizen;
             var isStudent = false;
             ushort homeId = 0;
             ushort workId = 0;
             ushort vehicleId = 0;
 
             if (citizenId != 0u) {
-                homeId = citMan.m_citizens.m_buffer[citizenId].m_homeBuilding;
-                workId = citMan.m_citizens.m_buffer[citizenId].m_workBuilding;
-                vehicleId = citMan.m_citizens.m_buffer[citizenId].m_vehicle;
-                isStudent =
-                    (citMan.m_citizens.m_buffer[citizenId].m_flags & Citizen.Flags.Student) !=
-                     Citizen.Flags.None;
+                citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId];
+                homeId = citizen.m_homeBuilding;
+                workId = citizen.m_workBuilding;
+                vehicleId = citizen.m_vehicle;
+                isStudent = (citizen.m_flags & Citizen.Flags.Student) != 0;
             }
 
             if ((data.m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None) {
