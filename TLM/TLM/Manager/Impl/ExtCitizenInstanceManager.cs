@@ -963,10 +963,17 @@ namespace TrafficManager.Manager.Impl {
              */
             if (extVehicleType == ExtVehicleType.PassengerCar ||
                 extVehicleType == ExtVehicleType.Bicycle) {
-                if (allowRandomParking && instanceData.m_targetBuilding != 0 &&
-                    (buildingsBuffer[instanceData.m_targetBuilding].Info.m_class.m_service
-                     > ItemClass.Service.Office
-                     || (instanceData.m_flags & CitizenInstance.Flags.TargetIsNode) != 0)) {
+
+                if (allowRandomParking
+                    && instanceData.m_targetBuilding != 0
+                    && buildingsBuffer[instanceData.m_targetBuilding].Info
+                    && (
+                        buildingsBuffer[instanceData.m_targetBuilding].Info.m_class.m_service > ItemClass.Service.Office
+                        || (instanceData.m_flags & CitizenInstance.Flags.TargetIsNode) != 0
+                       )
+                    )
+                {
+
                     randomParking = true;
                 }
             }
