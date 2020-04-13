@@ -287,7 +287,8 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         target.Building = targetBuildingId;
-                        return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");                    }
+                        return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
+                }
             }
 
             if (targetIsNode) {
