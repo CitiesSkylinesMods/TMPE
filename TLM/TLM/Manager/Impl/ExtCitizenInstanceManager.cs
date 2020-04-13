@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework.Globalization;
     using ColossalFramework;
     using CSUtil.Commons.Benchmark;
@@ -58,364 +58,282 @@
             Reset();
         }
 
-        internal void Reset() {
-            for (var i = 0; i < ExtInstances.Length; ++i) {
-                Reset(ref ExtInstances[i]);
-            }
-        }
-
+        /// <summary>
+        /// Generates the localized status for a tourist, which is displayed on <c>TouristWorldInfoPanel</c>.
+        /// </summary>
+        /// 
+        /// <param name="instanceID">Citizen instance id.</param>
+        /// <param name="data">Citizen instance data.</param>
+        /// <param name="mayAddCustomStatus">Will be <c>true</c> if the status can be customised by callee.</param>
+        /// <param name="target">The instance of target building or node.</param>
+        /// 
+        /// <returns>Returns the localised tourist status.</returns>
         public string GetTouristLocalizedStatus(ushort instanceID,
                                                 ref CitizenInstance data,
                                                 out bool mayAddCustomStatus,
                                                 out InstanceID target) {
-            if ((data.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) !=
-                CitizenInstance.Flags.None)
-            {
-                target = InstanceID.Empty;
+            mayAddCustomStatus = true;
+            target = InstanceID.Empty;
+
+            ushort targetBuildingId = data.m_targetBuilding;
+
+            if (IsSweaptAway(ref data) || targetBuildingId == 0) {
                 mayAddCustomStatus = false;
                 return Locale.Get("CITIZEN_STATUS_CONFUSED");
             }
 
-            CitizenManager instance = Singleton<CitizenManager>.instance;
             uint citizenId = data.m_citizen;
             ushort vehicleId = 0;
+
+            // if true, it means the targetBuildingId is actually a node, not a building
+            bool targetIsNode = (data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0;
+
             if (citizenId != 0u) {
-                vehicleId = instance.m_citizens.m_buffer[citizenId].m_vehicle;
+                Citizen citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId];
+                vehicleId = citizen.m_vehicle;
             }
-
-            ushort targetBuilding = data.m_targetBuilding;
-            if (targetBuilding == 0) {
-                target = InstanceID.Empty;
-                mayAddCustomStatus = false;
-                return Locale.Get("CITIZEN_STATUS_CONFUSED");
-            }
-
-            if ((data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0) {
-                if (vehicleId != 0) {
-                    VehicleManager vehManager = Singleton<VehicleManager>.instance;
-                    VehicleInfo info = vehManager.m_vehicles.m_buffer[vehicleId].Info;
-                    if (info.m_class.m_service == ItemClass.Service.Residential &&
-                        info.m_vehicleType != VehicleInfo.VehicleType.Bicycle) {
-                        if (info.m_vehicleAI.GetOwnerID(
-                                vehicleId,
-                                ref vehManager.m_vehicles.m_buffer[vehicleId]).Citizen == citizenId) {
-                            target = InstanceID.Empty;
-                            target.NetNode = targetBuilding;
-                            mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
-                        }
-                    } else if (info.m_class.m_service == ItemClass.Service.PublicTransport ||
-                               info.m_class.m_service == ItemClass.Service.Disaster) {
-                        ushort transportLine = Singleton<NetManager>
-                                               .instance.m_nodes.m_buffer[targetBuilding]
-                                               .m_transportLine;
-                        if ((data.m_flags & CitizenInstance.Flags.WaitingTaxi) != 0) {
-                            target = InstanceID.Empty;
-                            mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
-                        }
-
-                        if (vehManager.m_vehicles.m_buffer[vehicleId].m_transportLine !=
-                            transportLine) {
-                            target = InstanceID.Empty;
-                            target.NetNode = targetBuilding;
-                            mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
-                        }
-                    }
-                }
-
-                if ((data.m_flags & CitizenInstance.Flags.OnTour) != 0) {
-                    target = InstanceID.Empty;
-                    target.NetNode = targetBuilding;
-                    mayAddCustomStatus = true;
-                    return Locale.Get("CITIZEN_STATUS_VISITING");
-                }
-
-                target = InstanceID.Empty;
-                target.NetNode = targetBuilding;
-                mayAddCustomStatus = true;
-                return Locale.Get("CITIZEN_STATUS_GOINGTO");
-            }
-
-            bool isOutsideConnection =
-                (Singleton<BuildingManager>
-                 .instance.m_buildings.m_buffer[targetBuilding].m_flags &
-                 Building.Flags.IncomingOutgoing) != Building.Flags.None;
-            bool hangsAround = data.m_path == 0u &&
-                               (data.m_flags & CitizenInstance.Flags.HangAround) !=
-                               CitizenInstance.Flags.None;
 
             if (vehicleId != 0) {
-                VehicleManager vehManager = Singleton<VehicleManager>.instance;
-                VehicleInfo vehicleInfo = vehManager.m_vehicles.m_buffer[vehicleId].Info;
 
-                switch (vehicleInfo.m_class.m_service) {
+                Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
+                VehicleInfo info = vehicle.Info;
+
+                switch (info.m_class.m_service) {
+
                     case ItemClass.Service.Residential
-                        when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle
-                             && vehicleInfo.m_vehicleAI.GetOwnerID(
-                                               vehicleId,
-                                               ref vehManager.m_vehicles.m_buffer[vehicleId])
-                                           .Citizen == citizenId: {
-                        if (isOutsideConnection) {
-                            target = InstanceID.Empty;
-                            mayAddCustomStatus = true;
+                        when info.m_vehicleType != VehicleInfo.VehicleType.Bicycle
+                             && IsVehicleOwnedByCitizen(ref vehicle, citizenId):
+
+                        if (targetIsNode) {
+                            target.NetNode = targetBuildingId;
+                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
+                        }
+
+                        if (IsOutsideConnection(targetBuildingId)) {
                             return Locale.Get("CITIZEN_STATUS_DRIVINGTO_OUTSIDE");
                         }
 
-                        target = InstanceID.Empty;
-                        target.Building = targetBuilding;
-                        mayAddCustomStatus = true;
+                        target.Building = targetBuildingId;
                         return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
-                    }
 
                     case ItemClass.Service.PublicTransport:
-                    case ItemClass.Service.Disaster: {
-                        if (isOutsideConnection) {
-                            target = InstanceID.Empty;
-                            mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_OUTSIDE");
-                        }
+                    case ItemClass.Service.Disaster:
 
-                        target = InstanceID.Empty;
-                        target.Building = targetBuilding;
-                        mayAddCustomStatus = true;
-                        return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
-                    }
-                }
-            }
+                        if (targetIsNode) {
 
-            if (isOutsideConnection) {
-                target = InstanceID.Empty;
-                mayAddCustomStatus = true;
-                return Locale.Get("CITIZEN_STATUS_GOINGTO_OUTSIDE");
-            }
-
-            if (hangsAround) {
-                target = InstanceID.Empty;
-                target.Building = targetBuilding;
-                mayAddCustomStatus = false;
-                return Locale.Get("CITIZEN_STATUS_VISITING");
-            }
-
-            target = InstanceID.Empty;
-            target.Building = targetBuilding;
-            mayAddCustomStatus = true;
-            return Locale.Get("CITIZEN_STATUS_GOINGTO");
-        }
-
-        public string GetResidentLocalizedStatus(ushort instanceID,
-                                                 ref CitizenInstance data,
-                                                 out bool mayAddCustomStatus,
-                                                 out InstanceID target) {
-            if ((data.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating))
-                != CitizenInstance.Flags.None)
-            {
-                target = InstanceID.Empty;
-                mayAddCustomStatus = false;
-                return Locale.Get("CITIZEN_STATUS_CONFUSED");
-            }
-
-            CitizenManager citMan = Singleton<CitizenManager>.instance;
-            uint citizenId = data.m_citizen;
-            var isStudent = false;
-            ushort homeId = 0;
-            ushort workId = 0;
-            ushort vehicleId = 0;
-
-            if (citizenId != 0u) {
-                homeId = citMan.m_citizens.m_buffer[citizenId].m_homeBuilding;
-                workId = citMan.m_citizens.m_buffer[citizenId].m_workBuilding;
-                vehicleId = citMan.m_citizens.m_buffer[citizenId].m_vehicle;
-                isStudent =
-                    (citMan.m_citizens.m_buffer[citizenId].m_flags & Citizen.Flags.Student) !=
-                     Citizen.Flags.None;
-            }
-
-            ushort targetBuilding = data.m_targetBuilding;
-            if (targetBuilding == 0) {
-                target = InstanceID.Empty;
-                mayAddCustomStatus = false;
-                return Locale.Get("CITIZEN_STATUS_CONFUSED");
-            }
-
-            if ((data.m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None) {
-                if (vehicleId != 0) {
-                    VehicleManager vehManager = Singleton<VehicleManager>.instance;
-                    VehicleInfo vehicleInfo = vehManager.m_vehicles.m_buffer[vehicleId].Info;
-
-                    switch (vehicleInfo.m_class.m_service) {
-                        case ItemClass.Service.Residential
-                            when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
-                                 vehicleInfo.m_vehicleAI.GetOwnerID(
-                                                vehicleId,
-                                                ref vehManager.m_vehicles.m_buffer[vehicleId])
-                                            .Citizen == citizenId:
-                            target = InstanceID.Empty;
-                            target.NetNode = targetBuilding;
-                            mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
-                        case ItemClass.Service.PublicTransport:
-                        case ItemClass.Service.Disaster: {
-                            ushort transportLine = Singleton<NetManager>
-                                                   .instance.m_nodes.m_buffer[targetBuilding]
-                                                   .m_transportLine;
                             if ((data.m_flags & CitizenInstance.Flags.WaitingTaxi) != 0) {
-                                target = InstanceID.Empty;
-                                mayAddCustomStatus = true;
                                 return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
                             }
 
-                            if (vehManager.m_vehicles.m_buffer[vehicleId].m_transportLine !=
-                                transportLine) {
-                                target = InstanceID.Empty;
-                                target.NetNode = targetBuilding;
-                                mayAddCustomStatus = true;
+                            ushort transportLine = Singleton<NetManager>
+                                               .instance.m_nodes.m_buffer[targetBuildingId]
+                                               .m_transportLine;
+
+                            if (vehicle.m_transportLine != transportLine) {
+                                target.NetNode = targetBuildingId;
                                 return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
                             }
 
                             break;
                         }
-                    }
-                }
 
-                if ((data.m_flags & CitizenInstance.Flags.OnTour) != 0) {
-                    target = InstanceID.Empty;
-                    target.NetNode = targetBuilding;
-                    mayAddCustomStatus = true;
-                    return Locale.Get("CITIZEN_STATUS_VISITING");
-                }
-
-                target = InstanceID.Empty;
-                target.NetNode = targetBuilding;
-                mayAddCustomStatus = true;
-                return Locale.Get("CITIZEN_STATUS_GOINGTO");
-            }
-
-            bool isOutsideConnection =
-                (Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuilding].m_flags &
-                 Building.Flags.IncomingOutgoing) != Building.Flags.None;
-            bool hangsAround = data.m_path == 0u &&
-                               (data.m_flags & CitizenInstance.Flags.HangAround) !=
-                               CitizenInstance.Flags.None;
-
-            if (vehicleId != 0) {
-                VehicleManager vehicleMan = Singleton<VehicleManager>.instance;
-                VehicleInfo vehicleInfo = vehicleMan.m_vehicles.m_buffer[vehicleId].Info;
-
-                switch (vehicleInfo.m_class.m_service) {
-                    case ItemClass.Service.Residential
-                        when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
-                             vehicleInfo.m_vehicleAI.GetOwnerID(
-                                            vehicleId,
-                                            ref vehicleMan.m_vehicles.m_buffer[vehicleId])
-                                        .Citizen == citizenId: {
-                        if (isOutsideConnection) {
-                            target = InstanceID.Empty;
-                            mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO_OUTSIDE");
-                        }
-
-                        if (targetBuilding == homeId) {
-                            target = InstanceID.Empty;
-                            mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO_HOME");
-                        }
-
-                        if (targetBuilding == workId) {
-                            target = InstanceID.Empty;
-                            mayAddCustomStatus = true;
-                            return Locale.Get(
-                                (!isStudent)
-                                    ? "CITIZEN_STATUS_DRIVINGTO_WORK"
-                                    : "CITIZEN_STATUS_DRIVINGTO_SCHOOL");
-                        }
-
-                        target = InstanceID.Empty;
-                        target.Building = targetBuilding;
-                        mayAddCustomStatus = true;
-                        return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
-                    }
-
-                    case ItemClass.Service.PublicTransport:
-                    case ItemClass.Service.Disaster: {
-                        if ((data.m_flags & CitizenInstance.Flags.WaitingTaxi) != CitizenInstance.Flags.None) {
-                            target = InstanceID.Empty;
-                            mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
-                        }
-
-                        if (isOutsideConnection) {
-                            target = InstanceID.Empty;
-                            mayAddCustomStatus = true;
+                        if (IsOutsideConnection(targetBuildingId)) {
                             return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_OUTSIDE");
                         }
 
-                        if (targetBuilding == homeId) {
-                            target = InstanceID.Empty;
-                            mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_HOME");
-                        }
-
-                        if (targetBuilding == workId) {
-                            target = InstanceID.Empty;
-                            mayAddCustomStatus = true;
-                            return Locale.Get(
-                                (!isStudent)
-                                    ? "CITIZEN_STATUS_TRAVELLINGTO_WORK"
-                                    : "CITIZEN_STATUS_TRAVELLINGTO_SCHOOL");
-                        }
-
-                        target = InstanceID.Empty;
-                        target.Building = targetBuilding;
-                        mayAddCustomStatus = true;
+                        target.Building = targetBuildingId;
                         return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
-                    }
                 }
             }
 
-            if (isOutsideConnection) {
-                target = InstanceID.Empty;
-                mayAddCustomStatus = true;
+            if (targetIsNode) {
+
+                target.NetNode = targetBuildingId;
+ 
+                if ((data.m_flags & CitizenInstance.Flags.OnTour) != 0) {
+                    return Locale.Get("CITIZEN_STATUS_VISITING");
+                }
+
+                return Locale.Get("CITIZEN_STATUS_GOINGTO");
+            }
+
+            if (IsOutsideConnection(targetBuildingId)) {
                 return Locale.Get("CITIZEN_STATUS_GOINGTO_OUTSIDE");
             }
 
-            if (targetBuilding == homeId) {
-                if (hangsAround) {
-                    target = InstanceID.Empty;
-                    mayAddCustomStatus = false;
-                    return Locale.Get("CITIZEN_STATUS_AT_HOME");
-                }
+            target.Building = targetBuildingId;
 
-                target = InstanceID.Empty;
-                mayAddCustomStatus = true;
-                return Locale.Get("CITIZEN_STATUS_GOINGTO_HOME");
-            }
-
-            if (targetBuilding == workId) {
-                if (hangsAround) {
-                    target = InstanceID.Empty;
-                    mayAddCustomStatus = false;
-                    return Locale.Get(
-                        (!isStudent) ? "CITIZEN_STATUS_AT_WORK" : "CITIZEN_STATUS_AT_SCHOOL");
-                }
-
-                target = InstanceID.Empty;
-                mayAddCustomStatus = true;
-                return Locale.Get(
-                    (!isStudent) ? "CITIZEN_STATUS_GOINGTO_WORK" : "CITIZEN_STATUS_GOINGTO_SCHOOL");
-            }
-
-            if (hangsAround) {
-                target = InstanceID.Empty;
-                target.Building = targetBuilding;
+            if (IsHangingAround(ref data)) {
                 mayAddCustomStatus = false;
                 return Locale.Get("CITIZEN_STATUS_VISITING");
             }
 
-            target = InstanceID.Empty;
-            target.Building = targetBuilding;
+            return Locale.Get("CITIZEN_STATUS_GOINGTO");
+        }
+
+        /// <summary>
+        /// Generates the localized status for a resident, which is displayed on <c>CitizenWorldInfoPanel</c>.
+        /// </summary>
+        /// 
+        /// <param name="instanceID">Citizen instance id.</param>
+        /// <param name="data">Citizen instance data.</param>
+        /// <param name="mayAddCustomStatus">Will be <c>true</c> if the status can be customised by callee.</param>
+        /// <param name="target">The instance of target building or node.</param>
+        /// 
+        /// <returns>Returns the localised resident status.</returns>
+        public string GetResidentLocalizedStatus(ushort instanceID,
+                                                 ref CitizenInstance data,
+                                                 out bool mayAddCustomStatus,
+                                                 out InstanceID target) {
+
             mayAddCustomStatus = true;
+            target = InstanceID.Empty;
+
+            ushort targetBuildingId = data.m_targetBuilding;
+
+            if (IsSweaptAway(ref data) || targetBuildingId == 0) {
+                mayAddCustomStatus = false;
+                return Locale.Get("CITIZEN_STATUS_CONFUSED");
+            }
+
+            uint citizenId = data.m_citizen;
+            Citizen citizen;
+            var isStudent = false;
+            ushort homeId = 0;
+            ushort workId = 0;
+            ushort vehicleId = 0;
+
+            // if true, it means the targetBuildingId is actually a node, not a building
+            bool targetIsNode = (data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0;
+
+            if (citizenId != 0u) {
+                citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId];
+                homeId = citizen.m_homeBuilding;
+                workId = citizen.m_workBuilding;
+                vehicleId = citizen.m_vehicle;
+                isStudent = (citizen.m_flags & Citizen.Flags.Student) != 0;
+            }
+
+            if (vehicleId != 0) {
+
+                Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
+                VehicleInfo info = vehicle.Info;
+
+                switch (info.m_class.m_service) {
+
+                    case ItemClass.Service.Residential
+                        when info.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
+                             IsVehicleOwnedByCitizen(ref vehicle, citizenId):
+
+                        if (targetIsNode) {
+                            target.NetNode = targetBuildingId;
+                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
+                        }
+
+                        if (IsOutsideConnection(targetBuildingId)) {
+                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO_OUTSIDE");
+                        }
+
+                        if (targetBuildingId == homeId) {
+                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO_HOME");
+                        }
+
+                        if (targetBuildingId == workId) {
+                            return isStudent
+                                ? Locale.Get("CITIZEN_STATUS_DRIVINGTO_SCHOOL")
+                                : Locale.Get("CITIZEN_STATUS_DRIVINGTO_WORK");
+                        }
+
+                        target.Building = targetBuildingId;
+                        return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
+
+                    case ItemClass.Service.PublicTransport:
+                    case ItemClass.Service.Disaster:
+
+                        if (targetIsNode) {
+
+                            if ((data.m_flags & CitizenInstance.Flags.WaitingTaxi) != 0) {
+                                return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
+                            }
+
+                            ushort transportLine = Singleton<NetManager>
+                                                   .instance.m_nodes.m_buffer[targetBuildingId]
+                                                   .m_transportLine;
+
+                            if (vehicle.m_transportLine != transportLine) {
+                                target.NetNode = targetBuildingId;
+                                return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
+                            }
+
+                            break;
+                        }
+
+                        if ((data.m_flags & CitizenInstance.Flags.WaitingTaxi) != CitizenInstance.Flags.None) {
+                            return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
+                        }
+
+                        if (IsOutsideConnection(targetBuildingId)) {
+                            return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_OUTSIDE");
+                        }
+
+                        if (targetBuildingId == homeId) {
+                            return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_HOME");
+                        }
+
+                        if (targetBuildingId == workId) {
+                            return isStudent
+                                ? Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_SCHOOL")
+                                : Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_WORK");
+                        }
+
+                        target.Building = targetBuildingId;
+                        return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
+                }
+            }
+
+            if (targetIsNode) {
+                target.NetNode = targetBuildingId;
+
+                if ((data.m_flags & CitizenInstance.Flags.OnTour) != 0) {
+                    return Locale.Get("CITIZEN_STATUS_VISITING");
+                }
+
+                return Locale.Get("CITIZEN_STATUS_GOINGTO");
+            }
+
+            if (IsOutsideConnection(targetBuildingId)) {
+                return Locale.Get("CITIZEN_STATUS_GOINGTO_OUTSIDE");
+            }
+
+            if (targetBuildingId == homeId) {
+                if (IsHangingAround(ref data)) {
+                    mayAddCustomStatus = false;
+                    return Locale.Get("CITIZEN_STATUS_AT_HOME");
+                }
+
+                return Locale.Get("CITIZEN_STATUS_GOINGTO_HOME");
+            }
+
+            if (targetBuildingId == workId) {
+                if (IsHangingAround(ref data)) {
+                    mayAddCustomStatus = false;
+                    return isStudent
+                        ? Locale.Get("CITIZEN_STATUS_AT_SCHOOL")
+                        : Locale.Get("CITIZEN_STATUS_AT_WORK");
+                }
+
+                return isStudent
+                    ? Locale.Get("CITIZEN_STATUS_GOINGTO_SCHOOL")
+                    : Locale.Get("CITIZEN_STATUS_GOINGTO_WORK");
+            }
+
+            target.Building = targetBuildingId;
+
+            if (IsHangingAround(ref data)) {
+                mayAddCustomStatus = false;
+                return Locale.Get("CITIZEN_STATUS_VISITING");
+            }
+
             return Locale.Get("CITIZEN_STATUS_GOINGTO");
         }
 
@@ -1368,19 +1286,6 @@
             return false;
         }
 
-        public void Reset(ref ExtCitizenInstance extInstance) {
-            // Flags = ExtFlags.None;
-            extInstance.pathMode = ExtPathMode.None;
-            extInstance.failedParkingAttempts = 0;
-            extInstance.parkingSpaceLocation = ExtParkingSpaceLocation.None;
-            extInstance.parkingSpaceLocationId = 0;
-            extInstance.lastDistanceToParkedCar = float.MaxValue;
-            extInstance.atOutsideConnection = false;
-
-            // extInstance.ParkedVehiclePosition = default(Vector3);
-            ReleaseReturnPath(ref extInstance);
-        }
-
         public bool LoadData(List<Configuration.ExtCitizenInstanceData> data) {
             bool success = true;
             Log.Info($"Loading {data.Count} extended citizen instances");
@@ -1512,5 +1417,70 @@
 
             return ret;
         }
+
+        public void Reset(ref ExtCitizenInstance extInstance) {
+            // Flags = ExtFlags.None;
+            extInstance.pathMode = ExtPathMode.None;
+            extInstance.failedParkingAttempts = 0;
+            extInstance.parkingSpaceLocation = ExtParkingSpaceLocation.None;
+            extInstance.parkingSpaceLocationId = 0;
+            extInstance.lastDistanceToParkedCar = float.MaxValue;
+            extInstance.atOutsideConnection = false;
+
+            // extInstance.ParkedVehiclePosition = default(Vector3);
+            ReleaseReturnPath(ref extInstance);
+        }
+
+        internal void Reset() {
+            for (var i = 0; i < ExtInstances.Length; ++i) {
+                Reset(ref ExtInstances[i]);
+            }
+        }
+
+        /// <summary>
+        /// Check if a building id refers to an outside connection.
+        /// </summary>
+        /// 
+        /// <param name="buildingId">The id of the building to check.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if it's an outside connection, otherwise <c>false</c>.</returns>
+        internal bool IsOutsideConnection(ushort buildingId) {
+            Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
+            return (building.m_flags & Building.Flags.IncomingOutgoing) != 0;
+        }
+
+        /// <summary>
+        /// Check if a vehicle is owned by a certain citizen.
+        /// </summary>
+        /// 
+        /// <param name="vehicle">The vehicle.</param>
+        /// <param name="citizenId">The citizen.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if the vehicle is owned by the citizen, otherwise <c>false</c>.</returns>
+        internal bool IsVehicleOwnedByCitizen(ref Vehicle vehicle, uint citizenId) {
+            InstanceID id = InstanceID.Empty;
+            id.Building = vehicle.m_sourceBuilding;
+            return id.Citizen == citizenId;
+        }
+
+        /// <summary>
+        /// Check if a citizen is caught in a flood, tsunami or tornado.
+        /// </summary>
+        /// 
+        /// <param name="citizen">The citizen to inspect.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if having a bad day, otherwise <c>false</c>.</returns>
+        internal bool IsSweaptAway(ref CitizenInstance citizen) =>
+            (citizen.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != 0;
+
+        /// <summary>
+        /// Check if a citizen is loitering at their current location.
+        /// </summary>
+        /// 
+        /// <param name="citizen">The citizen to inspect.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if hanging around, otherwise <c>false</c>.</returns>
+        internal bool IsHangingAround(ref CitizenInstance citizen) =>
+            citizen.m_path == 0u && (citizen.m_flags & CitizenInstance.Flags.HangAround) != 0;
     }
 }
