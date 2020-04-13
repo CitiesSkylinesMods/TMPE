@@ -100,6 +100,16 @@ namespace TrafficManager.Manager.Impl {
         internal bool IsSweaptAway(ref CitizenInstance citizen) =>
             (citizen.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != 0;
 
+        /// <summary>
+        /// Check if a citizen is loitering at their current location.
+        /// </summary>
+        /// 
+        /// <param name="citizen">The citizen to inspect.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if hanging around, otherwise <c>false</c>.</returns>
+        internal bool IsHangingAround(ref CitizenInstance citizen) =>
+            citizen.m_path == 0u && (citizen.m_flags & CitizenInstance.Flags.HangAround) != 0;
+
         public string GetTouristLocalizedStatus(ushort instanceID,
                                                 ref CitizenInstance data,
                                                 out bool mayAddCustomStatus,
@@ -203,11 +213,7 @@ namespace TrafficManager.Manager.Impl {
                 return Locale.Get("CITIZEN_STATUS_GOINGTO_OUTSIDE");
             }
 
-            bool hangsAround = data.m_path == 0u &&
-                               (data.m_flags & CitizenInstance.Flags.HangAround) !=
-                               CitizenInstance.Flags.None;
-
-            if (hangsAround) {
+            if (IsHangingAround(ref data)) {
                 target.Building = targetBuildingId;
                 mayAddCustomStatus = false;
                 return Locale.Get("CITIZEN_STATUS_VISITING");
@@ -299,10 +305,6 @@ namespace TrafficManager.Manager.Impl {
                 return Locale.Get("CITIZEN_STATUS_GOINGTO");
             }
 
-            bool hangsAround = data.m_path == 0u &&
-                               (data.m_flags & CitizenInstance.Flags.HangAround) !=
-                               CitizenInstance.Flags.None;
-
             if (vehicleId != 0) {
                 VehicleManager vehicleMan = Singleton<VehicleManager>.instance;
                 VehicleInfo vehicleInfo = vehicleMan.m_vehicles.m_buffer[vehicleId].Info;
@@ -375,7 +377,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (targetBuildingId == homeId) {
-                if (hangsAround) {
+                if (IsHangingAround(ref data)) {
                     mayAddCustomStatus = false;
                     return Locale.Get("CITIZEN_STATUS_AT_HOME");
                 }
@@ -385,7 +387,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (targetBuildingId == workId) {
-                if (hangsAround) {
+                if (IsHangingAround(ref data)) {
                     mayAddCustomStatus = false;
                     return Locale.Get(
                         (!isStudent) ? "CITIZEN_STATUS_AT_WORK" : "CITIZEN_STATUS_AT_SCHOOL");
@@ -396,7 +398,7 @@ namespace TrafficManager.Manager.Impl {
                     (!isStudent) ? "CITIZEN_STATUS_GOINGTO_WORK" : "CITIZEN_STATUS_GOINGTO_SCHOOL");
             }
 
-            if (hangsAround) {
+            if (IsHangingAround(ref data)) {
                 target.Building = targetBuildingId;
                 mayAddCustomStatus = false;
                 return Locale.Get("CITIZEN_STATUS_VISITING");
