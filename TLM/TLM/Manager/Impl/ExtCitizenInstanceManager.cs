@@ -59,7 +59,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Generates the localized status for a tourist.
+        /// Generates the localized status for a tourist, which is displayed on <c>TouristWorldInfoPanel</c>.
         /// </summary>
         /// 
         /// <param name="instanceID">Citizen instance id.</param>
@@ -172,7 +172,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
-        /// Generates the localized status for a resident.
+        /// Generates the localized status for a resident, which is displayed on <c>CitizenWorldInfoPanel</c>.
         /// </summary>
         /// 
         /// <param name="instanceID">Citizen instance id.</param>
