@@ -77,17 +77,17 @@ namespace TrafficManager.Manager.Impl {
                 return Locale.Get("CITIZEN_STATUS_CONFUSED");
             }
 
+            ushort targetBuilding = data.m_targetBuilding;
+            if (targetBuilding == 0) {
+                mayAddCustomStatus = false;
+                return Locale.Get("CITIZEN_STATUS_CONFUSED");
+            }
+
             CitizenManager instance = Singleton<CitizenManager>.instance;
             uint citizenId = data.m_citizen;
             ushort vehicleId = 0;
             if (citizenId != 0u) {
                 vehicleId = instance.m_citizens.m_buffer[citizenId].m_vehicle;
-            }
-
-            ushort targetBuilding = data.m_targetBuilding;
-            if (targetBuilding == 0) {
-                mayAddCustomStatus = false;
-                return Locale.Get("CITIZEN_STATUS_CONFUSED");
             }
 
             if ((data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0) {
@@ -206,6 +206,12 @@ namespace TrafficManager.Manager.Impl {
                 return Locale.Get("CITIZEN_STATUS_CONFUSED");
             }
 
+            ushort targetBuilding = data.m_targetBuilding;
+            if (targetBuilding == 0) {
+                mayAddCustomStatus = false;
+                return Locale.Get("CITIZEN_STATUS_CONFUSED");
+            }
+
             CitizenManager citMan = Singleton<CitizenManager>.instance;
             uint citizenId = data.m_citizen;
             var isStudent = false;
@@ -220,12 +226,6 @@ namespace TrafficManager.Manager.Impl {
                 isStudent =
                     (citMan.m_citizens.m_buffer[citizenId].m_flags & Citizen.Flags.Student) !=
                      Citizen.Flags.None;
-            }
-
-            ushort targetBuilding = data.m_targetBuilding;
-            if (targetBuilding == 0) {
-                mayAddCustomStatus = false;
-                return Locale.Get("CITIZEN_STATUS_CONFUSED");
             }
 
             if ((data.m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None) {
