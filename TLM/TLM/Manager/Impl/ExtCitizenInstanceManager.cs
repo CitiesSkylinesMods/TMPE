@@ -125,14 +125,14 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (vehicleId != 0 && targetIsNode) {
-                VehicleManager vehManager = Singleton<VehicleManager>.instance;
-                VehicleInfo info = vehManager.m_vehicles.m_buffer[vehicleId].Info;
+                Vehicle vehicle = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
+                VehicleInfo info = vehicle.Info;
 
                 switch (info.m_class.m_service) {
 
                     case ItemClass.Service.Residential
                         when info.m_vehicleType != VehicleInfo.VehicleType.Bicycle
-                             && IsVehicleOwnedByCitizen(vehManager.m_vehicles.m_buffer[vehicleId], citizenId): {
+                             && IsVehicleOwnedByCitizen(vehicle, citizenId): {
 
                         target.NetNode = targetBuildingId;
                         mayAddCustomStatus = true;
@@ -150,8 +150,7 @@ namespace TrafficManager.Manager.Impl {
                             return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
                         }
 
-                        if (vehManager.m_vehicles.m_buffer[vehicleId].m_transportLine !=
-                            transportLine) {
+                        if (vehicle.m_transportLine != transportLine) {
                             target.NetNode = targetBuildingId;
                             mayAddCustomStatus = true;
                             return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
