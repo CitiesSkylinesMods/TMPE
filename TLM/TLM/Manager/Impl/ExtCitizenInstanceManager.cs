@@ -65,6 +65,20 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
+        /// Check if a vehicle is owned by a certain citizen.
+        /// </summary>
+        /// 
+        /// <param name="vehicle">The vehicle.</param>
+        /// <param name="citizenId">The citizen.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if the vehicle is owned by the citizen, otherwise <c>false</c>.</returns>
+        internal bool IsVehicleOwnedByCitizen(Vehicle vehicle, uint citizenId) {
+            InstanceID id = InstanceID.Empty;
+            id.Building = vehicle.m_sourceBuilding;
+            return id.Citizen == citizenId;
+        }
+
+        /// <summary>
         /// Check if a citizen is caught in a flood, tsunami or tornado.
         /// </summary>
         /// 
@@ -101,9 +115,7 @@ namespace TrafficManager.Manager.Impl {
                     VehicleInfo info = vehManager.m_vehicles.m_buffer[vehicleId].Info;
                     if (info.m_class.m_service == ItemClass.Service.Residential &&
                         info.m_vehicleType != VehicleInfo.VehicleType.Bicycle) {
-                        if (info.m_vehicleAI.GetOwnerID(
-                                vehicleId,
-                                ref vehManager.m_vehicles.m_buffer[vehicleId]).Citizen == citizenId) {
+                        if (IsVehicleOwnedByCitizen(vehManager.m_vehicles.m_buffer[vehicleId], citizenId)) {
                             target.NetNode = targetBuildingId;
                             mayAddCustomStatus = true;
                             return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
@@ -153,10 +165,7 @@ namespace TrafficManager.Manager.Impl {
                 switch (vehicleInfo.m_class.m_service) {
                     case ItemClass.Service.Residential
                         when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle
-                             && vehicleInfo.m_vehicleAI.GetOwnerID(
-                                               vehicleId,
-                                               ref vehManager.m_vehicles.m_buffer[vehicleId])
-                                           .Citizen == citizenId: {
+                             && IsVehicleOwnedByCitizen(vehManager.m_vehicles.m_buffer[vehicleId], citizenId): {
                         if (isOutsideConnection) {
                             mayAddCustomStatus = true;
                             return Locale.Get("CITIZEN_STATUS_DRIVINGTO_OUTSIDE");
@@ -234,10 +243,7 @@ namespace TrafficManager.Manager.Impl {
                     switch (vehicleInfo.m_class.m_service) {
                         case ItemClass.Service.Residential
                             when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
-                                 vehicleInfo.m_vehicleAI.GetOwnerID(
-                                                vehicleId,
-                                                ref vehManager.m_vehicles.m_buffer[vehicleId])
-                                            .Citizen == citizenId:
+                                 IsVehicleOwnedByCitizen(vehManager.m_vehicles.m_buffer[vehicleId], citizenId):
                             target.NetNode = targetBuildingId;
                             mayAddCustomStatus = true;
                             return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
@@ -288,10 +294,7 @@ namespace TrafficManager.Manager.Impl {
                 switch (vehicleInfo.m_class.m_service) {
                     case ItemClass.Service.Residential
                         when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
-                             vehicleInfo.m_vehicleAI.GetOwnerID(
-                                            vehicleId,
-                                            ref vehicleMan.m_vehicles.m_buffer[vehicleId])
-                                        .Citizen == citizenId: {
+                             IsVehicleOwnedByCitizen(vehicleMan.m_vehicles.m_buffer[vehicleId], citizenId): {
                         if (isOutsideConnection) {
                             mayAddCustomStatus = true;
                             return Locale.Get("CITIZEN_STATUS_DRIVINGTO_OUTSIDE");
