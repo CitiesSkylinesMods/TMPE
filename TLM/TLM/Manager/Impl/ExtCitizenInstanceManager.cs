@@ -116,12 +116,15 @@ namespace TrafficManager.Manager.Impl {
             uint citizenId = data.m_citizen;
             ushort vehicleId = 0;
 
+            // if true, it means the targetBuildingId is actually a node, not a building
+            bool targetIsNode = (data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0;
+
             if (citizenId != 0u) {
                 Citizen citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId];
                 vehicleId = citizen.m_vehicle;
             }
 
-            if ((data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0) {
+            if (targetIsNode) {
                 if (vehicleId != 0) {
                     VehicleManager vehManager = Singleton<VehicleManager>.instance;
                     VehicleInfo info = vehManager.m_vehicles.m_buffer[vehicleId].Info;
@@ -235,6 +238,9 @@ namespace TrafficManager.Manager.Impl {
             ushort workId = 0;
             ushort vehicleId = 0;
 
+            // if true, it means the targetBuildingId is actually a node, not a building
+            bool targetIsNode = (data.m_flags & CitizenInstance.Flags.TargetIsNode) != 0;
+
             if (citizenId != 0u) {
                 citizen = Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId];
                 homeId = citizen.m_homeBuilding;
@@ -243,7 +249,7 @@ namespace TrafficManager.Manager.Impl {
                 isStudent = (citizen.m_flags & Citizen.Flags.Student) != 0;
             }
 
-            if ((data.m_flags & CitizenInstance.Flags.TargetIsNode) != CitizenInstance.Flags.None) {
+            if (targetIsNode) {
                 if (vehicleId != 0) {
                     VehicleManager vehManager = Singleton<VehicleManager>.instance;
                     VehicleInfo vehicleInfo = vehManager.m_vehicles.m_buffer[vehicleId].Info;
