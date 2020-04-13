@@ -18,12 +18,9 @@ namespace TrafficManager.U {
         public static float GuiWidth {
             // TODO: Double check if GUI never changes width, the code below can be a const
             get {
-                UIView uiView = Singleton<UIView>.instance;
+                UIView uiView = UIView.GetAView();
                 if (uiView != null) {
-                    Camera uiCamera = uiView.uiCamera;
-                    if (uiCamera != null) {
-                        UIScaler.cachedGuiWidth = uiCamera.pixelWidth;
-                    }
+                    UIScaler.cachedGuiWidth = uiView.uiCamera.pixelWidth;
                 }
 
                 return UIScaler.cachedGuiWidth;
@@ -34,12 +31,9 @@ namespace TrafficManager.U {
         public static float GuiHeight {
             // TODO: Double check if GUI never changes height, the code below can be a const
             get {
-                UIView uiView = Singleton<UIView>.instance;
+                UIView uiView = UIView.GetAView();
                 if (uiView != null) {
-                    Camera uiCamera = uiView.uiCamera;
-                    if (uiCamera != null) {
-                        UIScaler.cachedGuiHeight = uiCamera.pixelHeight;
-                    }
+                    UIScaler.cachedGuiHeight = uiView.uiCamera.pixelHeight;
                 }
 
                 return UIScaler.cachedGuiHeight;
