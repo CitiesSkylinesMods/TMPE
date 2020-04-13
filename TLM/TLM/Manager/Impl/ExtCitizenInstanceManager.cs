@@ -268,13 +268,30 @@ namespace TrafficManager.Manager.Impl {
                         when info.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
                              IsVehicleOwnedByCitizen(ref vehicle, citizenId):
 
+                        mayAddCustomStatus = true;
+
                         if (targetIsNode) {
                             target.NetNode = targetBuildingId;
-                            mayAddCustomStatus = true;
                             return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
                         }
 
-                        break;
+                        if (IsOutsideConnection(targetBuildingId)) {
+                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO_OUTSIDE");
+                        }
+
+                        if (targetBuildingId == homeId) {
+                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO_HOME");
+                        }
+
+                        if (targetBuildingId == workId) {
+                            return Locale.Get(
+                                (!isStudent)
+                                    ? "CITIZEN_STATUS_DRIVINGTO_WORK"
+                                    : "CITIZEN_STATUS_DRIVINGTO_SCHOOL");
+                        }
+
+                        target.Building = targetBuildingId;
+                        return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
 
                     case ItemClass.Service.PublicTransport:
                     case ItemClass.Service.Disaster: {
@@ -295,61 +312,9 @@ namespace TrafficManager.Manager.Impl {
                                 mayAddCustomStatus = true;
                                 return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
                             }
+
+                            break;
                         }
-
-                        break;
-                    }
-                }
-            }
-
-            if (targetIsNode) {
-
-                if ((data.m_flags & CitizenInstance.Flags.OnTour) != 0) {
-                    target.NetNode = targetBuildingId;
-                    mayAddCustomStatus = true;
-                    return Locale.Get("CITIZEN_STATUS_VISITING");
-                }
-
-                target.NetNode = targetBuildingId;
-                mayAddCustomStatus = true;
-                return Locale.Get("CITIZEN_STATUS_GOINGTO");
-            }
-
-            if (vehicleId != 0) {
-                VehicleManager vehicleMan = Singleton<VehicleManager>.instance;
-                VehicleInfo vehicleInfo = vehicleMan.m_vehicles.m_buffer[vehicleId].Info;
-
-                switch (vehicleInfo.m_class.m_service) {
-
-                    case ItemClass.Service.Residential
-                        when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
-                             IsVehicleOwnedByCitizen(ref vehicleMan.m_vehicles.m_buffer[vehicleId], citizenId): {
-
-                        if (IsOutsideConnection(targetBuildingId)) {
-                            mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO_OUTSIDE");
-                        }
-
-                        if (targetBuildingId == homeId) {
-                            mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO_HOME");
-                        }
-
-                        if (targetBuildingId == workId) {
-                            mayAddCustomStatus = true;
-                            return Locale.Get(
-                                (!isStudent)
-                                    ? "CITIZEN_STATUS_DRIVINGTO_WORK"
-                                    : "CITIZEN_STATUS_DRIVINGTO_SCHOOL");
-                        }
-
-                        target.Building = targetBuildingId;
-                        mayAddCustomStatus = true;
-                        return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
-                    }
-
-                    case ItemClass.Service.PublicTransport:
-                    case ItemClass.Service.Disaster: {
 
                         if ((data.m_flags & CitizenInstance.Flags.WaitingTaxi) != CitizenInstance.Flags.None) {
                             mayAddCustomStatus = true;
@@ -376,9 +341,21 @@ namespace TrafficManager.Manager.Impl {
 
                         target.Building = targetBuildingId;
                         mayAddCustomStatus = true;
-                        return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
-                    }
+                        return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");                    }
                 }
+            }
+
+            if (targetIsNode) {
+
+                if ((data.m_flags & CitizenInstance.Flags.OnTour) != 0) {
+                    target.NetNode = targetBuildingId;
+                    mayAddCustomStatus = true;
+                    return Locale.Get("CITIZEN_STATUS_VISITING");
+                }
+
+                target.NetNode = targetBuildingId;
+                mayAddCustomStatus = true;
+                return Locale.Get("CITIZEN_STATUS_GOINGTO");
             }
 
             if (IsOutsideConnection(targetBuildingId)) {
