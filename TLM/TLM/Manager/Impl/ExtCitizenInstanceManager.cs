@@ -84,7 +84,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="citizenId">The citizen.</param>
         /// 
         /// <returns>Returns <c>true</c> if the vehicle is owned by the citizen, otherwise <c>false</c>.</returns>
-        internal bool IsVehicleOwnedByCitizen(Vehicle vehicle, uint citizenId) {
+        internal bool IsVehicleOwnedByCitizen(ref Vehicle vehicle, uint citizenId) {
             InstanceID id = InstanceID.Empty;
             id.Building = vehicle.m_sourceBuilding;
             return id.Citizen == citizenId;
@@ -132,7 +132,7 @@ namespace TrafficManager.Manager.Impl {
 
                     case ItemClass.Service.Residential
                         when info.m_vehicleType != VehicleInfo.VehicleType.Bicycle
-                             && IsVehicleOwnedByCitizen(vehicle, citizenId): {
+                             && IsVehicleOwnedByCitizen(ref vehicle, citizenId): {
 
                         if (targetIsNode) {
                             target.NetNode = targetBuildingId;
@@ -259,7 +259,7 @@ namespace TrafficManager.Manager.Impl {
 
                         case ItemClass.Service.Residential
                             when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
-                                 IsVehicleOwnedByCitizen(vehManager.m_vehicles.m_buffer[vehicleId], citizenId):
+                                 IsVehicleOwnedByCitizen(ref vehManager.m_vehicles.m_buffer[vehicleId], citizenId):
 
                             target.NetNode = targetBuildingId;
                             mayAddCustomStatus = true;
@@ -311,7 +311,7 @@ namespace TrafficManager.Manager.Impl {
 
                     case ItemClass.Service.Residential
                         when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
-                             IsVehicleOwnedByCitizen(vehicleMan.m_vehicles.m_buffer[vehicleId], citizenId): {
+                             IsVehicleOwnedByCitizen(ref vehicleMan.m_vehicles.m_buffer[vehicleId], citizenId): {
 
                         if (IsOutsideConnection(targetBuildingId)) {
                             mayAddCustomStatus = true;
