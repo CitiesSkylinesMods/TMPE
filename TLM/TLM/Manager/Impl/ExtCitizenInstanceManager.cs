@@ -65,6 +65,18 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
+        /// Check if a building id refers to an outside connection.
+        /// </summary>
+        /// 
+        /// <param name="buildingId">The id of the building to check.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if it's an outside connection, otherwise <c>false</c>.</returns>
+        internal bool IsOutsideConnection(ushort buildingId) {
+            Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
+            return (building.m_flags & Building.Flags.IncomingOutgoing) != 0;
+        }
+
+        /// <summary>
         /// Check if a vehicle is owned by a certain citizen.
         /// </summary>
         /// 
@@ -150,10 +162,6 @@ namespace TrafficManager.Manager.Impl {
                 return Locale.Get("CITIZEN_STATUS_GOINGTO");
             }
 
-            bool isOutsideConnection =
-                (Singleton<BuildingManager>
-                 .instance.m_buildings.m_buffer[targetBuildingId].m_flags &
-                 Building.Flags.IncomingOutgoing) != Building.Flags.None;
             bool hangsAround = data.m_path == 0u &&
                                (data.m_flags & CitizenInstance.Flags.HangAround) !=
                                CitizenInstance.Flags.None;
@@ -166,7 +174,7 @@ namespace TrafficManager.Manager.Impl {
                     case ItemClass.Service.Residential
                         when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle
                              && IsVehicleOwnedByCitizen(vehManager.m_vehicles.m_buffer[vehicleId], citizenId): {
-                        if (isOutsideConnection) {
+                        if (IsOutsideConnection(targetBuildingId)) {
                             mayAddCustomStatus = true;
                             return Locale.Get("CITIZEN_STATUS_DRIVINGTO_OUTSIDE");
                         }
@@ -178,7 +186,7 @@ namespace TrafficManager.Manager.Impl {
 
                     case ItemClass.Service.PublicTransport:
                     case ItemClass.Service.Disaster: {
-                        if (isOutsideConnection) {
+                        if (IsOutsideConnection(targetBuildingId)) {
                             mayAddCustomStatus = true;
                             return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_OUTSIDE");
                         }
@@ -190,7 +198,7 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            if (isOutsideConnection) {
+            if (IsOutsideConnection(targetBuildingId)) {
                 mayAddCustomStatus = true;
                 return Locale.Get("CITIZEN_STATUS_GOINGTO_OUTSIDE");
             }
@@ -280,9 +288,6 @@ namespace TrafficManager.Manager.Impl {
                 return Locale.Get("CITIZEN_STATUS_GOINGTO");
             }
 
-            bool isOutsideConnection =
-                (Singleton<BuildingManager>.instance.m_buildings.m_buffer[targetBuildingId].m_flags &
-                 Building.Flags.IncomingOutgoing) != Building.Flags.None;
             bool hangsAround = data.m_path == 0u &&
                                (data.m_flags & CitizenInstance.Flags.HangAround) !=
                                CitizenInstance.Flags.None;
@@ -295,7 +300,7 @@ namespace TrafficManager.Manager.Impl {
                     case ItemClass.Service.Residential
                         when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
                              IsVehicleOwnedByCitizen(vehicleMan.m_vehicles.m_buffer[vehicleId], citizenId): {
-                        if (isOutsideConnection) {
+                        if (IsOutsideConnection(targetBuildingId)) {
                             mayAddCustomStatus = true;
                             return Locale.Get("CITIZEN_STATUS_DRIVINGTO_OUTSIDE");
                         }
@@ -325,7 +330,7 @@ namespace TrafficManager.Manager.Impl {
                             return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
                         }
 
-                        if (isOutsideConnection) {
+                        if (IsOutsideConnection(targetBuildingId)) {
                             mayAddCustomStatus = true;
                             return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_OUTSIDE");
                         }
@@ -350,7 +355,7 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            if (isOutsideConnection) {
+            if (IsOutsideConnection(targetBuildingId)) {
                 mayAddCustomStatus = true;
                 return Locale.Get("CITIZEN_STATUS_GOINGTO_OUTSIDE");
             }
