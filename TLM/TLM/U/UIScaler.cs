@@ -5,11 +5,46 @@ namespace TrafficManager.U {
     using UnityEngine;
 
     public static class UIScaler {
+        public const float GUI_WIDTH = 1920f;
+        public const float GUI_HEIGHT = 1080f;
+
+        /// <summary>Caching because UIView.Instance.uiCamera can be null sometimes.</summary>
+        private static float cachedGuiWidth = GUI_WIDTH;
+
+        /// <summary>Caching because UIView.Instance.uiCamera can be null sometimes.</summary>
+        private static float cachedGuiHeight = GUI_HEIGHT;
+
         /// <summary>Screen width for GUI is always fixed at 1920.</summary>
-        public static float GuiWidth => Singleton<UIView>.instance.uiCamera.pixelWidth;
+        public static float GuiWidth {
+            // TODO: Double check if GUI never changes width, the code below can be a const
+            get {
+                UIView uiView = Singleton<UIView>.instance;
+                if (uiView != null) {
+                    Camera uiCamera = uiView.uiCamera;
+                    if (uiCamera != null) {
+                        UIScaler.cachedGuiWidth = uiCamera.pixelWidth;
+                    }
+                }
+
+                return UIScaler.cachedGuiWidth;
+            }
+        }
 
         /// <summary>Screen height for GUI is always fixed at 1080.</summary>
-        public static float GuiHeight => Singleton<UIView>.instance.uiCamera.pixelHeight;
+        public static float GuiHeight {
+            // TODO: Double check if GUI never changes height, the code below can be a const
+            get {
+                UIView uiView = Singleton<UIView>.instance;
+                if (uiView != null) {
+                    Camera uiCamera = uiView.uiCamera;
+                    if (uiCamera != null) {
+                        UIScaler.cachedGuiHeight = uiCamera.pixelHeight;
+                    }
+                }
+
+                return UIScaler.cachedGuiHeight;
+            }
+        }
 
         /// <summary>
         /// Calculate UI scale based on GUI scale slider in options multiplied by uiView's scale.
@@ -26,8 +61,8 @@ namespace TrafficManager.U {
         /// <returns>GUI space position.</returns>
         internal static Vector2 ScreenPointToGuiPoint(Vector2 screenPos) {
             return new Vector2(
-                (screenPos.x * 1920f) / Screen.width,
-                (screenPos.y * 1080f) / Screen.height);
+                (screenPos.x * GUI_WIDTH) / Screen.width,
+                (screenPos.y * GUI_HEIGHT) / Screen.height);
         }
     }
 }
