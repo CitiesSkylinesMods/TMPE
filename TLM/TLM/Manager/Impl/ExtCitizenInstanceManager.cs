@@ -58,58 +58,16 @@ namespace TrafficManager.Manager.Impl {
             Reset();
         }
 
-        internal void Reset() {
-            for (var i = 0; i < ExtInstances.Length; ++i) {
-                Reset(ref ExtInstances[i]);
-            }
-        }
-
         /// <summary>
-        /// Check if a building id refers to an outside connection.
+        /// Generates the localized status for a tourist.
         /// </summary>
         /// 
-        /// <param name="buildingId">The id of the building to check.</param>
+        /// <param name="instanceID">Citizen instance id.</param>
+        /// <param name="data">Citizen instance data.</param>
+        /// <param name="mayAddCustomStatus">Will be <c>true</c> if the status can be customised by callee.</param>
+        /// <param name="target">The instance of target building or node.</param>
         /// 
-        /// <returns>Returns <c>true</c> if it's an outside connection, otherwise <c>false</c>.</returns>
-        internal bool IsOutsideConnection(ushort buildingId) {
-            Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
-            return (building.m_flags & Building.Flags.IncomingOutgoing) != 0;
-        }
-
-        /// <summary>
-        /// Check if a vehicle is owned by a certain citizen.
-        /// </summary>
-        /// 
-        /// <param name="vehicle">The vehicle.</param>
-        /// <param name="citizenId">The citizen.</param>
-        /// 
-        /// <returns>Returns <c>true</c> if the vehicle is owned by the citizen, otherwise <c>false</c>.</returns>
-        internal bool IsVehicleOwnedByCitizen(ref Vehicle vehicle, uint citizenId) {
-            InstanceID id = InstanceID.Empty;
-            id.Building = vehicle.m_sourceBuilding;
-            return id.Citizen == citizenId;
-        }
-
-        /// <summary>
-        /// Check if a citizen is caught in a flood, tsunami or tornado.
-        /// </summary>
-        /// 
-        /// <param name="citizen">The citizen to inspect.</param>
-        /// 
-        /// <returns>Returns <c>true</c> if having a bad day, otherwise <c>false</c>.</returns>
-        internal bool IsSweaptAway(ref CitizenInstance citizen) =>
-            (citizen.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != 0;
-
-        /// <summary>
-        /// Check if a citizen is loitering at their current location.
-        /// </summary>
-        /// 
-        /// <param name="citizen">The citizen to inspect.</param>
-        /// 
-        /// <returns>Returns <c>true</c> if hanging around, otherwise <c>false</c>.</returns>
-        internal bool IsHangingAround(ref CitizenInstance citizen) =>
-            citizen.m_path == 0u && (citizen.m_flags & CitizenInstance.Flags.HangAround) != 0;
-
+        /// <returns>Returns the localised tourist status.</returns>
         public string GetTouristLocalizedStatus(ushort instanceID,
                                                 ref CitizenInstance data,
                                                 out bool mayAddCustomStatus,
@@ -144,7 +102,7 @@ namespace TrafficManager.Manager.Impl {
 
                     case ItemClass.Service.Residential
                         when info.m_vehicleType != VehicleInfo.VehicleType.Bicycle
-                             && IsVehicleOwnedByCitizen(ref vehicle, citizenId): {
+                             && IsVehicleOwnedByCitizen(ref vehicle, citizenId):
 
                         if (targetIsNode) {
                             target.NetNode = targetBuildingId;
@@ -157,10 +115,9 @@ namespace TrafficManager.Manager.Impl {
 
                         target.Building = targetBuildingId;
                         return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
-                    }
 
                     case ItemClass.Service.PublicTransport:
-                    case ItemClass.Service.Disaster: {
+                    case ItemClass.Service.Disaster:
 
                         if (targetIsNode) {
 
@@ -186,18 +143,17 @@ namespace TrafficManager.Manager.Impl {
 
                         target.Building = targetBuildingId;
                         return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
-                    }
                 }
             }
 
             if (targetIsNode) {
+
+                target.NetNode = targetBuildingId;
  
                 if ((data.m_flags & CitizenInstance.Flags.OnTour) != 0) {
-                    target.NetNode = targetBuildingId;
                     return Locale.Get("CITIZEN_STATUS_VISITING");
                 }
 
-                target.NetNode = targetBuildingId;
                 return Locale.Get("CITIZEN_STATUS_GOINGTO");
             }
 
@@ -205,16 +161,26 @@ namespace TrafficManager.Manager.Impl {
                 return Locale.Get("CITIZEN_STATUS_GOINGTO_OUTSIDE");
             }
 
+            target.Building = targetBuildingId;
+
             if (IsHangingAround(ref data)) {
-                target.Building = targetBuildingId;
                 mayAddCustomStatus = false;
                 return Locale.Get("CITIZEN_STATUS_VISITING");
             }
 
-            target.Building = targetBuildingId;
             return Locale.Get("CITIZEN_STATUS_GOINGTO");
         }
 
+        /// <summary>
+        /// Generates the localized status for a resident.
+        /// </summary>
+        /// 
+        /// <param name="instanceID">Citizen instance id.</param>
+        /// <param name="data">Citizen instance data.</param>
+        /// <param name="mayAddCustomStatus">Will be <c>true</c> if the status can be customised by callee.</param>
+        /// <param name="target">The instance of target building or node.</param>
+        /// 
+        /// <returns>Returns the localised resident status.</returns>
         public string GetResidentLocalizedStatus(ushort instanceID,
                                                  ref CitizenInstance data,
                                                  out bool mayAddCustomStatus,
@@ -273,17 +239,16 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         if (targetBuildingId == workId) {
-                            return Locale.Get(
-                                (!isStudent)
-                                    ? "CITIZEN_STATUS_DRIVINGTO_WORK"
-                                    : "CITIZEN_STATUS_DRIVINGTO_SCHOOL");
+                            return isStudent
+                                ? Locale.Get("CITIZEN_STATUS_DRIVINGTO_SCHOOL")
+                                : Locale.Get("CITIZEN_STATUS_DRIVINGTO_WORK");
                         }
 
                         target.Building = targetBuildingId;
                         return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
 
                     case ItemClass.Service.PublicTransport:
-                    case ItemClass.Service.Disaster: {
+                    case ItemClass.Service.Disaster:
 
                         if (targetIsNode) {
 
@@ -316,25 +281,22 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         if (targetBuildingId == workId) {
-                            return Locale.Get(
-                                (!isStudent)
-                                    ? "CITIZEN_STATUS_TRAVELLINGTO_WORK"
-                                    : "CITIZEN_STATUS_TRAVELLINGTO_SCHOOL");
+                            return isStudent
+                                ? Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_SCHOOL")
+                                : Locale.Get("CITIZEN_STATUS_TRAVELLINGTO_WORK");
                         }
 
                         target.Building = targetBuildingId;
                         return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");                    }
-                }
             }
 
             if (targetIsNode) {
+                target.NetNode = targetBuildingId;
 
                 if ((data.m_flags & CitizenInstance.Flags.OnTour) != 0) {
-                    target.NetNode = targetBuildingId;
                     return Locale.Get("CITIZEN_STATUS_VISITING");
                 }
 
-                target.NetNode = targetBuildingId;
                 return Locale.Get("CITIZEN_STATUS_GOINGTO");
             }
 
@@ -354,21 +316,23 @@ namespace TrafficManager.Manager.Impl {
             if (targetBuildingId == workId) {
                 if (IsHangingAround(ref data)) {
                     mayAddCustomStatus = false;
-                    return Locale.Get(
-                        (!isStudent) ? "CITIZEN_STATUS_AT_WORK" : "CITIZEN_STATUS_AT_SCHOOL");
+                    return isStudent
+                        ? Locale.Get("CITIZEN_STATUS_AT_SCHOOL")
+                        : Locale.Get("CITIZEN_STATUS_AT_WORK");
                 }
 
-                return Locale.Get(
-                    (!isStudent) ? "CITIZEN_STATUS_GOINGTO_WORK" : "CITIZEN_STATUS_GOINGTO_SCHOOL");
+                return isStudent
+                    ? Locale.Get("CITIZEN_STATUS_GOINGTO_SCHOOL")
+                    : Locale.Get("CITIZEN_STATUS_GOINGTO_WORK");
             }
 
+            target.Building = targetBuildingId;
+
             if (IsHangingAround(ref data)) {
-                target.Building = targetBuildingId;
                 mayAddCustomStatus = false;
                 return Locale.Get("CITIZEN_STATUS_VISITING");
             }
 
-            target.Building = targetBuildingId;
             return Locale.Get("CITIZEN_STATUS_GOINGTO");
         }
 
@@ -1321,19 +1285,6 @@ namespace TrafficManager.Manager.Impl {
             return false;
         }
 
-        public void Reset(ref ExtCitizenInstance extInstance) {
-            // Flags = ExtFlags.None;
-            extInstance.pathMode = ExtPathMode.None;
-            extInstance.failedParkingAttempts = 0;
-            extInstance.parkingSpaceLocation = ExtParkingSpaceLocation.None;
-            extInstance.parkingSpaceLocationId = 0;
-            extInstance.lastDistanceToParkedCar = float.MaxValue;
-            extInstance.atOutsideConnection = false;
-
-            // extInstance.ParkedVehiclePosition = default(Vector3);
-            ReleaseReturnPath(ref extInstance);
-        }
-
         public bool LoadData(List<Configuration.ExtCitizenInstanceData> data) {
             bool success = true;
             Log.Info($"Loading {data.Count} extended citizen instances");
@@ -1465,5 +1416,70 @@ namespace TrafficManager.Manager.Impl {
 
             return ret;
         }
+
+        public void Reset(ref ExtCitizenInstance extInstance) {
+            // Flags = ExtFlags.None;
+            extInstance.pathMode = ExtPathMode.None;
+            extInstance.failedParkingAttempts = 0;
+            extInstance.parkingSpaceLocation = ExtParkingSpaceLocation.None;
+            extInstance.parkingSpaceLocationId = 0;
+            extInstance.lastDistanceToParkedCar = float.MaxValue;
+            extInstance.atOutsideConnection = false;
+
+            // extInstance.ParkedVehiclePosition = default(Vector3);
+            ReleaseReturnPath(ref extInstance);
+        }
+
+        internal void Reset() {
+            for (var i = 0; i < ExtInstances.Length; ++i) {
+                Reset(ref ExtInstances[i]);
+            }
+        }
+
+        /// <summary>
+        /// Check if a building id refers to an outside connection.
+        /// </summary>
+        /// 
+        /// <param name="buildingId">The id of the building to check.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if it's an outside connection, otherwise <c>false</c>.</returns>
+        internal bool IsOutsideConnection(ushort buildingId) {
+            Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
+            return (building.m_flags & Building.Flags.IncomingOutgoing) != 0;
+        }
+
+        /// <summary>
+        /// Check if a vehicle is owned by a certain citizen.
+        /// </summary>
+        /// 
+        /// <param name="vehicle">The vehicle.</param>
+        /// <param name="citizenId">The citizen.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if the vehicle is owned by the citizen, otherwise <c>false</c>.</returns>
+        internal bool IsVehicleOwnedByCitizen(ref Vehicle vehicle, uint citizenId) {
+            InstanceID id = InstanceID.Empty;
+            id.Building = vehicle.m_sourceBuilding;
+            return id.Citizen == citizenId;
+        }
+
+        /// <summary>
+        /// Check if a citizen is caught in a flood, tsunami or tornado.
+        /// </summary>
+        /// 
+        /// <param name="citizen">The citizen to inspect.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if having a bad day, otherwise <c>false</c>.</returns>
+        internal bool IsSweaptAway(ref CitizenInstance citizen) =>
+            (citizen.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != 0;
+
+        /// <summary>
+        /// Check if a citizen is loitering at their current location.
+        /// </summary>
+        /// 
+        /// <param name="citizen">The citizen to inspect.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if hanging around, otherwise <c>false</c>.</returns>
+        internal bool IsHangingAround(ref CitizenInstance citizen) =>
+            citizen.m_path == 0u && (citizen.m_flags & CitizenInstance.Flags.HangAround) != 0;
     }
 }
