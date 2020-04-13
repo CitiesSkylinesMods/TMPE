@@ -64,21 +64,25 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        /// <summary>
+        /// Check if a citizen is caught in a flood, tsunami or tornado.
+        /// </summary>
+        /// 
+        /// <param name="citizen">The citizen to inspect.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if having a bad day, otherwise <c>false</c>.</returns>
+        internal bool IsSweaptAway(ref CitizenInstance citizen) =>
+            (citizen.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != 0;
+
         public string GetTouristLocalizedStatus(ushort instanceID,
                                                 ref CitizenInstance data,
                                                 out bool mayAddCustomStatus,
                                                 out InstanceID target) {
             target = InstanceID.Empty;
 
-            if ((data.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) !=
-                CitizenInstance.Flags.None)
-            {
-                mayAddCustomStatus = false;
-                return Locale.Get("CITIZEN_STATUS_CONFUSED");
-            }
-
             ushort targetBuildingId = data.m_targetBuilding;
-            if (targetBuildingId == 0) {
+
+            if (IsSweaptAway(ref data) || targetBuildingId == 0) {
                 mayAddCustomStatus = false;
                 return Locale.Get("CITIZEN_STATUS_CONFUSED");
             }
@@ -200,15 +204,9 @@ namespace TrafficManager.Manager.Impl {
 
             target = InstanceID.Empty;
 
-            if ((data.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating))
-                != CitizenInstance.Flags.None)
-            {                
-                mayAddCustomStatus = false;
-                return Locale.Get("CITIZEN_STATUS_CONFUSED");
-            }
-
             ushort targetBuildingId = data.m_targetBuilding;
-            if (targetBuildingId == 0) {
+
+            if (IsSweaptAway(ref data) || targetBuildingId == 0) {
                 mayAddCustomStatus = false;
                 return Locale.Get("CITIZEN_STATUS_CONFUSED");
             }
