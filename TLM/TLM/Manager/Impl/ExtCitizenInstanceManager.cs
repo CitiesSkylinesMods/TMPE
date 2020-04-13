@@ -21,16 +21,7 @@ namespace TrafficManager.Manager.Impl {
         public static readonly ExtCitizenInstanceManager Instance = new ExtCitizenInstanceManager();
 
         /// <summary>
-        /// Used to perform ad-hoc logging (only once) should errors occur in <see cref="StartPathFind()"/>:
-        ///
-        /// * Undefined = no error yet
-        /// * True = error occurred, log next patfind
-        /// * False = stop logging and don't do any additional logging.
-        /// </summary>
-        private static TernaryBool pathFindAdHocDebug = TernaryBool.Undefined;
-
-        /// <summary>
-        /// All additional data for citizen instance. Index: citizen instance id
+        /// Gets all additional data for citizen instance. Index: citizen instance id.
         /// </summary>
         public ExtCitizenInstance[] ExtInstances { get; }
 
@@ -454,33 +445,25 @@ namespace TrafficManager.Manager.Impl {
 
             }
             catch (Exception ex) {
+                // make sure we have copy of exception in TMPE.log
+                Log.Info(ex.ToString());
 
-                if (pathFindAdHocDebug == TernaryBool.Undefined) {
-                    // make sure we have copy of exception in TMPE.log
-                    Log.Info(ex.ToString());
-
-                    // enable debug logging
-                    pathFindAdHocDebug = TernaryBool.True;
-
-                    // run the code again, this time with full debug logging
-                    try {
-                        InternalStartPathFind(
-                            instanceID,
-                            ref instanceData,
-                            ref extInstance,
-                            ref extCitizen,
-                            startPos,
-                            endPos,
-                            vehicleInfo,
-                            enableTransport,
-                            ignoreCost);
-                    }
-                    catch {
-                        // ignore
-                    }
-
-                    // prevent future logging
-                    pathFindAdHocDebug = TernaryBool.False;
+                // run the code again, this time with full debug logging
+                try {
+                    InternalStartPathFind(
+                        instanceID,
+                        ref instanceData,
+                        ref extInstance,
+                        ref extCitizen,
+                        startPos,
+                        endPos,
+                        vehicleInfo,
+                        enableTransport,
+                        ignoreCost,
+                        true);
+                }
+                catch {
+                    // ignore
                 }
 
                 throw;
@@ -496,7 +479,8 @@ namespace TrafficManager.Manager.Impl {
             Vector3 endPos,
             VehicleInfo vehicleInfo,
             bool enableTransport,
-            bool ignoreCost) {
+            bool ignoreCost,
+            bool adhocDebugLog = false) {
 
             Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
             VehicleParked[] parkedVehiclesBuffer = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
@@ -515,9 +499,8 @@ namespace TrafficManager.Manager.Impl {
             bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 
 #else
-            bool logParkingAi;
-            bool extendedLogParkingAi;
-            logParkingAi = extendedLogParkingAi = pathFindAdHocDebug == TernaryBool.True;
+            bool logParkingAi = adhocDebugLog;
+            bool extendedLogParkingAi = adhocDebugLog;
 #endif
 
             if (logParkingAi) {
