@@ -256,43 +256,44 @@ namespace TrafficManager.Manager.Impl {
                 isStudent = (citizen.m_flags & Citizen.Flags.Student) != 0;
             }
 
-            if (targetIsNode) {
-                if (vehicleId != 0) {
-                    VehicleManager vehManager = Singleton<VehicleManager>.instance;
-                    VehicleInfo vehicleInfo = vehManager.m_vehicles.m_buffer[vehicleId].Info;
+            if (vehicleId != 0 && targetIsNode) {
+                VehicleManager vehManager = Singleton<VehicleManager>.instance;
+                VehicleInfo vehicleInfo = vehManager.m_vehicles.m_buffer[vehicleId].Info;
 
-                    switch (vehicleInfo.m_class.m_service) {
+                switch (vehicleInfo.m_class.m_service) {
 
-                        case ItemClass.Service.Residential
-                            when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
-                                 IsVehicleOwnedByCitizen(ref vehManager.m_vehicles.m_buffer[vehicleId], citizenId):
+                    case ItemClass.Service.Residential
+                        when vehicleInfo.m_vehicleType != VehicleInfo.VehicleType.Bicycle &&
+                             IsVehicleOwnedByCitizen(ref vehManager.m_vehicles.m_buffer[vehicleId], citizenId):
 
+                        target.NetNode = targetBuildingId;
+                        mayAddCustomStatus = true;
+                        return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
+
+                    case ItemClass.Service.PublicTransport:
+                    case ItemClass.Service.Disaster: {
+
+                        ushort transportLine = Singleton<NetManager>
+                                               .instance.m_nodes.m_buffer[targetBuildingId]
+                                               .m_transportLine;
+                        if ((data.m_flags & CitizenInstance.Flags.WaitingTaxi) != 0) {
+                            mayAddCustomStatus = true;
+                            return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
+                        }
+
+                        if (vehManager.m_vehicles.m_buffer[vehicleId].m_transportLine !=
+                            transportLine) {
                             target.NetNode = targetBuildingId;
                             mayAddCustomStatus = true;
-                            return Locale.Get("CITIZEN_STATUS_DRIVINGTO");
-
-                        case ItemClass.Service.PublicTransport:
-                        case ItemClass.Service.Disaster: {
-
-                            ushort transportLine = Singleton<NetManager>
-                                                   .instance.m_nodes.m_buffer[targetBuildingId]
-                                                   .m_transportLine;
-                            if ((data.m_flags & CitizenInstance.Flags.WaitingTaxi) != 0) {
-                                mayAddCustomStatus = true;
-                                return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
-                            }
-
-                            if (vehManager.m_vehicles.m_buffer[vehicleId].m_transportLine !=
-                                transportLine) {
-                                target.NetNode = targetBuildingId;
-                                mayAddCustomStatus = true;
-                                return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
-                            }
-
-                            break;
+                            return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
                         }
+
+                        break;
                     }
                 }
+            }
+
+            if (targetIsNode) {
 
                 if ((data.m_flags & CitizenInstance.Flags.OnTour) != 0) {
                     target.NetNode = targetBuildingId;
