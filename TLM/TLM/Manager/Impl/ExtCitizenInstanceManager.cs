@@ -21,7 +21,7 @@ namespace TrafficManager.Manager.Impl {
         public static readonly ExtCitizenInstanceManager Instance = new ExtCitizenInstanceManager();
 
         /// <summary>
-        /// All additional data for citizen instance. Index: citizen instance id
+        /// Gets all additional data for citizen instance. Index: citizen instance id.
         /// </summary>
         public ExtCitizenInstance[] ExtInstances { get; }
 
@@ -337,15 +337,69 @@ namespace TrafficManager.Manager.Impl {
             return Locale.Get("CITIZEN_STATUS_GOINGTO");
         }
 
-        public bool StartPathFind(ushort instanceID,
-                                  ref CitizenInstance instanceData,
-                                  ref ExtCitizenInstance extInstance,
-                                  ref ExtCitizen extCitizen,
-                                  Vector3 startPos,
-                                  Vector3 endPos,
-                                  VehicleInfo vehicleInfo,
-                                  bool enableTransport,
-                                  bool ignoreCost) {
+        public bool StartPathFind(
+            ushort instanceID,
+            ref CitizenInstance instanceData,
+            ref ExtCitizenInstance extInstance,
+            ref ExtCitizen extCitizen,
+            Vector3 startPos,
+            Vector3 endPos,
+            VehicleInfo vehicleInfo,
+            bool enableTransport,
+            bool ignoreCost) {
+
+            try {
+
+                return InternalStartPathFind(
+                    instanceID,
+                    ref instanceData,
+                    ref extInstance,
+                    ref extCitizen,
+                    startPos,
+                    endPos,
+                    vehicleInfo,
+                    enableTransport,
+                    ignoreCost);
+
+            }
+            catch (Exception ex) {
+                // make sure we have copy of exception in TMPE.log
+                Log.Info(ex.ToString());
+
+                // run the code again, this time with full debug logging
+                try {
+                    InternalStartPathFind(
+                        instanceID,
+                        ref instanceData,
+                        ref extInstance,
+                        ref extCitizen,
+                        startPos,
+                        endPos,
+                        vehicleInfo,
+                        enableTransport,
+                        ignoreCost,
+                        true);
+                }
+                catch {
+                    // ignore
+                }
+
+                throw;
+            }
+        }
+
+        internal bool InternalStartPathFind(
+            ushort instanceID,
+            ref CitizenInstance instanceData,
+            ref ExtCitizenInstance extInstance,
+            ref ExtCitizen extCitizen,
+            Vector3 startPos,
+            Vector3 endPos,
+            VehicleInfo vehicleInfo,
+            bool enableTransport,
+            bool ignoreCost,
+            bool adhocDebugLog = false) {
+
             Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
             VehicleParked[] parkedVehiclesBuffer = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
 #if DEBUG
@@ -362,8 +416,13 @@ namespace TrafficManager.Manager.Impl {
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
             bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
 
+#else
+            bool logParkingAi = adhocDebugLog;
+            bool extendedLogParkingAi = adhocDebugLog;
+#endif
+
             if (logParkingAi) {
-                Log.Warning(
+                Log.Info(
                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): called for citizen " +
                     $"{instanceData.m_citizen}, startPos={startPos}, endPos={endPos}, " +
                     $"sourceBuilding={instanceData.m_sourceBuilding}, " +
@@ -371,10 +430,6 @@ namespace TrafficManager.Manager.Impl {
                     $"pathMode={extInstance.pathMode}, enableTransport={enableTransport}, " +
                     $"ignoreCost={ignoreCost}");
             }
-#else
-            const bool logParkingAi = false;
-            const bool extendedLogParkingAi = false;
-#endif
 
             // NON-STOCK CODE START
             Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
@@ -395,7 +450,7 @@ namespace TrafficManager.Manager.Impl {
                                 // Parked vehicle not present but citizen wants to reach it
                                 // -> Reset path mode
                                 if (logParkingAi) {
-                                    Log._Debug(
+                                    Log.Info(
                                         $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen " +
                                         $"has CurrentPathMode={extInstance.pathMode} but no parked " +
                                         "vehicle present. Change to 'None'.");
@@ -406,7 +461,7 @@ namespace TrafficManager.Manager.Impl {
                                 // Parked vehicle is present and citizen wants to reach it
                                 // -> Prohibit car usage
                                 if (extendedLogParkingAi) {
-                                    Log._Debug(
+                                    Log.Info(
                                         $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen " +
                                         $"has CurrentPathMode={extInstance.pathMode}.  Change to " +
                                         "'CalculatingWalkingPathToParkedCar'.");
@@ -426,7 +481,7 @@ namespace TrafficManager.Manager.Impl {
                             // Citizen walks to target
                             // -> Reset path mode
                             if (extendedLogParkingAi) {
-                                Log._Debug(
+                                Log.Info(
                                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen " +
                                     $"has CurrentPathMode={extInstance.pathMode}. Change to " +
                                     "'CalculatingWalkingPathToTarget'.");
@@ -449,7 +504,7 @@ namespace TrafficManager.Manager.Impl {
                                 // Citizen wants to drive to target but parked vehicle is not present
                                 // -> Reset path mode
                                 if (logParkingAi) {
-                                    Log._Debug(
+                                    Log.Info(
                                         $"CustomCitizenAI.ExtStartPathFind({instanceID}): " +
                                         $"Citizen has CurrentPathMode={extInstance.pathMode} but " +
                                         "no parked vehicle present. Change to 'None'.");
@@ -460,7 +515,7 @@ namespace TrafficManager.Manager.Impl {
                                 // Citizen wants to drive to target and parked vehicle is present
                                 // -> Force parked car usage
                                 if (extendedLogParkingAi) {
-                                    Log._Debug(
+                                    Log.Info(
                                         $"CustomCitizenAI.ExtStartPathFind({instanceID}): " +
                                         $"Citizen has CurrentPathMode={extInstance.pathMode}.  " +
                                         "Change to 'RequiresCarPath'.");
@@ -477,7 +532,7 @@ namespace TrafficManager.Manager.Impl {
 
                         default: {
                             if (logParkingAi) {
-                                Log._Debug(
+                                Log.Info(
                                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen has " +
                                     $"CurrentPathMode={extInstance.pathMode}. Change to 'None'.");
                             }
@@ -502,7 +557,7 @@ namespace TrafficManager.Manager.Impl {
                             // Citizen is on a walking tour or is a mascot
                             // -> Prohibit car usage
                             if (logParkingAi) {
-                                Log._Debug(
+                                Log.Info(
                                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen ignores " +
                                     $"cost ({ignoreCost}) or is on a walking tour ({isOnTour}): Setting " +
                                     "path mode to 'CalculatingWalkingPathToTarget'");
@@ -526,7 +581,7 @@ namespace TrafficManager.Manager.Impl {
                                             // Citizen is located at a road outside connection and can spawn a car
                                             // -> Force car usage
                                             if (logParkingAi) {
-                                                Log._Debug(
+                                                Log.Info(
                                                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): " +
                                                     "Citizen is located at a road outside connection: " +
                                                     "Setting path mode to 'RequiresCarPath' and carUsageMode " +
@@ -540,7 +595,7 @@ namespace TrafficManager.Manager.Impl {
                                             // cannot spawn a car
                                             // -> Path-finding fails
                                             if (logParkingAi) {
-                                                Log._Debug(
+                                                Log.Info(
                                                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): " +
                                                     "Citizen is located at a road outside connection but " +
                                                     "does not have a car template: ABORTING PATH-FINDING");
@@ -553,7 +608,7 @@ namespace TrafficManager.Manager.Impl {
                                         // Citizen is located at a non-road outside connection
                                         // -> Prohibit car usage
                                         if (logParkingAi) {
-                                            Log._Debug(
+                                            Log.Info(
                                                 $"CustomCitizenAI.ExtStartPathFind({instanceID}): " +
                                                 "Citizen is located at a non-road outside connection: " +
                                                 "Setting path mode to 'CalculatingWalkingPathToTarget'");
@@ -589,7 +644,7 @@ namespace TrafficManager.Manager.Impl {
                                 carUsageMode = CarUsagePolicy.Forbidden;
 
                                 if (extendedLogParkingAi) {
-                                    Log._Debug(
+                                    Log.Info(
                                         $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen used " +
                                         "their car before and is not at home. Forcing to walk to parked car.");
                                 }
@@ -608,7 +663,7 @@ namespace TrafficManager.Manager.Impl {
                                     carUsageMode = CarUsagePolicy.Forbidden;
 
                                     if (extendedLogParkingAi) {
-                                        Log._Debug(
+                                        Log.Info(
                                             $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen " +
                                             "wants to go home and parked car is too far away " +
                                             $"({distHomeToParked}). Forcing walking to parked car.");
@@ -640,7 +695,7 @@ namespace TrafficManager.Manager.Impl {
                             // -> end position is parked car
                             endPos = parkedVehiclesBuffer[parkedVehicleId].m_position;
                             if (extendedLogParkingAi) {
-                                Log._Debug(
+                                Log.Info(
                                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen shall " +
                                     $"go to parked vehicle @ {endPos}");
                             }
@@ -649,10 +704,11 @@ namespace TrafficManager.Manager.Impl {
                 } // if Options.ParkingAi
             } // end benchmark
 
-            Log._DebugIf(
-                extendedLogParkingAi,
-                () => $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen is allowed to " +
-                $"drive their car? {carUsageMode}");
+            if (extendedLogParkingAi) {
+                Log.Info(
+                    $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen is allowed to " +
+                    $"drive their car? {carUsageMode}");
+            }
 
             // NON-STOCK CODE END
             //------------------------------------------------------------------
@@ -727,7 +783,7 @@ namespace TrafficManager.Manager.Impl {
                     // Parking AI
                     if (extInstance.pathMode == ExtPathMode.RequiresCarPath) {
                         if (logParkingAi) {
-                            Log._Debug(
+                            Log.Info(
                                 $"CustomCitizenAI.ExtStartPathFind({instanceID}): Setting " +
                                 $"startPos={startPos} for citizen instance {instanceID}. " +
                                 $"CurrentDepartureMode={extInstance.pathMode}");
@@ -740,7 +796,7 @@ namespace TrafficManager.Manager.Impl {
                             // connection
                             // -> find a suitable parking space near the target
                             if (logParkingAi) {
-                                Log._Debug(
+                                Log.Info(
                                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): Finding parking " +
                                     $"space at target for citizen instance {instanceID}. " +
                                     $"CurrentDepartureMode={extInstance.pathMode} parkedVehicleId={parkedVehicleId}");
@@ -771,7 +827,7 @@ namespace TrafficManager.Manager.Impl {
                                 // find a direct path to the calculated parking position
                                 allowRandomParking = false;
                                 if (logParkingAi) {
-                                    Log._Debug(
+                                    Log.Info(
                                         $"CustomCitizenAI.ExtStartPathFind({instanceID}): Finding " +
                                         $"known parking space for citizen instance {instanceID}, parked " +
                                         $"vehicle {parkedVehicleId} succeeded and return path " +
@@ -796,7 +852,7 @@ namespace TrafficManager.Manager.Impl {
                             // no known parking space found (pathMode has not been updated in the block above)
                             // -> calculate direct path to target
                             if (logParkingAi) {
-                                Log._Debug(
+                                Log.Info(
                                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen instance " +
                                     $"{instanceID} is still at CurrentPathMode={extInstance.pathMode} " +
                                     "(no parking space found?). Setting it to CalculatingCarPath. " +
@@ -825,10 +881,17 @@ namespace TrafficManager.Manager.Impl {
              */
             if (extVehicleType == ExtVehicleType.PassengerCar ||
                 extVehicleType == ExtVehicleType.Bicycle) {
-                if (allowRandomParking && instanceData.m_targetBuilding != 0 &&
-                    (buildingsBuffer[instanceData.m_targetBuilding].Info.m_class.m_service
-                     > ItemClass.Service.Office
-                     || (instanceData.m_flags & CitizenInstance.Flags.TargetIsNode) != 0)) {
+
+                if (allowRandomParking
+                    && instanceData.m_targetBuilding != 0
+                    && buildingsBuffer[instanceData.m_targetBuilding].Info
+                    && (
+                        buildingsBuffer[instanceData.m_targetBuilding].Info.m_class.m_service > ItemClass.Service.Office
+                        || (instanceData.m_flags & CitizenInstance.Flags.TargetIsNode) != 0
+                       )
+                    )
+                {
+
                     randomParking = true;
                 }
             }
@@ -860,7 +923,7 @@ namespace TrafficManager.Manager.Impl {
                 CitizenInstance.Flags.None;
 
             if (logParkingAi) {
-                Log._Debug($"CustomCitizenAI.ExtStartPathFind({instanceID}): Requesting path-finding " +
+                Log.Info($"CustomCitizenAI.ExtStartPathFind({instanceID}): Requesting path-finding " +
                            $"for citizen instance {instanceID}, citizen {instanceData.m_citizen}, " +
                            $"extVehicleType={extVehicleType}, extPathType={extPathType}, startPos={startPos}, " +
                            $"endPos={endPos}, sourceBuilding={instanceData.m_sourceBuilding}, " +
@@ -938,7 +1001,7 @@ namespace TrafficManager.Manager.Impl {
                         // -> add public transport demand for source building
                         if (instanceData.m_sourceBuilding != 0) {
                             if (logParkingAi) {
-                                Log._Debug(
+                                Log.Info(
                                     $"CustomCitizenAI.ExtStartPathFind({instanceID}): Citizen instance " +
                                     $"{instanceID} cannot uses public transport from building " +
                                     $"{instanceData.m_sourceBuilding} to {instanceData.m_targetBuilding}. " +
@@ -998,7 +1061,7 @@ namespace TrafficManager.Manager.Impl {
                 // NON-STOCK CODE END
                 if (res) {
                     if (logParkingAi) {
-                        Log._DebugFormat(
+                        Log.InfoFormat(
                             "CustomCitizenAI.ExtStartPathFind({0}): Path-finding starts for citizen " +
                             "instance {1}, path={2}, extVehicleType={3}, extPathType={4}, " +
                             "startPosA.segment={5}, startPosA.lane={6}, laneType={7}, vehicleType={8}, " +
@@ -1020,23 +1083,21 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
+            if (logParkingAi && Options.parkingAI) {
+                Log.InfoFormat(
+                    "CustomCitizenAI.ExtStartPathFind({0}): CustomCitizenAI.CustomStartPathFind: " +
+                    "[PFFAIL] failed for citizen instance {1} (CurrentPathMode={2}). " +
+                    "startPosA.segment={3}, startPosA.lane={4}, startPosA.offset={5}, " +
+                    "endPosA.segment={6}, endPosA.lane={7}, endPosA.offset={8}, " +
+                    "foundStartPos={9}, foundEndPos={10}",
+                    instanceID, instanceID, extInstance.pathMode, startPosA.m_segment,
+                    startPosA.m_lane, startPosA.m_offset, endPosA.m_segment, endPosA.m_lane,
+                    endPosA.m_offset, foundStartPos, foundEndPos);
 #if DEBUG
-            if (Options.parkingAI) {
-                if (logParkingAi) {
-                    Log._DebugFormat(
-                        "CustomCitizenAI.ExtStartPathFind({0}): CustomCitizenAI.CustomStartPathFind: " +
-                        "[PFFAIL] failed for citizen instance {1} (CurrentPathMode={2}). " +
-                        "startPosA.segment={3}, startPosA.lane={4}, startPosA.offset={5}, " +
-                        "endPosA.segment={6}, endPosA.lane={7}, endPosA.offset={8}, " +
-                        "foundStartPos={9}, foundEndPos={10}",
-                        instanceID, instanceID, extInstance.pathMode, startPosA.m_segment,
-                        startPosA.m_lane, startPosA.m_offset, endPosA.m_segment, endPosA.m_lane,
-                        endPosA.m_offset, foundStartPos, foundEndPos);
-                }
-
                 Reset(ref extInstance);
-            }
 #endif
+            }
+
             return false;
         }
 
