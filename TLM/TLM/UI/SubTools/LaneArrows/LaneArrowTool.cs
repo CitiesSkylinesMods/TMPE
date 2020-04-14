@@ -18,7 +18,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using Debug = UnityEngine.Debug;
-    using System.Linq;
 
     /// <summary>
     /// LaneArrow Tool creates ToolWindow for lane arrow buttons.
@@ -342,7 +341,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             } else if (SeparateNodeLanesModifierIsPressed) {
                 SeparateTurningLanesUtil.SeparateNode(HoveredNodeId, out var res, alternativeMode: alternativeMode_);
                 InformUserAboutPossibleFailure(res);
-                NetInfo.LaneType f;
             } else if (HasHoverLaneArrows()) {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
