@@ -33,8 +33,7 @@ namespace TrafficManager.Patch._InfoManager
             }
             else 
             {
-                // TODO fix [issue #882]: the line bellow functionaly works but puts a ton of null reference exceptions in the output.
-                //SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(Singleton<RoadWorldInfoPanel>.instance.Hide);
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
             }
 
         }

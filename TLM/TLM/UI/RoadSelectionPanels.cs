@@ -55,6 +55,7 @@ namespace TrafficManager.UI {
         }
 
         public UIPanel RoadWorldInfoPanelExt;
+        public static RoadWorldInfoPanel RoadWorldInfoPanel => UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
 
         /// <summary>
         ///  list all instances of road selection panels.
@@ -76,7 +77,7 @@ namespace TrafficManager.UI {
             panels_ = new List<PanelExt>();
 
             // attach an instance of road selection panel to RoadWorldInfoPanel.
-            RoadWorldInfoPanel roadWorldInfoPanel = UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
+            RoadWorldInfoPanel roadWorldInfoPanel = RoadWorldInfoPanel;
             if (roadWorldInfoPanel != null) {
                 // TODO [issue #710] add panel when able to get road by name.
                 PanelExt panel = AddPanel(roadWorldInfoPanel.component);

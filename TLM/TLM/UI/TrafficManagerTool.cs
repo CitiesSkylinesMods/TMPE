@@ -372,7 +372,7 @@ namespace TrafficManager.UI {
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
             MassEditOVerlay.Show = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
-            Log._Debug("Singleton<RoadWorldInfoPanel>.instance.isActiveAndEnabled=" + Singleton<RoadWorldInfoPanel>.instance.isActiveAndEnabled);
+            Log._Debug("RoadSelectionPanels.Root.RoadWorldInfoPanelExt.isActiveAndEnabled=" + RoadSelectionPanels.Root.RoadWorldInfoPanelExt.isActiveAndEnabled);
             if (NetManager.instance.NetAdjust.PathVisible =
                 RoadSelectionPanels.Root.ShouldPathBeVisible()) {
                 base.RenderOverlay(cameraInfo); // render path.
@@ -557,8 +557,7 @@ namespace TrafficManager.UI {
                         HitPos);
                 });
             } else if (e.type == EventType.MouseDown && e.button == 1) {
-                // TODO fix [issue #882]: the line bellow functionaly works but puts a ton of null reference exceptions in the output.
-                //SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(Singleton<RoadWorldInfoPanel>.instance.Hide);
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
             }
         }
 

@@ -354,7 +354,7 @@ namespace TrafficManager.Util {
 
             // Turning allowed when the main road is agnled.
             ArrowDirection dir = GetDirection(nodeSegments[0], nodeSegments[1], nodeId);
-            ignoreLanes &= dir != ArrowDirection.Forward;
+            ignoreLanes |= dir != ArrowDirection.Forward;
             ignoreLanes |= OptionsMassEditTab.PriorityRoad_AllowLeftTurns;
 
             //Log._Debug($"ignorelanes={ignoreLanes} isSemiRoundabout={isSemiRoundabout}\n" +
