@@ -26,6 +26,12 @@ This changelog includes all versions and major variants of the mod going all the
 >  
 > Date format: dd/mm/yyyy
 
+#### TM:PE V[11.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.2...11.4.0) LABS, 14/04/2020
+
+- Added: State machine for dedicated turning lanes (#755, #567)
+- Fixed: Default turning lane on wrong side (#755, #671)
+- Meta: Repeat application of turning lane shortcut will cycle through available options
+
 #### TM:PE V[11.3.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.1...11.3.2) LABS, 14/04/2020
 
 - Fixed: Icons not showing when selecting node (thanks xenoxaos for reporting!) (#839, #838)

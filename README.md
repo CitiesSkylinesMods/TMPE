@@ -39,6 +39,12 @@ Official releases:
 
 Recent updates:
 
+#### TM:PE V[11.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.2...11.4.0) LABS, 14/04/2020
+
+- Added: State machine for dedicated turning lanes (#755, #567)
+- Fixed: Default turning lane on wrong side (#755, #671)
+- Meta: Repeat application of turning lane shortcut will cycle through available options
+
 #### TM:PE V[11.3.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.1...11.3.2) LABS, 14/04/2020
 
 - Fixed: Icons not showing when selecting node (thanks xenoxaos for reporting!) (#839, #838)
@@ -46,26 +52,7 @@ Recent updates:
 - Updated: `StartPathFind()` will automatically run diagnostic logging on errors (#834)
 - Updated: Resident/Tourist status logic simplified (#837)
 
-#### TM:PE V[11.3.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.0...11.3.1) LABS, 11/04/2020
-
-- Fixed: Timed Traffic Lights bugs caused by v11.3.0 update (thanks to everyone who reported the bug!) (#828, #824)
-- Updated: Trees Respiration mod is now compatible with TM:PE v11! (thanks Klyte45!) (#831, #614, #611, #563, #484)
-
-#### TM:PE V[11.3.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.3...11.3.0) LABS, 10/04/2020
-
-- Added: Advanced auto lane connector tool (select a node, then `Ctrl + S`) (#706, #703)
-- Fixed: Stay-in-lane should not connect solitary lanes (#706, #617)
-- Fixed: Lane arrows UI too small on some resolutions except at junctions (#726, #571)
-- Updated: Lane connectors: `Shift + S` changed to `Ctrl + S` (see Options > Keybinds tab) (#706)
-- Updated: Lane Arrows UI now respects UI scale slider (see Options > General tab) (#726)
-- Updated: Improved UI for lane arrows tool (#726, #571)
-- Updated: Translations (will add more info later) (#726)
-
 #### TM:PE V[11.2.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.2...11.2.3) STABLE, 08/04/2020
-
-- Fixed: Unable to set default speed limits for roads that need DLCs (#821, #818)
-
-#### TM:PE V[11.2.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.2...11.2.3) LABS, 08/04/2020
 
 - Fixed: Unable to set default speed limits for roads that need DLCs (#821, #818)
 
