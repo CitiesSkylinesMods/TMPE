@@ -23,6 +23,12 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     /// LaneArrow Tool creates ToolWindow for lane arrow buttons.
     /// </summary>
     public class LaneArrowTool : TrafficManagerSubTool {
+        const bool DEFAULT_ALT_MODE = true;
+        private bool alternativeMode_ = DEFAULT_ALT_MODE;
+        private int framesSeparateTurningLanesModeActivated = 0;
+        bool SeparateSegmentLanesModifierIsPressed => AltIsPressed;
+        bool SeparateNodeLanesModifierIsPressed => ControlIsPressed;
+
         /// <summary>
         /// Finite State machine for the tool. Represents current UI state for Lane Arrows.
         /// </summary>
@@ -323,26 +329,28 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            if (Time.frameCount - framesSeparateTurningLanesModeActivated > 80) {
+                // the mode resets after 2 seconds.
+                alternativeMode_ = DEFAULT_ALT_MODE;
+            }
 
-            if (altDown) {
-                // Holding Alt will set separate lanes for selected segment
-                LaneArrowManager.SeparateTurningLanes.SeparateSegmentLanes(
-                    HoveredSegmentId,
-                    HoveredNodeId,
-                    out var res);
+            if (SeparateSegmentLanesModifierIsPressed) {
+                SeparateTurningLanesUtil.SeparateSegmentLanes(
+                    HoveredSegmentId, HoveredNodeId, out var res, alternativeMode: alternativeMode_);
                 InformUserAboutPossibleFailure(res);
-            } else if (ctrlDown) {
-                // Holding Ctrl will set separate lanes for node
-                LaneArrowManager.SeparateTurningLanes.SeparateNode(
-                    HoveredNodeId,
-                    out var res);
+            } else if (SeparateNodeLanesModifierIsPressed) {
+                SeparateTurningLanesUtil.SeparateNode(HoveredNodeId, out var res, alternativeMode: alternativeMode_);
                 InformUserAboutPossibleFailure(res);
             } else if (HasHoverLaneArrows()) {
                 SelectedSegmentId = HoveredSegmentId;
                 SelectedNodeId = HoveredNodeId;
+                alternativeMode_ = DEFAULT_ALT_MODE;
                 fsm_.SendTrigger(Trigger.SegmentClick);
+            }
+
+            if (SeparateSegmentLanesModifierIsPressed || SeparateNodeLanesModifierIsPressed) {
+                framesSeparateTurningLanesModeActivated = Time.frameCount;
+                alternativeMode_ = !alternativeMode_;
             }
         }
 
@@ -426,8 +434,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         protected override ushort HoveredNodeId {
         get {
-                bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-                if (ctrlDown) {
+                if (SeparateNodeLanesModifierIsPressed) {
                     // When control is down, we are selecting node.
                     return base.HoveredNodeId;
                 }
@@ -486,15 +493,12 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         private void RenderOverlay_Select(RenderManager.CameraInfo cameraInfo) {
             NetManager netManager = Singleton<NetManager>.instance;
 
-            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-
             // If CTRL is held, and hovered something: Draw hovered node
-            if (ctrlDown && HoveredNodeId != 0) {
+            if (SeparateNodeLanesModifierIsPressed && HoveredNodeId != 0) {
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 return;
             }
 
-            bool altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
             bool leftMouseDown = Input.GetMouseButton(0);
 
             // Log._Debug($"LaneArrow Overlay: {HoveredNodeId} {HoveredSegmentId} {SelectedNodeId} {SelectedSegmentId}");
@@ -515,7 +519,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 {
                     bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(HoveredSegmentId, HoveredNodeId);
                     Color color = MainTool.GetToolColor(leftMouseDown, false);
-                    bool alpha = !altDown;
+                    bool alpha = !SeparateSegmentLanesModifierIsPressed;
                     DrawSegmentEnd(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
                 }
             }

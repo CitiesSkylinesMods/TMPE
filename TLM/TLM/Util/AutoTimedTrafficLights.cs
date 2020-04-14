@@ -119,7 +119,7 @@ namespace TrafficManager.Util {
             }
 
             if (SeparateLanes) {
-                LaneArrowManager.SeparateTurningLanes.SeparateNode(nodeId, out _);
+                SeparateTurningLanesUtil.SeparateNode(nodeId, out _);
             }
 
             //Is it special case:
