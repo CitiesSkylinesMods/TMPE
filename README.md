@@ -39,10 +39,17 @@ Official releases:
 
 Recent updates:
 
+#### TM:PE V[11.3.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.1...11.3.2) LABS, 14/04/2020
+
+- Fixed: Icons not showing when selecting node (thanks xenoxaos for reporting!) (#839, #838)
+- Fixed: Bug in `StartPathFind()` if building missing (thanks ninjanoobslayer for reporting!) (#834, #840)
+- Updated: `StartPathFind()` will automatically run diagnostic logging on errors (#834)
+- Updated: Resident/Tourist status logic simplified (#837)
+
 #### TM:PE V[11.3.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.0...11.3.1) LABS, 11/04/2020
 
 - Fixed: Timed Traffic Lights bugs caused by v11.3.0 update (thanks to everyone who reported the bug!) (#828, #824)
-- Updated: Trees Respiration mod is now compatible with TM:PE v11! (Thanks Klyte45!) (#831, #614, #611, #563, #484)
+- Updated: Trees Respiration mod is now compatible with TM:PE v11! (thanks Klyte45!) (#831, #614, #611, #563, #484)
 
 #### TM:PE V[11.3.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.3...11.3.0) LABS, 10/04/2020
 
