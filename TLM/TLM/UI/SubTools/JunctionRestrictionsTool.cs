@@ -87,6 +87,10 @@ namespace TrafficManager.UI.SubTools {
             ushort updatedNodeId = 0;
             bool handleHovered = false;
             bool cursorInPanel = IsCursorInPanel();
+            PrioritySigns.Overlay overlay = new Overlay(
+                mainTool: this.MainTool,
+                debug: logJunctions,
+                handleClick: !cursorInPanel);
 
             foreach (ushort nodeId in currentRestrictedNodeIds) {
                 if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
@@ -106,18 +110,12 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                bool viewOnlyNode = viewOnly || (nodeId != SelectedNodeId);
-
                 // draw junction restrictions
-                if (PrioritySigns.Overlay.DrawSignHandles(
-                    mainTool: this.MainTool,
-                    debug: logJunctions,
-                    nodeId: nodeId,
-                    node: ref netManager.m_nodes.m_buffer[nodeId],
-                    viewOnly: viewOnlyNode,
-                    handleClick: !cursorInPanel,
-                    camPos: ref camPos,
-                    stateUpdated: out bool update))
+                overlay.ViewOnly = viewOnly || (nodeId != SelectedNodeId);
+                if (overlay.DrawSignHandles(nodeId: nodeId,
+                                            node: ref netManager.m_nodes.m_buffer[nodeId],
+                                            camPos: ref camPos,
+                                            stateUpdated: out bool update))
                 {
                     handleHovered = true;
                 }
