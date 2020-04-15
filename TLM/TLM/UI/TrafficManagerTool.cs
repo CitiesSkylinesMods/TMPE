@@ -24,6 +24,7 @@ namespace TrafficManager.UI {
     using UnityEngine;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.SubTools.LaneArrows;
+    using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.TimedTrafficLights;
 
     [UsedImplicitly]

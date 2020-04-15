@@ -16,6 +16,7 @@ namespace TrafficManager.UI.SubTools {
     using static TrafficManager.Util.Shortcuts;
     using System;
     using GenericGameBridge.Service;
+    using TrafficManager.UI.SubTools.PrioritySigns;
 
     public class LaneConnectorTool : LegacySubTool {
         private enum SelectionMode {
@@ -133,7 +134,7 @@ namespace TrafficManager.UI.SubTools {
 
         private void ShowOverlay(bool viewOnly, RenderManager.CameraInfo cameraInfo) {
             if (viewOnly && !(Options.connectedLanesOverlay ||
-                PrioritySignsTool.MassEditOVerlay.IsActive)) {
+                MassEditOverlay.IsActive)) {
                 return;
             }
 
@@ -997,7 +998,7 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
             if (Options.connectedLanesOverlay ||
-                PrioritySignsTool.MassEditOVerlay.IsActive) {
+                MassEditOverlay.IsActive) {
                 RefreshCurrentNodeMarkers();
             } else {
                 currentLaneEnds.Clear();
