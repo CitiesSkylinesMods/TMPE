@@ -72,8 +72,11 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
                 int numSignsPerRow = incoming ? 2 : 1;
 
-                NetInfo segmentInfo =
-                    Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+                NetInfo segmentInfo = Singleton<NetManager>
+                                      .instance
+                                      .m_segments
+                                      .m_buffer[segmentId]
+                                      .Info;
 
                 ItemClass connectionClass = segmentInfo.GetConnectionClass();
 
@@ -81,12 +84,23 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     continue; // only for road junctions
                 }
 
-                // draw all junction restriction signs
+                //------------------------------------
+                // Draw all junction restriction signs
+                // Determine direction from node center towards each segment center and use that
+                // as axis Y, and then dot product gives "horizontal" axis X
+                //------------------------------------
                 Vector3 segmentCenterPos = Singleton<NetManager>
-                                           .instance.m_segments.m_buffer[segmentId]
-                                           .m_bounds.center;
+                                           .instance
+                                           .m_segments
+                                           .m_buffer[segmentId]
+                                           .m_bounds
+                                           .center;
+
+                // Unit vector towards the segment center
                 Vector3 yu = (segmentCenterPos - nodePos).normalized;
-                Vector3 xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
+                // Unit vector perpendicular to the vector towards the segment center
+                Vector3 xu = Vector3.Cross(yu, new Vector3(0f, 1f, 0f)).normalized;
+
                 float f = this.ViewOnly ? 6f : 7f; // reserved sign size in game coordinates
 
                 Vector3 centerStart = nodePos + (yu * (this.ViewOnly ? 5f : 14f));
@@ -103,29 +117,29 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 int x = 0;
                 int y = 0;
                 bool hasSignInPrevRow = false;
+                IJunctionRestrictionsManager junctionRManager = Constants.ManagerFactory.JunctionRestrictionsManager;
 
                 // draw "lane-changing when going straight allowed" sign at (0; 0)
                 bool allowed =
-                    JunctionRestrictionsManager.Instance.IsLaneChangingAllowedWhenGoingStraight(
-                        segmentId,
-                        isStartNode);
+                    junctionRManager.IsLaneChangingAllowedWhenGoingStraight(
+                        segmentId: segmentId,
+                        startNode: isStartNode);
 
                 bool configurable =
-                    Constants.ManagerFactory.JunctionRestrictionsManager
-                             .IsLaneChangingAllowedWhenGoingStraightConfigurable(
-                                 segmentId,
-                                 isStartNode,
-                                 ref node);
+                    junctionRManager.IsLaneChangingAllowedWhenGoingStraightConfigurable(
+                        segmentId: segmentId,
+                        startNode: isStartNode,
+                        node: ref node);
 
                 if (this.debug_
                     || (configurable
                         && (!this.ViewOnly
-                            || (allowed != Constants.ManagerFactory
-                                                    .JunctionRestrictionsManager
-                                                    .GetDefaultLaneChangingAllowedWhenGoingStraight(
-                                                        segmentId: segmentId,
-                                                        startNode: isStartNode,
-                                                        node: ref node))))) {
+                            || (allowed != junctionRManager
+                                           .GetDefaultLaneChangingAllowedWhenGoingStraight(
+                                               segmentId: segmentId,
+                                               startNode: isStartNode,
+                                               node: ref node)))))
+                {
                     this.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
@@ -144,10 +158,9 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     if (signHovered && this.handleClick_) {
                         hovered = true;
                         if (this.mainTool_.CheckClicked()) {
-                            JunctionRestrictionsManager
-                                .Instance.ToggleLaneChangingAllowedWhenGoingStraight(
-                                    segmentId,
-                                    isStartNode);
+                            junctionRManager.ToggleLaneChangingAllowedWhenGoingStraight(
+                                segmentId: segmentId,
+                                startNode: isStartNode);
                             stateUpdated = true;
                         }
                     }
@@ -157,21 +170,20 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 }
 
                 // draw "u-turns allowed" sign at (1; 0)
-                allowed = JunctionRestrictionsManager.Instance.IsUturnAllowed(segmentId, isStartNode);
-                configurable =
-                    Constants.ManagerFactory.JunctionRestrictionsManager.IsUturnAllowedConfigurable(
-                        segmentId,
-                        isStartNode,
-                        ref node);
+                allowed = junctionRManager.IsUturnAllowed(segmentId, isStartNode);
+                configurable = junctionRManager.IsUturnAllowedConfigurable(
+                    segmentId: segmentId,
+                    startNode: isStartNode,
+                    node: ref node);
+
                 if (this.debug_
                     || (configurable
                         && (!this.ViewOnly
-                            || (allowed != Constants.ManagerFactory
-                                                    .JunctionRestrictionsManager
-                                                    .GetDefaultUturnAllowed(
-                                                        segmentId,
-                                                        isStartNode,
-                                                        ref node))))) {
+                            || (allowed != junctionRManager.GetDefaultUturnAllowed(
+                                    segmentId: segmentId,
+                                    startNode: isStartNode,
+                                    node: ref node)))))
+                {
                     this.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
@@ -191,7 +203,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         hovered = true;
 
                         if (this.mainTool_.CheckClicked()) {
-                            if (!JunctionRestrictionsManager.Instance.ToggleUturnAllowed(
+                            if (!junctionRManager.ToggleUturnAllowed(
                                     segmentId,
                                     isStartNode)) {
                                 // TODO MainTool.ShowTooltip(Translation.GetString("..."), Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position);
@@ -212,21 +224,18 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 }
 
                 // draw "entering blocked junctions allowed" sign at (0; 1)
-                allowed = JunctionRestrictionsManager.Instance.IsEnteringBlockedJunctionAllowed(
-                    segmentId,
-                    isStartNode);
-                configurable =
-                    Constants.ManagerFactory.JunctionRestrictionsManager
-                             .IsEnteringBlockedJunctionAllowedConfigurable(
-                                 segmentId,
-                                 isStartNode,
-                                 ref node);
+                allowed = junctionRManager.IsEnteringBlockedJunctionAllowed(
+                    segmentId: segmentId,
+                    startNode: isStartNode);
+                configurable = junctionRManager.IsEnteringBlockedJunctionAllowedConfigurable(
+                    segmentId: segmentId,
+                    startNode: isStartNode,
+                    node: ref node);
 
                 if (this.debug_
                     || (configurable
                         && (!this.ViewOnly
-                            || (allowed != Constants.ManagerFactory
-                                                    .JunctionRestrictionsManager
+                            || (allowed != junctionRManager
                                                     .GetDefaultEnteringBlockedJunctionAllowed(
                                                         segmentId,
                                                         isStartNode,
@@ -250,9 +259,9 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         hovered = true;
 
                         if (this.mainTool_.CheckClicked()) {
-                            JunctionRestrictionsManager
-                                .Instance
-                                .ToggleEnteringBlockedJunctionAllowed(segmentId, isStartNode);
+                            junctionRManager.ToggleEnteringBlockedJunctionAllowed(
+                                segmentId: segmentId,
+                                startNode: isStartNode);
                             stateUpdated = true;
                         }
                     }
@@ -262,15 +271,13 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 }
 
                 // draw "pedestrian crossing allowed" sign at (1; 1)
-                allowed = JunctionRestrictionsManager.Instance.IsPedestrianCrossingAllowed(
-                    segmentId,
-                    isStartNode);
-                configurable =
-                    Constants.ManagerFactory.JunctionRestrictionsManager
-                             .IsPedestrianCrossingAllowedConfigurable(
-                                 segmentId,
-                                 isStartNode,
-                                 ref node);
+                allowed = junctionRManager.IsPedestrianCrossingAllowed(
+                    segmentId: segmentId,
+                    startNode: isStartNode);
+                configurable = junctionRManager.IsPedestrianCrossingAllowedConfigurable(
+                    segmentId: segmentId,
+                    startNode: isStartNode,
+                    node: ref node);
 
                 if (this.debug_
                     || (configurable
@@ -294,7 +301,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         hovered = true;
 
                         if (this.mainTool_.CheckClicked()) {
-                            JunctionRestrictionsManager.Instance.TogglePedestrianCrossingAllowed(
+                            junctionRManager.TogglePedestrianCrossingAllowed(
                                 segmentId,
                                 isStartNode);
                             stateUpdated = true;
@@ -319,27 +326,28 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 //--------------------------------
                 // TURN ON RED ENABLED
                 //--------------------------------
-                IJunctionRestrictionsManager junctionRestrictionsManager =
-                    Constants.ManagerFactory.JunctionRestrictionsManager;
-                bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
+                bool leftSideTraffic = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
 
                 // draw "turn-left-on-red allowed" sign at (2; 0)
-                allowed = junctionRestrictionsManager.IsTurnOnRedAllowed(lht, segmentId, isStartNode);
-                configurable = junctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(
-                    lht,
-                    segmentId,
-                    isStartNode,
-                    ref node);
+                allowed = junctionRManager.IsTurnOnRedAllowed(
+                    near: leftSideTraffic,
+                    segmentId: segmentId,
+                    startNode: isStartNode);
+                configurable = junctionRManager.IsTurnOnRedAllowedConfigurable(
+                    near: leftSideTraffic,
+                    segmentId: segmentId,
+                    startNode: isStartNode,
+                    node: ref node);
 
                 if (this.debug_
                     || (configurable
                         && (!this.ViewOnly
-                            || (allowed != junctionRestrictionsManager
-                                    .GetDefaultTurnOnRedAllowed(
-                                        lht,
-                                        segmentId,
-                                        isStartNode,
-                                        ref node))))) {
+                            || (allowed != junctionRManager.GetDefaultTurnOnRedAllowed(
+                                    near: leftSideTraffic,
+                                    segmentId: segmentId,
+                                    startNode: isStartNode,
+                                    node: ref node)))))
+                {
                     this.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
@@ -359,10 +367,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         hovered = true;
 
                         if (this.mainTool_.CheckClicked()) {
-                            junctionRestrictionsManager.ToggleTurnOnRedAllowed(
-                                lht,
-                                segmentId,
-                                isStartNode);
+                            junctionRManager.ToggleTurnOnRedAllowed(
+                                near: leftSideTraffic,
+                                segmentId: segmentId,
+                                startNode: isStartNode);
                             stateUpdated = true;
                         }
                     }
@@ -373,25 +381,25 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 x++;
 
                 // draw "turn-right-on-red allowed" sign at (2; 1)
-                allowed = junctionRestrictionsManager.IsTurnOnRedAllowed(
-                    !lht,
-                    segmentId,
-                    isStartNode);
-                configurable = junctionRestrictionsManager.IsTurnOnRedAllowedConfigurable(
-                    !lht,
-                    segmentId,
-                    isStartNode,
-                    ref node);
+                allowed = junctionRManager.IsTurnOnRedAllowed(
+                    near: !leftSideTraffic,
+                    segmentId: segmentId,
+                    startNode: isStartNode);
+                configurable = junctionRManager.IsTurnOnRedAllowedConfigurable(
+                    near: !leftSideTraffic,
+                    segmentId: segmentId,
+                    startNode: isStartNode,
+                    node: ref node);
 
                 if (this.debug_
                     || (configurable
                         && (!this.ViewOnly
-                            || (allowed != junctionRestrictionsManager
-                                    .GetDefaultTurnOnRedAllowed(
-                                        !lht,
-                                        segmentId,
-                                        isStartNode,
-                                        ref node))))) {
+                            || (allowed != junctionRManager.GetDefaultTurnOnRedAllowed(
+                                    near: !leftSideTraffic,
+                                    segmentId: segmentId,
+                                    startNode: isStartNode,
+                                    node: ref node)))))
+                {
                     this.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
@@ -411,10 +419,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         hovered = true;
 
                         if (this.mainTool_.CheckClicked()) {
-                            junctionRestrictionsManager.ToggleTurnOnRedAllowed(
-                                !lht,
-                                segmentId,
-                                isStartNode);
+                            junctionRManager.ToggleTurnOnRedAllowed(
+                                near: !leftSideTraffic,
+                                segmentId: segmentId,
+                                startNode: isStartNode);
                             stateUpdated = true;
                         }
                     }
