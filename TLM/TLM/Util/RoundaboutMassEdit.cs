@@ -253,7 +253,7 @@ namespace TrafficManager.Util {
             var segments = GetSortedSegments( segmentId);
 
             foreach (var nextSegmentId in segments) {
-                bool isRoundabout = false;
+                bool isRoundabout;
                 if (nextSegmentId == segmentList[0]) {
                     isRoundabout = true;
                 } else if (Contains(nextSegmentId)) {

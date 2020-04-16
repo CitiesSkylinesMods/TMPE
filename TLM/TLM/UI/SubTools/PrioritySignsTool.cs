@@ -42,11 +42,14 @@ namespace TrafficManager.UI.SubTools {
 
             // TODO provide revert/clear mode issue #568
             if (ctrlDown && shiftDown) {
+                Log.Info("Before FixRoundabout/FixRoad."); // log time for benchmarking.
                 bool isRoundabout = RoundaboutMassEdit.Instance.FixRoundabout(HoveredSegmentId);
                 if (!isRoundabout) {
                     PriorityRoad.FixRoad(HoveredSegmentId);
                 }
+                Log.Info("After FixRoundabout/FixRoad. Before RefreshMassEditOverlay"); // log time for benchmarking.
                 RefreshMassEditOverlay();
+                Log.Info("After RefreshMassEditOverlay."); // log time for benchmarking.
                 return;
             } else if (ctrlDown) {
                 PriorityRoad.FixHighPriorityJunction(HoveredNodeId);
