@@ -20,6 +20,150 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
         public bool ViewOnly;
 
+        /// <summary>
+        /// Handles layout for the Junction Restriction signs being rendered.
+        /// One <see cref="SignsLayout"/> is created per junction.
+        /// Defines basis of rotated coordinate system, aligned somewhere near the node center,
+        /// and directed along the road segment.
+        /// </summary>
+        private struct SignsLayout {
+            private Vector3 zero_;
+
+            /// <summary>Unit vector perpendicular to the vector towards the segment center.</summary>
+            public Vector3 yBasis;
+
+            /// <summary>Unit vector towards the segment center.</summary>
+            public Vector3 xBasis;
+
+            private readonly int signsPerRow_;
+            private readonly bool viewOnly_;
+
+            /// <summary>Zoom level inherited from the MainTool.</summary>
+            private readonly float baseZoom_;
+
+            private float signSize_;
+
+            /// <summary>Horizontal position when placing signs in a grid.</summary>
+            private int xPosition;
+
+            /// <summary>Vertical position when placing signs in a grid.</summary>
+            private int yPosition;
+
+            public SignsLayout(Vector3 nodePos,
+                               Vector3 yBasis,
+                               int signsPerRow,
+                               bool viewOnly,
+                               float baseZoom) {
+                this.signsPerRow_ = signsPerRow;
+                this.viewOnly_ = viewOnly;
+                baseZoom_ = baseZoom;
+
+                this.xBasis = yBasis;
+                this.yBasis = Vector3.Cross(yBasis, new Vector3(0f, 1f, 0f)).normalized;
+
+                this.signSize_ = viewOnly ? 3.5f : 6f;
+
+                this.zero_ = GetZeroPosition(
+                    nodePos: nodePos,
+                    xu: this.yBasis,
+                    yu: this.xBasis,
+                    numSignsPerRow: signsPerRow,
+                    signSize: this.signSize_,
+                    viewOnly: viewOnly);
+                xPosition = 0;
+                yPosition = 0;
+
+                // For view mode: Offset to the left (for Left side drive) or to the right by 8 units
+                // if (viewOnly) {
+                //     if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
+                //         this.zero_ -= this.yBasis * 8f;
+                //     } else {
+                //         this.zero_ += this.yBasis * 8f;
+                //     }
+                // }
+            }
+
+            /// <summary>
+            /// Based on view mode, calculate zero position where the signs will start.
+            /// </summary>
+            /// <param name="nodePos">Center position for the junction.</param>
+            /// <param name="xu">Unit vector to the right.</param>
+            /// <param name="yu">Unit vector towards segment center.</param>
+            /// <param name="numSignsPerRow">How many signs per row.</param>
+            /// <param name="signSize">Sign size from <see cref="GetSignSize"/>.</param>
+            /// <returns>Zero position where first sign will go.</returns>
+            private static Vector3 GetZeroPosition(Vector3 nodePos,
+                                                   Vector3 xu,
+                                                   Vector3 yu,
+                                                   int numSignsPerRow,
+                                                   float signSize,
+                                                   bool viewOnly) {
+                // Vector3 centerStart = nodePos + (yu * (viewOnly ? 5f : 14f));
+                Vector3 centerStart = nodePos + (yu * 14f);
+                Vector3 zero = centerStart - (0.5f * (numSignsPerRow - 1) * signSize * xu); // "top left"
+                return zero;
+            }
+
+            public bool DrawSign(bool small,
+                                 ref Vector3 camPos,
+                                 Color guiColor,
+                                 Texture2D signTexture)
+            {
+                // World coordinates, where 1 unit = 1 m
+                Vector3 signCenter = this.zero_
+                                     + (this.signSize_ * this.xPosition * this.yBasis)
+                                     + (this.signSize_ * this.yPosition * this.xBasis);
+                bool visible = GeometryUtil.WorldToScreenPoint(worldPos: signCenter,
+                                                               screenPos: out Vector3 signScreenPos);
+
+                if (!visible) {
+                    return false;
+                }
+
+                Vector3 diff = signCenter - camPos;
+                float zoom = 100.0f * this.baseZoom_ / diff.magnitude;
+                float size = (small ? 0.75f : 1f)
+                             * (this.viewOnly_ ? 0.8f : 1f)
+                             * JUNCTION_RESTRICTIONS_SIGN_SIZE * zoom;
+
+                var boundingBox = new Rect(
+                    x: signScreenPos.x - (size / 2),
+                    y: signScreenPos.y - (size / 2),
+                    width: size,
+                    height: size);
+
+                bool hoveredHandle = !this.viewOnly_ && TrafficManagerTool.IsMouseOver(boundingBox);
+                if (this.viewOnly_) {
+                    // Readonly signs look grey-ish
+                    guiColor = Color.Lerp(guiColor, Color.gray, 0.5f);
+                    guiColor.a = TrafficManagerTool.GetHandleAlpha(hovered: false);
+                } else {
+                    // Handles in edit mode are always visible. Hovered handles are also highlighted.
+                    guiColor.a = 1f;
+
+                    if (hoveredHandle) {
+                        guiColor = Color.Lerp(
+                            a: guiColor,
+                            b: new Color(r: 1f, g: .7f, b: 0f),
+                            t: 0.5f);
+                    }
+                }
+                // guiColor.a = TrafficManagerTool.GetHandleAlpha(hoveredHandle);
+
+                GUI.color = guiColor;
+                GUI.DrawTexture(boundingBox, signTexture);
+                return hoveredHandle;
+            }
+
+            public void AdvancePosition() {
+                this.xPosition++;
+                if (this.xPosition >= this.signsPerRow_) {
+                    this.xPosition = 0;
+                    this.yPosition++;
+                }
+            }
+        }
+
         /// <summary>Initializes a new instance of the <see cref="Overlay"/> struct for rendering.</summary>
         /// <param name="mainTool">Parent <see cref="TrafficManagerTool"/>.</param>
         /// <param name="debug">Is debug rendering on.</param>
@@ -33,11 +177,19 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             ViewOnly = true;
         }
 
+        /// <summary>
+        /// Draws clickable or readonly sign handles for all segments in the junction.
+        /// </summary>
+        /// <param name="nodeId">Junction node id.</param>
+        /// <param name="node">Junction node ref.</param>
+        /// <param name="camPos">Camera position.</param>
+        /// <param name="stateUpdated">?</param>
+        /// <returns>Whether any of the signs was hovered.</returns>
         public bool DrawSignHandles(ushort nodeId,
                                     ref NetNode node,
                                     ref Vector3 camPos,
                                     out bool stateUpdated) {
-            bool hovered = false;
+            bool isAnyHovered = false;
             stateUpdated = false;
 
             // Quit now if:
@@ -66,11 +218,9 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 bool isStartNode =
                     (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
 
-                bool incoming = segEndMan
-                                .ExtSegmentEnds[segEndMan.GetIndex(segmentId, isStartNode)]
-                                .incoming;
-
-                int numSignsPerRow = incoming ? 2 : 1;
+                bool isIncoming = segEndMan
+                                  .ExtSegmentEnds[segEndMan.GetIndex(segmentId, isStartNode)]
+                                  .incoming;
 
                 NetInfo segmentInfo = Singleton<NetManager>
                                       .instance
@@ -96,27 +246,13 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                                            .m_bounds
                                            .center;
 
-                // Unit vector towards the segment center
-                Vector3 yu = (segmentCenterPos - nodePos).normalized;
-                // Unit vector perpendicular to the vector towards the segment center
-                Vector3 xu = Vector3.Cross(yu, new Vector3(0f, 1f, 0f)).normalized;
+                SignsLayout signsLayout = new SignsLayout(
+                    nodePos: nodePos,
+                    yBasis: (segmentCenterPos - nodePos).normalized,
+                    signsPerRow: isIncoming ? 2 : 1,
+                    viewOnly: this.ViewOnly,
+                    baseZoom: this.mainTool_.GetBaseZoom());
 
-                float f = this.ViewOnly ? 6f : 7f; // reserved sign size in game coordinates
-
-                Vector3 centerStart = nodePos + (yu * (this.ViewOnly ? 5f : 14f));
-                Vector3 zero = centerStart - (0.5f * (numSignsPerRow - 1) * f * xu); // "top left"
-                if (this.ViewOnly) {
-                    if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
-                        zero -= xu * 8f;
-                    } else {
-                        zero += xu * 8f;
-                    }
-                }
-
-                bool signHovered;
-                int x = 0;
-                int y = 0;
-                bool hasSignInPrevRow = false;
                 IJunctionRestrictionsManager junctionRManager = Constants.ManagerFactory.JunctionRestrictionsManager;
 
                 // draw "lane-changing when going straight allowed" sign at (0; 0)
@@ -140,23 +276,16 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                                                startNode: isStartNode,
                                                node: ref node)))))
                 {
-                    this.DrawSign(
+                    bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        xu: ref xu,
-                        yu: ref yu,
-                        f: f,
-                        zero: ref zero,
-                        x: x,
-                        y: y,
                         guiColor: guiColor,
                         signTexture: allowed
                                          ? JunctionRestrictions.LaneChangeAllowed
-                                         : JunctionRestrictions.LaneChangeForbidden,
-                        hoveredHandle: out signHovered);
+                                         : JunctionRestrictions.LaneChangeForbidden);
 
                     if (signHovered && this.handleClick_) {
-                        hovered = true;
+                        isAnyHovered = true;
                         if (this.mainTool_.CheckClicked()) {
                             junctionRManager.ToggleLaneChangingAllowedWhenGoingStraight(
                                 segmentId: segmentId,
@@ -165,8 +294,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         }
                     }
 
-                    ++x;
-                    hasSignInPrevRow = true;
+                    signsLayout.AdvancePosition();
                 }
 
                 // draw "u-turns allowed" sign at (1; 0)
@@ -184,23 +312,16 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                                     startNode: isStartNode,
                                     node: ref node)))))
                 {
-                    this.DrawSign(
+                    bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        xu: ref xu,
-                        yu: ref yu,
-                        f: f,
-                        zero: ref zero,
-                        x: x,
-                        y: y,
                         guiColor: guiColor,
                         signTexture: allowed
                                          ? JunctionRestrictions.UturnAllowed
-                                         : JunctionRestrictions.UturnForbidden,
-                        hoveredHandle: out signHovered);
+                                         : JunctionRestrictions.UturnForbidden);
 
                     if (signHovered && this.handleClick_) {
-                        hovered = true;
+                        isAnyHovered = true;
 
                         if (this.mainTool_.CheckClicked()) {
                             if (!junctionRManager.ToggleUturnAllowed(
@@ -213,14 +334,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         }
                     }
 
-                    x++;
-                    hasSignInPrevRow = true;
-                }
-
-                x = 0;
-                if (hasSignInPrevRow) {
-                    ++y;
-                    hasSignInPrevRow = false;
+                    signsLayout.AdvancePosition();
                 }
 
                 // draw "entering blocked junctions allowed" sign at (0; 1)
@@ -239,24 +353,18 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                                                     .GetDefaultEnteringBlockedJunctionAllowed(
                                                         segmentId,
                                                         isStartNode,
-                                                        ref node))))) {
-                    this.DrawSign(
+                                                        ref node)))))
+                {
+                    bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        xu: ref xu,
-                        yu: ref yu,
-                        f: f,
-                        zero: ref zero,
-                        x: x,
-                        y: y,
                         guiColor: guiColor,
                         signTexture: allowed
                                          ? JunctionRestrictions.EnterBlockedJunctionAllowed
-                                         : JunctionRestrictions.EnterBlockedJunctionForbidden,
-                        hoveredHandle: out signHovered);
+                                         : JunctionRestrictions.EnterBlockedJunctionForbidden);
 
                     if (signHovered && this.handleClick_) {
-                        hovered = true;
+                        isAnyHovered = true;
 
                         if (this.mainTool_.CheckClicked()) {
                             junctionRManager.ToggleEnteringBlockedJunctionAllowed(
@@ -266,8 +374,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         }
                     }
 
-                    ++x;
-                    hasSignInPrevRow = true;
+                    signsLayout.AdvancePosition();
                 }
 
                 // draw "pedestrian crossing allowed" sign at (1; 1)
@@ -282,23 +389,16 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 if (this.debug_
                     || (configurable
                         && (!this.ViewOnly || !allowed))) {
-                    this.DrawSign(
+                    bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        xu: ref xu,
-                        yu: ref yu,
-                        f: f,
-                        zero: ref zero,
-                        x: x,
-                        y: y,
                         guiColor: guiColor,
                         signTexture: allowed
                                          ? JunctionRestrictions.PedestrianCrossingAllowed
-                                         : JunctionRestrictions.PedestrianCrossingForbidden,
-                        hoveredHandle: out signHovered);
+                                         : JunctionRestrictions.PedestrianCrossingForbidden);
 
                     if (signHovered && this.handleClick_) {
-                        hovered = true;
+                        isAnyHovered = true;
 
                         if (this.mainTool_.CheckClicked()) {
                             junctionRManager.TogglePedestrianCrossingAllowed(
@@ -308,15 +408,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         }
                     }
 
-                    x++;
-                    hasSignInPrevRow = true;
-                }
-
-                x = 0;
-
-                if (hasSignInPrevRow) {
-                    ++y;
-                    hasSignInPrevRow = false;
+                    signsLayout.AdvancePosition();
                 }
 
                 if (!Options.turnOnRedEnabled) {
@@ -348,23 +440,16 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                                     startNode: isStartNode,
                                     node: ref node)))))
                 {
-                    this.DrawSign(
+                    bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        xu: ref xu,
-                        yu: ref yu,
-                        f: f,
-                        zero: ref zero,
-                        x: x,
-                        y: y,
                         guiColor: guiColor,
                         signTexture: allowed
                                          ? JunctionRestrictions.LeftOnRedAllowed
-                                         : JunctionRestrictions.LeftOnRedForbidden,
-                        hoveredHandle: out signHovered);
+                                         : JunctionRestrictions.LeftOnRedForbidden);
 
                     if (signHovered && this.handleClick_) {
-                        hovered = true;
+                        isAnyHovered = true;
 
                         if (this.mainTool_.CheckClicked()) {
                             junctionRManager.ToggleTurnOnRedAllowed(
@@ -375,10 +460,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         }
                     }
 
-                    hasSignInPrevRow = true;
+                    signsLayout.AdvancePosition();
                 }
-
-                x++;
 
                 // draw "turn-right-on-red allowed" sign at (2; 1)
                 allowed = junctionRManager.IsTurnOnRedAllowed(
@@ -400,23 +483,16 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                                     startNode: isStartNode,
                                     node: ref node)))))
                 {
-                    this.DrawSign(
+                    bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        xu: ref xu,
-                        yu: ref yu,
-                        f: f,
-                        zero: ref zero,
-                        x: x,
-                        y: y,
                         guiColor: guiColor,
                         signTexture: allowed
                                          ? JunctionRestrictions.RightOnRedAllowed
-                                         : JunctionRestrictions.RightOnRedForbidden,
-                        hoveredHandle: out signHovered);
+                                         : JunctionRestrictions.RightOnRedForbidden);
 
                     if (signHovered && this.handleClick_) {
-                        hovered = true;
+                        isAnyHovered = true;
 
                         if (this.mainTool_.CheckClicked()) {
                             junctionRManager.ToggleTurnOnRedAllowed(
@@ -427,51 +503,14 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         }
                     }
 
-                    hasSignInPrevRow = true;
+                    signsLayout.AdvancePosition();
                 }
             }
 
             guiColor.a = 1f;
             GUI.color = guiColor;
 
-            return hovered;
-        }
-
-        private void DrawSign(bool small,
-                              ref Vector3 camPos,
-                              ref Vector3 xu,
-                              ref Vector3 yu,
-                              float f,
-                              ref Vector3 zero,
-                              int x,
-                              int y,
-                              Color guiColor,
-                              Texture2D signTexture,
-                              out bool hoveredHandle) {
-            Vector3 signCenter = zero + (f * x * xu) + (f * y * yu); // in game coordinates
-            bool visible = GeometryUtil.WorldToScreenPoint(signCenter, out Vector3 signScreenPos);
-
-            if (!visible) {
-                hoveredHandle = false;
-                return;
-            }
-
-            Vector3 diff = signCenter - camPos;
-            float zoom = 100.0f * this.mainTool_.GetBaseZoom() / diff.magnitude;
-            float size = (small ? 0.75f : 1f)
-                         * (this.ViewOnly ? 0.8f : 1f)
-                         * JUNCTION_RESTRICTIONS_SIGN_SIZE * zoom;
-
-            var boundingBox = new Rect(
-                x: signScreenPos.x - (size / 2),
-                y: signScreenPos.y - (size / 2),
-                width: size,
-                height: size);
-            hoveredHandle = !this.ViewOnly && TrafficManagerTool.IsMouseOver(boundingBox);
-            guiColor.a = TrafficManagerTool.GetHandleAlpha(hoveredHandle);
-
-            GUI.color = guiColor;
-            GUI.DrawTexture(boundingBox, signTexture);
+            return isAnyHovered;
         }
     } // end class
 }
