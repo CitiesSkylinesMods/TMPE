@@ -31,9 +31,6 @@ namespace TrafficManager.UI {
         : DefaultTool,
           IObserver<GlobalConfig>
     {
-        // /// <summary>Set this to true to once call <see cref="RequestOnscreenDisplayUpdate"/>.</summary>
-        // public bool InvalidateOnscreenDisplayFlag { get; set; }
-
         public GuideHandler Guide;
 
         private ToolMode toolMode_;
@@ -416,11 +413,6 @@ namespace TrafficManager.UI {
         /// </summary>
         /// <param name="e">Event to handle.</param>
         protected override void OnToolGUI(Event e) {
-            // if (InvalidateOnscreenDisplayFlag) {
-            //     this.InvalidateOnscreenDisplayFlag = false;
-            //     this.RequestOnscreenDisplayUpdate();
-            // }
-
             try {
                 if (!Input.GetMouseButtonDown(0)) {
                     _mouseClickProcessed = false;
