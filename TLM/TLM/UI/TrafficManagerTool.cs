@@ -379,8 +379,9 @@ namespace TrafficManager.UI {
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
             MassEditOVerlay.Show = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
-            if (NetManager.instance.NetAdjust.PathVisible =
-                RoadSelectionPanels.Root.ShouldPathBeVisible()) {
+            NetManager.instance.NetAdjust.PathVisible =
+                RoadSelectionPanels.Root.ShouldPathBeVisible();
+            if (NetManager.instance.NetAdjust.PathVisible) {
                 base.RenderOverlay(cameraInfo); // render path.
             }
 
