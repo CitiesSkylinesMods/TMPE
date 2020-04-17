@@ -13,10 +13,13 @@ namespace TrafficManager.Util {
         /// <summary>Transforms a world point into a screen point.</summary>
         /// <param name="worldPos">Position in the world.</param>
         /// <param name="screenPos">2d position on screen.</param>
-        /// <returns>Screen point in pixels. Note: For use in UI transform to GUI coords.</returns>
+        /// <returns>
+        /// Screen point in pixels. Note: For use in UI transform to GUI coords
+        /// use <see cref="UIScaler.ScreenPointToGuiPoint"/>.
+        /// </returns>
         internal static bool WorldToScreenPoint(Vector3 worldPos, out Vector3 screenPos) {
             screenPos = Camera.main.WorldToScreenPoint(worldPos);
-            screenPos.y = UIScaler.GuiHeight - screenPos.y;
+            screenPos.y = Screen.height - screenPos.y;
 
             return screenPos.z >= 0;
         }
@@ -141,6 +144,5 @@ namespace TrafficManager.Util {
 
             return numLanes;
         }
-
     } // end class
 }

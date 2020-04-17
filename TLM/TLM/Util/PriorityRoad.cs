@@ -464,7 +464,8 @@ namespace TrafficManager.Util {
 
         private static void FixMajorSegmentLanes(ushort segmentId, ushort nodeId) {
             Log._Debug($"FixMajorSegmentLanes({segmentId}, {nodeId}) was called");
-            if (LaneArrowManager.SeparateTurningLanes.CanChangeLanes(segmentId, nodeId) != SetLaneArrow_Result.Success) {
+
+            if (SeparateTurningLanesUtil.CanChangeLanes(segmentId, nodeId) != SetLaneArrow_Result.Success) {
                 Log._Debug("FixMajorSegmentLanes: can't change lanes");
                 return;
             }
@@ -512,12 +513,11 @@ namespace TrafficManager.Util {
                 LanePos outerMostLane = laneList[laneList.Count - 1];
                 LaneArrowManager.Instance.AddLaneArrows(outerMostLane.laneId, arrowShort);
             }
-
         }
 
         private static void FixMinorSegmentLanes(ushort segmentId, ushort nodeId, List<ushort> segmentList) {
             Log._Debug($"FixMinorSegmentLanes({segmentId}, {nodeId}, segmentList) was called");
-            if (LaneArrowManager.SeparateTurningLanes.CanChangeLanes(segmentId, nodeId) != SetLaneArrow_Result.Success) {
+            if (SeparateTurningLanesUtil.CanChangeLanes(segmentId, nodeId) != SetLaneArrow_Result.Success) {
                 Debug.Log("FixMinorSegmentLanes(): can't change lanes");
                 return;
             }
@@ -589,10 +589,10 @@ namespace TrafficManager.Util {
             int forward = 0, backward = 0;
             segment.CountLanes(
                 segmentId,
-                        NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
-                        VehicleInfo.VehicleType.Car,
-                        ref forward,
-                        ref backward);
+                NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                VehicleInfo.VehicleType.Car,
+                ref forward,
+                ref backward);
             return forward + backward;
         }
 

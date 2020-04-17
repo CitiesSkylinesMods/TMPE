@@ -9,6 +9,8 @@ namespace TrafficManager.Util {
     using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
     using UnityEngine;
 
     internal static class Shortcuts {
@@ -142,14 +144,19 @@ namespace TrafficManager.Util {
         internal static bool LHT => Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
         internal static bool RHT => !LHT;
 
+        internal static LaneArrows LaneArrows_Near => RHT ? LaneArrows.Right : LaneArrows.Left;
+        internal static LaneArrows LaneArrows_Far  => RHT ? LaneArrows.Left  : LaneArrows.Right;
+        internal static LaneArrows LaneArrows_NearForward => LaneArrows_Near | LaneArrows.Forward;
+        internal static LaneArrows LaneArrows_FarForward  => LaneArrows_Far  | LaneArrows.Forward;
+
+        internal static ArrowDirection ArrowDirection_Near => RHT ? ArrowDirection.Right : ArrowDirection.Left;
+        internal static ArrowDirection ArrowDirection_Far  => RHT ? ArrowDirection.Left  : ArrowDirection.Right;
+
         internal static ushort GetNearSegment(this ref NetSegment segment, ushort nodeId) =>
             RHT ? segment.GetRightSegment(nodeId) : segment.GetLeftSegment(nodeId);
 
         internal static ushort GetFarSegment(this ref NetSegment segment, ushort nodeId) =>
             LHT ? segment.GetRightSegment(nodeId) : segment.GetLeftSegment(nodeId);
-
         #endregion
-
-
     }
 }

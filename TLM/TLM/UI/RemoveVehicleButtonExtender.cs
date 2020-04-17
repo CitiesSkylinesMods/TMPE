@@ -68,14 +68,15 @@
                     BackgroundHovered = true,
                     BackgroundActive = true,
                     ForegroundHovered = true,
-                    ForegroundActive = true
+                    ForegroundActive = true,
                 };
+                // TODO: This atlas is created multiple times, cache or find by name.
                 this.atlas = this.Skin.CreateAtlas(
-                    "Clear",
-                    50,
-                    50,
-                    256,
-                    this.Skin.CreateAtlasKeyset());
+                    loadingPath: "Clear",
+                    spriteWidth: 50,
+                    spriteHeight: 50,
+                    hintAtlasTextureSize: 256,
+                    atlasKeyset: this.Skin.CreateAtlasKeyset());
                 UpdateButtonImageAndTooltip();
                 width = height = 30f;
             }
@@ -93,16 +94,14 @@
                 }
             }
 
-            public override bool IsActive() => false;
+            protected override bool IsActive() => false;
 
             // public override Texture2D AtlasTexture => Textures.MainMenu.RemoveButton;
 
-            public override string ButtonName => "RemoveVehicle";
-
-            public override string GetTooltip() =>
+            protected override string GetTooltip() =>
                 Translation.Menu.Get("Button:Remove this vehicle");
 
-            public override bool IsVisible() => true;
+            protected override bool IsVisible() => true;
 
             public override bool CanActivate() {
                 return false;

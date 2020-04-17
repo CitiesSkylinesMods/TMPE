@@ -6,17 +6,14 @@
     using TrafficManager.U.Button;
 
     public class DespawnButton : BaseMenuButton {
-        protected override ButtonFunction Function =>
-            new ButtonFunction("Despawn", !Options.disableDespawning);
-
-        public override string GetTooltip() =>
+        protected override string GetTooltip() =>
             Options.disableDespawning
                 ? Translation.Menu.Get("Tooltip:Enable despawning")
                 : Translation.Menu.Get("Tooltip:Disable despawning");
 
-        public override bool IsVisible() => true;
+        protected override bool IsVisible() => true;
 
-        public override bool IsActive() => Options.disableDespawning;
+        protected override bool IsActive() => Options.disableDespawning;
 
         public override void SetupButtonSkin(HashSet<string> atlasKeys) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start

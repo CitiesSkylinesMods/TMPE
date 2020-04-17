@@ -2,6 +2,7 @@ namespace TrafficManager.U.Button {
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework.UI;
+    using JetBrains.Annotations;
 
     /// <summary>
     /// Struct defines button atlas keys for button states.
@@ -93,12 +94,12 @@ namespace TrafficManager.U.Button {
                                           int hintAtlasTextureSize,
                                           HashSet<string> atlasKeyset) {
             return TextureUtil.CreateAtlas(
-                $"TMPE_U_{Prefix}_Atlas",
-                loadingPath,
-                atlasKeyset.ToArray(),
-                spriteWidth,
-                spriteHeight,
-                hintAtlasTextureSize);
+                atlasName: $"TMPE_U_{Prefix}_Atlas",
+                resourcePrefix: loadingPath,
+                spriteNames: atlasKeyset.ToArray(),
+                spriteWidth: spriteWidth,
+                spriteHeight: spriteHeight,
+                hintAtlasTextureSize: hintAtlasTextureSize);
         }
 
         /// <summary>

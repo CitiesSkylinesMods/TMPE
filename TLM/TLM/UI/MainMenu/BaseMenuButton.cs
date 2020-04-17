@@ -21,20 +21,13 @@
 
         protected override void OnClick(UIMouseEventParameter p) {
             OnClickInternal(p);
-            foreach (BaseMenuButton button in ModUI.Instance.MainMenu.Buttons) {
-                button.UpdateButtonImageAndTooltip();
-            }
+            ModUI.Instance.MainMenu.UpdateButtons();
         }
 
         public abstract void OnClickInternal(UIMouseEventParameter p);
 
-        /// <summary>Used to determine which actual button was clicked by the base class.</summary>
-        protected abstract ButtonFunction Function { get; }
-
         public override bool CanActivate() {
             return true;
         }
-
-        public override string ButtonName => MENU_BUTTON;
     }
 }

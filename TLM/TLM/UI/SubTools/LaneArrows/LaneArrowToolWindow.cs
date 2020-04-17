@@ -1,12 +1,11 @@
-namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools.LaneArrows {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.RedirectionFramework;
-    using TrafficManager.State.Keybinds;
+    using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
     using TrafficManager.U.Button;
-    using TrafficManager.UI.SubTools.LaneArrows;
     using UnityEngine;
 
     /// <summary>
@@ -14,7 +13,6 @@ namespace TrafficManager.UI.SubTools {
     /// </summary>
     public class LaneArrowToolWindow : U.Panel.BaseUWindowPanel {
         private const string GAMEOBJECT_NAME = "TMPE_LaneArrow_ToolPanel";
-        private const float LABEL_HEIGHT = 18f; // a normal font label
 
         /// <summary>
         /// Contains atlas with button backgrounds and arrows.
@@ -28,8 +26,11 @@ namespace TrafficManager.UI.SubTools {
             base.Start();
             UIUtil.MakeUniqueAndSetName(gameObject, GAMEOBJECT_NAME);
 
+            // the GenericPanel sprite is silver, make it dark
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(64, 64, 64, 240);
+            this.SetOpacity(
+                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
         }
 
         private UITextureAtlas GetAtlas() {
@@ -57,10 +58,10 @@ namespace TrafficManager.UI.SubTools {
 
             // Load actual graphics into an atlas
             laneArrowButtonAtlas_ = skin.CreateAtlas(
-                "LaneArrows",
-                64,
-                64,
-                256, // 4x4 atlas
+                loadingPath: "LaneArrows",
+                spriteWidth: 64,
+                spriteHeight: 64,
+                hintAtlasTextureSize: 256, // 4x4 atlas
                 atlasKeysSet);
             return laneArrowButtonAtlas_;
         }
@@ -87,13 +88,13 @@ namespace TrafficManager.UI.SubTools {
         public void SetupControls(UiBuilder<LaneArrowToolWindow> builder, int numLanes) {
             Buttons = new List<LaneArrowButton>();
 
-
             using (var buttonRowBuilder = builder.ChildPanel<U.Panel.UPanel>(
                 setupFn: p => { p.name = "TMPE_ButtonRow"; })) {
                 // buttonRowBuilder.SetPadding(Constants.U_UI_PADDING);
                 buttonRowBuilder.ResizeFunction(
                     r => {
-                        r.StackVertical(Constants.UIPADDING);
+                        r.Stack(mode: UStackMode.Below,
+                                spacing: UConst.UIPADDING);
                         r.FitToChildren();
                     });
 
@@ -113,17 +114,14 @@ namespace TrafficManager.UI.SubTools {
                     {
                         int i1 = i; // copy of the loop variable, for the resizeFunction below
 
-                        buttonGroupBuilder.SetPadding(Constants.UIPADDING);
+                        buttonGroupBuilder.SetPadding(UConst.UIPADDING);
                         buttonGroupBuilder.ResizeFunction(
                             r => {
-                                if (i1 == 0) {
-                                    // attach below "Lane #" label
-                                    r.StackVertical(Constants.UIPADDING);
-                                } else {
-                                    // attach to the right of the previous button group
-                                    r.StackHorizontal(Constants.UIPADDING);
-                                }
-
+                                // attach below "Lane #" label,
+                                // else: attach to the right of the previous button group
+                                r.Stack(
+                                    mode: i1 == 0 ? UStackMode.Below : UStackMode.ToTheRight,
+                                    spacing: UConst.UIPADDING);
                                 r.FitToChildren();
                             });
 
@@ -132,7 +130,7 @@ namespace TrafficManager.UI.SubTools {
                         using (var laneLabel = buttonGroupBuilder.Label<U.Label.ULabel>(labelText))
                         {
                             // The label will be repositioned to the top of the parent
-                            laneLabel.ResizeFunction(r => { r.StackVertical(); });
+                            laneLabel.ResizeFunction(r => { r.Stack(UStackMode.Below); });
                         }
 
                         // Create and populate the panel with buttons
@@ -156,12 +154,11 @@ namespace TrafficManager.UI.SubTools {
                                         // First button in the group will be stacking vertical
                                         // under the "Lane #" label, while 2nd and 3rd will be
                                         // stacking horizontal
-                                        if (prefix == "LaneArrowLeft") {
-                                            r.StackVertical(Constants.UIPADDING);
-                                        } else {
-                                            r.StackHorizontal(Constants.UIPADDING);
-                                        }
-
+                                        r.Stack(
+                                            mode: prefix == "LaneArrowLeft"
+                                                      ? UStackMode.Below
+                                                      : UStackMode.ToTheRight,
+                                            spacing: UConst.UIPADDING);
                                         r.Width(UValue.FixedSize(40f));
                                         r.Height(UValue.FixedSize(40f));
                                     });
@@ -170,28 +167,6 @@ namespace TrafficManager.UI.SubTools {
                     } // end button group panel
                 } // end button loop, for each lane
             } // end button row
-
-            // // And add another line: "Delete" action
-            // using (var shortcutBuilder =
-            //     builder.ShortcutLabel(KeybindSettingsBase.LaneConnectorDelete)) {
-            //     shortcutBuilder.ResizeFunction(
-            //         r => {
-            //             r.StackVertical(Constants.UIPADDING);
-            //         });
-            // }
-            //
-            // string deleteLabelText = Translation.LaneRouting.Get("LaneConnector.Label:Reset to default");
-            // using (var deleteLabelBuilder =
-            //     builder.Label<U.Label.ULabel>(deleteLabelText)) {
-            //     deleteLabelBuilder.ResizeFunction(
-            //         r => {
-            //             r.StackHorizontal(Constants.UIPADDING * 2f); // double space
-            //         });
-            // }
-        }
-
-        public override void OnRescaleRequested() {
-            UResizer.UpdateControlRecursive(this, null);
         }
     }
 }

@@ -9,8 +9,12 @@ namespace TrafficManager.U.Label {
             return resizerConfig_;
         }
 
-        public void OnResizerUpdate() {
+        /// <summary>Called by UResizer for every control before it is to be 'resized'.</summary>
+        public virtual void OnBeforeResizerUpdate() {
             this.textScale = UIScaler.GetScale();
         }
+
+        /// <summary>Called by UResizer for every control after it is to be 'resized'.</summary>
+        public virtual void OnAfterResizerUpdate() { }
     }
 }

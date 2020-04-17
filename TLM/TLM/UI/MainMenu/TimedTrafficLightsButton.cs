@@ -19,12 +19,12 @@ namespace TrafficManager.UI.MainMenu {
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override ButtonFunction Function => new ButtonFunction("TimedTrafficLights");
-
-        public override string GetTooltip() =>
+        protected override string GetTooltip() =>
             Translation.Menu.Get("Tooltip:Timed traffic lights") + "\n" +
             Translation.Menu.Get("Tooltip.Keybinds:Auto TL");
 
-        public override bool IsVisible() => Options.timedLightsEnabled;
+        protected override bool IsVisible() => IsButtonEnabled();
+
+        public static bool IsButtonEnabled() => Options.timedLightsEnabled;
     }
 }

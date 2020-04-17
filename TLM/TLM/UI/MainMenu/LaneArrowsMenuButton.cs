@@ -4,7 +4,7 @@
     using TrafficManager.State.Keybinds;
     using TrafficManager.U.Button;
 
-    public class LaneArrowsButton : BaseMenuToolModeButton {
+    public class LaneArrowsMenuButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.LaneArrows;
 
         public override void SetupButtonSkin(HashSet<string> atlasKeys) {
@@ -19,14 +19,10 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override ButtonFunction Function => new ButtonFunction("LaneArrows");
+        protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Change lane arrows");
 
-        public override string GetTooltip() =>
-            Translation.Menu.Get("Tooltip:Change lane arrows") + "\n" +
-            Translation.Menu.Get("Tooltip.Keybinds:Change lane arrows");
+        protected override bool IsVisible() => true;
 
-        public override bool IsVisible() => true;
-
-        public override KeybindSetting ShortcutKey => KeybindSettingsBase.LaneArrowTool;
+        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.LaneArrowTool;
     }
 }

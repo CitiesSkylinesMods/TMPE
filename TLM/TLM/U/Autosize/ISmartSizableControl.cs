@@ -9,7 +9,9 @@ namespace TrafficManager.U.Autosize {
 
         /// <summary>
         /// Implement in child controls for extra actions while being updated from <see cref="UResizer"/>.
+        /// Labels use this for UI scaling of their font.
         /// </summary>
-        void OnResizerUpdate();
+        void OnBeforeResizerUpdate();
+        void OnAfterResizerUpdate();
     }
 }
