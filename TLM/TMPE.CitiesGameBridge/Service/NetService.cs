@@ -102,71 +102,108 @@ namespace CitiesGameBridge.Service {
             IterateNodeSegments(nodeId, ClockDirection.None, handler);
         }
 
-        public void IterateNodeSegments(ushort nodeId,
-                                        ClockDirection dir,
-                                        NetSegmentHandler handler) {
-            NetManager netManager = Singleton<NetManager>.instance;
-
-            bool ProcessFun(ushort nId, ref NetNode node) {
-                if (dir == ClockDirection.None) {
-                    for (int i = 0; i < 8; ++i) {
-                        ushort segmentId = node.GetSegment(i);
-                        if (segmentId != 0) {
-                            if (!handler(
-                                    segmentId,
-                                    ref netManager.m_segments.m_buffer[segmentId])) {
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    ushort segmentId = 0;
-                    for (int i = 0; i < 8; ++i) {
-                        segmentId = node.GetSegment(i);
-                        if (segmentId != 0) {
-                            break;
-                        }
-                    }
-                    ushort initSegId = segmentId;
-
-                    while (true) {
-                        if (segmentId != 0) {
-                            if (!handler(
-                                    segmentId,
-                                    ref netManager.m_segments.m_buffer[segmentId])) {
-                                break;
-                            }
-                        }
-
-                        switch (dir) {
-                            // also: case ClockDirection.Clockwise:
-                            default:
-                                segmentId = netManager.m_segments.m_buffer[segmentId]
-                                                      .GetLeftSegment(nodeId);
-                                break;
-                            case ClockDirection.CounterClockwise:
-                                segmentId = netManager.m_segments.m_buffer[segmentId]
-                                                      .GetRightSegment(nodeId);
-                                break;
-                        }
-
-                        if (segmentId == initSegId || segmentId == 0) {
-                            break;
-                        }
-                    }
-                }
-
-                return true;
+        /// <summary>
+        /// Given a <paramref name="nodeId"/>, retrieves the assocaited <see cref="NetNode"/>.
+        ///
+        /// A <c>nodeId</c> of <c>0</c> returns <c>false</c>.
+        /// </summary>
+        /// 
+        /// <param name="nodeId">The id of the segment to retrieve.</param>
+        /// <param name="node">The returned segment.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
+        public bool TryGetNode(ushort nodeId, out NetNode node) {
+            if (nodeId == 0) {
+                node = default;
+                return false;
             }
 
-            ProcessNode(nodeId, ProcessFun);
+            node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            return true;
+        }
+
+        /// <summary>
+        /// Given a <paramref name="segmentId"/>, retrieves the assocaited <see cref="NetSegment"/>.
+        ///
+        /// A <c>segmentId</c> of <c>0</c> returns <c>false</c>.
+        /// </summary>
+        /// 
+        /// <param name="segmentId">The id of the segment to retrieve.</param>
+        /// <param name="segment">The returned segment.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
+        public bool TryGetSegment(ushort segmentId, out NetSegment segment) {
+            if (segmentId == 0) {
+                segment = default;
+                return false;
+            }
+
+            segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            return true;
+        }
+
+        /// <summary>
+        /// Call a handler function for each segment in specified direciton around a node.
+        /// </summary>
+        /// 
+        /// <param name="nodeId">Node id to scan.</param>
+        /// <param name="dir">The <see cref="ClockDirection"/> in which segments should be iterated.</param>
+        /// <param name="handler">Function to call per segment; return <c>true</c> to continue iterating, or <c>false</c> to stop.</param>
+        public void IterateNodeSegments(
+            ushort nodeId,
+            ClockDirection dir,
+            NetSegmentHandler handler)
+        {
+            if (!TryGetNode(nodeId, out var node)) {
+                return;
+            }
+
+            int i = 0;
+            ushort segmentId;
+
+            // special case
+            if (dir == ClockDirection.None) {
+
+                do {
+                    segmentId = node.GetSegment(i);
+
+                    if (TryGetSegment(segmentId, out var segment) && !handler(segmentId, ref segment)) {
+                        return;
+                    }
+                }
+                while (++i < 8);
+
+                return;
+            }
+
+            // find first filled slot
+            do {
+                segmentId = node.GetSegment(i);
+            }
+            while (segmentId == 0 && ++i < 8);
+
+            ushort startSegmentId = segmentId;
+
+            do {
+                if (!TryGetSegment(segmentId, out var segment)) {
+                    return;
+                }
+
+                if (!handler(segmentId, ref segment)) {
+                    return;
+                }
+
+                segmentId = dir == ClockDirection.CounterClockwise
+                    ? segment.GetRightSegment(nodeId) // counterclockwise = right? dafuq?
+                    : segment.GetLeftSegment(nodeId);
+            }
+            while (segmentId != startSegmentId);
         }
 
         public void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler) {
-            IterateSegmentLanes(
-                segmentId,
-                ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
-                handler);
+            if (TryGetSegment(segmentId, out var segment)) {
+                IterateSegmentLanes(segmentId, ref segment, handler);
+            }
         }
 
         public void IterateSegmentLanes(ushort segmentId,
