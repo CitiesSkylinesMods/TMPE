@@ -350,15 +350,15 @@ namespace TrafficManager.UI {
             }
 
             public class ClearButtton : ButtonExt {
-                public override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
+                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
                 internal override FunctionModes Function => FunctionModes.Clear;
-                public override bool IsActive() => false; // Clear funtionality can't be undone. #568
+                protected override bool IsActive() => false; // Clear funtionality can't be undone. #568
                 public override void Do() => // TODO delete all rules as part of #568
                     PriorityRoad.ClearRoad(Selection);
                 public override void Undo() => throw new Exception("Unreachable code");
             }
             public class StopButtton : ButtonExt {
-                public override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
+                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
                 internal override FunctionModes Function => FunctionModes.Stop;
                 public override void Do() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainStop, Selection);
@@ -366,7 +366,7 @@ namespace TrafficManager.UI {
                     PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, Selection);
             }
             public class YieldButton : ButtonExt {
-                public override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
+                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
                 internal override FunctionModes Function => FunctionModes.Yield;
                 public override void Do() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainYield, Selection);
@@ -374,7 +374,7 @@ namespace TrafficManager.UI {
                     PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, Selection);
             }
             public class HighPriorityButtton : ButtonExt {
-                public override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
+                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
                 internal override FunctionModes Function => FunctionModes.HighPriority;
                 public override void Do() =>
                     PriorityRoad.FixRoad(Selection);
@@ -382,7 +382,7 @@ namespace TrafficManager.UI {
                     PriorityRoad.ClearRoad(Selection);
             }
             public class RoundaboutButtton : ButtonExt {
-                public override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
+                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
                 internal override FunctionModes Function => FunctionModes.Roundabout;
                 public override void Do() =>
                     RoundaboutMassEdit.Instance.FixRoundabout(Selection);
@@ -408,7 +408,7 @@ namespace TrafficManager.UI {
 
                 public RoadSelectionPanels Root => RoadSelectionPanels.Root;
 
-                public override string ButtonName => "TMPE.RoadSelectionPanel" + this.GetType().ToString();
+                public virtual  string ButtonName => "TMPE.RoadSelectionPanel" + this.GetType().ToString();
 
                 public virtual string SkinPrefix => Function.ToString();
 
@@ -422,13 +422,13 @@ namespace TrafficManager.UI {
 
                 public override bool CanActivate() => true;
 
-                public override bool IsActive() => Root.Function == this.Function;
+                protected override bool IsActive() => Root.Function == this.Function;
 
                 public virtual bool ShouldDisable() => Length == 0;
 
                 internal abstract FunctionModes Function { get; }
 
-                public override bool IsVisible() => true;
+                protected override bool IsVisible() => true;
 
                 public override void Start() {
                     base.Start();
@@ -437,6 +437,7 @@ namespace TrafficManager.UI {
 
                 public override void Awake() {
                     base.Awake();
+                    name = ButtonName;
                     Skin = new U.Button.ButtonSkin() {
                         Prefix = SkinPrefix,
 
