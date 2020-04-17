@@ -2,8 +2,6 @@ namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System;
-    using TrafficManager.API.Util;
-    using TrafficManager.U;
     using TrafficManager.UI.MainMenu;
     using TrafficManager.Util;
     using UnityEngine;
@@ -26,10 +24,10 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>Gets the floating draggable button which shows and hides TM:PE UI.</summary>
-        public UI.MainMenu.MainMenuButton MainMenuButton { get; }
+        public UI.MainMenu.MainMenuButton MainMenuButton { get; set; }
 
         /// <summary>Gets the floating tool panel with TM:PE tool buttons.</summary>
-        public UI.MainMenu.MainMenuPanel MainMenu { get; private set; }
+        public UI.MainMenu.MainMenuWindow MainMenu { get; set; }
 
 #if DEBUG
         public DebugMenuPanel DebugMenu { get; private set; }
@@ -54,9 +52,8 @@ namespace TrafficManager.UI {
 
         private bool _uiShown;
 
-        public struct UIScaleNotification {
-            public float NewScale;
-        }
+        /// <summary>Event to be sent when UI scale changes in the General Options tab.</summary>
+        public struct UIScaleNotification { public float NewScale; }
 
         public class UIScaleObservable : GenericObservable<UIScaleNotification> {
         }
@@ -65,28 +62,55 @@ namespace TrafficManager.UI {
         /// Subscribe to this to get notifications in your UI about UI scale changes (slider in
         /// General options tab).
         /// </summary>
+        [NonSerialized]
         public UIScaleObservable UiScaleObservable;
+
+        /// <summary>Event to be sent when UI transparency slider changes in the General Options tab.</summary>
+        public struct UIOpacityNotification { public U.UOpacityValue Opacity; }
+
+        public class UIOpacityObservable : GenericObservable<UIOpacityNotification> {
+        }
+
+        /// <summary>
+        /// Subscribe to this to get notifications in your UI about UI transparency changes
+        /// (slider in General options tab).
+        /// </summary>
+        [NonSerialized]
+        public UIOpacityObservable uiOpacityObservable;
 
         public ModUI() {
             UiScaleObservable = new UIScaleObservable();
+            uiOpacityObservable = new UIOpacityObservable();
 
             Log._Debug("##### Initializing ModUI.");
 
-            // Get the UIView object. This seems to be the top-level object for most
-            // of the UI.
-            UIView uiView = UIView.GetAView();
-
-            // Add a new button to the view.
-            MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
-
-            // add the menu
-            MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
-            MainMenu.gameObject.AddComponent<CustomKeyHandler>();
+            CreateMainMenuButtonAndWindow();
 #if DEBUG
+            UIView uiView = UIView.GetAView();
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
 #endif
 
             ToolMode = TrafficManagerMode.None;
+
+            // One time load
+            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
+            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
+        }
+
+        private void CreateMainMenuButtonAndWindow() {
+            UIView uiView = UIView.GetAView();
+            try {
+                MainMenu = MainMenuWindow.CreateMainMenuWindow();
+            }
+            catch (Exception e) {
+                Log.Error($"While creating MainMenu: {e}");
+            }
+            try {
+                MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
+            }
+            catch (Exception e) {
+                Log.Error($"While creating MainButton: {e}");
+            }
         }
 
         ~ModUI() {
@@ -108,26 +132,30 @@ namespace TrafficManager.UI {
             }
         }
 
+        /// <summary>
+        /// Called from Options and Options-Maintenance tab, when features and options changed,
+        /// which might require rebuilding the main menu buttons.
+        /// </summary>
         internal void RebuildMenu() {
-            // Close();
+            Close();
 
             if (MainMenu != null) {
-//                 CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
-//                 if (keyHandler != null) {
-//                     UnityEngine.Object.Destroy(keyHandler);
-//                 }
-//
-//                 UnityEngine.Object.Destroy(MainMenu);
+                CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
+                if (keyHandler != null) {
+                    UnityEngine.Object.Destroy(keyHandler);
+                }
+
+                UnityEngine.Object.Destroy(MainMenu);
+                UnityEngine.Object.Destroy(MainMenuButton);
+                MainMenu = null;
+                MainMenuButton = null;
 #if DEBUG
-                 UnityEngine.Object.Destroy(DebugMenu);
+                UnityEngine.Object.Destroy(DebugMenu);
+                DebugMenu = null;
 #endif
-                 MainMenu.OnRescaleRequested();
             }
 
-            // UIView uiView = UIView.GetAView();
-            // MainMenu = (MainMenuPanel)uiView.AddUIComponent(typeof(MainMenuPanel));
-            // MainMenu.gameObject.AddComponent<CustomKeyHandler>();
-
+            CreateMainMenuButtonAndWindow();
 #if DEBUG
             UIView uiView = UIView.GetAView();
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
@@ -141,14 +169,10 @@ namespace TrafficManager.UI {
                 Log.Error("Error on Show(): " + e);
             }
 
-            foreach (BaseMenuButton button in GetMenu().Buttons) {
-                // TODO: move this to MainMenu UI classes
-                button.UpdateButtonImageAndTooltip();
-            }
+            MainMenuWindow menuWindow = GetMenu();
+            menuWindow.UpdateButtons();
+            menuWindow.Show();
 
-            GetMenu().Show();
-            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
-            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
             TrafficManagerTool.ShowAdvisor("MainMenu");
 #if DEBUG
             GetDebugMenu().Show();
@@ -174,7 +198,7 @@ namespace TrafficManager.UI {
             MainMenuButton.UpdateButtonImageAndTooltip();
         }
 
-        internal MainMenuPanel GetMenu() {
+        internal MainMenuWindow GetMenu() {
             return MainMenu;
         }
 

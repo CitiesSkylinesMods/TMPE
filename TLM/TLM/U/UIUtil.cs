@@ -1,5 +1,6 @@
 namespace TrafficManager.U {
-    using ColossalFramework.UI;
+    using System.Collections.Generic;
+    using System.Linq;
     using UnityEngine;
 
     /// <summary>
@@ -9,15 +10,21 @@ namespace TrafficManager.U {
         /// <summary>
         /// Delete all gameobjects under CO.UI UIView, which have `name`, and set name for the object.
         /// </summary>
-        /// <param name="obj">Object to become unique.</param>
+        /// <param name="toMakeUnique">Object to become unique.</param>
         /// <param name="name">Object name.</param>
-        public static void MakeUniqueAndSetName(GameObject obj, string name) {
-            GameObject found = GameObject.Find(name);
-            if (found != null) {
-                UnityEngine.Object.Destroy(found);
+        public static void MakeUniqueAndSetName(GameObject toMakeUnique, string name) {
+            toMakeUnique.name = $"{name}_temporary_placeholder";
+
+            IEnumerable<GameObject> objects
+                = Resources.FindObjectsOfTypeAll<GameObject>()
+                           .Where(obj => obj.name == name);
+
+            foreach (GameObject found in objects) {
+                found.gameObject.SetActive(false);
+                UnityEngine.Object.DestroyImmediate(found.gameObject);
             }
 
-            obj.name = name;
+            toMakeUnique.name = name;
         }
     }
 }

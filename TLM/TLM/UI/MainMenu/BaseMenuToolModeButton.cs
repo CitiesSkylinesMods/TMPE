@@ -8,7 +8,7 @@
     public abstract class BaseMenuToolModeButton : BaseMenuButton {
         protected abstract ToolMode ToolMode { get; }
 
-        public override bool IsActive() =>
+        protected override bool IsActive() =>
             ToolMode.Equals(ModUI.GetTrafficManagerTool(false)?.GetToolMode());
 
         public override void OnClickInternal(UIMouseEventParameter p) {

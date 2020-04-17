@@ -3,6 +3,7 @@
     using CSUtil.Commons;
     using System.Threading;
     using System;
+    using JetBrains.Annotations;
     using TrafficManager.API.Manager;
     using TrafficManager.State;
     using UnityEngine;
@@ -57,6 +58,7 @@
             }
         }
 
+        [UsedImplicitly]
         public void PrintAllDebugInfo() {
             Log._Debug("UtilityManager.PrintAllDebugInfo(): Pausing simulation.");
             Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;

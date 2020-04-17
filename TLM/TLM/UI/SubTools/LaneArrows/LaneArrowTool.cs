@@ -1,7 +1,6 @@
 namespace TrafficManager.UI.SubTools.LaneArrows {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
@@ -12,8 +11,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
-    using TrafficManager.U.Autosize;
-    using TrafficManager.U.Button;
+    using TrafficManager.UI.MainMenu;
     using TrafficManager.Util;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
@@ -48,8 +46,16 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         /// <summary>Events which trigger state transitions.</summary>
         private enum Trigger {
+            /// <summary>A segment was hovered and clicked.</summary>
             SegmentClick,
+
+            /// <summary>Right mouse has been clicked.</summary>
             RightMouseClick,
+
+            /// <summary>
+            /// Escape has been pressed (this is handled by the MainMenu or ModUI code so might as
+            /// well be a candidate for removal).
+            /// </summary>
             EscapeKey,
         }
 
@@ -61,6 +67,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             fsm_ = new Util.GenericFsm<State, Trigger>(State.Select);
         }
 
+        private static string T(string key) {
+            return Translation.LaneRouting.Get(key);
+        }
 
         /// <summary>
         /// Creates FSM ready to begin editing. Or recreates it when ESC is pressed
@@ -72,11 +81,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             // From Select mode, user can either click a segment, or Esc/rightclick to quit
             fsm.Configure(State.Select)
-               .OnEntry(
-                   () => {
-                       SelectedNodeId = 0;
-                       SelectedSegmentId = 0;
-                   })
+               .OnEntry(this.OnEnterSelectState)
+               .OnLeave(this.OnLeaveSelectState)
                .TransitionOnEvent(Trigger.SegmentClick, State.EditLaneArrows)
                .TransitionOnEvent(Trigger.RightMouseClick, State.ToolDisabled)
                .TransitionOnEvent(Trigger.EscapeKey, State.ToolDisabled);
@@ -84,8 +90,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             fsm.Configure(State.EditLaneArrows)
                .OnEntry(this.OnEnterEditorState)
                .OnLeave(this.OnLeaveEditorState)
-               .TransitionOnEvent(Trigger.RightMouseClick, State.Select)
-               .TransitionOnEvent(Trigger.EscapeKey, State.Select);
+               .TransitionOnEvent(Trigger.SegmentClick, State.EditLaneArrows)
+               .TransitionOnEvent(Trigger.RightMouseClick, State.Select);
+            // This transition is ignored because Esc disables the tool
+            //   .TransitionOnEvent(Trigger.EscapeKey, State.Select);
 
             fsm.Configure(State.ToolDisabled)
                .OnEntry(
@@ -97,6 +105,16 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                    });
 
             return fsm;
+        }
+
+        private void OnLeaveSelectState() {
+            OnScreenDisplay.Clear();
+        }
+
+        private void OnEnterSelectState() {
+            SelectedNodeId = 0;
+            SelectedSegmentId = 0;
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         /// <summary>Called from GenericFsm when a segment is clicked to show lane arrows GUI.</summary>
@@ -149,7 +167,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
 
             CreateLaneArrowsWindow(laneList.Count);
-            SetupLaneArrowsWindowButtons(laneList, (bool)startNode);
+            SetupLaneArrowsWindowButtons(laneList: laneList,
+                                         startNode: (bool)startNode);
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         /// <summary>
@@ -159,11 +179,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         private void CreateLaneArrowsWindow(int numLanes) {
             var parent = UIView.GetAView();
             ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
+            ToolWindow.SetOpacity(
+                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
+
             RepositionWindowToNode(); // reposition 1st time to avoid visible window jump
 
             using (var builder = new U.UiBuilder<LaneArrowToolWindow>(ToolWindow)) {
                 builder.ResizeFunction(r => { r.FitToChildren(); });
-                builder.SetPadding(Constants.UIPADDING);
+                builder.SetPadding(UConst.UIPADDING);
 
                 ToolWindow.SetupControls(builder, numLanes);
 
@@ -175,6 +198,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 };
 
                 // Resize everything correctly
+                // builder.Control.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
                 builder.Done();
                 RepositionWindowToNode(); // reposition again 2nd time now that size is known
             }
@@ -224,6 +248,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         /// <summary>Called from GenericFsm when user leaves lane arrow editor, to hide the GUI.</summary>
         private void OnLeaveEditorState() {
+            OnScreenDisplay.Clear();
             DestroyToolWindow();
         }
 
@@ -256,6 +281,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         public override void ActivateTool() {
             Log._Debug("LaneArrow: Activated tool");
             fsm_ = InitFiniteStateMachine();
+            this.OnEnterSelectState(); // FSM does not call enter on initial state
         }
 
         /// <summary>Cleans up when tool is deactivated or user switched to another tool.</summary>
@@ -290,8 +316,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         /// <summary>Called from the Main Tool when left mouse button clicked.</summary>
         public override void OnToolLeftClick() {
-            if (ToolWindow != null && ToolWindow.containsMouse) {
-                return; // ignore clicks landing into the window
+            if (ToolWindow != null && MainTool.GetToolController().IsInsideUI) {
+                return; // ignore clicks landing into some UI, only consume map clicks
             }
 
             Log._Debug($"LaneArrow({fsm_.State}): left click");
@@ -300,9 +326,11 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     OnToolLeftClick_Select();
                     break;
                 case State.EditLaneArrows:
-                    // Allow selecting other segments while doing lane editing
-                    fsm_.SendTrigger(Trigger.RightMouseClick);
-                    OnToolLeftClick_Select();
+                    if (HoveredSegmentId != 0) {
+                        // Allow selecting other segments while doing lane editing
+                        // fsm_.SendTrigger(Trigger.ReenterSameState);
+                        OnToolLeftClick_Select();
+                    }
                     break;
             }
         }
@@ -383,6 +411,45 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
 
             RepositionWindowToNode();
+        }
+
+        /// <summary>
+        /// Called from the <see cref="TrafficManagerTool"/> when update for the Keybinds panel
+        /// in MainMenu is requested. Or when we need to change state.
+        /// Never call this directly, only as: MainTool.RequestOnscreenDisplayUpdate();
+        /// </summary>
+        public override void UpdateOnscreenDisplayPanel() {
+            if (fsm_ == null) {
+                OnScreenDisplay.Clear();
+                return;
+            }
+
+            switch (fsm_.State) {
+                case State.Select: {
+                    OnScreenDisplay.Begin();
+                    OnScreenDisplay.Click(
+                        shift: false,
+                        ctrl: true,
+                        alt: false,
+                        localizedText: T("LaneArrows.Click:Separate lanes for entire junction"));
+                    OnScreenDisplay.Click(
+                        shift: false,
+                        ctrl: false,
+                        alt: true,
+                        localizedText: T("LaneArrows.Click:Separate lanes for segment"));
+                    OnScreenDisplay.Done();
+                    return;
+                }
+                case State.EditLaneArrows: {
+                    OnScreenDisplay.Begin();
+                    OnScreenDisplay.Shortcut(
+                        kbSetting: KeybindSettingsBase.LaneConnectorDelete,
+                        localizedText: T("LaneConnector.Label:Reset to default"));
+                    OnScreenDisplay.Done();
+                    return;
+                }
+            }
+            OnScreenDisplay.Clear();
         }
 
         private void RepositionWindowToNode() {

@@ -252,20 +252,21 @@
     <Compile Include="UI\MainMenu\BaseMenuToolModeButton.cs" />
     <Compile Include="UI\MainMenu\MainMenuButton.cs" />
     <Compile Include="UI\MainMenu\MainMenuLayout.cs" />
+    <Compile Include="UI\MainMenu\MenuButtonDef.cs" />
+    <Compile Include="UI\MainMenu\OnScreenDisplay.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />
-    <Compile Include="UI\MainMenu\MainMenuPanel.cs" />
+    <Compile Include="UI\MainMenu\MainMenuWindow.cs" />
     <Compile Include="UI\MainMenu\StatsLabel.cs" />
     <Compile Include="UI\MainMenu\ParkingRestrictionsButton.cs" />
-    <Compile Include="UI\MainMenu\VersionLabel.cs" />
     <Compile Include="UI\MainMenu\VehicleRestrictionsButton.cs" />
     <Compile Include="UI\MainMenu\ToggleTrafficLightsButton.cs" />
     <Compile Include="UI\MainMenu\TimedTrafficLightsButton.cs" />
     <Compile Include="UI\MainMenu\SpeedLimitsButton.cs" />
     <Compile Include="UI\MainMenu\PrioritySignsButton.cs" />
     <Compile Include="UI\MainMenu\ManualTrafficLightsButton.cs" />
-    <Compile Include="UI\MainMenu\LaneArrowsButton.cs" />
+    <Compile Include="UI\MainMenu\LaneArrowsMenuButton.cs" />
     <Compile Include="UI\MainMenu\JunctionRestrictionsButton.cs" />
     <Compile Include="UI\MainMenu\DespawnButton.cs" />
     <Compile Include="UI\MainMenu\ClearTrafficButton.cs" />
@@ -338,21 +339,23 @@
     <Compile Include="U\Autosize\ISmartSizableControl.cs" />
     <Compile Include="U\Autosize\UResizerConfig.cs" />
     <Compile Include="U\Autosize\URule.cs" />
+    <Compile Include="U\Autosize\UStackMode.cs" />
     <Compile Include="U\Autosize\UValue.cs" />
     <Compile Include="U\Button\UButton.cs" />
     <Compile Include="U\ControlActiveState.cs" />
     <Compile Include="U\ControlHoveredState.cs" />
     <Compile Include="U\ControlEnabledState.cs" />
     <Compile Include="U\Button\BaseUButton.cs" />
-    <Compile Include="U\Button\ButtonFunction.cs" />
     <Compile Include="U\Button\ButtonSkin.cs" />
     <Compile Include="U\Label\ULabel.cs" />
     <Compile Include="U\Panel\BaseUWindowPanel.cs" />
     <Compile Include="U\Panel\UPanel.cs" />
     <Compile Include="U\TextureUtil.cs" />
+    <Compile Include="U\UConst.cs" />
     <Compile Include="U\UIBuilder.cs" />
     <Compile Include="U\UIScaler.cs" />
     <Compile Include="U\UIUtil.cs" />
+    <Compile Include="U\UOpacityValue.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\JunctionRestrictions\crossing_allowed.png" />
@@ -370,6 +373,8 @@
     <EmbeddedResource Include="Resources\MainMenu\LegacyButtons.png" />
     <EmbeddedResource Include="Resources\MainMenu\noimage.png" />
     <EmbeddedResource Include="Resources\MainMenu\remove-btn.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\Help-fg-active.png" />
+    <EmbeddedResource Include="Resources\MainMenu\Tool\Help-fg-normal.png" />
     <EmbeddedResource Include="Resources\MainMenu\WindowBackground.png" />
     <EmbeddedResource Include="Resources\clear.png" />
   </ItemGroup>

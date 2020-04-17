@@ -31,6 +31,9 @@ namespace TrafficManager.UI {
         : DefaultTool,
           IObserver<GlobalConfig>
     {
+        // /// <summary>Set this to true to once call <see cref="RequestOnscreenDisplayUpdate"/>.</summary>
+        // public bool InvalidateOnscreenDisplayFlag { get; set; }
+
         public GuideHandler Guide;
 
         private ToolMode toolMode_;
@@ -101,8 +104,8 @@ namespace TrafficManager.UI {
             // x := main menu x + rect.x
             // y := main menu y + main menu height + rect.y
             return new Rect(
-                MainMenuPanel.DEFAULT_MENU_X + rect.x,
-                MainMenuPanel.DEFAULT_MENU_Y + MainMenuPanel.ScaledSize.GetHeight() + rect.y,
+                MainMenuWindow.DEFAULT_MENU_X + rect.x,
+                MainMenuWindow.DEFAULT_MENU_Y + rect.y + ModUI.Instance.MainMenu.height,
                 rect.width,
                 rect.height);
         }
@@ -275,6 +278,10 @@ namespace TrafficManager.UI {
 
         /// <summary>Resets the tool and calls deactivate on it.</summary>
         private void SetToolMode_DeactivateTool() {
+            // Clear OSD panel with keybinds
+            OnScreenDisplay.Begin();
+            OnScreenDisplay.Done();
+
             if (activeLegacySubTool_ != null || activeSubTool_ != null) {
                 activeLegacySubTool_?.Cleanup();
                 activeLegacySubTool_ = null;
@@ -409,6 +416,11 @@ namespace TrafficManager.UI {
         /// </summary>
         /// <param name="e">Event to handle.</param>
         protected override void OnToolGUI(Event e) {
+            // if (InvalidateOnscreenDisplayFlag) {
+            //     this.InvalidateOnscreenDisplayFlag = false;
+            //     this.RequestOnscreenDisplayUpdate();
+            // }
+
             try {
                 if (!Input.GetMouseButtonDown(0)) {
                     _mouseClickProcessed = false;
@@ -1743,6 +1755,15 @@ namespace TrafficManager.UI {
             }
 
             Prompt.Warning("Warning", message);
+        }
+
+        public void RequestOnscreenDisplayUpdate() {
+            if (!GlobalConfig.Instance.Main.KeybindsPanelVisible) {
+                OnScreenDisplay.Clear();
+                return;
+            }
+
+            activeSubTool_?.UpdateOnscreenDisplayPanel();
         }
     }
 }

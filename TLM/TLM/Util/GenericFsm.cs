@@ -90,15 +90,11 @@ namespace TrafficManager.Util {
         /// <returns>Whether state change succeeded</returns>
         public bool SendTrigger(TTrigger trigger) {
             if (!transitions_.ContainsKey(State)) {
-                // Log._Debug($"FSM: Can't leave state {State} with {trigger} - " +
-                //           "no transitions defined for it");
                 return false;
             }
 
             var outTransitions = transitions_[State];
             if (!outTransitions.ContainsKey(trigger)) {
-                // Log._Debug($"FSM: Can't leave state {State} with {trigger} - " +
-                //           "the trigger is not accepted in this state");
                 return false;
             }
 
@@ -107,7 +103,6 @@ namespace TrafficManager.Util {
                 leaveEvent.Invoke();
             }
 
-            // Log._Debug($"FSM: State changed {State} -> ({trigger}) -> {outTransitions[trigger]}");
             State = outTransitions[trigger];
 
             // Callback on enter state

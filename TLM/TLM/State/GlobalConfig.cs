@@ -95,10 +95,10 @@
                 conf.Main.MainMenuButtonPosLocked = oldConfig.Main.MainMenuButtonPosLocked;
                 conf.Main.MainMenuPosLocked = oldConfig.Main.MainMenuPosLocked;
 
-                conf.Main.GuiTransparency = oldConfig.Main.GuiTransparency;
+                conf.Main.GuiOpacity = oldConfig.Main.GuiOpacity;
                 conf.Main.OverlayTransparency = oldConfig.Main.OverlayTransparency;
 
-                conf.Main.TinyMainMenu = oldConfig.Main.TinyMainMenu;
+                // conf.Main.TinyMainMenu = oldConfig.Main.TinyMainMenu;
 
                 conf.Main.EnableTutorial = oldConfig.Main.EnableTutorial;
                 conf.Main.DisplayedTutorialMessages = oldConfig.Main.DisplayedTutorialMessages;

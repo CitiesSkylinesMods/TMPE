@@ -19,10 +19,10 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override ButtonFunction Function => new ButtonFunction("VehicleRestrictions");
+        protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Vehicle restrictions");
 
-        public override string GetTooltip() => Translation.Menu.Get("Tooltip:Vehicle restrictions");
+        protected override bool IsVisible() => IsButtonEnabled();
 
-        public override bool IsVisible() => Options.vehicleRestrictionsEnabled;
+        public static bool IsButtonEnabled() => Options.vehicleRestrictionsEnabled;
     }
 }

@@ -1,10 +1,9 @@
 namespace TrafficManager.U {
     using System;
     using ColossalFramework.UI;
-    using CSUtil.Commons;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U.Autosize;
-    using UnityEngine;
+    using TrafficManager.UI;
 
     /// <summary>
     /// Create an UI builder to populate a panel with good things: buttons, sub-panels, create a
@@ -32,6 +31,17 @@ namespace TrafficManager.U {
             return new UiBuilder<TButton>(newButton);
         }
 
+        /// <summary>Same as Button<T>() but allows custom subtype to be passed to AddUIComponent.</summary>
+        /// <param name="t">The type to pass to AddUIComponent.</param>
+        /// <typeparam name="TButton">The type to cast to.</typeparam>
+        /// <returns>New builder for that button.</returns>
+        public UiBuilder<TButton> Button<TButton>(Type t)
+            where TButton : UIButton, ISmartSizableControl {
+            var newButton = Control.AddUIComponent(t) as TButton;
+
+            return new UiBuilder<TButton>(newButton);
+        }
+
         public UiBuilder<TLabel> Label<TLabel>(string t)
             where TLabel : UILabel, ISmartSizableControl {
             var newLabel = Control.AddUIComponent(typeof(TLabel)) as TLabel;
@@ -39,19 +49,41 @@ namespace TrafficManager.U {
             return new UiBuilder<TLabel>(newLabel);
         }
 
-        private static readonly Color SHORTCUT_DESCR_TEXT = new Color(.75f, .75f, .75f, 1f);
-        public static readonly Color SHORTCUT_KEYBIND_TEXT = new Color(.8f, .6f, .3f, 1f);
-
-        /// <summary>Add a colored label for a keyboard or mouse shortcut.</summary>
+        /// <summary>Add a colored label for a keyboard shortcut.</summary>
         /// <returns>New UI Builder with the keybind label created.</returns>
         public UiBuilder<U.Label.ULabel> ShortcutLabel(KeybindSetting ks) {
             var shortcutLabel = Control.AddUIComponent(typeof(U.Label.ULabel)) as U.Label.ULabel;
 
             shortcutLabel.backgroundSprite = "GenericPanelDark";
-            shortcutLabel.textColor = SHORTCUT_KEYBIND_TEXT;
+            shortcutLabel.textColor = UConst.SHORTCUT_KEYBIND_TEXT;
             shortcutLabel.text = $" {ks.ToLocalizedString()} ";
 
             return new UiBuilder<U.Label.ULabel>(shortcutLabel);
+        }
+
+        /// <summary>Add a colored label for a 'Shift + Ctrl + Alt' modifier key.</summary>
+        /// <returns>New UI Builder with the keybind label created.</returns>
+        public UiBuilder<U.Label.ULabel> ModifierLabel(bool shift, bool ctrl, bool alt) {
+            var modifierLabel = Control.AddUIComponent(typeof(U.Label.ULabel)) as U.Label.ULabel;
+
+            modifierLabel.backgroundSprite = "GenericPanelDark";
+            modifierLabel.textColor = UConst.SHORTCUT_KEYBIND_TEXT;
+
+            string modifiers = shift
+                                   ? Translation.Options.Get("Shortcut.Modifier:Shift")
+                                   : string.Empty;
+            if (ctrl) {
+                modifiers += string.IsNullOrEmpty(modifiers) ? string.Empty : " + ";
+                modifiers += Translation.Options.Get("Shortcut.Modifier:Ctrl");
+            }
+            if (alt) {
+                modifiers += string.IsNullOrEmpty(modifiers) ? string.Empty : " + ";
+                modifiers += Translation.Options.Get("Shortcut.Modifier:Alt");
+            }
+
+            modifierLabel.text = $" {modifiers} ";
+
+            return new UiBuilder<U.Label.ULabel>(modifierLabel);
         }
 
         public UiBuilder<TPanel> ChildPanel<TPanel>(Action<TPanel> setupFn)
@@ -70,8 +102,7 @@ namespace TrafficManager.U {
         /// according to sizes and positions configured in USizePosition members of form controls.
         /// </summary>
         public void Done() {
-            // UResizer.UpdateHierarchy(this.Control);
-            UResizer.UpdateControlRecursive(this.Control, null);
+            UResizer.UpdateControl(this.Control);
         }
 
         /// <summary>End of `using (var x = ...) {}` statement.</summary>

@@ -19,11 +19,11 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override ButtonFunction Function => new ButtonFunction("ManualTrafficLights");
-
-        public override string GetTooltip() =>
+        protected override string GetTooltip() =>
             Translation.Menu.Get("Tooltip:Manual traffic lights");
 
-        public override bool IsVisible() => Options.timedLightsEnabled;
+        protected override bool IsVisible() => IsButtonEnabled();
+
+        public static bool IsButtonEnabled() => Options.timedLightsEnabled;
     }
 }
