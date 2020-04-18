@@ -26,11 +26,19 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.SubTools.LaneArrows;
     using TrafficManager.UI.SubTools.TimedTrafficLights;
 
+    using static TrafficManager.UI.SubTools.PrioritySignsTool;
+    using static TrafficManager.Util.Shortcuts;
+    using static TrafficManager.Util.SegmentTraverser;
+
     [UsedImplicitly]
     public class TrafficManagerTool
         : DefaultTool,
           IObserver<GlobalConfig>
     {
+        // TODO [issue #710] Road adjust mechanism seem to have changed in Sunset Harbor DLC.
+        // activate when we know the mechinism.  
+        private bool ReadjustPathMode => false; //ShiftIsPressed; 
+
         // /// <summary>Set this to true to once call <see cref="RequestOnscreenDisplayUpdate"/>.</summary>
         // public bool InvalidateOnscreenDisplayFlag { get; set; }
 
@@ -319,10 +327,11 @@ namespace TrafficManager.UI {
                     e.Value.Cleanup();
                 }
             }
+            // disable base class behavior
         }
 
-        // Overridden to disable base class behavior
         protected override void OnDisable() {
+            // Overridden to disable base class behavior
         }
 
         public override void RenderGeometry(RenderManager.CameraInfo cameraInfo) {
@@ -331,12 +340,20 @@ namespace TrafficManager.UI {
             }
         }
 
-        /// <summary>
-        /// Renders overlays (node selection, segment selection, etc.)
-        /// </summary>
-        /// <param name="cameraInfo">The camera to use</param>
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
-            if (!isActiveAndEnabled) {
+            RenderOverlayImpl(cameraInfo);
+            if (GetToolMode()==ToolMode.None) {
+                DefaultRenderOverlay(cameraInfo);
+            }
+        }
+
+        /// <summary>
+        /// renders presistent overlay.
+        /// if any subtool is active it renders overlay for that subtool (e.g. node selection, segment selection, etc.)
+        /// Must not call base.RenderOverlay() . Doing so may cause infinite recursion with Postfix of base.RenderOverlay()
+        /// </summary>
+        public void RenderOverlayImpl(RenderManager.CameraInfo cameraInfo) {
+            if (!(isActiveAndEnabled || MassEditOVerlay.IsActive)) {
                 return;
             }
 
@@ -352,6 +369,58 @@ namespace TrafficManager.UI {
                 }
 
                 e.Value.RenderOverlayForOtherTools(cameraInfo);
+            }
+        }
+
+        /// <summary>
+        /// Renders overlay when no subtool is active.
+        /// May call base.RenderOverlay() without risk of infinte recursion.
+        /// </summary>
+        void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
+        {
+            MassEditOVerlay.Show = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+            NetManager.instance.NetAdjust.PathVisible =
+                RoadSelectionPanels.Root.ShouldPathBeVisible();
+            if (NetManager.instance.NetAdjust.PathVisible) {
+                base.RenderOverlay(cameraInfo); // render path.
+            }
+
+            if (HoveredSegmentId == 0)
+                return;
+            var netAdjust = NetManager.instance?.NetAdjust;
+            if (netAdjust == null)
+                return;
+
+            // use the same color as in NetAdjust
+            ref NetSegment segment = ref HoveredSegmentId.ToSegment();
+            var color = ToolsModifierControl.toolController.m_validColorInfo;
+            float alpha = 1f;
+            NetTool.CheckOverlayAlpha(ref segment, ref alpha);
+            color.a *= alpha;
+
+            if (ReadjustPathMode) {
+                if (Input.GetMouseButton(0)) {
+                    color = GetToolColor(Input.GetMouseButton(0), false);
+                }
+                bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+                if (!isRoundabout) {
+                    segmentList = SegmentTraverser.Traverse(
+                        HoveredSegmentId,
+                        TraverseDirection.AnyDirection,
+                        TraverseSide.Straight,
+                        SegmentStopCriterion.None,
+                        (_) => true);
+                }
+                foreach (ushort segmentId in segmentList ?? Enumerable.Empty<ushort>()) {
+                    ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                    NetTool.RenderOverlay(
+                        cameraInfo,
+                        ref seg,
+                        color,
+                        color);
+                }
+            } else {
+                NetTool.RenderOverlay(cameraInfo, ref segment, color, color);
             }
         }
 
@@ -411,11 +480,21 @@ namespace TrafficManager.UI {
             }
         }
 
+        protected override void OnToolGUI(Event e) {
+            OnToolGUIImpl(e);
+            if (GetToolMode() == ToolMode.None) {
+                DefaultOnToolGUI(e);
+            }
+        }
+
+
         /// <summary>
-        /// Immediate mode GUI (IMGUI) handler called every frame for input and IMGUI rendering.
+        /// Immediate mode GUI (IMGUI) handler called every frame for input and IMGUI rendering (persistent overlay).
+        /// If any subtool is active it calls OnToolGUI for that subtool
+        /// Must not call base.OnToolGUI(). Doing so may cause infinite recursion with Postfix of DefaultTool.OnToolGUI()
         /// </summary>
         /// <param name="e">Event to handle.</param>
-        protected override void OnToolGUI(Event e) {
+        public void OnToolGUIImpl(Event e) {
             // if (InvalidateOnscreenDisplayFlag) {
             //     this.InvalidateOnscreenDisplayFlag = false;
             //     this.RequestOnscreenDisplayUpdate();
@@ -455,11 +534,42 @@ namespace TrafficManager.UI {
                     activeLegacySubTool_.OnToolGUI(e);
                 } else if (activeSubTool_ != null) {
                     activeSubTool_.UpdateEveryFrame();
-                } else {
-                    base.OnToolGUI(e);
                 }
             } catch (Exception ex) {
                 Log.Error("GUI Error: " + ex);
+            }
+        }
+
+        void DefaultOnToolGUI(Event e) {
+            if (e.type == EventType.MouseDown && e.button == 0) {
+                bool isRoad = HoveredSegmentId != 0 && HoveredSegmentId.ToSegment().Info.m_netAI is RoadBaseAI;
+                if (!isRoad)
+                    return;
+
+                if (ReadjustPathMode) {
+                    bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+                    if (!isRoundabout) {
+                        segmentList = SegmentTraverser.Traverse(
+                            HoveredSegmentId,
+                            TraverseDirection.AnyDirection,
+                            TraverseSide.Straight,
+                            SegmentStopCriterion.None,
+                            (_) => true);
+                    }
+                    RoadSelectionUtil.SetRoad(HoveredSegmentId, segmentList);
+                }
+
+                InstanceID instanceID = new InstanceID {
+                    NetSegment = HoveredSegmentId,
+                };
+
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(delegate () {
+                    OpenWorldInfoPanel(
+                        instanceID,
+                        HitPos);
+                });
+            } else if (e.type == EventType.MouseDown && e.button == 1) {
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
             }
         }
 
@@ -866,6 +976,7 @@ namespace TrafficManager.UI {
             }
 
             if (!Translation.Tutorials.HasString(Translation.TUTORIAL_BODY_KEY_PREFIX + localeKey)) {
+                Log.Warning($"ShowAdvisor: localeKey:{localeKey} does not exist");
                 return;
             }
 

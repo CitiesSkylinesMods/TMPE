@@ -5,6 +5,7 @@ namespace TrafficManager {
     using Harmony;
     using ICities;
     using JetBrains.Annotations;
+    using UnityEngine;
     using Object = UnityEngine.Object;
     using System.Collections.Generic;
     using System.Reflection;
@@ -14,7 +15,6 @@ namespace TrafficManager {
     using TrafficManager.Manager.Impl;
     using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
-    using TrafficManager.UI.Localization;
     using TrafficManager.UI;
     using static TrafficManager.Util.Shortcuts;
     using UnityEngine;
@@ -339,14 +339,16 @@ namespace TrafficManager {
                 GlobalConfig.OnLevelUnloading();
 
                 var gameObject = UIView.GetAView().gameObject;
-                void Destroy<T>() where T : MonoBehaviour {
+
+                void Destroy<T>() where T : MonoBehaviour
+                {
                     Object obj = (Object)gameObject.GetComponent<T>();
                     if (obj != null) {
                         Object.Destroy(obj);
                     }
                 }
 
-                // remove vehicle button
+                Destroy<RoadSelectionPanels>();
                 Destroy<RemoveVehicleButtonExtender>();
                 Destroy<RemoveCitizenInstanceButtonExtender>();
 
@@ -538,12 +540,7 @@ namespace TrafficManager {
                 }
             }
 
-            Log.Info("Adding Controls to UI.");
-            if (ModUI.Instance == null) {
-                Log._Debug("Adding UIBase instance.");
-                ModUI.SetSingletonInstance(
-                    ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>());
-            }
+            ModUI.OnLevelLoaded();
 
             // Init transport demand UI
             if (TransportDemandUI == null) {
@@ -556,6 +553,8 @@ namespace TrafficManager {
 
             // add "remove citizen instance" button
             UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
+
+            UIView.GetAView().gameObject.AddComponent<RoadSelectionPanels>();
 
             InitDetours();
 

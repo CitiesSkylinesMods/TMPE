@@ -230,6 +230,17 @@ namespace TrafficManager.UI {
             ToolsModifierControl.SetTool<TrafficManagerTool>();
         }
 
+        public static void OnLevelLoaded() {
+            Log._Debug("ModUI.OnLevelLoaded: called");
+            if (ModUI.Instance == null) {
+                Log._Debug("Adding UIBase instance.");
+                ModUI.SetSingletonInstance(
+                    ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>());
+            }
+            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
+            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
+        }
+
         public static void DisableTool() {
             Log._Debug("ModUI.DisableTool: called");
             if (ToolsModifierControl.toolController == null) {

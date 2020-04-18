@@ -546,6 +546,7 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="mode">determines for which side to connect lanes.</param>
         /// <returns><c>false</c> if there is only one incomming/outgoing lane, <c>true</c> otherwise</returns>
         public static bool StayInLane(ushort nodeId, StayInLaneMode mode = StayInLaneMode.None) {
+            Log._Debug($"Stay In Lane called node:{nodeId} mode:{mode}");
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
 
             GetSortedSegments(nodeId, out List<ushort> segments);
