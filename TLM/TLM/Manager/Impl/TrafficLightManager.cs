@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using System.Linq;
@@ -7,7 +7,6 @@
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
-    using TrafficManager.Util;
 
     /// <summary>
     /// Manages traffic light toggling
@@ -124,7 +123,7 @@
         }
 
         public bool CanToggleTrafficLight(ushort nodeId,
-                                          bool flag,
+                                          bool flag, // override?
                                           ref NetNode node,
                                           out ToggleTrafficLightError reason)
         {
@@ -142,10 +141,10 @@
                 return false;
             }
 
-            if (flag && !LogicUtil.CheckFlags(
-                    (uint)node.m_flags,
-                    (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction),
-                    (uint)(NetNode.Flags.Created | NetNode.Flags.Junction))) {
+            if (flag &&
+                (!Services.NetService.IsNodeValid(nodeId)
+                || !Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Junction))) {
+
                 reason = ToggleTrafficLightError.NoJunction;
 
                 if (logTrafficLights) {
@@ -155,10 +154,7 @@
                 return false;
             }
 
-            if (!flag && LogicUtil.CheckFlags(
-                    (uint)node.m_flags,
-                    (uint)NetNode.Flags.LevelCrossing,
-                    (uint)NetNode.Flags.LevelCrossing)) {
+            if (!flag && Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.LevelCrossing)) {
                 reason = ToggleTrafficLightError.IsLevelCrossing;
 
                 if (logTrafficLights) {
@@ -230,10 +226,8 @@
         }
 
         public bool HasTrafficLight(ushort nodeId, ref NetNode node) {
-            return LogicUtil.CheckFlags(
-                (uint)node.m_flags,
-                (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.TrafficLights),
-                (uint)(NetNode.Flags.Created | NetNode.Flags.TrafficLights));
+            return Services.NetService.IsNodeValid(nodeId)
+                && Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.TrafficLights);
         }
 
         [Obsolete]
