@@ -203,14 +203,14 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 foreach (LaneEnd laneEnd in laneEnds) {
-                    if (!Constants.ServiceFactory.NetService.IsLaneValid(laneEnd.LaneId)) {
+                    if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(laneEnd.LaneId)) {
                         continue;
                     }
 
                     if (laneEnd != selectedLaneEnd) {
                         foreach (LaneEnd targetLaneEnd in laneEnd.ConnectedLaneEnds) {
                             // render lane connection from laneEnd to targetLaneEnd
-                            if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneEnd.LaneId)) {
+                            if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
                                 continue;
                             }
 
@@ -270,7 +270,7 @@ namespace TrafficManager.UI.SubTools {
                         // lane curves for selectedMarker will be drawn last to
                         // be on the top of other lane markers.
                         foreach (LaneEnd targetLaneEnd in selectedLaneEnd.ConnectedLaneEnds) {
-                            if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneEnd.LaneId)) {
+                            if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
                                 continue;
                             }
 
