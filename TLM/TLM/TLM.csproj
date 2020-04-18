@@ -250,6 +250,7 @@
     <Compile Include="UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\MainMenu\BaseMenuButton.cs" />
     <Compile Include="UI\MainMenu\BaseMenuToolModeButton.cs" />
+    <Compile Include="UI\MainMenu\IOnscreenDisplayProvider.cs" />
     <Compile Include="UI\MainMenu\MainMenuButton.cs" />
     <Compile Include="UI\MainMenu\MainMenuLayout.cs" />
     <Compile Include="UI\MainMenu\MenuButtonDef.cs" />

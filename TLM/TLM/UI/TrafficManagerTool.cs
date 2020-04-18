@@ -467,7 +467,11 @@ namespace TrafficManager.UI {
                                    ushort nodeId,
                                    bool warning = false,
                                    bool alpha = false) {
-            DrawNodeCircle(cameraInfo, nodeId, GetToolColor(warning, false), alpha);
+            DrawNodeCircle(
+                cameraInfo: cameraInfo,
+                nodeId: nodeId,
+                color: GetToolColor(warning: warning, error: false),
+                alpha: alpha);
         }
 
         /// <summary>
@@ -1763,7 +1767,8 @@ namespace TrafficManager.UI {
                 return;
             }
 
-            activeSubTool_?.UpdateOnscreenDisplayPanel();
+            (activeLegacySubTool_ as IOnscreenDisplayProvider)?.UpdateOnscreenDisplayPanel();
+            (activeSubTool_ as IOnscreenDisplayProvider)?.UpdateOnscreenDisplayPanel();
         }
     }
 }

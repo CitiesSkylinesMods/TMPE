@@ -1,5 +1,4 @@
 namespace TrafficManager.UI.SubTools.LaneArrows {
-    using System;
     using System.Collections.Generic;
     using ColossalFramework;
     using ColossalFramework.UI;
@@ -20,7 +19,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     /// <summary>
     /// LaneArrow Tool creates ToolWindow for lane arrow buttons.
     /// </summary>
-    public class LaneArrowTool : TrafficManagerSubTool {
+    public class LaneArrowTool
+        : TrafficManagerSubTool,
+          IOnscreenDisplayProvider
+    {
         const bool DEFAULT_ALT_MODE = true;
         private bool alternativeMode_ = DEFAULT_ALT_MODE;
         private int framesSeparateTurningLanesModeActivated = 0;
@@ -418,7 +420,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// in MainMenu is requested. Or when we need to change state.
         /// Never call this directly, only as: MainTool.RequestOnscreenDisplayUpdate();
         /// </summary>
-        public override void UpdateOnscreenDisplayPanel() {
+        void IOnscreenDisplayProvider.UpdateOnscreenDisplayPanel() {
             if (fsm_ == null) {
                 OnScreenDisplay.Clear();
                 return;
@@ -428,15 +430,18 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 case State.Select: {
                     OnScreenDisplay.Begin();
                     OnScreenDisplay.Click(
+                        button: UIMouseButton.Left,
                         shift: false,
                         ctrl: true,
                         alt: false,
                         localizedText: T("LaneArrows.Click:Separate lanes for entire junction"));
                     OnScreenDisplay.Click(
+                        button: UIMouseButton.Left,
                         shift: false,
                         ctrl: false,
                         alt: true,
                         localizedText: T("LaneArrows.Click:Separate lanes for segment"));
+                    OnScreenDisplay.RightClickCancel();
                     OnScreenDisplay.Done();
                     return;
                 }
@@ -445,6 +450,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     OnScreenDisplay.Shortcut(
                         kbSetting: KeybindSettingsBase.LaneConnectorDelete,
                         localizedText: T("LaneConnector.Label:Reset to default"));
+                    OnScreenDisplay.RightClickCancel();
                     OnScreenDisplay.Done();
                     return;
                 }
