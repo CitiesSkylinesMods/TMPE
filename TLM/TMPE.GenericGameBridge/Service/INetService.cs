@@ -85,7 +85,7 @@ namespace GenericGameBridge.Service {
                                       bool reverse = false,
                                       bool sort = true);
 
-        bool IsLaneValid(uint laneId);
+        bool IsLaneAndItsSegmentValid(uint laneId);
 
         bool IsNodeValid(ushort nodeId);
 
