@@ -96,38 +96,6 @@ namespace TrafficManager.Util {
             }
         }
 
-        public static void Traverse(List<ushort> segmentList, SegmentVisitor visitorFun) {
-            if (segmentList == null) {
-                return;
-            }
-            ushort prevSegId = 0;
-            ExtSegment[] extSegment_buffer = Constants.ManagerFactory.ExtSegmentManager.ExtSegments;
-            NetSegment[] segment_buffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            foreach (var segId in segmentList) {
-                SegmentTraverser.SegmentVisitData data;
-                if (prevSegId == 0) {
-                    data = new SegmentVisitData(
-                        ref extSegment_buffer[segId],
-                        ref extSegment_buffer[segId],
-                        false,
-                        false,
-                        true);
-                } else {
-                    data = new SegmentVisitData(
-                        ref extSegment_buffer[prevSegId],
-                        ref extSegment_buffer[segId],
-                        true,
-                        segment_buffer[prevSegId].m_endNode == segment_buffer[segId].m_startNode,
-                        false);
-                }
-                if (!visitorFun(data)) {
-                    break;
-                }
-                prevSegId = segId;
-            }
-
-        }
-
         /// <summary>
         /// Performs a Depth-First traversal over the cached segment geometry structure. At each
         /// traversed segment, the given `visitor` is notified. It then can update the current `state`.
@@ -143,7 +111,7 @@ namespace TrafficManager.Util {
         ///     segment will be traversed (event the initial segment will be omitted).</param>
         /// <param name="visitorFun">Specifies the stateful visitor that should be notified as soon as
         ///     a traversable segment (which has not been traversed before) is found.</param>
-        public static void Traverse(ushort initialSegmentId,
+        public static List<ushort> Traverse(ushort initialSegmentId,
                                     TraverseDirection direction,
                                     TraverseSide side,
                                     SegmentStopCriterion stopCrit,
@@ -151,7 +119,7 @@ namespace TrafficManager.Util {
         {
             ExtSegment initialSeg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[initialSegmentId];
             if (!initialSeg.valid) {
-                return;
+                return null;
             }
 
             // Log._Debug($"SegmentTraverser: Traversing initial segment {initialSegmentId}");
@@ -162,7 +130,7 @@ namespace TrafficManager.Util {
                         false,
                         false,
                         true))) {
-                return;
+                return null;
             }
 
             HashSet<ushort> visitedSegmentIds = new HashSet<ushort>();
@@ -209,6 +177,7 @@ namespace TrafficManager.Util {
                 });
 
             // Log._Debug($"SegmentTraverser: Traversal finished.");
+            return new List<ushort>(visitedSegmentIds);
         }
 
         private static void TraverseRec(ref ExtSegment prevSeg,

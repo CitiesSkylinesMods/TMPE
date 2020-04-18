@@ -14,7 +14,7 @@ namespace TrafficManager.UI.SubTools {
     using UnityEngine;
 
     public class PrioritySignsTool : LegacySubTool {
-        private enum PrioritySignsMassEditMode {
+        public enum PrioritySignsMassEditMode {
             MainYield = 0,
             MainStop = 1,
             YieldMain = 2,
@@ -42,98 +42,32 @@ namespace TrafficManager.UI.SubTools {
 
             // TODO provide revert/clear mode issue #568
             if (ctrlDown && shiftDown) {
-                bool isRAbout = RoundaboutMassEdit.Instance.FixRabout(HoveredSegmentId);
-                if (!isRAbout) {
+                Log.Info("Before FixRoundabout/FixRoad."); // log time for benchmarking.
+                bool isRoundabout = RoundaboutMassEdit.Instance.FixRoundabout(HoveredSegmentId);
+                if (!isRoundabout) {
                     PriorityRoad.FixRoad(HoveredSegmentId);
                 }
+                Log.Info("After FixRoundabout/FixRoad. Before RefreshMassEditOverlay"); // log time for benchmarking.
                 RefreshMassEditOverlay();
+                Log.Info("After RefreshMassEditOverlay."); // log time for benchmarking.
                 return;
             } else if (ctrlDown) {
-                PriorityRoad.FixJunction(HoveredNodeId);
+                PriorityRoad.FixHighPriorityJunction(HoveredNodeId);
                 RefreshMassEditOverlay();
                 return;
             }
             if (shiftDown) {
-                var primaryPrioType = PriorityType.None;
-                var secondaryPrioType = PriorityType.None;
-
-                switch (massEditMode) {
-                    case PrioritySignsMassEditMode.MainYield: {
-                            primaryPrioType = PriorityType.Main;
-                            secondaryPrioType = PriorityType.Yield;
-                            break;
-                        }
-
-                    case PrioritySignsMassEditMode.MainStop: {
-                            primaryPrioType = PriorityType.Main;
-                            secondaryPrioType = PriorityType.Stop;
-                            break;
-                        }
-
-                    case PrioritySignsMassEditMode.YieldMain: {
-                            primaryPrioType = PriorityType.Yield;
-                            secondaryPrioType = PriorityType.Main;
-                            break;
-                        }
-
-                    case PrioritySignsMassEditMode.StopMain: {
-                            primaryPrioType = PriorityType.Stop;
-                            secondaryPrioType = PriorityType.Main;
-                            break;
-                        }
-                }
-
-                IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-
-                bool VisitorFun(SegmentVisitData data) {
-                    foreach (bool startNode in Constants.ALL_BOOL) {
-                        TrafficPriorityManager.Instance.SetPrioritySign(
-                            data.CurSeg.segmentId,
-                            startNode,
-                            primaryPrioType);
-                        ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(
-                            data.CurSeg.segmentId,
-                            startNode);
-                        ExtSegmentEnd curEnd = segEndMan.ExtSegmentEnds[
-                            segEndMan.GetIndex(data.CurSeg.segmentId, startNode)];
-
-                        for (int i = 0; i < 8; ++i) {
-                            ushort otherSegmentId = Singleton<NetManager>.instance.m_nodes
-                                                                         .m_buffer[nodeId]
-                                                                         .GetSegment(i);
-
-                            if (otherSegmentId == 0 || otherSegmentId == data.CurSeg.segmentId) {
-                                continue;
-                            }
-
-                            ArrowDirection dir = segEndMan.GetDirection(
-                                ref curEnd,
-                                otherSegmentId);
-
-                            if (dir != ArrowDirection.Forward) {
-                                TrafficPriorityManager.Instance.SetPrioritySign(
-                                    otherSegmentId,
-                                    (bool)Constants.ServiceFactory.NetService.IsStartNode(
-                                        otherSegmentId,
-                                        nodeId),
-                                    secondaryPrioType);
-                            }
-                        }
-                    }
-
-                    return true;
-                }
-                bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
-                if (isRAbout) {
-                    SegmentTraverser.Traverse(segmentList, VisitorFun);
-                } else {
-                    SegmentTraverser.Traverse(
+                bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+                if (!isRoundabout) {
+                    segmentList = SegmentTraverser.Traverse(
                         HoveredSegmentId,
                         TraverseDirection.AnyDirection,
                         TraverseSide.Straight,
                         SegmentStopCriterion.None,
-                        VisitorFun);
+                        (_)=>true);
                 }
+
+                PriorityRoad.FixPrioritySigns(massEditMode,segmentList);
 
                 // cycle mass edit mode
                 massEditMode =
@@ -167,11 +101,6 @@ namespace TrafficManager.UI.SubTools {
 
             private static bool _show = false;
             public static bool Show {
-                get {
-                    lock (_lock) {
-                        return _show;
-                    }
-                }
                 set {
                     lock (_lock) {
                         _show = value;
@@ -262,9 +191,9 @@ namespace TrafficManager.UI.SubTools {
             }
 
             if (shiftDown) {
-                bool isRAbout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+                bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
-                if (isRAbout) {
+                if (isRoundabout) {
                     foreach (uint segmentId in segmentList) {
                         ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                         NetTool.RenderOverlay(
@@ -345,7 +274,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.prioritySignsOverlay) {
+            if (viewOnly && !(Options.prioritySignsOverlay || MassEditOVerlay.IsActive )) {
                 return;
             }
 
@@ -575,7 +504,7 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
 
-            if (Options.prioritySignsOverlay) {
+            if (Options.prioritySignsOverlay || MassEditOVerlay.IsActive) {
                 RefreshCurrentPriorityNodeIds();
             } else {
                 currentPriorityNodeIds.Clear();
