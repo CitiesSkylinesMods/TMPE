@@ -11,6 +11,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.UI.MainMenu;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
@@ -110,7 +111,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         }
 
         private void OnLeaveSelectState() {
-            OnScreenDisplay.Clear();
+            OnscreenDisplay.Clear();
         }
 
         private void OnEnterSelectState() {
@@ -250,7 +251,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         /// <summary>Called from GenericFsm when user leaves lane arrow editor, to hide the GUI.</summary>
         private void OnLeaveEditorState() {
-            OnScreenDisplay.Clear();
+            OnscreenDisplay.Clear();
             DestroyToolWindow();
         }
 
@@ -422,40 +423,45 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// </summary>
         void IOnscreenDisplayProvider.UpdateOnscreenDisplayPanel() {
             if (fsm_ == null) {
-                OnScreenDisplay.Clear();
+                OnscreenDisplay.Clear();
                 return;
             }
 
             switch (fsm_.State) {
                 case State.Select: {
-                    OnScreenDisplay.Begin();
-                    OnScreenDisplay.Click(
-                        button: UIMouseButton.Left,
-                        shift: false,
-                        ctrl: true,
-                        alt: false,
-                        localizedText: T("LaneArrows.Click:Separate lanes for entire junction"));
-                    OnScreenDisplay.Click(
-                        button: UIMouseButton.Left,
-                        shift: false,
-                        ctrl: false,
-                        alt: true,
-                        localizedText: T("LaneArrows.Click:Separate lanes for segment"));
-                    OnScreenDisplay.RightClickCancel();
-                    OnScreenDisplay.Done();
+                    var items = new List<OsdItem>();
+                    items.Add(
+                        new OsdClickItem(
+                            button: UIMouseButton.Left,
+                            shift: false,
+                            ctrl: true,
+                            alt: false,
+                            localizedText: T("LaneArrows.Click:Separate lanes for entire junction")));
+                    items.Add(
+                        new OsdClickItem(
+                            button: UIMouseButton.Left,
+                            shift: false,
+                            ctrl: false,
+                            alt: true,
+                            localizedText: T("LaneArrows.Click:Separate lanes for segment")));
+
+                    // TODO: Add right click cancel hint
+                    OnscreenDisplay.Display(items);
                     return;
                 }
                 case State.EditLaneArrows: {
-                    OnScreenDisplay.Begin();
-                    OnScreenDisplay.Shortcut(
-                        kbSetting: KeybindSettingsBase.LaneConnectorDelete,
-                        localizedText: T("LaneConnector.Label:Reset to default"));
-                    OnScreenDisplay.RightClickCancel();
-                    OnScreenDisplay.Done();
+                    var items = new List<OsdItem>();
+                    items.Add(
+                        new OsdKeybindItem(
+                            keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
+                            localizedText: T("LaneConnector.Label:Reset to default")));
+
+                    // TODO: Add right click cancel hint
+                    OnscreenDisplay.Display(items);
                     return;
                 }
             }
-            OnScreenDisplay.Clear();
+            OnscreenDisplay.Clear();
         }
 
         private void RepositionWindowToNode() {

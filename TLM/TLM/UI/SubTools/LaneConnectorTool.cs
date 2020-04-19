@@ -14,6 +14,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Util;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu;
+    using TrafficManager.UI.MainMenu.OSD;
     using static TrafficManager.Util.Shortcuts;
 
     public class LaneConnectorTool
@@ -1298,10 +1299,10 @@ namespace TrafficManager.UI.SubTools {
                   new Color32(240, 30, 30, 255),
                   new Color32(80, 214, 0, 255),
                   new Color32(30, 30, 214, 255),
-                  new Color32(163, 41, 73, 255),
                   new Color32(214, 136, 107, 255),
-                  new Color32(120, 189, 94, 255),
+                  new Color32(189, 186, 142, 255),
                   new Color32(106, 41, 163, 255),
+                  new Color32(0, 99, 53, 255),
                   new Color32(54, 118, 214, 255),
                   new Color32(163, 57, 41, 255),
                   new Color32(54, 161, 214, 255),
@@ -1310,16 +1311,16 @@ namespace TrafficManager.UI.SubTools {
                   new Color32(214, 0, 171, 255),
                   new Color32(151, 178, 201, 255),
                   new Color32(189, 101, 0, 255),
+                  new Color32(163, 41, 73, 255),
                   new Color32(154, 142, 189, 255),
-                  new Color32(189, 186, 142, 255),
                   new Color32(176, 88, 147, 255),
                   new Color32(150, 140, 0, 255),
                   new Color32(0, 140, 150, 255),
                   new Color32(0, 0, 138, 255),
                   new Color32(0, 60, 112, 255),
+                  new Color32(120, 189, 94, 255),
                   new Color32(112, 86, 56, 255),
                   new Color32(88, 112, 84, 255),
-                  new Color32(0, 99, 53, 255),
                   new Color32(75, 75, 99, 255),
                   new Color32(99, 75, 85, 255),
             };
@@ -1334,28 +1335,29 @@ namespace TrafficManager.UI.SubTools {
             switch (m) {
                 // TODO: uncomment this when state machine is properly implemented and right click cancels the mode
                 // case SelectionMode.None: {
-                //     OnScreenDisplay.Begin();
-                //     OnScreenDisplay.RightClickCancel();
-                //     OnScreenDisplay.Done();
+                //     OnScreenDisplay.Display(...);
                 //     return;
                 // }
                 case SelectionMode.SelectTarget:
                 case SelectionMode.SelectSource: {
-                    OnScreenDisplay.Begin();
-                    OnScreenDisplay.Shortcut(
-                        kbSetting: KeybindSettingsBase.LaneConnectorStayInLane,
-                        localizedText: T("LaneConnector.Label:Stay in lane, multiple modes"));
-                    OnScreenDisplay.Shortcut(
-                        kbSetting: KeybindSettingsBase.LaneConnectorDelete,
-                        localizedText: T("LaneConnector.Label:Reset to default"));
-                    OnScreenDisplay.RightClickCancel();
-                    OnScreenDisplay.Done();
+                    var items = new List<OsdItem>();
+                    items.Add(
+                        new OsdKeybindItem(
+                            keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
+                            localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
+                    items.Add(
+                        new OsdKeybindItem(
+                            keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
+                            localizedText: T("LaneConnector.Label:Reset to default")));
+
+                    // TODO: Add right click cancel hint
+                    OnscreenDisplay.Display(items);
                     return;
                 }
             }
 
             // Default: no hint
-            OnScreenDisplay.Clear();
+            OnscreenDisplay.Clear();
         }
     }
 }

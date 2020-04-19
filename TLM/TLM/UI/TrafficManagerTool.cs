@@ -23,6 +23,7 @@ namespace TrafficManager.UI {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.SubTools.LaneArrows;
     using TrafficManager.UI.SubTools.TimedTrafficLights;
 
@@ -279,8 +280,7 @@ namespace TrafficManager.UI {
         /// <summary>Resets the tool and calls deactivate on it.</summary>
         private void SetToolMode_DeactivateTool() {
             // Clear OSD panel with keybinds
-            OnScreenDisplay.Begin();
-            OnScreenDisplay.Done();
+            OnscreenDisplay.Clear();
 
             if (activeLegacySubTool_ != null || activeSubTool_ != null) {
                 activeLegacySubTool_?.Cleanup();
@@ -1763,7 +1763,7 @@ namespace TrafficManager.UI {
 
         public void RequestOnscreenDisplayUpdate() {
             if (!GlobalConfig.Instance.Main.KeybindsPanelVisible) {
-                OnScreenDisplay.Clear();
+                OnscreenDisplay.Clear();
                 return;
             }
 
