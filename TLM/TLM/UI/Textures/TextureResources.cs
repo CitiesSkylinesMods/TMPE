@@ -13,7 +13,7 @@ namespace TrafficManager.UI.Textures {
         internal static Texture2D LoadDllResource(string resourceName, int width, int height)
         {
 #if DEBUG
-            bool debug = DebugSwitch.JunctionRestrictions.Get();
+            bool debug =  DebugSwitch.ResourceLoading.Get();
 #endif
             try {
 #if DEBUG
@@ -23,6 +23,8 @@ namespace TrafficManager.UI.Textures {
 #endif
                 var myAssembly = Assembly.GetExecutingAssembly();
                 var myStream = myAssembly.GetManifestResourceStream("TrafficManager.Resources." + resourceName);
+                if (myStream == null)
+                    throw new Exception($"{resourceName} not found!");
 
                 var texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
 

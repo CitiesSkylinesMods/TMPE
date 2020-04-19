@@ -2,6 +2,7 @@ namespace TrafficManager {
     using GenericGameBridge.Factory;
     using JetBrains.Annotations;
     using TrafficManager.API.Manager;
+    using UnityEngine;
 
     public static class Constants {
         /// <summary>
@@ -13,12 +14,6 @@ namespace TrafficManager {
         /// Array of boolean to allow creating foreach loops
         /// </summary>
         public static readonly bool[] ALL_BOOL = { false, true };
-
-        /// <summary>
-        /// Default padding value does not scale with screen resolution, and is used in new U GUI
-        /// forms for spacing between elements and around container borders.
-        /// </summary>
-        public const float UIPADDING = 4f;
 
         /// <summary>
         /// Conversion rate from km/h to game speed (also exists in TrafficManager.API.Constants)

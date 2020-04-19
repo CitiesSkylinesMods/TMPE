@@ -12,6 +12,10 @@ namespace TrafficManager.U.Autosize {
             Value = v;
         }
 
+        /// <summary>
+        /// The control will be always sized to the fixed size.
+        /// The UI has internal fixed size of 1920x1080 points which is stretched to screen.
+        /// </summary>
         public static UValue FixedSize(float f) {
             return new UValue(URule.FixedSize, f);
         }

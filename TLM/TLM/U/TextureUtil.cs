@@ -1,10 +1,12 @@
-﻿namespace TrafficManager.U {
+namespace TrafficManager.U {
     using System;
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using TrafficManager.UI.Textures;
     using UnityEngine;
+    using CSUtil.Commons;
+    using TrafficManager.State.ConfigData;
 
     public static class TextureUtil {
         /// <summary>
@@ -23,28 +25,36 @@
                                                  int spriteHeight,
                                                  int hintAtlasTextureSize) {
             Texture2D texture2D = new Texture2D(
-                hintAtlasTextureSize,
-                hintAtlasTextureSize,
-                TextureFormat.ARGB32,
-                false);
+                width: hintAtlasTextureSize,
+                height: hintAtlasTextureSize,
+                format: TextureFormat.ARGB32,
+                mipmap: false);
 
             var loadedTextures = new List<Texture2D>(spriteNames.Length);
             var loadedSpriteNames = new List<string>();
 
             // Load separate sprites and then pack it in a texture together
             foreach (string spriteName in spriteNames) {
-                Log._Debug($"TextureUtil: Loading sprite {resourcePrefix}.{spriteName}.png");
+                string resourceName = $"{resourcePrefix}.{spriteName}.png";
+                Log._Debug($"TextureUtil: Loading {resourceName} for sprite={spriteName}");
+
                 Texture2D loadedSprite = TextureResources.LoadDllResource(
-                    $"{resourcePrefix}.{spriteName}.png",
-                    spriteWidth,
-                    spriteHeight);
-                if (loadedSprite) {
+                    resourceName: resourceName,
+                    width: spriteWidth,
+                    height: spriteHeight);
+
+                if (loadedSprite != null) {
                     loadedTextures.Add(loadedSprite);
                     loadedSpriteNames.Add(spriteName); // only take those which are loaded
+                } else {
+                    Log.Error($"TextureUtil: Sprite load failed: {resourceName} for sprite={spriteName}");
                 }
             }
 
-            var regions = texture2D.PackTextures(loadedTextures.ToArray(), 2, hintAtlasTextureSize);
+            var regions = texture2D.PackTextures(
+                textures: loadedTextures.ToArray(),
+                padding: 2,
+                maximumAtlasSize: hintAtlasTextureSize);
 
             // Now using loaded and packed textures, create the atlas with sprites
             UITextureAtlas newAtlas = ScriptableObject.CreateInstance<UITextureAtlas>();
@@ -87,6 +97,13 @@
                     "Number of sprite name does not match dimensions " +
                     $"(expected {numX} x {numY}, was {spriteNames.Length})");
             }
+
+#if DEBUG
+            Log._DebugIf(
+            DebugSwitch.ResourceLoading.Get(),
+                () => $"Loading atlas for {name} count:{numX}x{numY} " +
+                $"texture:{texture.name} size:{texture.width}x{texture.height}");
+#endif
 
             UITextureAtlas atlas = ScriptableObject.CreateInstance<UITextureAtlas>();
             atlas.padding = 0;

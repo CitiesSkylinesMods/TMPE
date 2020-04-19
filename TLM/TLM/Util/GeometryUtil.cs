@@ -144,6 +144,5 @@ namespace TrafficManager.Util {
 
             return numLanes;
         }
-
     } // end class
 }

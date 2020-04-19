@@ -19,9 +19,9 @@ namespace TrafficManager.UI.MainMenu {
 
         public override bool CanActivate() => true;
 
-        public override string ButtonName => "TMPE_MainMenu";
-
         public override void Start() {
+            U.UIUtil.MakeUniqueAndSetName(this.gameObject, "TMPE_MainMenuButton");
+
             // Place the button.
             OnUpdate(GlobalConfig.Instance);
 
@@ -75,7 +75,7 @@ namespace TrafficManager.UI.MainMenu {
             return 50f; // always 50px the original behaviour
         }
 
-        public override bool IsActive() {
+        protected override bool IsActive() {
             return ModUI.Instance.IsVisible();
         }
 
@@ -161,14 +161,14 @@ namespace TrafficManager.UI.MainMenu {
             }
         }
 
-        public override string GetTooltip() {
+        protected override string GetTooltip() {
             return Translation.Menu.Get("Tooltip:Toggle Main Menu");
             // return KeybindSettingsBase.ToggleMainMenu.ToLocalizedString("\n");
         }
 
-        public override KeybindSetting ShortcutKey => KeybindSettingsBase.ToggleMainMenu;
+        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.ToggleMainMenu;
 
-        public override bool IsVisible() => true;
+        protected override bool IsVisible() => true;
 
         public override void HandleClick(UIMouseEventParameter p) {
             try {

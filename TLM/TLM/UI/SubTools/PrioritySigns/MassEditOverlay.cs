@@ -6,12 +6,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
         private static object _lock = new object();
 
         private static bool _show = false;
+
         public static bool Show {
-            get {
-                lock (_lock) {
-                    return _show;
-                }
-            }
             set {
                 lock (_lock) {
                     _show = value;

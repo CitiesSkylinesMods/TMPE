@@ -2,7 +2,7 @@ namespace TrafficManager.Util {
     using CSUtil.Commons;
     using GenericGameBridge.Service;
     using static UI.SubTools.LaneConnectorTool;
-    using static Util.Shortcuts;
+    using static TrafficManager.Util.Shortcuts;
     using System.Collections.Generic;
     using System;
     using TrafficManager.API.Traffic.Data;
@@ -14,12 +14,12 @@ namespace TrafficManager.Util {
     public class RoundaboutMassEdit {
         public static RoundaboutMassEdit Instance = new RoundaboutMassEdit();
         public RoundaboutMassEdit() {
-            segmentList = new List<ushort>();
+            segmentList_ = new List<ushort>();
         }
 
-        private List<ushort> segmentList = null;
+        private List<ushort> segmentList_;
 
-        private static void FixLanesRAbout(ushort segmentId, ushort nextSegmentId) {
+        private static void FixLanesRoundabout(ushort segmentId, ushort nextSegmentId) {
             ushort nodeId = netService.GetHeadNode(segmentId);
 
             if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
@@ -91,7 +91,7 @@ namespace TrafficManager.Util {
             } // end if
         }
 
-        internal static void FixRulesRAbout(ushort segmentId) {
+        internal static void FixRulesRoundabout(ushort segmentId) {
             foreach (bool startNode in Constants.ALL_BOOL) {
                 if (OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns) {
                     TrafficPriorityManager.Instance.SetPrioritySign(
@@ -160,7 +160,7 @@ namespace TrafficManager.Util {
             for (int i = 0; i < 8; ++i) {
                 //find connected segments.
                 ushort segmentId = node.GetSegment(i);
-                if (segmentId == 0 || segmentList.Contains(segmentId)) {
+                if (segmentId == 0 || segmentList_.Contains(segmentId)) {
                     continue; // continue if it is part of roundabout
                 } // end if
 
@@ -174,23 +174,31 @@ namespace TrafficManager.Util {
         /// </summary>
         /// <param name="segmentId"></param>
         /// <returns></returns>
-        public bool FixRabout(ushort initialSegmentId) {
-            bool isRAbout = TraverseLoop(initialSegmentId, out _);
-            if (!isRAbout) {
+        public bool FixRoundabout(ushort initialSegmentId) {
+            bool isRoundabout = TraverseLoop(initialSegmentId, out var segList);
+            if (!isRoundabout) {
                 Log._Debug($"segment {initialSegmentId} not a roundabout.");
                 return false;
             }
-            int count = segmentList.Count;
+            int count = segList.Count;
             Log._Debug($"\n segmentId={initialSegmentId} seglist.count={count}\n");
 
+            FixRoundabout(segList);
+            return true;
+        }
+
+        public void FixRoundabout(List<ushort> segList) {
+            if (segList == null)
+                return;
+            this.segmentList_ = segList;
+            int count = segList.Count;
             for (int i = 0; i < count; ++i) {
-                ushort segId = segmentList[i];
-                ushort nextSegId = segmentList[(i + 1) % count];
-                FixLanesRAbout(segId, nextSegId);
-                FixRulesRAbout(segId);
+                ushort segId = segList[i];
+                ushort nextSegId = segList[(i + 1) % count];
+                FixLanesRoundabout(segId, nextSegId);
+                FixRulesRoundabout(segId);
                 FixMinor(netService.GetHeadNode(segId));
             }
-            return true;
         }
 
         /// <summary>
@@ -205,38 +213,66 @@ namespace TrafficManager.Util {
         /// </param>
         /// <returns>true if its a roundabout</returns>
         public bool TraverseLoop(ushort segmentId, out List<ushort> segList) {
-            this.segmentList.Clear();
+            if (segmentList_ != null) {
+                this.segmentList_.Clear();
+            } else {
+                this.segmentList_ = new List<ushort>();
+            }
             bool ret;
             if (segmentId == 0 || ! segMan.CalculateIsOneWay(segmentId)) {
                 ret = false;
             } else {
                 ret = TraverseAroundRecursive(segmentId);
             }
-            segList = this.segmentList;
+            segList = this.segmentList_;
             return ret;
         }
 
+        public static bool IsRoundabout(List<ushort> segList, bool semi = false) {
+            try {
+                int n = segList?.Count ?? 0;
+                if (n <= 1)
+                    return false;
+                int lastN = semi ? n - 1 : n;
+                for (int i = 0; i < lastN; ++i) {
+                    ushort prevSegmentID = segList[i];
+                    ushort nextSegmentID = segList[(i + 1) % n];
+                    ushort headNodeID = netService.GetHeadNode(prevSegmentID);
+                    bool isRoundabout = IsPartofRoundabout(nextSegmentID, prevSegmentID, headNodeID);
+                    if (!isRoundabout) {
+                        //Log._Debug($"segments {prevSegmentID} and {nextSegmentID} with node:{headNodeID} are not part of a roundabout");
+                        return false;
+                    }
+                }
+                return true;
+            }
+            catch (Exception e){
+                Log.Error(e.ToString());
+                return false;
+            }
+        }
+
         private bool TraverseAroundRecursive(ushort segmentId) {
-            if (segmentList.Count > 20) {
+            if (segmentList_.Count > 20) {
                 return false; // too long. prune
             }
-            segmentList.Add(segmentId);
+            segmentList_.Add(segmentId);
             var segments = GetSortedSegments( segmentId);
 
             foreach (var nextSegmentId in segments) {
-                bool isRAbout = false;
-                if (nextSegmentId == segmentList[0]) {
-                    isRAbout = true;
+                bool isRoundabout;
+                if (nextSegmentId == segmentList_[0]) {
+                    isRoundabout = true;
                 } else if (Contains(nextSegmentId)) {
-                    isRAbout = false;
+                    isRoundabout = false; // try another segment.
                 } else {
-                    isRAbout = TraverseAroundRecursive(nextSegmentId);
+                    isRoundabout = TraverseAroundRecursive(nextSegmentId);
                 }
-                if (isRAbout) {
+                if (isRoundabout) {
                     return true;
                 } //end if
             }// end foreach
-            segmentList.Remove(segmentId);
+            segmentList_.Remove(segmentId);
             return false;
         }
 
@@ -310,16 +346,43 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// returns true if the given segment is attached to the middle of the
-        /// path of segmentList by checking for duplicate nodes.
+        /// path of segmentList_ by checking for duplicate nodes.
         /// </summary>
         private bool Contains(ushort segmentId) {
             ushort nodeId = netService.GetHeadNode(segmentId);
-            foreach (ushort segId in segmentList) {
+            foreach (ushort segId in segmentList_) {
                 if (netService.GetHeadNode(segId) == nodeId) {
                     return true;
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Clears all rules put by RoundAboutMassEdit.FixRoundabout()
+        /// </summary>
+        public void ClearNode(ushort nodeId) {
+            PriorityRoad.ClearNode(nodeId);
+            netService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment seg) => {
+                if (!HasJunctionFlag(nodeId)) {
+                    // clear stay in lane.
+                    LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
+                }
+                return true;
+            });
+        }
+
+        /// <summary>
+        /// Clears all rules put by RoundAboutMassEdit.FixRoundabout()
+        /// </summary>
+        /// <param name="segList"></param>
+        public void ClearRoundabout(List<ushort> segList) {
+            foreach (ushort segmentId in segList) {
+                foreach (bool startNode in Constants.ALL_BOOL) {
+                    ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
+                    ClearNode(nodeId);
+                }
+            }
         }
     } // end class
 }//end namespace

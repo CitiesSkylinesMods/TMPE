@@ -1,21 +1,21 @@
 ﻿namespace TrafficManager.UI.MainMenu {
-    using ColossalFramework.UI;
     using TrafficManager.Custom.PathFinding;
     using UnityEngine;
 
-    public class StatsLabel : UILabel {
+    public class StatsLabel : U.Label.ULabel {
         private uint _previousValue = 0;
 
         public override void Start() {
-            size = new Vector2(
-                ModUI.Instance.MainMenu.width / 2f,
-                MainMenuPanel.ScaledSize.GetTitlebarHeight());
-            text = "0";
-            suffix = " PFs";
-            textColor = Color.green;
-            relativePosition = new Vector3(5f, -20f);
-            textAlignment = UIHorizontalAlignment.Left;
-            anchor = UIAnchorStyle.Top | UIAnchorStyle.Left;
+            base.Start();
+            // size = new Vector2(
+            //     ModUI.Instance.MainMenu.width / 2f,
+            //     MainMenuWindow.ScaledSize.GetTitlebarHeight());
+            this.text = "0";
+            this.suffix = " pathfinds";
+            this.textColor = Color.green;
+            // relativePosition = new Vector3(5f, -20f);
+            // textAlignment = UIHorizontalAlignment.Left;
+            // anchor = UIAnchorStyle.Top | UIAnchorStyle.Left;
         }
 
 #if QUEUEDSTATS
