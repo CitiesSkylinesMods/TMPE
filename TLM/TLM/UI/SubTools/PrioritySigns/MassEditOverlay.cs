@@ -18,17 +18,13 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
         private static DateTime _timer = DateTime.MinValue;
 
         /// <summary>
-        /// show mass edit over lay for the input duration.
-        /// overrides MassEditOVerlay.Show when it is set to a UTC time in future.
-        /// seconds is
-        /// seconds is
+        /// Show mass edit overlay for the input duration.
+        /// Overrides MassEditOverlay.Show when it is set to a UTC time in future.
         /// </summary>
-        /// <param name="seconds"> duration.
-        /// negative => never
-        /// float.MaxValue => always
-        /// </param>
+        /// <param name="seconds"> duration. Negative => never, float.MaxValue => always.</param>
         public static void SetTimer(float seconds) {
             DateTime dt;
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (seconds == Single.MaxValue) {
                 dt = DateTime.MaxValue;
             } else {
