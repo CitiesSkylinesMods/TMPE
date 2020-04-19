@@ -35,33 +35,21 @@ namespace TrafficManager.UI.MainMenu.OSD {
         }
 
         public override void Build(U.UiBuilder<U.Panel.UPanel> builder) {
-            StringBuilder text = new StringBuilder();
-            bool needSeparator = false;
+            // Capacity 9 will fit all modifiers and separators and the text
+            StringBuilder text = new StringBuilder(capacity: 9);
 
             text.Append($"<color {UConst.SHORTCUT_TEXT_HEX}>");
 
             if (this.shift_) {
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Shift"));
-                needSeparator = true;
+                text.Append("+");
             }
             if (this.ctrl_) {
-                if (needSeparator) {
-                    text.Append("+"); // separator required if shift is pressed
-                } else {
-                    needSeparator = true;
-                }
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Ctrl"));
+                text.Append("+");
             }
             if (this.alt_) {
-                if (needSeparator) {
-                    text.Append("+");
-                } else {
-                    needSeparator = true;
-                }
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Alt"));
-            }
-
-            if (needSeparator) {
                 text.Append("+");
             }
 
