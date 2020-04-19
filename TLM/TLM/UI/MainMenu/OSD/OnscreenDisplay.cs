@@ -1,5 +1,6 @@
 namespace TrafficManager.UI.MainMenu.OSD {
     using System.Collections.Generic;
+    using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
     using UnityEngine;
@@ -46,6 +47,30 @@ namespace TrafficManager.UI.MainMenu.OSD {
 
             // Recalculate now
             UResizer.UpdateControl(mainMenu);
+        }
+
+        /// <summary>Create OsdItem with generic "Esc Cancel and hide TMPE" text.</summary>
+        /// <returns>New OsdItem to pass to the <see cref="Display"/>.</returns>
+        public static Shortcut Esc_CancelAndHideTMPE() {
+            return new Shortcut(
+                keybindSetting: KeybindSettingsBase.Esc,
+                localizedText: Translation.Options.Get("Keybind.Esc:Cancel tool"));
+        }
+
+        /// <summary>Create OsdItem with generic "RightClick Leave node" text.</summary>
+        /// <returns>New OsdItem to pass to the <see cref="Display"/>.</returns>
+        public static Shortcut RightClick_LeaveNode() {
+            return new Shortcut(
+                keybindSetting: KeybindSettingsBase.RightClick,
+                localizedText: Translation.Options.Get("Keybind.RightClick:Leave node"));
+        }
+
+        /// <summary>Create OsdItem with generic "RightClick Leave segment" text.</summary>
+        /// <returns>New OsdItem to pass to the <see cref="Display"/>.</returns>
+        public static Shortcut RightClick_LeaveSegment() {
+            return new Shortcut(
+                keybindSetting: KeybindSettingsBase.RightClick,
+                localizedText: Translation.Options.Get("Keybind.RightClick:Leave segment"));
         }
     }
 }

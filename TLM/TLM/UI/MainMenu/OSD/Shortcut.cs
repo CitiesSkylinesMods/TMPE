@@ -6,12 +6,16 @@ namespace TrafficManager.UI.MainMenu.OSD {
     using TrafficManager.U.Autosize;
     using TrafficManager.U.Label;
 
-    /// <summary>Displays a keybind or dual keybind in the OSD panel.</summary>
-    public class OsdKeybindItem : OsdItem {
+    /// <summary>
+    /// Displays a keybind or dual keybind in the OSD panel.
+    /// This is for customizable shortcuts or dual shortcuts.
+    /// To display a hardcoded mouse click, use <see cref="HardcodedMouseShortcut"/>.
+    /// </summary>
+    public class Shortcut : OsdItem {
         private readonly KeybindSetting keybindSetting_;
         private readonly string localizedText_;
 
-        public OsdKeybindItem(KeybindSetting keybindSetting, string localizedText) {
+        public Shortcut(KeybindSetting keybindSetting, string localizedText) {
             keybindSetting_ = keybindSetting;
             localizedText_ = localizedText;
         }

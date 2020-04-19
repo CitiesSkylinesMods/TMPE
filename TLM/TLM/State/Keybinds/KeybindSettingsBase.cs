@@ -20,17 +20,16 @@ namespace TrafficManager.State.Keybinds {
         /// This input key can not be changed and is not checked, instead it is display only
         /// </value>
         // Not editable
-        protected static KeybindSetting ToolCancelViewOnly = new KeybindSetting(
+        internal static KeybindSetting Esc = new KeybindSetting(
             cat: "Global",
             configFileKey: "Key_ExitSubtool",
             defaultKey1: SavedInputKey.Encode(key: KeyCode.Escape, control: false, shift: false, alt: false));
 
         // Not editable
-        public static KeybindSetting ToolCancelRightClick = new KeybindSetting(
+        internal static KeybindSetting RightClick = new KeybindSetting(
             cat: "Global",
-            configFileKey: "Key_ExitOrBack",
-            defaultKey1: SavedInputKey.Encode(key: KeyCode.Escape, control: false, shift: false, alt: false),
-            defaultKey2: SavedInputKey.Encode(key: KeyCode.Mouse1, control: false, shift: false, alt: false));
+            configFileKey: "Key_RightClick",
+            defaultKey1: SavedInputKey.Encode(key: KeyCode.Mouse1, control: false, shift: false, alt: false));
 
         public static KeybindSetting ToggleMainMenu = new KeybindSetting(
             cat: "Global",

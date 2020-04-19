@@ -255,9 +255,9 @@
     <Compile Include="UI\MainMenu\MainMenuLayout.cs" />
     <Compile Include="UI\MainMenu\MenuButtonDef.cs" />
     <Compile Include="UI\MainMenu\OSD\OnscreenDisplay.cs" />
-    <Compile Include="UI\MainMenu\OSD\OsdClickItem.cs" />
+    <Compile Include="UI\MainMenu\OSD\HardcodedMouseShortcut.cs" />
     <Compile Include="UI\MainMenu\OSD\OsdItem.cs" />
-    <Compile Include="UI\MainMenu\OSD\OsdKeybindItem.cs" />
+    <Compile Include="UI\MainMenu\OSD\Shortcut.cs" />
     <Compile Include="UI\RemoveCitizenInstanceButtonExtender.cs" />
     <Compile Include="UI\RemoveVehicleButtonExtender.cs" />
     <Compile Include="UI\MainMenu\LaneConnectorButton.cs" />

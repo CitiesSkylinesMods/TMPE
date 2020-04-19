@@ -9,8 +9,12 @@ namespace TrafficManager.UI.MainMenu.OSD {
     using TrafficManager.U.Autosize;
     using TrafficManager.U.Label;
 
-    /// <summary>Displays a mouse click shortcut in OSD panel.</summary>
-    public class OsdClickItem : OsdItem {
+    /// <summary>
+    /// Displays a mouse click shortcut in OSD panel.
+    /// This is used for hardcoded mouse shortcuts. To display customizable shortcuts use the other
+    /// class: <see cref="Shortcut"/>.
+    /// </summary>
+    public class HardcodedMouseShortcut : OsdItem {
         private readonly UIMouseButton button_;
         private readonly bool shift_;
         private readonly bool ctrl_;
@@ -18,7 +22,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
         private readonly string localizedText_;
         private InputKey inputKey_;
 
-        public OsdClickItem(UIMouseButton button,
+        public HardcodedMouseShortcut(UIMouseButton button,
                             bool shift,
                             bool ctrl,
                             bool alt,

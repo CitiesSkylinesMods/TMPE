@@ -431,37 +431,40 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 case State.Select: {
                     var items = new List<OsdItem>();
                     items.Add(
-                        new OsdClickItem(
+                        new MainMenu.OSD.HardcodedMouseShortcut(
                             button: UIMouseButton.Left,
                             shift: false,
                             ctrl: true,
                             alt: false,
-                            localizedText: T("LaneArrows.Click:Separate lanes for entire junction")));
+                            localizedText: T(
+                                "LaneArrows.Click:Separate lanes for entire junction")));
                     items.Add(
-                        new OsdClickItem(
+                        new MainMenu.OSD.HardcodedMouseShortcut(
                             button: UIMouseButton.Left,
                             shift: false,
                             ctrl: false,
                             alt: true,
                             localizedText: T("LaneArrows.Click:Separate lanes for segment")));
-
-                    // TODO: Add right click cancel hint
+                    items.Add(OnscreenDisplay.Esc_CancelAndHideTMPE());
                     OnscreenDisplay.Display(items);
                     return;
                 }
                 case State.EditLaneArrows: {
                     var items = new List<OsdItem>();
                     items.Add(
-                        new OsdKeybindItem(
+                        new MainMenu.OSD.Shortcut(
                             keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
                             localizedText: T("LaneConnector.Label:Reset to default")));
-
-                    // TODO: Add right click cancel hint
+                    items.Add(OnscreenDisplay.RightClick_LeaveSegment());
+                    items.Add(OnscreenDisplay.Esc_CancelAndHideTMPE());
                     OnscreenDisplay.Display(items);
                     return;
                 }
+                default: {
+                    OnscreenDisplay.Clear();
+                    return;
+                }
             }
-            OnscreenDisplay.Clear();
         }
 
         private void RepositionWindowToNode() {

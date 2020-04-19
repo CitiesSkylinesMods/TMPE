@@ -1342,15 +1342,16 @@ namespace TrafficManager.UI.SubTools {
                 case SelectionMode.SelectSource: {
                     var items = new List<OsdItem>();
                     items.Add(
-                        new OsdKeybindItem(
+                        new MainMenu.OSD.Shortcut(
                             keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
                             localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
                     items.Add(
-                        new OsdKeybindItem(
+                        new MainMenu.OSD.Shortcut(
                             keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
                             localizedText: T("LaneConnector.Label:Reset to default")));
 
-                    // TODO: Add right click cancel hint
+                    items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                    items.Add(OnscreenDisplay.Esc_CancelAndHideTMPE());
                     OnscreenDisplay.Display(items);
                     return;
                 }
