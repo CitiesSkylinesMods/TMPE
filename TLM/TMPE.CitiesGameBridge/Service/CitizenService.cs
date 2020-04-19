@@ -62,28 +62,16 @@ namespace CitiesGameBridge.Service {
         }
 
         public void ProcessCitizen(uint citizenId, CitizenHandler handler) {
-            ProcessCitizen(
+            handler(
                 citizenId,
-                ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId],
-                handler);
-        }
-
-        public void ProcessCitizen(uint citizenId, ref Citizen citizen, CitizenHandler handler) {
-            handler(citizenId, ref citizen);
+                ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId]);
         }
 
         public void ProcessCitizenInstance(ushort citizenInstanceId,
                                            CitizenInstanceHandler handler) {
-            ProcessCitizenInstance(
+            handler(
                 citizenInstanceId,
-                ref Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId],
-                handler);
-        }
-
-        public void ProcessCitizenInstance(ushort citizenInstanceId,
-                                           ref CitizenInstance citizenInstance,
-                                           CitizenInstanceHandler handler) {
-            handler(citizenInstanceId, ref citizenInstance);
+                ref Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId]);
         }
 
         public void ReleaseCitizenInstance(ushort citizenInstanceId) {

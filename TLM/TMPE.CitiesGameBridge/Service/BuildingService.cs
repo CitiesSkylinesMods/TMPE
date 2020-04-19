@@ -41,12 +41,9 @@ namespace CitiesGameBridge.Service {
         }
 
         public void ProcessBuilding(ushort buildingId, BuildingHandler handler) {
-            handler(buildingId, ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId]);
-        }
-
-        [Obsolete("Entirely useless method. Do not use.")]
-        public void ProcessBuilding(ushort buildingId, ref Building building, BuildingHandler handler) {
-            handler(buildingId, ref building);
+            handler(
+                buildingId,
+                ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId]);
         }
     }
 }

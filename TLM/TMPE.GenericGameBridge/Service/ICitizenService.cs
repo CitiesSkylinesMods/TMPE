@@ -1,4 +1,4 @@
-﻿namespace GenericGameBridge.Service {
+namespace GenericGameBridge.Service {
     public delegate bool CitizenHandler(uint citizenId, ref Citizen citizen);
 
     public delegate bool CitizenInstanceHandler(ushort citizenInstanceId,
@@ -13,8 +13,6 @@
 
         void ProcessCitizen(uint citizenId, CitizenHandler handler);
 
-        void ProcessCitizen(uint citizenId, ref Citizen citizen, CitizenHandler handler);
-
         bool CheckCitizenInstanceFlags(ushort citizenInstanceId,
                                        CitizenInstance.Flags flagMask,
                                        CitizenInstance.Flags? expectedResult =
@@ -23,10 +21,6 @@
         bool IsCitizenInstanceValid(ushort citizenInstanceId);
 
         void ProcessCitizenInstance(ushort citizenInstanceId, CitizenInstanceHandler handler);
-
-        void ProcessCitizenInstance(ushort citizenInstanceId,
-                                    ref CitizenInstance citizenInstance,
-                                    CitizenInstanceHandler handler);
 
         /// <summary>
         /// Despawns and releases the given citizen instance.

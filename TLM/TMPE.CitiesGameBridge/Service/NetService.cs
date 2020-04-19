@@ -52,12 +52,9 @@ namespace CitiesGameBridge.Service {
         /// <param name="nodeId">The id of the node.</param>
         /// <param name="handler">The handler function to invoke.</param>
         public void ProcessNode(ushort nodeId, NetNodeHandler handler) {
-            handler(nodeId, ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]);
-        }
-
-        [Obsolete("Entirely useless method. Do not use.")]
-        public void ProcessNode(ushort nodeId, ref NetNode node, NetNodeHandler handler) {
-            handler(nodeId, ref node);
+            handler(
+                nodeId,
+                ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]);
         }
 
         // SEGMENT BASICS --------------------------------------------------------------------------------
@@ -102,12 +99,9 @@ namespace CitiesGameBridge.Service {
         /// <param name="segmentId">The id of the segment.</param>
         /// <param name="handler">The handler function to invoke.</param>
         public void ProcessSegment(ushort segmentId, NetSegmentHandler handler) {
-            handler(segmentId, ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
-        }
-
-        [Obsolete("Entirely useless method. Do not use.")]
-        public void ProcessSegment(ushort segmentId, ref NetSegment segment, NetSegmentHandler handler) {
-            handler(segmentId, ref segment);
+            handler(
+                segmentId,
+                ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
         }
 
         // LANE BASICS --------------------------------------------------------------------------------
@@ -172,12 +166,9 @@ namespace CitiesGameBridge.Service {
         /// <param name="laneId">The id of the lane.</param>
         /// <param name="handler">The handler function to invoke.</param>
         public void ProcessLane(uint laneId, NetLaneHandler handler) {
-            handler(laneId, ref Singleton<NetManager>.instance.m_lanes.m_buffer[laneId]);
-        }
-
-        [Obsolete("There is liteally no point to this method; just inline the handler.")]
-        public void ProcessLane(uint laneId, ref NetLane lane, NetLaneHandler handler) {
-            handler(laneId, ref lane);
+            handler(
+                laneId,
+                ref Singleton<NetManager>.instance.m_lanes.m_buffer[laneId]);
         }
 
         // OTHER STUFF --------------------------------------------------------------------------------

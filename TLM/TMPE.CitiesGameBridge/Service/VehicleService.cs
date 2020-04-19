@@ -58,27 +58,15 @@ namespace CitiesGameBridge.Service {
         }
 
         public void ProcessParkedVehicle(ushort parkedVehicleId, ParkedVehicleHandler handler) {
-            ProcessParkedVehicle(
+            handler(
                 parkedVehicleId,
-                ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId],
-                handler);
-        }
-
-        public void ProcessParkedVehicle(ushort parkedVehicleId,
-                                         ref VehicleParked parkedVehicle,
-                                         ParkedVehicleHandler handler) {
-            handler(parkedVehicleId, ref parkedVehicle);
+                ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId]);
         }
 
         public void ProcessVehicle(ushort vehicleId, VehicleHandler handler) {
-            ProcessVehicle(
+            handler(
                 vehicleId,
-                ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId],
-                handler);
-        }
-
-        public void ProcessVehicle(ushort vehicleId, ref Vehicle vehicle, VehicleHandler handler) {
-            handler(vehicleId, ref vehicle);
+                ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
         }
 
         public void ReleaseParkedVehicle(ushort parkedVehicleId) {

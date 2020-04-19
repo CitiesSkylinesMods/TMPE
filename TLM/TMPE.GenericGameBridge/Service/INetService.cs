@@ -103,15 +103,9 @@ namespace GenericGameBridge.Service {
 
         void ProcessLane(uint laneId, NetLaneHandler handler);
 
-        void ProcessLane(uint laneId, ref NetLane lane, NetLaneHandler handler);
-
         void ProcessNode(ushort nodeId, NetNodeHandler handler);
 
-        void ProcessNode(ushort nodeId, ref NetNode node, NetNodeHandler handler);
-
         void ProcessSegment(ushort segmentId, NetSegmentHandler handler);
-
-        void ProcessSegment(ushort segmentId, ref NetSegment segment, NetSegmentHandler handler);
 
         void PublishSegmentChanges(ushort segmentId);
 
