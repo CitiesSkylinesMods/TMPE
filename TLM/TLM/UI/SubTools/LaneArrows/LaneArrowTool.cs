@@ -403,7 +403,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            if (KeybindSettingsBase.LaneConnectorDelete.IsPressed(Event.current)) {
+            if (Event.current.type == EventType.KeyDown && KeybindSettingsBase.LaneConnectorDelete.IsPressed(Event.current)) {
                 OnResetToDefaultPressed();
             }
 
