@@ -1,15 +1,16 @@
 namespace TrafficManager.Util {
+    using ColossalFramework.Math;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using static UI.SubTools.LaneConnectorTool;
-    using static TrafficManager.Util.Shortcuts;
-    using System.Collections.Generic;
     using System;
+    using System.Collections.Generic;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using UnityEngine;
+    using static TrafficManager.Util.Shortcuts;
+    using static UI.SubTools.LaneConnectorTool;
 
     public class RoundaboutMassEdit {
         public static RoundaboutMassEdit Instance = new RoundaboutMassEdit();
@@ -18,6 +19,16 @@ namespace TrafficManager.Util {
         }
 
         private List<ushort> segmentList_;
+
+        public static class RoundAboutSearchTree {
+            public struct Node {
+                ushort [] Children;
+
+            }
+
+
+
+        }
 
         private static void FixLanesRoundabout(ushort segmentId, ushort nextSegmentId) {
             ushort nodeId = netService.GetHeadNode(segmentId);
@@ -219,7 +230,7 @@ namespace TrafficManager.Util {
                 this.segmentList_ = new List<ushort>();
             }
             bool ret;
-            if (segmentId == 0 || ! segMan.CalculateIsOneWay(segmentId)) {
+            if (segmentId == 0 || !segMan.CalculateIsOneWay(segmentId)) {
                 ret = false;
             } else {
                 ret = TraverseAroundRecursive(segmentId);
@@ -246,7 +257,7 @@ namespace TrafficManager.Util {
                 }
                 return true;
             }
-            catch (Exception e){
+            catch (Exception e) {
                 Log.Error(e.ToString());
                 return false;
             }
@@ -257,7 +268,7 @@ namespace TrafficManager.Util {
                 return false; // too long. prune
             }
             segmentList_.Add(segmentId);
-            var segments = GetSortedSegments( segmentId);
+            var segments = GetSortedSegments(segmentId);
 
             foreach (var nextSegmentId in segments) {
                 bool isRoundabout;
@@ -286,9 +297,9 @@ namespace TrafficManager.Util {
         private static List<ushort> GetSortedSegments(ushort segmentId) {
             ushort headNodeId = netService.GetHeadNode(segmentId);
             bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
-            var list0 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Forward, !lht);
-            var list1 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Left   ,  lht);
-            var list2 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Right  , !lht);
+            var list0 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Forward, !lht);
+            var list1 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Left, lht);
+            var list2 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Right, !lht);
 
             if (lht) {
                 list0.AddRange(list1);
@@ -337,7 +348,7 @@ namespace TrafficManager.Util {
         /// <param name="prevSegmentId"></param>
         /// <param name="headNodeId">head node for prevSegmentId</param>
         /// <returns></returns>
-        private static bool IsPartofRoundabout( ushort nextSegmentId, ushort prevSegmentId, ushort headNodeId) {
+        private static bool IsPartofRoundabout(ushort nextSegmentId, ushort prevSegmentId, ushort headNodeId) {
             bool ret = nextSegmentId != 0 && nextSegmentId != prevSegmentId;
             ret &= segMan.CalculateIsOneWay(nextSegmentId);
             ret &= headNodeId == netService.GetTailNode(nextSegmentId);
@@ -383,6 +394,24 @@ namespace TrafficManager.Util {
                     ClearNode(nodeId);
                 }
             }
+        }
+
+        internal static float CalculateRadius(ref NetSegment segment) {
+            // TDOO: to calculate maximum curviture for eleptical roundabout, cut the bezier in 10 portions
+            // and then find the bezier with minimum raduis.
+            Vector2 startDir = VectorUtils.XZ(segment.m_startDirection);
+            Vector2 endDir = VectorUtils.XZ(segment.m_endDirection);
+            Vector2 startPos = VectorUtils.XZ(segment.m_startNode.ToNode().m_position);
+            Vector2 endPos = VectorUtils.XZ(segment.m_endNode.ToNode().m_position);
+            float angle = Vector2.Angle(startDir, -endDir);
+            float l = (startPos - endPos).magnitude;
+            float r = l / (2 * Mathf.Sin(angle / 2)); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issuecomment-616351792
+            return r;
+        }
+
+        private static float CalculatePreferedSpeedKPH(ushort segmentId) {
+            float r = CalculateRadius(ref segmentId.ToSegment());
+            return 4 / Mathf.Sqrt(r); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issue-589462235
         }
     } // end class
 }//end namespace
