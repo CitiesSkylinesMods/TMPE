@@ -1339,7 +1339,7 @@ namespace TrafficManager.UI.SubTools {
                     var items = new List<OsdItem>();
                     items.Add(
                         new MainMenu.OSD.ModeDescription(
-                            T("LaneArrows.Mode.Select:Select a junction to edit")));
+                            T("LaneConnector.Mode.Select:Select a junction to edit")));
                     OnscreenDisplay.Display(items);
                     return;
                 }
