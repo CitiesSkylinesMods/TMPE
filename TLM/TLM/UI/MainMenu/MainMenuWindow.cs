@@ -338,6 +338,8 @@ namespace TrafficManager.UI.MainMenu {
         private void OnToggleOsdButtonClicked(U.Button.UButton button) {
             bool value = !GlobalConfig.Instance.Main.KeybindsPanelVisible;
             GlobalConfig.Instance.Main.KeybindsPanelVisible = value;
+            GlobalConfig.WriteConfig();
+
             Log._Debug($"Toggle value of KeybindsPanelVisible to {value}");
 
             // Refer to the TrafficManager tool asking it to request help from the current tool
