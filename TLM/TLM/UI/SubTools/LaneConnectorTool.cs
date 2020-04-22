@@ -1334,13 +1334,22 @@ namespace TrafficManager.UI.SubTools {
 
             switch (m) {
                 // TODO: uncomment this when state machine is properly implemented and right click cancels the mode
-                // case SelectionMode.None: {
-                //     OnScreenDisplay.Display(...);
-                //     return;
-                // }
+                case SelectionMode.None: {
+                    var items = new List<OsdItem>();
+                    items.Add(
+                        new MainMenu.OSD.ModeDescription(
+                            T("LaneArrows.Mode.Select:Select a junction to edit")));
+                    OnscreenDisplay.Display(items);
+                    return;
+                }
                 case SelectionMode.SelectTarget:
                 case SelectionMode.SelectSource: {
                     var items = new List<OsdItem>();
+                    items.Add(
+                        new MainMenu.OSD.ModeDescription(
+                            m == SelectionMode.SelectSource
+                                ? T("LaneConnector.Mode.Source:Click outgoing lane")
+                                : T("LaneConnector.Mode.Source:Click incoming lane to connect")));
                     items.Add(
                         new MainMenu.OSD.Shortcut(
                             keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
@@ -1351,7 +1360,6 @@ namespace TrafficManager.UI.SubTools {
                             localizedText: T("LaneConnector.Label:Reset to default")));
 
                     items.Add(OnscreenDisplay.RightClick_LeaveNode());
-                    items.Add(OnscreenDisplay.Esc_CancelAndHideTMPE());
                     OnscreenDisplay.Display(items);
                     return;
                 }

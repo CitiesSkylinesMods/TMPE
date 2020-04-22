@@ -431,6 +431,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 case State.Select: {
                     var items = new List<OsdItem>();
                     items.Add(
+                        new MainMenu.OSD.ModeDescription(
+                            T("LaneArrows.Mode.Select:Click segment to edit")));
+                    items.Add(
                         new MainMenu.OSD.HardcodedMouseShortcut(
                             button: UIMouseButton.Left,
                             shift: false,
@@ -445,7 +448,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                             ctrl: false,
                             alt: true,
                             localizedText: T("LaneArrows.Click:Separate lanes for segment")));
-                    items.Add(OnscreenDisplay.Esc_CancelAndHideTMPE());
                     OnscreenDisplay.Display(items);
                     return;
                 }
@@ -456,7 +458,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                             keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
                             localizedText: T("LaneConnector.Label:Reset to default")));
                     items.Add(OnscreenDisplay.RightClick_LeaveSegment());
-                    items.Add(OnscreenDisplay.Esc_CancelAndHideTMPE());
                     OnscreenDisplay.Display(items);
                     return;
                 }

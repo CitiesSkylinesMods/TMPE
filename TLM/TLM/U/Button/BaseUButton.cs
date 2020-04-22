@@ -77,11 +77,15 @@
             UpdateButtonImageAndTooltip();
         }
 
+        // TODO: Simplify tooltip override, use this code for MainMenu buttons, and return back to the original tooltip in all other
         internal void UpdateButtonImageAndTooltip() {
             UpdateButtonImage();
 
             // Update localized tooltip with shortcut key if available
-            tooltip = GetTooltip() + GetShortcutTooltip();
+            string overrideTooltip = GetTooltip();
+            if (!string.IsNullOrEmpty(overrideTooltip)) {
+                this.tooltip = overrideTooltip + GetShortcutTooltip();
+            }
 
             this.isVisible = IsVisible();
             this.Invalidate();
@@ -103,32 +107,32 @@
                 = m_BackgroundSprites.m_Disabled =
                       m_BackgroundSprites.m_Focused =
                           Skin.GetBackgroundTextureId(
-                              enabledState,
-                              ControlHoveredState.Normal,
-                              activeState);
+                              enabledState: enabledState,
+                              hoveredState: ControlHoveredState.Normal,
+                              activeState: activeState);
             m_BackgroundSprites.m_Hovered
                 = Skin.GetBackgroundTextureId(
-                    enabledState,
-                    ControlHoveredState.Hovered,
-                    activeState);
+                    enabledState: enabledState,
+                    hoveredState: ControlHoveredState.Hovered,
+                    activeState: activeState);
             m_PressedBgSprite = Skin.GetBackgroundTextureId(
-                enabledState,
-                ControlHoveredState.Normal,
-                ControlActiveState.Active);
+                enabledState: enabledState,
+                hoveredState: ControlHoveredState.Normal,
+                activeState: ControlActiveState.Active);
 
             m_ForegroundSprites.m_Normal =
                 m_ForegroundSprites.m_Disabled =
                     m_ForegroundSprites.m_Focused =
                         Skin.GetForegroundTextureId(
-                            enabledState,
-                            ControlHoveredState.Normal,
-                            activeState);
+                            enabledState: enabledState,
+                            hoveredState: ControlHoveredState.Normal,
+                            activeState: activeState);
             m_ForegroundSprites.m_Hovered
                 = m_PressedFgSprite
                       = Skin.GetForegroundTextureId(
-                          enabledState,
-                          ControlHoveredState.Hovered,
-                          activeState);
+                          enabledState: enabledState,
+                          hoveredState: ControlHoveredState.Hovered,
+                          activeState: activeState);
         }
 
         /// <summary>
@@ -136,6 +140,7 @@
         /// otherwise an empty string is returned.
         /// </summary>
         /// <returns>Tooltip to append to the main tooltip text, or an empty string</returns>
+        // TODO: Move this code to MainMenu buttons which have shortcuts, other buttons don't have them
         private string GetShortcutTooltip() {
             return GetShortcutKey() != null
                        ? GetShortcutKey().ToLocalizedString("\n")

@@ -1,5 +1,6 @@
 namespace TrafficManager.UI.MainMenu.OSD {
     using System.Collections.Generic;
+    using JetBrains.Annotations;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
@@ -13,6 +14,18 @@ namespace TrafficManager.UI.MainMenu.OSD {
             Display(new List<OsdItem>());
         }
 
+        /// <summary>Hide the OSD panel and the OSD toggle button.</summary>
+        public static void Hide() {
+            MainMenuWindow mainMenu = ModUI.Instance.MainMenu;
+            mainMenu.KeybindsPanel.isVisible = false;
+        }
+
+        /// <summary>Show the OSD panel and the OSD toggle button.</summary>
+        public static void Show() {
+            MainMenuWindow mainMenu = ModUI.Instance.MainMenu;
+            mainMenu.KeybindsPanel.isVisible = true;
+        }
+
         /// <summary>
         /// On Screen Display feature:
         /// Clear, and hide the keybind panel.
@@ -21,7 +34,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
         /// <param name="items">List of <see cref="OsdItem"/> to display.</param>
         public static void Display(List<OsdItem> items) {
             MainMenuWindow mainMenu = ModUI.Instance.MainMenu;
-            mainMenu.KeybindsPanel.isVisible = false;
+            Hide();
 
             // Deactivate old items, and destroy them. Also remove them from the panel till Unity
             // is happy to delete them.
@@ -42,7 +55,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
 
             // Show the panel now
             if (items.Count > 0) {
-                mainMenu.KeybindsPanel.isVisible = true;
+                Show();
             }
 
             // Recalculate now
@@ -51,6 +64,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
 
         /// <summary>Create OsdItem with generic "Esc Cancel and hide TMPE" text.</summary>
         /// <returns>New OsdItem to pass to the <see cref="Display"/>.</returns>
+        [UsedImplicitly]
         public static Shortcut Esc_CancelAndHideTMPE() {
             return new Shortcut(
                 keybindSetting: KeybindSettingsBase.Esc,

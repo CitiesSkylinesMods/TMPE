@@ -254,6 +254,7 @@
     <Compile Include="UI\MainMenu\MainMenuButton.cs" />
     <Compile Include="UI\MainMenu\MainMenuLayout.cs" />
     <Compile Include="UI\MainMenu\MenuButtonDef.cs" />
+    <Compile Include="UI\MainMenu\OSD\ModeDescription.cs" />
     <Compile Include="UI\MainMenu\OSD\OnscreenDisplay.cs" />
     <Compile Include="UI\MainMenu\OSD\HardcodedMouseShortcut.cs" />
     <Compile Include="UI\MainMenu\OSD\OsdItem.cs" />

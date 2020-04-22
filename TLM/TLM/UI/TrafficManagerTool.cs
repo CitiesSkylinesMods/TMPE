@@ -416,11 +416,6 @@ namespace TrafficManager.UI {
         /// </summary>
         /// <param name="e">Event to handle.</param>
         protected override void OnToolGUI(Event e) {
-            // if (InvalidateOnscreenDisplayFlag) {
-            //     this.InvalidateOnscreenDisplayFlag = false;
-            //     this.RequestOnscreenDisplayUpdate();
-            // }
-
             try {
                 if (!Input.GetMouseButtonDown(0)) {
                     _mouseClickProcessed = false;
