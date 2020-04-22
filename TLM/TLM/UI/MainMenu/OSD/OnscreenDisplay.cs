@@ -43,7 +43,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
                 UnityEngine.Object.Destroy(c.gameObject);
             }
 
-            mainMenu.KeybindsPanel.transform.DetachChildren();
+            // mainMenu.KeybindsPanel.transform.DetachChildren();
 
             // Populate the panel with the items
             using (var builder = new UiBuilder<U.Panel.UPanel>(mainMenu.KeybindsPanel)) {
