@@ -150,6 +150,10 @@
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
+    <Compile Include="Patch\_DefaultTool\OnToolGUIPatch.cs" />
+    <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
+    <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
     <Compile Include="UI\Helpers\SegmentLaneMarker.cs" />
@@ -196,7 +200,7 @@
     <Compile Include="Manager\Impl\JunctionRestrictionsManager.cs" />
     <Compile Include="Manager\Impl\UtilityManager.cs" />
     <Compile Include="Manager\Impl\ExtCitizenInstanceManager.cs" />
-    <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
+    <Compile Include="Patch\_DefaultTool\RenderOverlayPatch.cs" />
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenInstancePatch.cs" />
     <Compile Include="Patch\_NetManager\UpdateSegmentPatch.cs" />
     <Compile Include="Patch\_NetManager\FinalizeSegmentPatch.cs" />
@@ -241,6 +245,7 @@
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
+    <Compile Include="UI\RoadSelectionPanels.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\Helpers\GuideHandler.cs" />
     <Compile Include="UI\Helpers\GuideWrapper.cs" />
@@ -320,6 +325,7 @@
     <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\LoopUtil.cs" />
     <Compile Include="Util\ModsCompatibilityChecker.cs" />
+    <Compile Include="Util\RoadSelectionUtil.cs" />
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
@@ -629,6 +635,22 @@
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
     <EmbeddedResource Include="Resources\Translations\VehicleRestrictions.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Clear-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Clear-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPriority-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPriority-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-active.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-hovered.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Yield-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Yield-fg-normal.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">

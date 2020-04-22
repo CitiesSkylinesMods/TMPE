@@ -1,10 +1,12 @@
-﻿namespace TrafficManager.U {
+namespace TrafficManager.U {
     using System;
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using TrafficManager.UI.Textures;
     using UnityEngine;
+    using CSUtil.Commons;
+    using TrafficManager.State.ConfigData;
 
     public static class TextureUtil {
         /// <summary>
@@ -95,6 +97,13 @@
                     "Number of sprite name does not match dimensions " +
                     $"(expected {numX} x {numY}, was {spriteNames.Length})");
             }
+
+#if DEBUG
+            Log._DebugIf(
+            DebugSwitch.ResourceLoading.Get(),
+                () => $"Loading atlas for {name} count:{numX}x{numY} " +
+                $"texture:{texture.name} size:{texture.width}x{texture.height}");
+#endif
 
             UITextureAtlas atlas = ScriptableObject.CreateInstance<UITextureAtlas>();
             atlas.padding = 0;

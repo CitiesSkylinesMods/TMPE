@@ -193,13 +193,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
                 ToolWindow.SetupControls(builder, numLanes);
 
-                // On Delete being pressed
-                ToolWindow.eventKeyDown += (component, param) => {
-                    if (KeybindSettingsBase.LaneConnectorDelete.IsPressed(param)) {
-                        OnResetToDefaultPressed();
-                    }
-                };
-
                 // Resize everything correctly
                 // builder.Control.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
                 builder.Done();
@@ -411,6 +404,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 fsm_.State != State.EditLaneArrows)
             {
                 return;
+            }
+
+            if (Event.current.type == EventType.KeyDown && KeybindSettingsBase.LaneConnectorDelete.IsPressed(Event.current)) {
+                OnResetToDefaultPressed();
             }
 
             RepositionWindowToNode();
