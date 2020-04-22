@@ -1,4 +1,5 @@
 namespace TrafficManager.U.Button {
+    using System;
     using ColossalFramework.UI;
     using TrafficManager.U.Autosize;
 
@@ -6,6 +7,9 @@ namespace TrafficManager.U.Button {
     /// Basic button, cannot be activated, clickable, no tooltip.
     /// </summary>
     public class UButton : BaseUButton {
+        [Obsolete("Remove this field and simplify tooltip handling in BaseUButton")]
+        public string uTooltip;
+
         public override bool CanActivate() {
             if (this.uCanActivate != null) {
                 return this.uCanActivate(this);
@@ -22,7 +26,7 @@ namespace TrafficManager.U.Button {
             return false;
         }
 
-        protected override string GetTooltip() => string.Empty; // to override in subclass
+        protected override string GetTooltip() => this.uTooltip; // to override in subclass
 
         protected override bool IsVisible() => this.isVisible;
     }

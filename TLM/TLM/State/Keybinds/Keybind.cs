@@ -22,6 +22,16 @@ namespace TrafficManager.State.Keybinds {
             if (k.value == SavedInputKey.Empty) {
                 return Translation.Options.Get("Keybind:None");
             }
+
+            switch (k.Key) {
+                case KeyCode.Mouse0:
+                    return Translation.Options.Get("Shortcut:Click");
+                case KeyCode.Mouse1:
+                    return Translation.Options.Get("Shortcut:RightClick");
+                case KeyCode.Mouse2:
+                    return Translation.Options.Get("Shortcut:MiddleClick");
+            }
+
             return k.ToLocalizedString("KEYNAME");
         }
 

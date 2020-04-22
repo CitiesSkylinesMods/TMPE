@@ -1,5 +1,6 @@
 namespace TrafficManager.U {
     using System;
+    using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U.Autosize;
@@ -47,43 +48,6 @@ namespace TrafficManager.U {
             var newLabel = Control.AddUIComponent(typeof(TLabel)) as TLabel;
             newLabel.text = t;
             return new UiBuilder<TLabel>(newLabel);
-        }
-
-        /// <summary>Add a colored label for a keyboard shortcut.</summary>
-        /// <returns>New UI Builder with the keybind label created.</returns>
-        public UiBuilder<U.Label.ULabel> ShortcutLabel(KeybindSetting ks) {
-            var shortcutLabel = Control.AddUIComponent(typeof(U.Label.ULabel)) as U.Label.ULabel;
-
-            shortcutLabel.backgroundSprite = "GenericPanelDark";
-            shortcutLabel.textColor = UConst.SHORTCUT_KEYBIND_TEXT;
-            shortcutLabel.text = $" {ks.ToLocalizedString()} ";
-
-            return new UiBuilder<U.Label.ULabel>(shortcutLabel);
-        }
-
-        /// <summary>Add a colored label for a 'Shift + Ctrl + Alt' modifier key.</summary>
-        /// <returns>New UI Builder with the keybind label created.</returns>
-        public UiBuilder<U.Label.ULabel> ModifierLabel(bool shift, bool ctrl, bool alt) {
-            var modifierLabel = Control.AddUIComponent(typeof(U.Label.ULabel)) as U.Label.ULabel;
-
-            modifierLabel.backgroundSprite = "GenericPanelDark";
-            modifierLabel.textColor = UConst.SHORTCUT_KEYBIND_TEXT;
-
-            string modifiers = shift
-                                   ? Translation.Options.Get("Shortcut.Modifier:Shift")
-                                   : string.Empty;
-            if (ctrl) {
-                modifiers += string.IsNullOrEmpty(modifiers) ? string.Empty : " + ";
-                modifiers += Translation.Options.Get("Shortcut.Modifier:Ctrl");
-            }
-            if (alt) {
-                modifiers += string.IsNullOrEmpty(modifiers) ? string.Empty : " + ";
-                modifiers += Translation.Options.Get("Shortcut.Modifier:Alt");
-            }
-
-            modifierLabel.text = $" {modifiers} ";
-
-            return new UiBuilder<U.Label.ULabel>(modifierLabel);
         }
 
         public UiBuilder<TPanel> ChildPanel<TPanel>(Action<TPanel> setupFn)

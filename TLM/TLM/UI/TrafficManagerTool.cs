@@ -23,6 +23,7 @@ namespace TrafficManager.UI {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.SubTools.LaneArrows;
     using TrafficManager.UI.SubTools.TimedTrafficLights;
 
@@ -36,8 +37,8 @@ namespace TrafficManager.UI {
           IObserver<GlobalConfig>
     {
         // TODO [issue #710] Road adjust mechanism seem to have changed in Sunset Harbor DLC.
-        // activate when we know the mechinism.  
-        private bool ReadjustPathMode => false; //ShiftIsPressed; 
+        // activate when we know the mechinism.
+        private bool ReadjustPathMode => false; //ShiftIsPressed;
 
         // /// <summary>Set this to true to once call <see cref="RequestOnscreenDisplayUpdate"/>.</summary>
         // public bool InvalidateOnscreenDisplayFlag { get; set; }
@@ -287,8 +288,7 @@ namespace TrafficManager.UI {
         /// <summary>Resets the tool and calls deactivate on it.</summary>
         private void SetToolMode_DeactivateTool() {
             // Clear OSD panel with keybinds
-            OnScreenDisplay.Begin();
-            OnScreenDisplay.Done();
+            OnscreenDisplay.Clear();
 
             if (activeLegacySubTool_ != null || activeSubTool_ != null) {
                 activeLegacySubTool_?.Cleanup();
@@ -495,11 +495,6 @@ namespace TrafficManager.UI {
         /// </summary>
         /// <param name="e">Event to handle.</param>
         public void OnToolGUIImpl(Event e) {
-            // if (InvalidateOnscreenDisplayFlag) {
-            //     this.InvalidateOnscreenDisplayFlag = false;
-            //     this.RequestOnscreenDisplayUpdate();
-            // }
-
             try {
                 if (!Input.GetMouseButtonDown(0)) {
                     _mouseClickProcessed = false;
@@ -577,7 +572,11 @@ namespace TrafficManager.UI {
                                    ushort nodeId,
                                    bool warning = false,
                                    bool alpha = false) {
-            DrawNodeCircle(cameraInfo, nodeId, GetToolColor(warning, false), alpha);
+            DrawNodeCircle(
+                cameraInfo: cameraInfo,
+                nodeId: nodeId,
+                color: GetToolColor(warning: warning, error: false),
+                alpha: alpha);
         }
 
         /// <summary>
@@ -1870,11 +1869,12 @@ namespace TrafficManager.UI {
 
         public void RequestOnscreenDisplayUpdate() {
             if (!GlobalConfig.Instance.Main.KeybindsPanelVisible) {
-                OnScreenDisplay.Clear();
+                OnscreenDisplay.Clear();
                 return;
             }
 
-            activeSubTool_?.UpdateOnscreenDisplayPanel();
+            (activeLegacySubTool_ as IOnscreenDisplayProvider)?.UpdateOnscreenDisplayPanel();
+            (activeSubTool_ as IOnscreenDisplayProvider)?.UpdateOnscreenDisplayPanel();
         }
     }
 }
