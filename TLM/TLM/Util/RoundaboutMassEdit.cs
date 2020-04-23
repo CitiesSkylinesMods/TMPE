@@ -2,6 +2,7 @@ namespace TrafficManager.Util {
     using ColossalFramework.Math;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
+    using Record;
     using System;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Data;
@@ -20,17 +21,18 @@ namespace TrafficManager.Util {
 
         private List<ushort> segmentList_;
 
-        public static class RoundAboutSearchTree {
-            public struct Node {
-                ushort [] Children;
-
+        private static void FixSegmentRoundabout(ushort segmentId, ushort nextSegmentId) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR) {
+                ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, false);
             }
-
-
-
-        }
-
-        private static void FixLanesRoundabout(ushort segmentId, ushort nextSegmentId) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits) {
+                float? targetSpeed = CalculatePreferedSpeed(segmentId)?.GameUnits;
+                float defaultSpeed = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(segmentId.ToSegment().Info);
+                if (targetSpeed != null && targetSpeed < defaultSpeed) {
+                    SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Forward, targetSpeed);
+                    SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Backward, targetSpeed);
+                }
+            }
             ushort nodeId = netService.GetHeadNode(segmentId);
 
             if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
@@ -151,14 +153,24 @@ namespace TrafficManager.Util {
                 //ignore highway rules: //TODO remove as part of issue #569
                 JunctionRestrictionsManager.Instance.SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, true);
             } // endif
+
+            if (OptionsMassEditTab.RoundAboutQuickFix_EnterBlockedRoundabout_Enabled) {
+                JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
+                    segmentId,
+                    startNode,
+                    OptionsMassEditTab.RoundAboutQuickFix_EnterBlockedRoundabout_Allowed);
+            }
+
         }
 
-        private static void FixLanesMinor(ushort segmentId, ushort nodeId) {
+        private static void FixSegmentMinor(ushort segmentId, ushort nodeId) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR) {
+                ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, false);
+            }
             int shortUnit = 4;
             int meterPerUnit = 8;
             ref NetSegment seg = ref GetSeg(segmentId);
             ushort otherNodeId = seg.GetOtherNode(nodeId);
-
             if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout &&
                 !HasJunctionFlag(otherNodeId) &&
                 seg.m_averageLength < shortUnit * meterPerUnit) {
@@ -176,7 +188,7 @@ namespace TrafficManager.Util {
                 } // end if
 
                 FixRulesMinor(segmentId, nodeId);
-                FixLanesMinor(segmentId, nodeId);
+                FixSegmentMinor(segmentId, nodeId);
             }//end for
         }
 
@@ -185,31 +197,34 @@ namespace TrafficManager.Util {
         /// </summary>
         /// <param name="segmentId"></param>
         /// <returns></returns>
-        public bool FixRoundabout(ushort initialSegmentId) {
+        public bool FixRoundabout(ushort initialSegmentId, out IRecordable record) {
             bool isRoundabout = TraverseLoop(initialSegmentId, out var segList);
             if (!isRoundabout) {
                 Log._Debug($"segment {initialSegmentId} not a roundabout.");
+                record = null;
                 return false;
             }
             int count = segList.Count;
             Log._Debug($"\n segmentId={initialSegmentId} seglist.count={count}\n");
 
-            FixRoundabout(segList);
+            record = FixRoundabout(segList);
             return true;
         }
 
-        public void FixRoundabout(List<ushort> segList) {
+        public IRecordable FixRoundabout(List<ushort> segList) {
             if (segList == null)
-                return;
+                return null;
+            IRecordable record = RecordRoundAbout(segList);
             this.segmentList_ = segList;
             int count = segList.Count;
             for (int i = 0; i < count; ++i) {
                 ushort segId = segList[i];
                 ushort nextSegId = segList[(i + 1) % count];
-                FixLanesRoundabout(segId, nextSegId);
+                FixSegmentRoundabout(segId, nextSegId);
                 FixRulesRoundabout(segId);
                 FixMinor(netService.GetHeadNode(segId));
             }
+            return record;
         }
 
         /// <summary>
@@ -369,31 +384,28 @@ namespace TrafficManager.Util {
             return false;
         }
 
-        /// <summary>
-        /// Clears all rules put by RoundAboutMassEdit.FixRoundabout()
-        /// </summary>
-        public void ClearNode(ushort nodeId) {
-            PriorityRoad.ClearNode(nodeId);
-            netService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment seg) => {
-                if (!HasJunctionFlag(nodeId)) {
-                    // clear stay in lane.
-                    LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
-                }
-                return true;
-            });
-        }
+        public static IRecordable RecordRoundAbout(List<ushort> segList) {
+            TrafficRulesRecord record = new TrafficRulesRecord();
+            foreach (ushort segmentId in segList)
+                record.AddCompleteSegment(segmentId);
 
-        /// <summary>
-        /// Clears all rules put by RoundAboutMassEdit.FixRoundabout()
-        /// </summary>
-        /// <param name="segList"></param>
-        public void ClearRoundabout(List<ushort> segList) {
-            foreach (ushort segmentId in segList) {
-                foreach (bool startNode in Constants.ALL_BOOL) {
-                    ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
-                    ClearNode(nodeId);
+            // add each minor road.
+            foreach (ushort nodeId in record.NodeIDs) {
+                ref NetNode node = ref nodeId.ToNode();
+                if (node.CountSegments() < 3) continue;
+                for (int i = 0; i < 8; ++i) {
+                    ushort segmentId = node.GetSegment(i);
+                    if (segmentId == 0)
+                        continue;
+                    if (record.SegmentIDs.Contains(segmentId))
+                        continue;
+
+                    record.AddSegmentAndNodes(segmentId);
                 }
             }
+
+            record.Record();
+            return record;
         }
 
         internal static float CalculateRadius(ref NetSegment segment) {
@@ -403,15 +415,24 @@ namespace TrafficManager.Util {
             Vector2 endDir = VectorUtils.XZ(segment.m_endDirection);
             Vector2 startPos = VectorUtils.XZ(segment.m_startNode.ToNode().m_position);
             Vector2 endPos = VectorUtils.XZ(segment.m_endNode.ToNode().m_position);
-            float angle = Vector2.Angle(startDir, -endDir);
-            float l = (startPos - endPos).magnitude;
-            float r = l / (2 * Mathf.Sin(angle / 2)); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issuecomment-616351792
+            float dot = Vector2.Dot(startDir, -endDir);
+            float len = (startPos - endPos).magnitude;
+            float r = len / Mathf.Sqrt(2 - 2 * dot); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issuecomment-616351792
             return r;
         }
 
-        private static float CalculatePreferedSpeedKPH(ushort segmentId) {
+        private static SpeedValue? CalculatePreferedSpeed(ushort segmentId) {
             float r = CalculateRadius(ref segmentId.ToSegment());
-            return 4 / Mathf.Sqrt(r); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issue-589462235
+            float kmph = 11.3f * Mathf.Sqrt(r); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issue-589462235
+            Log._Debug($"CalculatePreferedSpeed radius:{r} -> kmph:{kmph}");
+            if (float.IsNaN(kmph) || float.IsInfinity(kmph) || kmph < 1) {
+                Log._Debug("CalculatePreferedSpeed returned null");
+                return null;
+            }
+            if (kmph < 10) {
+                kmph = 10;
+            }
+            return SpeedValue.FromKmph((ushort)kmph);
         }
     } // end class
 }//end namespace

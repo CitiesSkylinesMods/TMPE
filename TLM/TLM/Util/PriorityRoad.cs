@@ -12,15 +12,18 @@ namespace TrafficManager.Util {
     using static TrafficManager.Util.Shortcuts;
     using static TrafficManager.UI.SubTools.PrioritySignsTool;
     using TrafficManager.API.Manager;
+    using TrafficManager.Util.Record;
 
     /// <summary>
     /// Utility for mass edit of prioirty roads.
     /// </summary>
     public static class PriorityRoad {
-        public static void FixPrioritySigns(PrioritySignsMassEditMode massEditMode, List<ushort> segmentList) {
+        public static IRecordable FixPrioritySigns
+            (PrioritySignsMassEditMode massEditMode, List<ushort> segmentList) {
             if (segmentList == null || segmentList.Count == 0) {
-                return;
+                return null;
             }
+            IRecordable record = RecordRoad(segmentList);
 
             var primaryPrioType = PriorityType.None;
             var secondaryPrioType = PriorityType.None;
@@ -83,13 +86,8 @@ namespace TrafficManager.Util {
                 ApplyPrioritySigns(segId, true);
                 ApplyPrioritySigns(segId, false);
             }
-        }
 
-
-        private static void Swap(this List<ushort> list, int i1, int i2) {
-            ushort temp = list[i1];
-            list[i1] = list[i2];
-            list[i2] = temp;
+            return record;
         }
 
         private static LaneArrows ToLaneArrows(ArrowDirection dir) {
@@ -109,22 +107,23 @@ namespace TrafficManager.Util {
         /// Quick-setups as priority junction: for every junctions on the road contianing
         /// the input segment traversing straight.
         /// </summary>
-        public static void FixRoad(ushort initialSegmentId) {
+        public static IRecordable FixRoad(ushort initialSegmentId) {
+            // Create segment list such that the first and last segments are at path end.
+            List<ushort> segmentList = new List<ushort>(40);
             SegmentTraverser.Traverse(
-                initialSegmentId,
-                TraverseDirection.AnyDirection,
-                TraverseSide.Straight,
-                SegmentStopCriterion.None,
-                VisitorFunc);
-        }
+                    initialSegmentId,
+                    TraverseDirection.AnyDirection,
+                    TraverseSide.Straight,
+                    SegmentStopCriterion.None,
+                    data => {
+                        if (data.ViaInitialStartNode)
+                            segmentList.Add(data.CurSeg.segmentId);
+                        else
+                            segmentList.Insert(0, data.CurSeg.segmentId);
+                        return true;
+                    });
 
-        private static bool VisitorFunc(SegmentVisitData data) {
-            ushort segmentId = data.CurSeg.segmentId;
-            foreach (bool startNode in Constants.ALL_BOOL) {
-                ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
-                FixHighPriorityJunction(nodeId);
-            }
-            return true;
+            return FixRoad(segmentList);
         }
 
         /// <returns>the node of <paramref name="segmentId"/> that is not shared 
@@ -141,7 +140,10 @@ namespace TrafficManager.Util {
         /// Quick-setups as priority junction: for every junctions on the road contianing
         /// the input segment traversing straight.
         /// </summary>
-        public static void FixRoad(List<ushort> segmentList) {
+        public static IRecordable FixRoad(List<ushort> segmentList) {
+            if (segmentList == null || segmentList.Count == 0)
+                return null;
+            IRecordable record = RecordRoad(segmentList);
             ushort firstNodeId = GetSharedOrOtherNode(segmentList[0], segmentList[1], out _);
             int last = segmentList.Count - 1;
             ushort lastNodeId = GetSharedOrOtherNode(segmentList[last], segmentList[last-1], out _);
@@ -160,6 +162,7 @@ namespace TrafficManager.Util {
                     }
                 }
             }
+            return record;
         }
 
         private static bool IsStraighOneWay(ushort segmentId0, ushort segmentId1) {
@@ -610,6 +613,9 @@ namespace TrafficManager.Util {
                 TPMan.SetPrioritySign(segmentId, startNode, PriorityType.None);
                 JPMan.SetPedestrianCrossingAllowed(segmentId, startNode, TernaryBool.Undefined);
                 JPMan.SetEnteringBlockedJunctionAllowed(segmentId, startNode, TernaryBool.Undefined);
+                ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, true);
+                SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Forward, null);
+                SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Backward, null);
                 if (ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId)) {
                     JPMan.SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, TernaryBool.Undefined);
                 }
@@ -622,13 +628,25 @@ namespace TrafficManager.Util {
         /// Clears all rules put by PriorityRoad.FixJunction()
         /// </summary>
         /// <param name="segmentList"></param>
-        public static void ClearRoad(List<ushort> segmentList) {
+        public static IRecordable ClearRoad(List<ushort> segmentList) {
+            if (segmentList == null || segmentList.Count == 0)
+                return null;
+            IRecordable record = RecordRoad(segmentList);
             foreach (ushort segmentId in segmentList) {
                 foreach (bool startNode in Constants.ALL_BOOL) {
                     ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
                     ClearNode(nodeId);
                 }
             }
+            return record;
+        }
+
+        public static IRecordable RecordRoad(List<ushort> segmentList) {
+            TrafficRulesRecord record = new TrafficRulesRecord();
+            foreach (ushort segmetnId in segmentList)
+                record.AddCompleteSegment(segmetnId);
+            record.Record();
+            return record;
         }
     } //end class
 }

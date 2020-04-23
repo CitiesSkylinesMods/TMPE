@@ -404,12 +404,13 @@ namespace TrafficManager.UI {
                 }
                 bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 if (!isRoundabout) {
-                    segmentList = SegmentTraverser.Traverse(
+                    var segments = SegmentTraverser.Traverse(
                         HoveredSegmentId,
                         TraverseDirection.AnyDirection,
                         TraverseSide.Straight,
                         SegmentStopCriterion.None,
                         (_) => true);
+                    segmentList = new List<ushort>(segmentList);
                 }
                 foreach (ushort segmentId in segmentList ?? Enumerable.Empty<ushort>()) {
                     ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
@@ -549,12 +550,13 @@ namespace TrafficManager.UI {
                 if (ReadjustPathMode) {
                     bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                     if (!isRoundabout) {
-                        segmentList = SegmentTraverser.Traverse(
+                        var segments = SegmentTraverser.Traverse(
                             HoveredSegmentId,
                             TraverseDirection.AnyDirection,
                             TraverseSide.Straight,
                             SegmentStopCriterion.None,
                             (_) => true);
+                        segmentList = new List<ushort>(segments);
                     }
                     RoadSelectionUtil.SetRoad(HoveredSegmentId, segmentList);
                 }

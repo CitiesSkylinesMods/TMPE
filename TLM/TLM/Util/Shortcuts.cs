@@ -43,6 +43,8 @@ namespace TrafficManager.Util {
 
         private static NetSegment[] _segBuffer => Singleton<NetManager>.instance.m_segments.m_buffer;
 
+        private static NetLane[] _laneBuffer => Singleton<NetManager>.instance.m_lanes.m_buffer;
+
         private static ExtSegmentEnd[] _segEndBuff => segEndMan.ExtSegmentEnds;
 
         internal static IExtSegmentEndManager segEndMan => Constants.ManagerFactory.ExtSegmentEndManager;
@@ -54,6 +56,8 @@ namespace TrafficManager.Util {
         internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
 
         internal static ref NetNode ToNode(this ushort nodeId) => ref GetNode(nodeId);
+
+        internal static ref NetLane ToLane(this uint laneId) => ref _laneBuffer[laneId];
 
         internal static ref NetSegment GetSeg(ushort segmentId) => ref _segBuffer[segmentId];
 

@@ -12,18 +12,24 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
+    using static Util.Shortcuts;
+    using TrafficManager.Util.Record;
 
     public class PrioritySignsTool : LegacySubTool {
         public enum PrioritySignsMassEditMode {
+            Min=0,
             MainYield = 0,
             MainStop = 1,
             YieldMain = 2,
             StopMain = 3,
-            Delete = 4,
+            Undo = 4,
+            Max = 4,
         }
 
+        IRecordable record_;
+
         private readonly HashSet<ushort> currentPriorityNodeIds;
-        private PrioritySignsMassEditMode massEditMode = PrioritySignsMassEditMode.MainYield;
+        private PrioritySignsMassEditMode massEditMode = PrioritySignsMassEditMode.Min;
 
         public PrioritySignsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -31,49 +37,45 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnPrimaryClickOverlay() {
-            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-            if(ctrlDown || shiftDown) {
+            if(ControlIsPressed || ShiftIsPressed) {
                 if (HoveredSegmentId == 0) {
                     return;
                 }
                 SelectedNodeId = 0;
             }
 
-            // TODO provide revert/clear mode issue #568
-            if (ctrlDown && shiftDown) {
+            if(massEditMode == PrioritySignsMassEditMode.Undo) {
+                record_.Restore();
+            }
+            else if (ControlIsPressed && ShiftIsPressed) {
                 Log.Info("Before FixRoundabout/FixRoad."); // log time for benchmarking.
-                bool isRoundabout = RoundaboutMassEdit.Instance.FixRoundabout(HoveredSegmentId);
+                bool isRoundabout = RoundaboutMassEdit.Instance.FixRoundabout(
+                    HoveredSegmentId, out record_);
                 if (!isRoundabout) {
-                    PriorityRoad.FixRoad(HoveredSegmentId);
+                    record_ = PriorityRoad.FixRoad(HoveredSegmentId);
                 }
+                // TODO: benchmark why bulk setup takes a long time. 
                 Log.Info("After FixRoundabout/FixRoad. Before RefreshMassEditOverlay"); // log time for benchmarking.
                 RefreshMassEditOverlay();
                 Log.Info("After RefreshMassEditOverlay."); // log time for benchmarking.
-                return;
-            } else if (ctrlDown) {
+            } else if (ControlIsPressed) {
+                record_ = new TrafficRulesRecord();
+                (record_ as TrafficRulesRecord).AddNodeAndSegmentEnds(HoveredNodeId);
                 PriorityRoad.FixHighPriorityJunction(HoveredNodeId);
-                RefreshMassEditOverlay();
-                return;
             }
-            if (shiftDown) {
+            else if (ShiftIsPressed) {
                 bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 if (!isRoundabout) {
-                    segmentList = SegmentTraverser.Traverse(
+                    var segments = SegmentTraverser.Traverse(
                         HoveredSegmentId,
                         TraverseDirection.AnyDirection,
                         TraverseSide.Straight,
                         SegmentStopCriterion.None,
                         (_)=>true);
+                    segmentList = new List<ushort>(segments);
                 }
 
-                PriorityRoad.FixPrioritySigns(massEditMode,segmentList);
-
-                // cycle mass edit mode
-                massEditMode =
-                    (PrioritySignsMassEditMode)(((int)massEditMode + 1) %
-                                                Enum.GetValues(typeof(PrioritySignsMassEditMode))
-                                                    .GetLength(0));
+                record_ = PriorityRoad.FixPrioritySigns(massEditMode, segmentList);
             } else {
                 if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
                     return;
@@ -87,8 +89,24 @@ namespace TrafficManager.UI.SubTools {
                 Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
             }
 
-            // update priority node cache
-            RefreshCurrentPriorityNodeIds();
+            // cycle mass edit mode
+            if (ControlIsPressed) {
+                massEditMode =
+                    massEditMode != PrioritySignsMassEditMode.MainYield ?
+                    PrioritySignsMassEditMode.MainYield :
+                    PrioritySignsMassEditMode.Undo;
+            } else if (ShiftIsPressed) {
+                massEditMode++;
+                if (massEditMode > PrioritySignsMassEditMode.Max) {
+                    massEditMode = PrioritySignsMassEditMode.Min;
+                }
+            }
+            
+            // refresh cache
+            if(ControlIsPressed)
+                RefreshMassEditOverlay();
+            else
+                RefreshCurrentPriorityNodeIds();
         }
 
         public override void OnToolGUI(Event e) { }
@@ -174,23 +192,16 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-
-            MassEditOVerlay.Show = ctrlDown;
-
-            if (ctrlDown) {
-                massEditMode = PrioritySignsMassEditMode.MainYield;
-            }
+            MassEditOVerlay.Show = ControlIsPressed;
 
             if (HoveredSegmentId == 0) {
-                if(shiftDown) {
-                    massEditMode = PrioritySignsMassEditMode.MainYield;
+                if(ShiftIsPressed || ControlIsPressed) {
+                    massEditMode = PrioritySignsMassEditMode.Min;
                 }
                 return;
             }
 
-            if (shiftDown) {
+            if (Shortcuts.ShiftIsPressed) {
                 bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
                 if (isRoundabout) {
@@ -219,12 +230,12 @@ namespace TrafficManager.UI.SubTools {
                         });
                 }
                 return;
-            } else if (ctrlDown) {
+            } else if (Shortcuts.ControlIsPressed) {
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 return;
             }
 
-            massEditMode = PrioritySignsMassEditMode.MainYield;
+            massEditMode = PrioritySignsMassEditMode.Min;
 
             if (HoveredNodeId == SelectedNodeId) {
                 return;

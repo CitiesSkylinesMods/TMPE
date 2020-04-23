@@ -48,6 +48,16 @@ namespace TrafficManager.Manager.Impl {
             return SetParkingAllowed(segmentId, finalDir, !IsParkingAllowed(segmentId, finalDir));
         }
 
+        /// <summary>
+        /// Sets Parking allowed to <paramref name="flag"/> for all directions.
+        /// </summary>
+        /// <returns><c>true</c> on success</returns>
+        public bool SetParkingAllowed(ushort segmentId, bool flag) {
+            bool ret = SetParkingAllowed(segmentId, NetInfo.Direction.Forward, flag);
+            ret |= SetParkingAllowed(segmentId, NetInfo.Direction.Backward, flag);
+            return ret;
+        }
+
         public bool SetParkingAllowed(ushort segmentId, NetInfo.Direction finalDir, bool flag) {
 #if DEBUG
             if (DebugSwitch.BasicParkingAILog.Get()) {

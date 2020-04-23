@@ -146,7 +146,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.parkingRestrictionsOverlay) {
+            if (viewOnly && !Options.parkingRestrictionsOverlay && !PrioritySignsTool.MassEditOVerlay.IsActive) {
                 return;
             }
 
@@ -245,7 +245,7 @@ namespace TrafficManager.UI.SubTools {
                                                    ref NetSegment segment,
                                                    bool viewOnly,
                                                    ref Vector3 camPos) {
-            if (viewOnly && !Options.parkingRestrictionsOverlay) {
+            if (viewOnly && !Options.parkingRestrictionsOverlay && !PrioritySignsTool.MassEditOVerlay.IsActive) {
                 return NetInfo.Direction.None;
             }
 
@@ -287,7 +287,7 @@ namespace TrafficManager.UI.SubTools {
                     size,
                     size);
 
-                if (Options.speedLimitsOverlay) {
+                if (Options.speedLimitsOverlay || PrioritySignsTool.MassEditOVerlay.IsActive) {
                     boundingBox.y -= size + 10f;
                 }
 

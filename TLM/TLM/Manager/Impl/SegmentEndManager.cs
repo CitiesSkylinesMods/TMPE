@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System;
     using TrafficManager.API.Manager;
@@ -40,6 +40,10 @@
 
         public ISegmentEnd GetSegmentEnd(ushort segmentId, bool startNode) {
             return SegmentEnds[GetIndex(segmentId, startNode)];
+        }
+
+        internal ISegmentEnd GetSegmentEnd(int segmentEndIndex) {
+            return SegmentEnds[segmentEndIndex];
         }
 
         public ISegmentEnd GetOrAddSegmentEnd(ISegmentEndId endId) {
@@ -155,7 +159,7 @@
             }
         }
 
-        private int GetIndex(ushort segmentId, bool startNode) {
+        internal int GetIndex(ushort segmentId, bool startNode) {
             return segmentId + (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT);
         }
 
