@@ -58,7 +58,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             if(massEditMode == PrioritySignsMassEditMode.Undo) {
-                record_.Restore();
+                record_?.Restore();
             }
             else if (ControlIsPressed && ShiftIsPressed) {
                 Log.Info("Before FixRoundabout/FixRoad."); // log time for benchmarking.
@@ -88,7 +88,8 @@ namespace TrafficManager.UI.SubTools {
                     segmentList = new List<ushort>(segments);
                 }
 
-                record_ = PriorityRoad.FixPrioritySigns(massEditMode, segmentList);
+                PriorityRoad.FixPrioritySigns(massEditMode, segmentList);
+                record_ = null;
             } else {
                 if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
                     return;

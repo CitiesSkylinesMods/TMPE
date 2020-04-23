@@ -32,9 +32,5 @@ namespace TrafficManager.Util.Record {
                 lane.Restore();
             }
         }
-
-
-
     }
-
 }

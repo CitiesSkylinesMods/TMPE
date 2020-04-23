@@ -9,6 +9,8 @@ namespace TrafficManager.Util.Record {
         public HashSet<ushort> SegmentIDs = new HashSet<ushort>();
         public HashSet<int> SegmentEndIndeces = new HashSet<int>();
 
+        public List<IRecordable> Records = new List<IRecordable>();
+
         public void AddSegmentAndNodes(ushort segmentId) {
             ushort node0 = segmentId.ToSegment().m_startNode;
             ushort node1 = segmentId.ToSegment().m_endNode;
@@ -38,21 +40,19 @@ namespace TrafficManager.Util.Record {
             }
         }
 
-        private List<IRecordable> records_ = new List<IRecordable>();
-
         public void Record() {
             foreach (ushort nodeId in NodeIDs)
-                records_.Add(new NodeRecord(nodeId));
+                Records.Add(new NodeRecord(nodeId));
             foreach(ushort segmentId in SegmentIDs) 
-                records_.Add(new SegmentRecord(segmentId));
+                Records.Add(new SegmentRecord(segmentId));
             foreach (int segmentEndIndex in SegmentEndIndeces)
-                records_.Add(new SegmentEndRecord(segmentEndIndex));
-            foreach (IRecordable record in records_)
+                Records.Add(new SegmentEndRecord(segmentEndIndex));
+            foreach (IRecordable record in Records)
                 record.Record();
         }
 
         public void Restore() {
-            foreach (IRecordable record in records_)
+            foreach (IRecordable record in Records)
                 record.Restore();
         }
     }

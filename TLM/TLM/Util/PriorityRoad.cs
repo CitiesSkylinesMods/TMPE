@@ -1,29 +1,28 @@
 namespace TrafficManager.Util {
-    using System;
-    using System.Collections.Generic;
     using API.Traffic.Data;
     using API.Traffic.Enums;
-    using Manager.Impl;
-    using GenericGameBridge.Service;
     using CSUtil.Commons;
-    using UnityEngine;
-    using static TrafficManager.Util.SegmentTraverser;
+    using GenericGameBridge.Service;
+    using Manager.Impl;
     using State;
-    using static TrafficManager.Util.Shortcuts;
-    using static TrafficManager.UI.SubTools.PrioritySignsTool;
+    using System;
+    using System.Collections.Generic;
     using TrafficManager.API.Manager;
     using TrafficManager.Util.Record;
+    using UnityEngine;
+    using static TrafficManager.UI.SubTools.PrioritySignsTool;
+    using static TrafficManager.Util.SegmentTraverser;
+    using static TrafficManager.Util.Shortcuts;
 
     /// <summary>
     /// Utility for mass edit of prioirty roads.
     /// </summary>
     public static class PriorityRoad {
-        public static IRecordable FixPrioritySigns
+        public static void FixPrioritySigns
             (PrioritySignsMassEditMode massEditMode, List<ushort> segmentList) {
             if (segmentList == null || segmentList.Count == 0) {
-                return null;
+                return;
             }
-            IRecordable record = RecordRoad(segmentList);
 
             var primaryPrioType = PriorityType.None;
             var secondaryPrioType = PriorityType.None;
@@ -82,12 +81,10 @@ namespace TrafficManager.Util {
             }
 
             // TODO avoid settin up the same node two times.s
-            foreach(ushort segId in segmentList) {
+            foreach (ushort segId in segmentList) {
                 ApplyPrioritySigns(segId, true);
                 ApplyPrioritySigns(segId, false);
             }
-
-            return record;
         }
 
         private static LaneArrows ToLaneArrows(ArrowDirection dir) {
@@ -144,10 +141,11 @@ namespace TrafficManager.Util {
             if (segmentList == null || segmentList.Count == 0)
                 return null;
             IRecordable record = RecordRoad(segmentList);
+
             ushort firstNodeId = GetSharedOrOtherNode(segmentList[0], segmentList[1], out _);
             int last = segmentList.Count - 1;
-            ushort lastNodeId = GetSharedOrOtherNode(segmentList[last], segmentList[last-1], out _);
-            if(firstNodeId == lastNodeId) {
+            ushort lastNodeId = GetSharedOrOtherNode(segmentList[last], segmentList[last - 1], out _);
+            if (firstNodeId == lastNodeId) {
                 firstNodeId = lastNodeId = 0;
             }
 
@@ -211,15 +209,15 @@ namespace TrafficManager.Util {
                 // expected a one way road and 2 two-way roads.
                 return false;
             } else if (!oneway0) {
-                segmentList.Swap( 0, 2);
+                segmentList.Swap(0, 2);
             } else if (!oneway1) {
-                segmentList.Swap( 1, 2);
+                segmentList.Swap(1, 2);
             }
 
             // slot 0: incomming road.
             // slot 1: outgoing road.
             if (netService.GetHeadNode(segmentList[1]) == netService.GetTailNode(segmentList[0])) {
-                segmentList.Swap( 0, 1);
+                segmentList.Swap(0, 1);
                 return true;
             }
 
@@ -245,7 +243,7 @@ namespace TrafficManager.Util {
 
             SetArrows(segmentList[0], segmentList[2]);
             SetArrows(segmentList[2], segmentList[1]);
-            foreach(ushort segmentId in segmentList) {
+            foreach (ushort segmentId in segmentList) {
                 FixMajorSegmentRules(segmentId, nodeId);
             }
         }
@@ -371,7 +369,7 @@ namespace TrafficManager.Util {
                     } else {
                         FixMajorSegmentRules(segmentId, nodeId);
                     }
-                    if(!ignoreLanes) {
+                    if (!ignoreLanes) {
                         FixMajorSegmentLanes(segmentId, nodeId);
                     }
                 } else {
@@ -397,7 +395,7 @@ namespace TrafficManager.Util {
             Log._Debug($"FixMajorSegmentRules({segmentId}, {nodeId}) was called");
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
             JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
-            if(!OptionsMassEditTab.PriorityRoad_CrossMainR) {
+            if (!OptionsMassEditTab.PriorityRoad_CrossMainR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(segmentId, startNode, false);
             }
             TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Main);
@@ -453,7 +451,7 @@ namespace TrafficManager.Util {
             }
 
             Log._Debug($"HasAccelerationLane: segmentId:{segmentId} MainToward={MainToward} MainAgainst={MainAgainst} ");
-            if (IsMain(MainToward) && IsMain(MainAgainst) ) {
+            if (IsMain(MainToward) && IsMain(MainAgainst)) {
                 int Yt = CountLanesTowardJunction(segmentId, nodeId); // Yeild Toward.
                 int Mt = CountLanesTowardJunction(MainToward, nodeId); // Main Toward.
                 int Ma = CountLanesAgainstJunction(MainAgainst, nodeId); // Main Against.
@@ -547,9 +545,9 @@ namespace TrafficManager.Util {
             // LHD vs RHD variables.
             bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
             ArrowDirection nearDir = lht ? ArrowDirection.Left : ArrowDirection.Right;
-            LaneArrows nearArrow   = lht ? LaneArrows.Left     : LaneArrows.Right;
-            bool             bnear = lht ? bLeft               : bRight;
-            int sideLaneIndex      = lht ? srcLaneCount - 1    : 0;
+            LaneArrows nearArrow = lht ? LaneArrows.Left : LaneArrows.Right;
+            bool bnear = lht ? bLeft : bRight;
+            int sideLaneIndex = lht ? srcLaneCount - 1 : 0;
 
             LaneArrows turnArrow = nearArrow;
             {
@@ -570,8 +568,8 @@ namespace TrafficManager.Util {
             /* in case there are multiple minor roads attached to the priority road at the same side
              * and the main road is straigh, then add a turn arrow into the other minor roads.
              */
-            if(srcLaneCount > 0 && bnear && turnArrow == LaneArrows.Forward) {
-                LaneArrowManager.Instance.AddLaneArrows( 
+            if (srcLaneCount > 0 && bnear && turnArrow == LaneArrows.Forward) {
+                LaneArrowManager.Instance.AddLaneArrows(
                     laneList[sideLaneIndex].laneId,
                     nearArrow);
             }
@@ -645,6 +643,7 @@ namespace TrafficManager.Util {
             TrafficRulesRecord record = new TrafficRulesRecord();
             foreach (ushort segmetnId in segmentList)
                 record.AddCompleteSegment(segmetnId);
+            record.SegmentIDs.Clear(); // We only need Nodes and segmentEnds.
             record.Record();
             return record;
         }
