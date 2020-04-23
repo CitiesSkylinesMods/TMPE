@@ -28,6 +28,19 @@ namespace TrafficManager.UI.SubTools {
 
         IRecordable record_;
 
+        enum ModifyMode {
+            None,
+            PrioirtyRoad,
+            HighPrioirtyRoad,
+            HighPrioirtJunction,
+            Roundabout,
+        }
+        static class PrevHoveredState {
+            public static ushort SegmentId;
+            public static ushort NodeId;
+            public static ModifyMode Mode;
+        }
+
         private readonly HashSet<ushort> currentPriorityNodeIds;
         private PrioritySignsMassEditMode massEditMode = PrioritySignsMassEditMode.Min;
 
@@ -192,12 +205,12 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
+            ModifyMode mode = ModifyMode.None;
+
             MassEditOVerlay.Show = ControlIsPressed;
 
             if (HoveredSegmentId == 0) {
-                if(ShiftIsPressed || ControlIsPressed) {
-                    massEditMode = PrioritySignsMassEditMode.Min;
-                }
+                massEditMode = PrioritySignsMassEditMode.Min;
                 return;
             }
 
@@ -229,30 +242,46 @@ namespace TrafficManager.UI.SubTools {
                             return true;
                         });
                 }
-                return;
+                if (!ControlIsPressed)
+                    mode = ModifyMode.PrioirtyRoad;
+                else if (!isRoundabout)
+                    mode = ModifyMode.HighPrioirtyRoad;
+                else
+                    mode = ModifyMode.Roundabout;
+
+                if (mode != PrevHoveredState.Mode || HoveredSegmentId != PrevHoveredState.SegmentId) {
+                    massEditMode = PrioritySignsMassEditMode.Min;
+                }
             } else if (Shortcuts.ControlIsPressed) {
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
-                return;
+                mode = ModifyMode.HighPrioirtJunction;
+                if (mode != PrevHoveredState.Mode || HoveredNodeId != PrevHoveredState.NodeId) {
+                    massEditMode = PrioritySignsMassEditMode.Min;
+                }
+            } else {
+                massEditMode = PrioritySignsMassEditMode.Min;
+
+                if (HoveredNodeId == SelectedNodeId) {
+                    return;
+                }
+
+                // no highlight for existing priority node in sign mode
+                if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
+                    // Log._Debug($"PrioritySignsTool.RenderOverlay: HasNodePrioritySign({HoveredNodeId})=true");
+                    return;
+                }
+
+                if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(HoveredNodeId)) {
+                    // Log._Debug($"PrioritySignsTool.RenderOverlay: MayNodeHavePrioritySigns({HoveredNodeId})=false");
+                    return;
+                }
+
+                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
             }
 
-            massEditMode = PrioritySignsMassEditMode.Min;
-
-            if (HoveredNodeId == SelectedNodeId) {
-                return;
-            }
-
-            // no highlight for existing priority node in sign mode
-            if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
-                // Log._Debug($"PrioritySignsTool.RenderOverlay: HasNodePrioritySign({HoveredNodeId})=true");
-                return;
-            }
-
-            if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(HoveredNodeId)) {
-                // Log._Debug($"PrioritySignsTool.RenderOverlay: MayNodeHavePrioritySigns({HoveredNodeId})=false");
-                return;
-            }
-
-            MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+            PrevHoveredState.Mode = mode;
+            PrevHoveredState.SegmentId = HoveredSegmentId;
+            PrevHoveredState.NodeId = HoveredNodeId;
         }
 
         private void RefreshCurrentPriorityNodeIds() {
