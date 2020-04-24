@@ -97,12 +97,6 @@ namespace GenericGameBridge.Service {
 
         void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler);
 
-        void IterateSegmentLanes(
-            ushort segmentId,
-            NetInfo.LaneType laneType,
-            VehicleInfo.VehicleType vehicleType,
-            NetSegmentLaneHandler handler);
-
         void IterateSegmentLanes(ushort segmentId,
                                  ref NetSegment segment,
                                  NetSegmentLaneHandler handler);
