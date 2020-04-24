@@ -32,7 +32,6 @@ namespace TrafficManager.Util.Record {
             foreach(var lane in lanes) {
                 LaneArrowsRecord laneData = new LaneArrowsRecord {
                     LaneId = lane.laneId,
-                    SegmentId = segmentId,
                 };
                 ret.Add(laneData);
             }

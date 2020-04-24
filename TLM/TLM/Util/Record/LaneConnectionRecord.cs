@@ -60,6 +60,10 @@ namespace TrafficManager.Util.Record {
                     ushort segmentId,
                     ref NetSegment segment,
                     byte laneIndex) {
+                    bool match = (laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != 0 &&
+                                  (laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != 0;
+                    if (!match)
+                        return true;
                     var laneData = new LaneConnectionRecord {
                         LaneId = laneId,
                         LaneIndex = laneIndex,
@@ -70,8 +74,6 @@ namespace TrafficManager.Util.Record {
                 }
                 netService.IterateSegmentLanes(
                     segmentId,
-                    LaneConnectionManager.LANE_TYPES,
-                    LaneConnectionManager.VEHICLE_TYPES,
                     Handler);
             }
             return ret;
