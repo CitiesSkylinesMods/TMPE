@@ -43,6 +43,8 @@ namespace TrafficManager.Util {
 
         private static NetSegment[] _segBuffer => Singleton<NetManager>.instance.m_segments.m_buffer;
 
+        private static NetLane[] _laneBuffer => Singleton<NetManager>.instance.m_lanes.m_buffer;
+
         private static ExtSegmentEnd[] _segEndBuff => segEndMan.ExtSegmentEnds;
 
         internal static IExtSegmentEndManager segEndMan => Constants.ManagerFactory.ExtSegmentEndManager;
@@ -54,6 +56,8 @@ namespace TrafficManager.Util {
         internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
 
         internal static ref NetNode ToNode(this ushort nodeId) => ref GetNode(nodeId);
+
+        internal static ref NetLane ToLane(this uint laneId) => ref _laneBuffer[laneId];
 
         internal static ref NetSegment GetSeg(ushort segmentId) => ref _segBuffer[segmentId];
 
@@ -103,10 +107,16 @@ namespace TrafficManager.Util {
             return stringToCenter.PadLeft(leftPadding).PadRight(totalLength);
         }
 
-        internal static string ToSTR<T>(this IEnumerable<T> segmentList) {
+        /// <summary>
+        /// Creates and string of all items with enumerable inpute as {item1, item2, item3}
+        /// null argument returns "Null"
+        /// </summary>
+        internal static string ToSTR<T>(this IEnumerable<T> enumerable) {
+            if (enumerable == null)
+                return "Null";
             string ret = "{ ";
-            foreach (T segmentId in segmentList) {
-                ret += $"{segmentId}, ";
+            foreach (T item in enumerable) {
+                ret += $"{item}, ";
             }
             ret.Remove(ret.Length - 2, 2);
             ret += " }";

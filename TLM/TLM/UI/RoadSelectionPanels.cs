@@ -11,6 +11,7 @@ namespace TrafficManager.UI {
     using TrafficManager.RedirectionFramework;
     using static UI.SubTools.PrioritySignsTool;
     using JetBrains.Annotations;
+    using TrafficManager.Util.Record;
 
     public class RoadSelectionPanels : MonoBehaviour {
         private const bool CREATE_NET_ADJUST_SUBPANEL = false;
@@ -62,6 +63,8 @@ namespace TrafficManager.UI {
         /// </summary>
         private IList<PanelExt> panels_;
         private UIComponent priorityRoadToggle_;
+
+        public IRecordable Record;
 
         #region Load
         public void Awake() {
@@ -352,43 +355,29 @@ namespace TrafficManager.UI {
             public class ClearButtton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
                 internal override FunctionModes Function => FunctionModes.Clear;
-                protected override bool IsActive() => false; // Clear funtionality can't be undone. #568
-                public override void Do() => // TODO delete all rules as part of #568
-                    PriorityRoad.ClearRoad(Selection);
-                public override void Undo() => throw new Exception("Unreachable code");
+                public override IRecordable Do() => PriorityRoad.ClearRoad(Selection);
             }
             public class StopButtton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
                 internal override FunctionModes Function => FunctionModes.Stop;
-                public override void Do() =>
+                public override IRecordable Do() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainStop, Selection);
-                public override void Undo() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, Selection);
             }
             public class YieldButton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
                 internal override FunctionModes Function => FunctionModes.Yield;
-                public override void Do() =>
+                public override IRecordable Do() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainYield, Selection);
-                public override void Undo() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, Selection);
             }
             public class HighPriorityButtton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
                 internal override FunctionModes Function => FunctionModes.HighPriority;
-                public override void Do() =>
-                    PriorityRoad.FixRoad(Selection);
-                public override void Undo() =>
-                    PriorityRoad.ClearRoad(Selection);
+                public override IRecordable Do() => PriorityRoad.FixRoad(Selection);
             }
             public class RoundaboutButtton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
                 internal override FunctionModes Function => FunctionModes.Roundabout;
-                public override void Do() =>
-                    RoundaboutMassEdit.Instance.FixRoundabout(Selection);
-                public override void Undo() =>
-                    RoundaboutMassEdit.Instance.ClearRoundabout(Selection);
-
+                public override IRecordable Do() => RoundaboutMassEdit.Instance.FixRoundabout(Selection);
                 public override bool ShouldDisable() {
                     if (Length <= 1) {
                         return true;
@@ -465,15 +454,15 @@ namespace TrafficManager.UI {
                     throw new Exception("Unreachable code");
 
                 /// <summary>Handles button click on activation. Apply traffic rules here.</summary> 
-                public abstract void Do();
+                public abstract IRecordable Do();
 
                 /// <summary>Handles button click on de-activation. Reset/Undo traffic rules here.</summary> 
-                public abstract void Undo();
+                public virtual void Undo() => Root.Record?.Restore();
 
                 protected override void OnClick(UIMouseEventParameter p) {
                     if (!IsActive()) {
                         Root.Function = this.Function;
-                        Do();
+                        Root.Record = Do();
                         Root.EnqueueAction(Root.ShowMassEditOverlay);
                     } else {
                         Root.Function = FunctionModes.None;

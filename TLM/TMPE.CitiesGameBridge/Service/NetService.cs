@@ -162,6 +162,29 @@ namespace CitiesGameBridge.Service {
             ProcessNode(nodeId, ProcessFun);
         }
 
+        public void IterateSegmentLanes(
+            ushort segmentId,
+            NetInfo.LaneType laneType,
+            VehicleInfo.VehicleType vehicleType,
+            NetSegmentLaneHandler handler) {
+
+            bool Handler2(
+                uint laneId,
+                ref NetLane lane,
+                NetInfo.Lane laneInfo,
+                ushort segmentId,
+                ref NetSegment segment,
+                byte laneIndex) {
+                if ((laneInfo.m_laneType | laneType) != 0 &&
+                    (laneInfo.m_vehicleType & vehicleType) != 0) {
+                    return handler(laneId, ref lane, laneInfo, segmentId, ref segment, laneIndex);
+                }
+                return true;
+            }
+
+            IterateSegmentLanes(segmentId, Handler2);
+        }
+
         public void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler) {
             IterateSegmentLanes(
                 segmentId,

@@ -317,6 +317,14 @@
     <Compile Include="Util\GenericFsm.cs" />
     <Compile Include="Util\GeometryUtil.cs" />
     <Compile Include="Util\PriorityRoad.cs" />
+    <Compile Include="Util\Record\IRecordable.cs" />
+    <Compile Include="Util\Record\LaneConnectionRecord.cs" />
+    <Compile Include="Util\Record\SpeedLimitLaneRecord.cs" />
+    <Compile Include="Util\Record\LaneArrowsRecord.cs" />
+    <Compile Include="Util\Record\NodeRecord.cs" />
+    <Compile Include="Util\Record\TrafficRulesRecord.cs" />
+    <Compile Include="Util\Record\SegmentEndRecord.cs" />
+    <Compile Include="Util\Record\SegmentRecord.cs" />
     <Compile Include="Util\SeparateTurningLanesUtil.cs" />
     <Compile Include="Util\Shortcuts.cs" />
     <Compile Include="Util\FloatUtil.cs" />

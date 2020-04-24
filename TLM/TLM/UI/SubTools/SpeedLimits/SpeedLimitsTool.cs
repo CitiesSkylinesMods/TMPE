@@ -243,7 +243,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.speedLimitsOverlay) {
+            if (viewOnly && !Options.speedLimitsOverlay && !PrioritySignsTool.MassEditOVerlay.IsActive) {
                 return;
             }
 
@@ -719,7 +719,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                            ref NetSegment segment,
                                            bool viewOnly,
                                            ref Vector3 camPos) {
-            if (viewOnly && !Options.speedLimitsOverlay) {
+            if (viewOnly && !Options.speedLimitsOverlay && !PrioritySignsTool.MassEditOVerlay.IsActive) {
                 return false;
             }
             bool ret = false;

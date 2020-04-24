@@ -37,6 +37,9 @@ namespace TrafficManager.UI.Helpers {
             if (Tooltip!=null) {
                 _ui.tooltip = T(Tooltip);
             }
+            if (Indent) {
+                State.Options.Indent(_ui);
+            }
         }
 
 
