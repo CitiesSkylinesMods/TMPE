@@ -18,11 +18,13 @@ namespace TrafficManager.Util {
     /// Utility for mass edit of prioirty roads.
     /// </summary>
     public static class PriorityRoad {
-        public static void FixPrioritySigns
+        public static IRecordable FixPrioritySigns
             (PrioritySignsMassEditMode massEditMode, List<ushort> segmentList) {
             if (segmentList == null || segmentList.Count == 0) {
-                return;
+                return null;
             }
+
+            IRecordable record = RecordRoad(segmentList);
 
             var primaryPrioType = PriorityType.None;
             var secondaryPrioType = PriorityType.None;
@@ -80,11 +82,13 @@ namespace TrafficManager.Util {
                 }
             }
 
-            // TODO avoid settin up the same node two times.s
+            // TODO avoid settin up the same node two times.
             foreach (ushort segId in segmentList) {
                 ApplyPrioritySigns(segId, true);
                 ApplyPrioritySigns(segId, false);
             }
+
+            return record;
         }
 
         private static LaneArrows ToLaneArrows(ArrowDirection dir) {
@@ -602,35 +606,29 @@ namespace TrafficManager.Util {
         /// </summary>
         /// <param name="segmentList"></param>
         public static void ClearNode(ushort nodeId) {
-            TrafficPriorityManager TPMan = Constants.ManagerFactory.TrafficPriorityManager as TrafficPriorityManager;
-            IJunctionRestrictionsManager JPMan = Constants.ManagerFactory.JunctionRestrictionsManager;
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
             netService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment seg) => {
                 ref NetNode node = ref GetNode(nodeId);
                 bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
-                TPMan.SetPrioritySign(segmentId, startNode, PriorityType.None);
-                JPMan.SetPedestrianCrossingAllowed(segmentId, startNode, TernaryBool.Undefined);
-                JPMan.SetEnteringBlockedJunctionAllowed(segmentId, startNode, TernaryBool.Undefined);
-                ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, true);
-                SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Forward, null);
-                SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Backward, null);
-                if (ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId)) {
-                    JPMan.SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, TernaryBool.Undefined);
-                }
+                TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.None);
+                JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
                 LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
                 return true;
             });
         }
 
         /// <summary>
-        /// Clears all rules put by PriorityRoad.FixJunction()
+        /// Clears all rules traffic rules accross given segmeent list.
+        /// Clears segment ends of connected branchs as well.
         /// </summary>
-        /// <param name="segmentList"></param>
         public static IRecordable ClearRoad(List<ushort> segmentList) {
             if (segmentList == null || segmentList.Count == 0)
                 return null;
             IRecordable record = RecordRoad(segmentList);
             foreach (ushort segmentId in segmentList) {
+                ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, true);
+                SpeedLimitManager.Instance.SetSpeedLimit(segmentId, null);
+                VehicleRestrictionsManager.Instance.ClearVehicleRestrictions(segmentId);
                 foreach (bool startNode in Constants.ALL_BOOL) {
                     ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
                     ClearNode(nodeId);
@@ -639,11 +637,13 @@ namespace TrafficManager.Util {
             return record;
         }
 
+        /// <summary>
+        /// records traffic rules state of everything affected by <c>FixRoad()</c> or <c>FixPrioritySigns()</c>
+        /// </summary>
         public static IRecordable RecordRoad(List<ushort> segmentList) {
             TrafficRulesRecord record = new TrafficRulesRecord();
             foreach (ushort segmetnId in segmentList)
                 record.AddCompleteSegment(segmetnId);
-            record.SegmentIDs.Clear(); // We only need Nodes and segmentEnds.
             record.Record();
             return record;
         }

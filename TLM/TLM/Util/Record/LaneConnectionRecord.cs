@@ -1,5 +1,7 @@
 namespace TrafficManager.Util.Record {
     using ColossalFramework;
+    using CSUtil.Commons;
+    using GenericGameBridge.Service;
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.Manager.Impl;
@@ -10,25 +12,36 @@ namespace TrafficManager.Util.Record {
         public byte LaneIndex;
         public bool StartNode;
 
-        private uint[] Connections;
+        private uint[] connections_;
 
         private static LaneConnectionManager connMan => LaneConnectionManager.Instance;
 
         private uint[] GetCurrentConnections() => connMan.GetLaneConnections(LaneId, StartNode);
 
         public void Record() {
-            Connections = (uint[])GetCurrentConnections().Clone();
+            connections_ = GetCurrentConnections();
+            //Log._Debug($"LaneConnectionRecord.Record: connections_=" + connections_.ToSTR());
+
+            if (connections_ != null)
+                connections_ = (uint[])connections_.Clone();
         }
 
         public void Restore() {
+            if (connections_ == null) {
+                connMan.RemoveLaneConnections(LaneId, StartNode);
+                return;
+            }
             var currentConnections = GetCurrentConnections();
-            foreach (uint targetLaneId in Connections) {
-                if (currentConnections.Contains(targetLaneId)) {
+            //Log._Debug($"currentConnections=" + currentConnections.ToSTR());
+            //Log._Debug($"connections_=" + connections_.ToSTR());
+
+            foreach (uint targetLaneId in connections_) {
+                if (currentConnections ==  null || !currentConnections.Contains(targetLaneId)) {
                     connMan.AddLaneConnection(LaneId, targetLaneId, StartNode);
                 }
             }
-            foreach (uint targetLaneId in currentConnections) {
-                if (Connections.Contains(targetLaneId)) {
+            foreach (uint targetLaneId in currentConnections ?? Enumerable.Empty<uint>()) {
+                if (!connections_.Contains(targetLaneId)) {
                     connMan.RemoveLaneConnection(LaneId, targetLaneId, StartNode);
                 }
             }
@@ -40,24 +53,26 @@ namespace TrafficManager.Util.Record {
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) continue;
-                ref NetSegment segment = ref segmentId.ToSegment();
-                uint laneId = segment.m_lanes;
-                NetInfo.Lane[] lanes = segment.Info.m_lanes;
-
-                for (byte laneIndex = 0; (laneIndex < lanes.Length) && (laneId != 0); laneIndex++) {
-                    NetInfo.Lane laneInfo = lanes[laneIndex];
-                    if (!laneInfo.m_laneType.IsFlagSet(LaneConnectionManager.LANE_TYPES) ||
-                        !laneInfo.m_vehicleType.IsFlagSet(LaneConnectionManager.VEHICLE_TYPES)) {
-                        continue;
-                    }
+                bool Handler(
+                    uint laneId,
+                    ref NetLane lane,
+                    NetInfo.Lane laneInfo,
+                    ushort segmentId,
+                    ref NetSegment segment,
+                    byte laneIndex) {
                     var laneData = new LaneConnectionRecord {
                         LaneId = laneId,
                         LaneIndex = laneIndex,
                         StartNode = (bool)netService.IsStartNode(segmentId, nodeId),
                     };
                     ret.Add(laneData);
-                    laneId = laneId.ToLane().m_nextLane;
+                    return true;
                 }
+                netService.IterateSegmentLanes(
+                    segmentId,
+                    LaneConnectionManager.LANE_TYPES,
+                    LaneConnectionManager.VEHICLE_TYPES,
+                    Handler);
             }
             return ret;
         }

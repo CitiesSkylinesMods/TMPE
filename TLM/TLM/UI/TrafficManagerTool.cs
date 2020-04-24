@@ -259,6 +259,14 @@ namespace TrafficManager.UI {
         public void SetToolMode(ToolMode newToolMode) {
             ToolMode oldToolMode = toolMode_;
 
+            if(toolMode_ != ToolMode.None) {
+                // Make it impossible for user to undo changes performed by Road selection panels
+                // after changing traffic rule vis other tools.
+                // TODO: This code will not be necessary when we implement intent.
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
+                RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
+            }
+
             // ToolModeChanged does not count timed traffic light submodes as a same tool
             bool toolModeChanged = newToolMode != toolMode_;
 

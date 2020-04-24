@@ -107,10 +107,16 @@ namespace TrafficManager.Util {
             return stringToCenter.PadLeft(leftPadding).PadRight(totalLength);
         }
 
-        internal static string ToSTR<T>(this IEnumerable<T> segmentList) {
+        /// <summary>
+        /// Creates and string of all items with enumerable inpute as {item1, item2, item3}
+        /// null argument returns "Null"
+        /// </summary>
+        internal static string ToSTR<T>(this IEnumerable<T> enumerable) {
+            if (enumerable == null)
+                return "Null";
             string ret = "{ ";
-            foreach (T segmentId in segmentList) {
-                ret += $"{segmentId}, ";
+            foreach (T item in enumerable) {
+                ret += $"{item}, ";
             }
             ret.Remove(ret.Length - 2, 2);
             ret += " }";

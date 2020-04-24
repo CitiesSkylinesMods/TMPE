@@ -6,6 +6,8 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State.ConfigData;
     using TrafficManager.Traffic.Impl;
     using TrafficManager.Traffic;
+    using CitiesGameBridge.Service;
+    using TrafficManager.Util;
 
     [Obsolete("should be removed when implementing issue #240")]
     public class SegmentEndManager
@@ -161,6 +163,12 @@ namespace TrafficManager.Manager.Impl {
 
         internal int GetIndex(ushort segmentId, bool startNode) {
             return segmentId + (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT);
+        }
+
+        internal void GetSegmentAndNodeFromIndex(int index, out ushort segmentId, out bool startNode) {
+            Shortcuts.Assert(index < 2 * NetManager.MAX_SEGMENT_COUNT && index > 0);
+            startNode = index < NetManager.MAX_SEGMENT_COUNT;
+            segmentId = (ushort)(index - (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT));
         }
 
         // protected override void HandleInvalidSegment(SegmentGeometry geometry) {

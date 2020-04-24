@@ -355,8 +355,7 @@ namespace TrafficManager.UI {
             public class ClearButtton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
                 internal override FunctionModes Function => FunctionModes.Clear;
-                public override IRecordable Do() => // TODO delete all rules as part of #568
-                    PriorityRoad.ClearRoad(Selection);
+                public override IRecordable Do() => PriorityRoad.ClearRoad(Selection);
             }
             public class StopButtton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
@@ -373,15 +372,12 @@ namespace TrafficManager.UI {
             public class HighPriorityButtton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
                 internal override FunctionModes Function => FunctionModes.HighPriority;
-                public override IRecordable Do() =>
-                    PriorityRoad.FixRoad(Selection);
+                public override IRecordable Do() => PriorityRoad.FixRoad(Selection);
             }
             public class RoundaboutButtton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
                 internal override FunctionModes Function => FunctionModes.Roundabout;
-                public override IRecordable Do() =>
-                    RoundaboutMassEdit.Instance.FixRoundabout(Selection);
-
+                public override IRecordable Do() => RoundaboutMassEdit.Instance.FixRoundabout(Selection);
                 public override bool ShouldDisable() {
                     if (Length <= 1) {
                         return true;

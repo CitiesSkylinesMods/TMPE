@@ -7,21 +7,21 @@ namespace TrafficManager.Util.Record {
         public ushort NodeId { get; private set; }
         public NodeRecord(ushort nodeId) => NodeId = nodeId;
 
-        private bool TrafficLight;
-        private List<LaneConnectionRecord> Lanes;
+        private bool trafficLight_;
+        private List<LaneConnectionRecord> lanes_;
         private static TrafficLightManager tlMan => TrafficLightManager.Instance;
 
         public void Record() {
-            TrafficLight = tlMan.HasTrafficLight(NodeId, ref NodeId.ToNode());
-            Lanes = LaneConnectionRecord.GetLanes(NodeId);
-            foreach (LaneConnectionRecord sourceLane in Lanes) {
+            trafficLight_ = tlMan.HasTrafficLight(NodeId, ref NodeId.ToNode());
+            lanes_ = LaneConnectionRecord.GetLanes(NodeId);
+            foreach (LaneConnectionRecord sourceLane in lanes_) {
                 sourceLane.Record();
             }
         }
 
         public void Restore() {
-            SetTrafficLight(NodeId, TrafficLight);
-            foreach (LaneConnectionRecord sourceLane in Lanes) {
+            SetTrafficLight(NodeId, trafficLight_);
+            foreach (LaneConnectionRecord sourceLane in lanes_) {
                 sourceLane.Restore();
             }
         }

@@ -11,6 +11,9 @@ namespace TrafficManager.Util.Record {
 
         public List<IRecordable> Records = new List<IRecordable>();
 
+        /// <summary>
+        /// Records segment and both node ends. but not the segment ends.
+        /// </summary>
         public void AddSegmentAndNodes(ushort segmentId) {
             ushort node0 = segmentId.ToSegment().m_startNode;
             ushort node1 = segmentId.ToSegment().m_endNode;
@@ -19,6 +22,9 @@ namespace TrafficManager.Util.Record {
             NodeIDs.Add(node1);
         }
 
+        /// <summary>
+        /// Adds the input segment, both node ends, and all segment ends attached to the nodes.
+        /// </summary>
         public void AddCompleteSegment(ushort segmentId) {
             ushort node0 = segmentId.ToSegment().m_startNode;
             ushort node1 = segmentId.ToSegment().m_endNode;
@@ -27,7 +33,9 @@ namespace TrafficManager.Util.Record {
             AddNodeAndSegmentEnds(node1);
         }
 
-        // add all segment ends attached to nodeId
+        /// <summary>
+        /// Adds the input node and all attached segmentEnds.
+        /// </summary>
         public void AddNodeAndSegmentEnds(ushort nodeId) {
             NodeIDs.Add(nodeId);
             ref NetNode node = ref nodeId.ToNode();

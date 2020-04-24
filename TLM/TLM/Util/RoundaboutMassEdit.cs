@@ -5,6 +5,7 @@ namespace TrafficManager.Util {
     using Record;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
@@ -214,7 +215,7 @@ namespace TrafficManager.Util {
         public IRecordable FixRoundabout(List<ushort> segList) {
             if (segList == null)
                 return null;
-            IRecordable record = RecordRoundAbout(segList);
+            IRecordable record = RecordRoundabout(segList);
             this.segmentList_ = segList;
             int count = segList.Count;
             for (int i = 0; i < count; ++i) {
@@ -384,13 +385,18 @@ namespace TrafficManager.Util {
             return false;
         }
 
-        public static IRecordable RecordRoundAbout(List<ushort> segList) {
+        /// <summary>
+        /// Records the state of traffic rules for all stuff affected by <c>FixRoundabout()</c>
+        /// </summary>
+        /// <param name="segList"></param>
+        /// <returns></returns>
+        public static IRecordable RecordRoundabout(List<ushort> segList) {
             TrafficRulesRecord record = new TrafficRulesRecord();
             foreach (ushort segmentId in segList)
                 record.AddCompleteSegment(segmentId);
 
-            // add each minor road.
-            foreach (ushort nodeId in record.NodeIDs) {
+            // Add each minor road.
+            foreach (ushort nodeId in record.NodeIDs.ToArray()) {
                 ref NetNode node = ref nodeId.ToNode();
                 if (node.CountSegments() < 3) continue;
                 for (int i = 0; i < 8; ++i) {
@@ -408,6 +414,9 @@ namespace TrafficManager.Util {
             return record;
         }
 
+        /// <summary>
+        /// Calculates Raduis of a curved segment assuming it is part of a circle.
+        /// </summary>
         internal static float CalculateRadius(ref NetSegment segment) {
             // TDOO: to calculate maximum curviture for eleptical roundabout, cut the bezier in 10 portions
             // and then find the bezier with minimum raduis.
@@ -421,12 +430,17 @@ namespace TrafficManager.Util {
             return r;
         }
 
+
+        /// <summary>
+        /// calculates realisitic speed limit of input curved segment assuming it is part of a circle.
+        /// minimum speed is 10kmph.
+        /// </summary>
+        /// <returns>Null if segment is straight, otherwise if successful it retunrs calcualted speed.</returns>
         private static SpeedValue? CalculatePreferedSpeed(ushort segmentId) {
             float r = CalculateRadius(ref segmentId.ToSegment());
             float kmph = 11.3f * Mathf.Sqrt(r); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issue-589462235
             Log._Debug($"CalculatePreferedSpeed radius:{r} -> kmph:{kmph}");
             if (float.IsNaN(kmph) || float.IsInfinity(kmph) || kmph < 1) {
-                Log._Debug("CalculatePreferedSpeed returned null");
                 return null;
             }
             if (kmph < 10) {
