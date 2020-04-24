@@ -19,15 +19,22 @@ namespace TrafficManager.State.Keybinds {
         /// <value>
         /// This input key can not be changed and is not checked, instead it is display only
         /// </value>
-        protected static KeybindSetting ToolCancelViewOnly = new KeybindSetting(
-            "Global",
-            "Key_ExitSubtool",
-            SavedInputKey.Encode(KeyCode.Escape, false, false, false));
+        // Not editable
+        internal static KeybindSetting Esc = new KeybindSetting(
+            cat: "Global",
+            configFileKey: "Key_ExitSubtool",
+            defaultKey1: SavedInputKey.Encode(key: KeyCode.Escape, control: false, shift: false, alt: false));
+
+        // Not editable
+        internal static KeybindSetting RightClick = new KeybindSetting(
+            cat: "Global",
+            configFileKey: "Key_RightClick",
+            defaultKey1: SavedInputKey.Encode(key: KeyCode.Mouse1, control: false, shift: false, alt: false));
 
         public static KeybindSetting ToggleMainMenu = new KeybindSetting(
-            "Global",
-            "Key_ToggleTMPEMainMenu",
-            SavedInputKey.Encode(KeyCode.Semicolon, false, true, false));
+            cat: "Global",
+            configFileKey: "Key_ToggleTMPEMainMenu",
+            defaultKey1: SavedInputKey.Encode(key: KeyCode.Semicolon, control: false, shift: true, alt: false));
 
         public static KeybindSetting ToggleTrafficLightTool =
             new KeybindSetting("Global", "Key_ToggleTrafficLightTool");

@@ -21,7 +21,7 @@ namespace TrafficManager.State.Keybinds {
         /// </summary>
         private void CreateUI_Global() {
             AddReadOnlyKeybind(Translation.Options.Get("Keybind:Generic exit subtool key"),
-                               ToolCancelViewOnly);
+                               Esc);
 
             AddKeybindRowUI(Translation.Options.Get("Keybind:Toggle Main Menu"),
                             ToggleMainMenu);

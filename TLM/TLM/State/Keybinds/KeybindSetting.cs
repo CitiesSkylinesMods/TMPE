@@ -1,4 +1,5 @@
 namespace TrafficManager.State.Keybinds {
+    using System.Collections.Generic;
     using ColossalFramework;
     using ColossalFramework.UI;
     using JetBrains.Annotations;
@@ -61,15 +62,15 @@ namespace TrafficManager.State.Keybinds {
                               InputKey? defaultKey2) {
             Category = cat;
             Key = new SavedInputKey(
-                configFileKey,
-                KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
-                defaultKey1 ?? SavedInputKey.Empty,
-                true);
+                name: configFileKey,
+                fileName: KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
+                def: defaultKey1 ?? SavedInputKey.Empty,
+                autoUpdate: true);
             AlternateKey = new SavedInputKey(
-                configFileKey + "_Alternate",
-                KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
-                defaultKey2 ?? SavedInputKey.Empty,
-                true);
+                name: configFileKey + "_Alternate",
+                fileName: KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
+                def: defaultKey2 ?? SavedInputKey.Empty,
+                autoUpdate: true);
         }
 
         /// <summary>
@@ -94,6 +95,24 @@ namespace TrafficManager.State.Keybinds {
             }
 
             return result + Keybind.ToLocalizedString(AlternateKey);
+        }
+
+        /// <summary>
+        /// Produce a keybind tooltip text, or two if alternate key is set. Prefixed if not empty.
+        /// </summary>
+        /// <param name="prefix">Prefix will be added if any key is not empty</param>
+        /// <returns>String tooltip with the key shortcut or two</returns>
+        public List<string> ToLocalizedStringList() {
+            var result = new List<string>(capacity: 2);
+            if (!Keybind.IsEmpty(Key)) {
+                result.Add(Keybind.ToLocalizedString(Key));;
+            }
+
+            if (AlternateKey != null && !Keybind.IsEmpty(AlternateKey)) {
+                result.Add(Keybind.ToLocalizedString(AlternateKey));
+            }
+
+            return result;
         }
 
         /// <param name="e"></param>
