@@ -87,7 +87,7 @@ namespace TrafficManager.UI.SubTools {
             ushort updatedNodeId = 0;
             bool handleHovered = false;
             bool cursorInPanel = IsCursorInPanel();
-            PrioritySigns.Overlay overlay = new Overlay(
+            PrioritySigns.PrioritySignsOverlay overlay = new PrioritySignsOverlay(
                 mainTool: this.MainTool,
                 debug: logJunctions,
                 handleClick: !cursorInPanel);

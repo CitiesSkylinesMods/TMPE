@@ -11,7 +11,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     /// Class handles rendering of priority signs overlay.
     /// Create one and set its fields before calling DrawSignHandles
     /// </summary>
-    public struct Overlay {
+    public struct PrioritySignsOverlay {
         private const float SIGN_SIZE_PIXELS = 80f;
         private const float AVERAGE_METERS_PER_PIXEL = 0.075f;
         private const float SIGN_SIZE_METERS = SIGN_SIZE_PIXELS * AVERAGE_METERS_PER_PIXEL;
@@ -30,15 +30,14 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
         /// and directed along the road segment.
         /// </summary>
         private struct SignsLayout {
+            /// <summary>starting point to draw signs.</summary>
+            private readonly Vector3 origin_;
 
-            /// <summary>starting point to draw signs</summary>
-            private Vector3 origin_;
+            /// <summary>normalized vector across segment (sideways).</summary>
+            private readonly Vector3 dirX_;
 
-            /// <summary>normalized vector across segment (sideways)</summary>
-            private Vector3 dirX_;
-
-            /// <summary>normalized vector going away from the node</summary>
-            private Vector3 dirY_; 
+            /// <summary>normalized vector going away from the node.</summary>
+            private readonly Vector3 dirY_;
 
             private readonly int signsPerRow_;
             private readonly bool viewOnly_;
@@ -46,35 +45,62 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             /// <summary>Zoom level inherited from the MainTool.</summary>
             private readonly float baseZoom_;
 
-            /// <summary>sign size in meters.</summary>
+            /// <summary>Sign size (world units: meters).</summary>
             private float signSizeMeters_;
 
             // outermost position to start drawing signs in x direction (sideways).
             private float startX_;
 
-            /// <summary>counts how many signs has been draw to calculate the position of the new sign</summary>
+            /// <summary>How many signs been drawn to calculate the position of the new sign.</summary>
             private int counter_;
 
             public SignsLayout(ushort segmentId,
                                bool startNode,
                                int signsPerRow,
                                bool viewOnly,
-                               float baseZoom) {
-                segmentId.ToSegment().CalculateCorner(segmentId, true, startNode, false, out Vector3 corner1Pos, out Vector3 coner1Direction, out _); // right corner
-                segmentId.ToSegment().CalculateCorner(segmentId, true, startNode, true, out Vector3 corner2Pos, out Vector3 coner2Direction, out _); // left corner.
-                dirX_ = (corner1Pos - corner2Pos).normalized; 
-                dirY_ = (coner1Direction + coner2Direction) * 0.5f; // for curved angled segements, coner1Direction may slightly differ from coner2Direction
-                origin_ = (corner1Pos + corner2Pos) * 0.5f; // origin point to start drawing sprites from.
-                const bool overlaysStartOnCrosswalks = true; // if false the overlays start after zebra crossings.
+                               float baseZoom)
+            {
+                // right corner
+                segmentId.ToSegment().CalculateCorner(
+                    segmentID: segmentId,
+                    heightOffset: true,
+                    start: startNode,
+                    leftSide: false,
+                    cornerPos: out Vector3 corner1Pos,
+                    cornerDirection: out Vector3 corner1Direction,
+                    smooth: out _);
+
+                // left corner
+                segmentId.ToSegment().CalculateCorner(
+                    segmentID: segmentId,
+                    heightOffset: true,
+                    start: startNode,
+                    leftSide: true,
+                    cornerPos: out Vector3 corner2Pos,
+                    cornerDirection: out Vector3 corner2Direction,
+                    smooth: out _);
+
+                this.dirX_ = (corner1Pos - corner2Pos).normalized;
+
+                // for curved angled segements, corner1Direction may slightly differ from corner2Direction
+                this.dirY_ = (corner1Direction + corner2Direction) * 0.5f;
+
+                // origin point to start drawing sprites from.
+                this.origin_ = (corner1Pos + corner2Pos) * 0.5f;
+
+                // if false the overlays start after zebra crossings.
+                // const bool overlaysStartOnCrosswalks = true;
 
                 this.signsPerRow_ = signsPerRow;
                 this.viewOnly_ = viewOnly;
                 this.baseZoom_ = baseZoom;
-                this.signSizeMeters_ = viewOnly ? SIGN_SIZE_METERS * VIEW_SIZE_RATIO : SIGN_SIZE_METERS;
+                this.signSizeMeters_ = viewOnly
+                                           ? SIGN_SIZE_METERS * VIEW_SIZE_RATIO
+                                           : SIGN_SIZE_METERS;
                 this.counter_ = 0;
 
-                float lenX = signSizeMeters_ * (signsPerRow - 1);
-                startX_ = -lenX * 0.5f;
+                float lenX = this.signSizeMeters_ * (signsPerRow - 1);
+                this.startX_ = -lenX * 0.5f;
             }
 
             public bool DrawSign(bool small,
@@ -83,13 +109,14 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                                  Texture2D signTexture)
             {
                 int col = counter_ / signsPerRow_;
-                int row = counter_ - col * signsPerRow_;
+                int row = counter_ - (col * signsPerRow_);
                 counter_++;
 
+                // +0.5f so that the signs don't cover crossings.
                 Vector3 signCenter =
                     origin_ +
-                    (signSizeMeters_ * (col + 0.5f)) * dirY_  + // +0.5f so that the signs don't cover crossings.
-                    (signSizeMeters_ * row + startX_) * dirX_;
+                    ((signSizeMeters_ * (col + 0.5f)) * dirY_) +
+                    (((signSizeMeters_ * row) + startX_) * dirX_);
 
                 bool visible = GeometryUtil.WorldToScreenPoint(worldPos: signCenter,
                                                                screenPos: out Vector3 signScreenPos);
@@ -133,11 +160,11 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             }
         }
 
-        /// <summary>Initializes a new instance of the <see cref="Overlay"/> struct for rendering.</summary>
+        /// <summary>Initializes a new instance of the <see cref="PrioritySignsOverlay"/> struct for rendering.</summary>
         /// <param name="mainTool">Parent <see cref="TrafficManagerTool"/>.</param>
         /// <param name="debug">Is debug rendering on.</param>
         /// <param name="handleClick">Whether clicks are to be handled.</param>
-        public Overlay(TrafficManagerTool mainTool,
+        public PrioritySignsOverlay(TrafficManagerTool mainTool,
                        bool debug,
                        bool handleClick) {
             mainTool_ = mainTool;
@@ -174,7 +201,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
             // NetManager netManager = Singleton<NetManager>.instance;
             Color guiColor = GUI.color;
-            Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+            // Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             for (int i = 0; i < 8; ++i) {

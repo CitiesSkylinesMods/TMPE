@@ -280,7 +280,7 @@
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowToolWindow.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\PrioritySigns\MassEditOverlay.cs" />
-    <Compile Include="UI\SubTools\PrioritySigns\Overlay.cs" />
+    <Compile Include="UI\SubTools\PrioritySigns\PrioritySignsOverlay.cs" />
     <Compile Include="UI\SubTools\PrioritySigns\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />

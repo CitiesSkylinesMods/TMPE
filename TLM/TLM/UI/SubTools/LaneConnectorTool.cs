@@ -2,7 +2,6 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework.Math;
     using ColossalFramework;
     using CSUtil.Commons;
-    using JetBrains.Annotations;
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.Manager.Impl;
@@ -14,8 +13,6 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Util;
     using TrafficManager.UI.Helpers;
     using static TrafficManager.Util.Shortcuts;
-    using System;
-    using GenericGameBridge.Service;
     using TrafficManager.UI.SubTools.PrioritySigns;
 
     public class LaneConnectorTool : LegacySubTool {
@@ -575,7 +572,7 @@ namespace TrafficManager.UI.SubTools {
         /// if segments are connected from inside and/or outside, then some lane connections
         /// are diverted toward those segments such that there is no criss-cross and cars stay on
         /// their respective lanes.
-        /// 
+        ///
         /// if the number of lanes does not match:
         ///  - if the main road is two ways then we prefer to merge/split inner lanes.
         ///  - else if <paramref name="minorSegmentId"/> == 0 then
@@ -594,8 +591,8 @@ namespace TrafficManager.UI.SubTools {
         /// <returns><c>false</c> if there is only one incomming/outgoing lane, <c>true</c> otherwise</returns>
         private static bool StayInLane(
             ushort nodeId,
-            ushort mainSegmentSourceId, 
-            ushort mainSegmentTargetId, 
+            ushort mainSegmentSourceId,
+            ushort mainSegmentTargetId,
             ushort minorSegmentId,
             ushort minorSegment2Id) {
             if (verbose_) {
@@ -622,11 +619,11 @@ namespace TrafficManager.UI.SubTools {
             // count relavent source(going toward the junction) lanes and
             // target (going aginst the junction) lanes on each segment.
             int laneCountMinorSource = minorSegmentId == 0 ? 0 : PriorityRoad.CountLanesTowardJunction(minorSegmentId, nodeId);
-            int laneCountMinorTarget = minorSegmentId == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(minorSegmentId, nodeId); 
-            int laneCountMinor2Source = minorSegment2Id == 0 ? 0 : PriorityRoad.CountLanesTowardJunction(minorSegment2Id, nodeId); 
-            int laneCountMinor2Target = minorSegment2Id == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(minorSegment2Id, nodeId); 
-            int laneCountMainSource = PriorityRoad.CountLanesTowardJunction(mainSegmentSourceId, nodeId); 
-            int laneCountMainTarget = PriorityRoad.CountLanesAgainstJunction(mainSegmentTargetId, nodeId); 
+            int laneCountMinorTarget = minorSegmentId == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(minorSegmentId, nodeId);
+            int laneCountMinor2Source = minorSegment2Id == 0 ? 0 : PriorityRoad.CountLanesTowardJunction(minorSegment2Id, nodeId);
+            int laneCountMinor2Target = minorSegment2Id == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(minorSegment2Id, nodeId);
+            int laneCountMainSource = PriorityRoad.CountLanesTowardJunction(mainSegmentSourceId, nodeId);
+            int laneCountMainTarget = PriorityRoad.CountLanesAgainstJunction(mainSegmentTargetId, nodeId);
             int totalSource = laneCountMinorSource + laneCountMainSource + laneCountMinor2Source;
             int totalTarget = laneCountMinorTarget + laneCountMainTarget + laneCountMinor2Target;
 
@@ -741,7 +738,7 @@ namespace TrafficManager.UI.SubTools {
                         !ConnectToMinor(sourceLaneEnd.OuterSimilarLaneIndex, targetLaneEnd.OuterSimilarLaneIndex) &&
                         !ConnectToMinor2(sourceLaneEnd.OuterSimilarLaneIndex, targetLaneEnd.OuterSimilarLaneIndex) &&
                         IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex + laneCountMinorSource,
-                                     targetLaneEnd.OuterSimilarLaneIndex + laneCountMinorTarget) 
+                                     targetLaneEnd.OuterSimilarLaneIndex + laneCountMinorTarget)
                         ) {
                         connect = true;
                     } else if (
