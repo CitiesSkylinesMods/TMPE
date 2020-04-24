@@ -127,7 +127,7 @@ namespace TrafficManager {
         public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
             base.OnUpdate(realTimeDelta, simulationTimeDelta);
 
-            using (var bm = Benchmark.MaybeCreateBenchmark()) {
+            using (var bm = CSUtil.Commons.Benchmark.Benchmark.MaybeCreateBenchmark()) {
                 if (ToolsModifierControl.toolController == null || ModUI.Instance == null) {
                     return;
                 }

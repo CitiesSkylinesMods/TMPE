@@ -87,8 +87,8 @@
     <MangedDLLPath Condition="!  Exists ('$(MangedDLLPath)')">..\dependencies</MangedDLLPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0TMPE.Harmony">
-      <HintPath>RedirectionFramework\lib\0TMPE.Harmony.dll</HintPath>
+    <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lib.Harmony.1.2.0.1\lib\net35\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(MangedDLLPath)\Assembly-CSharp.dll</HintPath>
@@ -101,6 +101,12 @@
     <Reference Include="ICities">
       <HintPath>$(MangedDLLPath)\ICities.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="SkyTools.Common, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SkyTools.Common.2.1.0\lib\net35\SkyTools.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="SkyTools.Patching, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SkyTools.Patching.2.1.0\lib\net35\SkyTools.Patching.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -125,6 +131,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Benchmark\BenchmarkManager.cs" />
     <Compile Include="CodeProfiler.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Custom\AI\CustomBuildingAI.cs" />
@@ -675,6 +682,8 @@ xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)SkyTools.Common.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)SkyTools.Patching.dll" "%25DEPLOYDIR%25"
 
 rem To avoid double hot reload, TrafficManager.dll must be replaced last and fast.
 rem Once TrafficManager.dll is re-loaded, all other dlls will be reloaded as well

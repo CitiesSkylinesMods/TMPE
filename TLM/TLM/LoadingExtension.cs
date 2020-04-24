@@ -18,6 +18,8 @@ namespace TrafficManager {
     using TrafficManager.UI;
     using static TrafficManager.Util.Shortcuts;
     using UnityEngine;
+    using SkyTools.Benchmarks;
+    using TrafficManager.Custom.AI;
 
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {
