@@ -12,7 +12,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     /// Create one and set its fields before calling DrawSignHandles
     /// </summary>
     public struct Overlay {
-        private const float JUNCTION_RESTRICTIONS_SIGN_SIZE = 80f;
+        private const float SIGN_SIZE_PIXELS = 80f;
+        private const float AVERAGE_METERS_PER_PIXEL = 0.075f;
+        private const float SIGN_SIZE_METERS = SIGN_SIZE_PIXELS * AVERAGE_METERS_PER_PIXEL;
+        private const float VIEW_SIZE_RATIO = 0.8f;
 
         private readonly TrafficManagerTool mainTool_;
         private readonly bool debug_;
@@ -27,13 +30,15 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
         /// and directed along the road segment.
         /// </summary>
         private struct SignsLayout {
-            private Vector3 zero_;
 
-            /// <summary>Unit vector perpendicular to the vector towards the segment center.</summary>
-            public Vector3 yBasis;
+            /// <summary>starting point to draw signs</summary>
+            private Vector3 origin_;
 
-            /// <summary>Unit vector towards the segment center.</summary>
-            public Vector3 xBasis;
+            /// <summary>normalized vector across segment (sideways)</summary>
+            private Vector3 dirX_;
+
+            /// <summary>normalized vector going away from the node</summary>
+            private Vector3 dirY_; 
 
             private readonly int signsPerRow_;
             private readonly bool viewOnly_;
@@ -41,67 +46,35 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             /// <summary>Zoom level inherited from the MainTool.</summary>
             private readonly float baseZoom_;
 
-            private float signSize_;
+            /// <summary>sign size in meters.</summary>
+            private float signSizeMeters_;
 
-            /// <summary>Horizontal position when placing signs in a grid.</summary>
-            private int xPosition;
+            // outermost position to start drawing signs in x direction (sideways).
+            private float startX_;
 
-            /// <summary>Vertical position when placing signs in a grid.</summary>
-            private int yPosition;
+            /// <summary>counts how many signs has been draw to calculate the position of the new sign</summary>
+            private int counter_;
 
-            public SignsLayout(Vector3 nodePos,
-                               Vector3 yBasis,
+            public SignsLayout(ushort segmentId,
+                               bool startNode,
                                int signsPerRow,
                                bool viewOnly,
                                float baseZoom) {
+                segmentId.ToSegment().CalculateCorner(segmentId, true, startNode, false, out Vector3 corner1Pos, out Vector3 coner1Direction, out _); // right corner
+                segmentId.ToSegment().CalculateCorner(segmentId, true, startNode, true, out Vector3 corner2Pos, out Vector3 coner2Direction, out _); // left corner.
+                dirX_ = (corner1Pos - corner2Pos).normalized; 
+                dirY_ = (coner1Direction + coner2Direction) * 0.5f; // for curved angled segements, coner1Direction may slightly differ from coner2Direction
+                origin_ = (corner1Pos + corner2Pos) * 0.5f; // origin point to start drawing sprites from.
+                const bool overlaysStartOnCrosswalks = true; // if false the overlays start after zebra crossings.
+
                 this.signsPerRow_ = signsPerRow;
                 this.viewOnly_ = viewOnly;
-                baseZoom_ = baseZoom;
+                this.baseZoom_ = baseZoom;
+                this.signSizeMeters_ = viewOnly ? SIGN_SIZE_METERS * VIEW_SIZE_RATIO : SIGN_SIZE_METERS;
+                this.counter_ = 0;
 
-                this.xBasis = yBasis;
-                this.yBasis = Vector3.Cross(yBasis, new Vector3(0f, 1f, 0f)).normalized;
-
-                this.signSize_ = viewOnly ? 3.5f : 6f;
-
-                this.zero_ = GetZeroPosition(
-                    nodePos: nodePos,
-                    xu: this.yBasis,
-                    yu: this.xBasis,
-                    numSignsPerRow: signsPerRow,
-                    signSize: this.signSize_,
-                    viewOnly: viewOnly);
-                xPosition = 0;
-                yPosition = 0;
-
-                // For view mode: Offset to the left (for Left side drive) or to the right by 8 units
-                // if (viewOnly) {
-                //     if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
-                //         this.zero_ -= this.yBasis * 8f;
-                //     } else {
-                //         this.zero_ += this.yBasis * 8f;
-                //     }
-                // }
-            }
-
-            /// <summary>
-            /// Based on view mode, calculate zero position where the signs will start.
-            /// </summary>
-            /// <param name="nodePos">Center position for the junction.</param>
-            /// <param name="xu">Unit vector to the right.</param>
-            /// <param name="yu">Unit vector towards segment center.</param>
-            /// <param name="numSignsPerRow">How many signs per row.</param>
-            /// <param name="signSize">Sign size from <see cref="GetSignSize"/>.</param>
-            /// <returns>Zero position where first sign will go.</returns>
-            private static Vector3 GetZeroPosition(Vector3 nodePos,
-                                                   Vector3 xu,
-                                                   Vector3 yu,
-                                                   int numSignsPerRow,
-                                                   float signSize,
-                                                   bool viewOnly) {
-                // Vector3 centerStart = nodePos + (yu * (viewOnly ? 5f : 14f));
-                Vector3 centerStart = nodePos + (yu * 14f);
-                Vector3 zero = centerStart - (0.5f * (numSignsPerRow - 1) * signSize * xu); // "top left"
-                return zero;
+                float lenX = signSizeMeters_ * (signsPerRow - 1);
+                startX_ = -lenX * 0.5f;
             }
 
             public bool DrawSign(bool small,
@@ -109,22 +82,26 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                                  Color guiColor,
                                  Texture2D signTexture)
             {
-                // World coordinates, where 1 unit = 1 m
-                Vector3 signCenter = this.zero_
-                                     + (this.signSize_ * this.xPosition * this.yBasis)
-                                     + (this.signSize_ * this.yPosition * this.xBasis);
+                int col = counter_ / signsPerRow_;
+                int row = counter_ - col * signsPerRow_;
+                counter_++;
+
+                Vector3 signCenter =
+                    origin_ +
+                    (signSizeMeters_ * (col + 0.5f)) * dirY_  + // +0.5f so that the signs don't cover crossings.
+                    (signSizeMeters_ * row + startX_) * dirX_;
+
                 bool visible = GeometryUtil.WorldToScreenPoint(worldPos: signCenter,
                                                                screenPos: out Vector3 signScreenPos);
-
                 if (!visible) {
                     return false;
                 }
 
                 Vector3 diff = signCenter - camPos;
-                float zoom = 100.0f * this.baseZoom_ / diff.magnitude;
+                float zoom = 100.0f * baseZoom_ / diff.magnitude;
                 float size = (small ? 0.75f : 1f)
-                             * (this.viewOnly_ ? 0.8f : 1f)
-                             * JUNCTION_RESTRICTIONS_SIGN_SIZE * zoom;
+                             * (viewOnly_ ? VIEW_SIZE_RATIO : 1f)
+                             * SIGN_SIZE_PIXELS * zoom;
 
                 var boundingBox = new Rect(
                     x: signScreenPos.x - (size / 2),
@@ -132,8 +109,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     width: size,
                     height: size);
 
-                bool hoveredHandle = !this.viewOnly_ && TrafficManagerTool.IsMouseOver(boundingBox);
-                if (this.viewOnly_) {
+                bool hoveredHandle = !viewOnly_ && TrafficManagerTool.IsMouseOver(boundingBox);
+                if (viewOnly_) {
                     // Readonly signs look grey-ish
                     guiColor = Color.Lerp(guiColor, Color.gray, 0.5f);
                     guiColor.a = TrafficManagerTool.GetHandleAlpha(hovered: false);
@@ -153,14 +130,6 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 GUI.color = guiColor;
                 GUI.DrawTexture(boundingBox, signTexture);
                 return hoveredHandle;
-            }
-
-            public void AdvancePosition() {
-                this.xPosition++;
-                if (this.xPosition >= this.signsPerRow_) {
-                    this.xPosition = 0;
-                    this.yPosition++;
-                }
             }
         }
 
@@ -234,21 +203,9 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     continue; // only for road junctions
                 }
 
-                //------------------------------------
-                // Draw all junction restriction signs
-                // Determine direction from node center towards each segment center and use that
-                // as axis Y, and then dot product gives "horizontal" axis X
-                //------------------------------------
-                Vector3 segmentCenterPos = Singleton<NetManager>
-                                           .instance
-                                           .m_segments
-                                           .m_buffer[segmentId]
-                                           .m_bounds
-                                           .center;
-
                 SignsLayout signsLayout = new SignsLayout(
-                    nodePos: nodePos,
-                    yBasis: (segmentCenterPos - nodePos).normalized,
+                    segmentId: segmentId,
+                    startNode: isStartNode,
                     signsPerRow: isIncoming ? 2 : 1,
                     viewOnly: this.ViewOnly,
                     baseZoom: this.mainTool_.GetBaseZoom());
@@ -293,8 +250,6 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             stateUpdated = true;
                         }
                     }
-
-                    signsLayout.AdvancePosition();
                 }
 
                 // draw "u-turns allowed" sign at (1; 0)
@@ -333,8 +288,6 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             }
                         }
                     }
-
-                    signsLayout.AdvancePosition();
                 }
 
                 // draw "entering blocked junctions allowed" sign at (0; 1)
@@ -373,8 +326,6 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             stateUpdated = true;
                         }
                     }
-
-                    signsLayout.AdvancePosition();
                 }
 
                 // draw "pedestrian crossing allowed" sign at (1; 1)
@@ -407,8 +358,6 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             stateUpdated = true;
                         }
                     }
-
-                    signsLayout.AdvancePosition();
                 }
 
                 if (!Options.turnOnRedEnabled) {
@@ -459,8 +408,6 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             stateUpdated = true;
                         }
                     }
-
-                    signsLayout.AdvancePosition();
                 }
 
                 // draw "turn-right-on-red allowed" sign at (2; 1)
@@ -502,8 +449,6 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             stateUpdated = true;
                         }
                     }
-
-                    signsLayout.AdvancePosition();
                 }
             }
 
