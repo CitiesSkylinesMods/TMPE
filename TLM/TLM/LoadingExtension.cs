@@ -16,6 +16,8 @@ namespace TrafficManager {
     using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
     using TrafficManager.UI;
+    using TrafficManager.UI.MainMenu.OSD;
+    using TrafficManager.Util;
 
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {
@@ -42,8 +44,6 @@ namespace TrafficManager {
 
         public static bool DetourInited { get; set; }
 
-        public static Harmony HarmonyInst { get; private set; }
-
         /// <summary>
         /// Contains loaded languages and lookup functions for text translations
         /// </summary>
@@ -58,13 +58,6 @@ namespace TrafficManager {
         public static bool IsPathManagerReplaced {
             get; private set;
         }
-
-        /// <summary>
-        /// Method redirection states for Harmony-driven patches
-        /// </summary>
-        public static IDictionary<MethodBase, RedirectCallsState> HarmonyMethodStates {
-            get;
-        } = new Dictionary<MethodBase, RedirectCallsState>();
 
         /// <summary>
         /// Method redirection states for attribute-driven detours
@@ -86,13 +79,9 @@ namespace TrafficManager {
                 return;
             }
 
-            Log.Info("Reverting attribute-driven detours");
-            AssemblyRedirector.Revert();
-
-            Log.Info("Reverting Harmony detours");
-            foreach (MethodBase m in HarmonyMethodStates.Keys) {
-                HarmonyInst.Unpatch(m, HarmonyPatchType.All, HARMONY_ID);
-            }
+            var harmony = new Harmony(HARMONY_ID);
+            Shortcuts.Assert(harmony != null, "HarmonyInst!=null");
+            harmony.UnpatchAll();
 
             DetourInited = false;
             Log.Info("Reverting detours finished.");
@@ -108,38 +97,22 @@ namespace TrafficManager {
             bool detourFailed = false;
 
             try {
-                Log.Info("Deploying Harmony patches");
 #if DEBUG
                 Harmony.DEBUG = true;
 #endif
-                Assembly assembly = Assembly.GetExecutingAssembly();
-
-                HarmonyMethodStates.Clear();
-
                 // Harmony attribute-driven patching
                 Log.Info($"Performing Harmony attribute-driven patching");
-                HarmonyInst = new Harmony(HARMONY_ID);
-                HarmonyInst.PatchAll(assembly);
-
-                foreach (Type type in assembly.GetTypes()) {
-                    object[] attributes = type.GetCustomAttributes(typeof(HarmonyPatch), true);
-                    if (attributes.Length <= 0) {
-                        continue;
-                    }
-
-                    foreach (object attr in attributes) {
-                        HarmonyPatch harmonyPatchAttr = (HarmonyPatch)attr;
-                        MethodBase info = HarmonyUtil.GetOriginalMethod(harmonyPatchAttr.info);
-                        IntPtr ptr = info.MethodHandle.GetFunctionPointer();
-                        RedirectCallsState state = RedirectionHelper.GetState(ptr);
-                        HarmonyMethodStates[info] = state;
-                    }
-                }
-            } catch (Exception e) {
+                var harmony = new Harmony(HARMONY_ID);
+                Shortcuts.Assert(harmony!=null, "HarmonyInst!=null");
+                harmony.PatchAll();
+                Log.Info($"Harmony attribute-driven patching successfull!");
+            }
+            catch (Exception e) {
                 Log.Error("Could not deploy Harmony patches");
                 Log.Info(e.Message);
                 Log.Info(e.StackTrace);
                 detourFailed = true;
+                throw e;
             }
 
             try {

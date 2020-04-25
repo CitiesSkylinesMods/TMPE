@@ -1,13 +1,24 @@
-﻿namespace TrafficManager.Patch._RoadBaseAI {
+namespace TrafficManager.Patch._RoadBaseAI {
     using API.Traffic.Enums;
     using ColossalFramework;
+    using HarmonyLib;
     using JetBrains.Annotations;
+    using System.Reflection;
     using TrafficManager.State;
-    using CSUtil.Commons.Benchmark;
 
-
-    // [Harmony] Manually patched because struct references are used
-    public class SegmentSimulationStepPatch {
+    [HarmonyPatch]
+    [UsedImplicitly]
+    public class SegmentSimulationStepPatch
+    {
+        [UsedImplicitly]
+        public static MethodBase TargetMethod()
+        {
+            return HarmonyLib.AccessTools.DeclaredMethod(
+                typeof(RoadBaseAI),
+                "SimulationStep",
+                new[] { typeof(ushort), typeof(NetSegment).MakeByRefType() }) ??
+                throw new System.Exception("SegmentSimulationStepPatch failed to find TargetMethod");
+        }
 
         private static ushort lastSimulatedSegmentId = 0;
         private static byte trafficMeasurementMod = 0;

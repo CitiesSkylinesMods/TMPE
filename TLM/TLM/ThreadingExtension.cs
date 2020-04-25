@@ -49,23 +49,6 @@ namespace TrafficManager {
 
                 List<string> missingDetours = new List<string>();
 
-                foreach (KeyValuePair<MethodBase, RedirectCallsState> entry in HarmonyMethodStates) {
-                    MethodBase method = entry.Key;
-                    RedirectCallsState oldState = entry.Value;
-                    RedirectCallsState newState =
-                        RedirectionHelper.GetState(method.MethodHandle.GetFunctionPointer());
-
-                    if (!oldState.Equals(newState)) {
-                        missingDetours.Add(
-                            string.Format(
-                                "<Harmony> {0}.{1} with {2} parameters ({3})",
-                                method.DeclaringType.Name,
-                                method.Name,
-                                method.GetParameters().Length,
-                                method.DeclaringType.AssemblyQualifiedName));
-                    }
-                }
-
                 Log.Info($"ThreadingExtension.OnBeforeSimulationFrame: First frame detected. " +
                          $"Detours checked. Result: {missingDetours.Count} missing detours");
 
