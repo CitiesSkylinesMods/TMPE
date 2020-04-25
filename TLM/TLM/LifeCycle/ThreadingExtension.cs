@@ -1,4 +1,4 @@
-namespace TrafficManager {
+namespace TrafficManager.LifeCycle {
     using ColossalFramework.UI;
     using ColossalFramework;
     using CSUtil.Commons.Benchmark;
@@ -25,8 +25,6 @@ namespace TrafficManager {
         IRoutingManager routeMan = Constants.ManagerFactory.RoutingManager;
         IUtilityManager utilMan = Constants.ManagerFactory.UtilityManager;
 
-        bool firstFrame = true;
-
         public override void OnCreated(IThreading threading) {
             base.OnCreated(threading);
 
@@ -43,54 +41,10 @@ namespace TrafficManager {
         public override void OnBeforeSimulationFrame() {
             base.OnBeforeSimulationFrame();
 
-            if (firstFrame) {
-                firstFrame = false;
-                Log.Info("ThreadingExtension.OnBeforeSimulationFrame: First frame detected. Checking detours.");
-
-                List<string> missingDetours = new List<string>();
-
-                Log.Info($"ThreadingExtension.OnBeforeSimulationFrame: First frame detected. " +
-                         $"Detours checked. Result: {missingDetours.Count} missing detours");
-
-                if (missingDetours.Count > 0) {
-                    string error =
-                        "Traffic Manager: President Edition detected an incompatibility with another " +
-                        "mod! You can continue playing but it's NOT recommended. Traffic Manager will " +
-                        "not work as expected. See TMPE.log for technical details.";
-                    Log.Error(error);
-                    string log = "The following methods were overriden by another mod:";
-
-                    foreach (string missingDetour in missingDetours) {
-                        log += $"\n\t{missingDetour}";
-                    }
-
-                    Log.Info(log);
-
-                    if (GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage) {
-                        Prompt.Error("TM:PE Incompatibility Issue", error);
-                    }
-                }
-            }
-
             if (Options.timedLightsEnabled) {
                 tlsMan.SimulationStep();
             }
         }
-
-        // public override void OnAfterSimulationFrame() {
-        //        base.OnAfterSimulationFrame();
-        //
-        //        routeMan.SimulationStep();
-        //
-        //        ++ticksSinceLastMinuteUpdate;
-        //        if (ticksSinceLastMinuteUpdate > 60 * 60) {
-        //            ticksSinceLastMinuteUpdate = 0;
-        //            GlobalConfig.Instance.SimulationStep();
-        // #if DEBUG
-        //            DebugMenuPanel.PrintTransportStats();
-        // #endif
-        //        }
-        // }
 
         public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
             base.OnUpdate(realTimeDelta, simulationTimeDelta);

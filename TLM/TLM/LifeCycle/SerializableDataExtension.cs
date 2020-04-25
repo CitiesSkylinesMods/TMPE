@@ -1,4 +1,4 @@
-namespace TrafficManager.State {
+namespace TrafficManager.LifeCycle {
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
@@ -8,6 +8,7 @@ namespace TrafficManager.State {
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.Manager.Impl;
+    using State;
 
     [UsedImplicitly]
     public class SerializableDataExtension

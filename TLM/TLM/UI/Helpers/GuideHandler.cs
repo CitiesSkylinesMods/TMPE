@@ -1,8 +1,9 @@
+namespace TrafficManager.UI.Helpers {
     using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
+    using TrafficManager.LifeCycle;
 
-namespace TrafficManager.UI.Helpers {
     public class GuideHandler {
         private Dictionary<string, GuideWrapper> GuideTable = new Dictionary<string, GuideWrapper>();
 

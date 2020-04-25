@@ -1,48 +1,29 @@
-namespace TrafficManager {
-    using ColossalFramework.UI;
+namespace TrafficManager.LifeCycle {
     using ColossalFramework;
+    using ColossalFramework.UI;
     using CSUtil.Commons;
-    using HarmonyLib;
     using ICities;
     using JetBrains.Annotations;
-    using UnityEngine;
-    using Object = UnityEngine.Object;
+    using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using System;
     using TrafficManager.API.Manager;
     using TrafficManager.Custom.PathFinding;
     using TrafficManager.Manager.Impl;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
     using TrafficManager.UI;
-    using TrafficManager.UI.MainMenu.OSD;
-    using TrafficManager.Util;
+    using UnityEngine;
+    using Object = UnityEngine.Object;
 
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {
-        private const string HARMONY_ID = "de.viathinksoft.tmpe";
         internal static LoadingExtension Instance = null;
 
         FastList<ISimulationManager> simManager =>
             typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
                 ?.GetValue(null) as FastList<ISimulationManager>;
 
-        public class Detour {
-            public MethodInfo OriginalMethod;
-            public MethodInfo CustomMethod;
-            public RedirectCallsState Redirect;
-
-            public Detour(MethodInfo originalMethod, MethodInfo customMethod) {
-                OriginalMethod = originalMethod;
-                CustomMethod = customMethod;
-                Redirect = RedirectionHelper.RedirectCalls(originalMethod, customMethod);
-            }
-        }
-
         public static CustomPathManager CustomPathManager { get; set; }
-
-        public static bool DetourInited { get; set; }
 
         /// <summary>
         /// Contains loaded languages and lookup functions for text translations
@@ -59,14 +40,6 @@ namespace TrafficManager {
             get; private set;
         }
 
-        /// <summary>
-        /// Method redirection states for attribute-driven detours
-        /// </summary>
-        public static IDictionary<MethodInfo, RedirectCallsState> DetouredMethodStates {
-            get;
-            private set;
-        } = new Dictionary<MethodInfo, RedirectCallsState>();
-
         static LoadingExtension() {
             TranslationDatabase.LoadAllTranslations();
         }
@@ -74,90 +47,18 @@ namespace TrafficManager {
         public LoadingExtension() {
         }
 
-        public void RevertDetours() {
-            if (!DetourInited) {
-                return;
-            }
-
-            var harmony = new Harmony(HARMONY_ID);
-            Shortcuts.Assert(harmony != null, "HarmonyInst!=null");
-            harmony.UnpatchAll();
-
-            DetourInited = false;
-            Log.Info("Reverting detours finished.");
-        }
-
-        private void InitDetours() {
-            // TODO realize detouring with annotations
-            if (DetourInited) {
-                return;
-            }
-
-            Log.Info("Init detours");
-            bool detourFailed = false;
-
-            try {
-#if DEBUG
-                Harmony.DEBUG = true;
-#endif
-                // Harmony attribute-driven patching
-                Log.Info($"Performing Harmony attribute-driven patching");
-                var harmony = new Harmony(HARMONY_ID);
-                Shortcuts.Assert(harmony!=null, "HarmonyInst!=null");
-                harmony.PatchAll();
-                Log.Info($"Harmony attribute-driven patching successfull!");
-            }
-            catch (Exception e) {
-                Log.Error("Could not deploy Harmony patches");
-                Log.Info(e.Message);
-                Log.Info(e.StackTrace);
-                detourFailed = true;
-                throw e;
-            }
-
-            try {
-                Log.Info("Deploying attribute-driven detours");
-                DetouredMethodStates = AssemblyRedirector.Deploy();
-            } catch (Exception e) {
-                Log.Error("Could not deploy attribute-driven detours");
-                Log.Info(e.ToString());
-                Log.Info(e.StackTrace);
-                detourFailed = true;
-            }
-
-            if (detourFailed) {
-                Log.Info("Detours failed");
-                Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
-                    () => {
-                        UIView.library
-                              .ShowModal<ExceptionPanel>("ExceptionPanel")
-                              .SetMessage(
-                                "TM:PE failed to load",
-                                "Traffic Manager: President Edition failed to load. You can " +
-                                "continue playing but it's NOT recommended. Traffic Manager will " +
-                                "not work as expected.",
-                                true);
-                    });
-            } else {
-                Log.Info("Detours successful");
-            }
-
-            DetourInited = true;
-        }
-
         public override void OnCreated(ILoading loading) {
             Log._Debug("LoadingExtension.OnCreated() called");
 
             // SelfDestruct.DestructOldInstances(this);
             base.OnCreated(loading);
-            if(IsGameLoaded) {
+            if (IsGameLoaded) {
                 // When another mod is detected, OnCreated is called again for god - or CS team - knows what reason!
                 Log._Debug("Hot reload of another mod detected. Skipping LoadingExtension.OnCreated() ...");
                 return;
             }
 
             RegisteredManagers = new List<ICustomManager>();
-            DetourInited = false;
             CustomPathManager = new CustomPathManager();
 
             RegisterCustomManagers();
@@ -223,8 +124,7 @@ namespace TrafficManager {
 
                 var gameObject = UIView.GetAView().gameObject;
 
-                void Destroy<T>() where T : MonoBehaviour
-                {
+                void Destroy<T>() where T : MonoBehaviour {
                     Object obj = (Object)gameObject.GetComponent<T>();
                     if (obj != null) {
                         Object.Destroy(obj);
@@ -259,7 +159,7 @@ namespace TrafficManager {
                 // ignored - prevents collision with other mods
             }
 
-            RevertDetours();
+            Patcher.Instance?.Uninstall();
             IsGameLoaded = false;
         }
 
@@ -276,81 +176,80 @@ namespace TrafficManager {
                 case SimulationManager.UpdateMode.NewGameFromMap:
                 case SimulationManager.UpdateMode.NewGameFromScenario:
                 case SimulationManager.UpdateMode.LoadGame: {
-                    if (BuildConfig.applicationVersion != BuildConfig.VersionToString(
-                            TrafficManagerMod.GAME_VERSION,
-                            false))
-                    {
-                        string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
-                        string[] versionElms = majorVersionElms[0].Split('.');
-                        uint versionA = Convert.ToUInt32(versionElms[0]);
-                        uint versionB = Convert.ToUInt32(versionElms[1]);
-                        uint versionC = Convert.ToUInt32(versionElms[2]);
+                        if (BuildConfig.applicationVersion != BuildConfig.VersionToString(
+                                TrafficManagerMod.GAME_VERSION,
+                                false)) {
+                            string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
+                            string[] versionElms = majorVersionElms[0].Split('.');
+                            uint versionA = Convert.ToUInt32(versionElms[0]);
+                            uint versionB = Convert.ToUInt32(versionElms[1]);
+                            uint versionC = Convert.ToUInt32(versionElms[2]);
 
-                        Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
+                            Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
 
-                        bool isModTooOld = TrafficManagerMod.GAME_VERSION_A < versionA ||
-                                           (TrafficManagerMod.GAME_VERSION_A == versionA &&
-                                            TrafficManagerMod.GAME_VERSION_B < versionB);
+                            bool isModTooOld = TrafficManagerMod.GAME_VERSION_A < versionA ||
+                                               (TrafficManagerMod.GAME_VERSION_A == versionA &&
+                                                TrafficManagerMod.GAME_VERSION_B < versionB);
                             // || (TrafficManagerMod.GameVersionA == versionA
                             // && TrafficManagerMod.GameVersionB == versionB
                             // && TrafficManagerMod.GameVersionC < versionC);
 
-                        bool isModNewer = TrafficManagerMod.GAME_VERSION_A < versionA ||
-                                          (TrafficManagerMod.GAME_VERSION_A == versionA &&
-                                           TrafficManagerMod.GAME_VERSION_B > versionB);
+                            bool isModNewer = TrafficManagerMod.GAME_VERSION_A < versionA ||
+                                              (TrafficManagerMod.GAME_VERSION_A == versionA &&
+                                               TrafficManagerMod.GAME_VERSION_B > versionB);
                             // || (TrafficManagerMod.GameVersionA == versionA
                             // && TrafficManagerMod.GameVersionB == versionB
                             // && TrafficManagerMod.GameVersionC > versionC);
 
-                        if (isModTooOld) {
-                            string msg = string.Format(
-                                "Traffic Manager: President Edition detected that you are running " +
-                                "a newer game version ({0}) than TM:PE has been built for ({1}). " +
-                                "Please be aware that TM:PE has not been updated for the newest game " +
-                                "version yet and thus it is very likely it will not work as expected.",
-                                BuildConfig.applicationVersion,
-                                BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false));
+                            if (isModTooOld) {
+                                string msg = string.Format(
+                                    "Traffic Manager: President Edition detected that you are running " +
+                                    "a newer game version ({0}) than TM:PE has been built for ({1}). " +
+                                    "Please be aware that TM:PE has not been updated for the newest game " +
+                                    "version yet and thus it is very likely it will not work as expected.",
+                                    BuildConfig.applicationVersion,
+                                    BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false));
 
-                            Log.Error(msg);
-                            Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
-                                    () => {
-                                        UIView.library
-                                              .ShowModal<ExceptionPanel>("ExceptionPanel")
-                                              .SetMessage(
-                                                  "TM:PE has not been updated yet",
-                                                  msg,
-                                                  false);
-                                    });
-                        } else if (isModNewer) {
-                            string msg = string.Format(
-                                "Traffic Manager: President Edition has been built for game version {0}. " +
-                                "You are running game version {1}. Some features of TM:PE will not " +
-                                "work with older game versions. Please let Steam update your game.",
-                                BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false),
-                                BuildConfig.applicationVersion);
+                                Log.Error(msg);
+                                Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
+                                        () => {
+                                            UIView.library
+                                                  .ShowModal<ExceptionPanel>("ExceptionPanel")
+                                                  .SetMessage(
+                                                      "TM:PE has not been updated yet",
+                                                      msg,
+                                                      false);
+                                        });
+                            } else if (isModNewer) {
+                                string msg = string.Format(
+                                    "Traffic Manager: President Edition has been built for game version {0}. " +
+                                    "You are running game version {1}. Some features of TM:PE will not " +
+                                    "work with older game versions. Please let Steam update your game.",
+                                    BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false),
+                                    BuildConfig.applicationVersion);
 
-                            Log.Error(msg);
-                            Singleton<SimulationManager>
-                                .instance.m_ThreadingWrapper.QueueMainThread(
-                                    () => {
-                                        UIView.library
-                                              .ShowModal<ExceptionPanel>("ExceptionPanel")
-                                              .SetMessage(
-                                                  "Your game should be updated",
-                                                  msg,
-                                                  false);
-                                    });
+                                Log.Error(msg);
+                                Singleton<SimulationManager>
+                                    .instance.m_ThreadingWrapper.QueueMainThread(
+                                        () => {
+                                            UIView.library
+                                                  .ShowModal<ExceptionPanel>("ExceptionPanel")
+                                                  .SetMessage(
+                                                      "Your game should be updated",
+                                                      msg,
+                                                      false);
+                                        });
+                            }
                         }
+
+                        IsGameLoaded = true;
+                        break;
                     }
 
-                    IsGameLoaded = true;
-                    break;
-                }
-
                 default: {
-                    Log.Info($"OnLevelLoaded: Unsupported game mode {mode}");
-                    return;
-                }
+                        Log.Info($"OnLevelLoaded: Unsupported game mode {mode}");
+                        return;
+                    }
             }
 
             //it will replace stock PathManager or already Replaced before HotReload
@@ -403,7 +302,8 @@ namespace TrafficManager {
                     Log._Debug("Should be custom: " + Singleton<PathManager>.instance.GetType());
 
                     IsPathManagerReplaced = true;
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     string error =
                         "Traffic Manager: President Edition failed to load. You can continue " +
                         "playing but it's NOT recommended. Traffic Manager will not work as expected.";
@@ -439,7 +339,7 @@ namespace TrafficManager {
 
             UIView.GetAView().gameObject.AddComponent<RoadSelectionPanels>();
 
-            InitDetours();
+            Patcher.Create().Install();
 
             // Log.Info("Fixing non-created nodes with problems...");
             // FixNonCreatedNodeProblems();

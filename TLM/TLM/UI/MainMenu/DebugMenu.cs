@@ -12,6 +12,7 @@ namespace TrafficManager.UI.MainMenu {
     using global::TrafficManager.State;
     using JetBrains.Annotations;
     using UnityEngine;
+    using TrafficManager.LifeCycle;
 
 #if DEBUG // whole class coverage
     public class DebugMenuPanel : UIPanel

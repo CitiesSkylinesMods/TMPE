@@ -7,6 +7,7 @@ namespace TrafficManager.UI {
     using ColossalFramework.Globalization;
     using CSUtil.Commons;
     using TrafficManager.State;
+    using TrafficManager.LifeCycle;
 
     /// <summary>
     /// Adding a new language step by step:

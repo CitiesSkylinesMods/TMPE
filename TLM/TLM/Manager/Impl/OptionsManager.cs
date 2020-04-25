@@ -1,10 +1,11 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State;
     using TrafficManager.UI.Helpers;
+    using TrafficManager.LifeCycle;
 
     public class OptionsManager
         : AbstractCustomManager,

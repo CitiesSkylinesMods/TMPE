@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.State {
+namespace TrafficManager.State {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System.IO;
@@ -6,6 +6,7 @@
     using System;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.LifeCycle;
 
     [XmlRootAttribute("GlobalConfig", Namespace = "http://www.viathinksoft.de/tmpe", IsNullable = false)]
     public class GlobalConfig : GenericObservable<GlobalConfig> {
