@@ -1,7 +1,7 @@
 namespace TrafficManager.Patch._RoadWorldInfoPanel
 {
     using ColossalFramework;
-    using Harmony;
+    using HarmonyLib;
     using JetBrains.Annotations;
 
     [HarmonyPatch(typeof(RoadWorldInfoPanel), "OnAdjustRoadButton")]

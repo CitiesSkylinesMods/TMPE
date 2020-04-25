@@ -1,7 +1,7 @@
 namespace TrafficManager.Patch._InfoManager
 {
     using ColossalFramework;
-    using Harmony;
+    using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using TrafficManager.UI;

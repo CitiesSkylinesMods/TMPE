@@ -49,21 +49,6 @@ namespace TrafficManager {
 
                 List<string> missingDetours = new List<string>();
 
-                foreach (Detour detour in Detours) {
-                    if (!RedirectionHelper.IsRedirected(
-                            detour.OriginalMethod,
-                            detour.CustomMethod))
-                    {
-                        missingDetours.Add(
-                            string.Format(
-                                "<Manual> {0}.{1} with {2} parameters ({3})",
-                                detour.OriginalMethod.DeclaringType.Name,
-                                detour.OriginalMethod.Name,
-                                detour.OriginalMethod.GetParameters().Length,
-                                detour.OriginalMethod.DeclaringType.AssemblyQualifiedName));
-                    }
-                }
-
                 foreach (KeyValuePair<MethodBase, RedirectCallsState> entry in HarmonyMethodStates) {
                     MethodBase method = entry.Key;
                     RedirectCallsState oldState = entry.Value;

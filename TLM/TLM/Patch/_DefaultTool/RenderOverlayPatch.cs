@@ -1,5 +1,5 @@
 namespace TrafficManager.Patch._DefaultTool {
-    using Harmony;
+    using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.UI;
     using static TrafficManager.UI.SubTools.PrioritySignsTool;
