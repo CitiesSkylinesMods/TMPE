@@ -71,8 +71,8 @@ namespace TrafficManager.UI {
         public void Start() {
             Root = this;
             // this code prevents a rare bug that RoadWorldInfoPanel some times does not show.
-            EnqueueAction(ModUI.Instance.Show);
-            EnqueueAction(ModUI.Instance.Close);
+            EnqueueAction(ModUI.Instance.ShowMainMenu);
+            EnqueueAction(ModUI.Instance.CloseMainMenu);
 
             panels_ = new List<PanelExt>();
 

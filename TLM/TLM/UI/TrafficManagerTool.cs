@@ -1867,14 +1867,26 @@ namespace TrafficManager.UI {
             Prompt.Warning("Warning", message);
         }
 
+        /// <summary>
+        /// Called when the onscreen hint update is due. This will request the update from the
+        /// active Traffic Manager Tool, or show the default hint.
+        /// </summary>
         public void RequestOnscreenDisplayUpdate() {
             if (!GlobalConfig.Instance.Main.KeybindsPanelVisible) {
                 OnscreenDisplay.Clear();
                 return;
             }
 
-            (activeLegacySubTool_ as IOnscreenDisplayProvider)?.UpdateOnscreenDisplayPanel();
-            (activeSubTool_ as IOnscreenDisplayProvider)?.UpdateOnscreenDisplayPanel();
+            var activeLegacyOsd = activeLegacySubTool_ as IOnscreenDisplayProvider;
+            activeLegacyOsd?.UpdateOnscreenDisplayPanel();
+
+            var activeOsd = activeSubTool_ as IOnscreenDisplayProvider;
+            activeOsd?.UpdateOnscreenDisplayPanel();
+
+            if (activeOsd == null && activeLegacyOsd == null) {
+                // No tool hint support was available means we have to show the default
+                OnscreenDisplay.DisplayIdle();
+            }
         }
     }
 }

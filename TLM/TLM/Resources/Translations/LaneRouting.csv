@@ -13,7 +13,7 @@ Fichier: TM: PE - Outil - Routage de voie de circulation","","","","","Aparte ri
 "LaneConnector.Label:Stay in lane, multiple modes","","Stay in lane, repeat to cycle through different modes","","LaneConnector.Label: Restez dans la voie de circulation, plusieurs modes possibles
 Restez dans la voie de circulation, répétez pour parcourir les différents modes
 Fichier: TM: PE - Outil - Routage de voie de circulation","","","","","Blijf op uw lijn, herhaal om door verschillende modi te bladeren","Pozostań na pasie, powtórz aby przełączać pomiędzy dostępnymi wariantami","","Оставаться в полосе, повторно нажмите для других режимов","","","Stay in lane, repeat to cycle through different modes","","Залишатись в своїй смузі, натисніть ще раз для інших режимів","Zůstat v pruhu, opakujte pro různé možnosti","",""
-"LaneArrows.Mode:Select","","Choose a segment to edit","","","","","","","","","","","","","Choose a segment to edit","","","","",""
-"LaneConnector.Mode:Select","","Choose a node or junction to edit","","","","","","","","","","","","","Choose a node or junction to edit","","","","",""
-"LaneConnector.Mode:Source","","Choose which lane to edit","","","","","","","","","","","","","Choose which lane to edit","","","","",""
-"LaneConnector.Mode:Target","","Click target lanes to toggle connections","","","","","","","","","","","","","Click target lanes to toggle connections","","","","",""
+"LaneArrows.Mode:Select","","Choose a segment to edit","","","","","","","","","","Выберите сегмент дороги","","","Choose a segment to edit","","Оберіть сегмент шляху","","",""
+"LaneConnector.Mode:Select","","Choose a node or junction to edit","","","","","","","","","","Выберите узел дороги или перекрёсток","","","Choose a node or junction to edit","","Оберіть вузол шляху або перехрестя","","",""
+"LaneConnector.Mode:Source","","Choose which lane to edit","","","","","","","","","","Выберите полосу движения","","","Choose which lane to edit","","Оберіть смугу руху","","",""
+"LaneConnector.Mode:Target","","Click target lanes to toggle connections","","","","","","","","","","Выберите полосы, чтобы направить либо запретить движение в них","","","Click target lanes to toggle connections","","Натисніть на смуги руху, куди слід дозволити або заборонити рух","","",""
