@@ -429,15 +429,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     var items = new List<OsdItem>();
                     items.Add(
                         new MainMenu.OSD.ModeDescription(
-                            T("LaneArrows.Mode.Select:Click segment to edit")));
+                            localizedText: T("LaneArrows.Mode:Select")));
                     items.Add(
                         new MainMenu.OSD.HardcodedMouseShortcut(
                             button: UIMouseButton.Left,
                             shift: false,
                             ctrl: true,
                             alt: false,
-                            localizedText: T(
-                                "LaneArrows.Click:Separate lanes for entire junction")));
+                            localizedText: T("LaneArrows.Click:Separate lanes for entire junction")));
                     items.Add(
                         new MainMenu.OSD.HardcodedMouseShortcut(
                             button: UIMouseButton.Left,
@@ -445,17 +444,17 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                             ctrl: false,
                             alt: true,
                             localizedText: T("LaneArrows.Click:Separate lanes for segment")));
-                    OnscreenDisplay.Display(items);
+                    OnscreenDisplay.Display(items: items);
                     return;
                 }
                 case State.EditLaneArrows: {
                     var items = new List<OsdItem>();
                     items.Add(
-                        new MainMenu.OSD.Shortcut(
+                        item: new MainMenu.OSD.Shortcut(
                             keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
-                            localizedText: T("LaneConnector.Label:Reset to default")));
-                    items.Add(OnscreenDisplay.RightClick_LeaveSegment());
-                    OnscreenDisplay.Display(items);
+                            localizedText: T(key: "LaneConnector.Label:Reset to default")));
+                    items.Add(item: OnscreenDisplay.RightClick_LeaveSegment());
+                    OnscreenDisplay.Display(items: items);
                     return;
                 }
                 default: {

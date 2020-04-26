@@ -12,18 +12,20 @@ namespace TrafficManager.UI.MainMenu.OSD {
     public static class OnscreenDisplay {
         public static void Clear() {
             Display(new List<OsdItem>());
+            Hide();
         }
 
-        /// <summary>Hide the OSD panel and the OSD toggle button.</summary>
-        public static void Hide() {
+        private static void Hide() {
             MainMenuWindow mainMenu = ModUI.Instance.MainMenu;
-            mainMenu.KeybindsPanel.isVisible = false;
+            mainMenu.OnscreenDisplayPanel.opacity = 0f; // invisible
         }
 
-        /// <summary>Show the OSD panel and the OSD toggle button.</summary>
-        public static void Show() {
-            MainMenuWindow mainMenu = ModUI.Instance.MainMenu;
-            mainMenu.KeybindsPanel.isVisible = true;
+        /// <summary>Clear the OSD panel and display the idle hint.</summary>
+        public static void DisplayIdle() {
+            var items = new List<OsdItem>();
+            items.Add(new MainMenu.OSD.ModeDescription(
+                          localizedText: Translation.Menu.Get("Onscreen.Idle:Choose a tool")));
+            Display(items);
         }
 
         /// <summary>
@@ -38,24 +40,22 @@ namespace TrafficManager.UI.MainMenu.OSD {
 
             // Deactivate old items, and destroy them. Also remove them from the panel till Unity
             // is happy to delete them.
-            foreach (Transform c in mainMenu.KeybindsPanel.transform) {
+            foreach (Transform c in mainMenu.OnscreenDisplayPanel.transform) {
                 c.gameObject.SetActive(false);
                 UnityEngine.Object.Destroy(c.gameObject);
             }
 
-            mainMenu.KeybindsPanel.transform.DetachChildren();
+            // mainMenu.KeybindsPanel.transform.DetachChildren();
 
             // Populate the panel with the items
-            using (var builder = new UiBuilder<U.Panel.UPanel>(mainMenu.KeybindsPanel)) {
+            using (var builder = new UiBuilder<U.Panel.UPanel>(mainMenu.OnscreenDisplayPanel)) {
                 foreach (var item in items) {
                     item.Build(builder);
                 }
             }
 
-
-            // Show the panel now
             if (items.Count > 0) {
-                Show();
+                mainMenu.OnscreenDisplayPanel.opacity = 1f; // fully visible, opaque
             }
 
             // Recalculate now

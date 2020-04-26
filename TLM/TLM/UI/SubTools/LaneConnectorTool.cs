@@ -1339,7 +1339,7 @@ namespace TrafficManager.UI.SubTools {
                     var items = new List<OsdItem>();
                     items.Add(
                         new MainMenu.OSD.ModeDescription(
-                            T("LaneArrows.Mode.Select:Select a junction to edit")));
+                            localizedText: T("LaneConnector.Mode:Select")));
                     OnscreenDisplay.Display(items);
                     return;
                 }
@@ -1349,8 +1349,8 @@ namespace TrafficManager.UI.SubTools {
                     items.Add(
                         new MainMenu.OSD.ModeDescription(
                             m == SelectionMode.SelectSource
-                                ? T("LaneConnector.Mode.Source:Click outgoing lane")
-                                : T("LaneConnector.Mode.Source:Click incoming lane to connect")));
+                                ? T("LaneConnector.Mode:Source")
+                                : T("LaneConnector.Mode:Target")));
                     items.Add(
                         new MainMenu.OSD.Shortcut(
                             keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
