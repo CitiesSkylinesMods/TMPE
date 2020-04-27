@@ -75,7 +75,7 @@ namespace TrafficManager.Manager.Impl {
             buf += $"\nLane end backward routings:\n";
 
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneValid(laneId)) {
+                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -86,7 +86,7 @@ namespace TrafficManager.Manager.Impl {
             buf += $"\nLane end forward routings:\n";
 
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneValid(laneId)) {
+                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
