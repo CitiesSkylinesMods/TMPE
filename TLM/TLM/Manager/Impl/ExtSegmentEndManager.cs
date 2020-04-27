@@ -274,7 +274,6 @@ namespace TrafficManager.Manager.Impl {
             ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
             segEnd.nodeId = nodeId;
             CalculateIncomingOutgoing(segmentId, nodeId, out segEnd.incoming, out segEnd.outgoing);
-            CalcualteCorners(ref segEnd);
 
             if (nodeIdBeforeRecalc != 0 && nodeIdBeforeRecalc != nodeId) {
                 Constants.ManagerFactory.ExtNodeManager.RemoveSegment(
@@ -290,26 +289,25 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        private void CalcualteCorners(ref ExtSegmentEnd segEnd) {
-            segEnd.segmentId.ToSegment().CalculateCorner(
-                segmentID: segEnd.segmentId,
+        public void CalculateCorners(ushort segmentId, bool startNode) {
+            ref ExtSegmentEnd segEnd = ref ExtSegmentEnds[GetIndex(segmentId, startNode)];
+            segmentId.ToSegment().CalculateCorner(
+                segmentID: segmentId,
                 heightOffset: true,
-                start: segEnd.startNode,
+                start: startNode,
                 leftSide: false,
                 cornerPos: out segEnd.RightCorner,
                 cornerDirection: out segEnd.RightCornerDir,
                 smooth: out _);
-            segEnd.segmentId.ToSegment().CalculateCorner(
-                segmentID: segEnd.segmentId,
+            segmentId.ToSegment().CalculateCorner(
+                segmentID: segmentId,
                 heightOffset: true,
-                start: segEnd.startNode,
+                start: startNode,
                 leftSide: true,
                 cornerPos: out segEnd.LeftCorner,
                 cornerDirection: out segEnd.LeftCornerDir,
                 smooth: out _);
         }
-
-
 
         private void CalculateIncomingOutgoing(ushort segmentId,
                                                ushort nodeId,
