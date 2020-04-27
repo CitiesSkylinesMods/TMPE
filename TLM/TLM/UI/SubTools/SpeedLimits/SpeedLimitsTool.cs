@@ -1,20 +1,20 @@
 namespace TrafficManager.UI.SubTools.SpeedLimits {
-    using ColossalFramework.UI;
     using ColossalFramework;
+    using ColossalFramework.UI;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using System.Collections.Generic;
     using System;
+    using System.Collections.Generic;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Traffic;
-    using TrafficManager.UI.Textures;
     using TrafficManager.UI.Helpers;
-    using TrafficManager.Util.Caching;
+    using TrafficManager.UI.Textures;
     using TrafficManager.Util;
-    using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.Util.Caching;
     using UnityEngine;
+    using static TrafficManager.Util.Shortcuts;
 
     public class SpeedLimitsTool : LegacySubTool {
         public const int
@@ -42,7 +42,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// 0 = no limit
         /// null = default
         /// </summary>
-        private SpeedValue ?currentPaletteSpeedLimit = new SpeedValue(-1f);
+        private SpeedValue? currentPaletteSpeedLimit = new SpeedValue(-1f);
 
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir =
             new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
@@ -95,8 +95,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private RenderData renderData_;
 
         public SpeedLimitsTool(TrafficManagerTool mainTool)
-            : base(mainTool)
-        {
+            : base(mainTool) {
             CachedVisibleSegmentIds = new GenericArrayCache<ushort>(NetManager.MAX_SEGMENT_COUNT);
             LastCachedCamera = new CameraTransformValue();
         }
@@ -154,17 +153,21 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private void RenderLaneOverlay(RenderManager.CameraInfo cameraInfo, uint laneId) {
             var marker = new SegmentLaneMarker(laneBuffer[laneId].m_bezier);
             bool pressed = Input.GetMouseButton(0);
-            Color color = MainTool.GetToolColor(pressed,false);
+            Color color = MainTool.GetToolColor(pressed, false);
             if (!ShowLimitsPerLane) {
                 marker.Size = 3f; // lump the lanes together.
             }
             marker.RenderOverlay(cameraInfo, color, pressed);
         }
 
+        /// <summary>
+        /// Renders all lanes with the given <paramref name="finalDirection"/>
+        /// if NetInfo.Direction.None, all lanes are rendered.
+        /// </summary>
         private int RenderSegmentSideOverlay(
             RenderManager.CameraInfo cameraInfo,
             ushort segmentId,
-            NetInfo.Direction finalDirection) {
+            NetInfo.Direction finalDirection = NetInfo.Direction.None) {
             int count = 0;
             bool pressed = Input.GetMouseButton(0);
             Color color = MainTool.GetToolColor(pressed, false);
@@ -178,7 +181,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 byte laneIndex) => {
                     bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
                     render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
-                    render &= laneInfo.m_finalDirection == finalDirection;
+                    render &= laneInfo.m_finalDirection == finalDirection || finalDirection == NetInfo.Direction.None;
                     if (render) {
                         RenderLaneOverlay(cameraInfo, laneId);
                         count++;
@@ -191,6 +194,18 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private void RenderLanes(RenderManager.CameraInfo cameraInfo) {
             if (!MultiSegmentMode) {
                 RenderLaneOverlay(cameraInfo, renderData_.LaneId);
+            } else if (RoundaboutMassEdit.Instance.TraverseLoop(renderData_.SegmentId, out var segmentList)) {
+                foreach (ushort segmentId in segmentList) {
+                    var lanes = netService.GetSortedLanes(
+                        segmentId: segmentId,
+                        segment: ref segmentId.ToSegment(),
+                        startNode: null,
+                        laneTypeFilter: SpeedLimitManager.LANE_TYPES,
+                        vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES,
+                        reverse: false,
+                        sort: true);
+                    RenderLaneOverlay(cameraInfo, lanes[renderData_.SortedLaneIndex].laneId);
+                }
             } else {
                 bool LaneVisitorFun(SegmentLaneTraverser.SegmentLaneVisitData data) {
                     if (data.SortedLaneIndex == renderData_.SortedLaneIndex) {
@@ -198,21 +213,26 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     }
                     return true;
                 }
-                SegmentLaneTraverser.Traverse(
-                    renderData_.SegmentId,
-                    SegmentTraverser.TraverseDirection.AnyDirection,
-                    SegmentTraverser.TraverseSide.AnySide,
-                    SegmentLaneTraverser.LaneStopCriterion.LaneCount,
-                    SegmentTraverser.SegmentStopCriterion.Junction,
-                    SpeedLimitManager.LANE_TYPES,
-                    SpeedLimitManager.VEHICLE_TYPES,
-                    LaneVisitorFun);
+                {
+                    SegmentLaneTraverser.Traverse(
+                        renderData_.SegmentId,
+                        SegmentTraverser.TraverseDirection.AnyDirection,
+                        SegmentTraverser.TraverseSide.AnySide,
+                        SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                        SegmentTraverser.SegmentStopCriterion.Junction,
+                        SpeedLimitManager.LANE_TYPES,
+                        SpeedLimitManager.VEHICLE_TYPES,
+                        LaneVisitorFun);
+                }
             }
         }
 
         private void RenderSegmentsSide(RenderManager.CameraInfo cameraInfo) {
             if (!MultiSegmentMode) {
                 RenderSegmentSideOverlay(cameraInfo, renderData_.SegmentId, renderData_.FinalDirection);
+            } else if (RoundaboutMassEdit.Instance.TraverseLoop(renderData_.SegmentId, out var segmentList)) {
+                foreach (ushort segmentId in segmentList)
+                    RenderSegmentSideOverlay(cameraInfo, segmentId);
             } else {
                 SegmentTraverser.Traverse(
                     renderData_.SegmentId,
@@ -303,8 +323,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             bool hover = false;
             for (int segmentIdIndex = CachedVisibleSegmentIds.Size - 1;
                  segmentIdIndex >= 0;
-                 segmentIdIndex--)
-            {
+                 segmentIdIndex--) {
                 ushort segmentId = CachedVisibleSegmentIds.Values[segmentIdIndex];
                 // draw speed limits
                 if ((MainTool.GetToolMode() == ToolMode.VehicleRestrictions) &&
@@ -313,7 +332,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 }
 
                 // no speed limit overlay on selected segment when in vehicle restrictions mode
-                hover|= DrawSpeedLimitHandles(
+                hover |= DrawSpeedLimitHandles(
                     segmentId,
                     ref netManager.m_segments.m_buffer[segmentId],
                     viewOnly,
@@ -483,8 +502,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             GUILayout.FlexibleSpace();
 
             if (GUILayout.Button(Translation.SpeedLimits.Get("Button:Save"),
-                                 GUILayout.Width(70)))
-            {
+                                 GUILayout.Width(70))) {
                 SpeedLimitManager.Instance.FixCurrentSpeedLimits(info);
                 SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(info, currentSpeedLimit.GameUnits);
             }
@@ -510,8 +528,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             if (info != null) {
                 if ((info.m_Atlas != null) && (info.m_Atlas.material != null) &&
                     (info.m_Atlas.material.mainTexture != null) &&
-                    info.m_Atlas.material.mainTexture is Texture2D mainTex)
-                {
+                    info.m_Atlas.material.mainTexture is Texture2D mainTex) {
                     UITextureAtlas.SpriteInfo spriteInfo = info.m_Atlas[info.m_Thumbnail];
 
                     if ((spriteInfo != null) && (spriteInfo.texture != null) &&
@@ -567,7 +584,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             foreach (SpeedValue speedLimit in allSpeedLimits) {
                 // Highlight palette item if it is very close to its float speed
-                if (currentPaletteSpeedLimit !=null &&
+                if (currentPaletteSpeedLimit != null &&
                     FloatUtil.NearlyEqual(
                         (float)currentPaletteSpeedLimit?.GameUnits,
                         speedLimit.GameUnits)) {
@@ -587,7 +604,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 }
             }
             {
-                if (currentPaletteSpeedLimit == null ) {
+                if (currentPaletteSpeedLimit == null) {
                     GUI.color = Color.gray;
                 }
                 GuiSpeedLimitsWindow_AddClearButton();
@@ -726,7 +743,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             Vector3 center = segment.m_bounds.center;
             NetManager netManager = Singleton<NetManager>.instance;
-            SpeedValue ?speedLimitToSet = viewOnly
+            SpeedValue? speedLimitToSet = viewOnly
                                              ? new SpeedValue(-1f)
                                              : currentPaletteSpeedLimit;
 
@@ -810,8 +827,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     if (!viewOnly
                         && !onlyMonorailLanes
                         && ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) !=
-                            VehicleInfo.VehicleType.None))
-                    {
+                            VehicleInfo.VehicleType.None)) {
                         Texture2D tex1 = RoadUI.VehicleInfoSignTextures[
                             LegacyExtVehicleType.ToNew(ExtVehicleType.PassengerTrain)];
                         MainTool.DrawStaticSquareOverlayGridTexture(
@@ -843,42 +859,62 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                             speedLimitToSet?.GameUnits);
 
                         if (MultiSegmentMode) {
-                            int slIndexCopy = sortedLaneIndex;
-
-                            SegmentLaneTraverser.Traverse(
-                                segmentId,
-                                SegmentTraverser.TraverseDirection.AnyDirection,
-                                SegmentTraverser.TraverseSide.AnySide,
-                                SegmentLaneTraverser.LaneStopCriterion.LaneCount,
-                                SegmentTraverser.SegmentStopCriterion.Junction,
-                                SpeedLimitManager.LANE_TYPES,
-                                SpeedLimitManager.VEHICLE_TYPES,
-                                data => {
-                                    if (data.SegVisitData.Initial) {
-                                        return true;
-                                    }
-
-                                    if (slIndexCopy != data.SortedLaneIndex) {
-                                        return true;
-                                    }
-
-                                    Constants.ServiceFactory.NetService.ProcessSegment(
-                                        data.SegVisitData.CurSeg.segmentId,
-                                        (ushort curSegmentId, ref NetSegment curSegment) => {
-                                            NetInfo.Lane curLaneInfo = curSegment.Info.m_lanes[
-                                                data.CurLanePos.laneIndex];
-
-                                            SpeedLimitManager.Instance.SetSpeedLimit(
-                                                curSegmentId,
-                                                data.CurLanePos.laneIndex,
-                                                curLaneInfo,
-                                                data.CurLanePos.laneId,
-                                                speedLimitToSet?.GameUnits);
+                            if (new RoundaboutMassEdit().TraverseLoop(segmentId, out var segmentList)) {
+                                foreach(ushort segId in segmentList) {
+                                    if (segId == segmentId)
+                                        continue;
+                                    var lane = netService.GetSortedLanes(
+                                        segmentId: segId,
+                                        segment: ref segId.ToSegment(),
+                                        startNode: null,
+                                        laneTypeFilter: SpeedLimitManager.LANE_TYPES,
+                                        vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES,
+                                        reverse: false,
+                                        sort: true)[sortedLaneIndex];
+                                    SpeedLimitManager.Instance.SetSpeedLimit(
+                                        segmentId: segmentId,
+                                        laneIndex: lane.laneIndex,
+                                        segmentId.ToSegment().Info.m_lanes[lane.laneIndex],
+                                        laneId: lane.laneId,
+                                        speedLimit: speedLimitToSet?.GameUnits);
+                                }
+                            } else {
+                                int slIndexCopy = sortedLaneIndex;
+                                SegmentLaneTraverser.Traverse(
+                                    segmentId,
+                                    SegmentTraverser.TraverseDirection.AnyDirection,
+                                    SegmentTraverser.TraverseSide.AnySide,
+                                    SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                                    SegmentTraverser.SegmentStopCriterion.Junction,
+                                    SpeedLimitManager.LANE_TYPES,
+                                    SpeedLimitManager.VEHICLE_TYPES,
+                                    data => {
+                                        if (data.SegVisitData.Initial) {
                                             return true;
-                                        });
+                                        }
 
-                                    return true;
-                                });
+                                        if (slIndexCopy != data.SortedLaneIndex) {
+                                            return true;
+                                        }
+
+                                        Constants.ServiceFactory.NetService.ProcessSegment(
+                                            data.SegVisitData.CurSeg.segmentId,
+                                            (ushort curSegmentId, ref NetSegment curSegment) => {
+                                                NetInfo.Lane curLaneInfo = curSegment.Info.m_lanes[
+                                                    data.CurLanePos.laneIndex];
+
+                                                SpeedLimitManager.Instance.SetSpeedLimit(
+                                                    curSegmentId,
+                                                    data.CurLanePos.laneIndex,
+                                                    curLaneInfo,
+                                                    data.CurLanePos.laneId,
+                                                    speedLimitToSet?.GameUnits);
+                                                return true;
+                                            });
+
+                                        return true;
+                                    });
+                            }
                         }
                     }
 
@@ -895,7 +931,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     GeometryUtil.CalculateSegmentCenterByDir(
                         segmentId,
                         segCenter,
-                        speedLimitSignSize*TrafficManagerTool.MAX_ZOOM);
+                        speedLimitSignSize * TrafficManagerTool.MAX_ZOOM);
                 }
 
                 foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {
@@ -939,53 +975,59 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                                                  currentPaletteSpeedLimit?.GameUnits);
 
                         if (MultiSegmentMode) {
-                            NetInfo.Direction normDir = e.Key;
-                            if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
-                                normDir = NetInfo.InvertDirection(normDir);
-                            }
+                            if (new RoundaboutMassEdit().TraverseLoop(segmentId, out var segmentList)) {
+                                foreach (ushort segId in segmentList) {
+                                    SpeedLimitManager.Instance.SetSpeedLimit(
+                                        segId,
+                                        currentPaletteSpeedLimit?.GameUnits);
+                                }
+                            } else {
+                                NetInfo.Direction normDir = e.Key;
+                                if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
+                                    normDir = NetInfo.InvertDirection(normDir);
+                                }
 
-                            SegmentLaneTraverser.Traverse(
-                                segmentId,
-                                SegmentTraverser.TraverseDirection.AnyDirection,
-                                SegmentTraverser.TraverseSide.AnySide,
-                                SegmentLaneTraverser.LaneStopCriterion.LaneCount,
-                                SegmentTraverser.SegmentStopCriterion.Junction,
-                                SpeedLimitManager.LANE_TYPES,
-                                SpeedLimitManager.VEHICLE_TYPES,
-                                data =>
-                                {
-                                    if (data.SegVisitData.Initial) {
+                                SegmentLaneTraverser.Traverse(
+                                    segmentId,
+                                    SegmentTraverser.TraverseDirection.AnyDirection,
+                                    SegmentTraverser.TraverseSide.AnySide,
+                                    SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                                    SegmentTraverser.SegmentStopCriterion.Junction,
+                                    SpeedLimitManager.LANE_TYPES,
+                                    SpeedLimitManager.VEHICLE_TYPES,
+                                    data => {
+                                        if (data.SegVisitData.Initial) {
+                                            return true;
+                                        }
+
+                                        bool reverse =
+                                            data.SegVisitData.ViaStartNode
+                                            == data.SegVisitData.ViaInitialStartNode;
+
+                                        ushort otherSegmentId = data.SegVisitData.CurSeg.segmentId;
+                                        NetInfo otherSegmentInfo =
+                                            netManager.m_segments.m_buffer[otherSegmentId].Info;
+                                        byte laneIndex = data.CurLanePos.laneIndex;
+                                        NetInfo.Lane laneInfo = otherSegmentInfo.m_lanes[laneIndex];
+
+                                        NetInfo.Direction otherNormDir = laneInfo.m_finalDirection;
+
+                                        if (((netManager.m_segments.m_buffer[otherSegmentId].m_flags
+                                              & NetSegment.Flags.Invert)
+                                             != NetSegment.Flags.None) ^ reverse) {
+                                            otherNormDir = NetInfo.InvertDirection(otherNormDir);
+                                        }
+
+                                        if (otherNormDir == normDir) {
+                                            SpeedLimitManager.Instance.SetSpeedLimit(
+                                                otherSegmentId,
+                                                laneInfo.m_finalDirection,
+                                                speedLimitToSet?.GameUnits);
+                                        }
+
                                         return true;
-                                    }
-
-                                    bool reverse =
-                                        data.SegVisitData.ViaStartNode
-                                        == data.SegVisitData.ViaInitialStartNode;
-
-                                    ushort otherSegmentId = data.SegVisitData.CurSeg.segmentId;
-                                    NetInfo otherSegmentInfo =
-                                        netManager.m_segments.m_buffer[otherSegmentId].Info;
-                                    byte laneIndex = data.CurLanePos.laneIndex;
-                                    NetInfo.Lane laneInfo = otherSegmentInfo.m_lanes[laneIndex];
-
-                                    NetInfo.Direction otherNormDir = laneInfo.m_finalDirection;
-
-                                    if (((netManager.m_segments.m_buffer[otherSegmentId].m_flags
-                                          & NetSegment.Flags.Invert)
-                                         != NetSegment.Flags.None) ^ reverse)
-                                    {
-                                        otherNormDir = NetInfo.InvertDirection(otherNormDir);
-                                    }
-
-                                    if (otherNormDir == normDir) {
-                                        SpeedLimitManager.Instance.SetSpeedLimit(
-                                            otherSegmentId,
-                                            laneInfo.m_finalDirection,
-                                            speedLimitToSet?.GameUnits);
-                                    }
-
-                                    return true;
-                                });
+                                    });
+                            }
                         }
                     }
 

@@ -575,6 +575,14 @@ namespace TrafficManager.Manager.Impl {
             return true;
         }
 
+        public bool SetSpeedLimit(ushort segmentId, float? speedLimit) {
+            bool ret = false;
+            foreach (NetInfo.Direction dir in Enum.GetValues(typeof(NetInfo.Direction))) {
+                ret |= SetSpeedLimit(segmentId, dir, speedLimit);
+            }
+            return ret;
+        }
+
         /// <summary>
         /// Sets the speed limit of a given segment and lane direction.
         /// </summary>
