@@ -1,5 +1,4 @@
 namespace TrafficManager.UI.SubTools {
-    using System;
     using ColossalFramework.Math;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -13,7 +12,6 @@ namespace TrafficManager.UI.SubTools {
     using UnityEngine;
     using TrafficManager.Util;
     using TrafficManager.UI.Helpers;
-    using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.MainMenu.OSD;
     using static TrafficManager.Util.Shortcuts;
 
@@ -1330,6 +1328,7 @@ namespace TrafficManager.UI.SubTools {
             return Translation.LaneRouting.Get(key);
         }
 
+        /// <inheritdoc/>
         public void UpdateOnscreenDisplayPanel() {
             SelectionMode m = GetSelectionMode();
 

@@ -9,12 +9,21 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.Textures;
     using UnityEngine;
     using TrafficManager.State.Keybinds;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util;
     using static TrafficManager.Util.Shortcuts;
 
-    public class JunctionRestrictionsTool : LegacySubTool {
+    public class JunctionRestrictionsTool
+        : LegacySubTool,
+          UI.MainMenu.IOnscreenDisplayProvider
+    {
         private readonly HashSet<ushort> currentRestrictedNodeIds;
-        private bool overlayHandleHovered;
+
+        /// <summary>
+        /// Set to true in render, if any of the overlay clickable icons has mouse in them.
+        /// </summary>
+        private bool isAnyOverlayHandleHovered;
+
         private readonly float junctionRestrictionsSignSize = 80f;
 
         public JunctionRestrictionsTool(TrafficManagerTool mainTool)
@@ -23,11 +32,6 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnToolGUI(Event e) {
-            // if (SelectedNodeId != 0) {
-            //        overlayHandleHovered = false;
-            // }
-            // ShowSigns(false);
-
             // handle delete
             if (KeybindSettingsBase.LaneConnectorDelete.KeyDown(e)) {
                 netService.IterateNodeSegments(
@@ -65,13 +69,13 @@ namespace TrafficManager.UI.SubTools {
             }
 
             if (SelectedNodeId != 0) {
-                overlayHandleHovered = false;
+                isAnyOverlayHandleHovered = false;
             }
 
-            ShowSigns(viewOnly);
+            ShowGUIOverlay_ShowSigns(viewOnly);
         }
 
-        private void ShowSigns(bool viewOnly) {
+        private void ShowGUIOverlay_ShowSigns(bool viewOnly) {
 #if DEBUG
             bool logJunctions = !viewOnly && DebugSwitch.JunctionRestrictions.Get();
 #else
@@ -109,14 +113,14 @@ namespace TrafficManager.UI.SubTools {
                 bool viewOnlyNode = viewOnly || (nodeId != SelectedNodeId);
 
                 // draw junction restrictions
-                if (drawSignHandles(
-                    logJunctions,
-                    nodeId,
-                    ref netManager.m_nodes.m_buffer[nodeId],
-                    viewOnlyNode,
-                    !cursorInPanel,
-                    ref camPos,
-                    out bool update))
+                if (DrawSignHandles(
+                    debug: logJunctions,
+                    nodeId: nodeId,
+                    node: ref netManager.m_nodes.m_buffer[nodeId],
+                    viewOnly: viewOnlyNode,
+                    handleClick: !cursorInPanel,
+                    camPos: ref camPos,
+                    stateUpdated: out bool update))
                 {
                     handleHovered = true;
                 }
@@ -126,7 +130,7 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
-            overlayHandleHovered = handleHovered;
+            isAnyOverlayHandleHovered = handleHovered;
 
             if (updatedNodeId != 0) {
                 RefreshCurrentRestrictedNodeIds(updatedNodeId);
@@ -143,7 +147,7 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            if (overlayHandleHovered) {
+            if (isAnyOverlayHandleHovered) {
                 return;
             }
 
@@ -154,6 +158,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             SelectedNodeId = HoveredNodeId;
+            MainTool.RequestOnscreenDisplayUpdate();
 
             // prevent accidential activation of signs on node selection (TODO [issue #740] improve this !)
             MainTool.CheckClicked();
@@ -161,11 +166,13 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnSecondaryClickOverlay() {
             SelectedNodeId = 0;
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         public override void OnActivate() {
             Log._Debug("LaneConnectorTool: OnActivate");
             SelectedNodeId = 0;
+            MainTool.RequestOnscreenDisplayUpdate();
             RefreshCurrentRestrictedNodeIds();
         }
 
@@ -208,7 +215,7 @@ namespace TrafficManager.UI.SubTools {
             }
         }
 
-        private bool drawSignHandles(bool debug,
+        private bool DrawSignHandles(bool debug,
                                      ushort nodeId,
                                      ref NetNode node,
                                      bool viewOnly,
@@ -642,6 +649,37 @@ namespace TrafficManager.UI.SubTools {
 
             GUI.color = guiColor;
             GUI.DrawTexture(boundingBox, signTexture);
+        }
+
+        private static string T(string key) {
+            return Translation.JunctionRestrictions.Get(key);
+        }
+
+        /// <inheritdoc/>
+        public void UpdateOnscreenDisplayPanel() {
+            if (SelectedNodeId == 0) {
+                // Select mode
+                var items = new List<OsdItem>();
+                items.Add(
+                    new UI.MainMenu.OSD.ModeDescription(
+                        localizedText: T("OnscreenHint.Mode:Select")));
+                OnscreenDisplay.Display(items);
+                return;
+            } else {
+                // Edit mode
+                var items = new List<OsdItem>();
+                items.Add(
+                    new UI.MainMenu.OSD.Shortcut(
+                        keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
+                        localizedText: T("OnscreenHint.Reset:Reset to default")));
+
+                items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                OnscreenDisplay.Display(items);
+                return;
+            }
+
+            // Default: no hint
+            // OnscreenDisplay.Clear();
         }
     }
 }

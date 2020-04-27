@@ -17,7 +17,9 @@ namespace TrafficManager.UI.MainMenu.OSD {
 
         private static void Hide() {
             MainMenuWindow mainMenu = ModUI.Instance.MainMenu;
-            mainMenu.OnscreenDisplayPanel.opacity = 0f; // invisible
+            if (mainMenu.OnscreenDisplayPanel.GetUIView() != null) { // safety
+                mainMenu.OnscreenDisplayPanel.opacity = 0f; // invisible
+            }
         }
 
         /// <summary>Clear the OSD panel and display the idle hint.</summary>
@@ -54,7 +56,9 @@ namespace TrafficManager.UI.MainMenu.OSD {
                 }
             }
 
-            if (items.Count > 0) {
+            if (items.Count > 0
+                && mainMenu.OnscreenDisplayPanel.GetUIView() != null)
+            {
                 mainMenu.OnscreenDisplayPanel.opacity = 1f; // fully visible, opaque
             }
 
