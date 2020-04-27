@@ -1,10 +1,11 @@
-namespace TrafficManager.UI.SubTools.PrioritySigns {
+namespace TrafficManager.UI.Helpers {
     using ColossalFramework;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Traffic.Impl;
+    using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
@@ -13,7 +14,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     /// Class handles rendering of priority signs overlay.
     /// Create one and set its fields before calling DrawSignHandles
     /// </summary>
-    public struct PrioritySignsOverlay {
+    public struct TrafficRulesOverlay {
         private const float SIGN_SIZE_PIXELS = 80f;
         private const float AVERAGE_METERS_PER_PIXEL = 0.075f;
         private const float SIGN_SIZE_METERS = SIGN_SIZE_PIXELS * AVERAGE_METERS_PER_PIXEL;
@@ -144,11 +145,11 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             }
         }
 
-        /// <summary>Initializes a new instance of the <see cref="PrioritySignsOverlay"/> struct for rendering.</summary>
+        /// <summary>Initializes a new instance of the <see cref="TrafficRulesOverlay"/> struct for rendering.</summary>
         /// <param name="mainTool">Parent <see cref="TrafficManagerTool"/>.</param>
         /// <param name="debug">Is debug rendering on.</param>
         /// <param name="handleClick">Whether clicks are to be handled.</param>
-        public PrioritySignsOverlay(TrafficManagerTool mainTool,
+        public TrafficRulesOverlay(TrafficManagerTool mainTool,
                        bool debug,
                        bool handleClick) {
             mainTool_ = mainTool;
@@ -175,7 +176,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             // Quit now if:
             //   * view only,
             //   * and no permanent overlay enabled,
-            //   * and is not Prio Signs tool
+            //   * and is Junctions restrictions tool
+            // TODO generalize for all tools.
             if (this.ViewOnly &&
                 !(Options.junctionRestrictionsOverlay ||
                   MassEditOverlay.IsActive) &&

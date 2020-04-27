@@ -12,6 +12,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.UI.Helpers;
 
     public class JunctionRestrictionsTool : LegacySubTool {
         private readonly HashSet<ushort> currentRestrictedNodeIds;
@@ -87,7 +88,7 @@ namespace TrafficManager.UI.SubTools {
             ushort updatedNodeId = 0;
             bool handleHovered = false;
             bool cursorInPanel = IsCursorInPanel();
-            PrioritySigns.PrioritySignsOverlay overlay = new PrioritySignsOverlay(
+            TrafficRulesOverlay overlay = new TrafficRulesOverlay(
                 mainTool: this.MainTool,
                 debug: logJunctions,
                 handleClick: !cursorInPanel);
