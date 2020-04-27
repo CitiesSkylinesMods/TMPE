@@ -1,8 +1,10 @@
 namespace TrafficManager.UI.SubTools.PrioritySigns {
     using ColossalFramework;
     using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.Traffic.Impl;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
@@ -33,7 +35,9 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             /// <summary>starting point to draw signs.</summary>
             private readonly Vector3 origin_;
 
-            /// <summary>normalized vector across segment (sideways).</summary>
+            /// <summary>normalized vector across segment (sideways).
+            /// dirX_ is not necessarily perpendicular to dirY_ for asymmetrical junctions.
+            /// </summary>
             private readonly Vector3 dirX_;
 
             /// <summary>normalized vector going away from the node.</summary>
@@ -60,36 +64,16 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                                bool viewOnly,
                                float baseZoom)
             {
-                // right corner
-                segmentId.ToSegment().CalculateCorner(
-                    segmentID: segmentId,
-                    heightOffset: true,
-                    start: startNode,
-                    leftSide: false,
-                    cornerPos: out Vector3 corner1Pos,
-                    cornerDirection: out Vector3 corner1Direction,
-                    smooth: out _);
+                int segmentEndIndex = ExtSegmentEndManager.Instance.GetIndex(segmentId, startNode);
+                ref ExtSegmentEnd segmentEnd = ref ExtSegmentEndManager.Instance.ExtSegmentEnds[segmentEndIndex];
 
-                // left corner
-                segmentId.ToSegment().CalculateCorner(
-                    segmentID: segmentId,
-                    heightOffset: true,
-                    start: startNode,
-                    leftSide: true,
-                    cornerPos: out Vector3 corner2Pos,
-                    cornerDirection: out Vector3 corner2Direction,
-                    smooth: out _);
-
-                this.dirX_ = (corner1Pos - corner2Pos).normalized;
+                dirX_ = (segmentEnd.LeftCorner - segmentEnd.RightCorner).normalized;
 
                 // for curved angled segements, corner1Direction may slightly differ from corner2Direction
-                this.dirY_ = (corner1Direction + corner2Direction) * 0.5f;
+                dirY_ = (segmentEnd.LeftCornerDir + segmentEnd.RightCornerDir) * 0.5f;
 
                 // origin point to start drawing sprites from.
-                this.origin_ = (corner1Pos + corner2Pos) * 0.5f;
-
-                // if false the overlays start after zebra crossings.
-                // const bool overlaysStartOnCrosswalks = true;
+                origin_ = (segmentEnd.LeftCorner + segmentEnd.RightCorner) * 0.5f;
 
                 this.signsPerRow_ = signsPerRow;
                 this.viewOnly_ = viewOnly;
@@ -131,8 +115,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                              * SIGN_SIZE_PIXELS * zoom;
 
                 var boundingBox = new Rect(
-                    x: signScreenPos.x - (size / 2),
-                    y: signScreenPos.y - (size / 2),
+                    x: signScreenPos.x - (size * 0.5f),
+                    y: signScreenPos.y - (size * 0.5f),
                     width: size,
                     height: size);
 

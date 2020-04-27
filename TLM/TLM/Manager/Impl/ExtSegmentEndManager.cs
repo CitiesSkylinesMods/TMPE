@@ -5,6 +5,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class ExtSegmentEndManager
@@ -273,6 +274,7 @@ namespace TrafficManager.Manager.Impl {
             ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
             segEnd.nodeId = nodeId;
             CalculateIncomingOutgoing(segmentId, nodeId, out segEnd.incoming, out segEnd.outgoing);
+            CalcualteCorners(ref segEnd);
 
             if (nodeIdBeforeRecalc != 0 && nodeIdBeforeRecalc != nodeId) {
                 Constants.ManagerFactory.ExtNodeManager.RemoveSegment(
@@ -287,6 +289,27 @@ namespace TrafficManager.Manager.Impl {
                          $"Recalculated ext. segment end: {segEnd}");
             }
         }
+
+        private void CalcualteCorners(ref ExtSegmentEnd segEnd) {
+            segEnd.segmentId.ToSegment().CalculateCorner(
+                segmentID: segEnd.segmentId,
+                heightOffset: true,
+                start: segEnd.startNode,
+                leftSide: false,
+                cornerPos: out segEnd.RightCorner,
+                cornerDirection: out segEnd.RightCornerDir,
+                smooth: out _);
+            segEnd.segmentId.ToSegment().CalculateCorner(
+                segmentID: segEnd.segmentId,
+                heightOffset: true,
+                start: segEnd.startNode,
+                leftSide: true,
+                cornerPos: out segEnd.LeftCorner,
+                cornerDirection: out segEnd.LeftCornerDir,
+                smooth: out _);
+        }
+
+
 
         private void CalculateIncomingOutgoing(ushort segmentId,
                                                ushort nodeId,
