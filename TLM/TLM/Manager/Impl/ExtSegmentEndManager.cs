@@ -289,6 +289,12 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        /// <summary>
+        /// This recalcualtion must requires to be called after CalcualteSegment(). therefore it is not being called together
+        /// with other calculations.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <param name="startNode"></param>
         public void CalculateCorners(ushort segmentId, bool startNode) {
             ref ExtSegmentEnd segEnd = ref ExtSegmentEnds[GetIndex(segmentId, startNode)];
             segmentId.ToSegment().CalculateCorner(
@@ -483,6 +489,18 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"Segment {i} @ start node: {ExtSegmentEnds[GetIndex((ushort)i, true)]}");
                 Log._Debug($"Segment {i} @ end node: {ExtSegmentEnds[GetIndex((ushort)i, false)]}");
             }
+        }
+
+        public override void OnLevelLoading() {
+            base.OnLevelLoading();
+            Log._Debug($"ExtSegmentEndManager.OnLevelLoading: Calculating {ExtSegmentEnds.Length} " +
+           "extended segment ends...");
+
+            for (int i = 0; i < ExtSegmentEnds.Length; ++i) {
+                // TODO [issue #872]: move CalculateCorners to Recalculate().
+                CalculateCorners(ExtSegmentEnds[i].segmentId, ExtSegmentEnds[i].startNode);
+            }
+            Log._Debug($"ExtSegmentEndManager.OnLevelLoading: Calculation finished.");
         }
 
         public override void OnLevelUnloading() {
