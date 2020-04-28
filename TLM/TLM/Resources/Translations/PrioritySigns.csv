@@ -1,3 +1,6 @@
 "","de","en","es","fr","hu","it","ja","ko","nl","pl","pt","ru","zh-tw","zh","en-gb","tr","uk","cz","sk","th"
 "Prio.OnscreenHint.Mode:Select","","Choose a junction to edit","","","","","","","","","","","","","Choose a junction to edit","","","","",""
 "Prio.OnscreenHint.Mode:Edit","","Click priority signs to toggle","","","","","","","","","","","","","Click priority signs to toggle","","","","",""
+"Prio.Click:Quick setup prio road/roundabout","","Quick setup priority road/roundabout","","","","","","","","","","","","","Quick setup priority road/roundabout","","","","",""
+"Prio.Click:Quick setup high prio road/roundabout","","Quick setup high priority road/roundabout","","","","","","","","","","","","","Quick setup high priority road/roundabout","","","","",""
+"Prio.Click:Quick setup prio junction","","Quick setup priority junction","","","","","","","","","","","","","Quick setup priority junction","","","","",""
