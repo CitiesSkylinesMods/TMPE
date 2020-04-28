@@ -954,6 +954,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnActivate() {
+            base.OnActivate();
 #if DEBUG
             bool logLaneConn = DebugSwitch.LaneConnections.Get();
             if (logLaneConn) {
@@ -1324,40 +1325,32 @@ namespace TrafficManager.UI.SubTools {
                   new Color32(99, 75, 85, 255),
             };
 
-        private static string T(string key) {
-            return Translation.LaneRouting.Get(key);
-        }
+        private static string T(string key) => Translation.LaneRouting.Get(key);
 
         /// <inheritdoc/>
         public void UpdateOnscreenDisplayPanel() {
             SelectionMode m = GetSelectionMode();
 
             switch (m) {
-                // TODO: uncomment this when state machine is properly implemented and right click cancels the mode
                 case SelectionMode.None: {
                     var items = new List<OsdItem>();
-                    items.Add(
-                        new MainMenu.OSD.ModeDescription(
-                            localizedText: T("LaneConnector.Mode:Select")));
+                    items.Add(new ModeDescription(localizedText: T("LaneConnector.Mode:Select")));
                     OnscreenDisplay.Display(items);
                     return;
                 }
                 case SelectionMode.SelectTarget:
                 case SelectionMode.SelectSource: {
                     var items = new List<OsdItem>();
-                    items.Add(
-                        new MainMenu.OSD.ModeDescription(
-                            m == SelectionMode.SelectSource
-                                ? T("LaneConnector.Mode:Source")
-                                : T("LaneConnector.Mode:Target")));
-                    items.Add(
-                        new MainMenu.OSD.Shortcut(
-                            keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
-                            localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
-                    items.Add(
-                        new MainMenu.OSD.Shortcut(
-                            keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
-                            localizedText: T("LaneConnector.Label:Reset to default")));
+                    items.Add(new ModeDescription(
+                                  m == SelectionMode.SelectSource
+                                      ? T("LaneConnector.Mode:Source")
+                                      : T("LaneConnector.Mode:Target")));
+                    items.Add(new Shortcut(
+                                  keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
+                                  localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
+                    items.Add(new Shortcut(
+                                  keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
+                                  localizedText: T("LaneConnector.Label:Reset to default")));
 
                     items.Add(OnscreenDisplay.RightClick_LeaveNode());
                     OnscreenDisplay.Display(items);

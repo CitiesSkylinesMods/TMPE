@@ -10,11 +10,13 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
-    using CSUtil.Commons;
+    using TrafficManager.UI.MainMenu.OSD;
     using static TrafficManager.Util.Shortcuts;
 
-
-    public class VehicleRestrictionsTool : LegacySubTool {
+    public class VehicleRestrictionsTool
+        : LegacySubTool,
+          UI.MainMenu.IOnscreenDisplayProvider
+    {
         private static readonly ExtVehicleType[] RoadVehicleTypes = {
             ExtVehicleType.PassengerCar, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.CargoTruck,
             ExtVehicleType.Service, ExtVehicleType.Emergency
@@ -55,8 +57,10 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnActivate() {
+            base.OnActivate();
             cursorInSecondaryPanel = false;
             RefreshCurrentRestrictedSegmentIds();
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         private void RefreshCurrentRestrictedSegmentIds(ushort forceSegmentId = 0) {
@@ -112,11 +116,13 @@ namespace TrafficManager.UI.SubTools {
             SelectedSegmentId = HoveredSegmentId;
             currentRestrictedSegmentIds.Add(SelectedSegmentId);
             MainTool.CheckClicked(); // consume click.
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         public override void OnSecondaryClickOverlay() {
             if (!IsCursorInPanel()) {
                 SelectedSegmentId = 0;
+                MainTool.RequestOnscreenDisplayUpdate();
             }
         }
 
@@ -593,6 +599,21 @@ namespace TrafficManager.UI.SubTools {
             GUI.color = guiColor;
 
             return hovered;
+        }
+
+        public void UpdateOnscreenDisplayPanel() {
+            if (SelectedNodeId == 0) {
+                // Select mode
+                var items = new List<OsdItem>();
+                items.Add(new ModeDescription(localizedText: T("OnscreenHint.Mode:Select segment")));
+                OnscreenDisplay.Display(items);
+            } else {
+                // Modify traffic light settings
+                var items = new List<OsdItem>();
+                items.Add(new ModeDescription(localizedText: T("OnscreenHint.Mode:Toggle restrictions")));
+                items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                OnscreenDisplay.Display(items);
+            }
         }
     }
 }

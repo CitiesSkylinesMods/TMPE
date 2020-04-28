@@ -9,11 +9,15 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
 
-    public class PrioritySignsTool : LegacySubTool {
+    public class PrioritySignsTool
+        : LegacySubTool,
+          UI.MainMenu.IOnscreenDisplayProvider
+    {
         public enum PrioritySignsMassEditMode {
             MainYield = 0,
             MainStop = 1,
@@ -38,6 +42,7 @@ namespace TrafficManager.UI.SubTools {
                     return;
                 }
                 SelectedNodeId = 0;
+                MainTool.RequestOnscreenDisplayUpdate();
             }
 
             // TODO provide revert/clear mode issue #568
@@ -84,7 +89,8 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 SelectedNodeId = HoveredNodeId;
-                Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
+                MainTool.RequestOnscreenDisplayUpdate();
+                // Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
             }
 
             // update priority node cache
@@ -427,6 +433,7 @@ namespace TrafficManager.UI.SubTools {
                 if (removedNodeId != 0) {
                     currentPriorityNodeIds.Remove(removedNodeId);
                     SelectedNodeId = 0;
+                    MainTool.RequestOnscreenDisplayUpdate();
                 }
             } catch (Exception e) {
                 Log.Error(e.ToString());
@@ -485,19 +492,12 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void Cleanup() {
-            //TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
-            //foreach (PrioritySegment trafficSegment in prioMan.PrioritySegments) {
-            //	try {
-            //		trafficSegment?.Instance1?.Reset();
-            //		trafficSegment?.Instance2?.Reset();
-            //	} catch (Exception e) {
-            //		Log.Error($"Error occured while performing PrioritySignsTool.Cleanup: {e.ToString()}");
-            //	}
-            //}
         }
 
         public override void OnActivate() {
+            base.OnActivate();
             RefreshCurrentPriorityNodeIds();
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         public override void Initialize() {
@@ -513,12 +513,8 @@ namespace TrafficManager.UI.SubTools {
 
         private bool MayNodeHavePrioritySigns(ushort nodeId) {
             SetPrioritySignError reason;
-            // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Checking if node {nodeId}
-            //     may have priority signs.");
 
             if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(nodeId, out reason)) {
-                // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not
-                //     allow priority signs: {reason}");
                 if (reason == SetPrioritySignError.HasTimedLight) {
                     MainTool.WarningPrompt(
                         Translation.TrafficLights.Get("Dialog.Text:Node has timed TL script"));
@@ -527,8 +523,24 @@ namespace TrafficManager.UI.SubTools {
                 return false;
             }
 
-            // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} allows priority signs");
             return true;
+        }
+
+        private static string T(string key) => Translation.PrioritySigns.Get(key);
+
+        public void UpdateOnscreenDisplayPanel() {
+            if (SelectedNodeId == 0) {
+                // Select mode
+                var items = new List<OsdItem>();
+                items.Add(new ModeDescription(localizedText: T("OnscreenHint.Mode:Select")));
+                OnscreenDisplay.Display(items);
+            } else {
+                // Modify traffic light settings
+                var items = new List<OsdItem>();
+                items.Add(new ModeDescription(localizedText: T("OnscreenHint.Mode:Edit")));
+                items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                OnscreenDisplay.Display(items);
+            }
         }
     }
 }

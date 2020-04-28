@@ -106,6 +106,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void OnActivate() {
+            base.OnActivate();
             LastCachedCamera = new CameraTransformValue();
         }
 

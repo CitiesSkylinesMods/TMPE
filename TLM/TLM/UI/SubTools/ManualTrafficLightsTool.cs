@@ -1041,25 +1041,26 @@ namespace TrafficManager.UI.SubTools {
                 removeTrafficLight: false);
         }
 
-        private static string T(string key) {
-            return Translation.TrafficLights.Get(key);
-        }
+        private static string T(string key) => Translation.TrafficLights.Get(key);
 
         public void UpdateOnscreenDisplayPanel() {
             if (SelectedNodeId == 0) {
                 // Select mode
                 var items = new List<OsdItem>();
-                items.Add(
-                    new UI.MainMenu.OSD.ModeDescription(localizedText: T("ManualTL.Mode:Select")));
+                items.Add(new ModeDescription(localizedText: T("ManualTL.Mode:Select")));
                 OnscreenDisplay.Display(items);
             } else {
                 // Modify traffic light settings
                 var items = new List<OsdItem>();
-                items.Add(
-                    new UI.MainMenu.OSD.ModeDescription(localizedText: T("ManualTL.Mode:Edit")));
+                items.Add(new ModeDescription(localizedText: T("ManualTL.Mode:Edit")));
                 items.Add(OnscreenDisplay.RightClick_LeaveNode());
                 OnscreenDisplay.Display(items);
             }
+        }
+
+        public override void OnActivate() {
+            base.OnActivate();
+            MainTool.RequestOnscreenDisplayUpdate();
         }
     }
 }

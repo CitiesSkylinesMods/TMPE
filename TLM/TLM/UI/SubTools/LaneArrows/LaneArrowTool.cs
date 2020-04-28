@@ -70,9 +70,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             fsm_ = new Util.GenericFsm<State, Trigger>(State.Select);
         }
 
-        private static string T(string key) {
-            return Translation.LaneRouting.Get(key);
-        }
+        private static string T(string key) => Translation.LaneRouting.Get(key);
 
         /// <summary>
         /// Creates FSM ready to begin editing. Or recreates it when ESC is pressed

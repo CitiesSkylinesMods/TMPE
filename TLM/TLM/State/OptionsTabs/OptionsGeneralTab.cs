@@ -40,9 +40,7 @@ namespace TrafficManager.State {
         private static UIDropDown _roadSignsMphThemeDropdown;
         private static int _roadSignMphStyleInt;
 
-        private static string T(string key) {
-            return Translation.Options.Get(key);
-        }
+        private static string T(string key) => Translation.Options.Get(key);
 
         internal static void MakeSettings_General(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(T("Tab:General"));

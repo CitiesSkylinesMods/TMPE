@@ -149,7 +149,6 @@ namespace TrafficManager.UI {
         public virtual void Cleanup() { }
 
         public virtual void OnActivate() {
-            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         /// <summary>

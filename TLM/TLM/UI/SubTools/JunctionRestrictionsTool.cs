@@ -170,6 +170,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnActivate() {
+            base.OnActivate();
             Log._Debug("LaneConnectorTool: OnActivate");
             SelectedNodeId = 0;
             MainTool.RequestOnscreenDisplayUpdate();
@@ -651,9 +652,7 @@ namespace TrafficManager.UI.SubTools {
             GUI.DrawTexture(boundingBox, signTexture);
         }
 
-        private static string T(string key) {
-            return Translation.JunctionRestrictions.Get(key);
-        }
+        private static string T(string key) => Translation.JunctionRestrictions.Get(key);
 
         /// <inheritdoc/>
         public void UpdateOnscreenDisplayPanel() {
