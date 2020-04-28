@@ -375,7 +375,7 @@ namespace TrafficManager.UI.SubTools {
 
         public void UpdateOnscreenDisplayPanel() {
             var items = new List<OsdItem>();
-            items.Add(new ModeDescription(localizedText: T("OnscreenHint.Mode:Click to toggle")));
+            items.Add(new ModeDescription(localizedText: T("Parking.OnscreenHint.Mode:Click to toggle")));
             OnscreenDisplay.Display(items);
         }
     }

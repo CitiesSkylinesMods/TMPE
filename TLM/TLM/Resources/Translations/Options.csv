@@ -106,7 +106,7 @@
 "Priority roads.Tooltip:Stop signs on entry","Wenn aktiviert, werden Stoppschilder an Straßen angebracht, die in die Hauptstraße münden. Wenn deaktiviert, werden stattdessen Vorfahrtsschilder angebracht","If enabled, puts stop signs on roads entering the main road. If disabled, puts yield signs instead","","Info-bulle : Panneau Stop/d'arrêt à l'entrée d'une route","Stop tábla a az út kezdeténél","Se abilitato, mette segnali di stop sulle strade che entrano in quella principale. Se disabilitato, invece, mette segnali di dare la precedenza","","활성화되면 메인 도로로 진입하는 도로에 정지 표지판을 놓습니다. 비활성화되면 대신 양보 표지판을 놓습니다.","Indien ingeschakeld, plaatst stopborden. Indien uitgeschakeld, plaats voorrangsborden.","Jeśli aktywne, ustawia znaki stop na drogach dojazdowych do drogi z pierwszeństwem, jeśli nie, używa znaków pierwszeństwa przejazdu","Caso ativado, põe placas de ""Pare"" nas ruas de entrada a rua principal. Caso desativado, põe placas de prioridade","Если включено, устанавливает на въездах на главную дорогу знаки Стоп. Иначе будут установлены знаки Уступить Дорогу.","如果啟用此選項，將放置「停」標誌在匯入幹道的支道。如果停用，則立即放置「讓」標誌。","","If enabled, puts stop signs on roads entering the main road. If disabled, puts yield signs instead","Yol girişinde Dur işareti","Встановлює знаки Стоп на в'їздах на головну дорогу, інакше встановлює знаки Дати Дорогу","Použít STOP při vjezdu na hlavní silnici. V opačném případě ""dej přednost""","",""
 "Priority roads.Option:Allow pedestrian crossings on main road","Erlaube Fußgängerübergänge auf der Hauptstraße","Allow pedestrian crossings on main road","","Autoriser les passages piétons sur les routes principales","Gyalogátkelőhelyek a felsőbbrendű úton","Abilita attraversamenti pedonali sulla strada principale","","메인 도로에서 보행자 횡단 허용","Sta oversteekplaatsen toe op de hoofdweg","Zezwól na przejście dla pieszych na drodze głównej","Permitir cruzamento de pedestres em rua principal","Позволить пешеходные переходы на главной дороге","在幹道允許行人穿越道","","Allow pedestrian crossings on main road","Ana yolda yaya geçitlerine izin verin.","Дозволити пішохідні переходи на головній дорозі","Povolit chodcům přecházet silnici","",""
 "General.Slider:GUI scale","Größe der Benutzeroberfläche","User interface scale","","Taille de l'interface","Grafikus felhasználói felület mérete","scala GUI","","GUI 스케일","Gebruikersinterface schaal","Skala interfejsu użytkownika","Escala da interface de usuário","Масштаб пользовательского интерфейса","使用者介面大小","","User interface scale","Arayüz ölçeği","Масштаб графічного інтерфейсу користувача","Velikost uživatelského rozhraní","",""
-"General.Tooltip.Format:GUI scale: {0}%","GUI-Skala: {0}%","Current GUI scale {0}%","","Info-bulle. Format : Échelle GUI : {0}%","Grafikus felhasználói felület {0}%","scala GUI: {0}%","","현재 GUI 스케일 {0}%","Huidige GUI-schaal {0}%","Aktualna skala interfejsu {0}%","Escala da Interface {0}%","Текущий масштаб интерфейса {0}%","","","Current GUI scale {0}%","Arayüz ölçeği: {0}%","Зараз встановлено масштаб {0}%","Velikost rozhraní {0}%","",""
+"General.Tooltip.Format:GUI scale: {0}%","GUI-Skala: {0}%","Current GUI scale {0}%","","Info-bulle. Format : Échelle GUI : {0}%","Grafikus felhasználói felület {0}%","scala GUI: {0}%","","현재 GUI 스케일 {0}%","Huidige GUI-schaal {0}%","Aktualna skala interfejsu {0}%","Escala da Interface {0}%","Текущий масштаб интерфейса {0}%","目前的使用者介面 {0}%","","Current GUI scale {0}%","Arayüz ölçeği: {0}%","Зараз встановлено масштаб {0}%","Velikost rozhraní {0}%","",""
 "General.Dropdown:Simulation accuracy","Genauigkeit der Simulation","Simulation accuracy","Precisión de la simulación","Précision de la simulation","Szimulációs pontosság","Precisione simulazione","シミュレーションの正確さ","시뮬레이션 정확도","Genauigkeit der Simulation","Dokładność symulacji","A precisão da simulação","Точность моделирования","模擬精準度","模拟真实度","Simulation accuracy","Simülasyon doğruluğu","Точність симуляції","Přesnost simulace","",""
 "General.Dropdown.Option:Very low","Sehr niedrig","Very low","Muy bajo","Très basse","Nagyon alacsony","Molto basso","とても低い","매우 낮음","Zeer laag","Bardzo niska","Muito Baixa","Очень медленно","非常低","非常低","Very low","En düşük","Дуже низька","Velmi nízká","",""
 "General.Dropdown.Option:Low","Niedrig","Low","Bajo","Basse","Alacsony","Basso","低い","낮음","Laag","Niska","Baixa","Замедленное","低","低","Low","Düşük","Низька","Nízká","",""
@@ -115,30 +115,30 @@
 "General.Dropdown.Option:Very high","Sehr hoch","Very high","Muy alto","Très haute","Nagyon magas","Molto alto","とても高い","매우 높음","Zeer hoog","Bardzo wysoka","Muito Alta","Очень высоко","非常高","非常高","Very high","En yüksek","Дуже висока","Velmi vysoká","",""
 "Shortcut.Modifier:Shift","Shift","Shift","","Raccourci Modificateur: Maj
 ""Maj"" à utiliser dans les raccourcis clavier de type ""Maj + Clic""
-Fichier: TM: PE - Options de Mod","Shift","","","","Shift","Shift","","Shift","","Shift","Shift","","Shift","Shift","",""
+Fichier: TM: PE - Options de Mod","Shift","","","","Shift","Shift","","Shift","Shift","Shift","Shift","","Shift","Shift","",""
 "Shortcut.Modifier:Ctrl","Ctrl","Ctrl","","Raccourci Modificateur: Ctrl
 ""Ctrl"" à utiliser dans les raccourcis clavier de type ""Maj + Clic""
-Fichier: TM: PE - Options de Mod","Ctrl","","","","Ctrl","Ctrl","","Ctrl","","Ctrl","Ctrl","","Ctrl","Ctrl","",""
+Fichier: TM: PE - Options de Mod","Ctrl","","","","Ctrl","Ctrl","","Ctrl","Ctrl","Ctrl","Ctrl","","Ctrl","Ctrl","",""
 "Shortcut.Modifier:Alt","Alt","Alt","","Raccourci Modificateur: Alt
 «Alt» à utiliser dans les raccourcis clavier de type «Alt + clic»
-Fichier: TM: PE - Options de Mod","Alt","","","","Alt","Alt","","Alt","","Alt","Alt","","Alt","Alt","",""
+Fichier: TM: PE - Options de Mod","Alt","","","","Alt","Alt","","Alt","Alt","Alt","Alt","","Alt","Alt","",""
 "Shortcut:Click","Linke Maustaste","Click","","Raccourci: Clic
 ""Clic"" représente le clic gauche de la souris, à utiliser dans les raccourcis clavier de style ""Maj + Click""
-Fichier: TM: PE - Options de Mod","Klikk","","","","Klik","Klik","","Клик","","鼠标左键","Click","","Клік","Klik","",""
+Fichier: TM: PE - Options de Mod","Klikk","","","","Klik","Klik","","Клик","滑鼠左鍵","鼠标左键","Click","","Клік","Klik","",""
 "Shortcut:RightClick","Rechte Maustaste","Right Click","","Raccourci: Clic droit
 Raccourci: Clic droit
 ""Clic droit"" à utiliser dans les raccourcis clavier ""Maj + Clic droit"", représente le clic droit de la souris
-Fichier: TM: PE - Options du Mod","Jobb klikk","","","","","PPM","","Правый Клик","","鼠标右键","Right Click","","Правий Клік","Pravé tlačítko","",""
+Fichier: TM: PE - Options du Mod","Jobb klikk","","","","","PPM","","Правый Клик","滑鼠右鍵","鼠标右键","Right Click","","Правий Клік","Pravé tlačítko","",""
 "Shortcut:MiddleClick","Mittlere Maustaste","Middle Click","","Raccourci: Clic du bouton du milieu de la souris
 Raccourci: Clic du bouton du milieu de la souris
 ""Clic du bouton du milieu de la souris"" à utiliser dans les raccourcis clavier de style ""Maj + Clic bouton du milieu de la souris"", représente le clic du bouton du milieu de la souris
-Fichier: TM: PE - Options du Mod","Középső egérgomb","","","","","ŚPM","","Средний Клик","","鼠标中键","Middle Click","","Середній Клік","Prostřední tlačítko","",""
+Fichier: TM: PE - Options du Mod","Középső egérgomb","","","","","ŚPM","","Средний Клик","滑鼠中鍵","鼠标中键","Middle Click","","Середній Клік","Prostřední tlačítko","",""
 "Keybind.Esc:Cancel tool","Das Tool verlassen und TM:PE verstecken","Exit the tool and hide TM:PE","","Keybind.Esc : Annuler l'outil
 Affiché dans les indications du clavier comme : ""Échapper (Esc) quitte l'outil actuel et masque TM: PE""
-Fichier: TMPE - Options du Mod","Kilépés az eszközből","","","","","Wyjdź i ukryj menu TM:PE","","Покинуть текущий режим и закрыть меню TM:PE","","","Exit the tool and hide TM:PE","","Скасувати поточний режим та закрити панель TM:PE","Ukončit současný nástroj a schovat Traffic Manager","",""
+Fichier: TMPE - Options du Mod","Kilépés az eszközből","","","","","Wyjdź i ukryj menu TM:PE","","Покинуть текущий режим и закрыть меню TM:PE","結束此工具並隱藏 TM:PE","","Exit the tool and hide TM:PE","","Скасувати поточний режим та закрити панель TM:PE","Ukončit současný nástroj a schovat Traffic Manager","",""
 "Keybind.RightClick:Leave node","","Leave the selected node","","Keybin.Click droit : Quitte l'outil noeud
 Affiché comme ""Click droit - Laisser le nœud sélectionné""
-Fichier: TM: PE - Option du mod","","","","","","Odznacz wybrany węzeł","","Покинуть выбранный перекрёсток или узел","","","Leave the selected node","","Залишити обране перехрестя або вузол","Pravé kliknutí zruší výběr zvoleného uzlu","",""
+Fichier: TM: PE - Option du mod","","","","","","Odznacz wybrany węzeł","","Покинуть выбранный перекрёсток или узел","留下選取的節點","","Leave the selected node","","Залишити обране перехрестя або вузол","Pravé kliknutí zruší výběr zvoleného uzlu","",""
 "Keybind.RightClick:Leave segment","Das ausgewählte Segment verlassen","Leave the selected segment","","Keybind. Clicdroit : Quitter le segment
 Affiché comme ""Clic droit, laisser le segment sélectionné""
-Fichier: TM: PE - Options du Mod","","","","","","Odznacz wybrany segment","","Покинуть выбранный сегмент дороги","","","Leave the selected segment","","Залишити обраний сегмент шляху","Pravé kliknutí zruší výběr zvoleného segmentu","",""
+Fichier: TM: PE - Options du Mod","","","","","","Odznacz wybrany segment","","Покинуть выбранный сегмент дороги","留下選取的部分","","Leave the selected segment","","Залишити обраний сегмент шляху","Pravé kliknutí zruší výběr zvoleného segmentu","",""

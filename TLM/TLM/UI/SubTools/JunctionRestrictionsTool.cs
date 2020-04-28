@@ -661,7 +661,7 @@ namespace TrafficManager.UI.SubTools {
                 var items = new List<OsdItem>();
                 items.Add(
                     new UI.MainMenu.OSD.ModeDescription(
-                        localizedText: T("OnscreenHint.Mode:Select")));
+                        localizedText: T("JR.OnscreenHint.Mode:Select")));
                 OnscreenDisplay.Display(items);
                 return;
             } else {
@@ -670,7 +670,7 @@ namespace TrafficManager.UI.SubTools {
                 items.Add(
                     new UI.MainMenu.OSD.Shortcut(
                         keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
-                        localizedText: T("OnscreenHint.Reset:Reset to default")));
+                        localizedText: T("JR.OnscreenHint.Reset:Reset to default")));
 
                 items.Add(OnscreenDisplay.RightClick_LeaveNode());
                 OnscreenDisplay.Display(items);

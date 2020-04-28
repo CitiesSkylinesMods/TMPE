@@ -605,12 +605,12 @@ namespace TrafficManager.UI.SubTools {
             if (SelectedNodeId == 0) {
                 // Select mode
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("OnscreenHint.Mode:Select segment")));
+                items.Add(new ModeDescription(localizedText: T("VR.OnscreenHint.Mode:Select segment")));
                 OnscreenDisplay.Display(items);
             } else {
                 // Modify traffic light settings
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("OnscreenHint.Mode:Toggle restrictions")));
+                items.Add(new ModeDescription(localizedText: T("VR.OnscreenHint.Mode:Toggle restrictions")));
                 items.Add(OnscreenDisplay.RightClick_LeaveNode());
                 OnscreenDisplay.Display(items);
             }

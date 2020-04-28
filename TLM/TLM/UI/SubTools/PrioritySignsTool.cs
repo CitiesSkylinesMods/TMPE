@@ -4,6 +4,7 @@ namespace TrafficManager.UI.SubTools {
     using static Util.SegmentTraverser;
     using System.Collections.Generic;
     using System;
+    using ColossalFramework.UI;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -532,12 +533,33 @@ namespace TrafficManager.UI.SubTools {
             if (SelectedNodeId == 0) {
                 // Select mode
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("OnscreenHint.Mode:Select")));
+                items.Add(new ModeDescription(localizedText: T("Prio.OnscreenHint.Mode:Select")));
+                items.Add(
+                    new HardcodedMouseShortcut(
+                        button: UIMouseButton.Left,
+                        shift: true,
+                        ctrl: false,
+                        alt: false,
+                        localizedText: T("Prio.Click:Quick setup prio road/roundabout")));
+                items.Add(
+                    new HardcodedMouseShortcut(
+                        button: UIMouseButton.Left,
+                        shift: true,
+                        ctrl: true,
+                        alt: false,
+                        localizedText: T("Prio.Click:Quick setup high prio road/roundabout")));
+                items.Add(
+                    new HardcodedMouseShortcut(
+                        button: UIMouseButton.Left,
+                        shift: false,
+                        ctrl: true,
+                        alt: false,
+                        localizedText: T("Prio.Click:Quick setup prio junction")));
                 OnscreenDisplay.Display(items);
             } else {
                 // Modify traffic light settings
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("OnscreenHint.Mode:Edit")));
+                items.Add(new ModeDescription(localizedText: T("Prio.OnscreenHint.Mode:Edit")));
                 items.Add(OnscreenDisplay.RightClick_LeaveNode());
                 OnscreenDisplay.Display(items);
             }
