@@ -25,9 +25,9 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.SubTools.LaneArrows;
+    using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.TimedTrafficLights;
 
-    using static TrafficManager.UI.SubTools.PrioritySignsTool;
     using static TrafficManager.Util.Shortcuts;
     using static TrafficManager.Util.SegmentTraverser;
 
@@ -353,7 +353,7 @@ namespace TrafficManager.UI {
         /// Must not call base.RenderOverlay() . Doing so may cause infinite recursion with Postfix of base.RenderOverlay()
         /// </summary>
         public void RenderOverlayImpl(RenderManager.CameraInfo cameraInfo) {
-            if (!(isActiveAndEnabled || MassEditOVerlay.IsActive)) {
+            if (!(isActiveAndEnabled || SubTools.PrioritySigns.MassEditOverlay.IsActive)) {
                 return;
             }
 
@@ -378,7 +378,9 @@ namespace TrafficManager.UI {
         /// </summary>
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
-            MassEditOVerlay.Show = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+            SubTools.PrioritySigns.MassEditOverlay.Show
+                = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+
             NetManager.instance.NetAdjust.PathVisible =
                 RoadSelectionPanels.Root.ShouldPathBeVisible();
             if (NetManager.instance.NetAdjust.PathVisible) {

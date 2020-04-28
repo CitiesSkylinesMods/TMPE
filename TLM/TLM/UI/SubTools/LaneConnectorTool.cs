@@ -14,6 +14,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu.OSD;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.UI.SubTools.PrioritySigns;
 
     public class LaneConnectorTool
         : LegacySubTool,
@@ -138,7 +139,7 @@ namespace TrafficManager.UI.SubTools {
 
         private void ShowOverlay(bool viewOnly, RenderManager.CameraInfo cameraInfo) {
             if (viewOnly && !(Options.connectedLanesOverlay ||
-                PrioritySignsTool.MassEditOVerlay.IsActive)) {
+                MassEditOverlay.IsActive)) {
                 return;
             }
 
@@ -1016,7 +1017,7 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
             if (Options.connectedLanesOverlay ||
-                PrioritySignsTool.MassEditOVerlay.IsActive) {
+                MassEditOverlay.IsActive) {
                 RefreshCurrentNodeMarkers();
             } else {
                 currentLaneEnds.Clear();

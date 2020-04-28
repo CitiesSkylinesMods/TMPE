@@ -153,6 +153,7 @@
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
     <Compile Include="Patch\_DefaultTool\OnToolGUIPatch.cs" />
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
+    <Compile Include="Patch\_NetSegment\CalculateSegmentPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
@@ -284,6 +285,9 @@
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool.cs" />
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowToolWindow.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
+    <Compile Include="UI\SubTools\PrioritySigns\MassEditOverlay.cs" />
+    <Compile Include="UI\Helpers\TrafficRulesOverlay.cs" />
+    <Compile Include="UI\SubTools\PrioritySigns\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
@@ -303,7 +307,6 @@
     <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
     <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\ManualTrafficLightsTool.cs" />
-    <Compile Include="UI\SubTools\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\ToggleTrafficLightsTool.cs" />
     <Compile Include="State\Options.cs" />
     <Compile Include="Manager\Impl\SpeedLimitManager.cs" />
