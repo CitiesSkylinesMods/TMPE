@@ -23,10 +23,11 @@ namespace TrafficManager.UI {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.UI.Helpers;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.SubTools.LaneArrows;
+    using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.TimedTrafficLights;
 
-    using static TrafficManager.UI.SubTools.PrioritySignsTool;
     using static TrafficManager.Util.Shortcuts;
     using static TrafficManager.Util.SegmentTraverser;
 
@@ -287,8 +288,7 @@ namespace TrafficManager.UI {
         /// <summary>Resets the tool and calls deactivate on it.</summary>
         private void SetToolMode_DeactivateTool() {
             // Clear OSD panel with keybinds
-            OnScreenDisplay.Begin();
-            OnScreenDisplay.Done();
+            OnscreenDisplay.Clear();
 
             if (activeLegacySubTool_ != null || activeSubTool_ != null) {
                 activeLegacySubTool_?.Cleanup();
@@ -353,7 +353,7 @@ namespace TrafficManager.UI {
         /// Must not call base.RenderOverlay() . Doing so may cause infinite recursion with Postfix of base.RenderOverlay()
         /// </summary>
         public void RenderOverlayImpl(RenderManager.CameraInfo cameraInfo) {
-            if (!(isActiveAndEnabled || MassEditOVerlay.IsActive)) {
+            if (!(isActiveAndEnabled || SubTools.PrioritySigns.MassEditOverlay.IsActive)) {
                 return;
             }
 
@@ -378,7 +378,9 @@ namespace TrafficManager.UI {
         /// </summary>
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
-            MassEditOVerlay.Show = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+            SubTools.PrioritySigns.MassEditOverlay.Show
+                = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+
             NetManager.instance.NetAdjust.PathVisible =
                 RoadSelectionPanels.Root.ShouldPathBeVisible();
             if (NetManager.instance.NetAdjust.PathVisible) {
@@ -495,11 +497,6 @@ namespace TrafficManager.UI {
         /// </summary>
         /// <param name="e">Event to handle.</param>
         public void OnToolGUIImpl(Event e) {
-            // if (InvalidateOnscreenDisplayFlag) {
-            //     this.InvalidateOnscreenDisplayFlag = false;
-            //     this.RequestOnscreenDisplayUpdate();
-            // }
-
             try {
                 if (!Input.GetMouseButtonDown(0)) {
                     _mouseClickProcessed = false;
@@ -577,7 +574,11 @@ namespace TrafficManager.UI {
                                    ushort nodeId,
                                    bool warning = false,
                                    bool alpha = false) {
-            DrawNodeCircle(cameraInfo, nodeId, GetToolColor(warning, false), alpha);
+            DrawNodeCircle(
+                cameraInfo: cameraInfo,
+                nodeId: nodeId,
+                color: GetToolColor(warning: warning, error: false),
+                alpha: alpha);
         }
 
         /// <summary>
@@ -1868,13 +1869,26 @@ namespace TrafficManager.UI {
             Prompt.Warning("Warning", message);
         }
 
+        /// <summary>
+        /// Called when the onscreen hint update is due. This will request the update from the
+        /// active Traffic Manager Tool, or show the default hint.
+        /// </summary>
         public void RequestOnscreenDisplayUpdate() {
             if (!GlobalConfig.Instance.Main.KeybindsPanelVisible) {
-                OnScreenDisplay.Clear();
+                OnscreenDisplay.Clear();
                 return;
             }
 
-            activeSubTool_?.UpdateOnscreenDisplayPanel();
+            var activeLegacyOsd = activeLegacySubTool_ as IOnscreenDisplayProvider;
+            activeLegacyOsd?.UpdateOnscreenDisplayPanel();
+
+            var activeOsd = activeSubTool_ as IOnscreenDisplayProvider;
+            activeOsd?.UpdateOnscreenDisplayPanel();
+
+            if (activeOsd == null && activeLegacyOsd == null) {
+                // No tool hint support was available means we have to show the default
+                OnscreenDisplay.DisplayIdle();
+            }
         }
     }
 }

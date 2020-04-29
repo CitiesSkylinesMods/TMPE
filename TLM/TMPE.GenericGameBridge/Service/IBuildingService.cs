@@ -1,4 +1,4 @@
-﻿namespace GenericGameBridge.Service {
+namespace GenericGameBridge.Service {
     public delegate bool BuildingHandler(ushort buildingId, ref Building building);
 
     public interface IBuildingService {
@@ -9,7 +9,5 @@
         bool IsBuildingValid(ushort buildingId);
 
         void ProcessBuilding(ushort buildingId, BuildingHandler handler);
-
-        void ProcessBuilding(ushort buildingId, ref Building building, BuildingHandler handler);
     }
 }

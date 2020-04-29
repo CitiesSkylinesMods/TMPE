@@ -28,12 +28,12 @@ namespace TrafficManager.UI.MainMenu {
         /// Panel floating below the main menu and shows keybinds and mouse shortcuts.
         /// Panel is hidden if it contains no controls.
         /// </summary>
-        public UPanel KeybindsPanel { get; set; }
+        public UPanel OnscreenDisplayPanel { get; set; }
 
         /// <summary>
         /// Button [?] in the corner which toggles keybinds
         /// </summary>
-        private UButton helpButton_;
+        private UButton toggleOsdButton_;
 
         /// <summary>Tool buttons occupy the left and bigger side of the main menu.</summary>
         private static readonly MenuButtonDef[] TOOL_BUTTON_DEFS
@@ -237,42 +237,40 @@ namespace TrafficManager.UI.MainMenu {
             foreach (BaseMenuButton b in ExtraButtonsList) {
                 b.atlas = allButtonsAtlas_;
             }
-            this.helpButton_.atlas = allButtonsAtlas_;
+            this.toggleOsdButton_.atlas = allButtonsAtlas_;
 
             //-------------------------------------------------------------------------
             // Foldable panel with keybinds, starts hidden below or above the main menu
             //-------------------------------------------------------------------------
-            SetupControls_KeybindsPanel(builder);
+            SetupControls_OnscreenDisplayPanel(builder);
 
             // Floating labels under TM:PE window
-            SetupControls_DebugLabels(builder, this.KeybindsPanel);
+            SetupControls_DebugLabels(builder, this.OnscreenDisplayPanel);
         }
 
-        private void SetupControls_KeybindsPanel(UiBuilder<MainMenuWindow> builder) {
-            using (var keybindsB = builder.ChildPanel<U.Panel.UPanel>(
+        private void SetupControls_OnscreenDisplayPanel(UiBuilder<MainMenuWindow> builder) {
+            using (var osdBuilder = builder.ChildPanel<U.Panel.UPanel>(
                 p => {
                     p.name = "TMPE_MainMenu_KeybindsPanel";
-                    p.isVisible = false; // not visible until needed
-
                     // the GenericPanel sprite is Light Silver, make it dark
                     p.atlas = TextureUtil.FindAtlas("Ingame");
                     p.backgroundSprite = "GenericPanel";
                     p.color = new Color32(64, 64, 64, 240);
-                })) {
-                keybindsB.SetPadding(UConst.UIPADDING);
+                }))
+            {
+                osdBuilder.SetPadding(UConst.UIPADDING);
 
                 // The keybinds panel belongs to main menu but does not expand it to fit
-                UResizerConfig.From(keybindsB.Control).ContributeToBoundingBox = false;
-                this.KeybindsPanel = keybindsB.Control;
+                UResizerConfig.From(osdBuilder.Control).ContributeToBoundingBox = false;
+                this.OnscreenDisplayPanel = osdBuilder.Control;
 
                 bool keybindsVisible = GlobalConfig.Instance.Main.KeybindsPanelVisible;
-                this.KeybindsPanel.gameObject.SetActive(keybindsVisible);
+                this.OnscreenDisplayPanel.gameObject.SetActive(keybindsVisible);
 
-                keybindsB.ResizeFunction(
+                osdBuilder.ResizeFunction(
                     r => {
-                        r.Stack(
-                            mode: UStackMode.Below,
-                            spacing: UConst.UIPADDING * 2);
+                        r.Stack(mode: UStackMode.Below, spacing: UConst.UIPADDING * 2);
+
                         // As the control technically belongs inside the mainmenu, it will respect
                         // the 4px padding, we want to shift it slightly left to line up with the
                         // main menu panel.
@@ -291,10 +289,11 @@ namespace TrafficManager.UI.MainMenu {
                 this.VersionLabel = versionLabel = versionLabelB.Control;
             }
 
-            using (var helpB = builder.Button<U.Button.UButton>()) {
-                this.helpButton_ = helpB.Control;
-                helpB.Control.atlas = this.allButtonsAtlas_;
-                helpB.Control.name = "TMPE_MainMenu_HelpButton";
+            using (var btnBuilder = builder.Button<U.Button.UButton>()) {
+                UButton control = btnBuilder.Control;
+                this.toggleOsdButton_ = control;
+                control.atlas = this.allButtonsAtlas_;
+                control.name = "TMPE_MainMenu_HelpButton";
 
                 // Texture for Help will be included in the `allButtonsAtlas_`
                 ButtonSkin skin = new ButtonSkin {
@@ -306,10 +305,13 @@ namespace TrafficManager.UI.MainMenu {
                                                  };
                 atlasKeySet.AddRange(skin.CreateAtlasKeyset());
 
-                helpB.Control.Skin = skin;
-                helpB.Control.UpdateButtonImage();
+                control.Skin = skin;
+                control.UpdateButtonImage();
 
-                helpB.ResizeFunction(
+                // This has to be done later when form setup is done:
+                // helpB.Control.atlas = allButtonsAtlas_;
+
+                btnBuilder.ResizeFunction(
                     resizeFn: r => {
                         r.Control.isVisible = true; // not sure why its hidden on create? TODO
                         r.Stack(mode: UStackMode.ToTheRight,
@@ -319,22 +321,25 @@ namespace TrafficManager.UI.MainMenu {
                         r.Height(UValue.FixedSize(18f));
                     });
 
-                helpB.Control.uCanActivate = c => true;
+                control.uCanActivate = c => true;
+                control.uTooltip = Translation.Menu.Get("Tooltip:Toggle onscreen display panel");
 
-                helpB.Control.uIsActive =
+                control.uIsActive =
                     c => GlobalConfig.Instance.Main.KeybindsPanelVisible;
 
-                helpB.Control.uOnClick += (component, eventParam) => {
-                    ModUI.Instance.MainMenu.OnHelpButtonClicked(component as U.Button.UButton);
+                control.uOnClick += (component, eventParam) => {
+                    ModUI.Instance.MainMenu.OnToggleOsdButtonClicked(component as U.Button.UButton);
                 };
             }
 
             return versionLabel;
         }
 
-        private void OnHelpButtonClicked(U.Button.UButton button) {
+        private void OnToggleOsdButtonClicked(U.Button.UButton button) {
             bool value = !GlobalConfig.Instance.Main.KeybindsPanelVisible;
             GlobalConfig.Instance.Main.KeybindsPanelVisible = value;
+            GlobalConfig.WriteConfig();
+
             Log._Debug($"Toggle value of KeybindsPanelVisible to {value}");
 
             // Refer to the TrafficManager tool asking it to request help from the current tool
