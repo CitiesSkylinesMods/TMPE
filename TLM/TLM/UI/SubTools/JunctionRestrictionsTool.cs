@@ -2,18 +2,16 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
-    using TrafficManager.API.Manager;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
-    using TrafficManager.UI.Textures;
     using UnityEngine;
     using TrafficManager.State.Keybinds;
     using TrafficManager.UI.SubTools.PrioritySigns;
-    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.UI.Helpers;
+    using TrafficManager.UI.MainMenu.OSD;
 
     public class JunctionRestrictionsTool
         : LegacySubTool,
@@ -216,5 +214,33 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
         }
-    }
+
+        private static string T(string key) => Translation.JunctionRestrictions.Get(key);
+
+        public void UpdateOnscreenDisplayPanel() {
+            if (SelectedNodeId == 0) {
+                // Select mode
+                var items = new List<OsdItem>();
+                items.Add(
+                    new UI.MainMenu.OSD.ModeDescription(
+                        localizedText: T("JR.OnscreenHint.Mode:Select")));
+                OnscreenDisplay.Display(items);
+                return;
+            } else {
+                // Edit mode
+                var items = new List<OsdItem>();
+                items.Add(
+                    new UI.MainMenu.OSD.Shortcut(
+                        keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
+                        localizedText: T("JR.OnscreenHint.Reset:Reset to default")));
+
+                items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                OnscreenDisplay.Display(items);
+                return;
+            }
+
+            // Default: no hint
+            // OnscreenDisplay.Clear();
+        }
+    } // end class
 }
