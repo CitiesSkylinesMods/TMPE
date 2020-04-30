@@ -37,16 +37,10 @@ namespace TrafficManager.State {
             Label = "Roundabout.Option:Set priority signs",
         };
 
-        public static CheckboxOption RoundAboutQuickFix_EnterBlockedRoundabout_Enabled =
-            new CheckboxOption("RoundAboutQuickFix_EnterBlockedRoundabout_Enabled") {
-            Label = "Roundabout.Option:Enter blocked roundabout",
+        public static CheckboxOption RoundAboutQuickFix_KeepClearYieldR =
+            new CheckboxOption("RoundAboutQuickFix_KeepClearYieldR") {
+            Label = "Roundabout.Option:Keep Clear of roundabout.",
             Tooltip = "Roundabout.Tooltip:Enter blocked roundabout",
-        };
-
-        public static CheckboxOption RoundAboutQuickFix_EnterBlockedRoundabout_Allowed =
-            new CheckboxOption("RoundAboutQuickFix_EnterBlockedRoundabout_Allowed") {
-            Label = "Roundabout.Option:Allowed(on) Banned(off)",
-            Indent = true,
         };
 
         public static CheckboxOption RoundAboutQuickFix_RealisticSpeedLimits =
@@ -75,7 +69,7 @@ namespace TrafficManager.State {
         public static CheckboxOption PriorityRoad_AllowLeftTurns =
             new CheckboxOption("PriorityRoad_AllowLeftTurns") {
                 Label = "Priority roads.Option:Allow far turns",
-                Tooltip = "Priority roads.Tooltipn:Allow far turns"
+                Tooltip = "Priority roads.Tooltipn:Allow far turns",
             };
 
         public static CheckboxOption PriorityRoad_EnterBlockedYeild =
@@ -86,7 +80,7 @@ namespace TrafficManager.State {
         public static CheckboxOption PriorityRoad_StopAtEntry =
             new CheckboxOption("PriorityRoad_StopAtEntry") {
                 Label = "Priority roads.Option:Stop signs on entry",
-                Tooltip = "Priority roads.Tooltip:Stop signs on entry"
+                Tooltip = "Priority roads.Tooltip:Stop signs on entry",
         };
         #endregion
 
@@ -104,8 +98,7 @@ namespace TrafficManager.State {
             RoundAboutQuickFix_StayInLaneNearRabout.AddUI(raboutGroup);
             RoundAboutQuickFix_DedicatedExitLanes.AddUI(raboutGroup);
             RoundAboutQuickFix_PrioritySigns.AddUI(raboutGroup);
-            RoundAboutQuickFix_EnterBlockedRoundabout_Enabled.AddUI(raboutGroup);
-            RoundAboutQuickFix_EnterBlockedRoundabout_Allowed.AddUI(raboutGroup);
+            RoundAboutQuickFix_KeepClearYieldR.AddUI(raboutGroup);
             RoundAboutQuickFix_RealisticSpeedLimits.AddUI(raboutGroup);
             RoundAboutQuickFix_ParkingBanMainR.AddUI(raboutGroup);
             RoundAboutQuickFix_ParkingBanYieldR.AddUI(raboutGroup);

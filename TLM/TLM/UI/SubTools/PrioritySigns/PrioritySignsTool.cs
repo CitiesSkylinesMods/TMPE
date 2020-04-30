@@ -30,9 +30,9 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
         enum ModifyMode {
             None,
-            PrioirtyRoad,
-            HighPrioirtyRoad,
-            HighPrioirtJunction,
+            PriorityRoad,
+            HighPriorityRoad,
+            HighPriorityJunction,
             Roundabout,
         }
         static class PrevHoveredState {
@@ -189,9 +189,9 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         });
                 }
                 if (!ControlIsPressed)
-                    mode = ModifyMode.PrioirtyRoad;
+                    mode = ModifyMode.PriorityRoad;
                 else if (!isRoundabout)
-                    mode = ModifyMode.HighPrioirtyRoad;
+                    mode = ModifyMode.HighPriorityRoad;
                 else
                     mode = ModifyMode.Roundabout;
 
@@ -200,7 +200,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 }
             } else if (ControlIsPressed) {
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
-                mode = ModifyMode.HighPrioirtJunction;
+                mode = ModifyMode.HighPriorityJunction;
                 if (mode != PrevHoveredState.Mode || HoveredNodeId != PrevHoveredState.NodeId) {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }

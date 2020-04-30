@@ -155,11 +155,11 @@ namespace TrafficManager.Util {
                 JunctionRestrictionsManager.Instance.SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, true);
             } // endif
 
-            if (OptionsMassEditTab.RoundAboutQuickFix_EnterBlockedRoundabout_Enabled) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_KeepClearYieldR) {
                 JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
                     segmentId,
                     startNode,
-                    OptionsMassEditTab.RoundAboutQuickFix_EnterBlockedRoundabout_Allowed);
+                    false);
             }
 
         }
@@ -440,11 +440,11 @@ namespace TrafficManager.Util {
             float r = CalculateRadius(ref segmentId.ToSegment());
             float kmph = 11.3f * Mathf.Sqrt(r); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issue-589462235
             Log._Debug($"CalculatePreferedSpeed radius:{r} -> kmph:{kmph}");
-            if (float.IsNaN(kmph) || float.IsInfinity(kmph) || kmph < 1) {
+            if (float.IsNaN(kmph) || float.IsInfinity(kmph) || kmph < 1f) {
                 return null;
             }
-            if (kmph < 10) {
-                kmph = 10;
+            if (kmph < 10f) {
+                kmph = 10f;
             }
             return SpeedValue.FromKmph((ushort)kmph);
         }

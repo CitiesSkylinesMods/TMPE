@@ -630,10 +630,8 @@ namespace TrafficManager.Util {
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, true);
                 SpeedLimitManager.Instance.SetSpeedLimit(segmentId, null);
                 VehicleRestrictionsManager.Instance.ClearVehicleRestrictions(segmentId);
-                foreach (bool startNode in Constants.ALL_BOOL) {
-                    ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
-                    ClearNode(nodeId);
-                }
+                ClearNode(netService.GetSegmentNodeId(segmentId, true));
+                ClearNode(netService.GetSegmentNodeId(segmentId, false));
             }
             return record;
         }
