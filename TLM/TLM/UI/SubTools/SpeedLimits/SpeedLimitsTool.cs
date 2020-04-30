@@ -15,6 +15,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using TrafficManager.Util;
     using static TrafficManager.Util.Shortcuts;
     using UnityEngine;
+    using TrafficManager.UI.SubTools.PrioritySigns;
 
     public class SpeedLimitsTool : LegacySubTool {
         public const int
@@ -243,7 +244,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.speedLimitsOverlay && !PrioritySignsTool.MassEditOVerlay.IsActive) {
+            if (viewOnly && !Options.speedLimitsOverlay && !MassEditOverlay.IsActive) {
                 return;
             }
 
@@ -719,7 +720,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                            ref NetSegment segment,
                                            bool viewOnly,
                                            ref Vector3 camPos) {
-            if (viewOnly && !Options.speedLimitsOverlay && !PrioritySignsTool.MassEditOVerlay.IsActive) {
+            if (viewOnly && !Options.speedLimitsOverlay && !MassEditOverlay.IsActive) {
                 return false;
             }
             bool ret = false;

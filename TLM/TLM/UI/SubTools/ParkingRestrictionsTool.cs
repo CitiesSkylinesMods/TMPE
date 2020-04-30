@@ -12,6 +12,7 @@ namespace TrafficManager.UI.SubTools {
     using static TrafficManager.Util.Shortcuts;
     using ColossalFramework.Math;
     using CSUtil.Commons;
+    using TrafficManager.UI.SubTools.PrioritySigns;
 
     public class ParkingRestrictionsTool : LegacySubTool {
         private ParkingRestrictionsManager parkingManager => ParkingRestrictionsManager.Instance;
@@ -146,7 +147,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.parkingRestrictionsOverlay && !PrioritySignsTool.MassEditOVerlay.IsActive) {
+            if (viewOnly && !Options.parkingRestrictionsOverlay && !MassEditOverlay.IsActive) {
                 return;
             }
 
@@ -245,7 +246,7 @@ namespace TrafficManager.UI.SubTools {
                                                    ref NetSegment segment,
                                                    bool viewOnly,
                                                    ref Vector3 camPos) {
-            if (viewOnly && !Options.parkingRestrictionsOverlay && !PrioritySignsTool.MassEditOVerlay.IsActive) {
+            if (viewOnly && !Options.parkingRestrictionsOverlay && !MassEditOverlay.IsActive) {
                 return NetInfo.Direction.None;
             }
 
@@ -287,7 +288,7 @@ namespace TrafficManager.UI.SubTools {
                     size,
                     size);
 
-                if (Options.speedLimitsOverlay || PrioritySignsTool.MassEditOVerlay.IsActive) {
+                if (Options.speedLimitsOverlay || MassEditOverlay.IsActive) {
                     boundingBox.y -= size + 10f;
                 }
 
