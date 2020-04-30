@@ -1,16 +1,16 @@
 namespace TrafficManager.Util {
-    using API.Traffic.Data;
-    using API.Traffic.Enums;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using Manager.Impl;
-    using State;
     using System;
     using System.Collections.Generic;
     using TrafficManager.API.Manager;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
+    using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util.Record;
     using UnityEngine;
-    using static TrafficManager.UI.SubTools.PrioritySignsTool;
     using static TrafficManager.Util.SegmentTraverser;
     using static TrafficManager.Util.Shortcuts;
 
@@ -18,8 +18,9 @@ namespace TrafficManager.Util {
     /// Utility for mass edit of prioirty roads.
     /// </summary>
     public static class PriorityRoad {
-        public static IRecordable FixPrioritySigns
-            (PrioritySignsMassEditMode massEditMode, List<ushort> segmentList) {
+        public static IRecordable FixPrioritySigns(
+            PrioritySignsTool.PrioritySignsMassEditMode massEditMode,
+            List<ushort> segmentList) {
             if (segmentList == null || segmentList.Count == 0) {
                 return null;
             }
@@ -30,25 +31,25 @@ namespace TrafficManager.Util {
             var secondaryPrioType = PriorityType.None;
 
             switch (massEditMode) {
-                case PrioritySignsMassEditMode.MainYield: {
+                case PrioritySignsTool.PrioritySignsMassEditMode.MainYield: {
                         primaryPrioType = PriorityType.Main;
                         secondaryPrioType = PriorityType.Yield;
                         break;
                     }
 
-                case PrioritySignsMassEditMode.MainStop: {
+                case PrioritySignsTool.PrioritySignsMassEditMode.MainStop: {
                         primaryPrioType = PriorityType.Main;
                         secondaryPrioType = PriorityType.Stop;
                         break;
                     }
 
-                case PrioritySignsMassEditMode.YieldMain: {
+                case PrioritySignsTool.PrioritySignsMassEditMode.YieldMain: {
                         primaryPrioType = PriorityType.Yield;
                         secondaryPrioType = PriorityType.Main;
                         break;
                     }
 
-                case PrioritySignsMassEditMode.StopMain: {
+                case PrioritySignsTool.PrioritySignsMassEditMode.StopMain: {
                         primaryPrioType = PriorityType.Stop;
                         secondaryPrioType = PriorityType.Main;
                         break;
@@ -127,7 +128,7 @@ namespace TrafficManager.Util {
             return FixRoad(segmentList);
         }
 
-        /// <returns>the node of <paramref name="segmentId"/> that is not shared 
+        /// <returns>the node of <paramref name="segmentId"/> that is not shared
         /// with <paramref name="otherSegmentId"/> .</returns>
         private static ushort GetSharedOrOtherNode(ushort segmentId, ushort otherSegmentId, out ushort sharedNodeId) {
             ref NetSegment segment = ref segmentId.ToSegment();
@@ -340,7 +341,7 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// apply high priority junction rules 
+        /// apply high priority junction rules
         /// - supports semi-roundabout.
         /// - no support for road spliting.
         /// </summary>

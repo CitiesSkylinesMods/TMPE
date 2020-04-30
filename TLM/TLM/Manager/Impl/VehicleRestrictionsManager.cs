@@ -399,7 +399,7 @@ namespace TrafficManager.Manager.Impl {
                                              NetInfo.Lane laneInfo,
                                              uint laneId,
                                              ExtVehicleType allowedTypes) {
-            if (!Services.NetService.IsLaneValid(laneId)) {
+            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                 return false;
             }
 
@@ -441,7 +441,7 @@ namespace TrafficManager.Manager.Impl {
                                    uint laneId,
                                    NetInfo.Lane laneInfo,
                                    ExtVehicleType vehicleType) {
-            if (!Services.NetService.IsLaneValid(laneId)) {
+            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                 return;
             }
 
@@ -484,7 +484,7 @@ namespace TrafficManager.Manager.Impl {
                                       uint laneId,
                                       NetInfo.Lane laneInfo,
                                       ExtVehicleType vehicleType) {
-            if (!Services.NetService.IsLaneValid(laneId)) {
+            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                 return;
             }
 
@@ -798,7 +798,7 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneVehicleTypes laneVehicleTypes in data) {
                 try {
-                    if (!Services.NetService.IsLaneValid(laneVehicleTypes.laneId))
+                    if (!Services.NetService.IsLaneAndItsSegmentValid(laneVehicleTypes.laneId))
                         continue;
 
                     ExtVehicleType baseMask = GetBaseMask(

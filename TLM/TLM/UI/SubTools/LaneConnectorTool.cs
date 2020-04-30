@@ -16,6 +16,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.MainMenu.OSD;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.UI.SubTools.PrioritySigns;
 
     public class LaneConnectorTool
         : LegacySubTool,
@@ -140,7 +141,7 @@ namespace TrafficManager.UI.SubTools {
 
         private void ShowOverlay(bool viewOnly, RenderManager.CameraInfo cameraInfo) {
             if (viewOnly && !(Options.connectedLanesOverlay ||
-                PrioritySignsTool.MassEditOVerlay.IsActive)) {
+                MassEditOverlay.IsActive)) {
                 return;
             }
 
@@ -210,14 +211,14 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 foreach (LaneEnd laneEnd in laneEnds) {
-                    if (!Constants.ServiceFactory.NetService.IsLaneValid(laneEnd.LaneId)) {
+                    if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(laneEnd.LaneId)) {
                         continue;
                     }
 
                     if (laneEnd != selectedLaneEnd) {
                         foreach (LaneEnd targetLaneEnd in laneEnd.ConnectedLaneEnds) {
                             // render lane connection from laneEnd to targetLaneEnd
-                            if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneEnd.LaneId)) {
+                            if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
                                 continue;
                             }
 
@@ -277,7 +278,7 @@ namespace TrafficManager.UI.SubTools {
                         // lane curves for selectedMarker will be drawn last to
                         // be on the top of other lane markers.
                         foreach (LaneEnd targetLaneEnd in selectedLaneEnd.ConnectedLaneEnds) {
-                            if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneEnd.LaneId)) {
+                            if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
                                 continue;
                             }
 
@@ -1017,7 +1018,7 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
             if (Options.connectedLanesOverlay ||
-                PrioritySignsTool.MassEditOVerlay.IsActive) {
+                MassEditOverlay.IsActive) {
                 RefreshCurrentNodeMarkers();
             } else {
                 currentLaneEnds.Clear();
@@ -1339,7 +1340,7 @@ namespace TrafficManager.UI.SubTools {
                     var items = new List<OsdItem>();
                     items.Add(
                         new MainMenu.OSD.ModeDescription(
-                            T("LaneArrows.Mode.Select:Select a junction to edit")));
+                            localizedText: T("LaneConnector.Mode:Select")));
                     OnscreenDisplay.Display(items);
                     return;
                 }
@@ -1349,8 +1350,8 @@ namespace TrafficManager.UI.SubTools {
                     items.Add(
                         new MainMenu.OSD.ModeDescription(
                             m == SelectionMode.SelectSource
-                                ? T("LaneConnector.Mode.Source:Click outgoing lane")
-                                : T("LaneConnector.Mode.Source:Click incoming lane to connect")));
+                                ? T("LaneConnector.Mode:Source")
+                                : T("LaneConnector.Mode:Target")));
                     items.Add(
                         new MainMenu.OSD.Shortcut(
                             keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,

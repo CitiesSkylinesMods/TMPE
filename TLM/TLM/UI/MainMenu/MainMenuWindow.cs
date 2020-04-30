@@ -14,7 +14,6 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.U.Autosize;
     using TrafficManager.U.Button;
     using TrafficManager.U.Panel;
-    using TrafficManager.UI.MainMenu.OSD;
     using UnityEngine;
 
     public class MainMenuWindow
@@ -28,7 +27,7 @@ namespace TrafficManager.UI.MainMenu {
         /// Panel floating below the main menu and shows keybinds and mouse shortcuts.
         /// Panel is hidden if it contains no controls.
         /// </summary>
-        public UPanel KeybindsPanel { get; set; }
+        public UPanel OnscreenDisplayPanel { get; set; }
 
         /// <summary>
         /// Button [?] in the corner which toggles keybinds
@@ -243,15 +242,13 @@ namespace TrafficManager.UI.MainMenu {
             SetupControls_OnscreenDisplayPanel(builder);
 
             // Floating labels under TM:PE window
-            SetupControls_DebugLabels(builder, this.KeybindsPanel);
+            SetupControls_DebugLabels(builder, this.OnscreenDisplayPanel);
         }
 
         private void SetupControls_OnscreenDisplayPanel(UiBuilder<MainMenuWindow> builder) {
             using (var osdBuilder = builder.ChildPanel<U.Panel.UPanel>(
                 p => {
                     p.name = "TMPE_MainMenu_KeybindsPanel";
-                    p.isVisible = false; // not visible until needed
-
                     // the GenericPanel sprite is Light Silver, make it dark
                     p.atlas = TextureUtil.FindAtlas("Ingame");
                     p.backgroundSprite = "GenericPanel";
@@ -262,10 +259,10 @@ namespace TrafficManager.UI.MainMenu {
 
                 // The keybinds panel belongs to main menu but does not expand it to fit
                 UResizerConfig.From(osdBuilder.Control).ContributeToBoundingBox = false;
-                this.KeybindsPanel = osdBuilder.Control;
+                this.OnscreenDisplayPanel = osdBuilder.Control;
 
                 bool keybindsVisible = GlobalConfig.Instance.Main.KeybindsPanelVisible;
-                this.KeybindsPanel.gameObject.SetActive(keybindsVisible);
+                this.OnscreenDisplayPanel.gameObject.SetActive(keybindsVisible);
 
                 osdBuilder.ResizeFunction(
                     r => {
@@ -338,6 +335,8 @@ namespace TrafficManager.UI.MainMenu {
         private void OnToggleOsdButtonClicked(U.Button.UButton button) {
             bool value = !GlobalConfig.Instance.Main.KeybindsPanelVisible;
             GlobalConfig.Instance.Main.KeybindsPanelVisible = value;
+            GlobalConfig.WriteConfig();
+
             Log._Debug($"Toggle value of KeybindsPanelVisible to {value}");
 
             // Refer to the TrafficManager tool asking it to request help from the current tool

@@ -1,9 +1,8 @@
-namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools.PrioritySigns {
+    using System;
+    using System.Collections.Generic;
     using ColossalFramework;
     using CSUtil.Commons;
-    using static Util.SegmentTraverser;
-    using System.Collections.Generic;
-    using System;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -12,8 +11,9 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
-    using static Util.Shortcuts;
     using TrafficManager.Util.Record;
+    using static Util.Shortcuts;
+    using static TrafficManager.Util.SegmentTraverser;
 
     public class PrioritySignsTool : LegacySubTool {
         public enum PrioritySignsMassEditMode {
@@ -126,61 +126,6 @@ namespace TrafficManager.UI.SubTools {
         public override void OnToolGUI(Event e) { }
 
         /// <summary>
-        /// Thread safe handling of mass edit overlay.
-        /// </summary>
-        public static class MassEditOVerlay {
-            private static object _lock = new object();
-
-            private static bool _show = false;
-            public static bool Show {
-                set {
-                    lock (_lock) {
-                        _show = value;
-                    }
-                }
-            }
-
-            private static DateTime _timer = DateTime.MinValue;
-
-            /// <summary>
-            /// show mass edit over lay for the input duration.
-            /// overrides MassEditOVerlay.Show when it is set to a UTC time in future.
-            /// seconds is
-            /// seconds is
-            /// </summary>
-            /// <param name="seconds"> duration.
-            /// negative => never
-            /// float.MaxValue => always
-            /// </param>
-            public static void SetTimer(float seconds) {
-                DateTime dt;
-                if (seconds == float.MaxValue) {
-                    dt = DateTime.MaxValue;
-                } else {
-                    dt = DateTime.UtcNow + TimeSpan.FromSeconds(seconds);
-                }
-                lock (_lock) {
-                    _timer = dt;
-                }
-            }
-
-            /// <summary>
-            /// show overlay for other subtools influced by mass edit.
-            /// </summary>
-            public static bool IsActive {
-                get {
-                    bool show;
-                    DateTime timer;
-                    lock (_lock) {
-                        show = _show;
-                        timer = _timer;
-                    }
-                    return show || DateTime.UtcNow < timer;
-                }
-            }
-        }
-
-        /// <summary>
         /// refreshes all subtools incflucned by mass edit.
         /// the mass edit overlay active while processing
         /// and remains active for one extra second so that
@@ -191,14 +136,14 @@ namespace TrafficManager.UI.SubTools {
             // that something is happening.
             // this is also to make sure overlay is refresshed
             // even when the user lets go of the mass edit overlay hotkey.
-            MassEditOVerlay.SetTimer(float.MaxValue);
+            MassEditOverlay.SetTimer(float.MaxValue);
 
             ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
             RefreshCurrentPriorityNodeIds();
 
             // keep active for one more second so that the user
             // has a chance to see the new traffic rules.
-            MassEditOVerlay.SetTimer(1);
+            MassEditOverlay.SetTimer(1);
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -208,7 +153,7 @@ namespace TrafficManager.UI.SubTools {
 
             ModifyMode mode = ModifyMode.None;
 
-            MassEditOVerlay.Show = ControlIsPressed;
+            MassEditOverlay.Show = ControlIsPressed;
 
             if (HoveredSegmentId == 0) {
                 massEditMode = PrioritySignsMassEditMode.Min;
@@ -253,7 +198,7 @@ namespace TrafficManager.UI.SubTools {
                 if (mode != PrevHoveredState.Mode || HoveredSegmentId != PrevHoveredState.SegmentId) {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }
-            } else if (Shortcuts.ControlIsPressed) {
+            } else if (ControlIsPressed) {
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 mode = ModifyMode.HighPrioirtJunction;
                 if (mode != PrevHoveredState.Mode || HoveredNodeId != PrevHoveredState.NodeId) {
@@ -315,7 +260,9 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !(Options.prioritySignsOverlay || MassEditOVerlay.IsActive )) {
+            if (viewOnly
+                && !(Options.prioritySignsOverlay
+                     || UI.SubTools.PrioritySigns.MassEditOverlay.IsActive)) {
                 return;
             }
 
@@ -545,7 +492,8 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
 
-            if (Options.prioritySignsOverlay || MassEditOVerlay.IsActive) {
+            if (Options.prioritySignsOverlay
+                || UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                 RefreshCurrentPriorityNodeIds();
             } else {
                 currentPriorityNodeIds.Clear();

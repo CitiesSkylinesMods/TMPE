@@ -25,9 +25,9 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.SubTools.LaneArrows;
+    using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.TimedTrafficLights;
 
-    using static TrafficManager.UI.SubTools.PrioritySignsTool;
     using static TrafficManager.Util.Shortcuts;
     using static TrafficManager.Util.SegmentTraverser;
 
@@ -361,7 +361,7 @@ namespace TrafficManager.UI {
         /// Must not call base.RenderOverlay() . Doing so may cause infinite recursion with Postfix of base.RenderOverlay()
         /// </summary>
         public void RenderOverlayImpl(RenderManager.CameraInfo cameraInfo) {
-            if (!(isActiveAndEnabled || MassEditOVerlay.IsActive)) {
+            if (!(isActiveAndEnabled || SubTools.PrioritySigns.MassEditOverlay.IsActive)) {
                 return;
             }
 
@@ -386,7 +386,9 @@ namespace TrafficManager.UI {
         /// </summary>
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
-            MassEditOVerlay.Show = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+            SubTools.PrioritySigns.MassEditOverlay.Show
+                = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+
             NetManager.instance.NetAdjust.PathVisible =
                 RoadSelectionPanels.Root.ShouldPathBeVisible();
             if (NetManager.instance.NetAdjust.PathVisible) {
@@ -1877,14 +1879,26 @@ namespace TrafficManager.UI {
             Prompt.Warning("Warning", message);
         }
 
+        /// <summary>
+        /// Called when the onscreen hint update is due. This will request the update from the
+        /// active Traffic Manager Tool, or show the default hint.
+        /// </summary>
         public void RequestOnscreenDisplayUpdate() {
             if (!GlobalConfig.Instance.Main.KeybindsPanelVisible) {
                 OnscreenDisplay.Clear();
                 return;
             }
 
-            (activeLegacySubTool_ as IOnscreenDisplayProvider)?.UpdateOnscreenDisplayPanel();
-            (activeSubTool_ as IOnscreenDisplayProvider)?.UpdateOnscreenDisplayPanel();
+            var activeLegacyOsd = activeLegacySubTool_ as IOnscreenDisplayProvider;
+            activeLegacyOsd?.UpdateOnscreenDisplayPanel();
+
+            var activeOsd = activeSubTool_ as IOnscreenDisplayProvider;
+            activeOsd?.UpdateOnscreenDisplayPanel();
+
+            if (activeOsd == null && activeLegacyOsd == null) {
+                // No tool hint support was available means we have to show the default
+                OnscreenDisplay.DisplayIdle();
+            }
         }
     }
 }
