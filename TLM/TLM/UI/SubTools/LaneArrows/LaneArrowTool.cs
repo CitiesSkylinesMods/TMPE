@@ -194,7 +194,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 ToolWindow.SetupControls(builder, numLanes);
 
                 // Resize everything correctly
-                // builder.Control.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
                 builder.Done();
                 RepositionWindowToNode(); // reposition again 2nd time now that size is known
             }
@@ -324,7 +323,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 case State.EditLaneArrows:
                     if (HoveredSegmentId != 0) {
                         // Allow selecting other segments while doing lane editing
-                        // fsm_.SendTrigger(Trigger.ReenterSameState);
                         OnToolLeftClick_Select();
                     }
                     break;
