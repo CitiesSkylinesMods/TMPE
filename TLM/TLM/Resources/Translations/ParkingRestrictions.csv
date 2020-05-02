@@ -1,2 +1,5 @@
 "","de","en","es","fr","hu","it","ja","ko","nl","pl","pt","ru","zh-tw","zh","en-gb","tr","uk","cz","sk","th"
-"Parking.OnscreenHint.Mode:Click to toggle","","Click parking icons to toggle parking","","","","","","","","","","","","","Click parking icons to toggle parking","","","","",""
+"Parking.OnscreenHint.Mode:Click to toggle","Zum Umschalten klicken","Click icons to toggle parking ban","","Aire de Stationnement. Conseil à l'écran. Mode : Cliquez pour basculer
+S'affiche lorsque l'outil de l'aire de stationnement est actif, invitant l'utilisateur à cliquer sur certaines icônes de restrictions
+Fichier : TM: PE - Outil - Restrictions de l'aire de stationnement","","","","","Klik op de parkeerpictogrammen om parkeren aan of uit te schakelen","","","","","","Click icons to toggle parking ban","","","","",""
+"Parking.ShiftClick:Apply to entire road","","Apply restrictions to entire road","","","","","","","","","","","","","Apply restrictions to entire road","","","","",""

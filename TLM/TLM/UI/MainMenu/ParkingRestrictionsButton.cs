@@ -19,9 +19,7 @@ namespace TrafficManager.UI.MainMenu {
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override string GetTooltip() =>
-            Translation.Menu.Get("Tooltip:Parking restrictions") + "\n" +
-            "[Shift]: " + Translation.Menu.Get("Tooltip.Keybinds:Parking restrictions");
+        protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Parking restrictions");
 
         protected override bool IsVisible() => IsButtonEnabled();
 

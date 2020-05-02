@@ -33,7 +33,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnToolGUI(Event e) {
             // handle delete
-            if (KeybindSettingsBase.LaneConnectorDelete.KeyDown(e)) {
+            if (KeybindSettingsBase.RestoreDefaultsKey.KeyDown(e)) {
                 netService.IterateNodeSegments(
                     SelectedNodeId,
                     (ushort segmmentId, ref NetSegment segment) => {
@@ -221,22 +221,19 @@ namespace TrafficManager.UI.SubTools {
             if (SelectedNodeId == 0) {
                 // Select mode
                 var items = new List<OsdItem>();
-                items.Add(
-                    new UI.MainMenu.OSD.ModeDescription(
-                        localizedText: T("JR.OnscreenHint.Mode:Select")));
+                items.Add(new UI.MainMenu.OSD.ModeDescription(T("JR.OnscreenHint.Mode:Select")));
                 OnscreenDisplay.Display(items);
-                return;
             } else {
                 // Edit mode
                 var items = new List<OsdItem>();
+                items.Add(new UI.MainMenu.OSD.ModeDescription(T("JR.OnscreenHint.Mode:Edit")));
                 items.Add(
                     new UI.MainMenu.OSD.Shortcut(
-                        keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
+                        keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
                         localizedText: T("JR.OnscreenHint.Reset:Reset to default")));
 
                 items.Add(OnscreenDisplay.RightClick_LeaveNode());
                 OnscreenDisplay.Display(items);
-                return;
             }
 
             // Default: no hint

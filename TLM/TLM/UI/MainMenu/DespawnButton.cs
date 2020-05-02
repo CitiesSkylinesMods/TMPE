@@ -27,10 +27,13 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        public override void OnClickInternal(UIMouseEventParameter p) {
+        protected override void OnClick(UIMouseEventParameter p) {
             // Immediately unclick the tool button, but toggle the option
             ModUI.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
             OptionsGameplayTab.SetDisableDespawning(!Options.disableDespawning);
+            UpdateTooltip(refreshTooltip: true);
+
+            base.OnClick(p);
         }
     }
 }

@@ -6,6 +6,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.State.Keybinds;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
@@ -602,7 +603,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public void UpdateOnscreenDisplayPanel() {
-            if (SelectedNodeId == 0) {
+            if (SelectedSegmentId == 0) {
                 // Select mode
                 var items = new List<OsdItem>();
                 items.Add(new ModeDescription(localizedText: T("VR.OnscreenHint.Mode:Select segment")));
@@ -611,7 +612,11 @@ namespace TrafficManager.UI.SubTools {
                 // Modify traffic light settings
                 var items = new List<OsdItem>();
                 items.Add(new ModeDescription(localizedText: T("VR.OnscreenHint.Mode:Toggle restrictions")));
-                items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                items.Add(
+                    item: new Shortcut(
+                        keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
+                        localizedText: T("VR.Label:Revert to default")));
+                items.Add(OnscreenDisplay.RightClick_LeaveSegment());
                 OnscreenDisplay.Display(items);
             }
         }

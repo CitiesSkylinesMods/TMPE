@@ -3,6 +3,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework;
+    using ColossalFramework.UI;
     using CSUtil.Commons;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
@@ -10,11 +11,15 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
     using TrafficManager.API.TrafficLight;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
 
-    public class TimedTrafficLightsTool : LegacySubTool {
+    public class TimedTrafficLightsTool
+        : LegacySubTool,
+          UI.MainMenu.IOnscreenDisplayProvider
+    {
         private TTLToolMode ttlToolMode_ = TTLToolMode.SelectNode;
 
         private readonly GUIStyle _counterStyle = new GUIStyle();
@@ -93,6 +98,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
                 tlsMan.TrafficLightSimulations[nodeId].Housekeeping();
             }
+
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         public override void OnSecondaryClickOverlay() {
@@ -2509,8 +2516,18 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             }
         }
 
-        private static string T(string text) {
-            return Translation.TrafficLights.Get(text);
+        private static string T(string text) => Translation.TrafficLights.Get(text);
+
+        public void UpdateOnscreenDisplayPanel() {
+            var items = new List<OsdItem>();
+            items.Add(
+                new UI.MainMenu.OSD.HardcodedMouseShortcut(
+                    button: UIMouseButton.Left,
+                    shift: false,
+                    ctrl: true,
+                    alt: false,
+                    localizedText: T("TimedTL.CtrlClick:Quick setup")));
+            OnscreenDisplay.Display(items: items);
         }
     } // end class
 }

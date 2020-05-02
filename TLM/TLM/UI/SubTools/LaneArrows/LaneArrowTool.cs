@@ -402,7 +402,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            if (Event.current.type == EventType.KeyDown && KeybindSettingsBase.LaneConnectorDelete.IsPressed(Event.current)) {
+            if (Event.current.type == EventType.KeyDown && KeybindSettingsBase.RestoreDefaultsKey.IsPressed(Event.current)) {
                 OnResetToDefaultPressed();
             }
 
@@ -447,7 +447,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     var items = new List<OsdItem>();
                     items.Add(
                         item: new MainMenu.OSD.Shortcut(
-                            keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
+                            keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
                             localizedText: T(key: "LaneConnector.Label:Reset to default")));
                     items.Add(item: OnscreenDisplay.RightClick_LeaveSegment());
                     OnscreenDisplay.Display(items: items);

@@ -488,6 +488,13 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 items.Add(
                     new HardcodedMouseShortcut(
                         button: UIMouseButton.Left,
+                        shift: false,
+                        ctrl: true,
+                        alt: false,
+                        localizedText: T("Prio.Click:Quick setup prio junction")));
+                items.Add(
+                    new HardcodedMouseShortcut(
+                        button: UIMouseButton.Left,
                         shift: true,
                         ctrl: false,
                         alt: false,
@@ -499,19 +506,12 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         ctrl: true,
                         alt: false,
                         localizedText: T("Prio.Click:Quick setup high prio road/roundabout")));
-                items.Add(
-                    new HardcodedMouseShortcut(
-                        button: UIMouseButton.Left,
-                        shift: false,
-                        ctrl: true,
-                        alt: false,
-                        localizedText: T("Prio.Click:Quick setup prio junction")));
                 OnscreenDisplay.Display(items);
             } else {
                 // Modify traffic light settings
                 var items = new List<OsdItem>();
                 items.Add(new ModeDescription(localizedText: T("Prio.OnscreenHint.Mode:Edit")));
-                items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                // items.Add(OnscreenDisplay.RightClick_LeaveNode());
                 OnscreenDisplay.Display(items);
             }
         }

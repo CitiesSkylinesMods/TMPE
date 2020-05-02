@@ -11,6 +11,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.Helpers;
     using static TrafficManager.Util.Shortcuts;
     using ColossalFramework.Math;
+    using ColossalFramework.UI;
     using TrafficManager.UI.MainMenu.OSD;
 
     public class ParkingRestrictionsTool
@@ -376,6 +377,13 @@ namespace TrafficManager.UI.SubTools {
         public void UpdateOnscreenDisplayPanel() {
             var items = new List<OsdItem>();
             items.Add(new ModeDescription(localizedText: T("Parking.OnscreenHint.Mode:Click to toggle")));
+            items.Add(
+                new HardcodedMouseShortcut(
+                    button: UIMouseButton.Left,
+                    shift: true,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: T("Parking.ShiftClick:Apply to entire road")));
             OnscreenDisplay.Display(items);
         }
     }

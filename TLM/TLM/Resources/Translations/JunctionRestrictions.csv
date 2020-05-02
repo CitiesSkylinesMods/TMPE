@@ -1,3 +1,8 @@
 "","de","en","es","fr","hu","it","ja","ko","nl","pl","pt","ru","zh-tw","zh","en-gb","tr","uk","cz","sk","th"
-"JR.OnscreenHint.Mode:Select","","Choose a junction to edit","","","","","","","","","","","","","Choose a junction to edit","","","","",""
-"JR.OnscreenHint.Reset:Reset to default","","Revert to default","","","","","","","","","","","","","Revert to default","","","","",""
+"JR.OnscreenHint.Mode:Select","Auswählen","Choose a junction to edit","","RJ. Conseil à l'écran. Mode : Sélectionnez
+S'affiche lorsque l'outil Restrictions de jonction est activé, demandant à l'utilisateur de sélectionner le nœud à modifier
+Fichier : TM: PE - Outil - Restrictions de jonction","","","","","Selecteer","","","","","","Choose a junction to edit","","","Zvolte si uzel k editaci","",""
+"JR.OnscreenHint.Reset:Reset to default","Auf Standard zurücksetzen","Revert to default","","RJ.Conseil à l'écran. Réinitialisation: Réinitialisation par défaut
+S'affiche lorsque l'outil Restrictions de jonction est en mode édition, suggérant que l'utilisateur peut supprimer les paramètres et rétablir les valeurs par défaut
+Fichier : TM: PE - Outil - Restrictions de jonction","","","","","Zet terug naar standaard","","","","","","Revert to default","","","Můžete smazat nastavení a obnovit tak výchozí hodnoty","",""
+"JR.OnscreenHint.Mode:Edit","","Click icons to toggle","","","","","","","Bewerk","","","","","","Click icons to toggle","","","","",""

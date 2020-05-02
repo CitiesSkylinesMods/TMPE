@@ -125,7 +125,7 @@ namespace TrafficManager.UI.SubTools {
                 // not too long ago (within 20 Unity frames or 0.33 sec)
             }
 
-            if (KeybindSettingsBase.LaneConnectorDelete.IsPressed(e)) {
+            if (KeybindSettingsBase.RestoreDefaultsKey.IsPressed(e)) {
                 frameClearPressed = Time.frameCount;
 
                 // this will be consumed in RenderOverlay() if the key was pressed
@@ -1350,10 +1350,10 @@ namespace TrafficManager.UI.SubTools {
                                   keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
                                   localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
                     items.Add(new Shortcut(
-                                  keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
+                                  keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
                                   localizedText: T("LaneConnector.Label:Reset to default")));
 
-                    items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                    items.Add(OnscreenDisplay.RightClick_LeaveLane());
                     OnscreenDisplay.Display(items);
                     return;
                 }

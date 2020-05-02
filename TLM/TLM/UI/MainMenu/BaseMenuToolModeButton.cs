@@ -11,9 +11,10 @@
         protected override bool IsActive() =>
             ToolMode.Equals(ModUI.GetTrafficManagerTool(false)?.GetToolMode());
 
-        public override void OnClickInternal(UIMouseEventParameter p) {
+        protected override void OnClick(UIMouseEventParameter p) {
             ModUI.GetTrafficManagerTool()
                  .SetToolMode(IsActive() ? ToolMode.None : ToolMode);
+            base.OnClick(p);
         }
     }
 }

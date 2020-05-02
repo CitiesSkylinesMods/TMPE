@@ -83,6 +83,14 @@ namespace TrafficManager.UI.MainMenu.OSD {
                 localizedText: Translation.Options.Get("Keybind.RightClick:Leave node"));
         }
 
+        /// <summary>Create OsdItem with generic "RightClick Leave lane" text.</summary>
+        /// <returns>New OsdItem to pass to the <see cref="Display"/>.</returns>
+        public static Shortcut RightClick_LeaveLane() {
+            return new Shortcut(
+                keybindSetting: KeybindSettingsBase.RightClick,
+                localizedText: Translation.Options.Get("Keybind.RightClick:Leave lane"));
+        }
+
         /// <summary>Create OsdItem with generic "RightClick Leave segment" text.</summary>
         /// <returns>New OsdItem to pass to the <see cref="Display"/>.</returns>
         public static Shortcut RightClick_LeaveSegment() {
