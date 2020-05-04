@@ -161,12 +161,12 @@ namespace TrafficManager.UI.MainMenu {
             }
         }
 
-        protected override string GetTooltip() {
+        protected override string U_OverrideTooltipText() {
             return Translation.Menu.Get("Tooltip:Toggle Main Menu");
             // return KeybindSettingsBase.ToggleMainMenu.ToLocalizedString("\n");
         }
 
-        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.ToggleMainMenu;
+        public override KeybindSetting U_OverrideTooltipShortcutKey() => KeybindSettingsBase.ToggleMainMenu;
 
         protected override bool IsVisible() => true;
 

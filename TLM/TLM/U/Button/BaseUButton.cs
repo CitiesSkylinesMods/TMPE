@@ -53,9 +53,12 @@ namespace TrafficManager.U.Button {
         /// </summary>
         protected abstract bool IsActive();
 
-        /// <summary>Override this to return localized string for the tooltip.</summary>
+        /// <summary>
+        /// Override this to return localized string for the tooltip.
+        /// Return empty if no override is required and `this.tooltip` will be used.
+        /// </summary>
         /// <returns>The tooltip for this button.</returns>
-        protected abstract string GetTooltip();
+        protected abstract string U_OverrideTooltipText();
 
         /// <summary>Override this to define whether the button should be visible on tool panel.</summary>
         /// <returns>Whether the button visible.</returns>
@@ -65,9 +68,10 @@ namespace TrafficManager.U.Button {
         }
 
         /// <summary>
-        /// Override this to return non-null, and it will display a keybind tooltip
+        /// Override this to return non-null, and it will display a keybind tooltip.
+        /// Return null if no keybind setting is available.
         /// </summary>
-        public virtual KeybindSetting GetShortcutKey() {
+        public virtual KeybindSetting U_OverrideTooltipShortcutKey() {
             return null;
         }
 
@@ -87,7 +91,7 @@ namespace TrafficManager.U.Button {
 
         internal void UpdateTooltip(bool refreshTooltip) {
             // Update localized tooltip with shortcut key if available
-            string overrideTooltip = GetTooltip();
+            string overrideTooltip = U_OverrideTooltipText();
             if (!string.IsNullOrEmpty(overrideTooltip)) {
                 this.tooltip = overrideTooltip + GetShortcutTooltip();
             }
@@ -148,8 +152,8 @@ namespace TrafficManager.U.Button {
         /// <returns>Tooltip to append to the main tooltip text, or an empty string</returns>
         // TODO: Move this code to MainMenu buttons which have shortcuts, other buttons don't have them
         private string GetShortcutTooltip() {
-            return GetShortcutKey() != null
-                       ? GetShortcutKey().ToLocalizedString("\n")
+            return U_OverrideTooltipShortcutKey() != null
+                       ? U_OverrideTooltipShortcutKey().ToLocalizedString("\n")
                        : string.Empty;
         }
     }

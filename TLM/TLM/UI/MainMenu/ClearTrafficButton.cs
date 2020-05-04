@@ -8,7 +8,7 @@
     public class ClearTrafficButton : BaseMenuButton {
         protected override bool IsActive() => false;
 
-        protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Clear traffic");
+        protected override string U_OverrideTooltipText() => Translation.Menu.Get("Tooltip:Clear traffic");
 
         protected override bool IsVisible() => true;
 

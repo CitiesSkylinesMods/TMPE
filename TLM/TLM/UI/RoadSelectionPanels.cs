@@ -348,30 +348,30 @@ namespace TrafficManager.UI {
             }
 
             public class ClearButtton : ButtonExt {
-                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
                 public override string SkinPrefix => Function.ToString(); // remove _RHT/_LHT postFix.
+                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
                 internal override FunctionModes Function => FunctionModes.Clear;
                 public override IRecordable Do() => PriorityRoad.ClearRoad(Selection);
             }
             public class StopButtton : ButtonExt {
-                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
+                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
                 internal override FunctionModes Function => FunctionModes.Stop;
                 public override IRecordable Do() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsTool.PrioritySignsMassEditMode.MainStop, Selection);
             }
             public class YieldButton : ButtonExt {
-                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
+                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
                 internal override FunctionModes Function => FunctionModes.Yield;
                 public override IRecordable Do() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsTool.PrioritySignsMassEditMode.MainYield, Selection);
             }
             public class HighPriorityButtton : ButtonExt {
-                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
+                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
                 internal override FunctionModes Function => FunctionModes.HighPriority;
                 public override IRecordable Do() => PriorityRoad.FixRoad(Selection);
             }
             public class RoundaboutButtton : ButtonExt {
-                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
+                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
                 internal override FunctionModes Function => FunctionModes.Roundabout;
                 public override IRecordable Do() => RoundaboutMassEdit.Instance.FixRoundabout(Selection);
                 public override bool ShouldDisable() {
@@ -451,10 +451,10 @@ namespace TrafficManager.UI {
                 public override void HandleClick(UIMouseEventParameter p) =>
                     throw new Exception("Unreachable code");
 
-                /// <summary>Handles button click on activation. Apply traffic rules here.</summary> 
+                /// <summary>Handles button click on activation. Apply traffic rules here.</summary>
                 public abstract IRecordable Do();
 
-                /// <summary>Handles button click on de-activation. Reset/Undo traffic rules here.</summary> 
+                /// <summary>Handles button click on de-activation. Reset/Undo traffic rules here.</summary>
                 public virtual void Undo() => Root.Record?.Restore();
 
                 protected override void OnClick(UIMouseEventParameter p) {

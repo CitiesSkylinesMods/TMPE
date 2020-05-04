@@ -301,8 +301,11 @@
     <Compile Include="UI\SubTools\PrioritySigns\MassEditOverlay.cs" />
     <Compile Include="UI\Helpers\TrafficRulesOverlay.cs" />
     <Compile Include="UI\SubTools\PrioritySigns\PrioritySignsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\LegacySpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool_2.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsWindow.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
     <Compile Include="UI\SubTools\TimedTrafficLights\TimedTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\TimedTrafficLights\TTLToolMode.cs" />

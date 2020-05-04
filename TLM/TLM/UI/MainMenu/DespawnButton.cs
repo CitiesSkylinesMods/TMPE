@@ -6,7 +6,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.U.Button;
 
     public class DespawnButton : BaseMenuButton {
-        protected override string GetTooltip() =>
+        protected override string U_OverrideTooltipText() =>
             Options.disableDespawning
                 ? Translation.Menu.Get("Tooltip:Enable despawning")
                 : Translation.Menu.Get("Tooltip:Disable despawning");

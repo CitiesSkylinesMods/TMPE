@@ -98,7 +98,7 @@ namespace TrafficManager.UI {
 
             // public override Texture2D AtlasTexture => Textures.MainMenu.RemoveButton;
 
-            protected override string GetTooltip() =>
+            protected override string U_OverrideTooltipText() =>
                 Translation.Menu.Get("Button:Remove this vehicle");
 
             protected override bool IsVisible() => true;

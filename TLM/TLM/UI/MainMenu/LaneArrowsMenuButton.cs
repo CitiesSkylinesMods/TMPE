@@ -19,10 +19,10 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Change lane arrows");
+        protected override string U_OverrideTooltipText() => Translation.Menu.Get("Tooltip:Change lane arrows");
 
         protected override bool IsVisible() => true;
 
-        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.LaneArrowTool;
+        public override KeybindSetting U_OverrideTooltipShortcutKey() => KeybindSettingsBase.LaneArrowTool;
     }
 }

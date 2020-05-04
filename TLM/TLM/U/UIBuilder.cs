@@ -21,6 +21,33 @@ namespace TrafficManager.U {
         }
 
         /// <summary>
+        /// Generic window creation.
+        /// Creates a window with generic padding (4px). The size will be "fit to children".
+        /// Calls a custom function after the setup is done, there you can populate the window.
+        /// </summary>
+        /// <typeparam name="TWindow">The window root panel type.</typeparam>
+        /// <param name="setupFn">Function called on to perform window post-setup.</param>
+        /// <returns>The new window panel.</returns>
+        public static TWindow CreateWindow<TWindow>(Action<UiBuilder<TWindow>> setupFn)
+            where TWindow : UIComponent, ISmartSizableControl
+        {
+            var parent = UIView.GetAView();
+            var window = (TWindow)parent.AddUIComponent(typeof(TWindow));
+
+            using (var builder = new U.UiBuilder<TWindow>(window)) {
+                builder.ResizeFunction(r => { r.FitToChildren(); });
+                builder.SetPadding(UConst.UIPADDING);
+
+                setupFn(builder);
+
+                // Resize everything correctly
+                builder.Done();
+            }
+
+            return window;
+        }
+
+        /// <summary>
         /// Create a button as a child of current UIBuilder. A new UIBuilder is returned.
         /// </summary>
         /// <typeparam name="TButton">The type of UIButton and ISmartSizableControl.</typeparam>

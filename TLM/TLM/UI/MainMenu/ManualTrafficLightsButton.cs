@@ -19,7 +19,7 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override string GetTooltip() =>
+        protected override string U_OverrideTooltipText() =>
             Translation.Menu.Get("Tooltip:Manual traffic lights");
 
         protected override bool IsVisible() => IsButtonEnabled();

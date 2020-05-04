@@ -20,10 +20,10 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override string GetTooltip() =>
+        protected override string U_OverrideTooltipText() =>
             Translation.Menu.Get("Tooltip:Junction restrictions");
 
-        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.JunctionRestrictionsTool;
+        public override KeybindSetting U_OverrideTooltipShortcutKey() => KeybindSettingsBase.JunctionRestrictionsTool;
 
         protected override bool IsVisible() => IsButtonEnabled();
 

@@ -105,7 +105,7 @@ namespace TrafficManager.UI {
 
             protected override bool IsActive() => false;
 
-            protected override string GetTooltip() =>
+            protected override string U_OverrideTooltipText() =>
                 Translation.Menu.Get("Button:Remove this citizen");
 
             protected override bool IsVisible() => true;

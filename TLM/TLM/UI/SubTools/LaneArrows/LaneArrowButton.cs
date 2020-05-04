@@ -49,7 +49,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             return (flags & NetlaneFlagsMask) == NetlaneFlagsMask;
         }
 
-        protected override string GetTooltip() {
+        protected override string U_OverrideTooltipText() {
             return string.Empty;
         }
     }

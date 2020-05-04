@@ -203,6 +203,7 @@ namespace TrafficManager.UI {
 
             subTools_ = new TinyDictionary<ToolMode, TrafficManagerSubTool> {
                 [ToolMode.LaneArrows] = new LaneArrowTool(this),
+                [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
             };
             legacySubTools_ = new TinyDictionary<ToolMode, LegacySubTool> {
                 [ToolMode.ToggleTrafficLight] = new ToggleTrafficLightsTool(this),
@@ -210,7 +211,6 @@ namespace TrafficManager.UI {
                 [ToolMode.ManualSwitch] = new ManualTrafficLightsTool(this),
                 [ToolMode.TimedTrafficLights] = timedLightsTool,
                 [ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this),
-                [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
                 [ToolMode.LaneConnector] = new LaneConnectorTool(this),
                 [ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this),
                 [ToolMode.ParkingRestrictions] = new ParkingRestrictionsTool(this),

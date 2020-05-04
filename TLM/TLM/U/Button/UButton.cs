@@ -26,7 +26,7 @@ namespace TrafficManager.U.Button {
             return false;
         }
 
-        protected override string GetTooltip() => this.uTooltip; // to override in subclass
+        protected override string U_OverrideTooltipText() => this.uTooltip; // to override in subclass
 
         protected override bool IsVisible() => this.isVisible;
     }

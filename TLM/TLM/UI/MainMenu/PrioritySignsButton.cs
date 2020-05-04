@@ -20,9 +20,9 @@ namespace TrafficManager.UI.MainMenu {
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Add priority signs");
+        protected override string U_OverrideTooltipText() => Translation.Menu.Get("Tooltip:Add priority signs");
 
-        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.PrioritySignsTool;
+        public override KeybindSetting U_OverrideTooltipShortcutKey() => KeybindSettingsBase.PrioritySignsTool;
 
         protected override bool IsVisible() => IsButtonEnabled();
 

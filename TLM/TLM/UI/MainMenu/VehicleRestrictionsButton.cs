@@ -19,7 +19,7 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Vehicle restrictions");
+        protected override string U_OverrideTooltipText() => Translation.Menu.Get("Tooltip:Vehicle restrictions");
 
         protected override bool IsVisible() => IsButtonEnabled();
 

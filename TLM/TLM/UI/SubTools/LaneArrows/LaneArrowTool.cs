@@ -22,7 +22,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     /// </summary>
     public class LaneArrowTool
         : TrafficManagerSubTool,
-          IOnscreenDisplayProvider
+          UI.MainMenu.IOnscreenDisplayProvider
     {
         const bool DEFAULT_ALT_MODE = true;
         private bool alternativeMode_ = DEFAULT_ALT_MODE;
@@ -122,10 +122,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <summary>Called from GenericFsm when a segment is clicked to show lane arrows GUI.</summary>
         private void OnEnterEditorState() {
             int numLanes = GeometryUtil.GetSegmentNumVehicleLanes(
-                SelectedSegmentId,
-                SelectedNodeId,
-                out int numDirections,
-                LaneArrowManager.VEHICLE_TYPES);
+                segmentId: SelectedSegmentId,
+                nodeId: SelectedNodeId,
+                numDirections: out int _,
+                vehicleTypeFilter: LaneArrowManager.VEHICLE_TYPES);
 
             if (numLanes <= 0) {
                 SelectedNodeId = 0;
@@ -168,34 +168,15 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            CreateLaneArrowsWindow(laneList.Count);
+            // Create a generic self-sizing window with padding of 4px.
+            ToolWindow = UiBuilder<LaneArrowToolWindow>.CreateWindow<LaneArrowToolWindow>(
+                    setupFn: b => b.Control.SetupControls(b, numLanes));
+            RepositionWindowToNode();
+            // end create window
+
             SetupLaneArrowsWindowButtons(laneList: laneList,
                                          startNode: (bool)startNode);
             MainTool.RequestOnscreenDisplayUpdate();
-        }
-
-        /// <summary>
-        /// Creates floating tool window for Lane Arrow controls and adds keyboard hints too.
-        /// </summary>
-        /// <param name="numLanes">How many groups of buttons.</param>
-        private void CreateLaneArrowsWindow(int numLanes) {
-            var parent = UIView.GetAView();
-            ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
-            ToolWindow.SetOpacity(
-                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
-
-            RepositionWindowToNode(); // reposition 1st time to avoid visible window jump
-
-            using (var builder = new U.UiBuilder<LaneArrowToolWindow>(ToolWindow)) {
-                builder.ResizeFunction(r => { r.FitToChildren(); });
-                builder.SetPadding(UConst.UIPADDING);
-
-                ToolWindow.SetupControls(builder, numLanes);
-
-                // Resize everything correctly
-                builder.Done();
-                RepositionWindowToNode(); // reposition again 2nd time now that size is known
-            }
         }
 
         /// <summary>
