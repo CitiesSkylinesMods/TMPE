@@ -243,7 +243,9 @@ namespace TrafficManager.State {
                 = string.Format(
                     T("General.Tooltip.Format:Window transparency: {0}%"),
                     GlobalConfig.Instance.Main.GuiOpacity);
-            _guiOpacitySlider.RefreshTooltip();
+            if (LoadingExtension.IsGameLoaded) {
+                _guiOpacitySlider.RefreshTooltip();
+            }
 
             GlobalConfig.WriteConfig();
             Log._Debug($"GuiTransparency changed to {GlobalConfig.Instance.Main.GuiOpacity}");
@@ -255,7 +257,9 @@ namespace TrafficManager.State {
                 = string.Format(
                     T("General.Tooltip.Format:GUI scale: {0}%"),
                     GlobalConfig.Instance.Main.GuiScale);
-            _guiScaleSlider.RefreshTooltip();
+            if (LoadingExtension.IsGameLoaded) {
+                _guiScaleSlider.RefreshTooltip();
+            }
 
             GlobalConfig.WriteConfig();
             Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScale}");
@@ -271,7 +275,10 @@ namespace TrafficManager.State {
                 T("General.Tooltip.Format:Overlay transparency: {0}%"),
                 GlobalConfig.Instance.Main.OverlayTransparency);
             GlobalConfig.WriteConfig();
-            _overlayTransparencySlider.RefreshTooltip();
+            if (LoadingExtension.IsGameLoaded) {
+                _overlayTransparencySlider.RefreshTooltip();
+            }
+
             Log._Debug($"Overlay transparency changed to {GlobalConfig.Instance.Main.OverlayTransparency}");
         }
 
