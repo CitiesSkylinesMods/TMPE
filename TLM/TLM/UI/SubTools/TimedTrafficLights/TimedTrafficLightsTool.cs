@@ -86,6 +86,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
         public override void OnActivate() {
             base.OnActivate();
+
+            SetToolMode(TTLToolMode.SelectNode);
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
             RefreshCurrentTimedNodeIds();
