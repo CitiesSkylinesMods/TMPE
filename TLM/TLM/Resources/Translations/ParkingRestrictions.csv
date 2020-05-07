@@ -1,1 +1,7 @@
 "","de","en","es","fr","hu","it","ja","ko","nl","pl","pt","ru","zh-tw","zh","en-gb","tr","uk","cz","sk","th"
+"Parking.OnscreenHint.Mode:Click to toggle","Zum Umschalten klicken","Click icons to toggle parking ban","","Aire de Stationnement. Conseil à l'écran. Mode : Cliquez pour basculer
+S'affiche lorsque l'outil de l'aire de stationnement est actif, invitant l'utilisateur à cliquer sur certaines icônes de restrictions
+Fichier : TM: PE - Outil - Restrictions de l'aire de stationnement","","","","","Klik op de parkeerpictogrammen om parkeren aan of uit te schakelen","Kliknij ikony aby wł/wył zakaz parkowania na wybranym odcinku","","Нажимайте на значки парковки для переключения","","","Click icons to toggle parking ban","","Натискайте на знаки паркування для заборони або дозволу","Zobrazuje se, když je nástroj pro parkování aktivní, a vyzve uživatele k kliknutí na některá omezení ikon","",""
+"Parking.ShiftClick:Apply to entire road","","Apply restrictions to entire road","","Aire de Stationnement. Shift Click : Appliquer toute la route
+Astuce à l'écran pour Maj + clic : Appliquer l'action à toute la route (étirer entre deux intersections)
+Fichier: TM: PE - Outil - Restrictions de stationnement","","","道路全体に制限を適用する","","","Zastosuj do całej drogi","","Применить к участку дороги (между перекрёстками)","","","Apply restrictions to entire road","","Застосувати до всієї дороги (між перехрестями)","Nápověda na obrazovce pro Shift+Click: Použijte akci na celou silnici (úsek mezi dvěma křižovatkami)","",""

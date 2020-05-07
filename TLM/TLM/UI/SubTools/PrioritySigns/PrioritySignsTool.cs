@@ -3,11 +3,16 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     using System.Collections.Generic;
     using ColossalFramework;
     using CSUtil.Commons;
+    using static Util.SegmentTraverser;
+    using System.Collections.Generic;
+    using System;
+    using ColossalFramework.UI;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
@@ -15,7 +20,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     using static Util.Shortcuts;
     using static TrafficManager.Util.SegmentTraverser;
 
-    public class PrioritySignsTool : LegacySubTool {
+    public class PrioritySignsTool
+        : LegacySubTool,
+          UI.MainMenu.IOnscreenDisplayProvider
+    {
         public enum PrioritySignsMassEditMode {
             Min=0,
             MainYield = 0,
@@ -55,6 +63,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     return;
                 }
                 SelectedNodeId = 0;
+                MainTool.RequestOnscreenDisplayUpdate();
             }
 
             if(massEditMode == PrioritySignsMassEditMode.Undo) {
@@ -100,7 +109,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 }
 
                 SelectedNodeId = HoveredNodeId;
-                Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
+                MainTool.RequestOnscreenDisplayUpdate();
+                // Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
             }
 
             // cycle mass edit mode
@@ -415,6 +425,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 if (removedNodeId != 0) {
                     currentPriorityNodeIds.Remove(removedNodeId);
                     SelectedNodeId = 0;
+                    MainTool.RequestOnscreenDisplayUpdate();
                 }
             } catch (Exception e) {
                 Log.Error(e.ToString());
@@ -473,19 +484,12 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
         }
 
         public override void Cleanup() {
-            //TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
-            //foreach (PrioritySegment trafficSegment in prioMan.PrioritySegments) {
-            //	try {
-            //		trafficSegment?.Instance1?.Reset();
-            //		trafficSegment?.Instance2?.Reset();
-            //	} catch (Exception e) {
-            //		Log.Error($"Error occured while performing PrioritySignsTool.Cleanup: {e.ToString()}");
-            //	}
-            //}
         }
 
         public override void OnActivate() {
+            base.OnActivate();
             RefreshCurrentPriorityNodeIds();
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         public override void Initialize() {
@@ -502,12 +506,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
         private bool MayNodeHavePrioritySigns(ushort nodeId) {
             SetPrioritySignError reason;
-            // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Checking if node {nodeId}
-            //     may have priority signs.");
 
             if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(nodeId, out reason)) {
-                // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not
-                //     allow priority signs: {reason}");
                 if (reason == SetPrioritySignError.HasTimedLight) {
                     MainTool.WarningPrompt(
                         Translation.TrafficLights.Get("Dialog.Text:Node has timed TL script"));
@@ -516,8 +516,45 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 return false;
             }
 
-            // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} allows priority signs");
             return true;
+        }
+
+        private static string T(string key) => Translation.PrioritySigns.Get(key);
+
+        public void UpdateOnscreenDisplayPanel() {
+            if (SelectedNodeId == 0) {
+                // Select mode
+                var items = new List<OsdItem>();
+                items.Add(new ModeDescription(localizedText: T("Prio.OnscreenHint.Mode:Select")));
+                items.Add(
+                    new HardcodedMouseShortcut(
+                        button: UIMouseButton.Left,
+                        shift: false,
+                        ctrl: true,
+                        alt: false,
+                        localizedText: T("Prio.Click:Quick setup prio junction")));
+                items.Add(
+                    new HardcodedMouseShortcut(
+                        button: UIMouseButton.Left,
+                        shift: true,
+                        ctrl: false,
+                        alt: false,
+                        localizedText: T("Prio.Click:Quick setup prio road/roundabout")));
+                items.Add(
+                    new HardcodedMouseShortcut(
+                        button: UIMouseButton.Left,
+                        shift: true,
+                        ctrl: true,
+                        alt: false,
+                        localizedText: T("Prio.Click:Quick setup high prio road/roundabout")));
+                OnscreenDisplay.Display(items);
+            } else {
+                // Modify traffic light settings
+                var items = new List<OsdItem>();
+                items.Add(new ModeDescription(localizedText: T("Prio.OnscreenHint.Mode:Edit")));
+                // items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                OnscreenDisplay.Display(items);
+            }
         }
     }
 }

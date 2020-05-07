@@ -77,18 +77,24 @@ namespace TrafficManager.U.Button {
             UpdateButtonImageAndTooltip();
         }
 
-        // TODO: Simplify tooltip override, use this code for MainMenu buttons, and return back to the original tooltip in all other
         internal void UpdateButtonImageAndTooltip() {
             UpdateButtonImage();
+            UpdateTooltip(refreshTooltip: true);
 
+            this.isVisible = IsVisible();
+            this.Invalidate();
+        }
+
+        internal void UpdateTooltip(bool refreshTooltip) {
             // Update localized tooltip with shortcut key if available
             string overrideTooltip = GetTooltip();
             if (!string.IsNullOrEmpty(overrideTooltip)) {
                 this.tooltip = overrideTooltip + GetShortcutTooltip();
             }
 
-            this.isVisible = IsVisible();
-            this.Invalidate();
+            if (refreshTooltip) {
+                this.RefreshTooltip();
+            }
         }
 
         internal void UpdateButtonImage() {

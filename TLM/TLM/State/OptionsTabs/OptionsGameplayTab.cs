@@ -168,6 +168,11 @@ namespace TrafficManager.State {
                 Translation.Options.Get("Gameplay.Tooltip:DLS_percentage") + ": " +
                 Options.altLaneSelectionRatio + " %";
 
+            // Only call this if the game is running, not during the loading time
+            if (LoadingExtension.IsGameLoaded) {
+                _altLaneSelectionRatioSlider.RefreshTooltip();
+            }
+
             Log._Debug($"altLaneSelectionRatio changed to {Options.altLaneSelectionRatio}");
         }
 

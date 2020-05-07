@@ -32,7 +32,7 @@
         public bool EnableTutorial = true;
 
         /// <summary>Determines if the main menu shall be displayed in a tiny format.</summary>
-        [Obsolete("Do not use. Main Menu now scales based on screen size")]
+        [Obsolete("Do not use. TM:PE now has UI scale slider")]
         public bool TinyMainMenu = true;
 
         /// <summary>User interface transparency, unit: percents, range: 0..100.</summary>

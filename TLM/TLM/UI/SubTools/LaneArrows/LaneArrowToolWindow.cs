@@ -90,7 +90,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             using (var buttonRowBuilder = builder.ChildPanel<U.Panel.UPanel>(
                 setupFn: p => { p.name = "TMPE_ButtonRow"; })) {
-                // buttonRowBuilder.SetPadding(Constants.U_UI_PADDING);
                 buttonRowBuilder.ResizeFunction(
                     r => {
                         r.Stack(mode: UStackMode.Below,
