@@ -1353,7 +1353,9 @@ namespace TrafficManager.UI.SubTools {
                                   keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
                                   localizedText: T("LaneConnector.Label:Reset to default")));
 
-                    items.Add(OnscreenDisplay.RightClick_LeaveLane());
+                    items.Add(m == SelectionMode.SelectSource
+                                  ? OnscreenDisplay.RightClick_LeaveNode()
+                                  : OnscreenDisplay.RightClick_LeaveLane());
                     OnscreenDisplay.Display(items);
                     return;
                 }
