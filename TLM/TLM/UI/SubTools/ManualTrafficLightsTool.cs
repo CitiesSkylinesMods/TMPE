@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.SubTools {
+    using System.Collections.Generic;
     using ColossalFramework;
     using JetBrains.Annotations;
     using TrafficManager.API.Manager;
@@ -6,11 +7,15 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.TrafficLight;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
 
-    public class ManualTrafficLightsTool : LegacySubTool {
+    public class ManualTrafficLightsTool
+        : LegacySubTool,
+          UI.MainMenu.IOnscreenDisplayProvider
+    {
         private readonly int[] hoveredButton = new int[2];
         private readonly GUIStyle counterStyle = new GUIStyle();
 
@@ -24,6 +29,7 @@ namespace TrafficManager.UI.SubTools {
 
             Cleanup();
             SelectedNodeId = 0;
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         public override void OnPrimaryClickOverlay() {
@@ -31,7 +37,9 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            if (SelectedNodeId != 0) return;
+            if (SelectedNodeId != 0) {
+                return;
+            }
 
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
             TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
@@ -48,22 +56,17 @@ namespace TrafficManager.UI.SubTools {
 
                 if (tlsMan.SetUpManualTrafficLight(HoveredNodeId)) {
                     SelectedNodeId = HoveredNodeId;
+                    MainTool.RequestOnscreenDisplayUpdate();
                 }
-
-                // for (var s = 0; s < 8; s++) {
-                //        var segment = Singleton<NetManager>
-                //                      .instance.m_nodes.m_buffer[SelectedNodeId].GetSegment(s);
-                //        if (segment != 0 &&
-                //            !TrafficPriority.IsPrioritySegment(SelectedNodeId, segment)) {
-                //            TrafficPriority.AddPrioritySegment(
-                //                SelectedNodeId,
-                //                segment,
-                //                SegmentEnd.PriorityType.None);
-                //        }
-                //    }
             } else {
                 MainTool.WarningPrompt(Translation.TrafficLights.Get("Dialog.Text:Node has timed TL script"));
             }
+        }
+
+        public override void Initialize() {
+            base.Initialize();
+            // TODO: Call this for all tools from main trafficmanager tool
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         public override void OnToolGUI(Event e) {
@@ -156,8 +159,8 @@ namespace TrafficManager.UI.SubTools {
                         GUI.color = guiColor;
 
                         var myRect3 = new Rect(
-                            screenPos.x - pedestrianWidth / 2 - lightWidth + 5f * zoom,
-                            screenPos.y - pedestrianHeight / 2 + 22f * zoom,
+                            (screenPos.x - (pedestrianWidth / 2) - lightWidth) + (5f * zoom),
+                            (screenPos.y - (pedestrianHeight / 2)) + (22f * zoom),
                             pedestrianWidth,
                             pedestrianHeight);
 
@@ -192,13 +195,13 @@ namespace TrafficManager.UI.SubTools {
                         ICustomSegmentLight segmentLight = segmentLights.GetCustomLight(vehicleType);
 
                         Vector3 offsetScreenPos = screenPos;
-                        offsetScreenPos.y -= (lightHeight + 10f * zoom) * lightOffset;
+                        offsetScreenPos.y -= (lightHeight + (10f * zoom)) * lightOffset;
 
                         SetAlpha(segmentId, -1);
 
                         var myRect1 = new Rect(
-                            offsetScreenPos.x - modeWidth / 2,
-                            offsetScreenPos.y - modeHeight / 2 + modeHeight - 7f * zoom,
+                            offsetScreenPos.x - (modeWidth / 2),
+                            ((offsetScreenPos.y - (modeHeight / 2)) + modeHeight) - (7f * zoom),
                             modeWidth,
                             modeHeight);
 
@@ -234,7 +237,7 @@ namespace TrafficManager.UI.SubTools {
                                 }
 
                                 var infoRect = new Rect(
-                                    offsetScreenPos.x + modeWidth / 2f +
+                                    offsetScreenPos.x + (modeWidth / 2f) +
                                     (7f * zoom * (float)(numInfos + 1)) + (infoWidth * (float)numInfos),
                                     offsetScreenPos.y - (infoHeight / 2f),
                                     infoWidth,
@@ -398,7 +401,7 @@ namespace TrafficManager.UI.SubTools {
             GUI.color = guiColor;
 
             var myRect2 = new Rect(
-                screenPos.x - (manualPedestrianWidth / 2) - lightWidth + (5f * zoom),
+                (screenPos.x - (manualPedestrianWidth / 2) - lightWidth) + (5f * zoom),
                 screenPos.y - (manualPedestrianHeight / 2) - (9f * zoom),
                 manualPedestrianWidth,
                 manualPedestrianHeight);
@@ -497,8 +500,8 @@ namespace TrafficManager.UI.SubTools {
             uint counter = segmentLights.LastChange();
 
             var myRectCounterNum = new Rect(
-                screenPos.x - counterSize + (15f * zoom) + (counter >= 10 ? -5 * zoom : 0f),
-                screenPos.y - counterSize + (11f * zoom),
+                (screenPos.x - counterSize) + (15f * zoom) + (counter >= 10 ? -5 * zoom : 0f),
+                (screenPos.y - counterSize) + (11f * zoom),
                 counterSize,
                 counterSize);
 
@@ -529,7 +532,7 @@ namespace TrafficManager.UI.SubTools {
 
             var myRect4 =
                 new Rect(
-                    screenPos.x - (lightWidth / 2) - lightWidth - pedestrianWidth + (5f * zoom),
+                    (screenPos.x - (lightWidth / 2) - lightWidth - pedestrianWidth) + (5f * zoom),
                     screenPos.y - (lightHeight / 2),
                     lightWidth,
                     lightHeight);
@@ -705,7 +708,7 @@ namespace TrafficManager.UI.SubTools {
             } else if (!hasLeftSegment) {
                 if (!hasRightSegment) {
                     myRect4 = new Rect(
-                        screenPos.x - (lightWidth / 2) - lightWidth - pedestrianWidth + (5f * zoom),
+                        (screenPos.x - (lightWidth / 2) - lightWidth - pedestrianWidth) + (5f * zoom),
                         screenPos.y - (lightHeight / 2),
                         lightWidth,
                         lightHeight);
@@ -1007,20 +1010,6 @@ namespace TrafficManager.UI.SubTools {
             }
 
             MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, false, false);
-
-            // var segment = Singleton<NetManager>.instance.m_segments.m_buffer[Singleton<NetManager>
-            //  .instance.m_nodes.m_buffer[HoveredNodeId].m_segment0];
-            //
-            // //if ((node.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) return;
-            // Bezier3 bezier;
-            // bezier.a = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position;
-            // bezier.d = Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_position;
-            //
-            // var color = MainTool.GetToolColor(false, false);
-            //
-            // NetSegment.CalculateMiddlePoints(bezier.a, segment.m_startDirection, bezier.d,
-            //         segment.m_endDirection, false, false, out bezier.b, out bezier.c);
-            // MainTool.DrawOverlayBezier(cameraInfo, bezier, color);
         }
 
         private void RenderManualNodeOverlays(RenderManager.CameraInfo cameraInfo) {
@@ -1028,18 +1017,50 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            MainTool.DrawNodeCircle(cameraInfo, SelectedNodeId, true, false);
+            MainTool.DrawNodeCircle(
+                cameraInfo: cameraInfo,
+                nodeId: SelectedNodeId,
+                warning: true,
+                alpha: false);
         }
 
         public override void Cleanup() {
-            if (SelectedNodeId == 0) return;
+            if (SelectedNodeId == 0) {
+                return;
+            }
+
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
             if (!tlsMan.HasManualSimulation(SelectedNodeId)) {
                 return;
             }
 
-            tlsMan.RemoveNodeFromSimulation(SelectedNodeId, true, false);
+            tlsMan.RemoveNodeFromSimulation(
+                nodeId: SelectedNodeId,
+                destroyGroup: true,
+                removeTrafficLight: false);
+        }
+
+        private static string T(string key) => Translation.TrafficLights.Get(key);
+
+        public void UpdateOnscreenDisplayPanel() {
+            if (SelectedNodeId == 0) {
+                // Select mode
+                var items = new List<OsdItem>();
+                items.Add(new ModeDescription(localizedText: T("ManualTL.Mode:Select")));
+                OnscreenDisplay.Display(items);
+            } else {
+                // Modify traffic light settings
+                var items = new List<OsdItem>();
+                items.Add(new ModeDescription(localizedText: T("ManualTL.Mode:Edit")));
+                items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                OnscreenDisplay.Display(items);
+            }
+        }
+
+        public override void OnActivate() {
+            base.OnActivate();
+            MainTool.RequestOnscreenDisplayUpdate();
         }
     }
 }

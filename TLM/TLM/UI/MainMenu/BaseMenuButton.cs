@@ -1,4 +1,5 @@
 ﻿namespace TrafficManager.UI.MainMenu {
+    using System;
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.U.Button;
@@ -19,12 +20,11 @@
 
         public override void HandleClick(UIMouseEventParameter p) { }
 
+        /// <summary>Handles click. NOTE: When overriding, call base.OnClick() last!</summary>
+        /// <param name="p">Event.</param>
         protected override void OnClick(UIMouseEventParameter p) {
-            OnClickInternal(p);
             ModUI.Instance.MainMenu.UpdateButtons();
         }
-
-        public abstract void OnClickInternal(UIMouseEventParameter p);
 
         public override bool CanActivate() {
             return true;

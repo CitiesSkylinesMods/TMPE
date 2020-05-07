@@ -106,6 +106,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void OnActivate() {
+            base.OnActivate();
             LastCachedCamera = new CameraTransformValue();
         }
 
@@ -125,19 +126,19 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                           : 8 * (GUI_SPEED_SIGN_SIZE + 5);
 
             paletteWindowRect = GUILayout.Window(
-                254,
-                paletteWindowRect,
-                GuiSpeedLimitsWindow,
-                Translation.Menu.Get("Tooltip:Speed limits") + unitTitle,
-                WindowStyle);
+                id: 254,
+                screenRect: paletteWindowRect,
+                func: GuiSpeedLimitsWindow,
+                text: Translation.Menu.Get("Tooltip:Speed limits") + unitTitle,
+                style: WindowStyle);
 
             if (defaultsWindowVisible) {
                 defaultsWindowRect = GUILayout.Window(
-                    258,
-                    defaultsWindowRect,
-                    GuiDefaultsWindow,
-                    Translation.SpeedLimits.Get("Window.Title:Default speed limits"),
-                    WindowStyle);
+                    id: 258,
+                    screenRect: defaultsWindowRect,
+                    func: GuiDefaultsWindow,
+                    text: Translation.SpeedLimits.Get("Window.Title:Default speed limits"),
+                    style: WindowStyle);
             }
 
             cursorInSecondaryPanel = paletteWindowRect.Contains(Event.current.mousePosition)

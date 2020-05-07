@@ -22,8 +22,9 @@ namespace TrafficManager.U {
                            .Where(obj => obj.name == name);
 
             foreach (GameObject found in objects) {
-                found.gameObject.SetActive(false);
-                UnityEngine.Object.DestroyImmediate(found.gameObject);
+                found.name = $"{name}_destroyed";
+                // found.gameObject.SetActive(false);
+                UnityEngine.Object.Destroy(found.gameObject);
             }
 
             toMakeUnique.name = name;

@@ -11,9 +11,13 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.Helpers;
     using static TrafficManager.Util.Shortcuts;
     using ColossalFramework.Math;
-    using CSUtil.Commons;
+    using ColossalFramework.UI;
+    using TrafficManager.UI.MainMenu.OSD;
 
-    public class ParkingRestrictionsTool : LegacySubTool {
+    public class ParkingRestrictionsTool
+        : LegacySubTool,
+          UI.MainMenu.IOnscreenDisplayProvider
+    {
         private ParkingRestrictionsManager parkingManager => ParkingRestrictionsManager.Instance;
 
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir
@@ -54,7 +58,10 @@ namespace TrafficManager.UI.SubTools {
             LastCachedCamera = new CameraTransformValue();
         }
 
-        public override void OnActivate() { }
+        public override void OnActivate() {
+            base.OnActivate();
+            MainTool.RequestOnscreenDisplayUpdate();
+        }
 
         public override void OnPrimaryClickOverlay() { }
 
@@ -363,6 +370,21 @@ namespace TrafficManager.UI.SubTools {
             }
 
             return hoveredDirection;
+        }
+
+        private static string T(string key) => Translation.ParkingRestrictions.Get(key);
+
+        public void UpdateOnscreenDisplayPanel() {
+            var items = new List<OsdItem>();
+            items.Add(new ModeDescription(localizedText: T("Parking.OnscreenHint.Mode:Click to toggle")));
+            items.Add(
+                new HardcodedMouseShortcut(
+                    button: UIMouseButton.Left,
+                    shift: true,
+                    ctrl: false,
+                    alt: false,
+                    localizedText: T("Parking.ShiftClick:Apply to entire road")));
+            OnscreenDisplay.Display(items);
         }
     }
 }

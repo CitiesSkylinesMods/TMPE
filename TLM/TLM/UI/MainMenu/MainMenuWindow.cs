@@ -256,6 +256,9 @@ namespace TrafficManager.UI.MainMenu {
                     p.atlas = TextureUtil.FindAtlas("Ingame");
                     p.backgroundSprite = "GenericPanel";
                     p.color = new Color32(64, 64, 64, 240);
+                    p.opacity = GlobalConfig.Instance.Main.KeybindsPanelVisible
+                                    ? 1f
+                                    : 0f;
                 }))
             {
                 osdBuilder.SetPadding(UConst.UIPADDING);
@@ -264,8 +267,8 @@ namespace TrafficManager.UI.MainMenu {
                 UResizerConfig.From(osdBuilder.Control).ContributeToBoundingBox = false;
                 this.OnscreenDisplayPanel = osdBuilder.Control;
 
-                bool keybindsVisible = GlobalConfig.Instance.Main.KeybindsPanelVisible;
-                this.OnscreenDisplayPanel.gameObject.SetActive(keybindsVisible);
+                // bool keybindsVisible = GlobalConfig.Instance.Main.KeybindsPanelVisible;
+                // this.OnscreenDisplayPanel.gameObject.SetActive(keybindsVisible);
 
                 osdBuilder.ResizeFunction(
                     r => {

@@ -70,9 +70,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             fsm_ = new Util.GenericFsm<State, Trigger>(State.Select);
         }
 
-        private static string T(string key) {
-            return Translation.LaneRouting.Get(key);
-        }
+        private static string T(string key) => Translation.LaneRouting.Get(key);
 
         /// <summary>
         /// Creates FSM ready to begin editing. Or recreates it when ESC is pressed
@@ -404,7 +402,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            if (Event.current.type == EventType.KeyDown && KeybindSettingsBase.LaneConnectorDelete.IsPressed(Event.current)) {
+            if (Event.current.type == EventType.KeyDown && KeybindSettingsBase.RestoreDefaultsKey.IsPressed(Event.current)) {
                 OnResetToDefaultPressed();
             }
 
@@ -449,7 +447,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     var items = new List<OsdItem>();
                     items.Add(
                         item: new MainMenu.OSD.Shortcut(
-                            keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
+                            keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
                             localizedText: T(key: "LaneConnector.Label:Reset to default")));
                     items.Add(item: OnscreenDisplay.RightClick_LeaveSegment());
                     OnscreenDisplay.Display(items: items);
