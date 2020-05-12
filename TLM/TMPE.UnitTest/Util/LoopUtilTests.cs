@@ -54,5 +54,23 @@ namespace TMUnitTest.Util {
 
             CollectionAssert.AreEqual(expected, actual);
         }
+
+        [TestMethod]
+        public void CompareSpiralLoopToGenerateLoopCoords_Radius33_WithOffset() {
+            var radius = 33;
+            var offset = new Vector2(121.3f, 324.7f);
+
+            var expected = new List<Vector2>();
+            LoopUtil.SpiralLoop((int)offset.x, (int)offset.y, radius, radius, (x, y) => {
+                expected.Add(new Vector2(x, y));
+                return true;
+            });
+
+            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise(radius)
+                .Select(p => p + new Vector2((int)offset.x, (int)offset.y))
+                .ToList();
+
+            CollectionAssert.AreEqual(expected, actual);
+        }
     }
 }
