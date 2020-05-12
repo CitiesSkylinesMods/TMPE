@@ -72,5 +72,31 @@ namespace TMUnitTest.Util {
 
             CollectionAssert.AreEqual(expected, actual);
         }
+
+        [TestMethod]
+        public void CompareSpiralLoopToGenerateLoopCoords_BreakCondition() {
+            var radius = 50;
+
+            var expected = new List<Vector2>();
+            LoopUtil.SpiralLoop(radius, radius, (x, y) => {
+                if (x == 4) {
+                    return false;
+                }
+
+                expected.Add(new Vector2(x, y));
+                return true;
+            });
+
+            var actual = new List<Vector2>();
+            foreach (var item in LoopUtil.GenerateSpiralGridCoordsClockwise(radius)) {
+                if (item.x == 4) {
+                    break;
+                }
+
+                actual.Add(item);
+            }
+
+            CollectionAssert.AreEqual(expected, actual);
+        }
     }
 }
