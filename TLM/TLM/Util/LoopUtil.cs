@@ -1,4 +1,7 @@
-﻿namespace TrafficManager.Util {
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+namespace TrafficManager.Util {
     public static class LoopUtil {
         public delegate bool TwoDimLoopHandler(int x, int y);
 
@@ -33,6 +36,27 @@
                     dx = -dy;
                     dy = t;
                 }
+
+                x += dx;
+                y += dy;
+            }
+        }
+
+        public static IEnumerable<Vector2> GenerateLoopCoords(int sizeX, int sizeY) {
+            var x = 0;
+            var y = 0;
+            var dx = 0;
+            var dy = -1;
+            var largerDimension = sizeX > sizeY ? sizeX : sizeY;
+            var maxI = largerDimension * largerDimension;
+            for (int i = 0; i < maxI; i++) {
+                if ((x == y) || ((x < 0) && (x == -y)) || ((x > 0) && (x == 1 - y))) {
+                    largerDimension = dx;
+                    dx = -dy;
+                    dy = largerDimension;
+                }
+
+                yield return new Vector2(x, y);
 
                 x += dx;
                 y += dy;
