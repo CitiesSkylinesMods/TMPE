@@ -8,71 +8,51 @@ namespace TMUnitTest.Util {
     [TestClass]
     public class LoopUtilTests {
         [TestMethod]
-        public void TestSizeXAndSizeYIsZero() {
-            var sizeX = 0;
-            var sizeY = 0;
+        public void CompareSpiralLoopToGenerateLoopCoords_RadiusZero() {
+            var radius = 0;
 
-            var resultSpiralLoop = new List<Vector2>();
-            LoopUtil.SpiralLoop(sizeX, sizeY, (x, y) => {
-                resultSpiralLoop.Add(new Vector2(x, y));
+            var expected = new List<Vector2>();
+            LoopUtil.SpiralLoop(radius, radius, (x, y) => {
+                expected.Add(new Vector2(x, y));
                 return true;
             });
 
-            var resultGenerateLoopCoords = LoopUtil.GenerateLoopCoords(sizeX, sizeY)
+            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise(radius)
                 .ToList();
 
-            CollectionAssert.AreEqual(resultSpiralLoop, resultGenerateLoopCoords);
+            CollectionAssert.AreEqual(expected, actual);
         }
 
         [TestMethod]
-        public void TestSizeXSmallerSizeY() {
-            var sizeX = 3;
-            var sizeY = 4;
+        public void CompareSpiralLoopToGenerateLoopCoords_Radius10() {
+            var radius = 10;
 
-            var resultSpiralLoop = new List<Vector2>();
-            LoopUtil.SpiralLoop(sizeX, sizeY, (x, y) => {
-                resultSpiralLoop.Add(new Vector2(x, y));
+            var expected = new List<Vector2>();
+            LoopUtil.SpiralLoop(radius, radius, (x, y) => {
+                expected.Add(new Vector2(x, y));
                 return true;
             });
 
-            var resultGenerateLoopCoords = LoopUtil.GenerateLoopCoords(sizeX, sizeY)
+            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise(radius)
                 .ToList();
 
-            CollectionAssert.AreEqual(resultSpiralLoop, resultGenerateLoopCoords);
+            CollectionAssert.AreEqual(expected, actual);
         }
 
         [TestMethod]
-        public void TestSizeXLargerSizeY() {
-            var sizeX = 4;
-            var sizeY = 3;
+        public void CompareSpiralLoopToGenerateLoopCoords_Radius33() {
+            var radius = 33;
 
-            var resultSpiralLoop = new List<Vector2>();
-            LoopUtil.SpiralLoop(sizeX, sizeY, (x, y) => {
-                resultSpiralLoop.Add(new Vector2(x, y));
+            var expected = new List<Vector2>();
+            LoopUtil.SpiralLoop(radius, radius, (x, y) => {
+                expected.Add(new Vector2(x, y));
                 return true;
             });
 
-            var resultGenerateLoopCoords = LoopUtil.GenerateLoopCoords(sizeX, sizeY)
+            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise(radius)
                 .ToList();
 
-            CollectionAssert.AreEqual(resultSpiralLoop, resultGenerateLoopCoords);
-        }
-
-        [TestMethod]
-        public void TestSizeXEqualSizeY() {
-            var sizeX = 4;
-            var sizeY = 4;
-
-            var resultSpiralLoop = new List<Vector2>();
-            LoopUtil.SpiralLoop(sizeX, sizeY, (x, y) => {
-                resultSpiralLoop.Add(new Vector2(x, y));
-                return true;
-            });
-
-            var resultGenerateLoopCoords = LoopUtil.GenerateLoopCoords(sizeX, sizeY)
-                .ToList();
-
-            CollectionAssert.AreEqual(resultSpiralLoop, resultGenerateLoopCoords);
+            CollectionAssert.AreEqual(expected, actual);
         }
     }
 }

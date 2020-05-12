@@ -8,18 +8,19 @@ using BenchmarkDotNet.Toolchains.InProcess.Emit;
 namespace Benchmarks {
     class Program {
         static void Main(string[] args) {
-            var summary = BenchmarkRunner.Run<SpiralLoopPerfTests>(
-                ManualConfig.Create(DefaultConfig.Instance)
+            var config = ManualConfig.Create(DefaultConfig.Instance)
                     .WithOption(ConfigOptions.DisableOptimizationsValidator, true)
                     .AddJob(
                         Job.ShortRun
                             .WithRuntime(
-                                new MonoRuntime("Mono x86", @"C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Mono\bin\mono.exe")
+                                new MonoRuntime("Mono x86", @"C:\Program Files\Unity\Hub\Editor\5.6.7f1\Editor\Data\Mono\bin\mono.exe")
                             )
                             .WithToolchain(InProcessEmitToolchain.Instance)
-                            
                     )
-                    .AddDiagnoser(MemoryDiagnoser.Default)
+                    .AddDiagnoser(MemoryDiagnoser.Default);
+
+            var spiralLoopPerfTestsSummary = BenchmarkRunner.Run<SpiralLoopPerfTests>(
+                config
             );
         }
     }
