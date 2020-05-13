@@ -76,7 +76,7 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (var laneInfo in segment.Info.m_lanes) {
                 if (laneId == sourceLaneId) {
-                    return (laneInfo.m_direction == NetInfo.Direction.Forward) ^ !inverted;
+                    return (laneInfo.m_finalDirection == NetInfo.Direction.Forward) ^ !inverted;
                 }
                 laneId = laneBuffer[laneId].m_nextLane;
             }
