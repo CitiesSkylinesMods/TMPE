@@ -348,6 +348,7 @@ namespace TrafficManager.UI {
             }
 
             public class ClearButtton : ButtonExt {
+                public virtual string SkinPrefix => Function.ToString(); // remove _RHT/_LHT postFix.
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
                 internal override FunctionModes Function => FunctionModes.Clear;
                 protected override bool IsActive() => false; // Clear funtionality can't be undone. #568
@@ -408,7 +409,9 @@ namespace TrafficManager.UI {
 
                 public virtual  string ButtonName => "TMPE.RoadSelectionPanel" + this.GetType().ToString();
 
-                public virtual string SkinPrefix => Function.ToString();
+                private static string TrafficSidePostFix => Shortcuts.RHT ? "_RHT" : "_LHT";
+
+                public virtual string SkinPrefix => Function.ToString() + TrafficSidePostFix;
 
                 public HashSet<string> GetAtlasKeys => this.Skin.CreateAtlasKeyset();
 
