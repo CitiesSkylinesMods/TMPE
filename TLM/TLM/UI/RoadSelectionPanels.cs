@@ -348,8 +348,8 @@ namespace TrafficManager.UI {
             }
 
             public class ClearButtton : ButtonExt {
-                public virtual string SkinPrefix => Function.ToString(); // remove _RHT/_LHT postFix.
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
+                public override string SkinPrefix => Function.ToString(); // remove _RHT/_LHT postFix.
                 internal override FunctionModes Function => FunctionModes.Clear;
                 protected override bool IsActive() => false; // Clear funtionality can't be undone. #568
                 public override void Do() => // TODO delete all rules as part of #568
