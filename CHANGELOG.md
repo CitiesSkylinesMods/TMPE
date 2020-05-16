@@ -26,11 +26,83 @@ This changelog includes all versions and major variants of the mod going all the
 >  
 > Date format: dd/mm/yyyy
 
+#### TM:PE V[11.5.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.4.0...11.5.0) LABS, 07/05/2020
+
+- Added: Bulk customisation buttons on road info panel (#631, #691, #557, #542, #541, #539, #537)
+- Added: While toolbar visible, click road = show info panel; right-click = hide (#631, #822, #557, #29)
+- Added: Custom icons for road panel (thanks Chamelon!) (#892, #887)
+- Added: Hints for Lane Routing tools (thanks Klyte45 for color info) (#851, #587, #500, #410, #421)
+- Added: Hints for Junction Restrictions, Priority Signs, Parking/Vehicle Restrictions (#868, #720)
+- Added: Czech language translation (thanks jakubpatek, LordOrodreth) (#858)
+- Fixed: Random UI bug when `UIView.GetAView()` is `null` (#868)
+- Fixed: Toolbar can sometimes go off-screen or disappear (#877, #868, #849, #848, #819)
+- Fixed: Toolbar buttons can escape toolbar (thanks to everyone who reported) (#850, #819)
+- Fixed: Toolbar position limited to partial screen area (#819)
+- Fixed: Parking button on toolbar always looks disabled (#858)
+- Fixed: Timed Traffic Light tool doesn't reset state between uses (#880, #861, #893)
+- Fixed: Confusing icon positions for junction restriction overlay (#845, #633)
+- Fixed: Lane connector node highlights not working (thanks Xyrhenix for reporting!) (#851, #830)
+- Fixed: Lane arrow 'reset' feature sometimes doesn't work (#891, #856, #738)
+- Fixed: Mod options sliders don't update tooltip when dragged (#857, #849)
+- Fixed: Slider tooltips update from wrong thread causing CTD (#880, #879)
+- Fixed: `NetSegment.CalculateCorner()` exception for unsubbed roads (#883, #881)
+- Updated: Toolbar rewrite - scalable, auto-arrange buttons, etc (#819, #523, #437, #38)
+- Updated: Replace vanilla priority road checkbox with TMPE tools (#631, #542, #7)
+- Updated: Consistent shortcuts for tools (#437, #587)
+- Updated: Reduced call stack in game bridge, culled unused code (#852)
+- Updated: Chinese Simplified translations (TianQiBuTian) (#720, #819, #851, #858)
+- Updated: Chinese Traditional translations (jrthsr700tmax) (#720, #819, #851, #858)
+- Updated: Czech translations (jakubpatek, LordOrodreth) (#720, #819, #851, #858)
+- Updated: Dutch translations (Headspike, CaptainKlums) (#720, #819, #851, #858)
+- Updated: English translations (kvakvs, kian.zarrin) (#720, #819, #851, #858)
+- Updated: French translations (mjm92150) (#720, #819, #851, #858)
+- Updated: German translations (BanditBloodwyn, Chamëleon, eilmannhenrik) (#720, #819, #851, #858)
+- Updated: Hungarian translations (StummeH) (#720, #819, #851, #858)
+- Updated: Japanese translations (mashitaro) (#720, #819, #851, #858)
+- Updated: Polish translations (krzychu1245, Chamëleon) (#720, #819, #851, #858)
+- Updated: Russian translations (kvakvs) (#720, #819, #851, #858)
+- Updated: Turkish translations (revolter00) (#720, #819, #851, #858)
+- Updated: Ukrainian translations (kvakvs) (#720, #819, #851, #858)
+- Removed: `LogicUtil.CheckFlags()` and associated files evicted (#852)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
+
+#### TM:PE V[11.3.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.3...11.3.2) STABLE, 16/04/2020
+
+- Added: Advanced auto lane connector tool (select a node, then `Ctrl + S`) (#706, #703)
+- Fixed: Icons not showing when selecting node (thanks xenoxaos for reporting!) (#839, #838)
+- Fixed: Bug in `StartPathFind()` if building missing (thanks ninjanoobslayer for reporting!) (#834, #840)
+- Fixed: Timed Traffic Lights bugs caused by v11.3.0 update (thanks to everyone who reported the bug!) (#828, #824)
+- Fixed: Stay-in-lane should not connect solitary lanes (#706, #617)
+- Fixed: Lane arrows UI too small on some resolutions except at junctions (#726, #571)
+- Updated: `StartPathFind()` will automatically run diagnostic logging on errors (#834)
+- Updated: Resident/Tourist status logic simplified (#837)
+- Updated: Trees Respiration mod is now compatible with TM:PE v11! (thanks Klyte45!) (#831, #614, #611, #563, #484)
+- Updated: Lane connectors: `Shift + S` changed to `Ctrl + S` (see Options > Keybinds tab) (#706)
+- Updated: Lane Arrows UI now respects UI scale slider (see Options > General tab) (#726)
+- Updated: Improved UI for lane arrows tool (#726, #571)
+- Updated: British translations (charlco, kvakvs, kian.zarrin) (#726)
+- Updated: Chinese Simplified translations (wxf26054) (#726)
+- Updated: Dutch translations (CaptainKlums) (#726)
+- Updated: English translations (kian.zarrin, kvakvs) (#726)
+- Updated: French translations (mjm92150, Stuart) (#726)
+- Updated: German translations (eilmannhenrik, BanditBloodwyn, Rodirik, Cirez) (#726)
+- Updated: Hungarian translations (szekely.david9) (#726)
+- Updated: Italian translations (emiliomacchione, DelvecchioSimone) (#726)
+- Updated: Korean translations (TwotoolusFLY_LSh.s, neinnew) (#726)
+- Updated: Polish translations (krzychu1245, dom.kawula)
+- Updated: Portuguese translations (BS_BlackScout) (#726)
+- Updated: Russian translations (kvakvs) (#726)
+- Updated: Turkish translations (revolter00, Koopr) (#726)
+- Updated: Ukranian translations (kvakvs) (#726)
+- Meta: Cumulative updates from 11.3.0, 11.3.1 and 11.3.2
+- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
+
 #### TM:PE V[11.4.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.2...11.4.0) LABS, 14/04/2020
 
 - Added: State machine for dedicated turning lanes (#755, #567)
 - Fixed: Default turning lane on wrong side (#755, #671)
 - Meta: Repeat application of turning lane shortcut will cycle through available options
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 #### TM:PE V[11.3.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.1...11.3.2) LABS, 14/04/2020
 
@@ -38,11 +110,13 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Bug in `StartPathFind()` if building missing (thanks ninjanoobslayer for reporting!) (#834, #840)
 - Updated: `StartPathFind()` will automatically run diagnostic logging on errors (#834)
 - Updated: Resident/Tourist status logic simplified (#837)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 #### TM:PE V[11.3.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.3.0...11.3.1) LABS, 11/04/2020
 
 - Fixed: Timed Traffic Lights bugs caused by v11.3.0 update (thanks to everyone who reported the bug!) (#828, #824)
 - Updated: Trees Respiration mod is now compatible with TM:PE v11! (thanks Klyte45!) (#831, #614, #611, #563, #484)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 #### TM:PE V[11.3.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.3...11.3.0) LABS, 10/04/2020
 
@@ -52,39 +126,59 @@ This changelog includes all versions and major variants of the mod going all the
 - Updated: Lane connectors: `Shift + S` changed to `Ctrl + S` (see Options > Keybinds tab) (#706)
 - Updated: Lane Arrows UI now respects UI scale slider (see Options > General tab) (#726)
 - Updated: Improved UI for lane arrows tool (#726, #571)
-- Updated: Translations (will add more info later) (#726)
+- Updated: British translations (charlco, kvakvs, kian.zarrin) (#726)
+- Updated: Chinese Simplified translations (wxf26054) (#726)
+- Updated: Dutch translations (CaptainKlums) (#726)
+- Updated: English translations (kian.zarrin, kvakvs) (#726)
+- Updated: French translations (mjm92150, Stuart) (#726)
+- Updated: German translations (eilmannhenrik, BanditBloodwyn, Rodirik, Cirez) (#726)
+- Updated: Hungarian translations (szekely.david9) (#726)
+- Updated: Italian translations (emiliomacchione, DelvecchioSimone) (#726)
+- Updated: Korean translations (TwotoolusFLY_LSh.s, neinnew) (#726)
+- Updated: Polish translations (krzychu1245, dom.kawula)
+- Updated: Portuguese translations (BS_BlackScout) (#726)
+- Updated: Russian translations (kvakvs) (#726)
+- Updated: Turkish translations (revolter00, Koopr) (#726)
+- Updated: Ukranian translations (kvakvs) (#726)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 #### TM:PE V[11.2.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.2...11.2.3) STABLE, 08/04/2020
 
 - Fixed: Unable to set default speed limits for roads that need DLCs (#821, #818)
+- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V[11.2.3](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.2...11.2.3) LABS, 08/04/2020
 
 - Fixed: Unable to set default speed limits for roads that need DLCs (#821, #818)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 #### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) STABLE, 26/03/2020
 
 - Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
 - Updated: Game version badges in readme (#806)
 - Updated: Mod version and changelogs (#816)
+- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V[11.2.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.1...11.2.2) LABS, 26/03/2020
 
 - Fixed: GetModName() when user has two mods with same assembly name/version (#812, #811)
 - Updated: Game version badges in readme (#806)
 - Updated: Mod version and changelogs (#816)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 #### TM:PE V[11.2.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.0...11.2.1) STABLE, 26/03/2020
 
 - Fixed: CustomPathManager nullpointer on exit from asset/map editor (#794)
 - Fixed: Add missing Trolleybus vehicle category (#794)
 - Fixed: CustomPathManager NullPointerException on second load (#794)
+- Steam: [TM:PE v11 STABLE](https://steamcommunity.com/sharedfiles/filedetails/?id=1637663252)
 
 #### TM:PE V[11.2.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.2.0...11.2.1) LABS, 29/03/2020
 
 - Fixed: CustomPathManager nullpointer on exit from asset/map editor (#794)
 - Fixed: Add missing Trolleybus vehicle category (#794)
 - Fixed: CustomPathManager NullPointerException on second load (#794)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 #### TM:PE V[11.2.0](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.2...11.2.0) LABS, 26/03/2020
 
@@ -112,6 +206,7 @@ This changelog includes all versions and major variants of the mod going all the
 ### TM:PE V[11.1.2](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.1-hotfix1...11.1.2) LABS, 02/03/2020
 
 - Fixed: One-click traffic lights wrong way on RHT maps, murdering pedestrians (#770, #769, #690)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 ### TM:PE V[11.1.1-hotfix1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.1...11.1.1-hotfix1) LABS, 01/03/2020
 
@@ -120,6 +215,7 @@ This changelog includes all versions and major variants of the mod going all the
 - Fixed: Info panel not closing after despawning a cim or tourist (#765)
 - Fixed: Faulty UI on tourist despawn button (#765)
 - Updated: Docs - Reference paths for EA Origin deployed game (thanks DannyDannyDan) ( #751)
+- Steam: [TM:PE v11 LABS](https://steamcommunity.com/sharedfiles/filedetails/?id=1806963141)
 
 ### TM:PE V[11.1.1](https://github.com/CitiesSkylinesMods/TMPE/compare/11.1.0...11.1.1) LABS, 29/02/2020
 
