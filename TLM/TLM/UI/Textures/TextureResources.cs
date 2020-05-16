@@ -32,7 +32,7 @@ namespace TrafficManager.UI.Textures {
 
                 return texture;
             } catch (Exception e) {
-                Log.Error(e.StackTrace.ToString());
+                Log.Error($"failed loading {resourceName} " + e);
                 return null;
             }
         }
