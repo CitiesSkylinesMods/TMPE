@@ -52,7 +52,7 @@ Recent updates:
 - Fixed: Toolbar buttons can escape toolbar (thanks to everyone who reported) (#850, #819)
 - Fixed: Toolbar position limited to partial screen area (#819)
 - Fixed: Parking button on toolbar always looks disabled (#858)
-- Fixed: Timed Traffic Light tool doesn't reset state between uses (#880, #861)
+- Fixed: Timed Traffic Light tool doesn't reset state between uses (#880, #861, #893)
 - Fixed: Confusing icon positions for junction restriction overlay (#845, #633)
 - Fixed: Lane connector node highlights not working (thanks Xyrhenix for reporting!) (#851, #830)
 - Fixed: Lane arrow 'reset' feature sometimes doesn't work (#891, #856, #738)
