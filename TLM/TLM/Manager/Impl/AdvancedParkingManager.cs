@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework.Globalization;
     using ColossalFramework.Math;
     using ColossalFramework;
@@ -16,15 +16,23 @@
     using TrafficManager.UI;
     using TrafficManager.Util;
     using UnityEngine;
+    using System.Linq;
 
     public class AdvancedParkingManager
         : AbstractFeatureManager,
           IAdvancedParkingManager
     {
-        public static AdvancedParkingManager Instance { get; }
+        private readonly Vector2[] _spiralGridCoordsCache;
 
-        static AdvancedParkingManager() {
-            Instance = new AdvancedParkingManager();
+        public static readonly AdvancedParkingManager Instance = new AdvancedParkingManager();
+
+        public AdvancedParkingManager() {
+            var radius = Math.Max(
+                1,
+                (int)(GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding / (BuildingManager.BUILDINGGRID_CELL_SIZE / 2f)) + 1
+            );
+
+            _spiralGridCoordsCache = LoopUtil.GenerateSpiralGridCoordsClockwise(radius).ToArray();
         }
 
         protected override void OnDisableFeatureInternal() {
@@ -2460,7 +2468,12 @@
                 return true;
             }
 
-            LoopUtil.SpiralLoop(centerI, centerJ, radius, radius, LoopHandler);
+            for (int i = 0; i < _spiralGridCoordsCache.Length; i++) {
+                var coords = _spiralGridCoordsCache[i];
+                if (!LoopHandler((int)(centerI + coords.x), (int)(centerJ + coords.y))) {
+                    break;
+                }
+            }
 
             if (foundSegmentId == 0) {
                 Log._DebugIf(
@@ -2565,7 +2578,12 @@
                 return true;
             }
 
-            LoopUtil.SpiralLoop(centerI, centerJ, radius, radius, LoopHandler);
+            for (int i = 0; i < _spiralGridCoordsCache.Length; i++) {
+                var coords = _spiralGridCoordsCache[i];
+                if (!LoopHandler((int)(centerI + coords.x), (int)(centerJ + coords.y))) {
+                    break;
+                }
+            }
 
             if (foundBuildingId == 0) {
                 Log._DebugIf(
