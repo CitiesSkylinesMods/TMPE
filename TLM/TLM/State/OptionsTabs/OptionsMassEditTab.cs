@@ -39,8 +39,8 @@ namespace TrafficManager.State {
 
         public static CheckboxOption RoundAboutQuickFix_KeepClearYieldR =
             new CheckboxOption("RoundAboutQuickFix_KeepClearYieldR") {
-            Label = "Roundabout.Option:Keep clear of roundabout for yield road",
-            Tooltip = "Roundabout.Tooltip:Keep clear of roundabout for yield road",
+            Label = "Roundabout.Option:Yielding vehicles keep clear of blocked roundabout",
+            Tooltip = "Roundabout.Tooltip:Yielding vehicles keep clear of blocked roundabout",
         };
 
         public static CheckboxOption RoundAboutQuickFix_RealisticSpeedLimits =

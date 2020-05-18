@@ -153,8 +153,8 @@ Fichier: TM: PE - Options du Mod","","","","","Verlaat segment","Odznacz wybrany
 "Keybind.RightClick:Leave lane","","Leave selected lane","","LienClé. Clic droit : Quitter la voie de circulation ou d'intersection
 Laisser la voie de circulation ou d'intersection sélectionnée
 Fichier: TM: PE - Options du Mod","","","選択した車線をそのままにする","","","Odznacz wybrany pas","","Покинуть режим редактирования полосы","","","Leave selected lane","","Залишити обрану смугу руху","Opustit pruh","",""
-"Roundabout.Option:Keep clear of roundabout for yield road","","Keep clear of roundabout on yield roads","","","","","","","","","","","","","Keep clear of roundabout on yield roads","","","","",""
-"Roundabout.Tooltip:Keep clear of roundabout for yield road","","If enabled, cars entering the roundabout will not enter roundabout when blocked to avoid getting in the way of cars inside of the roundabout.
+"Roundabout.Option:Yielding vehicles keep clear of blocked roundabout","Kreisverkehr freihalten und Vorfahrt gewähren","Yielding vehicles keep clear of blocked roundabout","","Rond-point. Option : Au rond-point, restez à l'écart pour céder le passage","","","非優先道路の迂回路を避ける","","","","","","","","Yielding vehicles keep clear of blocked roundabout","","","","",""
+"Roundabout.Tooltip:Yielding vehicles keep clear of blocked roundabout","Der Einfahrtsbereich in den Kreisverkehr wird freigehalten und die Fahrzeuge im Kreisverkehr haben Vorfahrt","If enabled, cars entering the roundabout will not enter blocked roundabout to avoid getting in the way of cars inside of the roundabout.
 If disabled, traffic rule is untouched","","","","","","","","","","","","","If enabled, cars entering the roundabout will not enter roundabout when blocked to avoid getting in the way of cars inside of the roundabout.
 If disabled, traffic rule is untouched","","","","",""
 "Roundabout.Option:Assign realistic speed limits to roundabouts","","Assign realistic speed limits to roundabouts","","","","","","","","","","","","","Assign realistic speed limits to roundabouts","","","","",""
