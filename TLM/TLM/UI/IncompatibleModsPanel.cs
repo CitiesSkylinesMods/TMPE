@@ -9,7 +9,6 @@ namespace TrafficManager.UI {
     using System;
     using TrafficManager.State;
     using UnityEngine;
-    using LifeCycle;
 
     public class IncompatibleModsPanel : UIPanel {
         private const ulong LOCAL_MOD = ulong.MaxValue;

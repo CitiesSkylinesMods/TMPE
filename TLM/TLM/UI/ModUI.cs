@@ -5,7 +5,6 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.MainMenu;
     using TrafficManager.Util;
     using UnityEngine;
-    using TrafficManager.LifeCycle;
 
     /// <summary>
     /// Globally available UI manager class which contains the main menu button and the panel.

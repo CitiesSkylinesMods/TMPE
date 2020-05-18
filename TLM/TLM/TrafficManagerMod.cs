@@ -1,4 +1,4 @@
-namespace TrafficManager.LifeCycle {
+namespace TrafficManager {
     using ColossalFramework.Globalization;
     using ColossalFramework.UI;
     using CSUtil.Commons;

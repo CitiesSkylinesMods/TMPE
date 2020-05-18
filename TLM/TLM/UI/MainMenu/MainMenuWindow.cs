@@ -16,7 +16,6 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.U.Panel;
     using TrafficManager.UI.MainMenu.OSD;
     using UnityEngine;
-    using TrafficManager.LifeCycle;
 
     public class MainMenuWindow
         : U.Panel.BaseUWindowPanel,

@@ -5,7 +5,6 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State;
     using TrafficManager.UI.Helpers;
-    using TrafficManager.LifeCycle;
 
     public class OptionsManager
         : AbstractCustomManager,

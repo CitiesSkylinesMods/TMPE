@@ -7,8 +7,6 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.State;
     using UnityEngine;
-    using TrafficManager.LifeCycle;
-
 
     public class UtilityManager : AbstractCustomManager, IUtilityManager {
         public static UtilityManager Instance { get; }

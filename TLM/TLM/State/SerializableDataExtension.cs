@@ -1,4 +1,4 @@
-namespace TrafficManager.LifeCycle {
+namespace TrafficManager {
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
