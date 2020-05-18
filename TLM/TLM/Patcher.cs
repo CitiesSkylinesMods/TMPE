@@ -1,14 +1,12 @@
 namespace TrafficManager {
-    using ColossalFramework.UI;
     using ColossalFramework;
+    using ColossalFramework.UI;
     using CSUtil.Commons;
     using HarmonyLib;
+    using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using System;
-
     using TrafficManager.RedirectionFramework;
-
     using TrafficManager.Util;
 
     public class Patcher {
