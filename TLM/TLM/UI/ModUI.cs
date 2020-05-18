@@ -126,9 +126,10 @@ namespace TrafficManager.UI {
 
         public void ToggleMainMenu() {
             if (IsVisible()) {
-                Close();
+                CloseMainMenu();
             } else {
-                Show();
+                ShowMainMenu();
+                GetTrafficManagerTool().RequestOnscreenDisplayUpdate();
             }
         }
 
@@ -137,7 +138,7 @@ namespace TrafficManager.UI {
         /// which might require rebuilding the main menu buttons.
         /// </summary>
         internal void RebuildMenu() {
-            Close();
+            CloseMainMenu();
 
             if (MainMenu != null) {
                 CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
@@ -162,7 +163,7 @@ namespace TrafficManager.UI {
 #endif
         }
 
-        public void Show() {
+        public void ShowMainMenu() {
             try {
                 ToolsModifierControl.mainToolbar.CloseEverything();
             } catch (Exception e) {
@@ -183,7 +184,7 @@ namespace TrafficManager.UI {
             UIView.SetFocus(MainMenu);
         }
 
-        public void Close() {
+        public void CloseMainMenu() {
             // Before hiding the menu, shut down the active tool
             GetTrafficManagerTool(false)?.SetToolMode(UI.ToolMode.None);
 

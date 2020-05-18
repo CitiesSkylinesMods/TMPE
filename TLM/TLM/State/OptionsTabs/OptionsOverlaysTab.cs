@@ -74,12 +74,12 @@ namespace TrafficManager.State {
                                        onVehicleOverlayChanged) as UICheckBox;
             _citizenOverlayToggle = panelHelper.AddCheckbox(
                                         Translation.Options.Get("Overlay.Checkbox:Citizens"),
-                                       Options.citizenOverlay,
-                                       onCitizenOverlayChanged) as UICheckBox;
+                                        Options.citizenOverlay,
+                                        onCitizenOverlayChanged) as UICheckBox;
             _buildingOverlayToggle = panelHelper.AddCheckbox(
                                          Translation.Options.Get("Overlay.Checkbox:Buildings"),
-                                        Options.buildingOverlay,
-                                        onBuildingOverlayChanged) as UICheckBox;
+                                         Options.buildingOverlay,
+                                         onBuildingOverlayChanged) as UICheckBox;
 #endif
         }
 
@@ -93,7 +93,7 @@ namespace TrafficManager.State {
             ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
-                public static void SetTimedLightsOverlay(bool newTimedLightsOverlay) {
+        public static void SetTimedLightsOverlay(bool newTimedLightsOverlay) {
             Options.timedLightsOverlay = newTimedLightsOverlay;
 
             if (_timedLightsOverlayToggle != null) {

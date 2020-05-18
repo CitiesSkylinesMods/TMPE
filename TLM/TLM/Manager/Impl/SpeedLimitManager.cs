@@ -339,7 +339,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneValid(laneId)) {
+                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -380,7 +380,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneValid(laneId)) {
+                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -563,7 +563,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (!Services.NetService.IsLaneValid(laneId)) {
+            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                 return false;
             }
 
@@ -886,7 +886,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
             foreach (Configuration.LaneSpeedLimit laneSpeedLimit in data) {
                 try {
-                    if (!Services.NetService.IsLaneValid(laneSpeedLimit.laneId)) {
+                    if (!Services.NetService.IsLaneAndItsSegmentValid(laneSpeedLimit.laneId)) {
 #if DEBUG
                         Log._DebugIf(debugSpeedLimits, () =>
                             $"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: Lane is invalid");

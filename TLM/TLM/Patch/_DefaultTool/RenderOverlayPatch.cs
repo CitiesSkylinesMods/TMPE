@@ -2,7 +2,6 @@ namespace TrafficManager.Patch._DefaultTool {
     using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.UI;
-    using static TrafficManager.UI.SubTools.PrioritySignsTool;
 
     [HarmonyPatch(typeof(DefaultTool), "RenderOverlay")]
     [UsedImplicitly]
@@ -14,7 +13,7 @@ namespace TrafficManager.Patch._DefaultTool {
         [UsedImplicitly]
         public static void Postfix(RenderManager.CameraInfo cameraInfo) {
             if (ToolsModifierControl.toolController.CurrentTool.GetType() != typeof(TrafficManagerTool)) {
-                if (MassEditOVerlay.IsActive) {
+                if (UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                     ModUI.GetTrafficManagerTool(true).RenderOverlayImpl(cameraInfo);
                 }
                 RoadSelectionPanels.Root.RenderOverlay();

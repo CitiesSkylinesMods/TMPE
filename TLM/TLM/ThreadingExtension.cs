@@ -57,11 +57,11 @@ namespace TrafficManager {
                 TrafficManagerTool tmTool = ModUI.GetTrafficManagerTool(false);
                 if (tmTool != null && ToolsModifierControl.toolController.CurrentTool != tmTool &&
                     ModUI.Instance.IsVisible()) {
-                    ModUI.Instance.Close();
+                    ModUI.Instance.CloseMainMenu();
                 }
 
                 if (Input.GetKeyDown(KeyCode.Escape)) {
-                    ModUI.Instance.Close();
+                    ModUI.Instance.CloseMainMenu();
                 }
             } // end benchmark
         }

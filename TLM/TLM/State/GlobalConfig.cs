@@ -98,8 +98,6 @@ namespace TrafficManager.State {
                 conf.Main.GuiOpacity = oldConfig.Main.GuiOpacity;
                 conf.Main.OverlayTransparency = oldConfig.Main.OverlayTransparency;
 
-                // conf.Main.TinyMainMenu = oldConfig.Main.TinyMainMenu;
-
                 conf.Main.EnableTutorial = oldConfig.Main.EnableTutorial;
                 conf.Main.DisplayedTutorialMessages = oldConfig.Main.DisplayedTutorialMessages;
             }

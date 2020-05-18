@@ -148,7 +148,8 @@ namespace TrafficManager.UI {
 
         public virtual void Cleanup() { }
 
-        public virtual void OnActivate() { }
+        public virtual void OnActivate() {
+        }
 
         /// <summary>
         /// Renders current situation overlay, called while the tool is not active to assist
