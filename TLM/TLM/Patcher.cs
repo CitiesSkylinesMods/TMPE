@@ -11,32 +11,14 @@ namespace TrafficManager {
 
     public class Patcher {
         public static Patcher Instance { get; private set; }
+
         public static Patcher Create() => Instance = new Patcher();
 
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
 
-        public class Detour {
-            public MethodInfo OriginalMethod;
-            public MethodInfo CustomMethod;
-            public RedirectCallsState Redirect;
-
-            public Detour(MethodInfo originalMethod, MethodInfo customMethod) {
-                OriginalMethod = originalMethod;
-                CustomMethod = customMethod;
-                Redirect = RedirectionHelper.RedirectCalls(originalMethod, customMethod);
-            }
-        }
-
-        public bool initialized_ { get; private set; } = false;
-
-        /// <summary>
-        /// Method redirection states for attribute-driven detours
-        /// </summary>
-        public IDictionary<MethodInfo, RedirectCallsState> DetouredMethodStates { get; private set; } =
-            new Dictionary<MethodInfo, RedirectCallsState>();
+        private bool initialized_ = false;
 
         public void Install() {
-            // TODO realize detouring with annotations
             if (initialized_) {
                 return;
             }
@@ -65,7 +47,7 @@ namespace TrafficManager {
 
             try {
                 Log.Info("Deploying attribute-driven detours");
-                DetouredMethodStates = AssemblyRedirector.Deploy();
+                AssemblyRedirector.Deploy();
             }
             catch (Exception e) {
                 Log.Error("Could not deploy attribute-driven detours");
@@ -101,7 +83,7 @@ namespace TrafficManager {
 
             var harmony = new Harmony(HARMONY_ID);
             Shortcuts.Assert(harmony != null, "HarmonyInst!=null");
-            harmony.UnpatchAll();
+            harmony.UnpatchAll(HARMONY_ID);
 
             initialized_ = false;
             Log.Info("Reverting detours finished.");
