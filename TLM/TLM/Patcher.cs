@@ -42,7 +42,6 @@ namespace TrafficManager {
                 Log.Info(e.Message);
                 Log.Info(e.StackTrace);
                 fail = true;
-                throw e;
             }
 
             try {
