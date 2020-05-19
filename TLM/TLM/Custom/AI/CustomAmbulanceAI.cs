@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Custom.AI {
+namespace TrafficManager.Custom.AI {
     using ColossalFramework;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
@@ -12,7 +12,7 @@
     public class CustomAmbulanceAI : CarAI {
         [RedirectMethod]
         [UsedImplicitly]
-        public bool CustomStartPathFind(ushort vehicleId,
+        public static bool CustomStartPathFind(ushort vehicleId,
                                         ref Vehicle vehicleData,
                                         Vector3 startPos,
                                         Vector3 endPos,
