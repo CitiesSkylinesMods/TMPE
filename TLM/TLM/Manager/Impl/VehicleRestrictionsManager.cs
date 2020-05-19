@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using TrafficManager.Traffic;
     using TrafficManager.Util;
+    using GenericGameBridge.Service;
 
     public class VehicleRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -350,6 +351,38 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return ExtVehicleType.None;
+        }
+
+        /// <summary>
+        /// Restores all vehicle restrictions on a given segment to default state.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <returns></returns>
+        internal bool ClearVehicleRestrictions(ushort segmentId) {
+            NetInfo segmentInfo = segmentId.ToSegment().Info;
+            bool ret = false;
+            IList<LanePos> lanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+                segmentId,
+                ref segmentId.ToSegment(),
+                null,
+                LANE_TYPES,
+                VEHICLE_TYPES,
+                sort: false);
+
+            foreach (LanePos laneData in lanes) {
+                uint laneId = laneData.laneId;
+                byte laneIndex = laneData.laneIndex;
+                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+                ret |= SetAllowedVehicleTypes(
+                    segmentId,
+                    segmentInfo,
+                    laneIndex,
+                    laneInfo,
+                    laneId,
+                    EXT_VEHICLE_TYPES);
+            }
+            return ret;
         }
 
         /// <summary>

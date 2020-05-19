@@ -31,6 +31,7 @@ namespace TrafficManager.UI.Helpers {
         protected TUI _ui;
         public string Label;
         public string Tooltip;
+        public bool Indent = false;
 
         public void DefaultOnValueChanged(TVal newVal) {
             Options.IsGameLoaded();
