@@ -134,8 +134,6 @@
     <Compile Include="CodeProfiler.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Custom\AI\CustomBuildingAI.cs" />
-    <Compile Include="Custom\AI\CustomBusAI.cs" />
-    <Compile Include="Custom\AI\CustomAmbulanceAI.cs" />
     <Compile Include="Custom\AI\CustomCitizenAI.cs" />
     <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
     <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
@@ -157,11 +155,13 @@
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
-    <Compile Include="Patch\StartPathFind\AmbulanceAIPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_AmbulanceAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_BusAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
     <Compile Include="Patch\_DefaultTool\OnToolGUIPatch.cs" />
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
     <Compile Include="Patch\_NetSegment\CalculateSegmentPatch.cs" />
+    <Compile Include="Patch\_PathManager\CreatePathPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
@@ -324,6 +324,7 @@
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
     <Compile Include="Util\Caching\CameraTransformValue.cs" />
     <Compile Include="Util\Caching\GenericArrayCache.cs" />
+    <Compile Include="Util\TranspilerUtil .cs" />
     <Compile Include="Util\GenericFsm.cs" />
     <Compile Include="Util\GeometryUtil.cs" />
     <Compile Include="Util\PriorityRoad.cs" />
