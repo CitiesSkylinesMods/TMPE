@@ -1,15 +1,18 @@
 namespace TrafficManager.Util {
+    using ColossalFramework.Math;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using static UI.SubTools.LaneConnectorTool;
-    using static TrafficManager.Util.Shortcuts;
-    using System.Collections.Generic;
+    using Record;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using UnityEngine;
+    using static TrafficManager.Util.Shortcuts;
+    using static UI.SubTools.LaneConnectorTool;
 
     public class RoundaboutMassEdit {
         public static RoundaboutMassEdit Instance = new RoundaboutMassEdit();
@@ -19,7 +22,18 @@ namespace TrafficManager.Util {
 
         private List<ushort> segmentList_;
 
-        private static void FixLanesRoundabout(ushort segmentId, ushort nextSegmentId) {
+        private static void FixSegmentRoundabout(ushort segmentId, ushort nextSegmentId) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR) {
+                ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, false);
+            }
+            if (OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits) {
+                float? targetSpeed = CalculatePreferedSpeed(segmentId)?.GameUnits;
+                float defaultSpeed = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(segmentId.ToSegment().Info);
+                if (targetSpeed != null && targetSpeed < defaultSpeed) {
+                    SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Forward, targetSpeed);
+                    SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Backward, targetSpeed);
+                }
+            }
             ushort nodeId = netService.GetHeadNode(segmentId);
 
             if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR && !HasJunctionFlag(nodeId)) {
@@ -140,14 +154,24 @@ namespace TrafficManager.Util {
                 //ignore highway rules: //TODO remove as part of issue #569
                 JunctionRestrictionsManager.Instance.SetLaneChangingAllowedWhenGoingStraight(segmentId, startNode, true);
             } // endif
+
+            if (OptionsMassEditTab.RoundAboutQuickFix_KeepClearYieldR) {
+                JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
+                    segmentId,
+                    startNode,
+                    false);
+            }
+
         }
 
-        private static void FixLanesMinor(ushort segmentId, ushort nodeId) {
+        private static void FixSegmentMinor(ushort segmentId, ushort nodeId) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR) {
+                ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, false);
+            }
             int shortUnit = 4;
             int meterPerUnit = 8;
             ref NetSegment seg = ref GetSeg(segmentId);
             ushort otherNodeId = seg.GetOtherNode(nodeId);
-
             if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout &&
                 !HasJunctionFlag(otherNodeId) &&
                 seg.m_averageLength < shortUnit * meterPerUnit) {
@@ -165,7 +189,7 @@ namespace TrafficManager.Util {
                 } // end if
 
                 FixRulesMinor(segmentId, nodeId);
-                FixLanesMinor(segmentId, nodeId);
+                FixSegmentMinor(segmentId, nodeId);
             }//end for
         }
 
@@ -174,31 +198,34 @@ namespace TrafficManager.Util {
         /// </summary>
         /// <param name="segmentId"></param>
         /// <returns></returns>
-        public bool FixRoundabout(ushort initialSegmentId) {
+        public bool FixRoundabout(ushort initialSegmentId, out IRecordable record) {
             bool isRoundabout = TraverseLoop(initialSegmentId, out var segList);
             if (!isRoundabout) {
                 Log._Debug($"segment {initialSegmentId} not a roundabout.");
+                record = null;
                 return false;
             }
             int count = segList.Count;
             Log._Debug($"\n segmentId={initialSegmentId} seglist.count={count}\n");
 
-            FixRoundabout(segList);
+            record = FixRoundabout(segList);
             return true;
         }
 
-        public void FixRoundabout(List<ushort> segList) {
+        public IRecordable FixRoundabout(List<ushort> segList) {
             if (segList == null)
-                return;
+                return null;
+            IRecordable record = RecordRoundabout(segList);
             this.segmentList_ = segList;
             int count = segList.Count;
             for (int i = 0; i < count; ++i) {
                 ushort segId = segList[i];
                 ushort nextSegId = segList[(i + 1) % count];
-                FixLanesRoundabout(segId, nextSegId);
+                FixSegmentRoundabout(segId, nextSegId);
                 FixRulesRoundabout(segId);
                 FixMinor(netService.GetHeadNode(segId));
             }
+            return record;
         }
 
         /// <summary>
@@ -219,7 +246,7 @@ namespace TrafficManager.Util {
                 this.segmentList_ = new List<ushort>();
             }
             bool ret;
-            if (segmentId == 0 || ! segMan.CalculateIsOneWay(segmentId)) {
+            if (segmentId == 0 || !segMan.CalculateIsOneWay(segmentId)) {
                 ret = false;
             } else {
                 ret = TraverseAroundRecursive(segmentId);
@@ -246,7 +273,7 @@ namespace TrafficManager.Util {
                 }
                 return true;
             }
-            catch (Exception e){
+            catch (Exception e) {
                 Log.Error(e.ToString());
                 return false;
             }
@@ -257,7 +284,7 @@ namespace TrafficManager.Util {
                 return false; // too long. prune
             }
             segmentList_.Add(segmentId);
-            var segments = GetSortedSegments( segmentId);
+            var segments = GetSortedSegments(segmentId);
 
             foreach (var nextSegmentId in segments) {
                 bool isRoundabout;
@@ -286,9 +313,9 @@ namespace TrafficManager.Util {
         private static List<ushort> GetSortedSegments(ushort segmentId) {
             ushort headNodeId = netService.GetHeadNode(segmentId);
             bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
-            var list0 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Forward, !lht);
-            var list1 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Left   ,  lht);
-            var list2 = GetSortedSegmentsHelper( headNodeId, segmentId, ArrowDirection.Right  , !lht);
+            var list0 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Forward, !lht);
+            var list1 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Left, lht);
+            var list2 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Right, !lht);
 
             if (lht) {
                 list0.AddRange(list1);
@@ -337,7 +364,7 @@ namespace TrafficManager.Util {
         /// <param name="prevSegmentId"></param>
         /// <param name="headNodeId">head node for prevSegmentId</param>
         /// <returns></returns>
-        private static bool IsPartofRoundabout( ushort nextSegmentId, ushort prevSegmentId, ushort headNodeId) {
+        private static bool IsPartofRoundabout(ushort nextSegmentId, ushort prevSegmentId, ushort headNodeId) {
             bool ret = nextSegmentId != 0 && nextSegmentId != prevSegmentId;
             ret &= segMan.CalculateIsOneWay(nextSegmentId);
             ret &= headNodeId == netService.GetTailNode(nextSegmentId);
@@ -359,30 +386,67 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// Clears all rules put by RoundAboutMassEdit.FixRoundabout()
+        /// Records the state of traffic rules for all stuff affected by <c>FixRoundabout()</c>
         /// </summary>
-        public void ClearNode(ushort nodeId) {
-            PriorityRoad.ClearNode(nodeId);
-            netService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment seg) => {
-                if (!HasJunctionFlag(nodeId)) {
-                    // clear stay in lane.
-                    LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
+        /// <param name="segList"></param>
+        /// <returns></returns>
+        public static IRecordable RecordRoundabout(List<ushort> segList) {
+            TrafficRulesRecord record = new TrafficRulesRecord();
+            foreach (ushort segmentId in segList)
+                record.AddCompleteSegment(segmentId);
+
+            // Add each minor road.
+            foreach (ushort nodeId in record.NodeIDs.ToArray()) {
+                ref NetNode node = ref nodeId.ToNode();
+                if (node.CountSegments() < 3) continue;
+                for (int i = 0; i < 8; ++i) {
+                    ushort segmentId = node.GetSegment(i);
+                    if (segmentId == 0)
+                        continue;
+                    if (record.SegmentIDs.Contains(segmentId))
+                        continue;
+
+                    record.AddSegmentAndNodes(segmentId);
                 }
-                return true;
-            });
+            }
+
+            record.Record();
+            return record;
         }
 
         /// <summary>
-        /// Clears all rules put by RoundAboutMassEdit.FixRoundabout()
+        /// Calculates Raduis of a curved segment assuming it is part of a circle.
         /// </summary>
-        /// <param name="segList"></param>
-        public void ClearRoundabout(List<ushort> segList) {
-            foreach (ushort segmentId in segList) {
-                foreach (bool startNode in Constants.ALL_BOOL) {
-                    ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
-                    ClearNode(nodeId);
-                }
+        internal static float CalculateRadius(ref NetSegment segment) {
+            // TDOO: to calculate maximum curviture for eleptical roundabout, cut the bezier in 10 portions
+            // and then find the bezier with minimum raduis.
+            Vector2 startDir = VectorUtils.XZ(segment.m_startDirection);
+            Vector2 endDir = VectorUtils.XZ(segment.m_endDirection);
+            Vector2 startPos = VectorUtils.XZ(segment.m_startNode.ToNode().m_position);
+            Vector2 endPos = VectorUtils.XZ(segment.m_endNode.ToNode().m_position);
+            float dot = Vector2.Dot(startDir, -endDir);
+            float len = (startPos - endPos).magnitude;
+            float r = len / Mathf.Sqrt(2 - 2 * dot); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issuecomment-616351792
+            return r;
+        }
+
+
+        /// <summary>
+        /// calculates realisitic speed limit of input curved segment assuming it is part of a circle.
+        /// minimum speed is 10kmph.
+        /// </summary>
+        /// <returns>Null if segment is straight, otherwise if successful it retunrs calcualted speed.</returns>
+        private static SpeedValue? CalculatePreferedSpeed(ushort segmentId) {
+            float r = CalculateRadius(ref segmentId.ToSegment());
+            float kmph = 11.3f * Mathf.Sqrt(r); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issue-589462235
+            Log._Debug($"CalculatePreferedSpeed radius:{r} -> kmph:{kmph}");
+            if (float.IsNaN(kmph) || float.IsInfinity(kmph) || kmph < 1f) {
+                return null;
             }
+            if (kmph < 10f) {
+                kmph = 10f;
+            }
+            return SpeedValue.FromKmph((ushort)kmph);
         }
     } // end class
 }//end namespace

@@ -576,6 +576,19 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
+        /// Sets speed limit for all configurable lanes.
+        /// </summary>
+        /// <param name="speedLimit">Speed limit in game units, or null to restore defaults</param>
+        /// <returns><c>false</c>if there are no configurable lanes. <c>true</c> if any speed limits were applied.</returns>
+        public bool SetSpeedLimit(ushort segmentId, float? speedLimit) {
+            bool ret = false;
+            foreach(NetInfo.Direction finaldir in Enum.GetValues(typeof(NetInfo.Direction))) {
+                ret |= SetSpeedLimit(segmentId, finaldir, speedLimit);
+            }
+            return ret;
+        }
+
+        /// <summary>
         /// Sets the speed limit of a given segment and lane direction.
         /// </summary>
         /// <param name="segmentId"></param>
