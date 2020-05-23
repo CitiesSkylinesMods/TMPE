@@ -1,7 +1,6 @@
 namespace TrafficManager {
     using ColossalFramework.UI;
     using ColossalFramework;
-    using CSUtil.Commons.Benchmark;
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
@@ -127,21 +126,19 @@ namespace TrafficManager {
         public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
             base.OnUpdate(realTimeDelta, simulationTimeDelta);
 
-            using (var bm = CSUtil.Commons.Benchmark.Benchmark.MaybeCreateBenchmark()) {
-                if (ToolsModifierControl.toolController == null || ModUI.Instance == null) {
-                    return;
-                }
+            if (ToolsModifierControl.toolController == null || ModUI.Instance == null) {
+                return;
+            }
 
-                TrafficManagerTool tmTool = ModUI.GetTrafficManagerTool(false);
-                if (tmTool != null && ToolsModifierControl.toolController.CurrentTool != tmTool &&
-                    ModUI.Instance.IsVisible()) {
-                    ModUI.Instance.CloseMainMenu();
-                }
+            TrafficManagerTool tmTool = ModUI.GetTrafficManagerTool(false);
+            if (tmTool != null && ToolsModifierControl.toolController.CurrentTool != tmTool &&
+                ModUI.Instance.IsVisible()) {
+                ModUI.Instance.CloseMainMenu();
+            }
 
-                if (Input.GetKeyDown(KeyCode.Escape)) {
-                    ModUI.Instance.CloseMainMenu();
-                }
-            } // end benchmark
+            if (Input.GetKeyDown(KeyCode.Escape)) {
+                ModUI.Instance.CloseMainMenu();
+            }
         }
     } // end class
 }

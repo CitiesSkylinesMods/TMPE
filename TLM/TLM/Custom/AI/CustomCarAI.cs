@@ -3,7 +3,6 @@
 namespace TrafficManager.Custom.AI {
     using ColossalFramework.Math;
     using ColossalFramework;
-    using CSUtil.Commons.Benchmark;
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System.Diagnostics.CodeAnalysis;
@@ -469,15 +468,12 @@ namespace TrafficManager.Custom.AI {
 
             ExtVehicleType vehicleType;
 
-            using (var bm = Benchmark.MaybeCreateBenchmark(null, "OnStartPathFind")) {
-                vehicleType =
-                    ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, null);
-                if (vehicleType == ExtVehicleType.None) {
-                    Log._DebugOnlyWarning(
-                        $"CustomCarAI.CustomStartPathFind({vehicleId}): Vehicle {vehicleId} " +
-                        "does not have a valid vehicle type!");
-                    vehicleType = ExtVehicleType.RoadVehicle;
-                }
+            vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleId, ref vehicleData, null);
+            if (vehicleType == ExtVehicleType.None) {
+                Log._DebugOnlyWarning(
+                    $"CustomCarAI.CustomStartPathFind({vehicleId}): Vehicle {vehicleId} " +
+                    "does not have a valid vehicle type!");
+                vehicleType = ExtVehicleType.RoadVehicle;
             }
 
             VehicleInfo info = m_info;

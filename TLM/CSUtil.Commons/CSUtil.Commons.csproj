@@ -75,11 +75,8 @@
   <ItemGroup>
     <Compile Include="ArrowDirection.cs" />
     <Compile Include="ArrowDirectionUtil.cs" />
-    <Compile Include="Benchmark\BenchmarkProfileProvider.cs" />
     <Compile Include="EnumUtil.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="Benchmark\Benchmark.cs" />
-    <Compile Include="Benchmark\BenchmarkProfile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TernaryBool.cs" />
     <Compile Include="TernaryBoolUtil.cs" />
