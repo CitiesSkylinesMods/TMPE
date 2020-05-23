@@ -16,23 +16,23 @@ namespace TrafficManager.Benchmark {
         /// Initializes the benchmarking.
         /// </summary>
         public static void Setup() {
-            var benchmark = new BenchmarkSimulationManager();
-            SimulationManager.RegisterSimulationManager(benchmark);
-            LoadingManager.instance.m_levelUnloaded += benchmark.Stop;
+            var benchmarkSimulationManager = new BenchmarkSimulationManager();
+            SimulationManager.RegisterSimulationManager(benchmarkSimulationManager);
+            LoadingManager.instance.m_levelUnloaded += benchmarkSimulationManager.Stop;
         }
 
         private sealed class BenchmarkSimulationManager : ISimulationManager {
-            private readonly Benchmark benchmark;
+            private readonly Benchmark simulationManagerSimulationStepBenchmark;
             private bool isRunning;
 
             public BenchmarkSimulationManager() {
-                benchmark = Benchmark.Create(0x1000 * 0x100);
+                simulationManagerSimulationStepBenchmark = Benchmark.Create(0x1000 * 0x100);
                 SetupMethods();
             }
 
             public void Stop() {
-                benchmark.Stop();
-                benchmark.Dump();
+                simulationManagerSimulationStepBenchmark.Stop();
+                simulationManagerSimulationStepBenchmark.Dump();
                 isRunning = false;
                 Log.Info("Benchmarking stopped.");
             }
@@ -59,7 +59,7 @@ namespace TrafficManager.Benchmark {
 
                     try {
                         // On failure, don't try to activate benchmark on each step
-                        benchmark.Start();
+                        simulationManagerSimulationStepBenchmark.Start();
                         Log.Info("Benchmarking started.");
                     }
                     catch {
@@ -67,7 +67,7 @@ namespace TrafficManager.Benchmark {
                 }
 
                 if ((SimulationManager.instance.m_currentFrameIndex & 0xFFF) == 0xFFF) {
-                    benchmark.MakeSnapshot();
+                    simulationManagerSimulationStepBenchmark.MakeSnapshot();
                 }
             }
 
@@ -76,7 +76,7 @@ namespace TrafficManager.Benchmark {
 
             private void SetupMethods() {
                 try {
-                    benchmark.BenchmarkMethod(typeof(SimulationManager), "SimulationStep");
+                    simulationManagerSimulationStepBenchmark.BenchmarkMethod(typeof(SimulationManager), "SimulationStep");
                 }
                 catch {
                 }
