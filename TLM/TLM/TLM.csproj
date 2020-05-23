@@ -160,6 +160,7 @@
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
     <Compile Include="Patch\_DefaultTool\OnToolGUIPatch.cs" />
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
+    <Compile Include="Patch\_NetSegment\CalculateSegmentPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
@@ -291,6 +292,9 @@
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowTool.cs" />
     <Compile Include="UI\SubTools\LaneArrows\LaneArrowToolWindow.cs" />
     <Compile Include="UI\SubTools\ParkingRestrictionsTool.cs" />
+    <Compile Include="UI\SubTools\PrioritySigns\MassEditOverlay.cs" />
+    <Compile Include="UI\Helpers\TrafficRulesOverlay.cs" />
+    <Compile Include="UI\SubTools\PrioritySigns\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
@@ -310,7 +314,6 @@
     <Compile Include="UI\SubTools\LaneConnectorTool.cs" />
     <Compile Include="UI\SubTools\VehicleRestrictionsTool.cs" />
     <Compile Include="UI\SubTools\ManualTrafficLightsTool.cs" />
-    <Compile Include="UI\SubTools\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\ToggleTrafficLightsTool.cs" />
     <Compile Include="State\Options.cs" />
     <Compile Include="Manager\Impl\SpeedLimitManager.cs" />
@@ -638,6 +641,26 @@
     <EmbeddedResource Include="Resources\Clear\Clear-fg-normal.png" />
     <EmbeddedResource Include="Resources\Clear\Clear-fg-hovered.png" />
     <EmbeddedResource Include="Resources\Clear\Clear-fg-active.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-active.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-hovered.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop_LHT-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop_RHT-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop_RHT-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Yield_LHT-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Yield_LHT-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Yield_RHT-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Yield_RHT-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPriority_LHT-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPriority_LHT-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPriority_RHT-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPriority_RHT-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout_LHT-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout_LHT-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout_RHT-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout_RHT-fg-normal.png" />
+    <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop_LHT-fg-disabled.png" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
@@ -646,18 +669,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Clear-fg-disabled.png" />
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Clear-fg-normal.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPriority-fg-disabled.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\HighPriority-fg-normal.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout-fg-disabled.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout-fg-normal.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-active.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-disabled.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-hovered.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\RoundButton-bg-normal.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop-fg-disabled.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop-fg-normal.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\Yield-fg-disabled.png" />
-    <EmbeddedResource Include="Resources\RoadSelectionPanel\Yield-fg-normal.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">

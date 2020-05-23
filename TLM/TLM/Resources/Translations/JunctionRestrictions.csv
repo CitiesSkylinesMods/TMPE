@@ -1,1 +1,10 @@
-"","de","en","es","fr","hu","it","ja","ko","nl","pl","pt","ru","zh-tw","zh","en-gb","tr","uk"
+"","de","en","es","fr","hu","it","ja","ko","nl","pl","pt","ru","zh-tw","zh","en-gb","tr","uk","cz","sk","th"
+"JR.OnscreenHint.Mode:Select","Auswählen","Choose a junction to edit","","RJ. Conseil à l'écran. Mode : Sélectionnez
+S'affiche lorsque l'outil Restrictions de jonction est activé, demandant à l'utilisateur de sélectionner le nœud à modifier
+Fichier : TM: PE - Outil - Restrictions de jonction","","","","","Selecteer","Wybierz skrzyżowanie aby edytować","","Выберите перекрёсток или узел для настройки","","","Choose a junction to edit","","Оберіть перехрестя або вузол шляху","Zvolte si uzel k editaci","",""
+"JR.OnscreenHint.Reset:Reset to default","Auf Standard zurücksetzen","Revert to default","","RJ.Conseil à l'écran. Réinitialisation: Réinitialisation par défaut
+S'affiche lorsque l'outil Restrictions de jonction est en mode édition, suggérant que l'utilisateur peut supprimer les paramètres et rétablir les valeurs par défaut
+Fichier : TM: PE - Outil - Restrictions de jonction","","","","","Zet terug naar standaard","Przywróć domyślne ustawienia","","Сбросить по умолчанию","","","Revert to default","","Скинути як було до змін","Můžete smazat nastavení a obnovit tak výchozí hodnoty","",""
+"JR.OnscreenHint.Mode:Edit","","Click icons to toggle","","RJ.Conseil à l'écran. Mode : Modifier
+Description du mode d'édition à l'écran pour l'outil de Restriction de Jonction : Cliquez sur les icônes pour basculer l'interdiction. Celui-ci devient cerclé et barré en rouge et à l'inverse, il redevient cerclé en vert en re-cliquant dessus.
+Fichier: TM: PE - Outil - Restrictions de jonction","","","","","Bewerk","Kliknij wybraną ikonę aby przełączać ustawienie","","Нажимайте на значки ограничений","","","Click icons to toggle","","Натискайте знаки для зміни обмежень перехрестя","Klikněte na ikonu pro přepnutí","",""

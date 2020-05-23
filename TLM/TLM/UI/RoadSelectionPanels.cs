@@ -2,15 +2,13 @@ namespace TrafficManager.UI {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using ColossalFramework;
     using ColossalFramework.UI;
     using UnityEngine;
     using CSUtil.Commons;
     using TrafficManager.Util;
     using TrafficManager.U.Button;
     using TrafficManager.RedirectionFramework;
-    using static UI.SubTools.PrioritySignsTool;
-    using JetBrains.Annotations;
+    using TrafficManager.UI.SubTools.PrioritySigns;
 
     public class RoadSelectionPanels : MonoBehaviour {
         private const bool CREATE_NET_ADJUST_SUBPANEL = false;
@@ -71,8 +69,8 @@ namespace TrafficManager.UI {
         public void Start() {
             Root = this;
             // this code prevents a rare bug that RoadWorldInfoPanel some times does not show.
-            EnqueueAction(ModUI.Instance.Show);
-            EnqueueAction(ModUI.Instance.Close);
+            EnqueueAction(ModUI.Instance.ShowMainMenu);
+            EnqueueAction(ModUI.Instance.CloseMainMenu);
 
             panels_ = new List<PanelExt>();
 
@@ -185,7 +183,7 @@ namespace TrafficManager.UI {
 
         internal void UpdateMassEditOverlay() {
             if (ModUI.GetTrafficManagerTool().GetToolMode() == ToolMode.None) {
-                if (!MassEditOVerlay.IsActive) {
+                if (!UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                     if (ShouldShowMassEditOverlay()) {
                         ShowMassEditOverlay();
                     }
@@ -247,14 +245,14 @@ namespace TrafficManager.UI {
                 Log.Error("ModUI.GetTrafficManagerTool(true) returned null");
                 return;
             }
-            MassEditOVerlay.Show = true;
+            UI.SubTools.PrioritySigns.MassEditOverlay.Show = true;
             tmTool.SetToolMode(ToolMode.None);
             tmTool.InitializeSubTools();
             Log._Debug("Mass edit overlay enabled");
         }
 
         private void HideMassEditOverlay() {
-            MassEditOVerlay.Show = false;
+            UI.SubTools.PrioritySigns.MassEditOverlay.Show = false;
             Log._Debug("Mass edit overlay disabled");
         }
 
@@ -351,6 +349,7 @@ namespace TrafficManager.UI {
 
             public class ClearButtton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
+                public override string SkinPrefix => Function.ToString(); // remove _RHT/_LHT postFix.
                 internal override FunctionModes Function => FunctionModes.Clear;
                 protected override bool IsActive() => false; // Clear funtionality can't be undone. #568
                 public override void Do() => // TODO delete all rules as part of #568
@@ -361,17 +360,17 @@ namespace TrafficManager.UI {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
                 internal override FunctionModes Function => FunctionModes.Stop;
                 public override void Do() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainStop, Selection);
+                    PriorityRoad.FixPrioritySigns(PrioritySignsTool.PrioritySignsMassEditMode.MainStop, Selection);
                 public override void Undo() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, Selection);
+                    PriorityRoad.FixPrioritySigns(PrioritySignsTool.PrioritySignsMassEditMode.Delete, Selection);
             }
             public class YieldButton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
                 internal override FunctionModes Function => FunctionModes.Yield;
                 public override void Do() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.MainYield, Selection);
+                    PriorityRoad.FixPrioritySigns(PrioritySignsTool.PrioritySignsMassEditMode.MainYield, Selection);
                 public override void Undo() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsMassEditMode.Delete, Selection);
+                    PriorityRoad.FixPrioritySigns(PrioritySignsTool.PrioritySignsMassEditMode.Delete, Selection);
             }
             public class HighPriorityButtton : ButtonExt {
                 protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
@@ -410,7 +409,9 @@ namespace TrafficManager.UI {
 
                 public virtual  string ButtonName => "TMPE.RoadSelectionPanel" + this.GetType().ToString();
 
-                public virtual string SkinPrefix => Function.ToString();
+                private static string TrafficSidePostFix => Shortcuts.RHT ? "_RHT" : "_LHT";
+
+                public virtual string SkinPrefix => Function.ToString() + TrafficSidePostFix;
 
                 public HashSet<string> GetAtlasKeys => this.Skin.CreateAtlasKeyset();
 
@@ -464,10 +465,10 @@ namespace TrafficManager.UI {
                 public override void HandleClick(UIMouseEventParameter p) =>
                     throw new Exception("Unreachable code");
 
-                /// <summary>Handles button click on activation. Apply traffic rules here.</summary> 
+                /// <summary>Handles button click on activation. Apply traffic rules here.</summary>
                 public abstract void Do();
 
-                /// <summary>Handles button click on de-activation. Reset/Undo traffic rules here.</summary> 
+                /// <summary>Handles button click on de-activation. Reset/Undo traffic rules here.</summary>
                 public abstract void Undo();
 
                 protected override void OnClick(UIMouseEventParameter p) {
