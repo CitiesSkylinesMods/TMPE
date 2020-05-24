@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.State {
+namespace TrafficManager.State {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System.IO;

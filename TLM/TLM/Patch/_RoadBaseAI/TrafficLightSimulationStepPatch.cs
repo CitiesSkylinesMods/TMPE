@@ -1,8 +1,9 @@
-﻿namespace TrafficManager.Patch._RoadBaseAI {
+namespace TrafficManager.Patch._RoadBaseAI {
+    using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.State;
 
-    // [Harmony] Manually patched because struct references are used
+    [HarmonyPatch(typeof(TrainTrackBaseAI), nameof(TrainTrackBaseAI.LevelCrossingSimulationStep))]
     public class TrafficLightSimulationStepPatch {
         /// <summary>
         /// Decides whether the stock simulation step for traffic lights should run.

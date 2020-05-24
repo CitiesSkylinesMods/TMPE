@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.Patch._NetManager {
-    using Harmony;
+    using HarmonyLib;
     using JetBrains.Annotations;
 
     [HarmonyPatch(

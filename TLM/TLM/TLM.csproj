@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -87,12 +87,18 @@
     <MangedDLLPath Condition="!  Exists ('$(MangedDLLPath)')">..\dependencies</MangedDLLPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0TMPE.Harmony">
-      <HintPath>RedirectionFramework\lib\0TMPE.Harmony.dll</HintPath>
+    <Reference Include="0Harmony, Version=2.0.0.9, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lib.Harmony.2.0.0.9\lib\net35\0Harmony.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(MangedDLLPath)\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="CitiesHarmony.API, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CitiesHarmony.API.1.0.4\lib\net35\CitiesHarmony.API.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="ColossalManaged">
       <HintPath>$(MangedDLLPath)\ColossalManaged.dll</HintPath>
@@ -144,6 +150,7 @@
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Custom\Data\CustomVehicle.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
+    <Compile Include="Patcher.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
     <Compile Include="Manager\AbstractGeometryObservingManager.cs" />
@@ -177,7 +184,6 @@
     <Compile Include="RedirectionFramework\Attributes\RedirectReverseAttribute.cs" />
     <Compile Include="RedirectionFramework\Attributes\TargetTypeAttribute.cs" />
     <Compile Include="RedirectionFramework\Extensions\TypeExtension.cs" />
-    <Compile Include="RedirectionFramework\HarmonyUtil.cs" />
     <Compile Include="RedirectionFramework\RedirectionHelper.cs" />
     <Compile Include="RedirectionFramework\RedirectionUtil.cs" />
     <Compile Include="RedirectionFramework\Redirector.cs" />
@@ -207,7 +213,7 @@
     <Compile Include="Patch\_NetManager\FinalizeSegmentPatch.cs" />
     <Compile Include="Patch\_VehicleManager\CreateVehiclePatch.cs" />
     <Compile Include="Patch\_VehicleManager\ReleaseVehiclePatch.cs" />
-    <Compile Include="Patch\_Vehicle\UnspawnPatch.cs" />
+    <Compile Include="Patch\_Vehicle\UnspawnPatch.cs" />    
     <Compile Include="Patch\_Vehicle\SpawnPatch.cs" />
     <Compile Include="State\ConfigData\Gameplay.cs" />
     <Compile Include="State\ConfigData\DebugSettings.cs" />
@@ -693,7 +699,7 @@ xcopy /y "$(TargetDir)TMPE.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
-xcopy /y "$(TargetDir)0TMPE.Harmony.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25"
 
 rem To avoid double hot reload, TrafficManager.dll must be replaced last and fast.
 rem Once TrafficManager.dll is re-loaded, all other dlls will be reloaded as well
