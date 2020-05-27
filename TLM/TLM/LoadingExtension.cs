@@ -13,6 +13,8 @@ namespace TrafficManager {
     using TrafficManager.State;
     using TrafficManager.UI;
     using UnityEngine;
+    using SkyTools.Benchmarks;
+    using TrafficManager.Custom.AI;
     using Object = UnityEngine.Object;
 
     [UsedImplicitly]

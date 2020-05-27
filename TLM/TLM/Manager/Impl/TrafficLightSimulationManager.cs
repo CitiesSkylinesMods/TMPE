@@ -1,5 +1,4 @@
 namespace TrafficManager.Manager.Impl {
-    using CSUtil.Commons.Benchmark;
     using CSUtil.Commons;
     using ExtVehicleType = global::TrafficManager.Traffic.ExtVehicleType;
     using static RoadBaseAI;
@@ -69,12 +68,8 @@ namespace TrafficManager.Manager.Impl {
             out TrafficLightState vehicleLightState,
             out TrafficLightState pedestrianLightState)
         {
-            bool callStockMethod = true;
-            using (var bm = Benchmark.MaybeCreateBenchmark(null, "callStockMethod")) {
-                callStockMethod = !Options.timedLightsEnabled
-                                  || !Instance
-                                      .TrafficLightSimulations[nodeId].IsSimulationRunning();
-            }
+            bool callStockMethod = !Options.timedLightsEnabled
+                || !Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
 
             if (callStockMethod) {
                 RoadBaseAI.GetTrafficLightState(
@@ -84,20 +79,18 @@ namespace TrafficManager.Manager.Impl {
                     out vehicleLightState,
                     out pedestrianLightState);
             } else {
-                using (var bm = Benchmark.MaybeCreateBenchmark(null, "GetCustomTrafficLightState")) {
-                    GetCustomTrafficLightState(
+                GetCustomTrafficLightState(
 #if DEBUG
-                        vehicleId,
-                        ref vehicleData,
+                    vehicleId,
+                    ref vehicleData,
 #endif
-                        nodeId,
-                        fromSegmentId,
-                        fromLaneIndex,
-                        toSegmentId,
-                        out vehicleLightState,
-                        out pedestrianLightState,
-                        ref Instance.TrafficLightSimulations[nodeId]);
-                }
+                    nodeId,
+                    fromSegmentId,
+                    fromLaneIndex,
+                    toSegmentId,
+                    out vehicleLightState,
+                    out pedestrianLightState,
+                    ref Instance.TrafficLightSimulations[nodeId]);
             }
         }
 
@@ -117,12 +110,8 @@ namespace TrafficManager.Manager.Impl {
             out bool vehicles,
             out bool pedestrians)
         {
-            bool callStockMethod;
-
-            using (var bm = Benchmark.MaybeCreateBenchmark(null, "callStockMethod")) {
-                callStockMethod = !Options.timedLightsEnabled ||
-                                  !Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
-            }
+            bool callStockMethod = !Options.timedLightsEnabled
+                || !Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
 
             if (callStockMethod) {
                 RoadBaseAI.GetTrafficLightState(
@@ -134,20 +123,18 @@ namespace TrafficManager.Manager.Impl {
                     out vehicles,
                     out pedestrians);
             } else {
-                using (var bm = Benchmark.MaybeCreateBenchmark(null, "GetCustomTrafficLightState")) {
-                    GetCustomTrafficLightState(
+                GetCustomTrafficLightState(
 #if DEBUG
-                        vehicleId,
-                        ref vehicleData,
+                    vehicleId,
+                    ref vehicleData,
 #endif
-                        nodeId,
-                        fromSegmentId,
-                        fromLaneIndex,
-                        toSegmentId,
-                        out vehicleLightState,
-                        out pedestrianLightState,
-                        ref Instance.TrafficLightSimulations[nodeId]);
-                }
+                    nodeId,
+                    fromSegmentId,
+                    fromLaneIndex,
+                    toSegmentId,
+                    out vehicleLightState,
+                    out pedestrianLightState,
+                    ref Instance.TrafficLightSimulations[nodeId]);
 
                 vehicles = false;
                 pedestrians = false;
