@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager {
+namespace TrafficManager.Manager {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System;
@@ -128,10 +128,6 @@
                     update.replacement,
                     ref segEndMan.ExtSegmentEnds[index0]);
             }
-        }
-
-        ~AbstractGeometryObservingManager() {
-            geoUpdateUnsubscriber?.Dispose();
         }
     }
 }
