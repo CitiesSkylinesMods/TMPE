@@ -106,7 +106,7 @@ namespace TrafficManager.Manager.Impl {
             const bool logPriority = false;
 #endif
 
-            if (! Services.NetService.IsSegmentValid(segmentId)) {
+            if (!Services.NetService.IsSegmentValid(segmentId)) {
                 if (logPriority) {
                     Log._Debug(
                         $"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment " +

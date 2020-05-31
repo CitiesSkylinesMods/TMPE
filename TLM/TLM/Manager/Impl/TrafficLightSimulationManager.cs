@@ -46,7 +46,7 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug($"Traffic light simulations:");
 
             for (int i = 0; i < TrafficLightSimulations.Length; ++i) {
-                if (! TrafficLightSimulations[i].HasSimulation()) {
+                if (!TrafficLightSimulations[i].HasSimulation()) {
                     continue;
                 }
 

@@ -307,7 +307,7 @@ namespace CitiesGameBridge.Service {
                                              NetInfo.LaneType? laneTypeFilter = null,
                                              VehicleInfo.VehicleType? vehicleTypeFilter = null,
                                              bool reverse = false,
-                                             bool sort=true) {
+                                             bool sort = true) {
             // TODO refactor together with getSegmentNumVehicleLanes, especially the vehicle type and lane type checks
             NetManager netManager = Singleton<NetManager>.instance;
             var laneList = new List<LanePos>();

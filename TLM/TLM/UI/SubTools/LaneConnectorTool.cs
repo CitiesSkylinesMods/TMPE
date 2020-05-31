@@ -427,7 +427,7 @@ namespace TrafficManager.UI.SubTools {
             if (nodeId.ToNode().CountSegments() > 4)
                 return false;
             foreach (var segmentId in segments) {
-                if (segmentId!= 0 && !segMan.CalculateIsOneWay(segmentId))
+                if (segmentId != 0 && !segMan.CalculateIsOneWay(segmentId))
                     return false;
             }
             int sourceCount = segments

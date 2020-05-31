@@ -567,7 +567,7 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logLogic = false;
 #endif
-            if (! Services.NetService.IsSegmentValid(segmentId)) {
+            if (!Services.NetService.IsSegmentValid(segmentId)) {
                 return false;
             }
 
