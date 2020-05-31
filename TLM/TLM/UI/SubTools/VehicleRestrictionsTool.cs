@@ -19,12 +19,17 @@ namespace TrafficManager.UI.SubTools {
           UI.MainMenu.IOnscreenDisplayProvider
     {
         private static readonly ExtVehicleType[] RoadVehicleTypes = {
-            ExtVehicleType.PassengerCar, ExtVehicleType.Bus, ExtVehicleType.Taxi, ExtVehicleType.CargoTruck,
-            ExtVehicleType.Service, ExtVehicleType.Emergency
+            ExtVehicleType.PassengerCar,
+            ExtVehicleType.Bus,
+            ExtVehicleType.Taxi,
+            ExtVehicleType.CargoTruck,
+            ExtVehicleType.Service,
+            ExtVehicleType.Emergency,
         };
 
         private static readonly ExtVehicleType[] RailVehicleTypes = {
-            ExtVehicleType.PassengerTrain, ExtVehicleType.CargoTrain
+            ExtVehicleType.PassengerTrain,
+            ExtVehicleType.CargoTrain,
         };
 
         private readonly float vehicleRestrictionsSignSize = 80f;

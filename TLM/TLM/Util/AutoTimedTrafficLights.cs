@@ -45,7 +45,7 @@ namespace TrafficManager.Util {
         private enum GreenDir {
             AllRed,
             AllGreen,
-            ShortOnly
+            ShortOnly,
         }
 
         public enum ErrorResult {

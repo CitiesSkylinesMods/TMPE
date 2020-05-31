@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     public enum ExtPathState {
         /// <summary>
         /// No path
@@ -15,6 +15,6 @@
         /// <summary>
         /// Path-finding has failed
         /// </summary>
-        Failed = 3
+        Failed = 3,
     }
 }

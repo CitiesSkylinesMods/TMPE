@@ -1097,10 +1097,10 @@ namespace TrafficManager.UI {
                     m_netService = {
                         // find road segments
                         m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels,
-                        m_service = ItemClass.Service.Road
+                        m_service = ItemClass.Service.Road,
                     },
                     m_ignoreTerrain = true,
-                    m_ignoreSegmentFlags = NetSegment.Flags.None
+                    m_ignoreSegmentFlags = NetSegment.Flags.None,
                 };
                 // segmentInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
 

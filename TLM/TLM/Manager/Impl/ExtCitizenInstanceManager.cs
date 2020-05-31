@@ -1311,7 +1311,7 @@ namespace TrafficManager.Manager.Impl {
                     ignoreCosts = false,
                     randomParking = false,
                     stablePath = false,
-                    skipQueue = false
+                    skipQueue = false,
                 };
 
                 if (CustomPathManager._instance.CustomCreatePath(
@@ -1359,7 +1359,7 @@ namespace TrafficManager.Manager.Impl {
                         var pos = new PathUnit.Position {
                             m_segment = item.parkingPathStartPositionSegment,
                             m_lane = item.parkingPathStartPositionLane,
-                            m_offset = item.parkingPathStartPositionOffset
+                            m_offset = item.parkingPathStartPositionOffset,
                         };
                         ExtInstances[instanceId].parkingPathStartPosition = pos;
                     } else {
@@ -1400,7 +1400,7 @@ namespace TrafficManager.Manager.Impl {
                         pathMode = (int)ExtInstances[instanceId].pathMode,
                         failedParkingAttempts = ExtInstances[instanceId].failedParkingAttempts,
                         parkingSpaceLocationId = ExtInstances[instanceId].parkingSpaceLocationId,
-                        parkingSpaceLocation = (int)ExtInstances[instanceId].parkingSpaceLocation
+                        parkingSpaceLocation = (int)ExtInstances[instanceId].parkingSpaceLocation,
                     };
 
                     if (ExtInstances[instanceId].parkingPathStartPosition != null) {

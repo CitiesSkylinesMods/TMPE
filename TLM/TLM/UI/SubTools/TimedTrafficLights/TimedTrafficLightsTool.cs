@@ -1024,7 +1024,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                 GUILayout.BeginHorizontal();
                 GUIStyle style = new GUIStyle {
                                                   normal = { textColor = Color.white },
-                                                  alignment = TextAnchor.LowerLeft
+                                                  alignment = TextAnchor.LowerLeft,
                                               };
                 GUILayout.Label(
                     T("TTL.Label:Low"),

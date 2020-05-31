@@ -46,7 +46,7 @@ namespace TrafficManager.Manager.Impl {
             1u << 16, 1u << 17, 1u << 18, 1u << 19,
             1u << 20, 1u << 21, 1u << 22, 1u << 23,
             1u << 24, 1u << 25, 1u << 26, 1u << 27,
-            1u << 28, 1u << 29, 1u << 30, 1u << 31
+            1u << 28, 1u << 29, 1u << 30, 1u << 31,
         };
 
         public static readonly VehicleBehaviorManager Instance = new VehicleBehaviorManager();
@@ -913,7 +913,7 @@ namespace TrafficManager.Manager.Impl {
                     ignoreCosts = false,
                     randomParking = randomParking,
                     stablePath = false,
-                    skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0
+                    skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0,
                 };
 
                 if (CustomPathManager._instance.CustomCreatePath(

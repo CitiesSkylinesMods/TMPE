@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     /// <summary>
     /// Indicates if a private car [may]/[shall]/[must not] be used
     /// </summary>
@@ -18,6 +18,6 @@
         /// <summary>
         /// Citizens are forbidden to use their car
         /// </summary>
-        Forbidden
+        Forbidden,
     }
 }
