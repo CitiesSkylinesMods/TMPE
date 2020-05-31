@@ -126,7 +126,7 @@ namespace TrafficManager.Util {
         internal static string ToSTR(this List<LanePos> laneList) =>
             (from lanePos in laneList select lanePos.laneId).ToSTR();
 
-        internal static void AssertEq<T>(T a, T b, string m = "") where T:IComparable {
+        internal static void AssertEq<T>(T a, T b, string m = "") where T : IComparable {
             if (a.CompareTo(b) != 0) {
                 Log.Error($"Assertion failed. Expected {a} == {b} | " + m);
             }

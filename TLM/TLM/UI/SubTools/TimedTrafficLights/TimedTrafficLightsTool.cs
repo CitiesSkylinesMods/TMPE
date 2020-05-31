@@ -1468,7 +1468,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                                             liveSegmentLights.StartNode);
 
                     bool timedActive = timedNode.IsStarted();
-                    if (! timedActive) {
+                    if (!timedActive) {
                         liveSegmentLights.MakeRedOrGreen();
                     }
 

@@ -45,7 +45,7 @@ namespace TrafficManager.Util {
         /// </summary>
         public static void SetRoad(ushort segmentId, IEnumerable<ushort> segmentIDs) {
             foreach(var targetSegmentID in segmentIDs) {
-                if(targetSegmentID!= segmentId&& targetSegmentID != 0) {
+                if(targetSegmentID != segmentId && targetSegmentID != 0) {
                     CopySegmentName(segmentId, targetSegmentID);
                 }
             }

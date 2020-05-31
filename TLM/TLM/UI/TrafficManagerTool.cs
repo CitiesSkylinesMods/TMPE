@@ -350,7 +350,7 @@ namespace TrafficManager.UI {
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             RenderOverlayImpl(cameraInfo);
-            if (GetToolMode()==ToolMode.None) {
+            if (GetToolMode() == ToolMode.None) {
                 DefaultRenderOverlay(cameraInfo);
             }
         }

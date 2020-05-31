@@ -315,7 +315,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 }
 
                 // no speed limit overlay on selected segment when in vehicle restrictions mode
-                hover|= DrawSpeedLimitHandles(
+                hover |= DrawSpeedLimitHandles(
                     segmentId,
                     ref netManager.m_segments.m_buffer[segmentId],
                     viewOnly,
@@ -569,7 +569,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             foreach (SpeedValue speedLimit in allSpeedLimits) {
                 // Highlight palette item if it is very close to its float speed
-                if (currentPaletteSpeedLimit !=null &&
+                if (currentPaletteSpeedLimit != null &&
                     FloatUtil.NearlyEqual(
                         (float)currentPaletteSpeedLimit?.GameUnits,
                         speedLimit.GameUnits)) {
@@ -897,7 +897,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     GeometryUtil.CalculateSegmentCenterByDir(
                         segmentId,
                         segCenter,
-                        speedLimitSignSize*TrafficManagerTool.MAX_ZOOM);
+                        speedLimitSignSize * TrafficManagerTool.MAX_ZOOM);
                 }
 
                 foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {

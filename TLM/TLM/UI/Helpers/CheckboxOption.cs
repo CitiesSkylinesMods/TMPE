@@ -28,7 +28,7 @@ namespace TrafficManager.UI.Helpers {
                 T(Label),
                 Value,
                 this.OnValueChanged) as UICheckBox;
-            if (Tooltip!=null) {
+            if (Tooltip != null) {
                 _ui.tooltip = T(Tooltip);
             }
             if (Indent) {

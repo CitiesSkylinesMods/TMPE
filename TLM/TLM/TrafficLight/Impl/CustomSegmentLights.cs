@@ -419,7 +419,7 @@ namespace TrafficManager.TrafficLight.Impl {
             }
         }
 
-        public void CalculateAutoPedestrianLightState(ref NetNode node, bool propagate=true) {
+        public void CalculateAutoPedestrianLightState(ref NetNode node, bool propagate = true) {
 #if DEBUG
             bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
                                     && DebugSettings.NodeId == NodeId;

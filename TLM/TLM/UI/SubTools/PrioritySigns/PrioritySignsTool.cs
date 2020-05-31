@@ -25,7 +25,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
           UI.MainMenu.IOnscreenDisplayProvider
     {
         public enum PrioritySignsMassEditMode {
-            Min=0,
+            Min = 0,
             MainYield = 0,
             MainStop = 1,
             YieldMain = 2,
@@ -93,7 +93,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         TraverseDirection.AnyDirection,
                         TraverseSide.Straight,
                         SegmentStopCriterion.None,
-                        (_)=>true);
+                        (_) => true);
                     segmentList = new List<ushort>(segments);
                 }
 
@@ -299,7 +299,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 bool showRemoveButton = false;
 
                 foreach (ushort nodeId in currentPriorityNodeIds) {
-                    if (! Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                    if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
                         continue;
                     }
 

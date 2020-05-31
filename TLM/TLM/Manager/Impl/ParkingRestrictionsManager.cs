@@ -106,7 +106,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected override void HandleValidSegment(ref ExtSegment seg) {
-            if (! MayHaveParkingRestriction(seg.segmentId)) {
+            if (!MayHaveParkingRestriction(seg.segmentId)) {
                 parkingAllowed[seg.segmentId][0] = true;
                 parkingAllowed[seg.segmentId][1] = true;
             }

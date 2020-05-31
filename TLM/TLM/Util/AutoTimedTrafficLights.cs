@@ -368,7 +368,7 @@ namespace TrafficManager.Util {
                 return false;
             }
             if (nShort == 1) {
-                ushort nextSegmentId = RHT? seg.GetRightSegment(nodeId) : seg.GetLeftSegment(nodeId);
+                ushort nextSegmentId = RHT ? seg.GetRightSegment(nodeId) : seg.GetLeftSegment(nodeId);
                 return !segMan.CalculateIsOneWay(nextSegmentId);
             }
             int nForward = CountDirSegs(segmentId, nodeId, ArrowDirection.Forward);
