@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     public enum ExtPathType {
         /// <summary>
         /// Mixed path
@@ -13,6 +13,6 @@
         /// <summary>
         /// Driving path
         /// </summary>
-        DrivingOnly = 2
+        DrivingOnly = 2,
     }
 }

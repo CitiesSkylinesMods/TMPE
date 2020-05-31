@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     /// <summary>
     /// Indicates the current state while approaching a private car
     /// </summary>
@@ -18,6 +18,6 @@
         /// <summary>
         /// Citizen failed to approach their parked car
         /// </summary>
-        Failure
+        Failure,
     }
 }

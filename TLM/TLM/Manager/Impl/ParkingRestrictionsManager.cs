@@ -170,7 +170,7 @@ namespace TrafficManager.Manager.Impl {
 
                     var restr = new Configuration.ParkingRestriction((ushort)segmentId) {
                         forwardParkingAllowed = parkingAllowed[segmentId][0],
-                        backwardParkingAllowed = parkingAllowed[segmentId][1]
+                        backwardParkingAllowed = parkingAllowed[segmentId][1],
                     };
 
                     Log._Trace(

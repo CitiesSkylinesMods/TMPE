@@ -31,7 +31,7 @@ namespace TrafficManager.State {
                                 Translation.Options.Get("Gameplay.Dropdown.Option:Path Of Evil (10%)"),
                                 Translation.Options.Get("Gameplay.Dropdown.Option:Rush Hour (5%)"),
                                 Translation.Options.Get("Gameplay.Dropdown.Option:Minor Complaints (2%)"),
-                                Translation.Options.Get("Gameplay.Dropdown.Option:Holy City (0%)")
+                                Translation.Options.Get("Gameplay.Dropdown.Option:Holy City (0%)"),
                       },
                       Options.recklessDrivers,
                       OnRecklessDriversChanged) as UIDropDown;

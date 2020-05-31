@@ -12,7 +12,7 @@ namespace TrafficManager.Util {
             None = 0,
             Incoming = 1,
             Outgoing = 1 << 1,
-            AnyDirection = Incoming | Outgoing
+            AnyDirection = Incoming | Outgoing,
         }
 
         [Flags]
@@ -21,7 +21,7 @@ namespace TrafficManager.Util {
             Left = 1,
             Straight = 1 << 1,
             Right = 1 << 2,
-            AnySide = Left | Straight | Right
+            AnySide = Left | Straight | Right,
         }
 
         public delegate bool SegmentVisitor(SegmentVisitData data);

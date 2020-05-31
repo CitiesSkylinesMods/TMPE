@@ -1950,7 +1950,7 @@ namespace TrafficManager.Manager.Impl {
                         type = newTransitions[i].type,
                         distance = newTransitions[i].distance,
                         segmentId = segmentId,
-                        startNode = startNode
+                        startNode = startNode,
                     };
 
                     LaneEndForwardRoutings[sourceIndex].AddTransition(forwardTransition);

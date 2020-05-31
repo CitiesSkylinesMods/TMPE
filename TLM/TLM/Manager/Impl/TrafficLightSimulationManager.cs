@@ -770,7 +770,7 @@ namespace TrafficManager.Manager.Impl {
                     var cnfTimedLights = new Configuration.TimedTrafficLights {
                         nodeId = timedNode.NodeId,
                         nodeGroup = new List<ushort>(timedNode.NodeGroup),
-                        started = timedNode.IsStarted()
+                        started = timedNode.IsStarted(),
                     };
                     ret.Add(cnfTimedLights);
 
@@ -794,7 +794,7 @@ namespace TrafficManager.Manager.Impl {
                             maxTime = timedStep.MaxTime,
                             changeMetric = (int)timedStep.ChangeMetric,
                             waitFlowBalance = timedStep.WaitFlowBalance,
-                            segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>()
+                            segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>(),
                         };
                         cnfTimedLights.timedSteps.Add(cnfTimedStep);
 
@@ -812,7 +812,7 @@ namespace TrafficManager.Manager.Impl {
                                 segmentId = segLights.SegmentId, // TODO not needed
                                 customLights = new Dictionary<ExtVehicleType, Configuration.CustomSegmentLight>(),
                                 pedestrianLightState = segLights.PedestrianLightState,
-                                manualPedestrianMode = segLights.ManualPedestrianMode
+                                manualPedestrianMode = segLights.ManualPedestrianMode,
                             };
 
                             if (lightsNodeId == 0 || lightsNodeId != timedNode.NodeId) {
@@ -843,7 +843,7 @@ namespace TrafficManager.Manager.Impl {
                                     currentMode = (int)segLight.CurrentMode,
                                     leftLight = segLight.LightLeft,
                                     mainLight = segLight.LightMain,
-                                    rightLight = segLight.LightRight
+                                    rightLight = segLight.LightRight,
                                 };
 
                                 cnfSegLights.customLights.Add(

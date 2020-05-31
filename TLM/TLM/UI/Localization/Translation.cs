@@ -241,7 +241,7 @@ namespace TrafficManager.UI {
 
                 var key = new Locale.Key() {
                     m_Identifier = identifier,
-                    m_Key = tutorialKey
+                    m_Key = tutorialKey,
                 };
 
                 resetFun?.Invoke(locale, new object[] { key });
@@ -290,7 +290,7 @@ namespace TrafficManager.UI {
 
                 var key = new Locale.Key() {
                     m_Identifier = identifier,
-                    m_Key = guideKey
+                    m_Key = guideKey,
                 };
 
                 resetFun?.Invoke(locale, new object[] { key });
