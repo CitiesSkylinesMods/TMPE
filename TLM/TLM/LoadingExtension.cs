@@ -146,8 +146,7 @@ namespace TrafficManager {
                 Log.Info("Removing Controls from UI.");
                 if (ModUI.Instance != null) {
                     ModUI.Instance.CloseMainMenu(); // Hide the UI ASAP
-                    Object.Destroy(ModUI.Instance);
-                    ModUI.SetSingletonInstance(null);
+                    ModUI.Instance.Destroy();
                     Log._Debug("removed UIBase instance.");
                 }
             }

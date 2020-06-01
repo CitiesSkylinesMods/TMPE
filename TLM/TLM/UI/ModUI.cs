@@ -11,17 +11,8 @@ namespace TrafficManager.UI {
     /// Access via ThreadingExtension.ModUi.
     /// </summary>
     public class ModUI : UICustomControl {
-        /// <summary>Singleton storage.</summary>
-        public static ModUI instance_;
-
         /// <summary>Singleton accessor.</summary>
-        public static ModUI Instance {
-            get => instance_;
-        }
-
-        public static void SetSingletonInstance(ModUI newInstance) {
-            instance_ = newInstance;
-        }
+        public static ModUI Instance { get; private set; }
 
         /// <summary>Gets the floating draggable button which shows and hides TM:PE UI.</summary>
         public UI.MainMenu.MainMenuButton MainMenuButton { get; set; }
@@ -113,11 +104,13 @@ namespace TrafficManager.UI {
             }
         }
 
-        ~ModUI() {
+        public void Destroy() {
             Log._Debug("ModUI destructor is called.");
             Destroy(MainMenuButton);
             Destroy(MainMenu);
             ReleaseTool();
+            Instance = null;
+            Destroy(this);
         }
 
         public bool IsVisible() {
@@ -235,8 +228,9 @@ namespace TrafficManager.UI {
             Log._Debug("ModUI.OnLevelLoaded: called");
             if (ModUI.Instance == null) {
                 Log._Debug("Adding UIBase instance.");
-                ModUI.SetSingletonInstance(
-                    ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>());
+                ModUI.Instance = ToolsModifierControl.toolController
+                    .gameObject
+                    .AddComponent<ModUI>();
             }
             LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
             LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
