@@ -150,10 +150,6 @@ namespace TrafficManager {
                     ModUI.SetSingletonInstance(null);
                     Log._Debug("removed UIBase instance.");
                 }
-
-#if TRACE
-                Singleton<CodeProfiler>.instance.OnLevelUnloading();
-#endif
             }
             catch (Exception e) {
                 Log.Error("Exception unloading mod. " + e.Message);
