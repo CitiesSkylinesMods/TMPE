@@ -553,7 +553,7 @@ namespace TrafficManager.UI.SubTools {
         /// </summary>
         /// <param name="nodeId"></param>
         /// <param name="mode">determines for which side to connect lanes.</param>
-        /// <returns><c>false</c> if there is only one incomming/outgoing lane, <c>true</c> otherwise</returns>
+        /// <returns><c>true</c> if any lanes were connectde, <c>false</c> otherwise</returns>
         public static bool StayInLane(ushort nodeId, StayInLaneMode mode = StayInLaneMode.None) {
             Log._Debug($"Stay In Lane called node:{nodeId} mode:{mode}");
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
@@ -629,12 +629,12 @@ namespace TrafficManager.UI.SubTools {
 
             // count relavent source(going toward the junction) lanes and
             // target (going aginst the junction) lanes on each segment.
-            int laneCountMinorSource = minorSegmentId == 0 ? 0 : PriorityRoad.CountLanesTowardJunction(minorSegmentId, nodeId);
-            int laneCountMinorTarget = minorSegmentId == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(minorSegmentId, nodeId);
-            int laneCountMinor2Source = minorSegment2Id == 0 ? 0 : PriorityRoad.CountLanesTowardJunction(minorSegment2Id, nodeId);
-            int laneCountMinor2Target = minorSegment2Id == 0 ? 0 : PriorityRoad.CountLanesAgainstJunction(minorSegment2Id, nodeId);
-            int laneCountMainSource = PriorityRoad.CountLanesTowardJunction(mainSegmentSourceId, nodeId);
-            int laneCountMainTarget = PriorityRoad.CountLanesAgainstJunction(mainSegmentTargetId, nodeId);
+            int laneCountMinorSource = minorSegmentId == 0 ? 0 : CountLanesTowardJunction(minorSegmentId, nodeId);
+            int laneCountMinorTarget = minorSegmentId == 0 ? 0 : CountLanesAgainstJunction(minorSegmentId, nodeId);
+            int laneCountMinor2Source = minorSegment2Id == 0 ? 0 : CountLanesTowardJunction(minorSegment2Id, nodeId);
+            int laneCountMinor2Target = minorSegment2Id == 0 ? 0 : CountLanesAgainstJunction(minorSegment2Id, nodeId);
+            int laneCountMainSource = CountLanesTowardJunction(mainSegmentSourceId, nodeId);
+            int laneCountMainTarget = CountLanesAgainstJunction(mainSegmentTargetId, nodeId);
             int totalSource = laneCountMinorSource + laneCountMainSource + laneCountMinor2Source;
             int totalTarget = laneCountMinorTarget + laneCountMainTarget + laneCountMinor2Target;
 
@@ -778,6 +778,20 @@ namespace TrafficManager.UI.SubTools {
             } // foreach
             return true;
         }
+
+        private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
+            return netService.GetSortedLanes(
+                                segmentId,
+                                ref segmentId.ToSegment(),
+                                netService.IsStartNode(segmentId, nodeId) ^ (!toward),
+                                LaneConnectionManager.LANE_TYPES,
+                                LaneConnectionManager.VEHICLE_TYPES,
+                                true
+                                ).Count;
+        }
+        internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
+        internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
+
 
         public override void OnPrimaryClickOverlay() {
 #if DEBUG
