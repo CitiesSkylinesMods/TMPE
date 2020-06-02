@@ -25,9 +25,9 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.SubTools.LaneArrows;
+    using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.TimedTrafficLights;
 
-    using static TrafficManager.UI.SubTools.PrioritySignsTool;
     using static TrafficManager.Util.Shortcuts;
     using static TrafficManager.Util.SegmentTraverser;
 
@@ -260,6 +260,14 @@ namespace TrafficManager.UI {
         public void SetToolMode(ToolMode newToolMode) {
             ToolMode oldToolMode = toolMode_;
 
+            if(toolMode_ != ToolMode.None) {
+                // Make it impossible for user to undo changes performed by Road selection panels
+                // after changing traffic rule vis other tools.
+                // TODO: This code will not be necessary when we implement intent.
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
+                RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
+            }
+
             // ToolModeChanged does not count timed traffic light submodes as a same tool
             bool toolModeChanged = newToolMode != toolMode_;
 
@@ -342,7 +350,7 @@ namespace TrafficManager.UI {
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             RenderOverlayImpl(cameraInfo);
-            if (GetToolMode()==ToolMode.None) {
+            if (GetToolMode() == ToolMode.None) {
                 DefaultRenderOverlay(cameraInfo);
             }
         }
@@ -353,7 +361,7 @@ namespace TrafficManager.UI {
         /// Must not call base.RenderOverlay() . Doing so may cause infinite recursion with Postfix of base.RenderOverlay()
         /// </summary>
         public void RenderOverlayImpl(RenderManager.CameraInfo cameraInfo) {
-            if (!(isActiveAndEnabled || MassEditOVerlay.IsActive)) {
+            if (!(isActiveAndEnabled || SubTools.PrioritySigns.MassEditOverlay.IsActive)) {
                 return;
             }
 
@@ -378,7 +386,9 @@ namespace TrafficManager.UI {
         /// </summary>
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
-            MassEditOVerlay.Show = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+            SubTools.PrioritySigns.MassEditOverlay.Show
+                = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+
             NetManager.instance.NetAdjust.PathVisible =
                 RoadSelectionPanels.Root.ShouldPathBeVisible();
             if (NetManager.instance.NetAdjust.PathVisible) {
@@ -404,12 +414,13 @@ namespace TrafficManager.UI {
                 }
                 bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 if (!isRoundabout) {
-                    segmentList = SegmentTraverser.Traverse(
+                    var segments = SegmentTraverser.Traverse(
                         HoveredSegmentId,
                         TraverseDirection.AnyDirection,
                         TraverseSide.Straight,
                         SegmentStopCriterion.None,
                         (_) => true);
+                    segmentList = new List<ushort>(segmentList);
                 }
                 foreach (ushort segmentId in segmentList ?? Enumerable.Empty<ushort>()) {
                     ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
@@ -544,12 +555,13 @@ namespace TrafficManager.UI {
                 if (ReadjustPathMode) {
                     bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                     if (!isRoundabout) {
-                        segmentList = SegmentTraverser.Traverse(
+                        var segments = SegmentTraverser.Traverse(
                             HoveredSegmentId,
                             TraverseDirection.AnyDirection,
                             TraverseSide.Straight,
                             SegmentStopCriterion.None,
                             (_) => true);
+                        segmentList = new List<ushort>(segments);
                     }
                     RoadSelectionUtil.SetRoad(HoveredSegmentId, segmentList);
                 }
@@ -1085,10 +1097,10 @@ namespace TrafficManager.UI {
                     m_netService = {
                         // find road segments
                         m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels,
-                        m_service = ItemClass.Service.Road
+                        m_service = ItemClass.Service.Road,
                     },
                     m_ignoreTerrain = true,
-                    m_ignoreSegmentFlags = NetSegment.Flags.None
+                    m_ignoreSegmentFlags = NetSegment.Flags.None,
                 };
                 // segmentInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
 
@@ -1867,14 +1879,26 @@ namespace TrafficManager.UI {
             Prompt.Warning("Warning", message);
         }
 
+        /// <summary>
+        /// Called when the onscreen hint update is due. This will request the update from the
+        /// active Traffic Manager Tool, or show the default hint.
+        /// </summary>
         public void RequestOnscreenDisplayUpdate() {
             if (!GlobalConfig.Instance.Main.KeybindsPanelVisible) {
                 OnscreenDisplay.Clear();
                 return;
             }
 
-            (activeLegacySubTool_ as IOnscreenDisplayProvider)?.UpdateOnscreenDisplayPanel();
-            (activeSubTool_ as IOnscreenDisplayProvider)?.UpdateOnscreenDisplayPanel();
+            var activeLegacyOsd = activeLegacySubTool_ as IOnscreenDisplayProvider;
+            activeLegacyOsd?.UpdateOnscreenDisplayPanel();
+
+            var activeOsd = activeSubTool_ as IOnscreenDisplayProvider;
+            activeOsd?.UpdateOnscreenDisplayPanel();
+
+            if (activeOsd == null && activeLegacyOsd == null) {
+                // No tool hint support was available means we have to show the default
+                OnscreenDisplay.DisplayIdle();
+            }
         }
     }
 }

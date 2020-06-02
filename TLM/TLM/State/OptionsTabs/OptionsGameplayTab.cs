@@ -31,7 +31,7 @@ namespace TrafficManager.State {
                                 Translation.Options.Get("Gameplay.Dropdown.Option:Path Of Evil (10%)"),
                                 Translation.Options.Get("Gameplay.Dropdown.Option:Rush Hour (5%)"),
                                 Translation.Options.Get("Gameplay.Dropdown.Option:Minor Complaints (2%)"),
-                                Translation.Options.Get("Gameplay.Dropdown.Option:Holy City (0%)")
+                                Translation.Options.Get("Gameplay.Dropdown.Option:Holy City (0%)"),
                       },
                       Options.recklessDrivers,
                       OnRecklessDriversChanged) as UIDropDown;
@@ -167,6 +167,11 @@ namespace TrafficManager.State {
             _altLaneSelectionRatioSlider.tooltip =
                 Translation.Options.Get("Gameplay.Tooltip:DLS_percentage") + ": " +
                 Options.altLaneSelectionRatio + " %";
+
+            // Only call this if the game is running, not during the loading time
+            if (LoadingExtension.IsGameLoaded) {
+                _altLaneSelectionRatioSlider.RefreshTooltip();
+            }
 
             Log._Debug($"altLaneSelectionRatio changed to {Options.altLaneSelectionRatio}");
         }

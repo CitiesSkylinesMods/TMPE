@@ -12,7 +12,7 @@ namespace TrafficManager.Util {
             None = 0,
             Incoming = 1,
             Outgoing = 1 << 1,
-            AnyDirection = Incoming | Outgoing
+            AnyDirection = Incoming | Outgoing,
         }
 
         [Flags]
@@ -21,7 +21,7 @@ namespace TrafficManager.Util {
             Left = 1,
             Straight = 1 << 1,
             Right = 1 << 2,
-            AnySide = Left | Straight | Right
+            AnySide = Left | Straight | Right,
         }
 
         public delegate bool SegmentVisitor(SegmentVisitData data);
@@ -111,7 +111,7 @@ namespace TrafficManager.Util {
         ///     segment will be traversed (event the initial segment will be omitted).</param>
         /// <param name="visitorFun">Specifies the stateful visitor that should be notified as soon as
         ///     a traversable segment (which has not been traversed before) is found.</param>
-        public static List<ushort> Traverse(ushort initialSegmentId,
+        public static IEnumerable<ushort> Traverse(ushort initialSegmentId,
                                     TraverseDirection direction,
                                     TraverseSide side,
                                     SegmentStopCriterion stopCrit,
@@ -157,8 +157,9 @@ namespace TrafficManager.Util {
                     return true;
                 });
 
-            ushort endNodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(initialSegmentId,
-                                                                                    false);
+            ushort endNodeId = Constants.ServiceFactory.NetService.
+                GetSegmentNodeId(initialSegmentId,false);
+
             Constants.ServiceFactory.NetService.ProcessNode(
                 endNodeId,
                 (ushort nId, ref NetNode node) => {
@@ -177,7 +178,7 @@ namespace TrafficManager.Util {
                 });
 
             // Log._Debug($"SegmentTraverser: Traversal finished.");
-            return new List<ushort>(visitedSegmentIds);
+            return visitedSegmentIds;
         }
 
         private static void TraverseRec(ref ExtSegment prevSeg,
@@ -256,6 +257,7 @@ namespace TrafficManager.Util {
                 }
 
                 visitedSegmentIds.Add(nextSegmentId);
+
                 // Log._Debug($"SegmentTraverser: Traversing segment {nextSegmentId}");
                 ushort nextStartNodeId =
                     Constants.ServiceFactory.NetService.GetSegmentNodeId(nextSegmentId, true);

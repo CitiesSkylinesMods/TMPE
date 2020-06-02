@@ -34,6 +34,6 @@ namespace TrafficManager.API.Traffic.Enums {
         /// <summary>
         /// Reference value of maximum allowed Simulation Accuracy
         /// </summary>
-        MaxValue = 4
+        MaxValue = 4,
     }
 }

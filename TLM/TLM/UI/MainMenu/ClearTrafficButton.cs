@@ -24,7 +24,7 @@
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 
-        public override void OnClickInternal(UIMouseEventParameter p) {
+        protected override void OnClick(UIMouseEventParameter p) {
             ConfirmPanel.ShowModal(
                 Translation.Menu.Get("Tooltip:Clear traffic"),
                 Translation.Menu.Get("Dialog.Text:Clear traffic, confirmation"),
@@ -36,6 +36,7 @@
 
                     ModUI.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
                 });
+            base.OnClick(p);
         }
     }
 }

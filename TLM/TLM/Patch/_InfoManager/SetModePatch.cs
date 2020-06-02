@@ -1,7 +1,7 @@
 namespace TrafficManager.Patch._InfoManager
 {
     using ColossalFramework;
-    using Harmony;
+    using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.Util;
     using TrafficManager.UI;
@@ -20,10 +20,10 @@ namespace TrafficManager.Patch._InfoManager
                     mode == InfoMode.None ||
                     RoadSelectionUtil.IsNetAdjustMode(mode, (int)subMode);
             }
-            if (RoadSelectionUtil.IsNetAdjustMode(mode,(int)subMode))
+            if (RoadSelectionUtil.IsNetAdjustMode(mode, (int)subMode))
             {
                 // UI to be handled by Default tool
-                ModUI.instance_.Close();
+                ModUI.Instance.CloseMainMenu();
 
                 SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(delegate () {
                     DefaultTool.OpenWorldInfoPanel(

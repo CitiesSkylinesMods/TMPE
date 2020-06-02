@@ -2,11 +2,9 @@
 // #define DUMP_TRANSLATIONS
 
 namespace TrafficManager.UI.Localization {
-    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
-    using System.Linq;
     using System.Reflection;
     using System.Text;
     using CSUtil.Commons;

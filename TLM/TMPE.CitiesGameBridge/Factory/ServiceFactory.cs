@@ -1,4 +1,4 @@
-﻿namespace CitiesGameBridge.Factory {
+namespace CitiesGameBridge.Factory {
     using GenericGameBridge.Factory;
     using GenericGameBridge.Service;
 
@@ -12,8 +12,6 @@
         public ICitizenService CitizenService => Service.CitizenService.Instance;
 
         public INetService NetService => Service.NetService.Instance;
-
-        public IPathService PathService => Service.PathService.Instance;
 
         public ISimulationService SimulationService => Service.SimulationService.Instance;
 

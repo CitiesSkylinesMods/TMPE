@@ -113,24 +113,25 @@ namespace TrafficManager.UI {
         public void LoadAllTranslations() {
             CsvColumnsToLocales
                 = new Dictionary<string, string> {
-                                                     { "English", "en" }, // DEFAULT_LANGUAGE_CODE
-                                                     { "Chinese Simplified", "zh" },
-                                                     { "Chinese Traditional", "zh-tw" },
-                                                     { "Dutch", "nl" },
-                                                     { "English, United Kingdom", "en-gb" },
-                                                     { "French", "fr" },
-                                                     { "German", "de" },
-                                                     { "Hungarian", "hu" },
-                                                     { "Italian", "it" },
-                                                     { "Japanese", "ja" },
-                                                     { "Korean", "ko" },
-                                                     { "Polish", "pl" },
-                                                     { "Portuguese", "pt" },
-                                                     { "Russian", "ru" },
-                                                     { "Spanish", "es" },
-                                                     { "Turkish", "tr"},
-                                                     { "Ukrainian", "uk"}
-                                                 };
+                    { "English", "en" }, // DEFAULT_LANGUAGE_CODE
+                    { "Chinese Simplified", "zh" },
+                    { "Chinese Traditional", "zh-tw" },
+                    { "Czech", "cz" },
+                    { "Dutch", "nl" },
+                    { "English, United Kingdom", "en-gb" },
+                    { "French", "fr" },
+                    { "German", "de" },
+                    { "Hungarian", "hu" },
+                    { "Italian", "it" },
+                    { "Japanese", "ja" },
+                    { "Korean", "ko" },
+                    { "Polish", "pl" },
+                    { "Portuguese", "pt" },
+                    { "Russian", "ru" },
+                    { "Spanish", "es" },
+                    { "Turkish", "tr"},
+                    { "Ukrainian", "uk"},
+                };
             AvailableLanguageCodes = CsvColumnsToLocales.Values.ToList();
             AvailableLanguageCodes.Sort();
 
@@ -240,7 +241,7 @@ namespace TrafficManager.UI {
 
                 var key = new Locale.Key() {
                     m_Identifier = identifier,
-                    m_Key = tutorialKey
+                    m_Key = tutorialKey,
                 };
 
                 resetFun?.Invoke(locale, new object[] { key });
@@ -289,7 +290,7 @@ namespace TrafficManager.UI {
 
                 var key = new Locale.Key() {
                     m_Identifier = identifier,
-                    m_Key = guideKey
+                    m_Key = guideKey,
                 };
 
                 resetFun?.Invoke(locale, new object[] { key });

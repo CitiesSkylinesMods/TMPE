@@ -11,17 +11,8 @@ namespace TrafficManager.UI {
     /// Access via ThreadingExtension.ModUi.
     /// </summary>
     public class ModUI : UICustomControl {
-        /// <summary>Singleton storage.</summary>
-        public static ModUI instance_;
-
         /// <summary>Singleton accessor.</summary>
-        public static ModUI Instance {
-            get => instance_;
-        }
-
-        public static void SetSingletonInstance(ModUI newInstance) {
-            instance_ = newInstance;
-        }
+        public static ModUI Instance { get; private set; }
 
         /// <summary>Gets the floating draggable button which shows and hides TM:PE UI.</summary>
         public UI.MainMenu.MainMenuButton MainMenuButton { get; set; }
@@ -113,11 +104,13 @@ namespace TrafficManager.UI {
             }
         }
 
-        ~ModUI() {
+        public void Destroy() {
             Log._Debug("ModUI destructor is called.");
             Destroy(MainMenuButton);
             Destroy(MainMenu);
             ReleaseTool();
+            Instance = null;
+            Destroy(this);
         }
 
         public bool IsVisible() {
@@ -126,9 +119,10 @@ namespace TrafficManager.UI {
 
         public void ToggleMainMenu() {
             if (IsVisible()) {
-                Close();
+                CloseMainMenu();
             } else {
-                Show();
+                ShowMainMenu();
+                GetTrafficManagerTool().RequestOnscreenDisplayUpdate();
             }
         }
 
@@ -137,7 +131,7 @@ namespace TrafficManager.UI {
         /// which might require rebuilding the main menu buttons.
         /// </summary>
         internal void RebuildMenu() {
-            Close();
+            CloseMainMenu();
 
             if (MainMenu != null) {
                 CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
@@ -162,7 +156,7 @@ namespace TrafficManager.UI {
 #endif
         }
 
-        public void Show() {
+        public void ShowMainMenu() {
             try {
                 ToolsModifierControl.mainToolbar.CloseEverything();
             } catch (Exception e) {
@@ -183,7 +177,7 @@ namespace TrafficManager.UI {
             UIView.SetFocus(MainMenu);
         }
 
-        public void Close() {
+        public void CloseMainMenu() {
             // Before hiding the menu, shut down the active tool
             GetTrafficManagerTool(false)?.SetToolMode(UI.ToolMode.None);
 
@@ -234,8 +228,9 @@ namespace TrafficManager.UI {
             Log._Debug("ModUI.OnLevelLoaded: called");
             if (ModUI.Instance == null) {
                 Log._Debug("Adding UIBase instance.");
-                ModUI.SetSingletonInstance(
-                    ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>());
+                ModUI.Instance = ToolsModifierControl.toolController
+                    .gameObject
+                    .AddComponent<ModUI>();
             }
             LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
             LoadingExtension.TranslationDatabase.ReloadGuideTranslations();

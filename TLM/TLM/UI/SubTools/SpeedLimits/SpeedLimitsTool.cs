@@ -15,6 +15,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using TrafficManager.Util.Caching;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.UI.SubTools.PrioritySigns;
 
     public class SpeedLimitsTool : LegacySubTool {
         public const int
@@ -105,6 +106,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void OnActivate() {
+            base.OnActivate();
             LastCachedCamera = new CameraTransformValue();
         }
 
@@ -124,19 +126,19 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                           : 8 * (GUI_SPEED_SIGN_SIZE + 5);
 
             paletteWindowRect = GUILayout.Window(
-                254,
-                paletteWindowRect,
-                GuiSpeedLimitsWindow,
-                Translation.Menu.Get("Tooltip:Speed limits") + unitTitle,
-                WindowStyle);
+                id: 254,
+                screenRect: paletteWindowRect,
+                func: GuiSpeedLimitsWindow,
+                text: Translation.Menu.Get("Tooltip:Speed limits") + unitTitle,
+                style: WindowStyle);
 
             if (defaultsWindowVisible) {
                 defaultsWindowRect = GUILayout.Window(
-                    258,
-                    defaultsWindowRect,
-                    GuiDefaultsWindow,
-                    Translation.SpeedLimits.Get("Window.Title:Default speed limits"),
-                    WindowStyle);
+                    id: 258,
+                    screenRect: defaultsWindowRect,
+                    func: GuiDefaultsWindow,
+                    text: Translation.SpeedLimits.Get("Window.Title:Default speed limits"),
+                    style: WindowStyle);
             }
 
             cursorInSecondaryPanel = paletteWindowRect.Contains(Event.current.mousePosition)
@@ -263,7 +265,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !Options.speedLimitsOverlay) {
+            if (viewOnly && !Options.speedLimitsOverlay && !MassEditOverlay.IsActive) {
                 return;
             }
 
@@ -736,7 +738,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                            ref NetSegment segment,
                                            bool viewOnly,
                                            ref Vector3 camPos) {
-            if (viewOnly && !Options.speedLimitsOverlay) {
+            if (viewOnly && !Options.speedLimitsOverlay && !MassEditOverlay.IsActive) {
                 return false;
             }
             bool ret = false;

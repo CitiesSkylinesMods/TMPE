@@ -207,7 +207,7 @@ namespace TrafficManager.Manager.Impl {
                     var laneId = Convert.ToUInt32(split[0]);
                     uint flags = Convert.ToUInt32(split[1]);
 
-                    if (!Services.NetService.IsLaneValid(laneId))
+                    if (!Services.NetService.IsLaneAndItsSegmentValid(laneId))
                         continue;
 
                     if (flags > ushort.MaxValue)
@@ -251,7 +251,7 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneArrowData laneArrowData in data) {
                 try {
-                    if (!Services.NetService.IsLaneValid(laneArrowData.laneId)) {
+                    if (!Services.NetService.IsLaneAndItsSegmentValid(laneArrowData.laneId)) {
                         continue;
                     }
 

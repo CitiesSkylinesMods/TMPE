@@ -105,24 +105,12 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private bool MayHaveJunctionRestrictions(ushort nodeId) {
-            NetNode.Flags flags = NetNode.Flags.None;
-            Services.NetService.ProcessNode(
-                nodeId,
-                (ushort nId, ref NetNode node) => {
-                    flags = node.m_flags;
-                    return true;
-                });
-
             Log._Debug($"JunctionRestrictionsManager.MayHaveJunctionRestrictions({nodeId}): " +
-                       $"flags={(NetNode.Flags)flags}");
+                       $"flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}");
 
-            return LogicUtil.CheckFlags(
-                       (uint)flags,
-                       (uint)(NetNode.Flags.Created | NetNode.Flags.Deleted),
-                       (uint)NetNode.Flags.Created)
-                   && LogicUtil.CheckFlags(
-                       (uint)flags,
-                       (uint)(NetNode.Flags.Junction | NetNode.Flags.Bend));
+            return
+                Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Junction | NetNode.Flags.Bend)
+                && Services.NetService.IsNodeValid(nodeId);
         }
 
         public bool HasJunctionRestrictions(ushort nodeId) {
@@ -579,7 +567,7 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logLogic = false;
 #endif
-            if (! Services.NetService.IsSegmentValid(segmentId)) {
+            if (!Services.NetService.IsSegmentValid(segmentId)) {
                 return false;
             }
 

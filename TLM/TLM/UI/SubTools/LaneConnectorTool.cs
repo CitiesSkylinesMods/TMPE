@@ -1,5 +1,4 @@
 namespace TrafficManager.UI.SubTools {
-    using System;
     using ColossalFramework.Math;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -13,9 +12,9 @@ namespace TrafficManager.UI.SubTools {
     using UnityEngine;
     using TrafficManager.Util;
     using TrafficManager.UI.Helpers;
-    using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.MainMenu.OSD;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.UI.SubTools.PrioritySigns;
 
     public class LaneConnectorTool
         : LegacySubTool,
@@ -126,7 +125,7 @@ namespace TrafficManager.UI.SubTools {
                 // not too long ago (within 20 Unity frames or 0.33 sec)
             }
 
-            if (KeybindSettingsBase.LaneConnectorDelete.IsPressed(e)) {
+            if (KeybindSettingsBase.RestoreDefaultsKey.IsPressed(e)) {
                 frameClearPressed = Time.frameCount;
 
                 // this will be consumed in RenderOverlay() if the key was pressed
@@ -140,7 +139,7 @@ namespace TrafficManager.UI.SubTools {
 
         private void ShowOverlay(bool viewOnly, RenderManager.CameraInfo cameraInfo) {
             if (viewOnly && !(Options.connectedLanesOverlay ||
-                PrioritySignsTool.MassEditOVerlay.IsActive)) {
+                MassEditOverlay.IsActive)) {
                 return;
             }
 
@@ -210,14 +209,14 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 foreach (LaneEnd laneEnd in laneEnds) {
-                    if (!Constants.ServiceFactory.NetService.IsLaneValid(laneEnd.LaneId)) {
+                    if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(laneEnd.LaneId)) {
                         continue;
                     }
 
                     if (laneEnd != selectedLaneEnd) {
                         foreach (LaneEnd targetLaneEnd in laneEnd.ConnectedLaneEnds) {
                             // render lane connection from laneEnd to targetLaneEnd
-                            if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneEnd.LaneId)) {
+                            if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
                                 continue;
                             }
 
@@ -277,7 +276,7 @@ namespace TrafficManager.UI.SubTools {
                         // lane curves for selectedMarker will be drawn last to
                         // be on the top of other lane markers.
                         foreach (LaneEnd targetLaneEnd in selectedLaneEnd.ConnectedLaneEnds) {
-                            if (!Constants.ServiceFactory.NetService.IsLaneValid(targetLaneEnd.LaneId)) {
+                            if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
                                 continue;
                             }
 
@@ -428,7 +427,7 @@ namespace TrafficManager.UI.SubTools {
             if (nodeId.ToNode().CountSegments() > 4)
                 return false;
             foreach (var segmentId in segments) {
-                if (segmentId!= 0 && !segMan.CalculateIsOneWay(segmentId))
+                if (segmentId != 0 && !segMan.CalculateIsOneWay(segmentId))
                     return false;
             }
             int sourceCount = segments
@@ -956,6 +955,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnActivate() {
+            base.OnActivate();
 #if DEBUG
             bool logLaneConn = DebugSwitch.LaneConnections.Get();
             if (logLaneConn) {
@@ -1017,7 +1017,7 @@ namespace TrafficManager.UI.SubTools {
             base.Initialize();
             Cleanup();
             if (Options.connectedLanesOverlay ||
-                PrioritySignsTool.MassEditOVerlay.IsActive) {
+                MassEditOverlay.IsActive) {
                 RefreshCurrentNodeMarkers();
             } else {
                 currentLaneEnds.Clear();
@@ -1326,41 +1326,36 @@ namespace TrafficManager.UI.SubTools {
                   new Color32(99, 75, 85, 255),
             };
 
-        private static string T(string key) {
-            return Translation.LaneRouting.Get(key);
-        }
+        private static string T(string key) => Translation.LaneRouting.Get(key);
 
+        /// <inheritdoc/>
         public void UpdateOnscreenDisplayPanel() {
             SelectionMode m = GetSelectionMode();
 
             switch (m) {
-                // TODO: uncomment this when state machine is properly implemented and right click cancels the mode
                 case SelectionMode.None: {
                     var items = new List<OsdItem>();
-                    items.Add(
-                        new MainMenu.OSD.ModeDescription(
-                            T("LaneArrows.Mode.Select:Select a junction to edit")));
+                    items.Add(new ModeDescription(localizedText: T("LaneConnector.Mode:Select")));
                     OnscreenDisplay.Display(items);
                     return;
                 }
                 case SelectionMode.SelectTarget:
                 case SelectionMode.SelectSource: {
                     var items = new List<OsdItem>();
-                    items.Add(
-                        new MainMenu.OSD.ModeDescription(
-                            m == SelectionMode.SelectSource
-                                ? T("LaneConnector.Mode.Source:Click outgoing lane")
-                                : T("LaneConnector.Mode.Source:Click incoming lane to connect")));
-                    items.Add(
-                        new MainMenu.OSD.Shortcut(
-                            keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
-                            localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
-                    items.Add(
-                        new MainMenu.OSD.Shortcut(
-                            keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
-                            localizedText: T("LaneConnector.Label:Reset to default")));
+                    items.Add(new ModeDescription(
+                                  m == SelectionMode.SelectSource
+                                      ? T("LaneConnector.Mode:Source")
+                                      : T("LaneConnector.Mode:Target")));
+                    items.Add(new Shortcut(
+                                  keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
+                                  localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
+                    items.Add(new Shortcut(
+                                  keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
+                                  localizedText: T("LaneConnector.Label:Reset to default")));
 
-                    items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                    items.Add(m == SelectionMode.SelectSource
+                                  ? OnscreenDisplay.RightClick_LeaveNode()
+                                  : OnscreenDisplay.RightClick_LeaveLane());
                     OnscreenDisplay.Display(items);
                     return;
                 }

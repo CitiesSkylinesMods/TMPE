@@ -38,7 +38,7 @@ namespace GenericGameBridge.Service {
     public enum ClockDirection {
         None,
         Clockwise,
-        CounterClockwise
+        CounterClockwise,
     }
 
     public interface INetService {
@@ -85,7 +85,7 @@ namespace GenericGameBridge.Service {
                                       bool reverse = false,
                                       bool sort = true);
 
-        bool IsLaneValid(uint laneId);
+        bool IsLaneAndItsSegmentValid(uint laneId);
 
         bool IsNodeValid(ushort nodeId);
 
@@ -103,15 +103,9 @@ namespace GenericGameBridge.Service {
 
         void ProcessLane(uint laneId, NetLaneHandler handler);
 
-        void ProcessLane(uint laneId, ref NetLane lane, NetLaneHandler handler);
-
         void ProcessNode(ushort nodeId, NetNodeHandler handler);
 
-        void ProcessNode(ushort nodeId, ref NetNode node, NetNodeHandler handler);
-
         void ProcessSegment(ushort segmentId, NetSegmentHandler handler);
-
-        void ProcessSegment(ushort segmentId, ref NetSegment segment, NetSegmentHandler handler);
 
         void PublishSegmentChanges(ushort segmentId);
 

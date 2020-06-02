@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using TrafficManager.Traffic;
     using TrafficManager.Util;
+    using GenericGameBridge.Service;
 
     public class VehicleRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -353,6 +354,38 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
+        /// Restores all vehicle restrictions on a given segment to default state.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <returns></returns>
+        internal bool ClearVehicleRestrictions(ushort segmentId) {
+            NetInfo segmentInfo = segmentId.ToSegment().Info;
+            bool ret = false;
+            IList<LanePos> lanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+                segmentId,
+                ref segmentId.ToSegment(),
+                null,
+                LANE_TYPES,
+                VEHICLE_TYPES,
+                sort: false);
+
+            foreach (LanePos laneData in lanes) {
+                uint laneId = laneData.laneId;
+                byte laneIndex = laneData.laneIndex;
+                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+
+                ret |= SetAllowedVehicleTypes(
+                    segmentId,
+                    segmentInfo,
+                    laneIndex,
+                    laneInfo,
+                    laneId,
+                    EXT_VEHICLE_TYPES);
+            }
+            return ret;
+        }
+
+        /// <summary>
         /// Sets the allowed vehicle types for the given segment and lane.
         /// </summary>
         /// <param name="segmentId"></param>
@@ -366,7 +399,7 @@ namespace TrafficManager.Manager.Impl {
                                              NetInfo.Lane laneInfo,
                                              uint laneId,
                                              ExtVehicleType allowedTypes) {
-            if (!Services.NetService.IsLaneValid(laneId)) {
+            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                 return false;
             }
 
@@ -408,7 +441,7 @@ namespace TrafficManager.Manager.Impl {
                                    uint laneId,
                                    NetInfo.Lane laneInfo,
                                    ExtVehicleType vehicleType) {
-            if (!Services.NetService.IsLaneValid(laneId)) {
+            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                 return;
             }
 
@@ -451,7 +484,7 @@ namespace TrafficManager.Manager.Impl {
                                       uint laneId,
                                       NetInfo.Lane laneInfo,
                                       ExtVehicleType vehicleType) {
-            if (!Services.NetService.IsLaneValid(laneId)) {
+            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                 return;
             }
 
@@ -765,7 +798,7 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneVehicleTypes laneVehicleTypes in data) {
                 try {
-                    if (!Services.NetService.IsLaneValid(laneVehicleTypes.laneId))
+                    if (!Services.NetService.IsLaneAndItsSegmentValid(laneVehicleTypes.laneId))
                         continue;
 
                     ExtVehicleType baseMask = GetBaseMask(

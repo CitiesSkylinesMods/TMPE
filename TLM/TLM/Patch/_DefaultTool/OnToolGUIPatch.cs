@@ -1,9 +1,8 @@
 namespace TrafficManager.Patch._DefaultTool {
-    using Harmony;
+    using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.UI;
     using UnityEngine;
-    using static TrafficManager.UI.SubTools.PrioritySignsTool;
 
     [HarmonyPatch(typeof(DefaultTool), "OnToolGUI")]
     [UsedImplicitly]
@@ -15,7 +14,7 @@ namespace TrafficManager.Patch._DefaultTool {
         [UsedImplicitly]
         public static void Postfix(Event e) {
             if(ToolsModifierControl.toolController.CurrentTool.GetType() != typeof(TrafficManagerTool)) {
-                if (MassEditOVerlay.IsActive) {
+                if (UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                     ModUI.GetTrafficManagerTool(true).OnToolGUIImpl(e);
                 }
             }

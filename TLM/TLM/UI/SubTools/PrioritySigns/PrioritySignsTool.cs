@@ -1,29 +1,56 @@
-namespace TrafficManager.UI.SubTools {
+namespace TrafficManager.UI.SubTools.PrioritySigns {
+    using System;
+    using System.Collections.Generic;
     using ColossalFramework;
     using CSUtil.Commons;
     using static Util.SegmentTraverser;
     using System.Collections.Generic;
     using System;
+    using ColossalFramework.UI;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Util.Record;
+    using static Util.Shortcuts;
+    using static TrafficManager.Util.SegmentTraverser;
 
-    public class PrioritySignsTool : LegacySubTool {
+    public class PrioritySignsTool
+        : LegacySubTool,
+          UI.MainMenu.IOnscreenDisplayProvider
+    {
         public enum PrioritySignsMassEditMode {
+            Min = 0,
             MainYield = 0,
             MainStop = 1,
             YieldMain = 2,
             StopMain = 3,
-            Delete = 4,
+            Undo = 4,
+            Max = 4,
+        }
+
+        IRecordable record_;
+
+        enum ModifyMode {
+            None,
+            PriorityRoad,
+            HighPriorityRoad,
+            HighPriorityJunction,
+            Roundabout,
+        }
+        static class PrevHoveredState {
+            public static ushort SegmentId;
+            public static ushort NodeId;
+            public static ModifyMode Mode;
         }
 
         private readonly HashSet<ushort> currentPriorityNodeIds;
-        private PrioritySignsMassEditMode massEditMode = PrioritySignsMassEditMode.MainYield;
+        private PrioritySignsMassEditMode massEditMode = PrioritySignsMassEditMode.Min;
 
         public PrioritySignsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -31,49 +58,47 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnPrimaryClickOverlay() {
-            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-            if(ctrlDown || shiftDown) {
+            if(ControlIsPressed || ShiftIsPressed) {
                 if (HoveredSegmentId == 0) {
                     return;
                 }
                 SelectedNodeId = 0;
+                MainTool.RequestOnscreenDisplayUpdate();
             }
 
-            // TODO provide revert/clear mode issue #568
-            if (ctrlDown && shiftDown) {
+            if(massEditMode == PrioritySignsMassEditMode.Undo) {
+                record_?.Restore();
+            }
+            else if (ControlIsPressed && ShiftIsPressed) {
                 Log.Info("Before FixRoundabout/FixRoad."); // log time for benchmarking.
-                bool isRoundabout = RoundaboutMassEdit.Instance.FixRoundabout(HoveredSegmentId);
+                bool isRoundabout = RoundaboutMassEdit.Instance.FixRoundabout(
+                    HoveredSegmentId, out record_);
                 if (!isRoundabout) {
-                    PriorityRoad.FixRoad(HoveredSegmentId);
+                    record_ = PriorityRoad.FixRoad(HoveredSegmentId);
                 }
+                // TODO: benchmark why bulk setup takes a long time. 
                 Log.Info("After FixRoundabout/FixRoad. Before RefreshMassEditOverlay"); // log time for benchmarking.
                 RefreshMassEditOverlay();
                 Log.Info("After RefreshMassEditOverlay."); // log time for benchmarking.
-                return;
-            } else if (ctrlDown) {
+            } else if (ControlIsPressed) {
+                record_ = new TrafficRulesRecord();
+                (record_ as TrafficRulesRecord).AddNodeAndSegmentEnds(HoveredNodeId);
                 PriorityRoad.FixHighPriorityJunction(HoveredNodeId);
-                RefreshMassEditOverlay();
-                return;
             }
-            if (shiftDown) {
+            else if (ShiftIsPressed) {
                 bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 if (!isRoundabout) {
-                    segmentList = SegmentTraverser.Traverse(
+                    var segments = SegmentTraverser.Traverse(
                         HoveredSegmentId,
                         TraverseDirection.AnyDirection,
                         TraverseSide.Straight,
                         SegmentStopCriterion.None,
-                        (_)=>true);
+                        (_) => true);
+                    segmentList = new List<ushort>(segments);
                 }
 
-                PriorityRoad.FixPrioritySigns(massEditMode,segmentList);
-
-                // cycle mass edit mode
-                massEditMode =
-                    (PrioritySignsMassEditMode)(((int)massEditMode + 1) %
-                                                Enum.GetValues(typeof(PrioritySignsMassEditMode))
-                                                    .GetLength(0));
+                PriorityRoad.FixPrioritySigns(massEditMode, segmentList);
+                record_ = null;
             } else {
                 if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
                     return;
@@ -84,69 +109,31 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 SelectedNodeId = HoveredNodeId;
-                Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
+                MainTool.RequestOnscreenDisplayUpdate();
+                // Log._Debug($"PrioritySignsTool.OnPrimaryClickOverlay: SelectedNodeId={SelectedNodeId}");
             }
 
-            // update priority node cache
-            RefreshCurrentPriorityNodeIds();
+            // cycle mass edit mode
+            if (ControlIsPressed) {
+                massEditMode =
+                    massEditMode != PrioritySignsMassEditMode.MainYield ?
+                    PrioritySignsMassEditMode.MainYield :
+                    PrioritySignsMassEditMode.Undo;
+            } else if (ShiftIsPressed) {
+                massEditMode++;
+                if (massEditMode > PrioritySignsMassEditMode.Max) {
+                    massEditMode = PrioritySignsMassEditMode.Min;
+                }
+            }
+            
+            // refresh cache
+            if(ControlIsPressed)
+                RefreshMassEditOverlay();
+            else
+                RefreshCurrentPriorityNodeIds();
         }
 
         public override void OnToolGUI(Event e) { }
-
-        /// <summary>
-        /// Thread safe handling of mass edit overlay.
-        /// </summary>
-        public static class MassEditOVerlay {
-            private static object _lock = new object();
-
-            private static bool _show = false;
-            public static bool Show {
-                set {
-                    lock (_lock) {
-                        _show = value;
-                    }
-                }
-            }
-
-            private static DateTime _timer = DateTime.MinValue;
-
-            /// <summary>
-            /// show mass edit over lay for the input duration.
-            /// overrides MassEditOVerlay.Show when it is set to a UTC time in future.
-            /// seconds is
-            /// seconds is
-            /// </summary>
-            /// <param name="seconds"> duration.
-            /// negative => never
-            /// float.MaxValue => always
-            /// </param>
-            public static void SetTimer(float seconds) {
-                DateTime dt;
-                if (seconds == float.MaxValue) {
-                    dt = DateTime.MaxValue;
-                } else {
-                    dt = DateTime.UtcNow + TimeSpan.FromSeconds(seconds);
-                }
-                lock (_lock) {
-                    _timer = dt;
-                }
-            }
-
-            /// <summary>
-            /// show overlay for other subtools influced by mass edit.
-            /// </summary>
-            public static bool IsActive {
-                get {
-                    bool show;
-                    DateTime timer;
-                    lock (_lock) {
-                        show = _show;
-                        timer = _timer;
-                    }
-                    return show || DateTime.UtcNow < timer;
-                }
-            }
-        }
 
         /// <summary>
         /// refreshes all subtools incflucned by mass edit.
@@ -159,14 +146,14 @@ namespace TrafficManager.UI.SubTools {
             // that something is happening.
             // this is also to make sure overlay is refresshed
             // even when the user lets go of the mass edit overlay hotkey.
-            MassEditOVerlay.SetTimer(float.MaxValue);
+            MassEditOverlay.SetTimer(float.MaxValue);
 
             ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
             RefreshCurrentPriorityNodeIds();
 
             // keep active for one more second so that the user
             // has a chance to see the new traffic rules.
-            MassEditOVerlay.SetTimer(1);
+            MassEditOverlay.SetTimer(1);
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -174,23 +161,16 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            bool ctrlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            bool shiftDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            ModifyMode mode = ModifyMode.None;
 
-            MassEditOVerlay.Show = ctrlDown;
-
-            if (ctrlDown) {
-                massEditMode = PrioritySignsMassEditMode.MainYield;
-            }
+            MassEditOverlay.Show = ControlIsPressed;
 
             if (HoveredSegmentId == 0) {
-                if(shiftDown) {
-                    massEditMode = PrioritySignsMassEditMode.MainYield;
-                }
+                massEditMode = PrioritySignsMassEditMode.Min;
                 return;
             }
 
-            if (shiftDown) {
+            if (Shortcuts.ShiftIsPressed) {
                 bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
                 if (isRoundabout) {
@@ -218,30 +198,46 @@ namespace TrafficManager.UI.SubTools {
                             return true;
                         });
                 }
-                return;
-            } else if (ctrlDown) {
+                if (!ControlIsPressed)
+                    mode = ModifyMode.PriorityRoad;
+                else if (!isRoundabout)
+                    mode = ModifyMode.HighPriorityRoad;
+                else
+                    mode = ModifyMode.Roundabout;
+
+                if (mode != PrevHoveredState.Mode || HoveredSegmentId != PrevHoveredState.SegmentId) {
+                    massEditMode = PrioritySignsMassEditMode.Min;
+                }
+            } else if (ControlIsPressed) {
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
-                return;
+                mode = ModifyMode.HighPriorityJunction;
+                if (mode != PrevHoveredState.Mode || HoveredNodeId != PrevHoveredState.NodeId) {
+                    massEditMode = PrioritySignsMassEditMode.Min;
+                }
+            } else {
+                massEditMode = PrioritySignsMassEditMode.Min;
+
+                if (HoveredNodeId == SelectedNodeId) {
+                    return;
+                }
+
+                // no highlight for existing priority node in sign mode
+                if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
+                    // Log._Debug($"PrioritySignsTool.RenderOverlay: HasNodePrioritySign({HoveredNodeId})=true");
+                    return;
+                }
+
+                if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(HoveredNodeId)) {
+                    // Log._Debug($"PrioritySignsTool.RenderOverlay: MayNodeHavePrioritySigns({HoveredNodeId})=false");
+                    return;
+                }
+
+                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
             }
 
-            massEditMode = PrioritySignsMassEditMode.MainYield;
-
-            if (HoveredNodeId == SelectedNodeId) {
-                return;
-            }
-
-            // no highlight for existing priority node in sign mode
-            if (TrafficPriorityManager.Instance.HasNodePrioritySign(HoveredNodeId)) {
-                // Log._Debug($"PrioritySignsTool.RenderOverlay: HasNodePrioritySign({HoveredNodeId})=true");
-                return;
-            }
-
-            if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(HoveredNodeId)) {
-                // Log._Debug($"PrioritySignsTool.RenderOverlay: MayNodeHavePrioritySigns({HoveredNodeId})=false");
-                return;
-            }
-
-            MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+            PrevHoveredState.Mode = mode;
+            PrevHoveredState.SegmentId = HoveredSegmentId;
+            PrevHoveredState.NodeId = HoveredNodeId;
         }
 
         private void RefreshCurrentPriorityNodeIds() {
@@ -274,7 +270,9 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) {
-            if (viewOnly && !(Options.prioritySignsOverlay || MassEditOVerlay.IsActive )) {
+            if (viewOnly
+                && !(Options.prioritySignsOverlay
+                     || UI.SubTools.PrioritySigns.MassEditOverlay.IsActive)) {
                 return;
             }
 
@@ -301,7 +299,7 @@ namespace TrafficManager.UI.SubTools {
                 bool showRemoveButton = false;
 
                 foreach (ushort nodeId in currentPriorityNodeIds) {
-                    if (! Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                    if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
                         continue;
                     }
 
@@ -427,6 +425,7 @@ namespace TrafficManager.UI.SubTools {
                 if (removedNodeId != 0) {
                     currentPriorityNodeIds.Remove(removedNodeId);
                     SelectedNodeId = 0;
+                    MainTool.RequestOnscreenDisplayUpdate();
                 }
             } catch (Exception e) {
                 Log.Error(e.ToString());
@@ -485,26 +484,20 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void Cleanup() {
-            //TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
-            //foreach (PrioritySegment trafficSegment in prioMan.PrioritySegments) {
-            //	try {
-            //		trafficSegment?.Instance1?.Reset();
-            //		trafficSegment?.Instance2?.Reset();
-            //	} catch (Exception e) {
-            //		Log.Error($"Error occured while performing PrioritySignsTool.Cleanup: {e.ToString()}");
-            //	}
-            //}
         }
 
         public override void OnActivate() {
+            base.OnActivate();
             RefreshCurrentPriorityNodeIds();
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         public override void Initialize() {
             base.Initialize();
             Cleanup();
 
-            if (Options.prioritySignsOverlay || MassEditOVerlay.IsActive) {
+            if (Options.prioritySignsOverlay
+                || UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                 RefreshCurrentPriorityNodeIds();
             } else {
                 currentPriorityNodeIds.Clear();
@@ -513,12 +506,8 @@ namespace TrafficManager.UI.SubTools {
 
         private bool MayNodeHavePrioritySigns(ushort nodeId) {
             SetPrioritySignError reason;
-            // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Checking if node {nodeId}
-            //     may have priority signs.");
 
             if (!TrafficPriorityManager.Instance.MayNodeHavePrioritySigns(nodeId, out reason)) {
-                // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} does not
-                //     allow priority signs: {reason}");
                 if (reason == SetPrioritySignError.HasTimedLight) {
                     MainTool.WarningPrompt(
                         Translation.TrafficLights.Get("Dialog.Text:Node has timed TL script"));
@@ -527,8 +516,45 @@ namespace TrafficManager.UI.SubTools {
                 return false;
             }
 
-            // Log._Debug($"PrioritySignsTool.MayNodeHavePrioritySigns: Node {nodeId} allows priority signs");
             return true;
+        }
+
+        private static string T(string key) => Translation.PrioritySigns.Get(key);
+
+        public void UpdateOnscreenDisplayPanel() {
+            if (SelectedNodeId == 0) {
+                // Select mode
+                var items = new List<OsdItem>();
+                items.Add(new ModeDescription(localizedText: T("Prio.OnscreenHint.Mode:Select")));
+                items.Add(
+                    new HardcodedMouseShortcut(
+                        button: UIMouseButton.Left,
+                        shift: false,
+                        ctrl: true,
+                        alt: false,
+                        localizedText: T("Prio.Click:Quick setup prio junction")));
+                items.Add(
+                    new HardcodedMouseShortcut(
+                        button: UIMouseButton.Left,
+                        shift: true,
+                        ctrl: false,
+                        alt: false,
+                        localizedText: T("Prio.Click:Quick setup prio road/roundabout")));
+                items.Add(
+                    new HardcodedMouseShortcut(
+                        button: UIMouseButton.Left,
+                        shift: true,
+                        ctrl: true,
+                        alt: false,
+                        localizedText: T("Prio.Click:Quick setup high prio road/roundabout")));
+                OnscreenDisplay.Display(items);
+            } else {
+                // Modify traffic light settings
+                var items = new List<OsdItem>();
+                items.Add(new ModeDescription(localizedText: T("Prio.OnscreenHint.Mode:Edit")));
+                // items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                OnscreenDisplay.Display(items);
+            }
         }
     }
 }

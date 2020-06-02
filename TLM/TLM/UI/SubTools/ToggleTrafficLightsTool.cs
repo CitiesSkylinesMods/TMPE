@@ -1,13 +1,18 @@
 namespace TrafficManager.UI.SubTools {
+    using System.Collections.Generic;
     using ColossalFramework;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util.Caching;
     using UnityEngine;
 
-    public class ToggleTrafficLightsTool : LegacySubTool {
+    public class ToggleTrafficLightsTool
+        : LegacySubTool,
+          UI.MainMenu.IOnscreenDisplayProvider
+    {
         /// <summary>
         /// Stores potentially visible ids for nodes while the camera did not move
         /// </summary>
@@ -187,6 +192,19 @@ namespace TrafficManager.UI.SubTools {
                 // Add
                 CachedVisibleNodeIds.Add(nodeId);
             }
+        }
+
+        private static string T(string key) => Translation.TrafficLights.Get(key);
+
+        public void UpdateOnscreenDisplayPanel() {
+            var items = new List<OsdItem>();
+            items.Add(new ModeDescription(localizedText: T("ToggleTL.Mode:Click to toggle")));
+            OnscreenDisplay.Display(items);
+        }
+
+        public override void OnActivate() {
+            base.OnActivate();
+            MainTool.RequestOnscreenDisplayUpdate();
         }
     }
 }

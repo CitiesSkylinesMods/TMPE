@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.Patch._VehicleManager {
-    using Harmony;
+    using HarmonyLib;
     using JetBrains.Annotations;
 
     [HarmonyPatch(typeof(VehicleManager), "ReleaseVehicle")]

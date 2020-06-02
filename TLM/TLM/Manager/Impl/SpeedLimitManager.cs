@@ -339,7 +339,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneValid(laneId)) {
+                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -380,7 +380,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneValid(laneId)) {
+                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -563,7 +563,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (!Services.NetService.IsLaneValid(laneId)) {
+            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                 return false;
             }
 
@@ -579,6 +579,19 @@ namespace TrafficManager.Manager.Impl {
             bool ret = false;
             foreach (NetInfo.Direction dir in Enum.GetValues(typeof(NetInfo.Direction))) {
                 ret |= SetSpeedLimit(segmentId, dir, speedLimit);
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Sets speed limit for all configurable lanes.
+        /// </summary>
+        /// <param name="speedLimit">Speed limit in game units, or null to restore defaults</param>
+        /// <returns><c>false</c>if there are no configurable lanes. <c>true</c> if any speed limits were applied.</returns>
+        public bool SetSpeedLimit(ushort segmentId, float? speedLimit) {
+            bool ret = false;
+            foreach(NetInfo.Direction finaldir in Enum.GetValues(typeof(NetInfo.Direction))) {
+                ret |= SetSpeedLimit(segmentId, finaldir, speedLimit);
             }
             return ret;
         }
@@ -894,7 +907,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
             foreach (Configuration.LaneSpeedLimit laneSpeedLimit in data) {
                 try {
-                    if (!Services.NetService.IsLaneValid(laneSpeedLimit.laneId)) {
+                    if (!Services.NetService.IsLaneAndItsSegmentValid(laneSpeedLimit.laneId)) {
 #if DEBUG
                         Log._DebugIf(debugSpeedLimits, () =>
                             $"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: Lane is invalid");

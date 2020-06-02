@@ -1,7 +1,7 @@
-﻿using ColossalFramework;
+using ColossalFramework;
 using ColossalFramework.Math;
 using CSUtil.Commons;
-using Harmony;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Text;
 using UnityEngine;
 
 namespace TrafficManager.Patch._Vehicle {
-    // TODO this does currently not work with Harmony v1.1
+    // TODO [issue #864] replace custom AI with harmony patch when possible.
 
     //[HarmonyPatch(typeof(Vehicle), "Unspawn")]
     //public static class UnspawnPatch {

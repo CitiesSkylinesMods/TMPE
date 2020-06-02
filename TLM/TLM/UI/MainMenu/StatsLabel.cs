@@ -7,15 +7,9 @@
 
         public override void Start() {
             base.Start();
-            // size = new Vector2(
-            //     ModUI.Instance.MainMenu.width / 2f,
-            //     MainMenuWindow.ScaledSize.GetTitlebarHeight());
             this.text = "0";
             this.suffix = " pathfinds";
             this.textColor = Color.green;
-            // relativePosition = new Vector3(5f, -20f);
-            // textAlignment = UIHorizontalAlignment.Left;
-            // anchor = UIAnchorStyle.Top | UIAnchorStyle.Left;
         }
 
 #if QUEUEDSTATS
