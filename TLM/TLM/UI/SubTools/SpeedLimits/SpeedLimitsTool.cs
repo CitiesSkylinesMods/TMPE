@@ -259,7 +259,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     sort: true);
                 int index = sortedLaneIndex;
 
-                // if lane count does not match, assume segmentsare connected from outer side of the roundabout.
+                // if lane count does not match, assume segments are connected from outer side of the roundabout.
                 if (invert0) {
                     int diff = lanes.Count - count0;
                     index += diff;
