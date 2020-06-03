@@ -231,6 +231,13 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             }
         }
 
+        /// <summary>
+        /// iterates through the given roundabout <paramref name="segmentList"/> returning an enumeration
+        /// of all lanes with a matching <paramref name="sortedLaneIndex"/> based on <paramref name="segmentId0"/>
+        /// </summary>
+        /// <param name="segmentList">input list of roundabout segments (must be oneway, and in the same direction).</param>
+        /// <param name="segmentId0">The segment to match lane agaisnt</param>
+        /// <param name="sortedLaneIndex"></param>
         private IEnumerable<LanePos> FollowRoundaboutLane(List<ushort> segmentList, ushort segmentId0, int sortedLaneIndex) {
             bool invert0 = segmentId0.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
             int count0 = netService.GetSortedLanes(
