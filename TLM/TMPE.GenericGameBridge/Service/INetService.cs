@@ -38,7 +38,7 @@ namespace GenericGameBridge.Service {
     public enum ClockDirection {
         None,
         Clockwise,
-        CounterClockwise
+        CounterClockwise,
     }
 
     public interface INetService {

@@ -17,8 +17,8 @@ namespace TrafficManager.State {
             get => instance;
             private set {
                 if (value != null && instance != null) {
-                    value.Observers = instance.Observers;
-                    value.ObserverLock = instance.ObserverLock;
+                    value._observers = instance._observers;
+                    value._lock = instance._lock;
                 }
 
                 instance = value;
@@ -105,7 +105,7 @@ namespace TrafficManager.State {
             return conf;
         }
 
-        private static DateTime WriteConfig(GlobalConfig config, string filename=FILENAME) {
+        private static DateTime WriteConfig(GlobalConfig config, string filename = FILENAME) {
             try {
                 Log.Info($"Writing global config to file '{filename}'...");
                 XmlSerializer serializer = new XmlSerializer(typeof(GlobalConfig));
@@ -183,7 +183,7 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void Reload(bool checkVersion=true) {
+        public static void Reload(bool checkVersion = true) {
             DateTime modifiedTime;
             GlobalConfig conf = Load(out modifiedTime);
             if (checkVersion && conf.Version != -1 && conf.Version < LATEST_VERSION) {
@@ -208,7 +208,7 @@ namespace TrafficManager.State {
             }
         }
 
-        public static void Reset(GlobalConfig oldConfig, bool resetAll=false) {
+        public static void Reset(GlobalConfig oldConfig, bool resetAll = false) {
             Log.Info($"Resetting global config.");
             DateTime modifiedTime;
             Instance = WriteDefaultConfig(oldConfig, resetAll, out modifiedTime);

@@ -88,7 +88,7 @@ namespace TrafficManager.State {
                                 Translation.Options.Get("VR.Dropdown.Option:Low Aggression"),
                                 Translation.Options.Get("VR.Dropdown.Option:Medium Aggression"),
                                 Translation.Options.Get("VR.Dropdown.Option:High Aggression"),
-                                Translation.Options.Get("VR.Dropdown.Option:Strict")
+                                Translation.Options.Get("VR.Dropdown.Option:Strict"),
                             },
                       (int)Options.vehicleRestrictionsAggression,
                       OnVehicleRestrictionsAggressionChanged) as UIDropDown;

@@ -67,10 +67,6 @@ namespace TrafficManager.Traffic.Impl {
             Update();
         }
 
-        ~SegmentEnd() {
-            // Destroy();
-        }
-
         /// <summary>
         /// Calculates for each segment the number of cars going to this segment.
         /// We use integer arithmetic for better performance.

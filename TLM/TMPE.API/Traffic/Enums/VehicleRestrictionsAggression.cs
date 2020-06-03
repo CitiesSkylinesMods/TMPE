@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     using JetBrains.Annotations;
 
     /// <summary>
@@ -25,6 +25,6 @@
         /// <summary>
         /// Strict aggression
         /// </summary>
-        Strict = 3
+        Strict = 3,
     }
 }

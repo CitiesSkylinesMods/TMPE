@@ -17,7 +17,7 @@ namespace TrafficManager.Util {
             /// <summary>
             /// Traversal stops when a segment consists of a different number of filtered lanes than the initial segment
             /// </summary>
-            LaneCount = 1
+            LaneCount = 1,
         }
 
         public class SegmentLaneVisitData {

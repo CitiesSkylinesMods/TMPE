@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     public enum EmergencyBehavior {
         /// <summary>
         /// No custom behavior
@@ -24,6 +24,6 @@
         /// <summary>
         /// Regular vehicles evade on the parking lane
         /// </summary>
-        EvadeOnParkingLane
+        EvadeOnParkingLane,
     }
 }

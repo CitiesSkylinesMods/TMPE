@@ -1,6 +1,5 @@
 namespace TrafficManager.Custom.AI {
     using ColossalFramework;
-    using CSUtil.Commons.Benchmark;
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System.Runtime.CompilerServices;
@@ -68,35 +67,29 @@ namespace TrafficManager.Custom.AI {
                         $"Path: {instanceData.m_path}, mainPathState={mainPathState}");
                 }
 
-                ExtSoftPathState finalPathState;
-                using (var bm = Benchmark.MaybeCreateBenchmark(
-                    null,
-                    "ConvertPathStateToSoftPathState+UpdateCitizenPathState"))
-                {
-                    finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
+                ExtSoftPathState finalPathState = ExtCitizenInstance.ConvertPathStateToSoftPathState(mainPathState);
 
-                    if (Options.parkingAI) {
-                        finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(
-                            instanceId,
-                            ref instanceData,
-                            ref ExtCitizenInstanceManager
-                                .Instance.ExtInstances[
-                                    instanceId],
-                            ref ExtCitizenManager
-                                .Instance.ExtCitizens[
-                                    citizenId],
-                            ref citizensBuffer[
-                                instanceData.m_citizen],
-                            mainPathState);
-                        if (logParkingAi) {
-                            Log._Debug(
-                                $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
-                                $"Applied Parking AI logic. Path: {instanceData.m_path}, " +
-                                $"mainPathState={mainPathState}, finalPathState={finalPathState}, " +
-                                $"extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceId]}");
-                        }
-                    } // if Options.parkingAi
-                }
+                if (Options.parkingAI) {
+                    finalPathState = AdvancedParkingManager.Instance.UpdateCitizenPathState(
+                        instanceId,
+                        ref instanceData,
+                        ref ExtCitizenInstanceManager
+                            .Instance.ExtInstances[
+                                instanceId],
+                        ref ExtCitizenManager
+                            .Instance.ExtCitizens[
+                                citizenId],
+                        ref citizensBuffer[
+                            instanceData.m_citizen],
+                        mainPathState);
+                    if (logParkingAi) {
+                        Log._Debug(
+                            $"CustomHumanAI.CustomSimulationStep({instanceId}): " +
+                            $"Applied Parking AI logic. Path: {instanceData.m_path}, " +
+                            $"mainPathState={mainPathState}, finalPathState={finalPathState}, " +
+                            $"extCitizenInstance={ExtCitizenInstanceManager.Instance.ExtInstances[instanceId]}");
+                    }
+                } // if Options.parkingAi
 
                 switch (finalPathState) {
                     case ExtSoftPathState.Ready: {
@@ -206,15 +199,13 @@ namespace TrafficManager.Custom.AI {
             }
 
             // NON-STOCK CODE START
-            using (var bm = Benchmark.MaybeCreateBenchmark(null, "ExtSimulationStep")) {
-                if (Options.parkingAI) {
-                    if (ExtSimulationStep(
-                        instanceId,
-                        ref instanceData,
-                        ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceId],
-                        physicsLodRefPos)) {
-                        return;
-                    }
+            if (Options.parkingAI) {
+                if (ExtSimulationStep(
+                    instanceId,
+                    ref instanceData,
+                    ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceId],
+                    physicsLodRefPos)) {
+                    return;
                 }
             }
 
@@ -430,13 +421,11 @@ namespace TrafficManager.Custom.AI {
             bool startNode = segmentsBuffer[segmentId].m_startNode == nodeId;
 
             ICustomSegmentLights lights = null;
-            using (var bm = Benchmark.MaybeCreateBenchmark(null, "GetSegmentLights")) {
-                if (customSim) {
-                    lights = CustomSegmentLightsManager.Instance.GetSegmentLights(
-                        segmentId,
-                        startNode,
-                        false);
-                }
+            if (customSim) {
+                lights = CustomSegmentLightsManager.Instance.GetSegmentLights(
+                    segmentId,
+                    startNode,
+                    false);
             }
 
             if (lights == null) {

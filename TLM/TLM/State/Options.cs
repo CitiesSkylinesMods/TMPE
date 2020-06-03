@@ -101,6 +101,10 @@ namespace TrafficManager.State {
         public static bool RoundAboutQuickFix_NoCrossMainR = true;
         public static bool RoundAboutQuickFix_NoCrossYieldR = false;
         public static bool RoundAboutQuickFix_PrioritySigns = true;
+        public static bool RoundAboutQuickFix_KeepClearYieldR = true; 
+        public static bool RoundAboutQuickFix_RealisticSpeedLimits = false;
+        public static bool RoundAboutQuickFix_ParkingBanMainR = true;
+        public static bool RoundAboutQuickFix_ParkingBanYieldR = false;
         public static bool PriorityRoad_CrossMainR = false;
         public static bool PriorityRoad_AllowLeftTurns = false;
         public static bool PriorityRoad_EnterBlockedYeild = false;

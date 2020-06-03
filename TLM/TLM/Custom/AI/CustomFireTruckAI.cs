@@ -1,6 +1,5 @@
-﻿namespace TrafficManager.Custom.AI {
+namespace TrafficManager.Custom.AI {
     using ColossalFramework;
-    using CSUtil.Commons.Benchmark;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -21,16 +20,12 @@
                                         bool endBothWays,
                                         bool undergroundTarget) {
 
-            ExtVehicleType vehicleType;
-
-            using (var bm = Benchmark.MaybeCreateBenchmark(null, "OnStartPathFind")) {
-                vehicleType = ExtVehicleManager.Instance.OnStartPathFind(
+            ExtVehicleType vehicleType = ExtVehicleManager.Instance.OnStartPathFind(
                     vehicleId,
                     ref vehicleData,
                     (vehicleData.m_flags & Vehicle.Flags.Emergency2) != 0
                         ? ExtVehicleType.Emergency
                         : ExtVehicleType.Service);
-            }
 
             VehicleInfo info = m_info;
             bool allowUnderground = (vehicleData.m_flags & (Vehicle.Flags.Underground

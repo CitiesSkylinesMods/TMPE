@@ -543,10 +543,6 @@ namespace TrafficManager.TrafficLight.Impl {
             ClearInvalidPedestrianLights();
         }
 
-        ~TimedTrafficLights() {
-            Destroy();
-        }
-
         // TODO  currently, this method must be called for each node in the node group individually
         public void Destroy() {
             started = false;

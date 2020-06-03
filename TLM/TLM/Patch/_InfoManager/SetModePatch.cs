@@ -20,10 +20,10 @@ namespace TrafficManager.Patch._InfoManager
                     mode == InfoMode.None ||
                     RoadSelectionUtil.IsNetAdjustMode(mode, (int)subMode);
             }
-            if (RoadSelectionUtil.IsNetAdjustMode(mode,(int)subMode))
+            if (RoadSelectionUtil.IsNetAdjustMode(mode, (int)subMode))
             {
                 // UI to be handled by Default tool
-                ModUI.instance_.CloseMainMenu();
+                ModUI.Instance.CloseMainMenu();
 
                 SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(delegate () {
                     DefaultTool.OpenWorldInfoPanel(

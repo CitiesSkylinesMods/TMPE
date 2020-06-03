@@ -2,7 +2,6 @@ namespace TrafficManager.Custom.AI {
     using ColossalFramework.Globalization;
     using ColossalFramework.Math;
     using ColossalFramework;
-    using CSUtil.Commons.Benchmark;
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System.Runtime.CompilerServices;
@@ -181,24 +180,22 @@ namespace TrafficManager.Custom.AI {
                 }
             }
 
-            using (var bm = Benchmark.MaybeCreateBenchmark(null, "ExtParkVehicle")) {
-                return Constants.ManagerFactory.VehicleBehaviorManager.ParkPassengerCar(
-                    vehicleId,
-                    ref vehicleData,
-                    vehicleData.Info,
-                    driverCitizenId,
-                    ref citizenManager.m_citizens.m_buffer[driverCitizenId],
-                    driverCitizenInstanceId,
-                    ref citizenManager.m_instances.m_buffer[
-                        driverCitizenInstanceId],
-                    ref ExtCitizenInstanceManager.Instance.ExtInstances[
-                        driverCitizenInstanceId],
-                    targetBuildingId,
-                    pathPos,
-                    nextPath,
-                    nextPositionIndex,
-                    out segmentOffset);
-            }
+            return Constants.ManagerFactory.VehicleBehaviorManager.ParkPassengerCar(
+                vehicleId,
+                ref vehicleData,
+                vehicleData.Info,
+                driverCitizenId,
+                ref citizenManager.m_citizens.m_buffer[driverCitizenId],
+                driverCitizenInstanceId,
+                ref citizenManager.m_instances.m_buffer[
+                    driverCitizenInstanceId],
+                ref ExtCitizenInstanceManager.Instance.ExtInstances[
+                    driverCitizenInstanceId],
+                targetBuildingId,
+                pathPos,
+                nextPath,
+                nextPositionIndex,
+                out segmentOffset);
         }
 
         [RedirectReverse]

@@ -1,7 +1,7 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     public enum TrafficLightSimulationType {
         None,
         Manual,
-        Timed
+        Timed,
     }
 }

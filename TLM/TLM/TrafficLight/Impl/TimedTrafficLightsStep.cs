@@ -1,5 +1,4 @@
 namespace TrafficManager.TrafficLight.Impl {
-    using CSUtil.Commons.Benchmark;
     using CSUtil.Commons;
     using ExtVehicleType = global::TrafficManager.API.Traffic.Enums.ExtVehicleType;
     using System.Collections.Generic;
@@ -643,9 +642,7 @@ namespace TrafficManager.TrafficLight.Impl {
             // Log._Debug($"TTL @ {timedNode.NodeId}: curFrame={curFrame} lastFlowWaitCalc={lastFlowWaitCalc}");
             if (lastFlowWaitCalc < curFrame) {
                 // Log._Debug($"TTL @ {timedNode.NodeId}: lastFlowWaitCalc<curFrame");
-                using (var bm = Benchmark.MaybeCreateBenchmark(null, "CalcWaitFlow")) {
-                    CalcWaitFlow(true, timedNode.CurrentStep, out wait, out flow);
-                }
+                CalcWaitFlow(true, timedNode.CurrentStep, out wait, out flow);
 
                 if (updateValues) {
                     lastFlowWaitCalc = curFrame;
