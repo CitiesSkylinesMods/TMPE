@@ -101,6 +101,16 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             LastCachedCamera = new CameraTransformValue();
         }
 
+        internal static void SetSpeedLimit(LanePos lane, SpeedValue? speed) {
+            ushort segmentId = lane.laneId.ToLane().m_segment;
+            SpeedLimitManager.Instance.SetSpeedLimit(
+                segmentId: segmentId,
+                laneIndex: lane.laneIndex,
+                laneInfo: segmentId.ToSegment().Info.m_lanes[lane.laneIndex],
+                laneId: lane.laneId,
+                speedLimit: speed?.GameUnits);
+        }
+
         public override bool IsCursorInPanel() {
             return base.IsCursorInPanel() || cursorInSecondaryPanel;
         }
@@ -242,48 +252,13 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     sort: true);
                 int index = sortedLaneIndex;
 
-                // if lane count does not match, assume new lanes are connected from outer side of the roundabout.
+                // if lane count does not match, assume segmentsare connected from outer side of the roundabout.
                 if (invert0) {
                     int diff = lanes.Count - count0;
                     index += diff;
                 }
                 if (0 <= index && index < lanes.Count) {
                     yield return lanes[index];
-                }
-            } // foreach
-        }
-
-        private void SetRoundaboutLaneSpeed(List<ushort> segmentList, ushort segmentId0, int sortedLaneIndex, SpeedValue? speed) {
-            Log._Debug("SetRoundaboutSpeed called()");
-            bool invert0 = segmentId0.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-            int count0 = netService.GetSortedLanes(
-               segmentId: segmentId0,
-               segment: ref segmentId0.ToSegment(),
-               startNode: null,
-               laneTypeFilter: SpeedLimitManager.LANE_TYPES,
-               vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES,
-               sort: false).Count;
-            foreach (ushort segmentId in segmentList) {
-                if (segmentId == segmentId0)
-                    continue;
-                bool invert = segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-                var lanes = netService.GetSortedLanes(
-                    segmentId: segmentId,
-                    segment: ref segmentId.ToSegment(),
-                    startNode: null,
-                    laneTypeFilter: SpeedLimitManager.LANE_TYPES,
-                    vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES,
-                    reverse: invert != invert0,
-                    sort: true);
-                int index = sortedLaneIndex;
-                if (invert0) {
-                    // if lane count does not match, assume new lanes are connected from outer side of the roundabout.
-                    int diff = lanes.Count - count0;
-                    index += diff;
-                }
-                if (0 <= index && index < lanes.Count) {
-                    var lane = lanes[index];
-
                 }
             } // foreach
         }
@@ -925,12 +900,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                 foreach (var lane in lanes) {
                                     if (lane.laneId == laneId) // the speed limit for this lane has already been set.
                                         continue;
-                                    SpeedLimitManager.Instance.SetSpeedLimit(
-                                        segmentId: segmentId,
-                                        laneIndex: lane.laneIndex,
-                                        laneInfo: segmentId.ToSegment().Info.m_lanes[lane.laneIndex],
-                                        laneId: lane.laneId,
-                                        speedLimit: speedLimitToSet?.GameUnits);
+                                    SetSpeedLimit(lane, speedLimitToSet);
                                 }
                             } else {
                                 int slIndexCopy = sortedLaneIndex;
