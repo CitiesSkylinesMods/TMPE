@@ -1,8 +1,6 @@
 using HarmonyLib;
 using TrafficManager.Manager.Impl;
-
 namespace TrafficManager.Patch._Vehicle {
-
     [HarmonyPatch(typeof(Vehicle), nameof(Vehicle.Unspawn))]
     public static class UnspawnPatch {
         /// <summary>
