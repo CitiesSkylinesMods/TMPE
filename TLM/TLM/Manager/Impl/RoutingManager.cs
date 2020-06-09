@@ -1042,8 +1042,7 @@ namespace TrafficManager.Manager.Impl {
                                             nextLaneIndex);
                                     }
 
-                                    // routed vehicle that does not follow lane arrows (trains,
-                                    trams,
+                                    // routed vehicle that does not follow lane arrows (trains, trams,
                                     // metros, monorails)
                                     transitionType = LaneEndTransitionType.Default;
 
