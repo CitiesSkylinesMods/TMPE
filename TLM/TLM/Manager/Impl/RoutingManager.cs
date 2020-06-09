@@ -16,6 +16,8 @@ namespace TrafficManager.Manager.Impl {
         : AbstractGeometryObservingManager,
           IRoutingManager
     {
+        private RoutingManager() { }
+
         public static readonly RoutingManager Instance = new RoutingManager();
 
         private const NetInfo.LaneType ROUTED_LANE_TYPES =
@@ -96,8 +98,6 @@ namespace TrafficManager.Manager.Impl {
 
             Log._Debug(buf);
         }
-
-        private RoutingManager() { }
 
         public void SimulationStep() {
             if (!segmentsUpdated || Singleton<NetManager>.instance.m_segmentsUpdated

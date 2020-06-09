@@ -18,6 +18,22 @@ namespace TrafficManager.TrafficLight.Impl {
 
     // TODO define TimedTrafficLights per node group, not per individual nodes
     public class TimedTrafficLights : ITimedTrafficLights {
+        public TimedTrafficLights(ushort nodeId, IEnumerable<ushort> nodeGroup) {
+            NodeId = nodeId;
+            NodeGroup = new List<ushort>(nodeGroup);
+            MasterNodeId = NodeGroup[0];
+
+            Constants.ServiceFactory.NetService.ProcessNode(
+                nodeId,
+                (ushort nId, ref NetNode node) => {
+                    UpdateDirections(ref node);
+                    UpdateSegmentEnds(ref node);
+                    return true;
+                });
+
+            started = false;
+        }
+
         public ushort NodeId {
             get;
         }
@@ -66,22 +82,6 @@ namespace TrafficManager.TrafficLight.Impl {
                 started,
                 Directions.DictionaryToString(),
                 segmentEndIds.CollectionToString());
-        }
-
-        public TimedTrafficLights(ushort nodeId, IEnumerable<ushort> nodeGroup) {
-            NodeId = nodeId;
-            NodeGroup = new List<ushort>(nodeGroup);
-            MasterNodeId = NodeGroup[0];
-
-            Constants.ServiceFactory.NetService.ProcessNode(
-                nodeId,
-                (ushort nId, ref NetNode node) => {
-                    UpdateDirections(ref node);
-                    UpdateSegmentEnds(ref node);
-                    return true;
-                });
-
-            started = false;
         }
 
         public void PasteSteps(ITimedTrafficLights sourceTimedLight) {

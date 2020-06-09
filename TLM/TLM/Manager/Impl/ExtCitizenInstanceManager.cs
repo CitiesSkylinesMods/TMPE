@@ -17,6 +17,13 @@ namespace TrafficManager.Manager.Impl {
           ICustomDataManager<List<Configuration.ExtCitizenInstanceData>>,
           IExtCitizenInstanceManager
     {
+        private ExtCitizenInstanceManager() {
+            ExtInstances = new ExtCitizenInstance[CitizenManager.MAX_INSTANCE_COUNT];
+            for (uint i = 0; i < CitizenManager.MAX_INSTANCE_COUNT; ++i) {
+                ExtInstances[i] = new ExtCitizenInstance((ushort)i);
+            }
+        }
+
         public static readonly ExtCitizenInstanceManager Instance = new ExtCitizenInstanceManager();
 
         /// <summary>
@@ -43,13 +50,6 @@ namespace TrafficManager.Manager.Impl {
 
         public void ResetInstance(ushort instanceId) {
             Reset(ref ExtInstances[instanceId]);
-        }
-
-        private ExtCitizenInstanceManager() {
-            ExtInstances = new ExtCitizenInstance[CitizenManager.MAX_INSTANCE_COUNT];
-            for (uint i = 0; i < CitizenManager.MAX_INSTANCE_COUNT; ++i) {
-                ExtInstances[i] = new ExtCitizenInstance((ushort)i);
-            }
         }
 
         public override void OnLevelUnloading() {

@@ -28,6 +28,40 @@ namespace TrafficManager.TrafficLight.Impl {
         public const ExtVehicleType DEFAULT_MAIN_VEHICLETYPE = ExtVehicleType.None;
 
         [Obsolete]
+        protected CustomSegmentLights(ICustomSegmentLightsManager lightsManager,
+                                      ushort nodeId,
+                                      ushort segmentId,
+                                      bool calculateAutoPedLight)
+            : this(
+                lightsManager,
+                segmentId,
+                nodeId == Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, true),
+                calculateAutoPedLight) { }
+
+        public CustomSegmentLights(ICustomSegmentLightsManager lightsManager,
+                                   ushort segmentId,
+                                   bool startNode,
+                                   bool calculateAutoPedLight)
+            : this(
+                lightsManager,
+                segmentId,
+                startNode,
+                calculateAutoPedLight,
+                true) { }
+
+        public CustomSegmentLights(ICustomSegmentLightsManager lightsManager,
+                                   ushort segmentId,
+                                   bool startNode,
+                                   bool calculateAutoPedLight,
+                                   bool performHousekeeping)
+            : base(segmentId, startNode) {
+            this.lightsManager = lightsManager;
+            if (performHousekeeping) {
+                Housekeeping(false, calculateAutoPedLight);
+            }
+        }
+
+        [Obsolete]
         public ushort NodeId => Constants.ServiceFactory.NetService.GetSegmentNodeId(SegmentId, StartNode);
 
         private uint LastChangeFrame;
@@ -154,41 +188,6 @@ namespace TrafficManager.TrafficLight.Impl {
             }
 
             return false;
-        }
-
-        [Obsolete]
-        protected CustomSegmentLights(ICustomSegmentLightsManager lightsManager,
-                                      ushort nodeId,
-                                      ushort segmentId,
-                                      bool calculateAutoPedLight)
-            : this(
-                lightsManager,
-                segmentId,
-                nodeId == Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, true),
-                calculateAutoPedLight) { }
-
-        public CustomSegmentLights(ICustomSegmentLightsManager lightsManager,
-                                   ushort segmentId,
-                                   bool startNode,
-                                   bool calculateAutoPedLight)
-            : this(
-                lightsManager,
-                segmentId,
-                startNode,
-                calculateAutoPedLight,
-                true) { }
-
-        public CustomSegmentLights(ICustomSegmentLightsManager lightsManager,
-                                   ushort segmentId,
-                                   bool startNode,
-                                   bool calculateAutoPedLight,
-                                   bool performHousekeeping)
-            : base(segmentId, startNode)
-        {
-            this.lightsManager = lightsManager;
-            if (performHousekeeping) {
-                Housekeeping(false, calculateAutoPedLight);
-            }
         }
 
         public bool IsAnyGreen() {

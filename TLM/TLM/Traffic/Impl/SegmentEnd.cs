@@ -20,6 +20,11 @@ namespace TrafficManager.Traffic.Impl {
     /// </summary>
     [Obsolete("should be removed when implementing issue #240")]
     public class SegmentEnd : SegmentEndId, ISegmentEnd {
+        public SegmentEnd(ushort segmentId, bool startNode)
+            : base(segmentId, startNode) {
+            Update();
+        }
+
         // TODO convert to struct
         [Obsolete]
         public ushort NodeId => Constants.ServiceFactory.NetService.GetSegmentNodeId(SegmentId, StartNode);
@@ -59,12 +64,6 @@ namespace TrafficManager.Traffic.Impl {
                         ? "<null>"
                         : numVehiclesGoingToSegmentId.ArrayToString()) + "\n" +
                    "SegmentEnd]";
-        }
-
-        public SegmentEnd(ushort segmentId, bool startNode)
-            : base(segmentId, startNode)
-        {
-            Update();
         }
 
         /// <summary>

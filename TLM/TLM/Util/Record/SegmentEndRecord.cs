@@ -6,15 +6,15 @@ namespace TrafficManager.Util.Record {
     using TrafficManager.Manager.Impl;
 
     class SegmentEndRecord : IRecordable {
-        public ushort SegmentId { get; private set; }
-        public bool StartNode { get; private set; }
-
         public SegmentEndRecord(int segmentEndIndex) {
             SegmentEndManager.Instance.
                 GetSegmentAndNodeFromIndex(segmentEndIndex, out ushort segmentId, out bool startNode);
             SegmentId = segmentId;
             StartNode = startNode;
         }
+
+        public ushort SegmentId { get; private set; }
+        public bool StartNode { get; private set; }
 
         private TernaryBool uturnAllowed_;
         private TernaryBool nearTurnOnRedAllowed_;

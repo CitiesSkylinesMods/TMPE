@@ -9,6 +9,34 @@ namespace TrafficManager.State.Keybinds {
     /// Contains one or two SavedInputKeys, and event handler when the key is changed.
     /// </summary>
     public class KeybindSetting {
+        public KeybindSetting(string cat,
+                              string configFileKey,
+                              InputKey? defaultKey1 = null) {
+            Category = cat;
+            Key = new SavedInputKey(
+                configFileKey,
+                KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
+                defaultKey1 ?? SavedInputKey.Empty,
+                true);
+        }
+
+        public KeybindSetting(string cat,
+                              string configFileKey,
+                              InputKey? defaultKey1,
+                              InputKey? defaultKey2) {
+            Category = cat;
+            Key = new SavedInputKey(
+                name: configFileKey,
+                fileName: KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
+                def: defaultKey1 ?? SavedInputKey.Empty,
+                autoUpdate: true);
+            AlternateKey = new SavedInputKey(
+                name: configFileKey + "_Alternate",
+                fileName: KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
+                def: defaultKey2 ?? SavedInputKey.Empty,
+                autoUpdate: true);
+        }
+
         /// <summary>
         /// Used by the GUI to tell the button event handler which key is being edited
         /// </summary>
@@ -37,40 +65,12 @@ namespace TrafficManager.State.Keybinds {
 
         public delegate void OnKeyChangedHandler();
 
-        public KeybindSetting(string cat,
-                              string configFileKey,
-                              InputKey? defaultKey1 = null) {
-            Category = cat;
-            Key = new SavedInputKey(
-                configFileKey,
-                KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
-                defaultKey1 ?? SavedInputKey.Empty,
-                true);
-        }
-
         public void OnKeyChanged(OnKeyChangedHandler onChanged) {
             onKeyChanged_ = onChanged;
         }
 
         public void NotifyKeyChanged() {
             onKeyChanged_?.Invoke();
-        }
-
-        public KeybindSetting(string cat,
-                              string configFileKey,
-                              InputKey? defaultKey1,
-                              InputKey? defaultKey2) {
-            Category = cat;
-            Key = new SavedInputKey(
-                name: configFileKey,
-                fileName: KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
-                def: defaultKey1 ?? SavedInputKey.Empty,
-                autoUpdate: true);
-            AlternateKey = new SavedInputKey(
-                name: configFileKey + "_Alternate",
-                fileName: KeybindSettingsBase.KEYBOARD_SHORTCUTS_FILENAME,
-                def: defaultKey2 ?? SavedInputKey.Empty,
-                autoUpdate: true);
         }
 
         /// <summary>

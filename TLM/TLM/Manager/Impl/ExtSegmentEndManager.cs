@@ -12,16 +12,9 @@ namespace TrafficManager.Manager.Impl {
         : AbstractCustomManager,
           IExtSegmentEndManager
     {
-        public static ExtSegmentEndManager Instance { get; }
-
         static ExtSegmentEndManager() {
             Instance = new ExtSegmentEndManager();
         }
-
-        /// <summary>
-        /// All additional data for segment ends
-        /// </summary>
-        public ExtSegmentEnd[] ExtSegmentEnds { get; }
 
         private ExtSegmentEndManager() {
             ExtSegmentEnds = new ExtSegmentEnd[NetManager.MAX_SEGMENT_COUNT * 2];
@@ -30,6 +23,13 @@ namespace TrafficManager.Manager.Impl {
                 ExtSegmentEnds[GetIndex((ushort)i, false)] = new ExtSegmentEnd((ushort)i, false);
             }
         }
+
+        public static ExtSegmentEndManager Instance { get; }
+
+        /// <summary>
+        /// All additional data for segment ends
+        /// </summary>
+        public ExtSegmentEnd[] ExtSegmentEnds { get; }
 
 #if DEBUG
         public string GenerateVehicleChainDebugInfo(ushort segmentId, bool startNode) {

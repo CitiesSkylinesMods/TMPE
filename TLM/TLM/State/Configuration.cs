@@ -28,6 +28,11 @@ namespace TrafficManager {
         public class LaneVehicleTypes {
             public uint laneId;
 
+            public LaneVehicleTypes(uint laneId, ExtVehicleType vehicleTypes) {
+                this.laneId = laneId;
+                this.vehicleTypes = vehicleTypes;
+            }
+
             /// <summary>
             /// Do not use this, for save compatibility only.
             /// </summary>
@@ -42,11 +47,6 @@ namespace TrafficManager {
             public API.Traffic.Enums.ExtVehicleType ApiVehicleTypes
                 => LegacyExtVehicleType.ToNew(vehicleTypes);
 #pragma warning restore 612
-
-            public LaneVehicleTypes(uint laneId, ExtVehicleType vehicleTypes) {
-                this.laneId = laneId;
-                this.vehicleTypes = vehicleTypes;
-            }
         }
 
         [Serializable]

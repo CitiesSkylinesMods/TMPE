@@ -3,14 +3,14 @@
     using TrafficManager.Traffic;
 
     public class SegmentEndId : ISegmentEndId {
-        public ushort SegmentId { get; protected set; }
-
-        public bool StartNode { get; protected set; }
-
         public SegmentEndId(ushort segmentId, bool startNode) {
             SegmentId = segmentId;
             StartNode = startNode;
         }
+
+        public ushort SegmentId { get; protected set; }
+
+        public bool StartNode { get; protected set; }
 
         public bool Relocate(ushort segmentId, bool startNode) {
             SegmentId = segmentId;
