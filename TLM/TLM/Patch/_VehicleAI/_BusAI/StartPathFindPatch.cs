@@ -44,6 +44,14 @@ namespace TrafficManager.Patch._VehicleAI._BusAI{
             args.ignoreCosts = false;
             args.stablePath = true;
             args.skipQueue = true;
+
+            Singleton<PathManager>.instance.CreatePath(out path,
+                ref Singleton<SimulationManager>.instance.m_randomizer, Singleton<SimulationManager>.instance.m_currentBuildIndex,
+                startPosA, startPosB, endPosA, endPosB, default(PathUnit.Position),
+                NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle, info.m_vehicleType, 20000f,
+                this.IsHeavyVehicle(), this.IgnoreBlocked(vehicleID, ref vehicleData),
+                false, false, false, false,
+                this.CombustionEngine())
         }
     }
 }
