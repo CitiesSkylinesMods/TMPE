@@ -7,6 +7,10 @@ namespace TrafficManager.UI {
 
     [Obsolete("Refactor tools to the new TrafficManagerSubTool class instead of LegacySubTool")]
     public abstract class LegacySubTool {
+        public LegacySubTool(TrafficManagerTool mainTool) {
+            MainTool = mainTool;
+        }
+
         protected TrafficManagerTool MainTool { get; }
 
         private Texture2D WindowTexture {
@@ -108,10 +112,6 @@ namespace TrafficManager.UI {
         protected ushort SelectedSegmentId {
             get => TrafficManagerTool.SelectedSegmentId;
             set => TrafficManagerTool.SelectedSegmentId = value;
-        }
-
-        public LegacySubTool(TrafficManagerTool mainTool) {
-            MainTool = mainTool;
         }
 
         [UsedImplicitly]

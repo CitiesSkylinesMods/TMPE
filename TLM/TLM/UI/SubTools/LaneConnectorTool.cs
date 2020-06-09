@@ -20,6 +20,15 @@ namespace TrafficManager.UI.SubTools {
         : LegacySubTool,
           UI.MainMenu.IOnscreenDisplayProvider
     {
+        public LaneConnectorTool(TrafficManagerTool mainTool)
+            : base(mainTool) {
+            // Log._Debug($"LaneConnectorTool: Constructor called");
+            currentLaneEnds = new Dictionary<ushort, List<LaneEnd>>();
+
+            CachedVisibleNodeIds = new GenericArrayCache<ushort>(NetManager.MAX_NODE_COUNT);
+            LastCachedCamera = new CameraTransformValue();
+        }
+
         /// <summary>State of the tool UI.</summary>
         private enum SelectionMode {
             None,
@@ -102,15 +111,6 @@ namespace TrafficManager.UI.SubTools {
                 }
                 NodeMarker.RenderOverlay(cameraInfo, color, enlarge: highlight);
             }
-        }
-
-        public LaneConnectorTool(TrafficManagerTool mainTool)
-            : base(mainTool) {
-            // Log._Debug($"LaneConnectorTool: Constructor called");
-            currentLaneEnds = new Dictionary<ushort, List<LaneEnd>>();
-
-            CachedVisibleNodeIds = new GenericArrayCache<ushort>(NetManager.MAX_NODE_COUNT);
-            LastCachedCamera = new CameraTransformValue();
         }
 
         public override void OnToolGUI(Event e) {

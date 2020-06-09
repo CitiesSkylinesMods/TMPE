@@ -18,6 +18,50 @@ namespace TrafficManager.TrafficLight.Impl {
     public class TimedTrafficLightsStep
         : ITimedTrafficLightsStep
     {
+        public TimedTrafficLightsStep(ITimedTrafficLights timedNode,
+                                      int minTime,
+                                      int maxTime,
+                                      StepChangeMetric stepChangeMode,
+                                      float waitFlowBalance,
+                                      bool makeRed = false) {
+            MinTime = minTime;
+            MaxTime = maxTime;
+            ChangeMetric = stepChangeMode;
+            WaitFlowBalance = waitFlowBalance;
+            this.timedNode = timedNode;
+
+            CurrentFlow = Single.NaN;
+            CurrentWait = Single.NaN;
+
+            endTransitionStart = null;
+            stepDone = false;
+
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = 0;
+                Constants.ServiceFactory.NetService.ProcessNode(
+                    timedNode.NodeId,
+                    (ushort nId, ref NetNode node) => {
+                        segmentId = node.GetSegment(i);
+                        return true;
+                    });
+
+                if (segmentId == 0) {
+                    continue;
+                }
+
+                bool startNode =
+                    (bool)Constants.ServiceFactory.NetService.IsStartNode(
+                        segmentId,
+                        timedNode.NodeId);
+
+                if (!AddSegment(segmentId, startNode, makeRed)) {
+                    Log.Warning(
+                        $"TimedTrafficLightsStep.ctor: Failed to add segment {segmentId} " +
+                        $"@ start {startNode} to node {timedNode.NodeId}");
+                }
+            }
+        }
+
         /// <summary>
         /// The number of time units this traffic light remains in the current state at least
         /// </summary>
@@ -92,50 +136,6 @@ namespace TrafficManager.TrafficLight.Impl {
                 CustomSegmentLights,
                 InvalidSegmentLights.CollectionToString(),
                 WaitFlowBalance);
-        }
-
-        public TimedTrafficLightsStep(ITimedTrafficLights timedNode,
-                                      int minTime,
-                                      int maxTime,
-                                      StepChangeMetric stepChangeMode,
-                                      float waitFlowBalance,
-                                      bool makeRed = false) {
-            MinTime = minTime;
-            MaxTime = maxTime;
-            ChangeMetric = stepChangeMode;
-            WaitFlowBalance = waitFlowBalance;
-            this.timedNode = timedNode;
-
-            CurrentFlow = Single.NaN;
-            CurrentWait = Single.NaN;
-
-            endTransitionStart = null;
-            stepDone = false;
-
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    timedNode.NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        segmentId = node.GetSegment(i);
-                        return true;
-                    });
-
-                if (segmentId == 0) {
-                    continue;
-                }
-
-                bool startNode =
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(
-                        segmentId,
-                        timedNode.NodeId);
-
-                if (!AddSegment(segmentId, startNode, makeRed)) {
-                    Log.Warning(
-                        $"TimedTrafficLightsStep.ctor: Failed to add segment {segmentId} " +
-                        $"@ start {startNode} to node {timedNode.NodeId}");
-                }
-            }
         }
 
         /// <summary>

@@ -10,16 +10,9 @@ namespace TrafficManager.Manager.Impl {
         : AbstractCustomManager,
           IExtNodeManager
     {
-        public static ExtNodeManager Instance { get; }
-
         static ExtNodeManager() {
             Instance = new ExtNodeManager();
         }
-
-        /// <summary>
-        /// All additional data for nodes
-        /// </summary>
-        public ExtNode[] ExtNodes { get; }
 
         private ExtNodeManager() {
             ExtNodes = new ExtNode[NetManager.MAX_NODE_COUNT];
@@ -28,6 +21,13 @@ namespace TrafficManager.Manager.Impl {
                 ExtNodes[i] = new ExtNode((ushort)i);
             }
         }
+
+        public static ExtNodeManager Instance { get; }
+
+        /// <summary>
+        /// All additional data for nodes
+        /// </summary>
+        public ExtNode[] ExtNodes { get; }
 
         /// <summary>
         /// assuming highway rules are on, does the junction follow highway rules?

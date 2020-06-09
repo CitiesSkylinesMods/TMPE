@@ -19,6 +19,12 @@ namespace TrafficManager.UI.SubTools {
         : LegacySubTool,
           UI.MainMenu.IOnscreenDisplayProvider
     {
+        public ParkingRestrictionsTool(TrafficManagerTool mainTool)
+            : base(mainTool) {
+            CachedVisibleSegmentIds = new GenericArrayCache<ushort>(NetManager.MAX_SEGMENT_COUNT);
+            LastCachedCamera = new CameraTransformValue();
+        }
+
         private ParkingRestrictionsManager parkingManager => ParkingRestrictionsManager.Instance;
 
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir
@@ -51,13 +57,6 @@ namespace TrafficManager.UI.SubTools {
         /// Stores last cached camera position in <see cref="CachedVisibleSegmentIds"/>
         /// </summary>
         private CameraTransformValue LastCachedCamera { get; set; }
-
-        public ParkingRestrictionsTool(TrafficManagerTool mainTool)
-            : base(mainTool)
-        {
-            CachedVisibleSegmentIds = new GenericArrayCache<ushort>(NetManager.MAX_SEGMENT_COUNT);
-            LastCachedCamera = new CameraTransformValue();
-        }
 
         public override void OnActivate() {
             base.OnActivate();

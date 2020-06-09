@@ -20,18 +20,7 @@ namespace TrafficManager.Manager.Impl {
           ICustomDataManager<List<Configuration.TimedTrafficLights>>,
           ITrafficLightSimulationManager
     {
-        public static readonly TrafficLightSimulationManager Instance =
-            new TrafficLightSimulationManager();
-
         private const int SIM_MOD = 64;
-
-        /// <summary>
-        /// For each node id: traffic light simulation assigned to the node
-        /// </summary>
-        public TrafficLightSimulation[] TrafficLightSimulations { get; }
-
-        // public Dictionary<ushort, TrafficLightSimulation> TrafficLightSimulations
-        // = new Dictionary<ushort, TrafficLightSimulation>();
 
         private TrafficLightSimulationManager() {
             TrafficLightSimulations = new TrafficLightSimulation[NetManager.MAX_NODE_COUNT];
@@ -40,6 +29,17 @@ namespace TrafficManager.Manager.Impl {
                 TrafficLightSimulations[i] = new TrafficLightSimulation((ushort)i);
             }
         }
+
+        public static readonly TrafficLightSimulationManager Instance =
+            new TrafficLightSimulationManager();
+
+        /// <summary>
+        /// For each node id: traffic light simulation assigned to the node
+        /// </summary>
+        public TrafficLightSimulation[] TrafficLightSimulations { get; }
+
+        // public Dictionary<ushort, TrafficLightSimulation> TrafficLightSimulations
+        // = new Dictionary<ushort, TrafficLightSimulation>();
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();

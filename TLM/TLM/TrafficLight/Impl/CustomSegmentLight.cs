@@ -17,6 +17,28 @@ namespace TrafficManager.TrafficLight.Impl {
     public class CustomSegmentLight
         : ICustomSegmentLight
     {
+        public CustomSegmentLight(CustomSegmentLights lights,
+                                  RoadBaseAI.TrafficLightState mainLight) {
+            this.lights_ = lights;
+
+            SetStates(mainLight, LightLeft, LightRight);
+            UpdateVisuals();
+        }
+
+        [UsedImplicitly]
+        public CustomSegmentLight(CustomSegmentLights lights,
+                                  RoadBaseAI.TrafficLightState mainLight,
+                                  RoadBaseAI.TrafficLightState leftLight,
+                                  RoadBaseAI.TrafficLightState rightLight
+            // , RoadBaseAI.TrafficLightState pedestrianLight
+            ) {
+            this.lights_ = lights;
+
+            SetStates(mainLight, leftLight, rightLight);
+
+            UpdateVisuals();
+        }
+
         [Obsolete]
         public ushort NodeId => lights_.NodeId;
 
@@ -99,28 +121,6 @@ namespace TrafficManager.TrafficLight.Impl {
             if (changed) {
                 lights_.OnChange();
             }
-        }
-
-        public CustomSegmentLight(CustomSegmentLights lights,
-                                  RoadBaseAI.TrafficLightState mainLight) {
-            this.lights_ = lights;
-
-            SetStates(mainLight, LightLeft, LightRight);
-            UpdateVisuals();
-        }
-
-        [UsedImplicitly]
-        public CustomSegmentLight(CustomSegmentLights lights,
-                                  RoadBaseAI.TrafficLightState mainLight,
-                                  RoadBaseAI.TrafficLightState leftLight,
-                                  RoadBaseAI.TrafficLightState rightLight
-                // , RoadBaseAI.TrafficLightState pedestrianLight
-            ) {
-            this.lights_ = lights;
-
-            SetStates(mainLight, leftLight, rightLight);
-
-            UpdateVisuals();
         }
 
         public void ToggleMode() {

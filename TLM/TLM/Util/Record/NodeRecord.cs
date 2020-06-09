@@ -4,9 +4,10 @@ namespace TrafficManager.Util.Record {
     using static TrafficManager.Util.Shortcuts;
 
     class NodeRecord : IRecordable {
-        public ushort NodeId { get; private set; }
         public NodeRecord(ushort nodeId) => NodeId = nodeId;
 
+        public ushort NodeId { get; private set; }
+        
         private bool trafficLight_;
         private List<LaneConnectionRecord> lanes_;
         private static TrafficLightManager tlMan => TrafficLightManager.Instance;

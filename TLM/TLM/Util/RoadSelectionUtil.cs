@@ -11,12 +11,12 @@ namespace TrafficManager.Util {
     using static SegmentTraverser;
 
     public class RoadSelectionUtil {
-        /// instance of singleton
-        public static RoadSelectionUtil Instance { get; private set; }
-
         public RoadSelectionUtil() : base() {
             Instance = this;
         }
+
+        /// instance of singleton
+        public static RoadSelectionUtil Instance { get; private set; }
 
         public static void Release() {
             if (Instance != null) {

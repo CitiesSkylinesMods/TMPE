@@ -49,6 +49,15 @@ namespace TrafficManager.State {
 
         private static object laneSpeedLimitLock = new object();
 
+        static Flags() {
+            laneConnections = new uint[NetManager.MAX_LANE_COUNT][][];
+            laneSpeedLimitArray = new float?[NetManager.MAX_SEGMENT_COUNT][];
+            laneSpeedLimit = new Dictionary<uint, float>();
+            laneAllowedVehicleTypesArray = new ExtVehicleType?[NetManager.MAX_SEGMENT_COUNT][];
+            laneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
+            highwayLaneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
+        }
+
         internal static void PrintDebugInfo() {
             Log.Info("------------------------");
             Log.Info("--- LANE ARROW FLAGS ---");
@@ -1167,15 +1176,6 @@ namespace TrafficManager.State {
             for (uint i = 0; i < highwayLaneArrowFlags.Length; ++i) {
                 highwayLaneArrowFlags[i] = null;
             }
-        }
-
-        static Flags() {
-            laneConnections = new uint[NetManager.MAX_LANE_COUNT][][];
-            laneSpeedLimitArray = new float?[NetManager.MAX_SEGMENT_COUNT][];
-            laneSpeedLimit = new Dictionary<uint, float>();
-            laneAllowedVehicleTypesArray = new ExtVehicleType?[NetManager.MAX_SEGMENT_COUNT][];
-            laneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
-            highwayLaneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
         }
 
         public static void OnBeforeLoadData() { }

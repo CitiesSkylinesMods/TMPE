@@ -33,6 +33,37 @@ namespace TrafficManager.API.Traffic.Data {
         public float minSafeSpeedImprovement;
         public float minSafeTrafficImprovement;
 
+        public ExtVehicle(ushort vehicleId) {
+            this.vehicleId = vehicleId;
+            lastPathId = 0;
+            lastPathPositionIndex = 0;
+            lastTransitStateUpdate = 0;
+            lastPositionUpdate = 0;
+            totalLength = 0;
+            waitTime = 0;
+            flags = ExtVehicleFlags.None;
+            vehicleType = ExtVehicleType.None;
+            heavyVehicle = false;
+            recklessDriver = false;
+            currentSegmentId = 0;
+            currentStartNode = false;
+            currentLaneIndex = 0;
+            nextSegmentId = 0;
+            nextLaneIndex = 0;
+            previousVehicleIdOnSegment = 0;
+            nextVehicleIdOnSegment = 0;
+            lastAltLaneSelSegmentId = 0;
+            junctionTransitState = VehicleJunctionTransitState.None;
+            timedRand = 0;
+            dlsReady = false;
+            maxReservedSpace = 0;
+            laneSpeedRandInterval = 0;
+            maxOptLaneChanges = 0;
+            maxUnsafeSpeedDiff = 0;
+            minSafeSpeedImprovement = 0;
+            minSafeTrafficImprovement = 0;
+        }
+
         public override string ToString() {
             return string.Format(
                 "[VehicleState\n\tvehicleId = {0}\n\tlastPathId = {1}\n" +
@@ -76,37 +107,6 @@ namespace TrafficManager.API.Traffic.Data {
                 maxUnsafeSpeedDiff,
                 minSafeSpeedImprovement,
                 minSafeTrafficImprovement);
-        }
-
-        public ExtVehicle(ushort vehicleId) {
-            this.vehicleId = vehicleId;
-            lastPathId = 0;
-            lastPathPositionIndex = 0;
-            lastTransitStateUpdate = 0;
-            lastPositionUpdate = 0;
-            totalLength = 0;
-            waitTime = 0;
-            flags = ExtVehicleFlags.None;
-            vehicleType = ExtVehicleType.None;
-            heavyVehicle = false;
-            recklessDriver = false;
-            currentSegmentId = 0;
-            currentStartNode = false;
-            currentLaneIndex = 0;
-            nextSegmentId = 0;
-            nextLaneIndex = 0;
-            previousVehicleIdOnSegment = 0;
-            nextVehicleIdOnSegment = 0;
-            lastAltLaneSelSegmentId = 0;
-            junctionTransitState = VehicleJunctionTransitState.None;
-            timedRand = 0;
-            dlsReady = false;
-            maxReservedSpace = 0;
-            laneSpeedRandInterval = 0;
-            maxOptLaneChanges = 0;
-            maxUnsafeSpeedDiff = 0;
-            minSafeSpeedImprovement = 0;
-            minSafeTrafficImprovement = 0;
         }
     }
 }
