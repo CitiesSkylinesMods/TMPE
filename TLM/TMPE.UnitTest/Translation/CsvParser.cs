@@ -273,8 +273,12 @@ namespace TMUnitTest.Translation {
         /// <param name="dataBlock"></param>
         /// <param name="columns"></param>
         /// <param name="result">map of translations [langCode][key][translated_string]</param>
-        private static void TestCollectTranslations(string dataBlock, List<string> columns,
-                                     out Dictionary<string, Dictionary<string, string>> result) {
+        private static void TestCollectTranslations(
+            string dataBlock,
+            List<string> columns,
+            out Dictionary<string,
+            Dictionary<string, string>> result)
+        {
             PrivateType privateType = new PrivateType(typeof(LookupTable));
             object[] args = {dataBlock, columns, null};
             privateType.InvokeStatic("CollectTranslations", args);

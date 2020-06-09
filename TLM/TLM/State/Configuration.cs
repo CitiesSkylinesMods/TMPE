@@ -155,8 +155,12 @@ namespace TrafficManager {
                     "uturnAllowed={0}, turnOnRedAllowed={1}, farTurnOnRedAllowed={2}, " +
                     "straightLaneChangingAllowed={3}, enterWhenBlockedAllowed={4}, " +
                     "pedestrianCrossingAllowed={5}",
-                    uturnAllowed, turnOnRedAllowed, farTurnOnRedAllowed, straightLaneChangingAllowed,
-                    enterWhenBlockedAllowed, pedestrianCrossingAllowed);
+                    uturnAllowed,
+                    turnOnRedAllowed,
+                    farTurnOnRedAllowed,
+                    straightLaneChangingAllowed,
+                    enterWhenBlockedAllowed,
+                    pedestrianCrossingAllowed);
             }
         }
 

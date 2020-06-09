@@ -410,8 +410,14 @@ namespace TrafficManager.Manager.Impl {
                 Log._DebugFormat(
                     "TrafficPriorityManager.HasPriority({0}): Checking vehicle {1} at node {2}. " +
                     "Coming from seg. {3}, start {4}, lane {5}, going to seg. {6}, lane {7}",
-                    vehicleId, vehicleId, transitNodeId, curPos.m_segment, startNode,
-                    curPos.m_lane, nextPos.m_segment, nextPos.m_lane);
+                    vehicleId,
+                    vehicleId,
+                    transitNodeId,
+                    curPos.m_segment,
+                    startNode,
+                    curPos.m_lane,
+                    nextPos.m_segment,
+                    nextPos.m_lane);
             }
 
             if ((vehicle.m_flags & Vehicle.Flags.Spawned) == 0) {
@@ -608,10 +614,23 @@ namespace TrafficManager.Manager.Impl {
                     "coming from seg. {5}, start {6}, lane {7}, going to seg. {8}, lane {9}\n" +
                     "TrafficPriorityManager.IsConflictingVehicle({10}, {11}): INCOMING is coming from " +
                     "seg. {12}, start {13}, lane {14}, going to seg. {15}, lane {16}\nincoming state: {17}",
-                    vehicleId, incomingVehicleId, incomingVehicleId, vehicleId, incomingVehicleId,
-                    curPos.m_segment, startNode, curPos.m_lane, nextPos.m_segment, nextPos.m_lane,
-                    vehicleId, incomingVehicleId, incomingState.currentSegmentId, incomingState.currentStartNode,
-                    incomingState.currentLaneIndex, incomingState.nextSegmentId, incomingState.nextLaneIndex,
+                    vehicleId,
+                    incomingVehicleId,
+                    incomingVehicleId,
+                    vehicleId,
+                    incomingVehicleId,
+                    curPos.m_segment,
+                    startNode,
+                    curPos.m_lane,
+                    nextPos.m_segment,
+                    nextPos.m_lane,
+                    vehicleId,
+                    incomingVehicleId,
+                    incomingState.currentSegmentId,
+                    incomingState.currentStartNode,
+                    incomingState.currentLaneIndex,
+                    incomingState.nextSegmentId,
+                    incomingState.nextLaneIndex,
                     incomingState);
             }
 
@@ -644,7 +663,9 @@ namespace TrafficManager.Manager.Impl {
                     Log._DebugFormat(
                         "TrafficPriorityManager.IsConflictingVehicle({0}, {1}): Detected traffic " +
                         "light. Incoming state ({2}): {3}",
-                        vehicleId, incomingVehicleId, incomingToRelDir,
+                        vehicleId,
+                        incomingVehicleId,
+                        incomingToRelDir,
                         incomingLight.GetLightState(incomingToRelDir));
                 }
 
@@ -736,8 +757,12 @@ namespace TrafficManager.Manager.Impl {
                                     "TrafficPriorityManager.IsConflictingVehicle({0}, {1}): Incoming " +
                                     "{2} needs {3} time units to get to the node where target needs {4} " +
                                     "time units (diff = {5}). Difference to large. *IGNORING*",
-                                    vehicleId, incomingVehicleId, incomingVehicleId,
-                                    incomingTimeToTransitNode, targetTimeToTransitNode, timeDiff);
+                                    vehicleId,
+                                    incomingVehicleId,
+                                    incomingVehicleId,
+                                    incomingTimeToTransitNode,
+                                    targetTimeToTransitNode,
+                                    timeDiff);
                             }
 
                             return false;
@@ -748,8 +773,12 @@ namespace TrafficManager.Manager.Impl {
                                 "TrafficPriorityManager.IsConflictingVehicle({0}, {1}): Incoming {2} " +
                                 "needs {3} time units to get to the node where target needs {4} time " +
                                 "units (diff = {5}). Difference within bounds. Priority check required.",
-                                vehicleId, incomingVehicleId, incomingVehicleId,
-                                incomingTimeToTransitNode, targetTimeToTransitNode, timeDiff);
+                                vehicleId,
+                                incomingVehicleId,
+                                incomingVehicleId,
+                                incomingTimeToTransitNode,
+                                targetTimeToTransitNode,
+                                timeDiff);
                         }
                     } else {
                         Log._DebugIf(
@@ -768,7 +797,11 @@ namespace TrafficManager.Manager.Impl {
                             "TrafficPriorityManager.IsConflictingVehicle({0}, {1}): Incoming {2} is " +
                             "BLOCKED and has waited a bit or is STOP and targetVehicleId {3} " +
                             "< incomingVehicleId {4}. *IGNORING*",
-                            vehicleId, incomingVehicleId, incomingVehicleId, vehicleId, incomingVehicleId);
+                            vehicleId,
+                            incomingVehicleId,
+                            incomingVehicleId,
+                            vehicleId,
+                            incomingVehicleId);
                     }
 
                     // incoming vehicle waits because the junction is blocked or it does not get
@@ -855,10 +888,22 @@ namespace TrafficManager.Manager.Impl {
                     "*** Checking if vehicle {2} (main road = {3}) @ (seg. {4}, start {5}, lane {6}) " +
                     "-> (seg. {7}, lane {8}) has priority over {9} (main road = {10}) " +
                     "@ (seg. {11}, start {12}, lane {13}) -> (seg. {14}, lane {15}).",
-                    vehicleId, incomingVehicleId, vehicleId, onMain, curPos.m_segment,
-                    startNode, curPos.m_lane, nextPos.m_segment, nextPos.m_lane, incomingVehicleId,
-                    incomingOnMain, incomingState.currentSegmentId, incomingState.currentStartNode,
-                    incomingState.currentLaneIndex, incomingState.nextSegmentId, incomingState.nextLaneIndex);
+                    vehicleId,
+                    incomingVehicleId,
+                    vehicleId,
+                    onMain,
+                    curPos.m_segment,
+                    startNode,
+                    curPos.m_lane,
+                    nextPos.m_segment,
+                    nextPos.m_lane,
+                    incomingVehicleId,
+                    incomingOnMain,
+                    incomingState.currentSegmentId,
+                    incomingState.currentStartNode,
+                    incomingState.currentLaneIndex,
+                    incomingState.nextSegmentId,
+                    incomingState.nextLaneIndex);
             }
 
             if (targetToDir == ArrowDirection.None || incomingFromDir == ArrowDirection.None ||
@@ -867,7 +912,11 @@ namespace TrafficManager.Manager.Impl {
                     Log._DebugFormat(
                         "  TrafficPriorityManager.HasVehiclePriority({0}, {1}): Invalid directions " +
                         "given: targetToDir={2}, incomingFromDir={3}, incomingToRelDir={4}",
-                        vehicleId, incomingVehicleId, targetToDir, incomingFromDir, incomingToRelDir);
+                        vehicleId,
+                        incomingVehicleId,
+                        targetToDir,
+                        incomingFromDir,
+                        incomingToRelDir);
                 }
 
                 return true;
@@ -900,7 +949,11 @@ namespace TrafficManager.Manager.Impl {
                 Log._DebugFormat(
                     "  TrafficPriorityManager.HasVehiclePriority({0}, {1}): targetToDir: {2}, " +
                     "incomingFromDir: {3}, incomingToRelDir: {4}",
-                    vehicleId, incomingVehicleId, targetToDir, incomingFromDir, incomingToRelDir);
+                    vehicleId,
+                    incomingVehicleId,
+                    targetToDir,
+                    incomingFromDir,
+                    incomingToRelDir);
             }
 
             if (Services.SimulationService.TrafficDrivesOnLeft) {
@@ -913,7 +966,11 @@ namespace TrafficManager.Manager.Impl {
                     Log._DebugFormat(
                         "  TrafficPriorityManager.HasVehiclePriority({0}, {1}): LHT! targetToDir: {2}, " +
                         "incomingFromDir: {3}, incomingToRelDir: {4}",
-                        vehicleId, incomingVehicleId, targetToDir, incomingFromDir, incomingToRelDir);
+                        vehicleId,
+                        incomingVehicleId,
+                        targetToDir,
+                        incomingFromDir,
+                        incomingToRelDir);
                 }
             }
 
@@ -921,7 +978,11 @@ namespace TrafficManager.Manager.Impl {
                 Log._DebugFormat(
                     "  TrafficPriorityManager.HasVehiclePriority({0}, {1}): targetToDir={2}, " +
                     "incomingFromDir={3}, incomingToRelDir={4}",
-                    vehicleId, incomingVehicleId, targetToDir, incomingFromDir, incomingToRelDir);
+                    vehicleId,
+                    incomingVehicleId,
+                    targetToDir,
+                    incomingFromDir,
+                    incomingToRelDir);
             }
 
             //---------------------------
@@ -1073,8 +1134,12 @@ namespace TrafficManager.Manager.Impl {
                                 Log._DebugFormat(
                                     "  TrafficPriorityManager.DetectCollision({0}, {1}): Target is going {2}. " +
                                     "Checking if lane {3} is LEFT to {4}. would collide? {5}",
-                                    vehicleId, incomingVehicleId, targetToDir, nextPos.m_lane,
-                                    incomingState.nextLaneIndex, wouldCollide);
+                                    vehicleId,
+                                    incomingVehicleId,
+                                    targetToDir,
+                                    nextPos.m_lane,
+                                    incomingState.nextLaneIndex,
+                                    wouldCollide);
                             }
 
                             break;
@@ -1097,8 +1162,13 @@ namespace TrafficManager.Manager.Impl {
                                             "  TrafficPriorityManager.DetectCollision({0}, {1}): " +
                                             "Target is going {2} and incoming is coming from {3}. " +
                                             "Checking if lane {4} is RIGHT to {5}. would collide? {6}",
-                                            vehicleId, incomingVehicleId, targetToDir, incomingFromDir,
-                                            nextPos.m_lane, incomingState.nextLaneIndex, wouldCollide);
+                                            vehicleId,
+                                            incomingVehicleId,
+                                            targetToDir,
+                                            incomingFromDir,
+                                            nextPos.m_lane,
+                                            incomingState.nextLaneIndex,
+                                            wouldCollide);
                                     }
 
                                     break;
@@ -1117,8 +1187,13 @@ namespace TrafficManager.Manager.Impl {
                                             "  TrafficPriorityManager.DetectCollision({0}, {1}): Target " +
                                             "is going {2} and incoming is coming from {3}. Checking if " +
                                             "lane {4} is LEFT to {5}. would collide? {6}",
-                                            vehicleId, incomingVehicleId, targetToDir, incomingFromDir,
-                                            nextPos.m_lane, incomingState.nextLaneIndex, wouldCollide);
+                                            vehicleId,
+                                            incomingVehicleId,
+                                            targetToDir,
+                                            incomingFromDir,
+                                            nextPos.m_lane,
+                                            incomingState.nextLaneIndex,
+                                            wouldCollide);
                                     }
 
                                     break;
@@ -1153,8 +1228,11 @@ namespace TrafficManager.Manager.Impl {
                                 Log._DebugFormat(
                                     "  TrafficPriorityManager.DetectCollision({0}, {1}): Target is " +
                                     "going RIGHT. Checking if lane {2} is RIGHT to {3}. would collide? {4}",
-                                    vehicleId, incomingVehicleId, nextPos.m_lane,
-                                    incomingState.nextLaneIndex, wouldCollide);
+                                    vehicleId,
+                                    incomingVehicleId,
+                                    nextPos.m_lane,
+                                    incomingState.nextLaneIndex,
+                                    wouldCollide);
                             }
 
                             break;
@@ -1199,8 +1277,12 @@ namespace TrafficManager.Manager.Impl {
                                         "  TrafficPriorityManager.DetectCollision({0}, {1}): Target " +
                                         "is going {2}, incoming is coming from {3} and going {4}. " +
                                         "SHOULD NOT HAPPEN. would collide? {5}",
-                                        vehicleId, incomingVehicleId, targetToDir, incomingFromDir,
-                                        incomingToRelDir, wouldCollide);
+                                        vehicleId,
+                                        incomingVehicleId,
+                                        targetToDir,
+                                        incomingFromDir,
+                                        incomingToRelDir,
+                                        wouldCollide);
                                 }
 
                                 break;
@@ -1237,8 +1319,12 @@ namespace TrafficManager.Manager.Impl {
                                         "  TrafficPriorityManager.DetectCollision({0}, {1}): Target " +
                                         "is going {2}, incoming is coming from {3} and going {4}. " +
                                         "SHOULD NOT HAPPEN. would collide? {5}",
-                                        vehicleId, incomingVehicleId, targetToDir, incomingFromDir,
-                                        incomingToRelDir, wouldCollide);
+                                        vehicleId,
+                                        incomingVehicleId,
+                                        targetToDir,
+                                        incomingFromDir,
+                                        incomingToRelDir,
+                                        wouldCollide);
                                 }
 
                                 break;
@@ -1260,8 +1346,12 @@ namespace TrafficManager.Manager.Impl {
                     Log._DebugFormat(
                         "  TrafficPriorityManager.DetectCollision({0}, {1}): Target is going {2}, " +
                         "incoming is coming from {3} and going {4}. would collide? {5}",
-                        vehicleId, incomingVehicleId, targetToDir, incomingFromDir,
-                        incomingToRelDir, wouldCollide);
+                        vehicleId,
+                        incomingVehicleId,
+                        targetToDir,
+                        incomingFromDir,
+                        incomingToRelDir,
+                        wouldCollide);
                 }
             }
 
@@ -1312,7 +1402,10 @@ namespace TrafficManager.Manager.Impl {
                             Log.WarningFormat(
                                 "TrafficPriorityManager.HasPriorityOnSameLevel({0}, {1}): targetToDir={2}, " +
                                 "incomingFromDir={3}, incomingToRelDir={4}: SHOULD NOT HAPPEN",
-                                vehicleId, incomingVehicleId, targetToDir, incomingFromDir,
+                                vehicleId,
+                                incomingVehicleId,
+                                targetToDir,
+                                incomingFromDir,
                                 incomingToRelDir);
                         }
 
@@ -1327,8 +1420,12 @@ namespace TrafficManager.Manager.Impl {
                 Log._DebugFormat(
                     "TrafficPriorityManager.HasPriorityOnSameLevel({0}, {1}): targetToDir={2}, " +
                     "incomingFromDir={3}, incomingToRelDir={4}: ret={5}",
-                    vehicleId, incomingVehicleId, targetToDir, incomingFromDir,
-                    incomingToRelDir, ret);
+                    vehicleId,
+                    incomingVehicleId,
+                    targetToDir,
+                    incomingFromDir,
+                    incomingToRelDir,
+                    ret);
             }
 
             return ret;
@@ -1380,8 +1477,15 @@ namespace TrafficManager.Manager.Impl {
                     Log._DebugFormat(
                         "    IsLaneOrderConflictFree({0}, {1}, {2}): dir={3}, dir2={4}, dir3={5} " +
                         "laneDir={6}, leftLanePos={7}, rightLanePos={8}",
-                        segmentId, leftLaneIndex, rightLaneIndex, dir, dir2, dir3,
-                        leftLane.m_direction, leftLane.m_position, rightLane.m_position);
+                        segmentId,
+                        leftLaneIndex,
+                        rightLaneIndex,
+                        dir,
+                        dir2,
+                        dir3,
+                        leftLane.m_direction,
+                        leftLane.m_position,
+                        rightLane.m_position);
                 }
 
                 return (dir3 == NetInfo.Direction.Forward)

@@ -128,10 +128,20 @@ namespace TrafficManager.TrafficLight.Impl {
                 "\tSeparateVehicleTypes: {7}\n\tAutoPedestrianLightState: {8}\n\tPedestrianLightState: " +
                 "{9}\n\tManualPedestrianMode: {10}\n\tmanualPedestrianMode: {11}\n\t" +
                 "InternalPedestrianLightState: {12}\n\tMainSegmentLight: {13}\nCustomSegmentLights]",
-                base.ToString(), NodeId, LastChangeFrame, InvalidPedestrianLight, CustomLights,
-                VehicleTypes.CollectionToString(), VehicleTypeByLaneIndex.ArrayToString(),
-                SeparateVehicleTypes, AutoPedestrianLightState, PedestrianLightState, ManualPedestrianMode,
-                manualPedestrianMode, InternalPedestrianLightState, MainSegmentLight);
+                base.ToString(),
+                NodeId,
+                LastChangeFrame,
+                InvalidPedestrianLight,
+                CustomLights,
+                VehicleTypes.CollectionToString(),
+                VehicleTypeByLaneIndex.ArrayToString(),
+                SeparateVehicleTypes,
+                AutoPedestrianLightState,
+                PedestrianLightState,
+                ManualPedestrianMode,
+                manualPedestrianMode,
+                InternalPedestrianLightState,
+                MainSegmentLight);
         }
 
         public bool Relocate(ushort segmentId,
@@ -542,7 +552,10 @@ namespace TrafficManager.TrafficLight.Impl {
                                 "CustomSegmentLights.CalculateAutoPedestrianLightState: Other (straight) " +
                                 "segment {0} @ {1} has different connection service than segment {2} " +
                                 "({3} vs. {4}). Ignoring traffic light state.",
-                                otherSegmentId, NodeId, SegmentId, nextConnectionClass.m_service,
+                                otherSegmentId,
+                                NodeId,
+                                SegmentId,
+                                nextConnectionClass.m_service,
                                 prevConnectionClass.m_service);
                         }
 
@@ -618,8 +631,12 @@ namespace TrafficManager.TrafficLight.Impl {
                 Log._DebugFormat(
                     "CustomSegmentLights.Housekeeping({0}, {1}): housekeeping started @ seg. {2}, " +
                     "node {3}, allAllowedTypes={4}, allAllowedMask={5}",
-                    mayDelete, calculateAutoPedLight, SegmentId, nodeId,
-                    allAllowedTypes.DictionaryToString(), allAllowedMask);
+                    mayDelete,
+                    calculateAutoPedLight,
+                    SegmentId,
+                    nodeId,
+                    allAllowedTypes.DictionaryToString(),
+                    allAllowedMask);
             }
 
             // bool addPedestrianLight = false;
@@ -731,9 +748,15 @@ namespace TrafficManager.TrafficLight.Impl {
                             "node {3}: Finished processing lane {4}: mainVehicleType={5}, " +
                             "VehicleTypeByLaneIndex={6}, laneIndicesWithoutSeparateLights={7}, " +
                             "numLights={8}, SeparateVehicleTypes={9}",
-                            mayDelete, calculateAutoPedLight, SegmentId, nodeId, laneIndex,
-                            mainVehicleType, VehicleTypeByLaneIndex.ArrayToString(),
-                            laneIndicesWithoutSeparateLights.CollectionToString(), separateLanes,
+                            mayDelete,
+                            calculateAutoPedLight,
+                            SegmentId,
+                            nodeId,
+                            laneIndex,
+                            mainVehicleType,
+                            VehicleTypeByLaneIndex.ArrayToString(),
+                            laneIndicesWithoutSeparateLights.CollectionToString(),
+                            separateLanes,
                             SeparateVehicleTypes);
                     }
                 }
@@ -790,8 +813,12 @@ namespace TrafficManager.TrafficLight.Impl {
                 Log._DebugFormat(
                     "CustomSegmentLights.Housekeeping({0}, {1}): housekeeping @ seg. {2}, node {3}: " +
                     "Created all necessary lights. VehicleTypeByLaneIndex={4}, CustomLights={5}",
-                    mayDelete, calculateAutoPedLight, SegmentId, nodeId,
-                    VehicleTypeByLaneIndex.ArrayToString(), CustomLights.DictionaryToString());
+                    mayDelete,
+                    calculateAutoPedLight,
+                    SegmentId,
+                    nodeId,
+                    VehicleTypeByLaneIndex.ArrayToString(),
+                    CustomLights.DictionaryToString());
             }
 
             if (mayDelete) {
@@ -811,7 +838,10 @@ namespace TrafficManager.TrafficLight.Impl {
                     Log._DebugFormat(
                         "CustomSegmentLights.Housekeeping({0}, {1}): housekeeping @ seg. {2}, " +
                         "node {3}: Going to delete unnecessary lights now: vehicleTypesToDelete={4}",
-                        mayDelete, calculateAutoPedLight, SegmentId, nodeId,
+                        mayDelete,
+                        calculateAutoPedLight,
+                        SegmentId,
+                        nodeId,
                         vehicleTypesToDelete.CollectionToString());
                 }
 
@@ -847,8 +877,12 @@ namespace TrafficManager.TrafficLight.Impl {
                 Log._DebugFormat(
                     "CustomSegmentLights.Housekeeping({0}, {1}): housekeeping @ seg. {2}, node {3}: " +
                     "Housekeeping complete. VehicleTypeByLaneIndex={4} CustomLights={5}",
-                    mayDelete, calculateAutoPedLight, SegmentId, nodeId,
-                    VehicleTypeByLaneIndex.ArrayToString(), CustomLights.DictionaryToString());
+                    mayDelete,
+                    calculateAutoPedLight,
+                    SegmentId,
+                    nodeId,
+                    VehicleTypeByLaneIndex.ArrayToString(),
+                    CustomLights.DictionaryToString());
             }
         } // end Housekeeping()
     } // end class

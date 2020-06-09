@@ -51,7 +51,12 @@ namespace TrafficManager.TrafficLight.Impl {
             return string.Format(
                 "[CustomSegmentLight seg. {0} @ node {1}\n\tCurrentMode: {2}\n\tLightLeft: {3}\n" +
                 "\tLightMain: {4}\n\tLightRight: {5}\nCustomSegmentLight]",
-                SegmentId, NodeId, CurrentMode, LightLeft, LightMain, LightRight);
+                SegmentId,
+                NodeId,
+                CurrentMode,
+                LightLeft,
+                LightMain,
+                LightRight);
         }
 
         private void EnsureModeLights() {

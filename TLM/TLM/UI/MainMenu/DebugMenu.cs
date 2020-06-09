@@ -245,8 +245,10 @@ namespace TrafficManager.UI.MainMenu {
 
                 Log.InfoFormat(
                     "\tFlags: {0}, cat: {1}, type: {2}, name: {3}",
-                    linesBuffer[i].m_flags, linesBuffer[i].Info.category,
-                    linesBuffer[i].Info.m_transportType, TransportManager.instance.GetLineName((ushort)i));
+                    linesBuffer[i].m_flags,
+                    linesBuffer[i].Info.category,
+                    linesBuffer[i].Info.m_transportType,
+                    TransportManager.instance.GetLineName((ushort)i));
 
                 ushort firstStopNodeId = linesBuffer[i].m_stops;
                 ushort stopNodeId = firstStopNodeId;
@@ -259,9 +261,13 @@ namespace TrafficManager.UI.MainMenu {
                     Log.InfoFormat(
                         "\tStop node #{0} -- {1}: Flags: {2}, Transport line: {3}, Problems: {4} " +
                         "Pos: {5}, Dist. to lat pos: {6}",
-                        index, stopNodeId, nodesBuffer[stopNodeId].m_flags,
-                        nodesBuffer[stopNodeId].m_transportLine, nodesBuffer[stopNodeId].m_problems,
-                        pos, (lastNodePos - pos).magnitude);
+                        index,
+                        stopNodeId,
+                        nodesBuffer[stopNodeId].m_flags,
+                        nodesBuffer[stopNodeId].m_transportLine,
+                        nodesBuffer[stopNodeId].m_problems,
+                        pos,
+                        (lastNodePos - pos).magnitude);
 
                     if (nodesBuffer[stopNodeId].m_problems != Notification.Problem.None) {
                         Log.Warning("\t*** PROBLEMS DETECTED ***");
