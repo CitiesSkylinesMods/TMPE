@@ -299,8 +299,11 @@ namespace TrafficManager.Manager.Impl {
                     "defaultUturnAllowed={2}, defaultNearTurnOnRedAllowed={3}, " +
                     "defaultFarTurnOnRedAllowed={4}, defaultStraightLaneChangingAllowed={5}, " +
                     "defaultEnterWhenBlockedAllowed={6}, defaultPedestrianCrossingAllowed={7}",
-                    segEnd.segmentId, segEnd.startNode, endFlags.defaultUturnAllowed,
-                    endFlags.defaultNearTurnOnRedAllowed, endFlags.defaultFarTurnOnRedAllowed,
+                    segEnd.segmentId,
+                    segEnd.startNode,
+                    endFlags.defaultUturnAllowed,
+                    endFlags.defaultNearTurnOnRedAllowed,
+                    endFlags.defaultFarTurnOnRedAllowed,
                     endFlags.defaultStraightLaneChangingAllowed,
                     endFlags.defaultEnterWhenBlockedAllowed,
                     endFlags.defaultPedestrianCrossingAllowed);
@@ -324,7 +327,11 @@ namespace TrafficManager.Manager.Impl {
                 Log._DebugFormat(
                     "JunctionRestrictionsManager.IsUturnAllowedConfigurable({0}, {1}): ret={2}, " +
                     "flags={3}, service={4}, seg.oneWay={5}",
-                    segmentId, startNode, ret, node.m_flags, node.Info?.m_class?.m_service,
+                    segmentId,
+                    startNode,
+                    ret,
+                    node.m_flags,
+                    node.Info?.m_class?.m_service,
                     Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId].oneWay);
             }
 #endif
@@ -485,7 +492,11 @@ namespace TrafficManager.Manager.Impl {
                     "JunctionRestrictionsManager.IsLaneChangingAllowedWhenGoingStraightConfigurable" +
                     "({0}, {1}): ret={2}, flags={3}, service={4}, outgoingOneWay={5}, " +
                     "node.CountSegments()={6}",
-                    segmentId, startNode, ret, node.m_flags, node.Info?.m_class?.m_service,
+                    segmentId,
+                    startNode,
+                    ret,
+                    node.m_flags,
+                    node.Info?.m_class?.m_service,
                     isOneWay && segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].outgoing,
                     node.CountSegments());
             }
@@ -551,7 +562,11 @@ namespace TrafficManager.Manager.Impl {
                 Log._DebugFormat(
                     "JunctionRestrictionsManager.IsEnteringBlockedJunctionAllowedConfigurable" +
                     "({0}, {1}): ret={2}, flags={3}, service={4}, outgoingOneWay={5}",
-                    segmentId, startNode, ret, node.m_flags, node.Info?.m_class?.m_service,
+                    segmentId,
+                    startNode,
+                    ret,
+                    node.m_flags,
+                    node.Info?.m_class?.m_service,
                     isOneWay && segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)].outgoing);
             }
 #endif
@@ -581,7 +596,11 @@ namespace TrafficManager.Manager.Impl {
                         "JunctionRestrictionsManager.GetDefaultEnteringBlockedJunctionAllowed" +
                         "({0}, {1}): Setting is not configurable. res={2}, flags={3}, " +
                         "node.CountSegments()={4}",
-                        segmentId, startNode, res, node.m_flags, node.CountSegments());
+                        segmentId,
+                        startNode,
+                        res,
+                        node.m_flags,
+                        node.CountSegments());
                 }
 
                 return res;

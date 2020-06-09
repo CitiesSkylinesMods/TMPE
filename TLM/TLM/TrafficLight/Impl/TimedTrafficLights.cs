@@ -58,8 +58,14 @@ namespace TrafficManager.TrafficLight.Impl {
                 "[TimedTrafficLights\n\tNodeId = {0}\n\tmasterNodeId = {1}\n\tSteps = {2}\n" +
                 "\tNodeGroup = {3}\n\ttestMode = {4}\n\tstarted = {5}\n\tDirections = {6}\n" +
                 "\tsegmentEndIds = {7}\nTimedTrafficLights]",
-                NodeId, MasterNodeId, Steps.CollectionToString(), NodeGroup.CollectionToString(),
-                TestMode, started, Directions.DictionaryToString(), segmentEndIds.CollectionToString());
+                NodeId,
+                MasterNodeId,
+                Steps.CollectionToString(),
+                NodeGroup.CollectionToString(),
+                TestMode,
+                started,
+                Directions.DictionaryToString(),
+                segmentEndIds.CollectionToString());
         }
 
         public TimedTrafficLights(ushort nodeId, IEnumerable<ushort> nodeGroup) {
@@ -653,8 +659,12 @@ namespace TrafficManager.TrafficLight.Impl {
                         Log._DebugFormat(
                             "TimedTrafficLights.SimulationStep(): Next step {0} has minTime = 0 at " +
                             "timed light {1}. Old step {2} has waitFlowDiff={3} (flow={4}, wait={5}).",
-                            nextStepIndex, NodeId, CurrentStep, maxWaitFlowDiff,
-                            Steps[CurrentStep].CurrentFlow, Steps[CurrentStep].CurrentWait);
+                            nextStepIndex,
+                            NodeId,
+                            CurrentStep,
+                            maxWaitFlowDiff,
+                            Steps[CurrentStep].CurrentFlow,
+                            Steps[CurrentStep].CurrentWait);
                     }
 
                     while (nextStepIndex != prevStepIndex) {
@@ -677,8 +687,13 @@ namespace TrafficManager.TrafficLight.Impl {
                                 "TimedTrafficLights.SimulationStep(): Checking upcoming step {0} " +
                                 "@ node {1}: flow={2} wait={3} minTime={4}. bestWaitFlowDiff={5}, " +
                                 "bestNextStepIndex={6}",
-                                nextStepIndex, NodeId, flow, wait, Steps[nextStepIndex].MinTime,
-                                bestNextStepIndex, bestNextStepIndex);
+                                nextStepIndex,
+                                NodeId,
+                                flow,
+                                wait,
+                                Steps[nextStepIndex].MinTime,
+                                bestNextStepIndex,
+                                bestNextStepIndex);
                         }
 
                         if (Steps[nextStepIndex].MinTime != 0) {
@@ -768,7 +783,8 @@ namespace TrafficManager.TrafficLight.Impl {
                     "done. NodeGroup={1}, nodeId={2}, NumSteps={3}",
                     NodeId,
                     string.Join(", ", NodeGroup.Select(x => x.ToString()).ToArray()),
-                    NodeId, NumSteps());
+                    NodeId,
+                    NumSteps());
             }
 
             // using (var bm = Benchmark.MaybeCreateBenchmark(null, "ChangeStep")) {
@@ -1008,7 +1024,9 @@ namespace TrafficManager.TrafficLight.Impl {
                     Log._DebugFormat(
                         "TimedTrafficLights.BackUpInvalidStepSegments finished for TTL step {0} @ " +
                         "node {1}: step.CustomSegmentLights={2} step.InvalidSegmentLights={3}",
-                        i, NodeId, step.CustomSegmentLights.DictionaryToString(),
+                        i,
+                        NodeId,
+                        step.CustomSegmentLights.DictionaryToString(),
                         step.InvalidSegmentLights.CollectionToString());
                 }
 

@@ -204,12 +204,22 @@ namespace TrafficManager.Util {
             int near, forward, far;
             if (!alt3) {
                 DistributeLanes(
-                    srcLaneCount, farLanesCount, forwardLanesCount, nearLanesCount,
-                    out far, out forward, out near);
+                    srcLaneCount,
+                    farLanesCount,
+                    forwardLanesCount,
+                    nearLanesCount,
+                    out far,
+                    out forward,
+                    out near);
             } else {
                 DistributeLanes(
-                    srcLaneCount, forwardLanesCount, farLanesCount, nearLanesCount,
-                    out forward, out far, out near);
+                    srcLaneCount,
+                    forwardLanesCount,
+                    farLanesCount,
+                    nearLanesCount,
+                    out forward,
+                    out far,
+                    out near);
             }
 
             Log._Debug($"near=${near} forward={forward} far={far}");

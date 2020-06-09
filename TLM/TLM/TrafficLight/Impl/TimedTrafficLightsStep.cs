@@ -78,9 +78,20 @@ namespace TrafficManager.TrafficLight.Impl {
                 "\tmaxWait = {7}\n\tPreviousStepRefIndex = {8}\n\tNextStepRefIndex = {9}\n" +
                 "\tlastFlowWaitCalc = {10}\n\tCustomSegmentLights = {11}\n" +
                 "\tInvalidSegmentLights = {12}\n\twaitFlowBalance = {13}\nTimedTrafficLightsStep]",
-                MinTime, MaxTime, ChangeMetric, startFrame, stepDone, endTransitionStart, CurrentFlow,
-                CurrentWait, PreviousStepRefIndex, NextStepRefIndex, lastFlowWaitCalc, CustomSegmentLights,
-                InvalidSegmentLights.CollectionToString(), WaitFlowBalance);
+                MinTime,
+                MaxTime,
+                ChangeMetric,
+                startFrame,
+                stepDone,
+                endTransitionStart,
+                CurrentFlow,
+                CurrentWait,
+                PreviousStepRefIndex,
+                NextStepRefIndex,
+                lastFlowWaitCalc,
+                CustomSegmentLights,
+                InvalidSegmentLights.CollectionToString(),
+                WaitFlowBalance);
         }
 
         public TimedTrafficLightsStep(ITimedTrafficLights timedNode,
@@ -145,8 +156,12 @@ namespace TrafficManager.TrafficLight.Impl {
                 Log._DebugFormat(
                     "TimedTrafficLightsStep.isEndTransitionDone() called for master NodeId={0}. " +
                     "CurrentStep={1} getCurrentFrame()={2} endTransitionStart={3} stepDone={4} ret={5}",
-                    timedNode.NodeId, timedNode.CurrentStep, GetCurrentFrame(),
-                    endTransitionStart, stepDone, ret);
+                    timedNode.NodeId,
+                    timedNode.CurrentStep,
+                    GetCurrentFrame(),
+                    endTransitionStart,
+                    stepDone,
+                    ret);
             }
 #endif
             return ret;
@@ -170,8 +185,12 @@ namespace TrafficManager.TrafficLight.Impl {
                 Log._DebugFormat(
                     "TimedTrafficLightsStep.isInEndTransition() called for master NodeId={0}. " +
                     "CurrentStep={1} getCurrentFrame()={2} endTransitionStart={3} stepDone={4} ret={5}",
-                    timedNode.NodeId, timedNode.CurrentStep, GetCurrentFrame(), endTransitionStart,
-                    stepDone, ret);
+                    timedNode.NodeId,
+                    timedNode.CurrentStep,
+                    GetCurrentFrame(),
+                    endTransitionStart,
+                    stepDone,
+                    ret);
             }
 #endif
             return ret;
@@ -189,8 +208,12 @@ namespace TrafficManager.TrafficLight.Impl {
                 Log._DebugFormat(
                     "TimedTrafficLightsStep.isInStartTransition() called for master NodeId={0}. " +
                     "CurrentStep={1} getCurrentFrame()={2} startFrame={3} stepDone={4} ret={5}",
-                    timedNode.NodeId, timedNode.CurrentStep, GetCurrentFrame(), startFrame,
-                    stepDone, ret);
+                    timedNode.NodeId,
+                    timedNode.CurrentStep,
+                    GetCurrentFrame(),
+                    startFrame,
+                    stepDone,
+                    ret);
             }
 #endif
 
@@ -492,8 +515,13 @@ namespace TrafficManager.TrafficLight.Impl {
                             Log._DebugFormat(
                                 "TimedTrafficLightsStep.SetLights({0})     -> *SETTING* LightLeft={1} " +
                                 "LightMain={2} LightRight={3} for segmentId={4} @ NodeId={5} for vehicle {6}",
-                                noTransition, liveSegmentLight.LightLeft, liveSegmentLight.LightMain,
-                                liveSegmentLight.LightRight, segmentId, timedNode.NodeId, vehicleType);
+                                noTransition,
+                                liveSegmentLight.LightLeft,
+                                liveSegmentLight.LightMain,
+                                liveSegmentLight.LightRight,
+                                segmentId,
+                                timedNode.NodeId,
+                                vehicleType);
                         }
 #endif
 
@@ -844,7 +872,8 @@ namespace TrafficManager.TrafficLight.Impl {
                     if (logTrafficLights) {
                         Log._DebugFormat(
                             "calcWaitFlow: Seg. {0} @ {1}, vehTypeByLaneIndex={2}",
-                            sourceSegmentId, timedNodeId,
+                            sourceSegmentId,
+                            timedNodeId,
                             string.Join(
                                 ", ",
                                 vehTypeByLaneIndex.Select(x => x == null ? "null" : x.ToString())

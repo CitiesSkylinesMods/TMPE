@@ -168,8 +168,15 @@ namespace TrafficManager.Traffic.Impl {
                 Log._DebugFormat(
                     " MeasureOutgoingVehicle: (Segment {0}, Node {1} (start={2})) Checking vehicle {3}. " +
                     "Coming from seg. {4}, start {5}, lane {6} going to seg. {7}, lane {8}",
-                    SegmentId, NodeId, StartNode, vehicleId, state.currentSegmentId,
-                    state.currentStartNode, state.currentLaneIndex, state.nextSegmentId, state.nextLaneIndex);
+                    SegmentId,
+                    NodeId,
+                    StartNode,
+                    vehicleId,
+                    state.currentSegmentId,
+                    state.currentStartNode,
+                    state.currentLaneIndex,
+                    state.nextSegmentId,
+                    state.nextLaneIndex);
             }
 
             if ((state.flags & ExtVehicleFlags.Spawned) == ExtVehicleFlags.None) {
@@ -206,8 +213,13 @@ namespace TrafficManager.Traffic.Impl {
                     Log._DebugFormat(
                         " MeasureOutgoingVehicle: (Segment {0}, Node {1} (start={2})) Vehicle {3} is " +
                         "on lane {4} and wants to go to segment {5} but one or both are invalid: {6}",
-                        SegmentId, NodeId, StartNode, vehicleId, state.currentLaneIndex,
-                        state.nextSegmentId, ret.CollectionToString());
+                        SegmentId,
+                        NodeId,
+                        StartNode,
+                        vehicleId,
+                        state.currentLaneIndex,
+                        state.nextSegmentId,
+                        ret.CollectionToString());
                 }
 
                 return;
@@ -220,7 +232,10 @@ namespace TrafficManager.Traffic.Impl {
                 if (logDebug) {
                     Log._DebugFormat(
                         "  MeasureOutgoingVehicle: (Segment {0}, Node {1}) Vehicle {2}: too slow ({3})",
-                        SegmentId, NodeId, vehicleId, vehicle.GetLastFrameVelocity().sqrMagnitude);
+                        SegmentId,
+                        NodeId,
+                        vehicleId,
+                        vehicle.GetLastFrameVelocity().sqrMagnitude);
                 }
 
                 ++numProcessed;
@@ -239,7 +254,12 @@ namespace TrafficManager.Traffic.Impl {
                 Log._DebugFormat(
                     "  MeasureOutgoingVehicle: (Segment {0}, Node {1}) NormLength of vehicle {2}: " +
                     "{3} -> {4} (avgSegmentLength={5})",
-                    SegmentId, NodeId, vehicleId, state.totalLength, normLength, avgSegmentLength);
+                    SegmentId,
+                    NodeId,
+                    vehicleId,
+                    state.totalLength,
+                    normLength,
+                    avgSegmentLength);
             }
 
             ret[state.currentLaneIndex][state.nextSegmentId] += normLength;
@@ -249,8 +269,13 @@ namespace TrafficManager.Traffic.Impl {
                 Log._DebugFormat(
                     "  MeasureOutgoingVehicle: (Segment {0}, Node {1}) Vehicle {2}: ***ADDED*** " +
                     "({3}@{4} -> {5}@{6})!",
-                    SegmentId, NodeId, vehicleId, state.currentSegmentId, state.currentLaneIndex,
-                    state.nextSegmentId, state.nextLaneIndex);
+                    SegmentId,
+                    NodeId,
+                    vehicleId,
+                    state.currentSegmentId,
+                    state.currentLaneIndex,
+                    state.nextSegmentId,
+                    state.nextLaneIndex);
             }
         }
 
