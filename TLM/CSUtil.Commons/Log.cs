@@ -1,4 +1,4 @@
-﻿namespace CSUtil.Commons {
+namespace CSUtil.Commons {
     using System;
     using System.Diagnostics;
     using System.IO;

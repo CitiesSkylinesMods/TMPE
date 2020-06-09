@@ -6,10 +6,10 @@ namespace TrafficManager.Patch._RoadBaseAI {
     using System.Reflection;
     using TrafficManager.State;
 
+    // [Harmony] Manually patched because struct references are used
     [HarmonyPatch]
     [UsedImplicitly]
-    public class SegmentSimulationStepPatch
-    {
+    public class SegmentSimulationStepPatch {
         [UsedImplicitly]
         public static MethodBase TargetMethod()
         {
@@ -42,34 +42,28 @@ namespace TrafficManager.Patch._RoadBaseAI {
 
             // ↑↑↑↑
             // TODO check if this is required *END*
-#if BENCHMARK
-            using (Benchmark.MaybeCreateBenchmark(null, "Traffic-measurement")) {
-#endif
-                if (segmentID < lastSimulatedSegmentId) {
-                    // segment simulation restart
-                    ++trafficMeasurementMod;
-                    if (trafficMeasurementMod >= 4)
-                        trafficMeasurementMod = 0;
-                }
-
-                lastSimulatedSegmentId = segmentID;
-
-                bool doTrafficMeasurement = true;
-                if (Options.simulationAccuracy == SimulationAccuracy.High ||
-                    Options.simulationAccuracy == SimulationAccuracy.Medium) {
-                    doTrafficMeasurement = (segmentID & 1) == trafficMeasurementMod;
-                } else if (Options.simulationAccuracy <= SimulationAccuracy.Low) {
-                    doTrafficMeasurement = (segmentID & 3) == trafficMeasurementMod;
-                }
-
-                if (doTrafficMeasurement) {
-                    Constants.ManagerFactory.TrafficMeasurementManager.OnBeforeSimulationStep(
-                        segmentID,
-                        ref data);
-                }
-#if BENCHMARK
+            if (segmentID < lastSimulatedSegmentId) {
+                // segment simulation restart
+                ++trafficMeasurementMod;
+                if (trafficMeasurementMod >= 4)
+                    trafficMeasurementMod = 0;
             }
-#endif
+
+            lastSimulatedSegmentId = segmentID;
+
+            bool doTrafficMeasurement = true;
+            if (Options.simulationAccuracy == SimulationAccuracy.High ||
+                Options.simulationAccuracy == SimulationAccuracy.Medium) {
+                doTrafficMeasurement = (segmentID & 1) == trafficMeasurementMod;
+            } else if (Options.simulationAccuracy <= SimulationAccuracy.Low) {
+                doTrafficMeasurement = (segmentID & 3) == trafficMeasurementMod;
+            }
+
+            if (doTrafficMeasurement) {
+                Constants.ManagerFactory.TrafficMeasurementManager.OnBeforeSimulationStep(
+                    segmentID,
+                    ref data);
+            }
         }
     }
 }

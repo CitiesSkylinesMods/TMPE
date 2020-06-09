@@ -341,7 +341,7 @@
                 (queueItem_.vehicleType & ExtVehicleType.RoadVehicle) != ExtVehicleType.None;
 
             isLaneArrowObeyingEntity_ =
-                (! Options.relaxedBusses || queueItem_.vehicleType != ExtVehicleType.Bus) &&
+                (!Options.relaxedBusses || queueItem_.vehicleType != ExtVehicleType.Bus) &&
                 (vehicleTypes_ & LaneArrowManager.VEHICLE_TYPES) != VehicleInfo.VehicleType.None &&
                 (queueItem_.vehicleType & LaneArrowManager.EXT_VEHICLE_TYPES) != ExtVehicleType.None;
 #if DEBUG
@@ -3092,7 +3092,7 @@
                             (nextLaneInfo.m_vehicleType & vehicleTypes_) !=
                             VehicleInfo.VehicleType.None) {
 #if ADVANCEDAI && ROUTING
-                            if (! enableAdvancedAI) {
+                            if (!enableAdvancedAI) {
 #endif
                                 int firstTarget = netManager.m_lanes.m_buffer[nextLaneId].m_firstTarget;
                                 int lastTarget = netManager.m_lanes.m_buffer[nextLaneId].m_lastTarget;

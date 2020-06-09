@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     using System;
 
     // TODO why do we need this?
@@ -6,6 +6,6 @@
     public enum ExtVehicleFlags {
         None = 0,
         Created = 1,
-        Spawned = 1 << 1
+        Spawned = 1 << 1,
     }
 }

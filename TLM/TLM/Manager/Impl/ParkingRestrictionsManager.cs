@@ -48,6 +48,17 @@ namespace TrafficManager.Manager.Impl {
             return SetParkingAllowed(segmentId, finalDir, !IsParkingAllowed(segmentId, finalDir));
         }
 
+        /// <summary>
+        /// Sets Parking allowed to <paramref name="flag"/> for all supported directions.
+        /// </summary>
+        /// <returns><c>false</c>if no there are no configurable lanes.
+        /// <c>true</c> if any parking rules were applied.</returns>
+        public bool SetParkingAllowed(ushort segmentId, bool flag) {
+            bool ret = SetParkingAllowed(segmentId, NetInfo.Direction.Forward, flag);
+            ret |= SetParkingAllowed(segmentId, NetInfo.Direction.Backward, flag);
+            return ret;
+        }
+
         public bool SetParkingAllowed(ushort segmentId, NetInfo.Direction finalDir, bool flag) {
 #if DEBUG
             if (DebugSwitch.BasicParkingAILog.Get()) {
@@ -95,7 +106,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected override void HandleValidSegment(ref ExtSegment seg) {
-            if (! MayHaveParkingRestriction(seg.segmentId)) {
+            if (!MayHaveParkingRestriction(seg.segmentId)) {
                 parkingAllowed[seg.segmentId][0] = true;
                 parkingAllowed[seg.segmentId][1] = true;
             }
@@ -159,7 +170,7 @@ namespace TrafficManager.Manager.Impl {
 
                     var restr = new Configuration.ParkingRestriction((ushort)segmentId) {
                         forwardParkingAllowed = parkingAllowed[segmentId][0],
-                        backwardParkingAllowed = parkingAllowed[segmentId][1]
+                        backwardParkingAllowed = parkingAllowed[segmentId][1],
                     };
 
                     Log._Trace(

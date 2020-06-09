@@ -8,8 +8,7 @@ namespace TrafficManager.Manager.Impl {
 
     public class OptionsManager
         : AbstractCustomManager,
-          IOptionsManager
-    {
+          IOptionsManager {
         // TODO I contain ugly code
         public static OptionsManager Instance = new OptionsManager();
 
@@ -216,7 +215,7 @@ namespace TrafficManager.Manager.Impl {
                 OptionsVehicleRestrictionsTab.SetAddTrafficLightsIfApplicable(data[41] == 1);
             }
 
-            int LoadBool (int idx, ILegacySerializableOption opt) {
+            int LoadBool(int idx, ILegacySerializableOption opt) {
                 if (data.Length > idx) {
                     opt.Load(data[idx]);
                 }
@@ -235,6 +234,11 @@ namespace TrafficManager.Manager.Impl {
             index = LoadBool(index, OptionsMassEditTab.PriorityRoad_AllowLeftTurns);
             index = LoadBool(index, OptionsMassEditTab.PriorityRoad_EnterBlockedYeild);
             index = LoadBool(index, OptionsMassEditTab.PriorityRoad_StopAtEntry);
+
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_KeepClearYieldR);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR);
+            index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR);
 
             return true;
         }
@@ -295,6 +299,11 @@ namespace TrafficManager.Manager.Impl {
                 (byte)(OptionsMassEditTab.PriorityRoad_AllowLeftTurns.Save()),
                 (byte)(OptionsMassEditTab.PriorityRoad_EnterBlockedYeild.Save()),
                 (byte)(OptionsMassEditTab.PriorityRoad_StopAtEntry.Save()),
+
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_KeepClearYieldR.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR.Save()),
+                (byte)(OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR.Save()),
             };
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using System;
     using TrafficManager.API.Manager;
@@ -6,6 +6,8 @@
     using TrafficManager.State.ConfigData;
     using TrafficManager.Traffic.Impl;
     using TrafficManager.Traffic;
+    using CitiesGameBridge.Service;
+    using TrafficManager.Util;
 
     [Obsolete("should be removed when implementing issue #240")]
     public class SegmentEndManager
@@ -40,6 +42,10 @@
 
         public ISegmentEnd GetSegmentEnd(ushort segmentId, bool startNode) {
             return SegmentEnds[GetIndex(segmentId, startNode)];
+        }
+
+        internal ISegmentEnd GetSegmentEnd(int segmentEndIndex) {
+            return SegmentEnds[segmentEndIndex];
         }
 
         public ISegmentEnd GetOrAddSegmentEnd(ISegmentEndId endId) {
@@ -100,7 +106,7 @@
             const bool logPriority = false;
 #endif
 
-            if (! Services.NetService.IsSegmentValid(segmentId)) {
+            if (!Services.NetService.IsSegmentValid(segmentId)) {
                 if (logPriority) {
                     Log._Debug(
                         $"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment " +
@@ -155,8 +161,14 @@
             }
         }
 
-        private int GetIndex(ushort segmentId, bool startNode) {
+        internal int GetIndex(ushort segmentId, bool startNode) {
             return segmentId + (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT);
+        }
+
+        internal void GetSegmentAndNodeFromIndex(int index, out ushort segmentId, out bool startNode) {
+            Shortcuts.Assert(index < 2 * NetManager.MAX_SEGMENT_COUNT && index > 0);
+            startNode = index < NetManager.MAX_SEGMENT_COUNT;
+            segmentId = (ushort)(index - (startNode ? 0 : NetManager.MAX_SEGMENT_COUNT));
         }
 
         // protected override void HandleInvalidSegment(SegmentGeometry geometry) {

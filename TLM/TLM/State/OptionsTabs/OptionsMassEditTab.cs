@@ -4,6 +4,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI;
 
     public static class OptionsMassEditTab {
+        #region Roundabout options
         public static CheckboxOption RoundAboutQuickFix_DedicatedExitLanes =
             new CheckboxOption("RoundAboutQuickFix_DedicatedExitLanes") {
             Label = "Roundabout.Option:Allocate dedicated exit lanes",
@@ -36,6 +37,30 @@ namespace TrafficManager.State {
             Label = "Roundabout.Option:Set priority signs",
         };
 
+        public static CheckboxOption RoundAboutQuickFix_KeepClearYieldR =
+            new CheckboxOption("RoundAboutQuickFix_KeepClearYieldR") {
+            Label = "Roundabout.Option:Yielding vehicles keep clear of blocked roundabout",
+            Tooltip = "Roundabout.Tooltip:Yielding vehicles keep clear of blocked roundabout",
+        };
+
+        public static CheckboxOption RoundAboutQuickFix_RealisticSpeedLimits =
+            new CheckboxOption("RoundAboutQuickFix_RealisticSpeedLimits") {
+            Label = "Roundabout.Option:Assign realistic speed limits to roundabouts",
+            Tooltip = "Roundabout.Tooltip:Assign realistic speed limits to roundabouts",
+        };
+
+        public static CheckboxOption RoundAboutQuickFix_ParkingBanMainR =
+            new CheckboxOption("RoundAboutQuickFix_ParkingBanMainR") {
+            Label = "Roundabout.Option:Put parking ban inside roundabouts",
+        };
+
+        public static CheckboxOption RoundAboutQuickFix_ParkingBanYieldR =
+            new CheckboxOption("RoundAboutQuickFix_ParkingBanYieldR") {
+            Label = "Roundabout.Option:Put parking ban on roundabout branches",
+        };
+
+        #endregion
+        #region Prioirty road options
         public static CheckboxOption PriorityRoad_CrossMainR =
             new CheckboxOption("PriorityRoad_CrossMainR") {
                 Label = "Priority roads.Option:Allow pedestrian crossings on main road",
@@ -44,7 +69,7 @@ namespace TrafficManager.State {
         public static CheckboxOption PriorityRoad_AllowLeftTurns =
             new CheckboxOption("PriorityRoad_AllowLeftTurns") {
                 Label = "Priority roads.Option:Allow far turns",
-                Tooltip = "Priority roads.Tooltipn:Allow far turns"
+                Tooltip = "Priority roads.Tooltip:Allow far turns",
             };
 
         public static CheckboxOption PriorityRoad_EnterBlockedYeild =
@@ -55,10 +80,9 @@ namespace TrafficManager.State {
         public static CheckboxOption PriorityRoad_StopAtEntry =
             new CheckboxOption("PriorityRoad_StopAtEntry") {
                 Label = "Priority roads.Option:Stop signs on entry",
-                Tooltip = "Priority roads.Tooltip:Stop signs on entry"
+                Tooltip = "Priority roads.Tooltip:Stop signs on entry",
         };
-
-
+        #endregion
 
         public static void MakeSettings_MassEdit(ExtUITabstrip tabStrip, int tabIndex)
         {
@@ -74,6 +98,10 @@ namespace TrafficManager.State {
             RoundAboutQuickFix_StayInLaneNearRabout.AddUI(raboutGroup);
             RoundAboutQuickFix_DedicatedExitLanes.AddUI(raboutGroup);
             RoundAboutQuickFix_PrioritySigns.AddUI(raboutGroup);
+            RoundAboutQuickFix_KeepClearYieldR.AddUI(raboutGroup);
+            RoundAboutQuickFix_RealisticSpeedLimits.AddUI(raboutGroup);
+            RoundAboutQuickFix_ParkingBanMainR.AddUI(raboutGroup);
+            RoundAboutQuickFix_ParkingBanYieldR.AddUI(raboutGroup);
 
             UIHelperBase priorityRoadGroup = panelHelper.AddGroup(T("MassEdit.Group.Priority roads"));
             PriorityRoad_CrossMainR.AddUI(priorityRoadGroup);

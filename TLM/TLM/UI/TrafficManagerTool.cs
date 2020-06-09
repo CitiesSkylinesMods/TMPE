@@ -260,6 +260,14 @@ namespace TrafficManager.UI {
         public void SetToolMode(ToolMode newToolMode) {
             ToolMode oldToolMode = toolMode_;
 
+            if(toolMode_ != ToolMode.None) {
+                // Make it impossible for user to undo changes performed by Road selection panels
+                // after changing traffic rule vis other tools.
+                // TODO: This code will not be necessary when we implement intent.
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
+                RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
+            }
+
             // ToolModeChanged does not count timed traffic light submodes as a same tool
             bool toolModeChanged = newToolMode != toolMode_;
 
@@ -342,7 +350,7 @@ namespace TrafficManager.UI {
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             RenderOverlayImpl(cameraInfo);
-            if (GetToolMode()==ToolMode.None) {
+            if (GetToolMode() == ToolMode.None) {
                 DefaultRenderOverlay(cameraInfo);
             }
         }
@@ -406,12 +414,13 @@ namespace TrafficManager.UI {
                 }
                 bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 if (!isRoundabout) {
-                    segmentList = SegmentTraverser.Traverse(
+                    var segments = SegmentTraverser.Traverse(
                         HoveredSegmentId,
                         TraverseDirection.AnyDirection,
                         TraverseSide.Straight,
                         SegmentStopCriterion.None,
                         (_) => true);
+                    segmentList = new List<ushort>(segmentList);
                 }
                 foreach (ushort segmentId in segmentList ?? Enumerable.Empty<ushort>()) {
                     ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
@@ -546,12 +555,13 @@ namespace TrafficManager.UI {
                 if (ReadjustPathMode) {
                     bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                     if (!isRoundabout) {
-                        segmentList = SegmentTraverser.Traverse(
+                        var segments = SegmentTraverser.Traverse(
                             HoveredSegmentId,
                             TraverseDirection.AnyDirection,
                             TraverseSide.Straight,
                             SegmentStopCriterion.None,
                             (_) => true);
+                        segmentList = new List<ushort>(segments);
                     }
                     RoadSelectionUtil.SetRoad(HoveredSegmentId, segmentList);
                 }
@@ -1087,10 +1097,10 @@ namespace TrafficManager.UI {
                     m_netService = {
                         // find road segments
                         m_itemLayers = ItemClass.Layer.Default | ItemClass.Layer.MetroTunnels,
-                        m_service = ItemClass.Service.Road
+                        m_service = ItemClass.Service.Road,
                     },
                     m_ignoreTerrain = true,
-                    m_ignoreSegmentFlags = NetSegment.Flags.None
+                    m_ignoreSegmentFlags = NetSegment.Flags.None,
                 };
                 // segmentInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
 

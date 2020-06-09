@@ -15,6 +15,12 @@ namespace TrafficManager {
     using CitiesHarmony.API;
 
     public class TrafficManagerMod : IUserMod {
+#if BENCHMARK
+        public TrafficManagerMod() {
+            Benchmark.BenchmarkManager.Setup();
+        }
+#endif
+
 #if LABS
         public const string BRANCH = "LABS";
 #elif DEBUG

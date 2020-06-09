@@ -75,19 +75,19 @@ namespace TMUnitTest.Util {
             dict1 = new TinyDictionary<string, int> {
                 { alice, 1 },
                 { bob, 2 },
-                { cedric, 3 }
+                { cedric, 3 },
             };
 
             dict2 = new TinyDictionary<string, IList<string>> {
                 { bob, bobsNicknames },
                 { cedric, cedricsNicknames },
                 { dora, dorasNicknames },
-                { alice, alicesNicknames }
+                { alice, alicesNicknames },
             };
 
             dict3 = new TinyDictionary<ICollection<string>, bool> {
                 { girls, true },
-                { boys, false }
+                { boys, false },
             };
         }
 

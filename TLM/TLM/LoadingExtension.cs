@@ -13,6 +13,8 @@ namespace TrafficManager {
     using TrafficManager.State;
     using TrafficManager.UI;
     using UnityEngine;
+    using SkyTools.Benchmarks;
+    using TrafficManager.Custom.AI;
     using Object = UnityEngine.Object;
 
     [UsedImplicitly]
@@ -144,14 +146,9 @@ namespace TrafficManager {
                 Log.Info("Removing Controls from UI.");
                 if (ModUI.Instance != null) {
                     ModUI.Instance.CloseMainMenu(); // Hide the UI ASAP
-                    Object.Destroy(ModUI.Instance);
-                    ModUI.SetSingletonInstance(null);
+                    ModUI.Instance.Destroy();
                     Log._Debug("removed UIBase instance.");
                 }
-
-#if TRACE
-                Singleton<CodeProfiler>.instance.OnLevelUnloading();
-#endif
             }
             catch (Exception e) {
                 Log.Error("Exception unloading mod. " + e.Message);

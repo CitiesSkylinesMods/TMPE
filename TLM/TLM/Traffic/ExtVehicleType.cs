@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Traffic {
+namespace TrafficManager.Traffic {
     using System;
     using JetBrains.Annotations;
 
@@ -64,7 +64,7 @@
         Ferry = PassengerFerry,
 
         [UsedImplicitly]
-        Blimp = PassengerBlimp
+        Blimp = PassengerBlimp,
     }
 
     public static class LegacyExtVehicleType {

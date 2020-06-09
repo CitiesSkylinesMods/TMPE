@@ -78,7 +78,7 @@ namespace TrafficManager.UI.Helpers {
             return scrollablePanel;
         }
 
-        public UIHelper AddTabPage(string name, bool scrollBars=true) {
+        public UIHelper AddTabPage(string name, bool scrollBars = true) {
             UIButton tabButton = base.AddTab(name);
             tabButton.normalBgSprite = "SubBarButtonBase";
             tabButton.disabledBgSprite = "SubBarButtonBaseDisabled";

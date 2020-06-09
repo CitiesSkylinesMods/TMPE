@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI {
+namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System.Collections.Generic;
@@ -59,7 +59,7 @@
                     BackgroundHovered = true,
                     BackgroundActive = true,
                     ForegroundHovered = true,
-                    ForegroundActive = true
+                    ForegroundActive = true,
                 };
                 this.atlas = this.Skin.CreateAtlas(
                     "Clear",

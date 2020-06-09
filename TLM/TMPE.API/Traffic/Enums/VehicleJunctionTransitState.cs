@@ -23,6 +23,6 @@ namespace TrafficManager.API.Traffic.Enums {
         /// <summary>
         /// Vehicle may leave but is blocked due to traffic ahead
         /// </summary>
-        Blocked
+        Blocked,
     }
 }

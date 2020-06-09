@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     public enum LaneEndTransitionType {
         /// <summary>
         /// No connection
@@ -15,6 +15,6 @@
         /// <summary>
         /// Relaxed connection for road vehicles [!] that do not have to follow lane arrows
         /// </summary>
-        Relaxed
+        Relaxed,
     }
 }

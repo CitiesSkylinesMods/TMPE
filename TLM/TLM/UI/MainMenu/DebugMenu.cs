@@ -6,7 +6,6 @@ namespace TrafficManager.UI.MainMenu {
     using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using CSUtil.Commons.Benchmark;
     using global::TrafficManager.API.Manager;
     using global::TrafficManager.Custom.PathFinding;
     using global::TrafficManager.State;
@@ -38,8 +37,6 @@ namespace TrafficManager.UI.MainMenu {
         private static UIButton _noneToVehicleButton = null;
         private static UIButton _vehicleToNoneButton = null;
         private static UIButton _printFlagsDebugInfoButton;
-        private static UIButton _resetBenchmarksDataButton;
-        private static UIButton _printBenchmarkReportButton;
 #endif
 
 #if QUEUEDSTATS
@@ -110,12 +107,6 @@ namespace TrafficManager.UI.MainMenu {
 #endif
 #if DEBUG
             _printFlagsDebugInfoButton = CreateButton("Print flags debug info", y, ClickPrintFlagsDebugInfo);
-            y += 40;
-            height += 40;
-            _resetBenchmarksDataButton = CreateButton("Reset benchmarks data", y, ClickResetBenchmarks);
-            y += 40;
-            height += 40;
-            _printBenchmarkReportButton = CreateButton("Print benchmark report", y, ClickPrintBenchmarkReport);
             y += 40;
             height += 40;
 #endif
@@ -356,17 +347,6 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickPrintFlagsDebugInfo(UIComponent component,
                                               UIMouseEventParameter eventParam) {
             Flags.PrintDebugInfo();
-        }
-
-        private void ClickPrintBenchmarkReport(UIComponent component,
-                                               UIMouseEventParameter eventParam) {
-            Constants.ServiceFactory.SimulationService.AddAction(
-                () => { Log.Info(BenchmarkProfileProvider.Instance.CreateReport()); });
-        }
-
-        private void ClickResetBenchmarks(UIComponent component, UIMouseEventParameter eventParam) {
-            Constants.ServiceFactory.SimulationService.AddAction(
-                () => { BenchmarkProfileProvider.Instance.ClearProfiles(); });
         }
 
         [UsedImplicitly]
