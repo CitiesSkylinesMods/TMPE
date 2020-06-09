@@ -1,7 +1,12 @@
-﻿namespace TrafficManager.Util {
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace TrafficManager.Util {
     public static class LoopUtil {
         public delegate bool TwoDimLoopHandler(int x, int y);
 
+        [Obsolete("Use 'GenerateSpiralGridCoordsClockwise' instead.")]
         public static void SpiralLoop(int xCenter,
                                       int yCenter,
                                       int width,
@@ -13,6 +18,7 @@
                 (x, y) => handler(xCenter + x, yCenter + y));
         }
 
+        [Obsolete("Use 'GenerateSpiralGridCoordsClockwise' instead.")]
         public static void SpiralLoop(int width, int height, TwoDimLoopHandler handler) {
             int x, y, dx, dy;
             x = y = dx = 0;
@@ -36,6 +42,46 @@
 
                 x += dx;
                 y += dy;
+            }
+        }
+
+        /// <summary>
+        /// Generates a non halting stream of spiral grid coordinates clockwise.
+        /// </summary>
+        /// <param name="radius">Maximum grid width/height of the spiral.</param>
+        /// <returns>Non halting stream of spiral grid coordinates.</returns>
+        public static IEnumerable<Vector2> GenerateSpiralGridCoordsClockwise(int radius) {
+            var cursorX = 0;
+            var cursorY = 0;
+
+            var directionX = 1;
+            var directionY = 0;
+
+            var segmentLength = 1;
+            var segmentsPassed = 0;
+
+            var maxSteps = radius * radius;
+            for (var n = 0; n < maxSteps; n++) {
+                yield return new Vector2(cursorX, cursorY);
+
+                cursorX += directionX;
+                cursorY += directionY;
+
+                segmentsPassed++;
+                if (segmentsPassed != segmentLength) {
+                    continue; //if segment is not full yet
+                }
+                segmentsPassed = 0; //start of new segment
+
+                //rotate clockwise
+                var buffer = directionX;
+                directionX = -directionY;
+                directionY = buffer;
+
+                //increase segmentLength every second time
+                if (directionY == 0) {
+                    segmentLength++;
+                }
             }
         }
     }

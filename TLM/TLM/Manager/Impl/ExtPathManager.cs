@@ -1,6 +1,7 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using System;
+    using System.Linq;
     using TrafficManager.API.Manager;
     using TrafficManager.Util;
     using UnityEngine;
@@ -9,9 +10,13 @@
         : AbstractCustomManager,
           IExtPathManager
     {
+        private readonly Vector2[] _spiralGridCoordsCache;
+
         public static readonly ExtPathManager Instance = new ExtPathManager();
 
         private ExtPathManager() {
+            var radius = 3;
+            _spiralGridCoordsCache = LoopUtil.GenerateSpiralGridCoordsClockwise(3).ToArray();
         }
 
         public bool FindPathPositionWithSpiralLoop(Vector3 position,
@@ -344,7 +349,12 @@
                 return true;
             }
 
-            LoopUtil.SpiralLoop(centerI, centerJ, width, height, FindHelper);
+            for (int i = 0; i < _spiralGridCoordsCache.Length; i++) {
+                var coords = _spiralGridCoordsCache[i];
+                if (!FindHelper((int)(centerI + coords.x), (int)(centerJ + coords.y))) {
+                    break;
+                }
+            }
 
             pathPosA = myPathPosA;
             distanceSqrA = myDistanceSqrA;
