@@ -1765,9 +1765,11 @@ namespace TrafficManager.Custom.PathFinding {
                                 exploreUturn = true; // allow exceptional u-turns
 #if DEBUG
                                 if (isLogEnabled) {
-                                    DebugLog(unitId, item, "ProcessItemMain: bicycle -> vehicle / stock vehicle routing: exceptional u-turn allowed\n"
-                                                        + "\t" + $"nextSegmentId={nextSegmentId}"
-                                        );
+                                    DebugLog(
+                                        unitId,
+                                        item,
+                                        "ProcessItemMain: bicycle -> vehicle / stock vehicle routing: "
+                                        + $"exceptional u-turn allowed\n\tnextSegmentId={nextSegmentId}");
                                 }
 #endif
                             }

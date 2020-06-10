@@ -29,9 +29,7 @@ namespace TrafficManager.TrafficLight.Impl {
         public CustomSegmentLight(CustomSegmentLights lights,
                                   RoadBaseAI.TrafficLightState mainLight,
                                   RoadBaseAI.TrafficLightState leftLight,
-                                  RoadBaseAI.TrafficLightState rightLight
-            // , RoadBaseAI.TrafficLightState pedestrianLight
-            ) {
+                                  RoadBaseAI.TrafficLightState rightLight) {
             this.lights_ = lights;
 
             SetStates(mainLight, leftLight, rightLight);
