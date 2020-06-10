@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -140,10 +140,8 @@
     <Compile Include="Benchmark\BenchmarkManager.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Custom\AI\CustomBuildingAI.cs" />
+    <Compile Include="Custom\AI\CustomCarAI.cs" />
     <Compile Include="Custom\AI\CustomCitizenAI.cs" />
-    <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
-    <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
-    <Compile Include="Custom\AI\CustomPostVanAI.cs" />
     <Compile Include="Custom\AI\CustomResidentAI.cs" />
     <Compile Include="Custom\AI\CustomShipAI.cs" />
     <Compile Include="Custom\AI\CustomTaxiAI.cs" />
@@ -161,7 +159,13 @@
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="Patch\_VehicleAI\StartPathFindCommons.cs" />
+    <Compile Include="Patch\_VehicleAI\_PostVanAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PolicCarAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_FireTruckAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_AmbulanceAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_CargoTruckAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_CarAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_BusAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
     <Compile Include="Patch\_DefaultTool\OnToolGUIPatch.cs" />
@@ -249,7 +253,6 @@
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
     <Compile Include="Manager\Impl\VehicleRestrictionsManager.cs" />
-    <Compile Include="Custom\AI\CustomCarAI.cs" />
     <Compile Include="Custom\AI\CustomCargoTruckAI.cs" />
     <Compile Include="Custom\AI\CustomHumanAI.cs" />
     <Compile Include="Custom\AI\CustomPassengerCarAI.cs" />

@@ -9,6 +9,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
     using System.Reflection;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Custom.PathFinding;
+    using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
 
     [HarmonyPatch]
@@ -29,10 +30,15 @@ namespace TrafficManager.Patch._RoadBaseAI {
                 throw new Exception("CreatePathPatch failed to find TargetMethod");
         }
 
-        public static PathCreationArgs Args;
+        public static ExtVehicleType ExtVehicleType;
+        public static ExtPathType ExtPathType;
+        public static ushort VehicleID;
+
+        public static bool? StablePath;
+        public static NetInfo.LaneType? LaneTypes;
 
         /// <summary>
-        /// precondition: Args.extVehicleType, Args.extPathType and Args.vehicleId are initialized.
+        /// precondition: Args.extVehicleType, Args.extPathType, Args.vehicleId, and Args.stablePath are initialized.
         /// </summary>
         [UsedImplicitly]
         public static bool Prefix(ref bool __result, out uint unit, ref Randomizer randomizer, uint buildIndex,
@@ -41,35 +47,58 @@ namespace TrafficManager.Patch._RoadBaseAI {
             bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost)
         {
             var vehicleBuffer = VehicleManager.instance.m_vehicles.m_buffer;
-            ref Vehicle vehicleData = ref vehicleBuffer[Args.vehicleId];
-            //var info = vehicleBuffer[Args.vehicleId].Info;
-            //var ai = info.m_vehicleAI;
+            ref Vehicle vehicleData = ref vehicleBuffer[VehicleID];
+            var info = vehicleData.Info;
+            var ai = info.m_vehicleAI;
 
-            Args.buildIndex = buildIndex;
-            Args.vehiclePosition = vehiclePosition;
-            Args.stablePath = stablePath;
-            Args.randomParking = randomParking;
-            Args.ignoreFlooded = ignoreFlooded;
-            Args.ignoreCosts = ignoreCost;
+            PathCreationArgs args;
+            args.vehicleId = VehicleID;
+            args.extPathType = ExtPathType;
+            args.extVehicleType = ExtVehicleType;
+            args.spawned = vehicleData.m_flags.IsFlagSet(Vehicle.Flags.Spawned);
 
-            Args.vehicleTypes = vehicleTypes;
-            Args.isHeavyVehicle = isHeavyVehicle;
-            Args.hasCombustionEngine = combustionEngine;
-            Args.ignoreBlocked = ignoreBlocked;
+            // vanilla values
+            args.buildIndex = buildIndex;
+            args.vehiclePosition = vehiclePosition;
+            args.stablePath = stablePath;
+            args.randomParking = randomParking;
+            args.ignoreFlooded = ignoreFlooded;
+            args.ignoreCosts = ignoreCost;
 
-            Args.startPosA = startPosA;
-            Args.startPosB = startPosB;
-            Args.endPosA = endPosA;
-            Args.endPosB = endPosB;
+            args.laneTypes = laneTypes;
+            args.vehicleTypes = vehicleTypes;
+            args.isHeavyVehicle = isHeavyVehicle;
+            args.hasCombustionEngine = combustionEngine;
+            args.ignoreBlocked = ignoreBlocked;
+            args.maxLength = maxLength;
 
-            Args.spawned = vehicleData.m_flags.IsFlagSet(Vehicle.Flags.Spawned);
+            args.startPosA = startPosA;
+            args.startPosB = startPosB;
+            args.endPosA = endPosA;
+            args.endPosB = endPosB;
 
-            // different from vanilla values:
-            Args.skipQueue = Args.spawned;
+            // overridden vanilla values:
+            args.skipQueue = args.spawned;
+            args.stablePath = StablePath ?? stablePath;
+            args.laneTypes = LaneTypes ?? laneTypes;
 
-            __result = CustomPathManager._instance.CustomCreatePath(out unit, ref randomizer, Args);
-
-            Args = default;
+            __result = CustomPathManager._instance.CustomCreatePath(out unit, ref randomizer, args);
+            if (__result) {
+#if DEBUG
+                bool vehDebug = DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == VehicleID;
+                bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
+#else
+                var logParkingAi = false;
+#endif
+                var path = unit;
+                Log._DebugIf(
+                    logParkingAi,
+                    () => $"CreatePathPatch.Prefix({args.vehicleId}): " +
+                    $"Path-finding starts for vehicle {args.vehicleId}, path={path}, " +
+                    $"extVehicleType={ExtVehicleType}, startPosA.segment={startPosA.m_segment}, " +
+                    $"startPosA.lane={startPosA.m_lane}, info.m_vehicleType={info.m_vehicleType}, " +
+                    $"endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
+            }
 
             return false; // CustomCreatePath replaces CreatePath
         }
