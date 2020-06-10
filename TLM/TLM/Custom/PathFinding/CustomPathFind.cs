@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Custom.PathFinding {
+namespace TrafficManager.Custom.PathFinding {
     using ColossalFramework.Math;
     using ColossalFramework.UI;
     using ColossalFramework;
@@ -1810,9 +1810,11 @@
                                 exploreUturn = true; // allow exceptional u-turns
 #if DEBUG
                                 if (isLogEnabled) {
-                                    DebugLog(unitId, item, "ProcessItemMain: bicycle -> vehicle / stock vehicle routing: exceptional u-turn allowed\n"
-                                                        + "\t" + $"nextSegmentId={nextSegmentId}"
-                                        );
+                                    DebugLog(
+                                        unitId,
+                                        item,
+                                        "ProcessItemMain: bicycle -> vehicle / stock vehicle routing: "
+                                        + $"exceptional u-turn allowed\n\tnextSegmentId={nextSegmentId}");
                                 }
 #endif
                             }
