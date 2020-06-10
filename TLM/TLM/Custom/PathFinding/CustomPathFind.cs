@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Custom.PathFinding {
+namespace TrafficManager.Custom.PathFinding {
     using ColossalFramework.Math;
     using ColossalFramework.UI;
     using ColossalFramework;
@@ -73,10 +73,7 @@
             public uint LaneId;
             public NetInfo.Direction Direction;
             public NetInfo.LaneType LanesUsed;
-
-#if PARKINGAI
             public VehicleInfo.VehicleType VehiclesUsed;
-#endif
 
 #if ADVANCEDAI && ROUTING
             public float TrafficRand;
@@ -91,9 +88,7 @@
                        $"\tduration={Duration}\n" +
                        $"\tdirection={Direction}\n" +
                        $"\tlanesUsed={LanesUsed}\n" +
-#if PARKINGAI
                        $"\tvehiclesUsed={VehiclesUsed}\n" +
-#endif
 #if ADVANCEDAI && ROUTING
                        $"\ttrafficRand={TrafficRand}\n" +
 #endif
@@ -194,10 +189,9 @@
         private IDictionary<ushort, IList<ushort>> debugPositions_;
 #endif
 
-#if PARKINGAI || JUNCTIONRESTRICTIONS
         private ushort startSegmentA_;
         private ushort startSegmentB_;
-#endif
+
 #if ROUTING
         private bool isRoadVehicle_;
         private bool isLaneArrowObeyingEntity_;
@@ -371,62 +365,44 @@
             BufferItem bufferItemStartA = default(BufferItem);
 
             if (data.m_position00.m_segment != 0 && posCount >= 1) {
-#if PARKINGAI || JUNCTIONRESTRICTIONS
                 startSegmentA_ = data.m_position00.m_segment; // NON-STOCK CODE
-#endif
                 startLaneA_ = PathManager.GetLaneID(data.m_position00);
                 startOffsetA_ = data.m_position00.m_offset;
                 bufferItemStartA.LaneId = startLaneA_;
                 bufferItemStartA.Position = data.m_position00;
-#if PARKINGAI
+
                 GetLaneDirection(
                     data.m_position00,
                     out bufferItemStartA.Direction,
                     out bufferItemStartA.LanesUsed,
                     out bufferItemStartA.VehiclesUsed);
-#else
-                GetLaneDirection(
-                    data.m_position00,
-                    out bufferItemStartA.Direction,
-                    out bufferItemStartA.LanesUsed);
-#endif
+
                 bufferItemStartA.ComparisonValue = 0f;
                 bufferItemStartA.Duration = 0f;
             } else {
-#if PARKINGAI || JUNCTIONRESTRICTIONS
                 startSegmentA_ = 0; // NON-STOCK CODE
-#endif
                 startLaneA_ = 0u;
                 startOffsetA_ = 0;
             }
 
             BufferItem bufferItemStartB = default(BufferItem);
             if (data.m_position02.m_segment != 0 && posCount >= 3) {
-#if PARKINGAI || JUNCTIONRESTRICTIONS
                 startSegmentB_ = data.m_position02.m_segment; // NON-STOCK CODE
-#endif
                 startLaneB_ = PathManager.GetLaneID(data.m_position02);
                 startOffsetB_ = data.m_position02.m_offset;
                 bufferItemStartB.LaneId = startLaneB_;
                 bufferItemStartB.Position = data.m_position02;
-#if PARKINGAI
+
                 GetLaneDirection(
                     data.m_position02,
                     out bufferItemStartB.Direction,
                     out bufferItemStartB.LanesUsed,
                     out bufferItemStartB.VehiclesUsed);
-#else
-                GetLaneDirection(
-                    data.m_position02,
-                    out bufferItemStartB.Direction,
-                    out bufferItemStartB.LanesUsed);
-#endif
+
                 bufferItemStartB.ComparisonValue = 0f;
                 bufferItemStartB.Duration = 0f;
             } else {
-#if PARKINGAI || JUNCTIONRESTRICTIONS
                 startSegmentB_ = 0; // NON-STOCK CODE
-#endif
                 startLaneB_ = 0u;
                 startOffsetB_ = 0;
             }
@@ -436,18 +412,13 @@
                 endLaneA_ = PathManager.GetLaneID(data.m_position01);
                 bufferItemEndA.LaneId = endLaneA_;
                 bufferItemEndA.Position = data.m_position01;
-#if PARKINGAI
+
                 GetLaneDirection(
                     data.m_position01,
                     out bufferItemEndA.Direction,
                     out bufferItemEndA.LanesUsed,
                     out bufferItemEndA.VehiclesUsed);
-#else
-                GetLaneDirection(
-                    data.m_position01,
-                    out bufferItemEndA.Direction,
-                    out bufferItemEndA.LanesUsed);
-#endif
+
                 bufferItemEndA.MethodDistance = 0.01f;
                 bufferItemEndA.ComparisonValue = 0f;
                 bufferItemEndA.Duration = 0f;
@@ -460,18 +431,13 @@
                 endLaneB_ = PathManager.GetLaneID(data.m_position03);
                 bufferItemEndB.LaneId = endLaneB_;
                 bufferItemEndB.Position = data.m_position03;
-#if PARKINGAI
+
                 GetLaneDirection(
                     data.m_position03,
                     out bufferItemEndB.Direction,
                     out bufferItemEndB.LanesUsed,
                     out bufferItemEndB.VehiclesUsed);
-#else
-                GetLaneDirection(
-                    data.m_position03,
-                    out bufferItemEndB.Direction,
-                    out bufferItemEndB.LanesUsed);
-#endif
+
                 bufferItemEndB.MethodDistance = 0.01f;
                 bufferItemEndB.ComparisonValue = 0f;
                 bufferItemEndB.Duration = 0f;
@@ -541,11 +507,9 @@
                         $"\tm_queueItem={queueItem_}\n" +
                         $"\tm_isHeavyVehicle={isHeavyVehicle_}\n" +
                         $"\tm_failedPathFinds={m_failedPathFinds}\n" +
-                        $"\tm_succeededPathFinds={m_succeededPathFinds}\n"
-#if PARKINGAI || JUNCTIONRESTRICTIONS
-                        + $"\tm_startSegmentA={startSegmentA_}\n"
-                        + $"\tm_startSegmentB={startSegmentB_}\n"
-#endif
+                        $"\tm_succeededPathFinds={m_succeededPathFinds}\n" +
+                        $"\tm_startSegmentA={startSegmentA_}\n" +
+                        $"\tm_startSegmentB={startSegmentB_}\n"
 #if ROUTING
                         + $"\tm_isRoadVehicle={isRoadVehicle_}\n"
                         + $"\tm_isLaneArrowObeyingEntity={isLaneArrowObeyingEntity_}"
@@ -779,10 +743,9 @@
                         finalBufferItem.Duration),
                     0f,
                     255f);
-#if PARKINGAI
+
                 PathUnits.m_buffer[unit].m_laneTypes = (byte)finalBufferItem.LanesUsed;
                 PathUnits.m_buffer[unit].m_vehicleTypes = (uint)finalBufferItem.VehiclesUsed;
-#endif
 
                 uint currentPathUnitId = unit;
                 int currentItemPositionCount = 0;
@@ -884,13 +847,13 @@
                             PathUnits.m_buffer[createdPathUnitId].m_pathFindFlags = PathUnit.FLAG_READY;
                             PathUnits.m_buffer[currentPathUnitId].m_nextPathUnit = createdPathUnitId;
                             PathUnits.m_buffer[currentPathUnitId].m_positionCount = (byte)currentItemPositionCount;
-#if PARKINGAI
+
                             // (this is not accurate!)
                             PathUnits.m_buffer[currentPathUnitId].m_laneTypes =
                                 (byte)finalBufferItem.LanesUsed;
                             PathUnits.m_buffer[currentPathUnitId].m_vehicleTypes =
                                 (ushort)finalBufferItem.VehiclesUsed;
-#endif
+
                             sumOfPositionCounts += currentItemPositionCount;
                             Singleton<PathManager>.instance.m_pathUnitCount =
                                 (int)(PathUnits.ItemCount() - 1);
@@ -1025,7 +988,7 @@
                 prevIsCenterPlatform = prevLaneInfo.m_centerPlatform;
                 prevIsElevated = prevLaneInfo.m_elevated;
 
-#if (ADVANCEDAI || PARKINGAI) && ROUTING
+#if ADVANCEDAI && ROUTING
                 // NON-STOCK CODE START
                 prevIsCarLane =
                     (prevLaneInfo.m_laneType &
@@ -1401,7 +1364,6 @@
                     // NON-STOCK CODE START
                     bool parkingAllowed = true;
 
-#if PARKINGAI
                     // Parking AI: Determine if parking is allowed
                     if (Options.parkingAI) {
                         if (isLogEnabled) {
@@ -1445,7 +1407,7 @@
                                 $"allowed here? {parkingAllowed}");
                         }
                     }
-#endif
+
                     // NON-STOCK CODE END
 
                     if (parkingAllowed && // NON-STOCK CODE
@@ -1564,10 +1526,7 @@
                         }
                     } else {
                         // pocket car spawning
-#if PARKINGAI
-                        if (
-                                Options.parkingAI
-                            ) {
+                        if (Options.parkingAI) {
                             if (isLogEnabled) {
                                 DebugLog(
                                     unitId,
@@ -1612,7 +1571,6 @@
                                 }
                             }
                         } else {
-#endif
                             switchConnectOffset = (byte)pathRandomizer_.UInt32(1u, 254u);
                             if (isLogEnabled) {
                                 DebugLog(
@@ -1621,10 +1579,7 @@
                                     "ProcessItemMain: ped -> vehicle: Spawning pocket " +
                                     $"cars is allowed here\n\tswitchConnectOffset={switchConnectOffset}");
                             }
-
-#if PARKINGAI
                         }
-#endif
                     }
                 }
 
@@ -2369,9 +2324,8 @@
 
             nextItem.LaneId = nextLaneId;
             nextItem.LanesUsed = item.LanesUsed | nextLaneInfo.m_laneType;
-#if PARKINGAI
             nextItem.VehiclesUsed = item.VehiclesUsed | nextLaneInfo.m_vehicleType;
-#endif
+
 #if ADVANCEDAI && ROUTING
             // NON-STOCK CODE START
             nextItem.TrafficRand = item.TrafficRand;
@@ -3023,9 +2977,8 @@
 
                         nextItem.LaneId = nextLaneId;
                         nextItem.LanesUsed = item.LanesUsed | nextLaneInfo.m_laneType;
-#if PARKINGAI
                         nextItem.VehiclesUsed = item.VehiclesUsed | nextLaneInfo.m_vehicleType;
-#endif
+
 #if ADVANCEDAI && ROUTING
                         // NON-STOCK CODE START
                         nextItem.TrafficRand = item.TrafficRand;
@@ -3499,9 +3452,8 @@
 
             nextItem.LaneId = nextLaneId;
             nextItem.LanesUsed = item.LanesUsed | nextLaneInfo.m_laneType;
-#if PARKINGAI
             nextItem.VehiclesUsed = item.VehiclesUsed | nextLaneInfo.m_vehicleType;
-#endif
+
 #if ADVANCEDAI && ROUTING
             // NON-STOCK CODE START
             nextItem.TrafficRand = item.TrafficRand;
@@ -4025,22 +3977,18 @@
             return maxSpeed * 0.2f;
         }
 
-        private void GetLaneDirection(PathUnit.Position pathPos,
-                                      out NetInfo.Direction direction,
-                                      out NetInfo.LaneType laneType
-#if PARKINGAI
-                                      ,
-                                      out VehicleInfo.VehicleType vehicleType
-#endif
-            ) {
+        private void GetLaneDirection(
+            PathUnit.Position pathPos,
+            out NetInfo.Direction direction,
+            out NetInfo.LaneType laneType,
+            out VehicleInfo.VehicleType vehicleType) {
             NetManager netManager = Singleton<NetManager>.instance;
             NetInfo info = netManager.m_segments.m_buffer[pathPos.m_segment].Info;
             if (info.m_lanes.Length > pathPos.m_lane) {
                 direction = info.m_lanes[pathPos.m_lane].m_finalDirection;
                 laneType = info.m_lanes[pathPos.m_lane].m_laneType;
-#if PARKINGAI
                 vehicleType = info.m_lanes[pathPos.m_lane].m_vehicleType;
-#endif
+
                 if ((netManager.m_segments.m_buffer[pathPos.m_segment].m_flags &
                      NetSegment.Flags.Invert) != NetSegment.Flags.None) {
                     direction = NetInfo.InvertDirection(direction);
@@ -4048,9 +3996,7 @@
             } else {
                 direction = NetInfo.Direction.None;
                 laneType = NetInfo.LaneType.None;
-#if PARKINGAI
                 vehicleType = VehicleInfo.VehicleType.None;
-#endif
             }
         }
 
