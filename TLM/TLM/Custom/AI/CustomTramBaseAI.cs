@@ -215,7 +215,6 @@ namespace TrafficManager.Custom.AI {
             vehicleData.m_path = path;
             vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
             return true;
-
         }
 
         [RedirectMethod]

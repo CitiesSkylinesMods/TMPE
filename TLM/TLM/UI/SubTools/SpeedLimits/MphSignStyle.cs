@@ -7,5 +7,4 @@
         RoundUK = 1,
         RoundGerman = 2,
     }
-
 }

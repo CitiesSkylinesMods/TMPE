@@ -35,7 +35,5 @@ namespace TrafficManager.UI.Helpers {
                 State.Options.Indent(_ui);
             }
         }
-
-
     }
 }

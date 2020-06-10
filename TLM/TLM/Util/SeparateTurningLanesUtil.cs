@@ -267,7 +267,6 @@ namespace TrafficManager.Util {
                 DistributeLanes3(total, a, b, c, out x, out y, out z);
             }
             Log._Debug($"DistributeLanes (by prioirty): {a}=>{x} | {b}=>{y} | {c}=>{z}");
-
         }
 
         /// <summary>
@@ -381,7 +380,5 @@ namespace TrafficManager.Util {
 
             return SetLaneArrow_Result.Success;
         }
-
     }
-
 }

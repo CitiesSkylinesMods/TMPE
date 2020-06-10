@@ -463,6 +463,5 @@ namespace TrafficManager.State {
                 _automaticallyAddTrafficLightsIfApplicableToggle.isChecked = value;
             }
         }
-
     } // end class
 }

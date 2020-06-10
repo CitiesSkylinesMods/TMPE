@@ -729,7 +729,6 @@ namespace TrafficManager.TrafficLight.Impl {
             }
 
             return done;
-
         }
 
         public float GetMetric(float flow, float wait) {

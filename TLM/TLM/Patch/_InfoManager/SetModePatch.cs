@@ -35,7 +35,6 @@ namespace TrafficManager.Patch._InfoManager
             {
                 SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
             }
-
         }
     }
 }

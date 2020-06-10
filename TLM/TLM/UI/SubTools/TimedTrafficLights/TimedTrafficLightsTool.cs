@@ -720,7 +720,6 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                         BuildStepChangeMetricDisplay(true);
                         BuildFlowPolicyDisplay(true);
                         GUILayout.BeginHorizontal();
-
                     } else {
                         if (_timedEditStep < 0) {
                             if (GUILayout.Button(T("TTL.Button:Add step"))) {
