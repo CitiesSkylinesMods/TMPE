@@ -2342,8 +2342,7 @@ namespace TrafficManager.Manager.Impl {
         protected int FindLaneWithMaxOuterIndex(int[] indicesSortedByOuterIndex,
                                                 int targetOuterLaneIndex) {
             return indicesSortedByOuterIndex[
-                Math.Max(0, Math.Min(targetOuterLaneIndex, indicesSortedByOuterIndex.Length - 1))
-            ];
+                Math.Max(0, Math.Min(targetOuterLaneIndex, indicesSortedByOuterIndex.Length - 1))];
         }
 
         [UsedImplicitly]

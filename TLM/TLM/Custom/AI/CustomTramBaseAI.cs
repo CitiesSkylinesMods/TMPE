@@ -327,9 +327,7 @@ namespace TrafficManager.Custom.AI {
 
                     ExtVehicleManager.Instance.UpdateVehiclePosition(
                             vehicleId,
-                            ref vehicleData
-                            /*, lastFrameData.m_velocity.magnitude*/
-                        );
+                            ref vehicleData);
                 }
             }
 

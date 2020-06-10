@@ -287,8 +287,7 @@ namespace TrafficManager.UI.SubTools {
                                 middlePoint: NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
                                 color: selectedLaneEnd.Color,
                                 outlineColor: Color.grey,
-                                size: 0.18f // Embolden
-                                );
+                                size: 0.18f); // Embolden
                         } // end foreach selectedMarker.ConnectedMarkers
                     } // end if selectedMarker != null
                 } // end foreach lanemarker in node markers
@@ -786,8 +785,7 @@ namespace TrafficManager.UI.SubTools {
                                 netService.IsStartNode(segmentId, nodeId) ^ (!toward),
                                 LaneConnectionManager.LANE_TYPES,
                                 LaneConnectionManager.VEHICLE_TYPES,
-                                true
-                                ).Count;
+                                true).Count;
         }
         internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);

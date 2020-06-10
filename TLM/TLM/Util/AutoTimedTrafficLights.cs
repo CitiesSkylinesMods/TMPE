@@ -398,8 +398,7 @@ namespace TrafficManager.Util {
                                 netService.IsStartNode(segmentId, nodeId) ^ (!outgoing),
                                 LaneArrowManager.LANE_TYPES,
                                 LaneArrowManager.VEHICLE_TYPES,
-                                true
-                                ).Count;
+                                true).Count;
         }
         private static int CountOutgoingLanes(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         private static int CountIncomingLanes(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);

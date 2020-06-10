@@ -28,8 +28,7 @@ namespace TrafficManager.Manager.Impl {
         public AdvancedParkingManager() {
             var radius = Math.Max(
                 1,
-                (int)(GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding / (BuildingManager.BUILDINGGRID_CELL_SIZE / 2f)) + 1
-            );
+                (int)(GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding / (BuildingManager.BUILDINGGRID_CELL_SIZE / 2f)) + 1);
 
             _spiralGridCoordsCache = LoopUtil.GenerateSpiralGridCoordsClockwise(radius).ToArray();
         }
@@ -2530,8 +2529,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 ushort buildingId = Singleton<BuildingManager>.instance.m_buildingGrid[
-                    (i * BuildingManager.BUILDINGGRID_RESOLUTION) + j
-                ];
+                    (i * BuildingManager.BUILDINGGRID_RESOLUTION) + j];
                 var numIterations = 0;
                 Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
                 ParkingAI parkingAiConf = GlobalConfig.Instance.ParkingAI;

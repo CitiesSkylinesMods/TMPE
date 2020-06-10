@@ -285,8 +285,7 @@
                 ref extVehicle,
                 ref vehicleData,
                 ref segmentEndMan.ExtSegmentEnds[
-                    segmentEndMan.GetIndex(curPathPos.m_segment, startNode)
-                ],
+                    segmentEndMan.GetIndex(curPathPos.m_segment, startNode)],
                 ref curPathPos,
                 ref nextPathPos);
         }
