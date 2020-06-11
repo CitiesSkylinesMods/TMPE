@@ -52,12 +52,6 @@ namespace TrafficManager {
                 return;
             }
 
-            TrafficManagerTool tmTool = ModUI.GetTrafficManagerTool(false);
-            if (tmTool != null && ToolsModifierControl.toolController.CurrentTool != tmTool &&
-                ModUI.Instance.IsVisible()) {
-                ModUI.Instance.CloseMainMenu();
-            }
-
             if (Input.GetKeyDown(KeyCode.Escape)) {
                 ModUI.Instance.CloseMainMenu();
             }
