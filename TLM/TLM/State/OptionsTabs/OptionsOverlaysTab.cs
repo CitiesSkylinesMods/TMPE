@@ -299,6 +299,5 @@ namespace TrafficManager.State {
                 _showLanesToggle.isChecked = newShowLanes;
             }
         }
-
     } // end class
 }

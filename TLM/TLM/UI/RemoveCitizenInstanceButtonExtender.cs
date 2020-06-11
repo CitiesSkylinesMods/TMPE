@@ -69,7 +69,6 @@ namespace TrafficManager.UI {
                     this.Skin.CreateAtlasKeyset());
                 UpdateButtonImageAndTooltip();
                 width = height = 30;
-
             }
 
             public override void HandleClick(UIMouseEventParameter p) {

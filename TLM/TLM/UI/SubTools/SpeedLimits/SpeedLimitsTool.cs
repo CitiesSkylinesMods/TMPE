@@ -1124,6 +1124,5 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                        ? 1.25f
                        : 1.0f;
         }
-
     } // end class
 }

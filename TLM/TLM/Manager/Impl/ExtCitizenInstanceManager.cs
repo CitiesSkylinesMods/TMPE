@@ -348,7 +348,6 @@ namespace TrafficManager.Manager.Impl {
             bool ignoreCost) {
 
             try {
-
                 return InternalStartPathFind(
                     instanceID,
                     ref instanceData,
@@ -359,7 +358,6 @@ namespace TrafficManager.Manager.Impl {
                     vehicleInfo,
                     enableTransport,
                     ignoreCost);
-
             }
             catch (Exception ex) {
                 // make sure we have copy of exception in TMPE.log

@@ -200,7 +200,6 @@ namespace TrafficManager.UI.SubTools {
                         RenderRoadLane(cameraInfo);
                     } else {
                         RenderLaneOverlay(cameraInfo, renderData_.laneId);
-
                     }
                 }
             }

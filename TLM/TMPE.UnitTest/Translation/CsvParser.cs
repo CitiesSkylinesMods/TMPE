@@ -30,7 +30,6 @@ namespace TMUnitTest.Translation {
             PrepareData(testBlock_CRLF, out testBlock_CRLF_Columns, out testBlock_CRLF_DataBlock);
             PrepareData(multilineTestBlock_LF, out multilineTestBlock_LF_Columns, out multilineTestBlock_LF_DataBlock);
             PrepareData(multilineTestBlock_CRLF, out multilineTestBlock_CRLF_Columns, out multilineTestBlock_CRLF_DataBlock);
-
         }
 
         private static void PrepareData(byte[] testFileData, out List<string> columns, out string dataBlock) {

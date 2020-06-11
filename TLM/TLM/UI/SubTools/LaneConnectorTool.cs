@@ -332,7 +332,6 @@ namespace TrafficManager.UI.SubTools {
                         color: Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f),
                         outlineColor: Color.white,
                         size:0.11f);
-
                 }
 
                 NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;

@@ -35,49 +35,42 @@
         /// Performs actions after game data has been loaded
         /// </summary>
         public virtual void OnAfterLoadData() {
-
         }
 
         /// <summary>
         /// Performs actions after game data has been saved
         /// </summary>
         public virtual void OnAfterSaveData() {
-
         }
 
         /// <summary>
         /// Performs actions before game data is going to be loaded
         /// </summary>
         public virtual void OnBeforeLoadData() {
-
         }
 
         /// <summary>
         /// Performs actions before game data is going to be saved
         /// </summary>
         public virtual void OnBeforeSaveData() {
-
         }
 
         /// <summary>
         /// Performs actions after a game has been loaded
         /// </summary>
         public virtual void OnLevelLoading() {
-
         }
 
         /// <summary>
         /// Performs actions after a game has been unloaded
         /// </summary>
         public virtual void OnLevelUnloading() {
-
         }
 
         /// <summary>
         /// Prints information for debugging purposes
         /// </summary>
         protected virtual void InternalPrintDebugInfo() {
-
         }
 
         public void PrintDebugInfo() {
