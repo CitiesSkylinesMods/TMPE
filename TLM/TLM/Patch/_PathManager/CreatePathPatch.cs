@@ -1,4 +1,4 @@
-namespace TrafficManager.Patch._RoadBaseAI {
+namespace TrafficManager.Patch._PathManager {
     using API.Traffic.Enums;
     using ColossalFramework;
     using ColossalFramework.Math;
@@ -15,20 +15,15 @@ namespace TrafficManager.Patch._RoadBaseAI {
     [HarmonyPatch]
     [UsedImplicitly]
     public class CreatePathPatch {
-        // public bool CreatePath(out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost)
-        delegate bool TargetDelegate(out uint unit, ref Randomizer randomizer, uint buildIndex,
-            PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition,
-            NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle,
-            bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost);
+        //public bool CreatePath(out uint unit, ref Randomizer randomizer, uint buildIndex,
+        //  PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition,
+        //  NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle,
+        //  bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost)
+        delegate bool TargetDelegate(out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost);
 
         [UsedImplicitly]
-        public static MethodBase TargetMethod() {
-            return HarmonyLib.AccessTools.DeclaredMethod(
-                typeof(PathManager),
-                nameof(PathManager.CreatePath),
-                TranspilerUtil.GetGenericArguments<TargetDelegate>()) ??
-                throw new Exception("CreatePathPatch failed to find TargetMethod");
-        }
+        public static MethodBase TargetMethod() =>
+            TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(PathManager), nameof(PathManager.CreatePath));
 
         public static ExtVehicleType ExtVehicleType;
         public static ExtPathType ExtPathType;

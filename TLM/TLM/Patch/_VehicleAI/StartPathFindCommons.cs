@@ -1,30 +1,15 @@
 namespace TrafficManager.Patch._VehicleAI {
-    using ColossalFramework;
-    using HarmonyLib;
-    using JetBrains.Annotations;
-    using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.Manager.Impl;
-    using UnityEngine;
-    using TrafficManager.Patch._RoadBaseAI;
     using System.Reflection;
     using TrafficManager.Util;
     using System;
     using ColossalFramework.Math;
-    using CSUtil.Commons;
+    using UnityEngine;
 
     public static class StartPathFindCommons {
-        // public bool CreatePath(out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost)
-        delegate bool TargetDelegate(out uint unit, ref Randomizer randomizer, uint buildIndex,
-            PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition,
-            NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle,
-            bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost);
-
+        // protected override bool StartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget)        delegate bool TargetDelegate(out uint unit, ref Randomizer randomizer, uint buildIndex,
+        delegate bool TargetDelegate(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget);
         public static MethodBase TargetMethod<T>() {
-            return HarmonyLib.AccessTools.DeclaredMethod(
-                typeof(T),
-                "StartPathFind",
-                TranspilerUtil.GetGenericArguments<TargetDelegate>()) ??
-                throw new Exception("StartPathFind failed to find TargetMethod");
+            return TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(T), "StartPathFind");
         }
     }
 }

@@ -1,7 +1,7 @@
 namespace TrafficManager.Patch._VehicleAI._CarAI{
     using HarmonyLib;
     using JetBrains.Annotations;
-    using TrafficManager.Patch._RoadBaseAI;
+    using TrafficManager.Patch._PathManager;
     using System.Reflection;
     using UnityEngine;
     using TrafficManager.State.ConfigData;

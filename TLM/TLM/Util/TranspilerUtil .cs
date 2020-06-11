@@ -1,20 +1,25 @@
 
 namespace TrafficManager.Util {
-    using System;
-    using System.Collections.Generic;
-    using System.Reflection.Emit;
-    using HarmonyLib;
     using CSUtil.Commons;
+    using HarmonyLib;
+    using System;
+    using System.Linq;
     using System.Reflection;
+    using System.Reflection.Emit;
 
-    public static class TranspilerUtil{
+    public static class TranspilerUtil {
         /// <typeparam name="T">delegate type</typeparam>
         /// <returns>Type[] represeting arguments of the delegate.</returns>
-        internal static Type[] GetGenericArguments<T>() where T : Delegate {
-            T dummy = default;
-            return dummy.Method.GetGenericArguments();
+        internal static Type[] GetParameterTypes<T>() where T : Delegate {
+            return typeof(T).GetMethod("Invoke").GetParameters().Select(p => p.ParameterType).ToArray();
         }
 
+        internal static MethodInfo DeclaredMethod<DelegateT>(Type type, string name) where DelegateT : Delegate {
+            var ret = AccessTools.DeclaredMethod(type, name, GetParameterTypes<DelegateT>());
+            if (ret == null)
+                Log.Error($"faield to retrieve method {type}.name({typeof(DelegateT)})");
+            return ret;
+        }
 
         /// <summary>
         /// Generates Code instruction to access the given argument.

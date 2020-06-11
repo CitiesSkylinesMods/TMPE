@@ -1,7 +1,7 @@
 namespace TrafficManager.Patch._VehicleAI._AmbulanceAI {
     using HarmonyLib;
     using JetBrains.Annotations;
-    using TrafficManager.Patch._RoadBaseAI;
+    using TrafficManager.Patch._PathManager;
     using System.Reflection;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
