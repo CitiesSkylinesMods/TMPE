@@ -510,6 +510,9 @@ namespace TrafficManager.UI {
                 if (!Input.GetMouseButtonDown(0)) {
                     _mouseClickProcessed = false;
                 }
+                if (e.type == EventType.keyDown && e.keyCode == KeyCode.Escape) {
+                    ModUI.Instance.CloseMainMenu();
+                }
 
                 if (Options.nodesOverlay) {
                     DebugGuiDisplaySegments();

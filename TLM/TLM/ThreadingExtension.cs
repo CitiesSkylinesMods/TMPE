@@ -44,17 +44,5 @@ namespace TrafficManager {
                 tlsMan.SimulationStep();
             }
         }
-
-        public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) {
-            base.OnUpdate(realTimeDelta, simulationTimeDelta);
-
-            if (ToolsModifierControl.toolController == null || ModUI.Instance == null) {
-                return;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Escape)) {
-                ModUI.Instance.CloseMainMenu();
-            }
-        }
     } // end class
 }
