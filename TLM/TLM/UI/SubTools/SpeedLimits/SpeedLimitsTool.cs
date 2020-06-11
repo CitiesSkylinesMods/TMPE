@@ -606,7 +606,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             if (GUILayout.Button(Translation.SpeedLimits.Get("Window.Title:Default speed limits"),
                                  GUILayout.Width(200))) {
-                TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Defaults");
+                TrafficManagerTool.ShowAdvisor(GetType().Name + "_Defaults");
                 defaultsWindowVisible = true;
             }
 

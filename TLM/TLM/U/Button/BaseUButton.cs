@@ -72,7 +72,7 @@ namespace TrafficManager.U.Button {
         }
 
         protected override void OnClick(UIMouseEventParameter p) {
-            this.HandleClick(p);
+            HandleClick(p);
             uOnClick?.Invoke(this, p);
             UpdateButtonImageAndTooltip();
         }
@@ -81,19 +81,19 @@ namespace TrafficManager.U.Button {
             UpdateButtonImage();
             UpdateTooltip(refreshTooltip: true);
 
-            this.isVisible = IsVisible();
-            this.Invalidate();
+            isVisible = IsVisible();
+            Invalidate();
         }
 
         internal void UpdateTooltip(bool refreshTooltip) {
             // Update localized tooltip with shortcut key if available
             string overrideTooltip = GetTooltip();
             if (!string.IsNullOrEmpty(overrideTooltip)) {
-                this.tooltip = overrideTooltip + GetShortcutTooltip();
+                tooltip = overrideTooltip + GetShortcutTooltip();
             }
 
             if (refreshTooltip) {
-                this.RefreshTooltip();
+                RefreshTooltip();
             }
         }
 
@@ -107,7 +107,7 @@ namespace TrafficManager.U.Button {
                                                  ? ControlActiveState.Active
                                                  : ControlActiveState.Normal;
             ControlEnabledState enabledState =
-                this.isEnabled ? ControlEnabledState.Enabled : ControlEnabledState.Disabled;
+                isEnabled ? ControlEnabledState.Enabled : ControlEnabledState.Disabled;
 
             m_BackgroundSprites.m_Normal
                 = m_BackgroundSprites.m_Disabled =

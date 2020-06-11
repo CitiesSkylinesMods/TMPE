@@ -17,7 +17,7 @@ namespace TrafficManager.UI {
 
             if (transportInfoViewPanel != null) {
                 Log._Debug($"Public transport info view panel found.");
-                transportInfoViewPanel.component.eventVisibilityChanged += this.ParentVisibilityChanged;
+                transportInfoViewPanel.component.eventVisibilityChanged += ParentVisibilityChanged;
             } else {
                 Log.Warning($"Public transport info view panel NOT found.");
             }
@@ -87,9 +87,9 @@ namespace TrafficManager.UI {
                     switchViewModeButton_.text = Translation.Menu.Get("Button:Switch view");
                 }
 
-                this.Show();
+                Show();
             } else
-                this.Hide();
+                Hide();
         }
     }
 }

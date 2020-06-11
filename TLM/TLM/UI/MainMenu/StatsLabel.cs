@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using TrafficManager.Custom.PathFinding;
     using UnityEngine;
 
@@ -7,9 +7,9 @@
 
         public override void Start() {
             base.Start();
-            this.text = "0";
-            this.suffix = " pathfinds";
-            this.textColor = Color.green;
+            text = "0";
+            suffix = " pathfinds";
+            textColor = Color.green;
         }
 
 #if QUEUEDSTATS

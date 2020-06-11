@@ -107,7 +107,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         public override void OnSecondaryClickOverlay() {
             if (!IsCursorInPanel()) {
                 Cleanup();
-                this.SetToolMode(TTLToolMode.SelectNode);
+                SetToolMode(TTLToolMode.SelectNode);
             }
         }
 
@@ -147,7 +147,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     return;
                 }
                 RefreshCurrentTimedNodeIds(HoveredNodeId);
-                this.SetToolMode(TTLToolMode.ShowLights);
+                SetToolMode(TTLToolMode.ShowLights);
             }
 
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
@@ -156,7 +156,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                 case TTLToolMode.SelectNode:
                 case TTLToolMode.ShowLights: {
                     if (ttlToolMode_ == TTLToolMode.ShowLights) {
-                        this.SetToolMode(TTLToolMode.SelectNode);
+                        SetToolMode(TTLToolMode.SelectNode);
                         ClearSelectedNodes();
                     }
 
@@ -174,7 +174,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
                             if (timedLight != null) {
                                 selectedNodeIds = new List<ushort>(timedLight.NodeGroup);
-                                this.SetToolMode(TTLToolMode.ShowLights);
+                                SetToolMode(TTLToolMode.ShowLights);
                             }
                         } else {
                             MainTool.WarningPrompt(T("Dialog.Text:Node has timed TL script"));
@@ -186,7 +186,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
                 case TTLToolMode.AddNode: {
                     if (selectedNodeIds.Count <= 0) {
-                        this.SetToolMode(TTLToolMode.SelectNode);
+                        SetToolMode(TTLToolMode.SelectNode);
                         return;
                     }
 
@@ -224,13 +224,13 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                         AddSelectedNode(nodeId);
                     }
 
-                    this.SetToolMode(TTLToolMode.ShowLights);
+                    SetToolMode(TTLToolMode.ShowLights);
                     break;
                 }
 
                 case TTLToolMode.RemoveNode: {
                     if (selectedNodeIds.Count <= 0) {
-                        this.SetToolMode(TTLToolMode.SelectNode);
+                        SetToolMode(TTLToolMode.SelectNode);
                         return;
                     }
 
@@ -243,13 +243,13 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     }
 
                     RemoveSelectedNode(HoveredNodeId);
-                    this.SetToolMode(TTLToolMode.ShowLights);
+                    SetToolMode(TTLToolMode.ShowLights);
                     break;
                 }
 
                 case TTLToolMode.CopyLights: {
                     if (nodeIdToCopy == 0 || !tlsMan.HasTimedSimulation(nodeIdToCopy)) {
-                        this.SetToolMode(TTLToolMode.SelectNode);
+                        SetToolMode(TTLToolMode.SelectNode);
                         return;
                     }
 
@@ -288,7 +288,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
                     Cleanup();
                     AddSelectedNode(HoveredNodeId);
-                    this.SetToolMode(TTLToolMode.ShowLights);
+                    SetToolMode(TTLToolMode.ShowLights);
                     break;
                 }
             }
@@ -354,7 +354,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     ttlToolMode_ == TTLToolMode.RemoveNode) {
                     GUILayout.Label(T("TTL.Label:Select junction"));
                     if (GUILayout.Button(T("Button:Cancel"))) {
-                        this.SetToolMode(TTLToolMode.ShowLights);
+                        SetToolMode(TTLToolMode.ShowLights);
                     } else {
                         DragWindow(ref _windowRect);
                         return;
@@ -362,7 +362,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                 }
 
                 if (!tlsMan.HasTimedSimulation(selectedNodeIds[0])) {
-                    this.SetToolMode(TTLToolMode.SelectNode);
+                    SetToolMode(TTLToolMode.SelectNode);
                     // Log._Debug("nodesim or timednodemain is null");
                     DragWindow(ref _windowRect);
                     return;
@@ -686,7 +686,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                             T("Button:Add"),
                             GUILayout.Width(70)))
                         {
-                            TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddStep");
+                            TrafficManagerTool.ShowAdvisor(GetType().Name + "_AddStep");
                             if (_stepMinValue < 0) {
                                 _stepMinValue = 0;
                             }
@@ -723,7 +723,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     } else {
                         if (_timedEditStep < 0) {
                             if (GUILayout.Button(T("TTL.Button:Add step"))) {
-                                TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddStep");
+                                TrafficManagerTool.ShowAdvisor(GetType().Name + "_AddStep");
                                 _timedPanelAdd = true;
                                 nodeSelectionLocked = true;
                                 _timedViewedStep = -1;
@@ -825,9 +825,9 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     }
 
                     if (GUILayout.Button(T("TTL.Button:Copy"))) {
-                        TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Copy");
+                        TrafficManagerTool.ShowAdvisor(GetType().Name + "_Copy");
                         nodeIdToCopy = selectedNodeIds[0];
-                        this.SetToolMode(TTLToolMode.CopyLights);
+                        SetToolMode(TTLToolMode.CopyLights);
                     }
 
                     if (GUILayout.Button(T("TTL.Button:Rotate right"))) {
@@ -844,16 +844,16 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     if (GUILayout.Button(
                         T("TTL.Button:Add junction to TTL")))
                     {
-                        TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddJunction");
-                        this.SetToolMode(TTLToolMode.AddNode);
+                        TrafficManagerTool.ShowAdvisor(GetType().Name + "_AddJunction");
+                        SetToolMode(TTLToolMode.AddNode);
                     }
 
                     if (selectedNodeIds.Count > 1) {
                         if (GUILayout.Button(
                             T("TTL.Button:Remove junction from TTL")))
                         {
-                            TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_RemoveJunction");
-                            this.SetToolMode(TTLToolMode.RemoveNode);
+                            TrafficManagerTool.ShowAdvisor(GetType().Name + "_RemoveJunction");
+                            SetToolMode(TTLToolMode.RemoveNode);
                         }
                     }
 
@@ -862,7 +862,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     if (GUILayout.Button(T("TTL.Button:Remove entire TTL"))) {
                         DisableTimed();
                         ClearSelectedNodes();
-                        this.SetToolMode(TTLToolMode.SelectNode);
+                        SetToolMode(TTLToolMode.SelectNode);
                     }
                 }
 
@@ -1157,7 +1157,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                         RefreshCurrentTimedNodeIds(nodeId);
                     }
 
-                    this.SetToolMode(TTLToolMode.ShowLights);
+                    SetToolMode(TTLToolMode.ShowLights);
                 } else {
                     return;
                 }
