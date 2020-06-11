@@ -393,7 +393,7 @@ namespace TrafficManager.UI {
 
                 public RoadSelectionPanels Root => RoadSelectionPanels.Root;
 
-                public virtual string ButtonName => "TMPE.RoadSelectionPanel" + this.GetType().ToString();
+                public virtual string ButtonName => "TMPE.RoadSelectionPanel" + GetType().ToString();
 
                 private static string TrafficSidePostFix => Shortcuts.RHT ? "_RHT" : "_LHT";
 
@@ -409,7 +409,7 @@ namespace TrafficManager.UI {
 
                 public override bool CanActivate() => true;
 
-                protected override bool IsActive() => Root.Function == this.Function;
+                protected override bool IsActive() => Root.Function == Function;
 
                 public virtual bool ShouldDisable() => Length == 0;
 
@@ -459,7 +459,7 @@ namespace TrafficManager.UI {
 
                 protected override void OnClick(UIMouseEventParameter p) {
                     if (!IsActive()) {
-                        Root.Function = this.Function;
+                        Root.Function = Function;
                         Root.Record = Do();
                         Root.EnqueueAction(Root.ShowMassEditOverlay);
                     } else {

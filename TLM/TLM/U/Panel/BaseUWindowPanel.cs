@@ -80,9 +80,9 @@ namespace TrafficManager.U.Panel {
         /// </summary>
         /// <param name="opacity">Range 0..100, where 100 is solid and 0 invisible.</param>
         internal void SetOpacity(U.UOpacityValue opacity) {
-            Color32 modified = this.color;
+            Color32 modified = color;
             modified.a = opacity.GetOpacityByte();
-            this.color = modified;
+            color = modified;
         }
     }
 }

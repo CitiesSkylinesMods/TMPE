@@ -20,7 +20,7 @@ namespace TrafficManager.UI.MainMenu {
         public override bool CanActivate() => true;
 
         public override void Start() {
-            U.UIUtil.MakeUniqueAndSetName(this.gameObject, "TMPE_MainMenuButton");
+            U.UIUtil.MakeUniqueAndSetName(gameObject, "TMPE_MainMenuButton");
 
             // Place the button.
             OnUpdate(GlobalConfig.Instance);
@@ -36,7 +36,7 @@ namespace TrafficManager.UI.MainMenu {
                                            ForegroundHovered = true,
                                            ForegroundActive = true,
                                        };
-            this.atlas = this.Skin.CreateAtlas(
+            atlas = this.Skin.CreateAtlas(
                 "MainMenu",
                 50,
                 50,

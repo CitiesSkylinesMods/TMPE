@@ -169,7 +169,7 @@ namespace TrafficManager.UI {
         }
 
         public virtual string GetTutorialKey() {
-            return this.GetType().Name;
+            return GetType().Name;
         }
 
         protected void DragWindow(ref Rect window) {
