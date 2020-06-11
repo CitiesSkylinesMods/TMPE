@@ -89,16 +89,16 @@ namespace TrafficManager.UI.Helpers {
                 // origin point to start drawing sprites from.
                 origin_ = (segmentEnd.LeftCorner + segmentEnd.RightCorner) * 0.5f;
 
-                this.signsPerRow_ = signsPerRow;
-                this.viewOnly_ = viewOnly;
-                this.baseZoom_ = baseZoom;
-                this.signSizeMeters_ = viewOnly
+                signsPerRow_ = signsPerRow;
+                viewOnly_ = viewOnly;
+                baseZoom_ = baseZoom;
+                signSizeMeters_ = viewOnly
                                            ? SIGN_SIZE_METERS * VIEW_SIZE_RATIO
                                            : SIGN_SIZE_METERS;
-                this.counter_ = 0;
+                counter_ = 0;
 
-                float lenX = this.signSizeMeters_ * (signsPerRow - 1);
-                this.startX_ = -lenX * 0.5f;
+                float lenX = signSizeMeters_ * (signsPerRow - 1);
+                startX_ = -lenX * 0.5f;
             }
 
             public bool DrawSign(bool small,
@@ -178,10 +178,10 @@ namespace TrafficManager.UI.Helpers {
             //   * and no permanent overlay enabled,
             //   * and is Junctions restrictions tool
             // TODO generalize for all tools.
-            if (this.ViewOnly &&
+            if (ViewOnly &&
                 !(Options.junctionRestrictionsOverlay ||
                   MassEditOverlay.IsActive) &&
-                this.mainTool_.GetToolMode() != ToolMode.JunctionRestrictions) {
+                mainTool_.GetToolMode() != ToolMode.JunctionRestrictions) {
                 return false;
             }
 
@@ -220,8 +220,8 @@ namespace TrafficManager.UI.Helpers {
                     segmentId: segmentId,
                     startNode: isStartNode,
                     signsPerRow: isIncoming ? 2 : 1,
-                    viewOnly: this.ViewOnly,
-                    baseZoom: this.mainTool_.GetBaseZoom());
+                    viewOnly: ViewOnly,
+                    baseZoom: mainTool_.GetBaseZoom());
 
                 IJunctionRestrictionsManager junctionRManager = Constants.ManagerFactory.JunctionRestrictionsManager;
 
@@ -237,9 +237,9 @@ namespace TrafficManager.UI.Helpers {
                         startNode: isStartNode,
                         node: ref node);
 
-                if (this.debug_
+                if (debug_
                     || (configurable
-                        && (!this.ViewOnly
+                        && (!ViewOnly
                             || (allowed != junctionRManager
                                            .GetDefaultLaneChangingAllowedWhenGoingStraight(
                                                segmentId: segmentId,
@@ -254,9 +254,9 @@ namespace TrafficManager.UI.Helpers {
                                          ? JunctionRestrictions.LaneChangeAllowed
                                          : JunctionRestrictions.LaneChangeForbidden);
 
-                    if (signHovered && this.handleClick_) {
+                    if (signHovered && handleClick_) {
                         isAnyHovered = true;
-                        if (this.mainTool_.CheckClicked()) {
+                        if (mainTool_.CheckClicked()) {
                             junctionRManager.ToggleLaneChangingAllowedWhenGoingStraight(
                                 segmentId: segmentId,
                                 startNode: isStartNode);
@@ -272,9 +272,9 @@ namespace TrafficManager.UI.Helpers {
                     startNode: isStartNode,
                     node: ref node);
 
-                if (this.debug_
+                if (debug_
                     || (configurable
-                        && (!this.ViewOnly
+                        && (!ViewOnly
                             || (allowed != junctionRManager.GetDefaultUturnAllowed(
                                     segmentId: segmentId,
                                     startNode: isStartNode,
@@ -288,10 +288,10 @@ namespace TrafficManager.UI.Helpers {
                                          ? JunctionRestrictions.UturnAllowed
                                          : JunctionRestrictions.UturnForbidden);
 
-                    if (signHovered && this.handleClick_) {
+                    if (signHovered && handleClick_) {
                         isAnyHovered = true;
 
-                        if (this.mainTool_.CheckClicked()) {
+                        if (mainTool_.CheckClicked()) {
                             if (!junctionRManager.ToggleUturnAllowed(
                                     segmentId,
                                     isStartNode)) {
@@ -312,9 +312,9 @@ namespace TrafficManager.UI.Helpers {
                     startNode: isStartNode,
                     node: ref node);
 
-                if (this.debug_
+                if (debug_
                     || (configurable
-                        && (!this.ViewOnly
+                        && (!ViewOnly
                             || (allowed != junctionRManager
                                                     .GetDefaultEnteringBlockedJunctionAllowed(
                                                         segmentId,
@@ -329,10 +329,10 @@ namespace TrafficManager.UI.Helpers {
                                          ? JunctionRestrictions.EnterBlockedJunctionAllowed
                                          : JunctionRestrictions.EnterBlockedJunctionForbidden);
 
-                    if (signHovered && this.handleClick_) {
+                    if (signHovered && handleClick_) {
                         isAnyHovered = true;
 
-                        if (this.mainTool_.CheckClicked()) {
+                        if (mainTool_.CheckClicked()) {
                             junctionRManager.ToggleEnteringBlockedJunctionAllowed(
                                 segmentId: segmentId,
                                 startNode: isStartNode);
@@ -350,9 +350,9 @@ namespace TrafficManager.UI.Helpers {
                     startNode: isStartNode,
                     node: ref node);
 
-                if (this.debug_
+                if (debug_
                     || (configurable
-                        && (!this.ViewOnly || !allowed))) {
+                        && (!ViewOnly || !allowed))) {
                     bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
@@ -361,10 +361,10 @@ namespace TrafficManager.UI.Helpers {
                                          ? JunctionRestrictions.PedestrianCrossingAllowed
                                          : JunctionRestrictions.PedestrianCrossingForbidden);
 
-                    if (signHovered && this.handleClick_) {
+                    if (signHovered && handleClick_) {
                         isAnyHovered = true;
 
-                        if (this.mainTool_.CheckClicked()) {
+                        if (mainTool_.CheckClicked()) {
                             junctionRManager.TogglePedestrianCrossingAllowed(
                                 segmentId,
                                 isStartNode);
@@ -393,9 +393,9 @@ namespace TrafficManager.UI.Helpers {
                     startNode: isStartNode,
                     node: ref node);
 
-                if (this.debug_
+                if (debug_
                     || (configurable
-                        && (!this.ViewOnly
+                        && (!ViewOnly
                             || (allowed != junctionRManager.GetDefaultTurnOnRedAllowed(
                                     near: leftSideTraffic,
                                     segmentId: segmentId,
@@ -410,10 +410,10 @@ namespace TrafficManager.UI.Helpers {
                                          ? JunctionRestrictions.LeftOnRedAllowed
                                          : JunctionRestrictions.LeftOnRedForbidden);
 
-                    if (signHovered && this.handleClick_) {
+                    if (signHovered && handleClick_) {
                         isAnyHovered = true;
 
-                        if (this.mainTool_.CheckClicked()) {
+                        if (mainTool_.CheckClicked()) {
                             junctionRManager.ToggleTurnOnRedAllowed(
                                 near: leftSideTraffic,
                                 segmentId: segmentId,
@@ -434,9 +434,9 @@ namespace TrafficManager.UI.Helpers {
                     startNode: isStartNode,
                     node: ref node);
 
-                if (this.debug_
+                if (debug_
                     || (configurable
-                        && (!this.ViewOnly
+                        && (!ViewOnly
                             || (allowed != junctionRManager.GetDefaultTurnOnRedAllowed(
                                     near: !leftSideTraffic,
                                     segmentId: segmentId,
@@ -451,10 +451,10 @@ namespace TrafficManager.UI.Helpers {
                                          ? JunctionRestrictions.RightOnRedAllowed
                                          : JunctionRestrictions.RightOnRedForbidden);
 
-                    if (signHovered && this.handleClick_) {
+                    if (signHovered && handleClick_) {
                         isAnyHovered = true;
 
-                        if (this.mainTool_.CheckClicked()) {
+                        if (mainTool_.CheckClicked()) {
                             junctionRManager.ToggleTurnOnRedAllowed(
                                 near: !leftSideTraffic,
                                 segmentId: segmentId,

@@ -216,7 +216,7 @@ namespace TrafficManager.Util {
             if (segList == null)
                 return null;
             IRecordable record = RecordRoundabout(segList);
-            this.segmentList_ = segList;
+            segmentList_ = segList;
             int count = segList.Count;
             for (int i = 0; i < count; ++i) {
                 ushort segId = segList[i];
@@ -241,9 +241,9 @@ namespace TrafficManager.Util {
         /// <returns>true if its a roundabout</returns>
         public bool TraverseLoop(ushort segmentId, out List<ushort> segList) {
             if (segmentList_ != null) {
-                this.segmentList_.Clear();
+                segmentList_.Clear();
             } else {
-                this.segmentList_ = new List<ushort>();
+                segmentList_ = new List<ushort>();
             }
             bool ret;
             if (segmentId == 0 || !segMan.CalculateIsOneWay(segmentId)) {
@@ -251,7 +251,7 @@ namespace TrafficManager.Util {
             } else {
                 ret = TraverseAroundRecursive(segmentId);
             }
-            segList = this.segmentList_;
+            segList = segmentList_;
             return ret;
         }
 

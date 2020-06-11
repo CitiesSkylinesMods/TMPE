@@ -27,7 +27,7 @@ namespace TrafficManager.UI.Helpers {
             _ui = container.AddCheckbox(
                 T(Label),
                 Value,
-                this.OnValueChanged) as UICheckBox;
+                OnValueChanged) as UICheckBox;
             if (Tooltip != null) {
                 _ui.tooltip = T(Tooltip);
             }

@@ -53,7 +53,7 @@ namespace TrafficManager.UI {
         public class RemoveCitizenInstanceButton : BaseUButton {
             public override void Start() {
                 base.Start();
-                this.Skin = new ButtonSkin {
+                Skin = new ButtonSkin {
                     BackgroundPrefix = "Clear",
                     Prefix = "Clear",
                     BackgroundHovered = true,
@@ -61,7 +61,7 @@ namespace TrafficManager.UI {
                     ForegroundHovered = true,
                     ForegroundActive = true,
                 };
-                this.atlas = this.Skin.CreateAtlas(
+                atlas = Skin.CreateAtlas(
                     "Clear",
                     50,
                     50,
