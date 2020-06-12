@@ -21,8 +21,8 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
 
         // TODO [issue #] Should this be done in TMPE?
         // see https://github.com/CitiesSkylinesMods/TMPE/issues/895#issuecomment-643111138
-        const float _vanilaMaxPos = 4800f; // 25 tiles compatible value
-        const float _newMaxPos = 8000f; // 81 tiles compatible value.
+        const float vanilaMaxPos_ = 4800f; // 25 tiles compatible value
+        const float newMaxPos_ = 8000f; // 81 tiles compatible value.
 
         /// <summary>
         /// Notifies the extended citizen manager about a citizen that arrived at their destination if the Parking AI is active.
@@ -42,10 +42,10 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
             int n = 0;
             foreach (var instruction in instructions) {
                 bool is_ldfld_minCornerOffset =
-                    instruction.opcode == OpCodes.Ldc_R4 && ((float)instruction.operand) == _vanilaMaxPos;
+                    instruction.opcode == OpCodes.Ldc_R4 && ((float)instruction.operand) == vanilaMaxPos_;
                 if (is_ldfld_minCornerOffset) {
                     n++;
-                    yield return new CodeInstruction(OpCodes.Ldc_R4, operand: _newMaxPos);
+                    yield return new CodeInstruction(OpCodes.Ldc_R4, operand: newMaxPos_);
                 }else {
                     yield return instruction;
                 }
@@ -54,7 +54,7 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
             // if another mod has already made such replacement then this assertion fails and we would know :)
             Shortcuts.Assert(n > 0, "n>0"); 
             Log._Debug($"CargoTruckAI.StartPathFindPatch.Transpiler() successfully " +
-                $"replaced {n} instances of ldc.r4 {_vanilaMaxPos} with {_newMaxPos}");
+                $"replaced {n} instances of ldc.r4 {vanilaMaxPos_} with {newMaxPos_}");
             yield break;
         }
     }
