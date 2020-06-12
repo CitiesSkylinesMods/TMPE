@@ -329,17 +329,24 @@ namespace TrafficManager.UI {
 
         // Overridden to disable base class behavior
         protected override void OnEnable() {
+            // If TMPE was enabled by switching back from another tool (eg: buldozer, free camera), show main menue panel.
+            if (ModUI.Instance != null && !ModUI.Instance.IsVisible())
+                ModUI.Instance.ShowMainMenu();
+
             if (legacySubTools_ != null) {
                 Log._Debug("TrafficManagerTool.OnEnable(): Performing cleanup");
                 foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
                     e.Value.Cleanup();
                 }
             }
-            // disable base class behavior
+            // no call to base method to disable base class behavior
         }
 
         protected override void OnDisable() {
-            // Overridden to disable base class behavior
+            // If TMPE was disabled by switching to another tool, hide main menue panel.
+            if (ModUI.Instance != null && ModUI.Instance.IsVisible())
+                ModUI.Instance.CloseMainMenu();
+            // no call to base method to disable base class behavior
         }
 
         public override void RenderGeometry(RenderManager.CameraInfo cameraInfo) {
@@ -497,7 +504,6 @@ namespace TrafficManager.UI {
                 DefaultOnToolGUI(e);
             }
         }
-
 
         /// <summary>
         /// Immediate mode GUI (IMGUI) handler called every frame for input and IMGUI rendering (persistent overlay).
