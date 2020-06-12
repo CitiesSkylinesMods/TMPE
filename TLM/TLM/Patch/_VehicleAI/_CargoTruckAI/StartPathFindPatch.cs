@@ -13,15 +13,16 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util;
 
-    //[HarmonyPatch] // TODO complete transpiler
+    [HarmonyPatch]
     public class StartPathFindPatch {
 
         [UsedImplicitly]
         public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod<CargoTruckAI>();
 
-        // TODO this might not be necessary if we replace endpos with start pos.
-        const float _vanilaMaxPos = 4800f; // changed from 4800 in vanilla code for reasons known to pcfantacy and krzychu
-        const float _newMaxPos = 8000f; // changed from 4800 in vanilla code for reasons known to pcfantacy and krzychu
+        // TODO [issue #] Should this be done in TMPE
+        // see https://github.com/CitiesSkylinesMods/TMPE/issues/895#issuecomment-643111138
+        const float _vanilaMaxPos = 4800f; // 25 tiles compatible value
+        const float _newMaxPos = 8000f; // 81 tiles compatible value.
 
         /// <summary>
         /// Notifies the extended citizen manager about a citizen that arrived at their destination if the Parking AI is active.
@@ -34,7 +35,8 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
             CreatePathPatch.VehicleID = vehicleID;
         }
 
-        [UsedImplicitly] 
+        [UsedImplicitly]
+        [HarmonyPriority(Priority.Low)] // so that if this code is redundant, then the assertion bellow fails.
         public static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
             // TODO replace startPos with endpod if krzychu said it is necessary.
             int n = 0;
@@ -48,12 +50,11 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
                 }
             }
 
-            Shortcuts.Assert(n > 0, "n>0");
+            // if another mod has already made such replacement then this assertion fails and we would know :)
+            Shortcuts.Assert(n > 0, "n>0"); 
             Log._Debug($"CargoTruckAI.StartPathFindPatch.Transpiler() successfully " +
                 $"replaced {n} instances of ldc.r4 {_vanilaMaxPos} with {_newMaxPos}");
             yield break;
         }
-
-
     }
-    }
+}
