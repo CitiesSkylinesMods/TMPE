@@ -19,7 +19,7 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
         [UsedImplicitly]
         public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod<CargoTruckAI>();
 
-        // TODO [issue #] Should this be done in TMPE
+        // TODO [issue #] Should this be done in TMPE?
         // see https://github.com/CitiesSkylinesMods/TMPE/issues/895#issuecomment-643111138
         const float _vanilaMaxPos = 4800f; // 25 tiles compatible value
         const float _newMaxPos = 8000f; // 81 tiles compatible value.
@@ -41,12 +41,13 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
             // TODO replace startPos with endpod if krzychu said it is necessary.
             int n = 0;
             foreach (var instruction in instructions) {
-                yield return instruction;
                 bool is_ldfld_minCornerOffset =
-                    instruction.opcode == OpCodes.Ldc_R4 && (float)instruction.operand == _vanilaMaxPos;
+                    instruction.opcode == OpCodes.Ldc_R4 && ((float)instruction.operand) == _vanilaMaxPos;
                 if (is_ldfld_minCornerOffset) {
                     n++;
                     yield return new CodeInstruction(OpCodes.Ldc_R4, operand: _newMaxPos);
+                }else {
+                    yield return instruction;
                 }
             }
 
