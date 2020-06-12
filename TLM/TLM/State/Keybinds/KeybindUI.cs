@@ -232,7 +232,9 @@ namespace TrafficManager.State.Keybinds {
 
                 keybindButton.text = Keybind.ToLocalizedString(editedBinding.Value.TargetKey);
                 currentlyEditedBinding_ = null;
-            } catch (Exception e) {Log.Error($"{e}");}
+            } catch (Exception e) {
+                Log.Error($"{e}");
+            }
         }
 
         private void OnBindingMouseDown(UIComponent comp, UIMouseEventParameter evParam) {

@@ -862,8 +862,7 @@ namespace TrafficManager.Manager.Impl {
                                             currentLaneConnectionTransIndex =
                                                 numNextLaneConnectionTransitionDatas;
 
-                                            nextLaneConnectionTransitionDatas
-                                                [numNextLaneConnectionTransitionDatas++].Set(
+                                            nextLaneConnectionTransitionDatas[numNextLaneConnectionTransitionDatas++].Set(
                                                 nextLaneId,
                                                 nextLaneIndex,
                                                 LaneEndTransitionType.LaneConnection,

@@ -849,10 +849,10 @@ namespace TrafficManager.Manager.Impl {
             if (!Services.NetService.IsSegmentValid(segmentId)) {
                 return false;
             }
-            if(GetUturnAllowed(segmentId,startNode) == value) {
+            if(GetUturnAllowed(segmentId, startNode) == value) {
                 return true;
             }
-            if(!IsUturnAllowedConfigurable(segmentId,startNode, ref GetNode(segmentId, startNode))) {
+            if(!IsUturnAllowedConfigurable(segmentId, startNode, ref GetNode(segmentId, startNode))) {
                 return false;
             }
 

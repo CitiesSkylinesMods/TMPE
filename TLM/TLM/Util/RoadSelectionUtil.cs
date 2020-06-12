@@ -1,4 +1,3 @@
-
 namespace TrafficManager.Util {
     using System;
     using System.Collections.Generic;
@@ -15,7 +14,7 @@ namespace TrafficManager.Util {
             Instance = this;
         }
 
-        /// instance of singleton
+        // instance of singleton
         public static RoadSelectionUtil Instance { get; private set; }
 
         public static void Release() {
@@ -110,7 +109,7 @@ namespace TrafficManager.Util {
         public class Threading : ThreadingExtensionBase {
             private int prev_length = -2;
             private ushort prev_segmentID = 0;
-            private string  prev_name = "";
+            private string  prev_name = string.Empty;
 
             void UpdatePath() {
                 ushort selectedSegmentID = Singleton<InstanceManager>.instance.GetSelectedInstance().NetSegment;

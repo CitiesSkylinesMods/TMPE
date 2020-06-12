@@ -146,7 +146,6 @@ namespace TrafficManager.UI.Localization {
         /// <param name="sr">stream to read from</param>
         /// <param name="firstLine">first line of tranlation - row with language code names</param>
         /// <param name="dataBlock">string block of data (all remaining lines)</param>
-        /// <returns>collection of valid translation rows</returns>
         private static void ReadLines(StreamReader sr, out string firstLine, out string dataBlock) {
             firstLine = sr.ReadLine();
             dataBlock = sr.ReadToEnd();
@@ -196,8 +195,8 @@ namespace TrafficManager.UI.Localization {
                                 }
                                 case '\r':
                                     //Followed by a \r then \n or just \n - end-of-string
-                                    sr.Read();// consume double quote
-                                    sr.Read();// consume \r
+                                    sr.Read(); // consume double quote
+                                    sr.Read(); // consume \r
                                     if (sr.Peek() == '\n') {
                                         sr.Read(); // consume \n
                                     }

@@ -110,7 +110,7 @@ namespace TrafficManager.UI.Helpers {
             float orgOptsContainerWidth = optionsContainer.height;
             float orgOptsContainerHeight = optionsContainer.width;
 
-            int paddingRight = 10;//Options container is Scrollable panel itself(reserves space for scroll - which we don't use)
+            int paddingRight = 10; //Options container is Scrollable panel itself(reserves space for scroll - which we don't use)
             optionsContainer.size = new Vector2(orgOptsContainerWidth + paddingRight, orgOptsContainerHeight);
 
             ExtUITabstrip tabStrip = optionsContainer.AddUIComponent<ExtUITabstrip>();

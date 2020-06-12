@@ -88,8 +88,9 @@ namespace TrafficManager.UI {
                 }
 
                 Show();
-            } else
+            } else {
                 Hide();
+            }
         }
     }
 }

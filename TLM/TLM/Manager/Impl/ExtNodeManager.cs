@@ -32,7 +32,7 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// assuming highway rules are on, does the junction follow highway rules?
         /// </summary>
-        /// <param name=""></param>
+        /// <param name="nodeId">NodeId of the node to test.</param>
         /// <returns></returns>
         public static bool JunctionHasHighwayRules(ushort nodeId) {
             return JunctionHasOnlyHighwayRoads(nodeId) && !LaneConnectionManager.Instance.HasNodeConnections(nodeId);

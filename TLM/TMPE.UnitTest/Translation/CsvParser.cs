@@ -224,7 +224,7 @@ namespace TMUnitTest.Translation {
 
         [TestMethod]
         public void TestMultiLineCellParseWithCommas_LF() {
-            TestCollectTranslations(multilineTestBlock_LF_DataBlock,multilineTestBlock_LF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
+            TestCollectTranslations(multilineTestBlock_LF_DataBlock, multilineTestBlock_LF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-comma", "test\nmulti,line text\nseparation"));
             CollectionAssert.Contains(resultMap["en"], new KeyValuePair<string, string>("multiple-new-lines-contains-comma", "test en"));
 
@@ -234,7 +234,7 @@ namespace TMUnitTest.Translation {
 
         [TestMethod]
         public void TestMultiLineCellParseWithCommas_CRLF() {
-            TestCollectTranslations(multilineTestBlock_CRLF_DataBlock,multilineTestBlock_CRLF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
+            TestCollectTranslations(multilineTestBlock_CRLF_DataBlock, multilineTestBlock_CRLF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-comma", "test\r\nmulti,line text\r\nseparation"));
             CollectionAssert.Contains(resultMap["en"], new KeyValuePair<string, string>("multiple-new-lines-contains-comma", "test en"));
 
@@ -244,7 +244,7 @@ namespace TMUnitTest.Translation {
 
         [TestMethod]
         public void TestMultiLineCellParseWithVariousData_LF() {
-            TestCollectTranslations(multilineTestBlock_LF_DataBlock,multilineTestBlock_LF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
+            TestCollectTranslations(multilineTestBlock_LF_DataBlock, multilineTestBlock_LF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks", "test\nmulti, line text with \"quote-marked text\", text between commas,\nseparation"));
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks-2", "test\nmulti, line text with \"quote-marked\n text\", text between commas,\nseparation"));
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks-3", "test \"\nline end with \"quote-marks\""));
@@ -256,7 +256,7 @@ namespace TMUnitTest.Translation {
 
         [TestMethod]
         public void TestMultiLineCellParseWithVariousData_CRLF() {
-            TestCollectTranslations(multilineTestBlock_CRLF_DataBlock,multilineTestBlock_CRLF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
+            TestCollectTranslations(multilineTestBlock_CRLF_DataBlock, multilineTestBlock_CRLF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks", "test\r\nmulti, line text with \"quote-marked text\", text between commas,\r\nseparation"));
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks-2", "test\r\nmulti, line text with \"quote-marked\r\n text\", text between commas,\r\nseparation"));
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks-3", "test \"\r\nline end with \"quote-marks\""));

@@ -768,7 +768,6 @@ namespace TrafficManager.TrafficLight.Impl {
         /// </summary>
         /// <param name="wait"></param>
         /// <param name="flow"></param>
-        /// <returns>true if the values could be calculated, false otherwise</returns>
         public void CalcWaitFlow(bool countOnlyMovingIfGreen,
                                  int stepRefIndex,
                                  out float wait,

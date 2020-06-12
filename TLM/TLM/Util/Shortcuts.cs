@@ -109,7 +109,7 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// Creates and string of all items with enumerable inpute as {item1, item2, item3}
-        /// null argument returns "Null"
+        /// null argument returns "Null".
         /// </summary>
         internal static string ToSTR<T>(this IEnumerable<T> enumerable) {
             if (enumerable == null)

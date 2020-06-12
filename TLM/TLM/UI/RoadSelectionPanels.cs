@@ -30,10 +30,10 @@ namespace TrafficManager.UI {
         private FunctionModes _function;
 
         internal FunctionModes Function {
-            /// returns which button is in active state
+            // returns which button is in active state
             get => _function;
 
-            /// sets which button is in active state then refreshes buttons in all panels.
+            // sets which button is in active state then refreshes buttons in all panels.
             set {
                 if (_function != value) {
                     _function = value;
@@ -271,10 +271,10 @@ namespace TrafficManager.UI {
         /// Panel container for the Road selection UI. Multiple instances are allowed.
         /// </summary>
         public class PanelExt : UIPanel {
-            /// Container of this panel.
+            // Container of this panel.
             public RoadSelectionPanels Container;
 
-            /// list of buttons contained in this panel.
+            // list of buttons contained in this panel.
             private IList<ButtonExt> buttons_;
 
             UITextureAtlas allButtonsAtlas_;

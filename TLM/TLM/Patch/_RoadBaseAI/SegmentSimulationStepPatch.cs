@@ -1,5 +1,5 @@
 namespace TrafficManager.Patch._RoadBaseAI {
-    using API.Traffic.Enums;
+    using TrafficManager.API.Traffic.Enums;
     using ColossalFramework;
     using HarmonyLib;
     using JetBrains.Annotations;

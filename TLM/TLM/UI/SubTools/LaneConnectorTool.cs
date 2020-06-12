@@ -84,8 +84,8 @@ namespace TrafficManager.UI.SubTools {
             internal bool IsSource;
             internal bool IsTarget;
             internal int OuterSimilarLaneIndex;
-            internal int InnerSimilarLaneIndex; /// used for stay in lane.
-            internal int SegmentIndex; /// index accesable by NetNode.GetSegment(SegmentIndex);
+            internal int InnerSimilarLaneIndex; // used for stay in lane.
+            internal int SegmentIndex; // index accesable by NetNode.GetSegment(SegmentIndex);
             internal readonly List<LaneEnd> ConnectedLaneEnds = new List<LaneEnd>();
             internal Color Color;
 
@@ -353,7 +353,7 @@ namespace TrafficManager.UI.SubTools {
                     selectedLaneEnd = null;
                     ref NetNode node = ref SelectedNodeId.ToNode();
 
-                    bool stayInLane = GetSortedSegments(SelectedNodeId, out List<ushort> segList) ;
+                    bool stayInLane = GetSortedSegments(SelectedNodeId, out List<ushort> segList);
                     bool oneway = segMan.CalculateIsOneWay(segList[0]) || segMan.CalculateIsOneWay(segList[1]);
 
                     if (stayInLane) {
@@ -538,7 +538,7 @@ namespace TrafficManager.UI.SubTools {
             } else {
                 // final attempt to arrange one-way roads.
                 // this code path is reached when all incomming/outgoing segments have the same size.
-                ret = ArrangeOneWay(nodeId,segments);
+                ret = ArrangeOneWay(nodeId, segments);
             }
 
             return ret;
@@ -1089,7 +1089,7 @@ namespace TrafficManager.UI.SubTools {
                                 bezier = bezier.Cut(offsetT, 1f);
                                 pos = bezier.a;
                             } else {
-                                bezier = bezier.Cut(0, 1f-offsetT);
+                                bezier = bezier.Cut(0, 1f - offsetT);
                                 pos = bezier.d;
                             }
                             float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);

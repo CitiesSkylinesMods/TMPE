@@ -4,48 +4,12 @@ namespace TrafficManager.API.Traffic.Data {
     using UnityEngine;
 
     /// <summary>
-    /// Represents a speed value expressed in km/hour.
-    /// </summary>
-    [Serializable]
-    public readonly struct KmphValue {
-        public KmphValue(ushort kmph) {
-            Kmph = kmph;
-        }
-
-        public override string ToString() => $"{Kmph:0.0} km/h";
-
-        public ushort Kmph { get; }
-
-        /// <returns>A new KmphValue increased by right</returns>
-        public static KmphValue operator +(KmphValue left, ushort right)
-            => new KmphValue((ushort)(left.Kmph + right));
-    }
-
-    /// <summary>
-    /// Represents a speed value expressed in miles/hour.
-    /// </summary>
-    [Serializable]
-    public readonly struct MphValue {
-        public MphValue(ushort mph) {
-            Mph = mph;
-        }
-
-        public override string ToString() => $"{Mph} MPH";
-
-        public ushort Mph { get; }
-
-        /// <returns>A new MphValue increased by right</returns>
-        public static MphValue operator +(MphValue left, ushort right)
-            => new MphValue((ushort)(left.Mph + right));
-    }
-
-    /// <summary>
     /// Represents a speed value expressed in game units where 1f = 50 km/h or 32 MPH.
     /// </summary>
     [Serializable]
     public readonly struct SpeedValue {
         /// <summary>
-        /// Constructs a SpeedValue from game units float
+        /// Initializes a new instance of the <see cref="SpeedValue"/> struct from game units float.
         /// </summary>
         /// <param name="gameUnits">The value in game speed units</param>
         public SpeedValue(float gameUnits) {
@@ -146,5 +110,41 @@ namespace TrafficManager.API.Traffic.Data {
         /// <returns>A typed km/h value with integer km/hour</returns>
         public KmphValue ToKmphPrecise()
             => new KmphValue((ushort)Mathf.Round(GameUnits * ApiConstants.SPEED_TO_KMPH));
+    }
+
+    /// <summary>
+    /// Represents a speed value expressed in km/hour.
+    /// </summary>
+    [Serializable]
+    public readonly struct KmphValue {
+        public KmphValue(ushort kmph) {
+            Kmph = kmph;
+        }
+
+        public override string ToString() => $"{Kmph:0.0} km/h";
+
+        public ushort Kmph { get; }
+
+        /// <returns>A new KmphValue increased by right</returns>
+        public static KmphValue operator +(KmphValue left, ushort right)
+            => new KmphValue((ushort)(left.Kmph + right));
+    }
+
+    /// <summary>
+    /// Represents a speed value expressed in miles/hour.
+    /// </summary>
+    [Serializable]
+    public readonly struct MphValue {
+        public MphValue(ushort mph) {
+            Mph = mph;
+        }
+
+        public override string ToString() => $"{Mph} MPH";
+
+        public ushort Mph { get; }
+
+        /// <returns>A new MphValue increased by right</returns>
+        public static MphValue operator +(MphValue left, ushort right)
+            => new MphValue((ushort)(left.Mph + right));
     }
 }

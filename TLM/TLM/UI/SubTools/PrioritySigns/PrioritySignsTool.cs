@@ -4,8 +4,6 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     using ColossalFramework;
     using CSUtil.Commons;
     using static Util.SegmentTraverser;
-    using System.Collections.Generic;
-    using System;
     using ColossalFramework.UI;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
@@ -18,7 +16,6 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     using UnityEngine;
     using TrafficManager.Util.Record;
     using static Util.Shortcuts;
-    using static TrafficManager.Util.SegmentTraverser;
 
     public class PrioritySignsTool
         : LegacySubTool,

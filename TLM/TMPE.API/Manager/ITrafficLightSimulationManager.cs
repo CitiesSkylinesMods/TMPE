@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     using System.Collections.Generic;
     using TrafficManager.API.TrafficLight.Data;
 
@@ -32,7 +32,7 @@
 #if DEBUG
             ushort vehicleId,
             ref Vehicle vehicleData,
-# endif
+#endif
             ushort nodeId,
             ushort fromSegmentId,
             byte fromLaneIndex,

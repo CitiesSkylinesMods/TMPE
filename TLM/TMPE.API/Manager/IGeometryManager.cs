@@ -4,6 +4,17 @@ namespace TrafficManager.API.Manager {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Util;
 
+    public interface IGeometryManager {
+        // TODO define me!
+        void SimulationStep(bool onylFirstPass = false);
+        void OnUpdateSegment(ref ExtSegment segment);
+        void OnSegmentEndReplacement(SegmentEndReplacement replacement);
+        IDisposable Subscribe(IObserver<GeometryUpdate> observer);
+        void MarkAllAsUpdated();
+        void MarkAsUpdated(ref ExtSegment segment, bool updateNodes = true);
+        void MarkAsUpdated(ushort nodeId, bool updateSegments = false);
+    }
+
     public struct GeometryUpdate {
         public GeometryUpdate(ref ExtSegment segment) {
             this.segment = segment;
@@ -26,16 +37,5 @@ namespace TrafficManager.API.Manager {
         public ExtSegment? segment { get; private set; }
         public ushort? nodeId { get; private set; }
         public SegmentEndReplacement replacement { get; private set; }
-    }
-
-    public interface IGeometryManager {
-        // TODO define me!
-        void SimulationStep(bool onylFirstPass = false);
-        void OnUpdateSegment(ref ExtSegment segment);
-        void OnSegmentEndReplacement(SegmentEndReplacement replacement);
-        IDisposable Subscribe(IObserver<GeometryUpdate> observer);
-        void MarkAllAsUpdated();
-        void MarkAsUpdated(ref ExtSegment segment, bool updateNodes = true);
-        void MarkAsUpdated(ushort nodeId, bool updateSegments = false);
     }
 }

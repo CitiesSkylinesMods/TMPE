@@ -214,7 +214,6 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode">at start node?</param>
         /// <returns><code>true</code> if lane changing when going straight is allowed, <c>false</c> otherwise
         /// returns the default behaviour if flag is not set.</returns>
-
         bool IsLaneChangingAllowedWhenGoingStraight(ushort segmentId, bool startNode);
 
         /// <summary>

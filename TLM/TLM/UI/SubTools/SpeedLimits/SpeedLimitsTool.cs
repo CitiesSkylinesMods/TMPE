@@ -156,7 +156,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private void RenderLaneOverlay(RenderManager.CameraInfo cameraInfo, uint laneId) {
             var marker = new SegmentLaneMarker(laneBuffer[laneId].m_bezier);
             bool pressed = Input.GetMouseButton(0);
-            Color color = MainTool.GetToolColor(pressed,false);
+            Color color = MainTool.GetToolColor(pressed, false);
             if (!ShowLimitsPerLane) {
                 marker.Size = 3f; // lump the lanes together.
             }
@@ -612,13 +612,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             GUILayout.FlexibleSpace();
 
-            {
-                bool toggled = MultiSegmentMode != GUILayout.Toggle(
-                    MultiSegmentMode,
-                    Translation.SpeedLimits.Get("Checkbox:Apply to entire road") + " [shift]");
-                if (toggled) {
-                    multiSegmentMode_ = !multiSegmentMode_;
-                }
+            bool multiSegmentModeToggled = MultiSegmentMode != GUILayout.Toggle(
+                MultiSegmentMode,
+                Translation.SpeedLimits.Get("Checkbox:Apply to entire road") + " [shift]");
+            if (multiSegmentModeToggled) {
+                multiSegmentMode_ = !multiSegmentMode_;
             }
 
             GUILayout.FlexibleSpace();
@@ -630,13 +628,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            {
-                bool toggled = ShowLimitsPerLane != GUILayout.Toggle(
-                    ShowLimitsPerLane,
-                    Translation.SpeedLimits.Get("Checkbox:Show lane-wise speed limits") + " [ctrl]");
-                if (toggled) {
-                    showLimitsPerLane_ = !showLimitsPerLane_;
-                }
+            bool limitsPerLaneToggled = ShowLimitsPerLane != GUILayout.Toggle(
+                ShowLimitsPerLane,
+                Translation.SpeedLimits.Get("Checkbox:Show lane-wise speed limits") + " [ctrl]");
+            if (limitsPerLaneToggled) {
+                showLimitsPerLane_ = !showLimitsPerLane_;
             }
 
             GUILayout.FlexibleSpace();

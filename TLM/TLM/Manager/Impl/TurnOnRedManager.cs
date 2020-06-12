@@ -107,7 +107,7 @@ namespace TrafficManager.Manager.Impl {
             Services.NetService.IterateNodeSegments(
                 end.nodeId,
                 (ushort otherSegId, ref NetSegment otherSeg) => {
-                    int index0 = segmentEndManager.GetIndex(otherSegId,otherSeg.m_startNode == nodeId);
+                    int index0 = segmentEndManager.GetIndex(otherSegId, otherSeg.m_startNode == nodeId);
 
                     if (otherSegId != segmentId
                         && segmentEndManager.ExtSegmentEnds[index0].outgoing)

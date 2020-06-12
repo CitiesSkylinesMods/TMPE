@@ -1,8 +1,8 @@
 namespace TrafficManager.Custom.AI {
     using ColossalFramework;
     using JetBrains.Annotations;
-    using Manager.Impl;
-    using State;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Custom.PathFinding;

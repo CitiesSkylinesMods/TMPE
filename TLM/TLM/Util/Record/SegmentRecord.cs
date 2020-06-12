@@ -7,7 +7,7 @@ namespace TrafficManager.Util.Record {
     public class SegmentRecord : IRecordable {
         public SegmentRecord(ushort segmentId) => SegmentId = segmentId;
 
-        public ushort SegmentId { get; private set;}
+        public ushort SegmentId { get; private set; }
         
         private bool parkingForward_;
         private bool parkingBackward_;

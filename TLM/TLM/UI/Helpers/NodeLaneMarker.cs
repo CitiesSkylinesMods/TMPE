@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace TrafficManager.UI.Helpers {
     internal class NodeLaneMarker {
-        internal Vector3 TerrainPosition; /// projected on terrain
-        internal Vector3 Position; /// original height.
+        internal Vector3 TerrainPosition; // projected on terrain
+        internal Vector3 Position; // original height.
         static internal float Radius = 1f;
 
         /// <summary>
