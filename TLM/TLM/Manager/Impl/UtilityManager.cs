@@ -9,11 +9,11 @@ namespace TrafficManager.Manager.Impl {
     using UnityEngine;
 
     public class UtilityManager : AbstractCustomManager, IUtilityManager {
-        public static UtilityManager Instance { get; }
-
         static UtilityManager() {
             Instance = new UtilityManager();
         }
+
+        public static UtilityManager Instance { get; }
 
         public void ClearTraffic() {
             try {

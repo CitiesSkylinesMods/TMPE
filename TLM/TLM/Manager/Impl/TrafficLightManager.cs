@@ -194,7 +194,11 @@ namespace TrafficManager.Manager.Impl {
                     Log._DebugFormat(
                         "Can toggle traffic lights at node {0}: numRoads={1} numTrainTracks={2} " +
                         "numMonorailTracks={3} numPedSegments={4}",
-                        nodeId, numRoads, numTrainTracks, numMonorailTracks, numPedSegments);
+                        nodeId,
+                        numRoads,
+                        numTrainTracks,
+                        numMonorailTracks,
+                        numPedSegments);
                 }
 
                 reason = ToggleTrafficLightError.None;
@@ -205,7 +209,11 @@ namespace TrafficManager.Manager.Impl {
                 Log._DebugFormat(
                     "Cannot toggle traffic lights at node {0}: Insufficient segments. numRoads={1} " +
                     "numTrainTracks={2} numMonorailTracks={3} numPedSegments={4}",
-                    nodeId, numRoads, numTrainTracks, numMonorailTracks, numPedSegments);
+                    nodeId,
+                    numRoads,
+                    numTrainTracks,
+                    numMonorailTracks,
+                    numPedSegments);
             }
 
             reason = ToggleTrafficLightError.InsufficientSegments;

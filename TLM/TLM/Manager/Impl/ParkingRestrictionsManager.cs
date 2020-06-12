@@ -73,7 +73,6 @@ namespace TrafficManager.Manager.Impl {
                         Log.Error($"parking lane with bad m_finalDirection:{lane.m_finalDirection}, expected forward or backward");
                     }
                 }
-
             }
 #endif
 

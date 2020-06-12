@@ -24,18 +24,17 @@ namespace TrafficManager.U.Autosize {
         /// </summary>
         public float Padding;
 
-        /// <summary>
-        /// Set this to false, then the control will be positioned but will not contribute to
-        /// parent's all children bounding box. Useful for controls hanging outside of the parent.
-        /// </summary>
-        public bool ContributeToBoundingBox { get; set; }
-
         public UResizerConfig() {
             onResize_ = null;
             ContributeToBoundingBox = true;
             Padding = 0f;
         }
 
+        /// <summary>
+        /// Set this to false, then the control will be positioned but will not contribute to
+        /// parent's all children bounding box. Useful for controls hanging outside of the parent.
+        /// </summary>
+        public bool ContributeToBoundingBox { get; set; }
         public static UResizerConfig From(UIComponent control) {
             return (control as ISmartSizableControl)?.GetResizerConfig();
         }

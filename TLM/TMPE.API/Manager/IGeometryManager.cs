@@ -1,14 +1,10 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     using System;
     using TrafficManager.API.Geometry;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Util;
 
     public struct GeometryUpdate {
-        public ExtSegment? segment { get; private set; }
-        public ushort? nodeId { get; private set; }
-        public SegmentEndReplacement replacement { get; private set; }
-
         public GeometryUpdate(ref ExtSegment segment) {
             this.segment = segment;
             nodeId = null;
@@ -26,6 +22,10 @@
             segment = null;
             nodeId = null;
         }
+
+        public ExtSegment? segment { get; private set; }
+        public ushort? nodeId { get; private set; }
+        public SegmentEndReplacement replacement { get; private set; }
     }
 
     public interface IGeometryManager {

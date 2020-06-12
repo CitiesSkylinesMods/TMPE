@@ -13,6 +13,13 @@ namespace TrafficManager.API.TrafficLight.Data {
         public ushort nodeId;
         public TrafficLightSimulationType type;
 
+        public TrafficLightSimulation(ushort nodeId) {
+            // Log._Debug($"TrafficLightSimulation: Constructor called @ node {nodeId}");
+            this.nodeId = nodeId;
+            timedLight = null;
+            type = TrafficLightSimulationType.None;
+        }
+
         public override string ToString() {
             return string.Format(
                 "[TrafficLightSimulation\n\tnodeId = {0}\n\ttype = {1}\n\ttimedLight = {2}\n" +
@@ -20,13 +27,6 @@ namespace TrafficManager.API.TrafficLight.Data {
                 nodeId,
                 type,
                 timedLight);
-        }
-
-        public TrafficLightSimulation(ushort nodeId) {
-            // Log._Debug($"TrafficLightSimulation: Constructor called @ node {nodeId}");
-            this.nodeId = nodeId;
-            timedLight = null;
-            type = TrafficLightSimulationType.None;
         }
 
         public bool IsTimedLight() {

@@ -7,6 +7,10 @@ namespace TrafficManager.UI {
 
     [Obsolete("Refactor tools to the new TrafficManagerSubTool class instead of LegacySubTool")]
     public abstract class LegacySubTool {
+        public LegacySubTool(TrafficManagerTool mainTool) {
+            MainTool = mainTool;
+        }
+
         protected TrafficManagerTool MainTool { get; }
 
         private Texture2D WindowTexture {
@@ -110,10 +114,6 @@ namespace TrafficManager.UI {
             set => TrafficManagerTool.SelectedSegmentId = value;
         }
 
-        public LegacySubTool(TrafficManagerTool mainTool) {
-            MainTool = mainTool;
-        }
-
         [UsedImplicitly]
         public void OnToolUpdate() {
             // OnLeftClickOverlay();
@@ -169,7 +169,7 @@ namespace TrafficManager.UI {
         }
 
         public virtual string GetTutorialKey() {
-            return this.GetType().Name;
+            return GetType().Name;
         }
 
         protected void DragWindow(ref Rect window) {

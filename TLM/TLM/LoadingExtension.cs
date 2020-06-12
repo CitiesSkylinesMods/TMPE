@@ -19,6 +19,13 @@ namespace TrafficManager {
 
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {
+        static LoadingExtension() {
+            TranslationDatabase.LoadAllTranslations();
+        }
+
+        public LoadingExtension() {
+        }
+
         internal static LoadingExtension Instance = null;
 
         FastList<ISimulationManager> simManager =>
@@ -40,13 +47,6 @@ namespace TrafficManager {
 
         public static bool IsPathManagerReplaced {
             get; private set;
-        }
-
-        static LoadingExtension() {
-            TranslationDatabase.LoadAllTranslations();
-        }
-
-        public LoadingExtension() {
         }
 
         public override void OnCreated(ILoading loading) {

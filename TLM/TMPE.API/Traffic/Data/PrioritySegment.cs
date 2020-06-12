@@ -16,17 +16,17 @@ namespace TrafficManager.API.Traffic.Data {
         /// </summary>
         public PriorityType endType;
 
+        [UsedImplicitly]
+        public PrioritySegment(PriorityType startType, PriorityType endType) {
+            this.startType = startType;
+            this.endType = endType;
+        }
+
         public override string ToString() {
             return string.Format(
                 "[PrioritySegment\n\tstartType = {0}\n\tendType = {1}\nPrioritySegment]",
                 startType,
                 endType);
-        }
-
-        [UsedImplicitly]
-        public PrioritySegment(PriorityType startType, PriorityType endType) {
-            this.startType = startType;
-            this.endType = endType;
         }
 
         public void Reset() {

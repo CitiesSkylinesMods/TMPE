@@ -17,6 +17,26 @@ namespace TrafficManager.TrafficLight.Impl {
     public class CustomSegmentLight
         : ICustomSegmentLight
     {
+        public CustomSegmentLight(CustomSegmentLights lights,
+                                  RoadBaseAI.TrafficLightState mainLight) {
+            this.lights_ = lights;
+
+            SetStates(mainLight, LightLeft, LightRight);
+            UpdateVisuals();
+        }
+
+        [UsedImplicitly]
+        public CustomSegmentLight(CustomSegmentLights lights,
+                                  RoadBaseAI.TrafficLightState mainLight,
+                                  RoadBaseAI.TrafficLightState leftLight,
+                                  RoadBaseAI.TrafficLightState rightLight) {
+            this.lights_ = lights;
+
+            SetStates(mainLight, leftLight, rightLight);
+
+            UpdateVisuals();
+        }
+
         [Obsolete]
         public ushort NodeId => lights_.NodeId;
 
@@ -51,7 +71,12 @@ namespace TrafficManager.TrafficLight.Impl {
             return string.Format(
                 "[CustomSegmentLight seg. {0} @ node {1}\n\tCurrentMode: {2}\n\tLightLeft: {3}\n" +
                 "\tLightMain: {4}\n\tLightRight: {5}\nCustomSegmentLight]",
-                SegmentId, NodeId, CurrentMode, LightLeft, LightMain, LightRight);
+                SegmentId,
+                NodeId,
+                CurrentMode,
+                LightLeft,
+                LightMain,
+                LightRight);
         }
 
         private void EnsureModeLights() {
@@ -94,28 +119,6 @@ namespace TrafficManager.TrafficLight.Impl {
             if (changed) {
                 lights_.OnChange();
             }
-        }
-
-        public CustomSegmentLight(CustomSegmentLights lights,
-                                  RoadBaseAI.TrafficLightState mainLight) {
-            this.lights_ = lights;
-
-            SetStates(mainLight, LightLeft, LightRight);
-            UpdateVisuals();
-        }
-
-        [UsedImplicitly]
-        public CustomSegmentLight(CustomSegmentLights lights,
-                                  RoadBaseAI.TrafficLightState mainLight,
-                                  RoadBaseAI.TrafficLightState leftLight,
-                                  RoadBaseAI.TrafficLightState rightLight
-                // , RoadBaseAI.TrafficLightState pedestrianLight
-            ) {
-            this.lights_ = lights;
-
-            SetStates(mainLight, leftLight, rightLight);
-
-            UpdateVisuals();
         }
 
         public void ToggleMode() {

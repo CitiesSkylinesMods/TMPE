@@ -129,8 +129,11 @@ namespace TrafficManager.State.Keybinds {
             return label;
         }
 
-        public void CreateKeybindButton(UIPanel parent, KeybindSetting setting, SavedInputKey editKey,
-                                        float widthFraction) {
+        public void CreateKeybindButton(
+            UIPanel parent,
+            KeybindSetting setting,
+            SavedInputKey editKey,
+            float widthFraction) {
             var btn = parent.AddUIComponent<UIButton>();
             btn.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
             btn.text = Keybind.ToLocalizedString(editKey);

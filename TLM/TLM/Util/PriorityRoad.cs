@@ -429,8 +429,7 @@ namespace TrafficManager.Util {
                                 netService.IsStartNode(segmentId, nodeId) ^ (!toward),
                                 LaneArrowManager.LANE_TYPES,
                                 LaneArrowManager.VEHICLE_TYPES,
-                                true
-                                ).Count;
+                                true).Count;
         }
         internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
@@ -489,8 +488,7 @@ namespace TrafficManager.Util {
                     startNode,
                     LaneArrowManager.LANE_TYPES,
                     LaneArrowManager.VEHICLE_TYPES,
-                    !lht
-                    );
+                    !lht);
             int srcLaneCount = laneList.Count;
             Log._Debug($"FixMajorSegmentLanes: segment:{segmentId} laneList:" + laneList.ToSTR());
 
@@ -539,8 +537,7 @@ namespace TrafficManager.Util {
                     startNode,
                     LaneArrowManager.LANE_TYPES,
                     LaneArrowManager.VEHICLE_TYPES,
-                    true
-                    );
+                    true);
             int srcLaneCount = laneList.Count;
 
             bool bLeft, bRight, bForward;

@@ -26,6 +26,19 @@ namespace TrafficManager.UI.Helpers {
 
         public bool ViewOnly;
 
+        /// <summary>Initializes a new instance of the <see cref="TrafficRulesOverlay"/> struct for rendering.</summary>
+        /// <param name="mainTool">Parent <see cref="TrafficManagerTool"/>.</param>
+        /// <param name="debug">Is debug rendering on.</param>
+        /// <param name="handleClick">Whether clicks are to be handled.</param>
+        public TrafficRulesOverlay(TrafficManagerTool mainTool,
+                       bool debug,
+                       bool handleClick) {
+            mainTool_ = mainTool;
+            debug_ = debug;
+            handleClick_ = handleClick;
+            ViewOnly = true;
+        }
+
         /// <summary>
         /// Handles layout for the Junction Restriction signs being rendered.
         /// One <see cref="SignsLayout"/> is created per junction.
@@ -143,19 +156,6 @@ namespace TrafficManager.UI.Helpers {
                 GUI.DrawTexture(boundingBox, signTexture);
                 return hoveredHandle;
             }
-        }
-
-        /// <summary>Initializes a new instance of the <see cref="TrafficRulesOverlay"/> struct for rendering.</summary>
-        /// <param name="mainTool">Parent <see cref="TrafficManagerTool"/>.</param>
-        /// <param name="debug">Is debug rendering on.</param>
-        /// <param name="handleClick">Whether clicks are to be handled.</param>
-        public TrafficRulesOverlay(TrafficManagerTool mainTool,
-                       bool debug,
-                       bool handleClick) {
-            mainTool_ = mainTool;
-            debug_ = debug;
-            handleClick_ = handleClick;
-            ViewOnly = true;
         }
 
         /// <summary>

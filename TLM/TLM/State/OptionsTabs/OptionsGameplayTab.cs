@@ -253,6 +253,5 @@ namespace TrafficManager.State {
                 _disableDespawningToggle.isChecked = value;
             }
         }
-
     } // end class
 }

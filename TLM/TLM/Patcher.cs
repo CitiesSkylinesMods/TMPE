@@ -87,6 +87,5 @@ namespace TrafficManager {
             initialized_ = false;
             Log.Info("Reverting detours finished.");
         }
-
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Custom.AI {
+namespace TrafficManager.Custom.AI {
     using ColossalFramework;
     using JetBrains.Annotations;
     using Manager.Impl;
@@ -94,9 +94,7 @@
 
                     ExtVehicleManager.Instance.UpdateVehiclePosition(
                             vehicleId,
-                            ref vehicleData
-                            /*, lastFrameData.m_velocity.magnitude*/
-                        );
+                            ref vehicleData);
                 }
             }
 

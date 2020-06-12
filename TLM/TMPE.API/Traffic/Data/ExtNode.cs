@@ -19,6 +19,12 @@
         /// </summary>
         public ISegmentEndId removedSegmentEndId;
 
+        public ExtNode(ushort nodeId) {
+            this.nodeId = nodeId;
+            segmentIds = new HashSet<ushort>();
+            removedSegmentEndId = null;
+        }
+
         public override string ToString() {
             return string.Format(
                 "[ExtNode {0}\n\tnodeId={1}\n\tsegmentIds={2}\n\tremovedSegmentEndId={3}\nExtNode]",
@@ -26,12 +32,6 @@
                 nodeId,
                 segmentIds.CollectionToString(),
                 removedSegmentEndId);
-        }
-
-        public ExtNode(ushort nodeId) {
-            this.nodeId = nodeId;
-            segmentIds = new HashSet<ushort>();
-            removedSegmentEndId = null;
         }
 
         public void Reset() {

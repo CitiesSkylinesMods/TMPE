@@ -16,13 +16,6 @@
           ICustomDataManager<List<Configuration.ExtCitizenData>>,
           IExtCitizenManager
     {
-        public static ExtCitizenManager Instance = new ExtCitizenManager();
-
-        /// <summary>
-        /// All additional data for citizens. Index: citizen id
-        /// </summary>
-        public ExtCitizen[] ExtCitizens { get; }
-
         private ExtCitizenManager() {
             ExtCitizens = new ExtCitizen[CitizenManager.MAX_CITIZEN_COUNT];
 
@@ -31,6 +24,13 @@
                 Reset(ref ExtCitizens[i]);
             }
         }
+
+        public static ExtCitizenManager Instance = new ExtCitizenManager();
+
+        /// <summary>
+        /// All additional data for citizens. Index: citizen id
+        /// </summary>
+        public ExtCitizen[] ExtCitizens { get; }
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();

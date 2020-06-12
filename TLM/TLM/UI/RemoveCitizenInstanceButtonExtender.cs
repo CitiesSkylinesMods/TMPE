@@ -61,7 +61,7 @@ namespace TrafficManager.UI {
                     ForegroundHovered = true,
                     ForegroundActive = true,
                 };
-                this.atlas = this.Skin.CreateAtlas(
+                atlas = this.Skin.CreateAtlas(
                     "Clear",
                     50,
                     50,
@@ -69,7 +69,6 @@ namespace TrafficManager.UI {
                     this.Skin.CreateAtlasKeyset());
                 UpdateButtonImageAndTooltip();
                 width = height = 30;
-
             }
 
             public override void HandleClick(UIMouseEventParameter p) {

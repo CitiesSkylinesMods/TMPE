@@ -51,6 +51,19 @@
         /// </summary>
         public bool atOutsideConnection;
 
+        public ExtCitizenInstance(ushort instanceId) {
+            this.instanceId = instanceId;
+            pathMode = ExtPathMode.None;
+            failedParkingAttempts = 0;
+            parkingSpaceLocationId = 0;
+            parkingSpaceLocation = ExtParkingSpaceLocation.None;
+            parkingPathStartPosition = null;
+            returnPathId = 0;
+            returnPathState = ExtPathState.None;
+            lastDistanceToParkedCar = 0;
+            atOutsideConnection = false;
+        }
+
         public override string ToString() {
             return string.Format(
                 "[ExtCitizenInstance\n\tinstanceId = {0}\n\tpathMode = {1}\n" +
@@ -68,19 +81,6 @@
                 returnPathState,
                 lastDistanceToParkedCar,
                 atOutsideConnection);
-        }
-
-        public ExtCitizenInstance(ushort instanceId) {
-            this.instanceId = instanceId;
-            pathMode = ExtPathMode.None;
-            failedParkingAttempts = 0;
-            parkingSpaceLocationId = 0;
-            parkingSpaceLocation = ExtParkingSpaceLocation.None;
-            parkingPathStartPosition = null;
-            returnPathId = 0;
-            returnPathState = ExtPathState.None;
-            lastDistanceToParkedCar = 0;
-            atOutsideConnection = false;
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Custom.AI {
+namespace TrafficManager.Custom.AI {
     using ColossalFramework.Math;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -215,7 +215,6 @@
             vehicleData.m_path = path;
             vehicleData.m_flags |= Vehicle.Flags.WaitingPath;
             return true;
-
         }
 
         [RedirectMethod]
@@ -327,9 +326,7 @@
 
                     ExtVehicleManager.Instance.UpdateVehiclePosition(
                             vehicleId,
-                            ref vehicleData
-                            /*, lastFrameData.m_velocity.magnitude*/
-                        );
+                            ref vehicleData);
                 }
             }
 
@@ -977,8 +974,10 @@
                             maxSpeed = CalculateTargetSpeed(vehicleId, ref vehicleData, 1000f, curve);
                             maxSpeed = Mathf.Min(
                                 maxSpeed,
-                                CalculateMaxSpeed(targetDist, vehicleData.m_targetPos1.w,
-                                                  braking * 0.9f));
+                                CalculateMaxSpeed(
+                                    targetDist,
+                                    vehicleData.m_targetPos1.w,
+                                    braking * 0.9f));
                         } else {
                             maxSpeed = Mathf.Min(
                                 maxSpeed,
@@ -1016,8 +1015,13 @@
                             targetDist = Mathf.Max(0f, targetDist + (lengthExtra * 0.5f));
                         }
 
-                        maxSpeed = Mathf.Min(maxSpeed, CalculateMaxSpeed(targetDist, 0f,
-                                                                         braking * 0.9f));
+                        maxSpeed = Mathf.Min(
+                            maxSpeed,
+                            CalculateMaxSpeed(
+                                targetDist,
+                                0f,
+                                braking * 0.9f));
+
                         Log._DebugIf(
                             logLogic,
                             () => $"CustomTramBaseAI.SimulationStep({vehicleId}): [4] maxSpeed={maxSpeed}");

@@ -27,9 +27,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             UIUtil.MakeUniqueAndSetName(gameObject, GAMEOBJECT_NAME);
 
             // the GenericPanel sprite is silver, make it dark
-            this.backgroundSprite = "GenericPanel";
-            this.color = new Color32(64, 64, 64, 240);
-            this.SetOpacity(
+            backgroundSprite = "GenericPanel";
+            color = new Color32(64, 64, 64, 240);
+            SetOpacity(
                 U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
         }
 

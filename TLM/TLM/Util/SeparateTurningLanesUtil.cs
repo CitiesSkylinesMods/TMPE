@@ -204,12 +204,22 @@ namespace TrafficManager.Util {
             int near, forward, far;
             if (!alt3) {
                 DistributeLanes(
-                    srcLaneCount, farLanesCount, forwardLanesCount, nearLanesCount,
-                    out far, out forward, out near);
+                    srcLaneCount,
+                    farLanesCount,
+                    forwardLanesCount,
+                    nearLanesCount,
+                    out far,
+                    out forward,
+                    out near);
             } else {
                 DistributeLanes(
-                    srcLaneCount, forwardLanesCount, farLanesCount, nearLanesCount,
-                    out forward, out far, out near);
+                    srcLaneCount,
+                    forwardLanesCount,
+                    farLanesCount,
+                    nearLanesCount,
+                    out forward,
+                    out far,
+                    out near);
             }
 
             Log._Debug($"near=${near} forward={forward} far={far}");
@@ -257,7 +267,6 @@ namespace TrafficManager.Util {
                 DistributeLanes3(total, a, b, c, out x, out y, out z);
             }
             Log._Debug($"DistributeLanes (by prioirty): {a}=>{x} | {b}=>{y} | {c}=>{z}");
-
         }
 
         /// <summary>
@@ -371,7 +380,5 @@ namespace TrafficManager.Util {
 
             return SetLaneArrow_Result.Success;
         }
-
     }
-
 }
