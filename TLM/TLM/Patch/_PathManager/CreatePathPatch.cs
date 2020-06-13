@@ -29,8 +29,6 @@ namespace TrafficManager.Patch._PathManager {
         public static ExtPathType ExtPathType;
         public static ushort VehicleID;
 
-        public static bool? StablePath;
-
         /// <summary>
         /// precondition: Args.extVehicleType, Args.extPathType, Args.vehicleId, and Args.stablePath are initialized.
         /// </summary>
@@ -73,8 +71,7 @@ namespace TrafficManager.Patch._PathManager {
 
             // overridden vanilla values:
             args.skipQueue = args.spawned;
-            if (ai is ShipAI) args.skipQueue = false; // TODO [issue #] is this line necessary?
-            args.stablePath = StablePath ?? stablePath;
+            if (ai is ShipAI) args.skipQueue = false; // TODO [issue #] why ShipAI should be different than others?
 
             __result = CustomPathManager._instance.CustomCreatePath(out unit, ref randomizer, args);
             if (__result) {

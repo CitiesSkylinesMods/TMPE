@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
 
@@ -81,14 +81,6 @@
         ExtVehicleType OnStartPathFind(ref ExtVehicle extVehicle,
                                        ref Vehicle vehicleData,
                                        ExtVehicleType? vehicleType);
-
-        /// <summary>
-        /// Retrieves the driver citizen instance id for the given vehicle.
-        /// </summary>
-        /// <param name="vehicleId">vehicle id</param>
-        /// <param name="data">vehicle data</param>
-        /// <returns></returns>
-        ushort GetDriverInstanceId(ushort vehicleId, ref Vehicle data);
 
         /// <summary>
         /// Updates the vehicle's current path position.

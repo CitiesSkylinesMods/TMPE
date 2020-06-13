@@ -16,9 +16,6 @@ namespace TrafficManager.Patch._VehicleAI._BusAI{
             CreatePathPatch.ExtPathType = ExtPathType.None;
             CreatePathPatch.ExtVehicleType = ExtVehicleType.Bus;
             CreatePathPatch.VehicleID = vehicleID;
-
-            // override vanilla values.
-            CreatePathPatch.StablePath = true;
         }
     }
 }

@@ -18,7 +18,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI{
         public static void Prefix(ushort vehicleID, ref Vehicle vehicleData,
             Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget) {
 #if DEBUG
-            // TODO [issue *]: this message is not printed for all override of CarAI
+            // TODO [issue *]: why this message is not printed for all overrides of CarAI?
             bool vehDebug = DebugSettings.VehicleId == 0
                            || DebugSettings.VehicleId == vehicleID;
             bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
@@ -30,7 +30,11 @@ namespace TrafficManager.Patch._VehicleAI._CarAI{
                 $"undergroundTarget={undergroundTarget}");
 #endif
 
-            CreatePathPatch.ExtVehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
+            var vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
+            if (vehicleType == ExtVehicleType.None)
+                vehicleType = ExtVehicleType.RoadVehicle;
+
+            CreatePathPatch.ExtVehicleType = vehicleType;
             CreatePathPatch.ExtPathType = ExtPathType.None;
             CreatePathPatch.VehicleID = vehicleID;
         }
