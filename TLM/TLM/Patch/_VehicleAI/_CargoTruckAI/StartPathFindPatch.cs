@@ -5,13 +5,9 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
     using System.Reflection;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
-    using ColossalFramework;
     using System.Reflection.Emit;
     using System.Collections.Generic;
-    using CSUtil.Commons;
-    using static TrafficManager.Util.TranspilerUtil;
-    using TrafficManager.UI.MainMenu.OSD;
-    using TrafficManager.Util;
+
 
     [HarmonyPatch]
     public class StartPathFindPatch {

@@ -157,6 +157,7 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Patch\_VehicleAI\StartPathFindCommons.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrolleybusAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_TramBaseAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_TrainAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_TaxiAI\StartPathFindPatch.cs" />

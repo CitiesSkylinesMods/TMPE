@@ -1,4 +1,4 @@
-namespace TrafficManager.Patch._VehicleAI._TramBaseAI{
+namespace TrafficManager.Patch._VehicleAI._TrolleybusAI{
     using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.Patch._PathManager;
@@ -10,12 +10,11 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI{
     public class StartPathFindPatch {
 
         [UsedImplicitly]
-        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod<TramBaseAI>();
+        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod<TrolleybusAI>();
 
         [UsedImplicitly]
         public static void Prefix(ushort vehicleID, ref Vehicle vehicleData) {
-            ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
-            CreatePathPatch.ExtVehicleType = ExtVehicleType.Tram;
+            CreatePathPatch.ExtVehicleType = ExtVehicleType.Trolleybus;
             CreatePathPatch.ExtPathType = ExtPathType.None;
             CreatePathPatch.VehicleID = vehicleID;
         }

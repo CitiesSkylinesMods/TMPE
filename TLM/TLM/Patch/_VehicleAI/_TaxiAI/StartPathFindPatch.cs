@@ -3,12 +3,9 @@ namespace TrafficManager.Patch._VehicleAI._TaxiAI{
     using JetBrains.Annotations;
     using TrafficManager.Patch._PathManager;
     using System.Reflection;
-    using UnityEngine;
-    using TrafficManager.State.ConfigData;
-    using CSUtil.Commons;
+
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.Manager.Impl;
-    using ColossalFramework;
+
 
     [HarmonyPatch]
     public class StartPathFindPatch {
