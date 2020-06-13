@@ -71,7 +71,7 @@ namespace TrafficManager.UI {
                     ForegroundActive = true,
                 };
                 // TODO: This atlas is created multiple times, cache or find by name.
-                atlas = this.Skin.CreateAtlas(
+                this.atlas = this.Skin.CreateAtlas(
                     loadingPath: "Clear",
                     spriteWidth: 50,
                     spriteHeight: 50,

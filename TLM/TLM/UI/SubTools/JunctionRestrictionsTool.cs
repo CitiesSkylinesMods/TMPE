@@ -92,7 +92,7 @@ namespace TrafficManager.UI.SubTools {
             bool handleHovered = false;
             bool cursorInPanel = IsCursorInPanel();
             TrafficRulesOverlay overlay = new TrafficRulesOverlay(
-                mainTool: MainTool,
+                mainTool: this.MainTool,
                 debug: logJunctions,
                 handleClick: !cursorInPanel);
 
