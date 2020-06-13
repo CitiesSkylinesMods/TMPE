@@ -62,6 +62,40 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+
+        public ushort GetDriverInstanceId(ushort vehicleId, ref Vehicle data) {
+            // (stock code from PassengerCarAI.GetDriverInstance)
+            CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+            uint citizenUnitId = data.m_citizenUnits;
+            int numIter = 0;
+
+            while (citizenUnitId != 0) {
+                uint nextCitizenUnitId = citizenManager.m_units.m_buffer[citizenUnitId].m_nextUnit;
+
+                for (int i = 0; i < 5; i++) {
+                    uint citizenId = citizenManager.m_units.m_buffer[citizenUnitId].GetCitizen(i);
+
+                    if (citizenId != 0) {
+                        ushort citizenInstanceId =
+                            citizenManager.m_citizens.m_buffer[citizenId].m_instance;
+                        if (citizenInstanceId != 0) {
+                            return citizenInstanceId;
+                        }
+                    }
+                }
+
+                citizenUnitId = nextCitizenUnitId;
+                if (++numIter > CitizenManager.MAX_UNIT_COUNT) {
+                    CODebugBase<LogChannel>.Error(
+                        LogChannel.Core,
+                        "Invalid list detected!\n" + Environment.StackTrace);
+                    break;
+                }
+            }
+
+            return 0;
+        }
+
         public void LogTraffic(ushort vehicleId, ref Vehicle vehicle) {
             LogTraffic(vehicleId, ref vehicle, ref ExtVehicles[vehicleId]);
         }

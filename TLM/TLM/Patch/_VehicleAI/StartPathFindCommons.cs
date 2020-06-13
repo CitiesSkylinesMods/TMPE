@@ -14,28 +14,31 @@ namespace TrafficManager.Patch._VehicleAI {
             return TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(T), "StartPathFind");
         }
 
-        // TODO [issue #] Should this be done in TMPE?
-        // see https://github.com/CitiesSkylinesMods/TMPE/issues/895#issuecomment-643111138
-        const float vanilaMaxPos_ = 4800f; // 25 tiles compatible value
-        const float newMaxPos_ = 8000f; // 81 tiles compatible value.
-
+        /// <summary>
+        /// replaces max pos of 4800 with 8000 to support 81 tiles.
+        /// </summary>
         public static IEnumerable<CodeInstruction> ReplaceMaxPosTranspiler(IEnumerable<CodeInstruction> instructions) {
-            int n = 0;
+            // TODO [issue #] Should this be done in TMPE?
+            // see https://github.com/CitiesSkylinesMods/TMPE/issues/895#issuecomment-643111138
+            const float vanilaMaxPos = 4800f; // vanilla 25 tiles compatible value
+            const float newMaxPos = 8000f; // 81 tiles compatible value.
+
+            int counter = 0;
             foreach (var instruction in instructions) {
                 bool is_ldfld_minCornerOffset =
-                    instruction.opcode == OpCodes.Ldc_R4 && ((float)instruction.operand) == vanilaMaxPos_;
+                    instruction.opcode == OpCodes.Ldc_R4 && ((float)instruction.operand) == vanilaMaxPos;
                 if (is_ldfld_minCornerOffset) {
-                    n++;
-                    yield return new CodeInstruction(OpCodes.Ldc_R4, operand: newMaxPos_);
+                    counter++;
+                    yield return new CodeInstruction(OpCodes.Ldc_R4, operand: newMaxPos);
                 } else {
                     yield return instruction;
                 }
             }
 
             // if another mod has already made such replacement then this assertion fails and we would know :)
-            Shortcuts.Assert(n > 0, "n>0");
+            Shortcuts.Assert(counter > 0, "n>0");
             Log._Debug($"StartPathFindCommons.ReplaceMaxPosTranspiler() successfully " +
-                $"replaced {n} instances of ldc.r4 {vanilaMaxPos_} with {newMaxPos_}");
+                $"replaced {counter} instances of ldc.r4 {vanilaMaxPos} with {newMaxPos}");
             yield break;
         }
     }

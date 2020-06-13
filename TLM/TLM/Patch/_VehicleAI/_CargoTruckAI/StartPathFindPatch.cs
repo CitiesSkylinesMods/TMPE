@@ -18,7 +18,7 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
         [UsedImplicitly]
         public static void Prefix(ushort vehicleID, ref Vehicle vehicleData) {
             ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
-            CreatePathPatch.ExtVehicleType = ExtVehicleType.CargoVehicle; // TODO [issue #] why not cargo truck? why not store the return value from method above?
+            CreatePathPatch.ExtVehicleType = ExtVehicleType.CargoVehicle;
             CreatePathPatch.ExtPathType = ExtPathType.None;
             CreatePathPatch.VehicleID = vehicleID;
         }

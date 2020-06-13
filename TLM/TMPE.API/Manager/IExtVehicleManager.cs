@@ -83,6 +83,14 @@ namespace TrafficManager.API.Manager {
                                        ExtVehicleType? vehicleType);
 
         /// <summary>
+        /// Retrieves the driver citizen instance id for the given vehicle.
+        /// </summary>
+        /// <param name="vehicleId">vehicle id</param>
+        /// <param name="data">vehicle data</param>
+        /// <returns></returns>
+        ushort GetDriverInstanceId(ushort vehicleId, ref Vehicle data);
+
+        /// <summary>
         /// Updates the vehicle's current path position.
         /// </summary>
         /// <param name="vehicleId">vehicle id</param>
