@@ -17,6 +17,13 @@ namespace TrafficManager.Manager.Impl {
           ICustomDataManager<List<Configuration.ExtCitizenInstanceData>>,
           IExtCitizenInstanceManager
     {
+        private ExtCitizenInstanceManager() {
+            ExtInstances = new ExtCitizenInstance[CitizenManager.MAX_INSTANCE_COUNT];
+            for (uint i = 0; i < CitizenManager.MAX_INSTANCE_COUNT; ++i) {
+                ExtInstances[i] = new ExtCitizenInstance((ushort)i);
+            }
+        }
+
         public static readonly ExtCitizenInstanceManager Instance = new ExtCitizenInstanceManager();
 
         /// <summary>
@@ -43,13 +50,6 @@ namespace TrafficManager.Manager.Impl {
 
         public void ResetInstance(ushort instanceId) {
             Reset(ref ExtInstances[instanceId]);
-        }
-
-        private ExtCitizenInstanceManager() {
-            ExtInstances = new ExtCitizenInstance[CitizenManager.MAX_INSTANCE_COUNT];
-            for (uint i = 0; i < CitizenManager.MAX_INSTANCE_COUNT; ++i) {
-                ExtInstances[i] = new ExtCitizenInstance((ushort)i);
-            }
         }
 
         public override void OnLevelUnloading() {
@@ -348,7 +348,6 @@ namespace TrafficManager.Manager.Impl {
             bool ignoreCost) {
 
             try {
-
                 return InternalStartPathFind(
                     instanceID,
                     ref instanceData,
@@ -359,7 +358,6 @@ namespace TrafficManager.Manager.Impl {
                     vehicleInfo,
                     enableTransport,
                     ignoreCost);
-
             }
             catch (Exception ex) {
                 // make sure we have copy of exception in TMPE.log
@@ -1062,9 +1060,19 @@ namespace TrafficManager.Manager.Impl {
                             "startPosA.segment={5}, startPosA.lane={6}, laneType={7}, vehicleType={8}, " +
                             "endPosA.segment={9}, endPosA.lane={10}, vehiclePos.m_segment={11}, " +
                             "vehiclePos.m_lane={12}, vehiclePos.m_offset={13}",
-                            instanceID, instanceID, path, extVehicleType, extPathType, startPosA.m_segment,
-                            startPosA.m_lane, laneTypes, vehicleTypes, endPosA.m_segment, endPosA.m_lane,
-                            parkedVehiclePathPos.m_segment, parkedVehiclePathPos.m_lane,
+                            instanceID,
+                            instanceID,
+                            path,
+                            extVehicleType,
+                            extPathType,
+                            startPosA.m_segment,
+                            startPosA.m_lane,
+                            laneTypes,
+                            vehicleTypes,
+                            endPosA.m_segment,
+                            endPosA.m_lane,
+                            parkedVehiclePathPos.m_segment,
+                            parkedVehiclePathPos.m_lane,
                             parkedVehiclePathPos.m_offset);
                     }
 
@@ -1085,9 +1093,17 @@ namespace TrafficManager.Manager.Impl {
                     "startPosA.segment={3}, startPosA.lane={4}, startPosA.offset={5}, " +
                     "endPosA.segment={6}, endPosA.lane={7}, endPosA.offset={8}, " +
                     "foundStartPos={9}, foundEndPos={10}",
-                    instanceID, instanceID, extInstance.pathMode, startPosA.m_segment,
-                    startPosA.m_lane, startPosA.m_offset, endPosA.m_segment, endPosA.m_lane,
-                    endPosA.m_offset, foundStartPos, foundEndPos);
+                    instanceID,
+                    instanceID,
+                    extInstance.pathMode,
+                    startPosA.m_segment,
+                    startPosA.m_lane,
+                    startPosA.m_offset,
+                    endPosA.m_segment,
+                    endPosA.m_lane,
+                    endPosA.m_offset,
+                    foundStartPos,
+                    foundEndPos);
 #if DEBUG
                 Reset(ref extInstance);
 #endif
@@ -1323,8 +1339,12 @@ namespace TrafficManager.Manager.Impl {
                             "ExtCitizenInstance.CalculateReturnPath: Path-finding starts for return " +
                             "path of citizen instance {0}, path={1}, parkPathPos.segment={2}, " +
                             "parkPathPos.lane={3}, targetPathPos.segment={4}, targetPathPos.lane={5}",
-                            extInstance.instanceId, pathId, parkPathPos.m_segment, parkPathPos.m_lane,
-                            targetPathPos.m_segment, targetPathPos.m_lane);
+                            extInstance.instanceId,
+                            pathId,
+                            parkPathPos.m_segment,
+                            parkPathPos.m_lane,
+                            targetPathPos.m_segment,
+                            targetPathPos.m_lane);
                     }
 
                     extInstance.returnPathId = pathId;

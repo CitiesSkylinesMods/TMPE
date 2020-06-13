@@ -30,7 +30,6 @@ namespace TMUnitTest.Translation {
             PrepareData(testBlock_CRLF, out testBlock_CRLF_Columns, out testBlock_CRLF_DataBlock);
             PrepareData(multilineTestBlock_LF, out multilineTestBlock_LF_Columns, out multilineTestBlock_LF_DataBlock);
             PrepareData(multilineTestBlock_CRLF, out multilineTestBlock_CRLF_Columns, out multilineTestBlock_CRLF_DataBlock);
-
         }
 
         private static void PrepareData(byte[] testFileData, out List<string> columns, out string dataBlock) {
@@ -273,8 +272,12 @@ namespace TMUnitTest.Translation {
         /// <param name="dataBlock"></param>
         /// <param name="columns"></param>
         /// <param name="result">map of translations [langCode][key][translated_string]</param>
-        private static void TestCollectTranslations(string dataBlock, List<string> columns,
-                                     out Dictionary<string, Dictionary<string, string>> result) {
+        private static void TestCollectTranslations(
+            string dataBlock,
+            List<string> columns,
+            out Dictionary<string,
+            Dictionary<string, string>> result)
+        {
             PrivateType privateType = new PrivateType(typeof(LookupTable));
             object[] args = {dataBlock, columns, null};
             privateType.InvokeStatic("CollectTranslations", args);

@@ -161,7 +161,6 @@ namespace TrafficManager.Util {
                     startNode,
                     false);
             }
-
         }
 
         private static void FixSegmentMinor(ushort segmentId, ushort nodeId) {

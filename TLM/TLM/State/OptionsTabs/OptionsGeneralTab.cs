@@ -405,6 +405,5 @@ namespace TrafficManager.State {
                 SetIgnoreDisabledMods(false);
             }
         }
-
     } // end class
 }

@@ -5,9 +5,10 @@ namespace TrafficManager.Util.Record {
 
     // TODO record vehicle restrictions.
     public class SegmentRecord : IRecordable {
-        public ushort SegmentId { get; private set;}
         public SegmentRecord(ushort segmentId) => SegmentId = segmentId;
 
+        public ushort SegmentId { get; private set;}
+        
         private bool parkingForward_;
         private bool parkingBackward_;
 

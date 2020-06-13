@@ -38,6 +38,5 @@ namespace TrafficManager.UI.Helpers {
             Log._Debug($"{Label} changed to {newVal}");
             Value = newVal;
         }
-
     }
 }

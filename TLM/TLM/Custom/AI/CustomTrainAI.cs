@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Custom.AI {
+namespace TrafficManager.Custom.AI {
     using ColossalFramework.Math;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -636,14 +636,21 @@
                             curve /= forwardLen;
                         }
 
-                        maxSpeed = Mathf.Min(maxSpeed,
-                                             CalculateTargetSpeed(vehicleId,
-                                                                  ref vehicleData,
-                                                                  1000f, curve));
+                        maxSpeed = Mathf.Min(
+                            maxSpeed,
+                            CalculateTargetSpeed(
+                                vehicleId,
+                                ref vehicleData,
+                                1000f,
+                                curve));
+
                         float targetDist = forwardLen;
-                        maxSpeed = Mathf.Min(maxSpeed,
-                                             CalculateMaxSpeed(targetDist,
-                                                               vehicleData.m_targetPos2.w, braking));
+                        maxSpeed = Mathf.Min(
+                            maxSpeed,
+                            CalculateMaxSpeed(
+                                targetDist,
+                                vehicleData.m_targetPos2.w,
+                                braking));
                         targetDist += VectorUtils.LengthXZ(vehicleData.m_targetPos2 - vehicleData.m_targetPos1);
                         maxSpeed = Mathf.Min(maxSpeed,
                                              CalculateMaxSpeed(targetDist,
@@ -1073,9 +1080,7 @@
 
                 ExtVehicleManager.Instance.UpdateVehiclePosition(
                         vehicleId,
-                        ref vehicleData
-                        /*, lastFrameData.m_velocity.magnitude*/
-                    );
+                        ref vehicleData);
                 maxSpeed = oldMaxSpeed;
 
                 // NON-STOCK CODE

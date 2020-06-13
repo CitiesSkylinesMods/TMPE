@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI {
+namespace TrafficManager.UI {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System.Collections.Generic;
@@ -71,7 +71,7 @@
                     ForegroundActive = true,
                 };
                 // TODO: This atlas is created multiple times, cache or find by name.
-                this.atlas = this.Skin.CreateAtlas(
+                atlas = this.Skin.CreateAtlas(
                     loadingPath: "Clear",
                     spriteWidth: 50,
                     spriteHeight: 50,

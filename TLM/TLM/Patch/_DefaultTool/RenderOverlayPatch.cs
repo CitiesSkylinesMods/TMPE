@@ -18,7 +18,6 @@ namespace TrafficManager.Patch._DefaultTool {
                 }
                 RoadSelectionPanels.Root.RenderOverlay();
             }
-
         }
     }
 }

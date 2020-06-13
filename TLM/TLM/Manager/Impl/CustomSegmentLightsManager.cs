@@ -16,11 +16,11 @@ namespace TrafficManager.Manager.Impl {
         : AbstractGeometryObservingManager,
           ICustomSegmentLightsManager
     {
-        public static CustomSegmentLightsManager Instance { get; }
-
         static CustomSegmentLightsManager() {
             Instance = new CustomSegmentLightsManager();
         }
+
+        public static CustomSegmentLightsManager Instance { get; }
 
         /// <summary>
         /// custom traffic lights by segment id

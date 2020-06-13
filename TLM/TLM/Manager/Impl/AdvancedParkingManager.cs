@@ -15,15 +15,22 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.UI;
     using TrafficManager.Util;
     using UnityEngine;
+    using System.Linq;
 
     public class AdvancedParkingManager
         : AbstractFeatureManager,
           IAdvancedParkingManager
     {
-        public static AdvancedParkingManager Instance { get; }
+        private readonly Vector2[] _spiralGridCoordsCache;
 
-        static AdvancedParkingManager() {
-            Instance = new AdvancedParkingManager();
+        public static readonly AdvancedParkingManager Instance = new AdvancedParkingManager();
+
+        public AdvancedParkingManager() {
+            var radius = Math.Max(
+                1,
+                (int)(GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding / (BuildingManager.BUILDINGGRID_CELL_SIZE / 2f)) + 1);
+
+            _spiralGridCoordsCache = LoopUtil.GenerateSpiralGridCoordsClockwise(radius).ToArray();
         }
 
         protected override void OnDisableFeatureInternal() {
@@ -2457,7 +2464,12 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            LoopUtil.SpiralLoop(centerI, centerJ, radius, radius, LoopHandler);
+            for (int i = 0; i < _spiralGridCoordsCache.Length; i++) {
+                var coords = _spiralGridCoordsCache[i];
+                if (!LoopHandler((int)(centerI + coords.x), (int)(centerJ + coords.y))) {
+                    break;
+                }
+            }
 
             if (foundSegmentId == 0) {
                 Log._DebugIf(
@@ -2517,8 +2529,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 ushort buildingId = Singleton<BuildingManager>.instance.m_buildingGrid[
-                    (i * BuildingManager.BUILDINGGRID_RESOLUTION) + j
-                ];
+                    (i * BuildingManager.BUILDINGGRID_RESOLUTION) + j];
                 var numIterations = 0;
                 Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
                 ParkingAI parkingAiConf = GlobalConfig.Instance.ParkingAI;
@@ -2562,7 +2573,12 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            LoopUtil.SpiralLoop(centerI, centerJ, radius, radius, LoopHandler);
+            for (int i = 0; i < _spiralGridCoordsCache.Length; i++) {
+                var coords = _spiralGridCoordsCache[i];
+                if (!LoopHandler((int)(centerI + coords.x), (int)(centerJ + coords.y))) {
+                    break;
+                }
+            }
 
             if (foundBuildingId == 0) {
                 Log._DebugIf(

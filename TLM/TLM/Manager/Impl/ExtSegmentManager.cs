@@ -9,16 +9,9 @@ namespace TrafficManager.Manager.Impl {
         : AbstractCustomManager,
           IExtSegmentManager
     {
-        public static ExtSegmentManager Instance { get; }
-
         static ExtSegmentManager() {
             Instance = new ExtSegmentManager();
         }
-
-        /// <summary>
-        /// All additional data for buildings
-        /// </summary>
-        public ExtSegment[] ExtSegments { get; }
 
         private ExtSegmentManager() {
             ExtSegments = new ExtSegment[NetManager.MAX_SEGMENT_COUNT];
@@ -27,6 +20,13 @@ namespace TrafficManager.Manager.Impl {
                 ExtSegments[i] = new ExtSegment((ushort)i);
             }
         }
+
+        public static ExtSegmentManager Instance { get; }
+
+        /// <summary>
+        /// All additional data for buildings
+        /// </summary>
+        public ExtSegment[] ExtSegments { get; }
 
         public bool IsValid(ushort segmentId) {
             return Constants.ServiceFactory.NetService.IsSegmentValid(segmentId);

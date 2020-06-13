@@ -53,8 +53,7 @@ namespace TrafficManager.Util {
 
             public NetInfo.Lane CurLaneInfo =>
                 SegVisitData.CurSegmentInfo.m_lanes[CurLanePos.laneIndex];
-
-    }
+        }
 
         public static void Traverse(ushort initialSegmentId,
                                     TraverseDirection direction,

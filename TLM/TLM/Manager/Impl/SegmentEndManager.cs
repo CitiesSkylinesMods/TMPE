@@ -126,7 +126,12 @@ namespace TrafficManager.Manager.Impl {
                     Log._DebugFormat(
                         "SegmentEndManager.UpdateSegmentEnd({0}, {1}): Segment {2} @ {3} has timed " +
                         "light or priority sign. Adding segment end {4} @ {5}",
-                        segmentId, startNode, segmentId, startNode, segmentId, startNode);
+                        segmentId,
+                        startNode,
+                        segmentId,
+                        startNode,
+                        segmentId,
+                        startNode);
                 }
 
                 ISegmentEnd end = GetOrAddSegmentEnd(segmentId, startNode);
@@ -153,7 +158,12 @@ namespace TrafficManager.Manager.Impl {
                     Log._DebugFormat(
                         "SegmentEndManager.UpdateSegmentEnd({0}, {1}): Segment {2} @ {3} neither has " +
                         "timed light nor priority sign. Removing segment end {4} @ {5}",
-                        segmentId, startNode, segmentId, startNode, segmentId, startNode);
+                        segmentId,
+                        startNode,
+                        segmentId,
+                        startNode,
+                        segmentId,
+                        startNode);
                 }
 
                 RemoveSegmentEnd(segmentId, startNode);

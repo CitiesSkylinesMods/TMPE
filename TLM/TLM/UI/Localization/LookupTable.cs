@@ -277,6 +277,5 @@ namespace TrafficManager.UI.Localization {
 
             File.WriteAllText("lang.csv", sb.ToString(), Encoding.UTF8);
         }
-
     } // end class
 }

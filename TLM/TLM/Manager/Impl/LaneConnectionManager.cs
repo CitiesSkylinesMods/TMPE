@@ -28,11 +28,11 @@ namespace TrafficManager.Manager.Impl {
                                                              | VehicleInfo.VehicleType.Monorail
                                                              | VehicleInfo.VehicleType.Trolleybus;
 
-        public static LaneConnectionManager Instance { get; }
-
         static LaneConnectionManager() {
             Instance = new LaneConnectionManager();
         }
+
+        public static LaneConnectionManager Instance { get; }
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();

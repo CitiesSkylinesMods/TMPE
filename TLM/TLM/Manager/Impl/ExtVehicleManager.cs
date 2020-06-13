@@ -15,6 +15,17 @@
         : AbstractCustomManager,
           IExtVehicleManager
     {
+        static ExtVehicleManager() {
+            Instance = new ExtVehicleManager();
+        }
+
+        private ExtVehicleManager() {
+            ExtVehicles = new ExtVehicle[Constants.ServiceFactory.VehicleService.MaxVehicleCount];
+            for (uint i = 0; i < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++i) {
+                ExtVehicles[i] = new ExtVehicle((ushort)i);
+            }
+        }
+
         public static readonly ExtVehicleManager Instance = new ExtVehicleManager();
 
         private const int STATE_UPDATE_SHIFT = 6;
@@ -30,10 +41,6 @@
         /// </summary>
         public ExtVehicle[] ExtVehicles { get; }
 
-        static ExtVehicleManager() {
-            Instance = new ExtVehicleManager();
-        }
-
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
             Log._Debug($"Ext. vehicles:");
@@ -44,13 +51,6 @@
                 }
 
                 Log._Debug($"Vehicle {i}: {ExtVehicles[i]}");
-            }
-        }
-
-        private ExtVehicleManager() {
-            ExtVehicles = new ExtVehicle[Constants.ServiceFactory.VehicleService.MaxVehicleCount];
-            for (uint i = 0; i < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++i) {
-                ExtVehicles[i] = new ExtVehicle((ushort)i);
             }
         }
 
@@ -285,8 +285,7 @@
                 ref extVehicle,
                 ref vehicleData,
                 ref segmentEndMan.ExtSegmentEnds[
-                    segmentEndMan.GetIndex(curPathPos.m_segment, startNode)
-                ],
+                    segmentEndMan.GetIndex(curPathPos.m_segment, startNode)],
                 ref curPathPos,
                 ref nextPathPos);
         }

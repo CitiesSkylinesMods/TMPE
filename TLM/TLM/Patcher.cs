@@ -38,9 +38,9 @@ namespace TrafficManager {
                 Log.Info($"Harmony attribute-driven patching successfull!");
             }
             catch (Exception e) {
-                Log.Error("Could not deploy Harmony patches");
-                Log.Info(e.Message);
-                Log.Info(e.StackTrace);
+                Log.Error("Could not apply Harmony patches because the following exception occured:\n " +
+                    e +
+                    "\n   -- End of inner exception stack trace -- ");
                 fail = true;
             }
 
@@ -49,9 +49,9 @@ namespace TrafficManager {
                 AssemblyRedirector.Deploy();
             }
             catch (Exception e) {
-                Log.Error("Could not deploy attribute-driven detours");
-                Log.Info(e.ToString());
-                Log.Info(e.StackTrace);
+                Log.Error("Could not deploy attribute-driven detours because the following exception occured:\n "
+                    + e +
+                    "\n    -- End of inner exception stack trace -- ");
                 fail = true;
             }
 
@@ -87,6 +87,5 @@ namespace TrafficManager {
             initialized_ = false;
             Log.Info("Reverting detours finished.");
         }
-
     }
 }

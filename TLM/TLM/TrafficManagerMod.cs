@@ -94,6 +94,12 @@ namespace TrafficManager {
             InGameHotReload = InGame();
 
             HarmonyHelper.EnsureHarmonyInstalled();
+
+#if DEBUG
+            const bool installHarmonyASAP = false; // set true for fast testing
+            if (installHarmonyASAP)
+                HarmonyHelper.DoOnHarmonyReady(delegate () { Patcher.Create().Install(); });
+#endif
         }
 
         [UsedImplicitly]

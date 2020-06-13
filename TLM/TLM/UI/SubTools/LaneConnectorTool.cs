@@ -20,6 +20,15 @@ namespace TrafficManager.UI.SubTools {
         : LegacySubTool,
           UI.MainMenu.IOnscreenDisplayProvider
     {
+        public LaneConnectorTool(TrafficManagerTool mainTool)
+            : base(mainTool) {
+            // Log._Debug($"LaneConnectorTool: Constructor called");
+            currentLaneEnds = new Dictionary<ushort, List<LaneEnd>>();
+
+            CachedVisibleNodeIds = new GenericArrayCache<ushort>(NetManager.MAX_NODE_COUNT);
+            LastCachedCamera = new CameraTransformValue();
+        }
+
         /// <summary>State of the tool UI.</summary>
         private enum SelectionMode {
             None,
@@ -102,15 +111,6 @@ namespace TrafficManager.UI.SubTools {
                 }
                 NodeMarker.RenderOverlay(cameraInfo, color, enlarge: highlight);
             }
-        }
-
-        public LaneConnectorTool(TrafficManagerTool mainTool)
-            : base(mainTool) {
-            // Log._Debug($"LaneConnectorTool: Constructor called");
-            currentLaneEnds = new Dictionary<ushort, List<LaneEnd>>();
-
-            CachedVisibleNodeIds = new GenericArrayCache<ushort>(NetManager.MAX_NODE_COUNT);
-            LastCachedCamera = new CameraTransformValue();
         }
 
         public override void OnToolGUI(Event e) {
@@ -287,8 +287,7 @@ namespace TrafficManager.UI.SubTools {
                                 middlePoint: NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
                                 color: selectedLaneEnd.Color,
                                 outlineColor: Color.grey,
-                                size: 0.18f // Embolden
-                                );
+                                size: 0.18f); // Embolden
                         } // end foreach selectedMarker.ConnectedMarkers
                     } // end if selectedMarker != null
                 } // end foreach lanemarker in node markers
@@ -333,7 +332,6 @@ namespace TrafficManager.UI.SubTools {
                         color: Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f),
                         outlineColor: Color.white,
                         size:0.11f);
-
                 }
 
                 NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
@@ -786,8 +784,7 @@ namespace TrafficManager.UI.SubTools {
                                 netService.IsStartNode(segmentId, nodeId) ^ (!toward),
                                 LaneConnectionManager.LANE_TYPES,
                                 LaneConnectionManager.VEHICLE_TYPES,
-                                true
-                                ).Count;
+                                true).Count;
         }
         internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
@@ -1055,7 +1052,7 @@ namespace TrafficManager.UI.SubTools {
             int nodeMarkerColorIndex = 0;
             LaneConnectionManager connManager = LaneConnectionManager.Instance;
 
-            int offsetMultiplier = node.CountSegments() <= 2 ? 3 : 1;
+            float offset = node.CountSegments() <= 2 ? 3 : 1;
 
             for (int i = 0; i < 8; i++) {
                 ushort segmentId = node.GetSegment(i);
@@ -1066,10 +1063,9 @@ namespace TrafficManager.UI.SubTools {
 
                 NetSegment[] segmentsBuffer = NetManager.instance.m_segments.m_buffer;
                 bool startNode = segmentsBuffer[segmentId].m_startNode == nodeId;
-                Vector3 offset = segmentsBuffer[segmentId]
-                                     .FindDirection(segmentId, nodeId) * offsetMultiplier;
                 NetInfo.Lane[] lanes = segmentsBuffer[segmentId].Info.m_lanes;
                 uint laneId = segmentsBuffer[segmentId].m_lanes;
+                float offsetT = offset / segmentId.ToSegment().m_averageLength;
 
                 for (byte laneIndex = 0; (laneIndex < lanes.Length) && (laneId != 0); laneIndex++) {
                     NetInfo.Lane laneInfo = lanes[laneIndex];
@@ -1085,32 +1081,29 @@ namespace TrafficManager.UI.SubTools {
                             laneInfo: laneInfo,
                             outgoing: out bool isSource,
                             incoming: out bool isTarget,
-                            pos: out Vector3? pos))
+                            pos: out _))
                         {
-                            pos = pos.Value + offset;
-
-                            float terrainY =
-                                Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos.Value);
-
-                            var terrainPos = new Vector3(pos.Value.x, terrainY, pos.Value.z);
-
-                            Color32 nodeMarkerColor
-                                = isSource
-                                      ? COLOR_CHOICES[nodeMarkerColorIndex % COLOR_CHOICES.Length]
-                                      : default; // or black (not used while rendering)
-
-                            NetLane lane = NetManager.instance.m_lanes.m_buffer[laneId];
-                            Bezier3 bezier = lane.m_bezier;
+                            Vector3 pos;
+                            Bezier3 bezier = laneId.ToLane().m_bezier;
                             if (startNode) {
-                                bezier.a = (Vector3)pos;
+                                bezier = bezier.Cut(offsetT, 1f);
+                                pos = bezier.a;
                             } else {
-                                bezier.d = (Vector3)pos;
+                                bezier = bezier.Cut(0, 1f-offsetT);
+                                pos = bezier.d;
                             }
+                            float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
+                            var terrainPos = new Vector3(pos.x, terrainY, pos.z);
+
                             SegmentLaneMarker segmentMarker = new SegmentLaneMarker(bezier);
                             NodeLaneMarker nodeMarker = new NodeLaneMarker {
                                 TerrainPosition = terrainPos,
                                 Position = (Vector3)pos,
                             };
+
+                            Color32 nodeMarkerColor = isSource
+                                      ? COLOR_CHOICES[nodeMarkerColorIndex % COLOR_CHOICES.Length]
+                                      : default; // transparent
 
                             bool isFoward = (laneInfo.m_direction & NetInfo.Direction.Forward) != 0;
                             int innerSimilarLaneIndex;

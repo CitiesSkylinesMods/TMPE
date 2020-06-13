@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.RedirectionFramework;
@@ -39,8 +39,8 @@
             OptionsGameplayTab.SetDisableDespawning(!Options.disableDespawning);
 
             // Update currently visible tooltip
-            this.UpdateTooltip(refreshTooltip: true);
-            this.UpdateButtonImage();
+            UpdateTooltip(refreshTooltip: true);
+            UpdateButtonImage();
             // do not call base -- base.OnClick(p);
         }
     }

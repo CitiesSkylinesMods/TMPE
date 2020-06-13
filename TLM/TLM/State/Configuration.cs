@@ -28,6 +28,11 @@ namespace TrafficManager {
         public class LaneVehicleTypes {
             public uint laneId;
 
+            public LaneVehicleTypes(uint laneId, ExtVehicleType vehicleTypes) {
+                this.laneId = laneId;
+                this.vehicleTypes = vehicleTypes;
+            }
+
             /// <summary>
             /// Do not use this, for save compatibility only.
             /// </summary>
@@ -42,11 +47,6 @@ namespace TrafficManager {
             public API.Traffic.Enums.ExtVehicleType ApiVehicleTypes
                 => LegacyExtVehicleType.ToNew(vehicleTypes);
 #pragma warning restore 612
-
-            public LaneVehicleTypes(uint laneId, ExtVehicleType vehicleTypes) {
-                this.laneId = laneId;
-                this.vehicleTypes = vehicleTypes;
-            }
         }
 
         [Serializable]
@@ -155,8 +155,12 @@ namespace TrafficManager {
                     "uturnAllowed={0}, turnOnRedAllowed={1}, farTurnOnRedAllowed={2}, " +
                     "straightLaneChangingAllowed={3}, enterWhenBlockedAllowed={4}, " +
                     "pedestrianCrossingAllowed={5}",
-                    uturnAllowed, turnOnRedAllowed, farTurnOnRedAllowed, straightLaneChangingAllowed,
-                    enterWhenBlockedAllowed, pedestrianCrossingAllowed);
+                    uturnAllowed,
+                    turnOnRedAllowed,
+                    farTurnOnRedAllowed,
+                    straightLaneChangingAllowed,
+                    enterWhenBlockedAllowed,
+                    pedestrianCrossingAllowed);
             }
         }
 
