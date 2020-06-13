@@ -143,8 +143,6 @@
     <Compile Include="Custom\AI\CustomCarAI.cs" />
     <Compile Include="Custom\AI\CustomCitizenAI.cs" />
     <Compile Include="Custom\AI\CustomResidentAI.cs" />
-    <Compile Include="Custom\AI\CustomShipAI.cs" />
-    <Compile Include="Custom\AI\CustomTaxiAI.cs" />
     <Compile Include="Custom\AI\CustomTouristAI.cs" />
     <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
@@ -159,8 +157,11 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Patch\_VehicleAI\StartPathFindCommons.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrainAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TaxiAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_ShipAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_PostVanAI\StartPathFindPatch.cs" />
-    <Compile Include="Patch\_VehicleAI\_PolicCarAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PoliceCarAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_FireTruckAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_AmbulanceAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_CargoTruckAI\StartPathFindPatch.cs" />

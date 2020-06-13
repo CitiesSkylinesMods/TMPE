@@ -8,16 +8,24 @@ namespace TrafficManager.Util {
     using System.Reflection.Emit;
 
     public static class TranspilerUtil {
-        /// <typeparam name="T">delegate type</typeparam>
+        /// <typeparam name="TDelegate">delegate type</typeparam>
         /// <returns>Type[] represeting arguments of the delegate.</returns>
-        internal static Type[] GetParameterTypes<T>() where T : Delegate {
-            return typeof(T).GetMethod("Invoke").GetParameters().Select(p => p.ParameterType).ToArray();
+        internal static Type[] GetParameterTypes<TDelegate>() where TDelegate : Delegate {
+            return typeof(TDelegate).GetMethod("Invoke").GetParameters().Select(p => p.ParameterType).ToArray();
         }
 
-        internal static MethodInfo DeclaredMethod<DelegateT>(Type type, string name) where DelegateT : Delegate {
-            var ret = AccessTools.DeclaredMethod(type, name, GetParameterTypes<DelegateT>());
+        /// <summary>
+        /// Gets directly declared method.
+        /// </summary>
+        /// <typeparam name="TDelegate">delegate that has the same argument types as the intented overloaded method</typeparam>
+        /// <param name="type">the class/type where the method is delcared</param>
+        /// <param name="name">the name of the method</param>
+        /// <returns>a method or null when type is null or when a method is not found</returns>
+        internal static MethodInfo DeclaredMethod<TDelegate>(Type type, string name)
+            where TDelegate : Delegate {
+            var ret = AccessTools.DeclaredMethod(type, name, GetParameterTypes<TDelegate>());
             if (ret == null)
-                Log.Error($"faield to retrieve method {type}.name({typeof(DelegateT)})");
+                Log.Error($"faield to retrieve method {type}.name({typeof(TDelegate)})");
             return ret;
         }
 

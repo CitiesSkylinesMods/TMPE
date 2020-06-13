@@ -30,7 +30,6 @@ namespace TrafficManager.Patch._PathManager {
         public static ushort VehicleID;
 
         public static bool? StablePath;
-        public static NetInfo.LaneType? LaneTypes;
 
         /// <summary>
         /// precondition: Args.extVehicleType, Args.extPathType, Args.vehicleId, and Args.stablePath are initialized.
@@ -74,8 +73,8 @@ namespace TrafficManager.Patch._PathManager {
 
             // overridden vanilla values:
             args.skipQueue = args.spawned;
+            if (ai is ShipAI) args.skipQueue = false; // TODO [issue #] is this line necessary?
             args.stablePath = StablePath ?? stablePath;
-            args.laneTypes = LaneTypes ?? laneTypes;
 
             __result = CustomPathManager._instance.CustomCreatePath(out unit, ref randomizer, args);
             if (__result) {

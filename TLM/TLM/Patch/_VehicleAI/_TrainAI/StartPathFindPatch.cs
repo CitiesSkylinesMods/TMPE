@@ -1,4 +1,4 @@
-namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
+namespace TrafficManager.Patch._VehicleAI._TrainAI{
     using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.Patch._PathManager;
@@ -17,20 +17,19 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
     public class StartPathFindPatch {
 
         [UsedImplicitly]
-        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod<CargoTruckAI>();
+        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod<TrainAI>();
 
         [UsedImplicitly]
         public static void Prefix(ushort vehicleID, ref Vehicle vehicleData) {
-            ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
-            CreatePathPatch.ExtVehicleType = ExtVehicleType.CargoVehicle; // TODO [issue #] why not cargo truck? why not store the return value from method above?
+            ExtVehicleType vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
+            if (vehicleType == ExtVehicleType.None)
+                vehicleType = ExtVehicleType.RailVehicle;
+            else if (vehicleType == ExtVehicleType.CargoTrain)
+                vehicleType = ExtVehicleType.CargoVehicle;
+
+            CreatePathPatch.ExtVehicleType = vehicleType;
             CreatePathPatch.ExtPathType = ExtPathType.None;
             CreatePathPatch.VehicleID = vehicleID;
-        }
-
-        [UsedImplicitly]
-        [HarmonyPriority(Priority.Low)] // so that if this code is redundant, it would result in assertion failure.
-        public static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
-            return StartPathFindCommons.ReplaceMaxPosTranspiler(instructions);
         }
     }
 }
