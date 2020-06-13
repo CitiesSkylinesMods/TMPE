@@ -10,7 +10,7 @@ namespace TrafficManager.Patch._VehicleAI._TrolleybusAI{
     public class StartPathFindPatch {
 
         [UsedImplicitly]
-        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod<TrolleybusAI>();
+        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod2<TrolleybusAI>();
 
         [UsedImplicitly]
         public static void Prefix(ushort vehicleID, ref Vehicle vehicleData) {

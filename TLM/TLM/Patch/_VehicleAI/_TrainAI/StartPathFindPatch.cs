@@ -6,12 +6,10 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI{
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
 
-
     [HarmonyPatch]
     public class StartPathFindPatch {
-
         [UsedImplicitly]
-        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod<TrainAI>();
+        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod2<TrainAI>();
 
         [UsedImplicitly]
         public static void Prefix(ushort vehicleID, ref Vehicle vehicleData) {

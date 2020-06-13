@@ -23,9 +23,10 @@ namespace TrafficManager.Util {
         /// <returns>a method or null when type is null or when a method is not found</returns>
         internal static MethodInfo DeclaredMethod<TDelegate>(Type type, string name)
             where TDelegate : Delegate {
-            var ret = AccessTools.DeclaredMethod(type, name, GetParameterTypes<TDelegate>());
+            var args = GetParameterTypes<TDelegate>();
+            var ret = AccessTools.DeclaredMethod(type, name, args);
             if (ret == null)
-                Log.Error($"faield to retrieve method {type}.name({typeof(TDelegate)})");
+                Log.Error($"failed to retrieve method {type}.{name}({args.ToSTR()})");
             return ret;
         }
 

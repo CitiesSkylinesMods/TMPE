@@ -10,7 +10,7 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI{
     public class StartPathFindPatch {
 
         [UsedImplicitly]
-        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod<TramBaseAI>();
+        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod2<TramBaseAI>();
 
         [UsedImplicitly]
         public static void Prefix(ushort vehicleID, ref Vehicle vehicleData) {

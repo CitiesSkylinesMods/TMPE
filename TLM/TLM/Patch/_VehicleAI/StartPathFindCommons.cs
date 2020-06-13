@@ -10,9 +10,16 @@ namespace TrafficManager.Patch._VehicleAI {
     public static class StartPathFindCommons {
         // protected override bool StartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget)        delegate bool TargetDelegate(out uint unit, ref Randomizer randomizer, uint buildIndex,
         delegate bool TargetDelegate(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays, bool undergroundTarget);
-        public static MethodBase TargetMethod<T>() {
-            return TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(T), "StartPathFind");
-        }
+
+        //protected virtual bool StartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays)
+        delegate bool TargetDelegate2(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays);
+
+        public static MethodBase TargetMethod<T>() =>
+            TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(T), "StartPathFind");
+
+        public static MethodBase TargetMethod2<T>() =>
+            TranspilerUtil.DeclaredMethod<TargetDelegate2>(typeof(T), "StartPathFind");
+
 
         /// <summary>
         /// replaces max pos of 4800 with 8000 to support 81 tiles.
@@ -36,7 +43,7 @@ namespace TrafficManager.Patch._VehicleAI {
             }
 
             // if another mod has already made such replacement then this assertion fails and we would know :)
-            Shortcuts.Assert(counter > 0, "n>0");
+            Shortcuts.Assert(counter > 0, "counter>0");
             Log._Debug($"StartPathFindCommons.ReplaceMaxPosTranspiler() successfully " +
                 $"replaced {counter} instances of ldc.r4 {vanilaMaxPos} with {newMaxPos}");
             yield break;

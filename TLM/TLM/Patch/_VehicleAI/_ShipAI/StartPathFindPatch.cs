@@ -7,9 +7,8 @@ namespace TrafficManager.Patch._VehicleAI._ShipAI{
 
     [HarmonyPatch]
     public class StartPathFindPatch {
-
         [UsedImplicitly]
-        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod<ShipAI>();
+        public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod2<ShipAI>();
 
         [UsedImplicitly]
         public static void Prefix(ushort vehicleID, ref Vehicle vehicleData) {

@@ -33,11 +33,18 @@ namespace TrafficManager.Patch._PathManager {
         /// precondition: Args.extVehicleType, Args.extPathType, Args.vehicleId, and Args.stablePath are initialized.
         /// </summary>
         [UsedImplicitly]
-        public static bool Prefix(ref bool __result, out uint unit, ref Randomizer randomizer, uint buildIndex,
+        public static bool Prefix(ref bool __result, ref uint unit, ref Randomizer randomizer, uint buildIndex,
             PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition,
             NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle,
             bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost)
         {
+            if (VehicleID == 0) {
+                Log.Error("unexpected VehcileID == 0. " +
+                    "StartPathFind() is not ptched or it failed to set VehicleID. " +
+                    "Falling back to Vanilla path find");
+                return true; // fall back to Vanilla path find.
+            }
+
             var vehicleBuffer = VehicleManager.instance.m_vehicles.m_buffer;
             ref Vehicle vehicleData = ref vehicleBuffer[VehicleID];
             var info = vehicleData.Info;
@@ -90,6 +97,8 @@ namespace TrafficManager.Patch._PathManager {
                     $"startPosA.lane={startPosA.m_lane}, info.m_vehicleType={info.m_vehicleType}, " +
                     $"endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
             }
+
+            VehicleID = 0; // Indicates the previous Vehicle has been handled. Ready for next vehicle.
 
             return false; // CustomCreatePath replaces CreatePath
         }
