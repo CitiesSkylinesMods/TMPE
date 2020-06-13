@@ -7,9 +7,9 @@ namespace TrafficManager.UI.MainMenu {
 
         public override void Start() {
             base.Start();
-            text = "0";
-            suffix = " pathfinds";
-            textColor = Color.green;
+            this.text = "0";
+            this.suffix = " pathfinds";
+            this.textColor = Color.green;
         }
 
 #if QUEUEDSTATS

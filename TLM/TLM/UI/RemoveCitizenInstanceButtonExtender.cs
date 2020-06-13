@@ -61,7 +61,7 @@ namespace TrafficManager.UI {
                     ForegroundHovered = true,
                     ForegroundActive = true,
                 };
-                atlas = this.Skin.CreateAtlas(
+                this.atlas = this.Skin.CreateAtlas(
                     "Clear",
                     50,
                     50,

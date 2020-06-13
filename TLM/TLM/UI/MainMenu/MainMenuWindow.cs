@@ -132,7 +132,7 @@ namespace TrafficManager.UI.MainMenu {
             base.Start();
 
             U.UIUtil.MakeUniqueAndSetName(
-                toMakeUnique: gameObject,
+                toMakeUnique: this.gameObject,
                 name: WINDOW_CONTROL_NAME);
 
             GlobalConfig conf = GlobalConfig.Instance;
@@ -169,20 +169,20 @@ namespace TrafficManager.UI.MainMenu {
 
         /// <summary>Called from constructor to setup own properties and events.</summary>
         private void SetupWindow() {
-            name = WINDOW_CONTROL_NAME;
-            isVisible = false;
-            backgroundSprite = "GenericPanel";
-            color = new Color32(64, 64, 64, 240);
-            SetOpacity(
+            this.name = WINDOW_CONTROL_NAME;
+            this.isVisible = false;
+            this.backgroundSprite = "GenericPanel";
+            this.color = new Color32(64, 64, 64, 240);
+            this.SetOpacity(
                 U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
 
             var dragHandler = new GameObject("TMPE_Menu_DragHandler");
             dragHandler.transform.parent = transform;
             dragHandler.transform.localPosition = Vector3.zero;
-            DragHandle = dragHandler.AddComponent<UIDragHandle>();
-            DragHandle.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
+            this.DragHandle = dragHandler.AddComponent<UIDragHandle>();
+            this.DragHandle.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
 
-            eventVisibilityChanged += OnVisibilityChanged;
+            this.eventVisibilityChanged += OnVisibilityChanged;
         }
 
         /// <summary>Called from ModUI to setup children for the window.</summary>
@@ -245,7 +245,7 @@ namespace TrafficManager.UI.MainMenu {
             SetupControls_OnscreenDisplayPanel(builder);
 
             // Floating labels under TM:PE window
-            SetupControls_DebugLabels(builder, OnscreenDisplayPanel);
+            SetupControls_DebugLabels(builder, this.OnscreenDisplayPanel);
         }
 
         private void SetupControls_OnscreenDisplayPanel(UiBuilder<MainMenuWindow> builder) {
@@ -265,7 +265,7 @@ namespace TrafficManager.UI.MainMenu {
 
                 // The keybinds panel belongs to main menu but does not expand it to fit
                 UResizerConfig.From(osdBuilder.Control).ContributeToBoundingBox = false;
-                OnscreenDisplayPanel = osdBuilder.Control;
+                this.OnscreenDisplayPanel = osdBuilder.Control;
 
                 // bool keybindsVisible = GlobalConfig.Instance.Main.KeybindsPanelVisible;
                 // this.OnscreenDisplayPanel.gameObject.SetActive(keybindsVisible);
@@ -289,7 +289,7 @@ namespace TrafficManager.UI.MainMenu {
 
             using (var versionLabelB = builder.Label<U.Label.ULabel>(TrafficManagerMod.ModName)) {
                 versionLabelB.ResizeFunction(r => r.Stack(UStackMode.Below));
-                VersionLabel = versionLabel = versionLabelB.Control;
+                this.VersionLabel = versionLabel = versionLabelB.Control;
             }
 
             using (var btnBuilder = builder.Button<U.Button.UButton>()) {
@@ -366,7 +366,7 @@ namespace TrafficManager.UI.MainMenu {
                                 spacing: 2f * UConst.UIPADDING,
                                 stackRef: under);
                         });
-                    stackUnder = StatsLabel = statsLabelB.Control;
+                    stackUnder = this.StatsLabel = statsLabelB.Control;
                 }
             }
 
@@ -449,17 +449,17 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         public override void OnBeforeResizerUpdate() {
-            if (DragHandle != null) {
+            if (this.DragHandle != null) {
                 // Drag handle is manually resized to the form width, but when the form is large,
                 // the handle prevents it from shrinking. So shrink now, size properly after.
-                DragHandle.size = Vector2.one;
+                this.DragHandle.size = Vector2.one;
             }
         }
 
         /// <summary>Called by UResizer for every control to be 'resized'.</summary>
         public override void OnAfterResizerUpdate() {
-            if (DragHandle != null) {
-                DragHandle.size = VersionLabel.size;
+            if (this.DragHandle != null) {
+                this.DragHandle.size = this.VersionLabel.size;
 
                 // Push the window back into screen if the label/draghandle are partially offscreen
                 U.UIUtil.ClampToScreen(window: this,
@@ -582,9 +582,9 @@ namespace TrafficManager.UI.MainMenu {
         /// <summary>Always invalidates the main menu, do not call too often!</summary>
         /// <param name="pos">Config main menu position.</param>
         public void UpdatePosition(Vector2 pos) {
-            absolutePosition = new Vector2(pos.x, pos.y);
-            if (U.UIUtil.ClampToScreen(window: this, alwaysVisible: VersionLabel)) {
-                Log.Info($"Moving main menu pos={absolutePosition}");
+            this.absolutePosition = new Vector2(pos.x, pos.y);
+            if (U.UIUtil.ClampToScreen(window: this, alwaysVisible: this.VersionLabel)) {
+                Log.Info($"Moving main menu pos={this.absolutePosition}");
             }
 
             Invalidate();
