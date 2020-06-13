@@ -24,7 +24,7 @@ namespace TrafficManager.Patch._VehicleAI._CargoTruckAI{
         }
 
         [UsedImplicitly]
-        [HarmonyPriority(Priority.Low)] // so that if this code is redundant, it would result in assertion failure.
+        [HarmonyPriority(Priority.Low)] // so that if this code is redundant, it would result in warning log.
         public static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
             return StartPathFindCommons.ReplaceMaxPosTranspiler(instructions);
         }

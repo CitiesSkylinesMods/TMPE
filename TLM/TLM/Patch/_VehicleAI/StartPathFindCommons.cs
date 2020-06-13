@@ -42,8 +42,10 @@ namespace TrafficManager.Patch._VehicleAI {
                 }
             }
 
-            // if another mod has already made such replacement then this assertion fails and we would know :)
-            Shortcuts.Assert(counter > 0, "counter > 0. Warning: redundant transpiler - Another mod must have changed these values already.");
+            if (counter == 0) {
+                // if another mod has already made such replacement then we would know :)
+                Log.Warning("Warning: redundant transpiler (counter == 0) - Another mod must have changed these values already.");
+            }
             Log._Debug($"StartPathFindCommons.ReplaceMaxPosTranspiler() successfully " +
                 $"replaced {counter} instances of ldc.r4 {vanilaMaxPos} with {newMaxPos}");
             yield break;
