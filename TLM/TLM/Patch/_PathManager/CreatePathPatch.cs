@@ -78,7 +78,7 @@ namespace TrafficManager.Patch._PathManager {
 
             // overridden vanilla values:
             args.skipQueue = args.spawned;
-            if (ai is ShipAI) args.skipQueue = false; // TODO [issue #] why ShipAI should be different than others?
+            if (ai is ShipAI) args.skipQueue = false; // TODO [issue #952] why ShipAI should be different than others?
 
             __result = CustomPathManager._instance.CustomCreatePath(out unit, ref randomizer, args);
             if (__result) {

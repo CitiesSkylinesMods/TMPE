@@ -25,7 +25,7 @@ namespace TrafficManager.Patch._VehicleAI {
         /// replaces max pos of 4800 with 8000 to support 81 tiles.
         /// </summary>
         public static IEnumerable<CodeInstruction> ReplaceMaxPosTranspiler(IEnumerable<CodeInstruction> instructions) {
-            // TODO [issue #] Should this be done in TMPE?
+            // TODO [issue #952] Should this be done in TMPE?
             // see https://github.com/CitiesSkylinesMods/TMPE/issues/895#issuecomment-643111138
             const float vanilaMaxPos = 4800f; // vanilla 25 tiles compatible value
             const float newMaxPos = 8000f; // 81 tiles compatible value.

@@ -14,10 +14,11 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI{
         [UsedImplicitly]
         public static void Prefix(ushort vehicleID, ref Vehicle vehicleData) {
             ExtVehicleType vehicleType = ExtVehicleManager.Instance.OnStartPathFind(vehicleID, ref vehicleData, null);
-            if (vehicleType == ExtVehicleType.None)
-                vehicleType = ExtVehicleType.RailVehicle;
-            else if (vehicleType == ExtVehicleType.CargoTrain)
-                vehicleType = ExtVehicleType.CargoVehicle;
+            vehicleType = vehicleType switch {
+                ExtVehicleType.None => ExtVehicleType.RailVehicle,
+                ExtVehicleType.CargoTrain => ExtVehicleType.CargoVehicle,
+                _ => vehicleType,
+            };
 
             CreatePathPatch.ExtVehicleType = vehicleType;
             CreatePathPatch.ExtPathType = ExtPathType.None;
