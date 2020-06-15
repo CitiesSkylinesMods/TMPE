@@ -39,8 +39,8 @@ namespace TrafficManager.UI.MainMenu {
             OptionsGameplayTab.SetDisableDespawning(!Options.disableDespawning);
 
             // Update currently visible tooltip
-            UpdateTooltip(refreshTooltip: true);
-            UpdateButtonImage();
+            this.UpdateTooltip(refreshTooltip: true);
+            this.UpdateButtonImage();
             // do not call base -- base.OnClick(p);
         }
     }

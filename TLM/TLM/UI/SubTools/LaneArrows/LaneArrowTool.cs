@@ -83,15 +83,15 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             // From Select mode, user can either click a segment, or Esc/rightclick to quit
             fsm.Configure(State.Select)
-               .OnEntry(OnEnterSelectState)
-               .OnLeave(OnLeaveSelectState)
+               .OnEntry(this.OnEnterSelectState)
+               .OnLeave(this.OnLeaveSelectState)
                .TransitionOnEvent(Trigger.SegmentClick, State.EditLaneArrows)
                .TransitionOnEvent(Trigger.RightMouseClick, State.ToolDisabled)
                .TransitionOnEvent(Trigger.EscapeKey, State.ToolDisabled);
 
             fsm.Configure(State.EditLaneArrows)
-               .OnEntry(OnEnterEditorState)
-               .OnLeave(OnLeaveEditorState)
+               .OnEntry(this.OnEnterEditorState)
+               .OnLeave(this.OnLeaveEditorState)
                .TransitionOnEvent(Trigger.SegmentClick, State.EditLaneArrows)
                .TransitionOnEvent(Trigger.RightMouseClick, State.Select);
             // This transition is ignored because Esc disables the tool
@@ -275,7 +275,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         public override void ActivateTool() {
             Log._Debug("LaneArrow: Activated tool");
             fsm_ = InitFiniteStateMachine();
-            OnEnterSelectState(); // FSM does not call enter on initial state
+            this.OnEnterSelectState(); // FSM does not call enter on initial state
         }
 
         /// <summary>Cleans up when tool is deactivated or user switched to another tool.</summary>
@@ -626,7 +626,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             LaneArrowManager.Instance.ResetLaneArrows(SelectedSegmentId, startNode);
 
             // Update button states
-            UpdateAllButtons();
+            this.UpdateAllButtons();
         }
     }
 }

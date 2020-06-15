@@ -17,7 +17,7 @@ namespace TrafficManager.UI {
 
             if (transportInfoViewPanel != null) {
                 Log._Debug($"Public transport info view panel found.");
-                transportInfoViewPanel.component.eventVisibilityChanged += ParentVisibilityChanged;
+                transportInfoViewPanel.component.eventVisibilityChanged += this.ParentVisibilityChanged;
             } else {
                 Log.Warning($"Public transport info view panel NOT found.");
             }

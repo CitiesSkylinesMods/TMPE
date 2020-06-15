@@ -133,7 +133,7 @@ namespace TrafficManager.U.Autosize {
                 return; // do nothing on destroyed controls
             }
 
-            Control.width = Calculate(val, Control);
+            Control.width = this.Calculate(val, Control);
         }
 
         /// <summary>Set height based on various rules.</summary>
@@ -143,7 +143,7 @@ namespace TrafficManager.U.Autosize {
                 return; // do nothing on destroyed controls
             }
 
-            Control.height = Calculate(val, Control);
+            Control.height = this.Calculate(val, Control);
         }
 
         /// <summary>Automatically defines control size to wrap around child controls.</summary>
@@ -153,8 +153,8 @@ namespace TrafficManager.U.Autosize {
             }
 
             // value 0f is ignored, the padding is to be set in UResizerConfig
-            Width(new UValue(URule.FitChildrenWidth));
-            Height(new UValue(URule.FitChildrenHeight));
+            this.Width(new UValue(URule.FitChildrenWidth));
+            this.Height(new UValue(URule.FitChildrenHeight));
         }
 
         /// <summary>Instructs U UI to place the control vertically below the previous sibling.</summary>

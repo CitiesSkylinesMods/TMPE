@@ -32,7 +32,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 ToggleFlag,
                 out var res);
             ParentTool.InformUserAboutPossibleFailure(res);
-            UpdateButtonImageAndTooltip();
+            this.UpdateButtonImageAndTooltip();
         }
 
         /// <summary>UButton disables this, we want this enabled.</summary>
