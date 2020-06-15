@@ -6,7 +6,6 @@ namespace TrafficManager.Patch._RoadBaseAI {
     using System.Reflection;
     using TrafficManager.State;
 
-    // [Harmony] Manually patched because struct references are used
     [HarmonyPatch]
     [UsedImplicitly]
     public class SegmentSimulationStepPatch {

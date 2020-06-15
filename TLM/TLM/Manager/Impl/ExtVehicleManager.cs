@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework.Math;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -61,6 +61,7 @@
                 extVehicle.lastTransitStateUpdate = Now();
             }
         }
+
 
         public ushort GetDriverInstanceId(ushort vehicleId, ref Vehicle data) {
             // (stock code from PassengerCarAI.GetDriverInstance)
@@ -201,6 +202,9 @@
                     ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId],
                     vehicleType);
             }
+
+            if (vehicleType == ExtVehicleType.None)
+                Log._DebugOnlyWarning($"Vehicle {vehicleId} does not have a valid vehicle type!");
 
             return ret;
         }
