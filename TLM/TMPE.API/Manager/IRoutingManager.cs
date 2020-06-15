@@ -1,7 +1,40 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     using System;
     using CSUtil.Commons;
     using TrafficManager.API.Traffic.Enums;
+
+    public interface IRoutingManager {
+        // TODO documentation
+        /// <summary>
+        /// Structs for path-finding that contain required segment-related routing data
+        /// </summary>
+        SegmentRoutingData[] SegmentRoutings { get; }
+
+        /// <summary>
+        /// Structs for path-finding that contain required lane-end-related backward routing data.
+        /// Index:
+        ///		[0 .. NetManager.MAX_LANE_COUNT-1]: lane ends at start node
+        ///		[NetManager.MAX_LANE_COUNT .. 2*NetManger.MAX_LANE_COUNT-1]: lane ends at end node
+        /// </summary>
+        LaneEndRoutingData[] LaneEndBackwardRoutings { get; }
+
+        /// <summary>
+        /// Structs for path-finding that contain required lane-end-related forward routing data.
+        /// Index:
+        ///		[0 .. NetManager.MAX_LANE_COUNT-1]: lane ends at start node
+        ///		[NetManager.MAX_LANE_COUNT .. 2*NetManger.MAX_LANE_COUNT-1]: lane ends at end node
+        /// </summary>
+        LaneEndRoutingData[] LaneEndForwardRoutings { get; }
+
+        void SimulationStep();
+        void RequestFullRecalculation();
+        void RequestRecalculation(ushort segmentId, bool propagate = true);
+        uint GetLaneEndRoutingIndex(uint laneId, bool startNode);
+        int CalcInnerSimilarLaneIndex(ushort segmentId, int laneIndex);
+        int CalcInnerSimilarLaneIndex(NetInfo.Lane laneInfo);
+        int CalcOuterSimilarLaneIndex(ushort segmentId, int laneIndex);
+        int CalcOuterSimilarLaneIndex(NetInfo.Lane laneInfo);
+    }
 
     public struct SegmentRoutingData {
         public bool startNodeOutgoingOneWay;
@@ -96,7 +129,7 @@
         }
 
         public void AddTransition(LaneTransitionData transition) {
-            AddTransitions(new LaneTransitionData[1] {transition});
+            AddTransitions(new LaneTransitionData[1] { transition });
         }
     }
 
@@ -141,38 +174,5 @@
                         bool startNode) {
             Set(laneId, laneIndex, type, segmentId, startNode, 0);
         }
-    }
-
-    public interface IRoutingManager {
-        // TODO documentation
-        /// <summary>
-        /// Structs for path-finding that contain required segment-related routing data
-        /// </summary>
-        SegmentRoutingData[] SegmentRoutings { get; }
-
-        /// <summary>
-        /// Structs for path-finding that contain required lane-end-related backward routing data.
-        /// Index:
-        ///		[0 .. NetManager.MAX_LANE_COUNT-1]: lane ends at start node
-        ///		[NetManager.MAX_LANE_COUNT .. 2*NetManger.MAX_LANE_COUNT-1]: lane ends at end node
-        /// </summary>
-        LaneEndRoutingData[] LaneEndBackwardRoutings { get; }
-
-        /// <summary>
-        /// Structs for path-finding that contain required lane-end-related forward routing data.
-        /// Index:
-        ///		[0 .. NetManager.MAX_LANE_COUNT-1]: lane ends at start node
-        ///		[NetManager.MAX_LANE_COUNT .. 2*NetManger.MAX_LANE_COUNT-1]: lane ends at end node
-        /// </summary>
-        LaneEndRoutingData[] LaneEndForwardRoutings { get; }
-
-        void SimulationStep();
-        void RequestFullRecalculation();
-        void RequestRecalculation(ushort segmentId, bool propagate = true);
-        uint GetLaneEndRoutingIndex(uint laneId, bool startNode);
-        int CalcInnerSimilarLaneIndex(ushort segmentId, int laneIndex);
-        int CalcInnerSimilarLaneIndex(NetInfo.Lane laneInfo);
-        int CalcOuterSimilarLaneIndex(ushort segmentId, int laneIndex);
-        int CalcOuterSimilarLaneIndex(NetInfo.Lane laneInfo);
     }
 }

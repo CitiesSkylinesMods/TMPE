@@ -5,7 +5,6 @@ namespace TrafficManager.U {
     using CSUtil.Commons;
     using TrafficManager.UI.Textures;
     using UnityEngine;
-    using CSUtil.Commons;
     using TrafficManager.State.ConfigData;
 
     public static class TextureUtil {

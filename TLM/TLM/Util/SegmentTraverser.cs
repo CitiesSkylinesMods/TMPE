@@ -158,7 +158,7 @@ namespace TrafficManager.Util {
                 });
 
             ushort endNodeId = Constants.ServiceFactory.NetService.
-                GetSegmentNodeId(initialSegmentId,false);
+                GetSegmentNodeId(initialSegmentId, false);
 
             Constants.ServiceFactory.NetService.ProcessNode(
                 endNodeId,

@@ -168,6 +168,7 @@
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
     <Compile Include="Patch\_NetSegment\CalculateSegmentPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
+    <Compile Include="Traffic\LegacyExtVehicleType.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
     <Compile Include="UI\Helpers\SegmentLaneMarker.cs" />
@@ -263,7 +264,7 @@
     <Compile Include="UI\Helpers\GuideHandler.cs" />
     <Compile Include="UI\Helpers\GuideWrapper.cs" />
     <Compile Include="UI\Helpers\CheckboxOption.cs" />
-    <Compile Include="UI\Helpers\ISerializableOptionBase.cs" />
+    <Compile Include="UI\Helpers\ILegacySerializableOption.cs" />
     <Compile Include="UI\Helpers\SerializableUIOptionBase.cs" />
     <Compile Include="UI\IncompatibleModsPanel.cs" />
     <Compile Include="UI\MainMenu\BaseMenuButton.cs" />

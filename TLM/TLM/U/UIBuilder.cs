@@ -10,7 +10,7 @@ namespace TrafficManager.U {
     /// Create an UI builder to populate a panel with good things: buttons, sub-panels, create a
     /// drag handle and other controls.
     /// </summary>
-    /// <typeparam name="T">The UI Component and ISmartSizableControl we're placing into the UI.</typeparam>
+    /// <typeparam name="TControl">The UI Component and ISmartSizableControl we're placing into the UI.</typeparam>
     public class UiBuilder<TControl> : IDisposable
         where TControl : UIComponent, ISmartSizableControl
     {
@@ -32,9 +32,11 @@ namespace TrafficManager.U {
             return new UiBuilder<TButton>(newButton);
         }
 
-        /// <summary>Same as Button<T>() but allows custom subtype to be passed to AddUIComponent.</summary>
-        /// <param name="t">The type to pass to AddUIComponent.</param>
+        /// <summary>
+        /// Same as Button&lt;T&gt;() but allows custom subtype to be passed to AddUIComponent.
+        /// </summary>
         /// <typeparam name="TButton">The type to cast to.</typeparam>
+        /// <param name="t">The type to pass to AddUIComponent.</param>
         /// <returns>New builder for that button.</returns>
         public UiBuilder<TButton> Button<TButton>(Type t)
             where TButton : UIButton, ISmartSizableControl {

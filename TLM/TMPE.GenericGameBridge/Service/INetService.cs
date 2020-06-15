@@ -14,33 +14,6 @@ namespace GenericGameBridge.Service {
                                                ref NetSegment segment,
                                                byte laneIndex);
 
-    public struct LanePos {
-        public uint laneId;
-        public byte laneIndex;
-        public float position;
-        public VehicleInfo.VehicleType vehicleType;
-        public NetInfo.LaneType laneType;
-
-        public LanePos(uint laneId,
-                       byte laneIndex,
-                       float position,
-                       VehicleInfo.VehicleType vehicleType,
-                       NetInfo.LaneType laneType) {
-            this.laneId = laneId;
-            this.laneIndex = laneIndex;
-            this.position = position;
-            this.vehicleType = vehicleType;
-            this.laneType = laneType;
-        }
-    }
-
-
-    public enum ClockDirection {
-        None,
-        Clockwise,
-        CounterClockwise,
-    }
-
     public interface INetService {
         bool CheckLaneFlags(uint laneId,
                             NetLane.Flags flagMask,
@@ -122,5 +95,32 @@ namespace GenericGameBridge.Service {
 
         /// <summary>tail node>-------->head node</summary>
         ushort GetTailNode(ref NetSegment segment);
+    }
+
+    public struct LanePos {
+        public uint laneId;
+        public byte laneIndex;
+        public float position;
+        public VehicleInfo.VehicleType vehicleType;
+        public NetInfo.LaneType laneType;
+
+        public LanePos(uint laneId,
+                       byte laneIndex,
+                       float position,
+                       VehicleInfo.VehicleType vehicleType,
+                       NetInfo.LaneType laneType) {
+            this.laneId = laneId;
+            this.laneIndex = laneIndex;
+            this.position = position;
+            this.vehicleType = vehicleType;
+            this.laneType = laneType;
+        }
+    }
+
+
+    public enum ClockDirection {
+        None,
+        Clockwise,
+        CounterClockwise,
     }
 }

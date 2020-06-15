@@ -484,7 +484,6 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="laneId1">First lane</param>
         /// <param name="laneId2">Second lane</param>
-        /// <returns>Node id shared by these lanes</returns>
         internal void GetCommonNodeId(uint laneId1,
                                       uint laneId2,
                                       bool startNode1,

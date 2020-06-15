@@ -115,6 +115,7 @@ namespace TrafficManager.State.Keybinds {
             return result;
         }
 
+        /// <summary>Method to check if a button is pressed.</summary>
         /// <param name="e"></param>
         /// <returns>true for as long as user holds the key</returns>
         public bool IsPressed(Event e) {

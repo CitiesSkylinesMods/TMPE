@@ -680,8 +680,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 unit,
 #endif
                                 candidateItem,
-                                ref netManager.m_segments.m_buffer
-                                    [candidateItem.Position.m_segment],
+                                ref netManager.m_segments.m_buffer[candidateItem.Position.m_segment],
                                 ref netManager.m_lanes.m_buffer[candidateItem.LaneId],
                                 specialNodeId,
                                 ref netManager.m_nodes.m_buffer[specialNodeId],

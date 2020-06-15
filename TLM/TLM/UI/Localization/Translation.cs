@@ -201,7 +201,7 @@ namespace TrafficManager.UI {
                 BindingFlags.Instance | BindingFlags.NonPublic)
             ?.GetValue(SingletonLite<LocaleManager>.instance);
 
-        /// Reset is private method used to delete the key before re-adding it
+        // Reset is private method used to delete the key before re-adding it
         MethodInfo resetFun = typeof(Locale)
             .GetMethod(
             "ResetOverriddenLocalizedStrings",

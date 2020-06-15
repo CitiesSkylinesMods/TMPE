@@ -87,9 +87,10 @@ namespace TrafficManager.UI {
                     switchViewModeButton_.text = Translation.Menu.Get("Button:Switch view");
                 }
 
-                this.Show();
-            } else
-                this.Hide();
+                Show();
+            } else {
+                Hide();
+            }
         }
     }
 }

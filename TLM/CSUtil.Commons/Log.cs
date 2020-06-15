@@ -48,7 +48,7 @@ namespace CSUtil.Commons {
             Debug,
             Info,
             Warning,
-            Error
+            Error,
         }
 
         private static Stopwatch _sw = Stopwatch.StartNew();
@@ -59,7 +59,8 @@ namespace CSUtil.Commons {
                     File.Delete(LogFilename);
                 }
             }
-            catch (Exception) { }
+            catch (Exception) {
+            }
         }
 
         /// <summary>

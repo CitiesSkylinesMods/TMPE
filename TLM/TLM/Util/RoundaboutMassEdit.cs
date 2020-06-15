@@ -2,7 +2,7 @@ namespace TrafficManager.Util {
     using ColossalFramework.Math;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using Record;
+    using TrafficManager.Util.Record;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -75,7 +75,7 @@ namespace TrafficManager.Util {
                         Debug.LogAssertion("The road is the wrong way around.");
                         break;
                     case 1:
-                        break;// not enough lanes Use default settings.
+                        break; // not enough lanes Use default settings.
                     case 2:
                         if (bRight && bLeft) {
                             // not enough lanes, use default settings

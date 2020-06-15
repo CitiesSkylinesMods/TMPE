@@ -1,5 +1,5 @@
 namespace TrafficManager.State {
-    using API.Traffic.Enums;
+    using TrafficManager.API.Traffic.Enums;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;

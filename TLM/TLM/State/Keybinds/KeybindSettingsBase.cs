@@ -16,9 +16,9 @@ namespace TrafficManager.State.Keybinds {
         // detection code in KeybindUI.FindConflict(inTmpe) which expects these below
         // to be fields of type KeybindSetting.
 
-        /// <value>
+        /// <summary>
         /// This input key can not be changed and is not checked, instead it is display only
-        /// </value>
+        /// </summary>
         // Not editable
         internal static KeybindSetting Esc = new KeybindSetting(
             cat: "Global",
