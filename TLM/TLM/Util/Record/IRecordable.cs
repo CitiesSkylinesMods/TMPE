@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace TrafficManager.Util.Record {
@@ -17,5 +18,7 @@ namespace TrafficManager.Util.Record {
         /// </summary>
         /// <param name="map">maps old Instance IDs to new Instance IDs</param>
         void Transfer(Dictionary<InstanceID, InstanceID> map);
+
+        byte[] Serialize();
     }
 }

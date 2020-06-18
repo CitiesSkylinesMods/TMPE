@@ -1,11 +1,13 @@
 namespace TrafficManager.Util.Record {
     using CitiesGameBridge.Service;
     using GenericGameBridge.Service;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.Manager.Impl;
 
     // TODO record vehicle restrictions.
+    [Serializable]
     public class SegmentRecord : IRecordable {
         public SegmentRecord(ushort segmentId) => SegmentId = segmentId;
 
@@ -69,5 +71,8 @@ namespace TrafficManager.Util.Record {
                 sort: false);
             return lanes.Select(lane => lane.laneId).ToList();
         }
+
+        public byte[] Serialize() => RecordUtil.Serialize(this);
+
     }
 }

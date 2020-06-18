@@ -1,10 +1,12 @@
 namespace TrafficManager.Util.Record {
+    using System;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using static TrafficManager.Util.Shortcuts;
 
+    [Serializable]
     public class LaneArrowsRecord : IRecordable {
         public uint LaneId;
         InstanceID InstanceID => new InstanceID { NetLane = LaneId };
@@ -44,5 +46,7 @@ namespace TrafficManager.Util.Record {
             }
             return ret;
         }
+
+        public byte[] Serialize() => RecordUtil.Serialize(this);
     }
 }

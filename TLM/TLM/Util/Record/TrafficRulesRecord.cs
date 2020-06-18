@@ -1,9 +1,11 @@
 namespace TrafficManager.Util.Record {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
     using static Shortcuts;
 
+    [Serializable]
     public class TrafficRulesRecord : IRecordable {
         public HashSet<ushort> NodeIDs = new HashSet<ushort>();
         public HashSet<ushort> SegmentIDs = new HashSet<ushort>();
@@ -68,5 +70,8 @@ namespace TrafficManager.Util.Record {
             foreach (IRecordable record in Records)
                 record.Transfer(map);
         }
+
+        public byte[] Serialize() => RecordUtil.Serialize(this);
+
     }
 }

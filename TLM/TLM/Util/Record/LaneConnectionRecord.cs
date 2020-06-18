@@ -1,12 +1,11 @@
 namespace TrafficManager.Util.Record {
-    using ColossalFramework;
-    using CSUtil.Commons;
-    using GenericGameBridge.Service;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.Manager.Impl;
     using static TrafficManager.Util.Shortcuts;
 
+    [Serializable]
     public class LaneConnectionRecord : IRecordable {
         public uint LaneId;
         public byte LaneIndex;
@@ -105,5 +104,8 @@ namespace TrafficManager.Util.Record {
             }
             return ret;
         }
+
+        public byte[] Serialize() => RecordUtil.Serialize(this);
+
     }
 }

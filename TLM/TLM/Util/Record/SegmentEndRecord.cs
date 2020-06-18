@@ -1,14 +1,21 @@
 namespace TrafficManager.Util.Record {
     using CSUtil.Commons;
+    using System;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
 
+    [Serializable]
     class SegmentEndRecord : IRecordable {
         public SegmentEndRecord(int segmentEndIndex) {
             SegmentEndManager.Instance.
                 GetSegmentAndNodeFromIndex(segmentEndIndex, out ushort segmentId, out bool startNode);
+            SegmentId = segmentId;
+            StartNode = startNode;
+        }
+
+        public SegmentEndRecord(ushort segmentId, bool startNode) {
             SegmentId = segmentId;
             StartNode = startNode;
         }
@@ -91,5 +98,7 @@ namespace TrafficManager.Util.Record {
                 lanes_[i].Transfer(mappedLanes[i].LaneId);
             }
         }
+
+        public byte[] Serialize() => RecordUtil.Serialize(this);
     }
 }

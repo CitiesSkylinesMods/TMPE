@@ -4,7 +4,8 @@ namespace TrafficManager.Util.Record {
     using UnityEngine.Networking.Types;
     using static TrafficManager.Util.Shortcuts;
 
-    class NodeRecord : IRecordable {
+    [Serializable]
+    public class NodeRecord : IRecordable {
         public NodeRecord(ushort nodeId) => NodeId = nodeId;
 
         public ushort NodeId { get; private set; }
@@ -49,6 +50,9 @@ namespace TrafficManager.Util.Record {
                 return false;
             }
             return tlMan.SetTrafficLight(nodeId, flag, ref nodeId.ToNode());
+
+            public byte[] Serialize() => RecordUtil.Serialize(this);
+
         }
     }
 }

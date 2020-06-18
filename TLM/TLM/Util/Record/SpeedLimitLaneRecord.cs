@@ -1,8 +1,10 @@
 namespace TrafficManager.Util.Record {
+    using System;
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
     using static TrafficManager.Util.Shortcuts;
 
+    [Serializable]
     public class SpeedLimitLaneRecord : IRecordable {
         public const NetInfo.LaneType LANE_TYPES =
             LaneArrowManager.LANE_TYPES | SpeedLimitManager.LANE_TYPES;
@@ -56,5 +58,8 @@ namespace TrafficManager.Util.Record {
             }
             return ret;
         }
+
+        public byte[] Serialize() => RecordUtil.Serialize(this);
+
     }
 }
