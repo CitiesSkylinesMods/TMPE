@@ -63,5 +63,10 @@ namespace TrafficManager.Util.Record {
             foreach (IRecordable record in Records)
                 record.Restore();
         }
+
+        public void Transfer(Dictionary<InstanceID,InstanceID> map) {
+            foreach (IRecordable record in Records)
+                record.Transfer(map);
+        }
     }
 }

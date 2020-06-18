@@ -1,8 +1,5 @@
 namespace TrafficManager.Util.Record {
-    using ColossalFramework;
-    using CSUtil.Commons;
     using System.Collections.Generic;
-    using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using static TrafficManager.Util.Shortcuts;
 
@@ -15,7 +12,8 @@ namespace TrafficManager.Util.Record {
         public byte LaneIndex;
         public uint LaneId;
         NetInfo.Lane LaneInfo;
-        ushort SegmentId;
+        InstanceID InstanceID => new InstanceID { NetLane = LaneId };
+
 
         private float? speedLimit_; // game units
 
@@ -25,9 +23,14 @@ namespace TrafficManager.Util.Record {
                 speedLimit_ = null;
         }
 
-        public void Restore() {
+        public void Restore() => Transfer(LaneId);
+
+        public void Transfer(Dictionary<InstanceID, InstanceID> map) =>
+            Transfer(map[this.InstanceID].NetLane);
+
+        public void Transfer(uint laneId) {
             SpeedLimitManager.Instance.SetSpeedLimit(
-                SegmentId,
+                laneId.ToLane().m_segment,
                 LaneIndex,
                 LaneInfo,
                 LaneId,
@@ -43,11 +46,10 @@ namespace TrafficManager.Util.Record {
                 LANE_TYPES,
                 VEHICLE_TYPES,
                 sort: false);
-            foreach(var lane in lanes) {
+            foreach (var lane in lanes) {
                 SpeedLimitLaneRecord laneData = new SpeedLimitLaneRecord {
                     LaneId = lane.laneId,
                     LaneIndex = lane.laneIndex,
-                    SegmentId = segmentId,
                     LaneInfo = segmentId.ToSegment().Info.m_lanes[lane.laneIndex],
                 };
                 ret.Add(laneData);

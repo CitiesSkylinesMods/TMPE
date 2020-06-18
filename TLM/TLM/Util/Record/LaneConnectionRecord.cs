@@ -47,6 +47,33 @@ namespace TrafficManager.Util.Record {
             }
         }
 
+        public void Transfer(Dictionary<InstanceID, InstanceID> map) {
+            uint MappedLaneId(uint originalLaneID) =>
+                map[new InstanceID { NetLane = originalLaneID }].NetLane;
+            var mappedLaneId = MappedLaneId(LaneId);
+
+            if (connections_ == null) {
+                connMan.RemoveLaneConnections(mappedLaneId, StartNode);
+                return;
+            }
+            var currentConnections = GetCurrentConnections();
+            //Log._Debug($"currentConnections=" + currentConnections.ToSTR());
+            //Log._Debug($"connections_=" + connections_.ToSTR());
+
+            foreach (uint targetLaneId in connections_) {
+                var mappedTargetLaneId = MappedLaneId(targetLaneId);
+                if (currentConnections == null || !currentConnections.Contains(mappedTargetLaneId)) {
+                    connMan.AddLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
+                }
+            }
+            foreach (uint targetLaneId in currentConnections ?? Enumerable.Empty<uint>()) {
+                var mappedTargetLaneId = MappedLaneId(targetLaneId);
+                if (!connections_.Contains(mappedTargetLaneId)) {
+                    connMan.RemoveLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
+                }
+            }
+        }
+
         public static List<LaneConnectionRecord> GetLanes(ushort nodeId) {
             var ret = new List<LaneConnectionRecord>();
             ref NetNode node = ref nodeId.ToNode();

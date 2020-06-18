@@ -1,13 +1,15 @@
 namespace TrafficManager.Util.Record {
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
+    using UnityEngine.Networking.Types;
     using static TrafficManager.Util.Shortcuts;
 
     class NodeRecord : IRecordable {
         public NodeRecord(ushort nodeId) => NodeId = nodeId;
 
         public ushort NodeId { get; private set; }
-        
+        InstanceID InstanceID => new InstanceID { NetNode = NodeId};
+
         private bool trafficLight_;
         private List<LaneConnectionRecord> lanes_;
         private static TrafficLightManager tlMan => TrafficLightManager.Instance;
@@ -25,6 +27,12 @@ namespace TrafficManager.Util.Record {
             foreach (LaneConnectionRecord sourceLane in lanes_) {
                 sourceLane.Restore();
             }
+        }
+
+        public void Transfer(Dictionary<InstanceID, InstanceID> map) {
+            SetTrafficLight(map[InstanceID].NetNode, trafficLight_);
+            foreach (LaneConnectionRecord sourceLane in lanes_)
+                sourceLane.Transfer(map);
         }
 
         private static bool SetTrafficLight(ushort nodeId, bool flag) {
