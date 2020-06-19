@@ -6,7 +6,7 @@ namespace TrafficManager.Util.Record {
     using System.Linq;
     using TrafficManager.Manager.Impl;
 
-    // TODO record vehicle restrictions.
+    // TODO add record vehicle restrictions.
     [Serializable]
     public class SegmentRecord : IRecordable {
         public SegmentRecord(ushort segmentId) => SegmentId = segmentId;

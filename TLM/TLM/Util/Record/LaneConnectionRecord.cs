@@ -36,7 +36,7 @@ namespace TrafficManager.Util.Record {
             //Log._Debug($"connections_=" + connections_.ToSTR());
 
             foreach (uint targetLaneId in connections_) {
-                if (currentConnections ==  null || !currentConnections.Contains(targetLaneId)) {
+                if (currentConnections == null || !currentConnections.Contains(targetLaneId)) {
                     connMan.AddLaneConnection(LaneId, targetLaneId, StartNode);
                 }
             }
@@ -52,7 +52,7 @@ namespace TrafficManager.Util.Record {
                 var originalLaneInstanceID = new InstanceID { NetLane = originalLaneID };
                 if (map.TryGetValue(originalLaneInstanceID, out var ret))
                     return ret.NetLane;
-                Log.Warning($"Could not map {originalLaneID}. this is expected if move it has not copied several segments from an intersection"); 
+                Log._Debug($"Could not map lane:{originalLaneID}. this is expected if move it has not copied all segment[s] from an intersection"); 
                 return 0;
             }
             var mappedLaneId = MappedLaneId(LaneId);
@@ -65,14 +65,12 @@ namespace TrafficManager.Util.Record {
             if (mappedLaneId == 0)
                 return;
 
-            Log._Debug($"connections_=" + connections_.ToSTR());
-
-            //Log._Debug("TMPE A");
+            //Log._Debug($"connections_=" + connections_.ToSTR());
             foreach (uint targetLaneId in connections_) {
                 var mappedTargetLaneId = MappedLaneId(targetLaneId);
                 if (mappedTargetLaneId == 0)
                     continue;
-                Log._Debug($"connecting lanes: {mappedLaneId}->{mappedTargetLaneId}");
+                //Log._Debug($"connecting lanes: {mappedLaneId}->{mappedTargetLaneId}");
                 connMan.AddLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
             }
         }
