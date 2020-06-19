@@ -1,4 +1,5 @@
 namespace TrafficManager.Util.Record {
+    using CSUtil.Commons;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -51,7 +52,7 @@ namespace TrafficManager.Util.Record {
                 var originalLaneInstanceID = new InstanceID { NetLane = originalLaneID };
                 if (map.TryGetValue(originalLaneInstanceID, out var ret))
                     return ret.NetLane;
-                CSUtil.Commons.Log.Warning($"Could not map {originalLaneID}");
+                Log.Warning($"Could not map {originalLaneID}. this is expected if move it has not copied several segments from an intersection"); 
                 return 0;
             }
             var mappedLaneId = MappedLaneId(LaneId);
@@ -64,28 +65,15 @@ namespace TrafficManager.Util.Record {
             if (mappedLaneId == 0)
                 return;
 
-            var currentConnections = GetCurrentConnections();
-            //Log._Debug($"currentConnections=" + currentConnections.ToSTR());
-            //Log._Debug($"connections_=" + connections_.ToSTR());
+            Log._Debug($"connections_=" + connections_.ToSTR());
 
-            CSUtil.Commons.Log._Debug("TMPE A");
+            //Log._Debug("TMPE A");
             foreach (uint targetLaneId in connections_) {
                 var mappedTargetLaneId = MappedLaneId(targetLaneId);
                 if (mappedTargetLaneId == 0)
                     continue;
-                if (currentConnections == null || !currentConnections.Contains(mappedTargetLaneId)) {
-                    connMan.AddLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
-                }
-            }
-
-            CSUtil.Commons.Log._Debug("TMPE B");
-            foreach (uint targetLaneId in currentConnections ?? Enumerable.Empty<uint>()) {
-                var mappedTargetLaneId = MappedLaneId(targetLaneId);
-                if (mappedTargetLaneId == 0)
-                    continue;
-                if (!connections_.Contains(mappedTargetLaneId)) {
-                    connMan.RemoveLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
-                }
+                Log._Debug($"connecting lanes: {mappedLaneId}->{mappedTargetLaneId}");
+                connMan.AddLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
             }
         }
 
