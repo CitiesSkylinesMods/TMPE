@@ -1,7 +1,7 @@
 namespace TrafficManager.Util.Record {
+    using System;
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
-    using UnityEngine.Networking.Types;
     using static TrafficManager.Util.Shortcuts;
 
     [Serializable]
@@ -50,9 +50,8 @@ namespace TrafficManager.Util.Record {
                 return false;
             }
             return tlMan.SetTrafficLight(nodeId, flag, ref nodeId.ToNode());
-
-            public byte[] Serialize() => RecordUtil.Serialize(this);
-
         }
+
+        public byte[] Serialize() => RecordUtil.Serialize(this);
     }
 }

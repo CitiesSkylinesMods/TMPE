@@ -47,26 +47,42 @@ namespace TrafficManager.Util.Record {
         }
 
         public void Transfer(Dictionary<InstanceID, InstanceID> map) {
-            uint MappedLaneId(uint originalLaneID) =>
-                map[new InstanceID { NetLane = originalLaneID }].NetLane;
+            uint MappedLaneId(uint originalLaneID) {
+                var originalLaneInstanceID = new InstanceID { NetLane = originalLaneID };
+                if (map.TryGetValue(originalLaneInstanceID, out var ret))
+                    return ret.NetLane;
+                CSUtil.Commons.Log.Warning($"Could not map {originalLaneID}");
+                return 0;
+            }
             var mappedLaneId = MappedLaneId(LaneId);
 
             if (connections_ == null) {
                 connMan.RemoveLaneConnections(mappedLaneId, StartNode);
                 return;
             }
+
+            if (mappedLaneId == 0)
+                return;
+
             var currentConnections = GetCurrentConnections();
             //Log._Debug($"currentConnections=" + currentConnections.ToSTR());
             //Log._Debug($"connections_=" + connections_.ToSTR());
 
+            CSUtil.Commons.Log._Debug("TMPE A");
             foreach (uint targetLaneId in connections_) {
                 var mappedTargetLaneId = MappedLaneId(targetLaneId);
+                if (mappedTargetLaneId == 0)
+                    continue;
                 if (currentConnections == null || !currentConnections.Contains(mappedTargetLaneId)) {
                     connMan.AddLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
                 }
             }
+
+            CSUtil.Commons.Log._Debug("TMPE B");
             foreach (uint targetLaneId in currentConnections ?? Enumerable.Empty<uint>()) {
                 var mappedTargetLaneId = MappedLaneId(targetLaneId);
+                if (mappedTargetLaneId == 0)
+                    continue;
                 if (!connections_.Contains(mappedTargetLaneId)) {
                     connMan.RemoveLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
                 }

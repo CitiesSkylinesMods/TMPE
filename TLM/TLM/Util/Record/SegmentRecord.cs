@@ -47,6 +47,8 @@ namespace TrafficManager.Util.Record {
                 lane.Transfer(map);
         }
 
+        public byte[] Serialize() => RecordUtil.Serialize(this);
+
         /// <summary>
         /// creates 1:1 map between lanes of original segment and new segment.
         /// Precondition: SegmentInfos must match.
@@ -71,8 +73,5 @@ namespace TrafficManager.Util.Record {
                 sort: false);
             return lanes.Select(lane => lane.laneId).ToList();
         }
-
-        public byte[] Serialize() => RecordUtil.Serialize(this);
-
     }
 }
