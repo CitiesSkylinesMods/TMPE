@@ -298,7 +298,7 @@ namespace TrafficManager.Manager.Impl {
         public void CalculateCorners(ushort segmentId, bool startNode) {
             if (!Shortcuts.netService.IsSegmentValid(segmentId))
                 return;
-            if (segmentId.ToSegment().Info == null) {
+            if (!segmentId.ToSegment().Info) {
                 Log.Warning($"segment {segmentId} has null info");
                 return;
             }
@@ -321,7 +321,7 @@ namespace TrafficManager.Manager.Impl {
                     cornerPos: out segEnd.LeftCorner,
                     cornerDirection: out segEnd.LeftCornerDir,
                     smooth: out _);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 Log.Error($"failed calculating corner for segment:{segmentId}, info={segmentId.ToSegment().Info}\n"
                     + e.Message);
             }
