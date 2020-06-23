@@ -59,7 +59,7 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-        public bool SetParkingAllowed(ushort segmentId, NetInfo.Direction finalDir, bool flag) {
+        public bool  (ushort segmentId, NetInfo.Direction finalDir, bool flag) {
 #if DEBUG
             if (DebugSwitch.BasicParkingAILog.Get()) {
                 if (finalDir != NetInfo.Direction.Forward &&

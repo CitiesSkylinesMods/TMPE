@@ -21,10 +21,15 @@ namespace TrafficManager.Util.Record {
         public void Record() {
             connections_ = GetCurrentConnections();
             //Log._Debug($"LaneConnectionRecord.Record: connections_=" + connections_.ToSTR());
+            if (connections_ == null || connections_.Length == 0) {
+                connections_ = null;
+                return;
+            }
 
-            if (connections_ != null)
-                connections_ = (uint[])connections_.Clone();
+            connections_ = (uint[])connections_.Clone();
         }
+
+        public bool IsDefault() => connections_ == null;
 
         public void Restore() {
             if (connections_ == null) {

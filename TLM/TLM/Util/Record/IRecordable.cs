@@ -19,6 +19,12 @@ namespace TrafficManager.Util.Record {
         /// <param name="map">maps old Instance IDs to new Instance IDs</param>
         void Transfer(Dictionary<InstanceID, InstanceID> map);
 
+        /// <summary>
+        /// Detects if record is empty to help releasing empty records from memory.
+        /// </summary>
+        /// <returns>true if record stores only default values. false if record stores any useful information.</returns>
+        bool IsDefault();
+
         byte[] Serialize();
     }
 }

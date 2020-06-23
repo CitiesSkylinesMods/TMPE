@@ -19,10 +19,10 @@ namespace TrafficManager.Util.Record {
         InstanceID InstanceID => new InstanceID { NetLane = LaneId };
 
         public void Record() {
-            speedLimit_ = SpeedLimitManager.Instance.GetCustomSpeedLimit(LaneId);
-            if (speedLimit_ == 0)
-                speedLimit_ = null;
+            speedLimit_ = SpeedLimitManager.Instance.GetCustomSpeedLimitRaw(LaneId);
         }
+
+        public bool IsDefault() => speedLimit_ == null;
 
         public void Restore() => Transfer(LaneId);
 

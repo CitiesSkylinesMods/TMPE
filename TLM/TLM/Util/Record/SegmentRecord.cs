@@ -31,6 +31,14 @@ namespace TrafficManager.Util.Record {
             allLaneIds_ = GetAllLanes(SegmentId);
         }
 
+        public bool IsDefault() {
+            foreach (var lane in arrowLanes_) {
+                if (!lane.IsDefault())
+                    return false;
+            }
+            return parkingForward_ == true && parkingBackward_ == true;
+        }
+
         public void Restore() {
             // TODO fix SetParkingAllowed 
             pMan.SetParkingAllowed(SegmentId, NetInfo.Direction.Forward, parkingForward_);

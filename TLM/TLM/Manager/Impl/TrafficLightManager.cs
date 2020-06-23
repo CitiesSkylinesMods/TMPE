@@ -7,6 +7,8 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
+    using TrafficManager.Util;
+    using ColossalFramework;
 
     /// <summary>
     /// Manages traffic light toggling
@@ -120,6 +122,29 @@ namespace TrafficManager.Manager.Impl {
 
         public bool ToggleTrafficLight(ushort nodeId, ref NetNode node, out ToggleTrafficLightError reason) {
             return SetTrafficLight(nodeId, !HasTrafficLight(nodeId, ref node), ref node, out reason);
+        }
+
+        public bool GetDefaultTrafficLight(ushort nodeId) {
+            // To determine if node has traffic lights by default, we test
+            // what would UpdateNodeFlags() would do if node did not have
+            // traffic lights flag.
+            NetNode nodeCopy = nodeId.ToNode(); 
+            nodeCopy.m_flags &= ~NetNode.Flags.TrafficLights; 
+            nodeCopy.Info.m_netAI.UpdateNodeFlags(nodeId, ref nodeCopy);
+            return nodeCopy.m_flags.IsFlagSet(NetNode.Flags.TrafficLights);
+        }
+
+        /// <summary>
+        /// like <see cref="HasTrafficLight(ushort, ref NetNode)"/> but returns null
+        /// if traffic light cannot be changed, or if traffic light has default value.
+        /// </summary>
+        public bool? GetTrafficLight(ushort nodeId) {
+            bool flag = HasTrafficLight(nodeId, ref nodeId.ToNode());
+            if (!CanToggleTrafficLight(nodeId, !flag, ref nodeId.ToNode(), out _))
+                return null;
+            if(flag == GetDefaultTrafficLight(nodeId)) 
+                return null;
+            return flag;
         }
 
         public bool CanToggleTrafficLight(ushort nodeId,

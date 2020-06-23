@@ -18,6 +18,8 @@ namespace TrafficManager.Util.Record {
             arrows_ = Flags.GetLaneArrowFlags(LaneId);
         }
 
+        public bool IsDefault() => arrows_ == null;
+
         public void Restore() => Transfer(LaneId);
 
         public void Transfer(Dictionary<InstanceID, InstanceID> map) =>

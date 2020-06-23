@@ -231,6 +231,20 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
+        /// like <see cref="GetCustomSpeedLimit"/> but:
+        /// - returns null if no speed value is forced on lane
+        /// - speed limit value if lane has forced speed limit value.
+        ///   even if that value matches the default value.
+        /// Note: if prefab has speed limit customisation but the particular lane in question has
+        /// no forced speed limit value this still returns null.
+        /// </summary>
+        /// <param name="laneId">Interested in this lane</param>
+        /// <returns>Speed limit if set for lane, or null if lane has default speed limit.</returns>
+        public float? GetCustomSpeedLimitRaw(uint laneId) {
+            return Flags.GetLaneSpeedLimit(laneId);
+        }
+
+        /// <summary>
         /// Determines the currently set speed limit for the given lane in terms of discrete speed
         /// limit levels. An in-game speed limit of 2.0 (e.g. on highway) is hereby translated into
         /// a discrete speed limit value of 100 (km/h).
