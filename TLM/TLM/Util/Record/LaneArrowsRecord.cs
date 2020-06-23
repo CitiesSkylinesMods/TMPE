@@ -1,4 +1,5 @@
 namespace TrafficManager.Util.Record {
+    using ColossalFramework;
     using System;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Enums;
@@ -30,7 +31,8 @@ namespace TrafficManager.Util.Record {
         }
 
         public static List<LaneArrowsRecord> GetLanes(ushort segmentId, bool startNode) {
-            var ret = new List<LaneArrowsRecord>();
+            int maxLaneCount = segmentId.ToSegment().Info.m_lanes.Length;
+            var ret = new List<LaneArrowsRecord>(maxLaneCount); 
             var lanes = netService.GetSortedLanes(
                 segmentId,
                 ref segmentId.ToSegment(),
@@ -44,6 +46,7 @@ namespace TrafficManager.Util.Record {
                 };
                 ret.Add(laneData);
             }
+            ret.TrimExcess();
             return ret;
         }
 
