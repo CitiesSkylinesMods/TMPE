@@ -171,8 +171,8 @@ namespace TrafficManager.UI {
 #if DEBUG
             GetDebugMenu().Show();
 #endif
-            SetToolMode(TrafficManagerMode.Activated);
             _uiShown = true;
+            SetToolMode(TrafficManagerMode.Activated);
             MainMenuButton.UpdateButtonImageAndTooltip();
             UIView.SetFocus(MainMenu);
         }
@@ -187,8 +187,8 @@ namespace TrafficManager.UI {
             GetDebugMenu().Hide();
 #endif
 
-            SetToolMode(TrafficManagerMode.None);
             _uiShown = false;
+            SetToolMode(TrafficManagerMode.None);
             MainMenuButton.UpdateButtonImageAndTooltip();
         }
 
