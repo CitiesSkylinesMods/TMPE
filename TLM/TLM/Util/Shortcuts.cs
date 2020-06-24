@@ -141,6 +141,12 @@ namespace TrafficManager.Util {
             }
         }
 
+        internal static void AssertNotNull(object obj, string m = "") {
+            if (obj == null) {
+                Log.Error("Assertion failed. Expected not null: " + m);
+            }
+        }
+
         internal static void Assert(bool con, string m = "") {
             if (!con) {
                 Log.Error("Assertion failed: " + m);
