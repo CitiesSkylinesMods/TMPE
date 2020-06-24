@@ -267,7 +267,7 @@ namespace TrafficManager.UI {
         public void SetToolMode(ToolMode newToolMode) {
             ToolMode oldToolMode = toolMode_;
 
-            if(toolMode_ != ToolMode.None) {
+            if(toolMode_ != ToolMode.None && LoadingExtension.InGameMode) {
                 // Make it impossible for user to undo changes performed by Road selection panels
                 // after changing traffic rule vis other tools.
                 // TODO: This code will not be necessary when we implement intent.
@@ -275,7 +275,6 @@ namespace TrafficManager.UI {
                 RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
             }
 
-            // ToolModeChanged does not count timed traffic light submodes as a same tool
             bool toolModeChanged = newToolMode != toolMode_;
 
             if (!toolModeChanged) {
@@ -284,7 +283,7 @@ namespace TrafficManager.UI {
             }
 
             SetToolMode_DeactivateTool();
-
+            UnityEngine.Debug.Log("Point A");
             // Try figure out whether legacy subtool or a new subtool is selected
             if (!legacySubTools_.TryGetValue(newToolMode, out activeLegacySubTool_)
                 && !subTools_.TryGetValue(newToolMode, out activeSubTool_)) {
@@ -295,6 +294,7 @@ namespace TrafficManager.UI {
                 Log._Debug($"SetToolMode: reset because toolmode not found {newToolMode}");
                 return;
             }
+            UnityEngine.Debug.Log("Point B");
 
             SetToolMode_Activate(newToolMode);
             Log._Debug($"SetToolMode: changed old={oldToolMode} new={newToolMode}");
