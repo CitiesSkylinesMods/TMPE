@@ -94,6 +94,13 @@ namespace TrafficManager.UI {
 
         static TrafficManagerTool() { }
 
+        /// <summary>
+        /// Determines if the current tool is traffic manager tool.
+        /// </summary>
+        public static bool IsCurrentTool =>
+            ToolsModifierControl.toolController?.CurrentTool != null
+            && ToolsModifierControl.toolController.CurrentTool is TrafficManagerTool;
+
         protected override void OnDestroy() {
             Log.Info("TrafficManagerTool.OnDestroy() called");
             base.OnDestroy();
@@ -386,6 +393,8 @@ namespace TrafficManager.UI {
         /// </summary>
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
+            if (!LoadingExtension.InGameMode)
+                return;
             SubTools.PrioritySigns.MassEditOverlay.Show
                 = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
 
@@ -547,6 +556,8 @@ namespace TrafficManager.UI {
         }
 
         void DefaultOnToolGUI(Event e) {
+            if (!LoadingExtension.InGameMode)
+                return;
             if (e.type == EventType.MouseDown && e.button == 0) {
                 bool isRoad = HoveredSegmentId != 0 && HoveredSegmentId.ToSegment().Info.m_netAI is RoadBaseAI;
                 if (!isRoad)
@@ -982,7 +993,7 @@ namespace TrafficManager.UI {
         /// <summary>Shows a tutorial message. Must be called by a Unity thread.</summary>
         /// <param name="localeKey">Tutorial key.</param>
         public static void ShowAdvisor(string localeKey) {
-            if (!GlobalConfig.Instance.Main.EnableTutorial) {
+            if (!GlobalConfig.Instance.Main.EnableTutorial || !LoadingExtension.InGameMode) {
                 return;
             }
 
