@@ -1,12 +1,12 @@
 namespace TrafficManager.Util.Record {
-    using ColossalFramework;
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.Manager.Impl;
     using static TrafficManager.Util.Shortcuts;
 
+    [Serializable]
     public class LaneConnectionRecord : IRecordable {
         public uint LaneId;
         public byte LaneIndex;
@@ -36,7 +36,7 @@ namespace TrafficManager.Util.Record {
             //Log._Debug($"connections_=" + connections_.ToSTR());
 
             foreach (uint targetLaneId in connections_) {
-                if (currentConnections ==  null || !currentConnections.Contains(targetLaneId)) {
+                if (currentConnections == null || !currentConnections.Contains(targetLaneId)) {
                     connMan.AddLaneConnection(LaneId, targetLaneId, StartNode);
                 }
             }
@@ -44,6 +44,34 @@ namespace TrafficManager.Util.Record {
                 if (!connections_.Contains(targetLaneId)) {
                     connMan.RemoveLaneConnection(LaneId, targetLaneId, StartNode);
                 }
+            }
+        }
+
+        public void Transfer(Dictionary<InstanceID, InstanceID> map) {
+            uint MappedLaneId(uint originalLaneID) {
+                var originalLaneInstanceID = new InstanceID { NetLane = originalLaneID };
+                if (map.TryGetValue(originalLaneInstanceID, out var ret))
+                    return ret.NetLane;
+                Log._Debug($"Could not map lane:{originalLaneID}. this is expected if move it has not copied all segment[s] from an intersection"); 
+                return 0;
+            }
+            var mappedLaneId = MappedLaneId(LaneId);
+
+            if (connections_ == null) {
+                connMan.RemoveLaneConnections(mappedLaneId, StartNode);
+                return;
+            }
+
+            if (mappedLaneId == 0)
+                return;
+
+            //Log._Debug($"connections_=" + connections_.ToSTR());
+            foreach (uint targetLaneId in connections_) {
+                var mappedTargetLaneId = MappedLaneId(targetLaneId);
+                if (mappedTargetLaneId == 0)
+                    continue;
+                //Log._Debug($"connecting lanes: {mappedLaneId}->{mappedTargetLaneId}");
+                connMan.AddLaneConnection(mappedLaneId, mappedTargetLaneId, StartNode);
             }
         }
 
@@ -78,5 +106,8 @@ namespace TrafficManager.Util.Record {
             }
             return ret;
         }
+
+        public byte[] Serialize() => RecordUtil.Serialize(this);
+
     }
 }

@@ -63,6 +63,9 @@ namespace TrafficManager.Util {
 
         internal static ref NetSegment ToSegment(this ushort segmentId) => ref GetSeg(segmentId);
 
+        internal static NetInfo.Lane GetLaneInfo(ushort segmentId, int laneIndex) =>
+            segmentId.ToSegment().Info.m_lanes[laneIndex];
+
         internal static ref ExtSegmentEnd GetSegEnd(ushort segmentId, ushort nodeId) =>
             ref _segEndBuff[segEndMan.GetIndex(segmentId, nodeId)];
 
