@@ -133,23 +133,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            // Vector3 nodePos = Singleton<NetManager>
-            //                   .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
-            //
-            // // Hide if node position is off-screen
-            //
-            // bool visible = GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 screenPos);
-            //
-            // // if (!visible) {
-            //     // return;
-            // // }
-            //
-            // Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-            // Vector3 diff = nodePos - camPos;
-            //
-            // if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
-            //     return; // do not draw if too distant
-            // }
             // Calculate lanes and arrows
             NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
             IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(

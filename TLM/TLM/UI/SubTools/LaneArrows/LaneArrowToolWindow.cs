@@ -29,8 +29,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             // the GenericPanel sprite is silver, make it dark
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(64, 64, 64, 240);
-            this.SetOpacity(
-                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
+            this.SetOpacityFromGuiOpacity();
         }
 
         private UITextureAtlas GetAtlas() {

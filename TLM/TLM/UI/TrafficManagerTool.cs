@@ -68,6 +68,7 @@ namespace TrafficManager.UI {
         /// <summary>Square of the distance, where overlays are not rendered.</summary>
         public const float MAX_OVERLAY_DISTANCE_SQR = 450f * 450f;
 
+        [Obsolete("Do not add to these tools. Refactor legacy tools into TrafficManagerSubTool")]
         private IDictionary<ToolMode, LegacySubTool> legacySubTools_;
 
         private IDictionary<ToolMode, TrafficManagerSubTool> subTools_;
@@ -383,7 +384,7 @@ namespace TrafficManager.UI {
                     continue;
                 }
 
-                e.Value.RenderOverlayForOtherTools(cameraInfo);
+                e.Value?.RenderOverlayForOtherTools(cameraInfo);
             }
         }
 

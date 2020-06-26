@@ -84,5 +84,10 @@ namespace TrafficManager.U.Panel {
             modified.a = opacity.GetOpacityByte();
             this.color = modified;
         }
+
+        /// <summary>Set window panel opacity from Options GUI Opacity.</summary>
+        internal void SetOpacityFromGuiOpacity() {
+            SetOpacity(UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
+        }
     }
 }
