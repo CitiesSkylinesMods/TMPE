@@ -1,4 +1,4 @@
-namespace TrafficManager.U.Button {
+namespace TrafficManager.U {
     using System;
     using ColossalFramework.UI;
     using TrafficManager.State.Keybinds;

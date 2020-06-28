@@ -207,9 +207,9 @@ namespace TrafficManager.UI.MainMenu {
             // Main menu contains 2 panels side by side, one for tool buttons and another for
             // despawn & clear buttons.
             ButtonsDict = new Dictionary<ToolMode, BaseMenuButton>();
-            U.Panel.UPanel leftPanel;
+            U.UPanel leftPanel;
 
-            using (var innerPanelB = builder.ChildPanel<U.Panel.UPanel>(setupFn: p => {
+            using (var innerPanelB = builder.ChildPanel<U.UPanel>(setupFn: p => {
                 p.name = "TMPE_MainMenu_InnerPanel";
             })) {
                 innerPanelB.ResizeFunction(r => {
@@ -249,7 +249,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private void SetupControls_OnscreenDisplayPanel(UiBuilder<MainMenuWindow> builder) {
-            using (var osdBuilder = builder.ChildPanel<U.Panel.UPanel>(
+            using (var osdBuilder = builder.ChildPanel<U.UPanel>(
                 p => {
                     p.name = "TMPE_MainMenu_KeybindsPanel";
                     // the GenericPanel sprite is Light Silver, make it dark
@@ -287,12 +287,12 @@ namespace TrafficManager.UI.MainMenu {
                                              HashSet<string> atlasKeySet) {
             UILabel versionLabel;
 
-            using (var versionLabelB = builder.Label<U.Label.ULabel>(TrafficManagerMod.ModName)) {
+            using (var versionLabelB = builder.Label<U.ULabel>(TrafficManagerMod.ModName)) {
                 versionLabelB.ResizeFunction(r => r.Stack(UStackMode.Below));
                 this.VersionLabel = versionLabel = versionLabelB.Control;
             }
 
-            using (var btnBuilder = builder.Button<U.Button.UButton>()) {
+            using (var btnBuilder = builder.Button<U.UButton>()) {
                 UButton control = btnBuilder.Control;
                 this.toggleOsdButton_ = control;
                 control.atlas = this.allButtonsAtlas_;
@@ -331,14 +331,14 @@ namespace TrafficManager.UI.MainMenu {
                     c => GlobalConfig.Instance.Main.KeybindsPanelVisible;
 
                 control.uOnClick += (component, eventParam) => {
-                    ModUI.Instance.MainMenu.OnToggleOsdButtonClicked(component as U.Button.UButton);
+                    ModUI.Instance.MainMenu.OnToggleOsdButtonClicked(component as U.UButton);
                 };
             }
 
             return versionLabel;
         }
 
-        private void OnToggleOsdButtonClicked(U.Button.UButton button) {
+        private void OnToggleOsdButtonClicked(U.UButton button) {
             bool value = !GlobalConfig.Instance.Main.KeybindsPanelVisible;
             GlobalConfig.Instance.Main.KeybindsPanelVisible = value;
             GlobalConfig.WriteConfig();
@@ -374,7 +374,7 @@ namespace TrafficManager.UI.MainMenu {
             if (TrafficManagerMod.Instance.InGameHotReload) {
                 // Hot Reload version label (debug only)
                 string text = $"HOT RELOAD {Assembly.GetExecutingAssembly().GetName().Version}";
-                using (var hotReloadB = builder.Label<U.Label.ULabel>(text)) {
+                using (var hotReloadB = builder.Label<U.ULabel>(text)) {
                     // Allow the label to hang outside the parent box
                     UResizerConfig.From(hotReloadB.Control).ContributeToBoundingBox = false;
 
@@ -394,7 +394,7 @@ namespace TrafficManager.UI.MainMenu {
         private AddButtonsResult SetupControls_ToolPanel(UiBuilder<UPanel> innerPanelB,
                                                          HashSet<string> atlasKeysSet) {
             // This is tool buttons panel
-            using (UiBuilder<UPanel> leftPanelB = innerPanelB.ChildPanel<U.Panel.UPanel>(
+            using (UiBuilder<UPanel> leftPanelB = innerPanelB.ChildPanel<U.UPanel>(
                 setupFn: panel => {
                     panel.name = "TMPE_MainMenu_ToolPanel";
                 }))
@@ -420,7 +420,7 @@ namespace TrafficManager.UI.MainMenu {
                                               HashSet<string> atlasKeysSet,
                                               AddButtonsResult toolButtonsResult) {
             // This is toggle despawn and clear traffic panel
-            using (UiBuilder<UPanel> rightPanelB = innerPanelB.ChildPanel<U.Panel.UPanel>(
+            using (UiBuilder<UPanel> rightPanelB = innerPanelB.ChildPanel<U.UPanel>(
                 setupFn: p => {
                     p.name = "TMPE_MainMenu_ExtraPanel";
                     // Silver background panel

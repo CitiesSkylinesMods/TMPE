@@ -7,7 +7,7 @@
     /// <summary>
     /// Base class for main menu panel buttons.
     /// </summary>
-    public abstract class BaseMenuButton : BaseUButton {
+    public abstract class BaseMenuButton : U.BaseUButton {
         /// <summary>Menu button gameobject name.</summary>
         private const string MENU_BUTTON = "TMPE_MenuButton";
 

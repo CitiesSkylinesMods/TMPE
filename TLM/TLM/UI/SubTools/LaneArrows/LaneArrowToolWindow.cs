@@ -87,7 +87,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         public void SetupControls(UiBuilder<LaneArrowToolWindow> builder, int numLanes) {
             Buttons = new List<LaneArrowButton>();
 
-            using (var buttonRowBuilder = builder.ChildPanel<U.Panel.UPanel>(
+            using (var buttonRowBuilder = builder.ChildPanel<U.UPanel>(
                 setupFn: p => { p.name = "TMPE_ButtonRow"; })) {
                 buttonRowBuilder.ResizeFunction(
                     r => {
@@ -103,7 +103,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 // -----------------------------------
                 for (var i = 0; i < numLanes; i++) {
                     string buttonName = $"TMPE_LaneArrow_ButtonGroup{i + 1}";
-                    using (var buttonGroupBuilder = buttonRowBuilder.ChildPanel<U.Panel.UPanel>(
+                    using (var buttonGroupBuilder = buttonRowBuilder.ChildPanel<U.UPanel>(
                             setupFn: p => {
                                 p.name = buttonName;
                                 p.atlas = TextureUtil.FindAtlas("Ingame");
@@ -125,7 +125,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
                         // Create a label with "Lane #" title
                         string labelText = Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1);
-                        using (var laneLabel = buttonGroupBuilder.Label<U.Label.ULabel>(labelText))
+                        using (var laneLabel = buttonGroupBuilder.Label<U.ULabel>(labelText))
                         {
                             // The label will be repositioned to the top of the parent
                             laneLabel.ResizeFunction(r => { r.Stack(UStackMode.Below); });

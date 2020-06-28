@@ -388,7 +388,7 @@ namespace TrafficManager.UI {
                 }
             }
 
-            public abstract class ButtonExt : BaseUButton {
+            public abstract class ButtonExt : U.BaseUButton {
                 const float REFERENCE_SIZE = 40f;
 
                 public RoadSelectionPanels Root => RoadSelectionPanels.Root;

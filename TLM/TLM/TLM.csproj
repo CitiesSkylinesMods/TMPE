@@ -590,7 +590,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Traffic\Data\" />
-    <Folder Include="U\MainMenu\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_1.png" />
