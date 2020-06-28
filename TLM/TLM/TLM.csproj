@@ -341,6 +341,7 @@
     <Compile Include="Util\Record\TrafficRulesRecord.cs" />
     <Compile Include="Util\Record\SegmentEndRecord.cs" />
     <Compile Include="Util\Record\SegmentRecord.cs" />
+    <Compile Include="Util\Record\TTLRecord.cs" />
     <Compile Include="Util\SeparateTurningLanesUtil.cs" />
     <Compile Include="Util\Record\RecordUtil.cs" />
     <Compile Include="Util\Shortcuts.cs" />

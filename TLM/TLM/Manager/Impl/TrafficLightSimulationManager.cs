@@ -752,105 +752,115 @@ namespace TrafficManager.Manager.Impl {
             return success;
         }
 
-        public List<Configuration.TimedTrafficLights> SaveData(ref bool success) {
-            var ret = new List<Configuration.TimedTrafficLights>();
+        /// <summary>
+        /// Saves TTL for the given node. returns null if non-existant.
+        /// </summary>
+        public Configuration.TimedTrafficLights SaveNode(ushort nodeId) {
+            if (!TrafficLightSimulations[nodeId].IsTimedLight()) {
+                return null;
+            }
 
-            for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                try {
-                    if (!TrafficLightSimulations[nodeId].IsTimedLight()) {
+#if DEBUGSAVE
+            Log._Debug($"Going to save timed light at node {nodeId}.");
+#endif
+            ITimedTrafficLights timedNode = TrafficLightSimulations[nodeId].timedLight;
+            timedNode.OnGeometryUpdate();
+
+            var cnfTimedLights = new Configuration.TimedTrafficLights {
+                nodeId = timedNode.NodeId,
+                nodeGroup = new List<ushort>(timedNode.NodeGroup),
+                started = timedNode.IsStarted(),
+            };
+
+            int stepIndex = timedNode.CurrentStep;
+            if (timedNode.IsStarted() &&
+                timedNode.GetStep(timedNode.CurrentStep).IsInEndTransition()) {
+                // if in end transition save the next step
+                stepIndex = (stepIndex + 1) % timedNode.NumSteps();
+            }
+
+            cnfTimedLights.currentStep = stepIndex;
+            cnfTimedLights.timedSteps = new List<Configuration.TimedTrafficLightsStep>();
+
+            for (var j = 0; j < timedNode.NumSteps(); j++) {
+#if DEBUGSAVE
+                Log._Debug($"Saving timed light step {j} at node {nodeId}.");
+#endif
+                ITimedTrafficLightsStep timedStep = timedNode.GetStep(j);
+                var cnfTimedStep = new Configuration.TimedTrafficLightsStep {
+                    minTime = timedStep.MinTime,
+                    maxTime = timedStep.MaxTime,
+                    changeMetric = (int)timedStep.ChangeMetric,
+                    waitFlowBalance = timedStep.WaitFlowBalance,
+                    segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>(),
+                };
+                cnfTimedLights.timedSteps.Add(cnfTimedStep);
+
+                foreach (KeyValuePair<ushort, ICustomSegmentLights> e
+                    in timedStep.CustomSegmentLights) {
+#if DEBUGSAVE
+                    Log._Debug($"Saving timed light step {j}, segment {e.Key} at node {nodeId}.");
+#endif
+
+                    ICustomSegmentLights segLights = e.Value;
+                    ushort lightsNodeId = segLights.NodeId;
+
+                    var cnfSegLights = new Configuration.CustomSegmentLights {
+                        nodeId = lightsNodeId, // TODO not needed
+                        segmentId = segLights.SegmentId, // TODO not needed
+                        customLights = new Dictionary<ExtVehicleType, Configuration.CustomSegmentLight>(),
+                        pedestrianLightState = segLights.PedestrianLightState,
+                        manualPedestrianMode = segLights.ManualPedestrianMode,
+                    };
+
+                    if (lightsNodeId == 0 || lightsNodeId != timedNode.NodeId) {
+                        Log.Warning(
+                            "Inconsistency detected: Timed traffic light @ node " +
+                            $"{timedNode.NodeId} contains custom traffic lights for the invalid " +
+                            $"segment ({segLights.SegmentId}) at step {j}: nId={lightsNodeId}");
                         continue;
                     }
 
+                    cnfTimedStep.segmentLights.Add(e.Key, cnfSegLights);
+
 #if DEBUGSAVE
-                    Log._Debug($"Going to save timed light at node {nodeId}.");
+                    Log._Debug($"Saving pedestrian light @ seg. {e.Key}, step {j}: " +
+                    $"{cnfSegLights.pedestrianLightState} {cnfSegLights.manualPedestrianMode}");
 #endif
-                    ITimedTrafficLights timedNode = TrafficLightSimulations[nodeId].timedLight;
-                    timedNode.OnGeometryUpdate();
 
-                    var cnfTimedLights = new Configuration.TimedTrafficLights {
-                        nodeId = timedNode.NodeId,
-                        nodeGroup = new List<ushort>(timedNode.NodeGroup),
-                        started = timedNode.IsStarted(),
-                    };
-                    ret.Add(cnfTimedLights);
-
-                    int stepIndex = timedNode.CurrentStep;
-                    if (timedNode.IsStarted() &&
-                        timedNode.GetStep(timedNode.CurrentStep).IsInEndTransition()) {
-                        // if in end transition save the next step
-                        stepIndex = (stepIndex + 1) % timedNode.NumSteps();
-                    }
-
-                    cnfTimedLights.currentStep = stepIndex;
-                    cnfTimedLights.timedSteps = new List<Configuration.TimedTrafficLightsStep>();
-
-                    for (var j = 0; j < timedNode.NumSteps(); j++) {
+                    foreach (KeyValuePair<API.Traffic.Enums.ExtVehicleType,
+                                 ICustomSegmentLight> e2 in segLights.CustomLights) {
 #if DEBUGSAVE
-                        Log._Debug($"Saving timed light step {j} at node {nodeId}.");
+                        Log._Debug($"Saving timed light step {j}, segment {e.Key}, vehicleType " +
+                        $"{e2.Key} at node {nodeId}.");
 #endif
-                        ITimedTrafficLightsStep timedStep = timedNode.GetStep(j);
-                        var cnfTimedStep = new Configuration.TimedTrafficLightsStep {
-                            minTime = timedStep.MinTime,
-                            maxTime = timedStep.MaxTime,
-                            changeMetric = (int)timedStep.ChangeMetric,
-                            waitFlowBalance = timedStep.WaitFlowBalance,
-                            segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>(),
+                        ICustomSegmentLight segLight = e2.Value;
+                        var cnfSegLight = new Configuration.CustomSegmentLight {
+                            nodeId = lightsNodeId,
+                            segmentId = segLights.SegmentId,
+                            currentMode = (int)segLight.CurrentMode,
+                            leftLight = segLight.LightLeft,
+                            mainLight = segLight.LightMain,
+                            rightLight = segLight.LightRight,
                         };
-                        cnfTimedLights.timedSteps.Add(cnfTimedStep);
 
-                        foreach (KeyValuePair<ushort, ICustomSegmentLights> e
-                            in timedStep.CustomSegmentLights) {
-#if DEBUGSAVE
-                            Log._Debug($"Saving timed light step {j}, segment {e.Key} at node {nodeId}.");
-#endif
+                        cnfSegLights.customLights.Add(
+                            LegacyExtVehicleType.ToOld(e2.Key),
+                            cnfSegLight);
+                    }
+                }
+            }
+            return cnfTimedLights;
+        }
 
-                            ICustomSegmentLights segLights = e.Value;
-                            ushort lightsNodeId = segLights.NodeId;
+        public List<Configuration.TimedTrafficLights> SaveData(ref bool success) {
+            var ret = new List<Configuration.TimedTrafficLights>();
 
-                            var cnfSegLights = new Configuration.CustomSegmentLights {
-                                nodeId = lightsNodeId, // TODO not needed
-                                segmentId = segLights.SegmentId, // TODO not needed
-                                customLights = new Dictionary<ExtVehicleType, Configuration.CustomSegmentLight>(),
-                                pedestrianLightState = segLights.PedestrianLightState,
-                                manualPedestrianMode = segLights.ManualPedestrianMode,
-                            };
-
-                            if (lightsNodeId == 0 || lightsNodeId != timedNode.NodeId) {
-                                Log.Warning(
-                                    "Inconsistency detected: Timed traffic light @ node " +
-                                    $"{timedNode.NodeId} contains custom traffic lights for the invalid " +
-                                    $"segment ({segLights.SegmentId}) at step {j}: nId={lightsNodeId}");
-                                continue;
-                            }
-
-                            cnfTimedStep.segmentLights.Add(e.Key, cnfSegLights);
-
-#if DEBUGSAVE
-                            Log._Debug($"Saving pedestrian light @ seg. {e.Key}, step {j}: "+
-                            $"{cnfSegLights.pedestrianLightState} {cnfSegLights.manualPedestrianMode}");
-#endif
-
-                            foreach (KeyValuePair<API.Traffic.Enums.ExtVehicleType,
-                                         ICustomSegmentLight> e2 in segLights.CustomLights) {
-#if DEBUGSAVE
-                                Log._Debug($"Saving timed light step {j}, segment {e.Key}, vehicleType "+
-                                $"{e2.Key} at node {nodeId}.");
-#endif
-                                ICustomSegmentLight segLight = e2.Value;
-                                var cnfSegLight = new Configuration.CustomSegmentLight {
-                                    nodeId = lightsNodeId, // TODO not needed
-                                    segmentId = segLights.SegmentId, // TODO not needed
-                                    currentMode = (int)segLight.CurrentMode,
-                                    leftLight = segLight.LightLeft,
-                                    mainLight = segLight.LightMain,
-                                    rightLight = segLight.LightRight,
-                                };
-
-                                cnfSegLights.customLights.Add(
-                                    LegacyExtVehicleType.ToOld(e2.Key),
-                                    cnfSegLight);
-                            }
-                        }
+            for (ushort nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+                try {
+                    var cnfTimedLights = SaveNode(nodeId);
+                    if (cnfTimedLights != null ) {
+                        ret.Add(cnfTimedLights);
                     }
                 }
                 catch (Exception e) {
