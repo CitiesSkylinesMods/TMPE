@@ -1,8 +1,6 @@
 ﻿namespace TrafficManager.UI.MainMenu {
-    using System;
     using System.Collections.Generic;
     using ColossalFramework.UI;
-    using TrafficManager.U.Button;
 
     /// <summary>
     /// Base class for main menu panel buttons.

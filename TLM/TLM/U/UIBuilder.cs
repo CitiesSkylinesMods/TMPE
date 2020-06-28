@@ -79,6 +79,19 @@ namespace TrafficManager.U {
             return new UiBuilder<TLabel>(newLabel);
         }
 
+        /// <summary>Quick create a label and stack it. Optionally set markup processing mode.</summary>
+        /// <param name="t">Localized text.</param>
+        /// <param name="stack">Stacking mode related to previous sibling.</param>
+        /// <param name="processMarkup">Whether label text contains C:S color markup.</param>
+        /// <returns>New label.</returns>
+        public U.ULabel Label(string t, UStackMode stack, bool processMarkup = false) {
+            using (UiBuilder<ULabel> labelB = this.Label<U.ULabel>(t)) {
+                labelB.ResizeFunction(r => r.Stack(mode: stack));
+                labelB.Control.processMarkup = processMarkup;
+                return labelB.Control;
+            }
+        }
+
         public UiBuilder<TPanel> ChildPanel<TPanel>(Action<TPanel> setupFn)
             where TPanel : UIPanel, ISmartSizableControl {
             var newPanel = Control.AddUIComponent(typeof(TPanel)) as TPanel;

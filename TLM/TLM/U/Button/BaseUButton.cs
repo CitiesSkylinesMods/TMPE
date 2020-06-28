@@ -34,7 +34,7 @@ namespace TrafficManager.U {
         public virtual void OnAfterResizerUpdate() { }
 
         /// <summary>Defines how the button looks, hovers and activates.</summary>
-        public U.Button.ButtonSkin Skin;
+        public U.ButtonSkin Skin;
 
         /// <summary>Checks whether a button can ever be "activated", i.e. stays highlighted.</summary>
         /// <returns>Whether a button can toggle-activate.</returns>

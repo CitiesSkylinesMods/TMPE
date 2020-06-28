@@ -2,10 +2,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.RedirectionFramework;
-    using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
-    using TrafficManager.U.Button;
     using UnityEngine;
 
     /// <summary>
@@ -124,21 +122,19 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                             });
 
                         // Create a label with "Lane #" title
-                        string labelText = Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1);
-                        using (var laneLabel = buttonGroupBuilder.Label<U.ULabel>(labelText))
-                        {
-                            // The label will be repositioned to the top of the parent
-                            laneLabel.ResizeFunction(r => { r.Stack(UStackMode.Below); });
-                        }
+                        // The label will be repositioned to the top of the parent
+                        string localizedLane = Translation.LaneRouting.Get("Format.Label:Lane");
+                        string labelText = $"{localizedLane} {i + 1}";
+                        buttonGroupBuilder.Label(t: labelText, stack: UStackMode.Below);
 
                         // Create and populate the panel with buttons
                         // 3 buttons are created [←] [↑] [→],
                         // The click event is assigned outside in LaneArrowTool.cs
                         foreach (string prefix in new[] {
-                                                            "LaneArrowLeft",
-                                                            "LaneArrowForward",
-                                                            "LaneArrowRight",
-                                                        }) {
+                            "LaneArrowLeft",
+                            "LaneArrowForward",
+                            "LaneArrowRight",
+                        }) {
                             using (UiBuilder<LaneArrowButton> buttonBuilder =
                                 buttonGroupBuilder.Button<LaneArrowButton>())
                             {

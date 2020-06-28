@@ -5,7 +5,6 @@ namespace TrafficManager.UI {
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.RedirectionFramework;
-    using TrafficManager.U.Button;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util;
     using TrafficManager.Util.Record;
@@ -304,7 +303,7 @@ namespace TrafficManager.UI {
             private void SetupAtlas() {
                 // Create and populate list of background atlas keys, used by all buttons
                 // And also each button will have a chance to add their own atlas keys for loading.
-                var tmpSkin = new ButtonSkin() {
+                var tmpSkin = new U.ButtonSkin() {
                     Prefix = "RoadSelection",
                     BackgroundPrefix = "RoundButton",
                     ForegroundNormal = false,
@@ -425,7 +424,7 @@ namespace TrafficManager.UI {
                 public override void Awake() {
                     base.Awake();
                     name = ButtonName;
-                    Skin = new U.Button.ButtonSkin() {
+                    Skin = new U.ButtonSkin() {
                         Prefix = SkinPrefix,
 
                         BackgroundPrefix = "RoundButton",

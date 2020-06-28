@@ -306,13 +306,13 @@ namespace TrafficManager.State {
             }
 
             // The UI order is: US, UK, German
-            var newStyle = MphSignStyle.RoundGerman;
+            var newStyle = SpeedLimitSignTheme.RoundGerman;
             switch (newRoadSignStyle) {
                 case 1:
-                    newStyle = MphSignStyle.RoundUK;
+                    newStyle = SpeedLimitSignTheme.RoundUK;
                     break;
                 case 0:
-                    newStyle = MphSignStyle.SquareUS;
+                    newStyle = SpeedLimitSignTheme.SquareUS;
                     break;
             }
 

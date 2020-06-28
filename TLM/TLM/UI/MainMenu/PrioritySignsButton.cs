@@ -3,20 +3,19 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
-    using TrafficManager.U.Button;
 
     public class PrioritySignsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.AddPrioritySigns;
 
         public override void SetupButtonSkin(HashSet<string> atlasKeys) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
-            this.Skin = new U.Button.ButtonSkin() {
-                                                      Prefix = "PrioritySigns",
-                                                      BackgroundPrefix = "RoundButton",
-                                                      BackgroundHovered = true,
-                                                      BackgroundActive = true,
-                                                      ForegroundActive = true,
-                                                  };
+            this.Skin = new U.ButtonSkin() {
+                Prefix = "PrioritySigns",
+                BackgroundPrefix = "RoundButton",
+                BackgroundHovered = true,
+                BackgroundActive = true,
+                ForegroundActive = true,
+            };
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 

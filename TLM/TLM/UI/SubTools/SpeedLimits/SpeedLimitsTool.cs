@@ -9,11 +9,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         : TrafficManagerSubTool,
           UI.MainMenu.IOnscreenDisplayProvider
     {
-        //private const ushort LOWER_KMPH = 10;
+        public const ushort LOWER_KMPH = 10;
         public const ushort UPPER_KMPH = 140;
         public const ushort KMPH_STEP = 10;
 
-        //private const ushort LOWER_MPH = 5;
+        public const ushort LOWER_MPH = 5;
         public const ushort UPPER_MPH = 90;
         public const ushort MPH_STEP = 5;
 

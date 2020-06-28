@@ -44,19 +44,19 @@ namespace TrafficManager.UI.Textures {
         /// <param name="mphStyle">Signs theme</param>
         /// <param name="unit">Mph or km/h</param>
         /// <returns></returns>
-        public static Texture2D GetSpeedLimitTexture(SpeedValue spd, MphSignStyle mphStyle, SpeedUnit unit) {
+        public static Texture2D GetSpeedLimitTexture(SpeedValue spd, SpeedLimitSignTheme mphStyle, SpeedUnit unit) {
             // Select the source for the textures based on unit and the theme
             bool mph = unit == SpeedUnit.Mph;
             IDictionary<int, Texture2D> textures = TexturesKmph;
             if (mph) {
                 switch (mphStyle) {
-                    case MphSignStyle.SquareUS:
+                    case SpeedLimitSignTheme.SquareUS:
                         textures = TexturesMphUS;
                         break;
-                    case MphSignStyle.RoundUK:
+                    case SpeedLimitSignTheme.RoundUK:
                         textures = TexturesMphUK;
                         break;
-                    case MphSignStyle.RoundGerman:
+                    case SpeedLimitSignTheme.RoundGerman:
                         // Do nothing, this is the default above
                         break;
                 }

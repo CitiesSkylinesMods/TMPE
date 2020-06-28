@@ -89,5 +89,18 @@ namespace TrafficManager.U.Panel {
         internal void SetOpacityFromGuiOpacity() {
             SetOpacity(UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
         }
+
+        /// <summary>
+        /// Creates a drag handle gameobject child for this window, which can be enabled or disabled
+        /// by the caller.
+        /// </summary>
+        /// <returns>New UIDragHandle object.</returns>
+        public UIDragHandle CreateDragHandle() {
+            GameObject dragHandler = new GameObject("TMPE_DragHandler");
+            dragHandler.transform.parent = transform;
+            dragHandler.transform.localPosition = Vector3.zero;
+
+            return dragHandler.AddComponent<UIDragHandle>();
+        }
     }
 }

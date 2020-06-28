@@ -6,7 +6,6 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
-    using TrafficManager.U.Button;
     using UnityEngine;
 
     public class MainMenuButton

@@ -3,7 +3,6 @@ namespace TrafficManager.UI.MainMenu {
     using ColossalFramework.UI;
     using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
-    using TrafficManager.U.Button;
 
     public class DespawnButton : BaseMenuButton {
         protected override string U_OverrideTooltipText() =>
@@ -21,13 +20,13 @@ namespace TrafficManager.UI.MainMenu {
 
         public override void SetupButtonSkin(HashSet<string> atlasKeys) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
-            this.Skin = new U.Button.ButtonSkin() {
-                                                      Prefix = "TrafficDespawning",
-                                                      BackgroundPrefix = "RoundButton",
-                                                      BackgroundHovered = true,
-                                                      BackgroundActive = true,
-                                                      ForegroundActive = true,
-                                                  };
+            this.Skin = new U.ButtonSkin() {
+                Prefix = "TrafficDespawning",
+                BackgroundPrefix = "RoundButton",
+                BackgroundHovered = true,
+                BackgroundActive = true,
+                ForegroundActive = true,
+            };
             atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
         }
 

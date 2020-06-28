@@ -12,8 +12,6 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
-    using TrafficManager.U.Button;
-    using TrafficManager.U.Panel;
     using UnityEngine;
 
     public class MainMenuWindow
@@ -117,7 +115,7 @@ namespace TrafficManager.UI.MainMenu {
 
         public UILabel StatsLabel { get; private set; }
 
-        public UIDragHandle DragHandle { get; private set; }
+        private UIDragHandle dragHandle_;
 
         IDisposable confDisposable;
 
@@ -158,7 +156,6 @@ namespace TrafficManager.UI.MainMenu {
                 builder.SetPadding(UConst.UIPADDING);
 
                 window.SetupControls(builder);
-                // window.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
 
                 // Resize everything correctly
                 builder.Done();
@@ -173,14 +170,10 @@ namespace TrafficManager.UI.MainMenu {
             this.isVisible = false;
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(64, 64, 64, 240);
-            this.SetOpacity(
-                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
+            this.SetOpacityFromGuiOpacity();
 
-            var dragHandler = new GameObject("TMPE_Menu_DragHandler");
-            dragHandler.transform.parent = transform;
-            dragHandler.transform.localPosition = Vector3.zero;
-            this.DragHandle = dragHandler.AddComponent<UIDragHandle>();
-            this.DragHandle.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
+            this.dragHandle_ = this.CreateDragHandle();
+            this.dragHandle_.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
 
             this.eventVisibilityChanged += OnVisibilityChanged;
         }
@@ -190,19 +183,19 @@ namespace TrafficManager.UI.MainMenu {
         public void SetupControls(UiBuilder<MainMenuWindow> builder) {
             // Create and populate list of background atlas keys, used by all buttons
             // And also each button will have a chance to add their own atlas keys for loading.
-            var tmpSkin = new U.Button.ButtonSkin {
-                                                      Prefix = "MainMenuPanel",
-                                                      BackgroundPrefix = "RoundButton",
-                                                      ForegroundNormal = false,
-                                                      BackgroundHovered = true,
-                                                      BackgroundActive = true,
-                                                  };
+            var tmpSkin = new U.ButtonSkin {
+                Prefix = "MainMenuPanel",
+                BackgroundPrefix = "RoundButton",
+                ForegroundNormal = false,
+                BackgroundHovered = true,
+                BackgroundActive = true,
+            };
             // By default the atlas will include backgrounds: DefaultRound-bg-normal
             HashSet<string> atlasKeysSet = tmpSkin.CreateAtlasKeyset();
 
             // Create Version Label and Help button:
             // [ TM:PE 11.x ] [?]
-            UILabel versionLabel = SetupControls_TopRow(builder, atlasKeysSet);
+            SetupControls_TopRow(builder, atlasKeysSet);
 
             // Main menu contains 2 panels side by side, one for tool buttons and another for
             // despawn & clear buttons.
@@ -213,7 +206,7 @@ namespace TrafficManager.UI.MainMenu {
                 p.name = "TMPE_MainMenu_InnerPanel";
             })) {
                 innerPanelB.ResizeFunction(r => {
-                    r.Stack(mode: UStackMode.Below, spacing: 0f, stackRef: versionLabel);
+                    r.Stack(mode: UStackMode.Below, spacing: 0f, stackRef: this.VersionLabel);
                     r.FitToChildren();
                 });
 
@@ -283,14 +276,11 @@ namespace TrafficManager.UI.MainMenu {
             }
         }
 
-        private UILabel SetupControls_TopRow(UiBuilder<MainMenuWindow> builder,
-                                             HashSet<string> atlasKeySet) {
-            UILabel versionLabel;
-
-            using (var versionLabelB = builder.Label<U.ULabel>(TrafficManagerMod.ModName)) {
-                versionLabelB.ResizeFunction(r => r.Stack(UStackMode.Below));
-                this.VersionLabel = versionLabel = versionLabelB.Control;
-            }
+        private void SetupControls_TopRow(UiBuilder<MainMenuWindow> builder,
+                                          HashSet<string> atlasKeySet) {
+            this.VersionLabel = builder.Label(
+                t: TrafficManagerMod.ModName,
+                stack: UStackMode.Below);
 
             using (var btnBuilder = builder.Button<U.UButton>()) {
                 UButton control = btnBuilder.Control;
@@ -319,7 +309,7 @@ namespace TrafficManager.UI.MainMenu {
                         r.Control.isVisible = true; // not sure why its hidden on create? TODO
                         r.Stack(mode: UStackMode.ToTheRight,
                                 spacing: UConst.UIPADDING * 3f,
-                                stackRef: versionLabel);
+                                stackRef: this.VersionLabel);
                         r.Width(UValue.FixedSize(18f)); // assume Version label is 18pt high
                         r.Height(UValue.FixedSize(18f));
                     });
@@ -334,8 +324,6 @@ namespace TrafficManager.UI.MainMenu {
                     ModUI.Instance.MainMenu.OnToggleOsdButtonClicked(component as U.UButton);
                 };
             }
-
-            return versionLabel;
         }
 
         private void OnToggleOsdButtonClicked(U.UButton button) {
@@ -449,17 +437,17 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         public override void OnBeforeResizerUpdate() {
-            if (this.DragHandle != null) {
-                // Drag handle is manually resized to the form width, but when the form is large,
+            if (this.dragHandle_ != null) {
+                // Drag handle is manually resized to the label width, but when the form is large,
                 // the handle prevents it from shrinking. So shrink now, size properly after.
-                this.DragHandle.size = Vector2.one;
+                this.dragHandle_.size = Vector2.one;
             }
         }
 
         /// <summary>Called by UResizer for every control to be 'resized'.</summary>
         public override void OnAfterResizerUpdate() {
-            if (this.DragHandle != null) {
-                this.DragHandle.size = this.VersionLabel.size;
+            if (this.dragHandle_ != null) {
+                this.dragHandle_.size = this.VersionLabel.size;
 
                 // Push the window back into screen if the label/draghandle are partially offscreen
                 U.UIUtil.ClampToScreen(window: this,
@@ -545,7 +533,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         internal void SetPosLock(bool lck) {
-            DragHandle.enabled = !lck;
+            dragHandle_.enabled = !lck;
         }
 
         protected override void OnPositionChanged() {

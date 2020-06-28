@@ -13,11 +13,10 @@ namespace TrafficManager.UI.MainMenu.OSD {
         }
 
         public override void Build(U.UiBuilder<U.UPanel> builder) {
-            using (UiBuilder<ULabel> labelB = builder.Label<U.ULabel>(string.Empty)) {
-                labelB.ResizeFunction(r => { r.Stack(mode: UStackMode.NewRowBelow); });
-                labelB.Control.text = this.localizedText_;
-                labelB.Control.opacity = 0.8f;
-            }
+            ULabel control = builder.Label(
+                t: this.localizedText_,
+                stack: UStackMode.NewRowBelow);
+            control.opacity = 0.8f;
         }
     }
 }

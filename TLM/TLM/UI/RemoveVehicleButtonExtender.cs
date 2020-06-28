@@ -3,9 +3,6 @@ namespace TrafficManager.UI {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using TrafficManager.U;
-    using TrafficManager.U.Button;
-    using TrafficManager.UI.MainMenu;
-    using TrafficManager.UI.Textures;
     using UnityEngine;
 
     public class RemoveVehicleButtonExtender : MonoBehaviour {

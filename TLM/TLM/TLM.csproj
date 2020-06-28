@@ -303,7 +303,8 @@
     <Compile Include="UI\Helpers\TrafficRulesOverlay.cs" />
     <Compile Include="UI\SubTools\PrioritySigns\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\LegacySpeedLimitsTool.cs" />
-    <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\PaletteGenerator.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitSignTheme.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool_Legacy.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsWindow.cs" />

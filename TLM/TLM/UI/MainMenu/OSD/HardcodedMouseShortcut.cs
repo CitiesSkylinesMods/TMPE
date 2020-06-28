@@ -53,15 +53,10 @@ namespace TrafficManager.UI.MainMenu.OSD {
             }
 
             text.Append(TranslationForMouseButton(this.button_));
-
             text.Append("</color> ");
             text.Append(this.localizedText_);
 
-            using (UiBuilder<ULabel> labelB = builder.Label<U.ULabel>(text.ToString())) {
-                labelB.Control.processMarkup = true;
-                labelB.ResizeFunction(
-                    r => { r.Stack(mode: UStackMode.NewRowBelow); });
-            }
+            builder.Label(t: text.ToString(), stack: UStackMode.NewRowBelow, processMarkup: true);
         }
 
         private static string TranslationForMouseButton(UIMouseButton button) {
