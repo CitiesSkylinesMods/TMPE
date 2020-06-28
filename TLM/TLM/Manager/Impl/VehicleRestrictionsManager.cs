@@ -180,6 +180,10 @@ namespace TrafficManager.Manager.Impl {
                 busLaneMode);
         }
 
+        public ExtVehicleType? GetAllowedVehicleTypesRaw(ushort segmentId, uint laneIndex) {
+            return Flags.laneAllowedVehicleTypesArray?[segmentId]?[laneIndex];
+        }
+
         /// <summary>
         /// Determines the default set of allowed vehicle types for a given segment and lane.
         /// </summary>
@@ -351,6 +355,24 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return ExtVehicleType.None;
+        }
+
+
+        /// <summary>
+        /// Restores all vehicle restrictions on a given segment to default state.
+        /// </summary>
+        /// <param name="segmentId"></param>
+        /// <returns></returns>
+        internal bool ClearVehicleRestrictions(ushort segmentId, byte laneIndex, uint laneId) {
+            NetInfo segmentInfo = segmentId.ToSegment().Info;
+            NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+            return SetAllowedVehicleTypes(
+                segmentId,
+                segmentId.ToSegment().Info,
+                laneIndex,
+                laneInfo,
+                laneId,
+                EXT_VEHICLE_TYPES);
         }
 
         /// <summary>
