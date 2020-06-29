@@ -30,7 +30,10 @@ namespace TrafficManager {
             typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
                 ?.GetValue(null) as FastList<ISimulationManager>;
 
-        internal static bool InGameMode => Instance.loadingManager.currentMode == AppMode.Game;
+        /// <summary>
+        /// determines whether Game mode as oppose to edit mode (eg asset editor).
+        /// </summary>
+        internal static bool PlayMode => Instance.loadingManager.currentMode == AppMode.Game;
 
         public static CustomPathManager CustomPathManager { get; set; }
 
@@ -309,7 +312,7 @@ namespace TrafficManager {
             }
 
             ModUI.OnLevelLoaded();
-            if (InGameMode) {
+            if (PlayMode) {
                 // Init transport demand UI
                 if (TransportDemandUI == null) {
                     UIView uiView = UIView.GetAView();
