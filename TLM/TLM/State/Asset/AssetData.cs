@@ -8,18 +8,19 @@ namespace TrafficManager.State.Asset {
 
     [Serializable]
     public class AssetData {
-        private string _version;
+        private string version_;
 
+        /// Mod version at the time where data was serailized.
         public Version Version {
-            get => _version != null ? new Version(_version) : default;
-            set => value.ToString();
+            get => version_ != null ? new Version(version_) : default;
+            set => version_ = value.ToString();
         }
 
         public IRecordable Record;
 
         //TODO [issue #959] record networkIDs.
 
-        public override string ToString() => $"AssetData Version={Version} record={Record}";
+        public override string ToString() => $"AssetData(Version={Version} record={Record})";
 
         public static AssetData GetAssetData() {
             return new AssetData {

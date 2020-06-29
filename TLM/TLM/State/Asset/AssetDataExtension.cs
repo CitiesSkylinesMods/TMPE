@@ -33,14 +33,15 @@ namespace TrafficManager.State.Asset {
             }
         }
 
+        // asset should be the same as ToolsModifierControl.toolController.m_editPrefabInfo
         public override void OnAssetSaved(string name, object asset, out Dictionary<string, byte[]> userData) {
             Log.Info($"AssetDataExtension.OnAssetSaved({name}, {asset}, userData) called");
             userData = null;
-            //var info = ToolsModifierControl.toolController.m_editPrefabInfo;
             if (asset is BuildingInfo prefab) {
                 Log.Info("AssetDataExtension.OnAssetSaved():  prefab is " + prefab);
                 var assetData = AssetData.GetAssetData();
                 Log._Debug("AssetDataExtension.OnAssetSaved(): assetData=" + assetData);
+                userData = new Dictionary<string, byte[]>();
                 userData.Add(TMPE_RECORD_ID, SerializationUtil.Serialize(assetData));
             }
         }
