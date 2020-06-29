@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.SubTools.SpeedLimits {
+    using System;
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.API.Traffic.Data;
@@ -17,6 +18,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Window drag handle.</summary>
         private UIDragHandle dragHandle_;
+
+        /// <summary>
+        /// Currently selected speed limit on the limits palette.
+        /// units &lt; 0: invalid (something must be selected)
+        /// units == 0: no limit
+        /// </summary>
+        [NonSerialized]
+        public SpeedValue CurrentPaletteSpeedLimit = new SpeedValue(-1f);
 
         /// <summary>Called by Unity on instantiation once when the game is running.</summary>
         public override void Start() {
@@ -45,6 +54,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             // Goes right of the modebuttons panel
             SetupControls_SpeedPalette(builder);
+
+            // Text below for "Hold Alt, hold Shift, etc..."
+            SetupControls_InfoRow(builder);
         }
 
         /// <summary>Creates a draggable label with current unit (mph or km/h).</summary>
@@ -126,7 +138,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Create speeds palette based on the current options choices.</summary>
         /// <param name="builder">The UI builder to use.</param>
-        private static void SetupControls_SpeedPalette(UiBuilder<SpeedLimitsWindow> builder) {
+        private void SetupControls_SpeedPalette(UiBuilder<SpeedLimitsWindow> builder) {
             void PaletteSetupFn(UPanel p) => p.name = GAMEOBJECT_NAME + "_PalettePanel";
             using (var palettePanelB = builder.ChildPanel<U.UPanel>(PaletteSetupFn)) {
                 palettePanelB.SetPadding(U.UConst.UIPADDING);
@@ -146,29 +158,71 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 List<SpeedValue> values = PaletteGenerator.AllSpeedLimits(SpeedUnit.CurrentlyConfigured);
                 values.Add(new SpeedValue(0)); // add last item: no limit
                 foreach (var speedValue in values) {
-                    using (var buttonB = palettePanelB.Button<U.UButton>()) {
-                        int speedInteger = showMph
-                            ? speedValue.ToMphRounded(SpeedLimitsTool.MPH_STEP).Mph
-                            : speedValue.ToKmphRounded(SpeedLimitsTool.KMPH_STEP).Kmph;
-
-                        buttonB.Control.text = speedInteger.ToString();
-                        buttonB.Control.textHorizontalAlignment = UIHorizontalAlignment.Center;
-
-                        // Speeds over 100 have wider buttons
-                        float buttonWidth = speedInteger >= 100 ? 40f : 30f;
-
-                        buttonB.ResizeFunction(r => {
-                            r.Width(UValue.FixedSize(buttonWidth));
-                            r.Height(UValue.FixedSize(60f));
-                            r.Stack(UStackMode.ToTheRight);
-                        });
-                    }
+                    SetupControls_SpeedPalette_Button(
+                        builder: palettePanelB,
+                        showMph: showMph,
+                        speedValue: speedValue);
                 }
-                // Opposite speed unit info label
-                // buttonB.Control.text = showMph
-                //     ? ToKmphPreciseString(speedValue)
-                //     : ToMphPreciseString(speedValue);
+            } // end palette panel
+        }
+
+        private void SetupControls_SpeedPalette_Button(UiBuilder<UPanel> builder,
+                                                              bool showMph,
+                                                              SpeedValue speedValue) {
+            int speedInteger = showMph
+                ? speedValue.ToMphRounded(SpeedLimitsTool.MPH_STEP).Mph
+                : speedValue.ToKmphRounded(SpeedLimitsTool.KMPH_STEP).Kmph;
+            // Speeds over 100 have wider buttons
+            float buttonWidth = speedInteger >= 100 ? 40f : 30f;
+
+            bool isSelected = FloatUtil.NearlyEqual(
+                this.CurrentPaletteSpeedLimit.GameUnits,
+                speedValue.GameUnits);
+
+            //--- uncomment below to create a label under each button ---
+            // void ButtonSetupFn(UPanel p) => p.name = $"{GAMEOBJECT_NAME}_Button_{speedInteger}";
+            // Create a small panel which stacks together with other button panels horizontally
+            // using (var buttonPanelB = builder.ChildPanel<U.UPanel>(ButtonSetupFn)) {
+            //     buttonPanelB.ResizeFunction(r => {
+            //         r.Stack(UStackMode.ToTheRight);
+            //         r.FitToChildren();
+            //     });
+
+            // Create vertical combo:
+            // [ 100  ]
+            //  65 mph
+            using (var buttonB = builder.Button<U.UButton>()) {
+                buttonB.Control.text = speedInteger == 0 ? "X" : speedInteger.ToString();
+                buttonB.Control.textHorizontalAlignment = UIHorizontalAlignment.Center;
+
+                buttonB.ResizeFunction(
+                    r => {
+                        r.Width(UValue.FixedSize(buttonWidth));
+                        r.Height(UValue.FixedSize(60f));
+                        r.Stack(UStackMode.ToTheRight);
+                    });
+
+                if (isSelected) {
+                    buttonB.Control.textScale = 2.0f;
+                }
             }
+
+            //--- uncomment below to create a label under each button ---
+            //     // Other speed unit info label
+            //     string otherUnit = showMph
+            //          ? ToKmphPreciseString(speedValue)
+            //          : ToMphPreciseString(speedValue);
+            //     var label = buttonPanelB.Label(t: otherUnit, stack: UStackMode.Below);
+            //     label.width = buttonWidth;
+            //     label.textAlignment = UIHorizontalAlignment.Center;
+            // } // end containing mini panel
+        }
+
+        /// <summary>
+        /// Create info row under the speed buttons, which prompts to hold Alt, Shift etc.
+        /// </summary>
+        /// <param name="builder">The UI builder to use.</param>
+        private void SetupControls_InfoRow(UiBuilder<SpeedLimitsWindow> builder) {
         }
 
         /// <summary>Converts speed value to string with units.</summary>
