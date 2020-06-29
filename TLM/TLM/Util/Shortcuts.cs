@@ -14,6 +14,9 @@ namespace TrafficManager.Util {
     using UnityEngine;
 
     internal static class Shortcuts {
+        internal static bool InSimulationThread() =>
+            System.Threading.Thread.CurrentThread == SimulationManager.instance.m_simulationThread;
+
         /// <summary>
         /// returns a new calling Clone() on all items.
         /// </summary>

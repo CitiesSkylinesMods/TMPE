@@ -39,7 +39,7 @@ namespace TrafficManager.State.Asset {
             userData = null;
             if (asset is BuildingInfo prefab) {
                 Log.Info("AssetDataExtension.OnAssetSaved():  prefab is " + prefab);
-                var assetData = AssetData.GetAssetData();
+                var assetData = AssetData.GetAssetData(prefab);
                 Log._Debug("AssetDataExtension.OnAssetSaved(): assetData=" + assetData);
                 userData = new Dictionary<string, byte[]>();
                 userData.Add(TMPE_RECORD_ID, SerializationUtil.Serialize(assetData));
