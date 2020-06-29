@@ -13,6 +13,7 @@ namespace TrafficManager {
     using TrafficManager.State;
     using TrafficManager.UI;
     using UnityEngine;
+    using UnityEngine.SceneManagement;
     using Object = UnityEngine.Object;
 
     [UsedImplicitly]
@@ -30,10 +31,12 @@ namespace TrafficManager {
             typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
                 ?.GetValue(null) as FastList<ISimulationManager>;
 
+        internal static AppMode? AppMode => Instance?.loadingManager?.currentMode;
+
         /// <summary>
         /// determines whether Game mode as oppose to edit mode (eg asset editor).
         /// </summary>
-        internal static bool PlayMode => Instance.loadingManager.currentMode == AppMode.Game;
+        internal static bool PlayMode => AppMode != null && AppMode == ICities.AppMode.Game;
 
         public static CustomPathManager CustomPathManager { get; set; }
 
@@ -165,10 +168,11 @@ namespace TrafficManager {
 
         public override void OnLevelLoaded(LoadMode mode) {
             SimulationManager.UpdateMode updateMode = SimulationManager.instance.m_metaData.m_updateMode;
-            Log.Info($"OnLevelLoaded({mode}) called. updateMode={updateMode}");
-            base.OnLevelLoaded(mode);
+            string scene = SceneManager.GetActiveScene().name;
+            Log.Info($"OnLevelLoaded({mode}) called. updateMode={updateMode}, scene={scene}");
 
-            Log._Debug("OnLevelLoaded Returned from base, calling custom code.");
+            if (scene == "ThemeEditor")
+                return;
 
             IsGameLoaded = false;
 
