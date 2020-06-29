@@ -94,6 +94,13 @@ namespace TrafficManager.UI {
 
         static TrafficManagerTool() { }
 
+        /// <summary>
+        /// Determines if the current tool is traffic manager tool.
+        /// </summary>
+        public static bool IsCurrentTool =>
+            ToolsModifierControl.toolController?.CurrentTool != null
+            && ToolsModifierControl.toolController.CurrentTool is TrafficManagerTool;
+
         protected override void OnDestroy() {
             Log.Info("TrafficManagerTool.OnDestroy() called");
             base.OnDestroy();
@@ -260,7 +267,7 @@ namespace TrafficManager.UI {
         public void SetToolMode(ToolMode newToolMode) {
             ToolMode oldToolMode = toolMode_;
 
-            if(toolMode_ != ToolMode.None) {
+            if(toolMode_ != ToolMode.None && LoadingExtension.PlayMode) {
                 // Make it impossible for user to undo changes performed by Road selection panels
                 // after changing traffic rule vis other tools.
                 // TODO: This code will not be necessary when we implement intent.
@@ -268,7 +275,6 @@ namespace TrafficManager.UI {
                 RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
             }
 
-            // ToolModeChanged does not count timed traffic light submodes as a same tool
             bool toolModeChanged = newToolMode != toolMode_;
 
             if (!toolModeChanged) {
@@ -277,7 +283,6 @@ namespace TrafficManager.UI {
             }
 
             SetToolMode_DeactivateTool();
-
             // Try figure out whether legacy subtool or a new subtool is selected
             if (!legacySubTools_.TryGetValue(newToolMode, out activeLegacySubTool_)
                 && !subTools_.TryGetValue(newToolMode, out activeSubTool_)) {
@@ -393,6 +398,8 @@ namespace TrafficManager.UI {
         /// </summary>
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
+            if (!LoadingExtension.PlayMode)
+                return; // world info view panels are not availble in edit mode
             SubTools.PrioritySigns.MassEditOverlay.Show
                 = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
 
@@ -556,6 +563,8 @@ namespace TrafficManager.UI {
         }
 
         void DefaultOnToolGUI(Event e) {
+            if (!LoadingExtension.PlayMode)
+                return; // world info view panels are not availble in edit mode
             if (e.type == EventType.MouseDown && e.button == 0) {
                 bool isRoad = HoveredSegmentId != 0 && HoveredSegmentId.ToSegment().Info.m_netAI is RoadBaseAI;
                 if (!isRoad)
@@ -991,7 +1000,7 @@ namespace TrafficManager.UI {
         /// <summary>Shows a tutorial message. Must be called by a Unity thread.</summary>
         /// <param name="localeKey">Tutorial key.</param>
         public static void ShowAdvisor(string localeKey) {
-            if (!GlobalConfig.Instance.Main.EnableTutorial) {
+            if (!GlobalConfig.Instance.Main.EnableTutorial || !LoadingExtension.PlayMode) {
                 return;
             }
 

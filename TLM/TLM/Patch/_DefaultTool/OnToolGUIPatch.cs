@@ -13,7 +13,7 @@ namespace TrafficManager.Patch._DefaultTool {
         [HarmonyPostfix]
         [UsedImplicitly]
         public static void Postfix(Event e) {
-            if(ToolsModifierControl.toolController.CurrentTool.GetType() != typeof(TrafficManagerTool)) {
+            if (LoadingExtension.PlayMode && !TrafficManagerTool.IsCurrentTool) {
                 if (UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                     ModUI.GetTrafficManagerTool(true).OnToolGUIImpl(e);
                 }
