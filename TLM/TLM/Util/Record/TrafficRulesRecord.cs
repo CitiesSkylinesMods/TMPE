@@ -1,4 +1,5 @@
 namespace TrafficManager.Util.Record {
+    using CSUtil.Commons;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -67,8 +68,14 @@ namespace TrafficManager.Util.Record {
         }
 
         public void Transfer(Dictionary<InstanceID,InstanceID> map) {
-            foreach (IRecordable record in Records)
-                record.Transfer(map);
+            foreach (IRecordable record in Records) {
+                try {
+                    record.Transfer(map);
+                }
+                catch {
+                    Log.Error($"could not transfer {record}");
+                }
+            }
         }
 
         public byte[] Serialize() => RecordUtil.Serialize(this);

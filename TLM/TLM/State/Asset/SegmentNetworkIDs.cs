@@ -1,6 +1,7 @@
 namespace TrafficManager.State.Asset {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using CSUtil.Commons;
     using TrafficManager.Util;
 
@@ -49,6 +50,10 @@ namespace TrafficManager.State.Asset {
             Log._Debug($"pathInfoExt.MapInstanceIDs: " +
                 $"[{StartNodeId} .- {SegmentId} -. {EndNodeId}] -> " +
                 $"[{newSegmentId.ToSegment().m_startNode} .- {newSegmentId} -. {newSegmentId.ToSegment().m_endNode}]");
+
+            Log._Debug($"pathInfoExt.MapInstanceIDs: " +
+                $"{laneIDs.ToSTR()} -> " +
+                $"[{laneIDs.Select(id=>map[new InstanceID { NetLane = id }]).ToSTR()}");
         }
 
         public override string ToString() =>
