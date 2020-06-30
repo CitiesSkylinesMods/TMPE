@@ -164,7 +164,7 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Patch\_BuildingDecoration\LoadPathsPatch.cs" />
-    <Compile Include="Patch\_NetTool\NetToolCreateNodePatch.cs" />
+    <Compile Include="Patch\_NetTool\CreateNodePatch.cs" />
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
     <Compile Include="Patch\_DefaultTool\OnToolGUIPatch.cs" />
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />

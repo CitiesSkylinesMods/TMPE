@@ -1,9 +1,12 @@
 namespace TrafficManager.Patches._NetTool {
-    using CSUtil.Commons;
-    using HarmonyLib;
     using System;
     using System.Reflection;
+    using ColossalFramework;
+    using HarmonyLib;
+    using CSUtil.Commons;
     using TrafficManager.Util;
+    using CitiesGameBridge.Service;
+    using System.Runtime.CompilerServices;
 
     [HarmonyPatch]
     public class CreateNodePatch {
@@ -28,9 +31,13 @@ namespace TrafficManager.Patches._NetTool {
                 // we should ignore that.
                 return;
             }
+            if (!NetService.Instance.IsSegmentValid(segment)) {
+                // this code can be reached when we are removing coliding segments.
+                return;
+            }
 
             // at this point we are sure that the caller is LoadPaths.
-            Log._Debug($"CreateNodePatch.Postfix(segment={segment}");
+            Log._Debug($"CreateNodePatch.Postfix(segment={segment})");
             bool verbose = false;
             if (verbose) {
                 Log._Debug($"CreateNodePatch.Postfix(): index={PlaceIntersectionUtil.Index} " +

@@ -55,7 +55,7 @@ namespace TrafficManager.Util {
 
             if (PathNetowrkIDs == null) Index = -1;
 
-            Log._Debug($"LoadPathsPatch.Prefix(): IntersectionInfo={IntersectionInfo} PathNetowrkIDs={PathNetowrkIDs.ToSTR()} Mapping={Mapping}" +
+            Log._Debug($"LoadPathsPatch.Prefix(): IntersectionInfo={IntersectionInfo} PathNetowrkIDs={PathNetowrkIDs.ToSTR()} Mapping={Mapping} " +
                 $"PathNetowrkIDs.Length:{PathNetowrkIDs?.Length}, IntersectionInfo.m_paths.Length:{IntersectionInfo.m_paths.Length}");
         }
 

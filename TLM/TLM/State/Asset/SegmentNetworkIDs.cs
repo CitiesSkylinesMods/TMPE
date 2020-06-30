@@ -39,24 +39,30 @@ namespace TrafficManager.State.Asset {
             map[new InstanceID { NetNode = EndNodeId }] =
                 new InstanceID { NetNode = newSegmentId.ToSegment().m_endNode };
 
-            var lanes = SegmentId.ToSegment().Info.m_lanes;
-            uint laneId = SegmentId.ToSegment().m_lanes;
+            var lanes = newSegmentId.ToSegment().Info.m_lanes;
+            uint laneId = newSegmentId.ToSegment().m_lanes;
+            Log._Debug($"lanes.Length={lanes.Length} laneIDs.Length={laneIDs.Length} segment.m_lanes={laneId} ");
+
             for (int laneIndex = 0; laneIndex < lanes.Length && laneId != 0; ++laneIndex) {
                 map[new InstanceID { NetLane = laneIDs[laneIndex] }] =
                     new InstanceID { NetLane = laneId };
                 laneId = laneId.ToLane().m_nextLane;
             }
 
-            Log._Debug($"pathInfoExt.MapInstanceIDs: " +
-                $"[{StartNodeId} .- {SegmentId} -. {EndNodeId}] -> " +
-                $"[{newSegmentId.ToSegment().m_startNode} .- {newSegmentId} -. {newSegmentId.ToSegment().m_endNode}]");
+            uint MappedLane(uint id) {
+                if (map.TryGetValue(new InstanceID { NetLane = id }, out var val)) {
+                    return val.NetLane;
+                }
+                return 0;
+            }
 
-            Log._Debug($"pathInfoExt.MapInstanceIDs: " +
-                $"{laneIDs.ToSTR()} -> " +
-                $"[{laneIDs.Select(id=>map[new InstanceID { NetLane = id }]).ToSTR()}");
+            Log._Debug($"SegmentNetworkIDs.MapInstanceIDs: " +
+                $"[{StartNodeId} .- {SegmentId} -. {EndNodeId}] -> " +
+                $"[{newSegmentId.ToSegment().m_startNode} .- {newSegmentId} -. {newSegmentId.ToSegment().m_endNode}]\n" +
+                $"lanes: {laneIDs.ToSTR()} -> " + $"[{laneIDs.Select(id => MappedLane(id)).ToSTR()}");
         }
 
         public override string ToString() =>
-            $"pathInfoExt[start:{StartNodeId} segment:{SegmentId} end:{EndNodeId} lanes={laneIDs.ToSTR()}]";
+            $"SegmentNetworkIDs[start:{StartNodeId} segment:{SegmentId} end:{EndNodeId} lanes={laneIDs.ToSTR()}]";
     }
 }
