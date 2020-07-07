@@ -7,9 +7,9 @@ namespace TrafficManager.Util.Record {
 
     [Serializable]
     public class TrafficRulesRecord : IRecordable {
-        public HashSet<ushort> NodeIDs = new HashSet<ushort>();
-        public HashSet<ushort> SegmentIDs = new HashSet<ushort>();
-        public HashSet<int> SegmentEndIndeces = new HashSet<int>();
+        [NonSerialized] public HashSet<ushort> NodeIDs = new HashSet<ushort>();
+        [NonSerialized] public HashSet<ushort> SegmentIDs = new HashSet<ushort>();
+        [NonSerialized] public HashSet<int> SegmentEndIndeces = new HashSet<int>();
 
         public List<IRecordable> Records = new List<IRecordable>();
 
@@ -72,6 +72,5 @@ namespace TrafficManager.Util.Record {
         }
 
         public byte[] Serialize() => RecordUtil.Serialize(this);
-
     }
 }
