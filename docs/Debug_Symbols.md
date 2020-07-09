@@ -22,7 +22,7 @@ Download from [Unity website](https://unity3d.com/get-unity/download/archive?_ga
 if you do not install unity in program files then create a `\TLM\Unity` [symlink](https://github.com/git-for-windows/git/wiki/Symbolic-Links) to it.
 
 ## Build
-With Unity instaslled Building TMPE also generates the mdb file and copies it to the mod folder.
+With Unity installed, building TMPE also generates the mdb file and copies it to the mod folder.
 
 ## Replace CO
 
