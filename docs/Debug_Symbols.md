@@ -1,5 +1,6 @@
 # Debug Symbols
-when debugging CS mods it would be useful to get file and line number in your exceptions stack trace like this:
+
+When debugging CS mods, it would be useful to get file and line number in your exceptions stack trace like this:
 ```
 Exception: test kian exception
   at NetworkDetective.Test.Factorial (Int32 n) [0x00025] in C:\Users\dell\source\repos\NetworkDetective\NetowrkDetective\NetworkDetectiveMod.cs:35 
