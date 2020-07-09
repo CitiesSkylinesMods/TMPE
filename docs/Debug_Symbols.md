@@ -26,6 +26,6 @@ With Unity installed, building TMPE also generates the mdb file and copies it to
 
 ## Replace CO
 
-I have modified CO dll (see https://github.com/kianzarrin/PedestrianBridge/issues/7#issuecomment-654776528) to automatically load `<FileName>.dll.mdb` if one exists in the same director as `<ModName>.dll` . Download it here:
+I have modified CO dll (see https://github.com/kianzarrin/PedestrianBridge/issues/7#issuecomment-654776528) to automatically load `<FileName>.dll.mdb` if one exists in the same directory as `<FileName>.dll` . Download it here:
 [ColossalManaged.zip](https://github.com/kianzarrin/PedestrianBridge/files/4884294/ColossalManaged.zip)
 Copy this in place of your ColossalManaged.dll located in `C:\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed` (depending on your CS installation folder).
