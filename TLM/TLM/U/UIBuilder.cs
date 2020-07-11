@@ -5,6 +5,7 @@ namespace TrafficManager.U {
     using TrafficManager.State.Keybinds;
     using TrafficManager.U.Autosize;
     using TrafficManager.UI;
+    using UnityEngine;
 
     /// <summary>
     /// Create an UI builder to populate a panel with good things: buttons, sub-panels, create a
@@ -72,6 +73,20 @@ namespace TrafficManager.U {
             return new UiBuilder<TButton>(newButton);
         }
 
+        public UiBuilder<TButton> FixedSizeButton<TButton>(string text,
+                                                           string tooltip,
+                                                           Vector2 size,
+                                                           UStackMode stack)
+            where TButton : UIButton, ISmartSizableControl
+        {
+            UiBuilder<TButton> builder = this.Button<TButton>();
+            builder.Control.text = text;
+            builder.Control.tooltip = tooltip;
+            builder.SetStacking(stack);
+            builder.SetFixedSize(size);
+            return builder;
+        }
+
         public UiBuilder<TLabel> Label<TLabel>(string t)
             where TLabel : UILabel, ISmartSizableControl {
             var newLabel = Control.AddUIComponent(typeof(TLabel)) as TLabel;
@@ -116,6 +131,24 @@ namespace TrafficManager.U {
 
         public void SetPadding(float f) {
             Control.GetResizerConfig().Padding = f;
+        }
+
+        /// <summary>Instruct the <see cref="UResizer"/> to always use fixed size for the control.</summary>
+        /// <param name="size">The size in units of 1080p screen.</param>
+        public void SetFixedSize(Vector2 size) {
+            UResizerConfig c = Control.GetResizerConfig();
+            c.SizeChoice = USizeChoice.Predefined;
+            c.FixedSize = size;
+        }
+
+        /// <summary>Instruct the <see cref="UResizer"/> to always use this stacking for the control.</summary>
+        /// <param name="mode">The stacking mode to always use.</param>
+        /// <param name="spacing">Spacing to use in the call to automatic predefined spacing.0</param>
+        public void SetStacking(UStackMode mode, float spacing = 0f) {
+            UResizerConfig c = Control.GetResizerConfig();
+            c.StackingChoice = UStackingChoice.Predefined;
+            c.Stacking = mode;
+            c.StackingSpacing = spacing;
         }
     }
 }

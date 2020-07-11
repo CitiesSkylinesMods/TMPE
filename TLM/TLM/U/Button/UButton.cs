@@ -1,7 +1,5 @@
 namespace TrafficManager.U {
     using System;
-    using ColossalFramework.UI;
-    using TrafficManager.U.Autosize;
 
     /// <summary>
     /// Basic button, cannot be activated, clickable, no tooltip.
@@ -9,6 +7,18 @@ namespace TrafficManager.U {
     public class UButton : BaseUButton {
         [Obsolete("Remove this field and simplify tooltip handling in BaseUButton")]
         public string uTooltip;
+
+        public override void Awake() {
+            base.Awake();
+            SetupDefaultSprites();
+        }
+
+        private void SetupDefaultSprites() {
+            this.atlas = U.TextureUtil.FindAtlas("Ingame");
+            this.normalBgSprite = "ButtonMenu";
+            this.hoveredBgSprite = "ButtonMenuHovered";
+            this.pressedBgSprite = "ButtonMenuPressed";
+        }
 
         public override bool CanActivate() {
             if (this.uCanActivate != null) {

@@ -89,8 +89,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 this.dragHandle_.size = this.titleLabel_.size;
 
                 // Push the window back into screen if the label/draghandle are partially offscreen
-                U.UIUtil.ClampToScreen(window: this,
-                                       alwaysVisible: titleLabel_);
+                U.UIUtil.ClampToScreen(
+                    window: this,
+                    alwaysVisible: titleLabel_);
             }
         }
 
@@ -108,31 +109,25 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 modePanelB.ResizeFunction(ButtonpanelResizeFn);
 
                 // Edit Segments/Lanes mode button
-                using (var editmodeBtnB = modePanelB.Button<U.UButton>()) {
-                    editmodeBtnB.Control.tooltip = "Override speed limits for one road or segment";
-
-                    void EditmodeResizeFn(UResizer r) {
-                        r.Width(UValue.FixedSize(40f));
-                        r.Height(UValue.FixedSize(40f));
-                        r.Stack(UStackMode.Below);
-                    }
-
-                    editmodeBtnB.ResizeFunction(EditmodeResizeFn);
-                }
+                modePanelB.FixedSizeButton<U.UButton>(
+                        text: string.Empty,
+                        tooltip: "Override speed limits for one road or segment",
+                        size: new Vector2(40f, 40f),
+                        stack: UStackMode.Below);
 
                 // Edit Defaults mode button
-                using (var defaultsmodeBtnB = modePanelB.Button<U.UButton>()) {
-                    defaultsmodeBtnB.Control.tooltip =
-                        "Edit default speed limits for all roads of that type";
+                modePanelB.FixedSizeButton<U.UButton>(
+                    text: string.Empty,
+                    tooltip: "Edit default speed limits for all roads of that type",
+                    size: new Vector2(40f, 40f),
+                    stack: UStackMode.Below);
 
-                    void DefaultsmodeResizeFn(UResizer r) {
-                        r.Width(UValue.FixedSize(40f));
-                        r.Height(UValue.FixedSize(40f));
-                        r.Stack(UStackMode.Below);
-                    }
-
-                    defaultsmodeBtnB.ResizeFunction(DefaultsmodeResizeFn);
-                }
+                // MPH/Kmph switch
+                modePanelB.FixedSizeButton<U.UButton>(
+                    text: "km/h",
+                    tooltip: "Kilometers per hour",
+                    size: new Vector2(40f, 40f),
+                    stack: UStackMode.Below);
             }
         }
 
@@ -155,7 +150,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 // [ 10 20 30 ... 120 130 140 0(no limit) ]
                 //-----------------------------------------
                 // the Current Selected Speed is highlighted
-                List<SpeedValue> values = PaletteGenerator.AllSpeedLimits(SpeedUnit.CurrentlyConfigured);
+                List<SpeedValue> values =
+                    PaletteGenerator.AllSpeedLimits(SpeedUnit.CurrentlyConfigured);
                 values.Add(new SpeedValue(0)); // add last item: no limit
                 foreach (var speedValue in values) {
                     SetupControls_SpeedPalette_Button(
@@ -167,8 +163,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         private void SetupControls_SpeedPalette_Button(UiBuilder<UPanel> builder,
-                                                              bool showMph,
-                                                              SpeedValue speedValue) {
+                                                       bool showMph,
+                                                       SpeedValue speedValue) {
             int speedInteger = showMph
                 ? speedValue.ToMphRounded(SpeedLimitsTool.MPH_STEP).Mph
                 : speedValue.ToKmphRounded(SpeedLimitsTool.KMPH_STEP).Kmph;
@@ -195,12 +191,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 buttonB.Control.text = speedInteger == 0 ? "X" : speedInteger.ToString();
                 buttonB.Control.textHorizontalAlignment = UIHorizontalAlignment.Center;
 
-                buttonB.ResizeFunction(
-                    r => {
-                        r.Width(UValue.FixedSize(buttonWidth));
-                        r.Height(UValue.FixedSize(60f));
-                        r.Stack(UStackMode.ToTheRight);
-                    });
+                buttonB.SetStacking(UStackMode.ToTheRight);
+                buttonB.SetFixedSize(new Vector2(buttonWidth, 60f));
 
                 if (isSelected) {
                     buttonB.Control.textScale = 2.0f;
@@ -223,6 +215,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// </summary>
         /// <param name="builder">The UI builder to use.</param>
         private void SetupControls_InfoRow(UiBuilder<SpeedLimitsWindow> builder) {
+            builder.Label(
+                t: "Hold Alt to modify default speed limits temporarily",
+                stack: UStackMode.Below);
         }
 
         /// <summary>Converts speed value to string with units.</summary>

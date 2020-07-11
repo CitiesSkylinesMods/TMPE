@@ -304,14 +304,14 @@ namespace TrafficManager.UI.MainMenu {
                 // This has to be done later when form setup is done:
                 // helpB.Control.atlas = allButtonsAtlas_;
 
+                // assume Version label is 18 units high
+                btnBuilder.SetFixedSize(new Vector2(18f, 18f));
                 btnBuilder.ResizeFunction(
                     resizeFn: r => {
                         r.Control.isVisible = true; // not sure why its hidden on create? TODO
                         r.Stack(mode: UStackMode.ToTheRight,
                                 spacing: UConst.UIPADDING * 3f,
                                 stackRef: this.VersionLabel);
-                        r.Width(UValue.FixedSize(18f)); // assume Version label is 18pt high
-                        r.Height(UValue.FixedSize(18f));
                     });
 
                 control.uCanActivate = c => true;
@@ -489,15 +489,11 @@ namespace TrafficManager.UI.MainMenu {
                 var buttonBuilder = builder.Button<BaseMenuButton>(buttonDef.ButtonType);
 
                 // Count buttons in a row and break the line
-                bool doRowBreak = result.Layout.IsRowBreak(placedInARow, minRowLength);
+                bool isRowBreak = result.Layout.IsRowBreak(placedInARow, minRowLength);
+                buttonBuilder.SetStacking(isRowBreak ? UStackMode.NewRowBelow : UStackMode.ToTheRight);
+                buttonBuilder.SetFixedSize(new Vector2(40f, 40f));
 
-                buttonBuilder.ResizeFunction(r => {
-                    r.Stack(doRowBreak ? UStackMode.NewRowBelow : UStackMode.ToTheRight);
-                    r.Width(UValue.FixedSize(40f));
-                    r.Height(UValue.FixedSize(40f));
-                });
-
-                if (doRowBreak) {
+                if (isRowBreak) {
                     placedInARow = 0;
                     result.Layout.Rows++;
                 } else {

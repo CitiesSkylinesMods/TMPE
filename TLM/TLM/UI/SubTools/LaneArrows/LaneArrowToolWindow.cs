@@ -143,19 +143,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                                 buttonBuilder.Control.Skin.Prefix = prefix;
                                 Buttons.Add(buttonBuilder.Control);
 
-                                buttonBuilder.ResizeFunction(
-                                    r => {
-                                        // First button in the group will be stacking vertical
-                                        // under the "Lane #" label, while 2nd and 3rd will be
-                                        // stacking horizontal
-                                        r.Stack(
-                                            mode: prefix == "LaneArrowLeft"
-                                                      ? UStackMode.Below
-                                                      : UStackMode.ToTheRight,
-                                            spacing: UConst.UIPADDING);
-                                        r.Width(UValue.FixedSize(40f));
-                                        r.Height(UValue.FixedSize(40f));
-                                    });
+                                // First button in the group will be stacking vertical
+                                // under the "Lane #" label, while 2nd and 3rd will be
+                                // stacking horizontal
+                                buttonBuilder.SetStacking(mode: prefix == "LaneArrowLeft"
+                                                              ? UStackMode.Below
+                                                              : UStackMode.ToTheRight,
+                                                          spacing: UConst.UIPADDING);
+                                buttonBuilder.SetFixedSize(new Vector2(40f, 40f));
                             }
                         } // for each button
                     } // end button group panel
