@@ -213,23 +213,6 @@ namespace TrafficManager.State {
             return true;
         }
 
-        [Obsolete]
-        [UsedImplicitly]
-        // Not used
-        internal static bool IsNodeTrafficLight(ushort nodeId) {
-            if (nodeId <= 0) {
-                return false;
-            }
-
-            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
-                 (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created) {
-                return false;
-            }
-
-            return (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
-                    NetNode.Flags.TrafficLights) != NetNode.Flags.None;
-        }
-
         /// <summary>
         /// Removes lane connections that point from lane <paramref name="sourceLaneId"/> to lane
         /// <paramref name="targetLaneId"/> at node <paramref name="startNode"/>.
@@ -525,38 +508,6 @@ namespace TrafficManager.State {
 
         public static void RemoveLaneSpeedLimit(uint laneId) {
             SetLaneSpeedLimit(laneId, null);
-        }
-
-        [UsedImplicitly]
-        // Not used
-        public static void SetLaneSpeedLimit(ushort segmentId, uint laneIndex, float speedLimit) {
-            if (segmentId <= 0) {
-                return;
-            }
-
-            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags &
-                 (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
-                return;
-            }
-
-            NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-
-            if (laneIndex >= segmentInfo.m_lanes.Length) {
-                return;
-            }
-
-            // find the lane id
-            uint laneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
-
-            for (var i = 0; i < laneIndex; ++i) {
-                if (laneId == 0) {
-                    return; // no valid lane found
-                }
-
-                laneId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_nextLane;
-            }
-
-            SetLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
         }
 
         public static void SetLaneSpeedLimit(ushort segmentId,
