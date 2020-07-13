@@ -3,6 +3,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
@@ -22,20 +23,24 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>
         /// Currently selected speed limit on the limits palette.
         /// units &lt; 0: invalid (something must be selected)
-        /// units == 0: no limit
+        /// units == 0: no limit.
         /// </summary>
         [NonSerialized]
         public SpeedValue CurrentPaletteSpeedLimit = new SpeedValue(-1f);
+
+        /// <summary>UI button which toggles per-segment or per-lane speed limits.</summary>
+        private UButton segmentLaneModeToggleButton_;
+
+        /// <summary>
+        /// Contains atlas with UI elements. Static to prevent reloading on every window creation.
+        /// </summary>
+        private static UITextureAtlas uiAtlas_ = null;
 
         /// <summary>Called by Unity on instantiation once when the game is running.</summary>
         public override void Start() {
             base.Start();
             UIUtil.MakeUniqueAndSetName(gameObject, GAMEOBJECT_NAME);
-
-            // the GenericPanel sprite is silver, make it dark
-            this.backgroundSprite = "GenericPanel";
-            this.color = new Color32(64, 64, 64, 240);
-            this.SetOpacityFromGuiOpacity();
+            this.GenericBackgroundAndOpacity();
         }
 
         /// <summary>Populate the window using UIBuilder of the window panel.</summary>
@@ -57,6 +62,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             // Text below for "Hold Alt, hold Shift, etc..."
             SetupControls_InfoRow(builder);
+
+            // this.segmentLaneModeToggleButton_.atlas
         }
 
         /// <summary>Creates a draggable label with current unit (mph or km/h).</summary>
@@ -77,8 +84,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <inheritdoc/>
         public override void OnBeforeResizerUpdate() {
             if (this.dragHandle_ != null) {
-                // Drag handle is manually resized to the label width, but when the form is large,
-                // the handle prevents it from shrinking. So shrink now, size properly after.
+                // Drag handle is manually resized to the label width in OnAfterResizerUpdate.
                 this.dragHandle_.size = Vector2.one;
             }
         }
@@ -89,7 +95,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 this.dragHandle_.size = this.titleLabel_.size;
 
                 // Push the window back into screen if the label/draghandle are partially offscreen
-                U.UIUtil.ClampToScreen(
+                UIUtil.ClampToScreen(
                     window: this,
                     alwaysVisible: titleLabel_);
             }
@@ -100,7 +106,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private void SetupControls_ModeButtons(UiBuilder<SpeedLimitsWindow> builder) {
             void ButtonpanelSetupFn(UPanel p) => p.name = GAMEOBJECT_NAME + "_ModesPanel";
 
-            using (var modePanelB = builder.ChildPanel<U.UPanel>(ButtonpanelSetupFn)) {
+            using (var modePanelB = builder.ChildPanel<UPanel>(ButtonpanelSetupFn)) {
                 void ButtonpanelResizeFn(UResizer r) {
                     r.Stack(mode: UStackMode.Below, stackRef: this.titleLabel_);
                     r.FitToChildren();
@@ -108,25 +114,40 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
                 modePanelB.ResizeFunction(ButtonpanelResizeFn);
 
-                // Edit Segments/Lanes mode button
-                modePanelB.FixedSizeButton<U.UButton>(
-                        text: string.Empty,
-                        tooltip: "Override speed limits for one road or segment",
-                        size: new Vector2(40f, 40f),
-                        stack: UStackMode.Below);
+                Vector2 buttonSize = new Vector2(60f, 60f);
 
+                //----------------
+                // Edit Segments/Lanes mode button
+                //----------------
+                using (var b = modePanelB.FixedSizeButton<UButton>(
+                    text: string.Empty,
+                    tooltip: "Override speed limits for one road or segment",
+                    size: buttonSize,
+                    stack: UStackMode.Below)) {
+                    this.segmentLaneModeToggleButton_ = b.Control;
+                }
+
+                //----------------
                 // Edit Defaults mode button
-                modePanelB.FixedSizeButton<U.UButton>(
+                //----------------
+                modePanelB.FixedSizeButton<UButton>(
                     text: string.Empty,
                     tooltip: "Edit default speed limits for all roads of that type",
-                    size: new Vector2(40f, 40f),
+                    size: buttonSize,
                     stack: UStackMode.Below);
 
+                //----------------
                 // MPH/Kmph switch
-                modePanelB.FixedSizeButton<U.UButton>(
-                    text: "km/h",
-                    tooltip: "Kilometers per hour",
-                    size: new Vector2(40f, 40f),
+                //----------------
+                bool displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+                modePanelB.FixedSizeButton<MphToggleButton>(
+                    text: displayMph
+                        ? "MPH"
+                        : "km/h",
+                    tooltip: displayMph
+                        ? Translation.SpeedLimits.Get("Miles per hour")
+                        : Translation.SpeedLimits.Get("Kilometers per hour"),
+                    size: buttonSize,
                     stack: UStackMode.Below);
             }
         }
@@ -135,8 +156,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <param name="builder">The UI builder to use.</param>
         private void SetupControls_SpeedPalette(UiBuilder<SpeedLimitsWindow> builder) {
             void PaletteSetupFn(UPanel p) => p.name = GAMEOBJECT_NAME + "_PalettePanel";
-            using (var palettePanelB = builder.ChildPanel<U.UPanel>(PaletteSetupFn)) {
-                palettePanelB.SetPadding(U.UConst.UIPADDING);
+            using (var palettePanelB = builder.ChildPanel<UPanel>(PaletteSetupFn)) {
+                palettePanelB.SetPadding(UConst.UIPADDING);
 
                 void PaletteResizeFn(UResizer r) {
                     r.Stack(mode: UStackMode.ToTheRight);
@@ -176,6 +197,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 speedValue.GameUnits);
 
             //--- uncomment below to create a label under each button ---
+            // Create vertical combo:
+            // [ 100  ]
+            //  65 mph
             // void ButtonSetupFn(UPanel p) => p.name = $"{GAMEOBJECT_NAME}_Button_{speedInteger}";
             // Create a small panel which stacks together with other button panels horizontally
             // using (var buttonPanelB = builder.ChildPanel<U.UPanel>(ButtonSetupFn)) {
@@ -184,10 +208,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             //         r.FitToChildren();
             //     });
 
-            // Create vertical combo:
-            // [ 100  ]
-            //  65 mph
-            using (var buttonB = builder.Button<U.UButton>()) {
+            using (var buttonB = builder.Button<UButton>()) {
                 buttonB.Control.text = speedInteger == 0 ? "X" : speedInteger.ToString();
                 buttonB.Control.textHorizontalAlignment = UIHorizontalAlignment.Center;
 
@@ -220,22 +241,57 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 stack: UStackMode.Below);
         }
 
-        /// <summary>Converts speed value to string with units.</summary>
-        /// <param name="speed">Speed value.</param>
-        /// <returns>Formatted String "N MPH".</returns>
-        private static string ToMphPreciseString(SpeedValue speed) {
-            return FloatUtil.IsZero(speed.GameUnits)
-                ? Translation.SpeedLimits.Get("Unlimited")
-                : speed.ToMphPrecise().ToString();
+        // /// <summary>Converts speed value to string with units.</summary>
+        // /// <param name="speed">Speed value.</param>
+        // /// <returns>Formatted String "N MPH".</returns>
+        // private static string ToMphPreciseString(SpeedValue speed) {
+        //     return FloatUtil.IsZero(speed.GameUnits)
+        //         ? Translation.SpeedLimits.Get("Unlimited")
+        //         : speed.ToMphPrecise().ToString();
+        // }
+
+        // /// <summary>Converts speed value to string with units.</summary>
+        // /// <param name="speed">Speed value.</param>
+        // /// <returns>Formatted String "N km/h".</returns>
+        // private static string ToKmphPreciseString(SpeedValue speed) {
+        //     return FloatUtil.IsZero(speed.GameUnits)
+        //         ? Translation.SpeedLimits.Get("Unlimited")
+        //         : speed.ToKmphPrecise().ToString();
+        // }
+
+        private UITextureAtlas GetUiAtlas() {
+            if (uiAtlas_ != null) {
+                return uiAtlas_;
+            }
+
+            // Create base atlas with backgrounds and no foregrounds
+            ButtonSkin skin = ButtonSkin.CreateDefaultButtonSkin("SpeedLimits");
+            HashSet<U.AtlasSpriteDef> spriteDefs = skin.CreateAtlasSpriteSet(new IntVector2(50));
+
+            // Merge names of all foreground sprites for 3 directions into atlasKeySet
+            skin.ForegroundNormal = true;
+            skin.ForegroundActive = true;
+            foreach (string prefix in new[] { "MphToggle", "EditSegments", "EditDefaults", }) {
+                skin.Prefix = prefix;
+
+                // Create keysets for lane arrow button icons and merge to the shared atlas
+                spriteDefs.AddRange(skin.CreateAtlasSpriteSet(new IntVector2(50)));
+            }
+
+            // foreach (string prefix in new[] { "MphToggle", "EditSegments", "EditDefaults", }) {
+            //     skin.Prefix = prefix;
+            //
+            //     // Create keysets for lane arrow button icons and merge to the shared atlas
+            //     spriteDefs.AddRange(skin.CreateAtlasSpriteSet(new IntVector2(50)));
+            // }
+
+            // Load actual graphics into an atlas
+            uiAtlas_ = skin.CreateAtlas(
+                loadingPath: "SpeedLimits",
+                atlasSizeHint: new IntVector2(512), // 10x10 atlas
+                spriteDefs);
+            return uiAtlas_;
         }
 
-        /// <summary>Converts speed value to string with units.</summary>
-        /// <param name="speed">Speed value.</param>
-        /// <returns>Formatted String "N km/h".</returns>
-        private static string ToKmphPreciseString(SpeedValue speed) {
-            return FloatUtil.IsZero(speed.GameUnits)
-                ? Translation.SpeedLimits.Get("Unlimited")
-                : speed.ToKmphPrecise().ToString();
-        }
     } // end class
 }

@@ -3,6 +3,7 @@ namespace TrafficManager.U {
     using System.Linq;
     using ColossalFramework.UI;
     using JetBrains.Annotations;
+    using TrafficManager.Util;
 
     /// <summary>
     /// Struct defines button atlas keys for button states.
@@ -46,7 +47,29 @@ namespace TrafficManager.U {
         public bool ForegroundHovered = false;
         public bool ForegroundActive = false;
 
-        public HashSet<string> CreateAtlasKeyset() {
+        /// <summary>
+        /// Create Button Skin for a given button name, which can be hovered, active,
+        /// but not disabled.
+        /// </summary>
+        /// <param name="buttonName">Prefix of the filenames to use for this button.</param>
+        /// <returns>Button skin object.</returns>
+        public static ButtonSkin CreateDefaultButtonSkin(string buttonName) {
+            return new ButtonSkin {
+                BackgroundPrefix = buttonName, // filename prefix
+
+                BackgroundHovered = true,
+                BackgroundActive = true,
+                BackgroundDisabled = false,
+
+                ForegroundNormal = true,
+                ForegroundActive = true,
+            };
+        }
+
+        /// <summary>Create set of atlas spritedefs all of the same size.</summary>
+        /// <param name="spriteSize">The size to assume for all sprites.</param>
+        /// <returns>New spriteset (can be merged with another spriteset).</returns>
+        public HashSet<U.AtlasSpriteDef> CreateAtlasSpriteSet(IntVector2 spriteSize) {
             // Two normal textures (bg and fg) are always assumed to exist.
             var names = new HashSet<string>();
             bool haveBackgroundPrefix = !string.IsNullOrEmpty(BackgroundPrefix);
@@ -76,30 +99,31 @@ namespace TrafficManager.U {
                 names.Add($"{Prefix}-fg-active");
             }
 
-            return names;
+            // Convert string hashset into spritedefs hashset
+            HashSet<AtlasSpriteDef> spriteDefs = new HashSet<U.AtlasSpriteDef>();
+            foreach (var n in names) {
+                spriteDefs.Add(new U.AtlasSpriteDef(name: n, size: spriteSize));
+            }
+
+            return spriteDefs;
         }
 
         /// <summary>Following the settings in the Skin fields, load sprites into an UI atlas.
         /// Longer list of atlas keys can be loaded into one atlas.</summary>
         /// <param name="loadingPath">Path inside Resources. directory (dot separated).</param>
-        /// <param name="spriteWidth">When loading assume this width.</param>
-        /// <param name="spriteHeight">When loading assume this height.</param>
-        /// <param name="hintAtlasTextureSize">Square atlas of this size is created.</param>
+        /// <param name="spriteSizes">Load textures with these sizes, pass single element to apply same size to all.</param>
+        /// <param name="atlasSizeHint">Square atlas of this size is created.</param>
         /// <param name="atlasKeyset">List of atlas keys to load under the loadingPath. Created by
         /// calling CreateAtlasKeysList() on a ButtonSkin.</param>
         /// <returns>New UI atlas.</returns>
         public UITextureAtlas CreateAtlas(string loadingPath,
-                                          int spriteWidth,
-                                          int spriteHeight,
-                                          int hintAtlasTextureSize,
-                                          HashSet<string> atlasKeyset) {
+                                          IntVector2 atlasSizeHint,
+                                          HashSet<U.AtlasSpriteDef> atlasKeyset) {
             return TextureUtil.CreateAtlas(
                 atlasName: $"TMPE_U_{Prefix}_Atlas",
                 resourcePrefix: loadingPath,
-                spriteNames: atlasKeyset.ToArray(),
-                spriteWidth: spriteWidth,
-                spriteHeight: spriteHeight,
-                hintAtlasTextureSize: hintAtlasTextureSize);
+                spriteDefs: atlasKeyset.ToArray(),
+                atlasSizeHint: atlasSizeHint);
         }
 
         /// <summary>

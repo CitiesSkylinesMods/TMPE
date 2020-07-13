@@ -48,9 +48,5 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             NetLane.Flags flags = (NetLane.Flags)lanesBuffer[LaneId].m_flags;
             return (flags & NetlaneFlagsMask) == NetlaneFlagsMask;
         }
-
-        protected override string U_OverrideTooltipText() {
-            return string.Empty;
-        }
     }
 }

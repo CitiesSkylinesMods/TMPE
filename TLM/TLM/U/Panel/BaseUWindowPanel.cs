@@ -85,11 +85,6 @@ namespace TrafficManager.U.Panel {
             this.color = modified;
         }
 
-        /// <summary>Set window panel opacity from Options GUI Opacity.</summary>
-        internal void SetOpacityFromGuiOpacity() {
-            SetOpacity(UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
-        }
-
         /// <summary>
         /// Creates a drag handle gameobject child for this window, which can be enabled or disabled
         /// by the caller.
@@ -101,6 +96,15 @@ namespace TrafficManager.U.Panel {
             dragHandler.transform.localPosition = Vector3.zero;
 
             return dragHandler.AddComponent<UIDragHandle>();
+        }
+
+        /// <summary>Make this panel use dark gray generic background and opacity from the GUI Options.</summary>
+        internal void GenericBackgroundAndOpacity() {
+            // the GenericPanel sprite is silver, make it dark
+            this.backgroundSprite = "GenericPanel";
+            this.color = new Color32(64, 64, 64, 240);
+
+            SetOpacity(UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
         }
     }
 }

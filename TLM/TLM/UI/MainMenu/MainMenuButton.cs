@@ -6,6 +6,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class MainMenuButton
@@ -28,19 +29,17 @@ namespace TrafficManager.UI.MainMenu {
 
             // Let the mainmenu atlas know we need this texture and assign it to self.atlas.
             this.Skin = new ButtonSkin {
-                                           BackgroundPrefix = "MainMenuButton",
-                                           Prefix = "MainMenuButton",
-                                           BackgroundHovered = true,
-                                           BackgroundActive = true,
-                                           ForegroundHovered = true,
-                                           ForegroundActive = true,
-                                       };
+                BackgroundPrefix = "MainMenuButton",
+                Prefix = "MainMenuButton",
+                BackgroundHovered = true,
+                BackgroundActive = true,
+                ForegroundHovered = true,
+                ForegroundActive = true,
+            };
             this.atlas = this.Skin.CreateAtlas(
-                "MainMenu",
-                50,
-                50,
-                256,
-                this.Skin.CreateAtlasKeyset());
+                loadingPath: "MainMenu",
+                atlasSizeHint: new IntVector2(256),
+                atlasKeyset: this.Skin.CreateAtlasSpriteSet(new IntVector2(50)));
             UpdateButtonImageAndTooltip();
 
             // Set the button dimensions to smallest of 2.6% of screen width or 4.6% of screen height

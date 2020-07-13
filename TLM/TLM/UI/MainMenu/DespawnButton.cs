@@ -3,6 +3,7 @@ namespace TrafficManager.UI.MainMenu {
     using ColossalFramework.UI;
     using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
+    using TrafficManager.Util;
 
     public class DespawnButton : BaseMenuButton {
         protected override string U_OverrideTooltipText() =>
@@ -18,7 +19,7 @@ namespace TrafficManager.UI.MainMenu {
         /// </summary>
         protected override bool IsActive() => !Options.disableDespawning;
 
-        public override void SetupButtonSkin(HashSet<string> atlasKeys) {
+        public override void SetupButtonSkin(HashSet<U.AtlasSpriteDef> spriteDefs) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
             this.Skin = new U.ButtonSkin() {
                 Prefix = "TrafficDespawning",
@@ -27,7 +28,7 @@ namespace TrafficManager.UI.MainMenu {
                 BackgroundActive = true,
                 ForegroundActive = true,
             };
-            atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
+            spriteDefs.AddRange(this.Skin.CreateAtlasSpriteSet(new IntVector2(50)));
         }
 
         protected override void OnClick(UIMouseEventParameter p) {

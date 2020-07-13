@@ -696,13 +696,12 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             GUILayout.FlexibleSpace();
 
             // Display MPH checkbox, if ticked will save global config
-            bool displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-            displayMph = GUILayout.Toggle(
-                displayMph,
+            showMph = GUILayout.Toggle(
+                showMph,
                 Translation.SpeedLimits.Get("Checkbox:Display speed limits mph"));
 
-            if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != displayMph) {
-                OptionsGeneralTab.SetDisplayInMph(displayMph);
+            if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != showMph) {
+                OptionsGeneralTab.SetDisplayInMph(showMph);
             }
 
             GUILayout.FlexibleSpace();

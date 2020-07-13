@@ -3,6 +3,7 @@ namespace TrafficManager.UI {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using TrafficManager.U;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class RemoveVehicleButtonExtender : MonoBehaviour {
@@ -70,10 +71,8 @@ namespace TrafficManager.UI {
                 // TODO: This atlas is created multiple times, cache or find by name.
                 this.atlas = this.Skin.CreateAtlas(
                     loadingPath: "Clear",
-                    spriteWidth: 50,
-                    spriteHeight: 50,
-                    hintAtlasTextureSize: 256,
-                    atlasKeyset: this.Skin.CreateAtlasKeyset());
+                    atlasSizeHint: new IntVector2(256),
+                    atlasKeyset: this.Skin.CreateAtlasSpriteSet(new IntVector2(50)));
                 UpdateButtonImageAndTooltip();
                 width = height = 30f;
             }

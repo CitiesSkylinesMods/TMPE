@@ -3,11 +3,12 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
+    using TrafficManager.Util;
 
     public class PrioritySignsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.AddPrioritySigns;
 
-        public override void SetupButtonSkin(HashSet<string> atlasKeys) {
+        public override void SetupButtonSkin(HashSet<U.AtlasSpriteDef> spriteDefs) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
             this.Skin = new U.ButtonSkin() {
                 Prefix = "PrioritySigns",
@@ -16,7 +17,7 @@ namespace TrafficManager.UI.MainMenu {
                 BackgroundActive = true,
                 ForegroundActive = true,
             };
-            atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
+            spriteDefs.AddRange(this.Skin.CreateAtlasSpriteSet(new IntVector2(50)));
         }
 
         protected override string U_OverrideTooltipText() => Translation.Menu.Get("Tooltip:Add priority signs");

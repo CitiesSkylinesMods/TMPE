@@ -313,7 +313,8 @@ namespace TrafficManager.UI {
                 };
 
                 // By default the atlas will include backgrounds: DefaultRound-bg-normal
-                HashSet<string> atlasKeysSet = tmpSkin.CreateAtlasKeyset();
+                HashSet<U.AtlasSpriteDef> atlasKeysSet =
+                    tmpSkin.CreateAtlasSpriteSet(new IntVector2(50));
 
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
                     atlasKeysSet.AddRange(button.GetAtlasKeys);
@@ -321,11 +322,9 @@ namespace TrafficManager.UI {
 
                 // Create atlas and give it to all buttons
                 allButtonsAtlas_ = tmpSkin.CreateAtlas(
-                                       "RoadSelectionPanel",
-                                       50,
-                                       50,
-                                       512,
-                                       atlasKeysSet);
+                                       loadingPath: "RoadSelectionPanel",
+                                       atlasSizeHint: new IntVector2(512),
+                                       atlasKeyset: atlasKeysSet);
 
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
                     button.atlas = allButtonsAtlas_;
@@ -334,8 +333,9 @@ namespace TrafficManager.UI {
 
             internal bool HasHoveringButton() {
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
-                    if (button.IsHovered && button.isEnabled)
+                    if (button.IsHovered && button.isEnabled) {
                         return true;
+                    }
                 }
                 return false;
             }
@@ -398,7 +398,8 @@ namespace TrafficManager.UI {
 
                 public virtual string SkinPrefix => Function.ToString() + TrafficSidePostFix;
 
-                public HashSet<string> GetAtlasKeys => this.Skin.CreateAtlasKeyset();
+                public HashSet<U.AtlasSpriteDef> GetAtlasKeys =>
+                    this.Skin.CreateAtlasSpriteSet(new IntVector2(50));
 
                 public bool IsHovered => m_IsMouseHovering; // exposing the protected member
 

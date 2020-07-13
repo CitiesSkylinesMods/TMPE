@@ -3,6 +3,7 @@ namespace TrafficManager.UI {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using TrafficManager.U;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class RemoveCitizenInstanceButtonExtender : MonoBehaviour {
@@ -59,11 +60,9 @@ namespace TrafficManager.UI {
                     ForegroundActive = true,
                 };
                 this.atlas = this.Skin.CreateAtlas(
-                    "Clear",
-                    50,
-                    50,
-                    256,
-                    this.Skin.CreateAtlasKeyset());
+                    loadingPath: "Clear",
+                    atlasSizeHint: new IntVector2(256),
+                    atlasKeyset: this.Skin.CreateAtlasSpriteSet(new IntVector2(50)));
                 UpdateButtonImageAndTooltip();
                 width = height = 30;
             }

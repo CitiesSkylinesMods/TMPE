@@ -58,7 +58,7 @@ namespace TrafficManager.U {
         /// Return empty if no override is required and `this.tooltip` will be used.
         /// </summary>
         /// <returns>The tooltip for this button.</returns>
-        protected abstract string U_OverrideTooltipText();
+        protected virtual string U_OverrideTooltipText() => string.Empty;
 
         /// <summary>Override this to define whether the button should be visible on tool panel.</summary>
         /// <returns>Whether the button visible.</returns>
