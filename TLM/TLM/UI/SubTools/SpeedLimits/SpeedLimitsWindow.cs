@@ -1,6 +1,7 @@
 namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using ColossalFramework.UI;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.RedirectionFramework;
@@ -20,21 +21,13 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Window drag handle.</summary>
         private UIDragHandle dragHandle_;
 
-        /// <summary>
-        /// Currently selected speed limit on the limits palette.
-        /// units &lt; 0: invalid (something must be selected)
-        /// units == 0: no limit.
-        /// </summary>
-        [NonSerialized]
-        public SpeedValue CurrentPaletteSpeedLimit = new SpeedValue(-1f);
-
         /// <summary>UI button which toggles per-segment or per-lane speed limits.</summary>
         private UButton segmentLaneModeToggleButton_;
 
-        /// <summary>
-        /// Contains atlas with UI elements. Static to prevent reloading on every window creation.
-        /// </summary>
-        private static UITextureAtlas uiAtlas_ = null;
+        // /// <summary>
+        // /// Contains atlas with UI elements. Static to prevent reloading on every window creation.
+        // /// </summary>
+        // private static UITextureAtlas uiAtlas_ = null;
 
         /// <summary>Called by Unity on instantiation once when the game is running.</summary>
         public override void Start() {
@@ -45,7 +38,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Populate the window using UIBuilder of the window panel.</summary>
         /// <param name="builder">The root builder of this window.</param>
-        public void SetupControls(UiBuilder<SpeedLimitsWindow> builder) {
+        public void SetupControls(UiBuilder<SpeedLimitsWindow> builder, SpeedLimitsTool parentTool) {
             //-------------------------------------
             // [Speed Limits - Kilometers per Hour]
             // [ Mode 1 ] [ 10 20 30 40 50 ... 120 130 140 ]
@@ -58,7 +51,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             SetupControls_ModeButtons(builder);
 
             // Goes right of the modebuttons panel
-            SetupControls_SpeedPalette(builder);
+            SetupControls_SpeedPalette(builder, parentTool);
 
             // Text below for "Hold Alt, hold Shift, etc..."
             SetupControls_InfoRow(builder);
@@ -154,7 +147,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Create speeds palette based on the current options choices.</summary>
         /// <param name="builder">The UI builder to use.</param>
-        private void SetupControls_SpeedPalette(UiBuilder<SpeedLimitsWindow> builder) {
+        private void SetupControls_SpeedPalette(UiBuilder<SpeedLimitsWindow> builder, SpeedLimitsTool parentTool) {
             void PaletteSetupFn(UPanel p) => p.name = GAMEOBJECT_NAME + "_PalettePanel";
             using (var palettePanelB = builder.ChildPanel<UPanel>(PaletteSetupFn)) {
                 palettePanelB.SetPadding(UConst.UIPADDING);
@@ -176,6 +169,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 values.Add(new SpeedValue(0)); // add last item: no limit
                 foreach (var speedValue in values) {
                     SetupControls_SpeedPalette_Button(
+                        parentTool: parentTool,
                         builder: palettePanelB,
                         showMph: showMph,
                         speedValue: speedValue);
@@ -185,7 +179,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         private void SetupControls_SpeedPalette_Button(UiBuilder<UPanel> builder,
                                                        bool showMph,
-                                                       SpeedValue speedValue) {
+                                                       SpeedValue speedValue,
+                                                       SpeedLimitsTool parentTool) {
             int speedInteger = showMph
                 ? speedValue.ToMphRounded(SpeedLimitsTool.MPH_STEP).Mph
                 : speedValue.ToKmphRounded(SpeedLimitsTool.KMPH_STEP).Kmph;
@@ -193,7 +188,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             float buttonWidth = speedInteger >= 100 ? 40f : 30f;
 
             bool isSelected = FloatUtil.NearlyEqual(
-                this.CurrentPaletteSpeedLimit.GameUnits,
+                parentTool.CurrentPaletteSpeedLimit.GameUnits,
                 speedValue.GameUnits);
 
             //--- uncomment below to create a label under each button ---
@@ -237,7 +232,13 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <param name="builder">The UI builder to use.</param>
         private void SetupControls_InfoRow(UiBuilder<SpeedLimitsWindow> builder) {
             builder.Label(
-                t: "Hold Alt to modify default speed limits temporarily",
+                t: "Hold [Alt] to see default speed limits temporarily",
+                stack: UStackMode.Below);
+            builder.Label(
+                t: "Hold [Ctrl] to see per lane limits temporarily",
+                stack: UStackMode.Below);
+            builder.Label(
+                t: "Hold [Shift] to modify entire road between two junctions",
                 stack: UStackMode.Below);
         }
 
@@ -259,11 +260,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         //         : speed.ToKmphPrecise().ToString();
         // }
 
-        private UITextureAtlas GetUiAtlas() {
-            if (uiAtlas_ != null) {
-                return uiAtlas_;
-            }
-
+        private UITextureAtlas CreateUiAtlas() {
             // Create base atlas with backgrounds and no foregrounds
             ButtonSkin skin = ButtonSkin.CreateDefaultButtonSkin("SpeedLimits");
             HashSet<U.AtlasSpriteDef> spriteDefs = skin.CreateAtlasSpriteSet(new IntVector2(50));
@@ -286,11 +283,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // }
 
             // Load actual graphics into an atlas
-            uiAtlas_ = skin.CreateAtlas(
-                loadingPath: "SpeedLimits",
-                atlasSizeHint: new IntVector2(512), // 10x10 atlas
-                spriteDefs);
-            return uiAtlas_;
+            return TextureUtil.CreateAtlas(
+                atlasName: $"TMPE_U_SpeedLimits_Atlas",
+                resourcePrefix: "SpeedLimits",
+                spriteDefs: spriteDefs.ToArray(),
+                atlasSizeHint: new IntVector2(512));
         }
 
     } // end class

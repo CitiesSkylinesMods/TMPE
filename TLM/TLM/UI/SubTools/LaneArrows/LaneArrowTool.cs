@@ -272,6 +272,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
         }
 
+        /// <summary>No generic overlay for other tool modes is provided by this tool, render nothing.</summary>
+        public override void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo) {
+        }
+
         /// <summary>Called from the Main Tool when left mouse button clicked.</summary>
         public override void OnToolLeftClick() {
             if (ToolWindow != null && MainTool.GetToolController().IsInsideUI) {
@@ -516,7 +520,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
         }
 
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+        public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
             switch (fsm_.State) {
                 case State.Select:
                     RenderOverlay_Select(cameraInfo);

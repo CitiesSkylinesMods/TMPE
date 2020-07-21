@@ -374,7 +374,7 @@ namespace TrafficManager.UI {
             }
 
             activeLegacySubTool_?.RenderOverlay(cameraInfo);
-            activeSubTool_?.RenderOverlay(cameraInfo);
+            activeSubTool_?.RenderActiveToolOverlay(cameraInfo);
 
             ToolMode currentMode = GetToolMode();
 
@@ -385,6 +385,11 @@ namespace TrafficManager.UI {
                 }
 
                 e.Value?.RenderOverlayForOtherTools(cameraInfo);
+            }
+            foreach (var st in subTools_) {
+                if (st.Key != GetToolMode()) {
+                    st.Value.RenderGenericInfoOverlay(cameraInfo);
+                }
             }
         }
 

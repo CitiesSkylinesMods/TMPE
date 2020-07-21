@@ -156,6 +156,7 @@ namespace TrafficManager.UI {
         /// other tools.
         /// </summary>
         /// <param name="cameraInfo">The camera.</param>
+        [Obsolete("Use new style TrafficManagerSubtool.RenderGenericInfoOverlay()")]
         public virtual void RenderOverlayForOtherTools(RenderManager.CameraInfo cameraInfo) { }
 
         public virtual void ShowGUIOverlay(ToolMode toolMode, bool viewOnly) { }

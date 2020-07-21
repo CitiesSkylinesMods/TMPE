@@ -849,18 +849,18 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                         SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId));
 
                     bool hoveredHandle = MainTool.DrawGenericOverlayGridTexture(
-                        SpeedLimitTextures.GetSpeedLimitTexture(laneSpeedLimit),
-                        camPos,
-                        zero,
-                        f,
-                        f,
-                        xu,
-                        yu,
-                        x,
-                        0,
-                        speedLimitSignSize,
-                        speedLimitSignSize * speedLimitSignVerticalScale,
-                        !viewOnly);
+                        texture: SpeedLimitTextures.GetSpeedLimitTexture(laneSpeedLimit),
+                        camPos: camPos,
+                        gridOrigin: zero,
+                        cellWidth: f,
+                        cellHeight: f,
+                        xu: xu,
+                        yu: yu,
+                        x: x,
+                        y: 0,
+                        width: speedLimitSignSize,
+                        height: speedLimitSignSize * speedLimitSignVerticalScale,
+                        canHover: !viewOnly);
 
                     if (!viewOnly
                         && !onlyMonorailLanes
@@ -869,15 +869,15 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                         Texture2D tex1 = RoadUI.VehicleInfoSignTextures[
                             LegacyExtVehicleType.ToNew(ExtVehicleType.PassengerTrain)];
                         MainTool.DrawStaticSquareOverlayGridTexture(
-                            tex1,
-                            camPos,
-                            zero,
-                            f,
-                            xu,
-                            yu,
-                            x,
-                            1,
-                            speedLimitSignSize);
+                            texture: tex1,
+                            camPos: camPos,
+                            gridOrigin: zero,
+                            cellSize: f,
+                            xu: xu,
+                            yu: yu,
+                            x: x,
+                            y: 1,
+                            size: speedLimitSignSize);
                     }
 
                     if (hoveredHandle) {

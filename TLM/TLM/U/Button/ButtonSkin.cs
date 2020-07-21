@@ -66,12 +66,15 @@ namespace TrafficManager.U {
             };
         }
 
-        /// <summary>Create set of atlas spritedefs all of the same size.</summary>
+        /// <summary>
+        /// Create set of atlas spritedefs all of the same size.
+        /// SpriteDef sets can be merged together and fed into sprite atlas creation call.
+        /// </summary>
         /// <param name="spriteSize">The size to assume for all sprites.</param>
         /// <returns>New spriteset (can be merged with another spriteset).</returns>
         public HashSet<U.AtlasSpriteDef> CreateAtlasSpriteSet(IntVector2 spriteSize) {
             // Two normal textures (bg and fg) are always assumed to exist.
-            var names = new HashSet<string>();
+            List<string> names = new List<string>();
             bool haveBackgroundPrefix = !string.IsNullOrEmpty(BackgroundPrefix);
             if (haveBackgroundPrefix) {
                 names.Add($"{BackgroundPrefix}-bg-normal");
@@ -101,7 +104,7 @@ namespace TrafficManager.U {
 
             // Convert string hashset into spritedefs hashset
             HashSet<AtlasSpriteDef> spriteDefs = new HashSet<U.AtlasSpriteDef>();
-            foreach (var n in names) {
+            foreach (string n in names) {
                 spriteDefs.Add(new U.AtlasSpriteDef(name: n, size: spriteSize));
             }
 

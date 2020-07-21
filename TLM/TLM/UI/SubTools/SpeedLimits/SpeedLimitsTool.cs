@@ -1,5 +1,11 @@
 namespace TrafficManager.UI.SubTools.SpeedLimits {
+    using GenericGameBridge.Service;
+    using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
     using TrafficManager.U;
+    using TrafficManager.UI.SubTools.PrioritySigns;
+    using TrafficManager.Util;
     using UnityEngine;
 
     /// <summary>
@@ -18,9 +24,34 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         public const ushort MPH_STEP = 5;
 
         /// <summary>
+        /// Currently selected speed limit on the limits palette.
+        /// units less than 0: invalid (not selected)
+        /// units = 0: no limit.
+        /// </summary>
+        public SpeedValue CurrentPaletteSpeedLimit = new SpeedValue(-1f);
+
+        /// <summary>
+        /// Will show and edit speed limits for each lane.
+        /// This is toggled by the tool window button or by holding Ctrl temporarily.
+        /// </summary>
+        private bool showLimitsPerLane_;
+
+        private bool ShowLimitsPerLane => showLimitsPerLane_ ^ Shortcuts.ControlIsPressed;
+
+        /// <summary>
+        /// Will edit entire road between two junctions.
+        /// This is toggled by holding Shift.
+        /// </summary>
+        private bool multiSegmentMode_;
+        private bool MultiSegmentMode => multiSegmentMode_ ^ Shortcuts.ShiftIsPressed;
+
+        /// <summary>
         /// Finite State machine for the tool. Represents current UI state for Lane Arrows.
         /// </summary>
         private Util.GenericFsm<State, Trigger> fsm_;
+
+        private SpeedLimitsOverlay.DrawArgs overlayDrawArgs_;
+        private SpeedLimitsOverlay overlay_;
 
         /// <summary>Tool states.</summary>
         private enum State {
@@ -57,6 +88,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <param name="mainTool">Reference to the parent maintool.</param>
         public SpeedLimitsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
+            overlay_ = new SpeedLimitsOverlay(mainTool: this.MainTool);
         }
 
         /// <summary>
@@ -94,7 +126,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // Create a generic self-sizing window with padding of 4px.
             void SetupFn(UiBuilder<SpeedLimitsWindow> b) {
                 b.SetPadding(UConst.UIPADDING);
-                b.Control.SetupControls(b);
+                b.Control.SetupControls(builder: b, parentTool: this);
             }
             this.Window = UiBuilder<SpeedLimitsWindow>.CreateWindow<SpeedLimitsWindow>(setupFn: SetupFn);
             this.fsm_ = InitFiniteStateMachine();
@@ -106,7 +138,29 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             this.fsm_ = null;
         }
 
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+        public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
+            CreateOverlayDrawArgs();
+            overlay_.Render(cameraInfo: cameraInfo, args: this.overlayDrawArgs_);
+            overlay_.ShowSigns(cameraInfo: cameraInfo, args: this.overlayDrawArgs_);
+        }
+
+        /// <summary>Copies important values for rendering the overlay into its args struct.</summary>
+        private void CreateOverlayDrawArgs() {
+            overlayDrawArgs_.InteractiveSigns = true;
+            overlayDrawArgs_.MultiSegmentMode = this.MultiSegmentMode;
+            overlayDrawArgs_.ShowLimitsPerLane = this.ShowLimitsPerLane;
+            overlayDrawArgs_.ParentTool = this;
+        }
+
+        /// <summary>Render overlay for other tool modes, if speed limits overlay is on.</summary>
+        /// <param name="cameraInfo">The camera.</param>
+        public override void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo) {
+            if (!Options.speedLimitsOverlay && !MassEditOverlay.IsActive) {
+                return;
+            }
+
+            CreateOverlayDrawArgs();
+            overlay_.ShowSigns(cameraInfo: cameraInfo, args: this.overlayDrawArgs_);
         }
 
         public override void OnToolLeftClick() {
@@ -120,6 +174,21 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Called when the tool must update onscreen keyboard/mouse hints.</summary>
         public void UpdateOnscreenDisplayPanel() {
+        }
+
+        // TODO: Possibly this is useful in more than this tool, then move it up the class hierarchy
+        public bool ContainsMouse() {
+            return Window != null && Window.containsMouse;
+        }
+
+        internal static void SetSpeedLimit(LanePos lane, SpeedValue? speed) {
+            ushort segmentId = lane.laneId.ToLane().m_segment;
+            SpeedLimitManager.Instance.SetSpeedLimit(
+                segmentId: segmentId,
+                laneIndex: lane.laneIndex,
+                laneInfo: segmentId.ToSegment().Info.m_lanes[lane.laneIndex],
+                laneId: lane.laneId,
+                speedLimit: speed?.GameUnits);
         }
     } // end class
 }

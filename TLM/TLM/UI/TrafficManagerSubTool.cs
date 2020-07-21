@@ -41,9 +41,18 @@ namespace TrafficManager.UI {
         /// <summary>Tool has been switched off by user selecting another tool or hitting Esc.</summary>
         public abstract void DeactivateTool();
 
-        /// <summary>Called every frame to display tool-specific overlay.</summary>
-        /// <param name="cameraInfo">Camera.</param>
-        public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo);
+        /// <summary>
+        /// Called every frame to display tool-specific overlay, when the tool is active.
+        /// </summary>
+        /// <param name="cameraInfo">The camera.</param>
+        public abstract void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo);
+
+        /// <summary>
+        /// Called when settings want the tool to show some information overlay,
+        /// but the tool is not active.
+        /// </summary>
+        /// <param name="cameraInfo">The camera.</param>
+        public abstract void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo);
 
         /// <summary>
         /// Called whenever the mouse left click happened on the world, while the tool was active.
