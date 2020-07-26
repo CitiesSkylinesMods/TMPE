@@ -33,7 +33,10 @@ namespace TrafficManager.Util {
         /// </summary>
         /// <param name="newSegmentIds">segment list provided by LoadPaths.</param>
         public static void ApplyTrafficRules(BuildingInfo intersectionInfo, ushort[] newSegmentIds) {
-            Log._Debug($"PlaceIntersectionUtil.Start({intersectionInfo?.ToString() ?? "null"})");
+            /*************************
+             * Prepration: */
+
+            Log._Debug($"PlaceIntersectionUtil.ApplyTrafficRules({intersectionInfo?.ToString() ?? "null"})");
 
             if (!Shortcuts.InSimulationThread()) {
                 Log.Error("must be called from simulation thread");
@@ -47,18 +50,21 @@ namespace TrafficManager.Util {
             var map = new Dictionary<InstanceID, InstanceID>();
 
             var Asset2Data = AssetDataExtension.Instance.Asset2Data;
-            Log._Debug("LoadPathsPatch.Prefix(): Asset2Data.keys=" +
+            Log._Debug("PlaceIntersectionUtil.ApplyTrafficRules(): Asset2Data.keys=" +
                 Asset2Data.Select(item => item.Key).ToSTR());
 
             if (Asset2Data.TryGetValue(intersectionInfo, out var assetData)) {
-                Log.Info("LoadPathsPatch.Postfix(): assetData =" + assetData);
+                Log.Info("PlaceIntersectionUtil.ApplyTrafficRules(): assetData =" + assetData);
             } else {
-                Log.Info("LoadPathsPatch.Postfix(): assetData not found (the asset does not have TMPE data)");
+                Log.Info("PlaceIntersectionUtil.ApplyTrafficRules(): assetData not found (the asset does not have TMPE data)");
                 return;
             }
 
             var pathNetowrkIDs = assetData.PathNetworkIDs;
             if (pathNetowrkIDs == null) return;
+
+            /*************************
+             * Apply traffic rules: */
 
             MapSegments(oldSegments: pathNetowrkIDs, newSegmentIds: newSegmentIds, map: map);
 

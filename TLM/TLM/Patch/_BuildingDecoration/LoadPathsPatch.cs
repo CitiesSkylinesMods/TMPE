@@ -10,6 +10,9 @@ namespace TrafficManager.Patches._BuildingDecoration {
     public class LoadPathsPatch {
         ///<summary>Called after intersection is built</summary> 
         internal static void AfterIntersectionBuilt(BuildingInfo info) {
+            if (!Shortcuts.InSimulationThread())
+                return; // only rendering
+
             var newSegmentIds = NetManager.instance.m_tempSegmentBuffer.ToArray();
             PlaceIntersectionUtil.ApplyTrafficRules(info, newSegmentIds);
         }
