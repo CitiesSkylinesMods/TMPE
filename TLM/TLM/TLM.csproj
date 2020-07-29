@@ -171,6 +171,7 @@
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
+    <Content Include="UI\Helpers\OverlayRenderer.txt" />
     <Compile Include="UI\Helpers\Prompt.cs" />
     <Compile Include="UI\Helpers\SegmentLaneMarker.cs" />
     <Compile Include="UI\Helpers\ExtUITabStrip.cs" />

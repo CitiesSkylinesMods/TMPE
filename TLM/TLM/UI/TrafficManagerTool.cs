@@ -364,9 +364,11 @@ namespace TrafficManager.UI {
         }
 
         /// <summary>
-        /// renders presistent overlay.
-        /// if any subtool is active it renders overlay for that subtool (e.g. node selection, segment selection, etc.)
-        /// Must not call base.RenderOverlay() . Doing so may cause infinite recursion with Postfix of base.RenderOverlay()
+        /// Penders persistent overlay.
+        /// If any subtool is active it renders overlay for that subtool (e.g. node selection,
+        ///     segment selection, etc.)
+        /// Must not call base.RenderOverlay() . Doing so may cause infinite recursion with
+        ///     Postfix of base.RenderOverlay()
         /// </summary>
         public void RenderOverlayImpl(RenderManager.CameraInfo cameraInfo) {
             if (!(isActiveAndEnabled || SubTools.PrioritySigns.MassEditOverlay.IsActive)) {
@@ -404,15 +406,20 @@ namespace TrafficManager.UI {
 
             NetManager.instance.NetAdjust.PathVisible =
                 RoadSelectionPanels.Root.ShouldPathBeVisible();
+
             if (NetManager.instance.NetAdjust.PathVisible) {
                 base.RenderOverlay(cameraInfo); // render path.
             }
 
-            if (HoveredSegmentId == 0)
+            if (HoveredSegmentId == 0) {
                 return;
+            }
+
             var netAdjust = NetManager.instance?.NetAdjust;
-            if (netAdjust == null)
+
+            if (netAdjust == null) {
                 return;
+            }
 
             // use the same color as in NetAdjust
             ref NetSegment segment = ref HoveredSegmentId.ToSegment();
@@ -426,22 +433,24 @@ namespace TrafficManager.UI {
                     color = GetToolColor(Input.GetMouseButton(0), false);
                 }
                 bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
+
                 if (!isRoundabout) {
-                    var segments = SegmentTraverser.Traverse(
-                        HoveredSegmentId,
-                        TraverseDirection.AnyDirection,
-                        TraverseSide.Straight,
-                        SegmentStopCriterion.None,
-                        (_) => true);
+                    IEnumerable<ushort> segments = SegmentTraverser.Traverse(
+                        initialSegmentId: HoveredSegmentId,
+                        direction: TraverseDirection.AnyDirection,
+                        side: TraverseSide.Straight,
+                        stopCrit: SegmentStopCriterion.None,
+                        visitorFun: (_) => true);
                     segmentList = new List<ushort>(segmentList);
                 }
+
                 foreach (ushort segmentId in segmentList ?? Enumerable.Empty<ushort>()) {
                     ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                     NetTool.RenderOverlay(
-                        cameraInfo,
-                        ref seg,
-                        color,
-                        color);
+                        cameraInfo: cameraInfo,
+                        segment: ref seg,
+                        importantColor: color,
+                        nonImportantColor: color);
                 }
             } else {
                 NetTool.RenderOverlay(cameraInfo, ref segment, color, color);
@@ -543,8 +552,24 @@ namespace TrafficManager.UI {
                     DebugGuiDisplayBuildings();
                 }
 
+                //----------------------
+                // Render legacy GUI overlay, and new style GUI mode overlays need to render too
+                ToolMode toolMode = GetToolMode();
+
                 foreach (KeyValuePair<ToolMode, LegacySubTool> en in legacySubTools_) {
-                    en.Value.ShowGUIOverlay(en.Key, en.Key != GetToolMode());
+                    en.Value.ShowGUIOverlay(
+                        toolMode: en.Key,
+                        viewOnly: en.Key != toolMode);
+                }
+
+                var camera = Camera.main;
+
+                foreach (KeyValuePair<ToolMode, TrafficManagerSubTool> st in subTools_) {
+                    if (st.Key == toolMode) {
+                        st.Value.RenderActiveToolOverlay_GUI();
+                    } else {
+                        st.Value.RenderGenericInfoOverlay_GUI();
+                    }
                 }
 
                 Color guiColor = GUI.color;
@@ -553,8 +578,8 @@ namespace TrafficManager.UI {
 
                 if (activeLegacySubTool_ != null) {
                     activeLegacySubTool_.OnToolGUI(e);
-                } else if (activeSubTool_ != null) {
-                    activeSubTool_.UpdateEveryFrame();
+                } else {
+                    activeSubTool_?.UpdateEveryFrame();
                 }
             } catch (Exception ex) {
                 Log.Error("GUI Error: " + ex);

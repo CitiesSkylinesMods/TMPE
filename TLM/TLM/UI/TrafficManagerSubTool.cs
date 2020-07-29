@@ -42,17 +42,32 @@ namespace TrafficManager.UI {
         public abstract void DeactivateTool();
 
         /// <summary>
-        /// Called every frame to display tool-specific overlay, when the tool is active.
+        /// NOTE: This is Non-GUI overlay which cannot call GUI.DrawTexture and similar GUI calls.
+        /// Called every frame to display edit assist overlay, when the tool is active.
         /// </summary>
         /// <param name="cameraInfo">The camera.</param>
         public abstract void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo);
 
         /// <summary>
+        /// NOTE: This is GUI overlay CAN call GUI.DrawTexture and similar GUI calls.
+        /// Called every frame to display edit assist overlay, when the tool is active.
+        /// </summary>
+        public abstract void RenderActiveToolOverlay_GUI();
+
+        /// <summary>
+        /// NOTE: This is Non-GUI overlay which cannot call GUI.DrawTexture and similar GUI calls.
         /// Called when settings want the tool to show some information overlay,
         /// but the tool is not active.
         /// </summary>
         /// <param name="cameraInfo">The camera.</param>
         public abstract void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo);
+
+        /// <summary>
+        /// NOTE: This is GUI overlay CAN call GUI.DrawTexture and similar GUI calls.
+        /// Called when settings want the tool to show some information overlay,
+        /// but the tool is not active.
+        /// </summary>
+        public abstract void RenderGenericInfoOverlay_GUI();
 
         /// <summary>
         /// Called whenever the mouse left click happened on the world, while the tool was active.

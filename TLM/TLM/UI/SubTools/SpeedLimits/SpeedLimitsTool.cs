@@ -138,15 +138,26 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             this.fsm_ = null;
         }
 
+        /// <summary>Render overlay segments/lanes in non-GUI mode, as overlays.</summary>
         public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
-            CreateOverlayDrawArgs();
-            overlay_.Render(cameraInfo: cameraInfo, args: this.overlayDrawArgs_);
-            overlay_.ShowSigns(cameraInfo: cameraInfo, args: this.overlayDrawArgs_);
+            CreateOverlayDrawArgs(interactive: true);
+
+            // Draw hovered lanes or segments
+            overlay_.RenderHelperGraphics(cameraInfo: cameraInfo, args: this.overlayDrawArgs_);
+        }
+
+        /// <summary>Render overlay speed limit signs in GUI mode.</summary>
+        public override void RenderActiveToolOverlay_GUI() {
+            CreateOverlayDrawArgs(interactive: true);
+
+            // Draw the clickable speed limit signs
+            overlay_.ShowSigns_GUI(args: this.overlayDrawArgs_);
         }
 
         /// <summary>Copies important values for rendering the overlay into its args struct.</summary>
-        private void CreateOverlayDrawArgs() {
-            overlayDrawArgs_.InteractiveSigns = true;
+        /// <param name="interactive"></param>
+        private void CreateOverlayDrawArgs(bool interactive) {
+            overlayDrawArgs_.InteractiveSigns = interactive;
             overlayDrawArgs_.MultiSegmentMode = this.MultiSegmentMode;
             overlayDrawArgs_.ShowLimitsPerLane = this.ShowLimitsPerLane;
             overlayDrawArgs_.ParentTool = this;
@@ -155,12 +166,20 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Render overlay for other tool modes, if speed limits overlay is on.</summary>
         /// <param name="cameraInfo">The camera.</param>
         public override void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo) {
+            // No non-GUI overlays for other tools, we draw signs in the *_GUI variant
+        }
+
+        /// <summary>Called in the GUI mode for GUI.DrawTexture.</summary>
+        /// <param name="cameraInfo">The camera.</param>
+        public override void RenderGenericInfoOverlay_GUI() {
             if (!Options.speedLimitsOverlay && !MassEditOverlay.IsActive) {
                 return;
             }
 
-            CreateOverlayDrawArgs();
-            overlay_.ShowSigns(cameraInfo: cameraInfo, args: this.overlayDrawArgs_);
+            CreateOverlayDrawArgs(interactive: false);
+
+            // Draw the NON-clickable speed limit signs
+            overlay_.ShowSigns_GUI(args: this.overlayDrawArgs_);
         }
 
         public override void OnToolLeftClick() {

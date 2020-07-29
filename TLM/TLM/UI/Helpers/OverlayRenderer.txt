@@ -1,0 +1,126 @@
+﻿namespace TrafficManager.UI {
+    using UnityEngine;
+
+    public class OverlayRenderer {
+        public static void DrawTexture(Rect position, Texture2D image) {
+            UnityEngine.Graphics.DrawTexture(screenRect: position, texture: image);
+        }
+
+        public static void DrawTexture(Rect position, Texture image) =>
+            GUI.DrawTexture(position: position, image: image, scaleMode: ScaleMode.StretchToFill);
+
+        public static void DrawTexture(Rect position, Texture image, ScaleMode scaleMode) =>
+            GUI.DrawTexture(
+                position: position,
+                image: image,
+                scaleMode: scaleMode,
+                alphaBlend: true);
+
+        public static void DrawTexture(Rect position,
+                                       Texture image,
+                                       ScaleMode scaleMode,
+                                       bool alphaBlend) {
+            GUI.DrawTexture(
+                position: position,
+                image: image,
+                scaleMode: scaleMode,
+                alphaBlend: alphaBlend,
+                imageAspect: 0.0f);
+        }
+
+        public static void DrawTexture(
+            Rect position,
+            Texture image,
+            ScaleMode scaleMode,
+            bool alphaBlend,
+            float imageAspect) {
+            if ((double)imageAspect == 0.0) {
+                imageAspect = (float)image.width / (float)image.height;
+            }
+
+            Material material = !alphaBlend ? GUI.blitMaterial : GUI.blendMaterial;
+            Internal_DrawTextureArguments args = new Internal_DrawTextureArguments();
+            args.leftBorder = 0;
+            args.rightBorder = 0;
+            args.topBorder = 0;
+            args.bottomBorder = 0;
+            args.color = (Color32)GUI.color;
+            args.texture = image;
+            args.mat = material;
+            CalculateScaledTextureRects(
+                position: position,
+                scaleMode: scaleMode,
+                imageAspect: imageAspect,
+                outScreenRect: ref args.screenRect,
+                outSourceRect: ref args.sourceRect);
+            Graphics.Internal_DrawTexture(ref args);
+        }
+
+        private static bool CalculateScaledTextureRects(
+            Rect position,
+            ScaleMode scaleMode,
+            float imageAspect,
+            ref Rect outScreenRect,
+            ref Rect outSourceRect)
+        {
+            float num1 = position.width / position.height;
+            bool flag = false;
+
+            switch (scaleMode) {
+                case ScaleMode.StretchToFill:
+                    outScreenRect = position;
+                    outSourceRect = new Rect(0.0f, 0.0f, 1f, 1f);
+                    flag = true;
+                    break;
+                case ScaleMode.ScaleAndCrop:
+                    if (num1 > (double)imageAspect) {
+                        float height = imageAspect / num1;
+                        outScreenRect = position;
+                        outSourceRect = new Rect(
+                            x: 0.0f,
+                            y: (float)((1.0 - height) * 0.5),
+                            width: 1f,
+                            height: height);
+                        flag = true;
+                        break;
+                    }
+
+                    float width = num1 / imageAspect;
+                    outScreenRect = position;
+                    outSourceRect = new Rect(
+                        x: (float)(0.5 - (width * 0.5)),
+                        y: 0.0f,
+                        width: width,
+                        height: 1f);
+                    flag = true;
+                    break;
+                case ScaleMode.ScaleToFit:
+                    if (num1 > (double)imageAspect) {
+                        float num2 = imageAspect / num1;
+                        outScreenRect = new Rect(
+                            position.xMin +
+                            (float)(position.width * (1.0 - num2) * 0.5),
+                            position.yMin,
+                            num2 * position.width,
+                            position.height);
+                        outSourceRect = new Rect(0.0f, 0.0f, 1f, 1f);
+                        flag = true;
+                        break;
+                    }
+
+                    float num3 = num1 / imageAspect;
+                    outScreenRect = new Rect(
+                        x: position.xMin,
+                        y: position.yMin +
+                           (float)(position.height * (1.0 - num3) * 0.5),
+                        width: position.width,
+                        height: num3 * position.height);
+                    outSourceRect = new Rect(0.0f, 0.0f, 1f, 1f);
+                    flag = true;
+                    break;
+            }
+
+            return flag;
+        }
+    }
+}

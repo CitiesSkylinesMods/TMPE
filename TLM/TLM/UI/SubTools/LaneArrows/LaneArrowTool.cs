@@ -272,8 +272,30 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
         }
 
+        public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
+            // We will be calling GUI.DrawTexture in the overlay renderer, so we need *_GUI variant
+            switch (fsm_.State) {
+                case State.Select:
+                    RenderOverlay_Select(cameraInfo);
+                    break;
+                case State.EditLaneArrows:
+                    RenderOverlay_Select(cameraInfo); // show potential half-segments to select
+                    RenderOverlay_EditLaneArrows(cameraInfo);
+                    break;
+            }
+        }
+
+        public override void RenderActiveToolOverlay_GUI() {
+            // No GUI-specific info overlay for lane arrows
+        }
+
         /// <summary>No generic overlay for other tool modes is provided by this tool, render nothing.</summary>
         public override void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo) {
+            // No info overlay for other tools
+        }
+
+        public override void RenderGenericInfoOverlay_GUI() {
+            // No GUI-specific info overlay to show while other tools active
         }
 
         /// <summary>Called from the Main Tool when left mouse button clicked.</summary>
@@ -518,18 +540,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             float cut = con ? 1f : 0.5f;
 
             MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
-        }
-
-        public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
-            switch (fsm_.State) {
-                case State.Select:
-                    RenderOverlay_Select(cameraInfo);
-                    break;
-                case State.EditLaneArrows:
-                    RenderOverlay_Select(cameraInfo); // show potential half-segments to select
-                    RenderOverlay_EditLaneArrows(cameraInfo);
-                    break;
-            }
         }
 
         /// <summary>Render info overlay for active tool, when UI is in Select state.</summary>
