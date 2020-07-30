@@ -59,9 +59,9 @@ namespace TrafficManager.State.Keybinds {
             "Key_LaneConnector_StayInLane",
             SavedInputKey.Encode(KeyCode.S, control:true, shift:false, alt:false));
 
-        public static KeybindSetting LaneConnectorDelete = new KeybindSetting(
-            "LaneConnector",
-            "Key_LaneConnector_Delete",
+        public static KeybindSetting RestoreDefaultsKey = new KeybindSetting(
+            "Global",
+            "Key_RestoreDefaults",
             SavedInputKey.Encode(KeyCode.Delete, false, false, false),
             SavedInputKey.Encode(KeyCode.Backspace, false, false, false));
 

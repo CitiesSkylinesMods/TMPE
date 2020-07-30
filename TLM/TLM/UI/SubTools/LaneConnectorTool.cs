@@ -1,5 +1,4 @@
 namespace TrafficManager.UI.SubTools {
-    using System;
     using ColossalFramework.Math;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -13,7 +12,6 @@ namespace TrafficManager.UI.SubTools {
     using UnityEngine;
     using TrafficManager.Util;
     using TrafficManager.UI.Helpers;
-    using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.MainMenu.OSD;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.UI.SubTools.PrioritySigns;
@@ -127,7 +125,7 @@ namespace TrafficManager.UI.SubTools {
                 // not too long ago (within 20 Unity frames or 0.33 sec)
             }
 
-            if (KeybindSettingsBase.LaneConnectorDelete.IsPressed(e)) {
+            if (KeybindSettingsBase.RestoreDefaultsKey.IsPressed(e)) {
                 frameClearPressed = Time.frameCount;
 
                 // this will be consumed in RenderOverlay() if the key was pressed
@@ -957,6 +955,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnActivate() {
+            base.OnActivate();
 #if DEBUG
             bool logLaneConn = DebugSwitch.LaneConnections.Get();
             if (logLaneConn) {
@@ -1327,41 +1326,36 @@ namespace TrafficManager.UI.SubTools {
                   new Color32(99, 75, 85, 255),
             };
 
-        private static string T(string key) {
-            return Translation.LaneRouting.Get(key);
-        }
+        private static string T(string key) => Translation.LaneRouting.Get(key);
 
+        /// <inheritdoc/>
         public void UpdateOnscreenDisplayPanel() {
             SelectionMode m = GetSelectionMode();
 
             switch (m) {
-                // TODO: uncomment this when state machine is properly implemented and right click cancels the mode
                 case SelectionMode.None: {
                     var items = new List<OsdItem>();
-                    items.Add(
-                        new MainMenu.OSD.ModeDescription(
-                            localizedText: T("LaneConnector.Mode:Select")));
+                    items.Add(new ModeDescription(localizedText: T("LaneConnector.Mode:Select")));
                     OnscreenDisplay.Display(items);
                     return;
                 }
                 case SelectionMode.SelectTarget:
                 case SelectionMode.SelectSource: {
                     var items = new List<OsdItem>();
-                    items.Add(
-                        new MainMenu.OSD.ModeDescription(
-                            m == SelectionMode.SelectSource
-                                ? T("LaneConnector.Mode:Source")
-                                : T("LaneConnector.Mode:Target")));
-                    items.Add(
-                        new MainMenu.OSD.Shortcut(
-                            keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
-                            localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
-                    items.Add(
-                        new MainMenu.OSD.Shortcut(
-                            keybindSetting: KeybindSettingsBase.LaneConnectorDelete,
-                            localizedText: T("LaneConnector.Label:Reset to default")));
+                    items.Add(new ModeDescription(
+                                  m == SelectionMode.SelectSource
+                                      ? T("LaneConnector.Mode:Source")
+                                      : T("LaneConnector.Mode:Target")));
+                    items.Add(new Shortcut(
+                                  keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
+                                  localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
+                    items.Add(new Shortcut(
+                                  keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
+                                  localizedText: T("LaneConnector.Label:Reset to default")));
 
-                    items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                    items.Add(m == SelectionMode.SelectSource
+                                  ? OnscreenDisplay.RightClick_LeaveNode()
+                                  : OnscreenDisplay.RightClick_LeaveLane());
                     OnscreenDisplay.Display(items);
                     return;
                 }

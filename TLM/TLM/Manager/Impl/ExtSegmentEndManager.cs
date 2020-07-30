@@ -296,6 +296,8 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="segmentId"></param>
         /// <param name="startNode"></param>
         public void CalculateCorners(ushort segmentId, bool startNode) {
+            if (!Shortcuts.netService.IsSegmentValid(segmentId))
+                return;
             ref ExtSegmentEnd segEnd = ref ExtSegmentEnds[GetIndex(segmentId, startNode)];
             segmentId.ToSegment().CalculateCorner(
                 segmentID: segmentId,

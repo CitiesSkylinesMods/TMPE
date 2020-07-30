@@ -22,6 +22,7 @@ namespace TrafficManager.UI.MainMenu {
     {
         public const int DEFAULT_MENU_X = 85;
         public const int DEFAULT_MENU_Y = 60;
+        public const string WINDOW_CONTROL_NAME = "TMPE_MainMenu_Window";
 
         /// <summary>
         /// Panel floating below the main menu and shows keybinds and mouse shortcuts.
@@ -130,7 +131,9 @@ namespace TrafficManager.UI.MainMenu {
         public override void Start() {
             base.Start();
 
-            U.UIUtil.MakeUniqueAndSetName(this.gameObject, "TMPE_MainMenuWindow");
+            U.UIUtil.MakeUniqueAndSetName(
+                toMakeUnique: this.gameObject,
+                name: WINDOW_CONTROL_NAME);
 
             GlobalConfig conf = GlobalConfig.Instance;
 
@@ -166,7 +169,7 @@ namespace TrafficManager.UI.MainMenu {
 
         /// <summary>Called from constructor to setup own properties and events.</summary>
         private void SetupWindow() {
-            this.name = "TMPE_MainMenu_Window";
+            this.name = WINDOW_CONTROL_NAME;
             this.isVisible = false;
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(64, 64, 64, 240);
@@ -253,6 +256,9 @@ namespace TrafficManager.UI.MainMenu {
                     p.atlas = TextureUtil.FindAtlas("Ingame");
                     p.backgroundSprite = "GenericPanel";
                     p.color = new Color32(64, 64, 64, 240);
+                    p.opacity = GlobalConfig.Instance.Main.KeybindsPanelVisible
+                                    ? 1f
+                                    : 0f;
                 }))
             {
                 osdBuilder.SetPadding(UConst.UIPADDING);
@@ -261,8 +267,8 @@ namespace TrafficManager.UI.MainMenu {
                 UResizerConfig.From(osdBuilder.Control).ContributeToBoundingBox = false;
                 this.OnscreenDisplayPanel = osdBuilder.Control;
 
-                bool keybindsVisible = GlobalConfig.Instance.Main.KeybindsPanelVisible;
-                this.OnscreenDisplayPanel.gameObject.SetActive(keybindsVisible);
+                // bool keybindsVisible = GlobalConfig.Instance.Main.KeybindsPanelVisible;
+                // this.OnscreenDisplayPanel.gameObject.SetActive(keybindsVisible);
 
                 osdBuilder.ResizeFunction(
                     r => {
@@ -341,9 +347,6 @@ namespace TrafficManager.UI.MainMenu {
 
             // Refer to the TrafficManager tool asking it to request help from the current tool
             ModUI.GetTrafficManagerTool().RequestOnscreenDisplayUpdate();
-
-            // The task is delayed till next GUI update frame.
-            // ModUI.GetTrafficManagerTool().InvalidateOnscreenDisplayFlag = true;
         }
 
         private void SetupControls_DebugLabels(UiBuilder<MainMenuWindow> builder,
@@ -456,11 +459,11 @@ namespace TrafficManager.UI.MainMenu {
         /// <summary>Called by UResizer for every control to be 'resized'.</summary>
         public override void OnAfterResizerUpdate() {
             if (this.DragHandle != null) {
-                // Resize to the window width but remember there's padding on the left
-                // this.DragHandle.size = new Vector2(x: this.width - (UConst.UIPADDING * 2f),
-                //                                    y: this.VersionLabel.height);
-
                 this.DragHandle.size = this.VersionLabel.size;
+
+                // Push the window back into screen if the label/draghandle are partially offscreen
+                U.UIUtil.ClampToScreen(window: this,
+                                       alwaysVisible: this.VersionLabel);
             }
         }
 
@@ -574,24 +577,16 @@ namespace TrafficManager.UI.MainMenu {
                 UpdatePosition(new Vector2(config.Main.MainMenuX, config.Main.MainMenuY));
                 lastUpdatePositionFrame_ = nowFrame;
             }
-
-            // if (isStarted_) {
-            //     this.Invalidate();
-            // }
         }
 
         /// <summary>Always invalidates the main menu, do not call too often!</summary>
         /// <param name="pos">Config main menu position.</param>
         public void UpdatePosition(Vector2 pos) {
-            Rect rect = new Rect(
-                pos.x,
-                pos.y,
-                ModUI.Instance.MainMenu.width,
-                this.height);
-            Vector2 resolution = UIView.GetAView().GetScreenResolution();
-            VectorUtil.ClampRectToScreen(ref rect, resolution);
-            Log.Info($"Setting main menu position to [{pos.x},{pos.y}]");
-            absolutePosition = rect.position;
+            this.absolutePosition = new Vector2(pos.x, pos.y);
+            if (U.UIUtil.ClampToScreen(window: this, alwaysVisible: this.VersionLabel)) {
+                Log.Info($"Moving main menu pos={this.absolutePosition}");
+            }
+
             Invalidate();
         }
 

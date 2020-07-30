@@ -2,21 +2,29 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
-    using TrafficManager.API.Manager;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
-    using TrafficManager.UI.Textures;
     using UnityEngine;
     using TrafficManager.State.Keybinds;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.UI.Helpers;
+    using TrafficManager.UI.MainMenu.OSD;
 
-    public class JunctionRestrictionsTool : LegacySubTool {
+    public class JunctionRestrictionsTool
+        : LegacySubTool,
+          UI.MainMenu.IOnscreenDisplayProvider
+    {
         private readonly HashSet<ushort> currentRestrictedNodeIds;
-        private bool overlayHandleHovered;
+
+        /// <summary>
+        /// Set to true in render, if any of the overlay clickable icons has mouse in them.
+        /// </summary>
+        private bool isAnyOverlayHandleHovered;
+
+        private readonly float junctionRestrictionsSignSize = 80f;
 
         public JunctionRestrictionsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
@@ -24,13 +32,8 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnToolGUI(Event e) {
-            // if (SelectedNodeId != 0) {
-            //        overlayHandleHovered = false;
-            // }
-            // ShowSigns(false);
-
             // handle delete
-            if (KeybindSettingsBase.LaneConnectorDelete.KeyDown(e)) {
+            if (KeybindSettingsBase.RestoreDefaultsKey.KeyDown(e)) {
                 netService.IterateNodeSegments(
                     SelectedNodeId,
                     (ushort segmmentId, ref NetSegment segment) => {
@@ -66,13 +69,13 @@ namespace TrafficManager.UI.SubTools {
             }
 
             if (SelectedNodeId != 0) {
-                overlayHandleHovered = false;
+                isAnyOverlayHandleHovered = false;
             }
 
-            ShowSigns(viewOnly);
+            ShowGUIOverlay_ShowSigns(viewOnly);
         }
 
-        private void ShowSigns(bool viewOnly) {
+        private void ShowGUIOverlay_ShowSigns(bool viewOnly) {
 #if DEBUG
             bool logJunctions = !viewOnly && DebugSwitch.JunctionRestrictions.Get();
 #else
@@ -126,7 +129,7 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
-            overlayHandleHovered = handleHovered;
+            isAnyOverlayHandleHovered = handleHovered;
 
             if (updatedNodeId != 0) {
                 RefreshCurrentRestrictedNodeIds(updatedNodeId);
@@ -143,7 +146,7 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            if (overlayHandleHovered) {
+            if (isAnyOverlayHandleHovered) {
                 return;
             }
 
@@ -154,6 +157,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             SelectedNodeId = HoveredNodeId;
+            MainTool.RequestOnscreenDisplayUpdate();
 
             // prevent accidential activation of signs on node selection (TODO [issue #740] improve this !)
             MainTool.CheckClicked();
@@ -161,11 +165,14 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnSecondaryClickOverlay() {
             SelectedNodeId = 0;
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         public override void OnActivate() {
+            base.OnActivate();
             Log._Debug("LaneConnectorTool: OnActivate");
             SelectedNodeId = 0;
+            MainTool.RequestOnscreenDisplayUpdate();
             RefreshCurrentRestrictedNodeIds();
         }
 
@@ -207,5 +214,30 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
         }
-    }
+
+        private static string T(string key) => Translation.JunctionRestrictions.Get(key);
+
+        public void UpdateOnscreenDisplayPanel() {
+            if (SelectedNodeId == 0) {
+                // Select mode
+                var items = new List<OsdItem>();
+                items.Add(new UI.MainMenu.OSD.ModeDescription(T("JR.OnscreenHint.Mode:Select")));
+                OnscreenDisplay.Display(items);
+            } else {
+                // Edit mode
+                var items = new List<OsdItem>();
+                items.Add(new UI.MainMenu.OSD.ModeDescription(T("JR.OnscreenHint.Mode:Edit")));
+                items.Add(
+                    new UI.MainMenu.OSD.Shortcut(
+                        keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
+                        localizedText: T("JR.OnscreenHint.Reset:Reset to default")));
+
+                items.Add(OnscreenDisplay.RightClick_LeaveNode());
+                OnscreenDisplay.Display(items);
+            }
+
+            // Default: no hint
+            // OnscreenDisplay.Clear();
+        }
+    } // end class
 }

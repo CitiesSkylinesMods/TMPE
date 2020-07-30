@@ -17,7 +17,9 @@ namespace TrafficManager.UI.MainMenu.OSD {
 
         private static void Hide() {
             MainMenuWindow mainMenu = ModUI.Instance.MainMenu;
-            mainMenu.OnscreenDisplayPanel.opacity = 0f; // invisible
+            if (mainMenu.OnscreenDisplayPanel.GetUIView() != null) { // safety
+                mainMenu.OnscreenDisplayPanel.opacity = 0f; // invisible
+            }
         }
 
         /// <summary>Clear the OSD panel and display the idle hint.</summary>
@@ -54,7 +56,9 @@ namespace TrafficManager.UI.MainMenu.OSD {
                 }
             }
 
-            if (items.Count > 0) {
+            if (items.Count > 0
+                && mainMenu.OnscreenDisplayPanel.GetUIView() != null)
+            {
                 mainMenu.OnscreenDisplayPanel.opacity = 1f; // fully visible, opaque
             }
 
@@ -77,6 +81,14 @@ namespace TrafficManager.UI.MainMenu.OSD {
             return new Shortcut(
                 keybindSetting: KeybindSettingsBase.RightClick,
                 localizedText: Translation.Options.Get("Keybind.RightClick:Leave node"));
+        }
+
+        /// <summary>Create OsdItem with generic "RightClick Leave lane" text.</summary>
+        /// <returns>New OsdItem to pass to the <see cref="Display"/>.</returns>
+        public static Shortcut RightClick_LeaveLane() {
+            return new Shortcut(
+                keybindSetting: KeybindSettingsBase.RightClick,
+                localizedText: Translation.Options.Get("Keybind.RightClick:Leave lane"));
         }
 
         /// <summary>Create OsdItem with generic "RightClick Leave segment" text.</summary>

@@ -40,21 +40,19 @@ namespace TrafficManager.State {
         private static UIDropDown _roadSignsMphThemeDropdown;
         private static int _roadSignMphStyleInt;
 
-        private static string T(string key) {
-            return Translation.Options.Get(key);
-        }
+        private static string T(string key) => Translation.Options.Get(key);
 
         internal static void MakeSettings_General(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(T("Tab:General"));
 
-            UIHelperBase generalGroup = panelHelper.AddGroup(
-                T("Tab:General"));
+            UIHelperBase generalGroup = panelHelper.AddGroup(T("Tab:General"));
             string[] languageLabels = new string[Translation.AvailableLanguageCodes.Count + 1];
             languageLabels[0] = T("General.Dropdown.Option:Game language");
 
             for (int i = 0; i < Translation.AvailableLanguageCodes.Count; ++i) {
                 languageLabels[i + 1] = Translation.Options.Get(
-                    Translation.AvailableLanguageCodes[i], "General.Dropdown.Option:Language Name");
+                    lang: Translation.AvailableLanguageCodes[i],
+                    key: "General.Dropdown.Option:Language Name");
             }
 
             int languageIndex = 0;
@@ -70,18 +68,18 @@ namespace TrafficManager.State {
             }
 
             _languageDropdown = generalGroup.AddDropdown(
-                                    T("General.Dropdown:Select language") + ":",
-                                    languageLabels,
-                                    languageIndex,
-                                    OnLanguageChanged) as UIDropDown;
+                                    text: T("General.Dropdown:Select language") + ":",
+                                    options: languageLabels,
+                                    defaultSelection: languageIndex,
+                                    eventCallback: OnLanguageChanged) as UIDropDown;
             _lockButtonToggle = generalGroup.AddCheckbox(
-                                    T("General.Checkbox:Lock main menu button position"),
-                                    GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
-                                    OnLockButtonChanged) as UICheckBox;
+                                    text: T("General.Checkbox:Lock main menu button position"),
+                                    defaultValue: GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
+                                    eventCallback: OnLockButtonChanged) as UICheckBox;
             _lockMenuToggle = generalGroup.AddCheckbox(
-                                  T("General.Checkbox:Lock main menu window position"),
-                                  GlobalConfig.Instance.Main.MainMenuPosLocked,
-                                  OnLockMenuChanged) as UICheckBox;
+                                  text: T("General.Checkbox:Lock main menu window position"),
+                                  defaultValue: GlobalConfig.Instance.Main.MainMenuPosLocked,
+                                  eventCallback: OnLockMenuChanged) as UICheckBox;
 
             _guiScaleSlider = generalGroup.AddSlider(
                                         text: T("General.Slider:GUI scale") + ":",
@@ -124,9 +122,9 @@ namespace TrafficManager.State {
                       GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,
                       OnScanForKnownIncompatibleModsChanged) as UICheckBox;
             _ignoreDisabledModsToggle = generalGroup.AddCheckbox(
-                                            Translation.ModConflicts.Get("Checkbox:Ignore disabled mods"),
-                                            GlobalConfig.Instance.Main.IgnoreDisabledMods,
-                                            OnIgnoreDisabledModsChanged) as UICheckBox;
+                                            text: Translation.ModConflicts.Get("Checkbox:Ignore disabled mods"),
+                                            defaultValue: GlobalConfig.Instance.Main.IgnoreDisabledMods,
+                                            eventCallback: OnIgnoreDisabledModsChanged) as UICheckBox;
             Options.Indent(_ignoreDisabledModsToggle);
 
             // General: Speed Limits
@@ -135,28 +133,28 @@ namespace TrafficManager.State {
             // General: Simulation
             UIHelperBase simGroup = panelHelper.AddGroup(T("General.Group:Simulation"));
             _simulationAccuracyDropdown = simGroup.AddDropdown(
-                                       T("General.Dropdown:Simulation accuracy") + ":",
-                                       new[] {
-                                           T("General.Dropdown.Option:Very low"),
-                                           T("General.Dropdown.Option:Low"),
-                                           T("General.Dropdown.Option:Medium"),
-                                           T("General.Dropdown.Option:High"),
-                                           T("General.Dropdown.Option:Very high")
-                                       },
-                                       (int)Options.simulationAccuracy,
-                                       OnSimulationAccuracyChanged) as UIDropDown;
+                                       text: T("General.Dropdown:Simulation accuracy") + ":",
+                                       options: new[] {
+                                                          T("General.Dropdown.Option:Very low"),
+                                                          T("General.Dropdown.Option:Low"),
+                                                          T("General.Dropdown.Option:Medium"),
+                                                          T("General.Dropdown.Option:High"),
+                                                          T("General.Dropdown.Option:Very high"),
+                                                      },
+                                       defaultSelection: (int)Options.simulationAccuracy,
+                                       eventCallback: OnSimulationAccuracyChanged) as UIDropDown;
 
             _instantEffectsToggle = simGroup.AddCheckbox(
-                                       T("General.Checkbox:Apply AI changes right away"),
-                                       Options.instantEffects,
-                                       OnInstantEffectsChanged) as UICheckBox;
+                                       text: T("General.Checkbox:Apply AI changes right away"),
+                                       defaultValue: Options.instantEffects,
+                                       eventCallback: OnInstantEffectsChanged) as UICheckBox;
         }
 
         private static void SetupSpeedLimitsPanel(UIHelperBase generalGroup) {
             _displayMphToggle = generalGroup.AddCheckbox(
-                                    Translation.SpeedLimits.Get("Checkbox:Display speed limits mph"),
-                                    GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
-                                    OnDisplayMphChanged) as UICheckBox;
+                                    text: Translation.SpeedLimits.Get("Checkbox:Display speed limits mph"),
+                                    defaultValue: GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
+                                    eventCallback: OnDisplayMphChanged) as UICheckBox;
             string[] mphThemeOptions = {
                 Translation.SpeedLimits.Get("General.Theme.Option:Square US"),
                 Translation.SpeedLimits.Get("General.Theme.Option:Round UK"),
@@ -165,10 +163,10 @@ namespace TrafficManager.State {
             _roadSignMphStyleInt = (int)GlobalConfig.Instance.Main.MphRoadSignStyle;
             _roadSignsMphThemeDropdown
                 = generalGroup.AddDropdown(
-                      Translation.SpeedLimits.Get("General.Dropdown:Road signs theme mph") + ":",
-                      mphThemeOptions,
-                      _roadSignMphStyleInt,
-                      OnRoadSignsMphThemeChanged) as UIDropDown;
+                      text: Translation.SpeedLimits.Get("General.Dropdown:Road signs theme mph") + ":",
+                      options: mphThemeOptions,
+                      defaultSelection: _roadSignMphStyleInt,
+                      eventCallback: OnRoadSignsMphThemeChanged) as UIDropDown;
             _roadSignsMphThemeDropdown.width = 400;
         }
 
@@ -245,6 +243,9 @@ namespace TrafficManager.State {
                 = string.Format(
                     T("General.Tooltip.Format:Window transparency: {0}%"),
                     GlobalConfig.Instance.Main.GuiOpacity);
+            if (LoadingExtension.IsGameLoaded) {
+                _guiOpacitySlider.RefreshTooltip();
+            }
 
             GlobalConfig.WriteConfig();
             Log._Debug($"GuiTransparency changed to {GlobalConfig.Instance.Main.GuiOpacity}");
@@ -256,6 +257,9 @@ namespace TrafficManager.State {
                 = string.Format(
                     T("General.Tooltip.Format:GUI scale: {0}%"),
                     GlobalConfig.Instance.Main.GuiScale);
+            if (LoadingExtension.IsGameLoaded) {
+                _guiScaleSlider.RefreshTooltip();
+            }
 
             GlobalConfig.WriteConfig();
             Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScale}");
@@ -271,6 +275,10 @@ namespace TrafficManager.State {
                 T("General.Tooltip.Format:Overlay transparency: {0}%"),
                 GlobalConfig.Instance.Main.OverlayTransparency);
             GlobalConfig.WriteConfig();
+            if (LoadingExtension.IsGameLoaded) {
+                _overlayTransparencySlider.RefreshTooltip();
+            }
+
             Log._Debug($"Overlay transparency changed to {GlobalConfig.Instance.Main.OverlayTransparency}");
         }
 
