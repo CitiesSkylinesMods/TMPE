@@ -208,6 +208,8 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
+                float intersectionY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(netManager.m_nodes.m_buffer[nodeId].m_position);
+
                 foreach (LaneEnd laneEnd in laneEnds) {
                     if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(laneEnd.LaneId)) {
                         continue;
@@ -220,13 +222,14 @@ namespace TrafficManager.UI.SubTools {
                                 continue;
                             }
 
+                            Bezier3 bezier = CalculateBezierConnection(laneEnd, targetLaneEnd);
+                            Vector3 height = bezier.Max();
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
-                                start: laneEnd.NodeMarker.TerrainPosition,
-                                end: targetLaneEnd.NodeMarker.TerrainPosition,
-                                middlePoint: NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
+                                bezier: bezier,
                                 color: laneEnd.Color,
-                                outlineColor: Color.black);
+                                outlineColor: Color.black,
+                                underground: (height.y + 1f) < intersectionY);
                         }
                     }
 
@@ -280,14 +283,16 @@ namespace TrafficManager.UI.SubTools {
                                 continue;
                             }
 
+                            Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, targetLaneEnd);
+                            Vector3 height = bezier.Max();
+
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
-                                start: selectedLaneEnd.NodeMarker.TerrainPosition,
-                                end: targetLaneEnd.NodeMarker.TerrainPosition,
-                                middlePoint: NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
+                                bezier: bezier,
                                 color: selectedLaneEnd.Color,
                                 outlineColor: Color.grey,
-                                size: 0.18f); // Embolden
+                                size: 0.18f,// Embolden
+                                underground: (height.y - 1f) < intersectionY);
                         } // end foreach selectedMarker.ConnectedMarkers
                     } // end if selectedMarker != null
                 } // end foreach lanemarker in node markers
@@ -1269,6 +1274,7 @@ namespace TrafficManager.UI.SubTools {
                 smoothEnd: false,
                 middlePos1: out bezier.b,
                 middlePos2: out bezier.c);
+            Bounds bounds = bezier.GetBounds();
 
             // Draw black outline
             RenderManager.instance.OverlayEffect.DrawBezier(
@@ -1278,8 +1284,8 @@ namespace TrafficManager.UI.SubTools {
                 size: size * 1.5f,
                 cutStart: 0,
                 cutEnd: 0,
-                minY: -1f,
-                maxY: 1280f,
+                minY: bounds.min.y - 1f,
+                maxY: bounds.max.y + 1f,
                 renderLimits: false,
                 alphaBlend: false);
 
@@ -1291,10 +1297,85 @@ namespace TrafficManager.UI.SubTools {
                 size: size,
                 cutStart: 0,
                 cutEnd: 0,
-                minY: -1f,
-                maxY: 1280f,
+                minY: bounds.min.y - 1f,
+                maxY: bounds.max.y + 1f,
                 renderLimits: false,
                 alphaBlend: true);
+        }
+
+        /// <summary>
+        /// Draw accurate bezier line with option to be visible through terrain and other objects or not.
+        /// Lane rendering mesh(box) has very low height which prevents overdraw and other performance issues
+        /// </summary>
+        /// <param name="cameraInfo">Camera instance to use</param>
+        /// <param name="bezier">Bezier acr to render</param>
+        /// <param name="color">Color</param>
+        /// <param name="outlineColor">Outline color</param>
+        /// <param name="size">Bezier line thickness</param>
+        /// <param name="underground">Should be visible through obstacles like terrain or other objects</param>
+        private void DrawLaneCurve(RenderManager.CameraInfo cameraInfo,
+                                   Bezier3 bezier,
+                                   Color color,
+                                   Color outlineColor,
+                                   float size = 0.08f,
+                                   bool underground = false) {
+            Bounds bounds = bezier.GetBounds();
+            // Draw black outline
+            RenderManager.instance.OverlayEffect.DrawBezier(
+                cameraInfo: cameraInfo,
+                color: outlineColor,
+                bezier: bezier,
+                size: size * 1.5f,
+                cutStart: 0,
+                cutEnd: 0,
+                minY: bounds.min.y - 0.5f,
+                maxY: bounds.max.y + 0.5f,
+                renderLimits: underground,
+                alphaBlend: false);
+
+            // Inside the outline draw colored bezier
+            RenderManager.instance.OverlayEffect.DrawBezier(
+                cameraInfo: cameraInfo,
+                color: color,
+                bezier: bezier,
+                size: size,
+                cutStart: 0,
+                cutEnd: 0,
+                minY: bounds.min.y - 0.5f,
+                maxY: bounds.max.y + 0.5f,
+                renderLimits: underground,
+                alphaBlend: true);
+        }
+
+        /// <summary>
+        /// Calculates accurate bezier arc between two lane ends
+        /// </summary>
+        /// <param name="sourceLaneEnd">Start position marker</param>
+        /// <param name="targetLaneEnd">End position marker</param>
+        /// <returns>Bezier arc</returns>
+        private Bezier3 CalculateBezierConnection(LaneEnd sourceLaneEnd, LaneEnd targetLaneEnd) {
+            Bezier3 bezier3 = default;
+            bezier3.a = sourceLaneEnd.NodeMarker.Position;
+            bezier3.d = targetLaneEnd.NodeMarker.Position;
+
+            Vector3 sourceLaneDirection =
+                NetManager.instance.m_lanes.m_buffer[sourceLaneEnd.LaneId].m_bezier
+                          .Tangent(sourceLaneEnd.StartNode ? 0f : 1f) *
+                (sourceLaneEnd.StartNode ? -1 : 1);
+            Vector3 targetLaneDirection =
+                NetManager.instance.m_lanes.m_buffer[targetLaneEnd.LaneId].m_bezier
+                          .Tangent(targetLaneEnd.StartNode ? 0f : 1f) *
+                (targetLaneEnd.StartNode ? -1 : 1);
+            NetSegment.CalculateMiddlePoints(
+                bezier3.a,
+                sourceLaneDirection.normalized,
+                bezier3.d,
+                targetLaneDirection.normalized,
+                false,
+                false,
+                out bezier3.b,
+                out bezier3.c);
+            return bezier3;
         }
 
         /// <summary>
