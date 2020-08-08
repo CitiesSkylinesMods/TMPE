@@ -147,7 +147,7 @@ namespace TrafficManager.Custom.PathFinding {
         }
 
         // stock fields
-        public ThreadProfiler m_pathfindProfiler;
+        // public ThreadProfiler m_pathfindProfiler;
         private object bufferLock_;
         private int bufferMinPos_;
         private int bufferMaxPos_;

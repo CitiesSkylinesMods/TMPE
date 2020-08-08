@@ -695,14 +695,14 @@ namespace TrafficManager.UI {
             bezier.d = GetNodePos(segment.m_endNode);
 
             NetSegment.CalculateMiddlePoints(
-                bezier.a,
-                segment.m_startDirection,
-                bezier.d,
-                segment.m_endDirection,
-                IsMiddle(segment.m_startNode),
-                IsMiddle(segment.m_endNode),
-                out bezier.b,
-                out bezier.c);
+                startPos: bezier.a,
+                startDir: segment.m_startDirection,
+                endPos: bezier.d,
+                endDir: segment.m_endDirection,
+                smoothStart: IsMiddle(segment.m_startNode),
+                smoothEnd: IsMiddle(segment.m_endNode),
+                middlePos1: out bezier.b,
+                middlePos2: out bezier.c);
 
             if (bStartNode) {
                 bezier = bezier.Cut(0, cut);
@@ -715,12 +715,12 @@ namespace TrafficManager.UI {
                 cameraInfo,
                 color,
                 bezier,
-                width * 2f,
-                bStartNode ? 0 : width,
-                bStartNode ? width : 0,
-                -1f,
-                1280f,
-                false,
+                size: width * 2f,
+                cutStart: bStartNode ? 0 : width,
+                cutEnd: bStartNode ? width : 0,
+                minY: -1f,
+                maxY: 1280f,
+                renderLimits: false,
                 alpha);
         }
 
@@ -749,26 +749,26 @@ namespace TrafficManager.UI {
             bezier.d = GetNodePos(segment.m_endNode);
 
             NetSegment.CalculateMiddlePoints(
-                bezier.a,
-                segment.m_startDirection,
-                bezier.d,
-                segment.m_endDirection,
-                IsMiddle(segment.m_startNode),
-                IsMiddle(segment.m_endNode),
-                out bezier.b,
-                out bezier.c);
+                startPos: bezier.a,
+                startDir: segment.m_startDirection,
+                endPos: bezier.d,
+                endDir: segment.m_endDirection,
+                smoothStart: IsMiddle(segment.m_startNode),
+                smoothEnd: IsMiddle(segment.m_endNode),
+                middlePos1: out bezier.b,
+                middlePos2: out bezier.c);
 
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
                 cameraInfo,
                 color,
                 bezier,
-                width * 2f,
-                0,
-                0,
-                -1f,
-                1280f,
-                false,
+                size: width * 2f,
+                cutStart: 0,
+                cutEnd: 0,
+                minY: -1f,
+                maxY: 1280f,
+                renderLimits: false,
                 alphaBlend);
         }
 
@@ -784,10 +784,10 @@ namespace TrafficManager.UI {
                 cameraInfo,
                 color,
                 position,
-                width,
-                position.y - 100f,
-                position.y + 100f,
-                false,
+                size: width,
+                minY: position.y - 100f,
+                maxY: position.y + 100f,
+                renderLimits: false,
                 alpha);
         }
 
@@ -811,7 +811,7 @@ namespace TrafficManager.UI {
                 x,
                 y,
                 size,
-                false);
+                canHover: false);
         }
 
         [UsedImplicitly]
@@ -835,7 +835,7 @@ namespace TrafficManager.UI {
                 x,
                 y,
                 size,
-                true);
+                canHover: true);
         }
 
         // TODO: move to UI.Helpers (Highlight)
@@ -853,14 +853,14 @@ namespace TrafficManager.UI {
                 texture,
                 camPos,
                 gridOrigin,
-                cellSize,
-                cellSize,
+                cellWidth: cellSize,
+                cellHeight: cellSize,
                 xu,
                 yu,
                 x,
                 y,
-                size,
-                size,
+                width: size,
+                height: size,
                 canHover);
         }
 
@@ -888,7 +888,7 @@ namespace TrafficManager.UI {
                 y,
                 width,
                 height,
-                false);
+                canHover: false);
         }
 
         [UsedImplicitly]
@@ -916,7 +916,7 @@ namespace TrafficManager.UI {
                 y,
                 width,
                 height,
-                true);
+                canHover: true);
         }
 
         // TODO: move to UI.Helpers (Highlight)
@@ -943,7 +943,13 @@ namespace TrafficManager.UI {
                                                    Vector3 camPos,
                                                    Vector3 worldPos,
                                                    float size) {
-            DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, false);
+            DrawGenericOverlayTexture(
+                texture,
+                camPos,
+                worldPos,
+                width: size,
+                height: size,
+                canHover: false);
         }
 
         // TODO: move to UI.Helpers (Highlight)
@@ -951,7 +957,13 @@ namespace TrafficManager.UI {
                                                       Vector3 camPos,
                                                       Vector3 worldPos,
                                                       float size) {
-            return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, true);
+            return DrawGenericOverlayTexture(
+                texture,
+                camPos,
+                worldPos,
+                width: size,
+                height: size,
+                canHover: true);
         }
 
         // TODO: move to UI.Helpers (Highlight)
@@ -960,7 +972,13 @@ namespace TrafficManager.UI {
                                                     Vector3 worldPos,
                                                     float size,
                                                     bool canHover) {
-            return DrawGenericOverlayTexture(texture, camPos, worldPos, size, size, canHover);
+            return DrawGenericOverlayTexture(
+                texture,
+                camPos,
+                worldPos,
+                width: size,
+                height: size,
+                canHover);
         }
 
         // TODO: move to UI.Helpers (Highlight)
@@ -969,7 +987,7 @@ namespace TrafficManager.UI {
                                              Vector3 worldPos,
                                              float width,
                                              float height) {
-            DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, false);
+            DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, canHover: false);
         }
 
         [UsedImplicitly]
@@ -979,7 +997,13 @@ namespace TrafficManager.UI {
                                                 Vector3 worldPos,
                                                 float width,
                                                 float height) {
-            return DrawGenericOverlayTexture(texture, camPos, worldPos, width, height, true);
+            return DrawGenericOverlayTexture(
+                texture,
+                camPos,
+                worldPos,
+                width,
+                height,
+                canHover: true);
         }
 
         // TODO: move to UI.Helpers (Highlight)
