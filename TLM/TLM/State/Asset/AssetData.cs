@@ -10,7 +10,7 @@ namespace TrafficManager.State.Asset {
     public class AssetData {
         private string version_;
 
-        /// Mod version at the time where data was serailized.
+        /// <summary>Mod version at the time where data was serailized.</summary>
         public Version Version {
             get => version_ != null ? new Version(version_) : default;
             set => version_ = value.ToString();
@@ -18,14 +18,23 @@ namespace TrafficManager.State.Asset {
 
         public IRecordable Record;
 
-        //TODO [issue #959] record networkIDs.
+        /// <summary>
+        /// there is a 1:1 correspondence between returned array and BuildingInfo.m_paths.
+        /// Does not store nodes that have no segments (they are at the end of BuildingInfo.m_paths so
+        /// this does not interfere with array indeces).
+        /// </summary>
+        public SegmentNetworkIDs[] PathNetworkIDs;
 
-        public override string ToString() => $"AssetData(Version={Version} record={Record})";
+        public override string ToString() => $"AssetData(Version={Version} record={Record} ids={PathNetworkIDs})";
 
-        public static AssetData GetAssetData() {
+        /// <summary>
+        /// gathers all data for the given asset.
+        /// </summary>
+        public static AssetData GetAssetData(BuildingInfo prefab) {
             return new AssetData {
                 Version = TrafficManagerMod.ModVersion,
                 Record = RecordAll(),
+                PathNetworkIDs = GetPathsNetworkIDs(prefab),
             };
         }
 
@@ -40,6 +49,36 @@ namespace TrafficManager.State.Asset {
             }
             record.Record();
             return record;
+        }
+
+        /// <summary>
+        /// creates an array of SegmentNetworkIDs.
+        /// there is a 1:1 correspondence between returned array and BuildingInfo.m_paths.
+        /// Does not store nodes that have no segments (they are at the end of BuildingInfo.m_paths so
+        /// this does not interfere with array indeces).
+        /// </summary>
+        public static SegmentNetworkIDs [] GetPathsNetworkIDs(BuildingInfo prefab) {
+            // Code based on BuildingDecorations.SavePaths()
+            Building[] buildingBuffer = BuildingManager.instance.m_buildings.m_buffer;
+            List<ushort> assetSegmentIds = new List<ushort>();
+            List<ushort> buildingIds = new List<ushort>(prefab.m_paths.Length);
+            var ret = new List<SegmentNetworkIDs>();
+            for (ushort buildingId = 1; buildingId < BuildingManager.MAX_BUILDING_COUNT; buildingId += 1) {
+                if (buildingBuffer[buildingId].m_flags != Building.Flags.None) {
+                    assetSegmentIds.AddRange(BuildingDecoration.GetBuildingSegments(ref buildingBuffer[buildingId]));
+                    buildingIds.Add(buildingId);
+                }
+            }
+
+            for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; segmentId++) {
+                if (netService.IsSegmentValid(segmentId)) {
+                    if (!assetSegmentIds.Contains(segmentId)) {
+                        ret.Add(new SegmentNetworkIDs(segmentId));
+                    }
+                }
+            }
+            return ret.ToArray();
+
         }
     }
 }
