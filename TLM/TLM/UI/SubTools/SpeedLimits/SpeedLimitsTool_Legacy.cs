@@ -848,7 +848,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     SpeedValue laneSpeedLimit = new SpeedValue(
                         SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId));
 
-                    bool hoveredHandle = MainTool.DrawGenericOverlayGridTexture(
+                    bool hoveredHandle = Highlight.DrawGenericOverlayGridTexture(
                         texture: SpeedLimitTextures.GetSpeedLimitTexture(laneSpeedLimit),
                         camPos: camPos,
                         gridOrigin: zero,
@@ -860,7 +860,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                         y: 0,
                         width: speedLimitSignSize,
                         height: speedLimitSignSize * speedLimitSignVerticalScale,
-                        canHover: !viewOnly);
+                        canHover: !viewOnly,
+                        screenRect: out Rect _);
 
                     if (!viewOnly
                         && !onlyMonorailLanes
@@ -868,7 +869,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                             VehicleInfo.VehicleType.None)) {
                         Texture2D tex1 = RoadUI.VehicleInfoSignTextures[
                             LegacyExtVehicleType.ToNew(ExtVehicleType.PassengerTrain)];
-                        MainTool.DrawStaticSquareOverlayGridTexture(
+
+                        Highlight.DrawStaticSquareOverlayGridTexture(
                             texture: tex1,
                             camPos: camPos,
                             gridOrigin: zero,
@@ -877,7 +879,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                             yu: yu,
                             x: x,
                             y: 1,
-                            size: speedLimitSignSize);
+                            size: speedLimitSignSize,
+                            screenRect: out Rect _);
                     }
 
                     if (hoveredHandle) {
@@ -967,7 +970,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                         continue;
                     }
 
-                    float zoom = (1.0f / (e.Value - camPos).magnitude) * 100f * MainTool.GetBaseZoom();
+                    float zoom = (1.0f / (e.Value - camPos).magnitude) * 100f * U.UIScaler.GetScale();
                     float size = (viewOnly ? 0.8f : 1f) * speedLimitSignSize * zoom;
                     Color guiColor = GUI.color;
                     var boundingBox = new Rect(screenPos.x - (size / 2),

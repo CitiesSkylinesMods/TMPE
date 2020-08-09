@@ -170,8 +170,8 @@
     <Compile Include="Patch\_NetSegment\CalculateSegmentPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
+    <Compile Include="UI\Helpers\Highlight.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
-    <Content Include="UI\Helpers\OverlayRenderer.txt" />
     <Compile Include="UI\Helpers\Prompt.cs" />
     <Compile Include="UI\Helpers\SegmentLaneMarker.cs" />
     <Compile Include="UI\Helpers\ExtUITabStrip.cs" />
@@ -305,6 +305,8 @@
     <Compile Include="UI\SubTools\PrioritySigns\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\MphToggleButton.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\LegacySpeedLimitsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\OverlayLaneSpeedlimitHandle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\OverlaySegmentSpeedlimitHandle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\PaletteGenerator.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitSignTheme.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsOverlay.cs" />

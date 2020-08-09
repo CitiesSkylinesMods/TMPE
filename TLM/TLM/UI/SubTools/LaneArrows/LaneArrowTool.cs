@@ -539,7 +539,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 HasSegmentEndLaneArrows(segmentId, segment.m_endNode);
             float cut = con ? 1f : 0.5f;
 
-            MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
+            Highlight.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
         }
 
         /// <summary>Render info overlay for active tool, when UI is in Select state.</summary>
@@ -549,7 +549,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             // If CTRL is held, and hovered something: Draw hovered node
             if (SeparateNodeLanesModifierIsPressed && HoveredNodeId != 0) {
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                Highlight.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 return;
             }
 

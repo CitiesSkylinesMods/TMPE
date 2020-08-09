@@ -1009,7 +1009,11 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, false, false);
+            Highlight.DrawNodeCircle(
+                cameraInfo: cameraInfo,
+                nodeId: HoveredNodeId,
+                warning: false,
+                alpha: false);
         }
 
         private void RenderManualNodeOverlays(RenderManager.CameraInfo cameraInfo) {
@@ -1017,7 +1021,7 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            MainTool.DrawNodeCircle(
+            Highlight.DrawNodeCircle(
                 cameraInfo: cameraInfo,
                 nodeId: SelectedNodeId,
                 warning: true,

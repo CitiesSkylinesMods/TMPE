@@ -189,11 +189,16 @@ namespace TrafficManager.UI.SubTools {
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             // Log._Debug($"Restrictions overlay {_cursorInSecondaryPanel} {HoveredNodeId} {SelectedNodeId} {HoveredSegmentId} {SelectedSegmentId}");
             if (SelectedSegmentId != 0) {
-                Color color = MainTool.GetToolColor(true, false);
+                Color color = MainTool.GetToolColor(warning: true, error: false);
+
                 // continues lane highlight requires lane alphaBlend == false.
                 // for such lane highlight to be on the top of segment highlight,
                 // the alphaBlend of segment highlight needs to be true.
-                TrafficManagerTool.DrawSegmentOverlay(cameraInfo, SelectedSegmentId, color, true);
+                Highlight.DrawSegmentOverlay(
+                    cameraInfo: cameraInfo,
+                    segmentId: SelectedSegmentId,
+                    color: color,
+                    alphaBlend: true);
 
                 if (overlayHandleHovered) {
                     if (RoadMode) {
@@ -554,17 +559,18 @@ namespace TrafficManager.UI.SubTools {
                         continue; // do not draw allowed vehicles in view-only mode
                     }
 
-                    bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(
-                        RoadUI.VehicleRestrictionTextures[vehicleType][allowed],
-                        camPos,
-                        zero,
-                        f,
-                        xu,
-                        yu,
-                        x,
-                        y,
-                        vehicleRestrictionsSignSize,
-                        !viewOnly);
+                    bool hoveredHandle = Highlight.DrawGenericSquareOverlayGridTexture(
+                        texture: RoadUI.VehicleRestrictionTextures[key: vehicleType][key: allowed],
+                        camPos: camPos,
+                        gridOrigin: zero,
+                        cellSize: f,
+                        xu: xu,
+                        yu: yu,
+                        x: x,
+                        y: y,
+                        size: vehicleRestrictionsSignSize,
+                        canHover: !viewOnly,
+                        screenRect: out Rect _);
 
                     if (hoveredHandle) {
                         hovered = true;

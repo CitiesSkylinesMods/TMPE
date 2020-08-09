@@ -15,6 +15,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util;
     using UnityEngine;
     using System.Text;
+    using TrafficManager.API.Traffic;
 
     public class SpeedLimitManager
         : AbstractGeometryObservingManager,
@@ -640,7 +641,7 @@ namespace TrafficManager.Manager.Impl {
                 if (speedLimit != null) {
                     Log._Debug(
                         $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
-                        $"to {speedLimit * Constants.SPEED_TO_KMPH}");
+                        $"to {speedLimit * ApiConstants.SPEED_TO_KMPH}");
                     Flags.SetLaneSpeedLimit(curLaneId, speedLimit);
                 } else {
                     Log._Debug(
@@ -929,7 +930,7 @@ namespace TrafficManager.Manager.Impl {
                             $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit} km/h");
 #endif
                         float kmph = laneSpeedLimit.speedLimit /
-                                     Constants.SPEED_TO_KMPH; // convert to game units
+                                     ApiConstants.SPEED_TO_KMPH; // convert to game units
 
                         Flags.SetLaneSpeedLimit(laneSpeedLimit.laneId, kmph);
                     } else {

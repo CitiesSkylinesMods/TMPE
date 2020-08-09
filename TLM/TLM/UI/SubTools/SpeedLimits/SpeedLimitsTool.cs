@@ -50,7 +50,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// </summary>
         private Util.GenericFsm<State, Trigger> fsm_;
 
-        private SpeedLimitsOverlay.DrawArgs overlayDrawArgs_;
+        private SpeedLimitsOverlay.DrawArgs overlayDrawArgs_ = new SpeedLimitsOverlay.DrawArgs(false);
         private SpeedLimitsOverlay overlay_;
 
         /// <summary>Tool states.</summary>
@@ -183,6 +183,23 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void OnToolLeftClick() {
+            // Go through recently rendered overlay speedlimit handles
+            // Hovering multiple speed limits handles at once should set limits on multiple roads
+            if (this.ShowLimitsPerLane) {
+                foreach (var h in overlayDrawArgs_.HoveredLaneHandles) {
+                    // per lane
+                    h.Click(
+                        speedLimitToSet: this.CurrentPaletteSpeedLimit,
+                        multiSegmentMode: this.MultiSegmentMode);
+                }
+            } else {
+                // per segment
+                foreach (var h in overlayDrawArgs_.HoveredSegmentHandles) {
+                    h.Click(
+                        speedLimitToSet: this.CurrentPaletteSpeedLimit,
+                        multiSegmentMode: this.MultiSegmentMode);
+                }
+            }
         }
 
         public override void OnToolRightClick() {

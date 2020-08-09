@@ -73,7 +73,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 if (!isRoundabout) {
                     record_ = PriorityRoad.FixRoad(HoveredSegmentId);
                 }
-                // TODO: benchmark why bulk setup takes a long time. 
+                // TODO: benchmark why bulk setup takes a long time.
                 Log.Info("After FixRoundabout/FixRoad. Before RefreshMassEditOverlay"); // log time for benchmarking.
                 RefreshMassEditOverlay();
                 Log.Info("After RefreshMassEditOverlay."); // log time for benchmarking.
@@ -122,7 +122,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }
             }
-            
+
             // refresh cache
             if(ControlIsPressed)
                 RefreshMassEditOverlay();
@@ -206,8 +206,12 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }
             } else if (ControlIsPressed) {
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                Highlight.DrawNodeCircle(
+                    cameraInfo: cameraInfo,
+                    nodeId: HoveredNodeId,
+                    warning: Input.GetMouseButton(0));
                 mode = ModifyMode.HighPriorityJunction;
+
                 if (mode != PrevHoveredState.Mode || HoveredNodeId != PrevHoveredState.NodeId) {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }
@@ -229,7 +233,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     return;
                 }
 
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                Highlight.DrawNodeCircle(
+                    cameraInfo: cameraInfo,
+                    nodeId: HoveredNodeId,
+                    warning: Input.GetMouseButton(0));
             }
 
             PrevHoveredState.Mode = mode;
@@ -360,12 +367,12 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             showRemoveButton = true;
                         }
 
-                        if (MainTool.DrawGenericSquareOverlayTexture(
-                                RoadUI.PrioritySignTextures[sign],
-                                camPos,
-                                signPos,
-                                90f,
-                                !viewOnly) && clicked)
+                        if (Highlight.DrawGenericSquareOverlayTexture(
+                                texture: RoadUI.PrioritySignTextures[sign],
+                                camPos: camPos,
+                                worldPos: signPos,
+                                size: 90f,
+                                canHover: !viewOnly) && clicked)
                         {
                             PriorityType? newSign;
                             switch (sign) {
@@ -406,7 +413,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
                     // draw remove button and handle click
                     if (showRemoveButton
-                        && MainTool.DrawHoverableSquareOverlayTexture(
+                        &&
+                        Highlight.DrawHoverableSquareOverlayTexture(
                             RoadUI.SignClear,
                             camPos,
                             nodePos,

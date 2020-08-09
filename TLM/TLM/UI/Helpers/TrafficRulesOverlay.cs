@@ -221,7 +221,7 @@ namespace TrafficManager.UI.Helpers {
                     startNode: isStartNode,
                     signsPerRow: isIncoming ? 2 : 1,
                     viewOnly: this.ViewOnly,
-                    baseZoom: this.mainTool_.GetBaseZoom());
+                    baseZoom: U.UIScaler.GetScale());
 
                 IJunctionRestrictionsManager junctionRManager = Constants.ManagerFactory.JunctionRestrictionsManager;
 

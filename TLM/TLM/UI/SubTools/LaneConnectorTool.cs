@@ -197,7 +197,7 @@ namespace TrafficManager.UI.SubTools {
 
                 bool hasMarkers = currentLaneEnds.TryGetValue((ushort)nodeId, out List<LaneEnd> laneEnds);
                 if (!viewOnly && (GetSelectionMode() == SelectionMode.None)) {
-                    MainTool.DrawNodeCircle(
+                    Highlight.DrawNodeCircle(
                         cameraInfo: cameraInfo,
                         nodeId: (ushort)nodeId,
                         color: DefaultLaneEndColor,
@@ -398,7 +398,7 @@ namespace TrafficManager.UI.SubTools {
 
             if ((GetSelectionMode() == SelectionMode.None) && (HoveredNodeId != 0)) {
                 // draw hovered node
-                MainTool.DrawNodeCircle(
+                Highlight.DrawNodeCircle(
                     cameraInfo: cameraInfo,
                     nodeId: HoveredNodeId,
                     warning: Input.GetMouseButton(0),

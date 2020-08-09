@@ -285,7 +285,7 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                float zoom = (1.0f / (e.Value - camPos).magnitude) * 100f * MainTool.GetBaseZoom();
+                float zoom = (1.0f / (e.Value - camPos).magnitude) * 100f * U.UIScaler.GetScale();
                 float size = (viewOnly ? 0.8f : 1f) * SIGN_SIZE * zoom;
                 Color guiColor = GUI.color;
                 Rect boundingBox = new Rect(
