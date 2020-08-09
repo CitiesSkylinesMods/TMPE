@@ -830,6 +830,12 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
                 var directions = new HashSet<NetInfo.Direction>();
                 int sortedLaneIndex = -1;
+                Highlight.Grid grid = new Highlight.Grid(
+                    gridOrigin: Vector3.zero,
+                    cellWidth: f,
+                    cellHeight: f,
+                    xu: xu,
+                    yu: yu);
 
                 foreach (LanePos laneData in sortedLanes) {
                     ++sortedLaneIndex;
@@ -851,11 +857,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     bool hoveredHandle = Highlight.DrawGenericOverlayGridTexture(
                         texture: SpeedLimitTextures.GetSpeedLimitTexture(laneSpeedLimit),
                         camPos: camPos,
-                        gridOrigin: zero,
-                        cellWidth: f,
-                        cellHeight: f,
-                        xu: xu,
-                        yu: yu,
+                        grid: grid,
                         x: x,
                         y: 0,
                         width: speedLimitSignSize,
@@ -873,10 +875,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                         Highlight.DrawStaticSquareOverlayGridTexture(
                             texture: tex1,
                             camPos: camPos,
-                            gridOrigin: zero,
-                            cellSize: f,
-                            xu: xu,
-                            yu: yu,
+                            grid: grid,
                             x: x,
                             y: 1,
                             size: speedLimitSignSize,

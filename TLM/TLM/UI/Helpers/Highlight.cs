@@ -4,6 +4,10 @@
     using TrafficManager.Util;
     using UnityEngine;
 
+    /// <summary>
+    /// Provides static functions for drawing overlay textures.
+    /// Must be called from GUI callbacks only, will not work from other code.
+    /// </summary>
     public static class Highlight {
         public static void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                           ushort nodeId,
@@ -120,7 +124,6 @@
         /// similar to NetTool.RenderOverlay()
         /// but with additional control over alphaBlend.
         /// </summary>
-        // TODO: move to UI.Helpers (Highlight)
         internal static void DrawSegmentOverlay(
             RenderManager.CameraInfo cameraInfo,
             ushort segmentId,
@@ -184,134 +187,61 @@
                 alpha);
         }
 
+        /// <summary>
+        /// Create this to describe a grid for rendering multiple icons.
+        /// </summary>
+        public class Grid {
+            /// <summary>Grid starts here.</summary>
+            public Vector3 GridOrigin;
+
+            /// <summary>Grid cell width.</summary>
+            public float CellWidth;
+
+            /// <summary>Grid cell height.</summary>
+            public float CellHeight;
+
+            /// <summary>Grid basis vector for X axis.</summary>
+            public Vector3 Xu;
+
+            /// <summary>Grid basis vector for Y axis.</summary>
+            public Vector3 Yu;
+
+            public Grid(Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu) {
+                GridOrigin = gridOrigin;
+                CellWidth = cellWidth;
+                CellHeight = cellHeight;
+                Xu = xu;
+                Yu = yu;
+            }
+
+            /// <summary>Grid position in game coordinates for row and column.</summary>
+            /// <param name="x">Column.</param>
+            /// <param name="y">Row.</param>
+            /// <returns>World position.</returns>
+            public Vector3 GetPositionForRowCol(uint x, uint y) {
+                return this.GridOrigin + (this.CellWidth * x * this.Xu) +
+                    (this.CellHeight * y * this.Yu);
+            }
+        }
+
         public static void DrawStaticSquareOverlayGridTexture(Texture2D texture,
                                                               Vector3 camPos,
-                                                              Vector3 gridOrigin,
-                                                              float cellSize,
-                                                              Vector3 xu,
-                                                              Vector3 yu,
+                                                              Grid grid,
                                                               uint x,
                                                               uint y,
                                                               float size,
                                                               out Rect screenRect) {
-            DrawGenericSquareOverlayGridTexture(
-                texture,
-                camPos,
-                gridOrigin,
-                cellSize,
-                xu,
-                yu,
-                x,
-                y,
-                size,
-                canHover: false,
-                out screenRect);
-        }
-
-        // // TODO: move to UI.Helpers (Highlight)
-        // public bool DrawHoverableSquareOverlayGridTexture(Texture2D texture,
-        //                                                   Vector3 camPos,
-        //                                                   Vector3 gridOrigin,
-        //                                                   float cellSize,
-        //                                                   Vector3 xu,
-        //                                                   Vector3 yu,
-        //                                                   uint x,
-        //                                                   uint y,
-        //                                                   float size) {
-        //     return DrawGenericSquareOverlayGridTexture(
-        //         texture,
-        //         camPos,
-        //         gridOrigin,
-        //         cellSize,
-        //         xu,
-        //         yu,
-        //         x,
-        //         y,
-        //         size,
-        //         canHover: true);
-        // }
-
-        // TODO: Wrap with a grid struct holding origin, xu,yu bases, and cell size values
-        public static bool DrawGenericSquareOverlayGridTexture(Texture2D texture,
-                                                               Vector3 camPos,
-                                                               Vector3 gridOrigin,
-                                                               float cellSize,
-                                                               Vector3 xu,
-                                                               Vector3 yu,
-                                                               uint x,
-                                                               uint y,
-                                                               float size,
-                                                               bool canHover,
-                                                               out Rect screenRect) {
-            return DrawGenericOverlayGridTexture(
-                texture,
-                camPos,
-                gridOrigin,
-                cellWidth: cellSize,
-                cellHeight: cellSize,
-                xu,
-                yu,
-                x,
-                y,
+            DrawGenericOverlayGridTexture(
+                texture: texture,
+                camPos: camPos,
+                grid: grid,
+                x: x,
+                y: y,
                 width: size,
                 height: size,
-                canHover,
+                canHover: false,
                 screenRect: out screenRect);
         }
-
-        public static void DrawStaticOverlayGridTexture(Texture2D texture,
-                                                        Vector3 camPos,
-                                                        Vector3 gridOrigin,
-                                                        float cellWidth,
-                                                        float cellHeight,
-                                                        Vector3 xu,
-                                                        Vector3 yu,
-                                                        uint x,
-                                                        uint y,
-                                                        float width,
-                                                        float height,
-                                                        out Rect screenRect) {
-            DrawGenericOverlayGridTexture(
-                texture,
-                camPos,
-                gridOrigin,
-                cellWidth,
-                cellHeight,
-                xu,
-                yu,
-                x,
-                y,
-                width,
-                height,
-                canHover: false,
-                out screenRect);
-        }
-
-        // public bool DrawHoverableOverlayGridTexture(Texture2D texture,
-        //                                             Vector3 camPos,
-        //                                             Vector3 gridOrigin,
-        //                                             float cellWidth,
-        //                                             float cellHeight,
-        //                                             Vector3 xu,
-        //                                             Vector3 yu,
-        //                                             uint x,
-        //                                             uint y,
-        //                                             float width,
-        //                                             float height) {
-        //     return DrawGenericOverlayGridTexture(
-        //         texture,
-        //         camPos,
-        //         gridOrigin,
-        //         cellWidth,
-        //         cellHeight,
-        //         xu,
-        //         yu,
-        //         x,
-        //         y,
-        //         width,
-        //         height,
-        //         canHover: true);
-        // }
 
         /// <summary>
         /// Position a texture rectangle in a "grid cell" of a regular grid with center in the
@@ -320,35 +250,24 @@
         /// </summary>
         /// <param name="texture">Draw this.</param>
         /// <param name="camPos">From here.</param>
-        /// <param name="gridOrigin">Grid starts here.</param>
-        /// <param name="cellWidth">Grid cell width.</param>
-        /// <param name="cellHeight">Grid cell height.</param>
-        /// <param name="xu">Grid basis vector for X axis.</param>
-        /// <param name="yu">Grid basis vector for Y axis.</param>
         /// <param name="x">X position in grid.</param>
         /// <param name="y">Y position in grid.</param>
         /// <param name="width">Draw box size x.</param>
         /// <param name="height">Draw box size y.</param>
         /// <param name="canHover">Whether the icon is interacting with the mouse.</param>
         /// <returns>Whether mouse hovers the icon.</returns>
-        // TODO: move to UI.Helpers (Highlight)
         // TODO: Refactor to a new struct which will hold the grid origin, xu, yu, cell sizes
         public static bool DrawGenericOverlayGridTexture(Texture2D texture,
                                                          Vector3 camPos,
-                                                         Vector3 gridOrigin,
-                                                         float cellWidth,
-                                                         float cellHeight,
-                                                         Vector3 xu,
-                                                         Vector3 yu,
+                                                         Highlight.Grid grid,
                                                          uint x,
                                                          uint y,
                                                          float width,
                                                          float height,
                                                          bool canHover,
                                                          out Rect screenRect) {
-            Vector3 worldPos =
-                gridOrigin + (cellWidth * x * xu) +
-                (cellHeight * y * yu); // grid position in game coordinates
+            Vector3 worldPos = grid.GetPositionForRowCol(x, y);
+
             return DrawGenericOverlayTexture(
                 texture,
                 camPos,
@@ -357,21 +276,6 @@
                 height,
                 canHover,
                 out screenRect);
-        }
-
-        // TODO: move to UI.Helpers (Highlight)
-        public static void DrawStaticSquareOverlayTexture(Texture2D texture,
-                                                          Vector3 camPos,
-                                                          Vector3 worldPos,
-                                                          float size) {
-            DrawGenericOverlayTexture(
-                texture,
-                camPos,
-                worldPos,
-                width: size,
-                height: size,
-                canHover: false,
-                screenRect: out Rect _);
         }
 
         public static bool DrawHoverableSquareOverlayTexture(Texture2D texture,
@@ -402,35 +306,6 @@
                 canHover,
                 screenRect: out Rect _);
         }
-
-        public static void DrawStaticOverlayTexture(Texture2D texture,
-                                                    Vector3 camPos,
-                                                    Vector3 worldPos,
-                                                    float width,
-                                                    float height) {
-            DrawGenericOverlayTexture(
-                texture,
-                camPos,
-                worldPos,
-                width,
-                height,
-                canHover: false,
-                screenRect: out Rect _);
-        }
-
-        // public bool DrawHoverableOverlayTexture(Texture2D texture,
-        //                                         Vector3 camPos,
-        //                                         Vector3 worldPos,
-        //                                         float width,
-        //                                         float height) {
-        //     return DrawGenericOverlayTexture(
-        //         texture,
-        //         camPos,
-        //         worldPos,
-        //         width,
-        //         height,
-        //         canHover: true);
-        // }
 
         public static bool DrawGenericOverlayTexture(Texture2D texture,
                                                      Vector3 camPos,

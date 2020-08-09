@@ -552,6 +552,13 @@ namespace TrafficManager.UI.SubTools {
 
                 ++y;
 #endif
+                Highlight.Grid grid = new Highlight.Grid(
+                    gridOrigin: Vector3.zero,
+                    cellWidth: f,
+                    cellHeight: f,
+                    xu: xu,
+                    yu: yu);
+
                 foreach (ExtVehicleType vehicleType in possibleVehicleTypes) {
                     bool allowed = VehicleRestrictionsManager.Instance.IsAllowed(allowedTypes, vehicleType);
 
@@ -559,16 +566,14 @@ namespace TrafficManager.UI.SubTools {
                         continue; // do not draw allowed vehicles in view-only mode
                     }
 
-                    bool hoveredHandle = Highlight.DrawGenericSquareOverlayGridTexture(
+                    bool hoveredHandle = Highlight.DrawGenericOverlayGridTexture(
                         texture: RoadUI.VehicleRestrictionTextures[key: vehicleType][key: allowed],
                         camPos: camPos,
-                        gridOrigin: zero,
-                        cellSize: f,
-                        xu: xu,
-                        yu: yu,
+                        grid: grid,
                         x: x,
                         y: y,
-                        size: vehicleRestrictionsSignSize,
+                        width: vehicleRestrictionsSignSize,
+                        height: vehicleRestrictionsSignSize,
                         canHover: !viewOnly,
                         screenRect: out Rect _);
 

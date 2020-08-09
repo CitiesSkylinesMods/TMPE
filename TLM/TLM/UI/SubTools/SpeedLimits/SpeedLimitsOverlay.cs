@@ -451,6 +451,12 @@
 
             var directions = new HashSet<NetInfo.Direction>();
             int sortedLaneIndex = -1;
+            Highlight.Grid grid = new Highlight.Grid(
+                gridOrigin: zero,
+                cellWidth: signSize,
+                cellHeight: signSize,
+                xu: xu,
+                yu: yu);
 
             //-----------------------
             // For all lanes sorted
@@ -477,11 +483,7 @@
                 bool isHoveredHandle = Highlight.DrawGenericOverlayGridTexture(
                     texture: tex,
                     camPos: camPos,
-                    gridOrigin: zero,
-                    cellWidth: signSize,
-                    cellHeight: signSize,
-                    xu: xu,
-                    yu: yu,
+                    grid: grid,
                     x: x,
                     y: 0,
                     width: SPEED_LIMIT_SIGN_SIZE,
@@ -500,10 +502,7 @@
                     Highlight.DrawStaticSquareOverlayGridTexture(
                         texture: tex1,
                         camPos: camPos,
-                        gridOrigin: zero,
-                        cellSize: signSize,
-                        xu: xu,
-                        yu: yu,
+                        grid: grid,
                         x: x,
                         y: 1,
                         size: SPEED_LIMIT_SIGN_SIZE,
