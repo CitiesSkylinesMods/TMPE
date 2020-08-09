@@ -138,21 +138,6 @@ namespace TrafficManager.UI {
             return ret;
         }
 
-        // Not used
-        // TODO: Move to UI.Helpers
-        [UsedImplicitly]
-        internal static bool IsSegmentWithinViewDistance(ushort segmentId) {
-            bool ret = false;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    Vector3 centerPos = segment.m_bounds.center;
-                    ret = IsPosWithinOverlayDistance(centerPos);
-                    return true;
-                });
-            return ret;
-        }
-
         // TODO: Move to UI.Helpers
         internal static bool IsPosWithinOverlayDistance(Vector3 position) {
             return (position - Singleton<SimulationManager>.instance.m_simulationView.m_position)

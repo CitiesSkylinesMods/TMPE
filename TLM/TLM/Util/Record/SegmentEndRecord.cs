@@ -32,7 +32,7 @@ namespace TrafficManager.Util.Record {
         private TernaryBool pedestrianCrossingAllowed_;
 
         private PriorityType prioirtySign_;
-        private List<LaneArrowsRecord> lanes_;
+        private List<LaneArrowsRecord> arrowLanes_;
 
         private static TrafficPriorityManager priorityMan => TrafficPriorityManager.Instance;
         private static JunctionRestrictionsManager JRMan => JunctionRestrictionsManager.Instance;
@@ -47,13 +47,13 @@ namespace TrafficManager.Util.Record {
 
             prioirtySign_ = priorityMan.GetPrioritySign(SegmentId, StartNode);
 
-            lanes_ = LaneArrowsRecord.GetLanes(SegmentId, StartNode);
-            foreach(IRecordable lane in lanes_) 
+            arrowLanes_ = LaneArrowsRecord.GetLanes(SegmentId, StartNode);
+            foreach(IRecordable lane in arrowLanes_) 
                 lane.Record();
         }
 
         public void Restore() {
-            foreach (IRecordable lane in lanes_)
+            foreach (IRecordable lane in arrowLanes_)
                 lane.Restore();
 
             if (priorityMan.MaySegmentHavePrioritySign(SegmentId, StartNode) &&
@@ -73,7 +73,7 @@ namespace TrafficManager.Util.Record {
 
         public void Transfer(Dictionary<InstanceID, InstanceID> map) {
             ushort segmentId = map[InstanceID].NetSegment;
-            foreach (IRecordable lane in lanes_)
+            foreach (IRecordable lane in arrowLanes_)
                 lane.Transfer(map);
 
             if (priorityMan.MaySegmentHavePrioritySign(segmentId, StartNode) &&
@@ -94,8 +94,8 @@ namespace TrafficManager.Util.Record {
             ushort segmentId = (ushort)mappedId;
 
             var mappedLanes = SpeedLimitLaneRecord.GetLanes(segmentId);
-            for (int i = 0; i == lanes_.Count; ++i) {
-                lanes_[i].Transfer(mappedLanes[i].LaneId);
+            for (int i = 0; i == arrowLanes_.Count; ++i) {
+                arrowLanes_[i].Transfer(mappedLanes[i].LaneId);
             }
         }
 

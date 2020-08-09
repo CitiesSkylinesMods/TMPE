@@ -36,7 +36,7 @@ namespace TrafficManager.Util.Record {
                 segmentId: segmentId,
                 laneIndex: LaneIndex,
                 laneInfo: laneInfo,
-                laneId: LaneId,
+                laneId: laneId,
                 speedLimit: speedLimit_);
         }
 
