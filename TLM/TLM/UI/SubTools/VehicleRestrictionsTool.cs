@@ -569,8 +569,8 @@ namespace TrafficManager.UI.SubTools {
                     bool hoveredHandle = grid.DrawGenericOverlayGridTexture(
                         texture: RoadUI.VehicleRestrictionTextures[key: vehicleType][key: allowed],
                         camPos: camPos,
-                        x: x,
-                        y: y,
+                        col: x,
+                        row: y,
                         width: vehicleRestrictionsSignSize,
                         height: vehicleRestrictionsSignSize,
                         canHover: !viewOnly,

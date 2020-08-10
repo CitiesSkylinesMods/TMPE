@@ -410,7 +410,7 @@ namespace TrafficManager.Util {
         private static void FixMinorSegmentRules(ushort segmentId, ushort nodeId, List<ushort> segmentList) {
             Log._Debug($"FixMinorSegmentRules({segmentId}, {nodeId}, segmentList) was called");
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
-            if (OptionsMassEditTab.PriorityRoad_EnterBlockedYeild) {
+            if (OptionsMassEditTab.PriorityRoad_EnterBlockedYield) {
                 JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
             }
             if (HasAccelerationLane(segmentList, segmentId, nodeId)) {
@@ -424,15 +424,25 @@ namespace TrafficManager.Util {
 
         private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
             return netService.GetSortedLanes(
-                                segmentId,
-                                ref segmentId.ToSegment(),
-                                netService.IsStartNode(segmentId, nodeId) ^ (!toward),
-                                LaneArrowManager.LANE_TYPES,
-                                LaneArrowManager.VEHICLE_TYPES,
-                                true).Count;
+                segmentId: segmentId,
+                segment: ref segmentId.ToSegment(),
+                startNode: netService.IsStartNode(segmentId: segmentId, nodeId: nodeId) ^ (!toward),
+                laneTypeFilter: LaneArrowManager.LANE_TYPES,
+                vehicleTypeFilter: LaneArrowManager.VEHICLE_TYPES,
+                reverse: true).Count;
         }
-        internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
-        internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
+
+        internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) =>
+            CountLanes(
+                segmentId: segmentId,
+                nodeId: nodeId,
+                toward: true);
+
+        internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) =>
+            CountLanes(
+                segmentId: segmentId,
+                nodeId: nodeId,
+                toward: false);
 
 
         internal static bool HasAccelerationLane(List<ushort> segmentList, ushort segmentId, ushort nodeId) {
@@ -445,22 +455,22 @@ namespace TrafficManager.Util {
             }
             ref NetSegment seg = ref segmentId.ToSegment();
 
-            ushort MainAgainst, MainToward;
+            ushort mainAgainst, mainToward;
             if (lht) {
-                MainAgainst = seg.GetLeftSegment(nodeId);
-                MainToward = seg.GetRightSegment(nodeId);
+                mainAgainst = seg.GetLeftSegment(nodeId);
+                mainToward = seg.GetRightSegment(nodeId);
             } else {
-                MainAgainst = seg.GetRightSegment(nodeId);
-                MainToward = seg.GetLeftSegment(nodeId);
+                mainAgainst = seg.GetRightSegment(nodeId);
+                mainToward = seg.GetLeftSegment(nodeId);
             }
 
-            Log._Debug($"HasAccelerationLane: segmentId:{segmentId} MainToward={MainToward} MainAgainst={MainAgainst} ");
-            if (IsMain(MainToward) && IsMain(MainAgainst)) {
-                int Yt = CountLanesTowardJunction(segmentId, nodeId); // Yeild Toward.
-                int Mt = CountLanesTowardJunction(MainToward, nodeId); // Main Toward.
-                int Ma = CountLanesAgainstJunction(MainAgainst, nodeId); // Main Against.
-                bool ret = Yt > 0 && Yt + Mt <= Ma;
-                Log._Debug($"HasAccelerationLane: Yt={Yt}  Mt={Mt} Ma={Ma} ret={ret} : Yt + Mt <= Ma ");
+            Log._Debug($"HasAccelerationLane: segmentId:{segmentId} MainToward={mainToward} MainAgainst={mainAgainst} ");
+            if (IsMain(mainToward) && IsMain(mainAgainst)) {
+                int yieldToward1 = CountLanesTowardJunction(segmentId, nodeId);
+                int mainToward1 = CountLanesTowardJunction(mainToward, nodeId);
+                int mainAgainst1 = CountLanesAgainstJunction(mainAgainst, nodeId);
+                bool ret = yieldToward1 > 0 && yieldToward1 + mainToward1 <= mainAgainst1;
+                Log._Debug($"HasAccelerationLane: Yt={yieldToward1} Mt={mainToward1} Ma={mainAgainst1} ret={ret} : Yt + Mt <= Ma ");
                 return ret;
             }
 
@@ -483,12 +493,12 @@ namespace TrafficManager.Util {
             //list of outgoing lanes from current segment to current node.
             IList<LanePos> laneList =
                 netService.GetSortedLanes(
-                    segmentId,
-                    ref seg,
-                    startNode,
-                    LaneArrowManager.LANE_TYPES,
-                    LaneArrowManager.VEHICLE_TYPES,
-                    !lht);
+                    segmentId: segmentId,
+                    segment: ref seg,
+                    startNode: startNode,
+                    laneTypeFilter: LaneArrowManager.LANE_TYPES,
+                    vehicleTypeFilter: LaneArrowManager.VEHICLE_TYPES,
+                    reverse: !lht);
             int srcLaneCount = laneList.Count;
             Log._Debug($"FixMajorSegmentLanes: segment:{segmentId} laneList:" + laneList.ToSTR());
 
@@ -532,17 +542,22 @@ namespace TrafficManager.Util {
             //list of outgoing lanes from current segment to current node.
             IList<LanePos> laneList =
                 netService.GetSortedLanes(
-                    segmentId,
-                    ref seg,
-                    startNode,
-                    LaneArrowManager.LANE_TYPES,
-                    LaneArrowManager.VEHICLE_TYPES,
-                    true);
+                    segmentId: segmentId,
+                    segment: ref seg,
+                    startNode: startNode,
+                    laneTypeFilter: LaneArrowManager.LANE_TYPES,
+                    vehicleTypeFilter: LaneArrowManager.VEHICLE_TYPES,
+                    reverse: true);
             int srcLaneCount = laneList.Count;
 
-            bool bLeft, bRight, bForward;
+            bool bForward;
             ref ExtSegmentEnd segEnd = ref GetSegEnd(segmentId, nodeId);
-            segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out bLeft, out bForward, out bRight);
+            segEndMan.CalculateOutgoingLeftStraightRightSegments(
+                segEnd: ref segEnd,
+                node: ref node,
+                left: out bool bLeft,
+                straight: out bForward,
+                right: out bool bRight);
 
             // LHD vs RHD variables.
             bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
@@ -591,11 +606,11 @@ namespace TrafficManager.Util {
             ref NetSegment segment = ref segmentId.ToSegment();
             int forward = 0, backward = 0;
             segment.CountLanes(
-                segmentId,
-                NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
-                VehicleInfo.VehicleType.Car,
-                ref forward,
-                ref backward);
+                segmentID: segmentId,
+                laneTypes: NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle,
+                vehicleTypes: VehicleInfo.VehicleType.Car,
+                forward: ref forward,
+                backward: ref backward);
             return forward + backward;
         }
 
@@ -605,14 +620,17 @@ namespace TrafficManager.Util {
         /// <param name="segmentList"></param>
         public static void ClearNode(ushort nodeId) {
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
-            netService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment seg) => {
+
+            bool ForEachSegment(ushort segmentId, ref NetSegment seg) {
                 ref NetNode node = ref GetNode(nodeId);
                 bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
                 TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.None);
                 JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
                 LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
                 return true;
-            });
+            }
+
+            netService.IterateNodeSegments(nodeId, ForEachSegment);
         }
 
         /// <summary>
@@ -620,12 +638,19 @@ namespace TrafficManager.Util {
         /// Clears segment ends of connected branchs as well.
         /// </summary>
         public static IRecordable ClearRoad(List<ushort> segmentList) {
-            if (segmentList == null || segmentList.Count == 0)
+            if (segmentList == null || segmentList.Count == 0) {
                 return null;
+            }
+
             IRecordable record = RecordRoad(segmentList);
+
             foreach (ushort segmentId in segmentList) {
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, true);
-                SpeedLimitManager.Instance.SetSpeedLimit(segmentId, null);
+
+                SpeedLimitManager.Instance.SetSpeedLimit(
+                    segmentId,
+                    SetSpeedLimitAction.Default());
+
                 VehicleRestrictionsManager.Instance.ClearVehicleRestrictions(segmentId);
                 ClearNode(netService.GetSegmentNodeId(segmentId, true));
                 ClearNode(netService.GetSegmentNodeId(segmentId, false));
@@ -638,8 +663,11 @@ namespace TrafficManager.Util {
         /// </summary>
         public static IRecordable RecordRoad(List<ushort> segmentList) {
             TrafficRulesRecord record = new TrafficRulesRecord();
-            foreach (ushort segmetnId in segmentList)
+
+            foreach (ushort segmetnId in segmentList) {
                 record.AddCompleteSegment(segmetnId);
+            }
+
             record.Record();
             return record;
         }

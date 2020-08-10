@@ -26,14 +26,23 @@ namespace TrafficManager.Util {
             if (OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR) {
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, false);
             }
+
             if (OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits) {
                 float? targetSpeed = CalculatePreferedSpeed(segmentId)?.GameUnits;
                 float defaultSpeed = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(segmentId.ToSegment().Info);
+
                 if (targetSpeed != null && targetSpeed < defaultSpeed) {
-                    SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Forward, targetSpeed);
-                    SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Backward, targetSpeed);
+                    SpeedLimitManager.Instance.SetSpeedLimit(
+                        segmentId: segmentId,
+                        finalDir: NetInfo.Direction.Forward,
+                        action: SetSpeedLimitAction.GameSpeedUnits(targetSpeed.Value));
+                    SpeedLimitManager.Instance.SetSpeedLimit(
+                        segmentId: segmentId,
+                        finalDir: NetInfo.Direction.Backward,
+                        action: SetSpeedLimitAction.GameSpeedUnits(targetSpeed.Value));
                 }
             }
+
             ushort nodeId = netService.GetHeadNode(segmentId);
 
             if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR && !HasJunctionFlag(nodeId)) {

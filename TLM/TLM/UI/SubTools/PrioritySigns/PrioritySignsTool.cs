@@ -124,10 +124,11 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             }
 
             // refresh cache
-            if(ControlIsPressed)
+            if(ControlIsPressed) {
                 RefreshMassEditOverlay();
-            else
+            } else {
                 RefreshCurrentPriorityNodeIds();
+            }
         }
 
         public override void OnToolGUI(Event e) { }
@@ -174,10 +175,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     foreach (uint segmentId in segmentList) {
                         ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                         NetTool.RenderOverlay(
-                            cameraInfo,
-                            ref seg,
-                            color,
-                            color);
+                            cameraInfo: cameraInfo,
+                            segment: ref seg,
+                            importantColor: color,
+                            nonImportantColor: color);
                     } // end foreach
                 } else {
                     SegmentTraverser.Traverse(
@@ -187,20 +188,21 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         SegmentStopCriterion.None,
                         data => {
                             NetTool.RenderOverlay(
-                                cameraInfo,
-                                ref Singleton<NetManager>.instance.m_segments.m_buffer[
+                                cameraInfo: cameraInfo,
+                                segment: ref Singleton<NetManager>.instance.m_segments.m_buffer[
                                     data.CurSeg.segmentId],
-                                color,
-                                color);
+                                importantColor: color,
+                                nonImportantColor: color);
                             return true;
                         });
                 }
-                if (!ControlIsPressed)
+                if (!ControlIsPressed) {
                     mode = ModifyMode.PriorityRoad;
-                else if (!isRoundabout)
+                } else if (!isRoundabout) {
                     mode = ModifyMode.HighPriorityRoad;
-                else
+                } else {
                     mode = ModifyMode.Roundabout;
+                }
 
                 if (mode != PrevHoveredState.Mode || HoveredSegmentId != PrevHoveredState.SegmentId) {
                     massEditMode = PrioritySignsMassEditMode.Min;

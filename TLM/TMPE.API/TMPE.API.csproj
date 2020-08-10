@@ -124,7 +124,9 @@
     <Compile Include="Traffic\Data\ExtBuilding.cs" />
     <Compile Include="Traffic\Data\ExtCitizen.cs" />
     <Compile Include="Traffic\Data\ExtCitizenInstance.cs" />
+    <Compile Include="Traffic\Data\KmphValue.cs" />
     <Compile Include="Traffic\Data\LaneTrafficData.cs" />
+    <Compile Include="Traffic\Data\MphValue.cs" />
     <Compile Include="Traffic\Data\PathCreationArgs.cs" />
     <Compile Include="Traffic\Data\PathUnitQueueItem.cs" />
     <Compile Include="Traffic\Data\PrioritySegment.cs" />

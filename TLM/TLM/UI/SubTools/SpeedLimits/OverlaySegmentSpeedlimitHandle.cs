@@ -9,7 +9,7 @@
     /// It is created while rendering, and if mouse is hovering over it, it is added to the list.
     /// Click is handled separately away from the rendering code.
     /// </summary>
-    public struct OverlaySegmentSpeedlimitHandle {
+    public readonly struct OverlaySegmentSpeedlimitHandle {
         /// <summary>Segment id where the speedlimit sign was displayed.</summary>
         public readonly ushort SegmentId;
 
@@ -26,16 +26,16 @@
         /// Called when mouse is down, and when mouse is not in parent tool window area.
         /// The show per lane mode is disabled and editing per segment.
         /// </summary>
-        public void Click(in SpeedValue speedLimitToSet,
+        public void Click(in SetSpeedLimitAction action,
                           bool multiSegmentMode) {
             // change the speed limit to the selected one
             SpeedLimitManager.Instance.SetSpeedLimit(
                 segmentId: this.SegmentId,
                 finalDir: this.FinalDirection,
-                speedLimit: speedLimitToSet.GameUnits);
+                action: action);
 
             if (multiSegmentMode) {
-                ClickMultiSegment(speedLimitToSet);
+                ClickMultiSegment(action);
             }
         }
 
@@ -44,12 +44,12 @@
         /// but also multisegment mode was enabled (like holding Shift).
         /// </summary>
         /// <param name="speedLimitToSet">The active speed limit on the palette.</param>
-        private void ClickMultiSegment(SpeedValue speedLimitToSet) {
+        private void ClickMultiSegment(SetSpeedLimitAction action) {
             NetManager netManager = Singleton<NetManager>.instance;
 
             if (new RoundaboutMassEdit().TraverseLoop(this.SegmentId, out var segmentList)) {
                 foreach (ushort segId in segmentList) {
-                    SpeedLimitManager.Instance.SetSpeedLimit(segId, speedLimitToSet.GameUnits);
+                    SpeedLimitManager.Instance.SetSpeedLimit(segId, action);
                 }
 
                 return;
@@ -90,7 +90,7 @@
                     SpeedLimitManager.Instance.SetSpeedLimit(
                         segmentId: otherSegmentId,
                         finalDir: laneInfo.m_finalDirection,
-                        speedLimit: speedLimitToSet.GameUnits);
+                        action: action);
                 }
 
                 return true;

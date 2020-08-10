@@ -72,7 +72,7 @@ namespace TrafficManager.State {
                 Tooltip = "Priority roads.Tooltip:Allow far turns",
             };
 
-        public static CheckboxOption PriorityRoad_EnterBlockedYeild =
+        public static CheckboxOption PriorityRoad_EnterBlockedYield =
             new CheckboxOption("PriorityRoad_EnterBlockedYeild") {
                 Label = "Priority roads.Option:Enter blocked yield road",
         };
@@ -106,7 +106,7 @@ namespace TrafficManager.State {
             UIHelperBase priorityRoadGroup = panelHelper.AddGroup(T("MassEdit.Group.Priority roads"));
             PriorityRoad_CrossMainR.AddUI(priorityRoadGroup);
             PriorityRoad_AllowLeftTurns.AddUI(priorityRoadGroup);
-            PriorityRoad_EnterBlockedYeild.AddUI(priorityRoadGroup);
+            PriorityRoad_EnterBlockedYield.AddUI(priorityRoadGroup);
             PriorityRoad_StopAtEntry.AddUI(priorityRoadGroup);
         }
 

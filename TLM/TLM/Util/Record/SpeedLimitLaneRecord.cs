@@ -17,12 +17,10 @@ namespace TrafficManager.Util.Record {
         NetInfo.Lane LaneInfo;
         ushort SegmentId;
 
-        private float? speedLimit_; // game units
+        private GetSpeedLimitResult speedLimit_; // game units, unlimited or not set
 
         public void Record() {
             speedLimit_ = SpeedLimitManager.Instance.GetCustomSpeedLimit(LaneId);
-            if (speedLimit_ == 0)
-                speedLimit_ = null;
         }
 
         public void Restore() {
@@ -31,7 +29,7 @@ namespace TrafficManager.Util.Record {
                 LaneIndex,
                 LaneInfo,
                 LaneId,
-                speedLimit_);
+                SetSpeedLimitAction.FromGetResult(speedLimit_));
         }
 
         public static List<SpeedLimitLaneRecord> GetLanes(ushort segmentId) {

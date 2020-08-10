@@ -39,12 +39,12 @@
             }
 
             /// <summary>Grid position in game coordinates for row and column.</summary>
-            /// <param name="x">Column.</param>
-            /// <param name="y">Row.</param>
+            /// <param name="col">Column.</param>
+            /// <param name="row">Row.</param>
             /// <returns>World position.</returns>
-            public Vector3 GetPositionForRowCol(uint x, uint y) {
-                return this.GridOrigin + (this.CellWidth * x * this.Xu) +
-                       (this.CellHeight * y * this.Yu);
+            public Vector3 GetPositionForRowCol(uint col, uint row) {
+                return this.GridOrigin + (this.CellWidth * col * this.Xu) +
+                       (this.CellHeight * row * this.Yu);
             }
 
             /// <summary>
@@ -67,8 +67,8 @@
                 DrawGenericOverlayGridTexture(
                     texture: texture,
                     camPos: camPos,
-                    x: x,
-                    y: y,
+                    col: x,
+                    row: y,
                     width: size,
                     height: size,
                     canHover: false,
@@ -82,8 +82,8 @@
             /// </summary>
             /// <param name="texture">Draw this.</param>
             /// <param name="camPos">Visible from here.</param>
-            /// <param name="x">X position in grid.</param>
-            /// <param name="y">Y position in grid.</param>
+            /// <param name="col">X position in grid.</param>
+            /// <param name="row">Y position in grid.</param>
             /// <param name="width">Draw box size x.</param>
             /// <param name="height">Draw box size y.</param>
             /// <param name="canHover">Whether the icon is interacting with the mouse.</param>
@@ -91,13 +91,13 @@
             /// <returns>Whether mouse hovers the icon.</returns>
             public bool DrawGenericOverlayGridTexture(Texture2D texture,
                                                       Vector3 camPos,
-                                                      uint x,
-                                                      uint y,
+                                                      uint col,
+                                                      uint row,
                                                       float width,
                                                       float height,
                                                       bool canHover,
                                                       out Rect screenRect) {
-                Vector3 worldPos = this.GetPositionForRowCol(x, y);
+                Vector3 worldPos = this.GetPositionForRowCol(col, row);
 
                 return Highlight.DrawGenericOverlayTexture(
                     texture,

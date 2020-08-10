@@ -270,7 +270,6 @@
                 }
 
                 if (!speedLimitManager.MayHaveCustomSpeedLimits(
-                    segmentId: (ushort)segmentId,
                     segment: ref netManager.m_segments.m_buffer[segmentId])) {
                     continue;
                 }
@@ -333,6 +332,7 @@
             }
 
             float uiZoom = U.UIScaler.GetScale();
+            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
             // start from empty, no handles are hovered
             args.ClearHovered();
@@ -361,13 +361,24 @@
 
                 // Draw something right here, the road sign texture
                 GUI.color = guiColor;
-                SpeedValue segmentSpeedLimit = new SpeedValue(
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key));
-                Texture2D tex = SpeedLimitTextures.GetSpeedLimitTexture(segmentSpeedLimit);
+                var segmentSpeedLimit = SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key);
 
-                GUI.DrawTexture(
-                    position: screenRect,
-                    image: tex);
+                if (segmentSpeedLimit.HasValue) {
+                    // Render override
+                    Texture2D tex = SpeedLimitTextures.GetSpeedLimitTexture(segmentSpeedLimit.Value);
+
+                    GUI.DrawTexture(
+                        position: screenRect,
+                        image: tex);
+                } else {
+                    // // No override, retrieve and render default as a different color icon
+                    // var defaultValue =
+                    // Texture2D tex = SpeedLimitTextures.GetSpeedLimitTexture(defaultValue);
+                    //
+                    // GUI.DrawTexture(
+                    //     position: screenRect,
+                    //     image: tex);
+                }
 
                 if (isHoveredHandle) {
                     // Clickable overlay (interactive signs also True):
@@ -483,8 +494,8 @@
                 bool isHoveredHandle = grid.DrawGenericOverlayGridTexture(
                     texture: tex,
                     camPos: camPos,
-                    x: x,
-                    y: 0,
+                    col: x,
+                    row: 0,
                     width: SPEED_LIMIT_SIGN_SIZE,
                     height: SPEED_LIMIT_SIGN_SIZE * speedLimitSignVerticalScale,
                     canHover: args.InteractiveSigns,

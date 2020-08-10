@@ -169,7 +169,10 @@
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
     <Compile Include="Patch\_NetSegment\CalculateSegmentPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
+    <Compile Include="State\GetSpeedLimitResult.cs" />
+    <Compile Include="State\SetSpeedLimitAction.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
+    <Compile Include="UI\DebugToolGUI.cs" />
     <Compile Include="UI\Helpers\Highlight.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />

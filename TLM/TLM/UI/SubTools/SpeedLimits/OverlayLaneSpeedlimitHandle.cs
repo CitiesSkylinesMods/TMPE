@@ -7,11 +7,11 @@
     using TrafficManager.Util;
 
     /// <summary>
-    /// Describes a recently rendered speed icon on the speed limits overlay for LANE.
+    /// Describes a recently rendered speed icon on the speed limits overlay for a LANE.
     /// It is created while rendering, and if mouse is hovering over it, it is added to the list.
     /// Click is handled separately away from the rendering code.
     /// </summary>
-    public struct OverlayLaneSpeedlimitHandle {
+    public readonly struct OverlayLaneSpeedlimitHandle {
         /// <summary>Segment id where the speedlimit sign was displayed.</summary>
         public readonly ushort SegmentId;
 
@@ -36,15 +36,15 @@
         /// Called when mouse is down, and when mouse is not in parent tool window area.
         /// The show per lane mode is active.
         /// </summary>
-        public void Click(in SpeedValue speedLimitToSet, bool multiSegmentMode) {
+        public void Click(in SetSpeedLimitAction action, bool multiSegmentMode) {
             SpeedLimitManager.Instance.SetSpeedLimit(
                 segmentId: this.SegmentId,
                 laneIndex: this.LaneIndex,
                 laneInfo: this.LaneInfo,
                 laneId: this.LaneId,
-                speedLimit: speedLimitToSet.GameUnits);
+                action: action);
 
-            ClickMultiSegment(speedLimitToSet);
+            ClickMultiSegment(action);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@
         /// but also multisegment mode was enabled (like holding Shift).
         /// </summary>
         /// <param name="speedLimitToSet">The active speed limit on the palette.</param>
-        private void ClickMultiSegment(SpeedValue speedLimitToSet) {
+        private void ClickMultiSegment(SetSpeedLimitAction action) {
             if (new RoundaboutMassEdit().TraverseLoop(this.SegmentId, out var segmentList)) {
                 IEnumerable<LanePos> lanes = FollowRoundaboutLane(
                     segmentList,
@@ -65,7 +65,7 @@
                         continue;
                     }
 
-                    SpeedLimitsTool.SetSpeedLimit(lane, speedLimitToSet);
+                    SpeedLimitsTool.SetSpeedLimit(lane, action);
                 }
             } else {
                 int slIndexCopy = this.SortedLaneIndex;
@@ -91,7 +91,7 @@
                                 laneIndex: data.CurLanePos.laneIndex,
                                 laneInfo: curLaneInfo,
                                 laneId: data.CurLanePos.laneId,
-                                speedLimit: speedLimitToSet.GameUnits);
+                                action: action);
                             return true;
                         });
 

@@ -204,15 +204,20 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             //     });
 
             using (var buttonB = builder.Button<UButton>()) {
-                buttonB.Control.text = speedInteger == 0 ? "X" : speedInteger.ToString();
-                buttonB.Control.textHorizontalAlignment = UIHorizontalAlignment.Center;
+                UButton control = buttonB.Control;
+                control.text = speedInteger == 0 ? "X" : speedInteger.ToString();
+                control.textHorizontalAlignment = UIHorizontalAlignment.Center;
 
                 buttonB.SetStacking(UStackMode.ToTheRight);
                 buttonB.SetFixedSize(new Vector2(buttonWidth, 60f));
 
                 if (isSelected) {
-                    buttonB.Control.textScale = 2.0f;
+                    control.textScale = 2.0f;
                 }
+
+                control.uOnClick = (UIComponent component, UIMouseEventParameter _) => {
+                    parentTool.CurrentPaletteSpeedLimit = speedValue;
+                };
             }
 
             //--- uncomment below to create a label under each button ---

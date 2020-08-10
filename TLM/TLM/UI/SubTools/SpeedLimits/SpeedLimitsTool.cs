@@ -183,20 +183,26 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void OnToolLeftClick() {
-            // Go through recently rendered overlay speedlimit handles
+            if (this.Window.containsMouse) {
+                return; // no click in the window
+            }
+
+            // Go through recently rendered overlay speedlimit handles, which had mouse over them
             // Hovering multiple speed limits handles at once should set limits on multiple roads
+            float selectedSpeedLimit = this.CurrentPaletteSpeedLimit.GameUnits;
+
             if (this.ShowLimitsPerLane) {
                 foreach (var h in overlayDrawArgs_.HoveredLaneHandles) {
                     // per lane
                     h.Click(
-                        speedLimitToSet: this.CurrentPaletteSpeedLimit,
+                        action: SetSpeedLimitAction.GameSpeedUnits(selectedSpeedLimit),
                         multiSegmentMode: this.MultiSegmentMode);
                 }
             } else {
                 // per segment
                 foreach (var h in overlayDrawArgs_.HoveredSegmentHandles) {
                     h.Click(
-                        speedLimitToSet: this.CurrentPaletteSpeedLimit,
+                        action: SetSpeedLimitAction.GameSpeedUnits(selectedSpeedLimit),
                         multiSegmentMode: this.MultiSegmentMode);
                 }
             }
@@ -212,19 +218,19 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         public void UpdateOnscreenDisplayPanel() {
         }
 
-        // TODO: Possibly this is useful in more than this tool, then move it up the class hierarchy
-        public bool ContainsMouse() {
-            return Window != null && Window.containsMouse;
-        }
+        // TOxDO: Possibly this is useful in more than this tool, then move it up the class hierarchy
+        // public bool ContainsMouse() {
+        //     return Window != null && Window.containsMouse;
+        // }
 
-        internal static void SetSpeedLimit(LanePos lane, SpeedValue? speed) {
+        internal static void SetSpeedLimit(LanePos lane, SetSpeedLimitAction action) {
             ushort segmentId = lane.laneId.ToLane().m_segment;
             SpeedLimitManager.Instance.SetSpeedLimit(
                 segmentId: segmentId,
                 laneIndex: lane.laneIndex,
                 laneInfo: segmentId.ToSegment().Info.m_lanes[lane.laneIndex],
                 laneId: lane.laneId,
-                speedLimit: speed?.GameUnits);
+                action: action);
         }
     } // end class
 }
