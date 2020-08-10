@@ -480,10 +480,9 @@
                 Texture2D tex = SpeedLimitTextures.GetSpeedLimitTexture(laneSpeedLimit);
                 Rect screenRect;
 
-                bool isHoveredHandle = Highlight.DrawGenericOverlayGridTexture(
+                bool isHoveredHandle = grid.DrawGenericOverlayGridTexture(
                     texture: tex,
                     camPos: camPos,
-                    grid: grid,
                     x: x,
                     y: 0,
                     width: SPEED_LIMIT_SIGN_SIZE,
@@ -499,10 +498,9 @@
                         LegacyExtVehicleType.ToNew(ExtVehicleType.PassengerTrain)];
 
                     // TODO: Replace with direct call to GUI.DrawTexture as in the func above
-                    Highlight.DrawStaticSquareOverlayGridTexture(
+                    grid.DrawStaticSquareOverlayGridTexture(
                         texture: tex1,
                         camPos: camPos,
-                        grid: grid,
                         x: x,
                         y: 1,
                         size: SPEED_LIMIT_SIGN_SIZE,

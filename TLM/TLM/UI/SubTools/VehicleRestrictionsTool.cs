@@ -566,10 +566,9 @@ namespace TrafficManager.UI.SubTools {
                         continue; // do not draw allowed vehicles in view-only mode
                     }
 
-                    bool hoveredHandle = Highlight.DrawGenericOverlayGridTexture(
+                    bool hoveredHandle = grid.DrawGenericOverlayGridTexture(
                         texture: RoadUI.VehicleRestrictionTextures[key: vehicleType][key: allowed],
                         camPos: camPos,
-                        grid: grid,
                         x: x,
                         y: y,
                         width: vehicleRestrictionsSignSize,

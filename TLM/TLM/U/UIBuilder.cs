@@ -143,7 +143,7 @@ namespace TrafficManager.U {
 
         /// <summary>Instruct the <see cref="UResizer"/> to always use this stacking for the control.</summary>
         /// <param name="mode">The stacking mode to always use.</param>
-        /// <param name="spacing">Spacing to use in the call to automatic predefined spacing.0</param>
+        /// <param name="spacing">Spacing to use in the call to automatic predefined spacing.</param>
         public void SetStacking(UStackMode mode, float spacing = 0f) {
             UResizerConfig c = Control.GetResizerConfig();
             c.StackingChoice = UStackingChoice.Predefined;

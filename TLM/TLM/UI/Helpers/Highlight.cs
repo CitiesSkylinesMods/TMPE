@@ -9,6 +9,107 @@
     /// Must be called from GUI callbacks only, will not work from other code.
     /// </summary>
     public static class Highlight {
+        /// <summary>
+        /// Create this to describe a grid for rendering multiple icons.
+        /// Icons are positioned in the XZ plane in the world around the GridOrigin, but rendered
+        /// normally in screen space with their sides axis aligned.
+        /// </summary>
+        public class Grid {
+            /// <summary>Grid starts here.</summary>
+            public Vector3 GridOrigin;
+
+            /// <summary>Grid cell width.</summary>
+            public float CellWidth;
+
+            /// <summary>Grid cell height.</summary>
+            public float CellHeight;
+
+            /// <summary>Grid basis vector for X axis.</summary>
+            public Vector3 Xu;
+
+            /// <summary>Grid basis vector for Y axis.</summary>
+            public Vector3 Yu;
+
+            public Grid(Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu) {
+                GridOrigin = gridOrigin;
+                CellWidth = cellWidth;
+                CellHeight = cellHeight;
+                Xu = xu;
+                Yu = yu;
+            }
+
+            /// <summary>Grid position in game coordinates for row and column.</summary>
+            /// <param name="x">Column.</param>
+            /// <param name="y">Row.</param>
+            /// <returns>World position.</returns>
+            public Vector3 GetPositionForRowCol(uint x, uint y) {
+                return this.GridOrigin + (this.CellWidth * x * this.Xu) +
+                       (this.CellHeight * y * this.Yu);
+            }
+
+            /// <summary>
+            /// Position a texture rectangle in a "grid cell" of a regular grid with center in the
+            /// GridOrigin, and basis xu,yu. The draw box is not rotated together with the grid basis
+            /// and is aligned with screen axes.
+            /// </summary>
+            /// <param name="texture">Draw this.</param>
+            /// <param name="camPos">Visible from here.</param>
+            /// <param name="x">Column in grid.</param>
+            /// <param name="y">Row in grid.</param>
+            /// <param name="size">Square draw size (axis aligned).</param>
+            /// <param name="screenRect">Output visible screen rect.</param>
+            public void DrawStaticSquareOverlayGridTexture(Texture2D texture,
+                                                           Vector3 camPos,
+                                                           uint x,
+                                                           uint y,
+                                                           float size,
+                                                           out Rect screenRect) {
+                DrawGenericOverlayGridTexture(
+                    texture: texture,
+                    camPos: camPos,
+                    x: x,
+                    y: y,
+                    width: size,
+                    height: size,
+                    canHover: false,
+                    screenRect: out screenRect);
+            }
+
+            /// <summary>
+            /// Position a texture rectangle in a "grid cell" of a regular grid with center in the
+            /// GridOrigin, and basis xu,yu. The draw box is not rotated together with the grid basis
+            /// and is aligned with screen axes.
+            /// </summary>
+            /// <param name="texture">Draw this.</param>
+            /// <param name="camPos">Visible from here.</param>
+            /// <param name="x">X position in grid.</param>
+            /// <param name="y">Y position in grid.</param>
+            /// <param name="width">Draw box size x.</param>
+            /// <param name="height">Draw box size y.</param>
+            /// <param name="canHover">Whether the icon is interacting with the mouse.</param>
+            /// <param name="screenRect">Output visible screen rect.</param>
+            /// <returns>Whether mouse hovers the icon.</returns>
+            public bool DrawGenericOverlayGridTexture(Texture2D texture,
+                                                      Vector3 camPos,
+                                                      uint x,
+                                                      uint y,
+                                                      float width,
+                                                      float height,
+                                                      bool canHover,
+                                                      out Rect screenRect) {
+                Vector3 worldPos = this.GetPositionForRowCol(x, y);
+
+                return Highlight.DrawGenericOverlayTexture(
+                    texture,
+                    camPos,
+                    worldPos,
+                    width,
+                    height,
+                    canHover,
+                    out screenRect);
+            }
+        }
+
         public static void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                           ushort nodeId,
                                           bool warning = false,
@@ -50,7 +151,6 @@
             return sumHalfWidth / count;
         }
 
-        // TODO: move to UI.Helpers (Highlight)
         public static void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                           ushort nodeId,
                                           Color color,
@@ -185,97 +285,6 @@
                 maxY: position.y + 100f,
                 renderLimits: false,
                 alpha);
-        }
-
-        /// <summary>
-        /// Create this to describe a grid for rendering multiple icons.
-        /// </summary>
-        public class Grid {
-            /// <summary>Grid starts here.</summary>
-            public Vector3 GridOrigin;
-
-            /// <summary>Grid cell width.</summary>
-            public float CellWidth;
-
-            /// <summary>Grid cell height.</summary>
-            public float CellHeight;
-
-            /// <summary>Grid basis vector for X axis.</summary>
-            public Vector3 Xu;
-
-            /// <summary>Grid basis vector for Y axis.</summary>
-            public Vector3 Yu;
-
-            public Grid(Vector3 gridOrigin, float cellWidth, float cellHeight, Vector3 xu, Vector3 yu) {
-                GridOrigin = gridOrigin;
-                CellWidth = cellWidth;
-                CellHeight = cellHeight;
-                Xu = xu;
-                Yu = yu;
-            }
-
-            /// <summary>Grid position in game coordinates for row and column.</summary>
-            /// <param name="x">Column.</param>
-            /// <param name="y">Row.</param>
-            /// <returns>World position.</returns>
-            public Vector3 GetPositionForRowCol(uint x, uint y) {
-                return this.GridOrigin + (this.CellWidth * x * this.Xu) +
-                    (this.CellHeight * y * this.Yu);
-            }
-        }
-
-        public static void DrawStaticSquareOverlayGridTexture(Texture2D texture,
-                                                              Vector3 camPos,
-                                                              Grid grid,
-                                                              uint x,
-                                                              uint y,
-                                                              float size,
-                                                              out Rect screenRect) {
-            DrawGenericOverlayGridTexture(
-                texture: texture,
-                camPos: camPos,
-                grid: grid,
-                x: x,
-                y: y,
-                width: size,
-                height: size,
-                canHover: false,
-                screenRect: out screenRect);
-        }
-
-        /// <summary>
-        /// Position a texture rectangle in a "grid cell" of a regular grid with center in the
-        /// GridOrigin, and basis xu,yu. The draw box is not rotated together with the grid basis
-        /// and is aligned with screen axes.
-        /// </summary>
-        /// <param name="texture">Draw this.</param>
-        /// <param name="camPos">From here.</param>
-        /// <param name="x">X position in grid.</param>
-        /// <param name="y">Y position in grid.</param>
-        /// <param name="width">Draw box size x.</param>
-        /// <param name="height">Draw box size y.</param>
-        /// <param name="canHover">Whether the icon is interacting with the mouse.</param>
-        /// <returns>Whether mouse hovers the icon.</returns>
-        // TODO: Refactor to a new struct which will hold the grid origin, xu, yu, cell sizes
-        public static bool DrawGenericOverlayGridTexture(Texture2D texture,
-                                                         Vector3 camPos,
-                                                         Highlight.Grid grid,
-                                                         uint x,
-                                                         uint y,
-                                                         float width,
-                                                         float height,
-                                                         bool canHover,
-                                                         out Rect screenRect) {
-            Vector3 worldPos = grid.GetPositionForRowCol(x, y);
-
-            return DrawGenericOverlayTexture(
-                texture,
-                camPos,
-                worldPos,
-                width,
-                height,
-                canHover,
-                out screenRect);
         }
 
         public static bool DrawHoverableSquareOverlayTexture(Texture2D texture,

@@ -854,10 +854,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     SpeedValue laneSpeedLimit = new SpeedValue(
                         SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId));
 
-                    bool hoveredHandle = Highlight.DrawGenericOverlayGridTexture(
+                    bool hoveredHandle = grid.DrawGenericOverlayGridTexture(
                         texture: SpeedLimitTextures.GetSpeedLimitTexture(laneSpeedLimit),
                         camPos: camPos,
-                        grid: grid,
                         x: x,
                         y: 0,
                         width: speedLimitSignSize,
@@ -872,10 +871,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                         Texture2D tex1 = RoadUI.VehicleInfoSignTextures[
                             LegacyExtVehicleType.ToNew(ExtVehicleType.PassengerTrain)];
 
-                        Highlight.DrawStaticSquareOverlayGridTexture(
+                        grid.DrawStaticSquareOverlayGridTexture(
                             texture: tex1,
                             camPos: camPos,
-                            grid: grid,
                             x: x,
                             y: 1,
                             size: speedLimitSignSize,
