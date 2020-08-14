@@ -17,6 +17,17 @@ namespace TrafficManager.Util {
         private ReadOnlyCollection<Vector2> _spiralCoordsReadOnly;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Spiral"/> class.
+        /// A spiral coords generator that will cache all previously generated values,
+        /// and only generate new ones if necessary.
+        /// It will be initialized with a radius of 9.
+        /// </summary>
+        public Spiral()
+            : this(9) {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Spiral"/> class.
         /// A spiral coords generator that will cache all previously generated values,
         /// and only generate new ones if necessary.
         /// </summary>
@@ -36,16 +47,16 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// The largest radius the object was ever passed.
+        /// Gets the largest radius the object was ever passed.
         /// </summary>
         public int MaxRadius => _maxRadius;
 
         /// <summary>
-        /// 
+        /// Gets spiral coords and ensures that the given radius is satisfied.
         /// </summary>
-        /// <param name="radius">Needed radius of the spiral.</param>
+        /// <param name="radius">Needed radius for the spiral coords.</param>
         /// <returns>
-        /// Returns a readonly collection of spiral coords.
+        /// A readonly collection of spiral coords.
         /// The result won't generate a new collection for performance reasons,
         /// meaning it will return a reference to the same mutable underlying collection.
         /// The returned collection will always contain the coords for 'MaxRadius',
