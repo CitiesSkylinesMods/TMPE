@@ -15,8 +15,9 @@ namespace TrafficManager.Manager.Impl {
         public static readonly ExtPathManager Instance = new ExtPathManager();
 
         private ExtPathManager() {
-            var radius = 3;
-            _spiralGridCoordsCache = LoopUtil.GenerateSpiralGridCoordsClockwise(3).ToArray();
+            _spiralGridCoordsCache = LoopUtil.GenerateSpiralGridCoordsClockwise()
+                .Take(9)
+                .ToArray();
         }
 
         public bool FindPathPositionWithSpiralLoop(Vector3 position,

@@ -30,7 +30,9 @@ namespace TrafficManager.Manager.Impl {
                 1,
                 (int)(GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding / (BuildingManager.BUILDINGGRID_CELL_SIZE / 2f)) + 1);
 
-            _spiralGridCoordsCache = LoopUtil.GenerateSpiralGridCoordsClockwise(radius).ToArray();
+            _spiralGridCoordsCache = LoopUtil.GenerateSpiralGridCoordsClockwise()
+                .Take(radius * radius)
+                .ToArray();
         }
 
         protected override void OnDisableFeatureInternal() {
@@ -2464,7 +2466,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            for (int i = 0; i < _spiralGridCoordsCache.Length; i++) {
+            for (int i = 0; i < radius * radius; i++) {
                 var coords = _spiralGridCoordsCache[i];
                 if (!LoopHandler((int)(centerI + coords.x), (int)(centerJ + coords.y))) {
                     break;
@@ -2573,7 +2575,7 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            for (int i = 0; i < _spiralGridCoordsCache.Length; i++) {
+            for (int i = 0; i < radius * radius; i++) {
                 var coords = _spiralGridCoordsCache[i];
                 if (!LoopHandler((int)(centerI + coords.x), (int)(centerJ + coords.y))) {
                     break;

@@ -5,7 +5,9 @@ using UnityEngine;
 
 namespace Benchmarks {
     public class SpiralLoopPerfTests {
-        private readonly Vector2[] spiralCacheRadius17 = LoopUtil.GenerateSpiralGridCoordsClockwise(17).ToArray();
+        private readonly Vector2[] spiralCacheRadius17 = LoopUtil.GenerateSpiralGridCoordsClockwise()
+            .Take(17 * 17)
+            .ToArray();
 
         [Benchmark]
         public void SpiralLoop_Once_Radius17() {
@@ -90,7 +92,7 @@ namespace Benchmarks {
                 return true;
             }
 
-            foreach (var position in LoopUtil.GenerateSpiralGridCoordsClockwise(radius)) {
+            foreach (var position in LoopUtil.GenerateSpiralGridCoordsClockwise().Take(radius * radius)) {
                 var positionWithOffset = position + new Vector2(centerI, centerJ);
                 if (LoopHandler((int)positionWithOffset.x, (int)positionWithOffset.y)) {
                     break;
@@ -232,7 +234,7 @@ namespace Benchmarks {
                     return true;
                 }
 
-                foreach (var position in LoopUtil.GenerateSpiralGridCoordsClockwise(radius)) {
+                foreach (var position in LoopUtil.GenerateSpiralGridCoordsClockwise().Take(radius * radius)) {
                     var positionWithOffset = position + new Vector2(centerI, centerJ);
                     if (LoopHandler((int)positionWithOffset.x, (int)positionWithOffset.y)) {
                         break;
