@@ -251,16 +251,16 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 if (!searchedParkingSpace) {
+                    bool isElectric = vehicleInfo.m_class.m_subService != ItemClass.SubService.ResidentialLow;
                     foundParkingSpace =
-                        Constants.ManagerFactory.AdvancedParkingManager.FindParkingSpaceInVicinity(
+                        Constants.ManagerFactory.AdvancedParkingManager.VanillaFindParkingSpaceWithoutRestrictions(
+                            isElectric,
+                            homeID,
                             refPos,
                             searchDir,
-                            vehicleInfo,
-                            homeID,
-                            vehicleID,
-                            GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance,
-                            out ExtParkingSpaceLocation parkLoc,
-                            out ushort parkId,
+                            pathPos.m_segment,
+                            vehicleInfo.m_generatedInfo.m_size.x,
+                            vehicleInfo.m_generatedInfo.m_size.z,
                             out parkPos,
                             out parkRot,
                             out parkOffset);
