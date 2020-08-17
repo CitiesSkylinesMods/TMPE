@@ -136,6 +136,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             this.Window = UiBuilder<SpeedLimitsWindow>.CreateWindow<SpeedLimitsWindow>(setupFn: SetupFn);
 
+            //--------------------------------------------------
+            // Click handlers for the window are located here
+            // to have insight into SpeedLimits Tool internals
+            //--------------------------------------------------
+            this.Window.SegmentLaneModeToggleButton.uOnClick = (component, evt) => {
+                this.showLimitsPerLane_ = !this.showLimitsPerLane_;
+                // TODO: update button active/texture
+            };
             this.Window.EditDefaultsModeButton.uOnClick = (component, evt) => {
                 this.editDefaultsMode_ = !this.editDefaultsMode_;
                 // TODO: update button active/texture

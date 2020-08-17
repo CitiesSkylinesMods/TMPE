@@ -19,12 +19,6 @@ namespace TrafficManager.U {
                                                  string resourcePrefix,
                                                  U.AtlasSpriteDef[] spriteDefs,
                                                  IntVector2 atlasSizeHint) {
-            Texture2D texture2D = new Texture2D(
-                width: atlasSizeHint.x,
-                height: atlasSizeHint.y,
-                format: TextureFormat.ARGB32,
-                mipmap: false);
-
             var loadedTextures = new List<Texture2D>(spriteDefs.Length);
             var loadedSpriteNames = new List<string>();
 
@@ -35,23 +29,38 @@ namespace TrafficManager.U {
                     ? resourcePrefix
                     : spriteDef.ResourcePrefix;
 
+                //--------------------------
+                // Try loading the texture
+                //--------------------------
                 string resourceName = $"{prefix}.{spriteDef.Name}.png";
                 Log._Debug($"TextureUtil: Loading {resourceName} for sprite={spriteDef.Name}");
 
-                Texture2D loadedSprite = TextureResources.LoadDllResource(
+                Texture2D tex = TextureResources.LoadDllResource(
                     resourceName: resourceName,
-                    width: spriteDef.Size.x,
-                    height: spriteDef.Size.y);
+                    size: spriteDef.Size);
 
-                if (loadedSprite != null) {
-                    loadedTextures.Add(loadedSprite);
+                if (tex != null) {
+                    loadedTextures.Add(tex);
                     loadedSpriteNames.Add(spriteDef.Name); // only take those which are loaded
-                } else {
-                    Log.Error($"TextureUtil: Sprite load failed: {resourceName} for sprite={spriteDef.Name}");
                 }
+                // No error reporting, it is done in LoadDllResource
             }
 
-            var regions = texture2D.PackTextures(
+            Log._Debug($"TextureUtil: Atlas textures loaded, in {spriteDefs.Length}, success {loadedTextures.Count}");
+            return PackTextures(atlasName, atlasSizeHint, loadedTextures, loadedSpriteNames);
+        }
+
+        private static UITextureAtlas PackTextures(string atlasName,
+                                                   IntVector2 atlasSizeHint,
+                                                   List<Texture2D> loadedTextures,
+                                                   List<string> loadedSpriteNames) {
+            Texture2D texture2D = new Texture2D(
+                width: atlasSizeHint.x,
+                height: atlasSizeHint.y,
+                format: TextureFormat.ARGB32,
+                mipmap: false);
+
+            Rect[] regions = texture2D.PackTextures(
                 textures: loadedTextures.ToArray(),
                 padding: 2,
                 maximumAtlasSize: Math.Max(atlasSizeHint.x, atlasSizeHint.y));
@@ -65,7 +74,7 @@ namespace TrafficManager.U {
             newAtlas.material = material;
             newAtlas.name = atlasName;
 
-            for (int i = 0; i < spriteDefs.Length; i++) {
+            for (int i = 0; i < loadedTextures.Count; i++) {
                 var item = new UITextureAtlas.SpriteInfo {
                     name = loadedSpriteNames[i],
                     texture = loadedTextures[i],

@@ -423,7 +423,6 @@
     <EmbeddedResource Include="Resources\JunctionRestrictions\right_on_red_forbidden.png" />
     <EmbeddedResource Include="Resources\JunctionRestrictions\uturn_allowed.png" />
     <EmbeddedResource Include="Resources\JunctionRestrictions\uturn_forbidden.png" />
-    <EmbeddedResource Include="Resources\MainMenu\LegacyButtons.png" />
     <EmbeddedResource Include="Resources\MainMenu\noimage.png" />
     <EmbeddedResource Include="Resources\MainMenu\remove-btn.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\Help-fg-active.png" />
@@ -722,6 +721,10 @@
     <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\85.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\90.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\95.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\EditSegments-fg-active.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\EditSegments-fg-normal.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\MphToggle-fg-active.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\MphToggle-fg-normal.png" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />

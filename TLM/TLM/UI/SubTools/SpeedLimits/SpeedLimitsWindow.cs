@@ -22,7 +22,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private UIDragHandle dragHandle_;
 
         /// <summary>UI button which toggles per-segment or per-lane speed limits.</summary>
-        private UButton segmentLaneModeToggleButton_;
+        public UButton SegmentLaneModeToggleButton { get; set; }
+
+        private UITextureAtlas guiAtlas_;
 
         public UButton EditDefaultsModeButton { get; set; }
 
@@ -109,17 +111,20 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
                 modePanelB.ResizeFunction(ButtonpanelResizeFn);
 
-                Vector2 buttonSize = new Vector2(60f, 60f);
+                Vector2 buttonSize = new Vector2(50f, 50f);
 
                 //----------------
                 // Edit Segments/Lanes mode button
                 //----------------
                 using (var b = modePanelB.FixedSizeButton<UButton>(
                     text: string.Empty,
-                    tooltip: "Override speed limits for one road or segment",
+                    tooltip: "Edit segments. Click to edit lanes.",
                     size: buttonSize,
-                    stack: UStackMode.Below)) {
-                    this.segmentLaneModeToggleButton_ = b.Control;
+                    stack: UStackMode.Below))
+                {
+                    this.SegmentLaneModeToggleButton = b.Control;
+                    b.Control.atlas = GetUiAtlas();
+                    b.Control.Skin = ButtonSkin.CreateDefaultNoBackground("EditSegments");
                 }
 
                 //----------------
@@ -127,7 +132,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 //----------------
                 using (var defaultsB = modePanelB.FixedSizeButton<UButton>(
                     text: string.Empty,
-                    tooltip: "Edit default speed limits for all roads of that type",
+                    tooltip: "Default speed limits per road type",
                     size: buttonSize,
                     stack: UStackMode.Below)) {
                     this.EditDefaultsModeButton = defaultsB.Control;
@@ -137,15 +142,17 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 // MPH/Kmph switch
                 //----------------
                 bool displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-                modePanelB.FixedSizeButton<MphToggleButton>(
-                    text: displayMph
-                        ? "MPH"
-                        : "km/h",
+                using (var b = modePanelB.FixedSizeButton<MphToggleButton>(
+                    text: string.Empty,
                     tooltip: displayMph
                         ? Translation.SpeedLimits.Get("Miles per hour")
                         : Translation.SpeedLimits.Get("Kilometers per hour"),
                     size: buttonSize,
-                    stack: UStackMode.Below);
+                    stack: UStackMode.Below))
+                {
+                    b.Control.atlas = GetUiAtlas();
+                    b.Control.Skin = ButtonSkin.CreateDefaultNoBackground("MphToggle");
+                }
             }
         }
 
@@ -269,27 +276,21 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         //         : speed.ToKmphPrecise().ToString();
         // }
 
-        private UITextureAtlas CreateUiAtlas() {
+        private UITextureAtlas GetUiAtlas() {
+            if (guiAtlas_ != null) {
+                return guiAtlas_;
+            }
+
             // Create base atlas with backgrounds and no foregrounds
-            ButtonSkin skin = ButtonSkin.CreateDefaultButtonSkin("SpeedLimits");
-            HashSet<U.AtlasSpriteDef> spriteDefs = skin.CreateAtlasSpriteSet(new IntVector2(50));
+            HashSet<U.AtlasSpriteDef> spriteDefs = new HashSet<AtlasSpriteDef>();
 
             // Merge names of all foreground sprites for 3 directions into atlasKeySet
-            skin.ForegroundNormal = true;
-            skin.ForegroundActive = true;
-            foreach (string prefix in new[] { "MphToggle", "EditSegments", "EditDefaults", }) {
-                skin.Prefix = prefix;
+            foreach (string prefix in new[] { "MphToggle", "EditSegments", }) {
+                ButtonSkin skin = ButtonSkin.CreateDefaultNoBackground(prefix);
 
                 // Create keysets for lane arrow button icons and merge to the shared atlas
                 spriteDefs.AddRange(skin.CreateAtlasSpriteSet(new IntVector2(50)));
             }
-
-            // foreach (string prefix in new[] { "MphToggle", "EditSegments", "EditDefaults", }) {
-            //     skin.Prefix = prefix;
-            //
-            //     // Create keysets for lane arrow button icons and merge to the shared atlas
-            //     spriteDefs.AddRange(skin.CreateAtlasSpriteSet(new IntVector2(50)));
-            // }
 
             // Load actual graphics into an atlas
             return TextureUtil.CreateAtlas(

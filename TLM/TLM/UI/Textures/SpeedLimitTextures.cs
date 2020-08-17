@@ -4,6 +4,7 @@ namespace TrafficManager.UI.Textures {
     using System;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
+    using TrafficManager.State.ConfigData;
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
@@ -30,30 +31,33 @@ namespace TrafficManager.UI.Textures {
             TexturesMphUS = new TinyDictionary<int, Texture2D>();
             TexturesMphUK = new TinyDictionary<int, Texture2D>();
 
+            IntVector2 size = new IntVector2(200);
+            IntVector2 sizeUS = new IntVector2(200, 250);
+
             // Load shared speed limit signs for Kmph and Mph
             // Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no limit sign
             for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
-                var resource = LoadDllResource($"SpeedLimits.Kmh.{speedLimit}.png", 200, 200);
+                var resource = LoadDllResource($"SpeedLimits.Kmh.{speedLimit}.png", size, true);
                 TexturesKmph.Add(speedLimit, resource ?? TexturesKmph[5]);
             }
 
             for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
-                var resource = LoadDllResource($"SpeedLimits.RoadDefaults.{speedLimit}.png", 200, 200);
+                var resource = LoadDllResource($"SpeedLimits.RoadDefaults.{speedLimit}.png", size, true);
                 RoadDefaults.Add(speedLimit, resource ?? RoadDefaults[5]);
             }
 
             // Signs from 0 to 90 for MPH
             for (var speedLimit = 0; speedLimit <= 90; speedLimit += 5) {
                 // Load US textures, they are rectangular
-                var resourceUs = LoadDllResource($"SpeedLimits.Mph_US.{speedLimit}.png", 200, 250);
+                var resourceUs = LoadDllResource($"SpeedLimits.Mph_US.{speedLimit}.png", sizeUS, true);
                 TexturesMphUS.Add(speedLimit, resourceUs ?? TexturesMphUS[5]);
 
                 // Load UK textures, they are square
-                var resourceUk = LoadDllResource($"SpeedLimits.Mph_UK.{speedLimit}.png", 200, 200);
+                var resourceUk = LoadDllResource($"SpeedLimits.Mph_UK.{speedLimit}.png", size, true);
                 TexturesMphUK.Add(speedLimit, resourceUk ?? TexturesMphUK[5]);
             }
 
-            Clear = LoadDllResource("clear.png", 256, 256);
+            Clear = LoadDllResource("clear.png", new IntVector2(256));
         }
 
         /// <summary>
@@ -64,8 +68,8 @@ namespace TrafficManager.UI.Textures {
         public static Texture2D GetSpeedLimitTexture(SpeedValue spd,
                                                      IDictionary<int, Texture2D> textureSource) {
             // Select the source for the textures based on unit and the theme
-            var m = GlobalConfig.Instance.Main;
-            var unit = m.DisplaySpeedLimitsMph ? SpeedUnit.Mph : SpeedUnit.Kmph;
+            State.ConfigData.Main m = GlobalConfig.Instance.Main;
+            SpeedUnit unit = m.DisplaySpeedLimitsMph ? SpeedUnit.Mph : SpeedUnit.Kmph;
             bool mph = unit == SpeedUnit.Mph;
 
             // Round to nearest 5 MPH or nearest 10 km/h

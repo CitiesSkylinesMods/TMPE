@@ -51,14 +51,49 @@ namespace TrafficManager.U {
         /// Create Button Skin for a given button name, which can be hovered, active,
         /// but not disabled.
         /// </summary>
-        /// <param name="buttonName">Prefix of the filenames to use for this button.</param>
+        /// <param name="prefix">Prefix of the filenames to use for this button.</param>
         /// <returns>Button skin object.</returns>
-        public static ButtonSkin CreateDefaultButtonSkin(string buttonName) {
+        public static ButtonSkin CreateDefault(string prefix, string backgroundPrefix) {
             return new ButtonSkin {
+                Prefix = prefix,
+                BackgroundPrefix = backgroundPrefix,
+
+                BackgroundHovered = true,
+                BackgroundActive = true,
+                BackgroundDisabled = false,
+
+                ForegroundNormal = true,
+                ForegroundActive = true,
+            };
+        }
+
+        /// <summary>Create background only button skin.</summary>
+        /// <param name="buttonName">Prefix.</param>
+        /// <returns>New skin.</returns>
+        public static ButtonSkin CreateDefaultNoForeground(string buttonName) {
+            return new ButtonSkin {
+                Prefix = buttonName,
                 BackgroundPrefix = buttonName, // filename prefix
 
                 BackgroundHovered = true,
                 BackgroundActive = true,
+                BackgroundDisabled = false,
+
+                ForegroundNormal = false,
+                ForegroundActive = false,
+            };
+        }
+
+        /// <summary>Create foreground-only button skin.</summary>
+        /// <param name="buttonName">Prefix.</param>
+        /// <returns>New skin.</returns>
+        public static ButtonSkin CreateDefaultNoBackground(string buttonName) {
+            return new ButtonSkin {
+                Prefix = buttonName,
+                BackgroundPrefix = buttonName, // filename prefix
+
+                BackgroundHovered = false,
+                BackgroundActive = false,
                 BackgroundDisabled = false,
 
                 ForegroundNormal = true,
@@ -80,7 +115,7 @@ namespace TrafficManager.U {
                 names.Add($"{BackgroundPrefix}-bg-normal");
             }
 
-            if (ForegroundNormal) {
+            if (ForegroundNormal && !string.IsNullOrEmpty(Prefix)) {
                 names.Add($"{Prefix}-fg-normal");
             }
             if (BackgroundDisabled && haveBackgroundPrefix) {
@@ -92,13 +127,13 @@ namespace TrafficManager.U {
             if (BackgroundActive && haveBackgroundPrefix) {
                 names.Add($"{BackgroundPrefix}-bg-active");
             }
-            if (ForegroundDisabled) {
+            if (ForegroundDisabled && !string.IsNullOrEmpty(Prefix)) {
                 names.Add($"{Prefix}-fg-disabled");
             }
-            if (ForegroundHovered) {
+            if (ForegroundHovered && !string.IsNullOrEmpty(Prefix)) {
                 names.Add($"{Prefix}-fg-hovered");
             }
-            if (ForegroundActive) {
+            if (ForegroundActive && !string.IsNullOrEmpty(Prefix)) {
                 names.Add($"{Prefix}-fg-active");
             }
 

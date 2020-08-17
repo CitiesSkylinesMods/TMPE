@@ -7,7 +7,8 @@
     /// <summary>
     /// Combo sign object rendered as GUI overlay.
     /// Consists of a large speed limit icon using current theme, and a small optional icon
-    /// in the corner.
+    /// in the corner. Signs can have different aspect ratios (i.e. allows to combine US rectangular
+    /// and round signs).
     /// </summary>
     // +-----+
     // |     |
@@ -15,8 +16,9 @@
     // |   50|
     // +-----+
     public struct SpeedLimitsOverlaySign {
-        private float size_;
         private Vector3 screenPos_;
+
+        /// <summary>The visible screen-space box of the large texture (for mouse interaction).</summary>
         private Rect screenRect_;
 
         /// <summary>For each new sign world position, recalculate new rect for rendering.</summary>
@@ -60,11 +62,9 @@
                                      Vector2 smallSize,
                                      IDictionary<int, Texture2D> textureSource) {
             // Offset the drawing center to the bottom right quarter of the large rect
-            Vector3 drawCenter = this.screenPos_ + new Vector3(this.size_ * 0.25f,
-                                                               this.size_ * 0.25f);
             Rect smallRect = new Rect(
-                x: drawCenter.x,
-                y: drawCenter.y,
+                x: this.screenPos_.x,
+                y: this.screenPos_.y,
                 width: smallSize.x,
                 height: smallSize.y);
 
@@ -75,6 +75,14 @@
             GUI.DrawTexture(
                 position: smallRect,
                 image: tex);
+        }
+
+        /// <summary>Set GUI render transparency to A.</summary>
+        /// <param name="a">Alpha.</param>
+        public void SetGuiTransparency(float a) {
+            Color guiColor = GUI.color;
+            guiColor.a = a;
+            GUI.color = guiColor;
         }
     }
 }

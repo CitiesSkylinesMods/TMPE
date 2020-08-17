@@ -32,11 +32,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return laneArrowButtonAtlas_;
             }
 
-            ButtonSkin skin = ButtonSkin.CreateDefaultButtonSkin("LaneArrow");
-
             // Create base atlas with backgrounds and no foregrounds
-            skin.ForegroundNormal = false;
-            skin.ForegroundActive = false;
+            ButtonSkin skin = ButtonSkin.CreateDefaultNoBackground("LaneArrow");
             HashSet<U.AtlasSpriteDef> atlasKeysSet = skin.CreateAtlasSpriteSet(new IntVector2(64));
 
             // Merge names of all foreground sprites for 3 directions into atlasKeySet
@@ -120,8 +117,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                             using (var b = buttonGroupBuilder.Button<LaneArrowButton>())
                             {
                                 b.Control.atlas = GetUiAtlas();
-                                b.Control.Skin = ButtonSkin.CreateDefaultButtonSkin("LaneArrow");
-                                b.Control.Skin.Prefix = prefix;
+                                b.Control.Skin = ButtonSkin.CreateDefault(
+                                    prefix: prefix,
+                                    backgroundPrefix: "LaneArrow");
                                 Buttons.Add(b.Control);
 
                                 // First button in the group will be stacking vertical

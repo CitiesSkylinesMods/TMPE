@@ -353,17 +353,12 @@
 
                 float zoom = 100.0f / (e.Value - camPos).magnitude;
                 float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * zoom;
-                Color guiColor = GUI.color;
 
                 // Recalculate visible rect for screen position and size
                 signRenderer.Reset(screenPos, size * largeRatio);
 
                 bool isHoveredHandle = args.InteractiveSigns && signRenderer.ContainsMouse();
-
-                guiColor.a = TrafficManagerTool.GetHandleAlpha(isHoveredHandle);
-
-                // Draw something right here, the road sign texture
-                GUI.color = guiColor;
+                signRenderer.SetGuiTransparency(TrafficManagerTool.GetHandleAlpha(isHoveredHandle));
 
                 // Get speed limit override for segment
                 SpeedValue? overrideSpeedlimit =
@@ -407,11 +402,9 @@
                     this.finalDirection_ = e.Key;
                     ret = true;
                 }
-
-                guiColor.a = 1f;
-                GUI.color = guiColor;
             }
 
+            signRenderer.SetGuiTransparency(1f);
             return ret;
         }
 
@@ -458,7 +451,6 @@
 
             Vector3 drawOriginPos = segmentCenterPos -
                                     (0.5f * (((numLanes - 1) + numDirections) - 1) * signSize * xu);
-            uint x = 0;
 
             IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
                 segmentId: segmentId,
@@ -503,6 +495,13 @@
             Vector2 signsThemeAspectRatio = SpeedLimitTextures.GetTextureAspectRatio();
             Vector2 largeRatio = args.ShowDefaultsMode ? Vector2.one : signsThemeAspectRatio;
 
+            IDictionary<int, Texture2D> largeSignsTextureSource = args.ShowDefaultsMode
+                ? SpeedLimitTextures.RoadDefaults
+                : currentThemeTextures;
+
+            // Signs are rendered in a grid starting from col 0
+            float signColumn = 0f;
+
             //-----------------------
             // For all lanes sorted
             //-----------------------
@@ -514,13 +513,13 @@
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
                 if (!directions.Contains(laneInfo.m_finalDirection)) {
                     if (directions.Count > 0) {
-                        ++x; // space between different directions
+                        signColumn += 1f; // full space between opposite directions
                     }
 
                     directions.Add(laneInfo.m_finalDirection);
                 }
 
-                Vector3 worldPos = grid.GetPositionForRowCol(x, 0);
+                Vector3 worldPos = grid.GetPositionForRowCol(signColumn, 0);
 
                 bool visible = GeometryUtil.WorldToScreenPoint(worldPos, out Vector3 screenPos);
 
@@ -532,22 +531,21 @@
                 float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * zoom;
                 signRenderer.Reset(screenPos, largeRatio * size);
 
+                // Set render transparency based on mouse hover
+                bool isHoveredHandle = args.InteractiveSigns && signRenderer.ContainsMouse();
+                signRenderer.SetGuiTransparency(TrafficManagerTool.GetHandleAlpha(isHoveredHandle));
+
                 // Get speed limit override for the lane
                 GetSpeedLimitResult overrideSpeedlimit =
                     SpeedLimitManager.Instance.GetCustomSpeedLimit(laneId);
 
-                if (overrideSpeedlimit.Type == GetSpeedLimitResult.ResultType.OverrideExists
-                    && overrideSpeedlimit.OverrideValue.HasValue) {
-                    signRenderer.DrawLargeTexture(
-                        args.ShowDefaultsMode
-                            ? overrideSpeedlimit.DefaultValue
-                            : overrideSpeedlimit.OverrideValue,
-                        args.ShowDefaultsMode
-                            ? SpeedLimitTextures.RoadDefaults
-                            : currentThemeTextures);
-                }
+                SpeedValue? largeSpeedlimit =
+                    (overrideSpeedlimit.Type == GetSpeedLimitResult.ResultType.OverrideExists
+                     && overrideSpeedlimit.OverrideValue.HasValue)
+                        ? overrideSpeedlimit.OverrideValue
+                        : overrideSpeedlimit.DefaultValue;
 
-                bool isHoveredHandle = signRenderer.ContainsMouse();
+                signRenderer.DrawLargeTexture(largeSpeedlimit, largeSignsTextureSource);
 
                 // If Alt is held, then also overlay the other (default limit in edit override mode,
                 // or override in edit defaults mode) as a small texture.
@@ -576,13 +574,13 @@
                     grid.DrawStaticSquareOverlayGridTexture(
                         texture: tex1,
                         camPos: camPos,
-                        x: x,
-                        y: 1,
+                        x: signColumn,
+                        y: 1f,
                         size: SPEED_LIMIT_SIGN_SIZE,
                         screenRect: out Rect _);
                 }
 
-                if (isHoveredHandle) {
+                if (signRenderer.ContainsMouse()) {
                     // Clickable overlay (interactive signs also True):
                     // Register the position of a mouse-hovered speedlimit overlay icon
                     args.HoveredLaneHandles.Add(
@@ -594,16 +592,13 @@
                             sortedLaneIndex: sortedLaneIndex));
 
                     this.segmentId_ = segmentId;
-                    // this.laneId_ = laneId;
-                    // this.laneIndex_ = laneIndex;
-                    // this.laneInfo_ = laneInfo;
-                    // this.sortedLaneIndex_ = sortedLaneIndex;
                     ret = true;
                 }
 
-                ++x;
+                ++signColumn;
             }
 
+            signRenderer.SetGuiTransparency(1f);
             return ret;
         }
     }

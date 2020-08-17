@@ -15,9 +15,9 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="IntVector2"/> struct with same value.
         /// </summary>
-        /// <param name="x">Both first and second value.</param>
-        public IntVector2(int x) {
-            this.x = this.y = x;
+        /// <param name="xy">Both first and second value.</param>
+        public IntVector2(int xy) {
+            this.x = this.y = xy;
         }
     }
 }

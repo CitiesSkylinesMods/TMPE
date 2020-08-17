@@ -4,13 +4,16 @@ namespace TrafficManager.UI.Textures {
     using System.Reflection;
     using System;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public static class TextureResources {
         static TextureResources() {
         }
 
-        internal static Texture2D LoadDllResource(string resourceName, int width, int height)
+        internal static Texture2D LoadDllResource(string resourceName,
+                                                  IntVector2 size,
+                                                  bool mip = false)
         {
 #if DEBUG
             bool debug =  DebugSwitch.ResourceLoading.Get();
@@ -23,16 +26,25 @@ namespace TrafficManager.UI.Textures {
 #endif
                 var myAssembly = Assembly.GetExecutingAssembly();
                 var myStream = myAssembly.GetManifestResourceStream("TrafficManager.Resources." + resourceName);
-                if (myStream == null)
-                    throw new Exception($"{resourceName} not found!");
+                if (myStream == null) {
+                    throw new Exception($"Resource stream {resourceName} not found!");
+                }
 
-                var texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
+                var texture = new Texture2D(
+                    width: size.x,
+                    height: size.y,
+                    format: TextureFormat.ARGB32,
+                    mipmap: mip);
 
                 texture.LoadImage(ReadToEnd(myStream));
 
                 return texture;
             } catch (Exception e) {
-                Log.Error($"failed loading {resourceName} " + e);
+#if DEBUG
+                Log.Error("Failed to load texture " + e);
+#else
+                Log.Warning("Failed to load texture " + e);
+#endif
                 return null;
             }
         }
