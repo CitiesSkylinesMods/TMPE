@@ -1,8 +1,8 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
     /// <summary>Defines styles available for road signs.</summary>
     public enum SpeedLimitSignTheme {
-        /// <summary>US style white square road signs.</summary>
-        SquareUS = 0,
+        /// <summary>US style white rectangular road signs.</summary>
+        RectangularUS = 0,
 
         /// <summary>Round British style signs with bolder font called "Transport".</summary>
         RoundUK = 1,

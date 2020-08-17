@@ -312,7 +312,7 @@ namespace TrafficManager.State {
                     newStyle = SpeedLimitSignTheme.RoundUK;
                     break;
                 case 0:
-                    newStyle = SpeedLimitSignTheme.SquareUS;
+                    newStyle = SpeedLimitSignTheme.RectangularUS;
                     break;
             }
 

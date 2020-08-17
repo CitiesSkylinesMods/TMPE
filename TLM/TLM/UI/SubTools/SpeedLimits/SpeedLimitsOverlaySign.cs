@@ -1,4 +1,5 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
+    using System.Collections.Generic;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.UI.Textures;
     using UnityEngine;
@@ -14,40 +15,30 @@
     // |   50|
     // +-----+
     public struct SpeedLimitsOverlaySign {
-        const float SMALL_ICON_SCALE = 0.5f;
-
-        /// <summary>For rectangular US signs, this is set to a non 1.0f value.</summary>
-        private readonly float verticalScale_;
-
         private float size_;
         private Vector3 screenPos_;
         private Rect screenRect_;
 
-
-        public SpeedLimitsOverlaySign(float verticalScale) : this() {
-            verticalScale_ = verticalScale;
-        }
-
         /// <summary>For each new sign world position, recalculate new rect for rendering.</summary>
         /// <param name="screenPos">Sign position projected to screen.</param>
-        /// <param name="size">Visible sign size.</param>
-        public void Reset(Vector3 screenPos, float size) {
-            this.size_ = size;
+        /// <param name="size">Visible large sign size.</param>
+        public void Reset(Vector3 screenPos, Vector2 size) {
             this.screenPos_ = screenPos;
 
             this.screenRect_ = new Rect(
-                x: screenPos.x - (size * 0.5f),
-                y: screenPos.y - (size * 0.5f),
-                width: size,
-                height: size * verticalScale_);
+                x: screenPos.x - (size.x * 0.5f),
+                y: screenPos.y - (size.y * 0.5f),
+                width: size.x,
+                height: size.y);
         }
 
         /// <summary>Draw large rect with the speed value or unlimited.</summary>
         /// <param name="speedlimit">Show this speed.</param>
-        public void DrawLargeTexture(SpeedValue? speedlimit) {
+        public void DrawLargeTexture(SpeedValue? speedlimit,
+                                     IDictionary<int, Texture2D> textureSource) {
             Texture2D tex = speedlimit.HasValue
-                ? SpeedLimitTextures.GetSpeedLimitTexture(speedlimit.Value)
-                : SpeedLimitTextures.TexturesKmph[0];
+                ? SpeedLimitTextures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
+                : textureSource[0];
 
             GUI.DrawTexture(
                 position: this.screenRect_,
@@ -58,21 +49,28 @@
             return TrafficManagerTool.IsMouseOver(this.screenRect_);
         }
 
-        public void DrawSmallTexture(SpeedValue? speedlimit) {
-            float smallSize = this.size_ * SMALL_ICON_SCALE;
-
+        /// <summary>
+        /// Draws the small texture in the corner. Size is passed here again, because we could be
+        /// drawing a combination of rectangular US sign and round default speed sign.
+        /// </summary>
+        /// <param name="speedlimit">Show this.</param>
+        /// <param name="smallSize">Size of small rect.</param>
+        /// <param name="textureSource">Texture collection to use.</param>
+        public void DrawSmallTexture(SpeedValue? speedlimit,
+                                     Vector2 smallSize,
+                                     IDictionary<int, Texture2D> textureSource) {
             // Offset the drawing center to the bottom right quarter of the large rect
             Vector3 drawCenter = this.screenPos_ + new Vector3(this.size_ * 0.25f,
                                                                this.size_ * 0.25f);
             Rect smallRect = new Rect(
-                x: drawCenter.x - (smallSize * 0.5f),
-                y: drawCenter.y - (smallSize * 0.5f),
-                width: smallSize,
-                height: smallSize * verticalScale_);
+                x: drawCenter.x,
+                y: drawCenter.y,
+                width: smallSize.x,
+                height: smallSize.y);
 
             Texture2D tex = speedlimit.HasValue
-                ? SpeedLimitTextures.GetSpeedLimitTexture(speedlimit.Value)
-                : SpeedLimitTextures.TexturesKmph[0];
+                ? SpeedLimitTextures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
+                : textureSource[0];
 
             GUI.DrawTexture(
                 position: smallRect,

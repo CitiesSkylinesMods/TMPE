@@ -74,7 +74,7 @@
         /// <summary>
         /// Selected theme for road signs when MPH is active.
         /// </summary>
-        public SpeedLimitSignTheme MphRoadSignStyle = SpeedLimitSignTheme.SquareUS;
+        public SpeedLimitSignTheme MphRoadSignStyle = SpeedLimitSignTheme.RectangularUS;
 
         public void AddDisplayedTutorialMessage(string messageKey) {
             HashSet<string> newMessages = DisplayedTutorialMessages != null
