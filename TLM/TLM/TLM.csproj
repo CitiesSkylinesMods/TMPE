@@ -313,6 +313,7 @@
     <Compile Include="UI\SubTools\SpeedLimits\PaletteGenerator.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitSignTheme.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsOverlay.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsOverlaySign.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool_Legacy.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsWindow.cs" />

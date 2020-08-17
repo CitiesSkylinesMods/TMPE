@@ -39,6 +39,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private bool ShowLimitsPerLane => showLimitsPerLane_ ^ Shortcuts.ControlIsPressed;
 
         /// <summary>
+        /// True if user is editing road defaults. False if user is editing speed limit overrides.
+        /// </summary>
+        private bool editDefaultsMode_ = false;
+
+        /// <summary>
         /// Will edit entire road between two junctions.
         /// This is toggled by holding Shift.
         /// </summary>
@@ -50,7 +55,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// </summary>
         private Util.GenericFsm<State, Trigger> fsm_;
 
-        private SpeedLimitsOverlay.DrawArgs overlayDrawArgs_ = new SpeedLimitsOverlay.DrawArgs(false);
+        private SpeedLimitsOverlay.DrawArgs overlayDrawArgs_ = SpeedLimitsOverlay.DrawArgs.Create();
         private SpeedLimitsOverlay overlay_;
 
         /// <summary>Tool states.</summary>
@@ -128,7 +133,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 b.SetPadding(UConst.UIPADDING);
                 b.Control.SetupControls(builder: b, parentTool: this);
             }
+
             this.Window = UiBuilder<SpeedLimitsWindow>.CreateWindow<SpeedLimitsWindow>(setupFn: SetupFn);
+
+            this.Window.EditDefaultsModeButton.uOnClick = (component, evt) => {
+                this.editDefaultsMode_ = !this.editDefaultsMode_;
+                // TODO: update button active/texture
+            };
+
             this.fsm_ = InitFiniteStateMachine();
         }
 
@@ -155,12 +167,13 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         /// <summary>Copies important values for rendering the overlay into its args struct.</summary>
-        /// <param name="interactive"></param>
+        /// <param name="interactive">True if icons will be clickable.</param>
         private void CreateOverlayDrawArgs(bool interactive) {
             overlayDrawArgs_.InteractiveSigns = interactive;
             overlayDrawArgs_.MultiSegmentMode = this.MultiSegmentMode;
             overlayDrawArgs_.ShowLimitsPerLane = this.ShowLimitsPerLane;
-            overlayDrawArgs_.ParentTool = this;
+            overlayDrawArgs_.ShowDefaultsMode = this.editDefaultsMode_;
+            overlayDrawArgs_.ShowOtherPerLaneModeTemporary = interactive && Shortcuts.AltIsPressed;
         }
 
         /// <summary>Render overlay for other tool modes, if speed limits overlay is on.</summary>

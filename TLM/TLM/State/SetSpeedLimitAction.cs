@@ -43,12 +43,12 @@
         /// <returns>New action to pass to SetSpeedLimit.</returns>
         public static SetSpeedLimitAction FromGetResult(GetSpeedLimitResult res) {
             switch (res.Type) {
-                case GetSpeedLimitResult.ResultType.Unlimited:
-                    return Unlimited();
-                case GetSpeedLimitResult.ResultType.Value:
-                    return GameSpeedUnits(res.Value.GameUnits);
-                case GetSpeedLimitResult.ResultType.NotSet:
+                case GetSpeedLimitResult.ResultType.NotAvailable:
                     return Default();
+                case GetSpeedLimitResult.ResultType.OverrideExists:
+                    return res.OverrideValue.HasValue
+                        ? GameSpeedUnits(res.OverrideValue.Value.GameUnits)
+                        : Default();
             }
 
             throw new NotImplementedException();

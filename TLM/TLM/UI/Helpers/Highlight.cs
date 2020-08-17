@@ -42,9 +42,10 @@
             /// <param name="col">Column.</param>
             /// <param name="row">Row.</param>
             /// <returns>World position.</returns>
-            public Vector3 GetPositionForRowCol(uint col, uint row) {
-                return this.GridOrigin + (this.CellWidth * col * this.Xu) +
-                       (this.CellHeight * row * this.Yu);
+            public Vector3 GetPositionForRowCol(float col, float row) {
+                return this.GridOrigin
+                       + (this.CellWidth * col * this.Xu)
+                       + (this.CellHeight * row * this.Yu);
             }
 
             /// <summary>
@@ -60,15 +61,15 @@
             /// <param name="screenRect">Output visible screen rect.</param>
             public void DrawStaticSquareOverlayGridTexture(Texture2D texture,
                                                            Vector3 camPos,
-                                                           uint x,
-                                                           uint y,
+                                                           float x,
+                                                           float y,
                                                            float size,
                                                            out Rect screenRect) {
                 DrawGenericOverlayGridTexture(
                     texture: texture,
                     camPos: camPos,
-                    col: x,
-                    row: y,
+                    x: x,
+                    y: y,
                     width: size,
                     height: size,
                     canHover: false,
@@ -82,8 +83,8 @@
             /// </summary>
             /// <param name="texture">Draw this.</param>
             /// <param name="camPos">Visible from here.</param>
-            /// <param name="col">X position in grid.</param>
-            /// <param name="row">Y position in grid.</param>
+            /// <param name="x">X position in grid.</param>
+            /// <param name="y">Y position in grid.</param>
             /// <param name="width">Draw box size x.</param>
             /// <param name="height">Draw box size y.</param>
             /// <param name="canHover">Whether the icon is interacting with the mouse.</param>
@@ -91,13 +92,13 @@
             /// <returns>Whether mouse hovers the icon.</returns>
             public bool DrawGenericOverlayGridTexture(Texture2D texture,
                                                       Vector3 camPos,
-                                                      uint col,
-                                                      uint row,
+                                                      float x,
+                                                      float y,
                                                       float width,
                                                       float height,
                                                       bool canHover,
                                                       out Rect screenRect) {
-                Vector3 worldPos = this.GetPositionForRowCol(col, row);
+                Vector3 worldPos = this.GetPositionForRowCol(x, y);
 
                 return Highlight.DrawGenericOverlayTexture(
                     texture,

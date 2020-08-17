@@ -24,6 +24,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>UI button which toggles per-segment or per-lane speed limits.</summary>
         private UButton segmentLaneModeToggleButton_;
 
+        public UButton EditDefaultsModeButton { get; set; }
+
         // /// <summary>
         // /// Contains atlas with UI elements. Static to prevent reloading on every window creation.
         // /// </summary>
@@ -123,11 +125,13 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 //----------------
                 // Edit Defaults mode button
                 //----------------
-                modePanelB.FixedSizeButton<UButton>(
+                using (var defaultsB = modePanelB.FixedSizeButton<UButton>(
                     text: string.Empty,
                     tooltip: "Edit default speed limits for all roads of that type",
                     size: buttonSize,
-                    stack: UStackMode.Below);
+                    stack: UStackMode.Below)) {
+                    this.EditDefaultsModeButton = defaultsB.Control;
+                }
 
                 //----------------
                 // MPH/Kmph switch

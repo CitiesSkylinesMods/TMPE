@@ -7,6 +7,7 @@ namespace TrafficManager.State {
     using System.Collections.Generic;
     using System.Threading;
     using System;
+    using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
@@ -921,16 +922,16 @@ namespace TrafficManager.State {
             return false;
         }
 
-        public static GetSpeedLimitResult GetLaneSpeedLimit(uint laneId) {
+        public static SpeedValue? GetLaneSpeedLimit(uint laneId) {
             try {
                 Monitor.Enter(laneSpeedLimitLock);
 
-                if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out float speedLimit)) {
-                    return GetSpeedLimitResult.NotSet();
+                if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out float kmphOverride)) {
+                    return null;
                 }
 
                 // assumption: speed limit is stored in km/h
-                return GetSpeedLimitResult.CreateKmph(speedLimit);
+                return SpeedValue.FromKmph(kmphOverride);
             }
             finally {
                 Monitor.Exit(laneSpeedLimitLock);
