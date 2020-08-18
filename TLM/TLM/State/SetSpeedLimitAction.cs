@@ -1,12 +1,13 @@
 ﻿namespace TrafficManager {
     using System;
+    using TrafficManager.API.Traffic.Data;
 
     /// <summary>Used to give clear command to SetSpeedLimit.</summary>
     public readonly struct SetSpeedLimitAction {
         /// <summary>Defines the action on set speedlimit call.</summary>
         public enum ValueType {
-            /// <summary>The Value is game speed units.</summary>
-            GameSpeedUnits,
+            /// <summary>The Value contains the speed to set.</summary>
+            SetSpeed,
 
             /// <summary>The value is ignored. Speed is set to unlimited.</summary>
             Unlimited,
@@ -19,23 +20,23 @@
         public readonly ValueType Type;
 
         /// <summary>If Type is GameSpeedUnits, contains the value.</summary>
-        public readonly float Value;
+        public readonly SpeedValue Value;
 
-        private SetSpeedLimitAction(ValueType t, float v) {
+        private SetSpeedLimitAction(ValueType t, SpeedValue v) {
             this.Type = t;
             this.Value = v;
         }
 
         public static SetSpeedLimitAction Default() {
-            return new SetSpeedLimitAction(ValueType.Default, 0f);
+            return new SetSpeedLimitAction(ValueType.Default, default);
         }
 
         public static SetSpeedLimitAction Unlimited() {
-            return new SetSpeedLimitAction(ValueType.Unlimited, 0f);
+            return new SetSpeedLimitAction(ValueType.Unlimited, default);
         }
 
-        public static SetSpeedLimitAction GameSpeedUnits(float v) {
-            return new SetSpeedLimitAction(ValueType.GameSpeedUnits, v);
+        public static SetSpeedLimitAction SetSpeed(SpeedValue v) {
+            return new SetSpeedLimitAction(ValueType.SetSpeed, v);
         }
 
         /// <summary>Reapply value from GetSpeedLimitResult.</summary>
@@ -47,7 +48,7 @@
                     return Default();
                 case GetSpeedLimitResult.ResultType.OverrideExists:
                     return res.OverrideValue.HasValue
-                        ? GameSpeedUnits(res.OverrideValue.Value.GameUnits)
+                        ? SetSpeed(res.OverrideValue.Value)
                         : Default();
             }
 

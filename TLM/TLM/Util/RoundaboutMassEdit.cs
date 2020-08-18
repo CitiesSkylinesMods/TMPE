@@ -28,18 +28,18 @@ namespace TrafficManager.Util {
             }
 
             if (OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits) {
-                float? targetSpeed = CalculatePreferedSpeed(segmentId)?.GameUnits;
+                SpeedValue? targetSpeed = CalculatePreferedSpeed(segmentId);
                 float defaultSpeed = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(segmentId.ToSegment().Info);
 
-                if (targetSpeed != null && targetSpeed < defaultSpeed) {
+                if (targetSpeed != null && targetSpeed.Value.GetKmph() < defaultSpeed) {
                     SpeedLimitManager.Instance.SetSpeedLimit(
                         segmentId: segmentId,
                         finalDir: NetInfo.Direction.Forward,
-                        action: SetSpeedLimitAction.GameSpeedUnits(targetSpeed.Value));
+                        action: SetSpeedLimitAction.SetSpeed(targetSpeed.Value));
                     SpeedLimitManager.Instance.SetSpeedLimit(
                         segmentId: segmentId,
                         finalDir: NetInfo.Direction.Backward,
-                        action: SetSpeedLimitAction.GameSpeedUnits(targetSpeed.Value));
+                        action: SetSpeedLimitAction.SetSpeed(targetSpeed.Value));
                 }
             }
 

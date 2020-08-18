@@ -44,7 +44,9 @@
                 laneId: this.LaneId,
                 action: action);
 
-            ClickMultiSegment(action);
+            if (multiSegmentMode) {
+                ClickMultiSegment(action);
+            }
         }
 
         /// <summary>

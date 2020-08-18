@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System.Collections.Generic;
     using ColossalFramework;
+    using CSUtil.Commons;
     using GenericGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
@@ -334,9 +335,6 @@
                 ? SpeedLimitTextures.RoadDefaults
                 : signsThemeTextures;
 
-            // start from empty, no handles are hovered
-            args.ClearHovered();
-
             // Default signs are round, mph/kmph textures can be round or rectangular
             Vector2 signsThemeAspectRatio = SpeedLimitTextures.GetTextureAspectRatio();
             Vector2 largeRatio = args.ShowDefaultsMode ? Vector2.one : signsThemeAspectRatio;
@@ -428,9 +426,6 @@
                                                    ref NetSegment segment,
                                                    Vector3 camPos,
                                                    DrawArgs args) {
-            // start from empty, no handles are hovered
-            args.ClearHovered();
-
             bool ret = false;
             Vector3 segmentCenterPos = segment.m_bounds.center;
 
@@ -580,7 +575,7 @@
                         screenRect: out Rect _);
                 }
 
-                if (signRenderer.ContainsMouse()) {
+                if (isHoveredHandle) {
                     // Clickable overlay (interactive signs also True):
                     // Register the position of a mouse-hovered speedlimit overlay icon
                     args.HoveredLaneHandles.Add(
@@ -595,7 +590,7 @@
                     ret = true;
                 }
 
-                ++signColumn;
+                signColumn += 1f;
             }
 
             signRenderer.SetGuiTransparency(1f);

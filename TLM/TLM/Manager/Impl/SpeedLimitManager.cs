@@ -333,6 +333,7 @@ namespace TrafficManager.Manager.Impl {
         /// Explicitly stores currently set speed limits for all segments of the specified NetInfo
         /// </summary>
         /// <param name="info">The <see cref="NetInfo"/> for which speed limits should be stored.</param>
+        [Obsolete("Not used, delete this")]
         public void FixCurrentSpeedLimits(NetInfo info) {
             if (info == null) {
 #if DEBUG
@@ -368,10 +369,9 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 GetSpeedLimitResult laneCustomSpeedLimit = GetCustomSpeedLimit(laneId);
-                float gameUnits = laneCustomSpeedLimit.OverrideValue.Value.GameUnits;
                 Flags.SetLaneSpeedLimit(
                     laneId: laneId,
-                    action: SetSpeedLimitAction.GameSpeedUnits(gameUnits));
+                    action: SetSpeedLimitAction.SetSpeed(laneCustomSpeedLimit.OverrideValue.Value));
             }
         }
 
@@ -565,7 +565,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (action.Type != SetSpeedLimitAction.ValueType.Default
-                && !IsValidRange(action.Value)) {
+                && !IsValidRange(action.Value.GameUnits)) {
                 return false;
             }
 
@@ -611,8 +611,8 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (action.Type == SetSpeedLimitAction.ValueType.GameSpeedUnits
-                && !IsValidRange(action.Value)) {
+            if (action.Type == SetSpeedLimitAction.ValueType.SetSpeed
+                && !IsValidRange(action.Value.GameUnits)) {
                 return false;
             }
 
@@ -649,7 +649,7 @@ namespace TrafficManager.Manager.Impl {
                     } else {
                         Log._Debug(
                             $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
-                            $"to {action.Value * ApiConstants.SPEED_TO_KMPH}");
+                            $"to {action.Value}");
                         Flags.SetLaneSpeedLimit(curLaneId, action);
                     }
                 }
@@ -935,7 +935,7 @@ namespace TrafficManager.Manager.Impl {
 
                         Flags.SetLaneSpeedLimit(
                             laneSpeedLimit.laneId,
-                            SetSpeedLimitAction.GameSpeedUnits(units));
+                            SetSpeedLimitAction.SetSpeed(new SpeedValue(units)));
                     } else {
 #if DEBUG
                     Log._DebugIf(debugSpeedLimits, () =>

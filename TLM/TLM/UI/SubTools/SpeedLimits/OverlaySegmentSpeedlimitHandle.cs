@@ -1,6 +1,6 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
     using ColossalFramework;
-    using TrafficManager.API.Traffic.Data;
+    using CSUtil.Commons;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util;
 

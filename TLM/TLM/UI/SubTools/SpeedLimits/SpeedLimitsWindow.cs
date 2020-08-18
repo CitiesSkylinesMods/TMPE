@@ -25,6 +25,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         public UButton SegmentLaneModeToggleButton { get; set; }
 
         private UITextureAtlas guiAtlas_;
+        private List<SpeedLimitPaletteButton> paletteButtons_ = new List<SpeedLimitPaletteButton>();
 
         public UButton EditDefaultsModeButton { get; set; }
 
@@ -178,20 +179,26 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 List<SpeedValue> values =
                     PaletteGenerator.AllSpeedLimits(SpeedUnit.CurrentlyConfigured);
                 values.Add(new SpeedValue(0)); // add last item: no limit
+
+                this.paletteButtons_.Clear();
+
                 foreach (var speedValue in values) {
-                    SetupControls_SpeedPalette_Button(
+                    SpeedLimitPaletteButton nextButton = SetupControls_SpeedPalette_Button(
                         parentTool: parentTool,
                         builder: palettePanelB,
                         showMph: showMph,
                         speedValue: speedValue);
+                    this.paletteButtons_.Add(nextButton);
                 }
             } // end palette panel
         }
 
-        private void SetupControls_SpeedPalette_Button(UiBuilder<UPanel> builder,
-                                                       bool showMph,
-                                                       SpeedValue speedValue,
-                                                       SpeedLimitsTool parentTool) {
+        private SpeedLimitPaletteButton
+            SetupControls_SpeedPalette_Button(UiBuilder<UPanel> builder,
+                                              bool showMph,
+                                              SpeedValue speedValue,
+                                              SpeedLimitsTool parentTool)
+        {
             int speedInteger = showMph
                 ? speedValue.ToMphRounded(SpeedLimitsTool.MPH_STEP).Mph
                 : speedValue.ToKmphRounded(SpeedLimitsTool.KMPH_STEP).Kmph;
@@ -214,10 +221,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             //         r.FitToChildren();
             //     });
 
-            using (var buttonB = builder.Button<UButton>()) {
-                UButton control = buttonB.Control;
+            using (var buttonB = builder.Button<SpeedLimitPaletteButton>()) {
+                SpeedLimitPaletteButton control = buttonB.Control;
                 control.text = speedInteger == 0 ? "X" : speedInteger.ToString();
                 control.textHorizontalAlignment = UIHorizontalAlignment.Center;
+
+                control.AssignedValue = speedValue; // button must know its speed value
+                // The click events will be routed via the parent tool OnPaletteButtonClicked
+                control.ParentTool = parentTool;
 
                 buttonB.SetStacking(UStackMode.ToTheRight);
                 buttonB.SetFixedSize(new Vector2(buttonWidth, 60f));
@@ -226,9 +237,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     control.textScale = 2.0f;
                 }
 
-                control.uOnClick = (UIComponent component, UIMouseEventParameter _) => {
-                    parentTool.CurrentPaletteSpeedLimit = speedValue;
-                };
+                return control;
             }
 
             //--- uncomment below to create a label under each button ---
@@ -300,5 +309,12 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 atlasSizeHint: new IntVector2(512));
         }
 
-    } // end class
+        public void UpdatePaletteButtonsOnClick() {
+            foreach (var b in this.paletteButtons_) {
+                b.UpdateButtonImage();
+            }
+        }
+    }
+
+    // end class
 }

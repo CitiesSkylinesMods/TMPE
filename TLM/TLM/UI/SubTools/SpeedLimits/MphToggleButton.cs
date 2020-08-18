@@ -9,7 +9,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         public override void HandleClick(UIMouseEventParameter p) {
             bool mph = !GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
             OptionsGeneralTab.SetDisplayInMph(mph);
-            this.UpdateMphToggleTexture();
+            // this.UpdateMphToggleTexture();
         }
 
         /// <summary>Always clickable.</summary>
@@ -19,13 +19,13 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         protected override bool IsActive() => GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
 
         /// <summary>Based on current state of Options DisplaySpeedLimitsMph, update the button.</summary>
-        public void UpdateMphToggleTexture() {
-            string sprite = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
-                ? "MphToggle-Mph-normal"
-                : "MphToggle-Kmph-normal";
-            this.normalFgSprite = sprite;
-            this.hoveredFgSprite = sprite;
-            this.pressedFgSprite = sprite;
-        }
+        // public void UpdateMphToggleTexture() {
+        //     string sprite = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
+        //         ? "MphToggle-Mph-normal"
+        //         : "MphToggle-Kmph-normal";
+        //     this.normalFgSprite = sprite;
+        //     this.hoveredFgSprite = sprite;
+        //     this.pressedFgSprite = sprite;
+        // }
     }
 }

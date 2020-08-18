@@ -609,8 +609,8 @@ namespace TrafficManager.State {
                         break;
                     }
                     case SetSpeedLimitAction.ValueType.Unlimited:
-                    case SetSpeedLimitAction.ValueType.GameSpeedUnits: {
-                        laneSpeedLimit[laneId] = action.Value;
+                    case SetSpeedLimitAction.ValueType.SetSpeed: {
+                        laneSpeedLimit[laneId] = action.Value.GetKmph();
 
                         // save speed limit into the fast-access array.
                         // (1) ensure that the array is defined and large enough
@@ -625,7 +625,7 @@ namespace TrafficManager.State {
                         }
 
                         // (2) insert the custom speed limit
-                        laneSpeedLimitArray[segmentId][laneIndex] = action.Value;
+                        laneSpeedLimitArray[segmentId][laneIndex] = action.Value.GetKmph();
                         break;
                     }
                 }

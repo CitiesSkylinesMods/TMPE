@@ -177,6 +177,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Copies important values for rendering the overlay into its args struct.</summary>
         /// <param name="interactive">True if icons will be clickable.</param>
         private void CreateOverlayDrawArgs(bool interactive) {
+            overlayDrawArgs_.ClearHovered();
+
             overlayDrawArgs_.InteractiveSigns = interactive;
             overlayDrawArgs_.MultiSegmentMode = this.MultiSegmentMode;
             overlayDrawArgs_.ShowLimitsPerLane = this.ShowLimitsPerLane;
@@ -210,23 +212,23 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             // Go through recently rendered overlay speedlimit handles, which had mouse over them
             // Hovering multiple speed limits handles at once should set limits on multiple roads
-            float selectedSpeedLimit = this.CurrentPaletteSpeedLimit.GameUnits;
-
             if (this.ShowLimitsPerLane) {
                 foreach (var h in overlayDrawArgs_.HoveredLaneHandles) {
                     // per lane
                     h.Click(
-                        action: SetSpeedLimitAction.GameSpeedUnits(selectedSpeedLimit),
+                        action: SetSpeedLimitAction.SetSpeed(this.CurrentPaletteSpeedLimit),
                         multiSegmentMode: this.MultiSegmentMode);
                 }
             } else {
                 // per segment
                 foreach (var h in overlayDrawArgs_.HoveredSegmentHandles) {
                     h.Click(
-                        action: SetSpeedLimitAction.GameSpeedUnits(selectedSpeedLimit),
+                        action: SetSpeedLimitAction.SetSpeed(this.CurrentPaletteSpeedLimit),
                         multiSegmentMode: this.MultiSegmentMode);
                 }
             }
+
+            this.overlayDrawArgs_.ClearHovered();
         }
 
         public override void OnToolRightClick() {
@@ -252,6 +254,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 laneInfo: segmentId.ToSegment().Info.m_lanes[lane.laneIndex],
                 laneId: lane.laneId,
                 action: action);
+        }
+
+        /// <summary>When speed palette button clicked, touch all buttons forcing them to refresh.</summary>
+        public void OnPaletteButtonClicked(SpeedValue speed) {
+            this.CurrentPaletteSpeedLimit = speed;
+
+            // Deactivate all palette buttons and highlight one
+            Window.UpdatePaletteButtonsOnClick();
         }
     } // end class
 }

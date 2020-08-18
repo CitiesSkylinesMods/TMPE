@@ -119,5 +119,7 @@ namespace TrafficManager.API.Traffic.Data {
         public SpeedValue Scale(float n) {
             return new SpeedValue(this.GameUnits * n);
         }
+
+        public float GetKmph() => GameUnits * ApiConstants.SPEED_TO_KMPH;
     }
 }
