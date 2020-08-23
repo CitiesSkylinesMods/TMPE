@@ -47,7 +47,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// Will edit entire road between two junctions.
         /// This is toggled by holding Shift.
         /// </summary>
-        private bool multiSegmentMode_;
+        private bool multiSegmentMode_ = false;
+
         private bool MultiSegmentMode => multiSegmentMode_ ^ Shortcuts.ShiftIsPressed;
 
         /// <summary>

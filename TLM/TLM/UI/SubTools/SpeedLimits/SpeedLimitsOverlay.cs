@@ -1,7 +1,6 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System.Collections.Generic;
     using ColossalFramework;
-    using CSUtil.Commons;
     using GenericGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
@@ -17,7 +16,7 @@
     /// overlay for segments/lanes.
     /// </summary>
     public class SpeedLimitsOverlay {
-        const float SMALL_ICON_SCALE = 0.5f;
+        const float SMALL_ICON_SCALE = 0.66f;
 
         private ushort segmentId_;
         private NetInfo.Direction finalDirection_ = NetInfo.Direction.None;
@@ -155,28 +154,29 @@
             NetInfo.Direction finalDirection = NetInfo.Direction.None)
         {
             int count = 0;
-            // bool pressed = Input.GetMouseButton(0);
-            // Color color = this.mainTool_.GetToolColor(warning: pressed, error: false);
 
-            Shortcuts.netService.IterateSegmentLanes(
-                segmentId,
-                handler: (uint laneId,
-                          ref NetLane lane,
-                          NetInfo.Lane laneInfo,
-                          ushort _,
-                          ref NetSegment segment,
-                          byte laneIndex) => {
-                    bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
-                    render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
-                    render &= laneInfo.m_finalDirection == finalDirection
-                              || finalDirection == NetInfo.Direction.None;
+            // ------ visitor function
+            bool ForEachLane(uint laneId,
+                             ref NetLane lane,
+                             NetInfo.Lane laneInfo,
+                             ushort _,
+                             ref NetSegment segment,
+                             byte laneIndex) {
+                bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
+                render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
+                render &= laneInfo.m_finalDirection == finalDirection
+                          || finalDirection == NetInfo.Direction.None;
 
-                    if (render) {
-                        RenderLaneOverlay(cameraInfo: cameraInfo, laneId: laneId, args: args);
-                        count++;
-                    }
-                    return true;
-                });
+                if (render) {
+                    RenderLaneOverlay(cameraInfo: cameraInfo, laneId: laneId, args: args);
+                    count++;
+                }
+
+                return true;
+            }
+            // end visitor function ------
+
+            Shortcuts.netService.IterateSegmentLanes(segmentId, handler: ForEachLane);
             return count;
         }
 
@@ -367,10 +367,12 @@
                 SpeedValue defaultSpeedlimit =
                     new SpeedValue(SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(neti));
 
-                // Render override
-                signRenderer.DrawLargeTexture(
-                    speedlimit: args.ShowDefaultsMode ? defaultSpeedlimit : overrideSpeedlimit,
-                    textureSource: largeSignsTextureSource);
+                // Render override if interactive, or if readonly info layer and override exists
+                if (args.InteractiveSigns || overrideSpeedlimit.HasValue) {
+                    signRenderer.DrawLargeTexture(
+                        speedlimit: args.ShowDefaultsMode ? defaultSpeedlimit : overrideSpeedlimit,
+                        textureSource: largeSignsTextureSource);
+                }
 
                 // If Alt is held, then also overlay the other (default limit in edit override mode,
                 // or override in edit defaults mode) as a small texture.

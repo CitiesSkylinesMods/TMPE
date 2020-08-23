@@ -1,5 +1,4 @@
 namespace TrafficManager.UI.SubTools.SpeedLimits {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework.UI;
@@ -61,7 +60,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // Text below for "Hold Alt, hold Shift, etc..."
             SetupControls_InfoRow(builder);
 
-            // this.segmentLaneModeToggleButton_.atlas
+            // Force buttons resize and show the current speed limit on the palette
+            this.UpdatePaletteButtonsOnClick();
         }
 
         /// <summary>Creates a draggable label with current unit (mph or km/h).</summary>
@@ -202,12 +202,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             int speedInteger = showMph
                 ? speedValue.ToMphRounded(SpeedLimitsTool.MPH_STEP).Mph
                 : speedValue.ToKmphRounded(SpeedLimitsTool.KMPH_STEP).Kmph;
-            // Speeds over 100 have wider buttons
-            float buttonWidth = speedInteger >= 100 ? 40f : 30f;
-
-            bool isSelected = FloatUtil.NearlyEqual(
-                parentTool.CurrentPaletteSpeedLimit.GameUnits,
-                speedValue.GameUnits);
 
             //--- uncomment below to create a label under each button ---
             // Create vertical combo:
@@ -231,11 +225,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 control.ParentTool = parentTool;
 
                 buttonB.SetStacking(UStackMode.ToTheRight);
-                buttonB.SetFixedSize(new Vector2(buttonWidth, 60f));
-
-                if (isSelected) {
-                    control.textScale = 2.0f;
-                }
+                var IGNORED = 10f; // value will be overridden by the button's update visual function
+                buttonB.SetFixedSize(new Vector2(IGNORED, SpeedLimitPaletteButton.DEFAULT_WIDTH));
 
                 return control;
             }
@@ -309,10 +300,16 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 atlasSizeHint: new IntVector2(512));
         }
 
+        /// <summary>
+        /// Forces speedlimit palette buttons to be updated, and active button also is highlighted.
+        /// </summary>
         public void UpdatePaletteButtonsOnClick() {
             foreach (var b in this.paletteButtons_) {
                 b.UpdateButtonImage();
+                b.UpdateSpeedlimitButton();
             }
+
+            UResizer.UpdateControl(this); // force window relayout
         }
     }
 
