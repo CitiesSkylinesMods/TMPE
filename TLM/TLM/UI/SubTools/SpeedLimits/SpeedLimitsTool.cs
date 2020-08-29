@@ -5,6 +5,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.UI.SubTools.PrioritySigns;
+    using TrafficManager.UI.SubTools.SpeedLimits.Overlay;
     using TrafficManager.Util;
     using UnityEngine;
 

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
+﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.UI.Textures;
@@ -75,14 +75,6 @@
             GUI.DrawTexture(
                 position: smallRect,
                 image: tex);
-        }
-
-        /// <summary>Set GUI render transparency to A.</summary>
-        /// <param name="a">Alpha.</param>
-        public void SetGuiTransparency(float a) {
-            Color guiColor = GUI.color;
-            guiColor.a = a;
-            GUI.color = guiColor;
         }
     }
 }

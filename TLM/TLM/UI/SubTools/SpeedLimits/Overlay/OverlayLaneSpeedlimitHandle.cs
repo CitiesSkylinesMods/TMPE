@@ -1,8 +1,7 @@
-﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
+﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using System.Collections.Generic;
     using ColossalFramework;
     using GenericGameBridge.Service;
-    using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util;
 

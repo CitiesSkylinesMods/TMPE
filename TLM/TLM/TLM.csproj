@@ -175,6 +175,7 @@
     <Compile Include="UI\DebugToolGUI.cs" />
     <Compile Include="UI\Helpers\Highlight.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
+    <Compile Include="UI\Helpers\OverlayHandleColorController.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
     <Compile Include="UI\Helpers\SegmentLaneMarker.cs" />
     <Compile Include="UI\Helpers\ExtUITabStrip.cs" />
@@ -308,13 +309,13 @@
     <Compile Include="UI\SubTools\PrioritySigns\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\MphToggleButton.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\LegacySpeedLimitsTool.cs" />
-    <Compile Include="UI\SubTools\SpeedLimits\OverlayLaneSpeedlimitHandle.cs" />
-    <Compile Include="UI\SubTools\SpeedLimits\OverlaySegmentSpeedlimitHandle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\OverlayLaneSpeedlimitHandle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\OverlaySegmentSpeedlimitHandle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\SpeedLimitsOverlay.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\SpeedLimitsOverlaySign.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\PaletteGenerator.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitPaletteButton.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitSignTheme.cs" />
-    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsOverlay.cs" />
-    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsOverlaySign.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool_Legacy.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsWindow.cs" />

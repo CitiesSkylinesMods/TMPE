@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
+﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using System.Collections.Generic;
     using ColossalFramework;
     using GenericGameBridge.Service;
@@ -318,10 +318,10 @@
 
             // draw speedlimits over mean middle points of lane beziers
             if (!segmentCenterByDir.TryGetValue(
-                segmentId,
-                out Dictionary<NetInfo.Direction, Vector3> segCenter)) {
+                key: segmentId,
+                value: out Dictionary<NetInfo.Direction, Vector3> segCenter)) {
                 segCenter = new Dictionary<NetInfo.Direction, Vector3>();
-                segmentCenterByDir.Add(segmentId, segCenter);
+                segmentCenterByDir.Add(key: segmentId, value: segCenter);
                 GeometryUtil.CalculateSegmentCenterByDir(
                     segmentId: segmentId,
                     segmentCenterByDir: segCenter,
@@ -338,12 +338,13 @@
             // Default signs are round, mph/kmph textures can be round or rectangular
             Vector2 signsThemeAspectRatio = SpeedLimitTextures.GetTextureAspectRatio();
             Vector2 largeRatio = args.ShowDefaultsMode ? Vector2.one : signsThemeAspectRatio;
+            var colorController = new OverlayHandleColorController(args.InteractiveSigns);
 
             //--------------------------
             // For all segments visible
             //--------------------------
             foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {
-                bool visible = GeometryUtil.WorldToScreenPoint(e.Value, out Vector3 screenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(worldPos: e.Value, screenPos: out Vector3 screenPos);
 
                 if (!visible) {
                     continue;
@@ -353,19 +354,23 @@
                 float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * zoom;
 
                 // Recalculate visible rect for screen position and size
-                signRenderer.Reset(screenPos, size * largeRatio);
+                signRenderer.Reset(screenPos: screenPos, size: size * largeRatio);
 
                 bool isHoveredHandle = args.InteractiveSigns && signRenderer.ContainsMouse();
-                signRenderer.SetGuiTransparency(TrafficManagerTool.GetHandleAlpha(isHoveredHandle));
 
                 // Get speed limit override for segment
                 SpeedValue? overrideSpeedlimit =
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, e.Key);
+                    SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId: segmentId, finalDir: e.Key);
 
                 // Get default or default-override speed limit for road type
-                NetInfo neti = GetSegmentNetinfo(segmentId);
+                NetInfo neti = GetSegmentNetinfo(segmentId: segmentId);
                 SpeedValue defaultSpeedlimit =
-                    new SpeedValue(SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(neti));
+                    new SpeedValue(gameUnits: SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info: neti));
+
+                //-----------
+                // Rendering
+                //-----------
+                colorController.SetGUIColor(hovered: isHoveredHandle);
 
                 // Render override if interactive, or if readonly info layer and override exists
                 if (args.InteractiveSigns || overrideSpeedlimit.HasValue) {
@@ -394,7 +399,7 @@
                     // Clickable overlay (interactive signs also True):
                     // Register the position of a mouse-hovered speedlimit overlay icon
                     args.HoveredSegmentHandles.Add(
-                        new OverlaySegmentSpeedlimitHandle(
+                        item: new OverlaySegmentSpeedlimitHandle(
                             segmentId: segmentId,
                             finalDirection: e.Key));
 
@@ -404,7 +409,7 @@
                 }
             }
 
-            signRenderer.SetGuiTransparency(1f);
+            colorController.RestoreGUIColor();
             return ret;
         }
 
@@ -498,6 +503,7 @@
 
             // Signs are rendered in a grid starting from col 0
             float signColumn = 0f;
+            var colorController = new OverlayHandleColorController(args.InteractiveSigns);
 
             //-----------------------
             // For all lanes sorted
@@ -530,7 +536,7 @@
 
                 // Set render transparency based on mouse hover
                 bool isHoveredHandle = args.InteractiveSigns && signRenderer.ContainsMouse();
-                signRenderer.SetGuiTransparency(TrafficManagerTool.GetHandleAlpha(isHoveredHandle));
+                colorController.SetGUIColor(hovered: isHoveredHandle);
 
                 // Get speed limit override for the lane
                 GetSpeedLimitResult overrideSpeedlimit =
@@ -595,7 +601,7 @@
                 signColumn += 1f;
             }
 
-            signRenderer.SetGuiTransparency(1f);
+            colorController.RestoreGUIColor();
             return ret;
         }
     }

@@ -1,6 +1,5 @@
-﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
+﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using ColossalFramework;
-    using CSUtil.Commons;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util;
 
