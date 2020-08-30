@@ -101,10 +101,13 @@ namespace TrafficManager.UI.Textures {
 
             // pedestrian mode
             PedestrianModeAutomatic = LoadDllResource(
-                "TrafficLights.pedestrian_mode_1.png",
+                Translation.GetTranslatedFileName("TrafficLights.pedestrian_mode_1.png"),
                 73,
                 70);
-            PedestrianModeManual = LoadDllResource("TrafficLights.pedestrian_mode_2.png", 73, 73);
+            PedestrianModeManual = LoadDllResource(
+                Translation.GetTranslatedFileName("TrafficLights.pedestrian_mode_2.png"),
+                73,
+                70);
 
             // timer
             ClockPlay = LoadDllResource("TrafficLights.clock_play.png", 512, 512);

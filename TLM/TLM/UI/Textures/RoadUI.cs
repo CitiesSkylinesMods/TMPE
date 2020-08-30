@@ -18,8 +18,8 @@ namespace TrafficManager.UI.Textures {
             PrioritySignTextures = new TinyDictionary<PriorityType, Texture2D> {
                 [PriorityType.None] = LoadDllResource("RoadUI.sign_none.png", 200, 200),
                 [PriorityType.Main] = LoadDllResource("RoadUI.sign_priority.png", 200, 200),
-                [PriorityType.Stop] = LoadDllResource("RoadUI.sign_stop.png", 200, 200),
-                [PriorityType.Yield] = LoadDllResource("RoadUI.sign_yield.png", 200, 200),
+                [PriorityType.Stop] = LoadDllResource(Translation.GetTranslatedFileName("RoadUI.sign_stop.png"), 200, 200),
+                [PriorityType.Yield] = LoadDllResource(Translation.GetTranslatedFileName("RoadUI.sign_yield.png"), 200, 200),
             };
 
             // delete priority sign
