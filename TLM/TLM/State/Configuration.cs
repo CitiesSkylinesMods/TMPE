@@ -319,9 +319,8 @@ namespace TrafficManager {
         [Obsolete]
         public string NodeTrafficLights = string.Empty;
 
-        [Obsolete]
+        [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        // Not used
         public string NodeCrosswalk = string.Empty;
 
         [Obsolete]
@@ -330,34 +329,28 @@ namespace TrafficManager {
         [Obsolete]
         public List<int[]> PrioritySegments = new List<int[]>();
 
-        [Obsolete]
+        [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        // Not used
         public List<int[]> NodeDictionary = new List<int[]>();
 
-        [Obsolete]
+        [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        // Not used
         public List<int[]> ManualSegments = new List<int[]>();
 
-        [Obsolete]
+        [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        // Not used
         public List<int[]> TimedNodes = new List<int[]>();
 
-        [Obsolete]
+        [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        // Not used
         public List<ushort[]> TimedNodeGroups = new List<ushort[]>();
 
-        [Obsolete]
+        [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        // Not used
         public List<int[]> TimedNodeSteps = new List<int[]>();
 
-        [Obsolete]
+        [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        // Not used
         public List<int[]> TimedNodeStepSegments = new List<int[]>();
     }
 }

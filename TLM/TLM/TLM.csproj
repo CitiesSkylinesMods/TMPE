@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -75,6 +75,8 @@
     <CSPath>$(SteamPath)\steamapps\common\Cities_Skylines</CSPath>
     <MangedDLLPath>$(CSPath)\Cities_Data\Managed</MangedDLLPath>
     <MangedDLLPath Condition="!  Exists ('$(MangedDLLPath)')">..\dependencies</MangedDLLPath>
+    <UnityPath>$(MSBuildExtensionsPath64)\..\Unity\</UnityPath>
+    <UnityPath Condition="! Exists ('$(UnityPath)')">..\Unity\</UnityPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Benchmark|AnyCPU'">
     <OutputPath>bin\Benchmark\</OutputPath>
@@ -359,11 +361,11 @@
     <Compile Include="Util\Record\SegmentEndRecord.cs" />
     <Compile Include="Util\Record\SegmentRecord.cs" />
     <Compile Include="Util\SeparateTurningLanesUtil.cs" />
+    <Compile Include="Util\Record\RecordUtil.cs" />
     <Compile Include="Util\Shortcuts.cs" />
     <Compile Include="Util\FloatUtil.cs" />
     <Compile Include="Util\GenericObservable.cs" />
     <Compile Include="Util\GenericUnsubscriber.cs" />
-    <Compile Include="Util\MathUtil.cs" />
     <Compile Include="Util\LoopUtil.cs" />
     <Compile Include="Util\ModsCompatibilityChecker.cs" />
     <Compile Include="Util\RoadSelectionUtil.cs" />
@@ -746,6 +748,7 @@
     </GetAssemblyIdentity>
     <ItemGroup>
       <VersionNumber Include="@(Targets->'%(Version)')" />
+      <UnityDir Include="$(UnityPath)" />
     </ItemGroup>
   </Target>
   <PropertyGroup>
@@ -753,7 +756,12 @@
       $(PostBuildEventDependsOn);
       PostBuildMacros;
     </PostBuildEventDependsOn>
-    <PostBuildEvent>set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
+    <PostBuildEvent>set "MONODIR=@(UnityDir)Editor\Data\MonoBleedingEdge\"
+echo MONODIR is "%25MONODIR%25"
+"%25MONODIR%25bin\mono.exe" "%25MONODIR%25lib\mono\4.5\pdb2mdb.exe" "$(TargetPath)"
+
+set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
+xcopy /y /v "$(TargetPath).mdb" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.API.dll" "%25DEPLOYDIR%25"
@@ -766,10 +774,11 @@ xcopy /y "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25"
 
 rem To avoid double hot reload, TrafficManager.dll must be replaced last and fast.
 rem Once TrafficManager.dll is re-loaded, all other dlls will be reloaded as well
-del  "%25DEPLOYDIR%25TrafficManager.dll"
-xcopy /y "$(TargetDir)TrafficManager.dll" "%25DEPLOYDIR%25"
+del  "%25DEPLOYDIR%25$(TargetFileName)"
+xcopy /y "$(TargetPath)" "%25DEPLOYDIR%25"
 
 echo THE ASSEMBLY VERSION IS: @(VersionNumber) created at %25time%25
+set MONODIR=
 set DEPLOYDIR=
 </PostBuildEvent>
   </PropertyGroup>

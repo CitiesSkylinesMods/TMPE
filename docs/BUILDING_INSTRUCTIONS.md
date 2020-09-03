@@ -25,6 +25,8 @@ The following software is required...
 
 If desired, there are some [additional tools listed in the wiki](https://github.com/CitiesSkylinesMods/TMPE/wiki/Dev-Tools).
 
+To enable file and line numbers in log files follow [THIS PAGE](https://github.com/CitiesSkylinesMods/TMPE/blob/master/docs/Debug_Symbols.md).
+
 ## Clone
 
 > You only need to do these steps once

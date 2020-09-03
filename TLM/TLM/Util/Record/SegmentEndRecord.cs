@@ -1,10 +1,12 @@
 namespace TrafficManager.Util.Record {
     using CSUtil.Commons;
+    using System;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
 
+    [Serializable]
     class SegmentEndRecord : IRecordable {
         public SegmentEndRecord(int segmentEndIndex) {
             SegmentEndManager.Instance.
@@ -13,8 +15,14 @@ namespace TrafficManager.Util.Record {
             StartNode = startNode;
         }
 
+        public SegmentEndRecord(ushort segmentId, bool startNode) {
+            SegmentId = segmentId;
+            StartNode = startNode;
+        }
+
         public ushort SegmentId { get; private set; }
         public bool StartNode { get; private set; }
+        InstanceID InstanceID => new InstanceID { NetSegment = SegmentId };
 
         private TernaryBool uturnAllowed_;
         private TernaryBool nearTurnOnRedAllowed_;
@@ -24,7 +32,7 @@ namespace TrafficManager.Util.Record {
         private TernaryBool pedestrianCrossingAllowed_;
 
         private PriorityType prioirtySign_;
-        private List<LaneArrowsRecord> lanes_;
+        private List<LaneArrowsRecord> arrowLanes_;
 
         private static TrafficPriorityManager priorityMan => TrafficPriorityManager.Instance;
         private static JunctionRestrictionsManager JRMan => JunctionRestrictionsManager.Instance;
@@ -39,18 +47,18 @@ namespace TrafficManager.Util.Record {
 
             prioirtySign_ = priorityMan.GetPrioritySign(SegmentId, StartNode);
 
-            lanes_ = LaneArrowsRecord.GetLanes(SegmentId, StartNode);
-            foreach(IRecordable lane in lanes_) 
+            arrowLanes_ = LaneArrowsRecord.GetLanes(SegmentId, StartNode);
+            foreach(IRecordable lane in arrowLanes_) 
                 lane.Record();
         }
 
         public void Restore() {
-            foreach (IRecordable lane in lanes_)
+            foreach (IRecordable lane in arrowLanes_)
                 lane.Restore();
 
             if (priorityMan.MaySegmentHavePrioritySign(SegmentId, StartNode) &&
                 prioirtySign_ != priorityMan.GetPrioritySign(SegmentId, StartNode)) {
-                //TODO fix manager code.
+                //TODO fix manager code so that all necessary checks are performed internally. 
                 priorityMan.SetPrioritySign(SegmentId, StartNode, prioirtySign_);
             }
 
@@ -62,5 +70,35 @@ namespace TrafficManager.Util.Record {
             JRMan.SetEnteringBlockedJunctionAllowed(SegmentId, StartNode, enteringBlockedJunctionAllowed_);
             JRMan.SetPedestrianCrossingAllowed(SegmentId, StartNode, pedestrianCrossingAllowed_);
         }
+
+        public void Transfer(Dictionary<InstanceID, InstanceID> map) {
+            ushort segmentId = map[InstanceID].NetSegment;
+            foreach (IRecordable lane in arrowLanes_)
+                lane.Transfer(map);
+
+            if (priorityMan.MaySegmentHavePrioritySign(segmentId, StartNode) &&
+                prioirtySign_ != priorityMan.GetPrioritySign(segmentId, StartNode)) {
+                priorityMan.SetPrioritySign(segmentId, StartNode, prioirtySign_);
+            }
+
+            // all necessary checks are performed internally.
+            JRMan.SetUturnAllowed(segmentId, StartNode, uturnAllowed_);
+            JRMan.SetNearTurnOnRedAllowed(segmentId, StartNode, nearTurnOnRedAllowed_);
+            JRMan.SetFarTurnOnRedAllowed(segmentId, StartNode, farTurnOnRedAllowed_);
+            JRMan.SetLaneChangingAllowedWhenGoingStraight(segmentId, StartNode, laneChangingAllowedWhenGoingStraight_);
+            JRMan.SetEnteringBlockedJunctionAllowed(segmentId, StartNode, enteringBlockedJunctionAllowed_);
+            JRMan.SetPedestrianCrossingAllowed(segmentId, StartNode, pedestrianCrossingAllowed_);
+        }
+
+        public void Transfer(uint mappedId) {
+            ushort segmentId = (ushort)mappedId;
+
+            var mappedLanes = SpeedLimitLaneRecord.GetLanes(segmentId);
+            for (int i = 0; i == arrowLanes_.Count; ++i) {
+                arrowLanes_[i].Transfer(mappedLanes[i].LaneId);
+            }
+        }
+
+        public byte[] Serialize() => RecordUtil.Serialize(this);
     }
 }
