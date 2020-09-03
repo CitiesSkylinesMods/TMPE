@@ -3,6 +3,7 @@
     using ColossalFramework.UI;
     using TrafficManager.Manager.Impl;
     using TrafficManager.RedirectionFramework;
+    using TrafficManager.U;
     using TrafficManager.Util;
 
     public class ClearTrafficButton : BaseMenuButton {
@@ -12,7 +13,7 @@
 
         protected override bool IsVisible() => true;
 
-        public override void SetupButtonSkin(HashSet<U.AtlasSpriteDef> spriteDefs) {
+        public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
             this.Skin = new U.ButtonSkin() {
                 Prefix = "ClearTraffic",
@@ -21,7 +22,9 @@
                 BackgroundActive = true,
                 ForegroundActive = true,
             };
-            spriteDefs.AddRange(this.Skin.CreateAtlasSpriteSet(new IntVector2(50)));
+            this.Skin.UpdateAtlasBuilder(
+                atlasBuilder: futureAtlas,
+                spriteSize: new IntVector2(50));
         }
 
         protected override void OnClick(UIMouseEventParameter p) {

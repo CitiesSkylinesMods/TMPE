@@ -647,7 +647,7 @@ namespace TrafficManager.Util {
             foreach (ushort segmentId in segmentList) {
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, true);
 
-                SpeedLimitManager.Instance.SetSpeedLimit(
+                SpeedLimitManager.Instance.SetSegmentSpeedLimit(
                     segmentId,
                     SetSpeedLimitAction.Default());
 

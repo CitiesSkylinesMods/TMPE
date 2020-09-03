@@ -32,11 +32,11 @@ namespace TrafficManager.Util {
                 float defaultSpeed = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(segmentId.ToSegment().Info);
 
                 if (targetSpeed != null && targetSpeed.Value.GetKmph() < defaultSpeed) {
-                    SpeedLimitManager.Instance.SetSpeedLimit(
+                    SpeedLimitManager.Instance.SetSegmentSpeedLimit(
                         segmentId: segmentId,
                         finalDir: NetInfo.Direction.Forward,
                         action: SetSpeedLimitAction.SetSpeed(targetSpeed.Value));
-                    SpeedLimitManager.Instance.SetSpeedLimit(
+                    SpeedLimitManager.Instance.SetSegmentSpeedLimit(
                         segmentId: segmentId,
                         finalDir: NetInfo.Direction.Backward,
                         action: SetSpeedLimitAction.SetSpeed(targetSpeed.Value));

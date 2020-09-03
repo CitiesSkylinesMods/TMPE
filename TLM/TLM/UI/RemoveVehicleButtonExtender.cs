@@ -68,11 +68,17 @@ namespace TrafficManager.UI {
                     ForegroundHovered = true,
                     ForegroundActive = true,
                 };
-                // TODO: This atlas is created multiple times, cache or find by name.
-                this.atlas = this.Skin.CreateAtlas(
+
+                // This creates an atlas for a single button
+                var futureAtlas = new U.AtlasBuilder();
+                this.Skin.UpdateAtlasBuilder(
+                    atlasBuilder: futureAtlas,
+                    spriteSize: new IntVector2(50));
+                this.atlas = futureAtlas.CreateAtlas(
+                    atlasName: "RemoveVehButton_Atlas",
                     loadingPath: "Clear",
-                    atlasSizeHint: new IntVector2(256),
-                    atlasKeyset: this.Skin.CreateAtlasSpriteSet(new IntVector2(50)));
+                    atlasSizeHint: new IntVector2(256));
+
                 UpdateButtonImageAndTooltip();
                 width = height = 30f;
             }

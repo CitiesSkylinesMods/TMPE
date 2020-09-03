@@ -5,6 +5,7 @@ namespace TrafficManager.UI {
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.RedirectionFramework;
+    using TrafficManager.U;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util;
     using TrafficManager.Util.Record;
@@ -313,18 +314,22 @@ namespace TrafficManager.UI {
                 };
 
                 // By default the atlas will include backgrounds: DefaultRound-bg-normal
-                HashSet<U.AtlasSpriteDef> atlasKeysSet =
-                    tmpSkin.CreateAtlasSpriteSet(new IntVector2(50));
+                var futureAtlas = new AtlasBuilder();
+                tmpSkin.UpdateAtlasBuilder(
+                    atlasBuilder: futureAtlas,
+                    spriteSize: new IntVector2(50));
 
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
-                    atlasKeysSet.AddRange(button.GetAtlasKeys);
+                    button.Skin.UpdateAtlasBuilder(
+                        atlasBuilder: futureAtlas,
+                        spriteSize: new IntVector2(50));
                 }
 
                 // Create atlas and give it to all buttons
-                allButtonsAtlas_ = tmpSkin.CreateAtlas(
-                                       loadingPath: "RoadSelectionPanel",
-                                       atlasSizeHint: new IntVector2(512),
-                                       atlasKeyset: atlasKeysSet);
+                allButtonsAtlas_ = futureAtlas.CreateAtlas(
+                    atlasName: "RoadSelectionPanelAtlas",
+                    loadingPath: "RoadSelectionPanel",
+                    atlasSizeHint: new IntVector2(512));
 
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
                     button.atlas = allButtonsAtlas_;
@@ -397,9 +402,6 @@ namespace TrafficManager.UI {
                 private static string TrafficSidePostFix => Shortcuts.RHT ? "_RHT" : "_LHT";
 
                 public virtual string SkinPrefix => Function.ToString() + TrafficSidePostFix;
-
-                public HashSet<U.AtlasSpriteDef> GetAtlasKeys =>
-                    this.Skin.CreateAtlasSpriteSet(new IntVector2(50));
 
                 public bool IsHovered => m_IsMouseHovering; // exposing the protected member
 

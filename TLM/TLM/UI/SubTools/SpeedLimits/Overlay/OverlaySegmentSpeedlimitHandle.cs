@@ -1,5 +1,7 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
+    using System;
     using ColossalFramework;
+    using CSUtil.Commons;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util;
 
@@ -25,16 +27,24 @@
         /// Called when mouse is down, and when mouse is not in parent tool window area.
         /// The show per lane mode is disabled and editing per segment.
         /// </summary>
+        /// <param name="action">What speed limit to set or clear.</param>
+        /// <param name="target"></param>
+        /// <param name="multiSegmentMode"></param>
         public void Click(in SetSpeedLimitAction action,
+                          SetSpeedLimitTarget target,
                           bool multiSegmentMode) {
-            // change the speed limit to the selected one
-            SpeedLimitManager.Instance.SetSpeedLimit(
+            NetManager netManager = Singleton<NetManager>.instance;
+            NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
+
+            Apply(
                 segmentId: this.SegmentId,
                 finalDir: this.FinalDirection,
-                action: action);
+                netInfo: segmentsBuffer[this.SegmentId].Info,
+                action: action,
+                target: target);
 
             if (multiSegmentMode) {
-                ClickMultiSegment(action);
+                ClickMultiSegment(action, target);
             }
         }
 
@@ -42,13 +52,14 @@
         /// Called if speed limit icon was clicked in segment display mode,
         /// but also multisegment mode was enabled (like holding Shift).
         /// </summary>
-        /// <param name="speedLimitToSet">The active speed limit on the palette.</param>
-        private void ClickMultiSegment(SetSpeedLimitAction action) {
+        /// <param name="action">The active speed limit on the palette.</param>
+        private void ClickMultiSegment(SetSpeedLimitAction action,
+                                       SetSpeedLimitTarget target) {
             NetManager netManager = Singleton<NetManager>.instance;
 
             if (new RoundaboutMassEdit().TraverseLoop(this.SegmentId, out var segmentList)) {
                 foreach (ushort segId in segmentList) {
-                    SpeedLimitManager.Instance.SetSpeedLimit(segId, action);
+                    SpeedLimitManager.Instance.SetSegmentSpeedLimit(segId, action);
                 }
 
                 return;
@@ -86,10 +97,12 @@
                 }
 
                 if (otherNormDir == normDir) {
-                    SpeedLimitManager.Instance.SetSpeedLimit(
+                    Apply(
                         segmentId: otherSegmentId,
                         finalDir: laneInfo.m_finalDirection,
-                        action: action);
+                        netInfo: otherSegmentInfo,
+                        action: action,
+                        target: target);
                 }
 
                 return true;
@@ -105,6 +118,29 @@
                 vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES,
                 laneVisitor: ForEachSegmentFun);
         } // end Click MultiSegment
-    }
-    // end struct
+
+        /// <summary>
+        /// Based on target value, applies speed limit to a segmet or default for that road type.
+        /// </summary>
+        /// <param name="netInfo">For defaults, will set default speed limit for that road type.</param>
+        private static void Apply(ushort segmentId,
+                                  NetInfo.Direction finalDir,
+                                  NetInfo netInfo,
+                                  SetSpeedLimitAction action,
+                                  SetSpeedLimitTarget target) {
+            switch (target) {
+                case SetSpeedLimitTarget.SegmentOverride:
+                    SpeedLimitManager.Instance.SetSegmentSpeedLimit(segmentId, finalDir, action);
+                    break;
+                case SetSpeedLimitTarget.SegmentDefault:
+                    // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
+                    SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(netInfo, action.Value.GameUnits);
+                    break;
+                default:
+                    Log.Error(
+                        $"Target for SEGMENT speed handle click is not supported {nameof(target)}");
+                    throw new NotSupportedException();
+            }
+        }
+    } // end struct
 } // end namespace

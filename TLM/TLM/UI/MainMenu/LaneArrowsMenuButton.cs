@@ -2,12 +2,13 @@
     using System.Collections.Generic;
     using TrafficManager.RedirectionFramework;
     using TrafficManager.State.Keybinds;
+    using TrafficManager.U;
     using TrafficManager.Util;
 
     public class LaneArrowsMenuButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.LaneArrows;
 
-        public override void SetupButtonSkin(HashSet<U.AtlasSpriteDef> spriteDefs) {
+        public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
             this.Skin = new U.ButtonSkin() {
                 Prefix = "LaneArrows",
@@ -16,7 +17,9 @@
                 BackgroundActive = true,
                 ForegroundActive = true,
             };
-            spriteDefs.AddRange(this.Skin.CreateAtlasSpriteSet(new IntVector2(50)));
+            this.Skin.UpdateAtlasBuilder(
+                atlasBuilder: futureAtlas,
+                spriteSize: new IntVector2(50));
         }
 
         protected override string U_OverrideTooltipText() => Translation.Menu.Get("Tooltip:Change lane arrows");

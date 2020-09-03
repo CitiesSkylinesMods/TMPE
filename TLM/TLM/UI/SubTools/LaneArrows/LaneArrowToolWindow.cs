@@ -33,25 +33,29 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
 
             // Create base atlas with backgrounds and no foregrounds
-            ButtonSkin skin = ButtonSkin.CreateDefaultNoBackground("LaneArrow");
-            HashSet<U.AtlasSpriteDef> atlasKeysSet = skin.CreateAtlasSpriteSet(new IntVector2(64));
+            ButtonSkin backgroundOnlySkin = ButtonSkin.CreateDefaultNoForeground("LaneArrow");
+            var futureAtlas = new U.AtlasBuilder();
+            backgroundOnlySkin.UpdateAtlasBuilder(
+            atlasBuilder: futureAtlas,
+            spriteSize: new IntVector2(64));
 
             // Merge names of all foreground sprites for 3 directions into atlasKeySet
-            skin.ForegroundNormal = true;
-            skin.ForegroundActive = true;
             foreach (string prefix in new[]
-                                      { "LaneArrowLeft", "LaneArrowRight", "LaneArrowForward" }) {
-                skin.Prefix = prefix;
+                { "LaneArrowLeft", "LaneArrowRight", "LaneArrowForward" })
+            {
+                ButtonSkin skin = ButtonSkin.CreateDefaultNoBackground(prefix);
 
                 // Create keysets for lane arrow button icons and merge to the shared atlas
-                atlasKeysSet.AddRange(skin.CreateAtlasSpriteSet(new IntVector2(64)));
+                skin.UpdateAtlasBuilder(
+                    atlasBuilder: futureAtlas,
+                    spriteSize: new IntVector2(64));
             }
 
             // Load actual graphics into an atlas
-            laneArrowButtonAtlas_ = skin.CreateAtlas(
+            laneArrowButtonAtlas_ = futureAtlas.CreateAtlas(
+                atlasName: "LaneArrowsTool_Atlas",
                 loadingPath: "LaneArrows",
-                atlasSizeHint: new IntVector2(256), // 4x4 atlas
-                atlasKeysSet);
+                atlasSizeHint: new IntVector2(256));
             return laneArrowButtonAtlas_;
         }
 

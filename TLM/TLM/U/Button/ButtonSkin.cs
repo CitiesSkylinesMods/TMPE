@@ -90,7 +90,7 @@ namespace TrafficManager.U {
         public static ButtonSkin CreateDefaultNoBackground(string buttonName) {
             return new ButtonSkin {
                 Prefix = buttonName,
-                BackgroundPrefix = buttonName, // filename prefix
+                BackgroundPrefix = string.Empty, // no background
 
                 BackgroundHovered = false,
                 BackgroundActive = false,
@@ -105,9 +105,9 @@ namespace TrafficManager.U {
         /// Create set of atlas spritedefs all of the same size.
         /// SpriteDef sets can be merged together and fed into sprite atlas creation call.
         /// </summary>
+        /// <param name="atlasBuilder">Will later load sprites and form a texture atlas.</param>
         /// <param name="spriteSize">The size to assume for all sprites.</param>
-        /// <returns>New spriteset (can be merged with another spriteset).</returns>
-        public HashSet<U.AtlasSpriteDef> CreateAtlasSpriteSet(IntVector2 spriteSize) {
+        public void UpdateAtlasBuilder(AtlasBuilder atlasBuilder, IntVector2 spriteSize) {
             // Two normal textures (bg and fg) are always assumed to exist.
             List<string> names = new List<string>();
             bool haveBackgroundPrefix = !string.IsNullOrEmpty(BackgroundPrefix);
@@ -138,30 +138,9 @@ namespace TrafficManager.U {
             }
 
             // Convert string hashset into spritedefs hashset
-            HashSet<AtlasSpriteDef> spriteDefs = new HashSet<U.AtlasSpriteDef>();
             foreach (string n in names) {
-                spriteDefs.Add(new U.AtlasSpriteDef(name: n, size: spriteSize));
+                atlasBuilder.Add(new U.AtlasSpriteDef(name: n, size: spriteSize));
             }
-
-            return spriteDefs;
-        }
-
-        /// <summary>Following the settings in the Skin fields, load sprites into an UI atlas.
-        /// Longer list of atlas keys can be loaded into one atlas.</summary>
-        /// <param name="loadingPath">Path inside Resources. directory (dot separated).</param>
-        /// <param name="spriteSizes">Load textures with these sizes, pass single element to apply same size to all.</param>
-        /// <param name="atlasSizeHint">Square atlas of this size is created.</param>
-        /// <param name="atlasKeyset">List of atlas keys to load under the loadingPath. Created by
-        /// calling CreateAtlasKeysList() on a ButtonSkin.</param>
-        /// <returns>New UI atlas.</returns>
-        public UITextureAtlas CreateAtlas(string loadingPath,
-                                          IntVector2 atlasSizeHint,
-                                          HashSet<U.AtlasSpriteDef> atlasKeyset) {
-            return TextureUtil.CreateAtlas(
-                atlasName: $"TMPE_U_{Prefix}_Atlas",
-                resourcePrefix: loadingPath,
-                spriteDefs: atlasKeyset.ToArray(),
-                atlasSizeHint: atlasSizeHint);
         }
 
         /// <summary>

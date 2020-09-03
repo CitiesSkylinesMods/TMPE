@@ -330,9 +330,10 @@
                 return false;
             }
 
-            float zoom = 1.0f / (worldPos - camPos).magnitude * 100f * U.UIScaler.GetScale();
-            width *= zoom;
-            height *= zoom;
+            // UI Scale should not affect the overlays (no multiplication by U.UIScaler.GetScale())
+            float visibleScale = 1.0f / (worldPos - camPos).magnitude * 100f;
+            width *= visibleScale;
+            height *= visibleScale;
 
             screenRect = new Rect(
                 x: screenPos.x - (width / 2f),

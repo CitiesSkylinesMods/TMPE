@@ -215,18 +215,28 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // Go through recently rendered overlay speedlimit handles, which had mouse over them
             // Hovering multiple speed limits handles at once should set limits on multiple roads
             if (this.ShowLimitsPerLane) {
+                SetSpeedLimitTarget target = this.editDefaultsMode_
+                    ? SetSpeedLimitTarget.LaneDefault
+                    : SetSpeedLimitTarget.LaneOverride;
+
                 foreach (var h in overlayDrawArgs_.HoveredLaneHandles) {
                     // per lane
                     h.Click(
                         action: SetSpeedLimitAction.SetSpeed(this.CurrentPaletteSpeedLimit),
-                        multiSegmentMode: this.MultiSegmentMode);
+                        multiSegmentMode: this.MultiSegmentMode,
+                        target: target);
                 }
             } else {
                 // per segment
+                SetSpeedLimitTarget target = this.editDefaultsMode_
+                    ? SetSpeedLimitTarget.SegmentDefault
+                    : SetSpeedLimitTarget.SegmentOverride;
+
                 foreach (var h in overlayDrawArgs_.HoveredSegmentHandles) {
                     h.Click(
                         action: SetSpeedLimitAction.SetSpeed(this.CurrentPaletteSpeedLimit),
-                        multiSegmentMode: this.MultiSegmentMode);
+                        multiSegmentMode: this.MultiSegmentMode,
+                        target: target);
                 }
             }
 
@@ -250,7 +260,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         internal static void SetSpeedLimit(LanePos lane, SetSpeedLimitAction action) {
             ushort segmentId = lane.laneId.ToLane().m_segment;
-            SpeedLimitManager.Instance.SetSpeedLimit(
+            SpeedLimitManager.Instance.SetLaneSpeedLimit(
                 segmentId: segmentId,
                 laneIndex: lane.laneIndex,
                 laneInfo: segmentId.ToSegment().Info.m_lanes[lane.laneIndex],

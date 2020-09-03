@@ -3,6 +3,10 @@
 
     /// <summary>
     /// Provides consistent coloring logic for graphic overlays rendered with GUI.DrawTexture.
+    /// Usage:
+    /// 1. Create color controller at the start of your overlay render.
+    /// 2. Call .SetGUIColor() with mouse hover true or false.
+    /// 3. In the end call .RestoreGUIColor()
     /// </summary>
     public struct OverlayHandleColorController {
         private readonly bool isInteractable_;

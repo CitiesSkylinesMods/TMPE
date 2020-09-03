@@ -1,8 +1,13 @@
 ﻿namespace TrafficManager {
     using System;
+    using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
 
-    /// <summary>Used to give clear command to SetSpeedLimit.</summary>
+    /// <summary>
+    /// Used to give clear command to SetSpeedLimit.
+    /// Does not define where the speed limit goes (to override per segment, to override per lane,
+    /// to default per road type etc) for that <see cref="SetSpeedLimitTarget"/> is used.
+    /// </summary>
     public readonly struct SetSpeedLimitAction {
         /// <summary>Defines the action on set speedlimit call.</summary>
         public enum ValueType {
@@ -31,6 +36,7 @@
             return new SetSpeedLimitAction(ValueType.Default, default);
         }
 
+        [UsedImplicitly]
         public static SetSpeedLimitAction Unlimited() {
             return new SetSpeedLimitAction(ValueType.Unlimited, default);
         }

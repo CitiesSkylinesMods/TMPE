@@ -9,7 +9,8 @@ namespace TrafficManager.U {
 
     public static class TextureUtil {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SpriteAtlas"/> class from resource names list.
+        /// Initializes a new instance of the <see cref="UITextureAtlas"/> class from resource names list.
+        /// NOTE: For UI sprites loading use <see cref="U.AtlasBuilder"/> instead, do not call this.
         /// </summary>
         /// <param name="atlasName">Name for the new atlas.</param>
         /// <param name="resourcePrefix">Prefix to resource directory.</param>

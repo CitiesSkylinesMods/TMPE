@@ -24,7 +24,7 @@ namespace TrafficManager.Util.Record {
         }
 
         public void Restore() {
-            SpeedLimitManager.Instance.SetSpeedLimit(
+            SpeedLimitManager.Instance.SetLaneSpeedLimit(
                 SegmentId,
                 LaneIndex,
                 LaneInfo,

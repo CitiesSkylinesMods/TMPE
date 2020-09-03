@@ -191,11 +191,14 @@ namespace TrafficManager.UI.MainMenu {
             };
 
             // By default the atlas will include backgrounds: DefaultRound-bg-normal
-            HashSet<U.AtlasSpriteDef> spriteDefs = tmpSkin.CreateAtlasSpriteSet(new IntVector2(50));
+            var futureAtlas = new U.AtlasBuilder();
+            tmpSkin.UpdateAtlasBuilder(
+                atlasBuilder: futureAtlas,
+                spriteSize: new IntVector2(50));
 
             // Create Version Label and Help button:
             // [ TM:PE 11.x ] [?]
-            SetupControls_TopRow(builder, spriteDefs);
+            SetupControls_TopRow(builder, futureAtlas);
 
             // Main menu contains 2 panels side by side, one for tool buttons and another for
             // despawn & clear buttons.
@@ -210,17 +213,16 @@ namespace TrafficManager.UI.MainMenu {
                     r.FitToChildren();
                 });
 
-                AddButtonsResult toolButtonsResult
-                    = SetupControls_ToolPanel(innerPanelB, spriteDefs);
+                AddButtonsResult toolButtonsResult = SetupControls_ToolPanel(innerPanelB, futureAtlas);
 
-                SetupControls_ExtraPanel(innerPanelB, spriteDefs, toolButtonsResult);
+                SetupControls_ExtraPanel(innerPanelB, futureAtlas, toolButtonsResult);
             }
 
             // Create atlas and give it to all buttons
-            allButtonsAtlas_ = tmpSkin.CreateAtlas(
+            allButtonsAtlas_ = futureAtlas.CreateAtlas(
+                atlasName: "MainMenu_Atlas",
                 loadingPath: "MainMenu.Tool",
-                atlasSizeHint: new IntVector2(512),
-                spriteDefs);
+                atlasSizeHint: new IntVector2(512));
 
             foreach (BaseMenuButton b in ToolButtonsList) {
                 b.atlas = allButtonsAtlas_;
@@ -275,7 +277,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private void SetupControls_TopRow(UiBuilder<MainMenuWindow> builder,
-                                          HashSet<U.AtlasSpriteDef> atlasKeySet) {
+                                          U.AtlasBuilder futureAtlas) {
             this.VersionLabel = builder.Label(
                 t: TrafficManagerMod.ModName,
                 stack: UStackMode.Below);
@@ -294,7 +296,9 @@ namespace TrafficManager.UI.MainMenu {
                     BackgroundActive = true,
                     ForegroundActive = true,
                 };
-                atlasKeySet.AddRange(skin.CreateAtlasSpriteSet(new IntVector2(50)));
+                skin.UpdateAtlasBuilder(
+                    atlasBuilder: futureAtlas,
+                    spriteSize: new IntVector2(50));
 
                 control.Skin = skin;
                 control.UpdateButtonImage();
@@ -378,7 +382,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private AddButtonsResult SetupControls_ToolPanel(UiBuilder<UPanel> innerPanelB,
-                                                         HashSet<U.AtlasSpriteDef> spriteDefs) {
+                                                         U.AtlasBuilder futureAtlas) {
             // This is tool buttons panel
             using (UiBuilder<UPanel> leftPanelB = innerPanelB.ChildPanel<U.UPanel>(
                 setupFn: panel => {
@@ -393,7 +397,7 @@ namespace TrafficManager.UI.MainMenu {
                 // Create 1 or 2 rows of button objects
                 var toolButtonsResult = AddButtonsFromButtonDefinitions(
                     builder: leftPanelB,
-                    spriteDefs: spriteDefs,
+                    futureAtlas: futureAtlas,
                     buttonDefs: TOOL_BUTTON_DEFS,
                     minRowLength: 4);
                 ToolButtonsList = toolButtonsResult.Buttons;
@@ -403,7 +407,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private void SetupControls_ExtraPanel(UiBuilder<UPanel> innerPanelB,
-                                              HashSet<U.AtlasSpriteDef> spriteDefs,
+                                              U.AtlasBuilder futureAtlas,
                                               AddButtonsResult toolButtonsResult) {
             // This is toggle despawn and clear traffic panel
             using (UiBuilder<UPanel> rightPanelB = innerPanelB.ChildPanel<U.UPanel>(
@@ -427,7 +431,7 @@ namespace TrafficManager.UI.MainMenu {
                 // Use as many rows as in the other panel.
                 var extraButtonsResult = AddButtonsFromButtonDefinitions(
                     builder: rightPanelB,
-                    spriteDefs: spriteDefs,
+                    futureAtlas: futureAtlas,
                     buttonDefs: EXTRA_BUTTON_DEFS,
                     minRowLength: toolButtonsResult.Layout.Rows == 2 ? 1 : 2);
                 ExtraButtonsList = extraButtonsResult.Buttons;
@@ -460,12 +464,12 @@ namespace TrafficManager.UI.MainMenu {
 
         /// <summary>Create buttons and add them to the given panel UIBuilder.</summary>
         /// <param name="builder">UI builder to use.</param>
-        /// <param name="spriteDefs">Atlas keys to update for button images.</param>
+        /// <param name="futureAtlas">Contains sprite names, filenames, sizes, paths, etc.</param>
         /// <param name="buttonDefs">Button defs collection to create from it.</param>
         /// <param name="minRowLength">Longest the row can be without breaking.</param>
         /// <returns>A list of created buttons.</returns>
         private AddButtonsResult AddButtonsFromButtonDefinitions(UiBuilder<UPanel> builder,
-                                                                 HashSet<U.AtlasSpriteDef> spriteDefs,
+                                                                 U.AtlasBuilder futureAtlas,
                                                                  MenuButtonDef[] buttonDefs,
                                                                  int minRowLength)
         {
@@ -499,7 +503,7 @@ namespace TrafficManager.UI.MainMenu {
                 }
 
                 // Also ask each button what sprites they need
-                buttonBuilder.Control.SetupButtonSkin(spriteDefs);
+                buttonBuilder.Control.SetupButtonSkin(futureAtlas);
 
                 string buttonName = buttonDef.ButtonType.ToString().Split('.').Last();
                 buttonBuilder.Control.name = $"TMPE_MainMenuButton_{buttonName}";

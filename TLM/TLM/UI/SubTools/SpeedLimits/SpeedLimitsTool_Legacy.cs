@@ -1189,7 +1189,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <returns>Multiplier for horizontal sign size</returns>
         public static float GetVerticalTextureScale() {
             return (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph &&
-                    (GlobalConfig.Instance.Main.MphRoadSignStyle == SpeedLimitSignTheme.SquareUS))
+                    (GlobalConfig.Instance.Main.MphRoadSignStyle == SpeedLimitSignTheme.RectangularUS))
                        ? 1.25f
                        : 1.0f;
         }

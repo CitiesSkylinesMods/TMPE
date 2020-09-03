@@ -315,8 +315,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
                     Vector3 nodePos = default;
                     Constants.ServiceFactory.NetService.ProcessNode(
-                        nodeId,
-                        (ushort nId, ref NetNode node) => {
+                        nodeId: nodeId,
+                        handler: (ushort nId, ref NetNode node) => {
                             nodePos = node.m_position;
                             return true;
                         });
@@ -324,8 +324,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     for (int i = 0; i < 8; ++i) {
                         ushort segmentId = 0;
                         Constants.ServiceFactory.NetService.ProcessNode(
-                            nodeId,
-                            (ushort nId, ref NetNode node) => {
+                            nodeId: nodeId,
+                            handler: (ushort nId, ref NetNode node) => {
                                 segmentId = node.GetSegment(i);
                                 return true;
                             });
@@ -346,8 +346,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         Vector3 signPos = nodePos;
 
                         Constants.ServiceFactory.NetService.ProcessSegment(
-                            segmentId,
-                            (ushort sId, ref NetSegment segment) => {
+                            segmentId: segmentId,
+                            handler: (ushort sId, ref NetSegment segment) => {
                                 signPos +=
                                     10f * (startNode
                                                ? segment.m_startDirection
@@ -395,11 +395,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
                                 // also: case PriorityType.None:
                                 default: {
-                                    newSign = prioMan.CountPrioritySignsAtNode(
-                                                  nodeId,
-                                                  PriorityType.Main) >= 2
-                                                  ? PriorityType.Yield
-                                                  : PriorityType.Main;
+                                    byte count = prioMan.CountPrioritySignsAtNode(
+                                        nodeId: nodeId,
+                                        sign: PriorityType.Main);
+                                    newSign = count >= 2 ? PriorityType.Yield : PriorityType.Main;
                                     break;
                                 }
                             }
@@ -417,10 +416,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     if (showRemoveButton
                         &&
                         Highlight.DrawHoverableSquareOverlayTexture(
-                            RoadUI.SignClear,
+                            texture: RoadUI.SignClear,
                             camPos,
-                            nodePos,
-                            90f)
+                            worldPos: nodePos,
+                            size: 90f)
                         && clicked)
                     {
                         prioMan.RemovePrioritySignsFromNode(nodeId);

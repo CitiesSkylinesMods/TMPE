@@ -282,21 +282,22 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             }
 
             // Create base atlas with backgrounds and no foregrounds
-            HashSet<U.AtlasSpriteDef> spriteDefs = new HashSet<AtlasSpriteDef>();
+            var futureAtlas = new U.AtlasBuilder();
 
             // Merge names of all foreground sprites for 3 directions into atlasKeySet
             foreach (string prefix in new[] { "MphToggle", "EditSegments", }) {
                 ButtonSkin skin = ButtonSkin.CreateDefaultNoBackground(prefix);
 
                 // Create keysets for lane arrow button icons and merge to the shared atlas
-                spriteDefs.AddRange(skin.CreateAtlasSpriteSet(new IntVector2(50)));
+                skin.UpdateAtlasBuilder(
+                    atlasBuilder: futureAtlas,
+                    spriteSize: new IntVector2(50));
             }
 
             // Load actual graphics into an atlas
-            return TextureUtil.CreateAtlas(
-                atlasName: $"TMPE_U_SpeedLimits_Atlas",
-                resourcePrefix: "SpeedLimits",
-                spriteDefs: spriteDefs.ToArray(),
+            return futureAtlas.CreateAtlas(
+                atlasName: "SpeedLimits_Atlas",
+                loadingPath: "SpeedLimits",
                 atlasSizeHint: new IntVector2(512));
         }
 

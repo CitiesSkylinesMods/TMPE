@@ -171,6 +171,7 @@
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
     <Compile Include="State\GetSpeedLimitResult.cs" />
     <Compile Include="State\SetSpeedLimitAction.cs" />
+    <Compile Include="State\SetSpeedLimitTarget.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
     <Compile Include="UI\DebugToolGUI.cs" />
     <Compile Include="UI\Helpers\Highlight.cs" />
@@ -386,6 +387,7 @@
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
     <Compile Include="Util\IntVector2.cs" />
+    <Compile Include="U\AtlasBuilder.cs" />
     <Compile Include="U\AtlasSpriteDef.cs" />
     <Compile Include="U\Autosize\UBoundingBox.cs" />
     <Compile Include="U\Autosize\UStackingChoice.cs" />

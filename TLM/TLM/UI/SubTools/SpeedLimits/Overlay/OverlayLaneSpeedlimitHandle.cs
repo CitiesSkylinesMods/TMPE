@@ -1,6 +1,8 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
+    using System;
     using System.Collections.Generic;
     using ColossalFramework;
+    using CSUtil.Commons;
     using GenericGameBridge.Service;
     using TrafficManager.Manager.Impl;
     using TrafficManager.Util;
@@ -35,16 +37,26 @@
         /// Called when mouse is down, and when mouse is not in parent tool window area.
         /// The show per lane mode is active.
         /// </summary>
-        public void Click(in SetSpeedLimitAction action, bool multiSegmentMode) {
-            SpeedLimitManager.Instance.SetSpeedLimit(
+        /// <param name="action">The speed limit to set or clear.</param>
+        /// <param name="target">Destination (lanes or defaults).</param>
+        /// <param name="multiSegmentMode">Whether action affects entire street.</param>
+        public void Click(in SetSpeedLimitAction action,
+                          SetSpeedLimitTarget target,
+                          bool multiSegmentMode) {
+            NetManager netManager = Singleton<NetManager>.instance;
+            NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
+
+            Apply(
                 segmentId: this.SegmentId,
                 laneIndex: this.LaneIndex,
-                laneInfo: this.LaneInfo,
                 laneId: this.LaneId,
-                action: action);
+                netInfo: segmentsBuffer[this.SegmentId].Info,
+                laneInfo: this.LaneInfo,
+                action: action,
+                target: target);
 
             if (multiSegmentMode) {
-                ClickMultiSegment(action);
+                ClickMultiSegment(action, target);
             }
         }
 
@@ -53,7 +65,8 @@
         /// but also multisegment mode was enabled (like holding Shift).
         /// </summary>
         /// <param name="speedLimitToSet">The active speed limit on the palette.</param>
-        private void ClickMultiSegment(SetSpeedLimitAction action) {
+        private void ClickMultiSegment(SetSpeedLimitAction action,
+                                       SetSpeedLimitTarget target) {
             if (new RoundaboutMassEdit().TraverseLoop(this.SegmentId, out var segmentList)) {
                 IEnumerable<LanePos> lanes = FollowRoundaboutLane(
                     segmentList,
@@ -84,15 +97,16 @@
                     Constants.ServiceFactory.NetService.ProcessSegment(
                         segmentId: data.SegVisitData.CurSeg.segmentId,
                         handler: (ushort curSegmentId, ref NetSegment curSegment) => {
-                            NetInfo.Lane curLaneInfo =
-                                curSegment.Info.m_lanes[data.CurLanePos.laneIndex];
+                            NetInfo.Lane curLaneInfo = curSegment.Info.m_lanes[data.CurLanePos.laneIndex];
 
-                            SpeedLimitManager.Instance.SetSpeedLimit(
+                            Apply(
                                 segmentId: curSegmentId,
                                 laneIndex: data.CurLanePos.laneIndex,
-                                laneInfo: curLaneInfo,
                                 laneId: data.CurLanePos.laneId,
-                                action: action);
+                                netInfo: curSegment.Info,
+                                laneInfo: curLaneInfo,
+                                action: action,
+                                target: target);
                             return true;
                         });
 
@@ -154,6 +168,34 @@
                     yield return lanes[index];
                 }
             } // foreach
+        }
+
+        /// <summary>
+        /// Based on target value, applies speed limit to a lane or default for that road type.
+        /// </summary>
+        /// <param name="netInfo">Used for setting default speed limit for all roads if this type.</param>
+        /// <param name="laneInfo">Used for setting override for one lane.</param>
+        private static void Apply(ushort segmentId,
+                                  uint laneIndex,
+                                  uint laneId,
+                                  NetInfo netInfo,
+                                  NetInfo.Lane laneInfo,
+                                  SetSpeedLimitAction action,
+                                  SetSpeedLimitTarget target) {
+            switch (target) {
+                case SetSpeedLimitTarget.LaneOverride:
+                    SpeedLimitManager.Instance.SetLaneSpeedLimit(segmentId, laneIndex, laneInfo, laneId, action);
+                    break;
+                case SetSpeedLimitTarget.LaneDefault:
+                    // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
+                    SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(netInfo, action.Value.GameUnits);
+                    // TODO: The speed limit manager only supports default speed limit overrides per road type, not per lane
+                    break;
+                default:
+                    Log.Error(
+                        $"Target for LANE speed handle click is not supported {nameof(target)}");
+                    throw new NotSupportedException();
+            }
         }
     } // end struct
 } // end namespace

@@ -36,10 +36,15 @@ namespace TrafficManager.UI.MainMenu {
                 ForegroundHovered = true,
                 ForegroundActive = true,
             };
-            this.atlas = this.Skin.CreateAtlas(
+
+            var futureAtlas = new U.AtlasBuilder();
+            this.Skin.UpdateAtlasBuilder(
+                atlasBuilder: futureAtlas,
+                spriteSize: new IntVector2(50));
+            this.atlas = futureAtlas.CreateAtlas(
+                atlasName: "MainTMPEButton_Atlas",
                 loadingPath: "MainMenu",
-                atlasSizeHint: new IntVector2(256),
-                atlasKeyset: this.Skin.CreateAtlasSpriteSet(new IntVector2(50)));
+                atlasSizeHint: new IntVector2(256));
             UpdateButtonImageAndTooltip();
 
             // Set the button dimensions to smallest of 2.6% of screen width or 4.6% of screen height
