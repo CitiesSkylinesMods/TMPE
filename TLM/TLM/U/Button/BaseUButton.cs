@@ -3,6 +3,7 @@ namespace TrafficManager.U {
     using ColossalFramework.UI;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U.Autosize;
+    using UnityEngine;
 
     /// <summary>
     /// A smart button which can change its foreground and background textures based on its state,
@@ -155,6 +156,12 @@ namespace TrafficManager.U {
             return U_OverrideTooltipShortcutKey() != null
                        ? U_OverrideTooltipShortcutKey().ToLocalizedString("\n")
                        : string.Empty;
+        }
+
+        /// <summary>Colorizes button in all states.</summary>
+        /// <param name="c">Color hue.</param>
+        public void ColorizeAllStates(Color32 c) {
+            this.color = this.hoveredColor = this.focusedColor = this.disabledColor = c;
         }
     }
 }

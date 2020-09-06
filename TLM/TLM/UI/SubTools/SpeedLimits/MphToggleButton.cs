@@ -17,15 +17,5 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Active will mean MPH is activated.</summary>
         protected override bool IsActive() => GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-
-        /// <summary>Based on current state of Options DisplaySpeedLimitsMph, update the button.</summary>
-        // public void UpdateMphToggleTexture() {
-        //     string sprite = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
-        //         ? "MphToggle-Mph-normal"
-        //         : "MphToggle-Kmph-normal";
-        //     this.normalFgSprite = sprite;
-        //     this.hoveredFgSprite = sprite;
-        //     this.pressedFgSprite = sprite;
-        // }
     }
 }

@@ -132,10 +132,25 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private static string T(string key) => Translation.SpeedLimits.Get(key);
 
         public override void ActivateTool() {
+            RecreateToolWindow();
+
+            this.fsm_ = InitFiniteStateMachine();
+            MainTool.RequestOnscreenDisplayUpdate();
+        }
+
+        /// <summary>Drop tool window if it existed, and create again.</summary>
+        internal void RecreateToolWindow() {
             // Create a generic self-sizing window with padding of 4px.
             void SetupFn(UiBuilder<SpeedLimitsWindow> b) {
                 b.SetPadding(UConst.UIPADDING);
                 b.Control.SetupControls(builder: b, parentTool: this);
+            }
+
+            if (this.Window) {
+                this.Window.Hide();
+
+                // The constructor of new window will try to delete it by name, but we can help it
+                UnityEngine.Object.Destroy(this.Window);
             }
 
             this.Window = UiBuilder<SpeedLimitsWindow>.CreateWindow<SpeedLimitsWindow>(setupFn: SetupFn);
@@ -155,8 +170,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 // TODO: update button active/texture
             };
 
-            this.fsm_ = InitFiniteStateMachine();
-            MainTool.RequestOnscreenDisplayUpdate();
+            // Additional action to toggling MPH/kmph: Also to refresh the window
+            this.Window.ToggleMphButton.uOnClick = (component, param) => {
+                this.RecreateToolWindow();
+            };
+
         }
 
         public override void DeactivateTool() {

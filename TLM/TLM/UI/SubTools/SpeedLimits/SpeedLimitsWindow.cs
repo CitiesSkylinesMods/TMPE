@@ -1,9 +1,7 @@
 namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System.Collections.Generic;
-    using System.Linq;
     using ColossalFramework.UI;
     using TrafficManager.API.Traffic.Data;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
@@ -27,11 +25,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private List<SpeedLimitPaletteButton> paletteButtons_ = new List<SpeedLimitPaletteButton>();
 
         public UButton EditDefaultsModeButton { get; set; }
-
-        // /// <summary>
-        // /// Contains atlas with UI elements. Static to prevent reloading on every window creation.
-        // /// </summary>
-        // private static UITextureAtlas uiAtlas_ = null;
+        public MphToggleButton ToggleMphButton { get; set; }
 
         /// <summary>Called by Unity on instantiation once when the game is running.</summary>
         public override void Start() {
@@ -153,6 +147,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 {
                     b.Control.atlas = GetUiAtlas();
                     b.Control.Skin = ButtonSkin.CreateDefaultNoBackground("MphToggle");
+                    this.ToggleMphButton = b.Control;
                 }
             }
         }
@@ -193,6 +188,24 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             } // end palette panel
         }
 
+        /// <summary>Format string to display under the speed limit button with miles per hour.</summary>
+        /// <param name="speed">The speed.</param>
+        /// <returns>The string formatted with miles: MM MPH.</returns>
+        private static string ToMphPreciseString(SpeedValue speed) {
+            return FloatUtil.IsZero(speed.GameUnits)
+                ? Translation.SpeedLimits.Get("Unlimited")
+                : speed.ToMphPrecise().ToString();
+        }
+
+        /// <summary>Format string to display under the speed limit button with km/hour.</summary>
+        /// <param name="speed">The speed.</param>
+        /// <returns>The string formatted formatted with km: NN km/h.</returns>
+        private static string ToKmphPreciseString(SpeedValue speed) {
+            return FloatUtil.IsZero(speed.GameUnits)
+                ? Translation.SpeedLimits.Get("Unlimited")
+                : speed.ToKmphPrecise().ToIntegerString();
+        }
+
         private SpeedLimitPaletteButton
             SetupControls_SpeedPalette_Button(UiBuilder<UPanel> builder,
                                               bool showMph,
@@ -202,79 +215,55 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             int speedInteger = showMph
                 ? speedValue.ToMphRounded(SpeedLimitsTool.MPH_STEP).Mph
                 : speedValue.ToKmphRounded(SpeedLimitsTool.KMPH_STEP).Kmph;
+            SpeedLimitPaletteButton control;
 
             //--- uncomment below to create a label under each button ---
             // Create vertical combo:
             // [ 100  ]
             //  65 mph
-            // void ButtonSetupFn(UPanel p) => p.name = $"{GAMEOBJECT_NAME}_Button_{speedInteger}";
             // Create a small panel which stacks together with other button panels horizontally
-            // using (var buttonPanelB = builder.ChildPanel<U.UPanel>(ButtonSetupFn)) {
-            //     buttonPanelB.ResizeFunction(r => {
-            //         r.Stack(UStackMode.ToTheRight);
-            //         r.FitToChildren();
-            //     });
+            using (var buttonPanelB = builder.ChildPanel<U.UPanel>(
+                p => p.name = $"{GAMEOBJECT_NAME}_Button_{speedInteger}")) {
+                buttonPanelB.ResizeFunction(
+                    r => {
+                        r.Stack(UStackMode.ToTheRight);
+                        r.FitToChildren();
+                    });
 
-            using (var buttonB = builder.Button<SpeedLimitPaletteButton>()) {
-                SpeedLimitPaletteButton control = buttonB.Control;
-                control.text = speedInteger == 0 ? "X" : speedInteger.ToString();
-                control.textHorizontalAlignment = UIHorizontalAlignment.Center;
+                using (var buttonB = buttonPanelB.Button<SpeedLimitPaletteButton>()) {
+                    control = buttonB.Control;
+                    control.text = speedInteger == 0 ? "X" : speedInteger.ToString();
+                    control.textHorizontalAlignment = UIHorizontalAlignment.Center;
 
-                control.AssignedValue = speedValue; // button must know its speed value
-                // The click events will be routed via the parent tool OnPaletteButtonClicked
-                control.ParentTool = parentTool;
+                    control.AssignedValue = speedValue; // button must know its speed value
+                    // The click events will be routed via the parent tool OnPaletteButtonClicked
+                    control.ParentTool = parentTool;
 
-                buttonB.SetStacking(UStackMode.ToTheRight);
-                var IGNORED = 10f; // value will be overridden by the button's update visual function
-                buttonB.SetFixedSize(new Vector2(IGNORED, SpeedLimitPaletteButton.DEFAULT_WIDTH));
+                    buttonB.SetStacking(UStackMode.NewRowBelow);
 
-                return control;
-            }
+                    // Width will be overwritten in SpeedLimitPaletteButton.UpdateSpeedLimitButton
+                    buttonB.SetFixedSize(
+                        new Vector2(SpeedLimitPaletteButton.DEFAULT_WIDTH,
+                                    SpeedLimitPaletteButton.DEFAULT_HEIGHT));
+                }
 
-            //--- uncomment below to create a label under each button ---
-            //     // Other speed unit info label
-            //     string otherUnit = showMph
-            //          ? ToKmphPreciseString(speedValue)
-            //          : ToMphPreciseString(speedValue);
-            //     var label = buttonPanelB.Label(t: otherUnit, stack: UStackMode.Below);
-            //     label.width = buttonWidth;
-            //     label.textAlignment = UIHorizontalAlignment.Center;
-            // } // end containing mini panel
+                //--- uncomment below to create a label under each button ---
+                // Other speed unit info label
+                string otherUnit = showMph
+                    ? ToKmphPreciseString(speedValue)
+                    : ToMphPreciseString(speedValue);
+
+                ULabel label =
+                    control.AltUnitsLabel =
+                        buttonPanelB.Label(t: otherUnit, stack: UStackMode.Below);
+
+                label.width = SpeedLimitPaletteButton.DEFAULT_WIDTH * 1.5f;
+                label.textAlignment = UIHorizontalAlignment.Center;
+                label.GetResizerConfig().ContributeToBoundingBox = false; // parent ignore our width
+            } // end containing mini panel
+
+            return control;
         }
-
-        // /// <summary>
-        // /// Create info row under the speed buttons, which prompts to hold Alt, Shift etc.
-        // /// </summary>
-        // /// <param name="builder">The UI builder to use.</param>
-        // private void SetupControls_InfoRow(UiBuilder<SpeedLimitsWindow> builder) {
-        //     builder.Label(
-        //         t: "Hold [Alt] to see default speed limits temporarily",
-        //         stack: UStackMode.Below);
-        //     builder.Label(
-        //         t: "Hold [Ctrl] to see per lane limits temporarily",
-        //         stack: UStackMode.Below);
-        //     builder.Label(
-        //         t: "Hold [Shift] to modify entire road between two junctions",
-        //         stack: UStackMode.Below);
-        // }
-
-        // /// <summary>Converts speed value to string with units.</summary>
-        // /// <param name="speed">Speed value.</param>
-        // /// <returns>Formatted String "N MPH".</returns>
-        // private static string ToMphPreciseString(SpeedValue speed) {
-        //     return FloatUtil.IsZero(speed.GameUnits)
-        //         ? Translation.SpeedLimits.Get("Unlimited")
-        //         : speed.ToMphPrecise().ToString();
-        // }
-
-        // /// <summary>Converts speed value to string with units.</summary>
-        // /// <param name="speed">Speed value.</param>
-        // /// <returns>Formatted String "N km/h".</returns>
-        // private static string ToKmphPreciseString(SpeedValue speed) {
-        //     return FloatUtil.IsZero(speed.GameUnits)
-        //         ? Translation.SpeedLimits.Get("Unlimited")
-        //         : speed.ToKmphPrecise().ToString();
-        // }
 
         private UITextureAtlas GetUiAtlas() {
             if (guiAtlas_ != null) {
@@ -305,7 +294,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// Forces speedlimit palette buttons to be updated, and active button also is highlighted.
         /// </summary>
         public void UpdatePaletteButtonsOnClick() {
-            foreach (var b in this.paletteButtons_) {
+            foreach (SpeedLimitPaletteButton b in this.paletteButtons_) {
                 b.UpdateButtonImage();
                 b.UpdateSpeedlimitButton();
             }

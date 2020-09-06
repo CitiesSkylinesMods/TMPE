@@ -11,6 +11,7 @@
         }
 
         public override string ToString() => $"{Kmph:0.0} km/h";
+        public string ToIntegerString() => $"{Kmph} km/h";
 
         public ushort Kmph { get; }
 
