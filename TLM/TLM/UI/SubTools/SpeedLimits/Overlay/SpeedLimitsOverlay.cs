@@ -93,6 +93,9 @@
             this.lastCachedCamera_ = new CameraTransformValue();
         }
 
+        /// <summary>Displays non-sign overlays, like lane highlights.</summary>
+        /// <param name="cameraInfo">The camera.</param>
+        /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
         public void RenderHelperGraphics(RenderManager.CameraInfo cameraInfo,
                                          DrawArgs args) {
             if (args.ShowLimitsPerLane) {
@@ -107,39 +110,48 @@
 
         private void RenderSegments(RenderManager.CameraInfo cameraInfo,
                                     DrawArgs args) {
-            if (args.MultiSegmentMode) {
-                RenderSegmentSideOverlay(cameraInfo: cameraInfo,
-                                         segmentId: this.segmentId_,
-                                         args: args,
-                                         finalDirection: this.finalDirection_);
-            } else if (RoundaboutMassEdit.Instance.TraverseLoop(
-                segmentId: this.segmentId_,
-                segList: out var segmentList)) {
-                foreach (ushort segmentId in segmentList) {
-                    RenderSegmentSideOverlay(
-                        cameraInfo: cameraInfo,
-                        segmentId: segmentId,
-                        args: args);
-                }
+            if (!args.MultiSegmentMode) {
+                //------------------------
+                // Single segment highlight
+                //------------------------
+                RenderSegmentSideOverlay(
+                    cameraInfo: cameraInfo,
+                    segmentId: this.segmentId_,
+                    args: args,
+                    finalDirection: this.finalDirection_);
             } else {
-                SegmentTraverser.Traverse(
-                    initialSegmentId: this.segmentId_,
-                    direction: SegmentTraverser.TraverseDirection.AnyDirection,
-                    side: SegmentTraverser.TraverseSide.AnySide,
-                    stopCrit: SegmentTraverser.SegmentStopCriterion.Junction,
-                    visitorFun: data => {
-                        NetInfo.Direction finalDirection = this.finalDirection_;
-                        if (data.IsReversed(this.segmentId_)) {
-                            finalDirection = NetInfo.InvertDirection(finalDirection);
-                        }
-
+                //------------------------
+                // Entire street highlight
+                //------------------------
+                if (RoundaboutMassEdit.Instance.TraverseLoop(
+                    segmentId: this.segmentId_,
+                    segList: out var segmentList)) {
+                    foreach (ushort segmentId in segmentList) {
                         RenderSegmentSideOverlay(
                             cameraInfo: cameraInfo,
-                            segmentId: data.CurSeg.segmentId,
-                            args: args,
-                            finalDirection: finalDirection);
-                        return true;
-                    });
+                            segmentId: segmentId,
+                            args: args);
+                    }
+                } else {
+                    SegmentTraverser.Traverse(
+                        initialSegmentId: this.segmentId_,
+                        direction: SegmentTraverser.TraverseDirection.AnyDirection,
+                        side: SegmentTraverser.TraverseSide.AnySide,
+                        stopCrit: SegmentTraverser.SegmentStopCriterion.Junction,
+                        visitorFun: data => {
+                            NetInfo.Direction finalDirection = this.finalDirection_;
+                            if (data.IsReversed(this.segmentId_)) {
+                                finalDirection = NetInfo.InvertDirection(finalDirection);
+                            }
+
+                            RenderSegmentSideOverlay(
+                                cameraInfo: cameraInfo,
+                                segmentId: data.CurSeg.segmentId,
+                                args: args,
+                                finalDirection: finalDirection);
+                            return true;
+                        });
+                }
             }
         }
 

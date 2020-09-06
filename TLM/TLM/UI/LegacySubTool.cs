@@ -173,6 +173,7 @@ namespace TrafficManager.UI {
             return this.GetType().Name;
         }
 
+        [Obsolete("Implements old style IMGUI dragging. Do not use for new code.")]
         protected void DragWindow(ref Rect window) {
             Vector2 resolution = UIView.GetAView().GetScreenResolution();
             window.x = Mathf.Clamp(window.x, 0, resolution.x - window.width);

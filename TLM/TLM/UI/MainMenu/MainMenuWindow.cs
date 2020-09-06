@@ -7,7 +7,6 @@ namespace TrafficManager.UI.MainMenu {
     using System.Linq;
     using System.Reflection;
     using TrafficManager.API.Util;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.State.Keybinds;
     using TrafficManager.State;
     using TrafficManager.U;
@@ -15,6 +14,9 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.Util;
     using UnityEngine;
 
+    /// <summary>
+    /// Implements the main TMPE window with tool palette, drag handle, hanging onscreen hints etc.
+    /// </summary>
     public class MainMenuWindow
         : U.Panel.BaseUWindowPanel,
           IObserver<GlobalConfig>

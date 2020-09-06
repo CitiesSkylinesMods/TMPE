@@ -1,6 +1,7 @@
 namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System.Collections.Generic;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
     using TrafficManager.U;
@@ -32,6 +33,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             base.Start();
             UIUtil.MakeUniqueAndSetName(gameObject, GAMEOBJECT_NAME);
             this.GenericBackgroundAndOpacity();
+            this.position = new Vector3(
+                GlobalConfig.Instance.Main.SpeedLimitsWindowX,
+                GlobalConfig.Instance.Main.SpeedLimitsWindowY);
+            this.ClampToScreen();
         }
 
         /// <summary>Populate the window using UIBuilder of the window panel.</summary>
@@ -71,6 +76,13 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // The label will be repositioned to the top of the parent
             this.titleLabel_ = builder.Label(t: unitTitle, stack: UStackMode.Below);
             this.dragHandle_ = this.CreateDragHandle();
+
+            // On window drag - clamp to screen and then save in the config
+            this.eventPositionChanged += (UIComponent component, Vector2 value) => {
+                this.ClampToScreen();
+                GlobalConfig.Instance.Main.SpeedLimitsWindowX = (int)value.x;
+                GlobalConfig.Instance.Main.SpeedLimitsWindowY = (int)value.y;
+            };
         }
 
         /// <inheritdoc/>

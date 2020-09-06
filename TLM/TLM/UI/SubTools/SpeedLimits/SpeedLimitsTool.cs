@@ -46,13 +46,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// </summary>
         private bool editDefaultsMode_ = false;
 
-        /// <summary>
-        /// Will edit entire road between two junctions.
-        /// This is toggled by holding Shift.
-        /// </summary>
-        private bool multiSegmentMode_ = false;
-
-        private bool MultiSegmentMode => multiSegmentMode_ ^ Shortcuts.ShiftIsPressed;
+        /// <summary>Will edit entire road between two junctions by holding Shift.</summary>
+        private bool GetMultiSegmentMode() => Shortcuts.ShiftIsPressed;
 
         /// <summary>
         /// Finite State machine for the tool. Represents current UI state for Lane Arrows.
@@ -205,7 +200,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             overlayDrawArgs_.ClearHovered();
 
             overlayDrawArgs_.InteractiveSigns = interactive;
-            overlayDrawArgs_.MultiSegmentMode = this.MultiSegmentMode;
+            overlayDrawArgs_.MultiSegmentMode = this.GetMultiSegmentMode();
             overlayDrawArgs_.ShowLimitsPerLane = this.ShowLimitsPerLane;
             overlayDrawArgs_.ShowDefaultsMode = this.editDefaultsMode_;
             overlayDrawArgs_.ShowOtherPerLaneModeTemporary = interactive && Shortcuts.AltIsPressed;
@@ -246,7 +241,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     // per lane
                     h.Click(
                         action: SetSpeedLimitAction.SetSpeed(this.CurrentPaletteSpeedLimit),
-                        multiSegmentMode: this.MultiSegmentMode,
+                        multiSegmentMode: this.GetMultiSegmentMode(),
                         target: target);
                 }
             } else {
@@ -258,7 +253,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 foreach (var h in overlayDrawArgs_.HoveredSegmentHandles) {
                     h.Click(
                         action: SetSpeedLimitAction.SetSpeed(this.CurrentPaletteSpeedLimit),
-                        multiSegmentMode: this.MultiSegmentMode,
+                        multiSegmentMode: this.GetMultiSegmentMode(),
                         target: target);
                 }
             }
