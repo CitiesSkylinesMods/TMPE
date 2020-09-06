@@ -31,17 +31,18 @@
         /// </summary>
         /// <param name="hovered">Whether mouse is over the sign. Note: Interactive is set from
         /// the constructor.</param>
-        public void SetGUIColor(bool hovered) {
+        /// <param name="opacityMultiplier">Multiply alpha with this. Can use to fade signs with distance.</param>
+        public void SetGUIColor(bool hovered, float opacityMultiplier = 1f) {
             var tmpColor = this.originalColor_;
 
             if (this.isInteractable_) {
-                tmpColor.a = TrafficManagerTool.GetHandleAlpha(hovered);
+                tmpColor.a = TrafficManagerTool.GetHandleAlpha(hovered) * opacityMultiplier;
                 if (hovered) {
                     tmpColor = Color.Lerp(tmpColor, MOUSE_HOVER_INTERACTABLE_COLOR, 0.5f);
                 }
             } else {
                 // Gray-ish color and non-hover transparency
-                tmpColor.a = TrafficManagerTool.GetHandleAlpha(hovered: false);
+                tmpColor.a = TrafficManagerTool.GetHandleAlpha(hovered: false) * opacityMultiplier;
                 tmpColor = Color.Lerp(tmpColor, NON_INTERACTABLE_COLOR, 0.5f);
             }
 

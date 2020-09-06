@@ -7,7 +7,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
-    using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.UI.MainMenu;
@@ -413,24 +412,18 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             switch (fsm_.State) {
                 case State.Select: {
-                    var items = new List<OsdItem>();
-                    items.Add(
+                    var items = new List<OsdItem> {
                         new MainMenu.OSD.ModeDescription(
-                            localizedText: T("LaneArrows.Mode:Select")));
-                    items.Add(
+                            localizedText: T("LaneArrows.Mode:Select")),
                         new MainMenu.OSD.HardcodedMouseShortcut(
                             button: UIMouseButton.Left,
-                            shift: false,
                             ctrl: true,
-                            alt: false,
-                            localizedText: T("LaneArrows.Click:Separate lanes for entire junction")));
-                    items.Add(
+                            localizedText: T("LaneArrows.Click:Separate lanes for entire junction")),
                         new MainMenu.OSD.HardcodedMouseShortcut(
                             button: UIMouseButton.Left,
-                            shift: false,
-                            ctrl: false,
                             alt: true,
-                            localizedText: T("LaneArrows.Click:Separate lanes for segment")));
+                            localizedText: T("LaneArrows.Click:Separate lanes for segment")),
+                    };
                     OnscreenDisplay.Display(items: items);
                     return;
                 }

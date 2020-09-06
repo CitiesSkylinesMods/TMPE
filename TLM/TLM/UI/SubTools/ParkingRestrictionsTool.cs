@@ -381,8 +381,6 @@ namespace TrafficManager.UI.SubTools {
                 new HardcodedMouseShortcut(
                     button: UIMouseButton.Left,
                     shift: true,
-                    ctrl: false,
-                    alt: false,
                     localizedText: T("Parking.ShiftClick:Apply to entire road")));
             OnscreenDisplay.Display(items);
         }

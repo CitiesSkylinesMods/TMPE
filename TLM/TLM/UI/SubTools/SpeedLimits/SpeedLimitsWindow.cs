@@ -58,7 +58,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             SetupControls_SpeedPalette(builder, parentTool);
 
             // Text below for "Hold Alt, hold Shift, etc..."
-            SetupControls_InfoRow(builder);
+            // SetupControls_InfoRow(builder);
 
             // Force buttons resize and show the current speed limit on the palette
             this.UpdatePaletteButtonsOnClick();
@@ -242,21 +242,21 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // } // end containing mini panel
         }
 
-        /// <summary>
-        /// Create info row under the speed buttons, which prompts to hold Alt, Shift etc.
-        /// </summary>
-        /// <param name="builder">The UI builder to use.</param>
-        private void SetupControls_InfoRow(UiBuilder<SpeedLimitsWindow> builder) {
-            builder.Label(
-                t: "Hold [Alt] to see default speed limits temporarily",
-                stack: UStackMode.Below);
-            builder.Label(
-                t: "Hold [Ctrl] to see per lane limits temporarily",
-                stack: UStackMode.Below);
-            builder.Label(
-                t: "Hold [Shift] to modify entire road between two junctions",
-                stack: UStackMode.Below);
-        }
+        // /// <summary>
+        // /// Create info row under the speed buttons, which prompts to hold Alt, Shift etc.
+        // /// </summary>
+        // /// <param name="builder">The UI builder to use.</param>
+        // private void SetupControls_InfoRow(UiBuilder<SpeedLimitsWindow> builder) {
+        //     builder.Label(
+        //         t: "Hold [Alt] to see default speed limits temporarily",
+        //         stack: UStackMode.Below);
+        //     builder.Label(
+        //         t: "Hold [Ctrl] to see per lane limits temporarily",
+        //         stack: UStackMode.Below);
+        //     builder.Label(
+        //         t: "Hold [Shift] to modify entire road between two junctions",
+        //         stack: UStackMode.Below);
+        // }
 
         // /// <summary>Converts speed value to string with units.</summary>
         // /// <param name="speed">Speed value.</param>

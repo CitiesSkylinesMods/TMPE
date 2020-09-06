@@ -22,10 +22,10 @@ namespace TrafficManager.UI.MainMenu.OSD {
         private InputKey inputKey_;
 
         public HardcodedMouseShortcut(UIMouseButton button,
-                            bool shift,
-                            bool ctrl,
-                            bool alt,
-                            string localizedText) {
+                                      string localizedText,
+                                      bool shift = false,
+                                      bool ctrl = false,
+                                      bool alt = false) {
             button_ = button;
             shift_ = shift;
             ctrl_ = ctrl;
@@ -43,10 +43,12 @@ namespace TrafficManager.UI.MainMenu.OSD {
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Shift"));
                 text.Append("+");
             }
+
             if (this.ctrl_) {
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Ctrl"));
                 text.Append("+");
             }
+
             if (this.alt_) {
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Alt"));
                 text.Append("+");

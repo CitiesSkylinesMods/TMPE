@@ -2529,9 +2529,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             items.Add(
                 new UI.MainMenu.OSD.HardcodedMouseShortcut(
                     button: UIMouseButton.Left,
-                    shift: false,
                     ctrl: true,
-                    alt: false,
                     localizedText: T("TimedTL.CtrlClick:Quick setup")));
             OnscreenDisplay.Display(items: items);
         }

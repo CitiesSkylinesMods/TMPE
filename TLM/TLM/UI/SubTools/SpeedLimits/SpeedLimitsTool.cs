@@ -1,9 +1,11 @@
 namespace TrafficManager.UI.SubTools.SpeedLimits {
+    using System.Collections.Generic;
     using GenericGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.U;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.SpeedLimits.Overlay;
     using TrafficManager.Util;
@@ -144,14 +146,17 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             //--------------------------------------------------
             this.Window.SegmentLaneModeToggleButton.uOnClick = (component, evt) => {
                 this.showLimitsPerLane_ = !this.showLimitsPerLane_;
+                MainTool.RequestOnscreenDisplayUpdate();
                 // TODO: update button active/texture
             };
             this.Window.EditDefaultsModeButton.uOnClick = (component, evt) => {
                 this.editDefaultsMode_ = !this.editDefaultsMode_;
+                MainTool.RequestOnscreenDisplayUpdate();
                 // TODO: update button active/texture
             };
 
             this.fsm_ = InitFiniteStateMachine();
+            MainTool.RequestOnscreenDisplayUpdate();
         }
 
         public override void DeactivateTool() {
@@ -251,12 +256,31 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Called when the tool must update onscreen keyboard/mouse hints.</summary>
         public void UpdateOnscreenDisplayPanel() {
+            //     t: "Hold [Alt] to see default speed limits temporarily",
+            //     t: "Hold [Ctrl] to see per lane limits temporarily",
+            //     t: "Hold [Shift] to modify entire road between two junctions",
+            string toggleDefaultStr =
+                this.editDefaultsMode_
+                    ? T("SpeedLimits.Alt:See speed limits overrides temporarily")
+                    : T("SpeedLimits.Alt:See default speed limits temporarily");
+            string togglePerLaneStr =
+                this.ShowLimitsPerLane
+                    ? T("SpeedLimits.Ctrl:See speed limits per segment temporarily")
+                    : T("SpeedLimits.Ctrl:See speed limits per lane temporarily");
+            var items = new List<OsdItem> {
+                new MainMenu.OSD.ModeDescription(localizedText: T("SpeedLimits.OSD:Select")),
+                new MainMenu.OSD.HoldModifier(
+                    alt: true,
+                    localizedText: toggleDefaultStr),
+                new MainMenu.OSD.HoldModifier(
+                    ctrl: true,
+                    localizedText: togglePerLaneStr),
+                new MainMenu.OSD.HoldModifier(
+                    shift: true,
+                    localizedText: T("SpeedLimits.Shift:Modify road between two junctions")),
+            };
+            OnscreenDisplay.Display(items: items);
         }
-
-        // TOxDO: Possibly this is useful in more than this tool, then move it up the class hierarchy
-        // public bool ContainsMouse() {
-        //     return Window != null && Window.containsMouse;
-        // }
 
         internal static void SetSpeedLimit(LanePos lane, SetSpeedLimitAction action) {
             ushort segmentId = lane.laneId.ToLane().m_segment;

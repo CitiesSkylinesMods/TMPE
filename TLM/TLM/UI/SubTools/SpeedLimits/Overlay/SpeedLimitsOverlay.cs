@@ -350,8 +350,8 @@
                     continue;
                 }
 
-                float zoom = 100.0f / (e.Value - camPos).magnitude;
-                float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * zoom;
+                float visibleScale = 100.0f / (e.Value - camPos).magnitude;
+                float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
 
                 // Recalculate visible rect for screen position and size
                 signRenderer.Reset(screenPos: screenPos, size: size * largeRatio);
@@ -370,7 +370,10 @@
                 //-----------
                 // Rendering
                 //-----------
-                colorController.SetGUIColor(hovered: isHoveredHandle);
+                // Sqrt(visibleScale) makes fade start later as distance grows
+                colorController.SetGUIColor(
+                    hovered: isHoveredHandle,
+                    opacityMultiplier: Mathf.Sqrt(visibleScale));
 
                 // Render override if interactive, or if readonly info layer and override exists
                 if (args.InteractiveSigns || overrideSpeedlimit.HasValue) {
@@ -530,13 +533,17 @@
                     continue;
                 }
 
-                float zoom = 100.0f / (worldPos - camPos).magnitude;
-                float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * zoom;
+                float visibleScale = 100.0f / (worldPos - camPos).magnitude;
+                float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
                 signRenderer.Reset(screenPos, largeRatio * size);
 
                 // Set render transparency based on mouse hover
                 bool isHoveredHandle = args.InteractiveSigns && signRenderer.ContainsMouse();
-                colorController.SetGUIColor(hovered: isHoveredHandle);
+
+                // Sqrt(visibleScale) makes fade start later as distance grows
+                colorController.SetGUIColor(
+                    hovered: isHoveredHandle,
+                    opacityMultiplier: Mathf.Sqrt(visibleScale));
 
                 // Get speed limit override for the lane
                 GetSpeedLimitResult overrideSpeedlimit =

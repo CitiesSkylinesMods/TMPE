@@ -34,6 +34,10 @@
                 height: size.y);
         }
 
+        public bool ContainsMouse() {
+            return TrafficManagerTool.IsMouseOver(this.screenRect_);
+        }
+
         /// <summary>Draw large rect with the speed value or unlimited.</summary>
         /// <param name="speedlimit">Show this speed.</param>
         public void DrawLargeTexture(SpeedValue? speedlimit,
@@ -45,10 +49,6 @@
             GUI.DrawTexture(
                 position: this.screenRect_,
                 image: tex);
-        }
-
-        public bool ContainsMouse() {
-            return TrafficManagerTool.IsMouseOver(this.screenRect_);
         }
 
         /// <summary>
