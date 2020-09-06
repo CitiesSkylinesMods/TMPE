@@ -8,7 +8,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     /// <summary>
     /// Button in Lane Arrows editor, containing a direction arrow.
     /// </summary>
-    public class LaneArrowButton: U.Button.BaseUButton {
+    public class LaneArrowButton: U.BaseUButton {
         public uint LaneId = 0;
 
         public NetLane.Flags NetlaneFlagsMask = NetLane.Flags.None;
@@ -47,10 +47,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
             NetLane.Flags flags = (NetLane.Flags)lanesBuffer[LaneId].m_flags;
             return (flags & NetlaneFlagsMask) == NetlaneFlagsMask;
-        }
-
-        protected override string GetTooltip() {
-            return string.Empty;
         }
     }
 }

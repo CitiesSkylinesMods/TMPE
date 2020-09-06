@@ -78,24 +78,29 @@ namespace TrafficManager.Util.Record {
         public static List<LaneConnectionRecord> GetLanes(ushort nodeId) {
             var ret = new List<LaneConnectionRecord>();
             ref NetNode node = ref nodeId.ToNode();
+
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
-                if (segmentId == 0) continue;
+                if (segmentId == 0) {
+                    continue;
+                }
+
                 bool Handler(
                     uint laneId,
                     ref NetLane lane,
                     NetInfo.Lane laneInfo,
-                    ushort segmentId,
+                    ushort segmentId1,
                     ref NetSegment segment,
                     byte laneIndex) {
                     bool match = (laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != 0 &&
                                   (laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != 0;
-                    if (!match)
+                    if (!match) {
                         return true;
+                    }
                     var laneData = new LaneConnectionRecord {
                         LaneId = laneId,
                         LaneIndex = laneIndex,
-                        StartNode = (bool)netService.IsStartNode(segmentId, nodeId),
+                        StartNode = (bool)netService.IsStartNode(segmentId1, nodeId),
                     };
                     ret.Add(laneData);
                     return true;
@@ -104,6 +109,7 @@ namespace TrafficManager.Util.Record {
                     segmentId,
                     Handler);
             }
+
             return ret;
         }
 

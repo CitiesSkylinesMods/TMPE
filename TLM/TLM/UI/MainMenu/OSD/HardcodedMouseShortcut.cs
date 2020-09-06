@@ -7,7 +7,6 @@ namespace TrafficManager.UI.MainMenu.OSD {
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
-    using TrafficManager.U.Label;
 
     /// <summary>
     /// Displays a mouse click shortcut in OSD panel.
@@ -23,10 +22,10 @@ namespace TrafficManager.UI.MainMenu.OSD {
         private InputKey inputKey_;
 
         public HardcodedMouseShortcut(UIMouseButton button,
-                            bool shift,
-                            bool ctrl,
-                            bool alt,
-                            string localizedText) {
+                                      string localizedText,
+                                      bool shift = false,
+                                      bool ctrl = false,
+                                      bool alt = false) {
             button_ = button;
             shift_ = shift;
             ctrl_ = ctrl;
@@ -34,7 +33,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
             localizedText_ = localizedText;
         }
 
-        public override void Build(U.UiBuilder<U.Panel.UPanel> builder) {
+        public override void Build(U.UiBuilder<U.UPanel> builder) {
             // Capacity 9 will fit all modifiers and separators and the text
             StringBuilder text = new StringBuilder(capacity: 9);
 
@@ -44,25 +43,22 @@ namespace TrafficManager.UI.MainMenu.OSD {
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Shift"));
                 text.Append("+");
             }
+
             if (this.ctrl_) {
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Ctrl"));
                 text.Append("+");
             }
+
             if (this.alt_) {
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Alt"));
                 text.Append("+");
             }
 
             text.Append(TranslationForMouseButton(this.button_));
-
             text.Append("</color> ");
             text.Append(this.localizedText_);
 
-            using (UiBuilder<ULabel> labelB = builder.Label<U.Label.ULabel>(text.ToString())) {
-                labelB.Control.processMarkup = true;
-                labelB.ResizeFunction(
-                    r => { r.Stack(mode: UStackMode.NewRowBelow); });
-            }
+            builder.Label(t: text.ToString(), stack: UStackMode.NewRowBelow, processMarkup: true);
         }
 
         private static string TranslationForMouseButton(UIMouseButton button) {

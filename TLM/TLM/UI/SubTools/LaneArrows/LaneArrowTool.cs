@@ -7,7 +7,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
-    using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.UI.MainMenu;
@@ -22,7 +21,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     /// </summary>
     public class LaneArrowTool
         : TrafficManagerSubTool,
-          IOnscreenDisplayProvider
+          UI.MainMenu.IOnscreenDisplayProvider
     {
         const bool DEFAULT_ALT_MODE = true;
         private bool alternativeMode_ = DEFAULT_ALT_MODE;
@@ -122,10 +121,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// <summary>Called from GenericFsm when a segment is clicked to show lane arrows GUI.</summary>
         private void OnEnterEditorState() {
             int numLanes = GeometryUtil.GetSegmentNumVehicleLanes(
-                SelectedSegmentId,
-                SelectedNodeId,
-                out int numDirections,
-                LaneArrowManager.VEHICLE_TYPES);
+                segmentId: SelectedSegmentId,
+                nodeId: SelectedNodeId,
+                numDirections: out int _,
+                vehicleTypeFilter: LaneArrowManager.VEHICLE_TYPES);
 
             if (numLanes <= 0) {
                 SelectedNodeId = 0;
@@ -133,23 +132,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            // Vector3 nodePos = Singleton<NetManager>
-            //                   .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
-            //
-            // // Hide if node position is off-screen
-            //
-            // bool visible = GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 screenPos);
-            //
-            // // if (!visible) {
-            //     // return;
-            // // }
-            //
-            // Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-            // Vector3 diff = nodePos - camPos;
-            //
-            // if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
-            //     return; // do not draw if too distant
-            // }
             // Calculate lanes and arrows
             NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
             IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(
@@ -168,34 +150,15 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            CreateLaneArrowsWindow(laneList.Count);
+            // Create a generic self-sizing window with padding of 4px.
+            ToolWindow = UiBuilder<LaneArrowToolWindow>.CreateWindow<LaneArrowToolWindow>(
+                    setupFn: b => b.Control.SetupControls(b, numLanes));
+            RepositionWindowToNode();
+            // end create window
+
             SetupLaneArrowsWindowButtons(laneList: laneList,
                                          startNode: (bool)startNode);
             MainTool.RequestOnscreenDisplayUpdate();
-        }
-
-        /// <summary>
-        /// Creates floating tool window for Lane Arrow controls and adds keyboard hints too.
-        /// </summary>
-        /// <param name="numLanes">How many groups of buttons.</param>
-        private void CreateLaneArrowsWindow(int numLanes) {
-            var parent = UIView.GetAView();
-            ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
-            ToolWindow.SetOpacity(
-                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
-
-            RepositionWindowToNode(); // reposition 1st time to avoid visible window jump
-
-            using (var builder = new U.UiBuilder<LaneArrowToolWindow>(ToolWindow)) {
-                builder.ResizeFunction(r => { r.FitToChildren(); });
-                builder.SetPadding(UConst.UIPADDING);
-
-                ToolWindow.SetupControls(builder, numLanes);
-
-                // Resize everything correctly
-                builder.Done();
-                RepositionWindowToNode(); // reposition again 2nd time now that size is known
-            }
         }
 
         /// <summary>
@@ -306,6 +269,32 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     MainTool.Guide.Deactivate("LaneArrowTool_Disabled due to lane connections");
                     break;
             }
+        }
+
+        public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
+            // We will be calling GUI.DrawTexture in the overlay renderer, so we need *_GUI variant
+            switch (fsm_.State) {
+                case State.Select:
+                    RenderOverlay_Select(cameraInfo);
+                    break;
+                case State.EditLaneArrows:
+                    RenderOverlay_Select(cameraInfo); // show potential half-segments to select
+                    RenderOverlay_EditLaneArrows(cameraInfo);
+                    break;
+            }
+        }
+
+        public override void RenderActiveToolOverlay_GUI() {
+            // No GUI-specific info overlay for lane arrows
+        }
+
+        /// <summary>No generic overlay for other tool modes is provided by this tool, render nothing.</summary>
+        public override void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo) {
+            // No info overlay for other tools
+        }
+
+        public override void RenderGenericInfoOverlay_GUI() {
+            // No GUI-specific info overlay to show while other tools active
         }
 
         /// <summary>Called from the Main Tool when left mouse button clicked.</summary>
@@ -423,24 +412,18 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             switch (fsm_.State) {
                 case State.Select: {
-                    var items = new List<OsdItem>();
-                    items.Add(
+                    var items = new List<OsdItem> {
                         new MainMenu.OSD.ModeDescription(
-                            localizedText: T("LaneArrows.Mode:Select")));
-                    items.Add(
+                            localizedText: T("LaneArrows.Mode:Select")),
                         new MainMenu.OSD.HardcodedMouseShortcut(
                             button: UIMouseButton.Left,
-                            shift: false,
                             ctrl: true,
-                            alt: false,
-                            localizedText: T("LaneArrows.Click:Separate lanes for entire junction")));
-                    items.Add(
+                            localizedText: T("LaneArrows.Click:Separate lanes for entire junction")),
                         new MainMenu.OSD.HardcodedMouseShortcut(
                             button: UIMouseButton.Left,
-                            shift: false,
-                            ctrl: false,
                             alt: true,
-                            localizedText: T("LaneArrows.Click:Separate lanes for segment")));
+                            localizedText: T("LaneArrows.Click:Separate lanes for segment")),
+                    };
                     OnscreenDisplay.Display(items: items);
                     return;
                 }
@@ -549,19 +532,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 HasSegmentEndLaneArrows(segmentId, segment.m_endNode);
             float cut = con ? 1f : 0.5f;
 
-            MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
-        }
-
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
-            switch (fsm_.State) {
-                case State.Select:
-                    RenderOverlay_Select(cameraInfo);
-                    break;
-                case State.EditLaneArrows:
-                    RenderOverlay_Select(cameraInfo); // show potential half-segments to select
-                    RenderOverlay_EditLaneArrows(cameraInfo);
-                    break;
-            }
+            Highlight.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
         }
 
         /// <summary>Render info overlay for active tool, when UI is in Select state.</summary>
@@ -571,7 +542,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             // If CTRL is held, and hovered something: Draw hovered node
             if (SeparateNodeLanesModifierIsPressed && HoveredNodeId != 0) {
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                Highlight.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
                 return;
             }
 

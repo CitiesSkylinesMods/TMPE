@@ -73,7 +73,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 if (!isRoundabout) {
                     record_ = PriorityRoad.FixRoad(HoveredSegmentId);
                 }
-                // TODO: benchmark why bulk setup takes a long time. 
+                // TODO: benchmark why bulk setup takes a long time.
                 Log.Info("After FixRoundabout/FixRoad. Before RefreshMassEditOverlay"); // log time for benchmarking.
                 RefreshMassEditOverlay();
                 Log.Info("After RefreshMassEditOverlay."); // log time for benchmarking.
@@ -122,12 +122,13 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }
             }
-            
+
             // refresh cache
-            if(ControlIsPressed)
+            if(ControlIsPressed) {
                 RefreshMassEditOverlay();
-            else
+            } else {
                 RefreshCurrentPriorityNodeIds();
+            }
         }
 
         public override void OnToolGUI(Event e) { }
@@ -174,10 +175,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     foreach (uint segmentId in segmentList) {
                         ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                         NetTool.RenderOverlay(
-                            cameraInfo,
-                            ref seg,
-                            color,
-                            color);
+                            cameraInfo: cameraInfo,
+                            segment: ref seg,
+                            importantColor: color,
+                            nonImportantColor: color);
                     } // end foreach
                 } else {
                     SegmentTraverser.Traverse(
@@ -187,27 +188,32 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         SegmentStopCriterion.None,
                         data => {
                             NetTool.RenderOverlay(
-                                cameraInfo,
-                                ref Singleton<NetManager>.instance.m_segments.m_buffer[
+                                cameraInfo: cameraInfo,
+                                segment: ref Singleton<NetManager>.instance.m_segments.m_buffer[
                                     data.CurSeg.segmentId],
-                                color,
-                                color);
+                                importantColor: color,
+                                nonImportantColor: color);
                             return true;
                         });
                 }
-                if (!ControlIsPressed)
+                if (!ControlIsPressed) {
                     mode = ModifyMode.PriorityRoad;
-                else if (!isRoundabout)
+                } else if (!isRoundabout) {
                     mode = ModifyMode.HighPriorityRoad;
-                else
+                } else {
                     mode = ModifyMode.Roundabout;
+                }
 
                 if (mode != PrevHoveredState.Mode || HoveredSegmentId != PrevHoveredState.SegmentId) {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }
             } else if (ControlIsPressed) {
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                Highlight.DrawNodeCircle(
+                    cameraInfo: cameraInfo,
+                    nodeId: HoveredNodeId,
+                    warning: Input.GetMouseButton(0));
                 mode = ModifyMode.HighPriorityJunction;
+
                 if (mode != PrevHoveredState.Mode || HoveredNodeId != PrevHoveredState.NodeId) {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }
@@ -229,7 +235,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     return;
                 }
 
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                Highlight.DrawNodeCircle(
+                    cameraInfo: cameraInfo,
+                    nodeId: HoveredNodeId,
+                    warning: Input.GetMouseButton(0));
             }
 
             PrevHoveredState.Mode = mode;
@@ -306,8 +315,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
                     Vector3 nodePos = default;
                     Constants.ServiceFactory.NetService.ProcessNode(
-                        nodeId,
-                        (ushort nId, ref NetNode node) => {
+                        nodeId: nodeId,
+                        handler: (ushort nId, ref NetNode node) => {
                             nodePos = node.m_position;
                             return true;
                         });
@@ -315,8 +324,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     for (int i = 0; i < 8; ++i) {
                         ushort segmentId = 0;
                         Constants.ServiceFactory.NetService.ProcessNode(
-                            nodeId,
-                            (ushort nId, ref NetNode node) => {
+                            nodeId: nodeId,
+                            handler: (ushort nId, ref NetNode node) => {
                                 segmentId = node.GetSegment(i);
                                 return true;
                             });
@@ -337,8 +346,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         Vector3 signPos = nodePos;
 
                         Constants.ServiceFactory.NetService.ProcessSegment(
-                            segmentId,
-                            (ushort sId, ref NetSegment segment) => {
+                            segmentId: segmentId,
+                            handler: (ushort sId, ref NetSegment segment) => {
                                 signPos +=
                                     10f * (startNode
                                                ? segment.m_startDirection
@@ -360,12 +369,12 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             showRemoveButton = true;
                         }
 
-                        if (MainTool.DrawGenericSquareOverlayTexture(
-                                RoadUI.PrioritySignTextures[sign],
-                                camPos,
-                                signPos,
-                                90f,
-                                !viewOnly) && clicked)
+                        if (Highlight.DrawGenericSquareOverlayTexture(
+                                texture: RoadUI.PrioritySignTextures[sign],
+                                camPos: camPos,
+                                worldPos: signPos,
+                                size: 90f,
+                                canHover: !viewOnly) && clicked)
                         {
                             PriorityType? newSign;
                             switch (sign) {
@@ -386,11 +395,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
                                 // also: case PriorityType.None:
                                 default: {
-                                    newSign = prioMan.CountPrioritySignsAtNode(
-                                                  nodeId,
-                                                  PriorityType.Main) >= 2
-                                                  ? PriorityType.Yield
-                                                  : PriorityType.Main;
+                                    byte count = prioMan.CountPrioritySignsAtNode(
+                                        nodeId: nodeId,
+                                        sign: PriorityType.Main);
+                                    newSign = count >= 2 ? PriorityType.Yield : PriorityType.Main;
                                     break;
                                 }
                             }
@@ -406,11 +414,12 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
                     // draw remove button and handle click
                     if (showRemoveButton
-                        && MainTool.DrawHoverableSquareOverlayTexture(
-                            RoadUI.SignClear,
+                        &&
+                        Highlight.DrawHoverableSquareOverlayTexture(
+                            texture: RoadUI.SignClear,
                             camPos,
-                            nodePos,
-                            90f)
+                            worldPos: nodePos,
+                            size: 90f)
                         && clicked)
                     {
                         prioMan.RemovePrioritySignsFromNode(nodeId);
@@ -526,23 +535,18 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 items.Add(
                     new HardcodedMouseShortcut(
                         button: UIMouseButton.Left,
-                        shift: false,
                         ctrl: true,
-                        alt: false,
                         localizedText: T("Prio.Click:Quick setup prio junction")));
                 items.Add(
                     new HardcodedMouseShortcut(
                         button: UIMouseButton.Left,
                         shift: true,
-                        ctrl: false,
-                        alt: false,
                         localizedText: T("Prio.Click:Quick setup prio road/roundabout")));
                 items.Add(
                     new HardcodedMouseShortcut(
                         button: UIMouseButton.Left,
                         shift: true,
                         ctrl: true,
-                        alt: false,
                         localizedText: T("Prio.Click:Quick setup high prio road/roundabout")));
                 OnscreenDisplay.Display(items);
             } else {

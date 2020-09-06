@@ -7,15 +7,16 @@ namespace TrafficManager.UI.MainMenu {
     using System.Linq;
     using System.Reflection;
     using TrafficManager.API.Util;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.State.Keybinds;
     using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
-    using TrafficManager.U.Button;
-    using TrafficManager.U.Panel;
+    using TrafficManager.Util;
     using UnityEngine;
 
+    /// <summary>
+    /// Implements the main TMPE window with tool palette, drag handle, hanging onscreen hints etc.
+    /// </summary>
     public class MainMenuWindow
         : U.Panel.BaseUWindowPanel,
           IObserver<GlobalConfig>
@@ -117,7 +118,7 @@ namespace TrafficManager.UI.MainMenu {
 
         public UILabel StatsLabel { get; private set; }
 
-        public UIDragHandle DragHandle { get; private set; }
+        private UIDragHandle dragHandle_;
 
         IDisposable confDisposable;
 
@@ -158,7 +159,6 @@ namespace TrafficManager.UI.MainMenu {
                 builder.SetPadding(UConst.UIPADDING);
 
                 window.SetupControls(builder);
-                // window.SetTransparency(GlobalConfig.Instance.Main.GuiTransparency);
 
                 // Resize everything correctly
                 builder.Done();
@@ -171,16 +171,10 @@ namespace TrafficManager.UI.MainMenu {
         private void SetupWindow() {
             this.name = WINDOW_CONTROL_NAME;
             this.isVisible = false;
-            this.backgroundSprite = "GenericPanel";
-            this.color = new Color32(64, 64, 64, 240);
-            this.SetOpacity(
-                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
+            this.GenericBackgroundAndOpacity();
 
-            var dragHandler = new GameObject("TMPE_Menu_DragHandler");
-            dragHandler.transform.parent = transform;
-            dragHandler.transform.localPosition = Vector3.zero;
-            this.DragHandle = dragHandler.AddComponent<UIDragHandle>();
-            this.DragHandle.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
+            this.dragHandle_ = this.CreateDragHandle();
+            this.dragHandle_.enabled = !GlobalConfig.Instance.Main.MainMenuPosLocked;
 
             this.eventVisibilityChanged += OnVisibilityChanged;
         }
@@ -190,46 +184,47 @@ namespace TrafficManager.UI.MainMenu {
         public void SetupControls(UiBuilder<MainMenuWindow> builder) {
             // Create and populate list of background atlas keys, used by all buttons
             // And also each button will have a chance to add their own atlas keys for loading.
-            var tmpSkin = new U.Button.ButtonSkin {
-                                                      Prefix = "MainMenuPanel",
-                                                      BackgroundPrefix = "RoundButton",
-                                                      ForegroundNormal = false,
-                                                      BackgroundHovered = true,
-                                                      BackgroundActive = true,
-                                                  };
+            var tmpSkin = new U.ButtonSkin {
+                Prefix = "MainMenuPanel",
+                BackgroundPrefix = "RoundButton",
+                ForegroundNormal = false,
+                BackgroundHovered = true,
+                BackgroundActive = true,
+            };
+
             // By default the atlas will include backgrounds: DefaultRound-bg-normal
-            HashSet<string> atlasKeysSet = tmpSkin.CreateAtlasKeyset();
+            var futureAtlas = new U.AtlasBuilder();
+            tmpSkin.UpdateAtlasBuilder(
+                atlasBuilder: futureAtlas,
+                spriteSize: new IntVector2(50));
 
             // Create Version Label and Help button:
             // [ TM:PE 11.x ] [?]
-            UILabel versionLabel = SetupControls_TopRow(builder, atlasKeysSet);
+            SetupControls_TopRow(builder, futureAtlas);
 
             // Main menu contains 2 panels side by side, one for tool buttons and another for
             // despawn & clear buttons.
             ButtonsDict = new Dictionary<ToolMode, BaseMenuButton>();
-            U.Panel.UPanel leftPanel;
+            U.UPanel leftPanel;
 
-            using (var innerPanelB = builder.ChildPanel<U.Panel.UPanel>(setupFn: p => {
+            using (var innerPanelB = builder.ChildPanel<U.UPanel>(setupFn: p => {
                 p.name = "TMPE_MainMenu_InnerPanel";
             })) {
                 innerPanelB.ResizeFunction(r => {
-                    r.Stack(mode: UStackMode.Below, spacing: 0f, stackRef: versionLabel);
+                    r.Stack(mode: UStackMode.Below, spacing: 0f, stackRef: this.VersionLabel);
                     r.FitToChildren();
                 });
 
-                AddButtonsResult toolButtonsResult
-                    = SetupControls_ToolPanel(innerPanelB, atlasKeysSet);
+                AddButtonsResult toolButtonsResult = SetupControls_ToolPanel(innerPanelB, futureAtlas);
 
-                SetupControls_ExtraPanel(innerPanelB, atlasKeysSet, toolButtonsResult);
+                SetupControls_ExtraPanel(innerPanelB, futureAtlas, toolButtonsResult);
             }
 
             // Create atlas and give it to all buttons
-            allButtonsAtlas_ = tmpSkin.CreateAtlas(
+            allButtonsAtlas_ = futureAtlas.CreateAtlas(
+                atlasName: "MainMenu_Atlas",
                 loadingPath: "MainMenu.Tool",
-                spriteWidth: 50,
-                spriteHeight: 50,
-                hintAtlasTextureSize: 512,
-                atlasKeysSet);
+                atlasSizeHint: new IntVector2(512));
 
             foreach (BaseMenuButton b in ToolButtonsList) {
                 b.atlas = allButtonsAtlas_;
@@ -249,7 +244,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private void SetupControls_OnscreenDisplayPanel(UiBuilder<MainMenuWindow> builder) {
-            using (var osdBuilder = builder.ChildPanel<U.Panel.UPanel>(
+            using (var osdBuilder = builder.ChildPanel<U.UPanel>(
                 p => {
                     p.name = "TMPE_MainMenu_KeybindsPanel";
                     // the GenericPanel sprite is Light Silver, make it dark
@@ -283,16 +278,13 @@ namespace TrafficManager.UI.MainMenu {
             }
         }
 
-        private UILabel SetupControls_TopRow(UiBuilder<MainMenuWindow> builder,
-                                             HashSet<string> atlasKeySet) {
-            UILabel versionLabel;
+        private void SetupControls_TopRow(UiBuilder<MainMenuWindow> builder,
+                                          U.AtlasBuilder futureAtlas) {
+            this.VersionLabel = builder.Label(
+                t: TrafficManagerMod.ModName,
+                stack: UStackMode.Below);
 
-            using (var versionLabelB = builder.Label<U.Label.ULabel>(TrafficManagerMod.ModName)) {
-                versionLabelB.ResizeFunction(r => r.Stack(UStackMode.Below));
-                this.VersionLabel = versionLabel = versionLabelB.Control;
-            }
-
-            using (var btnBuilder = builder.Button<U.Button.UButton>()) {
+            using (var btnBuilder = builder.Button<U.UButton>()) {
                 UButton control = btnBuilder.Control;
                 this.toggleOsdButton_ = control;
                 control.atlas = this.allButtonsAtlas_;
@@ -300,13 +292,15 @@ namespace TrafficManager.UI.MainMenu {
 
                 // Texture for Help will be included in the `allButtonsAtlas_`
                 ButtonSkin skin = new ButtonSkin {
-                                                     BackgroundPrefix = "RoundButton",
-                                                     Prefix = "Help",
-                                                     BackgroundHovered = true,
-                                                     BackgroundActive = true,
-                                                     ForegroundActive = true,
-                                                 };
-                atlasKeySet.AddRange(skin.CreateAtlasKeyset());
+                    BackgroundPrefix = "RoundButton",
+                    Prefix = "Help",
+                    BackgroundHovered = true,
+                    BackgroundActive = true,
+                    ForegroundActive = true,
+                };
+                skin.UpdateAtlasBuilder(
+                    atlasBuilder: futureAtlas,
+                    spriteSize: new IntVector2(50));
 
                 control.Skin = skin;
                 control.UpdateButtonImage();
@@ -314,14 +308,14 @@ namespace TrafficManager.UI.MainMenu {
                 // This has to be done later when form setup is done:
                 // helpB.Control.atlas = allButtonsAtlas_;
 
+                // assume Version label is 18 units high
+                btnBuilder.SetFixedSize(new Vector2(18f, 18f));
                 btnBuilder.ResizeFunction(
                     resizeFn: r => {
                         r.Control.isVisible = true; // not sure why its hidden on create? TODO
                         r.Stack(mode: UStackMode.ToTheRight,
                                 spacing: UConst.UIPADDING * 3f,
-                                stackRef: versionLabel);
-                        r.Width(UValue.FixedSize(18f)); // assume Version label is 18pt high
-                        r.Height(UValue.FixedSize(18f));
+                                stackRef: this.VersionLabel);
                     });
 
                 control.uCanActivate = c => true;
@@ -331,14 +325,12 @@ namespace TrafficManager.UI.MainMenu {
                     c => GlobalConfig.Instance.Main.KeybindsPanelVisible;
 
                 control.uOnClick += (component, eventParam) => {
-                    ModUI.Instance.MainMenu.OnToggleOsdButtonClicked(component as U.Button.UButton);
+                    ModUI.Instance.MainMenu.OnToggleOsdButtonClicked(component as U.UButton);
                 };
             }
-
-            return versionLabel;
         }
 
-        private void OnToggleOsdButtonClicked(U.Button.UButton button) {
+        private void OnToggleOsdButtonClicked(U.UButton button) {
             bool value = !GlobalConfig.Instance.Main.KeybindsPanelVisible;
             GlobalConfig.Instance.Main.KeybindsPanelVisible = value;
             GlobalConfig.WriteConfig();
@@ -374,7 +366,7 @@ namespace TrafficManager.UI.MainMenu {
             if (TrafficManagerMod.Instance.InGameHotReload) {
                 // Hot Reload version label (debug only)
                 string text = $"HOT RELOAD {Assembly.GetExecutingAssembly().GetName().Version}";
-                using (var hotReloadB = builder.Label<U.Label.ULabel>(text)) {
+                using (var hotReloadB = builder.Label<U.ULabel>(text)) {
                     // Allow the label to hang outside the parent box
                     UResizerConfig.From(hotReloadB.Control).ContributeToBoundingBox = false;
 
@@ -392,9 +384,9 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private AddButtonsResult SetupControls_ToolPanel(UiBuilder<UPanel> innerPanelB,
-                                                         HashSet<string> atlasKeysSet) {
+                                                         U.AtlasBuilder futureAtlas) {
             // This is tool buttons panel
-            using (UiBuilder<UPanel> leftPanelB = innerPanelB.ChildPanel<U.Panel.UPanel>(
+            using (UiBuilder<UPanel> leftPanelB = innerPanelB.ChildPanel<U.UPanel>(
                 setupFn: panel => {
                     panel.name = "TMPE_MainMenu_ToolPanel";
                 }))
@@ -407,7 +399,7 @@ namespace TrafficManager.UI.MainMenu {
                 // Create 1 or 2 rows of button objects
                 var toolButtonsResult = AddButtonsFromButtonDefinitions(
                     builder: leftPanelB,
-                    atlasKeysSet: atlasKeysSet,
+                    futureAtlas: futureAtlas,
                     buttonDefs: TOOL_BUTTON_DEFS,
                     minRowLength: 4);
                 ToolButtonsList = toolButtonsResult.Buttons;
@@ -417,10 +409,10 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private void SetupControls_ExtraPanel(UiBuilder<UPanel> innerPanelB,
-                                              HashSet<string> atlasKeysSet,
+                                              U.AtlasBuilder futureAtlas,
                                               AddButtonsResult toolButtonsResult) {
             // This is toggle despawn and clear traffic panel
-            using (UiBuilder<UPanel> rightPanelB = innerPanelB.ChildPanel<U.Panel.UPanel>(
+            using (UiBuilder<UPanel> rightPanelB = innerPanelB.ChildPanel<U.UPanel>(
                 setupFn: p => {
                     p.name = "TMPE_MainMenu_ExtraPanel";
                     // Silver background panel
@@ -441,7 +433,7 @@ namespace TrafficManager.UI.MainMenu {
                 // Use as many rows as in the other panel.
                 var extraButtonsResult = AddButtonsFromButtonDefinitions(
                     builder: rightPanelB,
-                    atlasKeysSet: atlasKeysSet,
+                    futureAtlas: futureAtlas,
                     buttonDefs: EXTRA_BUTTON_DEFS,
                     minRowLength: toolButtonsResult.Layout.Rows == 2 ? 1 : 2);
                 ExtraButtonsList = extraButtonsResult.Buttons;
@@ -449,17 +441,17 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         public override void OnBeforeResizerUpdate() {
-            if (this.DragHandle != null) {
-                // Drag handle is manually resized to the form width, but when the form is large,
+            if (this.dragHandle_ != null) {
+                // Drag handle is manually resized to the label width, but when the form is large,
                 // the handle prevents it from shrinking. So shrink now, size properly after.
-                this.DragHandle.size = Vector2.one;
+                this.dragHandle_.size = Vector2.one;
             }
         }
 
         /// <summary>Called by UResizer for every control to be 'resized'.</summary>
         public override void OnAfterResizerUpdate() {
-            if (this.DragHandle != null) {
-                this.DragHandle.size = this.VersionLabel.size;
+            if (this.dragHandle_ != null) {
+                this.dragHandle_.size = this.VersionLabel.size;
 
                 // Push the window back into screen if the label/draghandle are partially offscreen
                 U.UIUtil.ClampToScreen(window: this,
@@ -474,12 +466,12 @@ namespace TrafficManager.UI.MainMenu {
 
         /// <summary>Create buttons and add them to the given panel UIBuilder.</summary>
         /// <param name="builder">UI builder to use.</param>
-        /// <param name="atlasKeysSet">Atlas keys to update for button images.</param>
+        /// <param name="futureAtlas">Contains sprite names, filenames, sizes, paths, etc.</param>
         /// <param name="buttonDefs">Button defs collection to create from it.</param>
         /// <param name="minRowLength">Longest the row can be without breaking.</param>
         /// <returns>A list of created buttons.</returns>
         private AddButtonsResult AddButtonsFromButtonDefinitions(UiBuilder<UPanel> builder,
-                                                                 HashSet<string> atlasKeysSet,
+                                                                 U.AtlasBuilder futureAtlas,
                                                                  MenuButtonDef[] buttonDefs,
                                                                  int minRowLength)
         {
@@ -501,15 +493,11 @@ namespace TrafficManager.UI.MainMenu {
                 var buttonBuilder = builder.Button<BaseMenuButton>(buttonDef.ButtonType);
 
                 // Count buttons in a row and break the line
-                bool doRowBreak = result.Layout.IsRowBreak(placedInARow, minRowLength);
+                bool isRowBreak = result.Layout.IsRowBreak(placedInARow, minRowLength);
+                buttonBuilder.SetStacking(isRowBreak ? UStackMode.NewRowBelow : UStackMode.ToTheRight);
+                buttonBuilder.SetFixedSize(new Vector2(40f, 40f));
 
-                buttonBuilder.ResizeFunction(r => {
-                    r.Stack(doRowBreak ? UStackMode.NewRowBelow : UStackMode.ToTheRight);
-                    r.Width(UValue.FixedSize(40f));
-                    r.Height(UValue.FixedSize(40f));
-                });
-
-                if (doRowBreak) {
+                if (isRowBreak) {
                     placedInARow = 0;
                     result.Layout.Rows++;
                 } else {
@@ -517,7 +505,7 @@ namespace TrafficManager.UI.MainMenu {
                 }
 
                 // Also ask each button what sprites they need
-                buttonBuilder.Control.SetupButtonSkin(atlasKeysSet);
+                buttonBuilder.Control.SetupButtonSkin(futureAtlas);
 
                 string buttonName = buttonDef.ButtonType.ToString().Split('.').Last();
                 buttonBuilder.Control.name = $"TMPE_MainMenuButton_{buttonName}";
@@ -545,7 +533,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         internal void SetPosLock(bool lck) {
-            DragHandle.enabled = !lck;
+            dragHandle_.enabled = !lck;
         }
 
         protected override void OnPositionChanged() {

@@ -112,13 +112,14 @@ namespace TrafficManager.UI.SubTools {
                     overlayTex = TrafficLightTextures.TrafficLightDisabled;
                 }
 
-                MainTool.DrawGenericOverlayTexture(
-                    overlayTex,
-                    camPos,
-                    nodesBuffer[nodeId].m_position,
-                    SIGN_SIZE,
-                    SIGN_SIZE,
-                    false);
+                Highlight.DrawGenericOverlayTexture(
+                    texture: overlayTex,
+                    camPos: camPos,
+                    worldPos: nodesBuffer[nodeId].m_position,
+                    width: SIGN_SIZE,
+                    height: SIGN_SIZE,
+                    canHover: false,
+                    screenRect: out Rect _);
             }
         }
 
@@ -144,11 +145,11 @@ namespace TrafficManager.UI.SubTools {
 
             // Render the current hovered node as blue
             if ((HoveredNodeId != 0) && Flags.MayHaveTrafficLight(HoveredNodeId)) {
-                MainTool.DrawNodeCircle(
-                    cameraInfo,
-                    HoveredNodeId,
-                    Input.GetMouseButton(0),
-                    false);
+                Highlight.DrawNodeCircle(
+                    cameraInfo: cameraInfo,
+                    nodeId: HoveredNodeId,
+                    warning: Input.GetMouseButton(0),
+                    alpha: false);
             }
         }
 

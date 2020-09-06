@@ -232,7 +232,7 @@ namespace TrafficManager.Manager.Impl {
 
             index = LoadBool(index, OptionsMassEditTab.PriorityRoad_CrossMainR);
             index = LoadBool(index, OptionsMassEditTab.PriorityRoad_AllowLeftTurns);
-            index = LoadBool(index, OptionsMassEditTab.PriorityRoad_EnterBlockedYeild);
+            index = LoadBool(index, OptionsMassEditTab.PriorityRoad_EnterBlockedYield);
             index = LoadBool(index, OptionsMassEditTab.PriorityRoad_StopAtEntry);
 
             index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_KeepClearYieldR);
@@ -297,7 +297,7 @@ namespace TrafficManager.Manager.Impl {
 
                 (byte)(OptionsMassEditTab.PriorityRoad_CrossMainR.Save()),
                 (byte)(OptionsMassEditTab.PriorityRoad_AllowLeftTurns.Save()),
-                (byte)(OptionsMassEditTab.PriorityRoad_EnterBlockedYeild.Save()),
+                (byte)(OptionsMassEditTab.PriorityRoad_EnterBlockedYield.Save()),
                 (byte)(OptionsMassEditTab.PriorityRoad_StopAtEntry.Save()),
 
                 (byte)(OptionsMassEditTab.RoundAboutQuickFix_KeepClearYieldR.Save()),

@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -170,8 +171,14 @@
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
     <Compile Include="Patch\_NetSegment\CalculateSegmentPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
+    <Compile Include="State\GetSpeedLimitResult.cs" />
+    <Compile Include="State\SetSpeedLimitAction.cs" />
+    <Compile Include="State\SetSpeedLimitTarget.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
+    <Compile Include="UI\DebugToolGUI.cs" />
+    <Compile Include="UI\Helpers\Highlight.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
+    <Compile Include="UI\Helpers\OverlayHandleColorController.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
     <Compile Include="UI\Helpers\SegmentLaneMarker.cs" />
     <Compile Include="UI\Helpers\ExtUITabStrip.cs" />
@@ -261,6 +268,7 @@
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
+    <Compile Include="UI\MainMenu\OSD\HoldModifier.cs" />
     <Compile Include="UI\RoadSelectionPanels.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\Helpers\GuideHandler.cs" />
@@ -303,8 +311,18 @@
     <Compile Include="UI\SubTools\PrioritySigns\MassEditOverlay.cs" />
     <Compile Include="UI\Helpers\TrafficRulesOverlay.cs" />
     <Compile Include="UI\SubTools\PrioritySigns\PrioritySignsTool.cs" />
-    <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\MphToggleButton.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\LegacySpeedLimitsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\OverlayLaneSpeedlimitHandle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\OverlaySegmentSpeedlimitHandle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\SpeedLimitsOverlay.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\SpeedLimitsOverlaySign.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\PaletteGenerator.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitPaletteButton.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitSignTheme.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool_Legacy.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsWindow.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
     <Compile Include="UI\SubTools\TimedTrafficLights\TimedTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\TimedTrafficLights\TTLToolMode.cs" />
@@ -371,11 +389,16 @@
     <Compile Include="UI\ModUI.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
+    <Compile Include="Util\IntVector2.cs" />
+    <Compile Include="U\AtlasBuilder.cs" />
+    <Compile Include="U\AtlasSpriteDef.cs" />
     <Compile Include="U\Autosize\UBoundingBox.cs" />
+    <Compile Include="U\Autosize\UStackingChoice.cs" />
     <Compile Include="U\Autosize\UResizer.cs" />
     <Compile Include="U\Autosize\ISmartSizableControl.cs" />
     <Compile Include="U\Autosize\UResizerConfig.cs" />
     <Compile Include="U\Autosize\URule.cs" />
+    <Compile Include="U\Autosize\USizeChoice.cs" />
     <Compile Include="U\Autosize\UStackMode.cs" />
     <Compile Include="U\Autosize\UValue.cs" />
     <Compile Include="U\Button\UButton.cs" />
@@ -407,7 +430,6 @@
     <EmbeddedResource Include="Resources\JunctionRestrictions\right_on_red_forbidden.png" />
     <EmbeddedResource Include="Resources\JunctionRestrictions\uturn_allowed.png" />
     <EmbeddedResource Include="Resources\JunctionRestrictions\uturn_forbidden.png" />
-    <EmbeddedResource Include="Resources\MainMenu\LegacyButtons.png" />
     <EmbeddedResource Include="Resources\MainMenu\noimage.png" />
     <EmbeddedResource Include="Resources\MainMenu\remove-btn.png" />
     <EmbeddedResource Include="Resources\MainMenu\Tool\Help-fg-active.png" />
@@ -588,7 +610,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Traffic\Data\" />
-    <Folder Include="U\MainMenu\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_1.png" />
@@ -678,6 +699,39 @@
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout_RHT-fg-disabled.png" />
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout_RHT-fg-normal.png" />
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop_LHT-fg-disabled.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\0.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\10.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\100.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\105.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\110.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\115.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\120.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\125.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\130.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\135.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\140.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\15.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\20.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\25.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\30.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\35.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\40.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\45.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\5.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\50.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\55.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\60.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\65.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\70.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\75.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\80.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\85.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\90.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\95.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\EditSegments-fg-active.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\EditSegments-fg-normal.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\MphToggle-fg-active.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\MphToggle-fg-normal.png" />
     <Content Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />

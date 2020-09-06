@@ -32,11 +32,11 @@ namespace TrafficManager.Util {
             }
 
             /// <summary>Calling this sets up an allowed FSM transition to the new state.</summary>
-            /// <param name="t">Trigger which will allow transition from the current to the new state.</param>
+            /// <param name="trigger">Trigger which will allow transition from the current to the new state.</param>
             /// <param name="toState">The new state.</param>
             /// <returns>This.</returns>
-            public Configurator TransitionOnEvent(TTrigger t, TState toState) {
-                fsm_.Permit(state_, t, toState);
+            public Configurator TransitionOnEvent(TTrigger trigger, TState toState) {
+                fsm_.Permit(state_, trigger, toState);
                 return this;
             }
 

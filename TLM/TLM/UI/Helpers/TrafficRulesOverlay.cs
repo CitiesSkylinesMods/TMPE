@@ -101,9 +101,10 @@ namespace TrafficManager.UI.Helpers {
                 this.startX_ = -lenX * 0.5f;
             }
 
+            // TODO: Refactor this again, move mouse interaction logic out to the caller.
             public bool DrawSign(bool small,
                                  ref Vector3 camPos,
-                                 Color guiColor,
+                                 OverlayHandleColorController colorController,
                                  Texture2D signTexture)
             {
                 int col = counter_ / signsPerRow_;
@@ -135,25 +136,9 @@ namespace TrafficManager.UI.Helpers {
                     height: size);
 
                 bool hoveredHandle = !viewOnly_ && TrafficManagerTool.IsMouseOver(boundingBox);
-                if (viewOnly_) {
-                    // Readonly signs look grey-ish
-                    guiColor = Color.Lerp(guiColor, Color.gray, 0.5f);
-                    guiColor.a = TrafficManagerTool.GetHandleAlpha(hovered: false);
-                } else {
-                    // Handles in edit mode are always visible. Hovered handles are also highlighted.
-                    guiColor.a = 1f;
-
-                    if (hoveredHandle) {
-                        guiColor = Color.Lerp(
-                            a: guiColor,
-                            b: new Color(r: 1f, g: .7f, b: 0f),
-                            t: 0.5f);
-                    }
-                }
-                // guiColor.a = TrafficManagerTool.GetHandleAlpha(hoveredHandle);
-
-                GUI.color = guiColor;
+                colorController.SetGUIColor(hoveredHandle);
                 GUI.DrawTexture(boundingBox, signTexture);
+
                 return hoveredHandle;
             }
         }
@@ -178,6 +163,7 @@ namespace TrafficManager.UI.Helpers {
             //   * and no permanent overlay enabled,
             //   * and is Junctions restrictions tool
             // TODO generalize for all tools.
+            // NOTE to the above: Do not overly generalize, write everything twice (WET) as opposed to DRY
             if (this.ViewOnly &&
                 !(Options.junctionRestrictionsOverlay ||
                   MassEditOverlay.IsActive) &&
@@ -189,6 +175,7 @@ namespace TrafficManager.UI.Helpers {
             Color guiColor = GUI.color;
             // Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+            var colorController = new OverlayHandleColorController(isInteractable: !this.ViewOnly);
 
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
@@ -221,7 +208,7 @@ namespace TrafficManager.UI.Helpers {
                     startNode: isStartNode,
                     signsPerRow: isIncoming ? 2 : 1,
                     viewOnly: this.ViewOnly,
-                    baseZoom: this.mainTool_.GetBaseZoom());
+                    baseZoom: U.UIScaler.GetScale());
 
                 IJunctionRestrictionsManager junctionRManager = Constants.ManagerFactory.JunctionRestrictionsManager;
 
@@ -249,7 +236,7 @@ namespace TrafficManager.UI.Helpers {
                     bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        guiColor: guiColor,
+                        colorController: colorController,
                         signTexture: allowed
                                          ? JunctionRestrictions.LaneChangeAllowed
                                          : JunctionRestrictions.LaneChangeForbidden);
@@ -283,7 +270,7 @@ namespace TrafficManager.UI.Helpers {
                     bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        guiColor: guiColor,
+                        colorController: colorController,
                         signTexture: allowed
                                          ? JunctionRestrictions.UturnAllowed
                                          : JunctionRestrictions.UturnForbidden);
@@ -324,7 +311,7 @@ namespace TrafficManager.UI.Helpers {
                     bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        guiColor: guiColor,
+                        colorController: colorController,
                         signTexture: allowed
                                          ? JunctionRestrictions.EnterBlockedJunctionAllowed
                                          : JunctionRestrictions.EnterBlockedJunctionForbidden);
@@ -356,7 +343,7 @@ namespace TrafficManager.UI.Helpers {
                     bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        guiColor: guiColor,
+                        colorController: colorController,
                         signTexture: allowed
                                          ? JunctionRestrictions.PedestrianCrossingAllowed
                                          : JunctionRestrictions.PedestrianCrossingForbidden);
@@ -405,7 +392,7 @@ namespace TrafficManager.UI.Helpers {
                     bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        guiColor: guiColor,
+                        colorController: colorController,
                         signTexture: allowed
                                          ? JunctionRestrictions.LeftOnRedAllowed
                                          : JunctionRestrictions.LeftOnRedForbidden);
@@ -446,7 +433,7 @@ namespace TrafficManager.UI.Helpers {
                     bool signHovered = signsLayout.DrawSign(
                         small: !configurable,
                         camPos: ref camPos,
-                        guiColor: guiColor,
+                        colorController: colorController,
                         signTexture: allowed
                                          ? JunctionRestrictions.RightOnRedAllowed
                                          : JunctionRestrictions.RightOnRedForbidden);
@@ -465,10 +452,8 @@ namespace TrafficManager.UI.Helpers {
                 }
             }
 
-            guiColor.a = 1f;
-            GUI.color = guiColor;
-
+            colorController.RestoreGUIColor();
             return isAnyHovered;
-        }
+        } // end draw_sign_handles()
     } // end class
 }

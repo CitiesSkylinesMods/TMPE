@@ -14,12 +14,14 @@
         public int MainMenuButtonY = 10;
         public bool MainMenuButtonPosLocked = false;
 
-        /// <summary>
-        /// Main menu position
-        /// </summary>
+        /// <summary>Main menu position.</summary>
         public int MainMenuX = MainMenuWindow.DEFAULT_MENU_X;
         public int MainMenuY = MainMenuWindow.DEFAULT_MENU_Y;
         public bool MainMenuPosLocked = false;
+
+        /// <summary>Speed Limits tool window position.</summary>
+        public int SpeedLimitsWindowX = 0;
+        public int SpeedLimitsWindowY = 0;
 
         /// <summary>
         /// Already displayed tutorial messages
@@ -74,7 +76,7 @@
         /// <summary>
         /// Selected theme for road signs when MPH is active.
         /// </summary>
-        public MphSignStyle MphRoadSignStyle = MphSignStyle.SquareUS;
+        public SpeedLimitSignTheme MphRoadSignStyle = SpeedLimitSignTheme.RectangularUS;
 
         public void AddDisplayedTutorialMessage(string messageKey) {
             HashSet<string> newMessages = DisplayedTutorialMessages != null

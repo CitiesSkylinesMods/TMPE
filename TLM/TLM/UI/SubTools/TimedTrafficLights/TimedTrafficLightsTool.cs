@@ -333,7 +333,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                 && Cursor.visible
                 && Flags.MayHaveTrafficLight(HoveredNodeId))
             {
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId);
+                Highlight.DrawNodeCircle(cameraInfo, HoveredNodeId);
             }
 
             if (selectedNodeIds.Count <= 0) {
@@ -341,7 +341,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             }
 
             foreach (ushort index in selectedNodeIds) {
-                MainTool.DrawNodeCircle(cameraInfo, index, true);
+                Highlight.DrawNodeCircle(cameraInfo, index, true);
             }
         }
 
@@ -1407,7 +1407,12 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                                                ? TrafficLightTextures.ClockTest
                                                : TrafficLightTextures.ClockPlay)
                                         : TrafficLightTextures.ClockPause;
-                    MainTool.DrawGenericSquareOverlayTexture(tex, camPos, nodePos, 120f, false);
+                    Highlight.DrawGenericSquareOverlayTexture(
+                        texture: tex,
+                        camPos: camPos,
+                        worldPos: nodePos,
+                        size: 120f,
+                        canHover: false);
                 }
             }
         }
@@ -1437,7 +1442,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                 }
 
                 Vector3 diff = nodePos - Camera.main.transform.position;
-                float zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
+                float zoom = 1.0f / diff.magnitude * 100f * U.UIScaler.GetScale();
 
                 for (int i = 0; i < 8; ++i) {
                     ushort srcSegmentId = 0;
@@ -2524,9 +2529,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             items.Add(
                 new UI.MainMenu.OSD.HardcodedMouseShortcut(
                     button: UIMouseButton.Left,
-                    shift: false,
                     ctrl: true,
-                    alt: false,
                     localizedText: T("TimedTL.CtrlClick:Quick setup")));
             OnscreenDisplay.Display(items: items);
         }

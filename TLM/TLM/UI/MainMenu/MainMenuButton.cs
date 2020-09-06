@@ -6,7 +6,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
-    using TrafficManager.U.Button;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class MainMenuButton
@@ -29,19 +29,22 @@ namespace TrafficManager.UI.MainMenu {
 
             // Let the mainmenu atlas know we need this texture and assign it to self.atlas.
             this.Skin = new ButtonSkin {
-                                           BackgroundPrefix = "MainMenuButton",
-                                           Prefix = "MainMenuButton",
-                                           BackgroundHovered = true,
-                                           BackgroundActive = true,
-                                           ForegroundHovered = true,
-                                           ForegroundActive = true,
-                                       };
-            this.atlas = this.Skin.CreateAtlas(
-                "MainMenu",
-                50,
-                50,
-                256,
-                this.Skin.CreateAtlasKeyset());
+                BackgroundPrefix = "MainMenuButton",
+                Prefix = "MainMenuButton",
+                BackgroundHovered = true,
+                BackgroundActive = true,
+                ForegroundHovered = true,
+                ForegroundActive = true,
+            };
+
+            var futureAtlas = new U.AtlasBuilder();
+            this.Skin.UpdateAtlasBuilder(
+                atlasBuilder: futureAtlas,
+                spriteSize: new IntVector2(50));
+            this.atlas = futureAtlas.CreateAtlas(
+                atlasName: "MainTMPEButton_Atlas",
+                loadingPath: "MainMenu",
+                atlasSizeHint: new IntVector2(256));
             UpdateButtonImageAndTooltip();
 
             // Set the button dimensions to smallest of 2.6% of screen width or 4.6% of screen height
@@ -161,12 +164,12 @@ namespace TrafficManager.UI.MainMenu {
             }
         }
 
-        protected override string GetTooltip() {
+        protected override string U_OverrideTooltipText() {
             return Translation.Menu.Get("Tooltip:Toggle Main Menu");
             // return KeybindSettingsBase.ToggleMainMenu.ToLocalizedString("\n");
         }
 
-        public override KeybindSetting GetShortcutKey() => KeybindSettingsBase.ToggleMainMenu;
+        public override KeybindSetting U_OverrideTooltipShortcutKey() => KeybindSettingsBase.ToggleMainMenu;
 
         protected override bool IsVisible() => true;
 

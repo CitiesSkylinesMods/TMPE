@@ -7,6 +7,7 @@ namespace TrafficManager.State {
     using System.Collections.Generic;
     using System.Threading;
     using System;
+    using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
@@ -485,7 +486,7 @@ namespace TrafficManager.State {
                     (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) == NetSegment.Flags.Created;
         }
 
-        public static void SetLaneSpeedLimit(uint laneId, float? speedLimit) {
+        public static void SetLaneSpeedLimit(uint laneId, SetSpeedLimitAction action) {
             if (!CheckLane(laneId)) {
                 return;
             }
@@ -497,7 +498,7 @@ namespace TrafficManager.State {
 
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
                 if (curLaneId == laneId) {
-                    SetLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
+                    SetLaneSpeedLimit(segmentId, laneIndex, laneId, action);
                     return;
                 }
 
@@ -507,28 +508,32 @@ namespace TrafficManager.State {
         }
 
         public static void RemoveLaneSpeedLimit(uint laneId) {
-            SetLaneSpeedLimit(laneId, null);
+            SetLaneSpeedLimit(laneId, SetSpeedLimitAction.Default());
         }
 
         public static void SetLaneSpeedLimit(ushort segmentId,
                                              uint laneIndex,
                                              uint laneId,
-                                             float? speedLimit) {
+                                             SetSpeedLimitAction action) {
             if (segmentId <= 0 || laneId <= 0) {
                 return;
             }
 
-            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags &
+            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+
+            if ((segmentsBuffer[segmentId].m_flags &
                  (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
                 return;
             }
 
-            if (((NetLane.Flags)Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags &
+            NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
+
+            if (((NetLane.Flags)lanesBuffer[laneId].m_flags &
                  (NetLane.Flags.Created | NetLane.Flags.Deleted)) != NetLane.Flags.Created) {
                 return;
             }
 
-            NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+            NetInfo segmentInfo = segmentsBuffer[segmentId].Info;
 
             if (laneIndex >= segmentInfo.m_lanes.Length) {
                 return;
@@ -541,33 +546,41 @@ namespace TrafficManager.State {
                     $"Flags.setLaneSpeedLimit: setting speed limit of lane index {laneIndex} @ seg. " +
                     $"{segmentId} to {speedLimit}");
 #endif
-                if (speedLimit == null) {
-                    laneSpeedLimit.Remove(laneId);
+                switch (action.Type) {
+                    case SetSpeedLimitAction.ValueType.Default: {
+                        laneSpeedLimit.Remove(laneId);
 
-                    if (laneSpeedLimitArray[segmentId] == null) {
-                        return;
+                        if (laneSpeedLimitArray[segmentId] == null) {
+                            return;
+                        }
+
+                        if (laneIndex >= laneSpeedLimitArray[segmentId].Length) {
+                            return;
+                        }
+
+                        laneSpeedLimitArray[segmentId][laneIndex] = null;
+                        break;
                     }
+                    case SetSpeedLimitAction.ValueType.Unlimited:
+                    case SetSpeedLimitAction.ValueType.SetSpeed: {
+                        laneSpeedLimit[laneId] = action.Value.GetKmph();
 
-                    if (laneIndex >= laneSpeedLimitArray[segmentId].Length) {
-                        return;
+                        // save speed limit into the fast-access array.
+                        // (1) ensure that the array is defined and large enough
+                        if (laneSpeedLimitArray[segmentId] == null) {
+                            laneSpeedLimitArray[segmentId] = new float?[segmentInfo.m_lanes.Length];
+                        } else if (laneSpeedLimitArray[segmentId].Length < segmentInfo.m_lanes.Length) {
+                            float?[] oldArray = laneSpeedLimitArray[segmentId];
+                            laneSpeedLimitArray[segmentId] = new float?[segmentInfo.m_lanes.Length];
+                            Array.Copy(sourceArray: oldArray,
+                                       destinationArray: laneSpeedLimitArray[segmentId],
+                                       length: oldArray.Length);
+                        }
+
+                        // (2) insert the custom speed limit
+                        laneSpeedLimitArray[segmentId][laneIndex] = action.Value.GetKmph();
+                        break;
                     }
-
-                    laneSpeedLimitArray[segmentId][laneIndex] = null;
-                } else {
-                    laneSpeedLimit[laneId] = speedLimit.Value;
-
-                    // save speed limit into the fast-access array.
-                    // (1) ensure that the array is defined and large enough
-                    if (laneSpeedLimitArray[segmentId] == null) {
-                        laneSpeedLimitArray[segmentId] = new float?[segmentInfo.m_lanes.Length];
-                    } else if (laneSpeedLimitArray[segmentId].Length < segmentInfo.m_lanes.Length) {
-                        float?[] oldArray = laneSpeedLimitArray[segmentId];
-                        laneSpeedLimitArray[segmentId] = new float?[segmentInfo.m_lanes.Length];
-                        Array.Copy(oldArray, laneSpeedLimitArray[segmentId], oldArray.Length);
-                    }
-
-                    // (2) insert the custom speed limit
-                    laneSpeedLimitArray[segmentId][laneIndex] = speedLimit;
                 }
             }
             finally {
@@ -862,15 +875,16 @@ namespace TrafficManager.State {
             return false;
         }
 
-        public static float? GetLaneSpeedLimit(uint laneId) {
+        public static SpeedValue? GetLaneSpeedLimit(uint laneId) {
             try {
                 Monitor.Enter(laneSpeedLimitLock);
 
-                if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out float speedLimit)) {
+                if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out float kmphOverride)) {
                     return null;
                 }
 
-                return speedLimit;
+                // assumption: speed limit is stored in km/h
+                return SpeedValue.FromKmph(kmphOverride);
             }
             finally {
                 Monitor.Exit(laneSpeedLimitLock);

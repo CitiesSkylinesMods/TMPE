@@ -14,14 +14,12 @@ namespace TrafficManager.Util.Record {
         public byte LaneIndex;
         public uint LaneId;
 
-        private float? speedLimit_; // game units
+        private GetSpeedLimitResult speedLimit_; // game units, unlimited or not set
 
         InstanceID InstanceID => new InstanceID { NetLane = LaneId };
 
         public void Record() {
             speedLimit_ = SpeedLimitManager.Instance.GetCustomSpeedLimit(LaneId);
-            if (speedLimit_ == 0)
-                speedLimit_ = null;
         }
 
         public void Restore() => Transfer(LaneId);
@@ -32,12 +30,18 @@ namespace TrafficManager.Util.Record {
         public void Transfer(uint laneId) {
             ushort segmentId = laneId.ToLane().m_segment;
             var laneInfo = GetLaneInfo(segmentId, LaneIndex);
-            SpeedLimitManager.Instance.SetSpeedLimit(
+            // SpeedLimitManager.Instance.SetSpeedLimit(
+            //     segmentId: segmentId,
+            //     laneIndex: LaneIndex,
+            //     laneInfo: laneInfo,
+            //     laneId: laneId,
+            //     speedLimit: speedLimit_);
+            SpeedLimitManager.Instance.SetLaneSpeedLimit(
                 segmentId: segmentId,
-                laneIndex: LaneIndex,
+                LaneIndex,
                 laneInfo: laneInfo,
-                laneId: laneId,
-                speedLimit: speedLimit_);
+                LaneId,
+                SetSpeedLimitAction.FromGetResult(speedLimit_));
         }
 
         public static List<SpeedLimitLaneRecord> GetLanes(ushort segmentId) {

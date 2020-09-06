@@ -171,6 +171,10 @@ namespace TrafficManager.UI.SubTools {
         private Vector3? lastCamPos;
 
         private void ShowSigns(bool viewOnly) {
+            if (viewOnly && !Options.parkingRestrictionsOverlay && !MassEditOverlay.IsActive) {
+                return;
+            }
+
             NetManager netManager = Singleton<NetManager>.instance;
 
             var currentCamera = new CameraTransformValue(Camera.main);
@@ -196,8 +200,8 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     bool visible = GeometryUtil.WorldToScreenPoint(
-                        netManager.m_segments.m_buffer[segmentId].m_bounds.center,
-                        out Vector3 _);
+                        worldPos: netManager.m_segments.m_buffer[segmentId].m_bounds.center,
+                        screenPos: out Vector3 _);
 
                     if (!visible) {
                         continue;
@@ -230,17 +234,18 @@ namespace TrafficManager.UI.SubTools {
 
                 // no parking restrictions overlay on selected segment when in vehicle restrictions mode
                 var dir = DrawParkingRestrictionHandles(
-                    segmentId,
-                    clicked,
-                    ref netManager.m_segments.m_buffer[segmentId],
-                    viewOnly,
-                    ref camPos);
+                    segmentId: segmentId,
+                    clicked: clicked,
+                    viewOnly: viewOnly,
+                    camPos: ref camPos);
+
                 if (dir != NetInfo.Direction.None) {
                     renderInfo_.SegmentId = segmentId;
                     renderInfo_.FinalDirection = dir;
                     hovered = true;
                 }
             }
+
             if (!hovered) {
                 renderInfo_.SegmentId = 0;
                 renderInfo_.FinalDirection = NetInfo.Direction.None;
@@ -248,14 +253,9 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private NetInfo.Direction DrawParkingRestrictionHandles(ushort segmentId,
-                                                   bool clicked,
-                                                   ref NetSegment segment,
-                                                   bool viewOnly,
-                                                   ref Vector3 camPos) {
-            if (viewOnly && !Options.parkingRestrictionsOverlay && !MassEditOverlay.IsActive) {
-                return NetInfo.Direction.None;
-            }
-
+                                                                bool clicked,
+                                                                bool viewOnly,
+                                                                ref Vector3 camPos) {
             NetManager netManager = Singleton<NetManager>.instance;
             ParkingRestrictionsManager parkingManager = ParkingRestrictionsManager.Instance;
             NetInfo.Direction hoveredDirection = NetInfo.Direction.None;
@@ -285,14 +285,14 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                float zoom = (1.0f / (e.Value - camPos).magnitude) * 100f * MainTool.GetBaseZoom();
+                float zoom = (1.0f / (e.Value - camPos).magnitude) * 100f * U.UIScaler.GetScale();
                 float size = (viewOnly ? 0.8f : 1f) * SIGN_SIZE * zoom;
                 Color guiColor = GUI.color;
                 Rect boundingBox = new Rect(
-                    screenPos.x - (size / 2),
-                    screenPos.y - (size / 2),
-                    size,
-                    size);
+                    x: screenPos.x - (size / 2),
+                    y: screenPos.y - (size / 2),
+                    width: size,
+                    height: size);
 
                 if (Options.speedLimitsOverlay || MassEditOverlay.IsActive) {
                     boundingBox.y -= size + 10f;
@@ -381,8 +381,6 @@ namespace TrafficManager.UI.SubTools {
                 new HardcodedMouseShortcut(
                     button: UIMouseButton.Left,
                     shift: true,
-                    ctrl: false,
-                    alt: false,
                     localizedText: T("Parking.ShiftClick:Apply to entire road")));
             OnscreenDisplay.Display(items);
         }

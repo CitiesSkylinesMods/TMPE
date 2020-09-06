@@ -2,10 +2,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.RedirectionFramework;
-    using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
-    using TrafficManager.U.Button;
+    using TrafficManager.Util;
     using UnityEngine;
 
     /// <summary>
@@ -25,58 +24,39 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         public override void Start() {
             base.Start();
             UIUtil.MakeUniqueAndSetName(gameObject, GAMEOBJECT_NAME);
-
-            // the GenericPanel sprite is silver, make it dark
-            this.backgroundSprite = "GenericPanel";
-            this.color = new Color32(64, 64, 64, 240);
-            this.SetOpacity(
-                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
+            this.GenericBackgroundAndOpacity();
         }
 
-        private UITextureAtlas GetAtlas() {
+        private UITextureAtlas GetUiAtlas() {
             if (laneArrowButtonAtlas_ != null) {
                 return laneArrowButtonAtlas_;
             }
 
-            var skin = CreateDefaultButtonSkin();
-
             // Create base atlas with backgrounds and no foregrounds
-            skin.ForegroundNormal = false;
-            skin.ForegroundActive = false;
-            HashSet<string> atlasKeysSet = skin.CreateAtlasKeyset();
+            ButtonSkin backgroundOnlySkin = ButtonSkin.CreateDefaultNoForeground("LaneArrow");
+            var futureAtlas = new U.AtlasBuilder();
+            backgroundOnlySkin.UpdateAtlasBuilder(
+            atlasBuilder: futureAtlas,
+            spriteSize: new IntVector2(64));
 
             // Merge names of all foreground sprites for 3 directions into atlasKeySet
-            skin.ForegroundNormal = true;
-            skin.ForegroundActive = true;
             foreach (string prefix in new[]
-                                      { "LaneArrowLeft", "LaneArrowRight", "LaneArrowForward" }) {
-                skin.Prefix = prefix;
+                { "LaneArrowLeft", "LaneArrowRight", "LaneArrowForward" })
+            {
+                ButtonSkin skin = ButtonSkin.CreateDefaultNoBackground(prefix);
 
                 // Create keysets for lane arrow button icons and merge to the shared atlas
-                atlasKeysSet.AddRange(skin.CreateAtlasKeyset());
+                skin.UpdateAtlasBuilder(
+                    atlasBuilder: futureAtlas,
+                    spriteSize: new IntVector2(64));
             }
 
             // Load actual graphics into an atlas
-            laneArrowButtonAtlas_ = skin.CreateAtlas(
+            laneArrowButtonAtlas_ = futureAtlas.CreateAtlas(
+                atlasName: "LaneArrowsTool_Atlas",
                 loadingPath: "LaneArrows",
-                spriteWidth: 64,
-                spriteHeight: 64,
-                hintAtlasTextureSize: 256, // 4x4 atlas
-                atlasKeysSet);
+                atlasSizeHint: new IntVector2(256));
             return laneArrowButtonAtlas_;
-        }
-
-        private static ButtonSkin CreateDefaultButtonSkin() {
-            return new ButtonSkin {
-                                      BackgroundPrefix = "LaneArrow", // filename prefix
-
-                                      BackgroundHovered = true,
-                                      BackgroundActive = true,
-                                      BackgroundDisabled = true,
-
-                                      ForegroundNormal = true,
-                                      ForegroundActive = true,
-                                  };
         }
 
         /// <summary>
@@ -88,7 +68,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         public void SetupControls(UiBuilder<LaneArrowToolWindow> builder, int numLanes) {
             Buttons = new List<LaneArrowButton>();
 
-            using (var buttonRowBuilder = builder.ChildPanel<U.Panel.UPanel>(
+            using (var buttonRowBuilder = builder.ChildPanel<U.UPanel>(
                 setupFn: p => { p.name = "TMPE_ButtonRow"; })) {
                 buttonRowBuilder.ResizeFunction(
                     r => {
@@ -104,7 +84,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 // -----------------------------------
                 for (var i = 0; i < numLanes; i++) {
                     string buttonName = $"TMPE_LaneArrow_ButtonGroup{i + 1}";
-                    using (var buttonGroupBuilder = buttonRowBuilder.ChildPanel<U.Panel.UPanel>(
+                    using (var buttonGroupBuilder = buttonRowBuilder.ChildPanel<U.UPanel>(
                             setupFn: p => {
                                 p.name = buttonName;
                                 p.atlas = TextureUtil.FindAtlas("Ingame");
@@ -125,42 +105,36 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                             });
 
                         // Create a label with "Lane #" title
-                        string labelText = Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1);
-                        using (var laneLabel = buttonGroupBuilder.Label<U.Label.ULabel>(labelText))
-                        {
-                            // The label will be repositioned to the top of the parent
-                            laneLabel.ResizeFunction(r => { r.Stack(UStackMode.Below); });
-                        }
+                        // The label will be repositioned to the top of the parent
+                        string localizedLane = Translation.LaneRouting.Get("Format.Label:Lane");
+                        string labelText = $"{localizedLane} {i + 1}";
+                        buttonGroupBuilder.Label(t: labelText, stack: UStackMode.Below);
 
                         // Create and populate the panel with buttons
                         // 3 buttons are created [←] [↑] [→],
                         // The click event is assigned outside in LaneArrowTool.cs
                         foreach (string prefix in new[] {
-                                                            "LaneArrowLeft",
-                                                            "LaneArrowForward",
-                                                            "LaneArrowRight",
-                                                        }) {
-                            using (UiBuilder<LaneArrowButton> buttonBuilder =
-                                buttonGroupBuilder.Button<LaneArrowButton>())
+                            "LaneArrowLeft",
+                            "LaneArrowForward",
+                            "LaneArrowRight",
+                        }) {
+                            using (var b = buttonGroupBuilder.Button<LaneArrowButton>())
                             {
-                                buttonBuilder.Control.atlas = GetAtlas();
-                                buttonBuilder.Control.Skin = CreateDefaultButtonSkin();
-                                buttonBuilder.Control.Skin.Prefix = prefix;
-                                Buttons.Add(buttonBuilder.Control);
+                                b.Control.atlas = GetUiAtlas();
+                                b.Control.Skin = ButtonSkin.CreateDefault(
+                                    prefix: prefix,
+                                    backgroundPrefix: "LaneArrow");
+                                Buttons.Add(b.Control);
 
-                                buttonBuilder.ResizeFunction(
-                                    r => {
-                                        // First button in the group will be stacking vertical
-                                        // under the "Lane #" label, while 2nd and 3rd will be
-                                        // stacking horizontal
-                                        r.Stack(
-                                            mode: prefix == "LaneArrowLeft"
-                                                      ? UStackMode.Below
-                                                      : UStackMode.ToTheRight,
-                                            spacing: UConst.UIPADDING);
-                                        r.Width(UValue.FixedSize(40f));
-                                        r.Height(UValue.FixedSize(40f));
-                                    });
+                                // First button in the group will be stacking vertical
+                                // under the "Lane #" label, while 2nd and 3rd will be
+                                // stacking horizontal
+                                b.SetStacking(
+                                    mode: prefix == "LaneArrowLeft"
+                                        ? UStackMode.Below
+                                        : UStackMode.ToTheRight,
+                                    spacing: UConst.UIPADDING);
+                                b.SetFixedSize(new Vector2(40f, 40f));
                             }
                         } // for each button
                     } // end button group panel

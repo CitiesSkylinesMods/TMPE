@@ -189,11 +189,16 @@ namespace TrafficManager.UI.SubTools {
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             // Log._Debug($"Restrictions overlay {_cursorInSecondaryPanel} {HoveredNodeId} {SelectedNodeId} {HoveredSegmentId} {SelectedSegmentId}");
             if (SelectedSegmentId != 0) {
-                Color color = MainTool.GetToolColor(true, false);
+                Color color = MainTool.GetToolColor(warning: true, error: false);
+
                 // continues lane highlight requires lane alphaBlend == false.
                 // for such lane highlight to be on the top of segment highlight,
                 // the alphaBlend of segment highlight needs to be true.
-                TrafficManagerTool.DrawSegmentOverlay(cameraInfo, SelectedSegmentId, color, true);
+                Highlight.DrawSegmentOverlay(
+                    cameraInfo: cameraInfo,
+                    segmentId: SelectedSegmentId,
+                    color: color,
+                    alphaBlend: true);
 
                 if (overlayHandleHovered) {
                     if (RoadMode) {
@@ -547,6 +552,13 @@ namespace TrafficManager.UI.SubTools {
 
                 ++y;
 #endif
+                Highlight.Grid grid = new Highlight.Grid(
+                    gridOrigin: Vector3.zero,
+                    cellWidth: f,
+                    cellHeight: f,
+                    xu: xu,
+                    yu: yu);
+
                 foreach (ExtVehicleType vehicleType in possibleVehicleTypes) {
                     bool allowed = VehicleRestrictionsManager.Instance.IsAllowed(allowedTypes, vehicleType);
 
@@ -554,17 +566,15 @@ namespace TrafficManager.UI.SubTools {
                         continue; // do not draw allowed vehicles in view-only mode
                     }
 
-                    bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(
-                        RoadUI.VehicleRestrictionTextures[vehicleType][allowed],
-                        camPos,
-                        zero,
-                        f,
-                        xu,
-                        yu,
-                        x,
-                        y,
-                        vehicleRestrictionsSignSize,
-                        !viewOnly);
+                    bool hoveredHandle = grid.DrawGenericOverlayGridTexture(
+                        texture: RoadUI.VehicleRestrictionTextures[key: vehicleType][key: allowed],
+                        camPos: camPos,
+                        x: x,
+                        y: y,
+                        width: vehicleRestrictionsSignSize,
+                        height: vehicleRestrictionsSignSize,
+                        canHover: !viewOnly,
+                        screenRect: out Rect _);
 
                     if (hoveredHandle) {
                         hovered = true;
