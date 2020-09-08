@@ -240,6 +240,7 @@ namespace TrafficManager.Manager.Impl {
             index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR);
             index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR);
 
+            index = LoadBool(index, OptionsVehicleRestrictionsTab.NoDoubleCrossings);
             return true;
         }
 
@@ -288,22 +289,24 @@ namespace TrafficManager.Manager.Impl {
                 (byte)(Options.allowFarTurnOnRed ? 1 : 0),
                 (byte)(Options.automaticallyAddTrafficLightsIfApplicable ? 1 : 0),
 
-                (byte)(OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR.Save()),
-                (byte)(OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout.Save()),
-                (byte)(OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes.Save()),
-                (byte)(OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR.Save()),
-                (byte)(OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR.Save()),
-                (byte)(OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns.Save()),
+                OptionsMassEditTab.RoundAboutQuickFix_StayInLaneMainR.Save(),
+                OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout.Save(),
+                OptionsMassEditTab.RoundAboutQuickFix_DedicatedExitLanes.Save(),
+                OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR.Save(),
+                OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR.Save(),
+                OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns.Save(),
 
-                (byte)(OptionsMassEditTab.PriorityRoad_CrossMainR.Save()),
-                (byte)(OptionsMassEditTab.PriorityRoad_AllowLeftTurns.Save()),
-                (byte)(OptionsMassEditTab.PriorityRoad_EnterBlockedYeild.Save()),
-                (byte)(OptionsMassEditTab.PriorityRoad_StopAtEntry.Save()),
+                OptionsMassEditTab.PriorityRoad_CrossMainR.Save(),
+                OptionsMassEditTab.PriorityRoad_AllowLeftTurns.Save(),
+                OptionsMassEditTab.PriorityRoad_EnterBlockedYeild.Save(),
+                OptionsMassEditTab.PriorityRoad_StopAtEntry.Save(),
 
-                (byte)(OptionsMassEditTab.RoundAboutQuickFix_KeepClearYieldR.Save()),
-                (byte)(OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits.Save()),
-                (byte)(OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR.Save()),
-                (byte)(OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR.Save()),
+                OptionsMassEditTab.RoundAboutQuickFix_KeepClearYieldR.Save(),
+                OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits.Save(),
+                OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR.Save(),
+                OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR.Save(),
+
+                OptionsVehicleRestrictionsTab.NoDoubleCrossings.Save(),
             };
         }
     }

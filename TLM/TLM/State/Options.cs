@@ -71,6 +71,7 @@ namespace TrafficManager.State {
         public static byte altLaneSelectionRatio;
         public static bool highwayRules;
         public static bool automaticallyAddTrafficLightsIfApplicable = true;
+        public static bool NoDoubleCrossings = false;
 #if DEBUG
         public static bool showLanes = true;
 #else

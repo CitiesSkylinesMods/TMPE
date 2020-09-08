@@ -23,6 +23,10 @@ namespace TrafficManager.State {
         private static UICheckBox _highwayRulesToggle;
         private static UICheckBox _preferOuterLaneToggle;
         private static UICheckBox _evacBussesMayIgnoreRulesToggle;
+        public static CheckboxOption NoDoubleCrossings =
+            new CheckboxOption("NoDoubleCrossings") {
+            Label = "VR.Option:No double crossings", // at a segment to segment transition, only the smaller segment gets crossings
+        };
 
         internal static void MakeSettings_VehicleRestrictions(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Policies & Restrictions"));
@@ -119,6 +123,9 @@ namespace TrafficManager.State {
                           Options.evacBussesMayIgnoreRules,
                           OnEvacBussesMayIgnoreRulesChanged) as UICheckBox;
             }
+
+            NoDoubleCrossings.AddUI(onRoadsGroup);
+            NoDoubleCrossings.OnValueChanged += (_) => JunctionRestrictionsManager.Instance.UpdateAllDefaults();
 
             OptionsMassEditTab.MakePanel_MassEdit(panelHelper);
         }

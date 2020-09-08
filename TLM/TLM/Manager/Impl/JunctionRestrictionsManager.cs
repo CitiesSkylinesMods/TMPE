@@ -665,6 +665,48 @@ namespace TrafficManager.Manager.Impl {
                         $"({segmentId}, {startNode}): Setting is not configurable. res=true");
                 }
 
+                if (OptionsVehicleRestrictionsTab.NoDoubleCrossings &&
+                    node.m_flags.IsFlagSet(NetNode.Flags.Junction) &&
+                    node.CountSegments() == 2) {
+                    // there are only two segments so left segment is the same as right.
+                    ushort otherSegmentID = startNode
+                        ? segmentId.ToSegment().m_startLeftSegment
+                        : segmentId.ToSegment().m_endLeftSegment;
+
+                    NetInfo info1 = segmentId.ToSegment().Info;
+                    NetInfo info2 = otherSegmentID.ToSegment().Info;
+                    bool hasPedestrianLanes1 = info1.m_hasPedestrianLanes;
+                    bool hasPedestrianLanes2 = info2.m_hasPedestrianLanes;
+
+                    // if only one of them has pedestrian lane then
+                    // only the segment with pedestrian lanes need crossings
+                    // also if neither have pedestrian lanes then none need crossing.
+                    if (!hasPedestrianLanes1)
+                        return false; 
+                    if (!hasPedestrianLanes2)
+                        return true; 
+
+                    // at bridge/tunnel entracnes, pedestrian crossing is on ground road.
+                    bool isRoad1 = info1.m_netAI is RoadAI;
+                    bool isRoad2 = info2.m_netAI is RoadAI;
+                    if (isRoad1 && !isRoad2)
+                        return true; // only this segment needs pedestrian crossing.
+                    if (isRoad2 && !isRoad1)
+                        return false; // only the other segment needs pedestrian crossing.
+
+                    // if one of them is bigger or has more vehicle lanes then
+                    // only the smaller segment needs crossing:
+                    int diff = PriorityRoad.CompareSegments(segmentId, otherSegmentID);
+                    if (diff > 0)
+                        return false; // only the other segment needs pedestrian crossing.
+                    if (diff < 0)
+                        return true; // only this segment needs pedestrian crossing.
+                    if (info1.m_pavementWidth < info2.m_pavementWidth)
+                        return false; // only the other segment needs pedestrian crossing.
+                    else
+                        return true; // this or both need crossing.
+                }
+
                 return true;
             }
 
