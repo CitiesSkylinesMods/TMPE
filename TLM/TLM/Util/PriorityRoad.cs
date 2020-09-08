@@ -577,6 +577,9 @@ namespace TrafficManager.Util {
             }
         }
 
+        /// <summary>
+        /// returns a posetive value if seg1Id < seg2Id
+        /// </summary>
         internal static int CompareSegments(ushort seg1Id, ushort seg2Id) {
             ref NetSegment seg1 = ref GetSeg(seg1Id);
             ref NetSegment seg2 = ref GetSeg(seg2Id);

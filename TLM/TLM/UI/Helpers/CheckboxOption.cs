@@ -9,6 +9,10 @@ namespace TrafficManager.UI.Helpers {
 
         public event ICities.OnCheckChanged OnValueChanged;
 
+        public OnCheckChanged Handler {
+            set => OnValueChanged += value;
+        }
+
         public override bool Value {
             get => base.Value;
             set {
