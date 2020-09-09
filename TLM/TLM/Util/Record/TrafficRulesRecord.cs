@@ -5,6 +5,7 @@ namespace TrafficManager.Util.Record {
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
     using static Shortcuts;
+    using TrafficManager.State;
 
     [Serializable]
     public class TrafficRulesRecord : IRecordable {
@@ -89,6 +90,6 @@ namespace TrafficManager.Util.Record {
             }
         }
 
-        public byte[] Serialize() => RecordUtil.Serialize(this);
+        public byte[] Serialize() => SerializationUtil.Serialize(this);
     }
 }

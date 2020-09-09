@@ -1,7 +1,8 @@
 namespace TrafficManager.Util.Record {
     using TrafficManager.State;
+    using System;
 
-    // This API is used by MoveIT mod.
+    [Obsolete("kept for Backward compatibility with MoveIT. to be deleted before release 11.6")]
     public static class RecordUtil {
         public static IRecordable Deserialize(byte[] data) =>
             SerializationUtil.Deserialize(data) as IRecordable;

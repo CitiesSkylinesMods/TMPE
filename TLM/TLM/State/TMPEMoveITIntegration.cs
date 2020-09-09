@@ -48,7 +48,7 @@ namespace TrafficManager.State {
         }
 
         public override object Decode64(string base64Data, Version dataVersion) {
-            return RecordUtil.Deserialize(Convert.FromBase64String(base64Data));
+            return SerializationUtil.Deserialize(Convert.FromBase64String(base64Data));
         }
 
         public override void Mirror(InstanceID targetInstanceID, object record, Dictionary<InstanceID, InstanceID> map) {

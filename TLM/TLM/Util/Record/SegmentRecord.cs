@@ -5,6 +5,7 @@ namespace TrafficManager.Util.Record {
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
 
     // TODO add record vehicle restrictions.
     [Serializable]
@@ -47,7 +48,7 @@ namespace TrafficManager.Util.Record {
                 lane.Transfer(map);
         }
 
-        public byte[] Serialize() => RecordUtil.Serialize(this);
+        public byte[] Serialize() => SerializationUtil.Serialize(this);
 
         /// <summary>
         /// creates 1:1 map between lanes of original segment and new segment.
