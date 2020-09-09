@@ -670,6 +670,7 @@ namespace TrafficManager.Manager.Impl {
 
             if (OptionsVehicleRestrictionsTab.NoDoubleCrossings &&
                 node.m_flags.IsFlagSet(NetNode.Flags.Junction) &&
+                !node.m_flags.IsFlagSet(NetNode.Flags.Untouchable) &&
                 node.CountSegments() == 2) {
 
                 // there are only two segments so left segment is the same as right.
@@ -690,6 +691,10 @@ namespace TrafficManager.Manager.Impl {
                 if (!hasPedestrianLanes2)
                     return true;
 
+                float sizeDiff = info1.m_halfWidth - info2.m_halfWidth;
+                if (sizeDiff == 0)
+                    return true; //if same size then both will get crossings.
+
                 // at bridge/tunnel entracnes, pedestrian crossing is on ground road.
                 bool isRoad1 = info1.m_netAI is RoadAI;
                 bool isRoad2 = info2.m_netAI is RoadAI;
@@ -698,20 +703,9 @@ namespace TrafficManager.Manager.Impl {
                 if (isRoad2 && !isRoad1)
                     return false; // only the other segment needs pedestrian crossing.
 
-                // if one of them is bigger or has more vehicle lanes then
-                // only the smaller segment needs crossing:
-                int diff = - PriorityRoad.CompareSegments(segmentId, otherSegmentID);
-                if (diff > 0)
-                    return false; // only the other segment needs pedestrian crossing.
-                if (diff < 0)
-                    return true; // only this segment needs pedestrian crossing.
-                if (info1.m_pavementWidth < info2.m_pavementWidth)
-                    return false; // only the other segment needs pedestrian crossing.
-                else
-                    return true; // this or both need crossing.
+                if (sizeDiff > 0)
+                    return false; // only the smaller segment needs pedestrian crossing.
             }
-
-
 
             // crossing is allowed at junctions and at untouchable nodes (for example: spiral
             // underground parking)
