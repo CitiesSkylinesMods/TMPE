@@ -9,13 +9,13 @@ namespace TrafficManager.State {
         public MoveItIntegrationBase GetInstance() => new TMPEMoveITIntegration();
     }
     public class TMPEMoveITIntegration : MoveItIntegrationBase {
-        public override string Name => "TMPE";
-
-        public override string Description => "Traffic rules";
-
         public override string ID => "me.tmpe";
 
         public override Version DataVersion => TrafficManagerMod.ModVersion;
+
+        public override string Name => "TMPE";
+
+        public override string Description => "Traffic rules";
 
         public override object Copy(InstanceID sourceInstanceID) {
             switch(sourceInstanceID.Type) {
