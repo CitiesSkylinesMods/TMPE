@@ -168,11 +168,17 @@
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="Patch\_BuildingDecoration\LoadPathsPatch.cs" />
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
     <Compile Include="Patch\_DefaultTool\OnToolGUIPatch.cs" />
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
+    <Compile Include="Patch\_LoadAssetPanel\OnLoadPatch.cs" />
     <Compile Include="Patch\_NetSegment\CalculateSegmentPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
+    <Compile Include="State\Asset\AssetData.cs" />
+    <Compile Include="State\Asset\AssetDataExtension.cs" />
+    <Compile Include="State\Asset\SegmentNetworkIDs.cs" />
+    <Compile Include="State\SerializationUtil.cs" />
     <Compile Include="State\TMPEMoveITIntegration.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
@@ -338,6 +344,7 @@
     <Compile Include="Util\Caching\GenericArrayCache.cs" />
     <Compile Include="Util\GenericFsm.cs" />
     <Compile Include="Util\GeometryUtil.cs" />
+    <Compile Include="Util\PlaceIntersectionUtil.cs" />
     <Compile Include="Util\PriorityRoad.cs" />
     <Compile Include="Util\Record\IRecordable.cs" />
     <Compile Include="Util\Record\LaneConnectionRecord.cs" />
@@ -375,6 +382,7 @@
     <Compile Include="UI\ModUI.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
+    <Compile Include="Util\TranspilerUtil.cs" />
     <Compile Include="U\Autosize\UBoundingBox.cs" />
     <Compile Include="U\Autosize\UResizer.cs" />
     <Compile Include="U\Autosize\ISmartSizableControl.cs" />

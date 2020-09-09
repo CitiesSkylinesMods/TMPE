@@ -14,6 +14,9 @@ namespace TrafficManager.Util {
     using UnityEngine;
 
     internal static class Shortcuts {
+        internal static bool InSimulationThread() =>
+            System.Threading.Thread.CurrentThread == SimulationManager.instance.m_simulationThread;
+
         /// <summary>
         /// returns a new calling Clone() on all items.
         /// </summary>
@@ -138,6 +141,12 @@ namespace TrafficManager.Util {
         internal static void AssertNEq<T>(T a, T b, string m = "") where T : IComparable {
             if (a.CompareTo(b) == 0) {
                 Log.Error($"Assertion failed. Expected {a} != {b} | " + m);
+            }
+        }
+
+        internal static void AssertNotNull(object obj, string m = "") {
+            if (obj == null) {
+                Log.Error("Assertion failed. Expected not null: " + m);
             }
         }
 
