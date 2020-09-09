@@ -13,8 +13,7 @@ namespace TrafficManager {
     using TrafficManager.State;
     using TrafficManager.UI;
     using UnityEngine;
-    using SkyTools.Benchmarks;
-    using TrafficManager.Custom.AI;
+    using UnityEngine.SceneManagement;
     using Object = UnityEngine.Object;
 
     [UsedImplicitly]
@@ -31,6 +30,13 @@ namespace TrafficManager {
         FastList<ISimulationManager> simManager =>
             typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
                 ?.GetValue(null) as FastList<ISimulationManager>;
+
+        internal static AppMode? AppMode => Instance?.loadingManager?.currentMode;
+
+        /// <summary>
+        /// determines whether Game mode as oppose to edit mode (eg asset editor).
+        /// </summary>
+        internal static bool PlayMode => AppMode != null && AppMode == ICities.AppMode.Game;
 
         public static CustomPathManager CustomPathManager { get; set; }
 
@@ -162,92 +168,81 @@ namespace TrafficManager {
 
         public override void OnLevelLoaded(LoadMode mode) {
             SimulationManager.UpdateMode updateMode = SimulationManager.instance.m_metaData.m_updateMode;
-            Log.Info($"OnLevelLoaded({mode}) called. updateMode={updateMode}");
-            base.OnLevelLoaded(mode);
+            string scene = SceneManager.GetActiveScene().name;
+            Log.Info($"OnLevelLoaded({mode}) called. updateMode={updateMode}, scene={scene}");
 
-            Log._Debug("OnLevelLoaded Returned from base, calling custom code.");
+            if (scene == "ThemeEditor")
+                return;
 
             IsGameLoaded = false;
 
-            switch (updateMode) {
-                case SimulationManager.UpdateMode.NewGameFromMap:
-                case SimulationManager.UpdateMode.NewGameFromScenario:
-                case SimulationManager.UpdateMode.LoadGame: {
-                        if (BuildConfig.applicationVersion != BuildConfig.VersionToString(
-                                TrafficManagerMod.GAME_VERSION,
-                                false)) {
-                            string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
-                            string[] versionElms = majorVersionElms[0].Split('.');
-                            uint versionA = Convert.ToUInt32(versionElms[0]);
-                            uint versionB = Convert.ToUInt32(versionElms[1]);
-                            uint versionC = Convert.ToUInt32(versionElms[2]);
+            if (BuildConfig.applicationVersion != BuildConfig.VersionToString(
+                    TrafficManagerMod.GAME_VERSION,
+                    false)) {
+                string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
+                string[] versionElms = majorVersionElms[0].Split('.');
+                uint versionA = Convert.ToUInt32(versionElms[0]);
+                uint versionB = Convert.ToUInt32(versionElms[1]);
+                uint versionC = Convert.ToUInt32(versionElms[2]);
 
-                            Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
+                Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
 
-                            bool isModTooOld = TrafficManagerMod.GAME_VERSION_A < versionA ||
-                                               (TrafficManagerMod.GAME_VERSION_A == versionA &&
-                                                TrafficManagerMod.GAME_VERSION_B < versionB);
-                            // || (TrafficManagerMod.GameVersionA == versionA
-                            // && TrafficManagerMod.GameVersionB == versionB
-                            // && TrafficManagerMod.GameVersionC < versionC);
+                bool isModTooOld = TrafficManagerMod.GAME_VERSION_A < versionA ||
+                                   (TrafficManagerMod.GAME_VERSION_A == versionA &&
+                                    TrafficManagerMod.GAME_VERSION_B < versionB);
+                // || (TrafficManagerMod.GameVersionA == versionA
+                // && TrafficManagerMod.GameVersionB == versionB
+                // && TrafficManagerMod.GameVersionC < versionC);
 
-                            bool isModNewer = TrafficManagerMod.GAME_VERSION_A < versionA ||
-                                              (TrafficManagerMod.GAME_VERSION_A == versionA &&
-                                               TrafficManagerMod.GAME_VERSION_B > versionB);
-                            // || (TrafficManagerMod.GameVersionA == versionA
-                            // && TrafficManagerMod.GameVersionB == versionB
-                            // && TrafficManagerMod.GameVersionC > versionC);
+                bool isModNewer = TrafficManagerMod.GAME_VERSION_A < versionA ||
+                                  (TrafficManagerMod.GAME_VERSION_A == versionA &&
+                                   TrafficManagerMod.GAME_VERSION_B > versionB);
+                // || (TrafficManagerMod.GameVersionA == versionA
+                // && TrafficManagerMod.GameVersionB == versionB
+                // && TrafficManagerMod.GameVersionC > versionC);
 
-                            if (isModTooOld) {
-                                string msg = string.Format(
-                                    "Traffic Manager: President Edition detected that you are running " +
-                                    "a newer game version ({0}) than TM:PE has been built for ({1}). " +
-                                    "Please be aware that TM:PE has not been updated for the newest game " +
-                                    "version yet and thus it is very likely it will not work as expected.",
-                                    BuildConfig.applicationVersion,
-                                    BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false));
+                if (isModTooOld) {
+                    string msg = string.Format(
+                        "Traffic Manager: President Edition detected that you are running " +
+                        "a newer game version ({0}) than TM:PE has been built for ({1}). " +
+                        "Please be aware that TM:PE has not been updated for the newest game " +
+                        "version yet and thus it is very likely it will not work as expected.",
+                        BuildConfig.applicationVersion,
+                        BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false));
 
-                                Log.Error(msg);
-                                Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
-                                        () => {
-                                            UIView.library
-                                                  .ShowModal<ExceptionPanel>("ExceptionPanel")
-                                                  .SetMessage(
-                                                      "TM:PE has not been updated yet",
-                                                      msg,
-                                                      false);
-                                        });
-                            } else if (isModNewer) {
-                                string msg = string.Format(
-                                    "Traffic Manager: President Edition has been built for game version {0}. " +
-                                    "You are running game version {1}. Some features of TM:PE will not " +
-                                    "work with older game versions. Please let Steam update your game.",
-                                    BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false),
-                                    BuildConfig.applicationVersion);
+                    Log.Error(msg);
+                    Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
+                            () => {
+                                UIView.library
+                                      .ShowModal<ExceptionPanel>("ExceptionPanel")
+                                      .SetMessage(
+                                          "TM:PE has not been updated yet",
+                                          msg,
+                                          false);
+                            });
+                } else if (isModNewer) {
+                    string msg = string.Format(
+                        "Traffic Manager: President Edition has been built for game version {0}. " +
+                        "You are running game version {1}. Some features of TM:PE will not " +
+                        "work with older game versions. Please let Steam update your game.",
+                        BuildConfig.VersionToString(TrafficManagerMod.GAME_VERSION, false),
+                        BuildConfig.applicationVersion);
 
-                                Log.Error(msg);
-                                Singleton<SimulationManager>
-                                    .instance.m_ThreadingWrapper.QueueMainThread(
-                                        () => {
-                                            UIView.library
-                                                  .ShowModal<ExceptionPanel>("ExceptionPanel")
-                                                  .SetMessage(
-                                                      "Your game should be updated",
-                                                      msg,
-                                                      false);
-                                        });
-                            }
-                        }
-
-                        IsGameLoaded = true;
-                        break;
-                    }
-
-                default: {
-                        Log.Info($"OnLevelLoaded: Unsupported game mode {mode}");
-                        return;
-                    }
+                    Log.Error(msg);
+                    Singleton<SimulationManager>
+                        .instance.m_ThreadingWrapper.QueueMainThread(
+                            () => {
+                                UIView.library
+                                      .ShowModal<ExceptionPanel>("ExceptionPanel")
+                                      .SetMessage(
+                                          "Your game should be updated",
+                                          msg,
+                                          false);
+                            });
+                }
             }
+
+            IsGameLoaded = true;
 
             //it will replace stock PathManager or already Replaced before HotReload
             if (!IsPathManagerReplaced || TrafficManagerMod.Instance.InGameHotReload) {
@@ -321,20 +316,21 @@ namespace TrafficManager {
             }
 
             ModUI.OnLevelLoaded();
+            if (PlayMode) {
+                // Init transport demand UI
+                if (TransportDemandUI == null) {
+                    UIView uiView = UIView.GetAView();
+                    TransportDemandUI = (UITransportDemand)uiView.AddUIComponent(typeof(UITransportDemand));
+                }
 
-            // Init transport demand UI
-            if (TransportDemandUI == null) {
-                UIView uiView = UIView.GetAView();
-                TransportDemandUI = (UITransportDemand)uiView.AddUIComponent(typeof(UITransportDemand));
+                // add "remove vehicle" button
+                UIView.GetAView().gameObject.AddComponent<RemoveVehicleButtonExtender>();
+
+                // add "remove citizen instance" button
+                UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
+
+                UIView.GetAView().gameObject.AddComponent<RoadSelectionPanels>();
             }
-
-            // add "remove vehicle" button
-            UIView.GetAView().gameObject.AddComponent<RemoveVehicleButtonExtender>();
-
-            // add "remove citizen instance" button
-            UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
-
-            UIView.GetAView().gameObject.AddComponent<RoadSelectionPanels>();
 
             Patcher.Create().Install();
 

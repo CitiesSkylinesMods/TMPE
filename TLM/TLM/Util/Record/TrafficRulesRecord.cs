@@ -1,4 +1,5 @@
 namespace TrafficManager.Util.Record {
+    using CSUtil.Commons;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -7,9 +8,9 @@ namespace TrafficManager.Util.Record {
 
     [Serializable]
     public class TrafficRulesRecord : IRecordable {
-        public HashSet<ushort> NodeIDs = new HashSet<ushort>();
-        public HashSet<ushort> SegmentIDs = new HashSet<ushort>();
-        public HashSet<int> SegmentEndIndeces = new HashSet<int>();
+        [NonSerialized] public HashSet<ushort> NodeIDs = new HashSet<ushort>();
+        [NonSerialized] public HashSet<ushort> SegmentIDs = new HashSet<ushort>();
+        [NonSerialized] public HashSet<int> SegmentEndIndeces = new HashSet<int>();
 
         public List<IRecordable> Records = new List<IRecordable>();
 
@@ -67,11 +68,16 @@ namespace TrafficManager.Util.Record {
         }
 
         public void Transfer(Dictionary<InstanceID,InstanceID> map) {
-            foreach (IRecordable record in Records)
-                record.Transfer(map);
+            foreach (IRecordable record in Records) {
+                try {
+                    record.Transfer(map);
+                }
+                catch {
+                    Log.Error($"could not transfer {record}");
+                }
+            }
         }
 
         public byte[] Serialize() => RecordUtil.Serialize(this);
-
     }
 }
