@@ -53,6 +53,9 @@ namespace TrafficManager {
 
         internal bool InGameHotReload { get; set; } = false;
 
+        /// <summary>
+        /// determines if simulation is inside game/editor. useful to detect hot-reload.
+        /// </summary>
         internal static bool InGame() =>
             SceneManager.GetActiveScene().name != "IntroScreen" &&
             SceneManager.GetActiveScene().name != "Startup";

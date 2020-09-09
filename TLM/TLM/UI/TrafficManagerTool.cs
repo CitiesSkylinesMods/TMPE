@@ -383,8 +383,9 @@ namespace TrafficManager.UI {
         /// </summary>
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
-            if (!LoadingExtension.PlayMode)
+            if (!LoadingExtension.PlayMode) {
                 return; // world info view panels are not availble in edit mode
+            }
             SubTools.PrioritySigns.MassEditOverlay.Show
                 = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
 
@@ -548,8 +549,9 @@ namespace TrafficManager.UI {
         }
 
         void DefaultOnToolGUI(Event e) {
-            if (!LoadingExtension.PlayMode)
+            if (!LoadingExtension.PlayMode) {
                 return; // world info view panels are not availble in edit mode
+            }
             if (e.type == EventType.MouseDown && e.button == 0) {
                 bool isRoad = HoveredSegmentId != 0 && HoveredSegmentId.ToSegment().Info.m_netAI is RoadBaseAI;
                 if (!isRoad)

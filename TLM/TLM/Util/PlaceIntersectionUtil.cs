@@ -26,7 +26,7 @@ namespace TrafficManager.Util {
         /// <summary>
         /// invoked when networkIDs are mapped and provides the user with dictionary of oldNetworkIds->newNetworkIds
         /// </summary>
-        public static event Handler OnNetowrksMapped;
+        public static event Handler OnNetworksMapped;
 
         /// <summary>
         /// start mapping for <paramref name="intersectionInfo"/>
@@ -60,13 +60,13 @@ namespace TrafficManager.Util {
                 return;
             }
 
-            var pathNetowrkIDs = assetData.PathNetworkIDs;
-            if (pathNetowrkIDs == null) return;
+            var pathNetworkIDs = assetData.PathNetworkIDs;
+            if (pathNetworkIDs == null) return;
 
             /*************************
              * Apply traffic rules: */
 
-            MapSegments(oldSegments: pathNetowrkIDs, newSegmentIds: newSegmentIds, map: map);
+            MapSegments(oldSegments: pathNetworkIDs, newSegmentIds: newSegmentIds, map: map);
 
             foreach (var item in map)
                 CalculateNetwork(item.Value);
