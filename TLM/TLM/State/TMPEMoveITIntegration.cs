@@ -5,10 +5,10 @@ namespace TrafficManager.State {
     using TrafficManager.Util.Record;
     using CSUtil.Commons;
 
-    public class MoveItIntegrationFactory : IMoveItIntegrationFactory {
-        public MoveItIntegrationBase GetInstance() => new TMPEMoveITIntegration();
+    public class TMPEMoveItIntegrationFactory : IMoveItIntegrationFactory {
+        public MoveItIntegrationBase GetInstance() => new TMPEMoveItIntegration();
     }
-    public class TMPEMoveITIntegration : MoveItIntegrationBase {
+    public class TMPEMoveItIntegration : MoveItIntegrationBase {
         public override string ID => "me.tmpe";
 
         public override Version DataVersion => TrafficManagerMod.ModVersion;

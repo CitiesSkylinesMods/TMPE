@@ -179,7 +179,7 @@
     <Compile Include="State\Asset\AssetDataExtension.cs" />
     <Compile Include="State\Asset\SegmentNetworkIDs.cs" />
     <Compile Include="State\SerializationUtil.cs" />
-    <Compile Include="State\TMPEMoveITIntegration.cs" />
+    <Compile Include="State\TMPEMoveItIntegration.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
