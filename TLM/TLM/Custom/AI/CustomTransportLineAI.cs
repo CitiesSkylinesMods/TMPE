@@ -74,7 +74,7 @@
                     vehicleType,
                     true,
                     false,
-                    32f,
+                    224f,//supports 544f(68u) segment
                     out PathUnit.Position startPosA,
                     out PathUnit.Position startPosB,
                     out _,
@@ -92,7 +92,7 @@
                     vehicleType,
                     true,
                     false,
-                    32f,
+                    224f,//supports 544f(68u) segment
                     out PathUnit.Position endPosA,
                     out PathUnit.Position endPosB,
                     out _,

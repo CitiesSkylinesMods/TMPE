@@ -826,7 +826,7 @@ namespace TrafficManager.Custom.AI {
                     VehicleInfo.VehicleType.None,
                     allowUnderground,
                     false,
-                    32f,
+                    224f,//supports 544f(68u) segment
                     out PathUnit.Position startPosA,
                     out PathUnit.Position startPosB,
                     out float startSqrDistA,
