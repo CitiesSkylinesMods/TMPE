@@ -171,16 +171,16 @@ namespace TrafficManager.UI.SubTools {
         /// </summary>
         private void RenderRoadLane(RenderManager.CameraInfo cameraInfo) {
             SegmentLaneTraverser.Traverse(
-                renderData_.segmentId,
-                SegmentTraverser.TraverseDirection.AnyDirection,
-                SegmentTraverser.TraverseSide.AnySide,
-                SegmentLaneTraverser.LaneStopCriterion.LaneCount,
-                SegmentTraverser.SegmentStopCriterion.Junction,
-                SpeedLimitManager.LANE_TYPES,
-                SpeedLimitManager.VEHICLE_TYPES,
-                data => {
+                initialSegmentId: renderData_.segmentId,
+                direction: SegmentTraverser.TraverseDirection.AnyDirection,
+                side: SegmentTraverser.TraverseSide.AnySide,
+                laneStopCrit: SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                segStopCrit: SegmentTraverser.SegmentStopCriterion.Junction,
+                laneTypeFilter: SpeedLimitManager.LANE_TYPES,
+                vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES,
+                laneVisitor: data => {
                     if (renderData_.SortedLaneIndex == data.SortedLaneIndex) {
-                        RenderLaneOverlay(cameraInfo, data.CurLanePos.laneId);
+                        RenderLaneOverlay(cameraInfo: cameraInfo, laneId: data.CurLanePos.laneId);
                     }
                     return true;
                 });
@@ -216,10 +216,10 @@ namespace TrafficManager.UI.SubTools {
             if (HoveredSegmentId != 0 && HoveredSegmentId != SelectedSegmentId &&
                 !overlayHandleHovered) {
                 NetTool.RenderOverlay(
-                    cameraInfo,
-                    ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId],
-                    MainTool.GetToolColor(false, false),
-                    MainTool.GetToolColor(false, false));
+                    cameraInfo: cameraInfo,
+                    segment: ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId],
+                    importantColor: MainTool.GetToolColor(warning: false, error: false),
+                    nonImportantColor: MainTool.GetToolColor(warning: false, error: false));
             }
         }
 
@@ -255,10 +255,10 @@ namespace TrafficManager.UI.SubTools {
 
                 // draw vehicle restrictions
                 if (DrawVehicleRestrictionHandles(
-                    segmentId,
-                    ref netManager.m_segments.m_buffer[segmentId],
-                    viewOnly || segmentId != SelectedSegmentId,
-                    out bool updated)) {
+                    segmentId: segmentId,
+                    segment: ref netManager.m_segments.m_buffer[segmentId],
+                    viewOnly: viewOnly || segmentId != SelectedSegmentId,
+                    stateUpdated: out bool updated)) {
                     handleHovered = true;
                 }
 
@@ -456,10 +456,10 @@ namespace TrafficManager.UI.SubTools {
             }
 
             int numLanes = GeometryUtil.GetSegmentNumVehicleLanes(
-                segmentId,
-                null,
-                out int numDirections,
-                VehicleRestrictionsManager.VEHICLE_TYPES);
+                segmentId: segmentId,
+                nodeId: null,
+                numDirections: out int numDirections,
+                vehicleTypeFilter: VehicleRestrictionsManager.VEHICLE_TYPES);
 
             // draw vehicle restrictions over each lane
             NetInfo segmentInfo = segment.Info;
@@ -468,7 +468,7 @@ namespace TrafficManager.UI.SubTools {
             // if ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None)
             //        yu = -yu;
             Vector3 xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
-            float f = viewOnly ? 4f : 7f; // reserved sign size in game coordinates
+            float signSize = viewOnly ? 4f : 7f; // reserved sign size in game coordinates
             int maxNumSigns = 0;
 
             if (VehicleRestrictionsManager.Instance.IsRoadSegment(segmentInfo)) {
@@ -478,21 +478,18 @@ namespace TrafficManager.UI.SubTools {
             }
 
             // Vector3 zero = center - 0.5f * (float)(numLanes + numDirections - 1) * f * (xu + yu); // "bottom left"
-            Vector3 zero = center - (0.5f * (numLanes - 1 + numDirections - 1) * f * xu)
-                                  - (0.5f * maxNumSigns * f * yu); // "bottom left"
-
-            // if (!viewOnly)
-            //     Log._Debug($"xu: {xu.ToString()} yu: {yu.ToString()} center: {center.ToString()}
-            //     zero: {zero.ToString()} numLanes: {numLanes} numDirections: {numDirections}");*/
+            Vector3 drawOrigin = center
+                                 - (0.5f * (numLanes - 1 + numDirections - 1) * signSize * xu)
+                                 - (0.5f * maxNumSigns * signSize * yu); // "bottom left"
 
             uint x = 0;
             Color guiColor = GUI.color;
             IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
-                segmentId,
-                ref segment,
-                null,
-                VehicleRestrictionsManager.LANE_TYPES,
-                VehicleRestrictionsManager.VEHICLE_TYPES);
+                segmentId: segmentId,
+                segment: ref segment,
+                startNode: null,
+                laneTypeFilter: VehicleRestrictionsManager.LANE_TYPES,
+                vehicleTypeFilter: VehicleRestrictionsManager.VEHICLE_TYPES);
             bool hovered = false;
             HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
             int sortedLaneIndex = -1;
@@ -532,30 +529,11 @@ namespace TrafficManager.UI.SubTools {
                         VehicleRestrictionsMode.Configured);
 
                 uint y = 0;
-#if DEBUG_disabled_xxx
-                Vector3 labelCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
 
-                Vector3 labelScreenPos;
-                bool visible = GeometryUtil.WorldToScreenPoint(labelCenter, out labelScreenPos);
-                // BUGBUG: Using screen.height might be wrong, consider U.UIScaler.ScreenHeight (from UIView.fixedHeight)
-                labelScreenPos.y = Screen.height - labelScreenPos.y;
-                diff = labelCenter - camPos;
-
-                var labelZoom = 1.0f / diff.magnitude * 100f;
-                _counterStyle.fontSize = (int)(11f * labelZoom);
-                _counterStyle.normal.textColor = new Color(1f, 1f, 0f);
-
-                string labelStr = $"Idx {laneIndex}";
-                Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
-                Rect labelRect = new Rect(labelScreenPos.x - dim.x / 2f, labelScreenPos.y, dim.x, dim.y);
-                GUI.Label(labelRect, labelStr, _counterStyle);
-
-                ++y;
-#endif
                 Highlight.Grid grid = new Highlight.Grid(
-                    gridOrigin: Vector3.zero,
-                    cellWidth: f,
-                    cellHeight: f,
+                    gridOrigin: drawOrigin,
+                    cellWidth: signSize,
+                    cellHeight: signSize,
                     xu: xu,
                     yu: yu);
 
@@ -585,10 +563,8 @@ namespace TrafficManager.UI.SubTools {
                         renderData_.SortedLaneIndex = sortedLaneIndex;
                     }
 
-                    if (hoveredHandle && MainTool.CheckClicked() ) {
+                    if (hoveredHandle && MainTool.CheckClicked()) {
                         // toggle vehicle restrictions
-                        // Log._Debug($"Setting vehicle restrictions of segment {segmentId}, lane
-                        //     idx {laneIndex}, {vehicleType.ToString()} to {!allowed}");
                         VehicleRestrictionsManager.Instance.ToggleAllowedType(
                             segmentId,
                             segmentInfo,
@@ -597,8 +573,10 @@ namespace TrafficManager.UI.SubTools {
                             laneInfo,
                             vehicleType,
                             !allowed);
+
                         stateUpdated = true;
                         RefreshCurrentRestrictedSegmentIds(segmentId);
+
                         if (RoadMode) {
                             ApplyRestrictionsToAllSegments(sortedLaneIndex, vehicleType);
                         }

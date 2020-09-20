@@ -107,10 +107,10 @@ namespace TrafficManager.Util {
 
                         if (!laneVisitor(
                                 new SegmentLaneVisitData(
-                                    segData,
-                                    i,
-                                    sortedLanes[i],
-                                    initialSortedLanes[i]))) {
+                                    segVisitData: segData,
+                                    sortedLaneIndex: i,
+                                    curLanePos: sortedLanes[i],
+                                    initLanePos: initialSortedLanes[i]))) {
                             return false;
                         }
                     }

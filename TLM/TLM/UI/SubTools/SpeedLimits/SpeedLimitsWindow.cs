@@ -42,11 +42,21 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Populate the window using UIBuilder of the window panel.</summary>
         /// <param name="builder">The root builder of this window.</param>
         public void SetupControls(UiBuilder<SpeedLimitsWindow> builder, SpeedLimitsTool parentTool) {
-            //-------------------------------------
-            // [Speed Limits - Kilometers per Hour]
-            // [ Mode 1 ] [ 10 20 30 40 50 ... 120 130 140 ]
-            // [ Mode 2 ] Hold Alt...
-            //-------------------------------------
+            // design variant 1
+            //
+            // Speed Limits - Kilometers per Hour
+            // [ Lane/Segment ] [ 10 20 30 40 50 ... 120 130 140 ]
+            // [ Edit Default ] |   |  |  |  |  |   |   |   |    |
+            // [_MPH/KM_______] [________________________________]
+            //
+            // design variant 2
+            //
+            // Speed Limits - Kilometers per Hour
+            // [Lane/Segment] [Edit Defaults] [MPH/KM]
+            // [ 10 20 30 40 50 ... 120 130 140 ]
+            // |   |  |  |  |  |   |   |   |    |
+            // [________________________________]
+            //
             // Goes first on top of the window
             SetupControls_TitleBar(builder);
 

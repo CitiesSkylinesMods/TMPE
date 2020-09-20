@@ -70,7 +70,7 @@ namespace TrafficManager.UI.SubTools {
             bool pressed = Input.GetMouseButton(0);
             Color color;
             if (pressed) {
-                color = MainTool.GetToolColor(true, false);
+                color = MainTool.GetToolColor(warning: true, error: false);
             } else if (allowed) {
                 color = Color.green;
             } else {
@@ -79,19 +79,23 @@ namespace TrafficManager.UI.SubTools {
 
             Bezier3 bezier = default;
             netService.IterateSegmentLanes(
-                renderInfo_.SegmentId,
-                (uint laneId,
-                ref NetLane lane,
-                NetInfo.Lane laneInfo,
-                ushort _,
-                ref NetSegment segment,
-                byte laneIndex) => {
-                    bool isParking = laneInfo.m_laneType.IsFlagSet(NetInfo.LaneType.Parking);
+                segmentId: renderInfo_.SegmentId,
+                handler: (uint laneId,
+                          ref NetLane lane,
+                          NetInfo.Lane laneInfo,
+                          ushort _,
+                          ref NetSegment segment,
+                          byte laneIndex) => {
+                    bool isParking = laneInfo.m_laneType.IsFlagSet(flag: NetInfo.LaneType.Parking);
                     if (isParking && laneInfo.m_finalDirection == renderInfo_.FinalDirection) {
                         bezier = lane.m_bezier;
-                        laneMarker_ = new SegmentLaneMarker(bezier);
-                        laneMarker_.RenderOverlay(cameraInfo, color, enlarge: pressed);
+                        laneMarker_ = new SegmentLaneMarker(bezier: bezier);
+                        laneMarker_.RenderOverlay(
+                            cameraInfo: cameraInfo,
+                            color: color,
+                            enlarge: pressed);
                     }
+
                     return true;
                 });
         }
@@ -120,7 +124,7 @@ namespace TrafficManager.UI.SubTools {
                 }
                 if (finalDirection == renderInfo_.FinalDirection) {
                     bool pressed = Input.GetMouseButton(0);
-                    Color color = MainTool.GetToolColor(pressed, false);
+                    Color color = MainTool.GetToolColor(warning: pressed, error: false);
                     uint otherLaneId = data.CurLanePos.laneId;
                     var laneMarker = new SegmentLaneMarker(laneBuffer[otherLaneId].m_bezier);
                     laneMarker.RenderOverlay(cameraInfo, color, enlarge: pressed);
@@ -354,14 +358,14 @@ namespace TrafficManager.UI.SubTools {
                         }
 
                         SegmentLaneTraverser.Traverse(
-                            segmentId,
-                            SegmentTraverser.TraverseDirection.AnyDirection,
-                            SegmentTraverser.TraverseSide.AnySide,
-                            SegmentLaneTraverser.LaneStopCriterion.LaneCount,
-                            SegmentTraverser.SegmentStopCriterion.Junction,
-                            ParkingRestrictionsManager.LANE_TYPES,
-                            ParkingRestrictionsManager.VEHICLE_TYPES,
-                            LaneVisitor);
+                            initialSegmentId: segmentId,
+                            direction: SegmentTraverser.TraverseDirection.AnyDirection,
+                            side: SegmentTraverser.TraverseSide.AnySide,
+                            laneStopCrit: SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                            segStopCrit: SegmentTraverser.SegmentStopCriterion.Junction,
+                            laneTypeFilter: ParkingRestrictionsManager.LANE_TYPES,
+                            vehicleTypeFilter: ParkingRestrictionsManager.VEHICLE_TYPES,
+                            laneVisitor: LaneVisitor);
                     }
                 }
 
