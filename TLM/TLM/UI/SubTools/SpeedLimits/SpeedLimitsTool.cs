@@ -61,31 +61,31 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private SpeedLimitsOverlay.DrawArgs overlayDrawArgs_ = SpeedLimitsOverlay.DrawArgs.Create();
         private SpeedLimitsOverlay overlay_;
 
-        /// <summary>Tool states.</summary>
-        private enum State {
-            /// <summary>Clicking a segment will override speed limit on all lanes.
-            /// Holding Alt will temporarily show the Defaults.
-            /// </summary>
-            EditSegments,
-
-            /// <summary>Clicking a road type will override default.</summary>
-            EditDefaults,
-
-            /// <summary>The user requested to leave the tool.</summary>
-            ToolDisabled,
-        }
-
-        /// <summary>Events which trigger state transitions.</summary>
-        private enum Trigger {
-            /// <summary>Mode 1 - Segment Edit Mode - clicked.</summary>
-            SegmentsButtonClick,
-
-            /// <summary>Mode 2 - Edit Defaults - clicked.</summary>
-            DefaultsButtonClick,
-
-            /// <summary>Right mouse has been clicked.</summary>
-            RightMouseClick,
-        }
+        // /// <summary>Tool states.</summary>
+        // private enum State {
+        //     /// <summary>Clicking a segment will override speed limit on all lanes.
+        //     /// Holding Alt will temporarily show the Defaults.
+        //     /// </summary>
+        //     EditSegments,
+        //
+        //     /// <summary>Clicking a road type will override default.</summary>
+        //     EditDefaults,
+        //
+        //     /// <summary>The user requested to leave the tool.</summary>
+        //     ToolDisabled,
+        // }
+        //
+        // /// <summary>Events which trigger state transitions.</summary>
+        // private enum Trigger {
+        //     /// <summary>Mode 1 - Segment Edit Mode - clicked.</summary>
+        //     SegmentsButtonClick,
+        //
+        //     /// <summary>Mode 2 - Edit Defaults - clicked.</summary>
+        //     DefaultsButtonClick,
+        //
+        //     /// <summary>Right mouse has been clicked.</summary>
+        //     RightMouseClick,
+        // }
 
         /// <summary>If exists, contains tool panel floating on the selected node.</summary>
         private SpeedLimitsWindow Window { get; set; }
@@ -99,34 +99,34 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             overlay_ = new SpeedLimitsOverlay(mainTool: this.MainTool);
         }
 
-        /// <summary>
-        /// Creates FSM ready to begin editing. Or recreates it when ESC is pressed
-        /// and the tool is canceled.
-        /// </summary>
-        /// <returns>The new FSM in the initial state.</returns>
-        private Util.GenericFsm<State, Trigger> InitFiniteStateMachine() {
-            var fsm = new Util.GenericFsm<State, Trigger>(State.EditSegments);
-
-            fsm.Configure(State.EditSegments)
-               // .OnEntry(this.OnEnterSelectState)
-               // .OnLeave(this.OnLeaveSelectState)
-               .TransitionOnEvent(Trigger.DefaultsButtonClick, State.EditDefaults)
-               .TransitionOnEvent(Trigger.RightMouseClick, State.ToolDisabled);
-
-            fsm.Configure(State.EditDefaults)
-               .TransitionOnEvent(Trigger.SegmentsButtonClick, State.EditSegments)
-               .TransitionOnEvent(Trigger.RightMouseClick, State.ToolDisabled);
-
-            fsm.Configure(State.ToolDisabled)
-               .OnEntry(
-                   () => {
-                       // We are done here, leave the tool.
-                       // This will result in this.DeactivateTool being called.
-                       ModUI.Instance.MainMenu.ClickToolButton(ToolMode.LaneArrows);
-                   });
-
-            return fsm;
-        }
+        // /// <summary>
+        // /// Creates FSM ready to begin editing. Or recreates it when ESC is pressed
+        // /// and the tool is canceled.
+        // /// </summary>
+        // /// <returns>The new FSM in the initial state.</returns>
+        // private Util.GenericFsm<State, Trigger> InitFiniteStateMachine() {
+        //     var fsm = new Util.GenericFsm<State, Trigger>(State.EditSegments);
+        //
+        //     fsm.Configure(State.EditSegments)
+        //        // .OnEntry(this.OnEnterSelectState)
+        //        // .OnLeave(this.OnLeaveSelectState)
+        //        .TransitionOnEvent(Trigger.DefaultsButtonClick, State.EditDefaults)
+        //        .TransitionOnEvent(Trigger.RightMouseClick, State.ToolDisabled);
+        //
+        //     fsm.Configure(State.EditDefaults)
+        //        .TransitionOnEvent(Trigger.SegmentsButtonClick, State.EditSegments)
+        //        .TransitionOnEvent(Trigger.RightMouseClick, State.ToolDisabled);
+        //
+        //     fsm.Configure(State.ToolDisabled)
+        //        .OnEntry(
+        //            () => {
+        //                // We are done here, leave the tool.
+        //                // This will result in this.DeactivateTool being called.
+        //                ModUI.Instance.MainMenu.ClickToolButton(ToolMode.LaneArrows);
+        //            });
+        //
+        //     return fsm;
+        // }
 
         private static string T(string key) => Translation.SpeedLimits.Get(key);
 
@@ -158,11 +158,12 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // Click handlers for the window are located here
             // to have insight into SpeedLimits Tool internals
             //--------------------------------------------------
-            this.Window.SegmentLaneModeToggleButton.uOnClick = OnClickSegmentLaneModeButton;
-            this.Window.SegmentLaneModeToggleButton.uIsActive = b => this.showLimitsPerLane_;
-
-            this.Window.EditDefaultsModeButton.uOnClick = OnClickEditDefaultsButton;
-            this.Window.EditDefaultsModeButton.uIsActive = b => this.editDefaultsMode_;
+            this.Window.SegmentLaneModeToggleButton.SetupToggleButton(
+                onClickFun: OnClickSegmentLaneModeButton,
+                isActiveFun: b => this.showLimitsPerLane_);
+            this.Window.EditDefaultsModeButton.SetupToggleButton(
+                onClickFun: OnClickEditDefaultsButton,
+                isActiveFun: b => this.editDefaultsMode_);
 
             this.Window.ToggleMphButton.uOnClick = OnClickToggleMphButton;
         }
@@ -184,7 +185,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private void OnClickSegmentLaneModeButton(UIComponent component, UIMouseEventParameter evt) {
             this.showLimitsPerLane_ = !this.showLimitsPerLane_;
             MainTool.RequestOnscreenDisplayUpdate();
-            // TODO: update button active/texture
+            this.Window.SegmentLaneModeToggleButton.UpdateButtonImage();
         }
 
         public override void DeactivateTool() {

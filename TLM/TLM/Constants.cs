@@ -30,5 +30,11 @@ namespace TrafficManager {
         }
 
         public static IManagerFactory ManagerFactory => Manager.Impl.ManagerFactory.Instance;
+
+        /// <summary>Size for clickable signs used in overlays. Larger than readonly signs.</summary>
+        public const float OVERLAY_INTERACTIVE_SIGN_SIZE = 6.0f;
+
+        /// <summary>Size for readonly signs used in overlays.</summary>
+        public const float OVERLAY_READONLY_SIGN_SIZE = 3.8f;
     }
 }

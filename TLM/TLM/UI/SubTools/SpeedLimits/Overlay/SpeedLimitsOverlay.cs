@@ -80,8 +80,6 @@
         /// </summary>
         private CameraTransformValue lastCachedCamera_;
 
-        private const float SIGN_SIZE_INTERACTIVE = 7f;
-        private const float SIGN_SIZE_READONLY = 4f;
         private const float SPEED_LIMIT_SIGN_SIZE = 70f;
 
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>
@@ -463,8 +461,8 @@
             Vector3 xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
 
             float signSize = args.InteractiveSigns
-                ? SIGN_SIZE_INTERACTIVE
-                : SIGN_SIZE_READONLY; // reserved sign size in game coordinates
+                ? Constants.OVERLAY_INTERACTIVE_SIGN_SIZE
+                : Constants.OVERLAY_READONLY_SIGN_SIZE; // reserved sign size in game coordinates
 
             Vector3 drawOriginPos = segmentCenterPos -
                                     (0.5f * (((numLanes - 1) + numDirections) - 1) * signSize * xu);

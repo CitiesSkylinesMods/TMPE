@@ -1,5 +1,6 @@
 namespace TrafficManager.U {
     using System;
+    using ColossalFramework.UI;
 
     /// <summary>
     /// Basic button, cannot be activated, clickable, no tooltip.
@@ -29,15 +30,22 @@ namespace TrafficManager.U {
         }
 
         protected override bool IsActive() {
-            if (this.uIsActive != null) {
-                return this.uIsActive(this);
-            }
-
-            return false;
+            // use uIsActive if its defined, otherwise false. Override this in your buttons.
+            return this.uIsActive != null && this.uIsActive(this);
         }
 
         protected override string U_OverrideTooltipText() => this.uTooltip; // to override in subclass
 
         protected override bool IsVisible() => this.isVisible;
+
+        /// <summary>
+        /// Sets up a clickable button which can be active (to toggle textures on the button).
+        /// </summary>
+        public void SetupToggleButton(MouseEventHandler onClickFun,
+                                      Func<UIComponent, bool> isActiveFun) {
+            this.uOnClick = onClickFun;
+            this.uIsActive = isActiveFun;
+            this.uCanActivate = _ => true;
+        }
     }
 }

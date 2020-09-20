@@ -468,7 +468,9 @@ namespace TrafficManager.UI.SubTools {
             // if ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None)
             //        yu = -yu;
             Vector3 xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
-            float signSize = viewOnly ? 4f : 7f; // reserved sign size in game coordinates
+            float signSize = viewOnly
+                ? Constants.OVERLAY_READONLY_SIGN_SIZE
+                : Constants.OVERLAY_INTERACTIVE_SIGN_SIZE; // reserved sign size in game coordinates
             int maxNumSigns = 0;
 
             if (VehicleRestrictionsManager.Instance.IsRoadSegment(segmentInfo)) {
