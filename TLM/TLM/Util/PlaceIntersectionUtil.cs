@@ -21,12 +21,13 @@ namespace TrafficManager.Util {
             }
         }
 
-        public delegate void Handler(Dictionary<InstanceID, InstanceID> map);
+        public delegate void Handler(BuildingInfo info, Dictionary<InstanceID, InstanceID> map);
 
         /// <summary>
-        /// invoked when networkIDs are mapped and provides the user with dictionary of oldNetworkIds->newNetworkIds
+        /// invoked when networkIDs are mapped and pre-calculated.
+        /// provides the user with dictionary of oldNetworkIds->newNetworkIds
         /// </summary>
-        public static event Handler OnNetworksMapped;
+        public static event Handler OnPlaceIntersection;
 
         /// <summary>
         /// start mapping for <paramref name="intersectionInfo"/>
@@ -72,6 +73,8 @@ namespace TrafficManager.Util {
                 CalculateNetwork(item.Value);
 
             assetData.Record.Transfer(map);
+
+            OnPlaceIntersection?.Invoke(intersectionInfo, map);
         }
 
         /// <summary>
