@@ -46,11 +46,10 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// Generates a non halting stream of spiral grid coordinates clockwise.
+        /// Generates a stream of spiral grid coordinates clockwise.
         /// </summary>
-        /// <param name="radius">Maximum grid width/height of the spiral.</param>
-        /// <returns>Non halting stream of spiral grid coordinates.</returns>
-        public static IEnumerable<Vector2> GenerateSpiralGridCoordsClockwise(int radius) {
+        /// <returns>Stream of spiral grid coordinates until int.MaxValue + 1 elements were returned.</returns>
+        public static IEnumerable<Vector2> GenerateSpiralGridCoordsClockwise() {
             var cursorX = 0;
             var cursorY = 0;
 
@@ -60,8 +59,7 @@ namespace TrafficManager.Util {
             var segmentLength = 1;
             var segmentsPassed = 0;
 
-            var maxSteps = radius * radius;
-            for (var n = 0; n < maxSteps; n++) {
+            for (var n = 0; n <= int.MaxValue; n++) {
                 yield return new Vector2(cursorX, cursorY);
 
                 cursorX += directionX;

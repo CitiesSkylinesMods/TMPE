@@ -17,7 +17,8 @@ namespace TMUnitTest.Util {
                 return true;
             });
 
-            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise(radius)
+            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise()
+                .Take(radius * radius)
                 .ToList();
 
             CollectionAssert.AreEqual(expected, actual);
@@ -33,7 +34,8 @@ namespace TMUnitTest.Util {
                 return true;
             });
 
-            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise(radius)
+            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise()
+                .Take(radius * radius)
                 .ToList();
 
             CollectionAssert.AreEqual(expected, actual);
@@ -49,7 +51,8 @@ namespace TMUnitTest.Util {
                 return true;
             });
 
-            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise(radius)
+            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise()
+                .Take(radius * radius)
                 .ToList();
 
             CollectionAssert.AreEqual(expected, actual);
@@ -66,7 +69,8 @@ namespace TMUnitTest.Util {
                 return true;
             });
 
-            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise(radius)
+            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise()
+                .Take(radius * radius)
                 .Select(p => p + new Vector2((int)offset.x, (int)offset.y))
                 .ToList();
 
@@ -88,7 +92,7 @@ namespace TMUnitTest.Util {
             });
 
             var actual = new List<Vector2>();
-            foreach (var item in LoopUtil.GenerateSpiralGridCoordsClockwise(radius)) {
+            foreach (var item in LoopUtil.GenerateSpiralGridCoordsClockwise().Take(radius * radius)) {
                 if (item.x == 4) {
                     break;
                 }
