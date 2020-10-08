@@ -7,7 +7,6 @@ namespace TrafficManager.Util.Record {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
 
-    // TODO add record vehicle restrictions.
     [Serializable]
     public class SegmentRecord : IRecordable {
         public SegmentRecord(ushort segmentId) => SegmentId = segmentId;
@@ -18,7 +17,8 @@ namespace TrafficManager.Util.Record {
         private bool parkingForward_;
         private bool parkingBackward_;
 
-        private List<SpeedLimitLaneRecord> speedLanes_; // lanes that can have lane arrows
+        private List<SpeedLimitLaneRecord> speedLanes_; 
+        private List<VehicleRestrictionsLaneRecord> vehicleRestrictionsLanes_; 
         private List<uint> allLaneIds_; // store lane ids to help with transfering lanes.
 
         private static ParkingRestrictionsManager pMan => ParkingRestrictionsManager.Instance;
@@ -29,6 +29,9 @@ namespace TrafficManager.Util.Record {
             speedLanes_ = SpeedLimitLaneRecord.GetLanes(SegmentId);
             foreach (var lane in speedLanes_)
                 lane.Record();
+            vehicleRestrictionsLanes_ = VehicleRestrictionsLaneRecord.GetLanes(SegmentId);
+            foreach (var lane in vehicleRestrictionsLanes_)
+                lane.Record();
             allLaneIds_ = GetAllLanes(SegmentId);
         }
 
@@ -38,6 +41,8 @@ namespace TrafficManager.Util.Record {
             pMan.SetParkingAllowed(SegmentId, NetInfo.Direction.Backward, parkingBackward_);
             foreach (var lane in speedLanes_)
                 lane.Restore();
+            foreach (var lane in vehicleRestrictionsLanes_)
+                lane.Restore();
         }
 
         public void Transfer(Dictionary<InstanceID, InstanceID> map){
@@ -45,6 +50,8 @@ namespace TrafficManager.Util.Record {
             pMan.SetParkingAllowed(segmentId, NetInfo.Direction.Forward, parkingForward_);
             pMan.SetParkingAllowed(segmentId, NetInfo.Direction.Backward, parkingBackward_);
             foreach (var lane in speedLanes_)
+                lane.Transfer(map);
+            foreach (var lane in vehicleRestrictionsLanes_)
                 lane.Transfer(map);
         }
 

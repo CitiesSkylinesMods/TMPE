@@ -348,6 +348,7 @@
     <Compile Include="Util\PriorityRoad.cs" />
     <Compile Include="Util\Record\IRecordable.cs" />
     <Compile Include="Util\Record\LaneConnectionRecord.cs" />
+    <Compile Include="Util\Record\VehicleRestrictionsLaneRecord.cs" />
     <Compile Include="Util\Record\SpeedLimitLaneRecord.cs" />
     <Compile Include="Util\Record\LaneArrowsRecord.cs" />
     <Compile Include="Util\Record\NodeRecord.cs" />
