@@ -3,6 +3,7 @@ namespace TrafficManager.Util.Record {
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
     using static TrafficManager.Util.Shortcuts;
 
     [Serializable]
@@ -73,7 +74,6 @@ namespace TrafficManager.Util.Record {
             return ret;
         }
 
-        public byte[] Serialize() => RecordUtil.Serialize(this);
-
+        public byte[] Serialize() => SerializationUtil.Serialize(this);
     }
 }
