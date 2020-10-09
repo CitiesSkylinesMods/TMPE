@@ -42,11 +42,11 @@ namespace TrafficManager.Util {
             list[index2] = temp;
         }
 
-        private static NetNode[] _nodeBuffer => Singleton<NetManager>.instance.m_nodes.m_buffer;
+        private static NetNode[] _nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
 
-        private static NetSegment[] _segBuffer => Singleton<NetManager>.instance.m_segments.m_buffer;
+        private static NetSegment[] _segBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
-        private static NetLane[] _laneBuffer => Singleton<NetManager>.instance.m_lanes.m_buffer;
+        private static NetLane[] _laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
 
         private static ExtSegmentEnd[] _segEndBuff => segEndMan.ExtSegmentEnds;
 
@@ -58,13 +58,13 @@ namespace TrafficManager.Util {
 
         internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
 
-        internal static ref NetNode ToNode(this ushort nodeId) => ref GetNode(nodeId);
+        internal static ref NetNode ToNode(this ushort nodeId) => ref _nodeBuffer[nodeId];
 
         internal static ref NetLane ToLane(this uint laneId) => ref _laneBuffer[laneId];
 
         internal static ref NetSegment GetSeg(ushort segmentId) => ref _segBuffer[segmentId];
 
-        internal static ref NetSegment ToSegment(this ushort segmentId) => ref GetSeg(segmentId);
+        internal static ref NetSegment ToSegment(this ushort segmentId) => ref _segBuffer[segmentId];
 
         internal static NetInfo.Lane GetLaneInfo(ushort segmentId, int laneIndex) =>
             segmentId.ToSegment().Info.m_lanes[laneIndex];

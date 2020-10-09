@@ -668,6 +668,45 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
+            if (OptionsVehicleRestrictionsTab.NoDoubleCrossings &&
+                node.m_flags.IsFlagSet(NetNode.Flags.Junction) &&
+                !node.m_flags.IsFlagSet(NetNode.Flags.Untouchable) &&
+                node.CountSegments() == 2) {
+
+                // there are only two segments so left segment is the same as right.
+                ushort otherSegmentID = startNode
+                    ? segmentId.ToSegment().m_startLeftSegment
+                    : segmentId.ToSegment().m_endLeftSegment;
+
+                NetInfo info1 = segmentId.ToSegment().Info;
+                NetInfo info2 = otherSegmentID.ToSegment().Info;
+                bool hasPedestrianLanes1 = info1.m_hasPedestrianLanes;
+                bool hasPedestrianLanes2 = info2.m_hasPedestrianLanes;
+
+                // if only one of them has pedestrian lane then
+                // only the segment with pedestrian lanes need crossings
+                // also if neither have pedestrian lanes then none need crossing.
+                if (!hasPedestrianLanes1)
+                    return false;
+                if (!hasPedestrianLanes2)
+                    return true;
+
+                float sizeDiff = info1.m_halfWidth - info2.m_halfWidth;
+                if (sizeDiff == 0)
+                    return true; //if same size then both will get crossings.
+
+                // at bridge/tunnel entracnes, pedestrian crossing is on ground road.
+                bool isRoad1 = info1.m_netAI is RoadAI;
+                bool isRoad2 = info2.m_netAI is RoadAI;
+                if (isRoad1 && !isRoad2)
+                    return true; // only this segment needs pedestrian crossing.
+                if (isRoad2 && !isRoad1)
+                    return false; // only the other segment needs pedestrian crossing.
+
+                if (sizeDiff > 0)
+                    return false; // only the smaller segment needs pedestrian crossing.
+            }
+
             // crossing is allowed at junctions and at untouchable nodes (for example: spiral
             // underground parking)
             bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Untouchable)) !=
