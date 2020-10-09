@@ -3,6 +3,7 @@ namespace TrafficManager.Util.Record {
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.State;
 
     [Serializable]
     public class SpeedLimitLaneRecord : IRecordable {
@@ -61,7 +62,7 @@ namespace TrafficManager.Util.Record {
             return ret;
         }
 
-        public byte[] Serialize() => RecordUtil.Serialize(this);
+        public byte[] Serialize() => SerializationUtil.Serialize(this);
 
     }
 }

@@ -50,6 +50,6 @@ namespace TrafficManager.Util.Record {
             return ret;
         }
 
-        public byte[] Serialize() => RecordUtil.Serialize(this);
+        public byte[] Serialize() => SerializationUtil.Serialize(this);
     }
 }

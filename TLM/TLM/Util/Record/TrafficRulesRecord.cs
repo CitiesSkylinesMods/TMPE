@@ -5,6 +5,7 @@ namespace TrafficManager.Util.Record {
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
     using static Shortcuts;
+    using TrafficManager.State;
 
     [Serializable]
     public class TrafficRulesRecord : IRecordable {
@@ -15,14 +16,25 @@ namespace TrafficManager.Util.Record {
         public List<IRecordable> Records = new List<IRecordable>();
 
         /// <summary>
-        /// Records segment and both node ends. but not the segment ends.
+        /// Records segment and both segment ends  but not nodes.
         /// </summary>
-        public void AddSegmentAndNodes(ushort segmentId) {
+        public void AddSegmentWithBothEnds(ushort segmentId) {
             ushort node0 = segmentId.ToSegment().m_startNode;
             ushort node1 = segmentId.ToSegment().m_endNode;
             SegmentIDs.Add(segmentId);
-            NodeIDs.Add(node0);
-            NodeIDs.Add(node1);
+            AddNodeAndSegmentEnds(node0);
+            AddNodeAndSegmentEnds(node1);
+        }
+
+        /// <summary>
+        /// Records segment and both node ends. but not the segment ends.
+        /// </summary>
+        public void AddSegmentAndNodes(ushort segmentId) {
+            SegmentIDs.Add(segmentId);
+            int index1 = SegmentEndManager.Instance.GetIndex(segmentId, true);
+            int index2 = SegmentEndManager.Instance.GetIndex(segmentId, false);
+            SegmentEndIndeces.Add(index1);
+            SegmentEndIndeces.Add(index2);
         }
 
         /// <summary>
@@ -78,6 +90,6 @@ namespace TrafficManager.Util.Record {
             }
         }
 
-        public byte[] Serialize() => RecordUtil.Serialize(this);
+        public byte[] Serialize() => SerializationUtil.Serialize(this);
     }
 }
