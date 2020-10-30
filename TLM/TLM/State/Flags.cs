@@ -939,9 +939,8 @@ namespace TrafficManager.State {
 
                 // ↑↑↑
                 // end local function
-                Constants.ServiceFactory.NetService.ProcessSegment(
-                    (ushort)segmentId,
-                    ForEachLane);
+                ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                ForEachLane((ushort)segmentId, ref segment);
             }
 
             return ret;

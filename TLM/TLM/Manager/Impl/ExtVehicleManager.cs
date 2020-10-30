@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework.Math;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -837,21 +837,12 @@
         private static ushort GetTransitNodeId(ref PathUnit.Position curPos,
                                                ref PathUnit.Position nextPos) {
             bool startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
-            ushort transitNodeId1 = 0;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                curPos.m_segment,
-                (ushort segmentId, ref NetSegment segment) => {
-                    transitNodeId1 = startNode ? segment.m_startNode : segment.m_endNode;
-                    return true;
-                });
 
-            ushort transitNodeId2 = 0;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                nextPos.m_segment,
-                (ushort segmentId, ref NetSegment segment) => {
-                    transitNodeId2 = startNode ? segment.m_startNode : segment.m_endNode;
-                    return true;
-                });
+            ref var curPosSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[curPos.m_segment];
+            var transitNodeId1 = startNode ? curPosSegment.m_startNode : curPosSegment.m_endNode;
+
+            ref var nextPosSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[nextPos.m_segment];
+            var transitNodeId2 = startNode ? nextPosSegment.m_startNode : nextPosSegment.m_endNode;
 
             return transitNodeId1 != transitNodeId2 ? (ushort)0 : transitNodeId1;
         }

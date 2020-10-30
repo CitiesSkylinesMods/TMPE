@@ -924,20 +924,18 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                             return true;
                                         }
 
-                                        Constants.ServiceFactory.NetService.ProcessSegment(
-                                            data.SegVisitData.CurSeg.segmentId,
-                                            (ushort curSegmentId, ref NetSegment curSegment) => {
-                                                NetInfo.Lane curLaneInfo = curSegment.Info.m_lanes[
+                                        var segmentId = data.SegVisitData.CurSeg.segmentId;
+                                        ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+
+                                        NetInfo.Lane curLaneInfo = segment.Info.m_lanes[
                                                     data.CurLanePos.laneIndex];
 
-                                                SpeedLimitManager.Instance.SetSpeedLimit(
-                                                    curSegmentId,
-                                                    data.CurLanePos.laneIndex,
-                                                    curLaneInfo,
-                                                    data.CurLanePos.laneId,
-                                                    speedLimitToSet?.GameUnits);
-                                                return true;
-                                            });
+                                        SpeedLimitManager.Instance.SetSpeedLimit(
+                                            segmentId,
+                                            data.CurLanePos.laneIndex,
+                                            curLaneInfo,
+                                            data.CurLanePos.laneId,
+                                            speedLimitToSet?.GameUnits);
 
                                         return true;
                                     });

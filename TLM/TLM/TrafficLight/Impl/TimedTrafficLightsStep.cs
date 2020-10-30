@@ -13,6 +13,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.State;
     using TrafficManager.Traffic;
     using TrafficManager.Util;
+    using ColossalFramework;
 
     // TODO class should be completely reworked, approx. in version 1.10
     public class TimedTrafficLightsStep
@@ -846,15 +847,10 @@ namespace TrafficManager.TrafficLight.Impl {
                         countOnlyMovingIfGreenOnSegment = countOnlyMovingIfGreen;
 
                         if (countOnlyMovingIfGreenOnSegment) {
-                            Constants.ServiceFactory.NetService.ProcessSegment(
-                                sourceSegmentId,
-                                (ushort srcSegId, ref NetSegment segment) => {
-                                    if (restrMan.IsRailSegment(segment.Info)) {
-                                        countOnlyMovingIfGreenOnSegment = false;
-                                    }
-
-                                    return true;
-                                });
+                            ref var sourceSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[sourceSegmentId];
+                            if (restrMan.IsRailSegment(sourceSegment.Info)) {
+                                countOnlyMovingIfGreenOnSegment = false;
+                            }
                         }
 
                         movingVehiclesMetrics =

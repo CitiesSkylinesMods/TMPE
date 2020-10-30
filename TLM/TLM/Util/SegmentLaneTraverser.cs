@@ -1,6 +1,7 @@
 namespace TrafficManager.Util {
     using System;
     using System.Collections.Generic;
+    using ColossalFramework;
     using GenericGameBridge.Service;
     using static SegmentTraverser;
 
@@ -119,9 +120,10 @@ namespace TrafficManager.Util {
                     return true;
                 }
 
-                Constants.ServiceFactory.NetService.ProcessSegment(
-                    segData.CurSeg.segmentId,
-                    VisitorProcessFun);
+                var segmentId = segData.CurSeg.segmentId;
+                ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                VisitorProcessFun(segmentId, ref segment);
+
                 return ret;
             }
 

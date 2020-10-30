@@ -80,13 +80,9 @@ namespace TrafficManager.Traffic.Impl {
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             // TODO pre-calculate this
-            uint avgSegLen = 0;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                SegmentId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    avgSegLen = (uint)segment.m_averageLength;
-                    return true;
-                });
+
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId];
+            uint avgSegLen = (uint)segment.m_averageLength;
 
             IDictionary<ushort, uint>[] ret =
                 includeStopped ? numVehiclesGoingToSegmentId : numVehiclesMovingToSegmentId;
@@ -307,13 +303,9 @@ namespace TrafficManager.Traffic.Impl {
         // }
 
         public void Update() {
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                SegmentId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    StartNode = segment.m_startNode == NodeId;
-                    numLanes = segment.Info.m_lanes.Length;
-                    return true;
-                });
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId];
+            StartNode = segment.m_startNode == NodeId;
+            numLanes = segment.Info.m_lanes.Length;
 
             if (!Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
                 Log.Error($"SegmentEnd.Update: Segment {SegmentId} is invalid.");

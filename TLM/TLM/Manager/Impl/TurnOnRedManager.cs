@@ -1,4 +1,5 @@
 namespace TrafficManager.Manager.Impl {
+    using ColossalFramework;
     using CSUtil.Commons;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
@@ -155,15 +156,9 @@ namespace TrafficManager.Manager.Impl {
             // get left/right segments
             ushort leftSegmentId = 0;
             ushort rightSegmentId = 0;
-            Services.NetService.ProcessSegment(
-                end.segmentId,
-                (ushort _, ref NetSegment segment) => {
-                    segment.GetLeftAndRightSegments(
-                        nodeId,
-                        out leftSegmentId,
-                        out rightSegmentId);
-                    return true;
-                });
+
+            ref var endSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[end.segmentId];
+            endSegment.GetLeftAndRightSegments(nodeId, out leftSegmentId, out rightSegmentId);
 
             if (logTurnOnRed) {
                 Log._Debug(

@@ -91,19 +91,6 @@ namespace CitiesGameBridge.Service {
             return expectedResult == null ? result != 0 : result == expectedResult;
         }
 
-        /// <summary>
-        /// Given a segment id, invoke a handler function with that id and the corresponding <see cref="NetSegment"/>,
-        /// without creating defensive copies of the segment struct.
-        /// </summary>
-        /// 
-        /// <param name="segmentId">The id of the segment.</param>
-        /// <param name="handler">The handler function to invoke.</param>
-        public void ProcessSegment(ushort segmentId, NetSegmentHandler handler) {
-            handler(
-                segmentId,
-                ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
-        }
-
         // LANE BASICS --------------------------------------------------------------------------------
 
         /// <summary>
@@ -174,14 +161,10 @@ namespace CitiesGameBridge.Service {
         // OTHER STUFF --------------------------------------------------------------------------------
 
         public ushort GetSegmentNodeId(ushort segmentId, bool startNode) {
-            ushort nodeId = 0;
-            ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    nodeId = startNode ? segment.m_startNode : segment.m_endNode;
-                    return true;
-                });
-            return nodeId;
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            return startNode
+                ? segment.m_startNode
+                : segment.m_endNode;
         }
 
         public void IterateNodeSegments(ushort nodeId, NetSegmentHandler handler) {
@@ -403,32 +386,22 @@ namespace CitiesGameBridge.Service {
             Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
             ISimulationService simService = SimulationService.Instance;
 
-            ProcessSegment(
-                segmentId,
-                (ushort sId, ref NetSegment segment) => {
-                    uint currentBuildIndex = simService.CurrentBuildIndex;
-                    simService.CurrentBuildIndex = currentBuildIndex + 1;
-                    segment.m_modifiedIndex = currentBuildIndex;
-
-                    ++segment.m_buildIndex;
-                    return true;
-                });
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            uint currentBuildIndex = simService.CurrentBuildIndex;
+            simService.CurrentBuildIndex = currentBuildIndex + 1;
+            segment.m_modifiedIndex = currentBuildIndex;
+            ++segment.m_buildIndex;
         }
 
         public bool? IsStartNode(ushort segmentId, ushort nodeId) {
-            bool? ret = null;
-            ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment seg) => {
-                    if (seg.m_startNode == nodeId) {
-                        ret = true;
-                    } else if (seg.m_endNode == nodeId) {
-                        ret = false;
-                    }
-
-                    return true;
-                });
-            return ret;
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            if (segment.m_startNode == nodeId) {
+                return true;
+            } else if (segment.m_endNode == nodeId) {
+                return false;
+            } else {
+                return null;
+            }
         }
 
         public ushort GetHeadNode(ref NetSegment segment) {

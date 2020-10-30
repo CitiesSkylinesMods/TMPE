@@ -494,12 +494,8 @@ namespace TrafficManager.TrafficLight.Impl {
 
             ItemClass prevConnectionClass = null;
 
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                SegmentId,
-                (ushort prevSegId, ref NetSegment segment) => {
-                    prevConnectionClass = segment.Info.GetConnectionClass();
-                    return true;
-                });
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId];
+            prevConnectionClass = segment.Info.GetConnectionClass();
 
             var autoPedestrianLightState = RoadBaseAI.TrafficLightState.Green;
             bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
@@ -537,13 +533,8 @@ namespace TrafficManager.TrafficLight.Impl {
                         continue;
                     }
 
-                    ItemClass nextConnectionClass = null;
-                    Constants.ServiceFactory.NetService.ProcessSegment(
-                        otherSegmentId,
-                        (ushort otherSegId, ref NetSegment segment) => {
-                            nextConnectionClass = segment.Info.GetConnectionClass();
-                            return true;
-                        });
+                    ref var otherSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId];
+                    ItemClass nextConnectionClass = otherSegment.Info.GetConnectionClass();
 
                     if (nextConnectionClass.m_service != prevConnectionClass.m_service) {
                         if (logTrafficLights) {
@@ -643,14 +634,9 @@ namespace TrafficManager.TrafficLight.Impl {
             int defaultLanes = 0;
             NetInfo segmentInfo = null;
 
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                SegmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    VehicleTypeByLaneIndex =
-                        new ExtVehicleType?[segment.Info.m_lanes.Length];
-                    segmentInfo = segment.Info;
-                    return true;
-                });
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId];
+            VehicleTypeByLaneIndex = new ExtVehicleType?[segment.Info.m_lanes.Length];
+            segmentInfo = segment.Info;
 
             // TODO improve
             var laneIndicesWithoutSeparateLights = new HashSet<byte>(allAllowedTypes.Keys);

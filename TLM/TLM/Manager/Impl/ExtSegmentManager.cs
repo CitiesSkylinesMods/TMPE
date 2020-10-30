@@ -139,14 +139,8 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            bool ret = false;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    ret = CalculateHasBusLane(segment.Info);
-                    return true;
-                });
-            return ret;
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            return CalculateHasBusLane(segment.Info);
         }
 
         /// <summary>
@@ -170,14 +164,8 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            var ret = false;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    ret = CalculateIsHighway(segment.Info);
-                    return true;
-                });
-            return ret;
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            return CalculateIsHighway(segment.Info);
         }
 
         /// <summary>

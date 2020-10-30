@@ -23,21 +23,14 @@ namespace TrafficManager.Manager.Impl {
         private ParkingRestrictionsManager() { }
 
         public bool MayHaveParkingRestriction(ushort segmentId) {
-            bool ret = false;
-            Services.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    if ((segment.m_flags & NetSegment.Flags.Created) ==
-                        NetSegment.Flags.None) {
-                        return true;
-                    }
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            if ((segment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
+                return true;
+            }
 
-                    ItemClass connectionClass = segment.Info.GetConnectionClass();
-                    ret = connectionClass.m_service == ItemClass.Service.Road
-                          && segment.Info.m_hasParkingSpaces;
-                    return true;
-                });
-            return ret;
+            ItemClass connectionClass = segment.Info.GetConnectionClass();
+
+            return connectionClass.m_service == ItemClass.Service.Road && segment.Info.m_hasParkingSpaces;
         }
 
         public bool IsParkingAllowed(ushort segmentId, NetInfo.Direction finalDir) {
@@ -87,12 +80,8 @@ namespace TrafficManager.Manager.Impl {
                 Services.SimulationService.AddAction(
                     () => {
                         // force relocation of illegaly parked vehicles
-                        Services.NetService.ProcessSegment(
-                            segmentId,
-                            (ushort segId, ref NetSegment segment) => {
-                                segment.UpdateSegment(segmentId);
-                                return true;
-                            });
+                        ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                        segment.UpdateSegment(segmentId);
                     });
             }
 
