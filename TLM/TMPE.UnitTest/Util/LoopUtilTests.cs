@@ -8,14 +8,12 @@ namespace TMUnitTest.Util {
     [TestClass]
     public class LoopUtilTests {
         [TestMethod]
-        public void CompareSpiralLoopToGenerateLoopCoords_RadiusZero() {
-            var radius = 0;
-
-            var expected = new List<Vector2>();
-            LoopUtil.SpiralLoop(radius, radius, (x, y) => {
-                expected.Add(new Vector2(x, y));
-                return true;
-            });
+        public void GenerateSpiralGridCoordsClockwise_Radius1() {
+            var radius = 1;
+            var expected = new List<Vector2>()
+            {
+                new Vector2() { x = 0f, y = 0f }
+            };
 
             var actual = LoopUtil.GenerateSpiralGridCoordsClockwise()
                 .Take(radius * radius)
@@ -25,80 +23,40 @@ namespace TMUnitTest.Util {
         }
 
         [TestMethod]
-        public void CompareSpiralLoopToGenerateLoopCoords_Radius10() {
-            var radius = 10;
-
-            var expected = new List<Vector2>();
-            LoopUtil.SpiralLoop(radius, radius, (x, y) => {
-                expected.Add(new Vector2(x, y));
-                return true;
-            });
+        public void GenerateSpiralGridCoordsClockwise_Radius5() {
+            var radius = 5;
+            var expected = new List<Vector2>()
+            {
+                new Vector2() { x = 0f, y = 0f },
+                new Vector2() { x = 1f, y = 0f },
+                new Vector2() { x = 1f, y = 1f },
+                new Vector2() { x = 0f, y = 1f },
+                new Vector2() { x = -1f, y = 1f },
+                new Vector2() { x = -1f, y = 0f },
+                new Vector2() { x = -1f, y = -1f },
+                new Vector2() { x = 0f, y = -1f },
+                new Vector2() { x = 1f, y = -1f },
+                new Vector2() { x = 2f, y = -1f },
+                new Vector2() { x = 2f, y = 0f },
+                new Vector2() { x = 2f, y = 1f },
+                new Vector2() { x = 2f, y = 2f },
+                new Vector2() { x = 1f, y = 2f },
+                new Vector2() { x = 0f, y = 2f },
+                new Vector2() { x = -1f, y = 2f },
+                new Vector2() { x = -2f, y = 2f },
+                new Vector2() { x = -2f, y = 1f },
+                new Vector2() { x = -2f, y = 0f },
+                new Vector2() { x = -2f, y = -1f },
+                new Vector2() { x = -2f, y = -2f },
+                new Vector2() { x = -1f, y = -2f },
+                new Vector2() { x = 0f, y = -2f },
+                new Vector2() { x = 1f, y = -2f },
+                new Vector2() { x = 2f, y = -2f },
+            };
 
             var actual = LoopUtil.GenerateSpiralGridCoordsClockwise()
                 .Take(radius * radius)
                 .ToList();
-
-            CollectionAssert.AreEqual(expected, actual);
-        }
-
-        [TestMethod]
-        public void CompareSpiralLoopToGenerateLoopCoords_Radius33() {
-            var radius = 33;
-
-            var expected = new List<Vector2>();
-            LoopUtil.SpiralLoop(radius, radius, (x, y) => {
-                expected.Add(new Vector2(x, y));
-                return true;
-            });
-
-            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise()
-                .Take(radius * radius)
-                .ToList();
-
-            CollectionAssert.AreEqual(expected, actual);
-        }
-
-        [TestMethod]
-        public void CompareSpiralLoopToGenerateLoopCoords_Radius33_WithOffset() {
-            var radius = 33;
-            var offset = new Vector2(121.3f, 324.7f);
-
-            var expected = new List<Vector2>();
-            LoopUtil.SpiralLoop((int)offset.x, (int)offset.y, radius, radius, (x, y) => {
-                expected.Add(new Vector2(x, y));
-                return true;
-            });
-
-            var actual = LoopUtil.GenerateSpiralGridCoordsClockwise()
-                .Take(radius * radius)
-                .Select(p => p + new Vector2((int)offset.x, (int)offset.y))
-                .ToList();
-
-            CollectionAssert.AreEqual(expected, actual);
-        }
-
-        [TestMethod]
-        public void CompareSpiralLoopToGenerateLoopCoords_BreakCondition() {
-            var radius = 50;
-
-            var expected = new List<Vector2>();
-            LoopUtil.SpiralLoop(radius, radius, (x, y) => {
-                if (x == 4) {
-                    return false;
-                }
-
-                expected.Add(new Vector2(x, y));
-                return true;
-            });
-
-            var actual = new List<Vector2>();
-            foreach (var item in LoopUtil.GenerateSpiralGridCoordsClockwise().Take(radius * radius)) {
-                if (item.x == 4) {
-                    break;
-                }
-
-                actual.Add(item);
-            }
 
             CollectionAssert.AreEqual(expected, actual);
         }
