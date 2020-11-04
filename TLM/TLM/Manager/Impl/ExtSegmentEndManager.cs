@@ -403,15 +403,11 @@ namespace TrafficManager.Manager.Impl {
             }
 
             bool hasOtherSegments = false;
+            ref NetNode node = ref nodeId.ToNode();
 
             for (var s = 0; s < 8; s++) {
-                ushort otherSegmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    nodeId,
-                    (ushort nId, ref NetNode node) => {
-                        otherSegmentId = node.GetSegment(s);
-                        return true;
-                    });
+                ushort otherSegmentId = node.GetSegment(s);
+
                 if (otherSegmentId == 0 || otherSegmentId == segmentId) {
                     continue;
                 }

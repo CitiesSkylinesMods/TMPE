@@ -3,8 +3,6 @@ namespace GenericGameBridge.Service {
 
     public delegate bool NetSegmentHandler(ushort segmentId, ref NetSegment segment);
 
-    public delegate bool NetNodeHandler(ushort nodeId, ref NetNode node);
-
     public delegate bool NetLaneHandler(uint laneId, ref NetLane lane);
 
     public delegate bool NetSegmentLaneHandler(uint laneId,
@@ -75,8 +73,6 @@ namespace GenericGameBridge.Service {
                                  NetSegmentLaneHandler handler);
 
         void ProcessLane(uint laneId, NetLaneHandler handler);
-
-        void ProcessNode(ushort nodeId, NetNodeHandler handler);
 
         void ProcessSegment(ushort segmentId, NetSegmentHandler handler);
 

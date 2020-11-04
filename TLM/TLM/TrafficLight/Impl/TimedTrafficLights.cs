@@ -23,13 +23,9 @@ namespace TrafficManager.TrafficLight.Impl {
             NodeGroup = new List<ushort>(nodeGroup);
             MasterNodeId = NodeGroup[0];
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                nodeId,
-                (ushort nId, ref NetNode node) => {
-                    UpdateDirections(ref node);
-                    UpdateSegmentEnds(ref node);
-                    return true;
-                });
+            ref NetNode node = ref nodeId.ToNode();
+            UpdateDirections(ref node);
+            UpdateSegmentEnds(ref node);
 
             started = false;
         }
@@ -367,14 +363,7 @@ namespace TrafficManager.TrafficLight.Impl {
             /*if (!housekeeping())
                     return;*/
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nodeId, ref NetNode node) => {
-                    Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
-                        NodeId,
-                        ref node);
-                    return true;
-                });
+            Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(NodeId, ref NodeId.ToNode());
 
             foreach (TimedTrafficLightsStep step in Steps) {
                 foreach (KeyValuePair<ushort, ICustomSegmentLights> e in step.CustomSegmentLights) {
@@ -395,15 +384,11 @@ namespace TrafficManager.TrafficLight.Impl {
             ICustomSegmentLightsManager customTrafficLightsManager = Constants.ManagerFactory.CustomSegmentLightsManager;
 
             // Log._Debug($"Checking for invalid pedestrian lights @ {NodeId}.");
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        segmentId = node.GetSegment(i);
-                        return true;
-                    });
 
+            ref NetNode node = ref NodeId.ToNode();
+
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) {
                     continue;
                 }
@@ -455,15 +440,10 @@ namespace TrafficManager.TrafficLight.Impl {
             ICustomSegmentLightsManager customTrafficLightsManager =
                 Constants.ManagerFactory.CustomSegmentLightsManager;
 
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        segmentId = node.GetSegment(i);
-                        return true;
-                    });
+            ref NetNode node = ref NodeId.ToNode();
 
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) {
                     continue;
                 }
@@ -940,26 +920,18 @@ namespace TrafficManager.TrafficLight.Impl {
             Log._Trace(
                 $"TimedTrafficLights.OnGeometryUpdate: called for timed traffic light @ {NodeId}.");
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    UpdateDirections(ref node);
-                    UpdateSegmentEnds(ref node);
-                    return true;
-                });
+            ref NetNode node = ref NodeId.ToNode();
+
+            UpdateDirections(ref node);
+            UpdateSegmentEnds(ref node);
 
             if (NumSteps() <= 0) {
                 Log._Debug($"TimedTrafficLights.OnGeometryUpdate: no steps @ {NodeId}");
                 return;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    BackUpInvalidStepSegments(ref node);
-                    HandleNewSegments(ref node);
-                    return true;
-                });
+            BackUpInvalidStepSegments(ref node);
+            HandleNewSegments(ref node);
         }
 
         /// <summary>
