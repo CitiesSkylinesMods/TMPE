@@ -461,15 +461,8 @@ namespace TrafficManager.Manager.Impl {
             nextIsRealJunction = nextNode.CountSegments() >= 3;
             buildingId = NetNode.FindOwnerBuilding(nextNodeId, 32f);
 
-            bool isTollBooth = false;
-            if (buildingId != 0) {
-                Constants.ServiceFactory.BuildingService.ProcessBuilding(
-                    buildingId,
-                    (ushort bId, ref Building building) => {
-                        isTollBooth = building.Info.m_buildingAI is TollBoothAI;
-                        return true;
-                    });
-            }
+            bool isTollBooth = buildingId != 0
+                && buildingId.ToBuilding().Info.m_buildingAI is TollBoothAI;
 
             bool nextIsSimpleJunction = false;
             bool nextIsSplitJunction = false;
@@ -1143,13 +1136,7 @@ namespace TrafficManager.Manager.Impl {
                         }
                     }
 
-                    Constants.ServiceFactory.NetService.ProcessLane(
-                        nextLaneId,
-                        (uint lId, ref NetLane lane) => {
-                            nextLaneId = lane.m_nextLane;
-                            return true;
-                        });
-
+                    nextLaneId = nextLaneId.ToLane().m_nextLane;
                     ++nextLaneIndex;
                 } // foreach lane
 

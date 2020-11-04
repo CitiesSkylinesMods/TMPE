@@ -1023,13 +1023,8 @@ namespace TrafficManager.State {
                 ret &= ~lfr; // remove all arrows
                 ret |= (uint)flags; // add desired arrows
             } else {
-                Constants.ServiceFactory.NetService.ProcessLane(
-                    laneId,
-                    (uint lId, ref NetLane lane) => {
-                        ret = lane.m_flags;
-                        ret &= (uint)LaneArrows.LeftForwardRight;
-                        return true;
-                    });
+                ret = laneId.ToLane().m_flags;
+                ret &= (uint)LaneArrows.LeftForwardRight;
             }
 
             return (LaneArrows)ret;
