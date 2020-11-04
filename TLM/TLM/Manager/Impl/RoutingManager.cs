@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
+    using TrafficManager.Util;
 
     public class RoutingManager
         : AbstractGeometryObservingManager,
@@ -1164,13 +1165,7 @@ namespace TrafficManager.Manager.Impl {
                         }
                     }
 
-                    Constants.ServiceFactory.NetService.ProcessLane(
-                        nextLaneId,
-                        (uint lId, ref NetLane lane) => {
-                            nextLaneId = lane.m_nextLane;
-                            return true;
-                        });
-
+                    nextLaneId = nextLaneId.ToLane().m_nextLane;
                     ++nextLaneIndex;
                 } // foreach lane
 

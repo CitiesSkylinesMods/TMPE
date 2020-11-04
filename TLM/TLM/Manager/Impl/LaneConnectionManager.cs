@@ -381,20 +381,15 @@ namespace TrafficManager.Manager.Impl {
             }*/
 
             Flags.RemoveLaneConnections(laneId, startNode);
+            
+            if (recalcAndPublish) {
+                ushort segment = laneId.ToLane().m_segment;
+                RoutingManager.Instance.RequestRecalculation(segment);
 
-            Services.NetService.ProcessLane(
-                laneId,
-                (uint lId, ref NetLane lane) => {
-                    if (recalcAndPublish) {
-                        RoutingManager.Instance.RequestRecalculation(lane.m_segment);
-
-                        if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                            Services.NetService.PublishSegmentChanges(lane.m_segment);
-                        }
-                    }
-
-                    return true;
-                });
+                if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+                    Services.NetService.PublishSegmentChanges(segment);
+                }
+            }
         }
 
         /// <summary>

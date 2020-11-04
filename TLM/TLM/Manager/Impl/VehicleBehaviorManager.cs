@@ -2443,14 +2443,7 @@ namespace TrafficManager.Manager.Impl {
                                     next1BackTransitions[j]);
                             }
 
-                            Services.NetService.ProcessLane(
-                                next1BackTransitions[j].laneId,
-                                (uint prevLaneId, ref NetLane prevLane) => {
-                                    prevLanesClear =
-                                        prevLane.GetReservedSpace() <= maxReservedSpace;
-                                    return true;
-                                });
-
+                            prevLanesClear = next1BackTransitions[j].laneId.ToLane().GetReservedSpace() <= maxReservedSpace;
                             if (!prevLanesClear) {
                                 if (logLaneSelection) {
                                     Log._Debug(
@@ -2971,30 +2964,23 @@ namespace TrafficManager.Manager.Impl {
                         () => $"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): Checking " +
                         $"for traffic on next lane id={currentFwdTransitions[i].laneId}.");
 
-                    Services.NetService.ProcessLane(
-                        currentFwdTransitions[i].laneId,
-                        (uint nextLaneId, ref NetLane nextLane) => {
-                            // similar to stock code in VehicleAI.FindBestLane
-                            float cost = nextLane.GetReservedSpace();
+                    float cost = currentFwdTransitions[i].laneId.ToLane().GetReservedSpace();
 
-                            if (currentFwdTransitions[i].laneIndex == nextPathPos.m_lane) {
-                                cost -= vehicleLength;
-                            }
+                    if (currentFwdTransitions[i].laneIndex == nextPathPos.m_lane) {
+                        cost -= vehicleLength;
+                    }
 
-                            cost += Mathf.Abs(curPosition - nextLaneInfoPos) * 0.1f;
+                    cost += Mathf.Abs(curPosition - nextLaneInfoPos) * 0.1f;
 
-                            if (cost < minCost) {
-                                minCost = cost;
-                                bestNextLaneIndex = currentFwdTransitions[i].laneIndex;
+                    if (cost < minCost) {
+                        minCost = cost;
+                        bestNextLaneIndex = currentFwdTransitions[i].laneIndex;
 
-                                Log._DebugIf(
-                                    logLaneSelection,
-                                    () => $"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): " +
-                                    $"Found better lane: bestNextLaneIndex={bestNextLaneIndex}, minCost={minCost}");
-                            }
-
-                            return true;
-                        });
+                        Log._DebugIf(
+                            logLaneSelection,
+                            () => $"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): " +
+                            $"Found better lane: bestNextLaneIndex={bestNextLaneIndex}, minCost={minCost}");
+                    }
                 } // for each forward transition
 
                 Log._DebugIf(
