@@ -1,9 +1,9 @@
 namespace TrafficManager.Manager.Impl {
-    using ColossalFramework;
     using CSUtil.Commons;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     public class TurnOnRedManager
         : AbstractGeometryObservingManager,
@@ -154,11 +154,9 @@ namespace TrafficManager.Manager.Impl {
             }
 
             // get left/right segments
-            ushort leftSegmentId = 0;
-            ushort rightSegmentId = 0;
-
-            ref var endSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[end.segmentId];
-            endSegment.GetLeftAndRightSegments(nodeId, out leftSegmentId, out rightSegmentId);
+            end.segmentId
+                .ToSegment()
+                .GetLeftAndRightSegments(nodeId, out ushort leftSegmentId, out ushort rightSegmentId);
 
             if (logTurnOnRed) {
                 Log._Debug(

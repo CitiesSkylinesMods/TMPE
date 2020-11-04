@@ -494,8 +494,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
             ItemClass prevConnectionClass = null;
 
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId];
-            prevConnectionClass = segment.Info.GetConnectionClass();
+            prevConnectionClass = SegmentId.ToSegment().Info.GetConnectionClass();
 
             var autoPedestrianLightState = RoadBaseAI.TrafficLightState.Green;
             bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
@@ -533,9 +532,7 @@ namespace TrafficManager.TrafficLight.Impl {
                         continue;
                     }
 
-                    ref var otherSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[otherSegmentId];
-                    ItemClass nextConnectionClass = otherSegment.Info.GetConnectionClass();
-
+                    ItemClass nextConnectionClass = otherSegmentId.ToSegment().Info.GetConnectionClass();
                     if (nextConnectionClass.m_service != prevConnectionClass.m_service) {
                         if (logTrafficLights) {
                             Log._DebugFormat(
@@ -632,11 +629,8 @@ namespace TrafficManager.TrafficLight.Impl {
             // bool addPedestrianLight = false;
             uint separateLanes = 0;
             int defaultLanes = 0;
-            NetInfo segmentInfo = null;
-
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId];
-            VehicleTypeByLaneIndex = new ExtVehicleType?[segment.Info.m_lanes.Length];
-            segmentInfo = segment.Info;
+            NetInfo segmentInfo = SegmentId.ToSegment().Info;
+            VehicleTypeByLaneIndex = new ExtVehicleType?[segmentInfo.m_lanes.Length];
 
             // TODO improve
             var laneIndicesWithoutSeparateLights = new HashSet<byte>(allAllowedTypes.Keys);

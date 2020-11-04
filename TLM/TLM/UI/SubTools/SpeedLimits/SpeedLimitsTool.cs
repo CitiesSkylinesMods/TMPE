@@ -924,11 +924,15 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                             return true;
                                         }
 
-                                        var segmentId = data.SegVisitData.CurSeg.segmentId;
-                                        ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                                        ushort segmentId = data
+                                            .SegVisitData
+                                            .CurSeg
+                                            .segmentId;
 
-                                        NetInfo.Lane curLaneInfo = segment.Info.m_lanes[
-                                                    data.CurLanePos.laneIndex];
+                                        NetInfo.Lane curLaneInfo = segmentId
+                                            .ToSegment()
+                                            .Info
+                                            .m_lanes[data.CurLanePos.laneIndex];
 
                                         SpeedLimitManager.Instance.SetSpeedLimit(
                                             segmentId,

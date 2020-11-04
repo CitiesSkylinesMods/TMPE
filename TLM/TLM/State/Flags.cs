@@ -894,7 +894,7 @@ namespace TrafficManager.State {
         internal static IDictionary<uint, ExtVehicleType> GetAllLaneAllowedVehicleTypes() {
             IDictionary<uint, ExtVehicleType> ret = new Dictionary<uint, ExtVehicleType>();
 
-            for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+            for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 // Begin local function
                 bool ForEachLane(ushort segId, ref NetSegment segment) {
                     if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) !=
@@ -939,8 +939,7 @@ namespace TrafficManager.State {
 
                 // ↑↑↑
                 // end local function
-                ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-                ForEachLane((ushort)segmentId, ref segment);
+                ForEachLane(segmentId, ref segmentId.ToSegment());
             }
 
             return ret;

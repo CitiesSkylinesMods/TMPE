@@ -4,6 +4,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     public class ExtSegmentManager
         : AbstractCustomManager,
@@ -139,8 +140,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            return CalculateHasBusLane(segment.Info);
+            return CalculateHasBusLane(segmentId.ToSegment().Info);
         }
 
         /// <summary>
@@ -164,8 +164,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            return CalculateIsHighway(segment.Info);
+            return CalculateIsHighway(segmentId.ToSegment().Info);
         }
 
         /// <summary>

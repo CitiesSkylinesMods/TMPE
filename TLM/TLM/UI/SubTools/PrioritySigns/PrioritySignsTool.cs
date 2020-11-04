@@ -334,10 +334,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         }
 
                         // calculate sign position
-                        Vector3 signPos = nodePos;
-
-                        ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-                        signPos += 10f * (startNode ? segment.m_startDirection : segment.m_endDirection);
+                        ref NetSegment segment = ref segmentId.ToSegment();
+                        Vector3 signPos = nodePos + (10f * (startNode ? segment.m_startDirection : segment.m_endDirection));
 
                         if (!GeometryUtil.WorldToScreenPoint(signPos, out Vector3 _)) {
                             continue;

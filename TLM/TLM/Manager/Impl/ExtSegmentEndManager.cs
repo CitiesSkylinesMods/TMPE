@@ -97,8 +97,7 @@ namespace TrafficManager.Manager.Impl {
             bool found = false;
             bool startNode = false;
 
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-
+            ref NetSegment segment = ref segmentId.ToSegment();
             if (segment.m_startNode == nodeId) {
                 found = true;
                 startNode = true;
@@ -149,12 +148,12 @@ namespace TrafficManager.Manager.Impl {
                 return ArrowDirection.None;
             }
 
-            ref NetSegment sourceEndSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[sourceEnd.segmentId];
+            ref NetSegment sourceEndSegment = ref sourceEnd.segmentId.ToSegment();
             Vector3 sourceDir = sourceEnd.startNode
                 ? sourceEndSegment.m_startDirection
                 : sourceEndSegment.m_endDirection;
 
-            ref NetSegment targetSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[targetSegmentId];
+            ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
             Vector3 targetDir = (bool)targetStartNode
                 ? targetSegment.m_startDirection
                 : targetSegment.m_endDirection;

@@ -23,7 +23,7 @@ namespace TrafficManager.Manager.Impl {
         private ParkingRestrictionsManager() { }
 
         public bool MayHaveParkingRestriction(ushort segmentId) {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            ref NetSegment segment = ref segmentId.ToSegment();
             if ((segment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
                 return true;
             }
@@ -77,12 +77,9 @@ namespace TrafficManager.Manager.Impl {
             parkingAllowed[segmentId][dirIndex] = flag;
 
             if (!flag || !parkingAllowed[segmentId][1 - dirIndex]) {
+                // force relocation of illegaly parked vehicles
                 Services.SimulationService.AddAction(
-                    () => {
-                        // force relocation of illegaly parked vehicles
-                        ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-                        segment.UpdateSegment(segmentId);
-                    });
+                    () => segmentId.ToSegment().UpdateSegment(segmentId));
             }
 
             return true;

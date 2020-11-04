@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
+    using TrafficManager.Util;
 
     public class RoutingManager
         : AbstractGeometryObservingManager,
@@ -249,7 +250,7 @@ namespace TrafficManager.Manager.Impl {
         protected void ResetIncomingHighwayLaneArrows(ushort segmentId) {
             ushort[] nodeIds = new ushort[2]; //TODO remove due to unnecessary allocation
 
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            ref NetSegment segment = ref segmentId.ToSegment();
             nodeIds[0] = segment.m_startNode;
             nodeIds[1] = segment.m_endNode;
 
@@ -404,7 +405,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            ref NetSegment segment = ref segmentId.ToSegment();
             NetInfo prevSegmentInfo = segment.Info;
             bool prevSegIsInverted = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
 
@@ -618,7 +619,7 @@ namespace TrafficManager.Manager.Impl {
                 int outgoingVehicleLanes = 0;
                 int incomingVehicleLanes = 0;
 
-                ref var nextSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[nextSegmentId];
+                ref NetSegment nextSegment = ref nextSegmentId.ToSegment();
                 bool isNextStartNodeOfNextSegment = nextSegment.m_startNode == nextNodeId;
 
                 NetInfo nextSegmentInfo = nextSegment.Info;
@@ -2135,7 +2136,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 if (iterateViaGeometry) {
-                    ref var nextSegment2 = ref Singleton<NetManager>.instance.m_segments.m_buffer[nextSegmentId];
+                    ref NetSegment nextSegment2 = ref nextSegmentId.ToSegment();
                     nextSegmentId = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft
                         ? nextSegment2.GetLeftSegment(nextNodeId)
                         : nextSegment2.GetRightSegment(nextNodeId);
@@ -2272,8 +2273,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public int CalcInnerSimilarLaneIndex(ushort segmentId, int laneIndex) {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            return CalcInnerSimilarLaneIndex(segment.Info.m_lanes[laneIndex]);
+            return CalcInnerSimilarLaneIndex(segmentId.ToSegment().Info.m_lanes[laneIndex]);
         }
 
         public int CalcInnerSimilarLaneIndex(NetInfo.Lane laneInfo) {
@@ -2284,8 +2284,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public int CalcOuterSimilarLaneIndex(ushort segmentId, int laneIndex) {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            return CalcOuterSimilarLaneIndex(segment.Info.m_lanes[laneIndex]);
+            return CalcOuterSimilarLaneIndex(segmentId.ToSegment().Info.m_lanes[laneIndex]);
         }
 
         public int CalcOuterSimilarLaneIndex(NetInfo.Lane laneInfo) {
@@ -2342,7 +2341,7 @@ namespace TrafficManager.Manager.Impl {
                                               bool startNode,
                                               int laneIndex,
                                               bool incoming) {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            ref NetSegment segment = ref segmentId.ToSegment();
             bool segIsInverted = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
 
             NetInfo.Direction dir = startNode ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;

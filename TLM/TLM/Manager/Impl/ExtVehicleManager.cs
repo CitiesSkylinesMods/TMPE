@@ -10,6 +10,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
     using UnityEngine;
+    using TrafficManager.Util;
 
     public class ExtVehicleManager
         : AbstractCustomManager,
@@ -838,13 +839,19 @@ namespace TrafficManager.Manager.Impl {
                                                ref PathUnit.Position nextPos) {
             bool startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
 
-            ref var curPosSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[curPos.m_segment];
-            var transitNodeId1 = startNode ? curPosSegment.m_startNode : curPosSegment.m_endNode;
+            ref NetSegment curPosSegment = ref curPos.m_segment.ToSegment();
+            var transitNodeId1 = startNode
+                ? curPosSegment.m_startNode
+                : curPosSegment.m_endNode;
 
-            ref var nextPosSegment = ref Singleton<NetManager>.instance.m_segments.m_buffer[nextPos.m_segment];
-            var transitNodeId2 = startNode ? nextPosSegment.m_startNode : nextPosSegment.m_endNode;
+            ref NetSegment nextPosSegment = ref nextPos.m_segment.ToSegment();
+            var transitNodeId2 = startNode
+                ? nextPosSegment.m_startNode
+                : nextPosSegment.m_endNode;
 
-            return transitNodeId1 != transitNodeId2 ? (ushort)0 : transitNodeId1;
+            return transitNodeId1 != transitNodeId2
+                ? (ushort)0
+                : transitNodeId1;
         }
 
         private static bool IsTransitNodeCurStartNode(ref PathUnit.Position curPos,

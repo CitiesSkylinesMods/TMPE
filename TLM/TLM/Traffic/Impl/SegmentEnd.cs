@@ -80,9 +80,7 @@ namespace TrafficManager.Traffic.Impl {
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             // TODO pre-calculate this
-
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId];
-            uint avgSegLen = (uint)segment.m_averageLength;
+            uint avgSegLen = (uint)SegmentId.ToSegment().m_averageLength;
 
             IDictionary<ushort, uint>[] ret =
                 includeStopped ? numVehiclesGoingToSegmentId : numVehiclesMovingToSegmentId;
@@ -303,7 +301,7 @@ namespace TrafficManager.Traffic.Impl {
         // }
 
         public void Update() {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[SegmentId];
+            ref NetSegment segment = ref SegmentId.ToSegment();
             StartNode = segment.m_startNode == NodeId;
             numLanes = segment.Info.m_lanes.Length;
 
