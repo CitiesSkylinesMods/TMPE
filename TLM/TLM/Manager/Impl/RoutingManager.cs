@@ -471,15 +471,8 @@ namespace TrafficManager.Manager.Impl {
                     return true;
                 });
 
-            bool isTollBooth = false;
-            if (buildingId != 0) {
-                Constants.ServiceFactory.BuildingService.ProcessBuilding(
-                    buildingId,
-                    (ushort bId, ref Building building) => {
-                        isTollBooth = building.Info.m_buildingAI is TollBoothAI;
-                        return true;
-                    });
-            }
+            bool isTollBooth = buildingId != 0
+                && buildingId.ToBuilding().Info.m_buildingAI is TollBoothAI;
 
             bool nextIsSimpleJunction = false;
             bool nextIsSplitJunction = false;
