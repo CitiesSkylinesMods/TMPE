@@ -16,6 +16,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.TrafficLight;
     using UnityEngine;
+    using TrafficManager.Util;
 
     public class TrafficPriorityManager
         : AbstractGeometryObservingManager,
@@ -252,12 +253,7 @@ namespace TrafficManager.Manager.Impl {
 
             if (type != PriorityType.None) {
                 ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
-                Services.NetService.ProcessNode(
-                    nodeId,
-                    (ushort nId, ref NetNode node) => {
-                        TrafficLightManager.Instance.RemoveTrafficLight(nodeId, ref node);
-                        return true;
-                    });
+                TrafficLightManager.Instance.RemoveTrafficLight(nodeId, ref nodeId.ToNode());
             }
 
             if (startNode) {

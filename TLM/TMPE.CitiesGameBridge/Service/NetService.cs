@@ -44,19 +44,6 @@ namespace CitiesGameBridge.Service {
             return expectedResult == null ? result != 0 : result == expectedResult;
         }
 
-        /// <summary>
-        /// Given a node id, invoke a handler function with that id and the corresponding <see cref="NetNode"/>,
-        /// without creating defensive copies of the node struct.
-        /// </summary>
-        /// 
-        /// <param name="nodeId">The id of the node.</param>
-        /// <param name="handler">The handler function to invoke.</param>
-        public void ProcessNode(ushort nodeId, NetNodeHandler handler) {
-            handler(
-                nodeId,
-                ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]);
-        }
-
         // SEGMENT BASICS --------------------------------------------------------------------------------
 
         /// <summary>
@@ -232,7 +219,8 @@ namespace CitiesGameBridge.Service {
                 return true;
             }
 
-            ProcessNode(nodeId, ProcessFun);
+            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ProcessFun(nodeId, ref node);
         }
 
         public void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler) {

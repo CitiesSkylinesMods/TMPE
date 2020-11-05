@@ -1439,15 +1439,10 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                 Vector3 diff = nodePos - Camera.main.transform.position;
                 float zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
 
-                for (int i = 0; i < 8; ++i) {
-                    ushort srcSegmentId = 0;
-                    Constants.ServiceFactory.NetService.ProcessNode(
-                        nodeId,
-                        (ushort nId, ref NetNode node) => {
-                            srcSegmentId = node.GetSegment(i);
-                            return true;
-                        });
+                ref NetNode node = ref nodeId.ToNode();
 
+                for (int i = 0; i < 8; ++i) {
+                    ushort srcSegmentId = node.GetSegment(i);
                     if (srcSegmentId == 0) {
                         continue;
                     }

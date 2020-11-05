@@ -453,23 +453,13 @@ namespace TrafficManager.Manager.Impl {
             bool nextIsRealJunction = false;
             ushort buildingId = 0;
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                nextNodeId,
-                (ushort nodeId, ref NetNode node) => {
-                    nextIsJunction =
-                        (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
-                    nextIsTransition =
-                        (node.m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
-                    nextHasTrafficLights =
-                        (node.m_flags & NetNode.Flags.TrafficLights) !=
-                        NetNode.Flags.None;
-                    nextIsEndOrOneWayOut =
-                        (node.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) !=
-                        NetNode.Flags.None;
-                    nextIsRealJunction = node.CountSegments() >= 3;
-                    buildingId = NetNode.FindOwnerBuilding(nextNodeId, 32f);
-                    return true;
-                });
+            ref NetNode nextNode = ref nextNodeId.ToNode();
+            nextIsJunction = (nextNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
+            nextIsTransition = (nextNode.m_flags & NetNode.Flags.Transition) != NetNode.Flags.None;
+            nextHasTrafficLights = (nextNode.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None;
+            nextIsEndOrOneWayOut = (nextNode.m_flags & (NetNode.Flags.End | NetNode.Flags.OneWayOut)) != NetNode.Flags.None;
+            nextIsRealJunction = nextNode.CountSegments() >= 3;
+            buildingId = NetNode.FindOwnerBuilding(nextNodeId, 32f);
 
             bool isTollBooth = buildingId != 0
                 && buildingId.ToBuilding().Info.m_buildingAI is TollBoothAI;
@@ -483,14 +473,7 @@ namespace TrafficManager.Manager.Impl {
                 int numIncoming = 0;
 
                 for (int i = 0; i < 8; ++i) {
-                    ushort segId = 0;
-                    Constants.ServiceFactory.NetService.ProcessNode(
-                        nextNodeId,
-                        (ushort nId, ref NetNode node) => {
-                            segId = node.GetSegment(i);
-                            return true;
-                        });
-
+                    ushort segId = nextNode.GetSegment(i);
                     if (segId == 0) {
                         continue;
                     }
@@ -608,12 +591,7 @@ namespace TrafficManager.Manager.Impl {
             for (int k = 0; k < 8; ++k) {
                 if (!iterateViaGeometry) {
                     int kCopy = k;
-                    Constants.ServiceFactory.NetService.ProcessNode(
-                        nextNodeId,
-                        (ushort nId, ref NetNode node) => {
-                            nextSegmentId = node.GetSegment(kCopy);
-                            return true;
-                        });
+                    nextSegmentId = nextNode.GetSegment(kCopy);
 
                     if (nextSegmentId == 0) {
                         continue;

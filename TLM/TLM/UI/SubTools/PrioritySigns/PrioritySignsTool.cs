@@ -304,23 +304,11 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         continue;
                     }
 
-                    Vector3 nodePos = default;
-                    Constants.ServiceFactory.NetService.ProcessNode(
-                        nodeId,
-                        (ushort nId, ref NetNode node) => {
-                            nodePos = node.m_position;
-                            return true;
-                        });
+                    ref NetNode node = ref nodeId.ToNode();
+                    Vector3 nodePos = node.m_position;
 
                     for (int i = 0; i < 8; ++i) {
-                        ushort segmentId = 0;
-                        Constants.ServiceFactory.NetService.ProcessNode(
-                            nodeId,
-                            (ushort nId, ref NetNode node) => {
-                                segmentId = node.GetSegment(i);
-                                return true;
-                            });
-
+                        ushort segmentId = node.GetSegment(i);
                         if (segmentId == 0) {
                             continue;
                         }
@@ -450,15 +438,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             Log._Debug("PrioritySignsTool.SetPrioritySign: flagging remaining segments at node " +
                        $"{nodeId} as main road.");
 
-            for (int i = 0; i < 8; ++i) {
-                ushort otherSegmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    nodeId,
-                    (ushort nId, ref NetNode node) => {
-                        otherSegmentId = node.GetSegment(i);
-                        return true;
-                    });
+            ref NetNode node = ref nodeId.ToNode();
 
+            for (int i = 0; i < 8; ++i) {
+                ushort otherSegmentId = node.GetSegment(i);
                 if (otherSegmentId == 0 || otherSegmentId == segmentId) {
                     continue;
                 }

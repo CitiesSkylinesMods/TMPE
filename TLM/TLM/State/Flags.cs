@@ -190,26 +190,22 @@ namespace TrafficManager.State {
                 return false;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                nodeId,
-                (ushort nId, ref NetNode node) => {
-                    NetNode.Flags flags =
-                        node.m_flags | NetNode.Flags.CustomTrafficLights;
-                    if (flag) {
+            ref NetNode node = ref nodeId.ToNode();
+            NetNode.Flags flags = node.m_flags | NetNode.Flags.CustomTrafficLights;
+            if (flag) {
 #if DEBUGFLAGS
-                        Log._Debug($"Adding traffic light @ node {nId}");
+                Log._Debug($"Adding traffic light @ node {nId}");
 #endif
-                        flags |= NetNode.Flags.TrafficLights;
-                    } else {
+                flags |= NetNode.Flags.TrafficLights;
+            } else {
 #if DEBUGFLAGS
-                        Log._Debug($"Removing traffic light @ node {nId}");
+                Log._Debug($"Removing traffic light @ node {nId}");
 #endif
-                        flags &= ~NetNode.Flags.TrafficLights;
-                    }
+                flags &= ~NetNode.Flags.TrafficLights;
+            }
 
-                    node.m_flags = flags;
-                    return true;
-                });
+            node.m_flags = flags;
+
             return true;
         }
 
