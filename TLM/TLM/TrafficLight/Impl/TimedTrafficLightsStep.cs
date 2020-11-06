@@ -36,15 +36,10 @@ namespace TrafficManager.TrafficLight.Impl {
             endTransitionStart = null;
             stepDone = false;
 
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    timedNode.NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        segmentId = node.GetSegment(i);
-                        return true;
-                    });
+            ref NetNode node = ref timedNode.NodeId.ToNode();
 
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) {
                     continue;
                 }

@@ -149,17 +149,11 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private void OnLaneChange(uint laneId) {
-            Services.NetService.ProcessLane(
-                laneId,
-                (uint lId, ref NetLane lane) => {
-                    RoutingManager.Instance.RequestRecalculation(lane.m_segment);
-
-                    if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                        Services.NetService.PublishSegmentChanges(lane.m_segment);
-                    }
-
-                    return true;
-                });
+            ushort segment = laneId.ToLane().m_segment;
+            RoutingManager.Instance.RequestRecalculation(segment);
+            if (OptionsManager.Instance.MayPublishSegmentChanges()) {
+                Services.NetService.PublishSegmentChanges(segment);
+            }
         }
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {

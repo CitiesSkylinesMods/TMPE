@@ -14,6 +14,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using TrafficManager.Traffic;
     using TrafficManager.TrafficLight.Impl;
+    using TrafficManager.Util;
 
     public class TrafficLightSimulationManager
         : AbstractGeometryObservingManager,
@@ -338,12 +339,7 @@ namespace TrafficManager.Manager.Impl {
                         // TrafficLightSimulations[timedNodeId].Destroy();
                         RemoveNodeFromSimulation(timedNodeId);
                         if (removeTrafficLight) {
-                            Constants.ServiceFactory.NetService.ProcessNode(
-                                timedNodeId,
-                                (ushort nId, ref NetNode node) => {
-                                    tlm.RemoveTrafficLight(timedNodeId, ref node);
-                                    return true;
-                                });
+                            tlm.RemoveTrafficLight(timedNodeId, ref timedNodeId.ToNode());
                         }
                     } else {
                         if (TrafficLightSimulations[timedNodeId].IsTimedLight()) {
@@ -359,12 +355,7 @@ namespace TrafficManager.Manager.Impl {
             RemoveNodeFromSimulation(nodeId);
 
             if (removeTrafficLight) {
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    nodeId,
-                    (ushort nId, ref NetNode node) => {
-                        tlm.RemoveTrafficLight(nodeId, ref node);
-                        return true;
-                    });
+                tlm.RemoveTrafficLight(nodeId, ref nodeId.ToNode());
             }
         }
 
@@ -406,14 +397,9 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
+            Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
                 sim.nodeId,
-                (ushort nId, ref NetNode node) => {
-                    Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
-                        nId,
-                        ref node);
-                    return true;
-                });
+                ref sim.nodeId.ToNode());
 
             Constants.ManagerFactory.CustomSegmentLightsManager.AddNodeLights(sim.nodeId);
             sim.type = TrafficLightSimulationType.Manual;
@@ -445,14 +431,9 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
+            Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
                 sim.nodeId,
-                (ushort nId, ref NetNode node) => {
-                    Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
-                        nId,
-                        ref node);
-                    return true;
-                });
+                ref sim.nodeId.ToNode());
 
             Constants.ManagerFactory.CustomSegmentLightsManager.AddNodeLights(sim.nodeId);
             sim.timedLight = new TimedTrafficLights(sim.nodeId, nodeGroup);

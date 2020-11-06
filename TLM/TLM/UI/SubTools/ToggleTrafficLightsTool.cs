@@ -6,6 +6,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.State;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
+    using TrafficManager.Util;
     using TrafficManager.Util.Caching;
     using UnityEngine;
 
@@ -43,12 +44,7 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                HoveredNodeId,
-                (ushort nId, ref NetNode node) => {
-                    ToggleTrafficLight(HoveredNodeId, ref node);
-                    return true;
-                });
+            ToggleTrafficLight(HoveredNodeId, ref HoveredNodeId.ToNode());
         }
 
         public void ToggleTrafficLight(ushort nodeId,

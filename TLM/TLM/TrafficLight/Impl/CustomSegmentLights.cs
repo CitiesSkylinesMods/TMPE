@@ -371,12 +371,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 e.Value.SetStates(lightState, lightState, lightState, false);
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    CalculateAutoPedestrianLightState(ref node);
-                    return true;
-                });
+            CalculateAutoPedestrianLightState(ref NodeId.ToNode());
         }
 
         public void SetLights(ICustomSegmentLights otherLights) {
@@ -419,12 +414,7 @@ namespace TrafficManager.TrafficLight.Impl {
             LastChangeFrame = GetCurrentFrame();
 
             if (calculateAutoPedLight) {
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        CalculateAutoPedestrianLightState(ref node);
-                        return true;
-                    });
+                CalculateAutoPedestrianLightState(ref NodeId.ToNode());
             }
         }
 

@@ -310,12 +310,7 @@ namespace TrafficManager.Traffic.Impl {
                 return;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    RebuildVehicleNumDicts(ref node);
-                    return true;
-                });
+            RebuildVehicleNumDicts(ref NodeId.ToNode());
         }
 
         private void RebuildVehicleNumDicts(ref NetNode node) {

@@ -128,14 +128,7 @@ namespace TrafficManager.UI {
 
         // TODO: Move to UI.Helpers
         internal static bool IsNodeWithinViewDistance(ushort nodeId) {
-            bool ret = false;
-            Constants.ServiceFactory.NetService.ProcessNode(
-                nodeId,
-                (ushort nId, ref NetNode node) => {
-                    ret = IsPosWithinOverlayDistance(node.m_position);
-                    return true;
-                });
-            return ret;
+            return IsPosWithinOverlayDistance(nodeId.ToNode().m_position);
         }
 
         // TODO: Move to UI.Helpers
