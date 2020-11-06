@@ -162,15 +162,8 @@ namespace CitiesGameBridge.Service {
                     }
                 }
             } else {
-                ushort segmentId = 0;
-                for (int i = 0; i < 8; ++i) {
-                    segmentId = node.GetSegment(i);
-                    if (segmentId != 0) {
-                        break;
-                    }
-                }
-                ushort initSegId = segmentId;
-
+                ushort initSegId = GetInitialSegment(ref node);
+                ushort segmentId = initSegId;
                 while (true) {
                     if (segmentId != 0) {
                         if (!netSegmentHandler(
@@ -199,6 +192,22 @@ namespace CitiesGameBridge.Service {
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Gets the initial segment.
+        /// </summary>
+        /// <param name="node">The node with the segments.</param>
+        /// <returns>First non 0 segmentId.</returns>
+        public ushort GetInitialSegment(ref NetNode node) {
+            for (int i = 0; i < 8; ++i) {
+                var segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    return segmentId;
+                }
+            }
+
+            return 0;
         }
 
         public void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler) {
