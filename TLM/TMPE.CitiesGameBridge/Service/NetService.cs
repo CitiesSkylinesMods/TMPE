@@ -141,10 +141,6 @@ namespace CitiesGameBridge.Service {
                 : segment.m_endNode;
         }
 
-        public void IterateNodeSegments(ushort nodeId, NetSegmentHandler handler) {
-            IterateNodeSegments(nodeId, ClockDirection.None, handler);
-        }
-
         public void IterateNodeSegments(ushort nodeId,
                                         ClockDirection dir,
                                         NetSegmentHandler handler) {

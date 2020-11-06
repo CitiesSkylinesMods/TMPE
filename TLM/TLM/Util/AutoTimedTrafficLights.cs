@@ -415,14 +415,16 @@ namespace TrafficManager.Util {
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
             int ret = 0;
 
-            netService.IterateNodeSegments(
-                nodeId,
-                (ushort segId, ref NetSegment seg) => {
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segId = node.GetSegment(i);
+                if (segId != 0) {
                     if (segEndMan.GetDirection(ref segEnd, segId) == dir) {
                         ret++;
                     }
-                    return true;
-                });
+                }
+            }
+
             return ret;
         }
     }

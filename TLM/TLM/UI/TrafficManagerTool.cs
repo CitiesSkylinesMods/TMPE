@@ -606,13 +606,15 @@ namespace TrafficManager.UI {
         private static float CalculateNodeRadius(ushort nodeId) {
             float sumHalfWidth = 0;
             int count = 0;
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    sumHalfWidth += segment.Info.m_halfWidth;
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    sumHalfWidth += segmentId.ToSegment().Info.m_halfWidth;
                     count++;
-                    return true;
-                });
+                }
+            }
+
             return sumHalfWidth / count;
         }
 
@@ -1171,20 +1173,20 @@ namespace TrafficManager.UI {
         /// </summary>
         internal ushort GetHoveredSegmentFromNode(Vector3 hitPos) {
             ushort minSegId = 0;
-            NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
             float minDistance = float.MaxValue;
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                HoveredNodeId,
-                (ushort segmentId, ref NetSegment segment) =>
-                {
-                    Vector3 pos = segment.GetClosestPosition(hitPos);
+            ref NetNode node = ref HoveredNodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    Vector3 pos = segmentId.ToSegment().GetClosestPosition(hitPos);
                     float distance = (hitPos - pos).sqrMagnitude;
                     if (distance < minDistance) {
                         minDistance = distance;
                         minSegId = segmentId;
                     }
-                    return true;
-                });
+                }
+            }
+
             return minSegId;
         }
 

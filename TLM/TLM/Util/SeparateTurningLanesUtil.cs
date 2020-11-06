@@ -23,9 +23,11 @@ namespace TrafficManager.Util {
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
-            LaneArrowManager.Instance.Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort otherSegmentId, ref NetSegment otherSeg) => {
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort otherSegmentId = node.GetSegment(i);
+                ref NetSegment otherSeg = ref otherSegmentId.ToSegment();
+                if (segmentId != 0) {
                     ArrowDirection dir2 = segEndMan.GetDirection(ref segEnd, otherSegmentId);
                     if (dir == dir2) {
                         int forward = 0, backward = 0;
@@ -42,12 +44,10 @@ namespace TrafficManager.Util {
                         } else {
                             count += backward;
                         }
-                        //Log._Debug(
-                        //    $"dir={dir} startNode={startNode} segmentId={segmentId}\n" +
-                        //    $"startNode2={startNode2} forward={forward} backward={backward} count={count}");
                     }
-                    return true;
-                });
+                }
+            }
+
             return count;
         }
 
