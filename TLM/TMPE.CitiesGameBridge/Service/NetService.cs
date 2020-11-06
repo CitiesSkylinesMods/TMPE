@@ -149,61 +149,60 @@ namespace CitiesGameBridge.Service {
                                         ClockDirection dir,
                                         NetSegmentHandler handler) {
             NetManager netManager = Singleton<NetManager>.instance;
+            ref NetNode node = ref netManager.m_nodes.m_buffer[nodeId];
+            ProcessNodeSegment(nodeId, ref node, netManager, dir, handler);
+        }
 
-            bool ProcessFun(ushort nId, ref NetNode node) {
-                if (dir == ClockDirection.None) {
-                    for (int i = 0; i < 8; ++i) {
-                        ushort segmentId = node.GetSegment(i);
-                        if (segmentId != 0) {
-                            if (!handler(
-                                    segmentId,
-                                    ref netManager.m_segments.m_buffer[segmentId])) {
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    ushort segmentId = 0;
-                    for (int i = 0; i < 8; ++i) {
-                        segmentId = node.GetSegment(i);
-                        if (segmentId != 0) {
-                            break;
-                        }
-                    }
-                    ushort initSegId = segmentId;
-
-                    while (true) {
-                        if (segmentId != 0) {
-                            if (!handler(
-                                    segmentId,
-                                    ref netManager.m_segments.m_buffer[segmentId])) {
-                                break;
-                            }
-                        }
-
-                        switch (dir) {
-                            // also: case ClockDirection.Clockwise:
-                            default:
-                                segmentId = netManager.m_segments.m_buffer[segmentId]
-                                                      .GetLeftSegment(nodeId);
-                                break;
-                            case ClockDirection.CounterClockwise:
-                                segmentId = netManager.m_segments.m_buffer[segmentId]
-                                                      .GetRightSegment(nodeId);
-                                break;
-                        }
-
-                        if (segmentId == initSegId || segmentId == 0) {
+        public bool ProcessNodeSegment(ushort nodeId, ref NetNode node, NetManager netManager, ClockDirection clockDirection, NetSegmentHandler netSegmentHandler) {
+            if (clockDirection == ClockDirection.None) {
+                for (int i = 0; i < 8; ++i) {
+                    ushort segmentId = node.GetSegment(i);
+                    if (segmentId != 0) {
+                        if (!netSegmentHandler(
+                                segmentId,
+                                ref netManager.m_segments.m_buffer[segmentId])) {
                             break;
                         }
                     }
                 }
+            } else {
+                ushort segmentId = 0;
+                for (int i = 0; i < 8; ++i) {
+                    segmentId = node.GetSegment(i);
+                    if (segmentId != 0) {
+                        break;
+                    }
+                }
+                ushort initSegId = segmentId;
 
-                return true;
+                while (true) {
+                    if (segmentId != 0) {
+                        if (!netSegmentHandler(
+                                segmentId,
+                                ref netManager.m_segments.m_buffer[segmentId])) {
+                            break;
+                        }
+                    }
+
+                    switch (clockDirection) {
+                        // also: case ClockDirection.Clockwise:
+                        default:
+                            segmentId = netManager.m_segments.m_buffer[segmentId]
+                                                  .GetLeftSegment(nodeId);
+                            break;
+                        case ClockDirection.CounterClockwise:
+                            segmentId = netManager.m_segments.m_buffer[segmentId]
+                                                  .GetRightSegment(nodeId);
+                            break;
+                    }
+
+                    if (segmentId == initSegId || segmentId == 0) {
+                        break;
+                    }
+                }
             }
 
-            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
-            ProcessFun(nodeId, ref node);
+            return true;
         }
 
         public void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler) {
