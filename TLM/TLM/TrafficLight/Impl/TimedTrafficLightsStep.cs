@@ -841,15 +841,9 @@ namespace TrafficManager.TrafficLight.Impl {
                         countOnlyMovingIfGreenOnSegment = countOnlyMovingIfGreen;
 
                         if (countOnlyMovingIfGreenOnSegment) {
-                            Constants.ServiceFactory.NetService.ProcessSegment(
-                                sourceSegmentId,
-                                (ushort srcSegId, ref NetSegment segment) => {
-                                    if (restrMan.IsRailSegment(segment.Info)) {
-                                        countOnlyMovingIfGreenOnSegment = false;
-                                    }
-
-                                    return true;
-                                });
+                            if (restrMan.IsRailSegment(sourceSegmentId.ToSegment().Info)) {
+                                countOnlyMovingIfGreenOnSegment = false;
+                            }
                         }
 
                         movingVehiclesMetrics =

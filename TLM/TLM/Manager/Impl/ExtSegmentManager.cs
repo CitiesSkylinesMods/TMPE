@@ -4,6 +4,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     public class ExtSegmentManager
         : AbstractCustomManager,
@@ -139,14 +140,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            bool ret = false;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    ret = CalculateHasBusLane(segment.Info);
-                    return true;
-                });
-            return ret;
+            return CalculateHasBusLane(segmentId.ToSegment().Info);
         }
 
         /// <summary>
@@ -170,14 +164,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            var ret = false;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    ret = CalculateIsHighway(segment.Info);
-                    return true;
-                });
-            return ret;
+            return CalculateIsHighway(segmentId.ToSegment().Info);
         }
 
         /// <summary>

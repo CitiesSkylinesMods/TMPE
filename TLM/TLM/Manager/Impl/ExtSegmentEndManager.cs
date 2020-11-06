@@ -96,18 +96,14 @@ namespace TrafficManager.Manager.Impl {
         public int GetIndex(ushort segmentId, ushort nodeId) {
             bool found = false;
             bool startNode = false;
-            Services.NetService.ProcessSegment(
-                segmentId,
-                (ushort _, ref NetSegment seg) => {
-                    if (seg.m_startNode == nodeId) {
-                        found = true;
-                        startNode = true;
-                    } else if (seg.m_endNode == nodeId) {
-                        found = true;
-                    }
 
-                    return true;
-                });
+            ref NetSegment segment = ref segmentId.ToSegment();
+            if (segment.m_startNode == nodeId) {
+                found = true;
+                startNode = true;
+            } else if (segment.m_endNode == nodeId) {
+                found = true;
+            }
 
             if (!found) {
                 Log.Warning(
@@ -152,27 +148,15 @@ namespace TrafficManager.Manager.Impl {
                 return ArrowDirection.None;
             }
 
-            bool sourceStartNode = sourceEnd.startNode;
+            ref NetSegment sourceEndSegment = ref sourceEnd.segmentId.ToSegment();
+            Vector3 sourceDir = sourceEnd.startNode
+                ? sourceEndSegment.m_startDirection
+                : sourceEndSegment.m_endDirection;
 
-            Vector3 sourceDir = Vector3.zero;
-            Services.NetService.ProcessSegment(
-                sourceEnd.segmentId,
-                (ushort segId, ref NetSegment seg) => {
-                    sourceDir = sourceStartNode
-                                    ? seg.m_startDirection
-                                    : seg.m_endDirection;
-                    return true;
-                });
-
-            Vector3 targetDir = Vector3.zero;
-            Services.NetService.ProcessSegment(
-                targetSegmentId,
-                (ushort segId, ref NetSegment seg) => {
-                    targetDir = (bool)targetStartNode
-                                    ? seg.m_startDirection
-                                    : seg.m_endDirection;
-                    return true;
-                });
+            ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
+            Vector3 targetDir = (bool)targetStartNode
+                ? targetSegment.m_startDirection
+                : targetSegment.m_endDirection;
 
             return CalculateArrowDirection(sourceDir, targetDir);
         }

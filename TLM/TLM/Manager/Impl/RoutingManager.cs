@@ -248,14 +248,11 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected void ResetIncomingHighwayLaneArrows(ushort segmentId) {
-            ushort[] nodeIds = new ushort[2];
-            Services.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    nodeIds[0] = segment.m_startNode;
-                    nodeIds[1] = segment.m_endNode;
-                    return true;
-                });
+            ushort[] nodeIds = new ushort[2]; //TODO remove due to unnecessary allocation
+
+            ref NetSegment segment = ref segmentId.ToSegment();
+            nodeIds[0] = segment.m_startNode;
+            nodeIds[1] = segment.m_endNode;
 
 #if DEBUG
             bool logRouting = DebugSwitch.RoutingBasicLog.Get()
@@ -408,17 +405,9 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            NetInfo prevSegmentInfo = null;
-            bool prevSegIsInverted = false;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort prevSegId, ref NetSegment segment) => {
-                    prevSegmentInfo = segment.Info;
-                    prevSegIsInverted =
-                        (segment.m_flags & NetSegment.Flags.Invert) !=
-                        NetSegment.Flags.None;
-                    return true;
-                });
+            ref NetSegment segment = ref segmentId.ToSegment();
+            NetInfo prevSegmentInfo = segment.Info;
+            bool prevSegIsInverted = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
 
             bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
 
@@ -600,29 +589,15 @@ namespace TrafficManager.Manager.Impl {
 
                 int outgoingVehicleLanes = 0;
                 int incomingVehicleLanes = 0;
-                bool isNextStartNodeOfNextSegment = false;
-                bool nextSegIsInverted = false;
-                NetInfo nextSegmentInfo = null;
-                uint nextFirstLaneId = 0;
 
-                Constants.ServiceFactory.NetService.ProcessSegment(
-                    nextSegmentId,
-                    (ushort nextSegId, ref NetSegment segment) => {
-                        isNextStartNodeOfNextSegment = segment.m_startNode == nextNodeId;
-                        // segment.UpdateLanes(nextSegmentId, true);
-                        // if (isNextStartNodeOfNextSegment) {
-                        //        segment.UpdateStartSegments(nextSegmentId);
-                        // } else {
-                        //    segment.UpdateEndSegments(nextSegmentId);
-                        // }
+                ref NetSegment nextSegment = ref nextSegmentId.ToSegment();
+                bool isNextStartNodeOfNextSegment = nextSegment.m_startNode == nextNodeId;
 
-                        nextSegmentInfo = segment.Info;
-                        nextSegIsInverted =
-                            (segment.m_flags & NetSegment.Flags.Invert) !=
-                            NetSegment.Flags.None;
-                        nextFirstLaneId = segment.m_lanes;
-                        return true;
-                    });
+                NetInfo nextSegmentInfo = nextSegment.Info;
+                bool nextSegIsInverted =
+                    (nextSegment.m_flags & NetSegment.Flags.Invert) !=
+                    NetSegment.Flags.None;
+                uint nextFirstLaneId = nextSegment.m_lanes;
 
                 bool nextIsHighway =
                     Constants.ManagerFactory.ExtSegmentManager.CalculateIsHighway(nextSegmentId);
@@ -2126,14 +2101,10 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 if (iterateViaGeometry) {
-                    Constants.ServiceFactory.NetService.ProcessSegment(
-                        nextSegmentId,
-                        (ushort nextSegId, ref NetSegment segment) => {
-                            nextSegmentId = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft
-                                                ? segment.GetLeftSegment(nextNodeId)
-                                                : segment.GetRightSegment(nextNodeId);
-                            return true;
-                        });
+                    ref NetSegment nextSegment2 = ref nextSegmentId.ToSegment();
+                    nextSegmentId = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft
+                        ? nextSegment2.GetLeftSegment(nextNodeId)
+                        : nextSegment2.GetRightSegment(nextNodeId);
 
                     if (nextSegmentId == prevSegmentId || nextSegmentId == 0) {
                         // we reached the first segment again
@@ -2267,15 +2238,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public int CalcInnerSimilarLaneIndex(ushort segmentId, int laneIndex) {
-            int ret = -1;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    ret = CalcInnerSimilarLaneIndex(segment.Info.m_lanes[laneIndex]);
-                    return true;
-                });
-
-            return ret;
+            return CalcInnerSimilarLaneIndex(segmentId.ToSegment().Info.m_lanes[laneIndex]);
         }
 
         public int CalcInnerSimilarLaneIndex(NetInfo.Lane laneInfo) {
@@ -2286,15 +2249,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public int CalcOuterSimilarLaneIndex(ushort segmentId, int laneIndex) {
-            int ret = -1;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    ret = CalcOuterSimilarLaneIndex(segment.Info.m_lanes[laneIndex]);
-                    return true;
-                });
-
-            return ret;
+            return CalcOuterSimilarLaneIndex(segmentId.ToSegment().Info.m_lanes[laneIndex]);
         }
 
         public int CalcOuterSimilarLaneIndex(NetInfo.Lane laneInfo) {
@@ -2351,25 +2306,13 @@ namespace TrafficManager.Manager.Impl {
                                               bool startNode,
                                               int laneIndex,
                                               bool incoming) {
-            bool segIsInverted = false;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    segIsInverted = (segment.m_flags & NetSegment.Flags.Invert) !=
-                                    NetSegment.Flags.None;
-                    return true;
-                });
+            ref NetSegment segment = ref segmentId.ToSegment();
+            bool segIsInverted = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
 
             NetInfo.Direction dir = startNode ? NetInfo.Direction.Forward : NetInfo.Direction.Backward;
             dir = incoming ^ segIsInverted ? NetInfo.InvertDirection(dir) : dir;
 
-            NetInfo.Direction finalDir = NetInfo.Direction.None;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    finalDir = segment.Info.m_lanes[laneIndex].m_finalDirection;
-                    return true;
-                });
+            NetInfo.Direction finalDir = segment.Info.m_lanes[laneIndex].m_finalDirection;
 
             return (finalDir & dir) != NetInfo.Direction.None;
         }

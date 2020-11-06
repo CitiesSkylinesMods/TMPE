@@ -149,17 +149,9 @@ namespace TrafficManager.Manager.Impl {
             }
 
             // get left/right segments
-            ushort leftSegmentId = 0;
-            ushort rightSegmentId = 0;
-            Services.NetService.ProcessSegment(
-                end.segmentId,
-                (ushort _, ref NetSegment segment) => {
-                    segment.GetLeftAndRightSegments(
-                        nodeId,
-                        out leftSegmentId,
-                        out rightSegmentId);
-                    return true;
-                });
+            end.segmentId
+                .ToSegment()
+                .GetLeftAndRightSegments(nodeId, out ushort leftSegmentId, out ushort rightSegmentId);
 
             if (logTurnOnRed) {
                 Log._Debug(

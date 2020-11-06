@@ -924,20 +924,22 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                             return true;
                                         }
 
-                                        Constants.ServiceFactory.NetService.ProcessSegment(
-                                            data.SegVisitData.CurSeg.segmentId,
-                                            (ushort curSegmentId, ref NetSegment curSegment) => {
-                                                NetInfo.Lane curLaneInfo = curSegment.Info.m_lanes[
-                                                    data.CurLanePos.laneIndex];
+                                        ushort segmentId = data
+                                            .SegVisitData
+                                            .CurSeg
+                                            .segmentId;
 
-                                                SpeedLimitManager.Instance.SetSpeedLimit(
-                                                    curSegmentId,
-                                                    data.CurLanePos.laneIndex,
-                                                    curLaneInfo,
-                                                    data.CurLanePos.laneId,
-                                                    speedLimitToSet?.GameUnits);
-                                                return true;
-                                            });
+                                        NetInfo.Lane curLaneInfo = segmentId
+                                            .ToSegment()
+                                            .Info
+                                            .m_lanes[data.CurLanePos.laneIndex];
+
+                                        SpeedLimitManager.Instance.SetSpeedLimit(
+                                            segmentId,
+                                            data.CurLanePos.laneIndex,
+                                            curLaneInfo,
+                                            data.CurLanePos.laneId,
+                                            speedLimitToSet?.GameUnits);
 
                                         return true;
                                     });
