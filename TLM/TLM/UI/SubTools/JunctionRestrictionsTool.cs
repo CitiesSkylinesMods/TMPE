@@ -164,8 +164,12 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnSecondaryClickOverlay() {
-            SelectedNodeId = 0;
-            MainTool.RequestOnscreenDisplayUpdate();
+            if (SelectedNodeId != 0) {
+                SelectedNodeId = 0;
+                MainTool.RequestOnscreenDisplayUpdate();
+            } else {
+                MainTool.SetToolMode(ToolMode.None);
+            }
         }
 
         public override void OnActivate() {

@@ -73,7 +73,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 if (!isRoundabout) {
                     record_ = PriorityRoad.FixRoad(HoveredSegmentId);
                 }
-                // TODO: benchmark why bulk setup takes a long time. 
+                // TODO: benchmark why bulk setup takes a long time.
                 Log.Info("After FixRoundabout/FixRoad. Before RefreshMassEditOverlay"); // log time for benchmarking.
                 RefreshMassEditOverlay();
                 Log.Info("After RefreshMassEditOverlay."); // log time for benchmarking.
@@ -122,12 +122,16 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }
             }
-            
+
             // refresh cache
             if(ControlIsPressed)
                 RefreshMassEditOverlay();
             else
                 RefreshCurrentPriorityNodeIds();
+        }
+
+        public override void OnSecondaryClickOverlay() {
+            MainTool.SetToolMode(ToolMode.None);
         }
 
         public override void OnToolGUI(Event e) { }

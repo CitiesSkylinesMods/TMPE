@@ -269,6 +269,8 @@ namespace TrafficManager.UI {
                 toolMode_ = ToolMode.None;
 
                 Log._Debug($"SetToolMode: reset because toolmode not found {newToolMode}");
+                OnscreenDisplay.DisplayIdle();
+                ModUI.Instance.MainMenu.UpdateButtons();
                 return;
             }
 
@@ -452,7 +454,7 @@ namespace TrafficManager.UI {
             }
 
             bool primaryMouseClicked = Input.GetMouseButtonDown(0);
-            bool secondaryMouseClicked = Input.GetMouseButtonDown(1);
+            bool secondaryMouseClicked = Input.GetMouseButtonUp(1);
 
             // check if clicked
             if (!primaryMouseClicked && !secondaryMouseClicked) {
@@ -478,8 +480,12 @@ namespace TrafficManager.UI {
                 }
 
                 if (secondaryMouseClicked) {
-                    activeLegacySubTool_?.OnSecondaryClickOverlay();
-                    activeSubTool_?.OnToolRightClick();
+                    if (GetToolMode() == ToolMode.None) {
+                        ModUI.Instance.CloseMainMenu();
+                    } else {
+                        activeLegacySubTool_?.OnSecondaryClickOverlay();
+                        activeSubTool_?.OnToolRightClick();
+                    }
                 }
             }
         }
