@@ -481,7 +481,12 @@ namespace TrafficManager.UI {
 
                 if (secondaryMouseClicked) {
                     if (GetToolMode() == ToolMode.None) {
-                        ModUI.Instance.CloseMainMenu();
+                        RoadSelectionPanels roadSelectionPanels = UIView.GetAView().GetComponent<RoadSelectionPanels>();
+                        if (roadSelectionPanels && roadSelectionPanels.RoadWorldInfoPanelExt && roadSelectionPanels.RoadWorldInfoPanelExt.isVisible) {
+                            RoadSelectionPanels.RoadWorldInfoPanel.Hide();
+                        } else {
+                            ModUI.Instance.CloseMainMenu();
+                        }
                     } else {
                         activeLegacySubTool_?.OnSecondaryClickOverlay();
                         activeSubTool_?.OnToolRightClick();
@@ -579,8 +584,6 @@ namespace TrafficManager.UI {
                         instanceID,
                         HitPos);
                 });
-            } else if (e.type == EventType.MouseDown && e.button == 1) {
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
             }
         }
 
