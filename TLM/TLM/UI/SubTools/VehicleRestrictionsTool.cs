@@ -122,8 +122,12 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnSecondaryClickOverlay() {
             if (!IsCursorInPanel()) {
-                SelectedSegmentId = 0;
-                MainTool.RequestOnscreenDisplayUpdate();
+                if (SelectedSegmentId != 0) {
+                    SelectedSegmentId = 0;
+                    MainTool.RequestOnscreenDisplayUpdate();
+                } else {
+                    MainTool.SetToolMode(ToolMode.None);
+                }
             }
         }
 
@@ -195,7 +199,6 @@ namespace TrafficManager.UI.SubTools {
                         RenderRoadLane(cameraInfo);
                     } else {
                         RenderLaneOverlay(cameraInfo, renderData_.laneId);
-
                     }
                 }
             }

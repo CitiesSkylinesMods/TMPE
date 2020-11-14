@@ -27,9 +27,13 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            Cleanup();
-            SelectedNodeId = 0;
-            MainTool.RequestOnscreenDisplayUpdate();
+            if (SelectedNodeId != 0) {
+                Cleanup();
+                SelectedNodeId = 0;
+                MainTool.RequestOnscreenDisplayUpdate();
+            } else {
+                MainTool.SetToolMode(ToolMode.None);
+            }
         }
 
         public override void OnPrimaryClickOverlay() {

@@ -122,6 +122,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         public override void OnPrimaryClickOverlay() { }
 
+        public override void OnSecondaryClickOverlay() {
+            MainTool.SetToolMode(ToolMode.None);
+        }
+
         public override void OnToolGUI(Event e) {
             base.OnToolGUI(e);
 

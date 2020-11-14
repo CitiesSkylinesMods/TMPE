@@ -286,6 +286,8 @@ namespace TrafficManager.UI {
                 toolMode_ = ToolMode.None;
 
                 Log._Debug($"SetToolMode: reset because toolmode not found {newToolMode}");
+                OnscreenDisplay.DisplayIdle();
+                ModUI.Instance.MainMenu.UpdateButtons();
                 return;
             }
 
@@ -329,6 +331,10 @@ namespace TrafficManager.UI {
 
         // Overridden to disable base class behavior
         protected override void OnEnable() {
+            // If TMPE was enabled by switching back from another tool (eg: buldozer, free camera), show main menue panel.
+            if (ModUI.Instance != null && !ModUI.Instance.IsVisible())
+                ModUI.Instance.ShowMainMenu();
+
             if (legacySubTools_ != null) {
                 Log._Debug("TrafficManagerTool.OnEnable(): Performing cleanup");
                 foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
@@ -339,7 +345,10 @@ namespace TrafficManager.UI {
         }
 
         protected override void OnDisable() {
-            // Overridden to disable base class behavior
+            // If TMPE was disabled by switching to another tool, hide main menue panel.
+            if (ModUI.Instance != null && ModUI.Instance.IsVisible())
+                ModUI.Instance.CloseMainMenu();
+            // no call to base method to disable base class behavior
         }
 
         public override void RenderGeometry(RenderManager.CameraInfo cameraInfo) {
@@ -459,7 +468,7 @@ namespace TrafficManager.UI {
             }
 
             bool primaryMouseClicked = Input.GetMouseButtonDown(0);
-            bool secondaryMouseClicked = Input.GetMouseButtonDown(1);
+            bool secondaryMouseClicked = Input.GetMouseButtonUp(1);
 
             // check if clicked
             if (!primaryMouseClicked && !secondaryMouseClicked) {
@@ -485,8 +494,17 @@ namespace TrafficManager.UI {
                 }
 
                 if (secondaryMouseClicked) {
-                    activeLegacySubTool_?.OnSecondaryClickOverlay();
-                    activeSubTool_?.OnToolRightClick();
+                    if (GetToolMode() == ToolMode.None) {
+                            RoadSelectionPanels roadSelectionPanels = UIView.GetAView().GetComponent<RoadSelectionPanels>();
+                        if (roadSelectionPanels && roadSelectionPanels.RoadWorldInfoPanelExt && roadSelectionPanels.RoadWorldInfoPanelExt.isVisible) {
+                            RoadSelectionPanels.RoadWorldInfoPanel.Hide();
+                        } else {
+                            ModUI.Instance.CloseMainMenu();
+                        }
+                    } else {
+                        activeLegacySubTool_?.OnSecondaryClickOverlay();
+                        activeSubTool_?.OnToolRightClick();
+                    }
                 }
             }
         }
@@ -509,6 +527,9 @@ namespace TrafficManager.UI {
             try {
                 if (!Input.GetMouseButtonDown(0)) {
                     _mouseClickProcessed = false;
+                }
+                if (e.type == EventType.keyDown && e.keyCode == KeyCode.Escape) {
+                    ModUI.Instance.CloseMainMenu();
                 }
 
                 if (Options.nodesOverlay) {
@@ -575,8 +596,6 @@ namespace TrafficManager.UI {
                         instanceID,
                         HitPos);
                 });
-            } else if (e.type == EventType.MouseDown && e.button == 1) {
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
             }
         }
 
