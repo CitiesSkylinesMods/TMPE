@@ -12,16 +12,9 @@ namespace TrafficManager.Manager.Impl {
         : AbstractCustomManager,
           IExtSegmentEndManager
     {
-        public static ExtSegmentEndManager Instance { get; }
-
         static ExtSegmentEndManager() {
             Instance = new ExtSegmentEndManager();
         }
-
-        /// <summary>
-        /// All additional data for segment ends
-        /// </summary>
-        public ExtSegmentEnd[] ExtSegmentEnds { get; }
 
         private ExtSegmentEndManager() {
             ExtSegmentEnds = new ExtSegmentEnd[NetManager.MAX_SEGMENT_COUNT * 2];
@@ -30,6 +23,13 @@ namespace TrafficManager.Manager.Impl {
                 ExtSegmentEnds[GetIndex((ushort)i, false)] = new ExtSegmentEnd((ushort)i, false);
             }
         }
+
+        public static ExtSegmentEndManager Instance { get; }
+
+        /// <summary>
+        /// All additional data for segment ends
+        /// </summary>
+        public ExtSegmentEnd[] ExtSegmentEnds { get; }
 
 #if DEBUG
         public string GenerateVehicleChainDebugInfo(ushort segmentId, bool startNode) {
@@ -298,23 +298,33 @@ namespace TrafficManager.Manager.Impl {
         public void CalculateCorners(ushort segmentId, bool startNode) {
             if (!Shortcuts.netService.IsSegmentValid(segmentId))
                 return;
-            ref ExtSegmentEnd segEnd = ref ExtSegmentEnds[GetIndex(segmentId, startNode)];
-            segmentId.ToSegment().CalculateCorner(
-                segmentID: segmentId,
-                heightOffset: true,
-                start: startNode,
-                leftSide: false,
-                cornerPos: out segEnd.RightCorner,
-                cornerDirection: out segEnd.RightCornerDir,
-                smooth: out _);
-            segmentId.ToSegment().CalculateCorner(
-                segmentID: segmentId,
-                heightOffset: true,
-                start: startNode,
-                leftSide: true,
-                cornerPos: out segEnd.LeftCorner,
-                cornerDirection: out segEnd.LeftCornerDir,
-                smooth: out _);
+            if (!segmentId.ToSegment().Info) {
+                Log.Warning($"segment {segmentId} has null info");
+                return;
+            }
+
+            try {
+                ref ExtSegmentEnd segEnd = ref ExtSegmentEnds[GetIndex(segmentId, startNode)];
+                segmentId.ToSegment().CalculateCorner(
+                    segmentID: segmentId,
+                    heightOffset: true,
+                    start: startNode,
+                    leftSide: false,
+                    cornerPos: out segEnd.RightCorner,
+                    cornerDirection: out segEnd.RightCornerDir,
+                    smooth: out _);
+                segmentId.ToSegment().CalculateCorner(
+                    segmentID: segmentId,
+                    heightOffset: true,
+                    start: startNode,
+                    leftSide: true,
+                    cornerPos: out segEnd.LeftCorner,
+                    cornerDirection: out segEnd.LeftCornerDir,
+                    smooth: out _);
+            } catch (Exception e) {
+                Log.Error($"failed calculating corner for segment:{segmentId}, info={segmentId.ToSegment().Info}\n"
+                    + e.Message);
+            }
         }
 
         private void CalculateIncomingOutgoing(ushort segmentId,
