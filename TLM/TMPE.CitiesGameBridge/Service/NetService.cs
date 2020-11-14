@@ -15,9 +15,9 @@ namespace CitiesGameBridge.Service {
         /// <summary>
         /// Check if a node id is valid.
         /// </summary>
-        /// 
+        ///
         /// <param name="nodeId">The id of the node to check.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
         public bool IsNodeValid(ushort nodeId) {
             return CheckNodeFlags(
@@ -29,11 +29,11 @@ namespace CitiesGameBridge.Service {
         /// <summary>
         /// Check node flags contain at least one of the flags in <paramref name="flagMask"/>.
         /// </summary>
-        /// 
+        ///
         /// <param name="nodeId">The id of the node to inspect.</param>
         /// <param name="flagMask">The flags to test.</param>
         /// <param name="expectedResult">If specified, ensure only the expected flags are found.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if the test passes, otherwise <c>false</c>.</returns>
         public bool CheckNodeFlags(ushort nodeId,
                                    NetNode.Flags flagMask,
@@ -49,9 +49,9 @@ namespace CitiesGameBridge.Service {
         /// <summary>
         /// Check if a segment id is valid.
         /// </summary>
-        /// 
+        ///
         /// <param name="segmentId">The id of the segment to check.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
         public bool IsSegmentValid(ushort segmentId) {
             return CheckSegmentFlags(
@@ -63,11 +63,11 @@ namespace CitiesGameBridge.Service {
         /// <summary>
         /// Check segment flags contain at least one of the flags in <paramref name="flagMask"/>.
         /// </summary>
-        /// 
+        ///
         /// <param name="segmentId">The id of the segment to inspect.</param>
         /// <param name="flagMask">The flags to test.</param>
         /// <param name="expectedResult">If specified, ensure only the expected flags are found.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if the test passes, otherwise <c>false</c>.</returns>
         public bool CheckSegmentFlags(ushort segmentId,
                                       NetSegment.Flags flagMask,
@@ -83,10 +83,10 @@ namespace CitiesGameBridge.Service {
         /// <summary>
         /// Check if a lane id is valid, optionally also checking validity of parent segment.
         /// </summary>
-        /// 
+        ///
         /// <param name="laneId">The id of the lane to check.</param>
         /// <param name="checkSegment">If <c>true</c>, validity of parent segment will also be checked.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
         public bool IsLaneValid(uint laneId, bool checkSegment) {
 
@@ -105,9 +105,9 @@ namespace CitiesGameBridge.Service {
         /// <summary>
         /// Check if a lane id and its parent segment are valid.
         /// </summary>
-        /// 
+        ///
         /// <param name="laneId">The id of the lane to check.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if both lane and segment are valid, otherwise <c>false</c>.</returns>
         [Obsolete("Use IsLaneValid(uint, bool) instead; ideally only check parent segment validity once per collection of lanes.")]
         public bool IsLaneAndItsSegmentValid(uint laneId) {
@@ -117,11 +117,11 @@ namespace CitiesGameBridge.Service {
         /// <summary>
         /// Check lane flags contain at least one of the flags in <paramref name="flagMask"/>.
         /// </summary>
-        /// 
+        ///
         /// <param name="laneId">The id of the lane to inspect.</param>
         /// <param name="flagMask">The flags to test for.</param>
         /// <param name="expectedResult">If specified, ensure only the expected flags are found.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if the test passes, otherwise <c>false</c>.</returns>
         public bool CheckLaneFlags(uint laneId,
                                    NetLane.Flags flagMask,
@@ -150,10 +150,10 @@ namespace CitiesGameBridge.Service {
                                         NetSegmentHandler handler) {
             NetManager netManager = Singleton<NetManager>.instance;
 
-            bool ProcessFun(ushort nId, ref NetNode node) {
+            bool ProcessFun(ushort nId, ref NetNode netNode) {
                 if (dir == ClockDirection.None) {
                     for (int i = 0; i < 8; ++i) {
-                        ushort segmentId = node.GetSegment(i);
+                        ushort segmentId = netNode.GetSegment(i);
                         if (segmentId != 0) {
                             if (!handler(
                                     segmentId,
@@ -165,7 +165,7 @@ namespace CitiesGameBridge.Service {
                 } else {
                     ushort segmentId = 0;
                     for (int i = 0; i < 8; ++i) {
-                        segmentId = node.GetSegment(i);
+                        segmentId = netNode.GetSegment(i);
                         if (segmentId != 0) {
                             break;
                         }

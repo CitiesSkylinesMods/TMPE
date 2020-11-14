@@ -274,7 +274,7 @@ namespace TrafficManager.Manager.Impl {
 
                 Services.NetService.IterateNodeSegments(
                     nodeId,
-                    (ushort segId, ref NetSegment segment) => {
+                    (ushort segId, ref NetSegment netSegment) => {
                         if (segId == segmentId) {
                             return true;
                         }
