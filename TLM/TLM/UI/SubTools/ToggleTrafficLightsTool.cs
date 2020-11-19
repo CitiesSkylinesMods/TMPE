@@ -51,6 +51,10 @@ namespace TrafficManager.UI.SubTools {
                 });
         }
 
+        public override void OnSecondaryClickOverlay() {
+            MainTool.SetToolMode(ToolMode.None);
+        }
+
         public void ToggleTrafficLight(ushort nodeId,
                                        ref NetNode node,
                                        bool showMessageOnError = true) {

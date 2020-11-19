@@ -17,8 +17,8 @@
             get => instance;
             private set {
                 if (value != null && instance != null) {
-                    value.Observers = instance.Observers;
-                    value.ObserverLock = instance.ObserverLock;
+                    value._observers = instance._observers;
+                    value._lock = instance._lock;
                 }
 
                 instance = value;
