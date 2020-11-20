@@ -935,6 +935,8 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
+            ushort previouslySelectedNodeId = SelectedNodeId;
+
             switch (GetSelectionMode()) {
                 // also: case MarkerSelectionMode.None:
                 default: {
@@ -967,7 +969,7 @@ namespace TrafficManager.UI.SubTools {
                     }
             }
 
-            if (GetSelectionMode() == SelectionMode.None) {
+            if (GetSelectionMode() == SelectionMode.None && previouslySelectedNodeId == 0) {
                 MainTool.SetToolMode(ToolMode.None);
             }
         }
