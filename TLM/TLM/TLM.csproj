@@ -110,6 +110,9 @@
       <HintPath>$(MangedDLLPath)\ICities.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="MoveItIntegration">
+      <HintPath>..\libs\MoveItIntegration.dll</HintPath>
+    </Reference>
     <Reference Include="SkyTools.Common, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SkyTools.Common.2.1.0\lib\net35\SkyTools.Common.dll</HintPath>
     </Reference>
@@ -165,11 +168,18 @@
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="Patch\_BuildingDecoration\LoadPathsPatch.cs" />
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
     <Compile Include="Patch\_DefaultTool\OnToolGUIPatch.cs" />
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
+    <Compile Include="Patch\_LoadAssetPanel\OnLoadPatch.cs" />
     <Compile Include="Patch\_NetSegment\CalculateSegmentPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
+    <Compile Include="State\Asset\AssetData.cs" />
+    <Compile Include="State\Asset\AssetDataExtension.cs" />
+    <Compile Include="State\Asset\SegmentNetworkIDs.cs" />
+    <Compile Include="State\SerializationUtil.cs" />
+    <Compile Include="State\TMPEMoveItIntegration.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
@@ -330,13 +340,16 @@
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
+    <Compile Include="Util\Spiral.cs" />
     <Compile Include="Util\Caching\CameraTransformValue.cs" />
     <Compile Include="Util\Caching\GenericArrayCache.cs" />
     <Compile Include="Util\GenericFsm.cs" />
     <Compile Include="Util\GeometryUtil.cs" />
+    <Compile Include="Util\PlaceIntersectionUtil.cs" />
     <Compile Include="Util\PriorityRoad.cs" />
     <Compile Include="Util\Record\IRecordable.cs" />
     <Compile Include="Util\Record\LaneConnectionRecord.cs" />
+    <Compile Include="Util\Record\VehicleRestrictionsLaneRecord.cs" />
     <Compile Include="Util\Record\SpeedLimitLaneRecord.cs" />
     <Compile Include="Util\Record\LaneArrowsRecord.cs" />
     <Compile Include="Util\Record\NodeRecord.cs" />
@@ -344,7 +357,6 @@
     <Compile Include="Util\Record\SegmentEndRecord.cs" />
     <Compile Include="Util\Record\SegmentRecord.cs" />
     <Compile Include="Util\SeparateTurningLanesUtil.cs" />
-    <Compile Include="Util\Record\RecordUtil.cs" />
     <Compile Include="Util\Shortcuts.cs" />
     <Compile Include="Util\FloatUtil.cs" />
     <Compile Include="Util\GenericObservable.cs" />
@@ -371,6 +383,7 @@
     <Compile Include="UI\ModUI.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
+    <Compile Include="Util\TranspilerUtil.cs" />
     <Compile Include="U\Autosize\UBoundingBox.cs" />
     <Compile Include="U\Autosize\UResizer.cs" />
     <Compile Include="U\Autosize\ISmartSizableControl.cs" />
@@ -724,6 +737,7 @@ xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)SkyTools.Common.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)SkyTools.Patching.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25"
+xcopy /y "$(TargetDir)MoveItIntegration.dll" "%25DEPLOYDIR%25"
 
 rem To avoid double hot reload, TrafficManager.dll must be replaced last and fast.
 rem Once TrafficManager.dll is re-loaded, all other dlls will be reloaded as well

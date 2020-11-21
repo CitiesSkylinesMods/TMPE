@@ -9,19 +9,18 @@ namespace Benchmarks {
     class Program {
         static void Main(string[] args) {
             var config = ManualConfig.Create(DefaultConfig.Instance)
-                    .WithOption(ConfigOptions.DisableOptimizationsValidator, true)
-                    .AddJob(
-                        Job.ShortRun
-                            .WithRuntime(
-                                new MonoRuntime("Mono x86", @"C:\Program Files\Unity\Hub\Editor\5.6.7f1\Editor\Data\Mono\bin\mono.exe")
-                            )
-                            .WithToolchain(InProcessEmitToolchain.Instance)
-                    )
-                    .AddDiagnoser(MemoryDiagnoser.Default);
+                .WithOption(ConfigOptions.DisableOptimizationsValidator, true)
+                .AddJob(
+                    Job.ShortRun
+                        .WithRuntime(
+                            new MonoRuntime("Mono x64", @"c:\program files (x86)\steam\steamapps\common\cities_skylines\mono\bin\mono.exe")
+                        )
+                        .WithToolchain(InProcessEmitToolchain.Instance)
+                )
+                .AddDiagnoser(MemoryDiagnoser.Default);
 
-            var spiralLoopPerfTestsSummary = BenchmarkRunner.Run<SpiralLoopPerfTests>(
-                config
-            );
+            var loopUtilPerfTestsSummary = BenchmarkRunner.Run<LoopUtilPerfTests>(config);
+            var spiralPerfTestsSummary = BenchmarkRunner.Run<SpiralPerfTests>(config);
         }
     }
 }

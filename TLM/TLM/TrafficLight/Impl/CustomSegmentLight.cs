@@ -10,6 +10,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.TrafficLight;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     /// <summary>
     /// Represents the traffic light (left, forward, right) at a specific segment end
@@ -128,15 +129,9 @@ namespace TrafficManager.TrafficLight.Impl {
             }
 
             IExtSegmentEndManager extSegMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    ToggleMode(
-                        ref extSegMan.ExtSegmentEnds[
-                            extSegMan.GetIndex(SegmentId, StartNode)],
-                        ref node);
-                    return true;
-                });
+            ToggleMode(
+                ref extSegMan.ExtSegmentEnds[extSegMan.GetIndex(SegmentId, StartNode)],
+                ref NodeId.ToNode());
         }
 
         private void ToggleMode(ref ExtSegmentEnd segEnd, ref NetNode node) {

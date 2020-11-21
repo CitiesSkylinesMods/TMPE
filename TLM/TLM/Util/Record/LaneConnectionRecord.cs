@@ -4,6 +4,7 @@ namespace TrafficManager.Util.Record {
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
     using static TrafficManager.Util.Shortcuts;
 
     [Serializable]
@@ -52,7 +53,7 @@ namespace TrafficManager.Util.Record {
                 var originalLaneInstanceID = new InstanceID { NetLane = originalLaneID };
                 if (map.TryGetValue(originalLaneInstanceID, out var ret))
                     return ret.NetLane;
-                Log._Debug($"Could not map lane:{originalLaneID}. this is expected if move it has not copied all segment[s] from an intersection"); 
+                Log._Debug($"Could not map lane:{originalLaneID}. this is expected if move it has not copied all segment[s] from an intersection");
                 return 0;
             }
             var mappedLaneId = MappedLaneId(LaneId);
@@ -85,7 +86,7 @@ namespace TrafficManager.Util.Record {
                     uint laneId,
                     ref NetLane lane,
                     NetInfo.Lane laneInfo,
-                    ushort segmentId,
+                    ushort currentSegmentId,
                     ref NetSegment segment,
                     byte laneIndex) {
                     bool match = (laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != 0 &&
@@ -95,7 +96,7 @@ namespace TrafficManager.Util.Record {
                     var laneData = new LaneConnectionRecord {
                         LaneId = laneId,
                         LaneIndex = laneIndex,
-                        StartNode = (bool)netService.IsStartNode(segmentId, nodeId),
+                        StartNode = (bool)netService.IsStartNode(currentSegmentId, nodeId),
                     };
                     ret.Add(laneData);
                     return true;
@@ -107,7 +108,7 @@ namespace TrafficManager.Util.Record {
             return ret;
         }
 
-        public byte[] Serialize() => RecordUtil.Serialize(this);
+        public byte[] Serialize() => SerializationUtil.Serialize(this);
 
     }
 }

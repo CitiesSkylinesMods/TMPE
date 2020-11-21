@@ -7,6 +7,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
+    using TrafficManager.Util;
 
     /// <summary>
     /// Manages traffic light toggling
@@ -287,17 +288,10 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUGLOAD
                     Log._Debug($"Setting traffic light @ {nodeLight.nodeId} to {nodeLight.trafficLight}");
 #endif
-                    Services.NetService.ProcessNode(
+                    SetTrafficLight(
                         nodeLight.nodeId,
-                        (ushort nodeId, ref NetNode node) => {
-                            SetTrafficLight(
-                                nodeLight.nodeId,
-                                nodeLight.trafficLight,
-                                ref node);
-                            return true;
-                        });
-
-                    // Flags.setNodeTrafficLight(nodeLight.nodeId, nodeLight.trafficLight);
+                        nodeLight.trafficLight,
+                        ref nodeLight.nodeId.ToNode());
                 } catch (Exception e) {
                     // ignore as it's probably bad save data.
                     Log.Error($"Error setting the NodeTrafficLights @ {nodeLight.nodeId}: {e}");

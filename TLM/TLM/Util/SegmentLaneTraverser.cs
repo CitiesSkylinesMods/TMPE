@@ -119,9 +119,9 @@ namespace TrafficManager.Util {
                     return true;
                 }
 
-                Constants.ServiceFactory.NetService.ProcessSegment(
-                    segData.CurSeg.segmentId,
-                    VisitorProcessFun);
+                ushort currentSegmentId = segData.CurSeg.segmentId;
+                VisitorProcessFun(currentSegmentId, ref currentSegmentId.ToSegment());
+
                 return ret;
             }
 

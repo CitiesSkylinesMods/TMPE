@@ -14,6 +14,9 @@ namespace TrafficManager.Util {
     using UnityEngine;
 
     internal static class Shortcuts {
+        internal static bool InSimulationThread() =>
+            System.Threading.Thread.CurrentThread == SimulationManager.instance.m_simulationThread;
+
         /// <summary>
         /// returns a new calling Clone() on all items.
         /// </summary>
@@ -39,11 +42,13 @@ namespace TrafficManager.Util {
             list[index2] = temp;
         }
 
-        private static NetNode[] _nodeBuffer => Singleton<NetManager>.instance.m_nodes.m_buffer;
+        private static NetNode[] _nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
 
-        private static NetSegment[] _segBuffer => Singleton<NetManager>.instance.m_segments.m_buffer;
+        private static NetSegment[] _segBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
-        private static NetLane[] _laneBuffer => Singleton<NetManager>.instance.m_lanes.m_buffer;
+        private static NetLane[] _laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
+
+        private static Building[] _buildingBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
 
         private static ExtSegmentEnd[] _segEndBuff => segEndMan.ExtSegmentEnds;
 
@@ -55,13 +60,15 @@ namespace TrafficManager.Util {
 
         internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
 
-        internal static ref NetNode ToNode(this ushort nodeId) => ref GetNode(nodeId);
+        internal static ref NetNode ToNode(this ushort nodeId) => ref _nodeBuffer[nodeId];
 
         internal static ref NetLane ToLane(this uint laneId) => ref _laneBuffer[laneId];
 
         internal static ref NetSegment GetSeg(ushort segmentId) => ref _segBuffer[segmentId];
 
-        internal static ref NetSegment ToSegment(this ushort segmentId) => ref GetSeg(segmentId);
+        internal static ref NetSegment ToSegment(this ushort segmentId) => ref _segBuffer[segmentId];
+
+        internal static ref Building ToBuilding(this ushort buildingId) => ref _buildingBuffer[buildingId];
 
         internal static NetInfo.Lane GetLaneInfo(ushort segmentId, int laneIndex) =>
             segmentId.ToSegment().Info.m_lanes[laneIndex];
@@ -138,6 +145,12 @@ namespace TrafficManager.Util {
         internal static void AssertNEq<T>(T a, T b, string m = "") where T : IComparable {
             if (a.CompareTo(b) == 0) {
                 Log.Error($"Assertion failed. Expected {a} != {b} | " + m);
+            }
+        }
+
+        internal static void AssertNotNull(object obj, string m = "") {
+            if (obj == null) {
+                Log.Error("Assertion failed. Expected not null: " + m);
             }
         }
 

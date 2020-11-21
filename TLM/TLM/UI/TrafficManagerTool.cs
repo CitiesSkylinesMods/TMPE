@@ -94,6 +94,13 @@ namespace TrafficManager.UI {
 
         static TrafficManagerTool() { }
 
+        /// <summary>
+        /// Determines if the current tool is traffic manager tool.
+        /// </summary>
+        public static bool IsCurrentTool =>
+            ToolsModifierControl.toolController?.CurrentTool != null
+            && ToolsModifierControl.toolController.CurrentTool is TrafficManagerTool;
+
         protected override void OnDestroy() {
             Log.Info("TrafficManagerTool.OnDestroy() called");
             base.OnDestroy();
@@ -121,14 +128,7 @@ namespace TrafficManager.UI {
 
         // TODO: Move to UI.Helpers
         internal static bool IsNodeWithinViewDistance(ushort nodeId) {
-            bool ret = false;
-            Constants.ServiceFactory.NetService.ProcessNode(
-                nodeId,
-                (ushort nId, ref NetNode node) => {
-                    ret = IsPosWithinOverlayDistance(node.m_position);
-                    return true;
-                });
-            return ret;
+            return IsPosWithinOverlayDistance(nodeId.ToNode().m_position);
         }
 
         // TODO: Move to UI.Helpers
@@ -245,7 +245,7 @@ namespace TrafficManager.UI {
         public void SetToolMode(ToolMode newToolMode) {
             ToolMode oldToolMode = toolMode_;
 
-            if(toolMode_ != ToolMode.None) {
+            if(toolMode_ != ToolMode.None && LoadingExtension.PlayMode) {
                 // Make it impossible for user to undo changes performed by Road selection panels
                 // after changing traffic rule vis other tools.
                 // TODO: This code will not be necessary when we implement intent.
@@ -253,7 +253,6 @@ namespace TrafficManager.UI {
                 RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
             }
 
-            // ToolModeChanged does not count timed traffic light submodes as a same tool
             bool toolModeChanged = newToolMode != toolMode_;
 
             if (!toolModeChanged) {
@@ -262,7 +261,6 @@ namespace TrafficManager.UI {
             }
 
             SetToolMode_DeactivateTool();
-
             // Try figure out whether legacy subtool or a new subtool is selected
             if (!legacySubTools_.TryGetValue(newToolMode, out activeLegacySubTool_)
                 && !subTools_.TryGetValue(newToolMode, out activeSubTool_)) {
@@ -271,6 +269,8 @@ namespace TrafficManager.UI {
                 toolMode_ = ToolMode.None;
 
                 Log._Debug($"SetToolMode: reset because toolmode not found {newToolMode}");
+                OnscreenDisplay.DisplayIdle();
+                ModUI.Instance.MainMenu.UpdateButtons();
                 return;
             }
 
@@ -378,6 +378,9 @@ namespace TrafficManager.UI {
         /// </summary>
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
+            if (!LoadingExtension.PlayMode) {
+                return; // world info view panels are not availble in edit mode
+            }
             SubTools.PrioritySigns.MassEditOverlay.Show
                 = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
 
@@ -451,7 +454,7 @@ namespace TrafficManager.UI {
             }
 
             bool primaryMouseClicked = Input.GetMouseButtonDown(0);
-            bool secondaryMouseClicked = Input.GetMouseButtonDown(1);
+            bool secondaryMouseClicked = Input.GetMouseButtonUp(1);
 
             // check if clicked
             if (!primaryMouseClicked && !secondaryMouseClicked) {
@@ -477,8 +480,17 @@ namespace TrafficManager.UI {
                 }
 
                 if (secondaryMouseClicked) {
-                    activeLegacySubTool_?.OnSecondaryClickOverlay();
-                    activeSubTool_?.OnToolRightClick();
+                    if (GetToolMode() == ToolMode.None) {
+                        RoadSelectionPanels roadSelectionPanels = UIView.GetAView().GetComponent<RoadSelectionPanels>();
+                        if (roadSelectionPanels && roadSelectionPanels.RoadWorldInfoPanelExt && roadSelectionPanels.RoadWorldInfoPanelExt.isVisible) {
+                            RoadSelectionPanels.RoadWorldInfoPanel.Hide();
+                        } else {
+                            ModUI.Instance.CloseMainMenu();
+                        }
+                    } else {
+                        activeLegacySubTool_?.OnSecondaryClickOverlay();
+                        activeSubTool_?.OnToolRightClick();
+                    }
                 }
             }
         }
@@ -541,6 +553,9 @@ namespace TrafficManager.UI {
         }
 
         void DefaultOnToolGUI(Event e) {
+            if (!LoadingExtension.PlayMode) {
+                return; // world info view panels are not availble in edit mode
+            }
             if (e.type == EventType.MouseDown && e.button == 0) {
                 bool isRoad = HoveredSegmentId != 0 && HoveredSegmentId.ToSegment().Info.m_netAI is RoadBaseAI;
                 if (!isRoad)
@@ -569,8 +584,6 @@ namespace TrafficManager.UI {
                         instanceID,
                         HitPos);
                 });
-            } else if (e.type == EventType.MouseDown && e.button == 1) {
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
             }
         }
 
@@ -976,7 +989,7 @@ namespace TrafficManager.UI {
         /// <summary>Shows a tutorial message. Must be called by a Unity thread.</summary>
         /// <param name="localeKey">Tutorial key.</param>
         public static void ShowAdvisor(string localeKey) {
-            if (!GlobalConfig.Instance.Main.EnableTutorial) {
+            if (!GlobalConfig.Instance.Main.EnableTutorial || !LoadingExtension.PlayMode) {
                 return;
             }
 

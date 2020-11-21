@@ -122,6 +122,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         public override void OnPrimaryClickOverlay() { }
 
+        public override void OnSecondaryClickOverlay() {
+            MainTool.SetToolMode(ToolMode.None);
+        }
+
         public override void OnToolGUI(Event e) {
             base.OnToolGUI(e);
 
@@ -924,20 +928,22 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                             return true;
                                         }
 
-                                        Constants.ServiceFactory.NetService.ProcessSegment(
-                                            data.SegVisitData.CurSeg.segmentId,
-                                            (ushort curSegmentId, ref NetSegment curSegment) => {
-                                                NetInfo.Lane curLaneInfo = curSegment.Info.m_lanes[
-                                                    data.CurLanePos.laneIndex];
+                                        ushort visitSegmentId = data
+                                            .SegVisitData
+                                            .CurSeg
+                                            .segmentId;
 
-                                                SpeedLimitManager.Instance.SetSpeedLimit(
-                                                    curSegmentId,
-                                                    data.CurLanePos.laneIndex,
-                                                    curLaneInfo,
-                                                    data.CurLanePos.laneId,
-                                                    speedLimitToSet?.GameUnits);
-                                                return true;
-                                            });
+                                        NetInfo.Lane curLaneInfo = visitSegmentId
+                                            .ToSegment()
+                                            .Info
+                                            .m_lanes[data.CurLanePos.laneIndex];
+
+                                        SpeedLimitManager.Instance.SetSpeedLimit(
+                                            visitSegmentId,
+                                            data.CurLanePos.laneIndex,
+                                            curLaneInfo,
+                                            data.CurLanePos.laneId,
+                                            speedLimitToSet?.GameUnits);
 
                                         return true;
                                     });

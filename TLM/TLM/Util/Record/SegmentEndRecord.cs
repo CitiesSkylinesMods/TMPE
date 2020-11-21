@@ -5,6 +5,7 @@ namespace TrafficManager.Util.Record {
     using TrafficManager.API.Traffic;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
 
     [Serializable]
     class SegmentEndRecord : IRecordable {
@@ -99,6 +100,6 @@ namespace TrafficManager.Util.Record {
             }
         }
 
-        public byte[] Serialize() => RecordUtil.Serialize(this);
+        public byte[] Serialize() => SerializationUtil.Serialize(this);
     }
 }

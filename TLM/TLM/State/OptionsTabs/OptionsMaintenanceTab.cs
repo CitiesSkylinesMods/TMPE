@@ -117,6 +117,16 @@ namespace TrafficManager.State {
                                              OnLaneConnectorEnabledChanged) as UICheckBox;
 
             Options.Indent(_turnOnRedEnabledToggle);
+
+            // TODO [issue ##959] remove when TTL is implemented in asset editor.
+            bool inEditor = (SerializableDataExtension.StateLoading || LoadingExtension.IsGameLoaded)
+                            && LoadingExtension.AppMode != AppMode.Game;
+            if (inEditor) {
+                EnableTimedLightsToggle.isChecked = false;
+                EnableTimedLightsToggle.isEnabled = false;
+                // since this is temprory I don't want to go through the trouble of creating translation key.
+                EnableTimedLightsToggle.tooltip = "TTL is not yet supported in asset editor";
+            }
         }
 
         private static void onClickResetStuckEntities() {

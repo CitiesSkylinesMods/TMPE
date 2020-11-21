@@ -3,6 +3,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     public class TurnOnRedManager
         : AbstractGeometryObservingManager,
@@ -133,16 +134,11 @@ namespace TrafficManager.Manager.Impl {
 
             // check node
             // note that we must not check for the `TrafficLights` flag here because the flag might not be loaded yet
-            bool nodeValid = false;
-            Services.NetService.ProcessNode(
-                nodeId,
-                (ushort _, ref NetNode node) => {
-                    nodeValid =
-                        (node.m_flags & NetNode.Flags.LevelCrossing) ==
-                        NetNode.Flags.None &&
-                        node.Info?.m_class?.m_service != ItemClass.Service.Beautification;
-                    return true;
-                });
+            ref NetNode node = ref nodeId.ToNode();
+            bool nodeValid =
+                (node.m_flags & NetNode.Flags.LevelCrossing) ==
+                NetNode.Flags.None &&
+                node.Info?.m_class?.m_service != ItemClass.Service.Beautification;
 
             if (!nodeValid) {
                 if (logTurnOnRed) {
@@ -153,17 +149,9 @@ namespace TrafficManager.Manager.Impl {
             }
 
             // get left/right segments
-            ushort leftSegmentId = 0;
-            ushort rightSegmentId = 0;
-            Services.NetService.ProcessSegment(
-                end.segmentId,
-                (ushort _, ref NetSegment segment) => {
-                    segment.GetLeftAndRightSegments(
-                        nodeId,
-                        out leftSegmentId,
-                        out rightSegmentId);
-                    return true;
-                });
+            end.segmentId
+                .ToSegment()
+                .GetLeftAndRightSegments(nodeId, out ushort leftSegmentId, out ushort rightSegmentId);
 
             if (logTurnOnRed) {
                 Log._Debug(

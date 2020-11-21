@@ -88,28 +88,23 @@ namespace TrafficManager.Manager {
                 }
             } else if (update.nodeId != null) {
                 // Handle a node update
-                ushort nodeId = (ushort)update.nodeId;
-                Services.NetService.ProcessNode(
-                    nodeId,
-                    (ushort nId, ref NetNode node) => {
-                        if ((node.m_flags &
+                ushort nodeId = update.nodeId.Value;
+                ref NetNode node = ref nodeId.ToNode();
+                if ((node.m_flags &
                              (NetNode.Flags.Created | NetNode.Flags.Deleted)) ==
                             NetNode.Flags.Created) {
-                            if (logGeometry) {
-                                Log._Debug($"{GetType().Name}.HandleValidNode({nodeId})");
-                            }
+                    if (logGeometry) {
+                        Log._Debug($"{GetType().Name}.HandleValidNode({nodeId})");
+                    }
 
-                            HandleValidNode(nodeId, ref node);
-                        } else {
-                            if (logGeometry) {
-                                Log._Debug($"{GetType().Name}.HandleInvalidNode({nodeId})");
-                            }
+                    HandleValidNode(nodeId, ref node);
+                } else {
+                    if (logGeometry) {
+                        Log._Debug($"{GetType().Name}.HandleInvalidNode({nodeId})");
+                    }
 
-                            HandleInvalidNode(nodeId, ref node);
-                        }
-
-                        return true;
-                    });
+                    HandleInvalidNode(nodeId, ref node);
+                }
             } else {
                 // Handle a segment end replacement
                 IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;

@@ -577,10 +577,13 @@ namespace TrafficManager.Util {
             }
         }
 
+        /// <summary>
+        /// returns a posetive value if seg1Id < seg2Id
+        /// </summary>
         internal static int CompareSegments(ushort seg1Id, ushort seg2Id) {
             ref NetSegment seg1 = ref GetSeg(seg1Id);
             ref NetSegment seg2 = ref GetSeg(seg2Id);
-            int diff = (int)Math.Ceiling(seg2.Info.m_halfWidth - seg1.Info.m_halfWidth);
+            int diff = (int)Mathf.RoundToInt(seg2.Info.m_halfWidth - seg1.Info.m_halfWidth);
             if (diff == 0) {
                 diff = CountRoadVehicleLanes(seg2Id) - CountRoadVehicleLanes(seg1Id);
             }
