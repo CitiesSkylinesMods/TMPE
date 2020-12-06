@@ -1,13 +1,10 @@
 namespace TrafficManager.UI.MainMenu.OSD {
     using System;
-    using System.Collections.Generic;
     using System.Text;
     using ColossalFramework;
     using ColossalFramework.UI;
-    using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
-    using TrafficManager.U.Label;
 
     /// <summary>
     /// Displays a mouse click shortcut in OSD panel.
@@ -34,7 +31,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
             localizedText_ = localizedText;
         }
 
-        public override void Build(U.UiBuilder<U.Panel.UPanel> builder) {
+        public override void Build(U.UiBuilder<U.UPanel> builder) {
             // Capacity 9 will fit all modifiers and separators and the text
             StringBuilder text = new StringBuilder(capacity: 9);
 
@@ -58,7 +55,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
             text.Append("</color> ");
             text.Append(this.localizedText_);
 
-            using (UiBuilder<ULabel> labelB = builder.Label<U.Label.ULabel>(text.ToString())) {
+            using (UiBuilder<ULabel> labelB = builder.Label<U.ULabel>(text.ToString())) {
                 labelB.Control.processMarkup = true;
                 labelB.ResizeFunction(
                     r => { r.Stack(mode: UStackMode.NewRowBelow); });

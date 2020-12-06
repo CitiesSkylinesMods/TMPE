@@ -4,7 +4,6 @@ namespace TrafficManager.UI.MainMenu.OSD {
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
-    using TrafficManager.U.Label;
 
     /// <summary>
     /// Displays a keybind or dual keybind in the OSD panel.
@@ -20,12 +19,12 @@ namespace TrafficManager.UI.MainMenu.OSD {
             localizedText_ = localizedText;
         }
 
-        public override void Build(U.UiBuilder<U.Panel.UPanel> builder) {
+        public override void Build(U.UiBuilder<U.UPanel> builder) {
             StringBuilder text = new StringBuilder();
             List<string> keybindStrings = this.keybindSetting_.ToLocalizedStringList();
             bool firstShortcut = true; // tracking | separators between multiple keybinds
 
-            using (UiBuilder<ULabel> labelB = builder.Label<U.Label.ULabel>(string.Empty)) {
+            using (UiBuilder<ULabel> labelB = builder.Label<U.ULabel>(string.Empty)) {
                 labelB.Control.processMarkup = true;
                 labelB.ResizeFunction(
                     r => {
