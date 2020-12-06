@@ -9,8 +9,8 @@ namespace TrafficManager.UI.Textures {
     using UnityEngine;
 
     public static class SpeedLimitTextures {
-        /// <summary>Blue textures for road/lane default speed limits.</summary>
-        public static readonly IDictionary<int, Texture2D> RoadDefaults;
+        // /// <summary>Blue textures for road/lane default speed limits.</summary>
+        // public static readonly IDictionary<int, Texture2D> RoadDefaults;
 
         /// <summary>German style textures for KM/hour also usable for MPH.</summary>
         public static readonly IDictionary<int, Texture2D> TexturesKmph;
@@ -39,10 +39,10 @@ namespace TrafficManager.UI.Textures {
                 TexturesKmph.Add(speedLimit, resource ? resource : TexturesKmph[5]);
             }
 
-            for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
-                var resource = LoadDllResource($"SpeedLimits.RoadDefaults.{speedLimit}.png", size, true);
-                RoadDefaults.Add(speedLimit, resource ? resource : RoadDefaults[5]);
-            }
+            // for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
+            //     var resource = LoadDllResource($"SpeedLimits.RoadDefaults.{speedLimit}.png", size, true);
+            //     RoadDefaults.Add(speedLimit, resource ? resource : RoadDefaults[5]);
+            // }
 
             // Signs from 0 to 90 for MPH
             for (var speedLimit = 0; speedLimit <= 90; speedLimit += 5) {
