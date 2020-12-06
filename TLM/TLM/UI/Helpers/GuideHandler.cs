@@ -2,13 +2,17 @@ namespace TrafficManager.UI.Helpers {
     using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
+    using TrafficManager.State;
 
     public class GuideHandler {
-        private Dictionary<string, GuideWrapper> GuideTable = new Dictionary<string, GuideWrapper>();
+        private Dictionary<string, GuideWrapper> GuideTable = new();
 
         public GuideHandler() {
             foreach (string localeKey in LoadingExtension.TranslationDatabase.GetGuides()) {
-                Log._Debug($"calling AddGuide(localeKey={localeKey}) ...");
+                if (GlobalConfig.Instance.Debug.Guide) {
+                    Log._Debug($"calling AddGuide(localeKey={localeKey}) ...");
+                }
+
                 AddGuide(localeKey);
             }
         }

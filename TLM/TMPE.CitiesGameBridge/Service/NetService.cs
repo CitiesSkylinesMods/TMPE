@@ -21,9 +21,9 @@ namespace CitiesGameBridge.Service {
         /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
         public bool IsNodeValid(ushort nodeId) {
             return CheckNodeFlags(
-                nodeId,
-                NetNode.Flags.Created | NetNode.Flags.Collapsed | NetNode.Flags.Deleted,
-                NetNode.Flags.Created);
+                nodeId: nodeId,
+                flagMask: NetNode.Flags.Created | NetNode.Flags.Collapsed | NetNode.Flags.Deleted,
+                expectedResult: NetNode.Flags.Created);
         }
 
         /// <summary>
@@ -197,16 +197,16 @@ namespace CitiesGameBridge.Service {
 
         public NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId, bool startNode) {
             return GetFinalSegmentEndDirection(
-                segmentId,
-                ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
-                startNode);
+                segmentId: segmentId,
+                segment: ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
+                startNode: startNode);
         }
 
         public NetInfo.Direction GetFinalSegmentEndDirection(
             ushort segmentId,
             ref NetSegment segment,
             bool startNode) {
-            var dir = startNode ? NetInfo.Direction.Backward : NetInfo.Direction.Forward;
+            NetInfo.Direction dir = startNode ? NetInfo.Direction.Backward : NetInfo.Direction.Forward;
 
             if ((segment.m_flags & NetSegment.Flags.Invert) !=
                 NetSegment.Flags.None /*^ SimulationService.Instance.LeftHandDrive*/) {
@@ -315,7 +315,6 @@ namespace CitiesGameBridge.Service {
         }
 
         public void PublishSegmentChanges(ushort segmentId) {
-            Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
             ISimulationService simService = SimulationService.Instance;
 
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
@@ -329,22 +328,21 @@ namespace CitiesGameBridge.Service {
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             if (segment.m_startNode == nodeId) {
                 return true;
-            } else if (segment.m_endNode == nodeId) {
-                return false;
-            } else {
-                return null;
             }
+
+            if (segment.m_endNode == nodeId) {
+                return false;
+            }
+
+            return null;
         }
 
         public ushort GetHeadNode(ref NetSegment segment) {
             // tail node>-------->head node
             bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ SimulationService.Instance.TrafficDrivesOnLeft;
-            if (invert) {
-                return segment.m_startNode;
-            } else {
-                return segment.m_endNode;
-            }
+            invert ^= SimulationService.Instance.TrafficDrivesOnLeft;
+
+            return invert ? segment.m_startNode : segment.m_endNode;
         }
 
         public ushort GetHeadNode(ushort segmentId) =>
@@ -352,12 +350,13 @@ namespace CitiesGameBridge.Service {
 
         public ushort GetTailNode(ref NetSegment segment) {
             bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ SimulationService.Instance.TrafficDrivesOnLeft;
+            invert ^= SimulationService.Instance.TrafficDrivesOnLeft;
+
             if (!invert) {
                 return segment.m_startNode;
-            } else {
-                return segment.m_endNode;
-            }//endif
+            }
+
+            return segment.m_endNode;
         }
 
         public ushort GetTailNode(ushort segmentId) =>

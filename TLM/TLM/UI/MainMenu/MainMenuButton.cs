@@ -11,8 +11,7 @@ namespace TrafficManager.UI.MainMenu {
 
     public class MainMenuButton
         : BaseUButton,
-          IObserver<GlobalConfig>
-    {
+          IObserver<GlobalConfig> {
         private UIDragHandle Drag { get; set; }
 
         private IDisposable confDisposable_;
@@ -28,23 +27,21 @@ namespace TrafficManager.UI.MainMenu {
             confDisposable_ = GlobalConfig.Instance.Subscribe(this);
 
             // Let the mainmenu atlas know we need this texture and assign it to self.atlas.
-            this.Skin = new ButtonSkin {
-                                           BackgroundPrefix = "MainMenuButton",
-                                           Prefix = "MainMenuButton",
-                                           BackgroundHovered = true,
-                                           BackgroundActive = true,
-                                           ForegroundHovered = true,
-                                           ForegroundActive = true,
-                                       };
-            var atlasBuilder = new U.AtlasBuilder();
+            this.Skin = ButtonSkin.CreateSimple(
+                                      backgroundPrefix: "MainMenuButton",
+                                      foregroundPrefix: "MainMenuButton")
+                                  .CanActivate()
+                                  .CanHover();
+
+            var atlasBuilder = new U.AtlasBuilder(
+                atlasName: "MainTMPEButton_Atlas",
+                loadingPath: "MainMenu",
+                sizeHint: new IntVector2(256));
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: atlasBuilder,
                 spriteSize: new IntVector2(50));
-            this.atlas = atlasBuilder.CreateAtlas(
-                atlasName: "MainTMPEButton_Atlas",
-                loadingPath: "MainMenu",
-                atlasSizeHint: new IntVector2(256));
-            UpdateButtonImageAndTooltip();
+            this.atlas = atlasBuilder.CreateAtlas();
+            UpdateButtonSkinAndTooltip();
 
             // Set the button dimensions to smallest of 2.6% of screen width or 4.6% of screen height
             // Which approximately equals to 50 pixels in 1080p.
@@ -107,36 +104,6 @@ namespace TrafficManager.UI.MainMenu {
             base.OnPositionChanged();
         }
 
-        // internal void UpdateSprites() {
-        //     if (!ModUI.Instance.IsVisible()) {
-        //         m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
-        //                                            m_BackgroundSprites.m_Focused =
-        //                                                ATLASKEY_BG_NORMAL;
-        //         m_BackgroundSprites.m_Hovered = ATLASKEY_BG_HOVERED;
-        //         m_PressedBgSprite = ATLASKEY_BG_ACTIVE;
-        //
-        //         m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
-        //                                            m_ForegroundSprites.m_Focused =
-        //                                                ATLASKEY_FG_NORMAL;
-        //         m_ForegroundSprites.m_Hovered = ATLASKEY_FG_HOVERED;
-        //         m_PressedFgSprite = ATLASKEY_FG_ACTIVE;
-        //     } else {
-        //         m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
-        //                                            m_BackgroundSprites.m_Focused =
-        //                                                m_BackgroundSprites.m_Hovered =
-        //                                                    ATLASKEY_BG_ACTIVE;
-        //         m_PressedBgSprite = ATLASKEY_BG_HOVERED;
-        //
-        //         m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
-        //                                            m_ForegroundSprites.m_Focused =
-        //                                                m_ForegroundSprites.m_Hovered =
-        //                                                    ATLASKEY_FG_ACTIVE;
-        //         m_PressedFgSprite = ATLASKEY_FG_HOVERED;
-        //     }
-        //
-        //     this.Invalidate();
-        // }
-
         public void OnUpdate(GlobalConfig config) {
             UpdatePosition(new Vector2(config.Main.MainMenuButtonX, config.Main.MainMenuButtonY));
         }
@@ -165,10 +132,10 @@ namespace TrafficManager.UI.MainMenu {
 
         protected override string U_OverrideTooltipText() {
             return Translation.Menu.Get("Tooltip:Toggle Main Menu");
-            // return KeybindSettingsBase.ToggleMainMenu.ToLocalizedString("\n");
         }
 
-        public override KeybindSetting U_OverrideTooltipShortcutKey() => KeybindSettingsBase.ToggleMainMenu;
+        public override KeybindSetting U_OverrideTooltipShortcutKey() =>
+            KeybindSettingsBase.ToggleMainMenu;
 
         protected override bool IsVisible() => true;
 

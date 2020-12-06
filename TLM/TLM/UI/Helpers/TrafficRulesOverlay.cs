@@ -189,6 +189,7 @@ namespace TrafficManager.UI.Helpers {
             Color guiColor = GUI.color;
             // Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
+            var textures = LoadingExtension.Instance.Textures.JunctionRestrictions;
 
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
@@ -221,7 +222,7 @@ namespace TrafficManager.UI.Helpers {
                     startNode: isStartNode,
                     signsPerRow: isIncoming ? 2 : 1,
                     viewOnly: this.ViewOnly,
-                    baseZoom: this.mainTool_.GetBaseZoom());
+                    baseZoom: U.UIScaler.GetScale());
 
                 IJunctionRestrictionsManager junctionRManager = Constants.ManagerFactory.JunctionRestrictionsManager;
 
@@ -251,8 +252,8 @@ namespace TrafficManager.UI.Helpers {
                         camPos: ref camPos,
                         guiColor: guiColor,
                         signTexture: allowed
-                                         ? JunctionRestrictions.LaneChangeAllowed
-                                         : JunctionRestrictions.LaneChangeForbidden);
+                                         ? textures.LaneChangeAllowed
+                                         : textures.LaneChangeForbidden);
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;
@@ -285,8 +286,8 @@ namespace TrafficManager.UI.Helpers {
                         camPos: ref camPos,
                         guiColor: guiColor,
                         signTexture: allowed
-                                         ? JunctionRestrictions.UturnAllowed
-                                         : JunctionRestrictions.UturnForbidden);
+                                         ? textures.UturnAllowed
+                                         : textures.UturnForbidden);
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;
@@ -326,8 +327,8 @@ namespace TrafficManager.UI.Helpers {
                         camPos: ref camPos,
                         guiColor: guiColor,
                         signTexture: allowed
-                                         ? JunctionRestrictions.EnterBlockedJunctionAllowed
-                                         : JunctionRestrictions.EnterBlockedJunctionForbidden);
+                                         ? textures.EnterBlockedJunctionAllowed
+                                         : textures.EnterBlockedJunctionForbidden);
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;
@@ -358,8 +359,8 @@ namespace TrafficManager.UI.Helpers {
                         camPos: ref camPos,
                         guiColor: guiColor,
                         signTexture: allowed
-                                         ? JunctionRestrictions.PedestrianCrossingAllowed
-                                         : JunctionRestrictions.PedestrianCrossingForbidden);
+                                         ? textures.PedestrianCrossingAllowed
+                                         : textures.PedestrianCrossingForbidden);
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;
@@ -407,8 +408,8 @@ namespace TrafficManager.UI.Helpers {
                         camPos: ref camPos,
                         guiColor: guiColor,
                         signTexture: allowed
-                                         ? JunctionRestrictions.LeftOnRedAllowed
-                                         : JunctionRestrictions.LeftOnRedForbidden);
+                                         ? textures.LeftOnRedAllowed
+                                         : textures.LeftOnRedForbidden);
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;
@@ -448,8 +449,8 @@ namespace TrafficManager.UI.Helpers {
                         camPos: ref camPos,
                         guiColor: guiColor,
                         signTexture: allowed
-                                         ? JunctionRestrictions.RightOnRedAllowed
-                                         : JunctionRestrictions.RightOnRedForbidden);
+                                         ? textures.RightOnRedAllowed
+                                         : textures.RightOnRedForbidden);
 
                     if (signHovered && this.handleClick_) {
                         isAnyHovered = true;

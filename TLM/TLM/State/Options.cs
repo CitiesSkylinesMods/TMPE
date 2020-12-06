@@ -11,8 +11,8 @@ namespace TrafficManager.State {
 
     public class Options : MonoBehaviour {
 #if DEBUG
-        private static List<UICheckBox> debugSwitchFields = new List<UICheckBox>();
-        private static List<UITextField> debugValueFields = new List<UITextField>();
+        private static List<UICheckBox> debugSwitchFields = new();
+        private static List<UITextField> debugValueFields = new();
 
         // private static UITextField pathCostMultiplicatorField = null;
         // private static UITextField pathCostMultiplicator2Field = null;
@@ -122,7 +122,7 @@ namespace TrafficManager.State {
 
                 // TM:PE main button also needs to be uidated
                 if (ModUI.Instance.MainMenuButton != null) {
-                    ModUI.Instance.MainMenuButton.UpdateButtonImageAndTooltip();
+                    ModUI.Instance.MainMenuButton.UpdateButtonSkinAndTooltip();
                 }
 
                 LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();

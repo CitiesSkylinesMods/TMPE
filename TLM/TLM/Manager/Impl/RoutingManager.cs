@@ -19,7 +19,7 @@ namespace TrafficManager.Manager.Impl {
     {
         private RoutingManager() { }
 
-        public static readonly RoutingManager Instance = new RoutingManager();
+        public static readonly RoutingManager Instance = new();
 
         private const NetInfo.LaneType ROUTED_LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
@@ -61,7 +61,7 @@ namespace TrafficManager.Manager.Impl {
 
         private readonly ulong[] updatedSegmentBuckets = new ulong[576];
 
-        private readonly object updateLock = new object();
+        private readonly object updateLock = new();
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
@@ -148,9 +148,9 @@ namespace TrafficManager.Manager.Impl {
 
         public void RequestRecalculation(ushort segmentId, bool propagate = true) {
 #if DEBUG
-            bool logRouting = DebugSwitch.RoutingBasicLog.Get()
-                         && (DebugSettings.SegmentId <= 0
-                             || DebugSettings.SegmentId == segmentId);
+            bool logRouting = GlobalConfig.Instance.Debug.RoutingBasicLog
+                              && (DebugSettings.SegmentId <= 0
+                                  || DebugSettings.SegmentId == segmentId);
 #else
             const bool logRouting = false;
 #endif
@@ -190,7 +190,7 @@ namespace TrafficManager.Manager.Impl {
 
         protected void RecalculateAll() {
 #if DEBUG
-            bool logRouting = DebugSwitch.RoutingBasicLog.Get();
+            // bool logRouting = GlobalConfig.Instance.Debug.RoutingBasicLog;
             Log._Debug($"RoutingManager.RecalculateAll: called");
 #endif
             Flags.ClearHighwayLaneArrows();
@@ -206,8 +206,9 @@ namespace TrafficManager.Manager.Impl {
 
         protected void RecalculateSegment(ushort segmentId) {
 #if DEBUG
-            bool logRouting = DebugSwitch.RoutingBasicLog.Get() &&
-                         (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == segmentId);
+            bool logRouting = GlobalConfig.Instance.Debug.RoutingBasicLog &&
+                              (DebugSettings.SegmentId <= 0
+                               || DebugSettings.SegmentId == segmentId);
 #else
             const bool logRouting = false;
 #endif
@@ -247,7 +248,7 @@ namespace TrafficManager.Manager.Impl {
             nodeIds[1] = segment.m_endNode;
 
 #if DEBUG
-            bool logRouting = DebugSwitch.RoutingBasicLog.Get()
+            bool logRouting = GlobalConfig.Instance.Debug.RoutingBasicLog
                               && (DebugSettings.SegmentId <= 0
                                   || DebugSettings.SegmentId == segmentId);
 #else
@@ -296,10 +297,10 @@ namespace TrafficManager.Manager.Impl {
 
         protected void ResetRoutingData(ushort segmentId) {
 #if DEBUG
-            bool logRouting = DebugSwitch.RoutingBasicLog.Get()
+            bool logRouting = GlobalConfig.Instance.Debug.RoutingBasicLog
                               && (DebugSettings.SegmentId <= 0
                                   || DebugSettings.SegmentId == segmentId);
-            bool extendedLogRouting = DebugSwitch.Routing.Get()
+            bool extendedLogRouting = GlobalConfig.Instance.Debug.Routing
                                       && (DebugSettings.SegmentId <= 0
                                           || DebugSettings.SegmentId == segmentId);
 #else
@@ -336,10 +337,10 @@ namespace TrafficManager.Manager.Impl {
 
         protected void RecalculateSegmentRoutingData(ushort segmentId) {
 #if DEBUG
-            bool logRouting = DebugSwitch.RoutingBasicLog.Get()
+            bool logRouting = GlobalConfig.Instance.Debug.RoutingBasicLog
                               && (DebugSettings.SegmentId <= 0
                                   || DebugSettings.SegmentId == segmentId);
-            bool extendedLogRouting = DebugSwitch.Routing.Get()
+            bool extendedLogRouting = GlobalConfig.Instance.Debug.Routing
                                       && (DebugSettings.SegmentId <= 0
                                           || DebugSettings.SegmentId == segmentId);
 #else
@@ -372,10 +373,10 @@ namespace TrafficManager.Manager.Impl {
                                                      uint laneId,
                                                      bool startNode) {
 #if DEBUG
-            bool logRouting = DebugSwitch.RoutingBasicLog.Get()
+            bool logRouting = GlobalConfig.Instance.Debug.RoutingBasicLog
                               && (DebugSettings.SegmentId <= 0
                                   || DebugSettings.SegmentId == segmentId);
-            bool extendedLogRouting = DebugSwitch.Routing.Get()
+            bool extendedLogRouting = GlobalConfig.Instance.Debug.Routing
                                       && (DebugSettings.SegmentId <= 0
                                           || DebugSettings.SegmentId == segmentId);
 #else
@@ -2311,7 +2312,7 @@ namespace TrafficManager.Manager.Impl {
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
 #if DEBUG
-            bool logRouting = DebugSwitch.RoutingBasicLog.Get()
+            bool logRouting = GlobalConfig.Instance.Debug.RoutingBasicLog
                               && (DebugSettings.SegmentId <= 0
                                   || DebugSettings.SegmentId == seg.segmentId);
 #else
@@ -2327,7 +2328,7 @@ namespace TrafficManager.Manager.Impl {
 
         protected override void HandleValidSegment(ref ExtSegment seg) {
 #if DEBUG
-            bool logRouting = DebugSwitch.RoutingBasicLog.Get()
+            bool logRouting = GlobalConfig.Instance.Debug.RoutingBasicLog
                               && (DebugSettings.SegmentId <= 0
                                   || DebugSettings.SegmentId == seg.segmentId);
 #else

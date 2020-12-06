@@ -12,7 +12,7 @@ namespace TrafficManager.Util.Record {
         public SegmentRecord(ushort segmentId) => SegmentId = segmentId;
 
         public ushort SegmentId { get; private set; }
-        InstanceID InstanceID => new InstanceID { NetSegment = SegmentId };
+        InstanceID InstanceID => new() { NetSegment = SegmentId };
 
         private bool parkingForward_;
         private bool parkingBackward_;

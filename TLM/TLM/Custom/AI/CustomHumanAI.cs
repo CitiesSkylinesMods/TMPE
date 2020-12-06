@@ -29,7 +29,7 @@ namespace TrafficManager.Custom.AI {
                                || DebugSettings.SourceBuildingId == instanceData.m_sourceBuilding)
                            && (DebugSettings.TargetBuildingId == 0
                                || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog && citizenDebug;
 #else
             var logParkingAi = false;
 #endif
@@ -264,8 +264,10 @@ namespace TrafficManager.Custom.AI {
                       || DebugSettings.SourceBuildingId == instanceData.m_sourceBuilding)
                   && (DebugSettings.TargetBuildingId == 0
                       || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             var logParkingAi = false;
             var extendedLogParkingAi = false;
@@ -404,8 +406,8 @@ namespace TrafficManager.Custom.AI {
         [UsedImplicitly]
         public bool CustomCheckTrafficLights(ushort nodeId, ushort segmentId) {
 #if DEBUG
-            bool logTimedLights = DebugSwitch.TimedTrafficLights.Get()
-                                 && DebugSettings.NodeId == nodeId;
+            bool logTimedLights = GlobalConfig.Instance.Debug.TimedTrafficLights
+                                  && DebugSettings.NodeId == nodeId;
 #endif
             NetManager netManager = Singleton<NetManager>.instance;
             uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;

@@ -7,6 +7,7 @@
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Custom.PathFinding;
     using TrafficManager.RedirectionFramework.Attributes;
+    using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using UnityEngine;
 
@@ -50,7 +51,7 @@
             Vector3 position = netManager.m_nodes.m_buffer[data.m_startNode].m_position;
             Vector3 position2 = netManager.m_nodes.m_buffer[data.m_endNode].m_position;
 #if DEBUG
-            bool logPathfind = DebugSwitch.TransportLinePathfind.Get();
+            bool logPathfind = GlobalConfig.Instance.Debug.TransportLinePathfind;
             ushort logStartNode = data.m_startNode;
             ushort logEndNode = data.m_endNode;
             Log._DebugIf(

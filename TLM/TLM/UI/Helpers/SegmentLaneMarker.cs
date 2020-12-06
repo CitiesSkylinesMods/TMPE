@@ -104,16 +104,16 @@ namespace TrafficManager.UI.Helpers {
 
             ColossalFramework.Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             RenderManager.instance.OverlayEffect.DrawBezier(
-                cameraInfo,
-                color,
-                Bezier,
-                enlarge ? Size * 1.41f : Size,
-                0,
-                0,
-                minH - 100f,
-                maxH + 100f,
-                true,
-                false);
+                cameraInfo: cameraInfo,
+                color: color,
+                bezier: Bezier,
+                size: enlarge ? Size * 1.41f : Size,
+                cutStart: 0,
+                cutEnd: 0,
+                minY: minH - 100f,
+                maxY: maxH + 100f,
+                renderLimits: true,
+                alphaBlend: false);
         }
     }
 }

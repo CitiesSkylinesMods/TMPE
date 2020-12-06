@@ -9,12 +9,12 @@ namespace TrafficManager.Util {
         /// Holds a list of observers which are being notified as soon as the managed node's
         /// geometry is updated (but not neccessarily modified)
         /// </summary>
-        protected List<IObserver<T>> _observers = new List<IObserver<T>>();
+        protected List<IObserver<T>> _observers = new();
 
         /// <summary>
         /// Lock object. Acquire this before accessing the HashSets.
         /// </summary>
-        protected object _lock = new object();
+        protected object _lock = new();
 
         /// <summary>
         /// Registers an observer.

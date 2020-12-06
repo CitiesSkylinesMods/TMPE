@@ -13,7 +13,7 @@ namespace TrafficManager.Manager.Impl {
         private readonly Spiral _spiral;
 
         public static readonly ExtPathManager Instance =
-            new ExtPathManager(SingletonLite<Spiral>.instance);
+            new(SingletonLite<Spiral>.instance);
 
         private ExtPathManager(Spiral spiral) {
             _spiral = spiral ?? throw new ArgumentNullException(nameof(spiral));

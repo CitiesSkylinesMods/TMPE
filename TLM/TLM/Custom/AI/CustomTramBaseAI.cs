@@ -249,13 +249,13 @@ namespace TrafficManager.Custom.AI {
                                       : segBuffer[refPosition.m_segment].m_endNode;
 
 #if DEBUG
-            bool logLogic = DebugSwitch.CalculateSegmentPosition.Get()
-                           && (DebugSettings.NodeId <= 0
-                               || refTargetNodeId == DebugSettings.NodeId)
-                           && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
-                               || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.Tram)
-                           && (DebugSettings.VehicleId == 0
-                               || DebugSettings.VehicleId == vehicleId);
+            bool logLogic = GlobalConfig.Instance.Debug.CalculateSegmentPosition
+                            && (DebugSettings.NodeId <= 0
+                                || refTargetNodeId == DebugSettings.NodeId)
+                            && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
+                                || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.Tram)
+                            && (DebugSettings.VehicleId == 0
+                                || DebugSettings.VehicleId == vehicleId);
 #else
             var logLogic = false;
 #endif
@@ -395,8 +395,8 @@ namespace TrafficManager.Custom.AI {
                                          ref Vehicle leaderData,
                                          int lodPhysics) {
 #if DEBUG
-            bool logLogic = DebugSwitch.TramBaseAISimulationStep.Get()
-                        && DebugSettings.NodeId == vehicleId;
+            bool logLogic = GlobalConfig.Instance.Debug.TramBaseAISimulationStep
+                            && DebugSettings.NodeId == vehicleId;
 #else
             var logLogic = false;
 #endif

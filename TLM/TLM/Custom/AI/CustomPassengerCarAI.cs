@@ -122,11 +122,11 @@ namespace TrafficManager.Custom.AI {
 
             // NON-STOCK CODE START
             if (!AdvancedParkingManager.Instance.TryMoveParkedVehicle(
-                    parkedId,
-                    ref data,
-                    data.m_position,
-                    GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding,
-                    homeId)) {
+                    parkedVehicleId: parkedId,
+                    parkedVehicle: ref data,
+                    refPos: data.m_position,
+                    maxDistance: GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding,
+                    homeId: homeId)) {
                 Singleton<VehicleManager>.instance.ReleaseParkedVehicle(parkedId);
             }
 

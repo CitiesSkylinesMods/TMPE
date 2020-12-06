@@ -57,31 +57,34 @@ namespace TrafficManager.State {
         [CanBeNull]
         public string LanguageCode = null;
 
-#if DEBUG
-        public DebugSettings Debug = new DebugSettings();
-#endif
+        /// <summary>
+        /// This should provide all settings as 'false' constants in Release.
+        /// </summary>
+        public DebugSettings Debug = new();
 
-        public AdvancedVehicleAI AdvancedVehicleAI = new AdvancedVehicleAI();
+        public AdvancedVehicleAI AdvancedVehicleAI = new();
 
-        public DynamicLaneSelection DynamicLaneSelection = new DynamicLaneSelection();
+        public DynamicLaneSelection DynamicLaneSelection = new();
 
-        public Gameplay Gameplay = new Gameplay();
+        public Gameplay Gameplay = new();
 
-        public Main Main = new Main();
+        public Main Main = new();
 
-        public ParkingAI ParkingAI = new ParkingAI();
+        public ParkingAI ParkingAI = new();
 
-        public PathFinding PathFinding = new PathFinding();
+        public PathFinding PathFinding = new();
 
-        public PriorityRules PriorityRules = new PriorityRules();
+        public PriorityRules PriorityRules = new();
 
-        public TimedTrafficLights TimedTrafficLights = new TimedTrafficLights();
+        public TimedTrafficLights TimedTrafficLights = new();
 
         internal static void WriteConfig() {
             ModifiedTime = WriteConfig(Instance);
         }
 
-        private static GlobalConfig WriteDefaultConfig(GlobalConfig oldConfig, bool resetAll, out DateTime modifiedTime) {
+        private static GlobalConfig WriteDefaultConfig(GlobalConfig oldConfig,
+                                                       bool resetAll,
+                                                       out DateTime modifiedTime) {
             Log._Debug($"Writing default config...");
             GlobalConfig conf = new GlobalConfig();
 
@@ -135,7 +138,7 @@ namespace TrafficManager.State {
                     GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
                     if (LoadingExtension.IsGameLoaded
 #if DEBUG
-                        && !DebugSwitch.NoRoutingRecalculationOnConfigReload.Get()
+                        && !GlobalConfig.Instance.Debug.NoRoutingRecalculationOnConfigReload
 #endif
                         ) {
                         Constants.ManagerFactory.RoutingManager.RequestFullRecalculation();
@@ -179,7 +182,10 @@ namespace TrafficManager.State {
                 }
             } catch (Exception e) {
                 Log.Warning($"Could not load global config: {e} Generating default config.");
-                return WriteDefaultConfig(null, false, out modifiedTime);
+                return WriteDefaultConfig(
+                    oldConfig: null,
+                    resetAll: false,
+                    modifiedTime: out modifiedTime);
             }
         }
 

@@ -87,10 +87,10 @@ namespace TrafficManager.Custom.AI {
                                                        float minSqrDistanceA,
                                                        float minSqrDistanceB) {
 #if DEBUG
-            bool logLogic = DebugSwitch.CalculateSegmentPosition.Get()
-                           && (GlobalConfig.Instance.Debug.ApiExtVehicleType == API.Traffic.Enums.ExtVehicleType.None
-                               || GlobalConfig.Instance.Debug.ApiExtVehicleType == API.Traffic.Enums.ExtVehicleType.RoadVehicle)
-                           && (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId);
+            bool logLogic = GlobalConfig.Instance.Debug.CalculateSegmentPosition
+                            && (GlobalConfig.Instance.Debug.ApiExtVehicleType == API.Traffic.Enums.ExtVehicleType.None
+                                || GlobalConfig.Instance.Debug.ApiExtVehicleType == API.Traffic.Enums.ExtVehicleType.RoadVehicle)
+                            && (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId);
 #else
             var logLogic = false;
 #endif

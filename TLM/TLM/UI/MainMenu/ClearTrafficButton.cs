@@ -9,19 +9,18 @@
     public class ClearTrafficButton : BaseMenuButton {
         protected override bool IsActive() => false;
 
-        protected override string U_OverrideTooltipText() => Translation.Menu.Get("Tooltip:Clear traffic");
+        protected override string U_OverrideTooltipText() =>
+            Translation.Menu.Get("Tooltip:Clear traffic");
 
         protected override bool IsVisible() => true;
 
         public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
-            this.Skin = new U.ButtonSkin() {
-                Prefix = "ClearTraffic",
-                BackgroundPrefix = "RoundButton",
-                BackgroundHovered = true,
-                BackgroundActive = true,
-                ForegroundActive = true,
-            };
+            this.Skin = ButtonSkin.CreateSimple(
+                                      foregroundPrefix: "ClearTraffic",
+                                      backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
+                                  .CanHover(foreground: false)
+                                  .CanActivate();
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: futureAtlas,
                 spriteSize: new IntVector2(50));
@@ -29,9 +28,9 @@
 
         protected override void OnClick(UIMouseEventParameter p) {
             ConfirmPanel.ShowModal(
-                Translation.Menu.Get("Tooltip:Clear traffic"),
-                Translation.Menu.Get("Dialog.Text:Clear traffic, confirmation"),
-                (comp, ret) => {
+                title: Translation.Menu.Get("Tooltip:Clear traffic"),
+                message: Translation.Menu.Get("Dialog.Text:Clear traffic, confirmation"),
+                callback: (_, ret) => {
                     if (ret == 1) {
                         Constants.ServiceFactory.SimulationService.AddAction(
                             () => { UtilityManager.Instance.ClearTraffic(); });

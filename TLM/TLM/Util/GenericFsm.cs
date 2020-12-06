@@ -82,7 +82,7 @@ namespace TrafficManager.Util {
         }
 
         public Configurator Configure(TState state) {
-            return new Configurator(this, state);
+            return new(this, state);
         }
 
         /// <summary>FSM takes a trigger event and possibly changes a state.</summary>

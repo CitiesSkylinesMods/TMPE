@@ -10,7 +10,6 @@ namespace TrafficManager.UI {
                 return;
             }
 
-            Log._Debug("CustomKeyHandler::OnKeyDown(KeyCode.Escape) call");
             p.Use();
         }
     }

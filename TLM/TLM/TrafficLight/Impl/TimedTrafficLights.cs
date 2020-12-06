@@ -11,6 +11,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.API.TrafficLight;
     using TrafficManager.Geometry.Impl;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Traffic;
     using TrafficManager.Util;
@@ -44,7 +45,7 @@ namespace TrafficManager.TrafficLight.Impl {
             get; set; // TODO private set
         }
 
-        private List<TimedTrafficLightsStep> Steps = new List<TimedTrafficLightsStep>();
+        private List<TimedTrafficLightsStep> Steps = new();
 
         public int CurrentStep { get; set; }
 
@@ -135,7 +136,7 @@ namespace TrafficManager.TrafficLight.Impl {
             }
         }
 
-        private readonly object rotateLock_ = new object();
+        private readonly object rotateLock_ = new();
 
         private void Rotate(ArrowDirection dir) {
             if (!IsMasterNode() || NodeGroup.Count != 1 || Steps.Count <= 0) {
@@ -241,8 +242,9 @@ namespace TrafficManager.TrafficLight.Impl {
 
         private void UpdateDirections(ref NetNode node) {
 #if DEBUG
-            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
-                                    && (DebugSettings.NodeId == 0 || DebugSettings.NodeId == NodeId);
+            bool logTrafficLights = GlobalConfig.Instance.Debug.TimedTrafficLights
+                                    && (DebugSettings.NodeId == 0
+                                        || DebugSettings.NodeId == NodeId);
 #else
             const bool logTrafficLights = false;
 #endif
@@ -449,9 +451,9 @@ namespace TrafficManager.TrafficLight.Impl {
             NodeGroup.Remove(otherNodeId);
             if (NodeGroup.Count <= 0) {
                 Constants.ManagerFactory.TrafficLightSimulationManager.RemoveNodeFromSimulation(
-                    NodeId,
-                    true,
-                    false);
+                    nodeId: NodeId,
+                    destroyGroup: true,
+                    removeTrafficLight: false);
                 return;
             }
 
@@ -534,7 +536,7 @@ namespace TrafficManager.TrafficLight.Impl {
         // TODO this method is currently called on each node, but should be called on the master node only
         public void SimulationStep() {
 #if DEBUG
-            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
+            bool logTrafficLights = GlobalConfig.Instance.Debug.TimedTrafficLights
                                     && DebugSettings.NodeId == NodeId;
 #else
             const bool logTrafficLights = false;
@@ -919,7 +921,7 @@ namespace TrafficManager.TrafficLight.Impl {
         /// </summary>
         private void BackUpInvalidStepSegments(ref NetNode node) {
 #if DEBUG
-            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
+            bool logTrafficLights = GlobalConfig.Instance.Debug.TimedTrafficLights
                                     && DebugSettings.NodeId == NodeId;
 #else
             const bool logTrafficLights = false;
@@ -991,7 +993,7 @@ namespace TrafficManager.TrafficLight.Impl {
         /// <param name="nodeGeo"></param>
         private void HandleNewSegments(ref NetNode node) {
 #if DEBUG
-            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
+            bool logTrafficLights = GlobalConfig.Instance.Debug.TimedTrafficLights
                                     && DebugSettings.NodeId == NodeId;
 #else
             const bool logTrafficLights = false;
@@ -1082,7 +1084,7 @@ namespace TrafficManager.TrafficLight.Impl {
                                     API.Traffic.Enums.ExtVehicleType vehicleType,
                                     LightMode mode) {
 #if DEBUG
-            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
+            bool logTrafficLights = GlobalConfig.Instance.Debug.TimedTrafficLights
                                     && DebugSettings.NodeId == NodeId;
 #else
             const bool logTrafficLights = false;
@@ -1235,7 +1237,8 @@ namespace TrafficManager.TrafficLight.Impl {
 
         private void UpdateSegmentEnds(ref NetNode node) {
 #if DEBUG
-            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == NodeId;
+            bool logTrafficLights = GlobalConfig.Instance.Debug.TimedTrafficLights
+                                    && DebugSettings.NodeId == NodeId;
 #else
             const bool logTrafficLights = false;
 #endif
@@ -1336,7 +1339,8 @@ namespace TrafficManager.TrafficLight.Impl {
 
         private void DestroySegmentEnds() {
 #if DEBUG
-            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == NodeId;
+            bool logTrafficLights = GlobalConfig.Instance.Debug.TimedTrafficLights
+                                    && DebugSettings.NodeId == NodeId;
 #else
             const bool logTrafficLights = false;
 #endif

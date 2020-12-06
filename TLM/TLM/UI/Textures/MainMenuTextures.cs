@@ -4,10 +4,10 @@ namespace TrafficManager.UI.Textures {
     using static TrafficManager.UI.Textures.TextureResources;
 
     /// <summary>Textures for main menu button and main menu panel.</summary>
-    public static class MainMenu {
-        public static readonly Texture2D WindowBackground;
+    public class MainMenuTextures {
+        public readonly Texture2D WindowBackground;
 
-        static MainMenu() {
+        public MainMenuTextures() {
             WindowBackground = LoadDllResource("MainMenu.WindowBackground.png", new IntVector2(16, 60));
         }
     }

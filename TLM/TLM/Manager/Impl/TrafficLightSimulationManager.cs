@@ -32,7 +32,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public static readonly TrafficLightSimulationManager Instance =
-            new TrafficLightSimulationManager();
+            new();
 
         /// <summary>
         /// For each node id: traffic light simulation assigned to the node
@@ -316,8 +316,11 @@ namespace TrafficManager.Manager.Impl {
                                              bool destroyGroup,
                                              bool removeTrafficLight)
         {
-            Log._Debug($"TrafficLightSimulationManager.RemoveNodeFromSimulation({nodeId}, " +
-                       $"{destroyGroup}, {removeTrafficLight}) called.");
+            if (GlobalConfig.Instance.Debug.TrafficLights) {
+                Log._Debug(
+                    $"TrafficLightSimulationManager.RemoveNodeFromSimulation({nodeId}, " +
+                    $"{destroyGroup}, {removeTrafficLight}) called.");
+            }
 
             if (!TrafficLightSimulations[nodeId].HasSimulation()) {
                 return;
@@ -380,7 +383,11 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private void RemoveNodeFromSimulation(ushort nodeId) {
-            Log._Debug($"TrafficLightSimulationManager.RemoveNodeFromSimulation({nodeId}) called.");
+            if (GlobalConfig.Instance.Debug.TrafficLights) {
+                Log._Debug(
+                    $"TrafficLightSimulationManager.RemoveNodeFromSimulation({nodeId}) called.");
+            }
+
             Destroy(ref TrafficLightSimulations[nodeId]);
         }
 
@@ -466,8 +473,8 @@ namespace TrafficManager.Manager.Impl {
 
         protected override void HandleValidNode(ushort nodeId, ref NetNode node) {
 #if DEBUG
-            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
-                         && (DebugSettings.NodeId == 0 || DebugSettings.NodeId == nodeId);
+            bool logTrafficLights = GlobalConfig.Instance.Debug.TimedTrafficLights
+                                    && (DebugSettings.NodeId == 0 || DebugSettings.NodeId == nodeId);
 #else
             const bool logTrafficLights = false;
 #endif

@@ -8,7 +8,7 @@ namespace TrafficManager.State.Asset {
         public const string TMPE_RECORD_ID = "TMPE_Records";
 
         public static AssetDataExtension Instance;
-        public Dictionary<BuildingInfo, AssetData> Asset2Data = new Dictionary<BuildingInfo, AssetData>();
+        public Dictionary<BuildingInfo, AssetData> Asset2Data = new();
 
         public override void OnCreated(IAssetData assetData) {
             base.OnCreated(assetData);

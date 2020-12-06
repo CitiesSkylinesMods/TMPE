@@ -198,7 +198,11 @@ namespace TrafficManager.UI.SubTools {
                 // continues lane highlight requires lane alphaBlend == false.
                 // for such lane highlight to be on the top of segment highlight,
                 // the alphaBlend of segment highlight needs to be true.
-                TrafficManagerTool.DrawSegmentOverlay(cameraInfo, SelectedSegmentId, color, true);
+                Highlight.DrawSegmentOverlay(
+                    cameraInfo: cameraInfo,
+                    segmentId: SelectedSegmentId,
+                    color: color,
+                    alphaBlend: true);
 
                 if (overlayHandleHovered) {
                     if (RoadMode) {
@@ -469,7 +473,9 @@ namespace TrafficManager.UI.SubTools {
             // if ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None)
             //        yu = -yu;
             Vector3 xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
-            float f = viewOnly ? 4f : 7f; // reserved sign size in game coordinates
+            float signSize = viewOnly
+                                 ? Constants.OVERLAY_READONLY_SIGN_SIZE
+                                 : Constants.OVERLAY_INTERACTIVE_SIGN_SIZE; // reserved sign size in game coordinates
             int maxNumSigns = 0;
 
             if (VehicleRestrictionsManager.Instance.IsRoadSegment(segmentInfo)) {
@@ -479,8 +485,9 @@ namespace TrafficManager.UI.SubTools {
             }
 
             // Vector3 zero = center - 0.5f * (float)(numLanes + numDirections - 1) * f * (xu + yu); // "bottom left"
-            Vector3 zero = center - (0.5f * (numLanes - 1 + numDirections - 1) * f * xu)
-                                  - (0.5f * maxNumSigns * f * yu); // "bottom left"
+            Vector3 drawOrigin = center
+                                 - (0.5f * (numLanes - 1 + numDirections - 1) * signSize * xu)
+                                 - (0.5f * maxNumSigns * signSize * yu); // "bottom left"
 
             // if (!viewOnly)
             //     Log._Debug($"xu: {xu.ToString()} yu: {yu.ToString()} center: {center.ToString()}
@@ -497,6 +504,7 @@ namespace TrafficManager.UI.SubTools {
             bool hovered = false;
             HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
             int sortedLaneIndex = -1;
+            var textures = LoadingExtension.Instance.Textures.RoadUI;
 
             foreach (LanePos laneData in sortedLanes) {
                 ++sortedLaneIndex;
@@ -533,26 +541,13 @@ namespace TrafficManager.UI.SubTools {
                         VehicleRestrictionsMode.Configured);
 
                 uint y = 0;
-#if DEBUG_disabled_xxx
-                Vector3 labelCenter = zero + f * (float)x * xu + f * (float)y * yu; // in game coordinates
+                Highlight.Grid grid = new Highlight.Grid(
+                    gridOrigin: drawOrigin,
+                    cellWidth: signSize,
+                    cellHeight: signSize,
+                    xu: xu,
+                    yu: yu);
 
-                Vector3 labelScreenPos;
-                bool visible = GeometryUtil.WorldToScreenPoint(labelCenter, out labelScreenPos);
-                // BUGBUG: Using screen.height might be wrong, consider U.UIScaler.ScreenHeight (from UIView.fixedHeight)
-                labelScreenPos.y = Screen.height - labelScreenPos.y;
-                diff = labelCenter - camPos;
-
-                var labelZoom = 1.0f / diff.magnitude * 100f;
-                _counterStyle.fontSize = (int)(11f * labelZoom);
-                _counterStyle.normal.textColor = new Color(1f, 1f, 0f);
-
-                string labelStr = $"Idx {laneIndex}";
-                Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
-                Rect labelRect = new Rect(labelScreenPos.x - dim.x / 2f, labelScreenPos.y, dim.x, dim.y);
-                GUI.Label(labelRect, labelStr, _counterStyle);
-
-                ++y;
-#endif
                 foreach (ExtVehicleType vehicleType in possibleVehicleTypes) {
                     bool allowed = VehicleRestrictionsManager.Instance.IsAllowed(allowedTypes, vehicleType);
 
@@ -560,17 +555,15 @@ namespace TrafficManager.UI.SubTools {
                         continue; // do not draw allowed vehicles in view-only mode
                     }
 
-                    bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(
-                        RoadUI.VehicleRestrictionTextures[vehicleType][allowed],
-                        camPos,
-                        zero,
-                        f,
-                        xu,
-                        yu,
-                        x,
-                        y,
-                        vehicleRestrictionsSignSize,
-                        !viewOnly);
+                    bool hoveredHandle = grid.DrawGenericOverlayGridTexture(
+                        texture: textures.VehicleRestrictionTextures[key: vehicleType][key: allowed],
+                        camPos: camPos,
+                        x: x,
+                        y: y,
+                        width: vehicleRestrictionsSignSize,
+                        height: vehicleRestrictionsSignSize,
+                        canHover: !viewOnly,
+                        screenRect: out Rect _);
 
                     if (hoveredHandle) {
                         hovered = true;

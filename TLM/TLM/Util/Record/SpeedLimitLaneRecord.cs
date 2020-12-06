@@ -1,6 +1,8 @@
 namespace TrafficManager.Util.Record {
     using System;
     using System.Collections.Generic;
+    using GenericGameBridge.Service;
+    using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.State;
@@ -9,6 +11,7 @@ namespace TrafficManager.Util.Record {
     public class SpeedLimitLaneRecord : IRecordable {
         public const NetInfo.LaneType LANE_TYPES =
             LaneArrowManager.LANE_TYPES | SpeedLimitManager.LANE_TYPES;
+
         public const VehicleInfo.VehicleType VEHICLE_TYPES =
             LaneArrowManager.VEHICLE_TYPES | SpeedLimitManager.VEHICLE_TYPES;
 
@@ -17,12 +20,13 @@ namespace TrafficManager.Util.Record {
 
         private float? speedLimit_; // game units
 
-        InstanceID InstanceID => new InstanceID { NetLane = LaneId };
+        InstanceID InstanceID => new() {NetLane = LaneId};
 
         public void Record() {
-            speedLimit_ = SpeedLimitManager.Instance.GetCustomSpeedLimit(LaneId);
-            if (speedLimit_ == 0)
-                speedLimit_ = null;
+            GetSpeedLimitResult gsl = SpeedLimitManager.Instance.GetCustomSpeedLimit(LaneId);
+            this.speedLimit_ = gsl.OverrideValue.HasValue && gsl.OverrideValue.Value.GameUnits > 0f
+                                   ? gsl.OverrideValue.Value.GameUnits
+                                   : (float?)null;
         }
 
         public void Restore() => Transfer(LaneId);
@@ -32,37 +36,37 @@ namespace TrafficManager.Util.Record {
 
         public void Transfer(uint laneId) {
             ushort segmentId = laneId.ToLane().m_segment;
-            var laneInfo = GetLaneInfo(segmentId, LaneIndex);
-            SpeedLimitManager.Instance.SetSpeedLimit(
+            NetInfo.Lane laneInfo = GetLaneInfo(segmentId, LaneIndex);
+            SpeedLimitManager.Instance.SetLaneSpeedLimit(
                 segmentId: segmentId,
                 laneIndex: LaneIndex,
                 laneInfo: laneInfo,
-                laneId: laneId,
-                speedLimit: speedLimit_);
+                laneId: LaneId,
+                action: SetSpeedLimitAction.FromNullableFloat(speedLimit_));
         }
 
         public static List<SpeedLimitLaneRecord> GetLanes(ushort segmentId) {
             int maxLaneCount = segmentId.ToSegment().Info.m_lanes.Length;
             var ret = new List<SpeedLimitLaneRecord>(maxLaneCount);
-            var lanes = netService.GetSortedLanes(
-                segmentId,
-                ref segmentId.ToSegment(),
-                null,
-                LANE_TYPES,
-                VEHICLE_TYPES,
+            IList<LanePos> lanes = netService.GetSortedLanes(
+                segmentId: segmentId,
+                segment: ref segmentId.ToSegment(),
+                startNode: null,
+                laneTypeFilter: LANE_TYPES,
+                vehicleTypeFilter: VEHICLE_TYPES,
                 sort: false);
-            foreach (var lane in lanes) {
-                SpeedLimitLaneRecord laneData = new SpeedLimitLaneRecord {
+            foreach (LanePos lane in lanes) {
+                var laneData = new SpeedLimitLaneRecord {
                     LaneId = lane.laneId,
                     LaneIndex = lane.laneIndex,
                 };
                 ret.Add(laneData);
             }
+
             ret.TrimExcess();
             return ret;
         }
 
         public byte[] Serialize() => SerializationUtil.Serialize(this);
-
     }
 }

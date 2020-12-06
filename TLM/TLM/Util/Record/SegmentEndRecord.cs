@@ -23,7 +23,7 @@ namespace TrafficManager.Util.Record {
 
         public ushort SegmentId { get; private set; }
         public bool StartNode { get; private set; }
-        InstanceID InstanceID => new InstanceID { NetSegment = SegmentId };
+        InstanceID InstanceID => new() { NetSegment = SegmentId };
 
         private TernaryBool uturnAllowed_;
         private TernaryBool nearTurnOnRedAllowed_;

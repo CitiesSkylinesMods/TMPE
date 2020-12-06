@@ -69,6 +69,8 @@ namespace TrafficManager.UI {
         [NonSerialized]
         public UIOpacityObservable uiOpacityObservable;
 
+        const string TMPE_DEBUGMENU_NAME = "DebugMenu";
+
         public void Awake() {
             UiScaleObservable = new UIScaleObservable();
             uiOpacityObservable = new UIOpacityObservable();
@@ -79,6 +81,7 @@ namespace TrafficManager.UI {
 #if DEBUG
             UIView uiView = UIView.GetAView();
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
+            U.UIUtil.MakeUniqueAndSetName(DebugMenu.gameObject, TMPE_DEBUGMENU_NAME);
 #endif
 
             ToolMode = TrafficManagerMode.None;
@@ -153,6 +156,7 @@ namespace TrafficManager.UI {
 #if DEBUG
             UIView uiView = UIView.GetAView();
             DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
+            U.UIUtil.MakeUniqueAndSetName(DebugMenu.gameObject, TMPE_DEBUGMENU_NAME);
 #endif
         }
 
@@ -173,7 +177,7 @@ namespace TrafficManager.UI {
 #endif
             _uiShown = true;
             SetToolMode(TrafficManagerMode.Activated);
-            MainMenuButton.UpdateButtonImageAndTooltip();
+            MainMenuButton.UpdateButtonSkinAndTooltip();
             UIView.SetFocus(MainMenu);
         }
 
@@ -189,7 +193,7 @@ namespace TrafficManager.UI {
 
             _uiShown = false;
             SetToolMode(TrafficManagerMode.None);
-            MainMenuButton.UpdateButtonImageAndTooltip();
+            MainMenuButton.UpdateButtonSkinAndTooltip();
         }
 
         internal MainMenuWindow GetMenu() {

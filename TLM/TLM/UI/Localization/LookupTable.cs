@@ -23,7 +23,6 @@ namespace TrafficManager.UI.Localization {
         public string Get(string lang, string key) {
 #if DEBUG
             if (!AllLanguages.ContainsKey(lang)) {
-                Log.Error($"Translation: Unknown language {lang}");
                 return key;
             }
 #endif

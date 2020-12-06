@@ -919,13 +919,13 @@ namespace TrafficManager.Custom.AI {
                                       : netManager.m_segments.m_buffer[refPosition.m_segment].m_endNode;
 
 #if DEBUG
-            bool logLogic = DebugSwitch.CalculateSegmentPosition.Get()
-                           && (DebugSettings.NodeId <= 0
-                               || refTargetNodeId == DebugSettings.NodeId)
-                           && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
-                               || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.RailVehicle)
-                           && (DebugSettings.VehicleId == 0
-                               || DebugSettings.VehicleId == vehicleId);
+            bool logLogic = GlobalConfig.Instance.Debug.CalculateSegmentPosition
+                            && (DebugSettings.NodeId <= 0
+                                || refTargetNodeId == DebugSettings.NodeId)
+                            && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
+                                || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.RailVehicle)
+                            && (DebugSettings.VehicleId == 0
+                                || DebugSettings.VehicleId == vehicleId);
 
             if (logLogic) {
                 Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleId}) called.\n" +

@@ -3,28 +3,36 @@ namespace TrafficManager.UI.Textures {
     using System.IO;
     using System.Reflection;
     using System;
+    using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using UnityEngine;
 
+    /// <summary>
+    /// Provides resource loading utility functions.
+    /// </summary>
     public static class TextureResources {
+        /// <summary>Loads a texture from DLL resource.</summary>
+        /// <param name="resourceName">Path to resource inside Resources/ directory separated by "."</param>
+        /// <param name="size">Expected texture size.</param>
+        /// <param name="mip">Whether mip levels are to be created and used.</param>
+        /// <returns>New texture.</returns>
+        /// <exception cref="Exception">Loading failed.</exception>
         internal static Texture2D LoadDllResource(string resourceName,
                                                   IntVector2 size,
                                                   bool mip = false) {
-#if DEBUG
-            bool debug = DebugSwitch.ResourceLoading.Get();
-#endif
+            bool debugResourceLoading = GlobalConfig.Instance.Debug.ResourceLoading;
             try {
-#if DEBUG
-                if (debug) {
+                if (debugResourceLoading) {
                     Log._Debug($"Loading DllResource {resourceName}");
                 }
-#endif
+
                 var myAssembly = Assembly.GetExecutingAssembly();
-                var myStream =
-                    myAssembly.GetManifestResourceStream(
-                        "TrafficManager.Resources." + resourceName);
+                var myStream = myAssembly.GetManifestResourceStream("TrafficManager.Resources." + resourceName);
                 if (myStream == null) {
+                    if (debugResourceLoading) {
+                        Log._DebugOnlyError($"Resource not found: {resourceName}");
+                    }
                     throw new Exception($"Resource stream {resourceName} not found!");
                 }
 
@@ -40,9 +48,9 @@ namespace TrafficManager.UI.Textures {
             }
             catch (Exception e) {
 #if DEBUG
-                Log.Error("Failed to load texture " + e);
+                Log.Error("Failed to load " + e);
 #else
-                Log.Warning("Failed to load texture " + e);
+                Log.Warning("Failed to load " + e);
 #endif
                 return null;
             }

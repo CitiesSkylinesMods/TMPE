@@ -18,7 +18,7 @@ namespace TrafficManager.U.Panel {
           IObserver<ModUI.UIScaleNotification>,
           IObserver<ModUI.UIOpacityNotification>
     {
-        private UResizerConfig resizerConfig_ = new UResizerConfig();
+        private readonly UResizerConfig resizerConfig_ = new();
 
         /// <summary>On destroy this will unsubscribe from the UI Scale observable.</summary>
         [UsedImplicitly]

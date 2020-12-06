@@ -298,7 +298,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private static Dictionary<string, List<byte>> _customEmergencyLanes
-            = new Dictionary<string, List<byte>>();
+            = new();
 
         [UsedImplicitly]
         private void ClickNoneToVehicle(UIComponent component, UIMouseEventParameter eventParam) {

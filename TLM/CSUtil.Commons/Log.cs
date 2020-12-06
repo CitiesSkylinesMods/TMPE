@@ -70,17 +70,9 @@ namespace CSUtil.Commons {
         /// </summary>
         /// <param name="s">The text</param>
         [Conditional("DEBUG")]
+        // ReSharper restore Unity.ExpensiveCode
         public static void _Debug(string s) {
             LogToFile(s, LogLevel.Debug);
-        }
-
-        /// <summary>
-        /// Will log only if debug mode, the string is prepared using string.Format
-        /// </summary>
-        /// <param name="format">The text</param>
-        [Conditional("DEBUG")]
-        public static void _DebugFormat(string format, params object[] args) {
-            LogToFile(string.Format(format, args), LogLevel.Debug);
         }
 
         /// <summary>
@@ -98,11 +90,23 @@ namespace CSUtil.Commons {
             }
         }
 
+        /// <summary>
+        /// Will log only if debug mode, the string is prepared using string.Format
+        /// </summary>
+        /// <param name="format">The text</param>
+        [Conditional("DEBUG")]
+        // ReSharper restore Unity.ExpensiveCode
+        public static void _DebugFormat(string format, params object[] args) {
+            LogToFile(string.Format(format, args), LogLevel.Debug);
+        }
+
         [Conditional("TRACE")]
+        // ReSharper restore Unity.ExpensiveCode
         public static void _Trace(string s) {
             LogToFile(s, LogLevel.Trace);
         }
 
+        // ReSharper restore Unity.ExpensiveCode
         public static void Info(string s) {
             LogToFile(s, LogLevel.Info);
         }
@@ -116,6 +120,7 @@ namespace CSUtil.Commons {
         /// </summary>
         /// <param name="s">The text</param>
         [Conditional("DEBUG")]
+        // ReSharper restore Unity.ExpensiveCode
         public static void _DebugOnlyWarning(string s) {
             LogToFile(s, LogLevel.Warning);
         }
@@ -134,6 +139,7 @@ namespace CSUtil.Commons {
             }
         }
 
+        // ReSharper restore Unity.ExpensiveCode
         public static void Warning(string s) {
             LogToFile(s, LogLevel.Warning);
         }
@@ -155,8 +161,15 @@ namespace CSUtil.Commons {
             }
         }
 
+        // ReSharper restore Unity.ExpensiveCode
         public static void Error(string s) {
             LogToFile(s, LogLevel.Error);
+        }
+
+        public static void ErrorIf(bool cond, string s) {
+            if (cond) {
+                LogToFile(s, LogLevel.Error);
+            }
         }
 
         public static void ErrorFormat(string format, params object[] args) {
@@ -181,6 +194,7 @@ namespace CSUtil.Commons {
         /// </summary>
         /// <param name="s">The text</param>
         [Conditional("DEBUG")]
+        // ReSharper restore Unity.ExpensiveCode
         public static void _DebugOnlyError(string s) {
             LogToFile(s, LogLevel.Error);
         }
@@ -195,19 +209,15 @@ namespace CSUtil.Commons {
         }
 
         private static void LogToFile(string log, LogLevel level) {
-            lock(LogLock){
-                using (StreamWriter w = File.AppendText(LogFilename)) {
-                    long secs = _sw.ElapsedTicks / Stopwatch.Frequency;
-                    long fraction = _sw.ElapsedTicks % Stopwatch.Frequency;
-                    w.WriteLine(
-                        $"{level.ToString()} " +
-                        $"{secs:n0}.{fraction:D7}: " +
-                        $"{log}");
+            lock (LogLock) {
+                using StreamWriter w = File.AppendText(LogFilename);
+                long secs = _sw.ElapsedTicks / Stopwatch.Frequency;
+                long fraction = _sw.ElapsedTicks % Stopwatch.Frequency;
+                w.WriteLine($"{level.ToString()} {secs:n0}.{fraction:D7}: {log}");
 
-                    if (level == LogLevel.Warning || level == LogLevel.Error) {
-                        w.WriteLine((new System.Diagnostics.StackTrace(true)).ToString());
-                        w.WriteLine();
-                    }
+                if (level == LogLevel.Warning || level == LogLevel.Error) {
+                    w.WriteLine(new System.Diagnostics.StackTrace(true).ToString());
+                    w.WriteLine();
                 }
             }
         }

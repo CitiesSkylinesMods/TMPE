@@ -46,13 +46,12 @@ namespace TrafficManager.UI.SubTools {
             Backward,
         }
 
-        private static bool verbose_ =>
 #if DEBUG
-            DebugSwitch.LaneConnections.Get();
+        private static bool verbose_ => GlobalConfig.Instance.Debug.LaneConnections;
 #else
-            false;
+        private static bool verbose_ => false;
 #endif
-        private static readonly Color DefaultLaneEndColor = new Color(1f, 1f, 1f, 0.4f);
+        private static readonly Color DefaultLaneEndColor = new(1f, 1f, 1f, 0.4f);
         private LaneEnd selectedLaneEnd;
         private LaneEnd hoveredLaneEnd;
         private readonly Dictionary<ushort, List<LaneEnd>> currentLaneEnds;
@@ -86,7 +85,7 @@ namespace TrafficManager.UI.SubTools {
             internal int OuterSimilarLaneIndex;
             internal int InnerSimilarLaneIndex; // used for stay in lane.
             internal int SegmentIndex; // index accesable by NetNode.GetSegment(SegmentIndex);
-            internal readonly List<LaneEnd> ConnectedLaneEnds = new List<LaneEnd>();
+            internal readonly List<LaneEnd> ConnectedLaneEnds = new();
             internal Color Color;
 
             internal SegmentLaneMarker SegmentMarker;
@@ -197,7 +196,7 @@ namespace TrafficManager.UI.SubTools {
 
                 bool hasMarkers = currentLaneEnds.TryGetValue((ushort)nodeId, out List<LaneEnd> laneEnds);
                 if (!viewOnly && (GetSelectionMode() == SelectionMode.None)) {
-                    MainTool.DrawNodeCircle(
+                    Highlight.DrawNodeCircle(
                         cameraInfo: cameraInfo,
                         nodeId: (ushort)nodeId,
                         color: DefaultLaneEndColor,
@@ -398,7 +397,7 @@ namespace TrafficManager.UI.SubTools {
 
             if ((GetSelectionMode() == SelectionMode.None) && (HoveredNodeId != 0)) {
                 // draw hovered node
-                MainTool.DrawNodeCircle(
+                Highlight.DrawNodeCircle(
                     cameraInfo: cameraInfo,
                     nodeId: HoveredNodeId,
                     warning: Input.GetMouseButton(0),
@@ -791,7 +790,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnPrimaryClickOverlay() {
 #if DEBUG
-            bool logLaneConn = DebugSwitch.LaneConnections.Get();
+            bool logLaneConn = GlobalConfig.Instance.Debug.LaneConnections;
 #else
             const bool logLaneConn = false;
 #endif
@@ -922,7 +921,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnSecondaryClickOverlay() {
 #if DEBUG
-            bool logLaneConn = DebugSwitch.LaneConnections.Get();
+            bool logLaneConn = GlobalConfig.Instance.Debug.LaneConnections;
 #else
             const bool logLaneConn = false;
 #endif
@@ -973,7 +972,7 @@ namespace TrafficManager.UI.SubTools {
         public override void OnActivate() {
             base.OnActivate();
 #if DEBUG
-            bool logLaneConn = DebugSwitch.LaneConnections.Get();
+            bool logLaneConn = GlobalConfig.Instance.Debug.LaneConnections;
             if (logLaneConn) {
                 Log._Debug("LaneConnectorTool: OnActivate");
             }
@@ -1309,33 +1308,33 @@ namespace TrafficManager.UI.SubTools {
         /// </summary>
         private static readonly Color32[] COLOR_CHOICES
             = {
-                  new Color32(240, 30, 30, 255),
-                  new Color32(80, 214, 0, 255),
-                  new Color32(30, 30, 214, 255),
-                  new Color32(214, 136, 107, 255),
-                  new Color32(189, 186, 142, 255),
-                  new Color32(106, 41, 163, 255),
-                  new Color32(0, 99, 53, 255),
-                  new Color32(54, 118, 214, 255),
-                  new Color32(163, 57, 41, 255),
-                  new Color32(54, 161, 214, 255),
-                  new Color32(107, 214, 193, 255),
-                  new Color32(214, 161, 175, 255),
-                  new Color32(214, 0, 171, 255),
-                  new Color32(151, 178, 201, 255),
-                  new Color32(189, 101, 0, 255),
-                  new Color32(163, 41, 73, 255),
-                  new Color32(154, 142, 189, 255),
-                  new Color32(176, 88, 147, 255),
-                  new Color32(150, 140, 0, 255),
-                  new Color32(0, 140, 150, 255),
-                  new Color32(0, 0, 138, 255),
-                  new Color32(0, 60, 112, 255),
-                  new Color32(120, 189, 94, 255),
-                  new Color32(112, 86, 56, 255),
-                  new Color32(88, 112, 84, 255),
-                  new Color32(75, 75, 99, 255),
-                  new Color32(99, 75, 85, 255),
+                  new(240, 30, 30, 255),
+                  new(80, 214, 0, 255),
+                  new(30, 30, 214, 255),
+                  new(214, 136, 107, 255),
+                  new(189, 186, 142, 255),
+                  new(106, 41, 163, 255),
+                  new(0, 99, 53, 255),
+                  new(54, 118, 214, 255),
+                  new(163, 57, 41, 255),
+                  new(54, 161, 214, 255),
+                  new(107, 214, 193, 255),
+                  new(214, 161, 175, 255),
+                  new(214, 0, 171, 255),
+                  new(151, 178, 201, 255),
+                  new(189, 101, 0, 255),
+                  new(163, 41, 73, 255),
+                  new(154, 142, 189, 255),
+                  new(176, 88, 147, 255),
+                  new(150, 140, 0, 255),
+                  new(0, 140, 150, 255),
+                  new(0, 0, 138, 255),
+                  new(0, 60, 112, 255),
+                  new(120, 189, 94, 255),
+                  new(112, 86, 56, 255),
+                  new(88, 112, 84, 255),
+                  new(75, 75, 99, 255),
+                  new(99, 75, 85, 255),
             };
 
         private static string T(string key) => Translation.LaneRouting.Get(key);

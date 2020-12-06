@@ -12,6 +12,8 @@ namespace TrafficManager {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI;
+    using TrafficManager.UI.MainMenu;
+    using TrafficManager.UI.Textures;
     using UnityEngine;
     using UnityEngine.SceneManagement;
     using Util;
@@ -44,7 +46,7 @@ namespace TrafficManager {
         /// <summary>
         /// Contains loaded languages and lookup functions for text translations
         /// </summary>
-        public static Translation TranslationDatabase = new Translation();
+        public static Translation TranslationDatabase = new();
 
         public static UITransportDemand TransportDemandUI { get; private set; }
 
@@ -55,6 +57,8 @@ namespace TrafficManager {
         public static bool IsPathManagerReplaced {
             get; private set;
         }
+
+        public readonly AllTextures Textures = new();
 
         public override void OnCreated(ILoading loading) {
             Log._Debug("LoadingExtension.OnCreated() called");
@@ -171,10 +175,11 @@ namespace TrafficManager {
         public override void OnLevelLoaded(LoadMode mode) {
             SimulationManager.UpdateMode updateMode = SimulationManager.instance.m_metaData.m_updateMode;
             string scene = SceneManager.GetActiveScene().name;
-            Log.Info($"OnLevelLoaded({mode}) called. updateMode={updateMode}, scene={scene}");
+            Log.Info($"LExt: OnLevelLoaded({mode}) called. updateMode={updateMode}, scene={scene}");
 
-            if (scene == "ThemeEditor")
+            if (scene == "ThemeEditor") {
                 return;
+            }
 
             IsGameLoaded = false;
 
@@ -187,21 +192,15 @@ namespace TrafficManager {
                 uint versionB = Convert.ToUInt32(versionElms[1]);
                 uint versionC = Convert.ToUInt32(versionElms[2]);
 
-                Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
+                Log.Info($"LExt: Detected game version v{BuildConfig.applicationVersion}");
 
-                bool isModTooOld = TrafficManagerMod.GAME_VERSION_A < versionA ||
-                                   (TrafficManagerMod.GAME_VERSION_A == versionA &&
-                                    TrafficManagerMod.GAME_VERSION_B < versionB);
-                // || (TrafficManagerMod.GameVersionA == versionA
-                // && TrafficManagerMod.GameVersionB == versionB
-                // && TrafficManagerMod.GameVersionC < versionC);
+                bool isModTooOld = versionA > TrafficManagerMod.GAME_VERSION_A ||
+                                   (versionA == TrafficManagerMod.GAME_VERSION_A &&
+                                    versionB > TrafficManagerMod.GAME_VERSION_B);
 
-                bool isModNewer = TrafficManagerMod.GAME_VERSION_A < versionA ||
-                                  (TrafficManagerMod.GAME_VERSION_A == versionA &&
-                                   TrafficManagerMod.GAME_VERSION_B > versionB);
-                // || (TrafficManagerMod.GameVersionA == versionA
-                // && TrafficManagerMod.GameVersionB == versionB
-                // && TrafficManagerMod.GameVersionC > versionC);
+                bool isModNewer = versionA > TrafficManagerMod.GAME_VERSION_A ||
+                                  (versionA == TrafficManagerMod.GAME_VERSION_A &&
+                                   versionB < TrafficManagerMod.GAME_VERSION_B);
 
                 if (isModTooOld) {
                     string msg = string.Format(
@@ -218,9 +217,9 @@ namespace TrafficManager {
                                 UIView.library
                                       .ShowModal<ExceptionPanel>("ExceptionPanel")
                                       .SetMessage(
-                                          "TM:PE has not been updated yet",
-                                          msg,
-                                          false);
+                                          title: "TM:PE has not been updated yet",
+                                          message: msg,
+                                          error: false);
                             });
                 } else if (isModNewer) {
                     string msg = string.Format(
@@ -237,9 +236,9 @@ namespace TrafficManager {
                                 UIView.library
                                       .ShowModal<ExceptionPanel>("ExceptionPanel")
                                       .SetMessage(
-                                          "Your game should be updated",
-                                          msg,
-                                          false);
+                                          title: "Your game should be updated",
+                                          message: msg,
+                                          error: false);
                             });
                 }
             }
@@ -249,7 +248,7 @@ namespace TrafficManager {
             //it will replace stock PathManager or already Replaced before HotReload
             if (!IsPathManagerReplaced || TrafficManagerMod.Instance.InGameHotReload) {
                 try {
-                    Log.Info("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
+                    Log.Info("LExt: Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
                     FieldInfo pathManagerInstance = typeof(Singleton<PathManager>).GetField(
                         "sInstance",
                         BindingFlags.Static | BindingFlags.NonPublic);
@@ -262,37 +261,37 @@ namespace TrafficManager {
                         throw new Exception("stockPathManager is null");
                     }
 
-                    Log._Debug($"Got stock PathManager instance {stockPathManager?.GetName()}");
+                    Log._Debug($"LExt: Got stock PathManager instance {stockPathManager?.GetName()}");
 
                     CustomPathManager =
                         stockPathManager.gameObject.AddComponent<CustomPathManager>();
-                    Log._Debug("Added CustomPathManager to gameObject List");
+                    Log._Debug("LExt: Added CustomPathManager to gameObject List");
 
                     if (CustomPathManager == null) {
-                        Log.Error("CustomPathManager null. Error creating it.");
+                        Log.Error("LExt: CustomPathManager null. Error creating it.");
                         return;
                     }
 
                     CustomPathManager.UpdateWithPathManagerValues(stockPathManager);
-                    Log._Debug("UpdateWithPathManagerValues success");
+                    Log._Debug("LExt: UpdateWithPathManagerValues success");
 
                     pathManagerInstance.SetValue(null, CustomPathManager);
 
-                    Log._Debug("Getting Current SimulationManager");
+                    Log._Debug("LExt: Getting Current SimulationManager");
                     var simManager = this.simManager;
                     if (simManager == null) {
                         throw new Exception("simManager is null");
                     }
 
-                    Log._Debug("Removing Stock PathManager");
+                    Log._Debug("LExt: Removing Stock PathManager");
                     simManager.Remove(stockPathManager);
 
-                    Log._Debug("Adding Custom PathManager");
+                    Log._Debug("LExt: Adding Custom PathManager");
                     simManager.Add(CustomPathManager);
 
                     Object.Destroy(stockPathManager, 10f);
 
-                    Log._Debug("Should be custom: " + Singleton<PathManager>.instance.GetType());
+                    Log._Debug("LExt: Should be custom: " + Singleton<PathManager>.instance.GetType());
 
                     IsPathManagerReplaced = true;
                 }
@@ -316,7 +315,9 @@ namespace TrafficManager {
                 }
             }
 
+            Textures.Load();
             ModUI.OnLevelLoaded();
+
             if (PlayMode) {
                 // Init transport demand UI
                 if (TransportDemandUI == null) {
@@ -335,17 +336,13 @@ namespace TrafficManager {
 
             Patcher.Create().Install();
 
-            // Log.Info("Fixing non-created nodes with problems...");
-            // FixNonCreatedNodeProblems();
-            Log.Info("Notifying managers...");
+            Log.Info("LExt: Notifying managers...");
             foreach (ICustomManager manager in RegisteredManagers) {
-                Log.Info($"OnLevelLoading: {manager.GetType().Name}");
+                Log.Info($"LExt: OnLevelLoading: {manager.GetType().Name}");
                 manager.OnLevelLoading();
             }
 
-            // InitTool();
-            // Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
-            Log.Info("OnLevelLoaded complete.");
+            Log.Info("LExt: OnLevelLoaded complete.");
         }
 
         [UsedImplicitly]

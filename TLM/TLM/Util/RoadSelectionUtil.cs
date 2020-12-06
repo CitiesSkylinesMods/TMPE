@@ -5,12 +5,10 @@ namespace TrafficManager.Util {
     using ColossalFramework;
     using ICities;
     using CSUtil.Commons;
-    using static TrafficManager.Util.Shortcuts;
-    using static NetAdjust;
-    using static SegmentTraverser;
+    using TrafficManager.State;
 
     public class RoadSelectionUtil {
-        public RoadSelectionUtil() : base() {
+        public RoadSelectionUtil() {
             Instance = this;
         }
 
@@ -29,13 +27,14 @@ namespace TrafficManager.Util {
         /// This will join target segment to the same road as source segment.
         /// </summary>
         public static void CopySegmentName(ushort sourceSegmentID, ushort targetSegmentID) {
-            SimulationManager.instance.AddAction(delegate () {
-                string sourceName = NetManager.instance.GetSegmentName(sourceSegmentID);
-                string targetName = NetManager.instance.GetSegmentName(targetSegmentID);
-                if (sourceName != targetName) {
-                    NetManager.instance.SetSegmentName(targetSegmentID, sourceName);
-                }
-            });
+            SimulationManager.instance.AddAction(
+                delegate() {
+                    string sourceName = NetManager.instance.GetSegmentName(sourceSegmentID);
+                    string targetName = NetManager.instance.GetSegmentName(targetSegmentID);
+                    if (sourceName != targetName) {
+                        NetManager.instance.SetSegmentName(targetSegmentID, sourceName);
+                    }
+                });
         }
 
         /// <summary>
@@ -43,16 +42,19 @@ namespace TrafficManager.Util {
         /// containing <paramref name="segmentId"/>
         /// </summary>
         public static void SetRoad(ushort segmentId, IEnumerable<ushort> segmentIDs) {
-            foreach(var targetSegmentID in segmentIDs) {
-                if(targetSegmentID != segmentId && targetSegmentID != 0) {
+            foreach (var targetSegmentID in segmentIDs) {
+                if (targetSegmentID != segmentId && targetSegmentID != 0) {
                     CopySegmentName(segmentId, targetSegmentID);
                 }
             }
         }
 
         internal const int NETADJUST_INFO_INDEX = 2;
+
         internal static bool IsNetAdjustMode() =>
-            IsNetAdjustMode(InfoManager.instance.CurrentMode, (int)InfoManager.instance.CurrentSubMode);
+            IsNetAdjustMode(
+                InfoManager.instance.CurrentMode,
+                (int)InfoManager.instance.CurrentSubMode);
 
         internal static bool IsNetAdjustMode(InfoManager.InfoMode mode, int subModeIndex) =>
             (mode == InfoManager.InfoMode.TrafficRoutes) &
@@ -72,31 +74,36 @@ namespace TrafficManager.Util {
                     for (int i = 0; i < Length; ++i) {
                         ret.Add(path.m_buffer[i]);
                     }
+
                     return ret;
                 }
+
                 return null;
             }
         }
 
         private NetAdjust netAdjust = NetManager.instance.NetAdjust ??
-            throw new Exception("netAdjust not found!");
+                                      throw new Exception("netAdjust not found!");
 
         private FieldInfo m_tempPath_field =
-            typeof(NetAdjust).GetField("m_tempPath", BindingFlags.Instance | BindingFlags.NonPublic);
+            typeof(NetAdjust).GetField(
+                name: "m_tempPath",
+                bindingAttr: BindingFlags.Instance | BindingFlags.NonPublic);
 
         private FastList<ushort> GetPath() =>
             (FastList<ushort>)m_tempPath_field.GetValue(netAdjust);
 
-        private MethodInfo mCalculatePath = typeof(NetAdjust).GetMethod(
-            "CalculatePath",
-            BindingFlags.Instance | BindingFlags.NonPublic,
-            Type.DefaultBinder,
-            new Type[] { typeof(ushort), typeof(int) },
-            null) ??
-            throw new Exception("mCalculatePath not found!");
+        private MethodInfo mCalculatePath
+            = typeof(NetAdjust).GetMethod(
+                  name: "CalculatePath",
+                  bindingAttr: BindingFlags.Instance | BindingFlags.NonPublic,
+                  binder: Type.DefaultBinder,
+                  types: new[] {typeof(ushort), typeof(int),},
+                  modifiers: null)
+              ?? throw new Exception("mCalculatePath not found!");
 
         private void CalculatePath(ushort segmentID, int modifyIndex) {
-            mCalculatePath.Invoke(netAdjust, new object[] { segmentID, modifyIndex });
+            mCalculatePath.Invoke(netAdjust, new object[] {segmentID, modifyIndex});
         }
 
         public delegate void Handler();
@@ -109,16 +116,21 @@ namespace TrafficManager.Util {
         public class Threading : ThreadingExtensionBase {
             private int prev_length = -2;
             private ushort prev_segmentID = 0;
-            private string  prev_name = string.Empty;
+            private string prev_name = string.Empty;
 
             void UpdatePath() {
-                ushort selectedSegmentID = Singleton<InstanceManager>.instance.GetSelectedInstance().NetSegment;
+                ushort selectedSegmentID = Singleton<InstanceManager>.instance.GetSelectedInstance()
+                    .NetSegment;
                 if (selectedSegmentID == 0) {
                     return;
                 }
+
                 string name = NetManager.instance.GetSegmentName(selectedSegmentID);
-                if(prev_name != name) {
-                    Log._Debug($"name={name} prev_name={prev_name}");
+                if (prev_name != name) {
+                    if (GlobalConfig.Instance.Debug.RoadSelection) {
+                        Log._Debug($"name={name} prev_name={prev_name}");
+                    }
+
                     prev_name = name;
                     RoadSelectionUtil.Instance.CalculatePath(selectedSegmentID, 0);
                 }
@@ -129,10 +141,12 @@ namespace TrafficManager.Util {
                     if (RoadSelectionUtil.Instance == null) {
                         return;
                     }
+
                     if (!RoadSelectionUtil.Instance.netAdjust.PathVisible) {
                         // RoadWorldInfoPanel does not update path. therefore we do it manually.
                         UpdatePath();
                     }
+
                     // Performance critical part of the code:
                     var path = RoadSelectionUtil.Instance.GetPath();
                     int len = path?.m_size ?? -1;
@@ -144,9 +158,9 @@ namespace TrafficManager.Util {
                     // Conclusions:
                     //  A- If user choses another path, all segments in path.m_buffer change.
                     //  B- If user modifies a path, the length of the path changes.
-                    // Caveat: 
+                    // Caveat:
                     //  A- Changing the center of selection without changing selected segments is
-                    //   detected as selection changed. (it deactivates all buttons) 
+                    //   detected as selection changed. (it deactivates all buttons)
                     bool changed = len != prev_length || segmentID != prev_segmentID;
 
                     if (changed && len == prev_length) {
@@ -154,17 +168,24 @@ namespace TrafficManager.Util {
                         // caveat A is addressed here: changing center of selection is not recognised as
                         // selection changed.
                         for (int i = 0; i < len; ++i) {
-                            if (prev_segmentID == path.m_buffer[i])
+                            if (prev_segmentID == path.m_buffer[i]) {
                                 changed = false;
+                            }
                         }
                     }
+
                     if (changed) {
-                        Log._Debug("RoadSelection.Threading.OnUpdate() road selection changed");
+                        if (GlobalConfig.Instance.Debug.RoadSelection) {
+                            Log._Debug("RoadSelection.Threading.OnUpdate() road selection changed");
+                        }
+
                         prev_length = len;
                         RoadSelectionUtil.Instance.OnChanged?.Invoke();
                     }
+
                     prev_segmentID = segmentID;
-                }catch(Exception e) {
+                }
+                catch (Exception e) {
                     Log.Error(e.Message);
                 }
             }

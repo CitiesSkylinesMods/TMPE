@@ -9,11 +9,11 @@ namespace TrafficManager.Util.Record {
 
     [Serializable]
     public class TrafficRulesRecord : IRecordable {
-        [NonSerialized] public HashSet<ushort> NodeIDs = new HashSet<ushort>();
-        [NonSerialized] public HashSet<ushort> SegmentIDs = new HashSet<ushort>();
-        [NonSerialized] public HashSet<int> SegmentEndIndeces = new HashSet<int>();
+        [NonSerialized] public HashSet<ushort> NodeIDs = new();
+        [NonSerialized] public HashSet<ushort> SegmentIDs = new();
+        [NonSerialized] public HashSet<int> SegmentEndIndeces = new();
 
-        public List<IRecordable> Records = new List<IRecordable>();
+        public List<IRecordable> Records = new();
 
         /// <summary>
         /// Records segment and both segment ends  but not nodes.

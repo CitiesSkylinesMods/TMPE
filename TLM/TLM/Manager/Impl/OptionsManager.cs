@@ -10,7 +10,7 @@ namespace TrafficManager.Manager.Impl {
         : AbstractCustomManager,
           IOptionsManager {
         // TODO I contain ugly code
-        public static OptionsManager Instance = new OptionsManager();
+        public static OptionsManager Instance = new();
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();

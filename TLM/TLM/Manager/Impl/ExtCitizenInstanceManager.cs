@@ -24,7 +24,7 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        public static readonly ExtCitizenInstanceManager Instance = new ExtCitizenInstanceManager();
+        public static readonly ExtCitizenInstanceManager Instance = new();
 
         /// <summary>
         /// Gets all additional data for citizen instance. Index: citizen instance id.
@@ -60,12 +60,12 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Generates the localized status for a tourist, which is displayed on <c>TouristWorldInfoPanel</c>.
         /// </summary>
-        /// 
+        ///
         /// <param name="instanceID">Citizen instance id.</param>
         /// <param name="data">Citizen instance data.</param>
         /// <param name="mayAddCustomStatus">Will be <c>true</c> if the status can be customised by callee.</param>
         /// <param name="target">The instance of target building or node.</param>
-        /// 
+        ///
         /// <returns>Returns the localised tourist status.</returns>
         public string GetTouristLocalizedStatus(ushort instanceID,
                                                 ref CitizenInstance data,
@@ -148,7 +148,7 @@ namespace TrafficManager.Manager.Impl {
             if (targetIsNode) {
 
                 target.NetNode = targetBuildingId;
- 
+
                 if ((data.m_flags & CitizenInstance.Flags.OnTour) != 0) {
                     return Locale.Get("CITIZEN_STATUS_VISITING");
                 }
@@ -173,12 +173,12 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Generates the localized status for a resident, which is displayed on <c>CitizenWorldInfoPanel</c>.
         /// </summary>
-        /// 
+        ///
         /// <param name="instanceID">Citizen instance id.</param>
         /// <param name="data">Citizen instance data.</param>
         /// <param name="mayAddCustomStatus">Will be <c>true</c> if the status can be customised by callee.</param>
         /// <param name="target">The instance of target building or node.</param>
-        /// 
+        ///
         /// <returns>Returns the localised resident status.</returns>
         public string GetResidentLocalizedStatus(ushort instanceID,
                                                  ref CitizenInstance data,
@@ -410,8 +410,10 @@ namespace TrafficManager.Manager.Impl {
                   && (DebugSettings.TargetBuildingId == 0
                       || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 
 #else
             bool logParkingAi = adhocDebugLog;
@@ -798,16 +800,16 @@ namespace TrafficManager.Manager.Impl {
 
                         // find a parking space in the vicinity of the target
                         if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(
-                                endPos,
-                                vehicleInfo,
-                                ref extInstance,
-                                homeId,
-                                instanceData.m_targetBuilding == homeId,
-                                0,
-                                false,
-                                out Vector3 parkPos,
-                                ref endPosA,
-                                out bool calcEndPos)
+                                endPos: endPos,
+                                vehicleInfo: vehicleInfo,
+                                extDriverInstance: ref extInstance,
+                                homeId: homeId,
+                                goingHome: instanceData.m_targetBuilding == homeId,
+                                vehicleId: 0,
+                                allowTourists: false,
+                                parkPos: out Vector3 parkPos,
+                                endPathPos: ref endPosA,
+                                calculateEndPos: out bool calcEndPos)
                             && CalculateReturnPath(
                                 ref extInstance,
                                 parkPos,
@@ -1203,8 +1205,9 @@ namespace TrafficManager.Manager.Impl {
             bool citizenDebug = DebugSettings.CitizenId == 0
                                 || DebugSettings.CitizenId == GetCitizenId(extInstance.instanceId);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            // bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            // bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog && citizenDebug;
 #else
             const bool logParkingAi = false;
 #endif
@@ -1228,8 +1231,10 @@ namespace TrafficManager.Manager.Impl {
             bool citizenDebug = DebugSettings.CitizenId == 0
                                 || DebugSettings.CitizenId == GetCitizenId(extInstance.instanceId);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 
             if (extendedLogParkingAi) {
                 Log._Debug(
@@ -1275,8 +1280,9 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0
                                 || DebugSettings.CitizenId == GetCitizenId(extInstance.instanceId);
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            // bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            // bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog && citizenDebug;
 #else
             const bool logParkingAi = false;
 #endif
@@ -1468,8 +1474,9 @@ namespace TrafficManager.Manager.Impl {
                  || DebugSettings.TargetBuildingId ==
                  citizensBuffer[extInstance.instanceId].m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            // bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            // bool fineDebug = GlobalConfig.Instance.Debug.ExtendedParkingAILog.Get() && citizenDebug;
 
             if (logParkingAi) {
                 Log._Debug(
@@ -1516,9 +1523,9 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Check if a building id refers to an outside connection.
         /// </summary>
-        /// 
+        ///
         /// <param name="buildingId">The id of the building to check.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if it's an outside connection, otherwise <c>false</c>.</returns>
         internal bool IsOutsideConnection(ushort buildingId) {
             Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
@@ -1528,10 +1535,10 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Check if a vehicle is owned by a certain citizen.
         /// </summary>
-        /// 
+        ///
         /// <param name="vehicle">The vehicle.</param>
         /// <param name="citizenId">The citizen.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if the vehicle is owned by the citizen, otherwise <c>false</c>.</returns>
         internal bool IsVehicleOwnedByCitizen(ref Vehicle vehicle, uint citizenId) {
             InstanceID id = InstanceID.Empty;
@@ -1542,9 +1549,9 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Check if a citizen is caught in a flood, tsunami or tornado.
         /// </summary>
-        /// 
+        ///
         /// <param name="citizen">The citizen to inspect.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if having a bad day, otherwise <c>false</c>.</returns>
         internal bool IsSweaptAway(ref CitizenInstance citizen) =>
             (citizen.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != 0;
@@ -1552,9 +1559,9 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Check if a citizen is loitering at their current location.
         /// </summary>
-        /// 
+        ///
         /// <param name="citizen">The citizen to inspect.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if hanging around, otherwise <c>false</c>.</returns>
         internal bool IsHangingAround(ref CitizenInstance citizen) =>
             citizen.m_path == 0u && (citizen.m_flags & CitizenInstance.Flags.HangAround) != 0;

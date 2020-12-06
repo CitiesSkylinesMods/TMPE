@@ -7,6 +7,7 @@ namespace TrafficManager.Manager {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Util;
     using TrafficManager.Geometry;
+    using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
 
@@ -14,7 +15,7 @@ namespace TrafficManager.Manager {
         private IDisposable geoUpdateUnsubscriber;
 
         [UsedImplicitly]
-        private object geoLock = new object();
+        private object geoLock = new();
 
         /// <summary>
         /// Handles an invalid segment
@@ -65,7 +66,7 @@ namespace TrafficManager.Manager {
 
         public void OnUpdate(GeometryUpdate update) {
 #if DEBUG
-            bool logGeometry = DebugSwitch.GeometryDebug.Get();
+            bool logGeometry = GlobalConfig.Instance.Debug.GeometryDebug;
 #else
             const bool logGeometry = false;
 #endif

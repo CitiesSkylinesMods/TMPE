@@ -6,9 +6,10 @@ namespace TrafficManager.Util {
     using TrafficManager.State.Asset;
     using TrafficManager.Util;
     using System.Security.Policy;
+    using TrafficManager.State;
 
     public static class PlaceIntersectionUtil {
-        ///<summary>maps old netowkr ids to new network ids</summary>
+        /// <summary>maps old network ids to new network ids</summary>
         /// <param name="newSegmentIds">segment list provided by LoadPaths.</param>
         public static void MapSegments(
             SegmentNetworkIDs[] oldSegments,
@@ -37,7 +38,11 @@ namespace TrafficManager.Util {
             /*************************
              * Prepration: */
 
-            Log._Debug($"PlaceIntersectionUtil.ApplyTrafficRules({intersectionInfo?.ToString() ?? "null"})");
+            bool logApplyTR = GlobalConfig.Instance.Debug.ApplyTrafficRules;
+            if (logApplyTR) {
+                Log._Debug(
+                    $"PlaceIntersectionUtil.ApplyTrafficRules({intersectionInfo?.ToString() ?? "null"})");
+            }
 
             if (!Shortcuts.InSimulationThread()) {
                 Log.Error("must be called from simulation thread");
@@ -51,26 +56,38 @@ namespace TrafficManager.Util {
             var map = new Dictionary<InstanceID, InstanceID>();
 
             var Asset2Data = AssetDataExtension.Instance.Asset2Data;
-            Log._Debug("PlaceIntersectionUtil.ApplyTrafficRules(): Asset2Data.keys=" +
-                Asset2Data.Select(item => item.Key).ToSTR());
+            if (logApplyTR) {
+                Log._Debug(
+                    "PlaceIntersectionUtil.ApplyTrafficRules(): Asset2Data.keys=" +
+                    Asset2Data.Select(item => item.Key).ToSTR());
+            }
 
             if (Asset2Data.TryGetValue(intersectionInfo, out var assetData)) {
-                Log.Info("PlaceIntersectionUtil.ApplyTrafficRules(): assetData =" + assetData);
+                if (logApplyTR) {
+                    Log.Info("PlaceIntersectionUtil.ApplyTrafficRules(): assetData =" + assetData);
+                }
             } else {
-                Log.Info("PlaceIntersectionUtil.ApplyTrafficRules(): assetData not found (the asset does not have TMPE data)");
+                if (logApplyTR) {
+                    Log.Info("PlaceIntersectionUtil.ApplyTrafficRules(): assetData not found " +
+                             "(the asset does not have TMPE data)");
+                }
+
                 return;
             }
 
-            var pathNetworkIDs = assetData.PathNetworkIDs;
-            if (pathNetworkIDs == null) return;
+            SegmentNetworkIDs[] pathNetworkIDs = assetData.PathNetworkIDs;
+            if (pathNetworkIDs == null) {
+                return;
+            }
 
             /*************************
              * Apply traffic rules: */
 
             MapSegments(oldSegments: pathNetworkIDs, newSegmentIds: newSegmentIds, map: map);
 
-            foreach (var item in map)
+            foreach (var item in map) {
                 CalculateNetwork(item.Value);
+            }
 
             assetData.Record.Transfer(map);
 

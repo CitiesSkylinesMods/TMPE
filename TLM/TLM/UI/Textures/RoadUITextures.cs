@@ -6,14 +6,14 @@ namespace TrafficManager.UI.Textures {
     using UnityEngine;
 
     /// <summary>UI Textures for controlling road segments.</summary>
-    public static class RoadUI {
-        public static readonly IDictionary<PriorityType, Texture2D> PrioritySignTextures;
-        public static readonly Texture2D SignClear;
-        public static readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
-        public static readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
-        public static readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
+    public class RoadUITextures {
+        public readonly IDictionary<PriorityType, Texture2D> PrioritySignTextures;
+        public readonly Texture2D SignClear;
+        public readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
+        public readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
+        public readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
 
-        static RoadUI() {
+        public RoadUITextures() {
             IntVector2 size = new IntVector2(200);
 
             // priority signs

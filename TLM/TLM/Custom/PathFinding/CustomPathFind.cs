@@ -338,17 +338,17 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
 #if DEBUG
-            debugLog_ = DebugSwitch.PathFindingLog.Get()
-                      && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
-                          || queueItem_.vehicleType == GlobalConfig.Instance.Debug.ApiExtVehicleType)
-                      && (DebugSettings.StartSegmentId == 0
-                          || data.m_position00.m_segment == DebugSettings.StartSegmentId
-                          || data.m_position02.m_segment == DebugSettings.StartSegmentId)
-                      && (DebugSettings.EndSegmentId == 0
-                          || data.m_position01.m_segment == DebugSettings.EndSegmentId
-                          || data.m_position03.m_segment == DebugSettings.EndSegmentId)
-                      && (DebugSettings.VehicleId == 0
-                          || queueItem_.vehicleId == DebugSettings.VehicleId);
+            debugLog_ = GlobalConfig.Instance.Debug.PathFindingLog
+                        && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
+                            || queueItem_.vehicleType == GlobalConfig.Instance.Debug.ApiExtVehicleType)
+                        && (DebugSettings.StartSegmentId == 0
+                            || data.m_position00.m_segment == DebugSettings.StartSegmentId
+                            || data.m_position02.m_segment == DebugSettings.StartSegmentId)
+                        && (DebugSettings.EndSegmentId == 0
+                            || data.m_position01.m_segment == DebugSettings.EndSegmentId
+                            || data.m_position03.m_segment == DebugSettings.EndSegmentId)
+                        && (DebugSettings.VehicleId == 0
+                            || queueItem_.vehicleId == DebugSettings.VehicleId);
             if (debugLog_) {
                 debugPositions_ = new Dictionary<ushort, IList<ushort>>();
             }

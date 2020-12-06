@@ -24,11 +24,11 @@
                 // for public transport.
                 if (Options.parkingAI) {
                     if (AdvancedParkingManager.Instance.GetBuildingInfoViewColor(
-                        buildingId,
-                        ref data,
-                        ref ExtBuildingManager.Instance.ExtBuildings[buildingId],
-                        infoMode,
-                        out Color? color)) {
+                        buildingId: buildingId,
+                        buildingData: ref data,
+                        extBuilding: ref ExtBuildingManager.Instance.ExtBuildings[buildingId],
+                        infoMode: infoMode,
+                        color: out Color? color)) {
                         return (Color)color;
                     }
                 }
