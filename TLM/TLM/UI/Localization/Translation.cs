@@ -113,6 +113,7 @@ namespace TrafficManager.UI {
         public void LoadAllTranslations() {
             CsvColumnsToLocales
                 = new Dictionary<string, string> {
+                    { "Arabic", "ar"},
                     { "English", "en" }, // DEFAULT_LANGUAGE_CODE
                     { "Chinese Simplified", "zh" },
                     { "Chinese Traditional", "zh-tw" },
@@ -125,10 +126,14 @@ namespace TrafficManager.UI {
                     { "Italian", "it" },
                     { "Japanese", "ja" },
                     { "Korean", "ko" },
+                    { "Occitan", "oc"},
                     { "Polish", "pl" },
                     { "Portuguese", "pt" },
+                    { "Romanian", "ro" },
                     { "Russian", "ru" },
+                    { "Slovak", "sk"},
                     { "Spanish", "es" },
+                    { "Thai", "th"},
                     { "Turkish", "tr"},
                     { "Ukrainian", "uk"},
                 };
