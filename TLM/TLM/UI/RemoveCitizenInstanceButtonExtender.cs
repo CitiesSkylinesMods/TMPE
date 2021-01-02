@@ -61,14 +61,14 @@ namespace TrafficManager.UI {
                 };
 
                 // This creates an atlas for a single button
-                var atlasBuilder = new U.AtlasBuilder();
+                var atlasBuilder = new U.AtlasBuilder(
+                    atlasName: "RemoveCitizenButton_Atlas",
+                    loadingPath: "Clear",
+                    sizeHint: new IntVector2(256));
                 this.Skin.UpdateAtlasBuilder(
                     atlasBuilder: atlasBuilder,
                     spriteSize: new IntVector2(50));
-                this.atlas = atlasBuilder.CreateAtlas(
-                    atlasName: "RemoveCitizenButton_Atlas",
-                    loadingPath: "Clear",
-                    atlasSizeHint: new IntVector2(256));
+                this.atlas = atlasBuilder.CreateAtlas();
 
                 UpdateButtonImageAndTooltip();
                 width = height = 30;

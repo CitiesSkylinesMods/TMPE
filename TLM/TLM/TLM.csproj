@@ -388,6 +388,7 @@
     <Compile Include="U\AtlasBuilder.cs" />
     <Compile Include="U\AtlasSpriteDef.cs" />
     <Compile Include="U\Autosize\ISmartSizableControl.cs" />
+    <Compile Include="U\Autosize\SmartResizeExtensions.cs" />
     <Compile Include="U\Autosize\UBoundingBox.cs" />
     <Compile Include="U\Autosize\UResizer.cs" />
     <Compile Include="U\Autosize\UResizerConfig.cs" />
@@ -407,7 +408,7 @@
     <Compile Include="U\Panel\UPanel.cs" />
     <Compile Include="U\TextureUtil.cs" />
     <Compile Include="U\UConst.cs" />
-    <Compile Include="U\UIBuilder.cs" />
+    <Compile Include="U\UBuilder.cs" />
     <Compile Include="U\UIScaler.cs" />
     <Compile Include="U\UIUtil.cs" />
     <Compile Include="U\UOpacityValue.cs" />

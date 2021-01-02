@@ -31,7 +31,8 @@ namespace TrafficManager.UI.MainMenu.OSD {
             localizedText_ = localizedText;
         }
 
-        public override void Build(U.UiBuilder<U.UPanel> builder) {
+        public override void Build(UIComponent parent,
+                                   U.UBuilder builder) {
             // Capacity 9 will fit all modifiers and separators and the text
             StringBuilder text = new StringBuilder(capacity: 9);
 
@@ -55,11 +56,11 @@ namespace TrafficManager.UI.MainMenu.OSD {
             text.Append("</color> ");
             text.Append(this.localizedText_);
 
-            using (UiBuilder<ULabel> labelB = builder.Label<U.ULabel>(text.ToString())) {
-                labelB.Control.processMarkup = true;
-                labelB.ResizeFunction(
-                    r => { r.Stack(mode: UStackMode.NewRowBelow); });
-            }
+            builder.Label<U.ULabel, UIComponent>(
+                parent,
+                t: text.ToString(),
+                stack: UStackMode.NewRowBelow,
+                processMarkup: true);
         }
 
         private static string TranslationForMouseButton(UIMouseButton button) {

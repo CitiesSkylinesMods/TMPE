@@ -314,7 +314,10 @@ namespace TrafficManager.UI {
                 };
 
                 // By default the atlas will include backgrounds: DefaultRound-bg-normal
-                var atlasBuilder = new AtlasBuilder();
+                var atlasBuilder = new AtlasBuilder(
+                    atlasName: "RoadSelectionPanelAtlas",
+                    loadingPath: "RoadSelectionPanel",
+                    sizeHint: new IntVector2(512));
                 tmpSkin.UpdateAtlasBuilder(
                     atlasBuilder: atlasBuilder,
                     spriteSize: new IntVector2(50));
@@ -326,10 +329,7 @@ namespace TrafficManager.UI {
                 }
 
                 // Create atlas and give it to all buttons
-                allButtonsAtlas_ = atlasBuilder.CreateAtlas(
-                    atlasName: "RoadSelectionPanelAtlas",
-                    loadingPath: "RoadSelectionPanel",
-                    atlasSizeHint: new IntVector2(512));
+                allButtonsAtlas_ = atlasBuilder.CreateAtlas();
 
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
                     button.atlas = allButtonsAtlas_;

@@ -10,6 +10,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
+    using TrafficManager.U.Autosize;
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util;
@@ -179,23 +180,21 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// </summary>
         /// <param name="numLanes">How many groups of buttons.</param>
         private void CreateLaneArrowsWindow(int numLanes) {
-            var parent = UIView.GetAView();
-            ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
-            ToolWindow.SetOpacity(
-                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
+            var builder = U.UBuilder.Create(
+                abAtlasName: "TMPE_LaneArrowsTool_Atlas",
+                abLoadingPath: "LaneArrows",
+                abSizeHint: new IntVector2(256));
 
+            ToolWindow = builder.CreateWindow<LaneArrowToolWindow>();
             RepositionWindowToNode(); // reposition 1st time to avoid visible window jump
 
-            using (var builder = new U.UiBuilder<LaneArrowToolWindow>(ToolWindow)) {
-                builder.ResizeFunction(r => { r.FitToChildren(); });
-                builder.SetPadding(UConst.UIPADDING);
+            ToolWindow.SetOpacity(
+                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
+            ToolWindow.SetupControls(builder, numLanes);
 
-                ToolWindow.SetupControls(builder, numLanes);
-
-                // Resize everything correctly
-                builder.Done();
-                RepositionWindowToNode(); // reposition again 2nd time now that size is known
-            }
+            // Resize everything correctly
+            ToolWindow.ForceUpdateLayout();
+            RepositionWindowToNode(); // reposition again 2nd time now that size is known
         }
 
         /// <summary>

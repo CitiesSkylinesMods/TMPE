@@ -29,21 +29,22 @@ namespace TrafficManager.UI.MainMenu {
 
             // Let the mainmenu atlas know we need this texture and assign it to self.atlas.
             this.Skin = new ButtonSkin {
-                                           BackgroundPrefix = "MainMenuButton",
-                                           Prefix = "MainMenuButton",
-                                           BackgroundHovered = true,
-                                           BackgroundActive = true,
-                                           ForegroundHovered = true,
-                                           ForegroundActive = true,
-                                       };
-            var atlasBuilder = new U.AtlasBuilder();
+                BackgroundPrefix = "MainMenuButton",
+                Prefix = "MainMenuButton",
+                BackgroundHovered = true,
+                BackgroundActive = true,
+                ForegroundHovered = true,
+                ForegroundActive = true,
+            };
+
+            var atlasBuilder = new U.AtlasBuilder(
+                atlasName: "MainTMPEButton_Atlas",
+                loadingPath: "MainMenu",
+                sizeHint: new IntVector2(256));
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: atlasBuilder,
                 spriteSize: new IntVector2(50));
-            this.atlas = atlasBuilder.CreateAtlas(
-                atlasName: "MainTMPEButton_Atlas",
-                loadingPath: "MainMenu",
-                atlasSizeHint: new IntVector2(256));
+            this.atlas = atlasBuilder.CreateAtlas();
             UpdateButtonImageAndTooltip();
 
             // Set the button dimensions to smallest of 2.6% of screen width or 4.6% of screen height

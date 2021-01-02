@@ -46,9 +46,6 @@ namespace TrafficManager.U.Autosize {
         /// parent's all children bounding box. Useful for controls hanging outside of the parent.
         /// </summary>
         public bool ContributeToBoundingBox { get; set; }
-        public static UResizerConfig From(UIComponent control) {
-            return (control as ISmartSizableControl)?.GetResizerConfig();
-        }
 
         /// <summary>Calls <see cref="onResize_"/> if it is not null.</summary>
         /// <param name="control">The control which is to be refreshed.</param>
