@@ -4,6 +4,7 @@ namespace CSUtil.Commons {
     using System.IO;
     using System.Threading;
     using UnityEngine;
+    using Debug = UnityEngine.Debug;
 
 #if !DEBUG
     #if TRACE
@@ -59,7 +60,8 @@ namespace CSUtil.Commons {
                     File.Delete(LogFilename);
                 }
             }
-            catch (Exception) {
+            catch (Exception e) {
+                Debug.LogException(e);
             }
         }
 
@@ -193,9 +195,7 @@ namespace CSUtil.Commons {
         }
 
         private static void LogToFile(string log, LogLevel level) {
-            try {
-                Monitor.Enter(LogLock);
-
+            lock(LogLock){
                 using (StreamWriter w = File.AppendText(LogFilename)) {
                     long secs = _sw.ElapsedTicks / Stopwatch.Frequency;
                     long fraction = _sw.ElapsedTicks % Stopwatch.Frequency;
@@ -209,9 +209,6 @@ namespace CSUtil.Commons {
                         w.WriteLine();
                     }
                 }
-            }
-            finally {
-                Monitor.Exit(LogLock);
             }
         }
     }
