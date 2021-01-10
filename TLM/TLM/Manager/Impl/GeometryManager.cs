@@ -70,8 +70,7 @@
                 return;
             }
 
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
 
                 bool updatesMissing = onlyFirstPass;
 
@@ -178,8 +177,6 @@
                 }
 
                 stateUpdated = false;
-            } finally {
-                Monitor.Exit(updateLock);
             }
         }
 
@@ -202,8 +199,7 @@
                     $"GeometryManager.MarkAsUpdated(segment {seg.segmentId}): Marking segment as updated");
             }
 #endif
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
 
                 updatedSegmentBuckets[seg.segmentId >> 6] |= 1uL << (seg.segmentId & 63);
                 stateUpdated = true;
@@ -218,8 +214,6 @@
                 if (!seg.valid) {
                     SimulationStep(true);
                 }
-            } finally {
-                Monitor.Exit(updateLock);
             }
         }
 
@@ -230,8 +224,7 @@
                     $"GeometryManager.MarkAsUpdated(node {nodeId}): Marking node as updated");
             }
 #endif
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
 
                 if (nodeId == 0) {
                     return;
@@ -257,9 +250,6 @@
                     SimulationStep(true);
                 }
             }
-            finally {
-                Monitor.Exit(updateLock);
-            }
         }
 
         public void OnSegmentEndReplacement(SegmentEndReplacement replacement) {
@@ -270,14 +260,9 @@
                     $"{replacement.oldSegmentEndId.SegmentId} -> {replacement.newSegmentEndId.SegmentId}");
             }
 #endif
-            try {
-                Monitor.Enter(updateLock);
-
+            lock(updateLock) {
                 segmentReplacements.Enqueue(replacement);
                 stateUpdated = true;
-            }
-            finally {
-                Monitor.Exit(updateLock);
             }
         }
 

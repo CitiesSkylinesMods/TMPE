@@ -22,12 +22,8 @@
                 return;
             }
 
-            try {
-                Monitor.Enter(lck_);
+            lock(lck_) {
                 observers_.Remove(observer_);
-            }
-            finally {
-                Monitor.Exit(lck_);
             }
         }
     }

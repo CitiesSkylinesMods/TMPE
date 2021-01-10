@@ -156,8 +156,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
             Stop();
 
-            try {
-                Monitor.Enter(rotateLock_);
+            lock(rotateLock_) {
 
                 Log._Debug($"TimedTrafficLights.Rotate({dir}) @ node {NodeId}: Rotating timed traffic light.");
 
@@ -247,8 +246,6 @@ namespace TrafficManager.TrafficLight.Impl {
 
                 CurrentStep = 0;
                 SetLights(true);
-            } finally {
-                Monitor.Exit(rotateLock_);
             }
         }
 
