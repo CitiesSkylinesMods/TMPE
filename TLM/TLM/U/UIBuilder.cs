@@ -5,6 +5,7 @@ namespace TrafficManager.U {
     using TrafficManager.State.Keybinds;
     using TrafficManager.U.Autosize;
     using TrafficManager.UI;
+    using UnityEngine;
 
     /// <summary>
     /// Create an UI builder to populate a panel with good things: buttons, sub-panels, create a
@@ -18,6 +19,33 @@ namespace TrafficManager.U {
 
         public UiBuilder(TControl curr) {
             Control = curr;
+        }
+
+        /// <summary>
+        /// Generic window creation.
+        /// Creates a window with generic padding (4px). The size will be "fit to children".
+        /// Calls a custom function after the setup is done, there you can populate the window.
+        /// </summary>
+        /// <typeparam name="TWindow">The window root panel type.</typeparam>
+        /// <param name="setupFn">Function called on to perform window post-setup.</param>
+        /// <returns>The new window panel.</returns>
+        public static TWindow CreateWindow<TWindow>(Action<UiBuilder<TWindow>> setupFn)
+            where TWindow : UIComponent, ISmartSizableControl
+        {
+            var parent = UIView.GetAView();
+            var window = (TWindow)parent.AddUIComponent(typeof(TWindow));
+
+            using (var builder = new U.UiBuilder<TWindow>(window)) {
+                builder.ResizeFunction(r => { r.FitToChildren(); });
+                builder.SetPadding(UConst.UIPADDING);
+
+                setupFn(builder);
+
+                // Resize everything correctly
+                builder.Done();
+            }
+
+            return window;
         }
 
         /// <summary>
@@ -45,11 +73,38 @@ namespace TrafficManager.U {
             return new UiBuilder<TButton>(newButton);
         }
 
+        public UiBuilder<TButton> FixedSizeButton<TButton>(string text,
+                                                           string tooltip,
+                                                           Vector2 size,
+                                                           UStackMode stack)
+            where TButton : UIButton, ISmartSizableControl
+        {
+            UiBuilder<TButton> builder = this.Button<TButton>();
+            builder.Control.text = text;
+            builder.Control.tooltip = tooltip;
+            builder.SetStacking(stack);
+            builder.SetFixedSize(size);
+            return builder;
+        }
+
         public UiBuilder<TLabel> Label<TLabel>(string t)
             where TLabel : UILabel, ISmartSizableControl {
             var newLabel = Control.AddUIComponent(typeof(TLabel)) as TLabel;
             newLabel.text = t;
             return new UiBuilder<TLabel>(newLabel);
+        }
+
+        /// <summary>Quick create a label and stack it. Optionally set markup processing mode.</summary>
+        /// <param name="t">Localized text.</param>
+        /// <param name="stack">Stacking mode related to previous sibling.</param>
+        /// <param name="processMarkup">Whether label text contains C:S color markup.</param>
+        /// <returns>New label.</returns>
+        public U.ULabel Label(string t, UStackMode stack, bool processMarkup = false) {
+            using (UiBuilder<ULabel> labelB = this.Label<U.ULabel>(t)) {
+                labelB.ResizeFunction(r => r.Stack(mode: stack));
+                labelB.Control.processMarkup = processMarkup;
+                return labelB.Control;
+            }
         }
 
         public UiBuilder<TPanel> ChildPanel<TPanel>(Action<TPanel> setupFn)
@@ -76,6 +131,24 @@ namespace TrafficManager.U {
 
         public void SetPadding(float f) {
             Control.GetResizerConfig().Padding = f;
+        }
+
+        /// <summary>Instruct the <see cref="UResizer"/> to always use fixed size for the control.</summary>
+        /// <param name="size">The size in units of 1080p screen.</param>
+        public void SetFixedSize(Vector2 size) {
+            UResizerConfig c = Control.GetResizerConfig();
+            c.SizeChoice = USizeChoice.Predefined;
+            c.FixedSize = size;
+        }
+
+        /// <summary>Instruct the <see cref="UResizer"/> to always use this stacking for the control.</summary>
+        /// <param name="mode">The stacking mode to always use.</param>
+        /// <param name="spacing">Spacing to use in the call to automatic predefined spacing.</param>
+        public void SetStacking(UStackMode mode, float spacing = 0f) {
+            UResizerConfig c = Control.GetResizerConfig();
+            c.StackingChoice = UStackingChoice.Predefined;
+            c.Stacking = mode;
+            c.StackingSpacing = spacing;
         }
     }
 }

@@ -610,7 +610,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             }
 
             // fallback to "noimage" texture
-            roadTexture = Textures.MainMenu.NoImage;
+            roadTexture = null;
         }
 
         /// <summary>

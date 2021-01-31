@@ -1,8 +1,7 @@
 ﻿namespace TrafficManager.UI.MainMenu {
-    using System;
     using System.Collections.Generic;
     using ColossalFramework.UI;
-    using TrafficManager.U.Button;
+    using TrafficManager.U;
 
     /// <summary>
     /// Base class for main menu panel buttons.
@@ -16,7 +15,7 @@
         /// each button is given a chance to add their own required sprites to that atlas.
         /// </summary>
         /// <param name="atlasKeys">List to modify.</param>
-        public abstract void SetupButtonSkin(HashSet<string> atlasKeys);
+        public abstract void SetupButtonSkin(U.AtlasBuilder atlasBuilder);
 
         public override void HandleClick(UIMouseEventParameter p) { }
 

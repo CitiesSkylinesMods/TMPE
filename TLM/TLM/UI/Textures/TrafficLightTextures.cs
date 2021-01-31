@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.Textures {
+    using TrafficManager.Util;
     using UnityEngine;
     using static TextureResources;
 
@@ -49,83 +50,79 @@ namespace TrafficManager.UI.Textures {
         public static readonly Texture2D TrafficLightDisabled;
 
         static TrafficLightTextures() {
-            // simple
-            RedLight = LoadDllResource("TrafficLights.light_1_1.png", 103, 243);
-            YellowRedLight = LoadDllResource("TrafficLights.light_1_2.png", 103, 243);
-            GreenLight = LoadDllResource("TrafficLights.light_1_3.png", 103, 243);
+            IntVector2 tlSize = new IntVector2(103, 243);
+
+            RedLight = LoadDllResource("TrafficLights.light_1_1.png", tlSize);
+            YellowRedLight = LoadDllResource("TrafficLights.light_1_2.png", tlSize);
+            GreenLight = LoadDllResource("TrafficLights.light_1_3.png", tlSize);
 
             // forward
-            RedLightStraight = LoadDllResource("TrafficLights.light_2_1.png", 103, 243);
-            YellowLightStraight = LoadDllResource("TrafficLights.light_2_2.png", 103, 243);
-            GreenLightStraight = LoadDllResource("TrafficLights.light_2_3.png", 103, 243);
+            RedLightStraight = LoadDllResource("TrafficLights.light_2_1.png", tlSize);
+            YellowLightStraight = LoadDllResource("TrafficLights.light_2_2.png", tlSize);
+            GreenLightStraight = LoadDllResource("TrafficLights.light_2_3.png", tlSize);
 
             // right
-            RedLightRight = LoadDllResource("TrafficLights.light_3_1.png", 103, 243);
-            YellowLightRight = LoadDllResource("TrafficLights.light_3_2.png", 103, 243);
-            GreenLightRight = LoadDllResource("TrafficLights.light_3_3.png", 103, 243);
+            RedLightRight = LoadDllResource("TrafficLights.light_3_1.png", tlSize);
+            YellowLightRight = LoadDllResource("TrafficLights.light_3_2.png", tlSize);
+            GreenLightRight = LoadDllResource("TrafficLights.light_3_3.png", tlSize);
 
             // left
-            RedLightLeft = LoadDllResource("TrafficLights.light_4_1.png", 103, 243);
-            YellowLightLeft = LoadDllResource("TrafficLights.light_4_2.png", 103, 243);
-            GreenLightLeft = LoadDllResource("TrafficLights.light_4_3.png", 103, 243);
+            RedLightLeft = LoadDllResource("TrafficLights.light_4_1.png", tlSize);
+            YellowLightLeft = LoadDllResource("TrafficLights.light_4_2.png", tlSize);
+            GreenLightLeft = LoadDllResource("TrafficLights.light_4_3.png", tlSize);
 
             // forwardright
-            RedLightForwardRight = LoadDllResource("TrafficLights.light_5_1.png", 103, 243);
-            YellowLightForwardRight = LoadDllResource("TrafficLights.light_5_2.png", 103, 243);
-            GreenLightForwardRight = LoadDllResource("TrafficLights.light_5_3.png", 103, 243);
+            RedLightForwardRight = LoadDllResource("TrafficLights.light_5_1.png", tlSize);
+            YellowLightForwardRight = LoadDllResource("TrafficLights.light_5_2.png", tlSize);
+            GreenLightForwardRight = LoadDllResource("TrafficLights.light_5_3.png", tlSize);
 
             // forwardleft
-            RedLightForwardLeft = LoadDllResource("TrafficLights.light_6_1.png", 103, 243);
-            YellowLightForwardLeft = LoadDllResource("TrafficLights.light_6_2.png", 103, 243);
-            GreenLightForwardLeft = LoadDllResource("TrafficLights.light_6_3.png", 103, 243);
+            RedLightForwardLeft = LoadDllResource("TrafficLights.light_6_1.png", tlSize);
+            YellowLightForwardLeft = LoadDllResource("TrafficLights.light_6_2.png", tlSize);
+            GreenLightForwardLeft = LoadDllResource("TrafficLights.light_6_3.png", tlSize);
 
             // yellow
-            YellowLight = LoadDllResource("TrafficLights.light_yellow.png", 103, 243);
+            YellowLight = LoadDllResource("TrafficLights.light_yellow.png", tlSize);
 
             // pedestrian
-            PedestrianRedLight = LoadDllResource("TrafficLights.pedestrian_light_1.png", 73, 123);
-            PedestrianGreenLight = LoadDllResource("TrafficLights.pedestrian_light_2.png", 73, 123);
+            IntVector2 pedSize = new IntVector2(73, 123);
+            PedestrianRedLight = LoadDllResource("TrafficLights.pedestrian_light_1.png", pedSize);
+            PedestrianGreenLight = LoadDllResource("TrafficLights.pedestrian_light_2.png", pedSize);
 
             //--------------------------
             // Timed TL Editor
             //--------------------------
             // light mode
+            IntVector2 tlModeSize = new IntVector2(103, 95);
+
             LightMode = LoadDllResource(
                 Translation.GetTranslatedFileName("TrafficLights.light_mode.png"),
-                103,
-                95);
+                tlModeSize);
             LightCounter = LoadDllResource(
                 Translation.GetTranslatedFileName("TrafficLights.light_counter.png"),
-                103,
-                95);
+                tlModeSize);
 
             // pedestrian mode
             PedestrianModeAutomatic = LoadDllResource(
                 "TrafficLights.pedestrian_mode_1.png",
-                73,
-                70);
-            PedestrianModeManual = LoadDllResource("TrafficLights.pedestrian_mode_2.png", 73, 73);
+                new IntVector2(73, 70));
+            PedestrianModeManual = LoadDllResource("TrafficLights.pedestrian_mode_2.png",
+                                                   new IntVector2(73, 73));
 
             // timer
-            ClockPlay = LoadDllResource("TrafficLights.clock_play.png", 512, 512);
-            ClockPause = LoadDllResource("TrafficLights.clock_pause.png", 512, 512);
-            ClockTest = LoadDllResource("TrafficLights.clock_test.png", 512, 512);
+            IntVector2 timerSize = new IntVector2(512);
+
+            ClockPlay = LoadDllResource("TrafficLights.clock_play.png", timerSize);
+            ClockPause = LoadDllResource("TrafficLights.clock_pause.png", timerSize);
+            ClockTest = LoadDllResource("TrafficLights.clock_test.png", timerSize);
 
             //--------------------------
             // Toggle TL Tool
             //--------------------------
-            TrafficLightEnabled = LoadDllResource(
-                "TrafficLights.IconJunctionTrafficLights.png",
-                64,
-                64);
-            TrafficLightEnabledTimed = LoadDllResource(
-                "TrafficLights.IconJunctionTimedTL.png",
-                64,
-                64);
-            TrafficLightDisabled = LoadDllResource(
-                "TrafficLights.IconJunctionNoTrafficLights.png",
-                64,
-                64);
+            IntVector2 toggleSize = new IntVector2(64);
+            TrafficLightEnabled = LoadDllResource("TrafficLights.IconJunctionTrafficLights.png", toggleSize);
+            TrafficLightEnabledTimed = LoadDllResource("TrafficLights.IconJunctionTimedTL.png", toggleSize);
+            TrafficLightDisabled = LoadDllResource("TrafficLights.IconJunctionNoTrafficLights.png", toggleSize);
         }
     }
 }
