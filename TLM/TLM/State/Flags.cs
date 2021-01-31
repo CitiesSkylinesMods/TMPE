@@ -530,8 +530,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            try {
-                Monitor.Enter(laneSpeedLimitLock);
+            lock(laneSpeedLimitLock) {
 #if DEBUGFLAGS
                 Log._Debug(
                     $"Flags.setLaneSpeedLimit: setting speed limit of lane index {laneIndex} @ seg. " +
@@ -565,9 +564,6 @@ namespace TrafficManager.State {
                     // (2) insert the custom speed limit
                     laneSpeedLimitArray[segmentId][laneIndex] = speedLimit;
                 }
-            }
-            finally {
-                Monitor.Exit(laneSpeedLimitLock);
             }
         }
 
@@ -859,8 +855,7 @@ namespace TrafficManager.State {
         }
 
         public static float? GetLaneSpeedLimit(uint laneId) {
-            try {
-                Monitor.Enter(laneSpeedLimitLock);
+            lock(laneSpeedLimitLock) {
 
                 if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out float speedLimit)) {
                     return null;
@@ -868,20 +863,12 @@ namespace TrafficManager.State {
 
                 return speedLimit;
             }
-            finally {
-                Monitor.Exit(laneSpeedLimitLock);
-            }
         }
 
         internal static IDictionary<uint, float> GetAllLaneSpeedLimits() {
-            IDictionary<uint, float> ret = new Dictionary<uint, float>();
-            try {
-                Monitor.Enter(laneSpeedLimitLock);
-
+            IDictionary<uint, float> ret;
+            lock(laneSpeedLimitLock) {
                 ret = new Dictionary<uint, float>(laneSpeedLimit);
-            }
-            finally {
-                Monitor.Exit(laneSpeedLimitLock);
             }
 
             return ret;
@@ -1074,17 +1061,13 @@ namespace TrafficManager.State {
         }
 
         public static void ResetSpeedLimits() {
-            try {
-                Monitor.Enter(laneSpeedLimitLock);
+            lock(laneSpeedLimitLock) {
                 laneSpeedLimit.Clear();
 
                 uint segmentsCount = Singleton<NetManager>.instance.m_segments.m_size;
                 for (int i = 0; i < segmentsCount; ++i) {
                     laneSpeedLimitArray[i] = null;
                 }
-            }
-            finally {
-                Monitor.Exit(laneSpeedLimitLock);
             }
         }
 
@@ -1097,12 +1080,8 @@ namespace TrafficManager.State {
                 laneSpeedLimitArray[i] = null;
             }
 
-            try {
-                Monitor.Enter(laneSpeedLimitLock);
+            lock(laneSpeedLimitLock) {
                 laneSpeedLimit.Clear();
-            }
-            finally {
-                Monitor.Exit(laneSpeedLimitLock);
             }
 
             for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
