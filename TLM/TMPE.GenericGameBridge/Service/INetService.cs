@@ -60,13 +60,13 @@ namespace GenericGameBridge.Service {
 
         bool IsSegmentValid(ushort segmentId);
 
-        void IterateNodeSegments(ushort nodeId, ClockDirection dir, NetSegmentHandler handler);
-
         void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler);
 
         void IterateSegmentLanes(ushort segmentId,
                                  ref NetSegment segment,
                                  NetSegmentLaneHandler handler);
+
+        IEnumerable<ushort> GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection);
 
         void PublishSegmentChanges(ushort segmentId);
 
@@ -107,7 +107,6 @@ namespace GenericGameBridge.Service {
 
 
     public enum ClockDirection {
-        None,
         Clockwise,
         CounterClockwise,
     }

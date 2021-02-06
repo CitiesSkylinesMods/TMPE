@@ -15,6 +15,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.Util;
     using UnityEngine;
+    using CitiesGameBridge.Service;
 
     // TODO define TimedTrafficLights per node group, not per individual nodes
     public class TimedTrafficLights : ITimedTrafficLights {
@@ -85,23 +86,10 @@ namespace TrafficManager.TrafficLight.Impl {
             Steps.Clear();
             RotationOffset = 0;
 
-            IList<ushort> clockSortedSourceSegmentIds = new List<ushort>();
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                sourceTimedLight.NodeId,
-                ClockDirection.Clockwise,
-                (ushort segmentId, ref NetSegment segment) => {
-                    clockSortedSourceSegmentIds.Add(segmentId);
-                    return true;
-                });
+            var netService = Constants.ServiceFactory.NetService;
 
-            IList<ushort> clockSortedTargetSegmentIds = new List<ushort>();
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                NodeId,
-                ClockDirection.Clockwise,
-                (ushort segmentId, ref NetSegment segment) => {
-                    clockSortedTargetSegmentIds.Add(segmentId);
-                    return true;
-                });
+            List<ushort> clockSortedSourceSegmentIds = netService.GetNodeSegmentIds(sourceTimedLight.NodeId, ClockDirection.Clockwise).ToList();
+            List<ushort> clockSortedTargetSegmentIds = netService.GetNodeSegmentIds(NodeId, ClockDirection.Clockwise).ToList();
 
             if (clockSortedTargetSegmentIds.Count != clockSortedSourceSegmentIds.Count) {
                 throw new Exception(
@@ -165,16 +153,10 @@ namespace TrafficManager.TrafficLight.Impl {
                     throw new NotSupportedException();
                 }
 
-                IList<ushort> clockSortedSegmentIds = new List<ushort>();
-                Constants.ServiceFactory.NetService.IterateNodeSegments(
-                    NodeId,
-                    dir == ArrowDirection.Right
-                        ? ClockDirection.Clockwise
-                        : ClockDirection.CounterClockwise,
-                    (ushort segmentId, ref NetSegment segment) => {
-                        clockSortedSegmentIds.Add(segmentId);
-                        return true;
-                    });
+                var clockDirection = dir == ArrowDirection.Right
+                    ? ClockDirection.Clockwise
+                    : ClockDirection.CounterClockwise;
+                List<ushort> clockSortedSegmentIds = Constants.ServiceFactory.NetService.GetNodeSegmentIds(NodeId, clockDirection).ToList();
 
                 Log._Debug(
                     $"TimedTrafficLights.Rotate({dir}) @ node {NodeId}: Clock-sorted segment ids: " +
