@@ -178,7 +178,7 @@ namespace TrafficManager.UI.SubTools {
             NetManager netManager = Singleton<NetManager>.instance;
 
             var currentCamera = new CameraTransformValue(InGameUtil.Instance.CachedMainCamera);
-            Transform currentCameraTransform = InGameUtil.Instance.CachedMainCamera.transform;
+            Transform currentCameraTransform = InGameUtil.Instance.CachedCameraTransform;
             Vector3 camPos = currentCameraTransform.position;
 
             if (!LastCachedCamera.Equals(currentCamera)) {

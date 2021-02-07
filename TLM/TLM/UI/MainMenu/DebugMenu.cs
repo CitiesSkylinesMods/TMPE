@@ -172,7 +172,7 @@ namespace TrafficManager.UI.MainMenu {
             CSUtil.CameraControl.CameraController.Instance.GoToPos(
                 new Vector3(
                     float.Parse(vectorElms[0]),
-                    InGameUtil.Instance.CachedMainCamera.transform.position.y,
+                    InGameUtil.Instance.CachedCameraTransform.position.y,
                     float.Parse(vectorElms[1])));
         }
 

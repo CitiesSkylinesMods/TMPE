@@ -10,8 +10,11 @@ namespace TrafficManager.Util {
         /// </summary>
         public readonly Camera CachedMainCamera;
 
+        public readonly Transform CachedCameraTransform;
+
         private InGameUtil() {
             CachedMainCamera = Camera.main;
+            CachedCameraTransform = CachedMainCamera.transform;
         }
 
         /// <summary>
