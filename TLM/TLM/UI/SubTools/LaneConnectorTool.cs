@@ -148,7 +148,7 @@ namespace TrafficManager.UI.SubTools {
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
             // Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
-            Camera currentCamera = Camera.main;
+            Camera currentCamera = InGameUtil.Instance.CachedMainCamera;
 
             // Check if camera pos/angle has changed then re-filter the visible nodes
             // Assumption: The states checked in this loop don't change while the tool is active

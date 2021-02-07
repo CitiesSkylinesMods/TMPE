@@ -231,7 +231,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void ShowSigns(bool viewOnly) {
-            Vector3 camPos = Camera.main.transform.position;
+            Vector3 camPos = InGameUtil.Instance.CachedMainCamera.transform.position;
             NetManager netManager = Singleton<NetManager>.instance;
             bool handleHovered = false;
 

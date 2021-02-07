@@ -1440,7 +1440,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     continue;
                 }
 
-                Vector3 diff = nodePos - Camera.main.transform.position;
+                Vector3 diff = nodePos - InGameUtil.Instance.CachedMainCamera.transform.position;
                 float zoom = 1.0f / diff.magnitude * 100f * MainTool.GetBaseZoom();
 
                 ref NetNode node = ref nodeId.ToNode();

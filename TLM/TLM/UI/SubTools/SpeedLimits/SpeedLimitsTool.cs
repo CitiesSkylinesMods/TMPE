@@ -328,8 +328,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             NetManager netManager = Singleton<NetManager>.instance;
             SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance;
 
-            var currentCamera = new CameraTransformValue(Camera.main);
-            Transform currentCameraTransform = Camera.main.transform;
+            var currentCamera = new CameraTransformValue(InGameUtil.Instance.CachedMainCamera);
+            Transform currentCameraTransform = InGameUtil.Instance.CachedMainCamera.transform;
             Vector3 camPos = currentCameraTransform.position;
 
             if (!LastCachedCamera.Equals(currentCamera)) {
