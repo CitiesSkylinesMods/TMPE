@@ -66,7 +66,7 @@ namespace GenericGameBridge.Service {
                                  ref NetSegment segment,
                                  NetSegmentLaneHandler handler);
 
-        IEnumerable<ushort> GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection);
+        GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection);
 
         void PublishSegmentChanges(ushort segmentId);
 

@@ -141,23 +141,10 @@ namespace CitiesGameBridge.Service {
                 : segment.m_endNode;
         }
 
-        public IEnumerable<ushort> GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection) {
+        public GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection) {
             var initialSegmentId = GetInitialSegment(ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]);
-            if (initialSegmentId == 0) {
-                yield break;
-            }
-
-            var segmentId = initialSegmentId;
-            do {
-                yield return segmentId;
-                if (clockDirection == ClockDirection.Clockwise) {
-                    segmentId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].GetLeftSegment(nodeId);
-                } else if (clockDirection == ClockDirection.CounterClockwise) {
-                    segmentId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].GetRightSegment(nodeId);
-                } else {
-                    throw new Exception($"Unknown ClockDirection '{nameof(clockDirection)}'");
-                }
-            } while (segmentId != initialSegmentId && segmentId != 0);
+            var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            return new GetNodeSegmentIdsEnumerable(nodeId, initialSegmentId, clockDirection, segmentBuffer);
         }
 
         /// <summary>
