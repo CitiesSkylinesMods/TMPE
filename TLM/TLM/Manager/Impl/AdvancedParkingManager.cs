@@ -2892,6 +2892,50 @@ namespace TrafficManager.Manager.Impl {
                        out parkOffset) != 0;
         }
 
+        public bool VanillaFindParkingSpaceWithoutRestrictions(bool isElectric,
+                                                                ushort homeId,
+                                                                Vector3 refPos,
+                                                                Vector3 searchDir,
+                                                                ushort segment,
+                                                                float width,
+                                                                float length,
+                                                                out Vector3 parkPos,
+                                                                out Quaternion parkRot,
+                                                                out float parkOffset) {
+            if (!CustomPassengerCarAI.FindParkingSpace(isElectric,
+                                                       homeId,
+                                                       refPos,
+                                                       searchDir,
+                                                       segment,
+                                                       width,
+                                                       length,
+                                                       out parkPos,
+                                                       out parkRot,
+                                                       out parkOffset)) {
+                return false;
+            }
+
+            // in vanilla parkOffset is always >= 0 for RoadSideParkingSpace
+            if (Options.parkingRestrictionsEnabled && parkOffset >= 0) {
+                if (Singleton<NetManager>.instance.m_segments.m_buffer[segment].GetClosestLanePosition(
+                        refPos,
+                        NetInfo.LaneType.Parking,
+                        VehicleInfo.VehicleType.Car,
+                        out _,
+                        out _,
+                        out int laneIndex,
+                        out _)) {
+                    NetInfo.Direction direction
+                        = Singleton<NetManager>.instance.m_segments.m_buffer[segment].Info.m_lanes[laneIndex].m_finalDirection;
+                    if (!ParkingRestrictionsManager.Instance.IsParkingAllowed(segment, direction)) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
         public bool GetBuildingInfoViewColor(ushort buildingId,
                                              ref Building buildingData,
                                              ref ExtBuilding extBuilding,

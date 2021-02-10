@@ -3,25 +3,28 @@
     using ColossalFramework.UI;
     using TrafficManager.Manager.Impl;
     using TrafficManager.RedirectionFramework;
-    using TrafficManager.U.Button;
+    using TrafficManager.U;
+    using TrafficManager.Util;
 
     public class ClearTrafficButton : BaseMenuButton {
         protected override bool IsActive() => false;
 
-        protected override string GetTooltip() => Translation.Menu.Get("Tooltip:Clear traffic");
+        protected override string U_OverrideTooltipText() => Translation.Menu.Get("Tooltip:Clear traffic");
 
         protected override bool IsVisible() => true;
 
-        public override void SetupButtonSkin(HashSet<string> atlasKeys) {
+        public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
-            this.Skin = new U.Button.ButtonSkin() {
-                                                      Prefix = "ClearTraffic",
-                                                      BackgroundPrefix = "RoundButton",
-                                                      BackgroundHovered = true,
-                                                      BackgroundActive = true,
-                                                      ForegroundActive = true,
-                                                  };
-            atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
+            this.Skin = new U.ButtonSkin() {
+                Prefix = "ClearTraffic",
+                BackgroundPrefix = "RoundButton",
+                BackgroundHovered = true,
+                BackgroundActive = true,
+                ForegroundActive = true,
+            };
+            this.Skin.UpdateAtlasBuilder(
+                atlasBuilder: futureAtlas,
+                spriteSize: new IntVector2(50));
         }
 
         protected override void OnClick(UIMouseEventParameter p) {

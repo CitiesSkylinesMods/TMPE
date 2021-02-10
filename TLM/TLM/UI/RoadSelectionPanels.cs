@@ -5,7 +5,7 @@ namespace TrafficManager.UI {
     using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.RedirectionFramework;
-    using TrafficManager.U.Button;
+    using TrafficManager.U;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util;
     using TrafficManager.Util.Record;
@@ -314,19 +314,22 @@ namespace TrafficManager.UI {
                 };
 
                 // By default the atlas will include backgrounds: DefaultRound-bg-normal
-                HashSet<string> atlasKeysSet = tmpSkin.CreateAtlasKeyset();
+                var atlasBuilder = new AtlasBuilder();
+                tmpSkin.UpdateAtlasBuilder(
+                    atlasBuilder: atlasBuilder,
+                    spriteSize: new IntVector2(50));
 
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
-                    atlasKeysSet.AddRange(button.GetAtlasKeys);
+                    button.Skin.UpdateAtlasBuilder(
+                        atlasBuilder: atlasBuilder,
+                        spriteSize: new IntVector2(50));
                 }
 
                 // Create atlas and give it to all buttons
-                allButtonsAtlas_ = tmpSkin.CreateAtlas(
-                                       "RoadSelectionPanel",
-                                       50,
-                                       50,
-                                       512,
-                                       atlasKeysSet);
+                allButtonsAtlas_ = atlasBuilder.CreateAtlas(
+                    atlasName: "RoadSelectionPanelAtlas",
+                    loadingPath: "RoadSelectionPanel",
+                    atlasSizeHint: new IntVector2(512));
 
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
                     button.atlas = allButtonsAtlas_;
@@ -348,30 +351,30 @@ namespace TrafficManager.UI {
             }
 
             public class ClearButtton : ButtonExt {
-                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
+                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
                 public override string SkinPrefix => Function.ToString(); // remove _RHT/_LHT postFix.
                 internal override FunctionModes Function => FunctionModes.Clear;
                 public override IRecordable Do() => PriorityRoad.ClearRoad(Selection);
             }
             public class StopButtton : ButtonExt {
-                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
+                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
                 internal override FunctionModes Function => FunctionModes.Stop;
                 public override IRecordable Do() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsTool.PrioritySignsMassEditMode.MainStop, Selection);
             }
             public class YieldButton : ButtonExt {
-                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
+                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
                 internal override FunctionModes Function => FunctionModes.Yield;
                 public override IRecordable Do() =>
                     PriorityRoad.FixPrioritySigns(PrioritySignsTool.PrioritySignsMassEditMode.MainYield, Selection);
             }
             public class HighPriorityButtton : ButtonExt {
-                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
+                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
                 internal override FunctionModes Function => FunctionModes.HighPriority;
                 public override IRecordable Do() => PriorityRoad.FixRoad(Selection);
             }
             public class RoundaboutButtton : ButtonExt {
-                protected override string GetTooltip() => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
+                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
                 internal override FunctionModes Function => FunctionModes.Roundabout;
                 public override IRecordable Do() => RoundaboutMassEdit.Instance.FixRoundabout(Selection);
                 public override bool ShouldDisable() {
@@ -399,8 +402,6 @@ namespace TrafficManager.UI {
 
                 public virtual string SkinPrefix => Function.ToString() + TrafficSidePostFix;
 
-                public HashSet<string> GetAtlasKeys => this.Skin.CreateAtlasKeyset();
-
                 public bool IsHovered => m_IsMouseHovering; // exposing the protected member
 
                 public List<ushort> Selection => Root?.roadSelectionUtil_?.Selection;
@@ -425,7 +426,7 @@ namespace TrafficManager.UI {
                 public override void Awake() {
                     base.Awake();
                     name = ButtonName;
-                    Skin = new U.Button.ButtonSkin() {
+                    Skin = new U.ButtonSkin() {
                         Prefix = SkinPrefix,
 
                         BackgroundPrefix = "RoundButton",
@@ -451,10 +452,10 @@ namespace TrafficManager.UI {
                 public override void HandleClick(UIMouseEventParameter p) =>
                     throw new Exception("Unreachable code");
 
-                /// <summary>Handles button click on activation. Apply traffic rules here.</summary> 
+                /// <summary>Handles button click on activation. Apply traffic rules here.</summary>
                 public abstract IRecordable Do();
 
-                /// <summary>Handles button click on de-activation. Reset/Undo traffic rules here.</summary> 
+                /// <summary>Handles button click on de-activation. Reset/Undo traffic rules here.</summary>
                 public virtual void Undo() => Root.Record?.Restore();
 
                 protected override void OnClick(UIMouseEventParameter p) {

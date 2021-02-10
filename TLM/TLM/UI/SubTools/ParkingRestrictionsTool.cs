@@ -65,6 +65,10 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnPrimaryClickOverlay() { }
 
+        public override void OnSecondaryClickOverlay() {
+            MainTool.SetToolMode(ToolMode.None);
+        }
+
         private void RenderSegmentParkings(RenderManager.CameraInfo cameraInfo) {
             bool allowed = parkingManager.IsParkingAllowed(renderInfo_.SegmentId, renderInfo_.FinalDirection);
             bool pressed = Input.GetMouseButton(0);

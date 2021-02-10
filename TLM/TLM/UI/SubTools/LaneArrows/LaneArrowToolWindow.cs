@@ -5,7 +5,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
-    using TrafficManager.U.Button;
+    using TrafficManager.Util;
     using UnityEngine;
 
     /// <summary>
@@ -38,31 +38,30 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return laneArrowButtonAtlas_;
             }
 
-            var skin = CreateDefaultButtonSkin();
-
             // Create base atlas with backgrounds and no foregrounds
-            skin.ForegroundNormal = false;
-            skin.ForegroundActive = false;
-            HashSet<string> atlasKeysSet = skin.CreateAtlasKeyset();
+            ButtonSkin backgroundOnlySkin = ButtonSkin.CreateDefaultNoForeground("LaneArrow");
+            var futureAtlas = new U.AtlasBuilder();
+            backgroundOnlySkin.UpdateAtlasBuilder(
+                atlasBuilder: futureAtlas,
+                spriteSize: new IntVector2(64));
 
             // Merge names of all foreground sprites for 3 directions into atlasKeySet
-            skin.ForegroundNormal = true;
-            skin.ForegroundActive = true;
             foreach (string prefix in new[]
-                                      { "LaneArrowLeft", "LaneArrowRight", "LaneArrowForward" }) {
-                skin.Prefix = prefix;
+                { "LaneArrowLeft", "LaneArrowRight", "LaneArrowForward" })
+            {
+                ButtonSkin skin = ButtonSkin.CreateDefaultNoBackground(prefix);
 
                 // Create keysets for lane arrow button icons and merge to the shared atlas
-                atlasKeysSet.AddRange(skin.CreateAtlasKeyset());
+                skin.UpdateAtlasBuilder(
+                    atlasBuilder: futureAtlas,
+                    spriteSize: new IntVector2(64));
             }
 
             // Load actual graphics into an atlas
-            laneArrowButtonAtlas_ = skin.CreateAtlas(
+            laneArrowButtonAtlas_ = futureAtlas.CreateAtlas(
+                atlasName: "LaneArrowsTool_Atlas",
                 loadingPath: "LaneArrows",
-                spriteWidth: 64,
-                spriteHeight: 64,
-                hintAtlasTextureSize: 256, // 4x4 atlas
-                atlasKeysSet);
+                atlasSizeHint: new IntVector2(256));
             return laneArrowButtonAtlas_;
         }
 
@@ -88,7 +87,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         public void SetupControls(UiBuilder<LaneArrowToolWindow> builder, int numLanes) {
             Buttons = new List<LaneArrowButton>();
 
-            using (var buttonRowBuilder = builder.ChildPanel<U.Panel.UPanel>(
+            using (var buttonRowBuilder = builder.ChildPanel<U.UPanel>(
                 setupFn: p => { p.name = "TMPE_ButtonRow"; })) {
                 buttonRowBuilder.ResizeFunction(
                     r => {
@@ -104,7 +103,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 // -----------------------------------
                 for (var i = 0; i < numLanes; i++) {
                     string buttonName = $"TMPE_LaneArrow_ButtonGroup{i + 1}";
-                    using (var buttonGroupBuilder = buttonRowBuilder.ChildPanel<U.Panel.UPanel>(
+                    using (var buttonGroupBuilder = buttonRowBuilder.ChildPanel<U.UPanel>(
                             setupFn: p => {
                                 p.name = buttonName;
                                 p.atlas = TextureUtil.FindAtlas("Ingame");
@@ -126,7 +125,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
                         // Create a label with "Lane #" title
                         string labelText = Translation.LaneRouting.Get("Format.Label:Lane") + " " + (i + 1);
-                        using (var laneLabel = buttonGroupBuilder.Label<U.Label.ULabel>(labelText))
+                        using (var laneLabel = buttonGroupBuilder.Label<U.ULabel>(labelText))
                         {
                             // The label will be repositioned to the top of the parent
                             laneLabel.ResizeFunction(r => { r.Stack(UStackMode.Below); });

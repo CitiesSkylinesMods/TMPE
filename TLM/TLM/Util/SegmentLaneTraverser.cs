@@ -119,8 +119,8 @@ namespace TrafficManager.Util {
                     return true;
                 }
 
-                var segmentId = segData.CurSeg.segmentId;
-                VisitorProcessFun(segmentId, ref segmentId.ToSegment());
+                ushort currentSegmentId = segData.CurSeg.segmentId;
+                VisitorProcessFun(currentSegmentId, ref currentSegmentId.ToSegment());
 
                 return ret;
             }

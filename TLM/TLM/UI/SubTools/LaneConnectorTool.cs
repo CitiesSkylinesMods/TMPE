@@ -963,6 +963,10 @@ namespace TrafficManager.UI.SubTools {
                         break;
                     }
             }
+
+            if (GetSelectionMode() == SelectionMode.None) {
+                MainTool.SetToolMode(ToolMode.None);
+            }
         }
 
         public override void OnActivate() {

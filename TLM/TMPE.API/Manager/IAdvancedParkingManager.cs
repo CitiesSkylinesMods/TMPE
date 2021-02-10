@@ -367,5 +367,30 @@
                                             out Vector3 parkPos,
                                             out Quaternion parkRot,
                                             out float parkOffset);
+
+        /// <summary>
+        /// Tries to find parking space using vanilla code, preserving parking restrictions
+        /// </summary>
+        /// <param name="isElectric">Is electric vehicle</param>
+        /// <param name="homeId">Home building id of the citizen (citizens are not allowed to park their car on foreign residential premises)</param>
+        /// <param name="refPos">Target position that is used as a center point for the search procedure</param>
+        /// <param name="searchDir">Search direction</param>
+        /// <param name="segment">If != 0, the building is forced to be "accessible" from this segment (where accessible means "close enough")</param>
+        /// <param name="width">Vehicle width</param>
+        /// <param name="length">Vehicle length</param>
+        /// <param name="parkPos">Identified parking space position (only valid if method returns true)</param>
+        /// <param name="parkRot">Identified parking space rotation (only valid if method returns true)</param>
+        /// <param name="parkOffset">Identified parking space offset (only valid if method returns true and a segment id was given)</param>
+        /// <returns></returns>
+        bool VanillaFindParkingSpaceWithoutRestrictions(bool isElectric,
+                                                         ushort homeId,
+                                                         Vector3 refPos,
+                                                         Vector3 searchDir,
+                                                         ushort segment,
+                                                         float width,
+                                                         float length,
+                                                         out Vector3 parkPos,
+                                                         out Quaternion parkRot,
+                                                         out float parkOffset);
     }
 }

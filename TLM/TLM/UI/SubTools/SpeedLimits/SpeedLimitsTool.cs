@@ -122,6 +122,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         public override void OnPrimaryClickOverlay() { }
 
+        public override void OnSecondaryClickOverlay() {
+            MainTool.SetToolMode(ToolMode.None);
+        }
+
         public override void OnToolGUI(Event e) {
             base.OnToolGUI(e);
 
@@ -606,7 +610,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             }
 
             // fallback to "noimage" texture
-            roadTexture = Textures.MainMenu.NoImage;
+            roadTexture = null;
         }
 
         /// <summary>
@@ -924,18 +928,18 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                             return true;
                                         }
 
-                                        ushort segmentId = data
+                                        ushort visitSegmentId = data
                                             .SegVisitData
                                             .CurSeg
                                             .segmentId;
 
-                                        NetInfo.Lane curLaneInfo = segmentId
+                                        NetInfo.Lane curLaneInfo = visitSegmentId
                                             .ToSegment()
                                             .Info
                                             .m_lanes[data.CurLanePos.laneIndex];
 
                                         SpeedLimitManager.Instance.SetSpeedLimit(
-                                            segmentId,
+                                            visitSegmentId,
                                             data.CurLanePos.laneIndex,
                                             curLaneInfo,
                                             data.CurLanePos.laneId,

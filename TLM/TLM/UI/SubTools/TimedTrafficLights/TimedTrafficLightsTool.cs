@@ -106,8 +106,12 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
         public override void OnSecondaryClickOverlay() {
             if (!IsCursorInPanel()) {
-                Cleanup();
-                this.SetToolMode(TTLToolMode.SelectNode);
+                if (ttlToolMode_ != TTLToolMode.SelectNode) {
+                    Cleanup();
+                    this.SetToolMode(TTLToolMode.SelectNode);
+                } else {
+                    MainTool.SetToolMode(ToolMode.None);
+                }
             }
         }
 

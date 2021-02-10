@@ -107,8 +107,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
                 segmentsUpdated = false;
 
                 int len = updatedSegmentBuckets.Length;
@@ -128,14 +127,10 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
             }
-            finally {
-                Monitor.Exit(updateLock);
-            }
         }
 
         public void RequestFullRecalculation() {
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
 
                 for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                     updatedSegmentBuckets[segmentId >> 6] |= 1uL << (int)(segmentId & 63);
@@ -148,9 +143,6 @@ namespace TrafficManager.Manager.Impl {
                     Services.SimulationService.ForcedSimulationPaused) {
                     SimulationStep();
                 }
-            }
-            finally {
-                Monitor.Exit(updateLock);
             }
         }
 
@@ -166,15 +158,11 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"RoutingManager.RequestRecalculation({segmentId}, {propagate}) called.");
             }
 
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
 
                 updatedSegmentBuckets[segmentId >> 6] |= 1uL << (segmentId & 63);
                 ResetIncomingHighwayLaneArrows(segmentId);
                 segmentsUpdated = true;
-            }
-            finally {
-                Monitor.Exit(updateLock);
             }
 
             if (propagate) {

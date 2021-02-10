@@ -68,8 +68,7 @@ namespace TrafficManager.Custom.PathFinding {
             Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects.");
             _replacementPathFinds = new CustomPathFind[numCustomPathFinds];
 
-            try {
-                Monitor.Enter(m_bufferLock);
+            lock(m_bufferLock) {
 
                 for (int i = 0; i < numCustomPathFinds; i++) {
                     _replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();
@@ -96,8 +95,6 @@ namespace TrafficManager.Custom.PathFinding {
                     // stockPathFinds[i].WaitForAllPaths();
                     Destroy(stockPathFinds[i]);
                 }
-            } finally {
-                Monitor.Exit(m_bufferLock);
             }
 
             InitDone = true;
@@ -112,8 +109,7 @@ namespace TrafficManager.Custom.PathFinding {
             if (m_pathUnits.m_buffer[unit].m_simulationFlags == 0) {
                 return;
             }
-            try {
-                Monitor.Enter(m_bufferLock);
+            lock(m_bufferLock) {
 
                 int numIters = 0;
                 while (unit != 0u) {
@@ -143,8 +139,6 @@ namespace TrafficManager.Custom.PathFinding {
                 }
 
                 m_pathUnitCount = (int)(m_pathUnits.ItemCount() - 1u);
-            } finally {
-                Monitor.Exit(m_bufferLock);
             }
         }
 
@@ -152,8 +146,7 @@ namespace TrafficManager.Custom.PathFinding {
                                      ref Randomizer randomizer,
                                      PathCreationArgs args) {
             uint pathUnitId;
-            try {
-                Monitor.Enter(m_bufferLock);
+            lock(m_bufferLock) {
 
                 int numIters = 0;
                 while (true) {
@@ -192,9 +185,6 @@ namespace TrafficManager.Custom.PathFinding {
                 // NON-STOCK CODE END
 
                 m_pathUnitCount = (int)(m_pathUnits.ItemCount() - 1u);
-            }
-            finally {
-                Monitor.Exit(m_bufferLock);
             }
 
             unit = pathUnitId;
@@ -269,8 +259,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
             // NON-STOCK CODE START
-            try {
-                Monitor.Enter(m_bufferLock);
+            lock(m_bufferLock) {
 
                 QueueItems[pathUnitId].queued = false;
                 // NON-STOCK CODE END
@@ -278,9 +267,6 @@ namespace TrafficManager.Custom.PathFinding {
 
                 // NON-STOCK CODE START
                 m_pathUnitCount = (int)(m_pathUnits.ItemCount() - 1u);
-            }
-            finally {
-                Monitor.Exit(m_bufferLock);
             }
 
             // NON-STOCK CODE END

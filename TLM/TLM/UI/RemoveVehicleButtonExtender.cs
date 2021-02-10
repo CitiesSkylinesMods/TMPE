@@ -3,9 +3,7 @@ namespace TrafficManager.UI {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using TrafficManager.U;
-    using TrafficManager.U.Button;
-    using TrafficManager.UI.MainMenu;
-    using TrafficManager.UI.Textures;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class RemoveVehicleButtonExtender : MonoBehaviour {
@@ -70,13 +68,17 @@ namespace TrafficManager.UI {
                     ForegroundHovered = true,
                     ForegroundActive = true,
                 };
-                // TODO: This atlas is created multiple times, cache or find by name.
-                this.atlas = this.Skin.CreateAtlas(
+
+                // This creates an atlas for a single button
+                var futureAtlas = new U.AtlasBuilder();
+                this.Skin.UpdateAtlasBuilder(
+                    atlasBuilder: futureAtlas,
+                    spriteSize: new IntVector2(50));
+                this.atlas = futureAtlas.CreateAtlas(
+                    atlasName: "RemoveVehButton_Atlas",
                     loadingPath: "Clear",
-                    spriteWidth: 50,
-                    spriteHeight: 50,
-                    hintAtlasTextureSize: 256,
-                    atlasKeyset: this.Skin.CreateAtlasKeyset());
+                    atlasSizeHint: new IntVector2(256));
+
                 UpdateButtonImageAndTooltip();
                 width = height = 30f;
             }
@@ -98,7 +100,7 @@ namespace TrafficManager.UI {
 
             // public override Texture2D AtlasTexture => Textures.MainMenu.RemoveButton;
 
-            protected override string GetTooltip() =>
+            protected override string U_OverrideTooltipText() =>
                 Translation.Menu.Get("Button:Remove this vehicle");
 
             protected override bool IsVisible() => true;

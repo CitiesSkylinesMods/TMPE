@@ -9,32 +9,53 @@ namespace TrafficManager.UI.Textures {
     using UnityEngine;
 
     public static class SpeedLimitTextures {
+        // /// <summary>Blue textures for road/lane default speed limits.</summary>
+        // public static readonly IDictionary<int, Texture2D> RoadDefaults;
+
+        /// <summary>German style textures for KM/hour also usable for MPH.</summary>
         public static readonly IDictionary<int, Texture2D> TexturesKmph;
+
+        /// <summary>White rectangular textures for MPH US style.</summary>
         public static readonly IDictionary<int, Texture2D> TexturesMphUS;
+
+        /// <summary>British style speed limit textures for MPH</summary>
         public static readonly IDictionary<int, Texture2D> TexturesMphUK;
+
         public static readonly Texture2D Clear;
+
         static SpeedLimitTextures() {
             // TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
             TexturesKmph = new TinyDictionary<int, Texture2D>();
             TexturesMphUS = new TinyDictionary<int, Texture2D>();
             TexturesMphUK = new TinyDictionary<int, Texture2D>();
 
+            IntVector2 size = new IntVector2(200);
+            IntVector2 sizeUS = new IntVector2(200, 250);
+
             // Load shared speed limit signs for Kmph and Mph
             // Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no limit sign
             for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
-                var resource = LoadDllResource($"SpeedLimits.Kmh.{speedLimit}.png", 200, 200);
-                TexturesKmph.Add(speedLimit, resource ?? TexturesKmph[5]);
+                var resource = LoadDllResource($"SpeedLimits.Kmh.{speedLimit}.png", size, true);
+                TexturesKmph.Add(speedLimit, resource ? resource : TexturesKmph[5]);
             }
+
+            // for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
+            //     var resource = LoadDllResource($"SpeedLimits.RoadDefaults.{speedLimit}.png", size, true);
+            //     RoadDefaults.Add(speedLimit, resource ? resource : RoadDefaults[5]);
+            // }
+
             // Signs from 0 to 90 for MPH
             for (var speedLimit = 0; speedLimit <= 90; speedLimit += 5) {
                 // Load US textures, they are rectangular
-                var resourceUs = LoadDllResource($"SpeedLimits.Mph_US.{speedLimit}.png", 200, 250);
-                TexturesMphUS.Add(speedLimit, resourceUs ?? TexturesMphUS[5]);
+                var resourceUs = LoadDllResource($"SpeedLimits.Mph_US.{speedLimit}.png", sizeUS, true);
+                TexturesMphUS.Add(speedLimit, resourceUs ? resourceUs : TexturesMphUS[5]);
+
                 // Load UK textures, they are square
-                var resourceUk = LoadDllResource($"SpeedLimits.Mph_UK.{speedLimit}.png", 200, 200);
-                TexturesMphUK.Add(speedLimit, resourceUk ?? TexturesMphUK[5]);
+                var resourceUk = LoadDllResource($"SpeedLimits.Mph_UK.{speedLimit}.png", size, true);
+                TexturesMphUK.Add(speedLimit, resourceUk ? resourceUk : TexturesMphUK[5]);
             }
-            Clear = LoadDllResource($"clear.png", 256, 256);
+
+            Clear = LoadDllResource("clear.png", new IntVector2(256));
         }
 
         /// <summary>
