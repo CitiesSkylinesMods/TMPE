@@ -789,7 +789,6 @@ namespace TrafficManager.UI.SubTools {
         internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
 
-
         public override void OnPrimaryClickOverlay() {
 #if DEBUG
             bool logLaneConn = DebugSwitch.LaneConnections.Get();

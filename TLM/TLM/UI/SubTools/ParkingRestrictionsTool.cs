@@ -47,7 +47,6 @@ namespace TrafficManager.UI.SubTools {
                 !(a == b);
         }
 
-
         /// <summary>
         /// Stores potentially visible segment ids while the camera did not move
         /// </summary>

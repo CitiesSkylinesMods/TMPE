@@ -314,7 +314,6 @@ namespace TrafficManager.UI.SubTools {
             DragWindow(ref windowRect);
         }
 
-
         private void AllVehiclesFunc(bool allow) {
             // allow all vehicle types
             NetInfo segmentInfo = SelectedSegmentId.ToSegment().Info;

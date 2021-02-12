@@ -403,7 +403,6 @@ namespace TrafficManager.Util {
         private static int CountOutgoingLanes(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         private static int CountIncomingLanes(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
 
-
         /// <summary>
         /// Counts the number of roads toward the given directions.
         /// </summary>

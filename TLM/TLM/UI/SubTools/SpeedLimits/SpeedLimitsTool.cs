@@ -992,7 +992,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
                     guiColor.a = TrafficManagerTool.GetHandleAlpha(hoveredHandle);
 
-
                     // Draw something right here, the road sign texture
                     GUI.color = guiColor;
                     SpeedValue displayLimit = new SpeedValue(

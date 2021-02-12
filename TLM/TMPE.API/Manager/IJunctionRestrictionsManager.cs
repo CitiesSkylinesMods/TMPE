@@ -470,7 +470,6 @@ namespace TrafficManager.API.Manager {
 
         #region Set<Traffic Rule> : TernaryBool
 
-
         /// <summary>
         /// Sets the u-turn flag for the given segment end to the given value.
         /// </summary>
