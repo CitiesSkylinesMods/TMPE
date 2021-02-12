@@ -273,8 +273,6 @@ namespace TrafficManager.Custom.PathFinding {
             return false;
         }
 
-
-
         /// <summary>
         /// Finds a suitable path position for a walking citizen with the given world position.
         /// If secondary lane constraints are given also checks whether there exists another lane that matches those constraints.

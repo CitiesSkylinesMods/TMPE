@@ -255,7 +255,6 @@ namespace TrafficManager {
                         throw new Exception("pathManagerInstance is null");
                     }
 
-
                     PathManager stockPathManager = PathManager.instance;
                     if (stockPathManager == null) {
                         throw new Exception("stockPathManager is null");
