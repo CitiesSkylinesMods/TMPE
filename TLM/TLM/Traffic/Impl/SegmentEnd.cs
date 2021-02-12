@@ -235,7 +235,6 @@ namespace TrafficManager.Traffic.Impl {
                 return;
             }
 
-
             uint normLength = 10u;
 
             if (avgSegmentLength > 0) {

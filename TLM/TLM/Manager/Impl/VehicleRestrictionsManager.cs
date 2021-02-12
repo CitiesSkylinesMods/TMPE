@@ -357,7 +357,6 @@ namespace TrafficManager.Manager.Impl {
             return ExtVehicleType.None;
         }
 
-
         /// <summary>
         /// Restores all vehicle restrictions on a given segment to default state.
         /// </summary>
