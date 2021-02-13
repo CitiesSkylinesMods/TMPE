@@ -69,7 +69,7 @@ namespace TrafficManager.UI {
         [NonSerialized]
         public UIOpacityObservable uiOpacityObservable;
 
-        public ModUI() {
+        public void Awake() {
             UiScaleObservable = new UIScaleObservable();
             uiOpacityObservable = new UIOpacityObservable();
 

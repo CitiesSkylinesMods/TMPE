@@ -336,7 +336,6 @@ namespace TrafficManager.State {
             ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
         }
 
-
         public static void SetPrioritySignsEnabled(bool newValue) {
             Options.RebuildMenu();
             Options.prioritySignsEnabled = newValue;

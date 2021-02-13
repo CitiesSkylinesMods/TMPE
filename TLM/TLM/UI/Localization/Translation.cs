@@ -212,7 +212,6 @@ namespace TrafficManager.UI {
             "ResetOverriddenLocalizedStrings",
             BindingFlags.Instance | BindingFlags.NonPublic);
 
-
         public void ReloadTutorialTranslations() {
             var locale = this.locale;
             if (locale == null) {
@@ -221,7 +220,6 @@ namespace TrafficManager.UI {
             }
 
             string lang = GetCurrentLanguage();
-
 
             foreach (KeyValuePair<string, string> entry in tutorialsLookup_.AllLanguages[lang]) {
                 if (!entry.Key.StartsWith(TUTORIAL_KEY_PREFIX)) {

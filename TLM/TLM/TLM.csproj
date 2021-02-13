@@ -340,6 +340,8 @@
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
+    <Compile Include="Util\InGameUtil.cs" />
+    <Compile Include="Util\IntVector2.cs" />
     <Compile Include="Util\Spiral.cs" />
     <Compile Include="Util\Caching\CameraTransformValue.cs" />
     <Compile Include="Util\Caching\GenericArrayCache.cs" />
@@ -384,19 +386,23 @@
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
     <Compile Include="Util\TranspilerUtil.cs" />
+    <Compile Include="U\AtlasBuilder.cs" />
+    <Compile Include="U\AtlasSpriteDef.cs" />
+    <Compile Include="U\Autosize\ISmartSizableControl.cs" />
     <Compile Include="U\Autosize\UBoundingBox.cs" />
     <Compile Include="U\Autosize\UResizer.cs" />
-    <Compile Include="U\Autosize\ISmartSizableControl.cs" />
     <Compile Include="U\Autosize\UResizerConfig.cs" />
     <Compile Include="U\Autosize\URule.cs" />
+    <Compile Include="U\Autosize\USizeChoice.cs" />
+    <Compile Include="U\Autosize\UStackingChoice.cs" />
     <Compile Include="U\Autosize\UStackMode.cs" />
     <Compile Include="U\Autosize\UValue.cs" />
-    <Compile Include="U\Button\UButton.cs" />
-    <Compile Include="U\ControlActiveState.cs" />
-    <Compile Include="U\ControlHoveredState.cs" />
-    <Compile Include="U\ControlEnabledState.cs" />
     <Compile Include="U\Button\BaseUButton.cs" />
     <Compile Include="U\Button\ButtonSkin.cs" />
+    <Compile Include="U\Button\UButton.cs" />
+    <Compile Include="U\ControlActiveState.cs" />
+    <Compile Include="U\ControlEnabledState.cs" />
+    <Compile Include="U\ControlHoveredState.cs" />
     <Compile Include="U\Label\ULabel.cs" />
     <Compile Include="U\Panel\BaseUWindowPanel.cs" />
     <Compile Include="U\Panel\UPanel.cs" />
@@ -601,7 +607,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Traffic\Data\" />
-    <Folder Include="U\MainMenu\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_1.png" />

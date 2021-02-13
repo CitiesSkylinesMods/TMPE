@@ -11,6 +11,7 @@ namespace TrafficManager.UI.MainMenu {
     using global::TrafficManager.State;
     using JetBrains.Annotations;
     using UnityEngine;
+    using Util;
 
 #if DEBUG // whole class coverage
     public class DebugMenuPanel : UIPanel
@@ -171,7 +172,7 @@ namespace TrafficManager.UI.MainMenu {
             CSUtil.CameraControl.CameraController.Instance.GoToPos(
                 new Vector3(
                     float.Parse(vectorElms[0]),
-                    Camera.main.transform.position.y,
+                    InGameUtil.Instance.CachedCameraTransform.position.y,
                     float.Parse(vectorElms[1])));
         }
 

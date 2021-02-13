@@ -129,12 +129,11 @@ namespace TrafficManager.UI.SubTools {
 
             // For current camera store its position and cast a ray via mouse position
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-            Camera currentCamera = Camera.main;
             // Ray mouseRay = currentCamera.ScreenPointToRay(Input.mousePosition);
 
             // Check if camera pos/angle has changed then re-filter the visible nodes
             // Assumption: The states checked in this loop don't change while the tool is active
-            var currentCameraState = new CameraTransformValue(currentCamera);
+            var currentCameraState = new CameraTransformValue(InGameUtil.Instance.CachedMainCamera);
             if (!LastCachedCamera.Equals(currentCameraState)) {
                 CachedVisibleNodeIds.Clear();
                 LastCachedCamera = currentCameraState;

@@ -1,25 +1,26 @@
 ﻿namespace TrafficManager.UI.MainMenu {
-    using System.Collections.Generic;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
-    using TrafficManager.U.Button;
+    using TrafficManager.U;
+    using TrafficManager.Util;
 
     public class ManualTrafficLightsButton : BaseMenuToolModeButton {
         protected override ToolMode ToolMode => ToolMode.ManualSwitch;
 
-        public override void SetupButtonSkin(HashSet<string> atlasKeys) {
+        public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
-            this.Skin = new U.Button.ButtonSkin() {
-                                                      Prefix = "ManualTL",
-                                                      BackgroundPrefix = "RoundButton",
-                                                      BackgroundHovered = true,
-                                                      BackgroundActive = true,
-                                                      ForegroundActive = true,
-                                                  };
-            atlasKeys.AddRange(this.Skin.CreateAtlasKeyset());
+            this.Skin = new U.ButtonSkin() {
+                Prefix = "ManualTL",
+                BackgroundPrefix = "RoundButton",
+                BackgroundHovered = true,
+                BackgroundActive = true,
+                ForegroundActive = true,
+            };
+            this.Skin.UpdateAtlasBuilder(
+                atlasBuilder: futureAtlas,
+                spriteSize: new IntVector2(50));
         }
 
-        protected override string GetTooltip() =>
+        protected override string U_OverrideTooltipText() =>
             Translation.Menu.Get("Tooltip:Manual traffic lights");
 
         protected override bool IsVisible() => IsButtonEnabled();

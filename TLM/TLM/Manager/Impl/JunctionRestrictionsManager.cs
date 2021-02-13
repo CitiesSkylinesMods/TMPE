@@ -858,7 +858,6 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-
         private static ref NetNode GetNode(ushort segmentId, bool startNode) {
             ref NetSegment segment = ref GetSeg(segmentId);
             ushort nodeId = startNode ? segment.m_startNode : segment.m_endNode;
@@ -982,7 +981,6 @@ namespace TrafficManager.Manager.Impl {
             if(!IsPedestrianCrossingAllowedConfigurable(segmentId, startNode, ref GetNode(segmentId, startNode))) {
                 return false;
             }
-
 
             segmentFlags_[segmentId].SetPedestrianCrossingAllowed(startNode, value);
             OnSegmentChange(

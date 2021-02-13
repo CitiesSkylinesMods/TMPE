@@ -119,7 +119,6 @@ namespace TrafficManager.Custom.AI {
             }
         }
 
-
         [RedirectMethod]
         [UsedImplicitly]
         public bool CustomStartPathFind(ushort vehicleId,
