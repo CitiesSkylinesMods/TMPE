@@ -202,23 +202,23 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
-            var ret = false;
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    if (HasSegmentPrioritySign(segmentId, nodeId == segment.m_startNode)) {
-                        // TODO rewrite this without modifying external ret variable
-                        ret = true;
-                        return false;
+
+            var res = false;
+
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    if (HasSegmentPrioritySign(segmentId, nodeId == segmentId.ToSegment().m_startNode)) {
+                        res = true;
+                        break;
                     }
+                }
+            }
 
-                    return true;
-                });
+            Log._DebugIf(logPriority, () => $"TrafficPriorityManager.HasNodePrioritySign: nodeId={nodeId}, result={res}");
 
-            Log._DebugIf(
-                logPriority,
-                () => $"TrafficPriorityManager.HasNodePrioritySign: nodeId={nodeId}, result={ret}");
-            return ret;
+            return res;
         }
 
         public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType type) {
@@ -283,14 +283,13 @@ namespace TrafficManager.Manager.Impl {
                 logPriority,
                 () => $"TrafficPriorityManager.RemovePrioritySignsFromNode: nodeId={nodeId}");
 
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    RemovePrioritySignFromSegmentEnd(
-                        segmentId,
-                        nodeId == segment.m_startNode);
-                    return true;
-                });
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    RemovePrioritySignFromSegmentEnd(segmentId, nodeId == segmentId.ToSegment().m_startNode);
+                }
+            }
         }
 
         public void RemovePrioritySignsFromSegment(ushort segmentId) {
@@ -346,21 +345,22 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
             byte ret = 0;
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    if (GetPrioritySign(
-                            segmentId,
-                            segment.m_startNode == nodeId) == sign) {
+
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    if (GetPrioritySign(segmentId, segmentId.ToSegment().m_startNode == nodeId) == sign) {
                         ++ret;
                     }
+                }
+            }
 
-                    return true;
-                });
             Log._DebugIf(
                 logPriority,
                 () => $"TrafficPriorityManager.CountPrioritySignsAtNode: nodeId={nodeId}, " +
                       $"sign={sign}, result={ret}");
+
             return ret;
         }
 

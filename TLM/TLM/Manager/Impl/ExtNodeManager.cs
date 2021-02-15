@@ -5,6 +5,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Geometry.Impl;
     using TrafficManager.Geometry;
+    using TrafficManager.Util;
 
     public class ExtNodeManager
         : AbstractCustomManager,
@@ -45,14 +46,17 @@ namespace TrafficManager.Manager.Impl {
         /// <returns></returns>
         public static bool JunctionHasOnlyHighwayRoads(ushort nodeId) {
             IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
-            bool ret = true;
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    ret &= segMan.CalculateIsHighway(segmentId);
-                    return ret;
-                });
-            return ret;
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    if(!segMan.CalculateIsHighway(segmentId)) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
         public bool IsValid(ushort nodeId) {

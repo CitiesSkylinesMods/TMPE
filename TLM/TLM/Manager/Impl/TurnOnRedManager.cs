@@ -105,20 +105,19 @@ namespace TrafficManager.Manager.Impl {
             ushort nodeId = end.nodeId;
             bool hasOutgoingSegment = false;
 
-            Services.NetService.IterateNodeSegments(
-                end.nodeId,
-                (ushort otherSegId, ref NetSegment otherSeg) => {
-                    int index0 = segmentEndManager.GetIndex(otherSegId, otherSeg.m_startNode == nodeId);
+            ref NetNode endNode = ref end.nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort otherSegmentId = endNode.GetSegment(i);
+                if (otherSegmentId != 0) {
+                    int index0 = segmentEndManager.GetIndex(otherSegmentId, otherSegmentId.ToSegment().m_startNode == nodeId);
 
-                    if (otherSegId != segmentId
-                        && segmentEndManager.ExtSegmentEnds[index0].outgoing)
-                    {
+                    if (otherSegmentId != segmentId
+                        && segmentEndManager.ExtSegmentEnds[index0].outgoing) {
                         hasOutgoingSegment = true;
-                        return false;
+                        break;
                     }
-
-                    return true;
-                });
+                }
+            }
 
             // check if traffic can flow to the node and that there is at least one left segment
             if (!end.incoming || !hasOutgoingSegment) {

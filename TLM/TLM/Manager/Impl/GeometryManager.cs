@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
@@ -234,16 +234,15 @@
                 stateUpdated = true;
 
                 if (updateSegments) {
-                    Services.NetService.IterateNodeSegments(
-                        nodeId,
-                        (ushort segmentId, ref NetSegment _) => {
+                    ref NetNode node = ref nodeId.ToNode();
+                    for (int i = 0; i < 8; ++i) {
+                        ushort segmentId = node.GetSegment(i);
+                        if (segmentId != 0) {
                             MarkAsUpdated(
-                                ref Constants
-                                    .ManagerFactory.ExtSegmentManager
-                                    .ExtSegments[segmentId],
+                                ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId],
                                 false);
-                            return true;
-                        });
+                        }
+                    }
                 }
 
                 if (!Services.NetService.IsNodeValid(nodeId)) {

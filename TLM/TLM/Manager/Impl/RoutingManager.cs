@@ -166,21 +166,25 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (propagate) {
+                //TODO refactor into RequestRecalculation(ushort nodeId)
+
                 ushort startNodeId = Services.NetService.GetSegmentNodeId(segmentId, true);
-                Services.NetService.IterateNodeSegments(
-                    startNodeId,
-                    (ushort otherSegmentId, ref NetSegment otherSeg) => {
+                ref NetNode startNode = ref startNodeId.ToNode();
+                for (int i = 0; i < 8; ++i) {
+                    ushort otherSegmentId = startNode.GetSegment(i);
+                    if (otherSegmentId != 0) {
                         RequestRecalculation(otherSegmentId, false);
-                        return true;
-                    });
+                    }
+                }
 
                 ushort endNodeId = Services.NetService.GetSegmentNodeId(segmentId, false);
-                Services.NetService.IterateNodeSegments(
-                    endNodeId,
-                    (ushort otherSegmentId, ref NetSegment otherSeg) => {
+                ref NetNode endNode = ref endNodeId.ToNode();
+                for (int i = 0; i < 8; ++i) {
+                    ushort otherSegmentId = endNode.GetSegment(i);
+                    if (otherSegmentId != 0) {
                         RequestRecalculation(otherSegmentId, false);
-                        return true;
-                    });
+                    }
+                }
             }
         }
 
@@ -260,11 +264,12 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                Services.NetService.IterateNodeSegments(
-                    nodeId,
-                    (ushort segId, ref NetSegment netSegment) => {
+                ref NetNode node = ref nodeId.ToNode();
+                for (int i = 0; i < 8; ++i) {
+                    ushort segId = node.GetSegment(i);
+                    if (segId != 0) {
                         if (segId == segmentId) {
-                            return true;
+                            continue;
                         }
 
                         Services.NetService.IterateSegmentLanes(
@@ -275,17 +280,17 @@ namespace TrafficManager.Manager.Impl {
                              ushort sId,
                              ref NetSegment seg,
                              byte laneIndex) => {
-                                if (IsIncomingLane(
-                                    segId,
-                                    seg.m_startNode == nodeId,
-                                    laneIndex)) {
-                                    Flags.RemoveHighwayLaneArrowFlags(laneId);
-                                }
+                                 if (IsIncomingLane(
+                                     segId,
+                                     seg.m_startNode == nodeId,
+                                     laneIndex)) {
+                                     Flags.RemoveHighwayLaneArrowFlags(laneId);
+                                 }
 
-                                return true;
-                            });
-                        return true;
-                    });
+                                 return true;
+                             });
+                    }
+                }
             }
         }
 

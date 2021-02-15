@@ -64,18 +64,18 @@ namespace TrafficManager.Util {
         /// <param name="nodeId">the junction</param>
         /// <returns>a list of segments aranged in counter clockwise direction.</returns>
         private static List<ushort> ArrangedSegments(ushort nodeId) {
-            ClockDirection clockDir = RHT ? ClockDirection.Clockwise : ClockDirection.CounterClockwise;
+            ClockDirection clockDirection = RHT
+                ? ClockDirection.Clockwise
+                : ClockDirection.CounterClockwise;
+
             List<ushort> segList = new List<ushort>();
-            netService.IterateNodeSegments(
-                nodeId,
-                clockDir,
-                (ushort segId, ref NetSegment _) => {
-                    if (CountOutgoingLanes(segId, nodeId) > 0) {
-                        segList.Add(segId);
-                    }
-                    return true;
-                });
-;
+
+            foreach (var segmentId in netService.GetNodeSegmentIds(nodeId, clockDirection)) {
+                if (CountOutgoingLanes(segmentId, nodeId) > 0) {
+                    segList.Add(segmentId);
+                }
+            }
+
             return segList;
         }
 
@@ -414,14 +414,16 @@ namespace TrafficManager.Util {
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
             int ret = 0;
 
-            netService.IterateNodeSegments(
-                nodeId,
-                (ushort segId, ref NetSegment seg) => {
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segId = node.GetSegment(i);
+                if (segId != 0) {
                     if (segEndMan.GetDirection(ref segEnd, segId) == dir) {
                         ret++;
                     }
-                    return true;
-                });
+                }
+            }
+
             return ret;
         }
     }
