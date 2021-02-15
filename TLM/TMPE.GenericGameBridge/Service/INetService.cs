@@ -105,7 +105,6 @@ namespace GenericGameBridge.Service {
         }
     }
 
-
     public enum ClockDirection {
         Clockwise,
         CounterClockwise,

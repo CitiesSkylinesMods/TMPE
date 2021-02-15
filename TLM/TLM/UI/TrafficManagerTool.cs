@@ -211,7 +211,6 @@ namespace TrafficManager.UI {
             Log.Info("TrafficManagerTool: Initialization completed.");
         }
 
-
         public void OnUpdate(GlobalConfig config) {
             InitializeSubTools();
         }
@@ -1856,7 +1855,6 @@ namespace TrafficManager.UI {
         internal static bool IsMouseOver(Rect boundingBox) {
             return boundingBox.Contains(Event.current.mousePosition);
         }
-
 
         /// <summary>
         /// this method should be used in OnToolGUI() instead of Input.GetMouseButtonDown(0).

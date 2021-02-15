@@ -128,7 +128,7 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
 
-                    Vector3 diff = position - Camera.main.transform.position;
+                    Vector3 diff = position - InGameUtil.Instance.CachedCameraTransform.position;
                     float zoom = 1.0f / diff.magnitude * 100f;
 
                     // original / 2.5

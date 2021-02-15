@@ -62,7 +62,6 @@ namespace TrafficManager.Manager.Impl {
                    && connectedLanes.Any(laneId => laneId == targetLaneId);
         }
 
-
         /// <summary>
         /// determines whether or not the input lane is heading toward a start node.
         /// </summary>
@@ -89,7 +88,6 @@ namespace TrafficManager.Manager.Impl {
             }
             return HasConnections(sourceLaneId, IsHeadingTowardsStartNode(sourceLaneId));
         }
-
 
         /// <summary>
         /// Determines if the given lane has outgoing connections

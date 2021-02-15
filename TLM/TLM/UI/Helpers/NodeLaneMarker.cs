@@ -2,6 +2,8 @@ using ColossalFramework.Math;
 using UnityEngine;
 
 namespace TrafficManager.UI.Helpers {
+    using Util;
+
     internal class NodeLaneMarker {
         internal Vector3 TerrainPosition; // projected on terrain
         internal Vector3 Position; // original height.
@@ -12,8 +14,7 @@ namespace TrafficManager.UI.Helpers {
         /// </summary>
         /// <returns><c>true</c>if mouse ray intersects with marker <c>false</c> otherwise</returns>
         internal bool IntersectRay() {
-            Camera currentCamera = Camera.main;
-            Ray mouseRay = currentCamera.ScreenPointToRay(Input.mousePosition);
+            Ray mouseRay = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
             float hitH = TrafficManagerTool.GetAccurateHitHeight();
 
             Vector3 pos = Position;

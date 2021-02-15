@@ -427,7 +427,6 @@ namespace TrafficManager.Util {
             return r;
         }
 
-
         /// <summary>
         /// calculates realisitic speed limit of input curved segment assuming it is part of a circle.
         /// minimum speed is 10kmph.

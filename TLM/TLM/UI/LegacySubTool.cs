@@ -12,6 +12,7 @@ namespace TrafficManager.UI {
         }
 
         protected TrafficManagerTool MainTool { get; }
+        protected GUILayoutOption[] EmptyOptionsArray = new GUILayoutOption[0];
 
         private Texture2D WindowTexture {
             get {

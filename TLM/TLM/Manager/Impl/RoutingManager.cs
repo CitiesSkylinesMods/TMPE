@@ -1108,7 +1108,6 @@ namespace TrafficManager.Manager.Impl {
                     ++nextLaneIndex;
                 } // foreach lane
 
-
                 if (extendedLogRouting) {
                     Log._Debug(
                         $"RoutingManager.RecalculateLaneEndRoutingData({segmentId}, {laneIndex}, " +

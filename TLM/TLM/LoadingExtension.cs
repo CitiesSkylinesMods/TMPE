@@ -14,6 +14,7 @@ namespace TrafficManager {
     using TrafficManager.UI;
     using UnityEngine;
     using UnityEngine.SceneManagement;
+    using Util;
     using Object = UnityEngine.Object;
 
     [UsedImplicitly]
@@ -65,6 +66,7 @@ namespace TrafficManager {
                 Log._Debug("Hot reload of another mod detected. Skipping LoadingExtension.OnCreated() ...");
                 return;
             }
+            InGameUtil.Instantiate();
 
             RegisteredManagers = new List<ICustomManager>();
             CustomPathManager = new CustomPathManager();
@@ -254,7 +256,6 @@ namespace TrafficManager {
                     if (pathManagerInstance == null) {
                         throw new Exception("pathManagerInstance is null");
                     }
-
 
                     PathManager stockPathManager = PathManager.instance;
                     if (stockPathManager == null) {

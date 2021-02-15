@@ -970,7 +970,6 @@ namespace TrafficManager.TrafficLight.Impl {
                     step.CustomSegmentLights.Remove(invalidSegmentId);
                 }
 
-
                 if (logTrafficLights) {
                     Log._DebugFormat(
                         "TimedTrafficLights.BackUpInvalidStepSegments finished for TTL step {0} @ " +
