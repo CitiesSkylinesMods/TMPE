@@ -332,26 +332,24 @@ namespace TrafficManager.Util {
             ArrowDirection dir,
             bool preferLeft) {
             ArrowDirection preferDir = preferLeft ? ArrowDirection.Left : ArrowDirection.Right;
+
             List<ushort> sortedSegList = new List<ushort>();
 
-            netService.IterateNodeSegments(
-                headNodeId,
-                ClockDirection.CounterClockwise,
-                (ushort NextSegmentId, ref NetSegment _) => {
-                    if (!IsPartofRoundabout(NextSegmentId, segmentId, headNodeId)) {
-                        return true;
-                    }
-                    if (segEndMan.GetDirection(segmentId, NextSegmentId, headNodeId) == dir) {
-                        for (int i = 0; i < sortedSegList.Count; ++i) {
-                            if (segEndMan.GetDirection(NextSegmentId, sortedSegList[i], headNodeId) == preferDir) {
-                                sortedSegList.Insert(i, NextSegmentId);
-                                return true;
-                            }
+            foreach (var nodeSegmentId in netService.GetNodeSegmentIds(headNodeId, ClockDirection.CounterClockwise)) {
+                if (!IsPartofRoundabout(nodeSegmentId, segmentId, headNodeId)) {
+                    continue;
+                }
+                if (segEndMan.GetDirection(segmentId, nodeSegmentId, headNodeId) == dir) {
+                    for (int i = 0; i < sortedSegList.Count; ++i) {
+                        if (segEndMan.GetDirection(nodeSegmentId, sortedSegList[i], headNodeId) == preferDir) {
+                            sortedSegList.Insert(i, nodeSegmentId);
+                            continue;
                         }
-                        sortedSegList.Add(NextSegmentId);
                     }
-                    return true;
-                });
+                    sortedSegList.Add(nodeSegmentId);
+                }
+            }
+
             return sortedSegList;
         }
 

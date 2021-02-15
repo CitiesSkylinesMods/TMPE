@@ -606,14 +606,17 @@ namespace TrafficManager.Util {
         /// <param name="segmentList"></param>
         public static void ClearNode(ushort nodeId) {
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
-            netService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment seg) => {
-                ref NetNode node = ref GetNode(nodeId);
-                bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
-                TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.None);
-                JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
-                LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
-                return true;
-            });
+
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+                    TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.None);
+                    JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
+                    LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
+                }
+            }
         }
 
         /// <summary>

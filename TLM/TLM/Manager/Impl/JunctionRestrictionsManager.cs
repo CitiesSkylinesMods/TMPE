@@ -111,47 +111,38 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            bool ret = false;
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    if (segmentId == 0) {
-                        return true;
-                    }
-
-                    bool startNode = segment.m_startNode == nodeId;
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    bool startNode = segmentId.ToSegment().m_startNode == nodeId;
                     bool isDefault = startNode
-                                         ? segmentFlags_[segmentId].startNodeFlags.IsDefault()
-                                         : segmentFlags_[segmentId].endNodeFlags.IsDefault();
+                        ? segmentFlags_[segmentId].startNodeFlags.IsDefault()
+                        : segmentFlags_[segmentId].endNodeFlags.IsDefault();
 
                     if (!isDefault) {
-                        ret = true;
-                        return false;
+                        return true;
                     }
+                }
+            }
 
-                    return true;
-                });
-
-            return ret;
+            return false;
         }
 
         private void RemoveJunctionRestrictions(ushort nodeId) {
             Log._Debug($"JunctionRestrictionsManager.RemoveJunctionRestrictions({nodeId}) called.");
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    if (segmentId == 0) {
-                        return true;
-                    }
 
-                    if (segment.m_startNode == nodeId) {
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    if (segmentId.ToSegment().m_startNode == nodeId) {
                         segmentFlags_[segmentId].startNodeFlags.Reset(false);
                     } else {
                         segmentFlags_[segmentId].endNodeFlags.Reset(false);
                     }
-
-                    return true;
-                });
+                }
+            }
         }
 
         [UsedImplicitly]

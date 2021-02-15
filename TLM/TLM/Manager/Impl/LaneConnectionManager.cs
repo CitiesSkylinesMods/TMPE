@@ -143,14 +143,17 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            bool ret = false;
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    ret = HasSegmentConnections(segmentId, nodeId);
-                    return !ret;
-                });
-            return ret;
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    if (HasSegmentConnections(segmentId, nodeId)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         public bool HasUturnConnections(ushort segmentId, bool startNode) {
@@ -280,14 +283,14 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromNode({nodeId}) called.");
             }
 #endif
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    RemoveLaneConnectionsFromSegment(
-                        segmentId,
-                        segment.m_startNode == nodeId);
-                    return true;
-                });
+
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    RemoveLaneConnectionsFromSegment(segmentId, segmentId.ToSegment().m_startNode == nodeId);
+                }
+            }
         }
 
         /// <summary>
@@ -662,10 +665,11 @@ namespace TrafficManager.Manager.Impl {
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
-
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort otherSegmentId, ref NetSegment otherSeg) => {
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort otherSegmentId = node.GetSegment(i);
+                if (otherSegmentId != 0) {
+                    //TODO move the following into a function
                     ArrowDirection dir = segEndMan.GetDirection(ref segEnd, otherSegmentId);
 
                     if (logLaneConnections) {
@@ -677,46 +681,46 @@ namespace TrafficManager.Manager.Impl {
                     // check if arrow has already been set for this direction
                     switch (dir) {
                         case ArrowDirection.Turn: {
-                            if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
-                                if ((arrows & LaneArrows.Right) != LaneArrows.None) {
-                                    return true;
+                                if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
+                                    if ((arrows & LaneArrows.Right) != LaneArrows.None) {
+                                        continue;
+                                    }
+                                } else {
+                                    if ((arrows & LaneArrows.Left) != LaneArrows.None) {
+                                        continue;
+                                    }
                                 }
-                            } else {
-                                if ((arrows & LaneArrows.Left) != LaneArrows.None) {
-                                    return true;
-                                }
-                            }
 
-                            break;
-                        }
+                                break;
+                            }
 
                         case ArrowDirection.Forward: {
-                            if ((arrows & LaneArrows.Forward) != LaneArrows.None) {
-                                return true;
-                            }
+                                if ((arrows & LaneArrows.Forward) != LaneArrows.None) {
+                                    continue;
+                                }
 
-                            break;
-                        }
+                                break;
+                            }
 
                         case ArrowDirection.Left: {
-                            if ((arrows & LaneArrows.Left) != LaneArrows.None) {
-                                return true;
-                            }
+                                if ((arrows & LaneArrows.Left) != LaneArrows.None) {
+                                    continue;
+                                }
 
-                            break;
-                        }
+                                break;
+                            }
 
                         case ArrowDirection.Right: {
-                            if ((arrows & LaneArrows.Right) != LaneArrows.None) {
-                                return true;
+                                if ((arrows & LaneArrows.Right) != LaneArrows.None) {
+                                    continue;
+                                }
+
+                                break;
                             }
 
-                            break;
-                        }
-
                         default: {
-                            return true;
-                        }
+                                continue;
+                            }
                     }
 
                     if (logLaneConnections) {
@@ -758,38 +762,38 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     if (!addArrow) {
-                        return true;
+                        continue;
                     }
 
                     switch (dir) {
                         case ArrowDirection.Turn: {
-                            if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
-                                arrows |= LaneArrows.Right;
-                            } else {
-                                arrows |= LaneArrows.Left;
+                                if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
+                                    arrows |= LaneArrows.Right;
+                                } else {
+                                    arrows |= LaneArrows.Left;
+                                }
+
+                                break;
                             }
 
-                            break;
-                        }
-
                         case ArrowDirection.Forward: {
-                            arrows |= LaneArrows.Forward;
-                            break;
-                        }
+                                arrows |= LaneArrows.Forward;
+                                break;
+                            }
 
                         case ArrowDirection.Left: {
-                            arrows |= LaneArrows.Left;
-                            break;
-                        }
+                                arrows |= LaneArrows.Left;
+                                break;
+                            }
 
                         case ArrowDirection.Right: {
-                            arrows |= LaneArrows.Right;
-                            break;
-                        }
+                                arrows |= LaneArrows.Right;
+                                break;
+                            }
 
                         default: {
-                            return true;
-                        }
+                                continue;
+                            }
                     }
 
                     if (logLaneConnections) {
@@ -797,9 +801,8 @@ namespace TrafficManager.Manager.Impl {
                             $"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
                             $"processing connected segment {otherSegmentId}: arrows={arrows}");
                     }
-
-                    return true;
-                });
+                }
+            }
 
             if (logLaneConnections) {
                 Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): " +

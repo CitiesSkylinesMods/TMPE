@@ -169,10 +169,11 @@ namespace TrafficManager.Manager.Impl {
             int numTrainTracks = 0;
             int numMonorailTracks = 0;
             int numPedSegments = 0;
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    NetInfo info = segment.Info;
+
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    NetInfo info = segmentId.ToSegment().Info;
                     if (info.m_class.m_service == ItemClass.Service.Road) {
                         ++numRoads;
                     } else if ((info.m_vehicleTypes & VehicleInfo.VehicleType.Train) !=
@@ -186,9 +187,8 @@ namespace TrafficManager.Manager.Impl {
                     if (info.m_hasPedestrianLanes) {
                         ++numPedSegments;
                     }
-
-                    return true;
-                });
+                }
+            }
 
             if (numRoads >= 2 || numTrainTracks >= 2 || numMonorailTracks >= 2 || numPedSegments != 0) {
                 if (logTrafficLights) {

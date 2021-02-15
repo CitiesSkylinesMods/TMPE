@@ -19,8 +19,8 @@ namespace Benchmarks {
                 )
                 .AddDiagnoser(MemoryDiagnoser.Default);
 
-            var loopUtilPerfTestsSummary = BenchmarkRunner.Run<LoopUtilPerfTests>(config);
-            var spiralPerfTestsSummary = BenchmarkRunner.Run<SpiralPerfTests>(config);
+            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly)
+                .Run(args, config);
         }
     }
 }

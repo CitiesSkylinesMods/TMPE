@@ -78,6 +78,8 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Factory\IServiceFactory.cs" />
+    <Compile Include="Service\GetNodeSegmentIdsEnumerable.cs" />
+    <Compile Include="Service\GetNodeSegmentIdsEnumerator.cs" />
     <Compile Include="Service\ICitizenService.cs" />
     <Compile Include="Service\IBuildingService.cs" />
     <Compile Include="Service\IVehicleService.cs" />
