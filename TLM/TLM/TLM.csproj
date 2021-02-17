@@ -89,18 +89,17 @@
     <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.0.0.9, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Lib.Harmony.2.0.0.9\lib\net35\0Harmony.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(MangedDLLPath)\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="CitiesHarmony.API, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CitiesHarmony.API.1.0.4\lib\net35\CitiesHarmony.API.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="CitiesHarmony.API, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\CitiesHarmony.API.2.0.0\lib\net35\CitiesHarmony.API.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="CitiesHarmony.Harmony, Version=2.0.4.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\CitiesHarmony.Harmony.2.0.4\lib\net35\CitiesHarmony.Harmony.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="ColossalManaged">
       <HintPath>$(MangedDLLPath)\ColossalManaged.dll</HintPath>
@@ -112,12 +111,6 @@
     </Reference>
     <Reference Include="MoveItIntegration">
       <HintPath>..\libs\MoveItIntegration.dll</HintPath>
-    </Reference>
-    <Reference Include="SkyTools.Common, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SkyTools.Common.2.1.0\lib\net35\SkyTools.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="SkyTools.Patching, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SkyTools.Patching.2.1.0\lib\net35\SkyTools.Patching.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -733,8 +726,6 @@ xcopy /y "$(TargetDir)TMPE.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
-xcopy /y "$(TargetDir)SkyTools.Common.dll" "%25DEPLOYDIR%25"
-xcopy /y "$(TargetDir)SkyTools.Patching.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)MoveItIntegration.dll" "%25DEPLOYDIR%25"
 
