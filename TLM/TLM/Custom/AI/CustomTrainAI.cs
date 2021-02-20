@@ -1192,7 +1192,6 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         protected static bool CheckOverlap(ushort vehicleId,
                                            ref Vehicle vehicleData,
                                            Segment3 segment,
@@ -1203,30 +1202,6 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
-        protected static ushort CheckOverlap(ushort vehicleId,
-                                             ref Vehicle vehicleData,
-                                             Segment3 segment,
-                                             ushort ignoreVehicle,
-                                             ushort otherId,
-                                             ref Vehicle otherData,
-                                             ref bool overlap,
-                                             Vector3 min,
-                                             Vector3 max) {
-            Log._DebugOnlyError("CustomTrainAI.CheckOverlap (2) called.");
-            return 0;
-        }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
-        private static void InitializePath(ushort vehicleId, ref Vehicle vehicleData) {
-            Log._DebugOnlyError("CustomTrainAI.InitializePath called");
-        }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         public static void UpdatePathTargetPositions(TrainAI trainAi,
                                                      ushort vehicleId,
                                                      ref Vehicle vehicleData,
@@ -1244,14 +1219,12 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private static void Reverse(ushort leaderId, ref Vehicle leaderData) {
             Log._DebugOnlyError("CustomTrainAI.Reverse called");
         }
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private static float GetMaxSpeed(ushort leaderId, ref Vehicle leaderData) {
             Log._DebugOnlyError("CustomTrainAI.GetMaxSpeed called");
             return 0f;
@@ -1259,7 +1232,6 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private static float CalculateMaxSpeed(float targetDist, float targetSpeed, float maxBraking) {
             Log._DebugOnlyError("CustomTrainAI.CalculateMaxSpeed called");
             return 0f;

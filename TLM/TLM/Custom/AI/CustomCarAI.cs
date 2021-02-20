@@ -813,41 +813,13 @@ namespace TrafficManager.Custom.AI {
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         [RedirectReverse]
-        [UsedImplicitly]
         private static bool CheckOverlap(Segment3 segment, ushort ignoreVehicle, float maxVelocity) {
             Log._DebugOnlyError("CustomCarAI.CheckOverlap called");
             return false;
         }
 
-        /*[MethodImpl(MethodImplOptions.NoInlining)]
-        [RedirectReverse]
-        private static ushort CheckOtherVehicle(ushort vehicleID, ref Vehicle vehicleData, ref Vehicle.Frame frameData, ref float maxSpeed, ref bool blocked, ref Vector3 collisionPush, float maxBraking, ushort otherID, ref Vehicle otherData, Vector3 min, Vector3 max, int lodPhysics) {
-                Log.Error("CustomCarAI.CheckOtherVehicle called");
-                return 0;
-        }*/
-
         [MethodImpl(MethodImplOptions.NoInlining)]
         [RedirectReverse]
-        [UsedImplicitly]
-        private static ushort CheckCitizen(ushort vehicleId,
-                                           ref Vehicle vehicleData,
-                                           Segment3 segment,
-                                           float lastLen,
-                                           float nextLen,
-                                           ref float maxSpeed,
-                                           ref bool blocked,
-                                           float maxBraking,
-                                           ushort otherId,
-                                           ref CitizenInstance otherData,
-                                           Vector3 min,
-                                           Vector3 max) {
-            Log._DebugOnlyError("CustomCarAI.CheckCitizen called");
-            return 0;
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [RedirectReverse]
-        [UsedImplicitly]
         private static float CalculateMaxSpeed(float targetDistance, float targetSpeed, float maxBraking) {
             Log._DebugOnlyError("CustomCarAI.CalculateMaxSpeed called");
             return 0f;

@@ -211,7 +211,6 @@ namespace TrafficManager.Custom.AI {
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         [RedirectReverse]
-        [UsedImplicitly]
         private void RemoveOffers(ushort vehicleId, ref Vehicle data) {
             Log._DebugOnlyError("CustomCargoTruckAI.RemoveOffers called");
         }

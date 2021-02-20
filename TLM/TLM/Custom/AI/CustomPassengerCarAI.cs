@@ -200,7 +200,6 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private ushort GetDriverInstance(ushort vehicleId, ref Vehicle data) {
             Log._DebugOnlyError("GetDriverInstance is not overridden!");
             return 0;
@@ -208,7 +207,6 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         public static bool FindParkingSpaceRoadSide(ushort ignoreParked,
                                                     ushort requireSegment,
                                                     Vector3 refPos,
@@ -226,7 +224,6 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         public static bool FindParkingSpace(bool isElectric,
                                             ushort homeId,
                                             Vector3 refPos,
@@ -246,7 +243,6 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         public static bool FindParkingSpaceProp(bool isElectric,
                                                 ushort ignoreParked,
                                                 PropInfo info,
@@ -260,21 +256,6 @@ namespace TrafficManager.Custom.AI {
                                                 ref Vector3 parkPos,
                                                 ref Quaternion parkRot) {
             Log._DebugOnlyError("FindParkingSpaceProp is not overridden!");
-            return false;
-        }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
-        public static bool CheckOverlap(ushort ignoreParked,
-                                        ref Bezier3 bezier,
-                                        float offset,
-                                        float length,
-                                        out float minPos,
-                                        out float maxPos) {
-            Log._DebugOnlyError("CheckOverlap is not overridden!");
-            minPos = 0;
-            maxPos = 0;
             return false;
         }
     }

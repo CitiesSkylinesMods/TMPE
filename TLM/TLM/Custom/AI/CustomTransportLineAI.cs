@@ -242,7 +242,6 @@
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private static bool GetStopLane(ref PathUnit.Position pos, VehicleInfo.VehicleType vehicleType) {
             Log._DebugOnlyError("CustomTransportLineAI.GetStopLane called.");
             return false;
@@ -250,16 +249,8 @@
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private static void CheckSegmentProblems(ushort segmentId, ref NetSegment data) {
             Log._DebugOnlyError($"CustomTransportLineAI.CheckSegmentProblems called.");
-        }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
-        private static void CheckNodeProblems(ushort nodeId, ref NetNode data) {
-            Log._DebugOnlyError($"CustomTransportLineAI.CheckNodeProblems called.");
         }
     }
 }

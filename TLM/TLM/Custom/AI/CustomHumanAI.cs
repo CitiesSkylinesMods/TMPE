@@ -497,42 +497,24 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private void PathfindFailure(ushort instanceId, ref CitizenInstance data) {
             Log._DebugOnlyError("HumanAI.PathfindFailure is not overriden!");
         }
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private void PathfindSuccess(ushort instanceId, ref CitizenInstance data) {
             Log._DebugOnlyError("HumanAI.PathfindSuccess is not overriden!");
         }
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private void Spawn(ushort instanceId, ref CitizenInstance data) {
             Log._DebugOnlyError("HumanAI.Spawn is not overriden!");
         }
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
-        private void GetBuildingTargetPosition(ushort instanceId, ref CitizenInstance data, float minSqrDistance) {
-            Log._DebugOnlyError("HumanAI.GetBuildingTargetPosition is not overriden!");
-        }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
-        private void WaitTouristVehicle(ushort instanceId, ref CitizenInstance data, ushort targetBuildingId) {
-            Log._DebugOnlyError("HumanAI.InvokeWaitTouristVehicle is not overriden!");
-        }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private void ArriveAtDestination(ushort instanceId, ref CitizenInstance citizenData, bool success) {
             Log._DebugOnlyError("HumanAI.ArriveAtDestination is not overriden!");
         }

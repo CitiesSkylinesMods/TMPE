@@ -1128,13 +1128,5 @@ namespace TrafficManager.Custom.AI {
 
             // Unreachable
         }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
-        private static int FindBestLane(ushort vehicleId, ref Vehicle vehicleData, PathUnit.Position position) {
-            Log._DebugOnlyError("CustomVehicleAI.FindBestLane called");
-            return 0;
-        }
     }
 }

@@ -1143,7 +1143,6 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         public static void UpdatePathTargetPositions(TramBaseAI tramBaseAi,
                                                      ushort vehicleId,
                                                      ref Vehicle vehicleData,
@@ -1162,7 +1161,6 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private static float GetMaxSpeed(ushort leaderId, ref Vehicle leaderData) {
             Log._DebugOnlyError("CustomTrainAI.GetMaxSpeed called");
             return 0f;
@@ -1170,17 +1168,9 @@ namespace TrafficManager.Custom.AI {
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private static float CalculateMaxSpeed(float targetDist, float targetSpeed, float maxBraking) {
             Log._DebugOnlyError("CustomTrainAI.CalculateMaxSpeed called");
             return 0f;
-        }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
-        private static void InitializePath(ushort vehicleId, ref Vehicle vehicleData) {
-            Log._DebugOnlyError("CustomTrainAI.InitializePath called");
         }
     }
 }

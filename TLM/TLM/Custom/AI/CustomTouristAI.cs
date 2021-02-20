@@ -179,7 +179,6 @@
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private int GetTaxiProbability() {
             Log._DebugOnlyError("CustomTouristAI.GetTaxiProbability called!");
             return 20;
@@ -187,7 +186,6 @@
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private int GetBikeProbability() {
             Log._DebugOnlyError("CustomTouristAI.GetBikeProbability called!");
             return 20;
@@ -195,7 +193,6 @@
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private int GetCarProbability() {
             Log._DebugOnlyError("CustomTouristAI.GetCarProbability called!");
             return 20;
@@ -203,7 +200,6 @@
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private int GetElectricCarProbability(Citizen.Wealth wealth) {
             Log._DebugOnlyError("CustomTouristAI.GetElectricCarProbability called!");
             return 20;
@@ -211,7 +207,6 @@
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private int GetCamperProbability(Citizen.Wealth wealth) {
             Log._DebugOnlyError("CustomTouristAI.GetCamperProbability called!");
             return 20;

@@ -135,7 +135,6 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Benchmark\BenchmarkManager.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Custom\AI\CustomBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomBusAI.cs" />

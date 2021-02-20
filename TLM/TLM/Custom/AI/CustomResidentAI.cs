@@ -168,7 +168,6 @@
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private int GetTaxiProbability(ushort instanceId, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
             Log._DebugOnlyError("CustomResidentAI.GetTaxiProbability called!");
             return 20;
@@ -176,7 +175,6 @@
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private int GetBikeProbability(ushort instanceId, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
             Log._DebugOnlyError("CustomResidentAI.GetBikeProbability called!");
             return 20;
@@ -184,7 +182,6 @@
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private int GetCarProbability(ushort instanceId, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
             Log._DebugOnlyError("CustomResidentAI.GetCarProbability called!");
             return 20;
@@ -192,7 +189,6 @@
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        [UsedImplicitly]
         private int GetElectricCarProbability(ushort instanceId,
                                               ref CitizenInstance citizenData,
                                               Citizen.AgePhase agePhase) {
