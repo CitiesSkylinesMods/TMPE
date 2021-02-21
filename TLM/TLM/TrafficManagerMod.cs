@@ -1,18 +1,16 @@
 namespace TrafficManager {
+    using CitiesHarmony.API;
     using ColossalFramework.Globalization;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
-    using System.Reflection;
     using System;
+    using System.Reflection;
     using TrafficManager.State;
     using TrafficManager.UI;
     using TrafficManager.Util;
-    using static TrafficManager.Util.Shortcuts;
-    using ColossalFramework;
     using UnityEngine.SceneManagement;
-    using CitiesHarmony.API;
 
     public class TrafficManagerMod : IUserMod {
 #if BENCHMARK
