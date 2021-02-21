@@ -6,13 +6,9 @@ namespace TrafficManager.Util {
     using System.Collections.Generic;
     using System.Reflection.Emit;
     using CSUtil.Commons;
-    
-    public static class TranspilerUtil {
-        public class InstructionNotFoundException : Exception {
-            public InstructionNotFoundException() : base() { }
-            public InstructionNotFoundException(string m) : base(m) { }
 
-        }
+    public static class TranspilerUtil {
+        public delegate bool Comperator(int idx);
 
         static bool VERBOSE => false;
 
@@ -74,7 +70,6 @@ namespace TrafficManager.Util {
             }
         }
 
-        public delegate bool Comperator(int idx);
         public static int SearchGeneric(List<CodeInstruction> codes, Comperator comperator, int index, int dir = +1, int counter = 1) {
             int count = 0;
             for (; 0 <= index && index < codes.Count; index += dir) {
@@ -117,6 +112,11 @@ namespace TrafficManager.Util {
                 if (count + start >= codes.Count) count = codes.Count - start - 1;
                 Log._Debug("PEEK:\n" + codes.GetRange(start, count).IL2STR());
             }
+        }
+
+        public class InstructionNotFoundException : Exception {
+            public InstructionNotFoundException() : base() { }
+            public InstructionNotFoundException(string m) : base(m) { }
         }
     }
 }
