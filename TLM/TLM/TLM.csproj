@@ -136,16 +136,14 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Constants.cs" />
-    <Compile Include="Custom\AI\CustomBuildingAI.cs" />
     <Compile Include="Custom\AI\CustomCarAI.cs" />
-    <Compile Include="Custom\AI\CustomCitizenAI.cs" />
     <Compile Include="Custom\AI\CustomResidentAI.cs" />
     <Compile Include="Custom\AI\CustomTouristAI.cs" />
-    <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
     <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
     <Compile Include="Custom\AI\CustomTrolleybusAI.cs" />
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
+    <Compile Include="Manager\Impl\GameConnectionManager.cs" />
     <Compile Include="Patcher.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
@@ -153,8 +151,21 @@
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="Patch\PatchCommons.cs" />
+    <Compile Include="Patch\_BuildingAI\GetColorPatch.cs" />
     <Compile Include="Patch\_BuildingDecoration\LoadPathsPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_RoadBaseAI\ClickNodeButtonPatch.cs" />
+    <Compile Include="Patch\_TransportLineAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\StartPathFindCommons.cs" />
+    <Compile Include="Patch\_VehicleAI\_CargoTruckAI\SimulationStepPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\Connection\PassengerCarAIConnection.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\Connection\PassengerCarAIHook.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\GetLocalizedStatusPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\ParkVehiclePatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\SimulationStepPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\UpdateParkedVehiclePatch.cs" />
     <Compile Include="Patch\_VehicleAI\_TrolleybusAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_TramBaseAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\_TrainAI\StartPathFindPatch.cs" />
@@ -260,10 +271,7 @@
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
     <Compile Include="Manager\Impl\VehicleRestrictionsManager.cs" />
-    <Compile Include="Custom\AI\CustomCargoTruckAI.cs" />
     <Compile Include="Custom\AI\CustomHumanAI.cs" />
-    <Compile Include="Custom\AI\CustomPassengerCarAI.cs" />
-    <Compile Include="Custom\AI\CustomRoadBaseAI.cs" />
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="LoadingExtension.cs" />

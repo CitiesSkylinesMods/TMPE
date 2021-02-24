@@ -14,12 +14,17 @@ namespace TrafficManager.Patch._VehicleAI {
         //protected virtual bool StartPathFind(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays)
         delegate bool TargetDelegate2(ushort vehicleID, ref Vehicle vehicleData, Vector3 startPos, Vector3 endPos, bool startBothWays, bool endBothWays);
 
+        //protected bool StartPathFind(ushort instanceID, ref CitizenInstance citizenData, Vector3 startPos, Vector3 endPos, VehicleInfo vehicleInfo, bool enableTransport, bool ignoreCost)
+        delegate bool CitizenAITargetDelegate(ushort instanceID, ref CitizenInstance citizenData, Vector3 startPos, Vector3 endPos, VehicleInfo vehicleInfo, bool enableTransport, bool ignoreCost);
+
         public static MethodBase TargetMethod<T>() =>
             TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(T), "StartPathFind");
 
         public static MethodBase TargetMethod2<T>() =>
             TranspilerUtil.DeclaredMethod<TargetDelegate2>(typeof(T), "StartPathFind");
 
+        public static MethodBase GetCitizenAITargetMethod() =>
+            TranspilerUtil.DeclaredMethod<CitizenAITargetDelegate>(typeof(CitizenAI), "StartPathFind");
 
         /// <summary>
         /// replaces max pos of 4800 with 8000 to support 81 tiles.

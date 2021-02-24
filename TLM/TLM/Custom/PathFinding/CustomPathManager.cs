@@ -9,6 +9,7 @@ namespace TrafficManager.Custom.PathFinding {
     using System.Reflection;
     using System.Threading;
     using System;
+    using API.Traffic.Enums;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.RedirectionFramework.Attributes;
@@ -363,6 +364,106 @@ namespace TrafficManager.Custom.PathFinding {
         /*internal void ResetQueueItem(uint unit) {
                 queueItems[unit].Reset();
         }*/
+
+        /// <summary>
+        /// Builds Creates Path for TransportLineAI
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="startPosA"></param>
+        /// <param name="startPosB"></param>
+        /// <param name="endPosA"></param>
+        /// <param name="endPosB"></param>
+        /// <param name="vehicleType"></param>
+        /// <param name="skipQueue"></param>
+        /// <returns>bool</returns>
+        public bool CreateTransportLinePath(
+                out uint path,
+                PathUnit.Position startPosA,
+                PathUnit.Position startPosB,
+                PathUnit.Position endPosA,
+                PathUnit.Position endPosB,
+                VehicleInfo.VehicleType vehicleType,
+                bool skipQueue) {
+
+            PathCreationArgs args = default;
+            args.extPathType = ExtPathType.None;
+            args.extVehicleType = ConvertToExtVehicleType(vehicleType);
+            args.vehicleId = 0;
+            args.spawned = true;
+            args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
+            args.startPosA = startPosA;
+            args.startPosB = startPosB;
+            args.endPosA = endPosA;
+            args.endPosB = endPosB;
+            args.vehiclePosition = default;
+            args.vehicleTypes = vehicleType;
+            args.isHeavyVehicle = false;
+            args.hasCombustionEngine = false;
+            args.ignoreBlocked = true;
+            args.ignoreFlooded = false;
+            args.ignoreCosts = false;
+            args.randomParking = false;
+            args.stablePath = true;
+            args.skipQueue = skipQueue;
+
+            if (vehicleType == VehicleInfo.VehicleType.None) {
+                args.laneTypes = NetInfo.LaneType.Pedestrian;
+                args.maxLength = 160000f;
+            } else {
+                args.laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+                args.maxLength = 20000f;
+            }
+
+            return CustomCreatePath(out path, ref SimulationManager.instance.m_randomizer, args);
+        }
+
+        /// <summary>
+        /// Converts game VehicleInfo.VehicleType to closest TMPE.API.Traffic.Enums.ExtVehicleType
+        /// </summary>
+        /// <param name="vehicleType"></param>
+        /// <returns></returns>
+        private static ExtVehicleType ConvertToExtVehicleType(VehicleInfo.VehicleType vehicleType) {
+            ExtVehicleType extVehicleType = ExtVehicleType.None;
+            if ((vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Bus;
+            }
+
+            if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |
+                                VehicleInfo.VehicleType.Monorail)) !=
+                VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerTrain;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Tram;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerShip;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerPlane;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Ferry;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Blimp;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.CableCar;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Trolleybus) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Trolleybus;
+            }
+
+            return extVehicleType;
+        }
 
         private void StopPathFinds() {
             foreach (CustomPathFind pathFind in _replacementPathFinds) {

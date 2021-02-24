@@ -2418,7 +2418,7 @@ namespace TrafficManager.Manager.Impl {
                                      VehicleRestrictionsMode.Configured)
                                  & ExtVehicleType.PassengerCar) != ExtVehicleType.None)
                             {
-                                if (CustomPassengerCarAI.FindParkingSpaceRoadSide(
+                                if (Constants.ManagerFactory.GameConnectionManager.PassengerCarAIConnection.FindParkingSpaceRoadSide(
                                     ignoreParked,
                                     segmentId,
                                     innerParkPos,
@@ -2687,19 +2687,19 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     Vector3 position = transformMatrix.MultiplyPoint(prop.m_position);
-                    if (CustomPassengerCarAI.FindParkingSpaceProp(
-                        isElectric,
-                        ignoreParked,
-                        propInfo,
-                        position,
-                        building.m_angle + prop.m_radAngle,
-                        prop.m_fixedHeight,
-                        refPos,
-                        vehicleInfo.m_generatedInfo.m_size.x,
-                        vehicleInfo.m_generatedInfo.m_size.z,
-                        ref propMinDistance,
-                        ref parkPos,
-                        ref parkRot))
+                    if (Constants.ManagerFactory.GameConnectionManager.PassengerCarAIConnection.FindParkingSpaceProp(
+                            isElectric,
+                            ignoreParked,
+                            propInfo,
+                            position,
+                            building.m_angle + prop.m_radAngle,
+                            prop.m_fixedHeight,
+                            refPos,
+                            vehicleInfo.m_generatedInfo.m_size.x,
+                            vehicleInfo.m_generatedInfo.m_size.z,
+                            ref propMinDistance,
+                            ref parkPos,
+                            ref parkRot))
                     {
                         // NON-STOCK CODE
                         result = true;
@@ -2818,7 +2818,7 @@ namespace TrafficManager.Manager.Impl {
                             netManager.m_segments.m_buffer[segmentId].Info
                                       .m_lanes[laneIndex].m_finalDirection))
                     {
-                        if (CustomPassengerCarAI.FindParkingSpaceRoadSide(
+                        if (Constants.ManagerFactory.GameConnectionManager.PassengerCarAIConnection.FindParkingSpaceRoadSide(
                             ignoreParked,
                             segmentId,
                             parkPos,
@@ -2902,7 +2902,7 @@ namespace TrafficManager.Manager.Impl {
                                                                 out Vector3 parkPos,
                                                                 out Quaternion parkRot,
                                                                 out float parkOffset) {
-            if (!CustomPassengerCarAI.FindParkingSpace(isElectric,
+            if (!Constants.ManagerFactory.GameConnectionManager.PassengerCarAIConnection.FindParkingSpace(isElectric,
                                                        homeId,
                                                        refPos,
                                                        searchDir,
