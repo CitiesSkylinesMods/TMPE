@@ -53,6 +53,22 @@ namespace TrafficManager.Util {
             return ret;
         }
 
+        public static TDelegate CreateDelegate<TDelegate>(Type type, string name, bool instance)
+            where TDelegate : Delegate {
+
+            var types = GetParameterTypes<TDelegate>(instance);
+            var ret = type.GetMethod(
+                name,
+                BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                types,
+                new ParameterModifier[0]);
+            if (ret == null)
+                Log.Error($"failed to retrieve method {type}.{name}({types.ToSTR()})");
+
+            return (TDelegate)Delegate.CreateDelegate(typeof(TDelegate), ret);
+        }
+
         public static List<CodeInstruction> ToCodeList(IEnumerable<CodeInstruction> instructions) {
             var originalCodes = new List<CodeInstruction>(instructions);
             var codes = new List<CodeInstruction>(originalCodes);

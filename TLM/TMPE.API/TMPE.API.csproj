@@ -77,6 +77,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Geometry\SegmentEndReplacement.cs" />
+    <Compile Include="Manager\Connections\IVehicleAIConnection.cs" />
     <Compile Include="Manager\Connections\IHumanAIConnection.cs" />
     <Compile Include="Manager\Connections\IPassengerCarAIConnection.cs" />
     <Compile Include="Manager\Connections\IResidentAIConnection.cs" />

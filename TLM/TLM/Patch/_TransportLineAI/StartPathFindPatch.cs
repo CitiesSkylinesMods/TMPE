@@ -25,7 +25,6 @@ namespace TrafficManager.Patch._TransportLineAI {
         [HarmonyTranspiler]
         public static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
             List<CodeInstruction> codes = TranspilerUtil.ToCodeList(instructions);
-            Log.Info("StartPathFind\n" + string.Join("\n", codes.Select(c => c.ToString()).ToArray()));
             int searchInstruction = TranspilerUtil.SearchInstruction(codes, new CodeInstruction(OpCodes.Call, CheckSegmentProblemsMethod()), 0, 1, 3);
             if (searchInstruction != -1
                 && codes[searchInstruction + 1].opcode.Equals(OpCodes.Ldc_I4_1)
