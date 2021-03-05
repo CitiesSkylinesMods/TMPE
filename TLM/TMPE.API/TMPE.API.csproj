@@ -77,13 +77,12 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Geometry\SegmentEndReplacement.cs" />
+    <Compile Include="Manager\Connections\ITrainAIConnection.cs" />
     <Compile Include="Manager\Connections\IVehicleAIConnection.cs" />
     <Compile Include="Manager\Connections\IHumanAIConnection.cs" />
     <Compile Include="Manager\Connections\IPassengerCarAIConnection.cs" />
     <Compile Include="Manager\Connections\IResidentAIConnection.cs" />
     <Compile Include="Manager\Connections\ITouristAIConnection.cs" />
-    <Compile Include="Manager\Connections\ITrainAIConnection.cs" />
-    <Compile Include="Manager\Connections\ITramAIConnection.cs" />
     <Compile Include="Manager\IAdvancedParkingManager.cs" />
     <Compile Include="Manager\ICustomDataManager.cs" />
     <Compile Include="Manager\ICustomManager.cs" />

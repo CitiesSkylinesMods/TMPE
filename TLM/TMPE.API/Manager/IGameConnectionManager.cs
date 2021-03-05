@@ -4,5 +4,6 @@ namespace TrafficManager.API.Manager {
     public interface IGameConnectionManager {
         IPassengerCarAIConnection PassengerCarAIConnection { get; }
         IVehicleAIConnection VehicleAIConnection { get; }
+        ITrainAIConnection TrainAIConnection { get; }
     }
 }

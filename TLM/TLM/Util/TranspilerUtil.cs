@@ -82,7 +82,8 @@ namespace TrafficManager.Util {
                 }
 
                 // This special code is needed for some reason because the == operator doesn't work on System.Byte
-                return (a.operand is byte aByte && b.operand is byte bByte && aByte == bByte);
+                return (a.operand is byte aByte && b.operand is byte bByte && aByte == bByte)
+                       || (a.operand is int aInt && b.operand is int bInt && aInt == bInt);
             } else {
                 return false;
             }

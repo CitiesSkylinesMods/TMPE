@@ -1,4 +1,4 @@
-namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
+namespace TrafficManager.Patch._VehicleAI._TrainAI {
     using System.Collections.Generic;
     using System.Reflection;
     using System.Reflection.Emit;
@@ -9,17 +9,16 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
 
     [UsedImplicitly]
     [HarmonyPatch]
-    public static class SimulationStepPatch {
+    public class SimulationStepPatch {
 
         private delegate void TargetDelegate(ushort vehicleID, ref Vehicle data, Vector3 physicsLodRefPos);
 
         [UsedImplicitly]
-        public static MethodBase TargetMethod() => TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(TramBaseAI), nameof(TramBaseAI.SimulationStep));
+        public static MethodBase TargetMethod() => TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(TrainAI), nameof(TramBaseAI.SimulationStep));
 
         [UsedImplicitly]
-        public static IEnumerable<CodeInstruction> Transpiler( ILGenerator il, IEnumerable<CodeInstruction> instructions) {
+        public static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
             return PatchCommons.TranspileTramTrainSimulationStep(il, instructions);
         }
-
     }
 }

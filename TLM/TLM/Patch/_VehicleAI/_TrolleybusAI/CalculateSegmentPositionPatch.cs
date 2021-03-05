@@ -48,7 +48,6 @@ namespace TrafficManager.Patch._VehicleAI._TrolleybusAI {
             } else {
                 throw new Exception("Could not find CalculateStopPositionAndDirection call or instructions has been patched");
             }
-            Log.Info("CalculateSegmentPosition\n-----------------------------------------------------\n" + string.Join("\n", codes.Select(c => c.ToString()).ToArray()));
 
             return codes;
         }
