@@ -8,6 +8,8 @@ namespace TrafficManager.Patch._VehicleAI {
     using HarmonyLib;
     using JetBrains.Annotations;
     using Manager.Impl;
+    using State;
+    using State.ConfigData;
     using UnityEngine;
     using Util;
 

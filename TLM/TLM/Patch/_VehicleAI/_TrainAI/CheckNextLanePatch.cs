@@ -1,10 +1,14 @@
 namespace TrafficManager.Patch._VehicleAI._TrainAI {
     using System.Reflection;
     using API.Manager.Connections;
+    using API.Traffic.Enums;
     using ColossalFramework.Math;
+    using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
     using Manager.Impl;
+    using State;
+    using State.ConfigData;
     using UnityEngine;
     using Util;
 
@@ -60,8 +64,8 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                                || refTargetNodeId == DebugSettings.NodeId)
                            && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
                                || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.RailVehicle)
-                           && (DebugSettings.vehicleID == 0
-                               || DebugSettings.vehicleID == vehicleID);
+                           && (DebugSettings.VehicleId == 0
+                               || DebugSettings.VehicleId == vehicleID);
 
             if (logLogic) {
                 Log._Debug($"CustomTrainAI.CustomCheckNextLane({vehicleID}) called.\n" +

@@ -1,0 +1,60 @@
+namespace TrafficManager.Patch._CitizenAI._HumanAI.Connection {
+    using System;
+    using API.Manager.Connections;
+    using CSUtil.Commons;
+    using Util;
+
+    public static class HumanAIHook {
+        internal static IHumanAIConnection GetConnection() {
+            try {
+                StartPathFindDelegate startPathFindCitizenAI =
+                    TranspilerUtil.CreateDelegate<StartPathFindDelegate>(
+                        typeof(CitizenAI),
+                        "StartPathFind",
+                        true);
+                SimulationStepDelegate simulationStepCitizenAI =
+                    TranspilerUtil.CreateDelegate<SimulationStepDelegate>(
+                        typeof(CitizenAI),
+                        "SimulationStep",
+                        true);
+                ArriveAtDestinationDelegate arriveAtDestination =
+                    TranspilerUtil.CreateDelegate<ArriveAtDestinationDelegate>(
+                        typeof(HumanAI),
+                        "ArriveAtDestination",
+                        true);
+                SpawnDelegate spawnCitizenAI =
+                    TranspilerUtil.CreateDelegate<SpawnDelegate>(
+                        typeof(HumanAI),
+                        "Spawn",
+                        true);
+                InvalidPathHumanAIDelegate invalidPath =
+                    TranspilerUtil.CreateDelegate<InvalidPathHumanAIDelegate>(
+                        typeof(CitizenAI),
+                        "InvalidPath",
+                        true);
+                PathfindFailureHumanAIDelegate pathfindFailure =
+                    TranspilerUtil.CreateDelegate<PathfindFailureHumanAIDelegate>(
+                        typeof(HumanAI),
+                        "PathfindFailure",
+                        true);
+                PathfindSuccessHumanAIDelegate pathfindSuccess =
+                    TranspilerUtil.CreateDelegate<PathfindSuccessHumanAIDelegate>(
+                        typeof(HumanAI),
+                        "PathfindSuccess",
+                        true);
+
+                return new HumanAIConnection(
+                    spawnCitizenAI,
+                    startPathFindCitizenAI,
+                    simulationStepCitizenAI,
+                    arriveAtDestination,
+                    invalidPath,
+                    pathfindFailure,
+                    pathfindSuccess);
+            } catch (Exception e) {
+                Log.Error(e.Message);
+                return null;
+            }
+        }
+    }
+}

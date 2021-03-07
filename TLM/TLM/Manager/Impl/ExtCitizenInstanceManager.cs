@@ -60,12 +60,12 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Generates the localized status for a tourist, which is displayed on <c>TouristWorldInfoPanel</c>.
         /// </summary>
-        /// 
+        ///
         /// <param name="instanceID">Citizen instance id.</param>
         /// <param name="data">Citizen instance data.</param>
         /// <param name="mayAddCustomStatus">Will be <c>true</c> if the status can be customised by callee.</param>
         /// <param name="target">The instance of target building or node.</param>
-        /// 
+        ///
         /// <returns>Returns the localised tourist status.</returns>
         public string GetTouristLocalizedStatus(ushort instanceID,
                                                 ref CitizenInstance data,
@@ -148,7 +148,7 @@ namespace TrafficManager.Manager.Impl {
             if (targetIsNode) {
 
                 target.NetNode = targetBuildingId;
- 
+
                 if ((data.m_flags & CitizenInstance.Flags.OnTour) != 0) {
                     return Locale.Get("CITIZEN_STATUS_VISITING");
                 }
@@ -173,12 +173,12 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Generates the localized status for a resident, which is displayed on <c>CitizenWorldInfoPanel</c>.
         /// </summary>
-        /// 
+        ///
         /// <param name="instanceID">Citizen instance id.</param>
         /// <param name="data">Citizen instance data.</param>
         /// <param name="mayAddCustomStatus">Will be <c>true</c> if the status can be customised by callee.</param>
         /// <param name="target">The instance of target building or node.</param>
-        /// 
+        ///
         /// <returns>Returns the localised resident status.</returns>
         public string GetResidentLocalizedStatus(ushort instanceID,
                                                  ref CitizenInstance data,
@@ -1516,9 +1516,9 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Check if a building id refers to an outside connection.
         /// </summary>
-        /// 
+        ///
         /// <param name="buildingId">The id of the building to check.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if it's an outside connection, otherwise <c>false</c>.</returns>
         internal bool IsOutsideConnection(ushort buildingId) {
             Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
@@ -1528,10 +1528,10 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Check if a vehicle is owned by a certain citizen.
         /// </summary>
-        /// 
+        ///
         /// <param name="vehicle">The vehicle.</param>
         /// <param name="citizenId">The citizen.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if the vehicle is owned by the citizen, otherwise <c>false</c>.</returns>
         internal bool IsVehicleOwnedByCitizen(ref Vehicle vehicle, uint citizenId) {
             InstanceID id = InstanceID.Empty;
@@ -1542,21 +1542,21 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Check if a citizen is caught in a flood, tsunami or tornado.
         /// </summary>
-        /// 
+        ///
         /// <param name="citizen">The citizen to inspect.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if having a bad day, otherwise <c>false</c>.</returns>
-        internal bool IsSweaptAway(ref CitizenInstance citizen) =>
+        internal static bool IsSweaptAway(ref CitizenInstance citizen) =>
             (citizen.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != 0;
 
         /// <summary>
         /// Check if a citizen is loitering at their current location.
         /// </summary>
-        /// 
+        ///
         /// <param name="citizen">The citizen to inspect.</param>
-        /// 
+        ///
         /// <returns>Returns <c>true</c> if hanging around, otherwise <c>false</c>.</returns>
-        internal bool IsHangingAround(ref CitizenInstance citizen) =>
+        internal static bool IsHangingAround(ref CitizenInstance citizen) =>
             citizen.m_path == 0u && (citizen.m_flags & CitizenInstance.Flags.HangAround) != 0;
     }
 }

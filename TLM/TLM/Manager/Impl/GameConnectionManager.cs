@@ -1,6 +1,9 @@
 namespace TrafficManager.Manager.Impl {
     using API.Manager;
     using API.Manager.Connections;
+    using Patch._CitizenAI._HumanAI.Connection;
+    using Patch._CitizenAI._ResidentAI.Connection;
+    using Patch._CitizenAI._TouristAI.Connection;
     using Patch._VehicleAI.Connection;
     using Patch._VehicleAI._PassengerCarAI.Connection;
     using Patch._VehicleAI._TrainAI.Connection;
@@ -16,10 +19,16 @@ namespace TrafficManager.Manager.Impl {
             PassengerCarAIConnection = PassengerCarAIHook.GetConnection();
             VehicleAIConnection = VehicleAIHook.GetConnection();
             TrainAIConnection = TrainAIHook.GetConnection();
+            HumanAIConnection = HumanAIHook.GetConnection();
+            ResidentAIConnection = ResidentAIHook.GetConnection();
+            TouristAIConnection = TouristAIHook.GetConnection();
         }
 
         public IPassengerCarAIConnection PassengerCarAIConnection { get; }
         public IVehicleAIConnection VehicleAIConnection { get; }
         public ITrainAIConnection TrainAIConnection { get; }
+        public IHumanAIConnection HumanAIConnection { get; }
+        public IResidentAIConnection ResidentAIConnection { get; }
+        public ITouristAIConnection TouristAIConnection { get; }
     }
 }

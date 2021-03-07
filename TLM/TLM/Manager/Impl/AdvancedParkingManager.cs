@@ -8,7 +8,6 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.Custom.AI;
     using TrafficManager.Custom.PathFinding;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;

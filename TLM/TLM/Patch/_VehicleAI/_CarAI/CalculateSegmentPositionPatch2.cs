@@ -1,10 +1,13 @@
 namespace TrafficManager.Patch._VehicleAI._CarAI {
     using System.Reflection;
+    using API.Traffic.Enums;
     using ColossalFramework;
+    using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
     using Manager.Impl;
     using State;
+    using State.ConfigData;
     using UnityEngine;
     using Util;
 

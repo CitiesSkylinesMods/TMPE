@@ -5,5 +5,8 @@ namespace TrafficManager.API.Manager {
         IPassengerCarAIConnection PassengerCarAIConnection { get; }
         IVehicleAIConnection VehicleAIConnection { get; }
         ITrainAIConnection TrainAIConnection { get; }
+        IHumanAIConnection HumanAIConnection { get; }
+        IResidentAIConnection ResidentAIConnection { get; }
+        ITouristAIConnection TouristAIConnection { get; }
     }
 }

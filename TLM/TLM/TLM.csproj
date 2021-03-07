@@ -136,8 +136,6 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Constants.cs" />
-    <Compile Include="Custom\AI\CustomResidentAI.cs" />
-    <Compile Include="Custom\AI\CustomTouristAI.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
     <Compile Include="Manager\Impl\GameConnectionManager.cs" />
     <Compile Include="Patcher.cs" />
@@ -150,7 +148,19 @@
     <Compile Include="Patch\PatchCommons.cs" />
     <Compile Include="Patch\_BuildingAI\GetColorPatch.cs" />
     <Compile Include="Patch\_BuildingDecoration\LoadPathsPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_ResidentAI\Connection\ResidentAIConnection.cs" />
+    <Compile Include="Patch\_CitizenAI\_ResidentAI\Connection\ResidentAIHook.cs" />
+    <Compile Include="Patch\_CitizenAI\_ResidentAI\GetLocalizedStatusPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_ResidentAI\GetVehicleInfoPatch.cs" />
     <Compile Include="Patch\_CitizenAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_HumanAI\CheckTrafficLightsPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_HumanAI\Connection\HumanAIConnection.cs" />
+    <Compile Include="Patch\_CitizenAI\_HumanAI\Connection\HumanAIHook.cs" />
+    <Compile Include="Patch\_CitizenAI\_HumanAI\SimulationStepPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_TouristAI\Connection\TouristAIHook.cs" />
+    <Compile Include="Patch\_CitizenAI\_TouristAI\Connection\TouristAIConnection.cs" />
+    <Compile Include="Patch\_CitizenAI\_TouristAI\GetLocalizedStatusPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_TouristAI\GetVehicleInfoPatch.cs" />
     <Compile Include="Patch\_HumanAI\SimulationStepPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\ClickNodeButtonPatch.cs" />
     <Compile Include="Patch\_TransportLineAI\StartPathFindPatch.cs" />
@@ -288,7 +298,6 @@
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
     <Compile Include="Manager\Impl\VehicleRestrictionsManager.cs" />
-    <Compile Include="Custom\AI\CustomHumanAI.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="LoadingExtension.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />

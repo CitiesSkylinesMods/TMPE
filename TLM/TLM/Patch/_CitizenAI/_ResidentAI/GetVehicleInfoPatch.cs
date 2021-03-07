@@ -1,49 +1,51 @@
-﻿namespace TrafficManager.Custom.AI {
-    using ColossalFramework.Math;
+namespace TrafficManager.Patch._CitizenAI._ResidentAI {
+    using System.Reflection;
+    using API.Manager.Connections;
+    using API.Traffic.Enums;
     using ColossalFramework;
+    using ColossalFramework.Math;
     using CSUtil.Commons;
+    using HarmonyLib;
     using JetBrains.Annotations;
-    using System.Runtime.CompilerServices;
-    using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.Manager.Impl;
-    using TrafficManager.RedirectionFramework.Attributes;
-    using TrafficManager.State.ConfigData;
-    using TrafficManager.State;
+    using Manager.Impl;
+    using State;
+    using State.ConfigData;
+    using Util;
 
-    [TargetType(typeof(ResidentAI))]
-    public class CustomResidentAI : ResidentAI {
-        [RedirectMethod]
+    [UsedImplicitly]
+    [HarmonyPatch]
+    public class GetVehicleInfoPatch {
+        private delegate VehicleInfo TargetDelegate(ushort instanceID,
+                                                    ref CitizenInstance citizenData,
+                                                    bool forceProbability,
+                                                    out VehicleInfo trailer);
+
         [UsedImplicitly]
-        public string CustomGetLocalizedStatus(ushort instanceId,
-                                               ref CitizenInstance data,
-                                               out InstanceID target) {
-            string ret = Constants.ManagerFactory.ExtCitizenInstanceManager.GetResidentLocalizedStatus(
-                instanceId,
-                ref data,
-                out bool addCustomStatus,
-                out target);
+        public static MethodBase TargetMethod() => TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(ResidentAI), "GetVehicleInfo");
 
-            // NON-STOCK CODE START
-            if (Options.parkingAI && addCustomStatus) {
-                ret = AdvancedParkingManager.Instance.EnrichLocalizedCitizenStatus(
-                    ret,
-                    ref ExtCitizenInstanceManager.Instance.ExtInstances[instanceId],
-                    ref ExtCitizenManager.Instance.ExtCitizens[data.m_citizen]);
-            }
+        private static GetTaxiProbabilityResidentDelegate GetTaxiProbability;
+        private static GetBikeProbabilityResidentDelegate GetBikeProbability;
+        private static GetCarProbabilityResidentDelegate GetCarProbability;
+        private static GetElectricCarProbabilityResidentDelegate GetElectricCarProbability;
 
-            // NON-STOCK CODE END
-            return ret;
+        [UsedImplicitly]
+        public static void Prepare() {
+            GetTaxiProbability = Constants.ManagerFactory.GameConnectionManager.ResidentAIConnection.GetTaxiProbability;
+            GetBikeProbability = Constants.ManagerFactory.GameConnectionManager.ResidentAIConnection.GetBikeProbability;
+            GetCarProbability = Constants.ManagerFactory.GameConnectionManager.ResidentAIConnection.GetCarProbability;
+            GetElectricCarProbability = Constants.ManagerFactory.GameConnectionManager.ResidentAIConnection.GetElectricCarProbability;
         }
 
-        [RedirectMethod]
         [UsedImplicitly]
-        public VehicleInfo CustomGetVehicleInfo(ushort instanceId,
-                                                ref CitizenInstance citizenData,
-                                                bool forceCar,
-                                                out VehicleInfo trailer) {
+        public static bool Prefix(ResidentAI __instance,
+                                   ref VehicleInfo __result,
+                                   ushort instanceID,
+                                   ref CitizenInstance citizenData,
+                                   bool forceProbability,
+                                   out VehicleInfo trailer) {
 #if DEBUG
             bool citizenDebug = (DebugSettings.CitizenInstanceId == 0
-                            || DebugSettings.CitizenInstanceId == instanceId)
+                            || DebugSettings.CitizenInstanceId == instanceID)
                            && (DebugSettings.CitizenId == 0
                                || DebugSettings.CitizenId == citizenData.m_citizen)
                            && (DebugSettings.SourceBuildingId == 0
@@ -57,13 +59,14 @@
             trailer = null;
 
             if (citizenData.m_citizen == 0u) {
-                return null;
+                __result = null;
+                return false;
             }
 
             // NON-STOCK CODE START
             bool forceTaxi = false;
             if (Options.parkingAI) {
-                if (ExtCitizenInstanceManager.Instance.ExtInstances[instanceId]
+                if (ExtCitizenInstanceManager.Instance.ExtInstances[instanceID]
                                              .pathMode == ExtPathMode.TaxiToTarget) {
                     forceTaxi = true;
                 }
@@ -83,16 +86,16 @@
                 bikeProb = 0;
                 taxiProb = 100;
             } else // NON-STOCK CODE END
-            if (forceCar
+            if (forceProbability
                 || (citizenData.m_flags & CitizenInstance.Flags.BorrowCar) !=
                 CitizenInstance.Flags.None) {
                 carProb = 100;
                 bikeProb = 0;
                 taxiProb = 0;
             } else {
-                carProb = GetCarProbability(instanceId, ref citizenData, ageGroup);
-                bikeProb = GetBikeProbability(instanceId, ref citizenData, ageGroup);
-                taxiProb = GetTaxiProbability(instanceId, ref citizenData, ageGroup);
+                carProb = GetCarProbability(__instance, instanceID, ref citizenData, ageGroup);
+                bikeProb = GetBikeProbability(__instance, instanceID, ref citizenData, ageGroup);
+                taxiProb = GetTaxiProbability(__instance, instanceID, ref citizenData, ageGroup);
             }
 
             Randomizer randomizer = new Randomizer(citizenData.m_citizen);
@@ -102,10 +105,10 @@
             bool useElectricCar = false;
 
             if (useCar) {
-                int electricProb = GetElectricCarProbability(
-                    instanceId,
-                    ref citizenData,
-                    m_info.m_agePhase);
+                int electricProb = GetElectricCarProbability(__instance,
+                                                             instanceID,
+                                                             ref citizenData,
+                                                             __instance.m_info.m_agePhase);
                 useElectricCar = randomizer.Int32(100u) < electricProb;
             }
 
@@ -128,8 +131,8 @@
                 if (parkedVehicleId != 0) {
                     Log._DebugIf(
                         logParkingAi,
-                        () => $"CustomResidentAI.CustomGetVehicleInfo({instanceId}): " +
-                        $"Citizen instance {instanceId} owns a parked vehicle {parkedVehicleId}. " +
+                        () => $"CustomResidentAI.CustomGetVehicleInfo({instanceID}): " +
+                        $"Citizen instance {instanceID} owns a parked vehicle {parkedVehicleId}. " +
                         $"Reusing vehicle info.");
                     carInfo = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId].Info;
                 }
@@ -155,45 +158,18 @@
                     ageGroupLvl);
 
                 if (bikeInfo != null) {
-                    return bikeInfo;
+                    __result = bikeInfo;
+                    return false;
                 }
             }
 
             if ((useCar || useTaxi) && carInfo != null) {
-                return carInfo;
+                __result = carInfo;
+                return false;
             }
 
-            return null;
-        }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private int GetTaxiProbability(ushort instanceId, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
-            Log._DebugOnlyError("CustomResidentAI.GetTaxiProbability called!");
-            return 20;
-        }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private int GetBikeProbability(ushort instanceId, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
-            Log._DebugOnlyError("CustomResidentAI.GetBikeProbability called!");
-            return 20;
-        }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private int GetCarProbability(ushort instanceId, ref CitizenInstance citizenData, Citizen.AgeGroup ageGroup) {
-            Log._DebugOnlyError("CustomResidentAI.GetCarProbability called!");
-            return 20;
-        }
-
-        [RedirectReverse]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private int GetElectricCarProbability(ushort instanceId,
-                                              ref CitizenInstance citizenData,
-                                              Citizen.AgePhase agePhase) {
-            Log._DebugOnlyError("CustomResidentAI.GetElectricCarProbability called!");
-            return 20;
+            __result = null;
+            return false;
         }
     }
 }
