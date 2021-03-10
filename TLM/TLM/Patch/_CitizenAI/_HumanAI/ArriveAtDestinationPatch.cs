@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Patch._HumanAI {
+﻿namespace TrafficManager.Patch._CitizenAI._HumanAI {
     using ColossalFramework;
     using HarmonyLib;
     using JetBrains.Annotations;

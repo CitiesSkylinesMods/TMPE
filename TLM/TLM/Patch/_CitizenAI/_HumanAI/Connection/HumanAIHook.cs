@@ -2,9 +2,15 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI.Connection {
     using System;
     using API.Manager.Connections;
     using CSUtil.Commons;
+    using HarmonyLib;
+    using UnityEngine;
     using Util;
 
     public static class HumanAIHook {
+        private delegate void SimulationStepTarget(ushort instanceID,
+                                                   ref CitizenInstance data,
+                                                   Vector3 physicsLodRefPos);
+
         internal static IHumanAIConnection GetConnection() {
             try {
                 StartPathFindDelegate startPathFindCitizenAI =
@@ -13,10 +19,10 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI.Connection {
                         "StartPathFind",
                         true);
                 SimulationStepDelegate simulationStepCitizenAI =
-                    TranspilerUtil.CreateDelegate<SimulationStepDelegate>(
-                        typeof(CitizenAI),
-                        "SimulationStep",
-                        true);
+                    AccessTools.MethodDelegate<SimulationStepDelegate>(
+                    TranspilerUtil.DeclaredMethod<SimulationStepTarget>(typeof(CitizenAI), "SimulationStep"),
+                    null,
+                    false);
                 ArriveAtDestinationDelegate arriveAtDestination =
                     TranspilerUtil.CreateDelegate<ArriveAtDestinationDelegate>(
                         typeof(HumanAI),

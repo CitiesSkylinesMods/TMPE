@@ -148,6 +148,7 @@
     <Compile Include="Patch\PatchCommons.cs" />
     <Compile Include="Patch\_BuildingAI\GetColorPatch.cs" />
     <Compile Include="Patch\_BuildingDecoration\LoadPathsPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_HumanAI\ArriveAtDestinationPatch.cs" />
     <Compile Include="Patch\_CitizenAI\_ResidentAI\Connection\ResidentAIConnection.cs" />
     <Compile Include="Patch\_CitizenAI\_ResidentAI\Connection\ResidentAIHook.cs" />
     <Compile Include="Patch\_CitizenAI\_ResidentAI\GetLocalizedStatusPatch.cs" />
@@ -161,7 +162,6 @@
     <Compile Include="Patch\_CitizenAI\_TouristAI\Connection\TouristAIConnection.cs" />
     <Compile Include="Patch\_CitizenAI\_TouristAI\GetLocalizedStatusPatch.cs" />
     <Compile Include="Patch\_CitizenAI\_TouristAI\GetVehicleInfoPatch.cs" />
-    <Compile Include="Patch\_HumanAI\SimulationStepPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\ClickNodeButtonPatch.cs" />
     <Compile Include="Patch\_TransportLineAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\CalculateSegmentPositionPatch.cs" />
@@ -224,7 +224,6 @@
     <Compile Include="UI\Helpers\ExtUITabStrip.cs" />
     <Compile Include="Manager\Impl\SegmentEndManager.cs" />
     <Compile Include="Patch\_CommonBuildingAI\SimulationStepPatch.cs" />
-    <Compile Include="Patch\_HumanAI\ArriveAtDestinationPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\GetTrafficLightNodeStatePatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\UpdateNodePatch.cs" />
     <Compile Include="Patch\_TrainTrackBaseAI\LevelCrossingSimulationStepPatch.cs" />

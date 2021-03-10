@@ -1283,7 +1283,7 @@ namespace TrafficManager.Manager.Impl {
             ReleaseReturnPath(ref extInstance);
 
             PathUnit.Position targetPathPos = default;
-            bool foundParkPathPos = CustomPathManager.FindCitizenPathPosition(
+            bool foundParkPathPos = ExtPathManager.FindCitizenPathPosition(
                 parkPos,
                 NetInfo.LaneType.Pedestrian,
                 VehicleInfo.VehicleType.None,
@@ -1294,7 +1294,7 @@ namespace TrafficManager.Manager.Impl {
                 out PathUnit.Position parkPathPos);
 
             bool foundTargetPathPos = foundParkPathPos
-                                      && CustomPathManager.FindCitizenPathPosition(
+                                      && ExtPathManager.FindCitizenPathPosition(
                                           targetPos,
                                           NetInfo.LaneType.Pedestrian,
                                           VehicleInfo.VehicleType.None,
