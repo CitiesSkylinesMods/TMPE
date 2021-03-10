@@ -162,6 +162,8 @@
     <Compile Include="Patch\_CitizenAI\_TouristAI\Connection\TouristAIConnection.cs" />
     <Compile Include="Patch\_CitizenAI\_TouristAI\GetLocalizedStatusPatch.cs" />
     <Compile Include="Patch\_CitizenAI\_TouristAI\GetVehicleInfoPatch.cs" />
+    <Compile Include="Patch\_PathFind\CalculatePathPatch.cs" />
+    <Compile Include="Patch\_PathManager\ReleasePathPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\ClickNodeButtonPatch.cs" />
     <Compile Include="Patch\_TransportLineAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_VehicleAI\CalculateSegmentPositionPatch.cs" />

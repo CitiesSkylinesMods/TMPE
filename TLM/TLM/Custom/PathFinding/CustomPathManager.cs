@@ -7,20 +7,13 @@ namespace TrafficManager.Custom.PathFinding {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System.Reflection;
-    using System.Threading;
     using System;
     using API.Traffic.Enums;
     using TrafficManager.API.Traffic.Data;
-    using TrafficManager.Manager.Impl;
-    using TrafficManager.RedirectionFramework.Attributes;
-    using TrafficManager.State;
-    using UnityEngine;
-
 #if !PF_DIJKSTRA
     using CustomPathFind = CustomPathFind_Old;
 #endif
 
-    [TargetType(typeof(PathManager))]
     public class CustomPathManager : PathManager {
         /// <summary>
         /// Holds a linked list of path units waiting to be calculated
@@ -101,10 +94,17 @@ namespace TrafficManager.Custom.PathFinding {
             InitDone = true;
         }
 
-        [RedirectMethod]
+        /// <summary>
+        /// Just in case other mod call ReleasePath on CustomPathManager
+        /// </summary>
+        /// <param name="unit"></param>
         public new void ReleasePath(uint unit) {
+            CustomReleasePath(unit);
+        }
+
+        internal void CustomReleasePath(uint unit) {
 #if DEBUGPF3
-			Log.Warning($"CustomPathManager.ReleasePath({unit}) called.");
+			Log.Warning($"CustomPathManager.CustomReleasePath({unit}) called.");
 #endif
 
             if (m_pathUnits.m_buffer[unit].m_simulationFlags == 0) {
@@ -165,7 +165,7 @@ namespace TrafficManager.Custom.PathFinding {
 
                     // NON-STOCK CODE START
                     if (QueueItems[pathUnitId].queued) {
-                        ReleasePath(pathUnitId);
+                        CustomReleasePath(pathUnitId);
 
                         if (numIters > 10) {
                             unit = 0u;
@@ -264,7 +264,7 @@ namespace TrafficManager.Custom.PathFinding {
 
                 QueueItems[pathUnitId].queued = false;
                 // NON-STOCK CODE END
-                ReleasePath(unit);
+                CustomReleasePath(unit);
 
                 // NON-STOCK CODE START
                 m_pathUnitCount = (int)(m_pathUnits.ItemCount() - 1u);
