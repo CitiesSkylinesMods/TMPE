@@ -239,7 +239,6 @@ namespace TrafficManager.Custom.PathFinding {
         }
 
         private bool ExtCalculatePath(uint unit, bool skipQueue) {
-            Log.Info($"Calc Path for {unit}");
             if (!CustomPathManager._instance.AddPathReference(unit)) {
                 return false;
             }

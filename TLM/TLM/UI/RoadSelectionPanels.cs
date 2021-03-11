@@ -4,7 +4,6 @@ namespace TrafficManager.UI {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.U;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util;

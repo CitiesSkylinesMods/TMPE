@@ -2,7 +2,6 @@
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using TrafficManager.Manager.Impl;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.U;
     using TrafficManager.Util;
 

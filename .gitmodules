@@ -4,6 +4,3 @@
 [submodule "TLM/CSUtil.CameraControl"]
 	path = TLM/CSUtil.CameraControl
 	url = https://github.com/krzychu124/CSUtil.CameraControl.git
-[submodule "TLM/TLM/RedirectionFramework"]
-	path = TLM/TLM/RedirectionFramework
-	url = https://github.com/krzychu124/RedirectionFramework.git
