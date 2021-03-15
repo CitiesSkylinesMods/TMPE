@@ -44,21 +44,21 @@ namespace TrafficManager.Manager.Impl {
             position = default(PathUnit.Position);
             float minDist = 1E+10f;
             if (Instance.FindPathPositionWithSpiralLoop(
-                    pos,
-                    ItemClass.Service.Road,
-                    laneTypes,
-                    vehicleTypes,
-                    otherLaneTypes,
-                    otherVehicleTypes,
-                    allowUnderground,
-                    false,
-                    Options.parkingAI
-                        ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
-                        : 32f,
-                    out PathUnit.Position posA,
-                    out _,
-                    out float distA,
-                    out _) && distA < minDist) {
+                    position: pos,
+                    service: ItemClass.Service.Road,
+                    laneType: laneTypes,
+                    vehicleType: vehicleTypes,
+                    otherLaneType: otherLaneTypes,
+                    otherVehicleType: otherVehicleTypes,
+                    allowUnderground: allowUnderground,
+                    requireConnect: false,
+                    maxDistance: Options.parkingAI
+                                     ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
+                                     : 32f,
+                    pathPosA: out PathUnit.Position posA,
+                    pathPosB: out _,
+                    distanceSqrA: out float distA,
+                    distanceSqrB: out _) && distA < minDist) {
                 minDist = distA;
                 position = posA;
             }

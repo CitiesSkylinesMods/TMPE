@@ -298,26 +298,27 @@ namespace TrafficManager.Custom.PathFinding {
                 VehicleInfo.VehicleType vehicleType,
                 bool skipQueue) {
 
-            PathCreationArgs args = default;
-            args.extPathType = ExtPathType.None;
-            args.extVehicleType = ConvertToExtVehicleType(vehicleType);
-            args.vehicleId = 0;
-            args.spawned = true;
-            args.buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
-            args.startPosA = startPosA;
-            args.startPosB = startPosB;
-            args.endPosA = endPosA;
-            args.endPosB = endPosB;
-            args.vehiclePosition = default;
-            args.vehicleTypes = vehicleType;
-            args.isHeavyVehicle = false;
-            args.hasCombustionEngine = false;
-            args.ignoreBlocked = true;
-            args.ignoreFlooded = false;
-            args.ignoreCosts = false;
-            args.randomParking = false;
-            args.stablePath = true;
-            args.skipQueue = skipQueue;
+            PathCreationArgs args = new PathCreationArgs {
+                extPathType = ExtPathType.None,
+                extVehicleType = ConvertToExtVehicleType(vehicleType),
+                vehicleId = 0,
+                spawned = true,
+                buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex,
+                startPosA = startPosA,
+                startPosB = startPosB,
+                endPosA = endPosA,
+                endPosB = endPosB,
+                vehiclePosition = default,
+                vehicleTypes = vehicleType,
+                isHeavyVehicle = false,
+                hasCombustionEngine = false,
+                ignoreBlocked = true,
+                ignoreFlooded = false,
+                ignoreCosts = false,
+                randomParking = false,
+                stablePath = true,
+                skipQueue = skipQueue
+            };
 
             if (vehicleType == VehicleInfo.VehicleType.None) {
                 args.laneTypes = NetInfo.LaneType.Pedestrian;

@@ -17,7 +17,20 @@ namespace TrafficManager.Patch._TransportLineAI {
         private delegate void CheckSegmentProblemsDelegate(ushort segmentID, ref NetSegment data);
         private static MethodBase CheckSegmentProblemsMethod() => TranspilerUtil.DeclaredMethod<CheckSegmentProblemsDelegate>( typeof(TransportLineAI), "CheckSegmentProblems");
 
-        private delegate void CreatePathDelegate(out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue);
+        private delegate void CreatePathDelegate(out uint unit,
+                                                 ref Randomizer randomizer,
+                                                 uint buildIndex,
+                                                 PathUnit.Position startPosA,
+                                                 PathUnit.Position startPosB,
+                                                 PathUnit.Position endPosA,
+                                                 PathUnit.Position endPosB,
+                                                 NetInfo.LaneType laneTypes,
+                                                 VehicleInfo.VehicleType vehicleTypes,
+                                                 float maxLength,
+                                                 bool isHeavyVehicle,
+                                                 bool ignoreBlocked,
+                                                 bool stablePath,
+                                                 bool skipQueue);
 
         private static MethodBase CreatePathMethod() => TranspilerUtil.DeclaredMethod<CreatePathDelegate>(typeof(PathManager), "CreatePath");
 
