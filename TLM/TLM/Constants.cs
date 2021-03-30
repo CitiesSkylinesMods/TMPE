@@ -4,7 +4,7 @@ namespace TrafficManager {
     using TrafficManager.API.Manager;
     using UnityEngine;
 
-    public static class Constants {
+    public static class Constants { 
         /// <summary>
         /// Used where a 0..1f value has to be scaled to byte or a byte to 0..1f
         /// </summary>
