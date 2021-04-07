@@ -125,7 +125,7 @@ namespace TrafficManager {
         }
 
         [UsedImplicitly]
-        public void OnSettingsUI(UIHelperBase helper) {
+        public void OnSettingsUI(UIHelper helper) {
             // Note: This bugs out if done in OnEnabled(), hence doing it here instead.
             if (!Translation.IsListeningToGameLocaleChanged) {
                 Translation.IsListeningToGameLocaleChanged = true;
