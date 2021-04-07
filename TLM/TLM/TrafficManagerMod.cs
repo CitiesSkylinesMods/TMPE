@@ -49,14 +49,12 @@ namespace TrafficManager {
 
         public string Description => "Manage your city's traffic";
 
-        internal static TrafficManagerMod Instance = null;
-
-        internal bool InGameHotReload { get; set; } = false;
+        internal static bool InGameHotReload { get; set; } = false;
 
         /// <summary>
         /// determines if simulation is inside game/editor. useful to detect hot-reload.
         /// </summary>
-        internal static bool InGame() =>
+        internal static bool InGameOrEditor() =>
             SceneManager.GetActiveScene().name != "IntroScreen" &&
             SceneManager.GetActiveScene().name != "Startup";
 
@@ -97,10 +95,14 @@ namespace TrafficManager {
 
             Log._Debug("Scene is " + SceneManager.GetActiveScene().name);
 
-            Instance = this;
-            InGameHotReload = InGame();
+            InGameHotReload = InGameOrEditor();
 
             HarmonyHelper.EnsureHarmonyInstalled();
+
+            if(InGameHotReload) {
+                SerializableDataExtension.Load();
+                LoadingExtension.Load();
+            }
 
 #if DEBUG
             const bool installHarmonyASAP = false; // set true for fast testing
@@ -116,12 +118,10 @@ namespace TrafficManager {
             LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
             Translation.IsListeningToGameLocaleChanged = false; // is this necessary?
 
-            if (InGame() && LoadingExtension.Instance != null) {
-                //Hot reload Unloading
-                LoadingExtension.Instance.OnLevelUnloading();
-                LoadingExtension.Instance.OnReleased();
+            if (InGameOrEditor() && LoadingExtension.IsGameLoaded) {
+                //Hot Unload
+                LoadingExtension.Unload();
             }
-            Instance = null;
         }
 
         [UsedImplicitly]

@@ -19,20 +19,15 @@ namespace TrafficManager {
 
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {
-        static LoadingExtension() {
-            TranslationDatabase.LoadAllTranslations();
-        }
-
-        public LoadingExtension() {
-        }
-
-        internal static LoadingExtension Instance = null;
-
-        FastList<ISimulationManager> simManager =>
+        static FastList<ISimulationManager> simManager =>
             typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
                 ?.GetValue(null) as FastList<ISimulationManager>;
 
-        internal static AppMode? AppMode => Instance?.loadingManager?.currentMode;
+        internal static AppMode? AppMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
+
+        public static SimulationManager.UpdateMode UpdateMode => SimulationManager.instance.m_metaData.m_updateMode;
+        public static LoadMode Mode => (LoadMode)UpdateMode;
+        public static string Scene => SceneManager.GetActiveScene().name;
 
         /// <summary>
         /// determines whether Game mode as oppose to edit mode (eg asset editor).
@@ -52,31 +47,11 @@ namespace TrafficManager {
 
         public static bool IsGameLoaded { get; private set; }
 
-        public static bool IsPathManagerReplaced {
-            get; private set;
-        }
+        public static bool IsPathManagerReplaced { get; private set; }
 
-        public override void OnCreated(ILoading loading) {
-            Log._Debug("LoadingExtension.OnCreated() called");
 
-            // SelfDestruct.DestructOldInstances(this);
-            base.OnCreated(loading);
-            if (IsGameLoaded) {
-                // When another mod is detected, OnCreated is called again for god - or CS team - knows what reason!
-                Log._Debug("Hot reload of another mod detected. Skipping LoadingExtension.OnCreated() ...");
-                return;
-            }
-            InGameUtil.Instantiate();
 
-            RegisteredManagers = new List<ICustomManager>();
-            CustomPathManager = new CustomPathManager();
-
-            RegisterCustomManagers();
-
-            Instance = this;
-        }
-
-        private void RegisterCustomManagers() {
+        private static void RegisterCustomManagers() {
             // TODO represent data dependencies differently
             RegisteredManagers.Add(ExtNodeManager.Instance);
             RegisteredManagers.Add(ExtSegmentManager.Instance);
@@ -107,15 +82,14 @@ namespace TrafficManager {
             RegisteredManagers.Add(JunctionRestrictionsManager.Instance);
         }
 
-        public override void OnReleased() {
-            TrafficManagerMod.Instance.InGameHotReload = false;
-            Instance = null;
-            base.OnReleased();
-        }
+        public override void OnLevelUnloading() => Unload();
 
-        public override void OnLevelUnloading() {
-            Log.Info("OnLevelUnloading");
-            base.OnLevelUnloading();
+        public override void OnLevelLoaded(LoadMode mode) => Load();
+
+        public static void Unload() {
+            Log.Info("LoadingExtension.Unload()");
+            TrafficManagerMod.InGameHotReload = false;
+
             if (IsPathManagerReplaced) {
                 CustomPathManager._instance.WaitForAllPaths();
             }
@@ -168,13 +142,19 @@ namespace TrafficManager {
             IsGameLoaded = false;
         }
 
-        public override void OnLevelLoaded(LoadMode mode) {
-            SimulationManager.UpdateMode updateMode = SimulationManager.instance.m_metaData.m_updateMode;
-            string scene = SceneManager.GetActiveScene().name;
-            Log.Info($"OnLevelLoaded({mode}) called. updateMode={updateMode}, scene={scene}");
+        public static void Load() {
+            Log.Info($"LoadingExtension.Load() called. {Mode} called. updateMode={UpdateMode}, scene={Scene}");
 
-            if (scene == "ThemeEditor")
+            if(Scene == "ThemeEditor")
                 return;
+
+            TranslationDatabase.LoadAllTranslations();
+            InGameUtil.Instantiate();
+
+            RegisteredManagers = new List<ICustomManager>();
+            CustomPathManager = new CustomPathManager();
+
+            RegisterCustomManagers();
 
             IsGameLoaded = false;
 
@@ -247,7 +227,7 @@ namespace TrafficManager {
             IsGameLoaded = true;
 
             //it will replace stock PathManager or already Replaced before HotReload
-            if (!IsPathManagerReplaced || TrafficManagerMod.Instance.InGameHotReload) {
+            if (!IsPathManagerReplaced || TrafficManagerMod.InGameHotReload) {
                 try {
                     Log.Info("Pathfinder Compatible. Setting up CustomPathManager and SimManager.");
                     FieldInfo pathManagerInstance = typeof(Singleton<PathManager>).GetField(
@@ -279,7 +259,7 @@ namespace TrafficManager {
                     pathManagerInstance.SetValue(null, CustomPathManager);
 
                     Log._Debug("Getting Current SimulationManager");
-                    var simManager = this.simManager;
+                    var simManager = LoadingExtension.simManager;
                     if (simManager == null) {
                         throw new Exception("simManager is null");
                     }
