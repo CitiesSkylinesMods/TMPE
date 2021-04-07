@@ -19,6 +19,10 @@ namespace TrafficManager {
 
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {
+        static LoadingExtension() {
+            TranslationDatabase.LoadAllTranslations();
+        }
+
         static FastList<ISimulationManager> simManager =>
             typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
                 ?.GetValue(null) as FastList<ISimulationManager>;
@@ -148,7 +152,6 @@ namespace TrafficManager {
             if(Scene == "ThemeEditor")
                 return;
 
-            TranslationDatabase.LoadAllTranslations();
             InGameUtil.Instantiate();
 
             RegisteredManagers = new List<ICustomManager>();
