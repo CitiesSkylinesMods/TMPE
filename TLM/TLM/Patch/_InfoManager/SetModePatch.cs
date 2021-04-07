@@ -28,7 +28,7 @@ namespace TrafficManager.Patch._InfoManager
                 // UI to be handled by Default tool
                 ModUI.Instance.CloseMainMenu();
 
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(delegate () {
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
                     DefaultTool.OpenWorldInfoPanel(
                     Singleton<InstanceManager>.instance.GetSelectedInstance(),
                     Input.mousePosition);
