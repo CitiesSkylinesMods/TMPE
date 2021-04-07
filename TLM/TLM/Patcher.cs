@@ -9,20 +9,10 @@ namespace TrafficManager {
     using TrafficManager.RedirectionFramework;
     using TrafficManager.Util;
 
-    public class Patcher {
-        public static Patcher Instance { get; private set; }
-
-        public static Patcher Create() => Instance = new Patcher();
-
+    public static class Patcher {
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
 
-        private bool initialized_ = false;
-
-        public void Install() {
-            if (initialized_) {
-                return;
-            }
-
+        public static void Install() {
             Log.Info("Init detours");
             bool fail = false;
 
@@ -71,20 +61,13 @@ namespace TrafficManager {
             } else {
                 Log.Info("Detours successful");
             }
-
-            initialized_ = true;
         }
 
-        public void Uninstall() {
-            if (!initialized_) {
-                return;
-            }
-
+        public static void Uninstall() {
             var harmony = new Harmony(HARMONY_ID);
             Shortcuts.Assert(harmony != null, "HarmonyInst!=null");
             harmony.UnpatchAll(HARMONY_ID);
 
-            initialized_ = false;
             Log.Info("Reverting detours finished.");
         }
     }

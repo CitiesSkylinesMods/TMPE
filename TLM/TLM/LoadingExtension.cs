@@ -16,16 +16,21 @@ namespace TrafficManager {
     using UnityEngine.SceneManagement;
     using Util;
     using Object = UnityEngine.Object;
+    using System.Linq;
 
     [UsedImplicitly]
     public class LoadingExtension : LoadingExtensionBase {
         static LoadingExtension() {
             TranslationDatabase.LoadAllTranslations();
+            RegisterCustomManagers();
         }
 
-        static FastList<ISimulationManager> simManager =>
-            typeof(SimulationManager).GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
-                ?.GetValue(null) as FastList<ISimulationManager>;
+        static FastList<ISimulationManager> GetSimManagers() =>
+            typeof(SimulationManager)
+            .GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
+            ?.GetValue(null)
+            as FastList<ISimulationManager>
+            ?? throw new Exception("could not get SimulationManager.m_managers");
 
         internal static AppMode? AppMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
 
@@ -45,17 +50,15 @@ namespace TrafficManager {
         /// </summary>
         public static Translation TranslationDatabase = new Translation();
 
-        public static UITransportDemand TransportDemandUI { get; private set; }
-
         public static List<ICustomManager> RegisteredManagers { get; private set; }
 
         public static bool IsGameLoaded { get; private set; }
 
         public static bool IsPathManagerReplaced { get; private set; }
 
-
-
         private static void RegisterCustomManagers() {
+            RegisteredManagers = new List<ICustomManager>();
+
             // TODO represent data dependencies differently
             RegisteredManagers.Add(ExtNodeManager.Instance);
             RegisteredManagers.Add(ExtSegmentManager.Instance);
@@ -92,17 +95,13 @@ namespace TrafficManager {
 
         public static void Unload() {
             Log.Info("LoadingExtension.Unload()");
-            TrafficManagerMod.InGameHotReload = false;
 
             if (IsPathManagerReplaced) {
                 CustomPathManager._instance.WaitForAllPaths();
             }
 
             try {
-                var reverseManagers = new List<ICustomManager>(RegisteredManagers);
-                reverseManagers.Reverse();
-
-                foreach (ICustomManager manager in reverseManagers) {
+                foreach (ICustomManager manager in RegisteredManagers.AsEnumerable().Reverse()) {
                     Log.Info($"OnLevelUnloading: {manager.GetType().Name}");
                     manager.OnLevelUnloading();
                 }
@@ -110,24 +109,12 @@ namespace TrafficManager {
                 Flags.OnLevelUnloading();
                 GlobalConfig.OnLevelUnloading();
 
-                var gameObject = UIView.GetAView().gameObject;
-
-                void Destroy<T>() where T : MonoBehaviour {
-                    Object obj = (Object)gameObject.GetComponent<T>();
-                    if (obj != null) {
-                        Object.Destroy(obj);
-                    }
-                }
-
-                Destroy<RoadSelectionPanels>();
-                Destroy<RemoveVehicleButtonExtender>();
-                Destroy<RemoveCitizenInstanceButtonExtender>();
-
-                //It's MonoBehaviour - comparing to null is wrong
-                if (TransportDemandUI) {
-                    Object.Destroy(TransportDemandUI);
-                    TransportDemandUI = null;
-                }
+                var uiviewGO = UIView.GetAView().gameObject;
+                Object.Destroy(uiviewGO.GetComponent<RoadSelectionPanels>());
+                Object.Destroy(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());
+                Object.Destroy(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
+                Object.Destroy(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
+                Object.Destroy(uiviewGO.GetComponent<UITransportDemand>());
 
                 Log.Info("Removing Controls from UI.");
                 if (ModUI.Instance != null) {
@@ -142,8 +129,9 @@ namespace TrafficManager {
                 // ignored - prevents collision with other mods
             }
 
-            Patcher.Instance?.Uninstall();
+            Patcher.Uninstall();
             IsGameLoaded = false;
+            TrafficManagerMod.InGameHotReload = false;
         }
 
         public static void Load() {
@@ -153,9 +141,6 @@ namespace TrafficManager {
                 return;
 
             InGameUtil.Instantiate();
-
-            RegisteredManagers = new List<ICustomManager>();
-            CustomPathManager = new CustomPathManager();
 
             RegisterCustomManagers();
 
@@ -261,17 +246,14 @@ namespace TrafficManager {
 
                     pathManagerInstance.SetValue(null, CustomPathManager);
 
-                    Log._Debug("Getting Current SimulationManager");
-                    var simManager = LoadingExtension.simManager;
-                    if (simManager == null) {
-                        throw new Exception("simManager is null");
-                    }
+                    Log._Debug("Getting Current SimulationManagers");
+                    var simManagers = GetSimManagers();
 
                     Log._Debug("Removing Stock PathManager");
-                    simManager.Remove(stockPathManager);
+                    simManagers.Remove(stockPathManager);
 
                     Log._Debug("Adding Custom PathManager");
-                    simManager.Add(CustomPathManager);
+                    simManagers.Add(CustomPathManager);
 
                     Object.Destroy(stockPathManager, 10f);
 
@@ -301,22 +283,14 @@ namespace TrafficManager {
 
             ModUI.OnLevelLoaded();
             if (PlayMode) {
-                // Init transport demand UI
-                if (TransportDemandUI == null) {
-                    UIView uiView = UIView.GetAView();
-                    TransportDemandUI = (UITransportDemand)uiView.AddUIComponent(typeof(UITransportDemand));
-                }
-
-                // add "remove vehicle" button
-                UIView.GetAView().gameObject.AddComponent<RemoveVehicleButtonExtender>();
-
-                // add "remove citizen instance" button
-                UIView.GetAView().gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
-
-                UIView.GetAView().gameObject.AddComponent<RoadSelectionPanels>();
+                UIView uiView = UIView.GetAView();
+                uiView.AddUIComponent(typeof(UITransportDemand));
+                uiView.gameObject.AddComponent<RemoveVehicleButtonExtender>();
+                uiView.gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
+                uiView.gameObject.AddComponent<RoadSelectionPanels>();
             }
 
-            Patcher.Create().Install();
+            Patcher.Install();
 
             // Log.Info("Fixing non-created nodes with problems...");
             // FixNonCreatedNodeProblems();
