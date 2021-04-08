@@ -14,6 +14,7 @@ namespace TrafficManager.Custom.PathFinding {
     using TrafficManager.RedirectionFramework.Attributes;
     using TrafficManager.State;
     using UnityEngine;
+    using ColossalFramework.UI;
 
 #if !PF_DIJKSTRA
     using CustomPathFind = CustomPathFind_Old;
@@ -28,7 +29,14 @@ namespace TrafficManager.Custom.PathFinding {
 
         private CustomPathFind[] _replacementPathFinds;
 
-        public static CustomPathManager _instance;
+        public static CustomPathManager _instance { get; private set; }
+
+        private static FastList<ISimulationManager> GetSimManagers() =>
+            typeof(SimulationManager)
+            .GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
+            ?.GetValue(null)
+            as FastList<ISimulationManager>
+            ?? throw new Exception("could not get SimulationManager.m_managers");
 
 #if QUEUEDSTATS
         public static uint TotalQueuedPathFinds {
@@ -373,6 +381,69 @@ namespace TrafficManager.Custom.PathFinding {
         protected virtual void OnDestroy() {
             Log._Debug("CustomPathManager: OnDestroy");
             StopPathFinds();
+        }
+
+        public void OnLevelUnloading() {
+            Log.Info("CustomPathManager.OnLevelUnloading()");
+            var simManagers = GetSimManagers();
+            WaitForAllPaths();
+            simManagers.Remove(this);
+            GameObject.Destroy(this);
+            _instance = null;
+
+            // restore stock path manager.
+            PathManager stockPathManager = PathManager.instance
+                ?? throw new Exception("stockPathManager is null");
+            simManagers.Add(stockPathManager);
+            stockPathManager.enabled = true;
+        }
+
+        public static void OnLevelLoaded() {
+            try {
+                Log.Info("CustomPathManager.OnLevelLoaded() called.");
+
+                PathManager stockPathManager = PathManager.instance
+                    ?? throw new Exception("stockPathManager is null");
+                Log._Debug($"Got stock PathManager instance {stockPathManager?.GetName()}");
+
+                _instance = stockPathManager.gameObject.AddComponent<CustomPathManager>()
+                    ?? throw new Exception("CustomPathManager is null. Error creating it.");
+                Log._Debug("Added CustomPathManager to gameObject List");
+
+                _instance.UpdateWithPathManagerValues(stockPathManager);
+                Log._Debug("UpdateWithPathManagerValues success");
+
+                var simManagers = GetSimManagers();
+
+                Log._Debug("Removing Stock PathManager");
+                simManagers.Remove(stockPathManager);
+
+                Log._Debug("Adding Custom PathManager");
+                simManagers.Add(_instance);
+
+                // retain vanila custom path manager for cleaner code and to support in-game unload 
+                stockPathManager.enabled = false;
+
+                Log._Debug("Should be custom: " + Singleton<PathManager>.instance.GetType());
+            } catch(Exception ex) {
+                string error =
+                    "Traffic Manager: President Edition failed to load. You can continue " +
+                    "playing but it's NOT recommended. Traffic Manager will not work as expected.";
+                Log.Error(error);
+                Log.Error($"Path manager replacement error: {ex}");
+
+                Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
+                    () => {
+                        UIView.library
+                              .ShowModal<ExceptionPanel>(
+                                  "ExceptionPanel")
+                              .SetMessage(
+                                  "TM:PE failed to load",
+                                  error,
+                                  true);
+                    });
+            
+            }
         }
     }
 }
