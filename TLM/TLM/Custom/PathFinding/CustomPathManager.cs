@@ -381,6 +381,7 @@ namespace TrafficManager.Custom.PathFinding {
         protected virtual void OnDestroy() {
             Log._Debug("CustomPathManager: OnDestroy");
             StopPathFinds();
+            _instance = null;
         }
 
         public void OnLevelUnloading() {
@@ -389,7 +390,6 @@ namespace TrafficManager.Custom.PathFinding {
             WaitForAllPaths();
             simManagers.Remove(this);
             GameObject.Destroy(this);
-            _instance = null;
 
             // restore stock path manager.
             PathManager stockPathManager = PathManager.instance
@@ -406,7 +406,7 @@ namespace TrafficManager.Custom.PathFinding {
                     ?? throw new Exception("stockPathManager is null");
                 Log._Debug($"Got stock PathManager instance {stockPathManager?.GetName()}");
 
-                _instance = stockPathManager.gameObject.AddComponent<CustomPathManager>()
+                _ = stockPathManager.gameObject.AddComponent<CustomPathManager>()
                     ?? throw new Exception("CustomPathManager is null. Error creating it.");
                 Log._Debug("Added CustomPathManager to gameObject List");
 

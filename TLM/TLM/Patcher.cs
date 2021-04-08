@@ -67,7 +67,9 @@ namespace TrafficManager {
             var harmony = new Harmony(HARMONY_ID);
             Shortcuts.Assert(harmony != null, "HarmonyInst!=null");
             harmony.UnpatchAll(HARMONY_ID);
+            Log.Info("Uninstalled harmony patches");
 
+            AssemblyRedirector.Revert();
             Log.Info("Reverting detours finished.");
         }
     }
