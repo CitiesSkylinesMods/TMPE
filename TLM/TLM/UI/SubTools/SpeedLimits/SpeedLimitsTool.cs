@@ -36,6 +36,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private const int GUI_SPEED_SIGN_SIZE = 80;
         private readonly float speedLimitSignSize = 70f;
 
+        private readonly GUI.WindowFunction _guiDefaultsWindowDelegate;
+        private readonly GUI.WindowFunction _guiSpeedLimitsWindowDelegate;
+
         private bool cursorInSecondaryPanel;
 
         /// <summary>Currently selected speed limit on the limits palette
@@ -97,6 +100,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         public SpeedLimitsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
+            _guiDefaultsWindowDelegate = GuiDefaultsWindow;
+            _guiSpeedLimitsWindowDelegate = GuiSpeedLimitsWindow;
+
             CachedVisibleSegmentIds = new GenericArrayCache<ushort>(NetManager.MAX_SEGMENT_COUNT);
             LastCachedCamera = new CameraTransformValue();
         }
@@ -142,7 +148,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             paletteWindowRect = GUILayout.Window(
                 id: 254,
                 screenRect: paletteWindowRect,
-                func: GuiSpeedLimitsWindow,
+                func: _guiSpeedLimitsWindowDelegate,
                 text: Translation.Menu.Get("Tooltip:Speed limits") + unitTitle,
                 style: WindowStyle,
                 options: EmptyOptionsArray);
@@ -151,7 +157,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 defaultsWindowRect = GUILayout.Window(
                     id: 258,
                     screenRect: defaultsWindowRect,
-                    func: GuiDefaultsWindow,
+                    func: _guiDefaultsWindowDelegate,
                     text: Translation.SpeedLimits.Get("Window.Title:Default speed limits"),
                     style: WindowStyle,
                     options: EmptyOptionsArray);
