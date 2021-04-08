@@ -16,10 +16,6 @@ namespace TrafficManager.Custom.PathFinding {
     using UnityEngine;
     using ColossalFramework.UI;
 
-#if !PF_DIJKSTRA
-    using CustomPathFind = CustomPathFind_Old;
-#endif
-
     [TargetType(typeof(PathManager))]
     public class CustomPathManager : PathManager {
         /// <summary>
@@ -44,18 +40,12 @@ namespace TrafficManager.Custom.PathFinding {
             typeof(Singleton<PathManager>)
             .GetField(
             "sInstance",
-            BindingFlags.Static | BindingFlags.NonPublic)??
+            BindingFlags.Static | BindingFlags.NonPublic) ??
             throw new Exception("pathManagerInstance is null");
 
 #if QUEUEDSTATS
-    public static uint TotalQueuedPathFinds {
-            get; private set;
-        }
+        public static uint TotalQueuedPathFinds { get; private set; }
 #endif
-
-        public static bool InitDone {
-            get; private set;
-        }
 
         public static void OnLevelLoaded() {
             try {
@@ -100,7 +90,6 @@ namespace TrafficManager.Custom.PathFinding {
             simManagers.Add(this);
 
             Log._Debug("Should be custom: " + PathManager.instance.GetType());
-            InitDone = true;
         }
 
         public void UpdateWithPathManagerValues(PathManager stockPathManager) {
@@ -128,12 +117,6 @@ namespace TrafficManager.Custom.PathFinding {
 
                 for (int i = 0; i < numCustomPathFinds; i++) {
                     _replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();
-#if !PF_DIJKSTRA
-		    _replacementPathFinds[i].pfId = i;
-		    if (i == 0) {
-			_replacementPathFinds[i].IsMasterPathFind = true;
-		    }
-#endif
                 }
 
                 Log._Debug("Setting _replacementPathFinds");
@@ -349,15 +332,9 @@ namespace TrafficManager.Custom.PathFinding {
                 pathFind = pathFindCandidate;
             }
 
-#if PF_DIJKSTRA
             if (pathFind != null && pathFind.CalculatePath(unit, args.skipQueue)) {
                 return true;
             }
-#else
-			if (pathFind != null && pathFind.ExtCalculatePath(unit, args.skipQueue)) {
-				return true;
-			}
-#endif
 
             // NON-STOCK CODE START
             lock(m_bufferLock) {
