@@ -27,7 +27,7 @@ namespace TrafficManager.Custom.PathFinding {
 
         public static CustomPathManager _instance => PathManager.instance as CustomPathManager;
 
-        public PathManager stockPathManager_;
+        private PathManager stockPathManager_;
 
         private static FastList<ISimulationManager> GetSimulationManagers() =>
             typeof(SimulationManager)
@@ -36,7 +36,7 @@ namespace TrafficManager.Custom.PathFinding {
             as FastList<ISimulationManager>
             ?? throw new Exception("could not get SimulationManager.m_managers");
 
-        private static FieldInfo pathManagerInstance =>
+        private static FieldInfo PathManagerInstance =>
             typeof(Singleton<PathManager>)
             .GetField(
             "sInstance",
@@ -78,7 +78,7 @@ namespace TrafficManager.Custom.PathFinding {
             stockPathManager_ = PathManager.instance
                 ?? throw new Exception("stockPathManager is null");
             Log._Debug($"Got stock PathManager instance {stockPathManager_?.GetName()}");
-            pathManagerInstance.SetValue(null, this);
+            PathManagerInstance.SetValue(null, this);
             UpdateWithPathManagerValues(stockPathManager_);
 
             var simManagers = GetSimulationManagers();
@@ -450,7 +450,7 @@ namespace TrafficManager.Custom.PathFinding {
             var simManagers = GetSimulationManagers();
             simManagers.Remove(this);
             simManagers.Add(stockPathManager_);
-            pathManagerInstance.SetValue(null, stockPathManager_);
+            PathManagerInstance.SetValue(null, stockPathManager_);
         }
     }
 }
