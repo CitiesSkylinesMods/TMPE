@@ -128,7 +128,7 @@ namespace TrafficManager.UI.Helpers {
 #if DEBUG
         public static class Test {
             private static int n = 0;
-            public static void OnSettingsUI(UIHelperBase helperBase) {
+            public static void OnSettingsUI(UIHelper helperBase) {
                 n = 0;
                 ExtUITabstrip tabStrip = ExtUITabstrip.Create(helperBase);
                 AddTab(tabStrip, "A");
