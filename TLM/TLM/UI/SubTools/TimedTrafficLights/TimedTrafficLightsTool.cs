@@ -20,6 +20,10 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         : LegacySubTool,
           UI.MainMenu.IOnscreenDisplayProvider
     {
+        private readonly GUI.WindowFunction _guiTimedControlPanelDelegate;
+        private readonly GUI.WindowFunction _guiTimedTrafficLightsNodeWindowDelegate;
+        private readonly GUI.WindowFunction _guiTimedTrafficLightsPasteWindowDelegate;
+
         private TTLToolMode ttlToolMode_ = TTLToolMode.SelectNode;
 
         private readonly GUIStyle _counterStyle = new GUIStyle();
@@ -54,6 +58,10 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
         public TimedTrafficLightsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
+            _guiTimedControlPanelDelegate = GuiTimedControlPanel;
+            _guiTimedTrafficLightsNodeWindowDelegate = GuiTimedTrafficLightsNodeWindow;
+            _guiTimedTrafficLightsPasteWindowDelegate = GuiTimedTrafficLightsPasteWindow;
+
             currentTimedNodeIds = new HashSet<ushort>();
         }
 
@@ -1093,7 +1101,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             _windowRect2 = GUILayout.Window(
                 id: 252,
                 screenRect: _windowRect2,
-                func: GuiTimedTrafficLightsNodeWindow,
+                func: _guiTimedTrafficLightsNodeWindowDelegate,
                 text: T("TTL.Window.Title:Select nodes"),
                 style: WindowStyle,
                 options: EmptyOptionsArray);
@@ -1110,7 +1118,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             _windowRect = GUILayout.Window(
                 id: 253,
                 screenRect: _windowRect,
-                func: GuiTimedControlPanel,
+                func: _guiTimedControlPanelDelegate,
                 text: T("Dialog.Title:Timed traffic lights manager"),
                 style: WindowStyle,
                 options: EmptyOptionsArray);
@@ -1133,7 +1141,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             _windowRect2 = GUILayout.Window(
                 id: 255,
                 screenRect: _windowRect2,
-                func: GuiTimedTrafficLightsPasteWindow,
+                func: _guiTimedTrafficLightsPasteWindowDelegate,
                 text: T("TTL.Window.Title:Paste"),
                 style: WindowStyle,
                 options: EmptyOptionsArray);
