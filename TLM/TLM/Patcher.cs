@@ -1,13 +1,9 @@
 namespace TrafficManager {
-    using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using HarmonyLib;
     using System;
-    using System.Collections.Generic;
-    using System.Reflection;
     using TrafficManager.RedirectionFramework;
-    using TrafficManager.Util;
 
     public static class Patcher {
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
@@ -59,10 +55,9 @@ namespace TrafficManager {
         }
 
         public static void Uninstall() {
-            var harmony = new Harmony(HARMONY_ID);
-            Shortcuts.Assert(harmony != null, "HarmonyInst!=null");
-            harmony.UnpatchAll(HARMONY_ID);
-            Log.Info("Uninstalled harmony patches");
+            new Harmony(HARMONY_ID).UnpatchAll(HARMONY_ID);
+            AssemblyRedirector.Revert();
+            Log.Info("TMPE patches uninstalled.");
         }
     }
 }
