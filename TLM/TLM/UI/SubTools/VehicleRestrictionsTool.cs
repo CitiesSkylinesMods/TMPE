@@ -150,7 +150,7 @@ namespace TrafficManager.UI.SubTools {
                     255,
                     windowRect,
                     _guiVehicleRestrictionsWindowDelegate,
-                   T("Dialog.Title:Vehicle restrictions"),
+                    T("Dialog.Title:Vehicle restrictions"),
                     WindowStyle,
                     EmptyOptionsArray);
                 cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
