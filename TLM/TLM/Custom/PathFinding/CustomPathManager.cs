@@ -431,18 +431,13 @@ namespace TrafficManager.Custom.PathFinding {
                     "playing but it's NOT recommended. Traffic Manager will not work as expected.";
                 Log.Error(error);
                 Log.Error($"Path manager replacement error: {ex}");
-
-                Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
-                    () => {
-                        UIView.library
-                              .ShowModal<ExceptionPanel>(
-                                  "ExceptionPanel")
-                              .SetMessage(
-                                  "TM:PE failed to load",
-                                  error,
-                                  true);
-                    });
-            
+                UIView.library
+                        .ShowModal<ExceptionPanel>(
+                            "ExceptionPanel")
+                        .SetMessage(
+                            "TM:PE failed to load",
+                            error,
+                            true);
             }
         }
     }
