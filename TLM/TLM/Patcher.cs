@@ -21,10 +21,8 @@ namespace TrafficManager {
                 Harmony.DEBUG = true;
 #endif
                 // Harmony attribute-driven patching
-                Log.Info($"Performing Harmony attribute-driven patching");
-                var harmony = new Harmony(HARMONY_ID);
-                Shortcuts.Assert(harmony != null, "HarmonyInst!=null");
-                harmony.PatchAll();
+                Log.Info($"Performing Harmony attribute-driven patches");
+                new Harmony(HARMONY_ID).PatchAll();
                 Log.Info($"Harmony attribute-driven patching successfull!");
             }
             catch (Exception e) {
@@ -46,20 +44,17 @@ namespace TrafficManager {
             }
 
             if (fail) {
-                Log.Info("Detours failed");
-                Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
-                    () => {
-                        UIView.library
-                              .ShowModal<ExceptionPanel>("ExceptionPanel")
-                              .SetMessage(
-                                "TM:PE failed to load",
-                                "Traffic Manager: President Edition failed to load. You can " +
-                                "continue playing but it's NOT recommended. Traffic Manager will " +
-                                "not work as expected.",
-                                true);
-                    });
+                Log.Info("patcher failed");
+                UIView.library
+                        .ShowModal<ExceptionPanel>("ExceptionPanel")
+                        .SetMessage(
+                        "TM:PE failed to load",
+                        "Traffic Manager: President Edition failed to load. You can " +
+                        "continue playing but it's NOT recommended. Traffic Manager will " +
+                        "not work as expected.",
+                        true);
             } else {
-                Log.Info("Detours successful");
+                Log.Info("TMPE patches installed successfully");
             }
         }
 
@@ -68,9 +63,6 @@ namespace TrafficManager {
             Shortcuts.Assert(harmony != null, "HarmonyInst!=null");
             harmony.UnpatchAll(HARMONY_ID);
             Log.Info("Uninstalled harmony patches");
-
-            AssemblyRedirector.Revert();
-            Log.Info("Reverting detours finished.");
         }
     }
 }
