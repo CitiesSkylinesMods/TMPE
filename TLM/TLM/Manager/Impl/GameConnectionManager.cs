@@ -1,6 +1,5 @@
 namespace TrafficManager.Manager.Impl {
-    using API.Manager;
-    using API.Manager.Connections;
+    using Connections;
     using Patch._CitizenAI._HumanAI.Connection;
     using Patch._CitizenAI._ResidentAI.Connection;
     using Patch._CitizenAI._TouristAI.Connection;

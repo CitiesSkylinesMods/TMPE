@@ -1,4 +1,4 @@
-namespace TrafficManager.API.Manager.Connections {
+namespace TrafficManager.Manager.Connections {
     using UnityEngine;
 
     public delegate float CalculateTargetSpeedDelegate(VehicleAI vehicleAI, ushort vehicleID, ref Vehicle data, float speedLimit, float curve);
@@ -14,7 +14,7 @@ namespace TrafficManager.API.Manager.Connections {
     public delegate void ArrivingToDestinationDelegate(VehicleAI vehicleAI, ushort vehicleID, ref Vehicle vehicleData);
     public delegate bool LeftHandDriveDelegate(VehicleAI vehicleAI, NetInfo.Lane lane);
 
-    public interface IVehicleAIConnection {
+    internal interface IVehicleAIConnection {
         CalculateTargetSpeedDelegate CalculateTargetSpeed { get; }
         PathfindFailureDelegate PathfindFailure { get; }
         PathfindSuccessDelegate PathfindSuccess { get; }

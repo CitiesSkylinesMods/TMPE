@@ -1,12 +1,12 @@
 namespace TrafficManager.Patch._CitizenAI._ResidentAI {
     using System.Reflection;
-    using API.Manager.Connections;
     using API.Traffic.Enums;
     using ColossalFramework;
     using ColossalFramework.Math;
     using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
+    using Manager.Connections;
     using Manager.Impl;
     using State;
     using State.ConfigData;
@@ -30,10 +30,10 @@ namespace TrafficManager.Patch._CitizenAI._ResidentAI {
 
         [UsedImplicitly]
         public static void Prepare() {
-            GetTaxiProbability = Constants.ManagerFactory.GameConnectionManager.ResidentAIConnection.GetTaxiProbability;
-            GetBikeProbability = Constants.ManagerFactory.GameConnectionManager.ResidentAIConnection.GetBikeProbability;
-            GetCarProbability = Constants.ManagerFactory.GameConnectionManager.ResidentAIConnection.GetCarProbability;
-            GetElectricCarProbability = Constants.ManagerFactory.GameConnectionManager.ResidentAIConnection.GetElectricCarProbability;
+            GetTaxiProbability = GameConnectionManager.Instance.ResidentAIConnection.GetTaxiProbability;
+            GetBikeProbability = GameConnectionManager.Instance.ResidentAIConnection.GetBikeProbability;
+            GetCarProbability = GameConnectionManager.Instance.ResidentAIConnection.GetCarProbability;
+            GetElectricCarProbability = GameConnectionManager.Instance.ResidentAIConnection.GetElectricCarProbability;
         }
 
         [UsedImplicitly]

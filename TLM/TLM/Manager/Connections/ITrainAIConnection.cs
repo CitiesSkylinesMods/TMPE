@@ -1,4 +1,4 @@
-namespace TrafficManager.API.Manager.Connections {
+namespace TrafficManager.Manager.Connections {
     using ColossalFramework.Math;
     using UnityEngine;
 
@@ -15,9 +15,7 @@ namespace TrafficManager.API.Manager.Connections {
 
     public delegate void ReverseDelegate(ushort leaderID, ref Vehicle leaderData);
 
-    public interface ITrainAIConnection {
-        // in-progress
-
+    internal interface ITrainAIConnection {
         UpdatePathTargetPositionsDelegate UpdatePathTargetPositions { get; }
         GetNoiseLevelDelegate GetNoiseLevel { get; }
         GetMaxSpeedDelegate GetMaxSpeed { get; }

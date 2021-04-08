@@ -34,7 +34,7 @@ namespace TrafficManager.API.Manager.Connections {
                                                       ref Vector3 parkPos,
                                                       ref Quaternion parkRot);
 
-    public interface IPassengerCarAIConnection {
+    internal interface IPassengerCarAIConnection {
         FindParkingSpaceDelegate FindParkingSpace { get; }
         FindParkingSpacePropDelegate FindParkingSpaceProp { get; }
         FindParkingSpaceRoadSideDelegate FindParkingSpaceRoadSide { get; }

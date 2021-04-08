@@ -1,6 +1,6 @@
 namespace TrafficManager.Patch._VehicleAI._TrainAI.Connection {
     using System;
-    using API.Manager.Connections;
+    using Manager.Connections;
 
     internal class TrainAIConnection : ITrainAIConnection {
         internal TrainAIConnection(UpdatePathTargetPositionsDelegate updatePathTargetPositionsDelegate,

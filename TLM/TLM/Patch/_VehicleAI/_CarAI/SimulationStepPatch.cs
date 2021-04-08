@@ -92,7 +92,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                         data.m_pathPositionIndex = 255;
                         data.m_flags &= ~Vehicle.Flags.WaitingPath;
                         data.m_flags &= ~Vehicle.Flags.Arriving;
-                        Constants.ManagerFactory.GameConnectionManager.VehicleAIConnection.PathfindSuccess(__instance, vehicleID, ref data);
+                        GameConnectionManager.Instance.VehicleAIConnection.PathfindSuccess(__instance, vehicleID, ref data);
                         __instance.TrySpawn(vehicleID, ref data);
                         break;
                     }
@@ -134,7 +134,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                         data.m_flags &= ~Vehicle.Flags.WaitingPath;
                         Singleton<PathManager>.instance.ReleasePath(data.m_path);
                         data.m_path = 0u;
-                        Constants.ManagerFactory.GameConnectionManager.VehicleAIConnection.PathfindFailure(__instance, vehicleID, ref data);
+                        GameConnectionManager.Instance.VehicleAIConnection.PathfindFailure(__instance, vehicleID, ref data);
                         return false;
                     }
 
@@ -150,7 +150,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
 
                         // path mode has been updated, repeat path-finding
                         data.m_flags &= ~Vehicle.Flags.WaitingPath;
-                        Constants.ManagerFactory.GameConnectionManager.VehicleAIConnection.InvalidPath(__instance, vehicleID, ref data, vehicleID, ref data);
+                        GameConnectionManager.Instance.VehicleAIConnection.InvalidPath(__instance, vehicleID, ref data, vehicleID, ref data);
                         break;
                     }
                 }

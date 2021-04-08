@@ -67,7 +67,5 @@
 
         public IVehicleRestrictionsManager VehicleRestrictionsManager =>
             Impl.VehicleRestrictionsManager.Instance;
-
-        public IGameConnectionManager GameConnectionManager => Impl.GameConnectionManager.Instance;
     }
 }

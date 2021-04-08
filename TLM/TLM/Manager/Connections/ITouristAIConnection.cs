@@ -1,4 +1,4 @@
-namespace TrafficManager.API.Manager.Connections {
+namespace TrafficManager.Manager.Connections {
     public delegate int GetTaxiProbabilityDelegate(TouristAI instance);
 
     public delegate int GetBikeProbabilityDelegate(TouristAI instance);
@@ -9,7 +9,7 @@ namespace TrafficManager.API.Manager.Connections {
 
     public delegate int GetCamperProbabilityDelegate(TouristAI instance, Citizen.Wealth wealth);
 
-    public interface ITouristAIConnection {
+    internal interface ITouristAIConnection {
         GetTaxiProbabilityDelegate GetTaxiProbability { get; }
         GetBikeProbabilityDelegate GetBikeProbability { get; }
         GetCarProbabilityDelegate GetCarProbability { get; }

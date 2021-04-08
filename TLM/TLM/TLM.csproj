@@ -137,6 +137,13 @@
     </Compile>
     <Compile Include="Constants.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
+    <Compile Include="Manager\Connections\IHumanAIConnection.cs" />
+    <Compile Include="Manager\Connections\IPassengerCarAIConnection.cs" />
+    <Compile Include="Manager\Connections\IResidentAIConnection.cs" />
+    <Compile Include="Manager\Connections\ITouristAIConnection.cs" />
+    <Compile Include="Manager\Connections\ITrainAIConnection.cs" />
+    <Compile Include="Manager\Connections\IVehicleAIConnection.cs" />
+    <Compile Include="Manager\IGameConnectionManager.cs" />
     <Compile Include="Manager\Impl\GameConnectionManager.cs" />
     <Compile Include="Patcher.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />

@@ -1,7 +1,7 @@
 namespace TrafficManager.Patch._CitizenAI._ResidentAI.Connection {
     using System;
-    using API.Manager.Connections;
     using CSUtil.Commons;
+    using Manager.Connections;
     using Util;
 
     public static class ResidentAIHook {

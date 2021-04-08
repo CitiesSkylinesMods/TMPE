@@ -1,8 +1,8 @@
 namespace TrafficManager.Patch._CitizenAI._HumanAI.Connection {
     using System;
-    using API.Manager.Connections;
     using CSUtil.Commons;
     using HarmonyLib;
+    using Manager.Connections;
     using UnityEngine;
     using Util;
 

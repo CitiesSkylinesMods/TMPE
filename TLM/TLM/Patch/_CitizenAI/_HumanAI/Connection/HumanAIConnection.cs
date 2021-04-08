@@ -1,6 +1,6 @@
 namespace TrafficManager.Patch._CitizenAI._HumanAI.Connection {
     using System;
-    using API.Manager.Connections;
+    using Manager.Connections;
 
     internal class HumanAIConnection : IHumanAIConnection {
         internal HumanAIConnection(SpawnDelegate spawnCitizenAI,

@@ -1,11 +1,11 @@
 namespace TrafficManager.Patch._CitizenAI._TouristAI {
     using System.Reflection;
-    using API.Manager.Connections;
     using API.Traffic.Enums;
     using ColossalFramework.Math;
     using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
+    using Manager.Connections;
     using Manager.Impl;
     using State;
     using State.ConfigData;
@@ -29,11 +29,11 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
 
         [UsedImplicitly]
         public static void Prepare() {
-            GetTaxiProbability = Constants.ManagerFactory.GameConnectionManager.TouristAIConnection.GetTaxiProbability;
-            GetBikeProbability = Constants.ManagerFactory.GameConnectionManager.TouristAIConnection.GetBikeProbability;
-            GetCarProbability = Constants.ManagerFactory.GameConnectionManager.TouristAIConnection.GetCarProbability;
-            GetElectricCarProbability = Constants.ManagerFactory.GameConnectionManager.TouristAIConnection.GetElectricCarProbability;
-            GetCamperProbability = Constants.ManagerFactory.GameConnectionManager.TouristAIConnection.GetCamperProbability;
+            GetTaxiProbability = GameConnectionManager.Instance.TouristAIConnection.GetTaxiProbability;
+            GetBikeProbability = GameConnectionManager.Instance.TouristAIConnection.GetBikeProbability;
+            GetCarProbability = GameConnectionManager.Instance.TouristAIConnection.GetCarProbability;
+            GetElectricCarProbability = GameConnectionManager.Instance.TouristAIConnection.GetElectricCarProbability;
+            GetCamperProbability = GameConnectionManager.Instance.TouristAIConnection.GetCamperProbability;
         }
 
         [UsedImplicitly]

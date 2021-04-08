@@ -1,6 +1,6 @@
 namespace TrafficManager.Patch._CitizenAI._ResidentAI.Connection {
     using System;
-    using API.Manager.Connections;
+    using Manager.Connections;
 
     internal class ResidentAIConnection : IResidentAIConnection {
         internal ResidentAIConnection(GetTaxiProbabilityResidentDelegate getTaxiProbability,

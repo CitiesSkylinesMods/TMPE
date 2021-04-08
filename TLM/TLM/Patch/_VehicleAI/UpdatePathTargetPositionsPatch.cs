@@ -1,12 +1,12 @@
 namespace TrafficManager.Patch._VehicleAI {
     using System;
     using System.Reflection;
-    using API.Manager.Connections;
     using ColossalFramework;
     using ColossalFramework.Math;
     using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
+    using Manager.Connections;
     using Manager.Impl;
     using State;
     using State.ConfigData;
@@ -39,7 +39,7 @@ namespace TrafficManager.Patch._VehicleAI {
 
         [UsedImplicitly]
         public static void Prepare() {
-            IVehicleAIConnection vehicleAIConnection = Constants.ManagerFactory.GameConnectionManager.VehicleAIConnection;
+            IVehicleAIConnection vehicleAIConnection = GameConnectionManager.Instance.VehicleAIConnection;
             InvalidPath = vehicleAIConnection.InvalidPath;
             ParkVehicle = vehicleAIConnection.ParkVehicle;
             NeedChangeVehicleType = vehicleAIConnection.NeedChangeVehicleType;
@@ -111,7 +111,7 @@ namespace TrafficManager.Patch._VehicleAI {
                         () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                         $"Could not calculate path position offset. ABORT. pathId={pathId}, " +
                         $"finePathPosIndex={finePathPosIndex}, targetPos={targetPos}");
-                    Constants.ManagerFactory.GameConnectionManager.VehicleAIConnection.InvalidPath(__instance, vehicleID, ref vehicleData, vehicleID, ref vehicleData);
+                    GameConnectionManager.Instance.VehicleAIConnection.InvalidPath(__instance, vehicleID, ref vehicleData, vehicleID, ref vehicleData);
                     return false;
                 }
             }
@@ -654,7 +654,7 @@ namespace TrafficManager.Patch._VehicleAI {
                         logLogic,
                         () => $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                         $"Next lane invalid. ABORT. nextLaneInfo.m_laneType={nextLaneInfo.m_laneType}");
-                    Constants.ManagerFactory.GameConnectionManager.VehicleAIConnection.InvalidPath(__instance, vehicleID, ref vehicleData, vehicleID, ref vehicleData);
+                    GameConnectionManager.Instance.VehicleAIConnection.InvalidPath(__instance, vehicleID, ref vehicleData, vehicleID, ref vehicleData);
                     return false;
                 }
 
@@ -688,7 +688,7 @@ namespace TrafficManager.Patch._VehicleAI {
                         if (vehicleID != 0
                             && !ChangeVehicleType(__instance, vehicleID, ref vehicleData, nextPosition, nextLaneId))
                         {
-                            Constants.ManagerFactory.GameConnectionManager.VehicleAIConnection.InvalidPath(__instance, vehicleID, ref vehicleData, vehicleID, ref vehicleData);
+                            GameConnectionManager.Instance.VehicleAIConnection.InvalidPath(__instance, vehicleID, ref vehicleData, vehicleID, ref vehicleData);
                         }
                     } else {
                         while (index < max) {

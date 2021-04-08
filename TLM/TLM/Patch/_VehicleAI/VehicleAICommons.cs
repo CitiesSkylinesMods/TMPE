@@ -1,12 +1,12 @@
 namespace TrafficManager.Patch._VehicleAI {
-    using API.Manager.Connections;
+    using Manager.Connections;
     using Manager.Impl;
     using State;
     using UnityEngine;
 
     public class VehicleAICommons {
 
-        private static CalculateTargetSpeedDelegate CalculateTargetSpeed = Constants.ManagerFactory.GameConnectionManager.VehicleAIConnection.CalculateTargetSpeed;
+        private static CalculateTargetSpeedDelegate CalculateTargetSpeed = GameConnectionManager.Instance.VehicleAIConnection.CalculateTargetSpeed;
         private static NetManager _netManager = NetManager.instance;
         public static void CustomCalculateSegmentPosition(VehicleAI instance,
                                                    ushort vehicleId,

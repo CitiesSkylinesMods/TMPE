@@ -1,10 +1,10 @@
 namespace TrafficManager.Patch._VehicleAI._TrainAI {
     using System.Reflection;
-    using API.Manager.Connections;
     using ColossalFramework;
     using ColossalFramework.Math;
     using HarmonyLib;
     using JetBrains.Annotations;
+    using Manager.Connections;
     using Manager.Impl;
     using UnityEngine;
     using Util;
@@ -31,12 +31,12 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
 
         [UsedImplicitly]
         public static void Prepare() {
-            UpdatePathTargetPositions = Constants.ManagerFactory.GameConnectionManager.TrainAIConnection.UpdatePathTargetPositions;
-            GetNoiseLevel = Constants.ManagerFactory.GameConnectionManager.TrainAIConnection.GetNoiseLevel;
-            GetMaxSpeed = Constants.ManagerFactory.GameConnectionManager.TrainAIConnection.GetMaxSpeed;
-            CalculateMaxSpeed = Constants.ManagerFactory.GameConnectionManager.TrainAIConnection.CalculateMaxSpeed;
-            Reverse = Constants.ManagerFactory.GameConnectionManager.TrainAIConnection.Reverse;
-            CalculateTargetSpeed = Constants.ManagerFactory.GameConnectionManager.TrainAIConnection.CalculateTargetSpeed;
+            UpdatePathTargetPositions = GameConnectionManager.Instance.TrainAIConnection.UpdatePathTargetPositions;
+            GetNoiseLevel = GameConnectionManager.Instance.TrainAIConnection.GetNoiseLevel;
+            GetMaxSpeed = GameConnectionManager.Instance.TrainAIConnection.GetMaxSpeed;
+            CalculateMaxSpeed = GameConnectionManager.Instance.TrainAIConnection.CalculateMaxSpeed;
+            Reverse = GameConnectionManager.Instance.TrainAIConnection.Reverse;
+            CalculateTargetSpeed = GameConnectionManager.Instance.TrainAIConnection.CalculateTargetSpeed;
         }
 
         [UsedImplicitly]

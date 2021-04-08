@@ -1,4 +1,4 @@
-namespace TrafficManager.API.Manager.Connections {
+namespace TrafficManager.Manager.Connections {
     public delegate int GetTaxiProbabilityResidentDelegate(ResidentAI instance,
                                                            ushort instanceID,
                                                            ref CitizenInstance citizenData,
@@ -20,7 +20,7 @@ namespace TrafficManager.API.Manager.Connections {
                                                                   Citizen.AgePhase agePhase);
 
 
-    public interface IResidentAIConnection {
+    internal interface IResidentAIConnection {
         GetTaxiProbabilityResidentDelegate GetTaxiProbability { get; }
         GetBikeProbabilityResidentDelegate GetBikeProbability { get; }
         GetCarProbabilityResidentDelegate GetCarProbability { get; }

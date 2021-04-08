@@ -1,13 +1,13 @@
 namespace TrafficManager.Patch._CitizenAI._HumanAI {
     using System.Reflection;
     using API.Manager;
-    using API.Manager.Connections;
     using API.Traffic.Data;
     using API.Traffic.Enums;
     using ColossalFramework;
     using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
+    using Manager.Connections;
     using Manager.Impl;
     using State;
     using State.ConfigData;
@@ -34,13 +34,13 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
 
         [UsedImplicitly]
         public static void Prepare() {
-            SpawnCitizenAI = Constants.ManagerFactory.GameConnectionManager.HumanAIConnection.SpawnCitizenAI;
-            StartPathFindCitizenAI = Constants.ManagerFactory.GameConnectionManager.HumanAIConnection.StartPathFindCitizenAI;
-            SimulationStepCitizenAI = Constants.ManagerFactory.GameConnectionManager.HumanAIConnection.SimulationStepCitizenAI;
-            ArriveAtDestination = Constants.ManagerFactory.GameConnectionManager.HumanAIConnection.ArriveAtDestination;
-            InvalidPath = Constants.ManagerFactory.GameConnectionManager.HumanAIConnection.InvalidPath;
-            PathfindFailure = Constants.ManagerFactory.GameConnectionManager.HumanAIConnection.PathfindFailure;
-            PathfindSuccess = Constants.ManagerFactory.GameConnectionManager.HumanAIConnection.PathfindSuccess;
+            SpawnCitizenAI = GameConnectionManager.Instance.HumanAIConnection.SpawnCitizenAI;
+            StartPathFindCitizenAI = GameConnectionManager.Instance.HumanAIConnection.StartPathFindCitizenAI;
+            SimulationStepCitizenAI = GameConnectionManager.Instance.HumanAIConnection.SimulationStepCitizenAI;
+            ArriveAtDestination = GameConnectionManager.Instance.HumanAIConnection.ArriveAtDestination;
+            InvalidPath = GameConnectionManager.Instance.HumanAIConnection.InvalidPath;
+            PathfindFailure = GameConnectionManager.Instance.HumanAIConnection.PathfindFailure;
+            PathfindSuccess = GameConnectionManager.Instance.HumanAIConnection.PathfindSuccess;
         }
 
         [UsedImplicitly]

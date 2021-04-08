@@ -5,7 +5,7 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System;
-    using API.Manager.Connections;
+    using Connections;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -32,12 +32,9 @@ namespace TrafficManager.Manager.Impl {
         public AdvancedParkingManager(Spiral spiral) {
             _spiral = spiral ?? throw new ArgumentNullException(nameof(spiral));
 
-            _findParkingSpaceDelegate = Constants.ManagerFactory.GameConnectionManager
-                                                 .PassengerCarAIConnection.FindParkingSpace;
-            _findParkingSpacePropDelegate = Constants.ManagerFactory.GameConnectionManager
-                                                     .PassengerCarAIConnection.FindParkingSpaceProp;
-            _findParkingSpaceRoadSideDelegate = Constants.ManagerFactory.GameConnectionManager
-                                                         .PassengerCarAIConnection.FindParkingSpaceRoadSide;
+            _findParkingSpaceDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpace;
+            _findParkingSpacePropDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpaceProp;
+            _findParkingSpaceRoadSideDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpaceRoadSide;
         }
 
         protected override void OnDisableFeatureInternal() {

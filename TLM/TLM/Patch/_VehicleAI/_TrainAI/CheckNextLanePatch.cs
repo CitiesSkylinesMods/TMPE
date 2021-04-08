@@ -1,11 +1,11 @@
 namespace TrafficManager.Patch._VehicleAI._TrainAI {
     using System.Reflection;
-    using API.Manager.Connections;
     using API.Traffic.Enums;
     using ColossalFramework.Math;
     using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
+    using Manager.Connections;
     using Manager.Impl;
     using State;
     using State.ConfigData;
@@ -33,7 +33,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
 
         [UsedImplicitly]
         public static void Prepare() {
-            CheckOverlap = Constants.ManagerFactory.GameConnectionManager.TrainAIConnection.CheckOverlap;
+            CheckOverlap = GameConnectionManager.Instance.TrainAIConnection.CheckOverlap;
         }
 
         [UsedImplicitly]

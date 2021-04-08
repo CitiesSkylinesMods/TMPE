@@ -1,4 +1,4 @@
-namespace TrafficManager.API.Manager.Connections {
+namespace TrafficManager.Manager.Connections {
     using UnityEngine;
 
     public delegate bool StartPathFindDelegate(CitizenAI instance,
@@ -31,7 +31,7 @@ namespace TrafficManager.API.Manager.Connections {
                                                         ushort instanceID,
                                                         ref CitizenInstance data);
 
-    public interface IHumanAIConnection {
+    internal interface IHumanAIConnection {
         SpawnDelegate SpawnCitizenAI { get; }
         StartPathFindDelegate StartPathFindCitizenAI { get; }
         SimulationStepDelegate SimulationStepCitizenAI { get; }

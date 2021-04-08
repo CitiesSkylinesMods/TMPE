@@ -1,6 +1,6 @@
 namespace TrafficManager.Patch._VehicleAI.Connection {
     using System;
-    using API.Manager.Connections;
+    using Manager.Connections;
 
     internal class VehicleAIConnection : IVehicleAIConnection {
         public VehicleAIConnection(CalculateTargetSpeedDelegate calculateTargetSpeedDelegate,

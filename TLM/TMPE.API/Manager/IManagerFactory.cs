@@ -27,6 +27,5 @@
         IUtilityManager UtilityManager { get; }
         IVehicleBehaviorManager VehicleBehaviorManager { get; }
         IVehicleRestrictionsManager VehicleRestrictionsManager { get; }
-        IGameConnectionManager GameConnectionManager { get; }
     }
 }
