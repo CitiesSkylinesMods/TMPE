@@ -104,9 +104,8 @@ namespace TrafficManager.UI.Helpers {
             return panelHelper;
         }
 
-        public static ExtUITabstrip Create(UIHelperBase helperBase) {
-            UIHelper actualHelper = helperBase as UIHelper;
-            UIComponent optionsContainer = actualHelper.self as UIComponent;
+        public static ExtUITabstrip Create(UIHelper helper) {
+            UIComponent optionsContainer = helper.self as UIComponent;
             float orgOptsContainerWidth = optionsContainer.height;
             float orgOptsContainerHeight = optionsContainer.width;
 
