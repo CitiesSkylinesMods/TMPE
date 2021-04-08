@@ -372,8 +372,7 @@ namespace TrafficManager.UI.MainMenu {
                 }
             }
 
-            // Hot Reload version label (debug only)
-            if (TrafficManagerMod.Instance.InGameHotReload) {
+            if (TrafficManagerMod.InGameHotReload) {
                 // Hot Reload version label (debug only)
                 string text = $"HOT RELOAD {Assembly.GetExecutingAssembly().GetName().Version}";
                 using (var hotReloadB = builder.Label<U.ULabel>(text)) {
