@@ -2,7 +2,6 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI.Connection {
     using System;
     using CSUtil.Commons;
     using HarmonyLib;
-    using Manager.Connections;
     using UnityEngine;
     using Util;
 
@@ -11,7 +10,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI.Connection {
                                                    ref CitizenInstance data,
                                                    Vector3 physicsLodRefPos);
 
-        internal static IHumanAIConnection GetConnection() {
+        internal static HumanAIConnection GetConnection() {
             try {
                 StartPathFindDelegate startPathFindCitizenAI =
                     TranspilerUtil.CreateDelegate<StartPathFindDelegate>(

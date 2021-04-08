@@ -1,8 +1,27 @@
 namespace TrafficManager.Patch._CitizenAI._ResidentAI.Connection {
     using System;
-    using Manager.Connections;
 
-    internal class ResidentAIConnection : IResidentAIConnection {
+    public delegate int GetTaxiProbabilityResidentDelegate(ResidentAI instance,
+                                                           ushort instanceID,
+                                                           ref CitizenInstance citizenData,
+                                                           Citizen.AgeGroup ageGroup);
+
+    public delegate int GetBikeProbabilityResidentDelegate(ResidentAI instance,
+                                                           ushort instanceID,
+                                                           ref CitizenInstance citizenData,
+                                                           Citizen.AgeGroup ageGroup);
+
+    public delegate int GetCarProbabilityResidentDelegate(ResidentAI instance,
+                                                          ushort instanceID,
+                                                          ref CitizenInstance citizenData,
+                                                          Citizen.AgeGroup ageGroup);
+
+    public delegate int GetElectricCarProbabilityResidentDelegate(ResidentAI instance,
+                                                                  ushort instanceID,
+                                                                  ref CitizenInstance citizenData,
+                                                                  Citizen.AgePhase agePhase);
+
+    internal class ResidentAIConnection {
         internal ResidentAIConnection(GetTaxiProbabilityResidentDelegate getTaxiProbability,
                                       GetBikeProbabilityResidentDelegate getBikeProbability,
                                       GetCarProbabilityResidentDelegate getCarProbability,

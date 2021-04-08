@@ -3,7 +3,6 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI.Connection {
     using System.Reflection;
     using CSUtil.Commons;
     using HarmonyLib;
-    using Manager.Connections;
     using Util;
 
     public static class PassengerCarAIHook {
@@ -16,7 +15,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI.Connection {
         private static MethodInfo TargetMethodRoadSide() =>
             TranspilerUtil.DeclaredMethod<FindParkingSpaceRoadSideDelegate>(typeof(PassengerCarAI), "FindParkingSpaceRoadSide");
 
-        internal static IPassengerCarAIConnection GetConnection() {
+        internal static PassengerCarAIConnection GetConnection() {
             try {
                 FindParkingSpaceDelegate findParkingSpaceDelegate =
                     AccessTools.MethodDelegate<FindParkingSpaceDelegate>(TargetMethod());

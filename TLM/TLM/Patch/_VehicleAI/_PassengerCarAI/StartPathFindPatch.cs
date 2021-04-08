@@ -1,9 +1,9 @@
 namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
     using System.Reflection;
     using ColossalFramework;
+    using Connection;
     using HarmonyLib;
     using JetBrains.Annotations;
-    using Manager.Connections;
     using Manager.Impl;
     using UnityEngine;
 

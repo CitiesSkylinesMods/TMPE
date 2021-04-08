@@ -1,11 +1,10 @@
 namespace TrafficManager.Patch._CitizenAI._ResidentAI.Connection {
     using System;
     using CSUtil.Commons;
-    using Manager.Connections;
     using Util;
 
     public static class ResidentAIHook {
-        internal static IResidentAIConnection GetConnection() {
+        internal static ResidentAIConnection GetConnection() {
             try {
                 GetTaxiProbabilityResidentDelegate getTaxiProbability =
                     TranspilerUtil.CreateDelegate<GetTaxiProbabilityResidentDelegate>(

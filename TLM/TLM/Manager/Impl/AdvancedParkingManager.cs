@@ -5,7 +5,7 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System;
-    using Connections;
+    using Patch._VehicleAI._PassengerCarAI.Connection;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;

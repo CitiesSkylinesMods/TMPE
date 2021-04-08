@@ -1,8 +1,13 @@
 namespace TrafficManager.Patch._CitizenAI._TouristAI.Connection {
     using System;
-    using Manager.Connections;
 
-    internal class TouristAIConnection : ITouristAIConnection {
+    public delegate int GetTaxiProbabilityDelegate(TouristAI instance);
+    public delegate int GetBikeProbabilityDelegate(TouristAI instance);
+    public delegate int GetCarProbabilityDelegate(TouristAI instance);
+    public delegate int GetElectricCarProbabilityDelegate(TouristAI instance, Citizen.Wealth wealth);
+    public delegate int GetCamperProbabilityDelegate(TouristAI instance, Citizen.Wealth wealth);
+
+    internal class TouristAIConnection {
         internal TouristAIConnection(GetTaxiProbabilityDelegate getTaxiProbability,
                                       GetBikeProbabilityDelegate getBikeProbability,
                                       GetCarProbabilityDelegate getCarProbability,

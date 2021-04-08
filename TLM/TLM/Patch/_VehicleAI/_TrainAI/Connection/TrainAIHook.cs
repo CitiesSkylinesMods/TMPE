@@ -1,11 +1,10 @@
 namespace TrafficManager.Patch._VehicleAI._TrainAI.Connection {
     using System;
     using CSUtil.Commons;
-    using Manager.Connections;
     using Util;
 
     public static class TrainAIHook {
-        internal static ITrainAIConnection GetConnection() {
+        internal static TrainAIConnection GetConnection() {
             try {
                 UpdatePathTargetPositionsDelegate updatePathTargetPositionsDelegate =
                     TranspilerUtil.CreateDelegate<UpdatePathTargetPositionsDelegate>(

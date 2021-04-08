@@ -3,10 +3,10 @@ namespace TrafficManager.Patch._VehicleAI {
     using System.Reflection;
     using ColossalFramework;
     using ColossalFramework.Math;
+    using Connection;
     using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
-    using Manager.Connections;
     using Manager.Impl;
     using State;
     using State.ConfigData;
@@ -39,7 +39,7 @@ namespace TrafficManager.Patch._VehicleAI {
 
         [UsedImplicitly]
         public static void Prepare() {
-            IVehicleAIConnection vehicleAIConnection = GameConnectionManager.Instance.VehicleAIConnection;
+            VehicleAIConnection vehicleAIConnection = GameConnectionManager.Instance.VehicleAIConnection;
             InvalidPath = vehicleAIConnection.InvalidPath;
             ParkVehicle = vehicleAIConnection.ParkVehicle;
             NeedChangeVehicleType = vehicleAIConnection.NeedChangeVehicleType;

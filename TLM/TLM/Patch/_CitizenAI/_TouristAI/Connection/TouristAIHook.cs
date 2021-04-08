@@ -1,11 +1,10 @@
 namespace TrafficManager.Patch._CitizenAI._TouristAI.Connection {
     using System;
     using CSUtil.Commons;
-    using Manager.Connections;
     using Util;
 
     public static class TouristAIHook {
-        internal static ITouristAIConnection GetConnection() {
+        internal static TouristAIConnection GetConnection() {
             try {
                 GetTaxiProbabilityDelegate getTaxiProbability =
                     TranspilerUtil.CreateDelegate<GetTaxiProbabilityDelegate>(

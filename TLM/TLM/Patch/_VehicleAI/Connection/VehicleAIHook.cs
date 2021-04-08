@@ -1,11 +1,10 @@
 namespace TrafficManager.Patch._VehicleAI.Connection {
     using System;
     using CSUtil.Commons;
-    using Manager.Connections;
     using Util;
 
     public class VehicleAIHook {
-        internal static IVehicleAIConnection GetConnection() {
+        internal static VehicleAIConnection GetConnection() {
             try {
                 CalculateTargetSpeedDelegate calculateTargetSpeedDelegate = TranspilerUtil.CreateDelegate<CalculateTargetSpeedDelegate>(typeof(VehicleAI), "CalculateTargetSpeed", true);
                 PathfindFailureDelegate pathfindFailureDelegate = TranspilerUtil.CreateDelegate<PathfindFailureDelegate>(typeof(CarAI), "PathfindFailure", true);

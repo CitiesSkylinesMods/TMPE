@@ -2,10 +2,10 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
     using System.Reflection;
     using API.Traffic.Enums;
     using ColossalFramework.Math;
+    using Connection;
     using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
-    using Manager.Connections;
     using Manager.Impl;
     using State;
     using State.ConfigData;

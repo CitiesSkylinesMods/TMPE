@@ -4,10 +4,10 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
     using API.Traffic.Data;
     using API.Traffic.Enums;
     using ColossalFramework;
+    using Connection;
     using CSUtil.Commons;
     using HarmonyLib;
     using JetBrains.Annotations;
-    using Manager.Connections;
     using Manager.Impl;
     using State;
     using State.ConfigData;

@@ -2,9 +2,9 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
     using System.Reflection;
     using ColossalFramework;
     using ColossalFramework.Math;
+    using Connection;
     using HarmonyLib;
     using JetBrains.Annotations;
-    using Manager.Connections;
     using Manager.Impl;
     using UnityEngine;
     using Util;

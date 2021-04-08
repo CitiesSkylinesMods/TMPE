@@ -1,5 +1,5 @@
 namespace TrafficManager.Patch._VehicleAI {
-    using Manager.Connections;
+    using Connection;
     using Manager.Impl;
     using State;
     using UnityEngine;

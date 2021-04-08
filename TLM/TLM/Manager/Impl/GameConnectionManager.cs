@@ -1,5 +1,4 @@
 namespace TrafficManager.Manager.Impl {
-    using Connections;
     using Patch._CitizenAI._HumanAI.Connection;
     using Patch._CitizenAI._ResidentAI.Connection;
     using Patch._CitizenAI._TouristAI.Connection;
@@ -7,7 +6,7 @@ namespace TrafficManager.Manager.Impl {
     using Patch._VehicleAI._PassengerCarAI.Connection;
     using Patch._VehicleAI._TrainAI.Connection;
 
-    internal class GameConnectionManager: IGameConnectionManager {
+    internal class GameConnectionManager {
 
         internal static GameConnectionManager Instance;
         static GameConnectionManager() {
@@ -23,11 +22,11 @@ namespace TrafficManager.Manager.Impl {
             TouristAIConnection = TouristAIHook.GetConnection();
         }
 
-        public IPassengerCarAIConnection PassengerCarAIConnection { get; }
-        public IVehicleAIConnection VehicleAIConnection { get; }
-        public ITrainAIConnection TrainAIConnection { get; }
-        public IHumanAIConnection HumanAIConnection { get; }
-        public IResidentAIConnection ResidentAIConnection { get; }
-        public ITouristAIConnection TouristAIConnection { get; }
+        public PassengerCarAIConnection PassengerCarAIConnection { get; }
+        public VehicleAIConnection VehicleAIConnection { get; }
+        public TrainAIConnection TrainAIConnection { get; }
+        public HumanAIConnection HumanAIConnection { get; }
+        public ResidentAIConnection ResidentAIConnection { get; }
+        public TouristAIConnection TouristAIConnection { get; }
     }
 }
