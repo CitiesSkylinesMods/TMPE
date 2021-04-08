@@ -1,9 +1,9 @@
 namespace TrafficManager.Patch._VehicleAI._PassengerCarAI.Connection {
     using System;
     using System.Reflection;
-    using API.Manager.Connections;
     using CSUtil.Commons;
     using HarmonyLib;
+    using Manager.Connections;
     using Util;
 
     public static class PassengerCarAIHook {
@@ -24,10 +24,13 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI.Connection {
                     AccessTools.MethodDelegate<FindParkingSpacePropDelegate>(TargetMethodProp());
                 FindParkingSpaceRoadSideDelegate findParkingSpaceRoadSideDelegate =
                     AccessTools.MethodDelegate<FindParkingSpaceRoadSideDelegate>(TargetMethodRoadSide());
+                GetDriverInstanceDelegate getDriverInstanceDelegate =
+                    TranspilerUtil.CreateDelegate<GetDriverInstanceDelegate>(typeof(PassengerCarAI), "GetDriverInstance", true);
 
                 return new PassengerCarAIConnection(findParkingSpaceDelegate,
                                                     findParkingSpacePropDelegate,
-                                                    findParkingSpaceRoadSideDelegate);
+                                                    findParkingSpaceRoadSideDelegate,
+                                                    getDriverInstanceDelegate);
             } catch (Exception e) {
                 Log.Error(e.Message);
                 return null;

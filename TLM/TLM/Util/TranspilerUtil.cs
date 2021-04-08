@@ -28,12 +28,12 @@ namespace TrafficManager.Util {
         /// <param name="instance">skip first parameter. Default value is false.</param>
         /// <returns>Type[] representing arguments of the delegate.</returns>
         internal static Type[] GetParameterTypes<TDelegate>(bool instance = false) where TDelegate : Delegate {
-            IEnumerable<ParameterInfo> args = typeof(TDelegate).GetMethod("Invoke").GetParameters();
+            IEnumerable<ParameterInfo> parameters = typeof(TDelegate).GetMethod("Invoke").GetParameters();
             if (instance) {
-                args = args.Skip(1);
+                parameters = parameters.Skip(1);
             }
 
-            return args.Select(p => p.ParameterType).ToArray();
+            return parameters.Select(p => p.ParameterType).ToArray();
         }
 
         /// <summary>

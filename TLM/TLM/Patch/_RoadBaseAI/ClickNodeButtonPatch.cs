@@ -10,12 +10,8 @@ namespace TrafficManager.Patch._RoadBaseAI {
     using Util;
 
     [UsedImplicitly]
-    [HarmonyPatch]
+    [HarmonyPatch(typeof(RoadBaseAI), nameof(RoadBaseAI.ClickNodeButton))]
     public class ClickNodeButtonPatch {
-        private delegate void TargetDelegate(ushort nodeID, ref NetNode data, int index);
-
-        [UsedImplicitly]
-        public static MethodBase TargetMethod() => TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(RoadBaseAI), nameof(RoadBaseAI.ClickNodeButton));
 
         [UsedImplicitly]
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {

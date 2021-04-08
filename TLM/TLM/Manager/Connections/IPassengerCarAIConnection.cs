@@ -1,4 +1,4 @@
-namespace TrafficManager.API.Manager.Connections {
+namespace TrafficManager.Manager.Connections {
     using UnityEngine;
 
     public delegate bool FindParkingSpaceRoadSideDelegate(ushort ignoreParked,
@@ -34,9 +34,15 @@ namespace TrafficManager.API.Manager.Connections {
                                                       ref Vector3 parkPos,
                                                       ref Quaternion parkRot);
 
+    public delegate ushort GetDriverInstanceDelegate(PassengerCarAI passengerCarAI,
+                                                     ushort vehicleID,
+                                                     ref Vehicle vehicleData);
+
+
     internal interface IPassengerCarAIConnection {
         FindParkingSpaceDelegate FindParkingSpace { get; }
         FindParkingSpacePropDelegate FindParkingSpaceProp { get; }
         FindParkingSpaceRoadSideDelegate FindParkingSpaceRoadSide { get; }
+        GetDriverInstanceDelegate GetDriverInstance { get; }
     }
 }

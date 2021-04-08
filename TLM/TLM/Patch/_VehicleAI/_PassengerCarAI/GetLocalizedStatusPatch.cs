@@ -3,6 +3,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
     using ColossalFramework.Globalization;
     using HarmonyLib;
     using JetBrains.Annotations;
+    using Manager.Connections;
     using Manager.Impl;
     using State;
     using Util;
@@ -16,18 +17,21 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
         [UsedImplicitly]
         public static MethodBase TargetMethod() => TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(PassengerCarAI), nameof(PassengerCarAI.GetLocalizedStatus));
 
-        [HarmonyDelegate(typeof(PassengerCarAI), "GetDriverInstance", MethodDispatchType.Call)]
-        public delegate ushort GetDriverInstance(ushort vehicleID, ref Vehicle vehicleData);
+        private static GetDriverInstanceDelegate GetDriverInstance;
+
+        [UsedImplicitly]
+        public static void Prepare() {
+            GetDriverInstance = GameConnectionManager.Instance.PassengerCarAIConnection.GetDriverInstance;
+        }
 
         [UsedImplicitly]
         public static bool Prefix(ref string __result,
-                                   GetDriverInstance getDriverInstance,
-                                   // Harmony magic END
-                                   ushort vehicleID,
-                                   ref Vehicle data,
-                                   out InstanceID target) {
+                                  PassengerCarAI __intance,
+                                  ushort vehicleID,
+                                  ref Vehicle data,
+                                  out InstanceID target) {
             CitizenManager citizenManager = CitizenManager.instance;
-            ushort driverInstanceId = getDriverInstance(vehicleID, ref data);
+            ushort driverInstanceId = GetDriverInstance(__intance, vehicleID, ref data);
             ushort targetBuildingId = 0;
             bool targetIsNode = false;
 

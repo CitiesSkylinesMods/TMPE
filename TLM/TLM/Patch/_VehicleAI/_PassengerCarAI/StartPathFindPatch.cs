@@ -3,6 +3,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
     using ColossalFramework;
     using HarmonyLib;
     using JetBrains.Annotations;
+    using Manager.Connections;
     using Manager.Impl;
     using UnityEngine;
 
@@ -13,14 +14,17 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
         [UsedImplicitly]
         public static MethodBase TargetMethod() => StartPathFindCommons.TargetMethod<PassengerCarAI>();
 
-        [HarmonyDelegate(typeof(PassengerCarAI), "GetDriverInstance", MethodDispatchType.Call)]
-        public delegate ushort GetDriverInstance(ushort vehicleID, ref Vehicle vehicleData);
+        private static GetDriverInstanceDelegate GetDriverInstance;
+
+        [UsedImplicitly]
+        public static void Prepare() {
+            GetDriverInstance = GameConnectionManager.Instance.PassengerCarAIConnection.GetDriverInstance;
+        }
 
         [UsedImplicitly]
         public static bool Prefix(ref bool __result,
                                   VehicleInfo ___m_info,
-                                  GetDriverInstance getDriverInstance,
-                                  //Harmony magic END
+                                  PassengerCarAI __instance,
                                   ushort vehicleID,
                                   ref Vehicle vehicleData,
                                   Vector3 startPos,
@@ -28,7 +32,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                                   bool startBothWays,
                                   bool endBothWays,
                                   bool undergroundTarget) {
-            ushort driverInstanceId = getDriverInstance(vehicleID, ref vehicleData);
+            ushort driverInstanceId = GetDriverInstance(__instance, vehicleID, ref vehicleData);
             __result = driverInstanceId != 0
                    && Constants.ManagerFactory.VehicleBehaviorManager.StartPassengerCarPathFind(
                        vehicleID,
