@@ -32,7 +32,6 @@ namespace TrafficManager {
         }
 
         public static void Install() {
-            Log.Info("Init detours");
             bool fail = false;
 #if DEBUG
             Harmony.DEBUG = false; // set to true to get harmony debug info.
