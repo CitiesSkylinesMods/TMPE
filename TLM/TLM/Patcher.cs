@@ -53,14 +53,13 @@ namespace TrafficManager {
 
             if (fail) {
                 Log.Info("patcher failed");
-                UIView.library
-                        .ShowModal<ExceptionPanel>("ExceptionPanel")
-                        .SetMessage(
-                        "TM:PE failed to load",
-                        "Traffic Manager: President Edition failed to load. You can " +
-                        "continue playing but it's NOT recommended. Traffic Manager will " +
-                        "not work as expected.",
-                        true);
+                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel")
+                    .SetMessage(
+                    "TM:PE failed to load",
+                    "Traffic Manager: President Edition failed to load. You can " +
+                    "continue playing but it's NOT recommended. Traffic Manager will " +
+                    "not work as expected.",
+                    true);
             } else {
                 Log.Info("TMPE patches installed successfully");
             }
