@@ -293,7 +293,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if QUEUEDSTATS
             TotalQueuedPathFinds = 0;
 #endif
-            foreach(CustomPathFind pathFindCandidate in _replacementPathFinds) {
+            foreach (CustomPathFind pathFindCandidate in _replacementPathFinds) {
 #if QUEUEDSTATS
                 TotalQueuedPathFinds += (uint)pathFindCandidate.m_queuedPathFindCount;
 #endif
