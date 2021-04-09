@@ -578,7 +578,7 @@ namespace TrafficManager.UI {
                     NetSegment = HoveredSegmentId,
                 };
 
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(delegate () {
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
                     OpenWorldInfoPanel(
                         instanceID,
                         HitPos);

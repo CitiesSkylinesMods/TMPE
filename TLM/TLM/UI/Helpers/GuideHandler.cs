@@ -25,7 +25,7 @@ namespace TrafficManager.UI.Helpers {
             if (guide == null) {
                 Log.Error("guide is null");
             } else {
-                Singleton<SimulationManager>.instance.AddAction(delegate () {
+                Singleton<SimulationManager>.instance.AddAction(() => {
                     guide.Activate();
                 });
             }
@@ -36,7 +36,7 @@ namespace TrafficManager.UI.Helpers {
                 if (guide == null) {
                     Log.Error("Unreachable code.");
                 } else {
-                    Singleton<SimulationManager>.instance.AddAction(delegate () {
+                    Singleton<SimulationManager>.instance.AddAction(() => {
                         guide.Deactivate();
                     });
                 }
@@ -44,7 +44,7 @@ namespace TrafficManager.UI.Helpers {
         }
 
         public void DeactivateAll() {
-            Singleton<SimulationManager>.instance.AddAction(delegate () {
+            Singleton<SimulationManager>.instance.AddAction(() => {
                 foreach (var item in GuideTable) {
                     item.Value?.Deactivate();
                 } // end foreach

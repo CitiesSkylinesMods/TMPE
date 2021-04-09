@@ -33,7 +33,7 @@ namespace TMUnitTest.Translation {
         }
 
         private static void PrepareData(byte[] testFileData, out List<string> columns, out string dataBlock) {
-                    PrivateType lookupTableType = new PrivateType(typeof(LookupTable));
+            PrivateType lookupTableType = new PrivateType(typeof(LookupTable));
             string columnsRow;
             using (var m = new MemoryStream(testFileData)) {
                 using (var sr = new StreamReader(m)) {
