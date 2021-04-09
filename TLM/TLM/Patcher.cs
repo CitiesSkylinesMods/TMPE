@@ -77,17 +77,22 @@ namespace TrafficManager {
             var assembly = Assembly.GetExecutingAssembly();
             foreach(var type in AccessTools.GetTypesFromAssembly(assembly)) {
                 try {
-                    harmony.CreateClassProcessor(type).Patch();
-                    Log.Info($"Patcher: {type.FullName} applied.");
+                    var methods = harmony.CreateClassProcessor(type).Patch();
+                    if (methods != null && methods.Any()) {
+                        var strMethods = methods.Select(_method => _method.Name).ToArray();
+                        Log.Info($"{type.FullName} patched: " + string.Join(", ", strMethods));
+                    }
                 } catch(Exception ex) {
                     ex.LogException();
                     success = false;
                 }
             }
-            var methods = harmony.GetPatchedMethods()
-                .Select(_method => $"\t{_method.FullDescription()}");
-            Log.Info($"The following methods were patched by TMPE:\n" +
-                string.Join("\n", methods.ToArray()));
+            {
+                var methods = harmony.GetPatchedMethods()
+                    .Select(_method => $"\t{_method.FullDescription()}");
+                Log.Info($"The following methods were patched by TMPE:\n" +
+                    string.Join("\n", methods.ToArray()));
+            }
             return success;
         }
 
