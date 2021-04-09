@@ -4,29 +4,41 @@ namespace TrafficManager {
     using HarmonyLib;
     using System;
     using TrafficManager.RedirectionFramework;
-
+    using CitiesHarmony.API;
+    using System.Runtime.CompilerServices;
+    using System.Reflection;
+    using TrafficManager.Util;
+    using System.Linq;
     public static class Patcher {
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
+
+        private const string ERROR_MESSAGE =
+                    "****** ERRRROOORRRRRR!!!!!!!!!! **************\n" +
+                    "**********************************************\n" +
+                    "    HARMONY MOD DEPENDANCY IS NOT INSTALLED!\n\n" +
+                    "solution:\n" +
+                    " - exit to desktop.\n" +
+                    " - unsub harmony mod.\n" +
+                    " - make sure harmony mod is deleted from the content folder\n" +
+                    " - resub to harmony mod.\n" +
+                    " - run the game again.\n" +
+                    "**********************************************\n" +
+                    "**********************************************\n";
+
+        internal static void AssertCitiesHarmonyInstalled() {
+            if(!HarmonyHelper.IsHarmonyInstalled) {
+                throw new Exception(ERROR_MESSAGE);
+            }
+        }
 
         public static void Install() {
             Log.Info("Init detours");
             bool fail = false;
-
-            try {
 #if DEBUG
-                Harmony.DEBUG = true;
+            Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
-                // Harmony attribute-driven patching
-                Log.Info($"Performing Harmony attribute-driven patches");
-                new Harmony(HARMONY_ID).PatchAll();
-                Log.Info($"Harmony attribute-driven patching successfull!");
-            }
-            catch (Exception e) {
-                Log.Error("Could not apply Harmony patches because the following exception occured:\n " +
-                    e +
-                    "\n   -- End of inner exception stack trace -- ");
-                fail = true;
-            }
+            AssertCitiesHarmonyInstalled();
+            fail = !PatchAll();
 
             try {
                 Log.Info("Deploying attribute-driven detours");
@@ -52,6 +64,32 @@ namespace TrafficManager {
             } else {
                 Log.Info("TMPE patches installed successfully");
             }
+        }
+
+        /// <summary>
+        /// applies all attribute diven harmony patches.
+        /// continues on error.
+        /// </summary>
+        /// <returns>false if exception happens, true otherwise</returns>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        static bool PatchAll() {
+            bool success = true;
+            var harmony = new Harmony(HARMONY_ID);
+            var assembly = Assembly.GetExecutingAssembly();
+            foreach(var type in AccessTools.GetTypesFromAssembly(assembly)) {
+                try {
+                    harmony.CreateClassProcessor(type).Patch();
+                    Log.Info($"Patcher: {type.FullName} applied.");
+                } catch(Exception ex) {
+                    ex.Log();
+                    success = false;
+                }
+            }
+            var methods = harmony.GetPatchedMethods()
+                .Select(_method => $"\t{_method.FullDescription()}");
+            Log.Info($"The following methods were patched by TMPE:\n" +
+                string.Join("\n", methods.ToArray()));
+            return success;
         }
 
         public static void Uninstall() {

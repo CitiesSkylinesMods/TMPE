@@ -12,6 +12,7 @@ namespace TrafficManager.Util {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using UnityEngine;
+    using ColossalFramework.UI;
 
     internal static class Shortcuts {
         internal static bool InSimulationThread() =>
@@ -157,6 +158,19 @@ namespace TrafficManager.Util {
         internal static void Assert(bool con, string m = "") {
             if (!con) {
                 Log.Error("Assertion failed: " + m);
+            }
+        }
+
+        internal static void Log(this Exception ex, bool showInPanel = false) {
+            if (ex is null)
+                Log.Error("null argument ex was passed to Log.Exception()");
+            try {
+                Log.Error(ex.ToString() + "\n\t===================="); // stack trace is prited after this.
+                UnityEngine.Debug.LogException(ex);
+                if (showInPanel)
+                    UIView.ForwardException(ex);
+            } catch (Exception ex2) {
+                Log.Error(ex2.ToString());
             }
         }
 
