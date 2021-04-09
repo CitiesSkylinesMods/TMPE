@@ -161,7 +161,7 @@ namespace TrafficManager.Util {
             }
         }
 
-        internal static void Log(this Exception ex, bool showInPanel = false) {
+        internal static void LogException(this Exception ex, bool showInPanel = false) {
             if (ex is null)
                 Log.Error("null argument ex was passed to Log.Exception()");
             try {

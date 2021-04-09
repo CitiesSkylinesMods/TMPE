@@ -80,7 +80,7 @@ namespace TrafficManager {
                     harmony.CreateClassProcessor(type).Patch();
                     Log.Info($"Patcher: {type.FullName} applied.");
                 } catch(Exception ex) {
-                    ex.Log();
+                    ex.LogException();
                     success = false;
                 }
             }
