@@ -136,7 +136,7 @@ namespace TrafficManager.Custom.PathFinding {
                   BindingFlags.NonPublic | BindingFlags.Instance)
                   ?? throw new Exception("f_pathFinds is null");
 
-            lock(stockPathManager.m_bufferLock) {
+            lock(PathManager.instance.m_bufferLock) {
                 for (int i = 0; i < n; i++) {
                     stockPathFinds[i] = gameObject.AddComponent<PathFind>();
                 }
