@@ -200,7 +200,6 @@ namespace TrafficManager.Lifecycle {
             Destroy(Instance?.gameObject);
         }
 
-
         internal void Load() {
             Log.Info($"TMPELifecycle.Load() called. Mode={Mode}, UpdateMode={UpdateMode}, Scene={Scene}");
 
