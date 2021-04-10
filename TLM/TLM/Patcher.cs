@@ -13,20 +13,23 @@ namespace TrafficManager {
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
 
         private const string ERROR_MESSAGE =
-                    "****** ERRRROOORRRRRR!!!!!!!!!! **************\n" +
-                    "**********************************************\n" +
-                    "    HARMONY MOD DEPENDANCY IS NOT INSTALLED!\n\n" +
-                    "solution:\n" +
-                    " - exit to desktop.\n" +
-                    " - unsub harmony mod.\n" +
-                    " - make sure harmony mod is deleted from the content folder\n" +
-                    " - resub to harmony mod.\n" +
-                    " - run the game again.\n" +
-                    "**********************************************\n" +
-                    "**********************************************\n";
+            "****** ERRRROOORRRRRR!!!!!!!!!! **************\n" +
+            "**********************************************\n" +
+            "    HARMONY MOD DEPENDANCY IS NOT INSTALLED!\n\n" +
+            SOLUTION + "\n" +
+            "**********************************************\n" +
+            "**********************************************\n";
+        private const string SOLUTION =
+            "solution:\n" +
+            " - exit to desktop.\n" +
+            " - unsub harmony mod.\n" +
+            " - make sure harmony mod is deleted from the content folder\n" +
+            " - resub to harmony mod.\n" +
+            " - run the game again.";
 
         internal static void AssertCitiesHarmonyInstalled() {
             if(!HarmonyHelper.IsHarmonyInstalled) {
+                Shortcuts.ShowErrorDialog("Error: Missing Harmony", SOLUTION);
                 throw new Exception(ERROR_MESSAGE);
             }
         }
@@ -52,13 +55,11 @@ namespace TrafficManager {
 
             if (fail) {
                 Log.Info("patcher failed");
-                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel")
-                    .SetMessage(
+                Shortcuts.ShowErrorDialog(
                     "TM:PE failed to load",
                     "Traffic Manager: President Edition failed to load. You can " +
                     "continue playing but it's NOT recommended. Traffic Manager will " +
-                    "not work as expected.",
-                    true);
+                    "not work as expected.");
             } else {
                 Log.Info("TMPE patches installed successfully");
             }

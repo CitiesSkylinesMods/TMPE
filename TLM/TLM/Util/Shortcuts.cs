@@ -174,6 +174,11 @@ namespace TrafficManager.Util {
             }
         }
 
+        internal static void ShowErrorDialog(string title, string message) {
+            UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel")
+                .SetMessage(title, message, true);
+        }
+
         internal static bool ShiftIsPressed => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         internal static bool ControlIsPressed => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
