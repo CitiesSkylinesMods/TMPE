@@ -18,9 +18,17 @@ namespace TrafficManager.Lifecycle {
     using UnityEngine.SceneManagement;
     using UnityEngine;
     using JetBrains.Annotations;
-
+    
+    /// <summary>
+    /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak. 
+    /// Instead use the TMPELifecycle.Instance property.
+    /// </summary>
     public class TMPELifecycle : MonoBehaviour {
-        public static TMPELifecycle Instance { get; private set; }
+        public static TMPELifecycle Instance { 
+            /// <summary> returns instance of TMPELifecycle if it exists. returns null otherwise. </summary>
+            get; 
+            private set; 
+        }
 
         /// <summary>TMPE is in the middle of deserializing data.</summary>
         public bool Deserializing;
