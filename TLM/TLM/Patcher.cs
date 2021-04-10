@@ -4,9 +4,6 @@ namespace TrafficManager {
     using CSUtil.Commons;
     using HarmonyLib;
     using System;
-    using System.Collections.Generic;
-    using System.Reflection;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.Util;
 
     public class Patcher {
@@ -41,17 +38,6 @@ namespace TrafficManager {
                 Log.Error("Could not apply Harmony patches because the following exception occured:\n " +
                     e +
                     "\n   -- End of inner exception stack trace -- ");
-                fail = true;
-            }
-
-            try {
-                Log.Info("Deploying attribute-driven detours");
-                AssemblyRedirector.Deploy();
-            }
-            catch (Exception e) {
-                Log.Error("Could not deploy attribute-driven detours because the following exception occured:\n "
-                    + e +
-                    "\n    -- End of inner exception stack trace -- ");
                 fail = true;
             }
 

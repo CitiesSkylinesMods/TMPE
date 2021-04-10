@@ -8,7 +8,6 @@ namespace TrafficManager {
     using System.Collections.Generic;
     using System.Reflection;
     using TrafficManager.API.Manager;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
     using TrafficManager.UI;
     using UnityEngine;
