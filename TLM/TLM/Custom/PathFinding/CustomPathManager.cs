@@ -7,7 +7,6 @@ namespace TrafficManager.Custom.PathFinding {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System.Reflection;
-    using System.Threading;
     using System;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
@@ -123,13 +122,9 @@ namespace TrafficManager.Custom.PathFinding {
         }
 
         public void UpdateOldPathManagerValues(PathManager stockPathManager) {
-            stockPathManager.m_simulationProfiler = m_simulationProfiler;
             stockPathManager.m_drawCallData = m_drawCallData;
-            stockPathManager.m_properties = m_properties;
             stockPathManager.m_pathUnitCount = m_pathUnitCount;
             stockPathManager.m_renderPathGizmo = m_renderPathGizmo;
-            stockPathManager.m_pathUnits = m_pathUnits;
-            stockPathManager.m_bufferLock = m_bufferLock;
 
             int n = _replacementPathFinds.Length;
 
@@ -141,7 +136,7 @@ namespace TrafficManager.Custom.PathFinding {
                   BindingFlags.NonPublic | BindingFlags.Instance)
                   ?? throw new Exception("f_pathFinds is null");
 
-            lock(m_bufferLock) {
+            lock(stockPathManager.m_bufferLock) {
                 for (int i = 0; i < n; i++) {
                     stockPathFinds[i] = gameObject.AddComponent<PathFind>();
                 }
