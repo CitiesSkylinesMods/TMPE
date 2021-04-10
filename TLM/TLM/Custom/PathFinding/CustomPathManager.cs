@@ -136,13 +136,7 @@ namespace TrafficManager.Custom.PathFinding {
                   BindingFlags.NonPublic | BindingFlags.Instance)
                   ?? throw new Exception("f_pathFinds is null");
 
-            lock(PathManager.instance.m_bufferLock) {
-                for (int i = 0; i < n; i++) {
-                    stockPathFinds[i] = gameObject.AddComponent<PathFind>();
-                }
-
-                f_pathfinds?.SetValue(stockPathManager, stockPathFinds);
-
+            lock (m_bufferLock) {
                 for (int i = 0; i < n; i++) {
                     Log._Debug($"PF {i}: {_replacementPathFinds[i].m_queuedPathFindCount} queued path-finds");
 
@@ -150,6 +144,12 @@ namespace TrafficManager.Custom.PathFinding {
                     // customPathFinds[i].WaitForAllPaths();
                     Destroy(_replacementPathFinds[i]);
                 }
+
+                for (int i = 0; i < n; i++) {
+                    stockPathFinds[i] = gameObject.AddComponent<PathFind>();
+                }
+
+                f_pathfinds?.SetValue(stockPathManager, stockPathFinds);
             }
         }
 
@@ -415,15 +415,16 @@ namespace TrafficManager.Custom.PathFinding {
         protected virtual void OnDestroy() {
             Log._Debug("CustomPathManager: OnDestroy");
             WaitForAllPaths();
+
+            PathManagerInstance.SetValue(null, stockPathManager_);
+            Log._Debug("Should be stock: " + PathManager.instance.GetType());
+
             UpdateOldPathManagerValues(stockPathManager_);
             var simManagers = GetSimulationManagers();
 
             simManagers.Remove(this);
 
             simManagers.Add(stockPathManager_);
-
-            PathManagerInstance.SetValue(null, stockPathManager_);
-            Log._Debug("Should be stock: " + PathManager.instance.GetType());
         }
     }
 }
