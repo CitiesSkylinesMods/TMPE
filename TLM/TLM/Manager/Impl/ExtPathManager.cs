@@ -83,7 +83,7 @@ namespace TrafficManager.Manager.Impl {
                 position = posA;
             }
 
-            if (allowTransport && Instance.FindPathPositionWithSpiralLoop(
+            if (allowTransport && FindPathPositionWithSpiralLoop(
                     pos,
                     ItemClass.Service.PublicTransport,
                     laneTypes,
