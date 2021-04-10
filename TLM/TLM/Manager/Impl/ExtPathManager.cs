@@ -33,7 +33,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="allowUnderground">underground position allowed?</param>
         /// <param name="position">resulting path position</param>
         /// <returns><code>true</code> if a position could be found, <code>false</code> otherwise</returns>
-        public static bool FindCitizenPathPosition(Vector3 pos,
+        public bool FindCitizenPathPosition(Vector3 pos,
                                                    NetInfo.LaneType laneTypes,
                                                    VehicleInfo.VehicleType vehicleTypes,
                                                    NetInfo.LaneType otherLaneTypes,
@@ -43,7 +43,7 @@ namespace TrafficManager.Manager.Impl {
                                                    out PathUnit.Position position) {
             position = default(PathUnit.Position);
             float minDist = 1E+10f;
-            if (Instance.FindPathPositionWithSpiralLoop(
+            if (FindPathPositionWithSpiralLoop(
                     position: pos,
                     service: ItemClass.Service.Road,
                     laneType: laneTypes,
@@ -63,7 +63,7 @@ namespace TrafficManager.Manager.Impl {
                 position = posA;
             }
 
-            if (Instance.FindPathPositionWithSpiralLoop(
+            if (FindPathPositionWithSpiralLoop(
                     pos,
                     ItemClass.Service.Beautification,
                     laneTypes,
