@@ -26,12 +26,12 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
 
         [UsedImplicitly]
         public static bool Prefix(ref string __result,
-                                  PassengerCarAI __intance,
+                                  PassengerCarAI __instance,
                                   ushort vehicleID,
                                   ref Vehicle data,
                                   out InstanceID target) {
             CitizenManager citizenManager = CitizenManager.instance;
-            ushort driverInstanceId = GetDriverInstance(__intance, vehicleID, ref data);
+            ushort driverInstanceId = GetDriverInstance(__instance, vehicleID, ref data);
             ushort targetBuildingId = 0;
             bool targetIsNode = false;
 
