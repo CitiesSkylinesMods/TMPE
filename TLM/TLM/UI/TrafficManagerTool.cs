@@ -338,6 +338,9 @@ namespace TrafficManager.UI {
             // If TMPE was disabled by switching to another tool, hide main menue panel.
             if (ModUI.Instance != null && ModUI.Instance.IsVisible())
                 ModUI.Instance.CloseMainMenu();
+
+            //hide speed limit overlay if necessary
+            SubTools.PrioritySigns.MassEditOverlay.Show = RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
             // no call to base method to disable base class behavior
         }
 
