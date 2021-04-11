@@ -323,6 +323,14 @@ namespace TrafficManager.UI {
                     e.Value.Cleanup();
                 }
             }
+
+            // Disabled camera may indicate the main camera change.
+            // Reinitialize camera cache to make sure we will use the correct one
+            if (!InGameUtil.Instance.CachedMainCamera.enabled) {
+                Log.Info("CachedMainCamera disabled - camera cache reinitialization");
+                InGameUtil.Instantiate();
+            }
+
             // no call to base method to disable base class behavior
         }
 
