@@ -208,8 +208,6 @@ namespace TrafficManager.Lifecycle {
 
             InGameUtil.Instantiate();
 
-            RegisterCustomManagers();
-
             IsGameLoaded = false;
 
             if (BuildConfig.applicationVersion != BuildConfig.VersionToString(
