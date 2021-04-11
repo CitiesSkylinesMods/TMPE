@@ -24,7 +24,7 @@ namespace TrafficManager.Custom.PathFinding {
 
         private CustomPathFind[] _replacementPathFinds;
 
-        public static CustomPathManager _instance => PathManager.instance as CustomPathManager;
+        public static CustomPathManager _instance;
 
         private PathManager stockPathManager_;
 
@@ -66,6 +66,7 @@ namespace TrafficManager.Custom.PathFinding {
             // On waking up, replace the stock pathfinders with the custom one
             // but retain the original version for future replace
             // also suppress call to base class.
+            _instance = this;
             stockPathManager_ = PathManager.instance
                 ?? throw new Exception("stockPathManager is null");
             Log._Debug($"Got stock PathManager instance {stockPathManager_?.GetName()}");
@@ -426,6 +427,8 @@ namespace TrafficManager.Custom.PathFinding {
             simManagers.Remove(this);
 
             simManagers.Add(stockPathManager_);
+
+            _instance = null;
         }
     }
 }
