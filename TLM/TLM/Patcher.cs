@@ -72,21 +72,26 @@ namespace TrafficManager {
         /// <returns>false if exception happens, true otherwise</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
         static bool PatchAll() {
-            bool success = true;
-            var harmony = new Harmony(HARMONY_ID);
-            var assembly = Assembly.GetExecutingAssembly();
-            foreach(var type in AccessTools.GetTypesFromAssembly(assembly)) {
-                try {
-                    var methods = harmony.CreateClassProcessor(type).Patch();
-                    if (methods != null && methods.Any()) {
-                        var strMethods = methods.Select(_method => _method.Name).ToArray();
+            try {
+                bool success = true;
+                var harmony = new Harmony(HARMONY_ID);
+                var assembly = Assembly.GetExecutingAssembly();
+                foreach (var type in AccessTools.GetTypesFromAssembly(assembly)) {
+                    try {
+                        var methods = harmony.CreateClassProcessor(type).Patch();
+                        if (methods != null && methods.Any()) {
+                            var strMethods = methods.Select(_method => _method.Name).ToArray();
+                        }
+                    } catch (Exception ex) {
+                        ex.LogException();
+                        success = false;
                     }
-                } catch(Exception ex) {
-                    ex.LogException();
-                    success = false;
                 }
+                return success;
+            } catch (Exception ex) {
+                ex.LogException();
+                return false;
             }
-            return success;
         }
 
         public static void Uninstall() {
