@@ -50,7 +50,7 @@ namespace TrafficManager.Custom.PathFinding {
             try {
                 Log.Info("CustomPathManager.OnLevelLoaded() called.");
                 PathManager.instance.gameObject.AddComponent<CustomPathManager>();
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 string error =
                     "Traffic Manager: President Edition failed to load. You can continue " +
                     "playing but it's NOT recommended. Traffic Manager will not work as expected.";
@@ -104,7 +104,7 @@ namespace TrafficManager.Custom.PathFinding {
                 BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new Exception("f_pathFinds is null");
 
-            lock(m_bufferLock) {
+            lock (m_bufferLock) {
 
                 for (int i = 0; i < numCustomPathFinds; i++) {
                     _replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();
@@ -164,7 +164,7 @@ namespace TrafficManager.Custom.PathFinding {
             if (m_pathUnits.m_buffer[unit].m_simulationFlags == 0) {
                 return;
             }
-            lock(m_bufferLock) {
+            lock (m_bufferLock) {
 
                 int numIters = 0;
                 while (unit != 0u) {
@@ -201,7 +201,7 @@ namespace TrafficManager.Custom.PathFinding {
                                      ref Randomizer randomizer,
                                      PathCreationArgs args) {
             uint pathUnitId;
-            lock(m_bufferLock) {
+            lock (m_bufferLock) {
 
                 int numIters = 0;
                 while (true) {
@@ -308,7 +308,7 @@ namespace TrafficManager.Custom.PathFinding {
             }
 
             // NON-STOCK CODE START
-            lock(m_bufferLock) {
+            lock (m_bufferLock) {
 
                 QueueItems[pathUnitId].queued = false;
                 // NON-STOCK CODE END
