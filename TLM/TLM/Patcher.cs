@@ -1,13 +1,9 @@
 namespace TrafficManager {
-    using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using HarmonyLib;
     using System;
-    using System.Collections.Generic;
-    using System.Reflection;
     using TrafficManager.RedirectionFramework;
-    using TrafficManager.Util;
 
     public static class Patcher {
         private const string HARMONY_ID = "de.viathinksoft.tmpe";

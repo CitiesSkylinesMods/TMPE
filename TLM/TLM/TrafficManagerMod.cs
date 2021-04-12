@@ -107,7 +107,7 @@ namespace TrafficManager {
 #if DEBUG
             const bool installHarmonyASAP = false; // set true for fast testing
             if (installHarmonyASAP)
-                HarmonyHelper.DoOnHarmonyReady(() => { Patcher.Create().Install(); });
+                HarmonyHelper.DoOnHarmonyReady(Patcher.Install);
 #endif
         }
 

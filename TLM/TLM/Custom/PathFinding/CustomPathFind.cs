@@ -23,12 +23,10 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
     /// <summary>
-    /// This replaces game PathFind class if PF_DIJKSTRA is defined
+    /// This replaces game PathFind class
     /// This is ALL targets except Benchmark
     /// </summary>
-#if PF_DIJKSTRA
     [TargetType(typeof(PathFind))]
-#endif
     public class CustomPathFind : PathFind {
         private const float BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR = Constants.BYTE_TO_FLOAT_SCALE;
 
@@ -238,9 +236,7 @@ namespace TrafficManager.Custom.PathFinding {
             }
         }
 
-#if PF_DIJKSTRA
         [RedirectMethod]
-#endif
         public new bool CalculatePath(uint unit, bool skipQueue) {
             return ExtCalculatePath(unit, skipQueue);
         }
