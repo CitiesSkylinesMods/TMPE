@@ -18,7 +18,7 @@ namespace TrafficManager.Util {
         }
 
         /// <summary>
-        /// Call after loading savegame to cache
+        /// Call after loading savegame to cache main camera reference
         /// </summary>
         public static void Instantiate() {
             Instance = new InGameUtil();

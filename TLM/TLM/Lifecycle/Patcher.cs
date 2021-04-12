@@ -9,24 +9,28 @@ namespace TrafficManager.Lifecycle {
     using System.Reflection;
     using TrafficManager.Util;
     using System.Linq;
+
     public static class Patcher {
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
 
         private const string ERROR_MESSAGE =
-                    "****** ERRRROOORRRRRR!!!!!!!!!! **************\n" +
-                    "**********************************************\n" +
-                    "    HARMONY MOD DEPENDANCY IS NOT INSTALLED!\n\n" +
-                    "solution:\n" +
-                    " - exit to desktop.\n" +
-                    " - unsub harmony mod.\n" +
-                    " - make sure harmony mod is deleted from the content folder\n" +
-                    " - resub to harmony mod.\n" +
-                    " - run the game again.\n" +
-                    "**********************************************\n" +
-                    "**********************************************\n";
+            "****** ERRRROOORRRRRR!!!!!!!!!! **************\n" +
+            "**********************************************\n" +
+            "    HARMONY MOD DEPENDENCY IS NOT INSTALLED!\n\n" +
+            SOLUTION + "\n" +
+            "**********************************************\n" +
+            "**********************************************\n";
+        private const string SOLUTION =
+            "solution:\n" +
+            " - exit to desktop.\n" +
+            " - unsub harmony mod.\n" +
+            " - make sure harmony mod is deleted from the content folder\n" +
+            " - resub to harmony mod.\n" +
+            " - run the game again.";
 
         internal static void AssertCitiesHarmonyInstalled() {
-            if(!HarmonyHelper.IsHarmonyInstalled) {
+            if (!HarmonyHelper.IsHarmonyInstalled) {
+                Shortcuts.ShowErrorDialog("Error: Missing Harmony", SOLUTION);
                 throw new Exception(ERROR_MESSAGE);
             }
         }
@@ -42,8 +46,7 @@ namespace TrafficManager.Lifecycle {
             try {
                 Log.Info("Deploying attribute-driven detours");
                 AssemblyRedirector.Deploy();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.Error("Could not deploy attribute-driven detours because the following exception occured:\n "
                     + e +
                     "\n    -- End of inner exception stack trace -- ");
@@ -52,13 +55,11 @@ namespace TrafficManager.Lifecycle {
 
             if (fail) {
                 Log.Info("patcher failed");
-                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel")
-                    .SetMessage(
+                Shortcuts.ShowErrorDialog(
                     "TM:PE failed to load",
                     "Traffic Manager: President Edition failed to load. You can " +
                     "continue playing but it's NOT recommended. Traffic Manager will " +
-                    "not work as expected.",
-                    true);
+                    "not work as expected.");
             } else {
                 Log.Info("TMPE patches installed successfully");
             }
@@ -71,21 +72,26 @@ namespace TrafficManager.Lifecycle {
         /// <returns>false if exception happens, true otherwise</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
         static bool PatchAll() {
-            bool success = true;
-            var harmony = new Harmony(HARMONY_ID);
-            var assembly = Assembly.GetExecutingAssembly();
-            foreach(var type in AccessTools.GetTypesFromAssembly(assembly)) {
-                try {
-                    var methods = harmony.CreateClassProcessor(type).Patch();
-                    if (methods != null && methods.Any()) {
-                        var strMethods = methods.Select(_method => _method.Name).ToArray();
+            try {
+                bool success = true;
+                var harmony = new Harmony(HARMONY_ID);
+                var assembly = Assembly.GetExecutingAssembly();
+                foreach (var type in AccessTools.GetTypesFromAssembly(assembly)) {
+                    try {
+                        var methods = harmony.CreateClassProcessor(type).Patch();
+                        if (methods != null && methods.Any()) {
+                            var strMethods = methods.Select(_method => _method.Name).ToArray();
+                        }
+                    } catch (Exception ex) {
+                        ex.LogException();
+                        success = false;
                     }
-                } catch(Exception ex) {
-                    ex.LogException();
-                    success = false;
                 }
+                return success;
+            } catch (Exception ex) {
+                ex.LogException();
+                return false;
             }
-            return success;
         }
 
         public static void Uninstall() {
