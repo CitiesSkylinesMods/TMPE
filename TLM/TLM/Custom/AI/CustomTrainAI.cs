@@ -152,7 +152,7 @@ namespace TrafficManager.Custom.AI {
                     if (++num3 > 16384) {
                         CODebugBase<LogChannel>.Error(
                             LogChannel.Core,
-                              $"Invalid list detected!\n{Environment.StackTrace}");
+                            $"Invalid list detected!\n{Environment.StackTrace}");
                         break;
                     }
                 }

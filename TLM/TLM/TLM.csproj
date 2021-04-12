@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -29,7 +29,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>TRACE;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -38,7 +38,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FullDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;PF_DIJKSTRA;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGHK;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGHK;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
@@ -49,7 +49,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'PF2_Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\PF2_Debug\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PF_DIJKSTRA;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
@@ -59,7 +59,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release LABS|AnyCPU'">
     <OutputPath>bin\Release LABS\</OutputPath>
-    <DefineConstants>PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;LABS</DefineConstants>
+    <DefineConstants>QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;LABS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -79,7 +79,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Benchmark|AnyCPU'">
     <OutputPath>bin\Benchmark\</OutputPath>
-    <DefineConstants>PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;BENCHMARK</DefineConstants>
+    <DefineConstants>QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;BENCHMARK</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -89,18 +89,17 @@
     <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.0.0.9, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Lib.Harmony.2.0.0.9\lib\net35\0Harmony.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(MangedDLLPath)\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="CitiesHarmony.API, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CitiesHarmony.API.1.0.4\lib\net35\CitiesHarmony.API.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="CitiesHarmony.API, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\CitiesHarmony.API.2.0.0\lib\net35\CitiesHarmony.API.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="CitiesHarmony.Harmony, Version=2.0.4.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\CitiesHarmony.Harmony.2.0.4\lib\net35\CitiesHarmony.Harmony.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="ColossalManaged">
       <HintPath>$(MangedDLLPath)\ColossalManaged.dll</HintPath>
@@ -112,12 +111,6 @@
     </Reference>
     <Reference Include="MoveItIntegration">
       <HintPath>..\libs\MoveItIntegration.dll</HintPath>
-    </Reference>
-    <Reference Include="SkyTools.Common, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SkyTools.Common.2.1.0\lib\net35\SkyTools.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="SkyTools.Patching, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SkyTools.Patching.2.1.0\lib\net35\SkyTools.Patching.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -161,7 +154,8 @@
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Custom\Data\CustomVehicle.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
-    <Compile Include="Patcher.cs" />
+    <Compile Include="Lifecycle\Patcher.cs" />
+    <Compile Include="Lifecycle\TMPELifecycle.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
     <Compile Include="Manager\AbstractGeometryObservingManager.cs" />
@@ -268,7 +262,7 @@
     <Compile Include="Custom\AI\CustomRoadBaseAI.cs" />
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
-    <Compile Include="LoadingExtension.cs" />
+    <Compile Include="Lifecycle\LoadingExtension.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\RoadSelectionPanels.cs" />
@@ -340,6 +334,8 @@
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
+    <Compile Include="Util\InGameUtil.cs" />
+    <Compile Include="Util\IntVector2.cs" />
     <Compile Include="Util\Spiral.cs" />
     <Compile Include="Util\Caching\CameraTransformValue.cs" />
     <Compile Include="Util\Caching\GenericArrayCache.cs" />
@@ -367,8 +363,8 @@
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
-    <Compile Include="State\SerializableDataExtension.cs" />
-    <Compile Include="ThreadingExtension.cs" />
+    <Compile Include="Lifecycle\SerializableDataExtension.cs" />
+    <Compile Include="Lifecycle\ThreadingExtension.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegment.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLight.cs" />
     <Compile Include="UI\ToolMode.cs" />
@@ -377,26 +373,30 @@
     <Compile Include="TrafficLight\Impl\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrafficManagerMod.cs" />
+    <Compile Include="Lifecycle\TrafficManagerMod.cs" />
     <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />
     <Compile Include="Manager\Impl\TrafficPriorityManager.cs" />
     <Compile Include="UI\ModUI.cs" />
     <Compile Include="UI\MainMenu\DebugMenu.cs" />
     <Compile Include="Util\SegmentTraverser.cs" />
     <Compile Include="Util\TranspilerUtil.cs" />
+    <Compile Include="U\AtlasBuilder.cs" />
+    <Compile Include="U\AtlasSpriteDef.cs" />
+    <Compile Include="U\Autosize\ISmartSizableControl.cs" />
     <Compile Include="U\Autosize\UBoundingBox.cs" />
     <Compile Include="U\Autosize\UResizer.cs" />
-    <Compile Include="U\Autosize\ISmartSizableControl.cs" />
     <Compile Include="U\Autosize\UResizerConfig.cs" />
     <Compile Include="U\Autosize\URule.cs" />
+    <Compile Include="U\Autosize\USizeChoice.cs" />
+    <Compile Include="U\Autosize\UStackingChoice.cs" />
     <Compile Include="U\Autosize\UStackMode.cs" />
     <Compile Include="U\Autosize\UValue.cs" />
-    <Compile Include="U\Button\UButton.cs" />
-    <Compile Include="U\ControlActiveState.cs" />
-    <Compile Include="U\ControlHoveredState.cs" />
-    <Compile Include="U\ControlEnabledState.cs" />
     <Compile Include="U\Button\BaseUButton.cs" />
     <Compile Include="U\Button\ButtonSkin.cs" />
+    <Compile Include="U\Button\UButton.cs" />
+    <Compile Include="U\ControlActiveState.cs" />
+    <Compile Include="U\ControlEnabledState.cs" />
+    <Compile Include="U\ControlHoveredState.cs" />
     <Compile Include="U\Label\ULabel.cs" />
     <Compile Include="U\Panel\BaseUWindowPanel.cs" />
     <Compile Include="U\Panel\UPanel.cs" />
@@ -605,7 +605,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Traffic\Data\" />
-    <Folder Include="U\MainMenu\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_1.png" />
@@ -734,8 +733,6 @@ xcopy /y "$(TargetDir)TMPE.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
-xcopy /y "$(TargetDir)SkyTools.Common.dll" "%25DEPLOYDIR%25"
-xcopy /y "$(TargetDir)SkyTools.Patching.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)MoveItIntegration.dll" "%25DEPLOYDIR%25"
 

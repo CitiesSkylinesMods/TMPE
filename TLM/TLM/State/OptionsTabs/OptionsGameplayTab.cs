@@ -6,6 +6,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI;
     using UnityEngine;
+    using TrafficManager.Lifecycle;
 
     public static class OptionsGameplayTab {
         private static UICheckBox _individualDrivingStyleToggle;
@@ -169,7 +170,7 @@ namespace TrafficManager.State {
                 Options.altLaneSelectionRatio + " %";
 
             // Only call this if the game is running, not during the loading time
-            if (LoadingExtension.IsGameLoaded) {
+            if (TMPELifecycle.Instance.IsGameLoaded) {
                 _altLaneSelectionRatioSlider.RefreshTooltip();
             }
 

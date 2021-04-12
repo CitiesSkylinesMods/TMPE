@@ -1,4 +1,4 @@
-namespace TrafficManager.State {
+namespace TrafficManager.Lifecycle {
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
@@ -8,6 +8,7 @@ namespace TrafficManager.State {
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -15,30 +16,15 @@ namespace TrafficManager.State {
     {
         private const string DATA_ID = "TrafficManager_v1.0";
 
-        private static ISerializableData _serializableData;
+        private static ISerializableData SerializableData => SimulationManager.instance.m_SerializableDataWrapper;
         private static Configuration _configuration;
-        public static bool StateLoading;
 
-        public override void OnCreated(ISerializableData serializableData) {
-            Log._Debug("SerializableDataExtension.OnCreated() called");
-            if(LoadingExtension.IsGameLoaded) {
-                Log._Debug("Hot reload of another mod detected. Skipping SerializableDataExtension.OnCreated() ...");
-                return;
-            }
-            _serializableData = serializableData;
+        public override void OnLoadData() => Load();
+        public override void OnSaveData() => Save();
 
-            if (TrafficManagerMod.Instance.InGameHotReload) {
-                Log._Debug("HOT RELOAD ...");
-                OnLoadData();
-                LoadingExtension.Instance.OnLevelLoaded(LoadMode.LoadGame);
-            }
-        }
-
-        public override void OnReleased() { }
-
-        public override void OnLoadData() {
+        public static void Load() { 
             Log.Info("Loading Traffic Manager: PE Data");
-            StateLoading = true;
+            TMPELifecycle.Instance.Deserializing = true;
             bool loadingSucceeded = true;
 
             try {
@@ -50,7 +36,7 @@ namespace TrafficManager.State {
                 loadingSucceeded = false;
             }
 
-            foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
+            foreach (ICustomManager manager in TMPELifecycle.Instance.RegisteredManagers) {
                 try {
                     Log.Info($"OnBeforeLoadData: {manager.GetType().Name}");
                     manager.OnBeforeLoadData();
@@ -64,7 +50,7 @@ namespace TrafficManager.State {
             Log.Info("Initialization done. Loading mod data now.");
 
             try {
-                byte[] data = _serializableData.LoadData(DATA_ID);
+                byte[] data = SerializableData.LoadData(DATA_ID);
                 DeserializeData(data);
             }
             catch (Exception e) {
@@ -74,7 +60,7 @@ namespace TrafficManager.State {
 
             // load options
             try {
-                byte[] options = _serializableData.LoadData("TMPE_Options");
+                byte[] options = SerializableData.LoadData("TMPE_Options");
                 if (options != null) {
                     if (!OptionsManager.Instance.LoadData(options)) {
                         loadingSucceeded = false;
@@ -100,9 +86,9 @@ namespace TrafficManager.State {
                 // steps under 'In case problems arise'.", true);
             }
 
-            StateLoading = false;
+            TMPELifecycle.Instance.Deserializing = false;
 
-            foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
+            foreach (ICustomManager manager in TMPELifecycle.Instance.RegisteredManagers) {
                 try {
                     Log.Info($"OnAfterLoadData: {manager.GetType().Name}");
                     manager.OnAfterLoadData();
@@ -288,7 +274,7 @@ namespace TrafficManager.State {
             }
         }
 
-        public override void OnSaveData() {
+        public static void Save() { 
             bool success = true;
 
             // try {
@@ -301,7 +287,7 @@ namespace TrafficManager.State {
             //    error = true;
             // }
 
-            foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
+            foreach (ICustomManager manager in TMPELifecycle.Instance.RegisteredManagers) {
                 try {
                     Log.Info($"OnBeforeSaveData: {manager.GetType().Name}");
                     manager.OnBeforeSaveData();
@@ -369,7 +355,7 @@ namespace TrafficManager.State {
 
                 try {
                     // save options
-                    _serializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
+                    SerializableData.SaveData("TMPE_Options", OptionsManager.Instance.SaveData(ref success));
                 } catch (Exception ex) {
                     Log.Error("Unexpected error while saving options: " + ex.Message);
                     success = false;
@@ -382,7 +368,7 @@ namespace TrafficManager.State {
                     binaryFormatter.Serialize(memoryStream, configuration);
                     memoryStream.Position = 0;
                     Log.Info($"Save data byte length {memoryStream.Length}");
-                    _serializableData.SaveData(DATA_ID, memoryStream.ToArray());
+                    SerializableData.SaveData(DATA_ID, memoryStream.ToArray());
                 } catch (Exception ex) {
                     Log.Error("Unexpected error while saving data: " + ex);
                     success = false;
@@ -390,7 +376,7 @@ namespace TrafficManager.State {
                     memoryStream.Close();
                 }
 
-                var reverseManagers = new List<ICustomManager>(LoadingExtension.RegisteredManagers);
+                var reverseManagers = new List<ICustomManager>(TMPELifecycle.Instance.RegisteredManagers);
                 reverseManagers.Reverse();
                 foreach (ICustomManager manager in reverseManagers) {
                     try {

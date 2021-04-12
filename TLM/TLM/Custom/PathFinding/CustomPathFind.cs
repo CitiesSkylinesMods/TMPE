@@ -23,12 +23,10 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
     /// <summary>
-    /// This replaces game PathFind class if PF_DIJKSTRA is defined
+    /// This replaces game PathFind class
     /// This is ALL targets except Benchmark
     /// </summary>
-#if PF_DIJKSTRA
     [TargetType(typeof(PathFind))]
-#endif
     public class CustomPathFind : PathFind {
         private const float BYTE_TO_FLOAT_OFFSET_CONVERSION_FACTOR = Constants.BYTE_TO_FLOAT_SCALE;
 
@@ -232,18 +230,13 @@ namespace TrafficManager.Custom.PathFinding {
         }
 
         private void OnDestroy() {
-            try {
-                Monitor.Enter(QueueLock);
+            lock (QueueLock) {
                 Terminated = true;
                 Monitor.PulseAll(QueueLock);
-            } finally {
-                Monitor.Exit(QueueLock);
             }
         }
 
-#if PF_DIJKSTRA
         [RedirectMethod]
-#endif
         public new bool CalculatePath(uint unit, bool skipQueue) {
             return ExtCalculatePath(unit, skipQueue);
         }
@@ -253,8 +246,7 @@ namespace TrafficManager.Custom.PathFinding {
                 return false;
             }
 
-            try {
-                Monitor.Enter(QueueLock);
+            lock(QueueLock) {
 
                 if (skipQueue) {
                     if (QueueLast == 0) {
@@ -282,8 +274,6 @@ namespace TrafficManager.Custom.PathFinding {
                 m_queuedPathFindCount++;
 
                 Monitor.Pulse(QueueLock);
-            } finally {
-                Monitor.Exit(QueueLock);
             }
 
             return true;
@@ -824,8 +814,7 @@ namespace TrafficManager.Custom.PathFinding {
 
                     if (currentItemPositionCount == 12) {
                         uint createdPathUnitId;
-                        try {
-                            Monitor.Enter(bufferLock_);
+                        lock(bufferLock_) {
 
                             if (!PathUnits.CreateItem(out createdPathUnitId, ref pathRandomizer_)) {
                                 PathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
@@ -856,8 +845,6 @@ namespace TrafficManager.Custom.PathFinding {
                             sumOfPositionCounts += currentItemPositionCount;
                             Singleton<PathManager>.instance.m_pathUnitCount =
                                 (int)(PathUnits.ItemCount() - 1);
-                        } finally {
-                            Monitor.Exit(bufferLock_);
                         }
 
                         currentPathUnitId = createdPathUnitId;
@@ -4199,8 +4186,7 @@ namespace TrafficManager.Custom.PathFinding {
 
         private void PathFindThread() {
             while (true) {
-                try {
-                    Monitor.Enter(QueueLock);
+                lock(QueueLock) {
 
                     while (QueueFirst == 0 && !Terminated) {
                         Monitor.Wait(QueueLock);
@@ -4238,9 +4224,6 @@ namespace TrafficManager.Custom.PathFinding {
 
                     // NON-STOCK CODE END
                 }
-                finally {
-                    Monitor.Exit(QueueLock);
-                }
 
                 try {
                     m_pathfindProfiler.BeginStep();
@@ -4266,30 +4249,22 @@ namespace TrafficManager.Custom.PathFinding {
                     // NON-STOCK CODE END
                 }
 
-                try {
-                    Monitor.Enter(QueueLock);
+                lock(QueueLock) {
 
                     PathUnits.m_buffer[Calculating].m_pathFindFlags =
                         (byte)(PathUnits.m_buffer[Calculating].m_pathFindFlags &
                                ~PathUnit.FLAG_CALCULATING);
 
                     // NON-STOCK CODE START
-                    try {
-                        Monitor.Enter(bufferLock_);
+                    lock(bufferLock_) {
                         CustomPathManager._instance.QueueItems[Calculating].queued = false;
                         CustomPathManager._instance.ReleasePath(Calculating);
-                    }
-                    finally {
-                        Monitor.Exit(bufferLock_);
                     }
 
                     // NON-STOCK CODE END
                     // Singleton<PathManager>.instance.ReleasePath(Calculating); // stock code commented
                     Calculating = 0u;
                     Monitor.Pulse(QueueLock);
-                }
-                finally {
-                    Monitor.Exit(QueueLock);
                 }
             }
         }

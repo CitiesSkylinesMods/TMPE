@@ -141,69 +141,26 @@ namespace CitiesGameBridge.Service {
                 : segment.m_endNode;
         }
 
-        public void IterateNodeSegments(ushort nodeId, NetSegmentHandler handler) {
-            IterateNodeSegments(nodeId, ClockDirection.None, handler);
+        public GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection) {
+            var initialSegmentId = GetInitialSegment(ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]);
+            var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            return new GetNodeSegmentIdsEnumerable(nodeId, initialSegmentId, clockDirection, segmentBuffer);
         }
 
-        public void IterateNodeSegments(ushort nodeId,
-                                        ClockDirection dir,
-                                        NetSegmentHandler handler) {
-            NetManager netManager = Singleton<NetManager>.instance;
-
-            bool ProcessFun(ushort nId, ref NetNode netNode) {
-                if (dir == ClockDirection.None) {
-                    for (int i = 0; i < 8; ++i) {
-                        ushort segmentId = netNode.GetSegment(i);
-                        if (segmentId != 0) {
-                            if (!handler(
-                                    segmentId,
-                                    ref netManager.m_segments.m_buffer[segmentId])) {
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    ushort segmentId = 0;
-                    for (int i = 0; i < 8; ++i) {
-                        segmentId = netNode.GetSegment(i);
-                        if (segmentId != 0) {
-                            break;
-                        }
-                    }
-                    ushort initSegId = segmentId;
-
-                    while (true) {
-                        if (segmentId != 0) {
-                            if (!handler(
-                                    segmentId,
-                                    ref netManager.m_segments.m_buffer[segmentId])) {
-                                break;
-                            }
-                        }
-
-                        switch (dir) {
-                            // also: case ClockDirection.Clockwise:
-                            default:
-                                segmentId = netManager.m_segments.m_buffer[segmentId]
-                                                      .GetLeftSegment(nodeId);
-                                break;
-                            case ClockDirection.CounterClockwise:
-                                segmentId = netManager.m_segments.m_buffer[segmentId]
-                                                      .GetRightSegment(nodeId);
-                                break;
-                        }
-
-                        if (segmentId == initSegId || segmentId == 0) {
-                            break;
-                        }
-                    }
+        /// <summary>
+        /// Gets the initial segment.
+        /// </summary>
+        /// <param name="node">The node with the segments.</param>
+        /// <returns>First non 0 segmentId.</returns>
+        public ushort GetInitialSegment(ref NetNode node) {
+            for (int i = 0; i < 8; ++i) {
+                var segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    return segmentId;
                 }
-
-                return true;
             }
 
-            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
-            ProcessFun(nodeId, ref node);
+            return 0;
         }
 
         public void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler) {

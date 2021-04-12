@@ -107,8 +107,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
                 segmentsUpdated = false;
 
                 int len = updatedSegmentBuckets.Length;
@@ -128,14 +127,10 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
             }
-            finally {
-                Monitor.Exit(updateLock);
-            }
         }
 
         public void RequestFullRecalculation() {
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
 
                 for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                     updatedSegmentBuckets[segmentId >> 6] |= 1uL << (int)(segmentId & 63);
@@ -148,9 +143,6 @@ namespace TrafficManager.Manager.Impl {
                     Services.SimulationService.ForcedSimulationPaused) {
                     SimulationStep();
                 }
-            }
-            finally {
-                Monitor.Exit(updateLock);
             }
         }
 
@@ -166,33 +158,33 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"RoutingManager.RequestRecalculation({segmentId}, {propagate}) called.");
             }
 
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
 
                 updatedSegmentBuckets[segmentId >> 6] |= 1uL << (segmentId & 63);
                 ResetIncomingHighwayLaneArrows(segmentId);
                 segmentsUpdated = true;
             }
-            finally {
-                Monitor.Exit(updateLock);
-            }
 
             if (propagate) {
+                //TODO refactor into RequestRecalculation(ushort nodeId)
+
                 ushort startNodeId = Services.NetService.GetSegmentNodeId(segmentId, true);
-                Services.NetService.IterateNodeSegments(
-                    startNodeId,
-                    (ushort otherSegmentId, ref NetSegment otherSeg) => {
+                ref NetNode startNode = ref startNodeId.ToNode();
+                for (int i = 0; i < 8; ++i) {
+                    ushort otherSegmentId = startNode.GetSegment(i);
+                    if (otherSegmentId != 0) {
                         RequestRecalculation(otherSegmentId, false);
-                        return true;
-                    });
+                    }
+                }
 
                 ushort endNodeId = Services.NetService.GetSegmentNodeId(segmentId, false);
-                Services.NetService.IterateNodeSegments(
-                    endNodeId,
-                    (ushort otherSegmentId, ref NetSegment otherSeg) => {
+                ref NetNode endNode = ref endNodeId.ToNode();
+                for (int i = 0; i < 8; ++i) {
+                    ushort otherSegmentId = endNode.GetSegment(i);
+                    if (otherSegmentId != 0) {
                         RequestRecalculation(otherSegmentId, false);
-                        return true;
-                    });
+                    }
+                }
             }
         }
 
@@ -272,11 +264,12 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                Services.NetService.IterateNodeSegments(
-                    nodeId,
-                    (ushort segId, ref NetSegment netSegment) => {
+                ref NetNode node = ref nodeId.ToNode();
+                for (int i = 0; i < 8; ++i) {
+                    ushort segId = node.GetSegment(i);
+                    if (segId != 0) {
                         if (segId == segmentId) {
-                            return true;
+                            continue;
                         }
 
                         Services.NetService.IterateSegmentLanes(
@@ -287,17 +280,17 @@ namespace TrafficManager.Manager.Impl {
                              ushort sId,
                              ref NetSegment seg,
                              byte laneIndex) => {
-                                if (IsIncomingLane(
-                                    segId,
-                                    seg.m_startNode == nodeId,
-                                    laneIndex)) {
-                                    Flags.RemoveHighwayLaneArrowFlags(laneId);
-                                }
+                                 if (IsIncomingLane(
+                                     segId,
+                                     seg.m_startNode == nodeId,
+                                     laneIndex)) {
+                                     Flags.RemoveHighwayLaneArrowFlags(laneId);
+                                 }
 
-                                return true;
-                            });
-                        return true;
-                    });
+                                 return true;
+                             });
+                    }
+                }
             }
         }
 
@@ -1114,7 +1107,6 @@ namespace TrafficManager.Manager.Impl {
                     nextLaneId = nextLaneId.ToLane().m_nextLane;
                     ++nextLaneIndex;
                 } // foreach lane
-
 
                 if (extendedLogRouting) {
                     Log._Debug(

@@ -34,6 +34,8 @@ namespace TrafficManager.UI.SubTools {
 
         private readonly float vehicleRestrictionsSignSize = 80f;
 
+        private readonly GUI.WindowFunction _guiVehicleRestrictionsWindowDelegate;
+
         private bool cursorInSecondaryPanel;
 
         private bool overlayHandleHovered;
@@ -59,6 +61,8 @@ namespace TrafficManager.UI.SubTools {
 
         public VehicleRestrictionsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
+            _guiVehicleRestrictionsWindowDelegate = GuiVehicleRestrictionsWindow;
+
             currentRestrictedSegmentIds = new HashSet<ushort>();
         }
 
@@ -145,9 +149,10 @@ namespace TrafficManager.UI.SubTools {
                 windowRect = GUILayout.Window(
                     255,
                     windowRect,
-                    GuiVehicleRestrictionsWindow,
-                   T("Dialog.Title:Vehicle restrictions"),
-                    WindowStyle);
+                    _guiVehicleRestrictionsWindowDelegate,
+                    T("Dialog.Title:Vehicle restrictions"),
+                    WindowStyle,
+                    EmptyOptionsArray);
                 cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
 
                 // overlayHandleHovered = false;
@@ -231,7 +236,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private void ShowSigns(bool viewOnly) {
-            Vector3 camPos = Camera.main.transform.position;
+            Vector3 camPos = InGameUtil.Instance.CachedCameraTransform.position;
             NetManager netManager = Singleton<NetManager>.instance;
             bool handleHovered = false;
 
@@ -286,7 +291,8 @@ namespace TrafficManager.UI.SubTools {
                 }
                 if (GUILayout.Button(
                    T("Button:Allow all vehicles") + " [delete]",
-                   style) || Input.GetKeyDown(hotkey)) {
+                   style,
+                   EmptyOptionsArray) || Input.GetKeyDown(hotkey)) {
                     AllVehiclesFunc(true);
                     if (RoadMode) {
                         ApplyRestrictionsToAllSegments();
@@ -294,7 +300,7 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
-            if (GUILayout.Button(T("Button:Ban all vehicles"))) {
+            if (GUILayout.Button(T("Button:Ban all vehicles"), EmptyOptionsArray)) {
                 AllVehiclesFunc(false);
                 if (RoadMode) {
                     ApplyRestrictionsToAllSegments();
@@ -304,13 +310,13 @@ namespace TrafficManager.UI.SubTools {
             GUI.color = oldColor;
 
             if (GUILayout.Button(
-               T("Button:Apply to entire road"))) {
+               T("Button:Apply to entire road"),
+               EmptyOptionsArray)) {
                 ApplyRestrictionsToAllSegments();
             }
 
             DragWindow(ref windowRect);
         }
-
 
         private void AllVehiclesFunc(bool allow) {
             // allow all vehicle types

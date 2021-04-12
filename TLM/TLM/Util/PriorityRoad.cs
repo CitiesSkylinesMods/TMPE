@@ -406,7 +406,6 @@ namespace TrafficManager.Util {
             TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.Main);
         }
 
-
         private static void FixMinorSegmentRules(ushort segmentId, ushort nodeId, List<ushort> segmentList) {
             Log._Debug($"FixMinorSegmentRules({segmentId}, {nodeId}, segmentList) was called");
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
@@ -433,7 +432,6 @@ namespace TrafficManager.Util {
         }
         internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
-
 
         internal static bool HasAccelerationLane(List<ushort> segmentList, ushort segmentId, ushort nodeId) {
             bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
@@ -608,14 +606,17 @@ namespace TrafficManager.Util {
         /// <param name="segmentList"></param>
         public static void ClearNode(ushort nodeId) {
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
-            netService.IterateNodeSegments(nodeId, (ushort segmentId, ref NetSegment seg) => {
-                ref NetNode node = ref GetNode(nodeId);
-                bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
-                TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.None);
-                JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
-                LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
-                return true;
-            });
+
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+                    TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.None);
+                    JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
+                    LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);
+                }
+            }
         }
 
         /// <summary>

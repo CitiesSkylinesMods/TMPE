@@ -5,6 +5,7 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.MainMenu;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Lifecycle;
 
     /// <summary>
     /// Globally available UI manager class which contains the main menu button and the panel.
@@ -69,7 +70,7 @@ namespace TrafficManager.UI {
         [NonSerialized]
         public UIOpacityObservable uiOpacityObservable;
 
-        public ModUI() {
+        public void Awake() {
             UiScaleObservable = new UIScaleObservable();
             uiOpacityObservable = new UIOpacityObservable();
 
@@ -84,8 +85,8 @@ namespace TrafficManager.UI {
             ToolMode = TrafficManagerMode.None;
 
             // One time load
-            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
-            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
         }
 
         private void CreateMainMenuButtonAndWindow() {
@@ -232,8 +233,8 @@ namespace TrafficManager.UI {
                     .gameObject
                     .AddComponent<ModUI>();
             }
-            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
-            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
         }
 
         public static void DisableTool() {

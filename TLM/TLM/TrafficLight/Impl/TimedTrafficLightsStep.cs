@@ -972,11 +972,11 @@ namespace TrafficManager.TrafficLight.Impl {
                             } else {
                                 curTotalLaneWait += numVehicles;
                                 ++numLaneWaits;
-                                    Log._DebugIf(
-                                        logTrafficLights,
-                                        () => "TimedTrafficLightsStep.calcWaitFlow: ## Vehicles @ " +
-                                        $"lane {laneIndex}, seg. {sourceSegmentId} going to seg. " +
-                                        $"{targetSegmentId}: COUTING as WAITING -- numVehicles={numVehicles}");
+                                Log._DebugIf(
+                                    logTrafficLights,
+                                    () => "TimedTrafficLightsStep.calcWaitFlow: ## Vehicles @ " +
+                                    $"lane {laneIndex}, seg. {sourceSegmentId} going to seg. " +
+                                    $"{targetSegmentId}: COUTING as WAITING -- numVehicles={numVehicles}");
                             }
 
                             Log._DebugIf(

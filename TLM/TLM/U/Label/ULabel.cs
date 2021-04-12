@@ -1,4 +1,4 @@
-namespace TrafficManager.U.Label {
+namespace TrafficManager.U {
     using ColossalFramework.UI;
     using TrafficManager.U.Autosize;
 

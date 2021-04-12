@@ -148,7 +148,7 @@ namespace TrafficManager.UI.SubTools {
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
             // Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
-            Camera currentCamera = Camera.main;
+            Camera currentCamera = InGameUtil.Instance.CachedMainCamera;
 
             // Check if camera pos/angle has changed then re-filter the visible nodes
             // Assumption: The states checked in this loop don't change while the tool is active
@@ -789,7 +789,6 @@ namespace TrafficManager.UI.SubTools {
         internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
 
-
         public override void OnPrimaryClickOverlay() {
 #if DEBUG
             bool logLaneConn = DebugSwitch.LaneConnections.Get();
@@ -932,6 +931,8 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
+            ushort previouslySelectedNodeId = SelectedNodeId;
+
             switch (GetSelectionMode()) {
                 // also: case MarkerSelectionMode.None:
                 default: {
@@ -964,7 +965,7 @@ namespace TrafficManager.UI.SubTools {
                     }
             }
 
-            if (GetSelectionMode() == SelectionMode.None) {
+            if (GetSelectionMode() == SelectionMode.None && previouslySelectedNodeId == 0) {
                 MainTool.SetToolMode(ToolMode.None);
             }
         }

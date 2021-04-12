@@ -6,7 +6,7 @@ namespace TrafficManager.State {
     using TrafficManager.Manager.Impl;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI;
-
+    using TrafficManager.Lifecycle;
     public static class OptionsMaintenanceTab {
         [UsedImplicitly]
         private static UIButton _resetStuckEntitiesBtn;
@@ -119,8 +119,8 @@ namespace TrafficManager.State {
             Options.Indent(_turnOnRedEnabledToggle);
 
             // TODO [issue ##959] remove when TTL is implemented in asset editor.
-            bool inEditor = (SerializableDataExtension.StateLoading || LoadingExtension.IsGameLoaded)
-                            && LoadingExtension.AppMode != AppMode.Game;
+            bool inEditor = TMPELifecycle.InGameOrEditor()
+                            && TMPELifecycle.AppMode != AppMode.Game;
             if (inEditor) {
                 EnableTimedLightsToggle.isChecked = false;
                 EnableTimedLightsToggle.isEnabled = false;

@@ -1307,11 +1307,11 @@ namespace TrafficManager.Manager.Impl {
                 default: {
                     // ... and a path to a parking spot was calculated: dismiss path and
                     // restart path-finding for walking
-                Log._DebugIf(
-                    logParkingAi,
-                    () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                    "A parking space car path was queried but it turned out that no car is " +
-                    "needed. Retrying path-finding for walking.");
+                    Log._DebugIf(
+                        logParkingAi,
+                        () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                        "A parking space car path was queried but it turned out that no car is " +
+                        "needed. Retrying path-finding for walking.");
 
                     extCitInstMan.Reset(ref extInstance);
                     extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;

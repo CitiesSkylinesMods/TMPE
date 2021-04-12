@@ -104,9 +104,8 @@ namespace TrafficManager.UI.Helpers {
             return panelHelper;
         }
 
-        public static ExtUITabstrip Create(UIHelperBase helperBase) {
-            UIHelper actualHelper = helperBase as UIHelper;
-            UIComponent optionsContainer = actualHelper.self as UIComponent;
+        public static ExtUITabstrip Create(UIHelper helper) {
+            UIComponent optionsContainer = helper.self as UIComponent;
             float orgOptsContainerWidth = optionsContainer.height;
             float orgOptsContainerHeight = optionsContainer.width;
 
@@ -129,7 +128,7 @@ namespace TrafficManager.UI.Helpers {
 #if DEBUG
         public static class Test {
             private static int n = 0;
-            public static void OnSettingsUI(UIHelperBase helperBase) {
+            public static void OnSettingsUI(UIHelper helperBase) {
                 n = 0;
                 ExtUITabstrip tabStrip = ExtUITabstrip.Create(helperBase);
                 AddTab(tabStrip, "A");
