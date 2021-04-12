@@ -9,6 +9,7 @@ namespace TrafficManager {
     using System.Reflection;
     using TrafficManager.Util;
     using System.Linq;
+
     public static class Patcher {
         private const string HARMONY_ID = "de.viathinksoft.tmpe";
 
