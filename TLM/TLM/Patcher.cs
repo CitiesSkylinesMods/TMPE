@@ -15,7 +15,7 @@ namespace TrafficManager {
         private const string ERROR_MESSAGE =
             "****** ERRRROOORRRRRR!!!!!!!!!! **************\n" +
             "**********************************************\n" +
-            "    HARMONY MOD DEPENDANCY IS NOT INSTALLED!\n\n" +
+            "    HARMONY MOD DEPENDENCY IS NOT INSTALLED!\n\n" +
             SOLUTION + "\n" +
             "**********************************************\n" +
             "**********************************************\n";
