@@ -1,4 +1,4 @@
-namespace TrafficManager {
+namespace TrafficManager.Lifecycle {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using HarmonyLib;
@@ -29,7 +29,7 @@ namespace TrafficManager {
             " - run the game again.";
 
         internal static void AssertCitiesHarmonyInstalled() {
-            if(!HarmonyHelper.IsHarmonyInstalled) {
+            if (!HarmonyHelper.IsHarmonyInstalled) {
                 Shortcuts.ShowErrorDialog("Error: Missing Harmony", SOLUTION);
                 throw new Exception(ERROR_MESSAGE);
             }
@@ -46,8 +46,7 @@ namespace TrafficManager {
             try {
                 Log.Info("Deploying attribute-driven detours");
                 AssemblyRedirector.Deploy();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.Error("Could not deploy attribute-driven detours because the following exception occured:\n "
                     + e +
                     "\n    -- End of inner exception stack trace -- ");

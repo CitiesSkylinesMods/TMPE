@@ -154,7 +154,8 @@
     <Compile Include="Custom\AI\CustomVehicleAI.cs" />
     <Compile Include="Custom\Data\CustomVehicle.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
-    <Compile Include="Patcher.cs" />
+    <Compile Include="Lifecycle\Patcher.cs" />
+    <Compile Include="Lifecycle\TMPELifecycle.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
     <Compile Include="Manager\AbstractGeometryObservingManager.cs" />
@@ -261,7 +262,7 @@
     <Compile Include="Custom\AI\CustomRoadBaseAI.cs" />
     <Compile Include="Custom\AI\CustomTrainAI.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
-    <Compile Include="LoadingExtension.cs" />
+    <Compile Include="Lifecycle\LoadingExtension.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\RoadSelectionPanels.cs" />
@@ -362,8 +363,8 @@
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
-    <Compile Include="State\SerializableDataExtension.cs" />
-    <Compile Include="ThreadingExtension.cs" />
+    <Compile Include="Lifecycle\SerializableDataExtension.cs" />
+    <Compile Include="Lifecycle\ThreadingExtension.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegment.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLight.cs" />
     <Compile Include="UI\ToolMode.cs" />
@@ -372,7 +373,7 @@
     <Compile Include="TrafficLight\Impl\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrafficManagerMod.cs" />
+    <Compile Include="Lifecycle\TrafficManagerMod.cs" />
     <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />
     <Compile Include="Manager\Impl\TrafficPriorityManager.cs" />
     <Compile Include="UI\ModUI.cs" />

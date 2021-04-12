@@ -1,4 +1,4 @@
-namespace TrafficManager.State {
+namespace TrafficManager.Lifecycle {
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
@@ -8,6 +8,7 @@ namespace TrafficManager.State {
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
 
     [UsedImplicitly]
     public class SerializableDataExtension
@@ -17,14 +18,13 @@ namespace TrafficManager.State {
 
         private static ISerializableData SerializableData => SimulationManager.instance.m_SerializableDataWrapper;
         private static Configuration _configuration;
-        public static bool StateLoading;
 
         public override void OnLoadData() => Load();
         public override void OnSaveData() => Save();
 
         public static void Load() { 
             Log.Info("Loading Traffic Manager: PE Data");
-            StateLoading = true;
+            TMPELifecycle.Instance.Deserializing = true;
             bool loadingSucceeded = true;
 
             try {
@@ -36,7 +36,7 @@ namespace TrafficManager.State {
                 loadingSucceeded = false;
             }
 
-            foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
+            foreach (ICustomManager manager in TMPELifecycle.Instance.RegisteredManagers) {
                 try {
                     Log.Info($"OnBeforeLoadData: {manager.GetType().Name}");
                     manager.OnBeforeLoadData();
@@ -86,9 +86,9 @@ namespace TrafficManager.State {
                 // steps under 'In case problems arise'.", true);
             }
 
-            StateLoading = false;
+            TMPELifecycle.Instance.Deserializing = false;
 
-            foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
+            foreach (ICustomManager manager in TMPELifecycle.Instance.RegisteredManagers) {
                 try {
                     Log.Info($"OnAfterLoadData: {manager.GetType().Name}");
                     manager.OnAfterLoadData();
@@ -287,7 +287,7 @@ namespace TrafficManager.State {
             //    error = true;
             // }
 
-            foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
+            foreach (ICustomManager manager in TMPELifecycle.Instance.RegisteredManagers) {
                 try {
                     Log.Info($"OnBeforeSaveData: {manager.GetType().Name}");
                     manager.OnBeforeSaveData();
@@ -376,7 +376,7 @@ namespace TrafficManager.State {
                     memoryStream.Close();
                 }
 
-                var reverseManagers = new List<ICustomManager>(LoadingExtension.RegisteredManagers);
+                var reverseManagers = new List<ICustomManager>(TMPELifecycle.Instance.RegisteredManagers);
                 reverseManagers.Reverse();
                 foreach (ICustomManager manager in reverseManagers) {
                     try {

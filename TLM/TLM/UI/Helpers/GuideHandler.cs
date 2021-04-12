@@ -2,12 +2,13 @@ namespace TrafficManager.UI.Helpers {
     using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
+    using TrafficManager.Lifecycle;
 
     public class GuideHandler {
         private Dictionary<string, GuideWrapper> GuideTable = new Dictionary<string, GuideWrapper>();
 
         public GuideHandler() {
-            foreach (string localeKey in LoadingExtension.TranslationDatabase.GetGuides()) {
+            foreach (string localeKey in TMPELifecycle.Instance.TranslationDatabase.GetGuides()) {
                 Log._Debug($"calling AddGuide(localeKey={localeKey}) ...");
                 AddGuide(localeKey);
             }
@@ -19,7 +20,7 @@ namespace TrafficManager.UI.Helpers {
         public void Activate(string localeKey) {
             if (!GuideTable.TryGetValue(localeKey, out GuideWrapper guide)) {
                 Log.Error($"Guide {localeKey} does not exists");
-                LoadingExtension.TranslationDatabase.AddMissingGuideString(localeKey);
+                TMPELifecycle.Instance.TranslationDatabase.AddMissingGuideString(localeKey);
                 guide = AddGuide(localeKey);
             }
             if (guide == null) {
