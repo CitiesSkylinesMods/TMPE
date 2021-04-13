@@ -271,26 +271,26 @@ namespace TrafficManager.UI.SubTools {
                         bool highlightMarker = laneEnd == selectedLaneEnd || markerIsHovered;
                         laneEnd.RenderOverlay(cameraInfo, color, highlightMarker);
                     } // if drawMarker
-
-                    if (selectedLaneEnd != null) {
-                        // lane curves for selectedMarker will be drawn last to
-                        // be on the top of other lane markers.
-                        foreach (LaneEnd targetLaneEnd in selectedLaneEnd.ConnectedLaneEnds) {
-                            if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
-                                continue;
-                            }
-
-                            DrawLaneCurve(
-                                cameraInfo: cameraInfo,
-                                start: selectedLaneEnd.NodeMarker.TerrainPosition,
-                                end: targetLaneEnd.NodeMarker.TerrainPosition,
-                                middlePoint: NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
-                                color: selectedLaneEnd.Color,
-                                outlineColor: Color.grey,
-                                size: 0.18f); // Embolden
-                        } // end foreach selectedMarker.ConnectedMarkers
-                    } // end if selectedMarker != null
                 } // end foreach lanemarker in node markers
+
+                if (selectedLaneEnd != null) {
+                    // lane curves for selectedMarker will be drawn last to
+                    // be on the top of other lane markers.
+                    foreach (LaneEnd targetLaneEnd in selectedLaneEnd.ConnectedLaneEnds) {
+                        if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
+                            continue;
+                        }
+
+                        DrawLaneCurve(
+                            cameraInfo: cameraInfo,
+                            start: selectedLaneEnd.NodeMarker.TerrainPosition,
+                            end: targetLaneEnd.NodeMarker.TerrainPosition,
+                            middlePoint: NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
+                            color: selectedLaneEnd.Color,
+                            outlineColor: Color.grey,
+                            size: 0.18f); // Embolden
+                    } // end foreach selectedMarker.ConnectedMarkers
+                } // end if selectedMarker != null
             } // end for node in all nodes
         }
 
