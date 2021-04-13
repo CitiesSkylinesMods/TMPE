@@ -345,7 +345,6 @@ namespace TrafficManager.UI.MainMenu {
 #if QUEUEDSTATS
         private void ClickTogglePathFindStats(UIComponent component,
                                               UIMouseEventParameter eventParam) {
-            Update();
             showPathFindStats = !showPathFindStats;
         }
 #endif
