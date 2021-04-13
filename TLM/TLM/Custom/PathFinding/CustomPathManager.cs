@@ -11,7 +11,6 @@ namespace TrafficManager.Custom.PathFinding {
     using API.Traffic.Enums;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
-    using TrafficManager.RedirectionFramework.Attributes;
     using TrafficManager.State;
     using UnityEngine;
     using ColossalFramework.UI;
