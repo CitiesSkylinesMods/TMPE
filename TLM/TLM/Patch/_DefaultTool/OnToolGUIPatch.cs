@@ -3,7 +3,7 @@ namespace TrafficManager.Patch._DefaultTool {
     using JetBrains.Annotations;
     using TrafficManager.UI;
     using UnityEngine;
-
+    using TrafficManager.Lifecycle;
     [HarmonyPatch(typeof(DefaultTool), "OnToolGUI")]
     [UsedImplicitly]
     public static class OnToolGUIPatch {
@@ -13,7 +13,7 @@ namespace TrafficManager.Patch._DefaultTool {
         [HarmonyPostfix]
         [UsedImplicitly]
         public static void Postfix(Event e) {
-            if (LoadingExtension.PlayMode && !TrafficManagerTool.IsCurrentTool) {
+            if (TMPELifecycle.PlayMode && !TrafficManagerTool.IsCurrentTool) {
                 if (UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                     ModUI.GetTrafficManagerTool(true).OnToolGUIImpl(e);
                 }

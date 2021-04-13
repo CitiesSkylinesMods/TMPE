@@ -10,9 +10,10 @@ namespace TrafficManager.Custom.PathFinding {
     using System;
     using API.Traffic.Enums;
     using TrafficManager.API.Traffic.Data;
-#if !PF_DIJKSTRA
-    using CustomPathFind = CustomPathFind_Old;
-#endif
+    using TrafficManager.Manager.Impl;
+    using TrafficManager.State;
+    using UnityEngine;
+    using ColossalFramework.UI;
 
     public class CustomPathManager : PathManager {
         /// <summary>
@@ -24,20 +25,58 @@ namespace TrafficManager.Custom.PathFinding {
 
         public static CustomPathManager _instance;
 
+        private PathManager stockPathManager_;
+
+        private static FastList<ISimulationManager> GetSimulationManagers() =>
+            typeof(SimulationManager)
+            .GetField("m_managers", BindingFlags.Static | BindingFlags.NonPublic)
+            ?.GetValue(null)
+            as FastList<ISimulationManager>
+            ?? throw new Exception("could not get SimulationManager.m_managers");
+
+        private static FieldInfo PathManagerInstance =>
+            typeof(Singleton<PathManager>)
+            .GetField(
+            "sInstance",
+            BindingFlags.Static | BindingFlags.NonPublic) ??
+            throw new Exception("pathManagerInstance is null");
+
 #if QUEUEDSTATS
-        public static uint TotalQueuedPathFinds {
-            get; private set;
-        }
+        public static uint TotalQueuedPathFinds { get; private set; }
 #endif
 
-        public static bool InitDone {
-            get; private set;
+        public static void OnLevelLoaded() {
+            try {
+                Log.Info("CustomPathManager.OnLevelLoaded() called.");
+                PathManager.instance.gameObject.AddComponent<CustomPathManager>();
+            } catch (Exception ex) {
+                string error =
+                    "Traffic Manager: President Edition failed to load. You can continue " +
+                    "playing but it's NOT recommended. Traffic Manager will not work as expected.";
+                Log.Error(error);
+                Log.Error($"Path manager replacement error: {ex}");
+                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel")
+                    .SetMessage("TM:PE failed to load", error, true);
+            }
         }
 
-        // On waking up, replace the stock pathfinders with the custom one
         [UsedImplicitly]
-        public new virtual void Awake() {
+        protected override void Awake() {
+            // On waking up, replace the stock pathfinders with the custom one
+            // but retain the original version for future replace
+            // also suppress call to base class.
             _instance = this;
+            stockPathManager_ = PathManager.instance
+                ?? throw new Exception("stockPathManager is null");
+            Log._Debug($"Got stock PathManager instance {stockPathManager_?.GetName()}");
+            PathManagerInstance.SetValue(null, this);
+            Log._Debug("Should be custom: " + PathManager.instance.GetType());
+
+            UpdateWithPathManagerValues(stockPathManager_);
+
+            var simManagers = GetSimulationManagers();
+            simManagers.Remove(stockPathManager_);
+            simManagers.Add(this);
         }
 
         public void UpdateWithPathManagerValues(PathManager stockPathManager) {
@@ -51,8 +90,6 @@ namespace TrafficManager.Custom.PathFinding {
             m_pathUnits = stockPathManager.m_pathUnits;
             m_bufferLock = stockPathManager.m_bufferLock;
 
-            Log._Debug("Waking up CustomPathManager.");
-
             QueueItems = new PathUnitQueueItem[MAX_PATHUNIT_COUNT];
 
             PathFind[] stockPathFinds = GetComponents<PathFind>();
@@ -61,26 +98,18 @@ namespace TrafficManager.Custom.PathFinding {
 
             Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects.");
             _replacementPathFinds = new CustomPathFind[numCustomPathFinds];
+            FieldInfo f_pathfinds = typeof(PathManager).GetField(
+                "m_pathfinds",
+                BindingFlags.NonPublic | BindingFlags.Instance)
+                ?? throw new Exception("f_pathFinds is null");
 
-            lock(m_bufferLock) {
+            lock (m_bufferLock) {
 
                 for (int i = 0; i < numCustomPathFinds; i++) {
                     _replacementPathFinds[i] = gameObject.AddComponent<CustomPathFind>();
-#if !PF_DIJKSTRA
-					_replacementPathFinds[i].pfId = i;
-					if (i == 0) {
-						_replacementPathFinds[i].IsMasterPathFind = true;
-					}
-#endif
                 }
 
-                Log._Debug("Setting _replacementPathFinds");
-                FieldInfo fieldInfo = typeof(PathManager).GetField(
-                    "m_pathfinds",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-
-                Log._Debug("Setting m_pathfinds to custom collection");
-                fieldInfo?.SetValue(this, _replacementPathFinds);
+                f_pathfinds?.SetValue(this, _replacementPathFinds);
 
                 for (int i = 0; i < numOfStockPathFinds; i++) {
                     Log._Debug($"PF {i}: {stockPathFinds[i].m_queuedPathFindCount} queued path-finds");
@@ -90,8 +119,39 @@ namespace TrafficManager.Custom.PathFinding {
                     Destroy(stockPathFinds[i]);
                 }
             }
+        }
 
-            InitDone = true;
+        public void UpdateOldPathManagerValues(PathManager stockPathManager) {
+            stockPathManager.m_drawCallData = m_drawCallData;
+            stockPathManager.m_pathUnitCount = m_pathUnitCount;
+            stockPathManager.m_renderPathGizmo = m_renderPathGizmo;
+
+            int n = _replacementPathFinds.Length;
+
+            Log._Debug("Creating " + n + " stock PathFind objects.");
+            PathFind[] stockPathFinds = new PathFind[n];
+
+            FieldInfo f_pathfinds = typeof(PathManager).GetField(
+                  "m_pathfinds",
+                  BindingFlags.NonPublic | BindingFlags.Instance)
+                  ?? throw new Exception("f_pathFinds is null");
+
+            // both stcok and custom PathMangers use the same lock object
+            lock (m_bufferLock) {
+                for (int i = 0; i < n; i++) {
+                    Log._Debug($"PF {i}: {_replacementPathFinds[i].m_queuedPathFindCount} queued path-finds");
+
+                    // would cause deadlock since we have a lock on m_bufferLock
+                    // customPathFinds[i].WaitForAllPaths();
+                    Destroy(_replacementPathFinds[i]);
+                }
+
+                for (int i = 0; i < n; i++) {
+                    stockPathFinds[i] = gameObject.AddComponent<PathFind>();
+                }
+
+                f_pathfinds?.SetValue(stockPathManager, stockPathFinds);
+            }
         }
 
         /// <summary>
@@ -110,7 +170,7 @@ namespace TrafficManager.Custom.PathFinding {
             if (m_pathUnits.m_buffer[unit].m_simulationFlags == 0) {
                 return;
             }
-            lock(m_bufferLock) {
+            lock (m_bufferLock) {
 
                 int numIters = 0;
                 while (unit != 0u) {
@@ -147,7 +207,7 @@ namespace TrafficManager.Custom.PathFinding {
                                      ref Randomizer randomizer,
                                      PathCreationArgs args) {
             uint pathUnitId;
-            lock(m_bufferLock) {
+            lock (m_bufferLock) {
 
                 int numIters = 0;
                 while (true) {
@@ -249,18 +309,12 @@ namespace TrafficManager.Custom.PathFinding {
                 pathFind = pathFindCandidate;
             }
 
-#if PF_DIJKSTRA
             if (pathFind != null && pathFind.CalculatePath(unit, args.skipQueue)) {
                 return true;
             }
-#else
-			if (pathFind != null && pathFind.ExtCalculatePath(unit, args.skipQueue)) {
-				return true;
-			}
-#endif
 
             // NON-STOCK CODE START
-            lock(m_bufferLock) {
+            lock (m_bufferLock) {
 
                 QueueItems[pathUnitId].queued = false;
                 // NON-STOCK CODE END
@@ -379,15 +433,26 @@ namespace TrafficManager.Custom.PathFinding {
             return extVehicleType;
         }
 
-        private void StopPathFinds() {
-            foreach (CustomPathFind pathFind in _replacementPathFinds) {
-                Destroy(pathFind);
-            }
+        public void OnLevelUnloading() {
+            Log.Info("CustomPathManager.OnLevelUnloading()");
+            DestroyImmediate(this);
         }
 
         protected virtual void OnDestroy() {
             Log._Debug("CustomPathManager: OnDestroy");
-            StopPathFinds();
+            WaitForAllPaths();
+
+            PathManagerInstance.SetValue(null, stockPathManager_);
+            Log._Debug("Should be stock: " + PathManager.instance.GetType());
+
+            UpdateOldPathManagerValues(stockPathManager_);
+            var simManagers = GetSimulationManagers();
+
+            simManagers.Remove(this);
+
+            simManagers.Add(stockPathManager_);
+
+            _instance = null;
         }
     }
 }

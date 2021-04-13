@@ -22,7 +22,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
 
     /// <summary>
-    /// This replaces game PathFind class if PF_DIJKSTRA is defined
+    /// This replaces game PathFind class
     /// This is ALL targets except Benchmark
     /// </summary>
     public class CustomPathFind : PathFind {

@@ -9,6 +9,7 @@ namespace TrafficManager.State {
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.UI;
     using UnityEngine;
+    using TrafficManager.Lifecycle;
 
     public static class OptionsGeneralTab {
         private static UICheckBox _instantEffectsToggle;
@@ -243,7 +244,7 @@ namespace TrafficManager.State {
                 = string.Format(
                     T("General.Tooltip.Format:Window transparency: {0}%"),
                     GlobalConfig.Instance.Main.GuiOpacity);
-            if (LoadingExtension.IsGameLoaded) {
+            if (TMPELifecycle.Instance.IsGameLoaded) {
                 _guiOpacitySlider.RefreshTooltip();
             }
 
@@ -257,7 +258,7 @@ namespace TrafficManager.State {
                 = string.Format(
                     T("General.Tooltip.Format:GUI scale: {0}%"),
                     GlobalConfig.Instance.Main.GuiScale);
-            if (LoadingExtension.IsGameLoaded) {
+            if (TMPELifecycle.Instance.IsGameLoaded) {
                 _guiScaleSlider.RefreshTooltip();
             }
 
@@ -275,7 +276,7 @@ namespace TrafficManager.State {
                 T("General.Tooltip.Format:Overlay transparency: {0}%"),
                 GlobalConfig.Instance.Main.OverlayTransparency);
             GlobalConfig.WriteConfig();
-            if (LoadingExtension.IsGameLoaded) {
+            if (TMPELifecycle.Instance.IsGameLoaded) {
                 _overlayTransparencySlider.RefreshTooltip();
             }
 

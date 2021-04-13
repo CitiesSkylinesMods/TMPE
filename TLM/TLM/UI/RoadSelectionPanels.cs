@@ -174,7 +174,7 @@ namespace TrafficManager.UI {
         }
 
         private void RefreshOnEvent() =>
-            EnqueueAction(delegate () { Root?.Refresh(reset: true); });
+            EnqueueAction(() => { Root?.Refresh(reset: true); });
 
         internal void RenderOverlay() {
             //Log._Debug("Render over lay called st:\n" + Environment.StackTrace);
@@ -259,7 +259,7 @@ namespace TrafficManager.UI {
 
         private void ShowAdvisorOnEvent(UIComponent component, bool value) {
             if (value) {
-                EnqueueAction(delegate () {
+                EnqueueAction(() => {
                     TrafficManagerTool.ShowAdvisor("RoadSelection");
                 });
             }

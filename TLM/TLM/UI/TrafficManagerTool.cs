@@ -27,6 +27,7 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.SubTools.LaneArrows;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.TimedTrafficLights;
+    using TrafficManager.Lifecycle;
 
     using static TrafficManager.Util.Shortcuts;
     using static TrafficManager.Util.SegmentTraverser;
@@ -244,7 +245,7 @@ namespace TrafficManager.UI {
         public void SetToolMode(ToolMode newToolMode) {
             ToolMode oldToolMode = toolMode_;
 
-            if(toolMode_ != ToolMode.None && LoadingExtension.PlayMode) {
+            if(toolMode_ != ToolMode.None && TMPELifecycle.PlayMode) {
                 // Make it impossible for user to undo changes performed by Road selection panels
                 // after changing traffic rule vis other tools.
                 // TODO: This code will not be necessary when we implement intent.
@@ -323,6 +324,14 @@ namespace TrafficManager.UI {
                     e.Value.Cleanup();
                 }
             }
+
+            // Disabled camera may indicate the main camera change.
+            // Reinitialize camera cache to make sure we will use the correct one
+            if (!InGameUtil.Instance.CachedMainCamera.enabled) {
+                Log.Info("CachedMainCamera disabled - camera cache reinitialization");
+                InGameUtil.Instantiate();
+            }
+
             // no call to base method to disable base class behavior
         }
 
@@ -330,6 +339,9 @@ namespace TrafficManager.UI {
             // If TMPE was disabled by switching to another tool, hide main menue panel.
             if (ModUI.Instance != null && ModUI.Instance.IsVisible())
                 ModUI.Instance.CloseMainMenu();
+
+            //hide speed limit overlay if necessary
+            SubTools.PrioritySigns.MassEditOverlay.Show = RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
             // no call to base method to disable base class behavior
         }
 
@@ -377,7 +389,7 @@ namespace TrafficManager.UI {
         /// </summary>
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
-            if (!LoadingExtension.PlayMode) {
+            if (!TMPELifecycle.PlayMode) {
                 return; // world info view panels are not availble in edit mode
             }
             SubTools.PrioritySigns.MassEditOverlay.Show
@@ -552,7 +564,7 @@ namespace TrafficManager.UI {
         }
 
         void DefaultOnToolGUI(Event e) {
-            if (!LoadingExtension.PlayMode) {
+            if (!TMPELifecycle.PlayMode) {
                 return; // world info view panels are not availble in edit mode
             }
             if (e.type == EventType.MouseDown && e.button == 0) {
@@ -578,7 +590,7 @@ namespace TrafficManager.UI {
                     NetSegment = HoveredSegmentId,
                 };
 
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(delegate () {
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
                     OpenWorldInfoPanel(
                         instanceID,
                         HitPos);
@@ -990,7 +1002,7 @@ namespace TrafficManager.UI {
         /// <summary>Shows a tutorial message. Must be called by a Unity thread.</summary>
         /// <param name="localeKey">Tutorial key.</param>
         public static void ShowAdvisor(string localeKey) {
-            if (!GlobalConfig.Instance.Main.EnableTutorial || !LoadingExtension.PlayMode) {
+            if (!GlobalConfig.Instance.Main.EnableTutorial || !TMPELifecycle.PlayMode) {
                 return;
             }
 

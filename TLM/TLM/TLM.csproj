@@ -19,53 +19,57 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>TRACE;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FullDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;PF_DIJKSTRA;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGHK;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGHK;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'PF2_Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\PF2_Debug\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PF_DIJKSTRA;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release LABS|AnyCPU'">
     <OutputPath>bin\Release LABS\</OutputPath>
-    <DefineConstants>PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;LABS</DefineConstants>
+    <DefineConstants>QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;LABS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <SteamPath>~/Library/Application Support/Steam/</SteamPath>
@@ -79,14 +83,15 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Benchmark|AnyCPU'">
     <OutputPath>bin\Benchmark\</OutputPath>
-    <DefineConstants>PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;BENCHMARK</DefineConstants>
+    <DefineConstants>QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;BENCHMARK</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>latest</LangVersion>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
@@ -137,8 +142,9 @@
     </Compile>
     <Compile Include="Constants.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
+    <Compile Include="Lifecycle\Patcher.cs" />
+    <Compile Include="Lifecycle\TMPELifecycle.cs" />
     <Compile Include="Manager\Impl\GameConnectionManager.cs" />
-    <Compile Include="Patcher.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
     <Compile Include="Manager\AbstractGeometryObservingManager.cs" />
@@ -288,7 +294,7 @@
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
     <Compile Include="Manager\Impl\VehicleRestrictionsManager.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
-    <Compile Include="LoadingExtension.cs" />
+    <Compile Include="Lifecycle\LoadingExtension.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\RoadSelectionPanels.cs" />
@@ -389,8 +395,8 @@
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
-    <Compile Include="State\SerializableDataExtension.cs" />
-    <Compile Include="ThreadingExtension.cs" />
+    <Compile Include="Lifecycle\SerializableDataExtension.cs" />
+    <Compile Include="Lifecycle\ThreadingExtension.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegment.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLight.cs" />
     <Compile Include="UI\ToolMode.cs" />
@@ -399,7 +405,7 @@
     <Compile Include="TrafficLight\Impl\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrafficManagerMod.cs" />
+    <Compile Include="Lifecycle\TrafficManagerMod.cs" />
     <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />
     <Compile Include="Manager\Impl\TrafficPriorityManager.cs" />
     <Compile Include="UI\ModUI.cs" />
@@ -468,7 +474,9 @@
     <EmbeddedResource Include="Resources\RoadUI\sign_none.png" />
     <EmbeddedResource Include="Resources\RoadUI\sign_priority.png" />
     <EmbeddedResource Include="Resources\RoadUI\sign_stop.png" />
+    <EmbeddedResource Include="Resources\RoadUI\sign_stop_zh.png" />
     <EmbeddedResource Include="Resources\RoadUI\sign_yield.png" />
+    <EmbeddedResource Include="Resources\RoadUI\sign_yield_zh.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\RoadUI\taxi_infosign.png" />
@@ -497,9 +505,11 @@
     <EmbeddedResource Include="Resources\TrafficLights\light_counter.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_counter_ja.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_counter_pl.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_counter_zh.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_mode.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_mode_ja.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_mode_pl.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_mode_zh.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_yellow.png" />
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_light_1.png" />
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_light_2.png" />
@@ -630,8 +640,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_1.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_1_zh.png" />
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_2.png" />
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_2_pl.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_2_zh.png" />
     <EmbeddedResource Include="Resources\Translations\JunctionRestrictions.csv" />
     <EmbeddedResource Include="Resources\Translations\ParkingRestrictions.csv" />
     <EmbeddedResource Include="Resources\Translations\PrioritySigns.csv" />

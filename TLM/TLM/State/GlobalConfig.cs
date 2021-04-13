@@ -6,6 +6,7 @@ namespace TrafficManager.State {
     using System;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Lifecycle;
 
     [XmlRootAttribute("GlobalConfig", Namespace = "http://www.viathinksoft.de/tmpe", IsNullable = false)]
     public class GlobalConfig : GenericObservable<GlobalConfig> {
@@ -133,7 +134,7 @@ namespace TrafficManager.State {
                     XmlSerializer serializer = new XmlSerializer(typeof(GlobalConfig));
                     Log.Info($"Global config loaded.");
                     GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
-                    if (LoadingExtension.IsGameLoaded
+                    if (TMPELifecycle.Instance.IsGameLoaded
 #if DEBUG
                         && !DebugSwitch.NoRoutingRecalculationOnConfigReload.Get()
 #endif

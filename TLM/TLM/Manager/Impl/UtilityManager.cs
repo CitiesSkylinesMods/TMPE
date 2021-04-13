@@ -7,7 +7,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.State;
     using UnityEngine;
-
+    using TrafficManager.Lifecycle;
     public class UtilityManager : AbstractCustomManager, IUtilityManager {
         static UtilityManager() {
             Instance = new UtilityManager();
@@ -63,7 +63,7 @@ namespace TrafficManager.Manager.Impl {
                 Log.Error($"Error occurred while printing debug info for flags: {e}");
             }
 
-            foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
+            foreach (ICustomManager manager in TMPELifecycle.Instance.RegisteredManagers) {
                 try {
                     manager.PrintDebugInfo();
                 }
