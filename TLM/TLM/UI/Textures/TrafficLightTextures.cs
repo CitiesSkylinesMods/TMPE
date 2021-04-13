@@ -103,11 +103,14 @@ namespace TrafficManager.UI.Textures {
                 tlModeSize);
 
             // pedestrian mode
+            IntVector2 pedModeSize = new IntVector2(73, 70);
+            
             PedestrianModeAutomatic = LoadDllResource(
-                "TrafficLights.pedestrian_mode_1.png",
-                new IntVector2(73, 70));
-            PedestrianModeManual = LoadDllResource("TrafficLights.pedestrian_mode_2.png",
-                                                   new IntVector2(73, 73));
+                Translation.GetTranslatedFileName("TrafficLights.pedestrian_mode_1.png"),
+                pedModeSize);
+            PedestrianModeManual = LoadDllResource(
+                Translation.GetTranslatedFileName("TrafficLights.pedestrian_mode_2.png"),
+                pedModeSize);
 
             // timer
             IntVector2 timerSize = new IntVector2(512);
