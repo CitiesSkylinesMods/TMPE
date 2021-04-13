@@ -160,6 +160,7 @@ namespace TrafficManager.UI {
         #endregion Unload
 
         #region Event handling
+
         /// <summary>
         /// Refreshes all butons in all panels according to state indicated by FunctionMode.
         /// this is activated in response to user button click or roadSelectionUtil_.OnChanged

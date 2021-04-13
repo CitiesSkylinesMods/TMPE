@@ -5,6 +5,7 @@ namespace TrafficManager.API.Traffic.Enums {
         /// traffic measurements are averaged
         /// </summary>
         Mean,
+
         /// <summary>
         /// traffic measurements are summed up
         /// </summary>
