@@ -8,14 +8,13 @@ namespace TrafficManager.Custom.PathFinding {
     using JetBrains.Annotations;
     using System.Reflection;
     using System;
+    using API.Traffic.Enums;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
-    using TrafficManager.RedirectionFramework.Attributes;
     using TrafficManager.State;
     using UnityEngine;
     using ColossalFramework.UI;
 
-    [TargetType(typeof(PathManager))]
     public class CustomPathManager : PathManager {
         /// <summary>
         /// Holds a linked list of path units waiting to be calculated
@@ -155,10 +154,17 @@ namespace TrafficManager.Custom.PathFinding {
             }
         }
 
-        [RedirectMethod]
+        /// <summary>
+        /// Just in case other mod call ReleasePath on CustomPathManager
+        /// </summary>
+        /// <param name="unit"></param>
         public new void ReleasePath(uint unit) {
+            CustomReleasePath(unit);
+        }
+
+        internal void CustomReleasePath(uint unit) {
 #if DEBUGPF3
-			Log.Warning($"CustomPathManager.ReleasePath({unit}) called.");
+			Log.Warning($"CustomPathManager.CustomReleasePath({unit}) called.");
 #endif
 
             if (m_pathUnits.m_buffer[unit].m_simulationFlags == 0) {
@@ -219,7 +225,7 @@ namespace TrafficManager.Custom.PathFinding {
 
                     // NON-STOCK CODE START
                     if (QueueItems[pathUnitId].queued) {
-                        ReleasePath(pathUnitId);
+                        CustomReleasePath(pathUnitId);
 
                         if (numIters > 10) {
                             unit = 0u;
@@ -312,7 +318,7 @@ namespace TrafficManager.Custom.PathFinding {
 
                 QueueItems[pathUnitId].queued = false;
                 // NON-STOCK CODE END
-                ReleasePath(unit);
+                CustomReleasePath(unit);
 
                 // NON-STOCK CODE START
                 m_pathUnitCount = (int)(m_pathUnits.ItemCount() - 1u);
@@ -322,91 +328,109 @@ namespace TrafficManager.Custom.PathFinding {
             return false;
         }
 
+        /*internal void ResetQueueItem(uint unit) {
+                queueItems[unit].Reset();
+        }*/
+
         /// <summary>
-        /// Finds a suitable path position for a walking citizen with the given world position.
-        /// If secondary lane constraints are given also checks whether there exists another lane that matches those constraints.
+        /// Builds Creates Path for TransportLineAI
         /// </summary>
-        /// <param name="pos">world position</param>
-        /// <param name="laneTypes">allowed lane types</param>
-        /// <param name="vehicleTypes">allowed vehicle types</param>
-        /// <param name="otherLaneTypes">allowed lane types for secondary lane</param>
-        /// <param name="otherVehicleTypes">other vehicle types for secondary lane</param>
-        /// <param name="allowTransport">public transport allowed?</param>
-        /// <param name="allowUnderground">underground position allowed?</param>
-        /// <param name="position">resulting path position</param>
-        /// <returns><code>true</code> if a position could be found, <code>false</code> otherwise</returns>
-        public static bool FindCitizenPathPosition(Vector3 pos,
-                                                   NetInfo.LaneType laneTypes,
-                                                   VehicleInfo.VehicleType vehicleTypes,
-                                                   NetInfo.LaneType otherLaneTypes,
-                                                   VehicleInfo.VehicleType otherVehicleTypes,
-                                                   bool allowTransport,
-                                                   bool allowUnderground,
-                                                   out PathUnit.Position position) {
-            // TODO move to ExtPathManager after harmony upgrade
-            position = default(PathUnit.Position);
-            float minDist = 1E+10f;
-            if (ExtPathManager.Instance.FindPathPositionWithSpiralLoop(
-                    pos,
-                    ItemClass.Service.Road,
-                    laneTypes,
-                    vehicleTypes,
-                    otherLaneTypes,
-                    otherVehicleTypes,
-                    allowUnderground,
-                    false,
-                    Options.parkingAI
-                        ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
-                        : 32f,
-                    out PathUnit.Position posA,
-                    out _,
-                    out float distA,
-                    out _) && distA < minDist) {
-                minDist = distA;
-                position = posA;
+        /// <param name="path"></param>
+        /// <param name="startPosA"></param>
+        /// <param name="startPosB"></param>
+        /// <param name="endPosA"></param>
+        /// <param name="endPosB"></param>
+        /// <param name="vehicleType"></param>
+        /// <param name="skipQueue"></param>
+        /// <returns>bool</returns>
+        public bool CreateTransportLinePath(
+                out uint path,
+                PathUnit.Position startPosA,
+                PathUnit.Position startPosB,
+                PathUnit.Position endPosA,
+                PathUnit.Position endPosB,
+                VehicleInfo.VehicleType vehicleType,
+                bool skipQueue) {
+
+            PathCreationArgs args = new PathCreationArgs {
+                extPathType = ExtPathType.None,
+                extVehicleType = ConvertToExtVehicleType(vehicleType),
+                vehicleId = 0,
+                spawned = true,
+                buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex,
+                startPosA = startPosA,
+                startPosB = startPosB,
+                endPosA = endPosA,
+                endPosB = endPosB,
+                vehiclePosition = default,
+                vehicleTypes = vehicleType,
+                isHeavyVehicle = false,
+                hasCombustionEngine = false,
+                ignoreBlocked = true,
+                ignoreFlooded = false,
+                ignoreCosts = false,
+                randomParking = false,
+                stablePath = true,
+                skipQueue = skipQueue
+            };
+
+            if (vehicleType == VehicleInfo.VehicleType.None) {
+                args.laneTypes = NetInfo.LaneType.Pedestrian;
+                args.maxLength = 160000f;
+            } else {
+                args.laneTypes = NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
+                args.maxLength = 20000f;
             }
 
-            if (ExtPathManager.Instance.FindPathPositionWithSpiralLoop(
-                    pos,
-                    ItemClass.Service.Beautification,
-                    laneTypes,
-                    vehicleTypes,
-                    otherLaneTypes,
-                    otherVehicleTypes,
-                    allowUnderground,
-                    false,
-                    Options.parkingAI
-                        ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
-                        : 32f,
-                    out posA,
-                    out _,
-                    out distA,
-                    out _) && distA < minDist) {
-                minDist = distA;
-                position = posA;
+            return CustomCreatePath(out path, ref SimulationManager.instance.m_randomizer, args);
+        }
+
+        /// <summary>
+        /// Converts game VehicleInfo.VehicleType to closest TMPE.API.Traffic.Enums.ExtVehicleType
+        /// </summary>
+        /// <param name="vehicleType"></param>
+        /// <returns></returns>
+        private static ExtVehicleType ConvertToExtVehicleType(VehicleInfo.VehicleType vehicleType) {
+            ExtVehicleType extVehicleType = ExtVehicleType.None;
+            if ((vehicleType & VehicleInfo.VehicleType.Car) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Bus;
             }
 
-            if (allowTransport && ExtPathManager.Instance.FindPathPositionWithSpiralLoop(
-                    pos,
-                    ItemClass.Service.PublicTransport,
-                    laneTypes,
-                    vehicleTypes,
-                    otherLaneTypes,
-                    otherVehicleTypes,
-                    allowUnderground,
-                    false,
-                    Options.parkingAI
-                        ? GlobalConfig
-                          .Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
-                        : 32f,
-                    out posA,
-                    out _,
-                    out distA,
-                    out _) && distA < minDist) {
-                position = posA;
+            if ((vehicleType & (VehicleInfo.VehicleType.Train | VehicleInfo.VehicleType.Metro |
+                                VehicleInfo.VehicleType.Monorail)) !=
+                VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerTrain;
             }
 
-            return position.m_segment != 0;
+            if ((vehicleType & VehicleInfo.VehicleType.Tram) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Tram;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Ship) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerShip;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Plane) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.PassengerPlane;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Ferry;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Blimp) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Blimp;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.CableCar) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.CableCar;
+            }
+
+            if ((vehicleType & VehicleInfo.VehicleType.Trolleybus) != VehicleInfo.VehicleType.None) {
+                extVehicleType = ExtVehicleType.Trolleybus;
+            }
+
+            return extVehicleType;
         }
 
         public void OnLevelUnloading() {

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
 
