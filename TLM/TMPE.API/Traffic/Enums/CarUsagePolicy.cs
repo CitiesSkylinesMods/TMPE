@@ -7,14 +7,17 @@ namespace TrafficManager.API.Traffic.Enums {
         /// Citizens may use their own car
         /// </summary>
         Allowed,
+
         /// <summary>
         /// Citizens are forced to use their parked car
         /// </summary>
         ForcedParked,
+
         /// <summary>
         /// Citizens are forced to use a pocket car
         /// </summary>
         ForcedPocket,
+
         /// <summary>
         /// Citizens are forbidden to use their car
         /// </summary>
