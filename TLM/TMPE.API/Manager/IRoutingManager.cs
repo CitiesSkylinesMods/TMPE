@@ -5,6 +5,7 @@ namespace TrafficManager.API.Manager {
 
     public interface IRoutingManager {
         // TODO documentation
+
         /// <summary>
         /// Structs for path-finding that contain required segment-related routing data
         /// </summary>
