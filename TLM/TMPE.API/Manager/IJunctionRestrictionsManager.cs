@@ -3,6 +3,7 @@ namespace TrafficManager.API.Manager {
 
     public interface IJunctionRestrictionsManager {
         #region Is<Traffic Rule>Configurable
+
         /// <summary>
         /// Determines if u-turn behavior may be controlled at the given segment end.
         /// </summary>
@@ -85,7 +86,8 @@ namespace TrafficManager.API.Manager {
                                                      ref NetNode node);
         #endregion
 
-        #region GetDefault<Traffic Rule> 
+        #region GetDefault<Traffic Rule>
+
         /// <summary>
         /// Determines the default setting for u-turns at the given segment end.
         /// </summary>
@@ -170,6 +172,7 @@ namespace TrafficManager.API.Manager {
         #endregion
 
         #region Is<Traffic Rule>Allowed
+
         /// <summary>
         /// Determines whether u-turns are allowed at the given segment end.
         /// </summary>
@@ -236,6 +239,7 @@ namespace TrafficManager.API.Manager {
         #endregion
 
         #region Get<Traffic Rule>
+
         /// <summary>
         /// Retrieves the u-turn setting for the given segment end.
         /// </summary>
@@ -302,6 +306,7 @@ namespace TrafficManager.API.Manager {
         #endregion
         
         #region Toggle<Traffic Rule>
+
         /// <summary>
         /// Switches the u-turn flag for the given segment end.
         /// </summary>
@@ -382,6 +387,7 @@ namespace TrafficManager.API.Manager {
         #endregion
 
         #region Set<Traffic Rule> : bool
+
         /// <summary>
         /// Sets the u-turn flag for the given segment end to the given value.
         /// </summary>

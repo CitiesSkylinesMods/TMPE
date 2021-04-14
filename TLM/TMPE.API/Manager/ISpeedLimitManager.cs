@@ -1,6 +1,7 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     public interface ISpeedLimitManager {
         // TODO define me!
+
         /// <summary>
         /// Retrieves the speed limit for the given lane without locking.
         /// </summary>
