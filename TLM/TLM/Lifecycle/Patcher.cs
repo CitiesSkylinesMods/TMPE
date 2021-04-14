@@ -1,9 +1,7 @@
 namespace TrafficManager.Lifecycle {
-    using ColossalFramework.UI;
     using CSUtil.Commons;
     using HarmonyLib;
     using System;
-    using TrafficManager.RedirectionFramework;
     using CitiesHarmony.API;
     using System.Runtime.CompilerServices;
     using System.Reflection;
@@ -42,16 +40,6 @@ namespace TrafficManager.Lifecycle {
 #endif
             AssertCitiesHarmonyInstalled();
             fail = !PatchAll();
-
-            try {
-                Log.Info("Deploying attribute-driven detours");
-                AssemblyRedirector.Deploy();
-            } catch (Exception e) {
-                Log.Error("Could not deploy attribute-driven detours because the following exception occured:\n "
-                    + e +
-                    "\n    -- End of inner exception stack trace -- ");
-                fail = true;
-            }
 
             if (fail) {
                 Log.Info("patcher failed");
@@ -96,7 +84,6 @@ namespace TrafficManager.Lifecycle {
 
         public static void Uninstall() {
             new Harmony(HARMONY_ID).UnpatchAll(HARMONY_ID);
-            AssemblyRedirector.Revert();
             Log.Info("TMPE patches uninstalled.");
         }
     }

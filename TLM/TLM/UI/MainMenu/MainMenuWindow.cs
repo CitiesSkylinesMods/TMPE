@@ -7,7 +7,6 @@ namespace TrafficManager.UI.MainMenu {
     using System.Linq;
     using System.Reflection;
     using TrafficManager.API.Util;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.State.Keybinds;
     using TrafficManager.State;
     using TrafficManager.U;

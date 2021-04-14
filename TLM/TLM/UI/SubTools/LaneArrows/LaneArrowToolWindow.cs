@@ -1,7 +1,6 @@
 namespace TrafficManager.UI.SubTools.LaneArrows {
     using System.Collections.Generic;
     using ColossalFramework.UI;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;

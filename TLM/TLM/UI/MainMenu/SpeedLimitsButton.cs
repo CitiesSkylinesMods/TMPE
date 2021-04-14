@@ -1,6 +1,5 @@
 ﻿namespace TrafficManager.UI.MainMenu {
     using System.Collections.Generic;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
