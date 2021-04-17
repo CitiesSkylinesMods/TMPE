@@ -389,6 +389,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                                                     | CitizenInstance.Flags.CustomColor
                                                     | CitizenInstance.Flags.Blown
                                                     | CitizenInstance.Flags.Floating
+                                                    | CitizenInstance.Flags.TargetIsNode
                                                     | CitizenInstance.Flags.TargetFlags;
 
                             if (StartPathFindCitizenAI(instance, instanceID, ref data)) {
