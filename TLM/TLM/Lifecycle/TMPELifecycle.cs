@@ -74,7 +74,7 @@ namespace TrafficManager.Lifecycle {
             mcc.PerformModCheck();
         }
 
-        private void RegisterCustomManagers() {
+        internal void RegisterCustomManagers() {
             // TODO represent data dependencies differently
             RegisteredManagers.Add(ExtNodeManager.Instance);
             RegisteredManagers.Add(ExtSegmentManager.Instance);
@@ -274,7 +274,6 @@ namespace TrafficManager.Lifecycle {
 
             IsGameLoaded = true;
 
-            RegisterCustomManagers();
             CustomPathManager.OnLevelLoaded();
 
             ModUI.OnLevelLoaded();

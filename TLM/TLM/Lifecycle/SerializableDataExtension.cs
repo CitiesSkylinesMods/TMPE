@@ -22,7 +22,7 @@ namespace TrafficManager.Lifecycle {
         public override void OnLoadData() => Load();
         public override void OnSaveData() => Save();
 
-        public static void Load() { 
+        public static void Load() {
             Log.Info("Loading Traffic Manager: PE Data");
             TMPELifecycle.Instance.Deserializing = true;
             bool loadingSucceeded = true;
@@ -36,6 +36,7 @@ namespace TrafficManager.Lifecycle {
                 loadingSucceeded = false;
             }
 
+            TMPELifecycle.Instance.RegisterCustomManagers();
             foreach (ICustomManager manager in TMPELifecycle.Instance.RegisteredManagers) {
                 try {
                     Log.Info($"OnBeforeLoadData: {manager.GetType().Name}");
@@ -274,7 +275,7 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
-        public static void Save() { 
+        public static void Save() {
             bool success = true;
 
             // try {
