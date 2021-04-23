@@ -241,7 +241,7 @@ namespace TrafficManager.UI.SubTools {
                         // draw source marker in source selection mode,
                         // make exception for markers that have no target:
                         foreach(var targetLaneEnd in laneEnds) {
-                            if (CanConnect(laneEnd, targetLaneEnd)){
+                            if (CanConnect(laneEnd, targetLaneEnd)) {
                                 drawMarker = true;
                                 break;
                             }
@@ -272,26 +272,26 @@ namespace TrafficManager.UI.SubTools {
                         laneEnd.RenderOverlay(cameraInfo, color, highlightMarker);
                     } // if drawMarker
                 } // end foreach lanemarker in node markers
-
-                if (selectedLaneEnd != null) {
-                    // lane curves for selectedMarker will be drawn last to
-                    // be on the top of other lane markers.
-                    foreach (LaneEnd targetLaneEnd in selectedLaneEnd.ConnectedLaneEnds) {
-                        if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
-                            continue;
-                        }
-
-                        DrawLaneCurve(
-                            cameraInfo: cameraInfo,
-                            start: selectedLaneEnd.NodeMarker.TerrainPosition,
-                            end: targetLaneEnd.NodeMarker.TerrainPosition,
-                            middlePoint: NetManager.instance.m_nodes.m_buffer[nodeId].m_position,
-                            color: selectedLaneEnd.Color,
-                            outlineColor: Color.grey,
-                            size: 0.18f); // Embolden
-                    } // end foreach selectedMarker.ConnectedMarkers
-                } // end if selectedMarker != null
             } // end for node in all nodes
+
+            if (this.selectedLaneEnd != null) {
+                // lane curves for selectedMarker will be drawn last to
+                // be on the top of other lane markers.
+                foreach (LaneEnd targetLaneEnd in this.selectedLaneEnd.ConnectedLaneEnds) {
+                    if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
+                        continue;
+                    }
+
+                    DrawLaneCurve(
+                        cameraInfo: cameraInfo,
+                        start: this.selectedLaneEnd.NodeMarker.TerrainPosition,
+                        end: targetLaneEnd.NodeMarker.TerrainPosition,
+                        middlePoint: NetManager.instance.m_nodes.m_buffer[targetLaneEnd.NodeId].m_position,
+                        color: this.selectedLaneEnd.Color,
+                        outlineColor: Color.grey,
+                        size: 0.18f); // Embolden
+                } // end foreach selectedMarker.ConnectedMarkers
+            } // end if selectedMarker != null
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -331,7 +331,7 @@ namespace TrafficManager.UI.SubTools {
                         middlePoint: selNodePos,
                         color: Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f),
                         outlineColor: Color.white,
-                        size:0.11f);
+                        size: 0.11f);
                 }
 
                 NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
