@@ -151,6 +151,7 @@ namespace TrafficManager.Lifecycle {
                 Log._Debug("Scene is " + SceneManager.GetActiveScene().name);
 
                 HarmonyHelper.EnsureHarmonyInstalled();
+                LoadingManager.instance.m_levelPreLoaded += RegisterCustomManagers;
 
                 InGameHotReload = InGameOrEditor();
                 if (InGameHotReload) {
@@ -302,6 +303,7 @@ namespace TrafficManager.Lifecycle {
 
         internal void Unload() {
             CustomPathManager._instance?.OnLevelUnloading();
+            LoadingManager.instance.m_levelPreLoaded -= RegisterCustomManagers;
 
             try {
                 foreach (ICustomManager manager in RegisteredManagers.AsEnumerable().Reverse()) {

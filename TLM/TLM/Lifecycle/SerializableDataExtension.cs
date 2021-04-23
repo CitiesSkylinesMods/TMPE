@@ -36,7 +36,6 @@ namespace TrafficManager.Lifecycle {
                 loadingSucceeded = false;
             }
 
-            TMPELifecycle.Instance.RegisterCustomManagers();
             foreach (ICustomManager manager in TMPELifecycle.Instance.RegisteredManagers) {
                 try {
                     Log.Info($"OnBeforeLoadData: {manager.GetType().Name}");
