@@ -25,7 +25,6 @@ namespace TrafficManager.UI.SubTools {
             // Log._Debug($"LaneConnectorTool: Constructor called");
             currentLaneEnds = new Dictionary<ushort, List<LaneEnd>>();
 
-            CachedVisibleNodeIds = new GenericArrayCache<ushort>(NetManager.MAX_NODE_COUNT);
             LastCachedCamera = new CameraTransformValue();
         }
 
@@ -65,11 +64,6 @@ namespace TrafficManager.UI.SubTools {
 
         /// <summary>Clear lane lines is Delete/Backspace (configurable)</summary>
         private int frameClearPressed;
-
-        /// <summary>
-        /// Stores potentially visible ids for nodes while the camera did not move
-        /// </summary>
-        private GenericArrayCache<ushort> CachedVisibleNodeIds { get; }
 
         /// <summary>
         /// Stores last cached camera position in <see cref="CachedVisibleNodeIds"/>
@@ -147,53 +141,37 @@ namespace TrafficManager.UI.SubTools {
 
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
-            // Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
-            Camera currentCamera = InGameUtil.Instance.CachedMainCamera;
-
-            // Check if camera pos/angle has changed then re-filter the visible nodes
-            // Assumption: The states checked in this loop don't change while the tool is active
-            var currentCameraState = new CameraTransformValue(currentCamera);
-            if (!LastCachedCamera.Equals(currentCameraState)) {
-                CachedVisibleNodeIds.Clear();
-                LastCachedCamera = currentCameraState;
-
-                for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                    if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
-                        continue;
-                    }
-
-                    //---------------------------
-                    // Check the connection class
-                    //---------------------------
-                    // TODO refactor connection class check
-                    ItemClass connectionClass =
-                        NetManager.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
-
-                    if ((connectionClass == null) ||
-                        !((connectionClass.m_service == ItemClass.Service.Road) ||
-                          ((connectionClass.m_service == ItemClass.Service.PublicTransport) &&
-                           ((connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain) ||
-                            (connectionClass.m_subService == ItemClass.SubService.PublicTransportMetro) ||
-                            (connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail))))) {
-                        continue;
-                    }
-
-                    //--------------------------
-                    // Check the camera distance
-                    //--------------------------
-                    Vector3 diff = NetManager.instance.m_nodes.m_buffer[nodeId].m_position - camPos;
-
-                    if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
-                        continue; // do not draw if too distant
-                    }
-
-                    // Add
-                    CachedVisibleNodeIds.Add(nodeId);
+            for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
+                if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                    continue;
                 }
-            }
 
-            for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
-                var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
+                NetNode node = netManager.m_nodes.m_buffer[nodeId];
+
+                //---------------------------
+                // Check the connection class
+                //---------------------------
+                // TODO refactor connection class check
+                ItemClass connectionClass =
+                    netManager.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
+
+                if ((connectionClass == null) ||
+                    !((connectionClass.m_service == ItemClass.Service.Road) ||
+                      ((connectionClass.m_service == ItemClass.Service.PublicTransport) &&
+                       ((connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain) ||
+                        (connectionClass.m_subService == ItemClass.SubService.PublicTransportMetro) ||
+                        (connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail))))) {
+                    continue;
+                }
+
+                //--------------------------
+                // Check the camera distance
+                //--------------------------
+                Vector3 diff = node.m_position - camPos;
+
+                if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
+                    continue; // do not draw if too distant
+                }
 
                 bool hasMarkers = currentLaneEnds.TryGetValue((ushort)nodeId, out List<LaneEnd> laneEnds);
                 if (!viewOnly && (GetSelectionMode() == SelectionMode.None)) {
@@ -237,10 +215,10 @@ namespace TrafficManager.UI.SubTools {
                     bool drawMarker = false;
                     bool SourceMode = GetSelectionMode() == SelectionMode.SelectSource;
                     bool TargetMode = GetSelectionMode() == SelectionMode.SelectTarget;
-                    if ( SourceMode & laneEnd.IsSource) {
+                    if (SourceMode & laneEnd.IsSource) {
                         // draw source marker in source selection mode,
                         // make exception for markers that have no target:
-                        foreach(var targetLaneEnd in laneEnds) {
+                        foreach (var targetLaneEnd in laneEnds) {
                             if (CanConnect(laneEnd, targetLaneEnd)) {
                                 drawMarker = true;
                                 break;
@@ -272,7 +250,7 @@ namespace TrafficManager.UI.SubTools {
                         laneEnd.RenderOverlay(cameraInfo, color, highlightMarker);
                     } // if drawMarker
                 } // end foreach lanemarker in node markers
-            } // end for node in all nodes
+            }
 
             if (this.selectedLaneEnd != null) {
                 // lane curves for selectedMarker will be drawn last to
