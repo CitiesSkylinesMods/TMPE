@@ -18,16 +18,16 @@ namespace TrafficManager.Lifecycle {
     using UnityEngine.SceneManagement;
     using UnityEngine;
     using JetBrains.Annotations;
-    
+
     /// <summary>
-    /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak. 
+    /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak.
     /// Instead use the TMPELifecycle.Instance property.
     /// </summary>
     public class TMPELifecycle : MonoBehaviour {
-        public static TMPELifecycle Instance { 
+        public static TMPELifecycle Instance {
             /// <summary> returns instance of TMPELifecycle if it exists. returns null otherwise. </summary>
-            get; 
-            private set; 
+            get;
+            private set;
         }
 
         /// <summary>TMPE is in the middle of deserializing data.</summary>
@@ -54,6 +54,7 @@ namespace TrafficManager.Lifecycle {
         /// </summary>
         public static bool InGameOrEditor() =>
             SceneManager.GetActiveScene().name != "IntroScreen" &&
+            SceneManager.GetActiveScene().name != "MainMenu" &&
             SceneManager.GetActiveScene().name != "Startup";
 
         public static AppMode? AppMode => SimulationManager.instance.m_ManagersWrapper.loading?.currentMode;
@@ -73,7 +74,7 @@ namespace TrafficManager.Lifecycle {
             mcc.PerformModCheck();
         }
 
-        private void RegisterCustomManagers() {
+        internal void RegisterCustomManagers() {
             // TODO represent data dependencies differently
             RegisteredManagers.Add(ExtNodeManager.Instance);
             RegisteredManagers.Add(ExtSegmentManager.Instance);
@@ -113,7 +114,6 @@ namespace TrafficManager.Lifecycle {
             Benchmark.BenchmarkManager.Setup();
 #endif
                 TranslationDatabase.LoadAllTranslations();
-                RegisterCustomManagers();
 
                 Log.InfoFormat(
                     "TM:PE enabled. Version {0}, Build {1} {2} for game version {3}.{4}.{5}-f{6}",
@@ -151,6 +151,7 @@ namespace TrafficManager.Lifecycle {
                 Log._Debug("Scene is " + SceneManager.GetActiveScene().name);
 
                 HarmonyHelper.EnsureHarmonyInstalled();
+                LoadingManager.instance.m_levelPreLoaded += RegisterCustomManagers;
 
                 InGameHotReload = InGameOrEditor();
                 if (InGameHotReload) {
@@ -188,7 +189,7 @@ namespace TrafficManager.Lifecycle {
 #if DEBUG
         ~TMPELifecycle() {
             // ensure there is no memory leak:
-            Log._Debug("TMPELifecycle.~TMPELifecycle()"); 
+            Log._Debug("TMPELifecycle.~TMPELifecycle()");
         }
 #endif
         internal static void StartMod() {
@@ -302,6 +303,7 @@ namespace TrafficManager.Lifecycle {
 
         internal void Unload() {
             CustomPathManager._instance?.OnLevelUnloading();
+            LoadingManager.instance.m_levelPreLoaded -= RegisterCustomManagers;
 
             try {
                 foreach (ICustomManager manager in RegisteredManagers.AsEnumerable().Reverse()) {
