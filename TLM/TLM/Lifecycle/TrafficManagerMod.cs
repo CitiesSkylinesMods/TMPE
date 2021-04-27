@@ -1,13 +1,12 @@
 namespace TrafficManager.Lifecycle {
     using ColossalFramework.Globalization;
-    using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
     using System;
     using TrafficManager.State;
     using TrafficManager.UI;
 
-    public class TrafficManagerMod : IUserMod {
+    public class TrafficManagerMod : ILoadingExtension, IUserMod {
 #if LABS
         public const string BRANCH = "LABS";
 #elif DEBUG
@@ -42,5 +41,10 @@ namespace TrafficManager.Lifecycle {
             LocaleManager.eventLocaleChanged += Translation.HandleGameLocaleChange;
             Options.MakeSettings(helper);
         }
+
+        public void OnCreated(ILoading loading) { }
+        public void OnReleased() { }
+        public void OnLevelLoaded(LoadMode mode) => TMPELifecycle.Instance.Load();
+        public void OnLevelUnloading() => TMPELifecycle.Instance.Unload();
     }
 }
