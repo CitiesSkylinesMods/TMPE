@@ -210,7 +210,7 @@
     <Compile Include="Patch\_PathManager\CreatePathPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
     <Compile Include="State\Asset\AssetData.cs" />
-    <Compile Include="State\Asset\AssetDataExtension.cs" />
+    <Compile Include="Lifecycle\AssetDataExtension.cs" />
     <Compile Include="State\Asset\SegmentNetworkIDs.cs" />
     <Compile Include="State\SerializationUtil.cs" />
     <Compile Include="State\TMPEMoveItIntegration.cs" />

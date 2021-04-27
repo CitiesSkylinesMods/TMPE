@@ -8,13 +8,13 @@ namespace TrafficManager.Lifecycle {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using TrafficManager.API.Manager;
     using TrafficManager.Custom.PathFinding;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI;
     using TrafficManager.Util;
+    using TrafficManager.State.Asset;
     using UnityEngine.SceneManagement;
     using UnityEngine;
     using JetBrains.Annotations;
@@ -42,6 +42,8 @@ namespace TrafficManager.Lifecycle {
         public bool InGameHotReload { get; private set; }
         public bool IsGameLoaded { get; private set; }
 
+        public Dictionary<BuildingInfo, AssetData> Asset2Data { get; set; }
+
         /// <summary>
         /// determines if simulation is inside game/editor. useful to detect hot-reload.
         /// </summary>
@@ -64,6 +66,11 @@ namespace TrafficManager.Lifecycle {
         private static void CheckForIncompatibleMods() {
             ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
             mcc.PerformModCheck();
+        }
+
+        internal void Preload() {
+            Asset2Data = new Dictionary<BuildingInfo, AssetData>();
+            RegisterCustomManagers();
         }
 
         internal void RegisterCustomManagers() {
@@ -120,10 +127,11 @@ namespace TrafficManager.Lifecycle {
                 }
 
                 HarmonyHelper.EnsureHarmonyInstalled();
-                LoadingManager.instance.m_levelPreLoaded += RegisterCustomManagers;
+                LoadingManager.instance.m_levelPreLoaded += Preload;
 
                 InGameHotReload = InGameOrEditor();
                 if (InGameHotReload) {
+                    Preload();
                     SerializableDataExtension.Load();
                     Load();
                 }
@@ -213,7 +221,6 @@ namespace TrafficManager.Lifecycle {
 
         internal void Unload() {
             CustomPathManager._instance?.OnLevelUnloading();
-            LoadingManager.instance.m_levelPreLoaded -= RegisterCustomManagers;
 
             try {
                 foreach (ICustomManager manager in RegisteredManagers.AsEnumerable().Reverse()) {
