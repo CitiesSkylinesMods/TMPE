@@ -31,14 +31,7 @@ namespace TrafficManager.Lifecycle {
         }
 
         /// <summary>TMPE is in the middle of deserializing data.</summary>
-        public bool Deserializing;
-
-        // These values from `BuildConfig` class (`APPLICATION_VERSION` constants) in game file `Managed/Assembly-CSharp.dll` (use ILSpy to inspect them)
-        public const uint GAME_VERSION = 188868624U;
-        public const uint GAME_VERSION_A = 1u;
-        public const uint GAME_VERSION_B = 13u;
-        public const uint GAME_VERSION_C = 0u;
-        public const uint GAME_VERSION_BUILD = 8u;
+        public bool Deserializing { get; set; }
 
         /// <summary>
         /// Contains loaded languages and lookup functions for text translations
@@ -67,7 +60,6 @@ namespace TrafficManager.Lifecycle {
         /// determines whether Game mode as oppose to edit mode (eg asset editor).
         /// </summary>
         internal static bool PlayMode => AppMode != null && AppMode == ICities.AppMode.Game;
-
 
         private static void CheckForIncompatibleMods() {
             ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
@@ -115,18 +107,8 @@ namespace TrafficManager.Lifecycle {
 #endif
                 TranslationDatabase.LoadAllTranslations();
 
-                Log.InfoFormat(
-                    "TM:PE enabled. Version {0}, Build {1} {2} for game version {3}.{4}.{5}-f{6}",
-                    TrafficManagerMod.VersionString,
-                    Assembly.GetExecutingAssembly().GetName().Version,
-                    TrafficManagerMod.BRANCH,
-                    GAME_VERSION_A,
-                    GAME_VERSION_B,
-                    GAME_VERSION_C,
-                    GAME_VERSION_BUILD);
-                Log.InfoFormat(
-                    "Enabled TM:PE has GUID {0}",
-                    Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId);
+                VersionUtil.LogEnvironmentDetails();
+                Log._Debug("Scene is " + Scene);
 
                 // check for incompatible mods
                 if (UIView.GetAView() != null) {
@@ -136,19 +118,6 @@ namespace TrafficManager.Lifecycle {
                     // or when game first loads if TM:PE was already enabled
                     LoadingManager.instance.m_introLoaded += CheckForIncompatibleMods;
                 }
-
-                // Log Mono version
-                Type monoRt = Type.GetType("Mono.Runtime");
-                if (monoRt != null) {
-                    MethodInfo displayName = monoRt.GetMethod(
-                        "GetDisplayName",
-                        BindingFlags.NonPublic | BindingFlags.Static);
-                    if (displayName != null) {
-                        Log.InfoFormat("Mono version: {0}", displayName.Invoke(null, null));
-                    }
-                }
-
-                Log._Debug("Scene is " + SceneManager.GetActiveScene().name);
 
                 HarmonyHelper.EnsureHarmonyInstalled();
                 LoadingManager.instance.m_levelPreLoaded += RegisterCustomManagers;
@@ -192,6 +161,7 @@ namespace TrafficManager.Lifecycle {
             Log._Debug("TMPELifecycle.~TMPELifecycle()");
         }
 #endif
+
         internal static void StartMod() {
             var go = new GameObject(nameof(TMPELifecycle), typeof(TMPELifecycle));
             DontDestroyOnLoad(go); // don't destroy when scene changes.
@@ -207,71 +177,11 @@ namespace TrafficManager.Lifecycle {
             if (Scene == "ThemeEditor")
                 return;
 
-            InGameUtil.Instantiate();
-
             IsGameLoaded = false;
 
-            if (BuildConfig.applicationVersion != BuildConfig.VersionToString(
-                    GAME_VERSION,
-                    false)) {
-                string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
-                string[] versionElms = majorVersionElms[0].Split('.');
-                uint versionA = Convert.ToUInt32(versionElms[0]);
-                uint versionB = Convert.ToUInt32(versionElms[1]);
-                uint versionC = Convert.ToUInt32(versionElms[2]);
+            InGameUtil.Instantiate();
 
-                Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
-
-                bool isModTooOld = GAME_VERSION_A < versionA ||
-                                   (GAME_VERSION_A == versionA &&
-                                    GAME_VERSION_B < versionB);
-
-
-                bool isModNewer = GAME_VERSION_A < versionA ||
-                                  (GAME_VERSION_A == versionA &&
-                                   GAME_VERSION_B > versionB);
-
-
-                if (isModTooOld) {
-                    string msg = string.Format(
-                        "Traffic Manager: President Edition detected that you are running " +
-                        "a newer game version ({0}) than TM:PE has been built for ({1}). " +
-                        "Please be aware that TM:PE has not been updated for the newest game " +
-                        "version yet and thus it is very likely it will not work as expected.",
-                        BuildConfig.applicationVersion,
-                        BuildConfig.VersionToString(GAME_VERSION, false));
-
-                    Log.Error(msg);
-                    Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
-                            () => {
-                                UIView.library
-                                      .ShowModal<ExceptionPanel>("ExceptionPanel")
-                                      .SetMessage(
-                                          "TM:PE has not been updated yet",
-                                          msg,
-                                          false);
-                            });
-                } else if (isModNewer) {
-                    string msg = string.Format(
-                        "Traffic Manager: President Edition has been built for game version {0}. " +
-                        "You are running game version {1}. Some features of TM:PE will not " +
-                        "work with older game versions. Please let Steam update your game.",
-                        BuildConfig.VersionToString(GAME_VERSION, false),
-                        BuildConfig.applicationVersion);
-
-                    Log.Error(msg);
-                    Singleton<SimulationManager>
-                        .instance.m_ThreadingWrapper.QueueMainThread(
-                            () => {
-                                UIView.library
-                                      .ShowModal<ExceptionPanel>("ExceptionPanel")
-                                      .SetMessage(
-                                          "Your game should be updated",
-                                          msg,
-                                          false);
-                            });
-                }
-            }
+            VersionUtil.CheckGameVersion();
 
             IsGameLoaded = true;
 
