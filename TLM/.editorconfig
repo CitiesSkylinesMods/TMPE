@@ -47,6 +47,9 @@ dotnet_diagnostic.SA1638.severity = none
 dotnet_diagnostic.SA1640.severity = none
 dotnet_diagnostic.SA1652.severity = none
 
+# SA1131: Use readable conditions
+dotnet_diagnostic.SA1131.severity = none
+
 [*]
 charset=utf-8
 end_of_line=crlf
