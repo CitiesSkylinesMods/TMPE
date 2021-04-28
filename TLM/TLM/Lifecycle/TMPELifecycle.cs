@@ -181,43 +181,47 @@ namespace TrafficManager.Lifecycle {
         }
 
         internal void Load() {
-            Log.Info($"TMPELifecycle.Load() called. Mode={Mode}, UpdateMode={UpdateMode}, Scene={Scene}"); 
+            try {
+                Log.Info($"TMPELifecycle.Load() called. Mode={Mode}, UpdateMode={UpdateMode}, Scene={Scene}");
 
-            if (Scene == "ThemeEditor")
-                return;
+                if (Scene == "ThemeEditor")
+                    return;
 
-            IsGameLoaded = false;
+                IsGameLoaded = false;
 
-            InGameUtil.Instantiate();
+                InGameUtil.Instantiate();
 
-            VersionUtil.CheckGameVersion();
+                VersionUtil.CheckGameVersion();
 
-            IsGameLoaded = true;
+                IsGameLoaded = true;
 
-            CustomPathManager.OnLevelLoaded();
+                CustomPathManager.OnLevelLoaded();
 
-            ModUI.OnLevelLoaded();
-            if (PlayMode) {
-                UIView uiView = UIView.GetAView();
-                uiView.AddUIComponent(typeof(UITransportDemand));
-                uiView.gameObject.AddComponent<RemoveVehicleButtonExtender>();
-                uiView.gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
-                uiView.gameObject.AddComponent<RoadSelectionPanels>();
+                ModUI.OnLevelLoaded();
+                if (PlayMode) {
+                    UIView uiView = UIView.GetAView();
+                    uiView.AddUIComponent(typeof(UITransportDemand));
+                    uiView.gameObject.AddComponent<RemoveVehicleButtonExtender>();
+                    uiView.gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
+                    uiView.gameObject.AddComponent<RoadSelectionPanels>();
+                }
+
+                Patcher.Install();
+
+                // Log.Info("Fixing non-created nodes with problems...");
+                // FixNonCreatedNodeProblems();
+                Log.Info("Notifying managers...");
+                foreach (ICustomManager manager in RegisteredManagers) {
+                    Log.Info($"OnLevelLoading: {manager.GetType().Name}");
+                    manager.OnLevelLoading();
+                }
+
+                // InitTool();
+                // Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
+                Log.Info("OnLevelLoaded complete.");
+            } catch (Exception ex) {
+                ex.LogException(true);
             }
-
-            Patcher.Install();
-
-            // Log.Info("Fixing non-created nodes with problems...");
-            // FixNonCreatedNodeProblems();
-            Log.Info("Notifying managers...");
-            foreach (ICustomManager manager in RegisteredManagers) {
-                Log.Info($"OnLevelLoading: {manager.GetType().Name}");
-                manager.OnLevelLoading();
-            }
-
-            // InitTool();
-            // Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
-            Log.Info("OnLevelLoaded complete.");
         }
 
         internal void Unload() {
