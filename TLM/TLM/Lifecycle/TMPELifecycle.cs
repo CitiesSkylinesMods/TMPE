@@ -63,9 +63,10 @@ namespace TrafficManager.Lifecycle {
         /// </summary>
         internal static bool PlayMode => AppMode != null && AppMode == ICities.AppMode.Game;
 
-        private static void CheckForIncompatibleMods() {
+        private static void CompatibilityCheck() {
             ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
             mcc.PerformModCheck();
+            VersionUtil.CheckGameVersion();
         }
 
         internal void Preload() {
@@ -120,10 +121,10 @@ namespace TrafficManager.Lifecycle {
                 // check for incompatible mods
                 if (UIView.GetAView() != null) {
                     // when TM:PE is enabled in content manager
-                    CheckForIncompatibleMods();
+                    CompatibilityCheck();
                 } else {
                     // or when game first loads if TM:PE was already enabled
-                    LoadingManager.instance.m_introLoaded += CheckForIncompatibleMods;
+                    LoadingManager.instance.m_introLoaded += CompatibilityCheck;
                 }
 
                 HarmonyHelper.EnsureHarmonyInstalled();
@@ -150,7 +151,7 @@ namespace TrafficManager.Lifecycle {
         void OnDestroy() {
             try {
                 Log.Info("TMPELifecycle.OnDestroy()");
-                LoadingManager.instance.m_introLoaded -= CheckForIncompatibleMods;
+                LoadingManager.instance.m_introLoaded -= CompatibilityCheck;
                 LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
 
                 if (InGameOrEditor() && IsGameLoaded) {

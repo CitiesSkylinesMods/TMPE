@@ -14,13 +14,29 @@ namespace TrafficManager.Util {
     [SuppressMessage("Performance", "HAA0601:Value type to reference type conversion causing boxing allocation", Justification = "Not performance critical")]
     [SuppressMessage("Performance", "HAA0302:Display class allocation to capture closure", Justification = "Not performance critical")]
     public static class VersionUtil {
+        public const string BRANCH =
 #if LABS
-        public const string BRANCH = "LABS";
+            "LABS";
 #elif DEBUG
-        public const string BRANCH = "DEBUG";
+            "DEBUG";
 #else
-        public const string BRANCH = "STABLE";
+            "STABLE";
 #endif
+
+        public const uint EXPECTED_GAME_VERSION_U = 188997904u;
+
+        public static Version ExpectedGameVersion => new Version(1, 13, 1, 1);
+
+        public static string ExpectedGameVersionString => BuildConfig.VersionToString(EXPECTED_GAME_VERSION_U, false);
+
+        public static uint CurrentGameVersionU =>
+            (uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_VERSION)).GetValue(null);
+
+        public static Version CurrentGameVersion => new Version(
+            (int)(uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_VERSION_A)).GetValue(null),
+            (int)(uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_VERSION_B)).GetValue(null),
+            (int)(uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_VERSION_C)).GetValue(null),
+            (int)(uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_BUILD_NUMBER)).GetValue(null));
 
         // Use SharedAssemblyInfo.cs to modify TM:PE version
         // External mods (eg. CSUR Toolbox) reference the versioning for compatibility purposes
@@ -28,15 +44,6 @@ namespace TrafficManager.Util {
 
         // used for in-game display
         public static string VersionString => ModVersion.ToString(3);
-
-        // These values from `BuildConfig` class (`APPLICATION_VERSION` constants) in game file `Managed/Assembly-CSharp.dll` (use ILSpy to inspect them)
-        public const uint EXPECTED_GAME_VERSION = 188868624U;
-        public static Version ExpectedGameVersion => new Version(1, 13, 1, 1);
-        public static Version CurrentGameVersion => new Version(
-            (int)BuildConfig.APPLICATION_VERSION_A,
-            (int)BuildConfig.APPLICATION_VERSION_B,
-            (int)BuildConfig.APPLICATION_VERSION_C,
-            (int)BuildConfig.APPLICATION_BUILD_NUMBER);
 
         /// <summary>
         /// Logs some info about TMPE build, mono version, etc.
@@ -91,48 +98,31 @@ namespace TrafficManager.Util {
         /// This will be replaced as part of #699.
         /// </summary>
         public static void CheckGameVersion() {
-            if (BuildConfig.APPLICATION_VERSION != EXPECTED_GAME_VERSION) {
-                Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
+            Log._Debug("CurrentGameVersion == ExpectedGameVersion : " + (CurrentGameVersion == ExpectedGameVersion));
+            if (CurrentGameVersionU != EXPECTED_GAME_VERSION_U) {
+                Log.Info($"Detected game version v{BuildConfig.applicationVersion}. TMPE built for {ExpectedGameVersionString}");
 
-                int compare = CurrentGameVersion.CompareTo(ExpectedGameVersion);
-                if (compare > 1) {
+                if (CurrentGameVersion < ExpectedGameVersion) {
+                    // game too old
                     string msg = string.Format(
                         "Traffic Manager: President Edition detected that you are running " +
                         "a newer game version ({0}) than TM:PE has been built for ({1}). " +
                         "Please be aware that TM:PE has not been updated for the newest game " +
                         "version yet and thus it is very likely it will not work as expected.",
                         BuildConfig.applicationVersion,
-                        BuildConfig.VersionToString(EXPECTED_GAME_VERSION, false));
-
+                        ExpectedGameVersionString);
                     Log.Error(msg);
-                    Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
-                            () => {
-                                UIView.library
-                                      .ShowModal<ExceptionPanel>("ExceptionPanel")
-                                      .SetMessage(
-                                          "TM:PE has not been updated yet",
-                                          msg,
-                                          false);
-                            });
-                } else if (compare < 1) {
+                    Shortcuts.ShowErrorDialog("TM:PE has not been updated yet", msg);
+                } else if (CurrentGameVersion > ExpectedGameVersion) {
+                    // TMPE too old
                     string msg = string.Format(
                         "Traffic Manager: President Edition has been built for game version {0}. " +
                         "You are running game version {1}. Some features of TM:PE will not " +
                         "work with older game versions. Please let Steam update your game.",
-                        BuildConfig.VersionToString(EXPECTED_GAME_VERSION, false),
+                        ExpectedGameVersionString,
                         BuildConfig.applicationVersion);
-
                     Log.Error(msg);
-                    Singleton<SimulationManager>
-                        .instance.m_ThreadingWrapper.QueueMainThread(
-                            () => {
-                                UIView.library
-                                      .ShowModal<ExceptionPanel>("ExceptionPanel")
-                                      .SetMessage(
-                                          "Your game should be updated",
-                                          msg,
-                                          false);
-                            });
+                    Shortcuts.ShowErrorDialog("Your game should be updated", msg);
                 }
             }
         }
