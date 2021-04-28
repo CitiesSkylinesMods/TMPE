@@ -208,16 +208,12 @@ namespace TrafficManager.Lifecycle {
 
                 Patcher.Install();
 
-                // Log.Info("Fixing non-created nodes with problems...");
-                // FixNonCreatedNodeProblems();
                 Log.Info("Notifying managers...");
                 foreach (ICustomManager manager in RegisteredManagers) {
                     Log.Info($"OnLevelLoading: {manager.GetType().Name}");
                     manager.OnLevelLoading();
                 }
 
-                // InitTool();
-                // Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
                 Log.Info("OnLevelLoaded complete.");
             } catch (Exception ex) {
                 ex.LogException(true);
