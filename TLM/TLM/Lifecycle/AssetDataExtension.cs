@@ -14,11 +14,11 @@ namespace TrafficManager.Lifecycle {
         public void OnReleased() { }
 
         public void OnAssetLoaded(string name, object asset, Dictionary<string, byte[]> userData) =>
-            OnAssetLoaded(name, asset, userData);
+            OnAssetLoadedImpl(name, asset, userData);
 
         // asset should be the same as ToolsModifierControl.toolController.m_editPrefabInfo
         public void OnAssetSaved(string name, object asset, out Dictionary<string, byte[]> userData) =>
-            OnAssetSaved(name, asset, out userData);
+            OnAssetSavedImpl(name, asset, out userData);
 
         public static void OnAssetLoadedImpl(string name, object asset, Dictionary<string, byte[]> userData) {
             Log.Info($"AssetDataExtension.OnAssetLoadedImpl({name}, {asset}, userData) called");
