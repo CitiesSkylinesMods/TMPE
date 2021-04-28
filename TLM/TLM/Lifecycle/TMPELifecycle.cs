@@ -154,7 +154,7 @@ namespace TrafficManager.Lifecycle {
                 LoadingManager.instance.m_introLoaded -= CompatibilityCheck;
                 LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
 
-                if (InGameOrEditor() && IsGameLoaded) {
+                if (IsGameLoaded) {
                     //Hot Unload
                     Unload();
                 }
@@ -177,11 +177,11 @@ namespace TrafficManager.Lifecycle {
         }
 
         internal static void EndMod() {
-            Destroy(Instance?.gameObject);
+            DestroyImmediate(Instance?.gameObject);
         }
 
         internal void Load() {
-            Log.Info($"TMPELifecycle.Load() called. Mode={Mode}, UpdateMode={UpdateMode}, Scene={Scene}");
+            Log.Info($"TMPELifecycle.Load() called. Mode={Mode}, UpdateMode={UpdateMode}, Scene={Scene}"); 
 
             if (Scene == "ThemeEditor")
                 return;
@@ -245,13 +245,12 @@ namespace TrafficManager.Lifecycle {
                     ModUI.Instance.Destroy();
                     Log._Debug("removed UIBase instance.");
                 }
-            } catch (Exception e) {
-                Log.Error("Exception unloading mod. " + e.Message);
 
-                // ignored - prevents collision with other mods
+                Patcher.Uninstall();
+            } catch (Exception ex) {
+                ex.LogException(true);
             }
 
-            Patcher.Uninstall();
             IsGameLoaded = false;
             InGameHotReload = false;
         }
