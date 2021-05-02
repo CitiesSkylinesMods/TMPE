@@ -87,7 +87,9 @@ namespace TrafficManager.Custom.AI {
                 NetInfo.LaneType.Vehicle,
                 VehicleInfo.VehicleType.Train
                 | VehicleInfo.VehicleType.Ship
-                | VehicleInfo.VehicleType.Plane,
+                | VehicleInfo.VehicleType.Plane
+                | VehicleInfo.VehicleType.Ferry
+                | VehicleInfo.VehicleType.Helicopter,
                 allowUnderground,
                 false,
                 32f,
@@ -127,7 +129,9 @@ namespace TrafficManager.Custom.AI {
                 NetInfo.LaneType.Vehicle,
                 VehicleInfo.VehicleType.Train
                 | VehicleInfo.VehicleType.Ship
-                | VehicleInfo.VehicleType.Plane,
+                | VehicleInfo.VehicleType.Plane
+                | VehicleInfo.VehicleType.Ferry
+                | VehicleInfo.VehicleType.Helicopter,
                 undergroundTarget,
                 false,
                 32f,
@@ -166,7 +170,9 @@ namespace TrafficManager.Custom.AI {
             const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car
                                              | VehicleInfo.VehicleType.Train
                                              | VehicleInfo.VehicleType.Ship
-                                             | VehicleInfo.VehicleType.Plane;
+                                             | VehicleInfo.VehicleType.Plane
+                                             | VehicleInfo.VehicleType.Ferry
+                                             | VehicleInfo.VehicleType.Helicopter;
 
             // NON-STOCK CODE START
             PathCreationArgs args;

@@ -60,7 +60,9 @@
             // try to find other start position (plane, train, ship)
             const VehicleInfo.VehicleType VEH_TYPE_MASK = VehicleInfo.VehicleType.Train
                                                           | VehicleInfo.VehicleType.Ship
-                                                          | VehicleInfo.VehicleType.Plane;
+                                                          | VehicleInfo.VehicleType.Plane
+                                                          | VehicleInfo.VehicleType.Ferry
+                                                          | VehicleInfo.VehicleType.Helicopter;
             if (PathManager.FindPathPosition(
                 startPos,
                 ItemClass.Service.PublicTransport,
@@ -153,7 +155,9 @@
             args.vehicleTypes = VehicleInfo.VehicleType.Car
                                 | VehicleInfo.VehicleType.Train
                                 | VehicleInfo.VehicleType.Ship
-                                | VehicleInfo.VehicleType.Plane;
+                                | VehicleInfo.VehicleType.Plane
+                                | VehicleInfo.VehicleType.Ferry
+                                | VehicleInfo.VehicleType.Helicopter;
             args.maxLength = 20000f;
             args.isHeavyVehicle = IsHeavyVehicle();
             args.hasCombustionEngine = CombustionEngine();
