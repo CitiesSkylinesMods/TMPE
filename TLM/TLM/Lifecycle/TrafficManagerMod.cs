@@ -8,8 +8,8 @@ namespace TrafficManager.Lifecycle {
     using TrafficManager.UI;
 
     public class TrafficManagerMod : IUserMod {
-#if LABS
-        public const string BRANCH = "LABS";
+#if TEST
+        public const string BRANCH = "TEST";
 #elif DEBUG
         public const string BRANCH = "DEBUG";
 #else
