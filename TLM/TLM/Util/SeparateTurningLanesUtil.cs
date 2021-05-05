@@ -420,7 +420,7 @@ namespace TrafficManager.Util {
             return x;
         }
 
-        public static SetLaneArrow_Result CanChangeLanes(ushort segmentId, ushort nodeId, bool builtIn) {
+        public static SetLaneArrow_Result CanChangeLanes(ushort segmentId, ushort nodeId, bool builtIn = false) {
             if (segmentId == 0 || nodeId == 0) {
                 return SetLaneArrow_Result.Invalid;
             }

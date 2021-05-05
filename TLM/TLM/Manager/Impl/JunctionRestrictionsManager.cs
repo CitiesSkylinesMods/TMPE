@@ -178,12 +178,13 @@ namespace TrafficManager.Manager.Impl {
 
         public void UpdateAllDefaults() {
             IExtSegmentManager extSegmentManager = Constants.ManagerFactory.ExtSegmentManager;
-            for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+            for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 if (!Services.NetService.IsSegmentValid((ushort)segmentId)) {
                     continue;
                 }
 
                 UpdateDefaults(ref extSegmentManager.ExtSegments[segmentId]);
+                netService.PublishSegmentChanges(segmentId);
             }
         }
 

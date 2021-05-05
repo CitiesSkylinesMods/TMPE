@@ -6,7 +6,7 @@ namespace TrafficManager.State {
     using TrafficManager.Manager.Impl;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI;
-    using UnityEngine;
+    using static TrafficManager.Util.Shortcuts;
 
     public static class OptionsVehicleRestrictionsTab {
         private static UICheckBox _relaxedBussesToggle;
@@ -30,8 +30,17 @@ namespace TrafficManager.State {
                 Handler = JunctionRestrictionsUpdateHandler,
             };
 
+        public static CheckboxOption DedicatedTurningLanes =
+            new CheckboxOption("DedicatedTurningLanes") {
+                Label = "VR.Option:Dedicated turning lanes",
+                Handler = LaneArrowsUpdateHandler,
+        };
+
         static void JunctionRestrictionsUpdateHandler(bool value ) =>
             JunctionRestrictionsManager.Instance.UpdateAllDefaults();
+
+        static void LaneArrowsUpdateHandler(bool value) =>
+            LaneArrowManager.Instance.UpdateAllDefaults(true);
 
         internal static void MakeSettings_VehicleRestrictions(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Policies & Restrictions"));
