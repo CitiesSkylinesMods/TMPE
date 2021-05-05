@@ -95,9 +95,6 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// separates turning lanes for the input segment on the input node.
-        /// <param name="alt2">alternativ mode for two lanes(dedicated near turn)</param>
-        /// <param name="alt3">alternative mode for 3+ lanes(favour forward)</param>
-        /// <param name="altBus">alternative mode for roads with bs lanes(mixed VS separate caluclations)</param>
         /// </summary>
         public static void SeparateSegmentLanes(
             ushort segmentId,
@@ -119,8 +116,9 @@ namespace TrafficManager.Util {
                     out res,
                     LaneArrowManager.LANE_TYPES,
                     LaneArrowManager.VEHICLE_TYPES,
-                    alt2,
-                    alt3);
+                    builtIn:false,
+                    alt2: alt2,
+                    alt3: alt3);
             } else {
                 if (altBus) {
                     SeparateSegmentLanes(
@@ -128,37 +126,96 @@ namespace TrafficManager.Util {
                         nodeId,
                         out res,
                         LaneArrowManager.LANE_TYPES,
-                        LaneArrowManager.VEHICLE_TYPES);
+                        LaneArrowManager.VEHICLE_TYPES,
+                        builtIn: false);
                 } else {
                     SeparateSegmentLanes(
                         segmentId,
                         nodeId,
                         out res,
                         NetInfo.LaneType.Vehicle,
-                        LaneArrowManager.VEHICLE_TYPES);
+                        LaneArrowManager.VEHICLE_TYPES,
+                        builtIn: false);
                     SeparateSegmentLanes(
                         segmentId,
                         nodeId,
-                        out res,
+                        out var res2,
                         NetInfo.LaneType.TransportVehicle,
-                        LaneArrowManager.VEHICLE_TYPES);
+                        LaneArrowManager.VEHICLE_TYPES,
+                        builtIn: false);
+
+                    if (res == SetLaneArrow_Result.Success)
+                        res = res2;
                 }
             }
         }
 
+        public static void SeparateSegmentLanesBuiltIn(
+            ushort segmentId,
+            ushort nodeId) {
+
+            bool alt2 = false; // alt mode for 2 lanes
+            bool alt3 = false; // alt mode for 3+ lanes
+            bool altBus = false; // alt mode if lanes include bus lane[s].
+            bool hasBusLanes = CountBusLanes(segmentId, nodeId) > 0;
+
+            if (!hasBusLanes) {
+                SeparateSegmentLanes(
+                    segmentId,
+                    nodeId,
+                    out _,
+                    LaneArrowManager.LANE_TYPES,
+                    LaneArrowManager.VEHICLE_TYPES,
+                    builtIn: true,
+                    alt2: alt2,
+                    alt3: alt3);
+            } else {
+                if (altBus) {
+                    SeparateSegmentLanes(
+                        segmentId,
+                        nodeId,
+                        out _,
+                        LaneArrowManager.LANE_TYPES,
+                        LaneArrowManager.VEHICLE_TYPES,
+                        builtIn: true);
+                } else {
+                    SeparateSegmentLanes(
+                        segmentId,
+                        nodeId,
+                        out _,
+                        NetInfo.LaneType.Vehicle,
+                        LaneArrowManager.VEHICLE_TYPES,
+                        builtIn: true);
+                    SeparateSegmentLanes(
+                        segmentId,
+                        nodeId,
+                        out _,
+                        NetInfo.LaneType.TransportVehicle,
+                        LaneArrowManager.VEHICLE_TYPES,
+                        builtIn: true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// separates turning lanes for the input segment on the input node.
+        /// <paramref name="builtIn">determines whather to change default or forced lane arrows</paramref>
+        /// <param name="alt2">alternativ mode for two lanes(dedicated near turn)</param>
+        /// <param name="alt3">alternative mode for 3+ lanes(favour forward)</param>
+        /// </summary>
         private static void SeparateSegmentLanes(
             ushort segmentId,
             ushort nodeId,
             out SetLaneArrow_Result res,
             NetInfo.LaneType laneType,
             VehicleInfo.VehicleType vehicleType,
+            bool builtIn,
             bool alt2 = false,
             bool alt3 = false) {
-            res = CanChangeLanes(segmentId, nodeId);
+            res = CanChangeLanes(segmentId, nodeId, builtIn);
             if (res != SetLaneArrow_Result.Success) {
                 return;
             }
-            res = SetLaneArrow_Result.Success;
 
             ref NetSegment seg = ref segmentId.ToSegment();
             bool startNode = seg.m_startNode == nodeId;
@@ -192,11 +249,11 @@ namespace TrafficManager.Util {
 
             if (srcLaneCount == 2 && numdirs == 3) {
                 if (alt2) {
-                    LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows_NearForward);
-                    LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows_Far);
+                    SetLaneArrows(laneList[0].laneId, LaneArrows_NearForward, builtIn: builtIn);
+                    SetLaneArrows(laneList[1].laneId, LaneArrows_Far, builtIn: builtIn);
                 } else {
-                    LaneArrowManager.Instance.SetLaneArrows(laneList[1].laneId, LaneArrows_FarForward);
-                    LaneArrowManager.Instance.SetLaneArrows(laneList[0].laneId, LaneArrows_Near);
+                    SetLaneArrows(laneList[1].laneId, LaneArrows_FarForward, builtIn: builtIn);
+                    SetLaneArrows(laneList[0].laneId, LaneArrows_Near, builtIn: builtIn);
                 }
                 return;
             }
@@ -232,7 +289,18 @@ namespace TrafficManager.Util {
                 } else {
                     arrow = LaneArrows_Far;
                 }
-                LaneArrowManager.Instance.SetLaneArrows(laneList[i].laneId, arrow);
+                SetLaneArrows(laneList[i].laneId, arrow, builtIn: builtIn);
+            }
+        }
+
+        private static void SetLaneArrows(uint laneId, LaneArrows arrows, bool builtIn) {
+            if (builtIn)
+                LaneArrowManager.Instance.SetLaneArrows(laneId, arrows);
+            else {
+                NetLane.Flags flags = (NetLane.Flags)laneId.ToLane().m_flags;
+                flags &= ~NetLane.Flags.LeftForwardRight; // clear arrows
+                flags |= (NetLane.Flags)arrows; // apply flags
+                laneId.ToLane().m_flags = (ushort)flags;
             }
         }
 
@@ -352,10 +420,15 @@ namespace TrafficManager.Util {
             return x;
         }
 
-        public static SetLaneArrow_Result CanChangeLanes(ushort segmentId, ushort nodeId) {
+        public static SetLaneArrow_Result CanChangeLanes(ushort segmentId, ushort nodeId, bool builtIn) {
             if (segmentId == 0 || nodeId == 0) {
                 return SetLaneArrow_Result.Invalid;
             }
+
+            if (builtIn) {
+                return SetLaneArrow_Result.Success;
+            }
+
             if (Options.highwayRules && ExtNodeManager.JunctionHasHighwayRules(nodeId)) {
                 return SetLaneArrow_Result.HighwayArrows;
             }
@@ -374,7 +447,7 @@ namespace TrafficManager.Util {
             int srcLaneCount = laneList.Count();
             for (int i = 0; i < srcLaneCount; ++i) {
                 if (LaneConnectionManager.Instance.HasConnections(laneList[i].laneId, startNode)) {
-                    return SetLaneArrow_Result.LaneConnection; ;
+                    return SetLaneArrow_Result.LaneConnection;
                 }
             }
 
