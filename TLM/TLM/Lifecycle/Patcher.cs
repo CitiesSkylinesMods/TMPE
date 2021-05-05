@@ -83,8 +83,12 @@ namespace TrafficManager.Lifecycle {
         }
 
         public static void Uninstall() {
-            new Harmony(HARMONY_ID).UnpatchAll(HARMONY_ID);
-            Log.Info("TMPE patches uninstalled.");
+            try {
+                new Harmony(HARMONY_ID).UnpatchAll(HARMONY_ID);
+                Log.Info("TMPE patches uninstalled.");
+            } catch(Exception ex) {
+                ex.LogException(true);
+            }
         }
     }
 }

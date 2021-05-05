@@ -1,6 +1,4 @@
 namespace TrafficManager.Util {
-    using ColossalFramework;
-    using ColossalFramework.UI;
     using CSUtil.Commons;
     using System;
     using System.Reflection;
@@ -23,15 +21,30 @@ namespace TrafficManager.Util {
             "STABLE";
 #endif
 
+        /// <summary>
+        /// VersionB of the game changes with mod breaking game updates .
+        /// </summary>
+        private const int VERSION_COMPONENTS_COUNT = 2;
+
+        // we could alternatively use BuildConfig.APPLICATION_VERSION because const values are evaluated at compile time.
+        // but I have decided not to do this because I don't want this to happen automatically with a rebuild if
+        // CS updates. these values should be changed manaually so as to force us to acknowledge that they have changed.
         public const uint EXPECTED_GAME_VERSION_U = 188997904u;
 
+        // see comments for EXPECTED_GAME_VERSION_U.
         public static Version ExpectedGameVersion => new Version(1, 13, 1, 1);
 
         public static string ExpectedGameVersionString => BuildConfig.VersionToString(EXPECTED_GAME_VERSION_U, false);
 
+        // we cannot use BuildConfig.APPLICATION_VERSION directly (it would not make sense).
+        // because BuildConfig.APPLICATION_VERSION is const and constants are resolved at compile-time.
+        // this is important when game version changes but TMPE dll is old. at such circumstance
+        // if we use BuildConfig.APPLICATION_VERSION then we will not notice that game version has changed.
+        // using reflection is a WORKAROUND to force the compiler to get value dynamically at run-time.
         public static uint CurrentGameVersionU =>
             (uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_VERSION)).GetValue(null);
 
+        // see comments CurrentGameVersionU.
         public static Version CurrentGameVersion => new Version(
             (int)(uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_VERSION_A)).GetValue(null),
             (int)(uint)typeof(BuildConfig).GetField(nameof(BuildConfig.APPLICATION_VERSION_B)).GetValue(null),
@@ -44,6 +57,13 @@ namespace TrafficManager.Util {
 
         // used for in-game display
         public static string VersionString => ModVersion.ToString(3);
+
+        /// <summary>
+        /// take first n components of the version.
+        /// </summary>
+        static Version Take(this Version version, int n) {
+            return new Version(version.ToString(n));
+        }
 
         /// <summary>
         /// Logs some info about TMPE build, mono version, etc.
@@ -91,18 +111,19 @@ namespace TrafficManager.Util {
             }
         }
 
-
         /// <summary>
         /// Checks to see if game version is what TMPE expects, and if not warns users.
         ///
         /// This will be replaced as part of #699.
         /// </summary>
         public static void CheckGameVersion() {
-            Log._Debug("CurrentGameVersion == ExpectedGameVersion : " + (CurrentGameVersion == ExpectedGameVersion));
             if (CurrentGameVersionU != EXPECTED_GAME_VERSION_U) {
                 Log.Info($"Detected game version v{BuildConfig.applicationVersion}. TMPE built for {ExpectedGameVersionString}");
+                Log._Debug($"CurrentGameVersion={CurrentGameVersion} ExpectedGameVersion={ExpectedGameVersion}");
+                Version current = CurrentGameVersion.Take(VERSION_COMPONENTS_COUNT);
+                Version expected = ExpectedGameVersion.Take(VERSION_COMPONENTS_COUNT);
 
-                if (CurrentGameVersion < ExpectedGameVersion) {
+                if (current < expected) {
                     // game too old
                     string msg = string.Format(
                         "Traffic Manager: President Edition detected that you are running " +
@@ -113,7 +134,7 @@ namespace TrafficManager.Util {
                         ExpectedGameVersionString);
                     Log.Error(msg);
                     Shortcuts.ShowErrorDialog("TM:PE has not been updated yet", msg);
-                } else if (CurrentGameVersion > ExpectedGameVersion) {
+                } else if (current > expected) {
                     // TMPE too old
                     string msg = string.Format(
                         "Traffic Manager: President Edition has been built for game version {0}. " +

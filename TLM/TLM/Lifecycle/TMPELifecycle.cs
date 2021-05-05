@@ -153,13 +153,14 @@ namespace TrafficManager.Lifecycle {
                 Log.Info("TMPELifecycle.OnDestroy()");
                 LoadingManager.instance.m_introLoaded -= CompatibilityCheck;
                 LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
+                LoadingManager.instance.m_levelPreLoaded -= Preload;
 
                 if (IsGameLoaded) {
                     //Hot Unload
                     Unload();
                 }
                 Instance = null;
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 ex.LogException(true);
             }
         }
@@ -221,35 +222,38 @@ namespace TrafficManager.Lifecycle {
         }
 
         internal void Unload() {
-            CustomPathManager._instance?.OnLevelUnloading();
-
             try {
+                CustomPathManager._instance?.OnLevelUnloading();
                 foreach (ICustomManager manager in RegisteredManagers.AsEnumerable().Reverse()) {
-                    Log.Info($"OnLevelUnloading: {manager.GetType().Name}");
-                    manager.OnLevelUnloading();
+                    try {
+                        Log.Info($"OnLevelUnloading: {manager.GetType().Name}");
+                        manager.OnLevelUnloading();
+                    } catch (Exception ex) {
+                        ex.LogException(true);
+                    }
                 }
-
                 Flags.OnLevelUnloading();
                 GlobalConfig.OnLevelUnloading();
 
+                // destroy immidately to prevent duplicates after hot-reload.
                 var uiviewGO = UIView.GetAView().gameObject;
-                Destroy(uiviewGO.GetComponent<RoadSelectionPanels>());
-                Destroy(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());
-                Destroy(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
-                Destroy(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
-                Destroy(uiviewGO.GetComponent<UITransportDemand>());
+                DestroyImmediate(uiviewGO.GetComponent<RoadSelectionPanels>());
+                DestroyImmediate(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());
+                DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
+                DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
+                DestroyImmediate(uiviewGO.GetComponent<UITransportDemand>());
 
                 Log.Info("Removing Controls from UI.");
-                if (ModUI.Instance != null) {
+                if (ModUI.Instance) {
                     ModUI.Instance.CloseMainMenu(); // Hide the UI ASAP
                     ModUI.Instance.Destroy();
                     Log._Debug("removed UIBase instance.");
                 }
-
-                Patcher.Uninstall();
             } catch (Exception ex) {
                 ex.LogException(true);
             }
+
+            Patcher.Uninstall();
 
             IsGameLoaded = false;
             InGameHotReload = false;
