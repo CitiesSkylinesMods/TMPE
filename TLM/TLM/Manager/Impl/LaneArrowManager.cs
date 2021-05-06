@@ -166,10 +166,6 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     NetManager.instance.UpdateSegment(segmentId);
-
-                    //ai.UpdateLanes(segmentId, ref segmentId.ToSegment(), false);
-                    //NetManager.instance.UpdateSegmentRenderer(segmentId, false);
-                    //netService.PublishSegmentChanges(segmentId);
                 }
             });
         }

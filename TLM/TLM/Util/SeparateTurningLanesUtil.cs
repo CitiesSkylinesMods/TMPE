@@ -154,7 +154,7 @@ namespace TrafficManager.Util {
             ushort segmentId,
             ushort nodeId) {
 
-            bool alt2 = false; // alt mode for 2 lanes
+            bool alt2 = true; // alt mode for 2 lanes
             bool alt3 = false; // alt mode for 3+ lanes
             bool altBus = false; // alt mode if lanes include bus lane[s].
             bool hasBusLanes = CountBusLanes(segmentId, nodeId) > 0;
@@ -185,14 +185,9 @@ namespace TrafficManager.Util {
                         out _,
                         NetInfo.LaneType.Vehicle,
                         LaneArrowManager.VEHICLE_TYPES,
-                        builtIn: true);
-                    SeparateSegmentLanes(
-                        segmentId,
-                        nodeId,
-                        out _,
-                        NetInfo.LaneType.TransportVehicle,
-                        LaneArrowManager.VEHICLE_TYPES,
-                        builtIn: true);
+                        builtIn: true,
+                        alt2,
+                        alt3);
                 }
             }
         }
@@ -294,7 +289,7 @@ namespace TrafficManager.Util {
         }
 
         private static void SetLaneArrows(uint laneId, LaneArrows arrows, bool builtIn) {
-            if (builtIn)
+            if (!builtIn)
                 LaneArrowManager.Instance.SetLaneArrows(laneId, arrows);
             else {
                 NetLane.Flags flags = (NetLane.Flags)laneId.ToLane().m_flags;
