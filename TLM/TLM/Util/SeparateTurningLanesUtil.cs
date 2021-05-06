@@ -93,21 +93,53 @@ namespace TrafficManager.Util {
             Debug.Assert(res == SetLaneArrow_Result.Success);
         }
 
-        /// <summary>
-        /// separates turning lanes for the input segment on the input node.
-        /// </summary>
         public static void SeparateSegmentLanes(
             ushort segmentId,
             ushort nodeId,
             out SetLaneArrow_Result res,
             bool alternativeMode = true) {
 
-            bool alt2 = alternativeMode; // alt mode for 2 lanes
-            bool alt3 = alternativeMode; // alt mode for 3+ lanes
-            bool altBus = alternativeMode; // alt mode if lanes include bus lane[s].
+            bool alt2 = alternativeMode;
+            bool alt3 = alternativeMode;
+            bool altBus = alternativeMode;
+
+            SeparateSegmentLanes(segmentId, nodeId, out res,
+                builtIn: false, alt2: alt2, alt3: alt3, altBus: altBus);
+        }
+
+        internal static void SeparateSegmentLanesBuiltIn(
+            ushort segmentId,
+            ushort nodeId) {
+
+            bool alt2 = true;
+            bool alt3 = true;
+            bool altBus = true; 
+
+            SeparateSegmentLanes(segmentId, nodeId, out _,
+                builtIn: true, alt2: alt2, alt3: alt3, altBus: altBus);
+        }
+
+        /// <summary>
+        /// separates turning lanes for the input segment on the input node.
+        /// </summary>
+        /// <paramref name="builtIn">determines whather to change default or forced lane arrows</paramref>
+        /// <param name="alt2">alternativ mode for two lanes(true => dedicated far turn)</param>
+        /// <param name="alt3">alternative mode for 3+ lanes(true => favour forward)</param>
+        /// <param name="altBus">true => treat bus lanes differently</param>
+        private static void SeparateSegmentLanes(
+            ushort segmentId,
+            ushort nodeId,
+            out SetLaneArrow_Result res,
+            bool builtIn,
+            bool alt2,
+            bool alt3,
+            bool altBus) {
+
             bool hasBusLanes = CountBusLanes(segmentId, nodeId) > 0;
 
-            LaneArrowManager.Instance.ResetLaneArrows(segmentId, netService.IsStartNode(segmentId, nodeId));
+            if (!builtIn) {
+                LaneArrowManager.Instance.ResetLaneArrows(segmentId, netService.IsStartNode(segmentId, nodeId));
+            }
 
             if (!hasBusLanes) {
                 SeparateSegmentLanes(
@@ -116,7 +148,7 @@ namespace TrafficManager.Util {
                     out res,
                     LaneArrowManager.LANE_TYPES,
                     LaneArrowManager.VEHICLE_TYPES,
-                    builtIn:false,
+                    builtIn: builtIn,
                     alt2: alt2,
                     alt3: alt3);
             } else {
@@ -127,7 +159,7 @@ namespace TrafficManager.Util {
                         out res,
                         LaneArrowManager.LANE_TYPES,
                         LaneArrowManager.VEHICLE_TYPES,
-                        builtIn: false);
+                        builtIn: builtIn);
                 } else {
                     SeparateSegmentLanes(
                         segmentId,
@@ -135,68 +167,23 @@ namespace TrafficManager.Util {
                         out res,
                         NetInfo.LaneType.Vehicle,
                         LaneArrowManager.VEHICLE_TYPES,
-                        builtIn: false);
-                    SeparateSegmentLanes(
+                        builtIn: builtIn);
+                    AddForwardToLanes(
                         segmentId,
                         nodeId,
-                        out var res2,
                         NetInfo.LaneType.TransportVehicle,
                         LaneArrowManager.VEHICLE_TYPES,
-                        builtIn: false);
-
-                    if (res == SetLaneArrow_Result.Success)
-                        res = res2;
+                        builtIn: builtIn);
                 }
             }
         }
 
-        public static void SeparateSegmentLanesBuiltIn(
-            ushort segmentId,
-            ushort nodeId) {
-
-            bool alt2 = true; // alt mode for 2 lanes
-            bool alt3 = false; // alt mode for 3+ lanes
-            bool altBus = false; // alt mode if lanes include bus lane[s].
-            bool hasBusLanes = CountBusLanes(segmentId, nodeId) > 0;
-
-            if (!hasBusLanes) {
-                SeparateSegmentLanes(
-                    segmentId,
-                    nodeId,
-                    out _,
-                    LaneArrowManager.LANE_TYPES,
-                    LaneArrowManager.VEHICLE_TYPES,
-                    builtIn: true,
-                    alt2: alt2,
-                    alt3: alt3);
-            } else {
-                if (altBus) {
-                    SeparateSegmentLanes(
-                        segmentId,
-                        nodeId,
-                        out _,
-                        LaneArrowManager.LANE_TYPES,
-                        LaneArrowManager.VEHICLE_TYPES,
-                        builtIn: true);
-                } else {
-                    SeparateSegmentLanes(
-                        segmentId,
-                        nodeId,
-                        out _,
-                        NetInfo.LaneType.Vehicle,
-                        LaneArrowManager.VEHICLE_TYPES,
-                        builtIn: true,
-                        alt2,
-                        alt3);
-                }
-            }
-        }
 
         /// <summary>
         /// separates turning lanes for the input segment on the input node.
         /// <paramref name="builtIn">determines whather to change default or forced lane arrows</paramref>
-        /// <param name="alt2">alternativ mode for two lanes(dedicated near turn)</param>
-        /// <param name="alt3">alternative mode for 3+ lanes(favour forward)</param>
+        /// <param name="alt2">alternativ mode for two lanes(true => dedicated far turn)</param>
+        /// <param name="alt3">alternative mode for 3+ lanes(true => favour forward)</param>
         /// </summary>
         private static void SeparateSegmentLanes(
             ushort segmentId,
@@ -288,12 +275,60 @@ namespace TrafficManager.Util {
             }
         }
 
+        /// <summary>
+        /// Adds forward flag to lanes where applicable.
+        /// <paramref name="builtIn">determines whather to change default or forced lane arrows</paramref>
+        /// </summary>
+        private static void AddForwardToLanes(
+            ushort segmentId,
+            ushort nodeId,
+            NetInfo.LaneType laneType,
+            VehicleInfo.VehicleType vehicleType,
+            bool builtIn) {
+            var res = CanChangeLanes(segmentId, nodeId, builtIn);
+            if (res != SetLaneArrow_Result.Success) {
+                return;
+            }
+
+            ref NetSegment seg = ref segmentId.ToSegment();
+            bool startNode = seg.m_startNode == nodeId;
+
+            //list of outgoing lanes from current segment to current node.
+            IList<LanePos> laneList =
+                Constants.ServiceFactory.NetService.GetSortedLanes(
+                    segmentId,
+                    ref seg,
+                    startNode,
+                    laneType,
+                    vehicleType,
+                    reverse: LHT,
+                    sort: false);
+
+            int forwardLanesCount = CountTargetLanesTowardDirection(segmentId, nodeId, ArrowDirection.Forward);
+            if (forwardLanesCount == 0)
+                return; // can't go forward.
+
+            foreach(var lanePos in laneList) {
+                AppendLaneArrows(lanePos.laneId, LaneArrows.Forward, builtIn);
+            }
+        }
+
         private static void SetLaneArrows(uint laneId, LaneArrows arrows, bool builtIn) {
             if (!builtIn)
                 LaneArrowManager.Instance.SetLaneArrows(laneId, arrows);
             else {
                 NetLane.Flags flags = (NetLane.Flags)laneId.ToLane().m_flags;
                 flags &= ~NetLane.Flags.LeftForwardRight; // clear arrows
+                flags |= (NetLane.Flags)arrows; // apply flags
+                laneId.ToLane().m_flags = (ushort)flags;
+            }
+        }
+
+        private static void AppendLaneArrows(uint laneId, LaneArrows arrows, bool builtIn) {
+            if (!builtIn)
+                LaneArrowManager.Instance.AddLaneArrows(laneId, arrows);
+            else {
+                NetLane.Flags flags = (NetLane.Flags)laneId.ToLane().m_flags;
                 flags |= (NetLane.Flags)arrows; // apply flags
                 laneId.ToLane().m_flags = (ushort)flags;
             }
