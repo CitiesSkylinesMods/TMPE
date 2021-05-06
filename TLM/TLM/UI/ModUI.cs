@@ -107,11 +107,11 @@ namespace TrafficManager.UI {
 
         public void Destroy() {
             Log._Debug("ModUI destructor is called.");
-            Destroy(MainMenuButton);
-            Destroy(MainMenu);
+            DestroyImmediate(MainMenuButton);
+            DestroyImmediate(MainMenu);
             ReleaseTool();
             Instance = null;
-            Destroy(this);
+            DestroyImmediate(this);
         }
 
         public bool IsVisible() {

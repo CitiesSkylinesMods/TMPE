@@ -1072,28 +1072,32 @@ namespace TrafficManager.State {
         }
 
         internal static void OnLevelUnloading() {
-            for (uint i = 0; i < laneConnections.Length; ++i) {
-                laneConnections[i] = null;
-            }
+            try {
+                for (uint i = 0; i < laneConnections.Length; ++i) {
+                    laneConnections[i] = null;
+                }
 
-            for (uint i = 0; i < laneSpeedLimitArray.Length; ++i) {
-                laneSpeedLimitArray[i] = null;
-            }
+                for (uint i = 0; i < laneSpeedLimitArray.Length; ++i) {
+                    laneSpeedLimitArray[i] = null;
+                }
 
-            lock(laneSpeedLimitLock) {
-                laneSpeedLimit.Clear();
-            }
+                lock (laneSpeedLimitLock) {
+                    laneSpeedLimit.Clear();
+                }
 
-            for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
-                laneAllowedVehicleTypesArray[i] = null;
-            }
+                for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
+                    laneAllowedVehicleTypesArray[i] = null;
+                }
 
-            for (uint i = 0; i < laneArrowFlags.Length; ++i) {
-                laneArrowFlags[i] = null;
-            }
+                for (uint i = 0; i < laneArrowFlags.Length; ++i) {
+                    laneArrowFlags[i] = null;
+                }
 
-            for (uint i = 0; i < highwayLaneArrowFlags.Length; ++i) {
-                highwayLaneArrowFlags[i] = null;
+                for (uint i = 0; i < highwayLaneArrowFlags.Length; ++i) {
+                    highwayLaneArrowFlags[i] = null;
+                }
+            } catch (Exception ex) {
+                ex.LogException(true);
             }
         }
 

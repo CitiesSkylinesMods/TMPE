@@ -145,28 +145,31 @@ namespace TrafficManager.Manager.Impl {
             SimulationManager.instance.AddAction(delegate () {
                 for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                     ref NetSegment segment = ref segmentId.ToSegment();
-                    if (netService.IsSegmentValid(segmentId)
-                        && segment.Info?.GetAI() is RoadBaseAI ai) {
-                        int forward = 0;
-                        int backward = 0;
-                        segment.CountLanes(
-                            segmentId, LANE_TYPES, VEHICLE_TYPES, ref forward, ref backward);
-                        if (dedicatedTurningLanes && forward == 1 && backward == 1) {
-                            // one lane cannot have dedicated turning lanes.
-                            continue; 
-                        }
+                    if (!netService.IsSegmentValid(segmentId))
+                        continue;
 
-                        if (dedicatedTurningLanes &&
-                            segment.m_startNode.ToNode().CountSegments() <= 2 &&
-                            segment.m_endNode.ToNode().CountSegments() <= 2) {
-                            // no intersection.
-                            continue;
-                        }
+                    if (segment.Info?.GetAI() is not RoadBaseAI ai)
+                        continue;
 
-                        ai.UpdateLanes(segmentId, ref segmentId.ToSegment(), false);
-                        NetManager.instance.UpdateSegmentRenderer(segmentId, false);
-                        netService.PublishSegmentChanges(segmentId);
+                    int forward = 0, backward = 0;
+                    segmentId.ToSegment().CountLanes(segmentId, LANE_TYPES, VEHICLE_TYPES, ref forward, ref backward);
+                    if (dedicatedTurningLanes && forward == 1 && backward == 1) {
+                        // one lane cannot have dedicated turning lanes.
+                        continue;
                     }
+
+                    if (dedicatedTurningLanes &&
+                        segment.m_startNode.ToNode().CountSegments() <= 2 &&
+                        segment.m_endNode.ToNode().CountSegments() <= 2) {
+                        // no intersection.
+                        continue;
+                    }
+
+                    NetManager.instance.UpdateSegment(segmentId);
+
+                    //ai.UpdateLanes(segmentId, ref segmentId.ToSegment(), false);
+                    //NetManager.instance.UpdateSegmentRenderer(segmentId, false);
+                    //netService.PublishSegmentChanges(segmentId);
                 }
             });
         }

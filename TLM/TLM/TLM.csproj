@@ -210,7 +210,7 @@
     <Compile Include="Patch\_PathManager\CreatePathPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
     <Compile Include="State\Asset\AssetData.cs" />
-    <Compile Include="State\Asset\AssetDataExtension.cs" />
+    <Compile Include="Lifecycle\AssetDataExtension.cs" />
     <Compile Include="State\Asset\SegmentNetworkIDs.cs" />
     <Compile Include="State\SerializationUtil.cs" />
     <Compile Include="State\TMPEMoveItIntegration.cs" />
@@ -283,7 +283,6 @@
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
     <Compile Include="Manager\Impl\VehicleRestrictionsManager.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
-    <Compile Include="Lifecycle\LoadingExtension.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\RoadSelectionPanels.cs" />
@@ -383,6 +382,7 @@
     <Compile Include="Util\RoadSelectionUtil.cs" />
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
+    <Compile Include="Util\VersionUtil.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
     <Compile Include="Lifecycle\SerializableDataExtension.cs" />
     <Compile Include="Lifecycle\ThreadingExtension.cs" />

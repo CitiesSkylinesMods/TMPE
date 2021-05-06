@@ -5,7 +5,7 @@ namespace TrafficManager.State.Asset {
     using System.Collections.Generic;
     using TrafficManager.Util.Record;
     using static Util.Shortcuts;
-    using TrafficManager.Lifecycle;
+    using TrafficManager.Util;
 
     [Serializable]
     public class AssetData {
@@ -33,7 +33,7 @@ namespace TrafficManager.State.Asset {
         /// </summary>
         public static AssetData GetAssetData(BuildingInfo prefab) {
             return new AssetData {
-                Version = TrafficManagerMod.ModVersion,
+                Version = VersionUtil.ModVersion,
                 Record = RecordAll(),
                 PathNetworkIDs = GetPathsNetworkIDs(prefab),
             };

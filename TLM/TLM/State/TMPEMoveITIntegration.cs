@@ -4,7 +4,7 @@ namespace TrafficManager.State {
     using System.Collections.Generic;
     using TrafficManager.Util.Record;
     using CSUtil.Commons;
-    using TrafficManager.Lifecycle;
+    using TrafficManager.Util;
 
     public class TMPEMoveItIntegrationFactory : IMoveItIntegrationFactory {
         public MoveItIntegrationBase GetInstance() => new TMPEMoveItIntegration();
@@ -12,7 +12,7 @@ namespace TrafficManager.State {
     public class TMPEMoveItIntegration : MoveItIntegrationBase {
         public override string ID => "me.tmpe";
 
-        public override Version DataVersion => TrafficManagerMod.ModVersion;
+        public override Version DataVersion => VersionUtil.ModVersion;
 
         public override string Name => "TMPE";
 
