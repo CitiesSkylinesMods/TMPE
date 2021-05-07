@@ -98,25 +98,27 @@ namespace TrafficManager.Util {
             ushort nodeId,
             out SetLaneArrow_Result res,
             bool alternativeMode = true) {
-
-            bool alt2 = alternativeMode;
-            bool alt3 = alternativeMode;
-            bool altBus = alternativeMode;
-
-            SeparateSegmentLanes(segmentId, nodeId, out res,
-                builtIn: false, alt2: alt2, alt3: alt3, altBus: altBus);
+            SeparateSegmentLanes(
+                segmentId,
+                nodeId,
+                out res,
+                builtIn: false,
+                alt2: alternativeMode,
+                alt3: alternativeMode,
+                altBus: alternativeMode);
         }
 
         internal static void SeparateSegmentLanesBuiltIn(
             ushort segmentId,
             ushort nodeId) {
-
-            bool alt2 = true;
-            bool alt3 = true;
-            bool altBus = true; 
-
-            SeparateSegmentLanes(segmentId, nodeId, out _,
-                builtIn: true, alt2: alt2, alt3: alt3, altBus: altBus);
+            SeparateSegmentLanes(
+                segmentId,
+                nodeId,
+                out _,
+                builtIn: true,
+                alt2: true,
+                alt3: true,
+                altBus: false);
         }
 
         /// <summary>
@@ -167,7 +169,9 @@ namespace TrafficManager.Util {
                         out res,
                         NetInfo.LaneType.Vehicle,
                         LaneArrowManager.VEHICLE_TYPES,
-                        builtIn: builtIn);
+                        builtIn: builtIn,
+                        alt2: true,
+                        alt3: true);
                     AddForwardToLanes(
                         segmentId,
                         nodeId,
