@@ -98,13 +98,14 @@ namespace TrafficManager.Util {
             ushort nodeId,
             out SetLaneArrow_Result res,
             bool alternativeMode = true) {
+            bool hasBus = CountBusLanes(segmentId, nodeId) > 0;
             SeparateSegmentLanes(
                 segmentId,
                 nodeId,
                 out res,
                 builtIn: false,
-                alt2: alternativeMode,
-                alt3: alternativeMode,
+                alt2: alternativeMode && !hasBus,
+                alt3: alternativeMode && !hasBus,
                 altBus: alternativeMode);
         }
 
@@ -127,7 +128,7 @@ namespace TrafficManager.Util {
         /// <paramref name="builtIn">determines whather to change default or forced lane arrows</paramref>
         /// <param name="alt2">alternativ mode for two lanes(true => dedicated far turn)</param>
         /// <param name="alt3">alternative mode for 3+ lanes(true => favour forward)</param>
-        /// <param name="altBus">true => treat bus lanes differently</param>
+        /// <param name="altBus">false => treat bus lanes differently</param>
         private static void SeparateSegmentLanes(
             ushort segmentId,
             ushort nodeId,
@@ -137,13 +138,11 @@ namespace TrafficManager.Util {
             bool alt3,
             bool altBus) {
 
-            bool hasBusLanes = CountBusLanes(segmentId, nodeId) > 0;
-
             if (!builtIn) {
                 LaneArrowManager.Instance.ResetLaneArrows(segmentId, netService.IsStartNode(segmentId, nodeId));
             }
 
-            if (!hasBusLanes) {
+            if (altBus) {
                 SeparateSegmentLanes(
                     segmentId,
                     nodeId,
@@ -154,31 +153,22 @@ namespace TrafficManager.Util {
                     alt2: alt2,
                     alt3: alt3);
             } else {
-                if (altBus) {
-                    SeparateSegmentLanes(
-                        segmentId,
-                        nodeId,
-                        out res,
-                        LaneArrowManager.LANE_TYPES,
-                        LaneArrowManager.VEHICLE_TYPES,
-                        builtIn: builtIn);
-                } else {
-                    SeparateSegmentLanes(
-                        segmentId,
-                        nodeId,
-                        out res,
-                        NetInfo.LaneType.Vehicle,
-                        LaneArrowManager.VEHICLE_TYPES,
-                        builtIn: builtIn,
-                        alt2: true,
-                        alt3: true);
-                    AddForwardToLanes(
+                SeparateSegmentLanes(
+                    segmentId,
+                    nodeId,
+                    out res,
+                    NetInfo.LaneType.Vehicle,
+                    LaneArrowManager.VEHICLE_TYPES,
+                    builtIn: builtIn,
+                    alt2: alt2,
+                    alt3: alt3);
+                // add forward arrow to bus lanes:
+                AddForwardToLanes(
                         segmentId,
                         nodeId,
                         NetInfo.LaneType.TransportVehicle,
                         LaneArrowManager.VEHICLE_TYPES,
                         builtIn: builtIn);
-                }
             }
         }
 
@@ -196,8 +186,8 @@ namespace TrafficManager.Util {
             NetInfo.LaneType laneType,
             VehicleInfo.VehicleType vehicleType,
             bool builtIn,
-            bool alt2 = false,
-            bool alt3 = false) {
+            bool alt2,
+            bool alt3) {
             res = CanChangeLanes(segmentId, nodeId, builtIn);
             if (res != SetLaneArrow_Result.Success) {
                 return;
