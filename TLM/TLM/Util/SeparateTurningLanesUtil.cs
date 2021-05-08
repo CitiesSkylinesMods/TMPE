@@ -51,14 +51,17 @@ namespace TrafficManager.Util {
             return count;
         }
 
-        static private int CountBusLanes(ushort segmentId, ushort nodeId) =>
+        static private IList<LanePos> GetBusLanes(ushort segmentId, ushort nodeId) =>
             netService.GetSortedLanes(
                 segmentId,
                 ref segmentId.ToSegment(),
                 netService.IsStartNode(segmentId, nodeId),
                 NetInfo.LaneType.TransportVehicle,
-                VehicleInfo.VehicleType.Car,
-                sort: false).Count;
+                LaneArrowManager.VEHICLE_TYPES,
+                sort: false);
+
+        static private LaneArrows Arrows(this LanePos lanePos) =>
+            (LaneArrows)lanePos.laneId.ToLane().m_flags & LaneArrows.LeftForwardRight;
 
         /// <summary>
         /// separates turning lanes for all segments attached to nodeId,
@@ -98,7 +101,7 @@ namespace TrafficManager.Util {
             ushort nodeId,
             out SetLaneArrow_Result res,
             bool alternativeMode = true) {
-            bool hasBus = CountBusLanes(segmentId, nodeId) > 0;
+            bool hasBus = GetBusLanes(segmentId, nodeId).Count > 0;
             SeparateSegmentLanes(
                 segmentId,
                 nodeId,
@@ -142,6 +145,7 @@ namespace TrafficManager.Util {
                 LaneArrowManager.Instance.ResetLaneArrows(segmentId, netService.IsStartNode(segmentId, nodeId));
             }
 
+            var busLanes = GetBusLanes(segmentId, nodeId);
             if (altBus) {
                 SeparateSegmentLanes(
                     segmentId,
@@ -153,25 +157,40 @@ namespace TrafficManager.Util {
                     alt2: alt2,
                     alt3: alt3);
             } else {
-                SeparateSegmentLanes(
-                    segmentId,
-                    nodeId,
-                    out res,
-                    NetInfo.LaneType.Vehicle,
-                    LaneArrowManager.VEHICLE_TYPES,
-                    builtIn: builtIn,
-                    alt2: alt2,
-                    alt3: alt3);
-                // add forward arrow to bus lanes:
-                AddForwardToLanes(
+                if (busLanes.Count == 1 && busLanes[0].Arrows() == LaneArrows.Forward) {
+                    // edge case: this optional piece of code imrpoves the lane arrows a little bit in some edge cases.
+                    // see https://github.com/CitiesSkylinesMods/TMPE/pull/1104#issuecomment-834145850
+                    // no need to have separate code for bus and car. bus lane is already a dedicated forward lane.
+                    SeparateSegmentLanes(
                         segmentId,
                         nodeId,
-                        NetInfo.LaneType.TransportVehicle,
+                        out res,
+                        LaneArrowManager.LANE_TYPES,
                         LaneArrowManager.VEHICLE_TYPES,
-                        builtIn: builtIn);
+                        builtIn: builtIn,
+                        alt2: alt2,
+                        alt3: alt3);
+                } else {
+                    // normal case
+                    SeparateSegmentLanes(
+                        segmentId,
+                        nodeId,
+                        out res,
+                        NetInfo.LaneType.Vehicle,
+                        LaneArrowManager.VEHICLE_TYPES,
+                        builtIn: builtIn,
+                        alt2: alt2,
+                        alt3: alt3);
+                    // add forward arrow to bus lanes:
+                    AddForwardToLanes(
+                            segmentId,
+                            nodeId,
+                            NetInfo.LaneType.TransportVehicle,
+                            LaneArrowManager.VEHICLE_TYPES,
+                            builtIn: builtIn);
+                }
             }
         }
-
 
         /// <summary>
         /// separates turning lanes for the input segment on the input node.
