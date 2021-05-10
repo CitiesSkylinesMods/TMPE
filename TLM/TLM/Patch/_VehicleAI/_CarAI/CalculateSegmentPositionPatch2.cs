@@ -66,13 +66,13 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                                   : segmentsBuffer[prevPos.m_segment].m_endNode;
 
 #if DEBUG
-            bool logCalculation = DebugSwitch.CalculateSegmentPosition.Get()
-                        && (DebugSettings.NodeId <= 0
-                            || curTargetNodeId == DebugSettings.NodeId)
-                        && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
-                            || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.RoadVehicle)
-                        && (DebugSettings.VehicleId == 0
-                            || DebugSettings.VehicleId == vehicleID);
+            bool logCalculation = GlobalConfig.Instance.Debug.CalculateSegmentPosition
+                                  && (DebugSettings.NodeId <= 0
+                                      || curTargetNodeId == DebugSettings.NodeId)
+                                  && (GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.None
+                                      || GlobalConfig.Instance.Debug.ApiExtVehicleType == ExtVehicleType.RoadVehicle)
+                                  && (DebugSettings.VehicleId == 0
+                                      || DebugSettings.VehicleId == vehicleID);
 
             if (logCalculation) {
                 Log._Debug($"CustomCarAI.CustomCalculateSegmentPosition({vehicleID}) called.\n" +

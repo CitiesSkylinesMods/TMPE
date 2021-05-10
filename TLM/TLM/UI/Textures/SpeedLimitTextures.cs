@@ -3,6 +3,7 @@ namespace TrafficManager.UI.Textures {
     using System.Collections.Generic;
     using System;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Lifecycle;
     using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.UI.SubTools.SpeedLimits;
@@ -153,7 +154,7 @@ namespace TrafficManager.UI.Textures {
 
             // Select the source for the textures based on unit and the theme
             bool mph = unit == SpeedUnit.Mph;
-            SpeedLimitTextures self = LoadingExtension.Instance.Textures.SpeedLimits;
+            SpeedLimitTextures self = TMPELifecycle.Instance.Textures.SpeedLimits;
 
             if (mph) {
                 switch (m.MphRoadSignStyle) {

@@ -31,7 +31,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
             #if DEBUG
             bool vehDebug = DebugSettings.VehicleId == 0
                            || DebugSettings.VehicleId == vehicleID;
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog && vehDebug;
 #else
             var logParkingAi = false;
 #endif

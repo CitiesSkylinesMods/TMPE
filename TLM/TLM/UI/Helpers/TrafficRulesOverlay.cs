@@ -2,6 +2,7 @@ namespace TrafficManager.UI.Helpers {
     using ColossalFramework;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Traffic.Impl;
@@ -189,7 +190,7 @@ namespace TrafficManager.UI.Helpers {
             Color guiColor = GUI.color;
             // Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            var textures = LoadingExtension.Instance.Textures.JunctionRestrictions;
+            var textures = TMPELifecycle.Instance.Textures.JunctionRestrictions;
 
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);

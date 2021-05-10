@@ -6,6 +6,7 @@
     using CSUtil.Commons;
     using GenericGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Traffic;
@@ -357,7 +358,7 @@
             SpeedLimitsOverlaySign signRenderer = default;
             IDictionary<int, Texture2D> signsThemeTextures = SpeedLimitTextures.GetTextureSource();
             IDictionary<int, Texture2D> largeSignsTextureSource = args.ShowDefaultsMode
-                ? LoadingExtension.Instance.Textures.SpeedLimits.RoadDefaults
+                ? TMPELifecycle.Instance.Textures.SpeedLimits.RoadDefaults
                 : signsThemeTextures;
 
             // Default signs are round, mph/kmph textures can be round or rectangular
@@ -420,7 +421,7 @@
                         signRenderer.DrawSmallTexture(
                             speedlimit: defaultSpeedlimit,
                             smallSize: size * SMALL_ICON_SCALE * Vector2.one,
-                            textureSource: LoadingExtension.Instance.Textures.SpeedLimits.RoadDefaults);
+                            textureSource: TMPELifecycle.Instance.Textures.SpeedLimits.RoadDefaults);
                     }
                 }
 
@@ -527,13 +528,13 @@
             Vector2 largeRatio = args.ShowDefaultsMode ? Vector2.one : signsThemeAspectRatio;
 
             IDictionary<int, Texture2D> largeSignsTextureSource = args.ShowDefaultsMode
-                ? LoadingExtension.Instance.Textures.SpeedLimits.RoadDefaults
+                ? TMPELifecycle.Instance.Textures.SpeedLimits.RoadDefaults
                 : currentThemeTextures;
 
             // Signs are rendered in a grid starting from col 0
             float signColumn = 0f;
             var colorController = new OverlayHandleColorController(args.InteractiveSigns);
-            var textures = LoadingExtension.Instance.Textures.RoadUI;
+            var textures = TMPELifecycle.Instance.Textures.RoadUI;
 
             //-----------------------
             // For all lanes sorted
@@ -597,7 +598,7 @@
                         signRenderer.DrawSmallTexture(
                             speedlimit: overrideSpeedlimit.DefaultValue,
                             smallSize: size * SMALL_ICON_SCALE * Vector2.one,
-                            textureSource: LoadingExtension.Instance.Textures.SpeedLimits.RoadDefaults);
+                            textureSource: TMPELifecycle.Instance.Textures.SpeedLimits.RoadDefaults);
                     }
                 }
 

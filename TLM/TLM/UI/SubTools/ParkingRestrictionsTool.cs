@@ -13,6 +13,7 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework.Math;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using ColossalFramework.UI;
+    using TrafficManager.Lifecycle;
     using TrafficManager.UI.MainMenu.OSD;
 
     public class ParkingRestrictionsTool
@@ -276,7 +277,7 @@ namespace TrafficManager.UI.SubTools {
                     SIGN_SIZE * TrafficManagerTool.MAX_ZOOM);
             }
 
-            var textures = LoadingExtension.Instance.Textures.RoadUI;
+            var textures = TMPELifecycle.Instance.Textures.RoadUI;
 
             foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {
                 bool allowed = parkingManager.IsParkingAllowed(segmentId, e.Key);

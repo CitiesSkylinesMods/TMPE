@@ -8,6 +8,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI.MainMenu.OSD;
@@ -304,7 +305,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
                 ushort removedNodeId = 0;
                 bool showRemoveButton = false;
-                var textures = LoadingExtension.Instance.Textures.RoadUI;
+                var textures = TMPELifecycle.Instance.Textures.RoadUI;
 
                 foreach (ushort nodeId in currentPriorityNodeIds) {
                     if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {

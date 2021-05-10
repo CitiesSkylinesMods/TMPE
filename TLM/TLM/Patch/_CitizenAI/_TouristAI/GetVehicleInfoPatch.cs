@@ -52,7 +52,7 @@ namespace TrafficManager.Patch._CitizenAI._TouristAI {
                                    || DebugSettings.SourceBuildingId == citizenData.m_sourceBuilding)
                                && (DebugSettings.TargetBuildingId == 0
                                    || DebugSettings.TargetBuildingId == citizenData.m_targetBuilding);
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog && citizenDebug;
 #else
             var logParkingAi = false;
 #endif

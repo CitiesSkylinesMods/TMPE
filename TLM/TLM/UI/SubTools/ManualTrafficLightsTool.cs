@@ -6,6 +6,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.TrafficLight;
+    using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
@@ -97,8 +98,8 @@ namespace TrafficManager.UI.SubTools {
                 // }
                 NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
                 NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-                var tlTextures = LoadingExtension.Instance.Textures.TrafficLight;
-                var roadUiTextures = LoadingExtension.Instance.Textures.RoadUI;
+                var tlTextures = TMPELifecycle.Instance.Textures.TrafficLight;
+                var roadUiTextures = TMPELifecycle.Instance.Textures.RoadUI;
 
                 for (int i = 0; i < 8; ++i) {
                     ushort segmentId = nodesBuffer[SelectedNodeId].GetSegment(i);
@@ -411,7 +412,7 @@ namespace TrafficManager.UI.SubTools {
                 y: screenPos.y - (manualPedestrianHeight / 2) - (9f * zoom),
                 width: manualPedestrianWidth,
                 height: manualPedestrianHeight);
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             GUI.DrawTexture(
                 myRect2,
@@ -499,7 +500,7 @@ namespace TrafficManager.UI.SubTools {
                 y: screenPos.y - (modeHeight / 2) - (6f * zoom),
                 width: modeWidth,
                 height: modeHeight);
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             GUI.DrawTexture(myRectCounter, textures.LightCounter);
 
@@ -544,7 +545,7 @@ namespace TrafficManager.UI.SubTools {
                     y: screenPos.y - (lightHeight / 2),
                     width: lightWidth,
                     height: lightHeight);
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             switch (segmentDict.LightMain) {
                 case RoadBaseAI.TrafficLightState.Green: {
@@ -585,7 +586,7 @@ namespace TrafficManager.UI.SubTools {
                                                         bool hasForwardSegment,
                                                         bool hasRightSegment)
         {
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
             if (hasLeftSegment) {
                 // left arrow light
                 SetAlpha(segmentId, 3);
@@ -702,7 +703,7 @@ namespace TrafficManager.UI.SubTools {
                 y: screenPos.y - (lightHeight / 2),
                 width: lightWidth,
                 height: lightHeight);
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             if (hasForwardSegment && hasLeftSegment) {
                 switch (segmentDict.LightLeft) {
@@ -841,7 +842,7 @@ namespace TrafficManager.UI.SubTools {
                     y: screenPos.y - (lightHeight / 2),
                     width: lightWidth,
                     height: lightHeight);
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             switch (segmentDict.LightLeft) {
                 case RoadBaseAI.TrafficLightState.Green:
@@ -896,7 +897,7 @@ namespace TrafficManager.UI.SubTools {
                     screenPos.y - (lightHeight / 2),
                     lightWidth,
                     lightHeight);
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             switch (segmentDict.LightMain) {
                 case RoadBaseAI.TrafficLightState.Green: {
@@ -942,7 +943,7 @@ namespace TrafficManager.UI.SubTools {
                     y: screenPos.y - (lightHeight / 2),
                     width: lightWidth,
                     height: lightHeight);
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             switch (segmentDict.LightRight) {
                 case RoadBaseAI.TrafficLightState.Green: {

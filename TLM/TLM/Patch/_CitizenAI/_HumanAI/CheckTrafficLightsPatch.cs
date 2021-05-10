@@ -22,8 +22,8 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                                   ushort node,
                                   ushort segment) {
 #if DEBUG
-            bool logTimedLights = DebugSwitch.TimedTrafficLights.Get()
-                                 && DebugSettings.NodeId == node;
+            bool logTimedLights = GlobalConfig.Instance.Debug.TimedTrafficLights
+                                  && DebugSettings.NodeId == node;
 #endif
             NetManager netManager = NetManager.instance;
             uint currentFrameIndex = SimulationManager.instance.m_currentFrameIndex;

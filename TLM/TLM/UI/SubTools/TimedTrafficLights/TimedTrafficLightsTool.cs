@@ -9,6 +9,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.TrafficLight;
+    using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI.MainMenu.OSD;
@@ -1253,7 +1254,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         }
 
         private void DrawStraightLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
@@ -1280,7 +1281,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         }
 
         private void DrawForwardLeftLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
@@ -1307,7 +1308,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         }
 
         private void DrawForwardRightLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
@@ -1334,7 +1335,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         }
 
         private void DrawLeftLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
@@ -1361,7 +1362,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         }
 
         private void DrawRightLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
@@ -1388,7 +1389,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         }
 
         private void DrawMainLightTexture(RoadBaseAI.TrafficLightState state, Rect rect) {
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             switch (state) {
                 case RoadBaseAI.TrafficLightState.Green: {
@@ -1425,7 +1426,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             foreach (ushort nodeId in currentTimedNodeIds) {
                 if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
@@ -1484,8 +1485,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
                 Vector3 diff = nodePos - InGameUtil.Instance.CachedCameraTransform.position;
                 float zoom = 1.0f / diff.magnitude * 100f * U.UIScaler.GetScale();
-                var roadUiTextures = LoadingExtension.Instance.Textures.RoadUI;
-                var tlTextures = LoadingExtension.Instance.Textures.TrafficLight;
+                var roadUiTextures = TMPELifecycle.Instance.Textures.RoadUI;
+                var tlTextures = TMPELifecycle.Instance.Textures.TrafficLight;
                 ref NetNode node = ref nodeId.ToNode();
 
                 for (int i = 0; i < 8; ++i) {

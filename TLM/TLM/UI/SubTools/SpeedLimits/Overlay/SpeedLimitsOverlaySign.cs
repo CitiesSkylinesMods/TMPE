@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Lifecycle;
     using TrafficManager.UI.Textures;
     using UnityEngine;
 
@@ -43,7 +44,7 @@
         /// <param name="speedlimit">Show this speed.</param>
         public void DrawLargeTexture(SpeedValue? speedlimit,
                                      IDictionary<int, Texture2D> textureSource) {
-            SpeedLimitTextures textures = LoadingExtension.Instance.Textures.SpeedLimits;
+            SpeedLimitTextures textures = TMPELifecycle.Instance.Textures.SpeedLimits;
             Texture2D tex = speedlimit.HasValue
                                 ? textures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
                                 : textureSource[0];
@@ -70,7 +71,7 @@
                 width: smallSize.x,
                 height: smallSize.y);
 
-            SpeedLimitTextures textures = LoadingExtension.Instance.Textures.SpeedLimits;
+            SpeedLimitTextures textures = TMPELifecycle.Instance.Textures.SpeedLimits;
             Texture2D tex = speedlimit.HasValue
                                 ? textures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
                                 : textureSource[0];

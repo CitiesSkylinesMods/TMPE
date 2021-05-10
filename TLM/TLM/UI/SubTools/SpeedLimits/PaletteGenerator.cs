@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Lifecycle;
     using TrafficManager.State;
     using TrafficManager.UI.Textures;
 
@@ -14,7 +15,7 @@
         /// </returns>
         public static List<SetSpeedLimitAction> AllSpeedLimits(SpeedUnit unit) {
             var result = new List<SetSpeedLimitAction>();
-            SpeedLimitTextures textures = LoadingExtension.Instance.Textures.SpeedLimits;
+            SpeedLimitTextures textures = TMPELifecycle.Instance.Textures.SpeedLimits;
 
             switch (unit) {
                 case SpeedUnit.Kmph:

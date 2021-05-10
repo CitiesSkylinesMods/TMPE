@@ -18,14 +18,15 @@ namespace TrafficManager.Lifecycle {
     using UnityEngine.SceneManagement;
     using UnityEngine;
     using JetBrains.Annotations;
+    using TrafficManager.UI.Textures;
 
     /// <summary>
     /// Do not use Singleton<TMPELifecycle>.instance to prevent memory leak.
     /// Instead use the TMPELifecycle.Instance property.
     /// </summary>
     public class TMPELifecycle : MonoBehaviour {
+        /// <summary> returns instance of TMPELifecycle if it exists. null otherwise.</summary>
         public static TMPELifecycle Instance {
-            /// <summary> returns instance of TMPELifecycle if it exists. returns null otherwise. </summary>
             get;
             private set;
         }
@@ -105,6 +106,8 @@ namespace TrafficManager.Lifecycle {
             RegisteredManagers.Add(JunctionRestrictionsManager.Instance);
         }
 
+        public AllTextures Textures;
+
         [UsedImplicitly]
         void Awake() {
             try {
@@ -164,6 +167,9 @@ namespace TrafficManager.Lifecycle {
                 if (installHarmonyASAP)
                     HarmonyHelper.DoOnHarmonyReady(Patcher.Install);
 #endif
+                Textures = new();
+                Textures.Load();
+
             } catch (Exception ex) {
                 ex.LogException(true);
             }

@@ -4,6 +4,7 @@ namespace TrafficManager.UI.SubTools {
     using static Util.SegmentLaneTraverser;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
@@ -508,7 +509,7 @@ namespace TrafficManager.UI.SubTools {
             bool hovered = false;
             HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
             int sortedLaneIndex = -1;
-            var textures = LoadingExtension.Instance.Textures.RoadUI;
+            var textures = TMPELifecycle.Instance.Textures.RoadUI;
 
             foreach (LanePos laneData in sortedLanes) {
                 ++sortedLaneIndex;

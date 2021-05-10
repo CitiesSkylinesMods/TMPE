@@ -9,6 +9,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI{
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using ColossalFramework;
+    using TrafficManager.State;
 
     [HarmonyPatch]
     public class StartPathFindPatch {
@@ -21,7 +22,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI{
             // TODO [issue #951]: why this message is not printed for all overrides of CarAI?
             bool vehDebug = DebugSettings.VehicleId == 0
                            || DebugSettings.VehicleId == vehicleID;
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog && vehDebug;
             Log._DebugOnlyWarningIf(
                 logParkingAi,
                 () => $"_CarAI.StartPathFindPatch.Prefix({vehicleID}): called for vehicle " +

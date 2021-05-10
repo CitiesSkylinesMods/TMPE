@@ -2,6 +2,7 @@ namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
     using ColossalFramework;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI.MainMenu.OSD;
@@ -90,7 +91,7 @@ namespace TrafficManager.UI.SubTools {
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
             NetManager netManager = Singleton<NetManager>.instance;
             NetNode[] nodesBuffer = netManager.m_nodes.m_buffer;
-            var textures = LoadingExtension.Instance.Textures.TrafficLight;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             //--------------------------------
             // Render all visible node states

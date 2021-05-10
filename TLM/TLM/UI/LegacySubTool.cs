@@ -2,6 +2,7 @@ namespace TrafficManager.UI {
     using System;
     using ColossalFramework.UI;
     using JetBrains.Annotations;
+    using TrafficManager.Lifecycle;
     using TrafficManager.U;
     using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace TrafficManager.UI {
             get {
                 if (windowTexture_ == null) {
                     windowTexture_ = TextureUtil.AdjustAlpha(
-                        LoadingExtension.Instance.Textures.MainMenu.WindowBackground,
+                        TMPELifecycle.Instance.Textures.MainMenu.WindowBackground,
                         TrafficManagerTool.GetWindowAlpha());
                 }
 
