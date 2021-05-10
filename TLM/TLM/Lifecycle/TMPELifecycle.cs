@@ -232,7 +232,14 @@ namespace TrafficManager.Lifecycle {
                         ex.LogException(true);
                     }
                 }
-                Flags.OnLevelUnloading();
+
+                try {
+                    Flags.OnLevelUnloading();
+                }
+                catch (Exception ex) {
+                    ex.LogException(true);
+                }
+                
                 GlobalConfig.OnLevelUnloading();
 
                 // destroy immidately to prevent duplicates after hot-reload.
