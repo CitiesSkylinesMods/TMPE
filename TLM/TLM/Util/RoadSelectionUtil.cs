@@ -27,14 +27,13 @@ namespace TrafficManager.Util {
         /// This will join target segment to the same road as source segment.
         /// </summary>
         public static void CopySegmentName(ushort sourceSegmentID, ushort targetSegmentID) {
-            SimulationManager.instance.AddAction(
-                delegate() {
-                    string sourceName = NetManager.instance.GetSegmentName(sourceSegmentID);
-                    string targetName = NetManager.instance.GetSegmentName(targetSegmentID);
-                    if (sourceName != targetName) {
-                        NetManager.instance.SetSegmentName(targetSegmentID, sourceName);
-                    }
-                });
+            SimulationManager.instance.AddAction(() => {
+                string sourceName = NetManager.instance.GetSegmentName(sourceSegmentID);
+                string targetName = NetManager.instance.GetSegmentName(targetSegmentID);
+                if (sourceName != targetName) {
+                    NetManager.instance.SetSegmentName(targetSegmentID, sourceName);
+                }
+            });
         }
 
         /// <summary>

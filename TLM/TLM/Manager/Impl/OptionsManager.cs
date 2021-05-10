@@ -5,6 +5,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State;
     using TrafficManager.UI.Helpers;
+    using TrafficManager.Lifecycle;
 
     public class OptionsManager
         : AbstractCustomManager,
@@ -36,7 +37,8 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool MayPublishSegmentChanges() {
-            return Options.instantEffects && !SerializableDataExtension.StateLoading;
+            return Options.instantEffects && TMPELifecycle.InGameOrEditor() &&
+                !TMPELifecycle.Instance.Deserializing;
         }
 
         public bool LoadData(byte[] data) {

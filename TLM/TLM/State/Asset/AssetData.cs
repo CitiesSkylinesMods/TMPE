@@ -5,6 +5,7 @@ namespace TrafficManager.State.Asset {
     using System.Collections.Generic;
     using TrafficManager.Util.Record;
     using static Util.Shortcuts;
+    using TrafficManager.Lifecycle;
 
     [Serializable]
     public class AssetData {

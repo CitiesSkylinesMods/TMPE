@@ -1108,11 +1108,11 @@ namespace TrafficManager.Manager.Impl {
                     wouldCollide = true;
                 } else {
                     // both are going to a different lane: check lane order
-                        Log._DebugIf(
-                            logPriority,
-                            () => $"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): " +
-                            "Target and incoming are going to the same segment BUT NOT to the same lane. " +
-                            "Determining if lane order is correct.");
+                    Log._DebugIf(
+                        logPriority,
+                        () => $"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): " +
+                        "Target and incoming are going to the same segment BUT NOT to the same lane. " +
+                        "Determining if lane order is correct.");
 
                     switch (targetToDir) {
                         case ArrowDirection.Left:

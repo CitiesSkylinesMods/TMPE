@@ -5,10 +5,10 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System;
+    using Patch._VehicleAI._PassengerCarAI.Connection;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.Custom.AI;
     using TrafficManager.Custom.PathFinding;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
@@ -25,8 +25,16 @@ namespace TrafficManager.Manager.Impl {
         public static readonly AdvancedParkingManager Instance
             = new(SingletonLite<Spiral>.instance);
 
+        private FindParkingSpaceDelegate _findParkingSpaceDelegate;
+        private FindParkingSpacePropDelegate _findParkingSpacePropDelegate;
+        private FindParkingSpaceRoadSideDelegate _findParkingSpaceRoadSideDelegate;
+
         public AdvancedParkingManager(Spiral spiral) {
             _spiral = spiral ?? throw new ArgumentNullException(nameof(spiral));
+
+            _findParkingSpaceDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpace;
+            _findParkingSpacePropDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpaceProp;
+            _findParkingSpaceRoadSideDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpaceRoadSide;
         }
 
         protected override void OnDisableFeatureInternal() {
@@ -1319,11 +1327,11 @@ namespace TrafficManager.Manager.Impl {
                 default: {
                     // ... and a path to a parking spot was calculated: dismiss path and
                     // restart path-finding for walking
-                Log._DebugIf(
-                    logParkingAi,
-                    () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                    "A parking space car path was queried but it turned out that no car is " +
-                    "needed. Retrying path-finding for walking.");
+                    Log._DebugIf(
+                        logParkingAi,
+                        () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                        "A parking space car path was queried but it turned out that no car is " +
+                        "needed. Retrying path-finding for walking.");
 
                     extCitInstMan.Reset(ref extInstance);
                     extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
@@ -2441,15 +2449,15 @@ namespace TrafficManager.Manager.Impl {
                                      VehicleRestrictionsMode.Configured)
                                  & ExtVehicleType.PassengerCar) != ExtVehicleType.None)
                             {
-                                if (CustomPassengerCarAI.FindParkingSpaceRoadSide(
-                                    ignoreParked,
-                                    segmentId,
-                                    innerParkPos,
-                                    width,
-                                    length,
-                                    out innerParkPos,
-                                    out Quaternion innerParkRot,
-                                    out float innerParkOffset))
+                                if (_findParkingSpaceRoadSideDelegate(
+                                    ignoreParked: ignoreParked,
+                                    requireSegment: segmentId,
+                                    refPos: innerParkPos,
+                                    width: width,
+                                    length: length,
+                                    parkPos: out innerParkPos,
+                                    parkRot: out Quaternion innerParkRot,
+                                    parkOffset: out float innerParkOffset))
                                 {
                                     Log._DebugIf(
                                         logParkingAi,
@@ -2710,19 +2718,19 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     Vector3 position = transformMatrix.MultiplyPoint(prop.m_position);
-                    if (CustomPassengerCarAI.FindParkingSpaceProp(
-                        isElectric,
-                        ignoreParked,
-                        propInfo,
-                        position,
-                        building.m_angle + prop.m_radAngle,
-                        prop.m_fixedHeight,
-                        refPos,
-                        vehicleInfo.m_generatedInfo.m_size.x,
-                        vehicleInfo.m_generatedInfo.m_size.z,
-                        ref propMinDistance,
-                        ref parkPos,
-                        ref parkRot))
+                    if (_findParkingSpacePropDelegate(
+                            isElectric: isElectric,
+                            ignoreParked: ignoreParked,
+                            info: propInfo,
+                            position: position,
+                            angle: building.m_angle + prop.m_radAngle,
+                            fixedHeight: prop.m_fixedHeight,
+                            refPos: refPos,
+                            width: vehicleInfo.m_generatedInfo.m_size.x,
+                            length: vehicleInfo.m_generatedInfo.m_size.z,
+                            maxDistance: ref propMinDistance,
+                            parkPos: ref parkPos,
+                            parkRot: ref parkRot))
                     {
                         // NON-STOCK CODE
                         result = true;
@@ -2841,15 +2849,16 @@ namespace TrafficManager.Manager.Impl {
                             netManager.m_segments.m_buffer[segmentId].Info
                                       .m_lanes[laneIndex].m_finalDirection))
                     {
-                        if (CustomPassengerCarAI.FindParkingSpaceRoadSide(
-                            ignoreParked,
-                            segmentId,
-                            parkPos,
-                            width,
-                            length,
-                            out parkPos,
-                            out parkRot,
-                            out parkOffset)) {
+                        if (_findParkingSpaceRoadSideDelegate(
+                            ignoreParked: ignoreParked,
+                            requireSegment: segmentId,
+                            refPos: parkPos,
+                            width: width,
+                            length: length,
+                            parkPos: out parkPos,
+                            parkRot: out parkRot,
+                            parkOffset: out parkOffset))
+                        {
                             if (logParkingAi) {
                                 Log._Debug(
                                     "FindParkingSpaceRoadSideForVehiclePos: Found a parking space " +
@@ -2925,16 +2934,16 @@ namespace TrafficManager.Manager.Impl {
                                                                 out Vector3 parkPos,
                                                                 out Quaternion parkRot,
                                                                 out float parkOffset) {
-            if (!CustomPassengerCarAI.FindParkingSpace(isElectric,
-                                                       homeId,
-                                                       refPos,
-                                                       searchDir,
-                                                       segment,
-                                                       width,
-                                                       length,
-                                                       out parkPos,
-                                                       out parkRot,
-                                                       out parkOffset)) {
+            if (!_findParkingSpaceDelegate(isElectric: isElectric,
+                                           homeId: homeId,
+                                           refPos: refPos,
+                                           searchDir: searchDir,
+                                           segment: segment,
+                                           width: width,
+                                           length: length,
+                                           parkPos: out parkPos,
+                                           parkRot: out parkRot,
+                                           parkOffset: out parkOffset)) {
                 return false;
             }
 

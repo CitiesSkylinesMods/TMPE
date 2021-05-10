@@ -767,11 +767,11 @@ namespace TrafficManager.TrafficLight.Impl {
                     VehicleTypeByLaneIndex[laneIndex] = ExtVehicleType.None;
                 }
 
-                    Log._DebugIf(
-                        logHouseKeeping,
-                        () => $"CustomSegmentLights.Housekeeping({mayDelete}, {calculateAutoPedLight}): " +
-                        $"housekeeping @ seg. {SegmentId}, node {nodeId}: Added default main vehicle " +
-                        $"light: {defaultSegmentLight}");
+                Log._DebugIf(
+                    logHouseKeeping,
+                    () => $"CustomSegmentLights.Housekeeping({mayDelete}, {calculateAutoPedLight}): " +
+                    $"housekeeping @ seg. {SegmentId}, node {nodeId}: Added default main vehicle " +
+                    $"light: {defaultSegmentLight}");
 
                     // addPedestrianLight = true;
             } else {

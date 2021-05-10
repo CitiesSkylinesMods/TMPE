@@ -34,6 +34,8 @@ namespace TrafficManager.UI.SubTools {
 
         private readonly float vehicleRestrictionsSignSize = 80f;
 
+        private readonly GUI.WindowFunction _guiVehicleRestrictionsWindowDelegate;
+
         private bool cursorInSecondaryPanel;
 
         private bool overlayHandleHovered;
@@ -59,6 +61,8 @@ namespace TrafficManager.UI.SubTools {
 
         public VehicleRestrictionsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
+            _guiVehicleRestrictionsWindowDelegate = GuiVehicleRestrictionsWindow;
+
             currentRestrictedSegmentIds = new HashSet<ushort>();
         }
 
@@ -145,8 +149,8 @@ namespace TrafficManager.UI.SubTools {
                 windowRect = GUILayout.Window(
                     255,
                     windowRect,
-                    GuiVehicleRestrictionsWindow,
-                   T("Dialog.Title:Vehicle restrictions"),
+                    _guiVehicleRestrictionsWindowDelegate,
+                    T("Dialog.Title:Vehicle restrictions"),
                     WindowStyle,
                     EmptyOptionsArray);
                 cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);

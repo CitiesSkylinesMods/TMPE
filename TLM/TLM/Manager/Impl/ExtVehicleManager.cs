@@ -203,6 +203,9 @@ namespace TrafficManager.Manager.Impl {
                     vehicleType);
             }
 
+            if (vehicleType == ExtVehicleType.None)
+                Log._DebugOnlyWarning($"Vehicle {vehicleId} does not have a valid vehicle type!");
+
             return ret;
         }
 

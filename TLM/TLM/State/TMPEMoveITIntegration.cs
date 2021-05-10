@@ -4,9 +4,8 @@ namespace TrafficManager.State {
     using System.Collections.Generic;
     using TrafficManager.Util.Record;
     using CSUtil.Commons;
-    using JetBrains.Annotations;
+    using TrafficManager.Lifecycle;
 
-    [UsedImplicitly]
     public class TMPEMoveItIntegrationFactory : IMoveItIntegrationFactory {
         public MoveItIntegrationBase GetInstance() => new TMPEMoveItIntegration();
     }

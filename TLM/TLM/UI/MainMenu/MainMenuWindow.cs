@@ -13,6 +13,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.U.Autosize;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Lifecycle;
 
     public partial class MainMenuWindow
         : U.Panel.BaseUWindowPanel,
@@ -340,8 +341,7 @@ namespace TrafficManager.UI.MainMenu {
                 stackUnder = this.StatsLabel = statsLabel;
             }
 
-            // Hot Reload version label (debug only)
-            if (TrafficManagerMod.Instance.InGameHotReload) {
+            if (TMPELifecycle.Instance.InGameHotReload) {
                 // Hot Reload version label (debug only)
                 var text = $"HOT RELOAD {Assembly.GetExecutingAssembly().GetName().Version}";
                 ULabel hotReloadLabel = builder.Label<U.ULabel, UIComponent>(parent: this, t: text);

@@ -1289,7 +1289,7 @@ namespace TrafficManager.Manager.Impl {
             ReleaseReturnPath(ref extInstance);
 
             PathUnit.Position targetPathPos = default;
-            bool foundParkPathPos = CustomPathManager.FindCitizenPathPosition(
+            bool foundParkPathPos = ExtPathManager.Instance.FindCitizenPathPosition(
                 parkPos,
                 NetInfo.LaneType.Pedestrian,
                 VehicleInfo.VehicleType.None,
@@ -1300,7 +1300,7 @@ namespace TrafficManager.Manager.Impl {
                 out PathUnit.Position parkPathPos);
 
             bool foundTargetPathPos = foundParkPathPos
-                                      && CustomPathManager.FindCitizenPathPosition(
+                                      && ExtPathManager.Instance.FindCitizenPathPosition(
                                           targetPos,
                                           NetInfo.LaneType.Pedestrian,
                                           VehicleInfo.VehicleType.None,
@@ -1553,7 +1553,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="citizen">The citizen to inspect.</param>
         ///
         /// <returns>Returns <c>true</c> if having a bad day, otherwise <c>false</c>.</returns>
-        internal bool IsSweaptAway(ref CitizenInstance citizen) =>
+        internal static bool IsSweaptAway(ref CitizenInstance citizen) =>
             (citizen.m_flags & (CitizenInstance.Flags.Blown | CitizenInstance.Flags.Floating)) != 0;
 
         /// <summary>
@@ -1563,7 +1563,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="citizen">The citizen to inspect.</param>
         ///
         /// <returns>Returns <c>true</c> if hanging around, otherwise <c>false</c>.</returns>
-        internal bool IsHangingAround(ref CitizenInstance citizen) =>
+        internal static bool IsHangingAround(ref CitizenInstance citizen) =>
             citizen.m_path == 0u && (citizen.m_flags & CitizenInstance.Flags.HangAround) != 0;
     }
 }

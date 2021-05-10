@@ -4,7 +4,6 @@ namespace TrafficManager.UI {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using TrafficManager.RedirectionFramework;
     using TrafficManager.U;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util;
@@ -188,7 +187,7 @@ namespace TrafficManager.UI {
         }
 
         private void RefreshOnEvent() =>
-            EnqueueAction(delegate() { Root?.Refresh(reset: true); });
+            EnqueueAction(() => { Root?.Refresh(reset: true); });
 
         internal void RenderOverlay() {
             //Log._Debug("Render over lay called st:\n" + Environment.StackTrace);
@@ -276,7 +275,9 @@ namespace TrafficManager.UI {
 
         private void ShowAdvisorOnEvent(UIComponent component, bool value) {
             if (value) {
-                EnqueueAction(delegate() { TrafficManagerTool.ShowAdvisor("RoadSelection"); });
+                EnqueueAction(() => {
+                    TrafficManagerTool.ShowAdvisor("RoadSelection");
+                });
             }
         }
 

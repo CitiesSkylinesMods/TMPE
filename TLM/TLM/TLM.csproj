@@ -19,53 +19,48 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>TRACE;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FullDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;PF_DIJKSTRA;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGHK;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGHK;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'PF2_Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\PF2_Debug\</OutputPath>
-    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;PF_DIJKSTRA;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
+    <DefineConstants>DEBUG;QUEUEDSTATS;DEBUGVSTATE;DEBUGNEWPF;DEBUGCOSTS;DEBUGCONN2;DEBUGHWJUNCTIONROUTING;DEBUGROUTING;DEBUGHK;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release LABS|AnyCPU'">
     <OutputPath>bin\Release LABS\</OutputPath>
-    <DefineConstants>PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;LABS</DefineConstants>
+    <DefineConstants>QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;LABS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <SteamPath>~/Library/Application Support/Steam/</SteamPath>
@@ -79,14 +74,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Benchmark|AnyCPU'">
     <OutputPath>bin\Benchmark\</OutputPath>
-    <DefineConstants>PF_DIJKSTRA;QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;BENCHMARK</DefineConstants>
+    <DefineConstants>QUEUEDSTATS;SPEEDLIMITS;ROUTING;JUNCTIONRESTRICTIONS;VEHICLERESTRICTIONS;ADVANCEDAI;CUSTOMTRAFFICLIGHTS;BENCHMARK</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>latest</LangVersion>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
@@ -135,38 +129,85 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Benchmark\BenchmarkManager.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Custom\AI\CustomBuildingAI.cs" />
-    <Compile Include="Custom\AI\CustomBusAI.cs" />
-    <Compile Include="Custom\AI\CustomAmbulanceAI.cs" />
-    <Compile Include="Custom\AI\CustomCitizenAI.cs" />
-    <Compile Include="Custom\AI\CustomFireTruckAI.cs" />
-    <Compile Include="Custom\AI\CustomPoliceCarAI.cs" />
-    <Compile Include="Custom\AI\CustomPostVanAI.cs" />
-    <Compile Include="Custom\AI\CustomResidentAI.cs" />
-    <Compile Include="Custom\AI\CustomShipAI.cs" />
-    <Compile Include="Custom\AI\CustomTaxiAI.cs" />
-    <Compile Include="Custom\AI\CustomTouristAI.cs" />
-    <Compile Include="Custom\AI\CustomTransportLineAI.cs" />
-    <Compile Include="Custom\AI\CustomTramBaseAI.cs" />
-    <Compile Include="Custom\AI\CustomTrolleybusAI.cs" />
-    <Compile Include="Custom\AI\CustomVehicleAI.cs" />
-    <Compile Include="Custom\Data\CustomVehicle.cs" />
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
-    <Compile Include="Patcher.cs" />
+    <Compile Include="Lifecycle\Patcher.cs" />
+    <Compile Include="Lifecycle\TMPELifecycle.cs" />
+    <Compile Include="Manager\Impl\GameConnectionManager.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
     <Compile Include="Manager\AbstractGeometryObservingManager.cs" />
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="Patch\PatchCommons.cs" />
+    <Compile Include="Patch\_BuildingAI\GetColorPatch.cs" />
     <Compile Include="Patch\_BuildingDecoration\LoadPathsPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_HumanAI\ArriveAtDestinationPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_ResidentAI\Connection\ResidentAIConnection.cs" />
+    <Compile Include="Patch\_CitizenAI\_ResidentAI\Connection\ResidentAIHook.cs" />
+    <Compile Include="Patch\_CitizenAI\_ResidentAI\GetLocalizedStatusPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_ResidentAI\GetVehicleInfoPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_HumanAI\CheckTrafficLightsPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_HumanAI\Connection\HumanAIConnection.cs" />
+    <Compile Include="Patch\_CitizenAI\_HumanAI\Connection\HumanAIHook.cs" />
+    <Compile Include="Patch\_CitizenAI\_HumanAI\SimulationStepPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_TouristAI\Connection\TouristAIHook.cs" />
+    <Compile Include="Patch\_CitizenAI\_TouristAI\Connection\TouristAIConnection.cs" />
+    <Compile Include="Patch\_CitizenAI\_TouristAI\GetLocalizedStatusPatch.cs" />
+    <Compile Include="Patch\_CitizenAI\_TouristAI\GetVehicleInfoPatch.cs" />
+    <Compile Include="Patch\_PathFind\CalculatePathPatch.cs" />
+    <Compile Include="Patch\_PathManager\ReleasePathPatch.cs" />
+    <Compile Include="Patch\_RoadBaseAI\ClickNodeButtonPatch.cs" />
+    <Compile Include="Patch\_TransportLineAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\CalculateSegmentPositionPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\CalculateSegmentPositionPatch2.cs" />
+    <Compile Include="Patch\_VehicleAI\Connection\VehicleAIConnection.cs" />
+    <Compile Include="Patch\_VehicleAI\Connection\VehicleAIHook.cs" />
+    <Compile Include="Patch\_VehicleAI\StartPathFindCommons.cs" />
+    <Compile Include="Patch\_VehicleAI\UpdatePathTargetPositionsPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\VehicleAICommons.cs" />
+    <Compile Include="Patch\_VehicleAI\_CarAI\CalculateSegmentPositionPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_CarAI\CalculateSegmentPositionPatch2.cs" />
+    <Compile Include="Patch\_VehicleAI\_CarAI\SimulationStepPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_CargoTruckAI\SimulationStepPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\Connection\PassengerCarAIConnection.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\Connection\PassengerCarAIHook.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\GetLocalizedStatusPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\ParkVehiclePatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\SimulationStepPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PassengerCarAI\UpdateParkedVehiclePatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrainAI\CalculateSegmentPositionPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrainAI\CheckNextLanePatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrainAI\Connection\TrainAIConnection.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrainAI\Connection\TrainAIHook.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrainAI\ForceTrafficLightsPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrainAI\SimulationStep2Patch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrainAI\SimulationStepPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TramBaseAI\CalculateSegmentPositionPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TramBaseAI\CalculateSegmentPositionPatch2.cs" />
+    <Compile Include="Patch\_VehicleAI\_TramBaseAI\SimulationStepPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrolleybusAI\CalculateSegmentPositionPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrolleybusAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TramBaseAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TrainAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_TaxiAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_ShipAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PostVanAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_PoliceCarAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_FireTruckAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_AmbulanceAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_CargoTruckAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_CarAI\StartPathFindPatch.cs" />
+    <Compile Include="Patch\_VehicleAI\_BusAI\StartPathFindPatch.cs" />
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
     <Compile Include="Patch\_DefaultTool\OnToolGUIPatch.cs" />
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
     <Compile Include="Patch\_LoadAssetPanel\OnLoadPatch.cs" />
     <Compile Include="Patch\_NetSegment\CalculateSegmentPatch.cs" />
+    <Compile Include="Patch\_PathManager\CreatePathPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
     <Compile Include="State\Asset\AssetData.cs" />
     <Compile Include="State\Asset\AssetDataExtension.cs" />
@@ -186,7 +227,6 @@
     <Compile Include="UI\Helpers\ExtUITabStrip.cs" />
     <Compile Include="Manager\Impl\SegmentEndManager.cs" />
     <Compile Include="Patch\_CommonBuildingAI\SimulationStepPatch.cs" />
-    <Compile Include="Patch\_HumanAI\ArriveAtDestinationPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\GetTrafficLightNodeStatePatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\UpdateNodePatch.cs" />
     <Compile Include="Patch\_TrainTrackBaseAI\LevelCrossingSimulationStepPatch.cs" />
@@ -194,18 +234,6 @@
     <Compile Include="Patch\_RoadBaseAI\SetTrafficLightStatePatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\SegmentSimulationStepPatch.cs" />
     <Compile Include="Patch\_RoadBaseAI\TrafficLightSimulationStepPatch.cs" />
-    <Compile Include="RedirectionFramework\AssemblyRedirector.cs" />
-    <Compile Include="RedirectionFramework\Attributes\IgnoreConditionAttribute.cs" />
-    <Compile Include="RedirectionFramework\Attributes\IgnoreConditions\DisableAttribute.cs" />
-    <Compile Include="RedirectionFramework\Attributes\RedirectAttribute.cs" />
-    <Compile Include="RedirectionFramework\Attributes\RedirectMethodAttribute.cs" />
-    <Compile Include="RedirectionFramework\Attributes\RedirectReverseAttribute.cs" />
-    <Compile Include="RedirectionFramework\Attributes\TargetTypeAttribute.cs" />
-    <Compile Include="RedirectionFramework\Extensions\TypeExtension.cs" />
-    <Compile Include="RedirectionFramework\RedirectionHelper.cs" />
-    <Compile Include="RedirectionFramework\RedirectionUtil.cs" />
-    <Compile Include="RedirectionFramework\Redirector.cs" />
-    <Compile Include="RedirectionFramework\Tuple.cs" />
     <Compile Include="Custom\PathFinding\CustomPathFind.cs" />
     <AdditionalFiles Include="Custom\PathFinding\StockPathFind.cs" />
     <Compile Include="Manager\Impl\ExtCitizenManager.cs" />
@@ -260,14 +288,8 @@
     <Compile Include="Manager\Impl\LaneConnectionManager.cs" />
     <Compile Include="Manager\Impl\ExtVehicleManager.cs" />
     <Compile Include="Manager\Impl\VehicleRestrictionsManager.cs" />
-    <Compile Include="Custom\AI\CustomCarAI.cs" />
-    <Compile Include="Custom\AI\CustomCargoTruckAI.cs" />
-    <Compile Include="Custom\AI\CustomHumanAI.cs" />
-    <Compile Include="Custom\AI\CustomPassengerCarAI.cs" />
-    <Compile Include="Custom\AI\CustomRoadBaseAI.cs" />
-    <Compile Include="Custom\AI\CustomTrainAI.cs" />
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
-    <Compile Include="LoadingExtension.cs" />
+    <Compile Include="Lifecycle\LoadingExtension.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
     <Compile Include="UI\MainMenu\MainMenuWindow.MainMenuLayout.cs">
@@ -429,8 +451,8 @@
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\TinyDictionary.cs" />
-    <Compile Include="State\SerializableDataExtension.cs" />
-    <Compile Include="ThreadingExtension.cs" />
+    <Compile Include="Lifecycle\SerializableDataExtension.cs" />
+    <Compile Include="Lifecycle\ThreadingExtension.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegment.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegmentLight.cs" />
     <Compile Include="UI\ToolMode.cs" />
@@ -439,7 +461,7 @@
     <Compile Include="TrafficLight\Impl\TimedTrafficLights.cs" />
     <Compile Include="UI\TrafficManagerTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrafficManagerMod.cs" />
+    <Compile Include="Lifecycle\TrafficManagerMod.cs" />
     <Compile Include="TrafficLight\Impl\TimedTrafficLightsStep.cs" />
     <Compile Include="Manager\Impl\TrafficPriorityManager.cs" />
     <Compile Include="UI\ModUI.cs" />
@@ -511,7 +533,9 @@
     <EmbeddedResource Include="Resources\RoadUI\sign_none.png" />
     <EmbeddedResource Include="Resources\RoadUI\sign_priority.png" />
     <EmbeddedResource Include="Resources\RoadUI\sign_stop.png" />
+    <EmbeddedResource Include="Resources\RoadUI\sign_stop_zh.png" />
     <EmbeddedResource Include="Resources\RoadUI\sign_yield.png" />
+    <EmbeddedResource Include="Resources\RoadUI\sign_yield_zh.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\RoadUI\taxi_infosign.png" />
@@ -540,9 +564,11 @@
     <EmbeddedResource Include="Resources\TrafficLights\light_counter.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_counter_ja.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_counter_pl.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_counter_zh.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_mode.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_mode_ja.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_mode_pl.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\light_mode_zh.png" />
     <EmbeddedResource Include="Resources\TrafficLights\light_yellow.png" />
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_light_1.png" />
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_light_2.png" />
@@ -642,8 +668,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_1.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_1_zh.png" />
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_2.png" />
     <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_2_pl.png" />
+    <EmbeddedResource Include="Resources\TrafficLights\pedestrian_mode_2_zh.png" />
     <EmbeddedResource Include="Resources\Translations\JunctionRestrictions.csv" />
     <EmbeddedResource Include="Resources\Translations\ParkingRestrictions.csv" />
     <EmbeddedResource Include="Resources\Translations\PrioritySigns.csv" />
@@ -823,7 +851,6 @@ xcopy /y "$(TargetDir)TMPE.CitiesGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.GenericGameBridge.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)TMPE.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.CameraControl.dll" "%25DEPLOYDIR%25"
-xcopy /y "$(TargetDir)TMPE.RedirectionFramework.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CSUtil.Commons.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25"
 xcopy /y "$(TargetDir)MoveItIntegration.dll" "%25DEPLOYDIR%25"

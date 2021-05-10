@@ -7,14 +7,17 @@ namespace TrafficManager.API.Traffic.Enums {
         /// Citizen is not approaching their parked car
         /// </summary>
         None,
+
         /// <summary>
         /// Citizen is currently approaching their parked car
         /// </summary>
         Approaching,
+
         /// <summary>
         /// Citizen has approaching their parked car
         /// </summary>
         Approached,
+
         /// <summary>
         /// Citizen failed to approach their parked car
         /// </summary>

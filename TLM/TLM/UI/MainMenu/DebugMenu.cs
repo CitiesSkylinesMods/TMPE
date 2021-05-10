@@ -11,7 +11,8 @@ namespace TrafficManager.UI.MainMenu {
     using global::TrafficManager.State;
     using JetBrains.Annotations;
     using UnityEngine;
-    using Util;
+    using TrafficManager.Util;
+    using TrafficManager.Lifecycle;
 
 #if DEBUG // whole class coverage
     public class DebugMenuPanel : UIPanel
@@ -198,7 +199,7 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
             Constants.ServiceFactory.SimulationService.AddAction(
                 () => {
-                    foreach (ICustomManager customManager in LoadingExtension
+                    foreach (ICustomManager customManager in TMPELifecycle.Instance
                         .RegisteredManagers) {
                         customManager.PrintDebugInfo();
                     }
@@ -344,7 +345,6 @@ namespace TrafficManager.UI.MainMenu {
 #if QUEUEDSTATS
         private void ClickTogglePathFindStats(UIComponent component,
                                               UIMouseEventParameter eventParam) {
-            Update();
             showPathFindStats = !showPathFindStats;
         }
 #endif
