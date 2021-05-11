@@ -99,8 +99,8 @@ namespace TrafficManager.Custom.AI {
                 out _)) {
                 if (!startPosFound
                     || (startAltDistSqrA < startDistSqrA
-                        && (Mathf.Abs(endPos.x) > 8000f
-                            || Mathf.Abs(endPos.z) > 8000f)))
+                        && (Mathf.Abs(startPos.x) > 8000f
+                            || Mathf.Abs(startPos.z) > 8000f)))
                 {
                     startPosA = startAltPosA;
                     startPosB = startAltPosB;
