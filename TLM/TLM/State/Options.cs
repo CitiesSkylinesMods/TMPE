@@ -75,6 +75,7 @@ namespace TrafficManager.State {
         public static bool highwayRules;
         public static bool automaticallyAddTrafficLightsIfApplicable = true;
         public static bool NoDoubleCrossings = false;
+        public static bool DedicatedTurningLanes = false;
 #if DEBUG
         public static bool showLanes = true;
 #else
