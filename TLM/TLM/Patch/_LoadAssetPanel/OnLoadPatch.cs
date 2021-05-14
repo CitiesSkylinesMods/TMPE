@@ -1,7 +1,7 @@
 namespace TrafficManager.Patch._LoadAssetPanel {
     using ColossalFramework.UI;
     using HarmonyLib;
-    using TrafficManager.State.Asset;
+    using TrafficManager.Lifecycle;
 
     [HarmonyPatch(typeof(LoadAssetPanel), "OnLoad")]
     public static class OnLoadPatch {
@@ -22,7 +22,7 @@ namespace TrafficManager.Patch._LoadAssetPanel {
                 if (userAssetData == null) {
                     userAssetData = new AssetDataWrapper.UserAssetData();
                 }
-                AssetDataExtension.Instance.OnAssetLoaded(listingMetaData.name, ToolsModifierControl.toolController.m_editPrefabInfo, userAssetData.Data);
+                AssetDataExtension.OnAssetLoadedImpl(listingMetaData.name, ToolsModifierControl.toolController.m_editPrefabInfo, userAssetData.Data);
             }
         }
     }

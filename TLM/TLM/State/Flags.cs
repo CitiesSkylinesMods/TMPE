@@ -1093,7 +1093,7 @@ namespace TrafficManager.State {
                 laneSpeedLimitArray[i] = null;
             }
 
-            lock(laneSpeedLimitLock) {
+            lock (laneSpeedLimitLock) {
                 laneSpeedLimit.Clear();
             }
 

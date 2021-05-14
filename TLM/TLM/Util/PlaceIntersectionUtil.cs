@@ -1,11 +1,10 @@
 namespace TrafficManager.Util {
     using System.Collections.Generic;
     using System.Linq;
-    using HarmonyLib;
     using CSUtil.Commons;
     using TrafficManager.State.Asset;
     using TrafficManager.Util;
-    using System.Security.Policy;
+    using TrafficManager.Lifecycle;
     using TrafficManager.State;
 
     public static class PlaceIntersectionUtil {
@@ -55,14 +54,14 @@ namespace TrafficManager.Util {
 
             var map = new Dictionary<InstanceID, InstanceID>();
 
-            var Asset2Data = AssetDataExtension.Instance.Asset2Data;
+            var asset2Data = TMPELifecycle.Instance.Asset2Data;
             if (logApplyTR) {
                 Log._Debug(
                     "PlaceIntersectionUtil.ApplyTrafficRules(): Asset2Data.keys=" +
-                    Asset2Data.Select(item => item.Key).ToSTR());
+                    asset2Data.Select(item => item.Key).ToSTR());
             }
 
-            if (Asset2Data.TryGetValue(intersectionInfo, out var assetData)) {
+            if (asset2Data.TryGetValue(intersectionInfo, out var assetData)) {
                 if (logApplyTR) {
                     Log.Info("PlaceIntersectionUtil.ApplyTrafficRules(): assetData =" + assetData);
                 }
