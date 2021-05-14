@@ -47,7 +47,7 @@
             SpeedLimitTextures textures = TMPELifecycle.Instance.Textures.SpeedLimits;
             Texture2D tex = speedlimit.HasValue
                                 ? textures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
-                                : textureSource[0];
+                                : textures.NoOverride;
 
             GUI.DrawTexture(
                 position: this.screenRect_,
@@ -74,7 +74,7 @@
             SpeedLimitTextures textures = TMPELifecycle.Instance.Textures.SpeedLimits;
             Texture2D tex = speedlimit.HasValue
                                 ? textures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
-                                : textureSource[0];
+                                : textures.NoOverride;
 
             GUI.DrawTexture(
                 position: smallRect,

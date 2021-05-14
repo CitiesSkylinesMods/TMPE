@@ -95,24 +95,6 @@
                         return true;
                     }
 
-                    //--- OBSOLETE ---
-                    // Constants.ServiceFactory.NetService.ProcessSegment(
-                    //     segmentId: data.SegVisitData.CurSeg.segmentId,
-                    //     handler: (ushort curSegmentId, ref NetSegment curSegment) => {
-                    //         NetInfo.Lane curLaneInfo = curSegment.Info.m_lanes[data.CurLanePos.laneIndex];
-                    //
-                    //         Apply(
-                    //             segmentId: curSegmentId,
-                    //             laneIndex: data.CurLanePos.laneIndex,
-                    //             laneId: data.CurLanePos.laneId,
-                    //             netInfo: curSegment.Info,
-                    //             laneInfo: curLaneInfo,
-                    //             action: action,
-                    //             target: target);
-                    //         return true;
-                    //     });
-
-                    //--- NEW ---
                     ushort segmentId = data
                                        .SegVisitData
                                        .CurSeg
@@ -122,13 +104,6 @@
                     NetInfo segmentInfo = segmentId.ToSegment().Info;
 
                     NetInfo.Lane curLaneInfo = segmentInfo.m_lanes[data.CurLanePos.laneIndex];
-
-                    // SpeedLimitManager.Instance.SetSpeedLimit(
-                    //     segmentId,
-                    //     data.CurLanePos.laneIndex,
-                    //     curLaneInfo,
-                    //     data.CurLanePos.laneId,
-                    //     speedLimitToSet?.GameUnits);
 
                     Apply(
                         segmentId: segmentId,

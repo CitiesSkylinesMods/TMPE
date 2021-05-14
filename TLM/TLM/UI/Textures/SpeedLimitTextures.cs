@@ -23,6 +23,9 @@ namespace TrafficManager.UI.Textures {
         public const ushort UPPER_MPH = 90;
         public const ushort MPH_STEP = 5;
 
+        /// <summary>Displayed in Override view for Speed Limits tool, when there's no override.</summary>
+        public readonly Texture2D NoOverride;
+
         /// <summary>Blue textures for road/lane default speed limits.</summary>
         public readonly IDictionary<int, Texture2D> RoadDefaults;
 
@@ -35,7 +38,7 @@ namespace TrafficManager.UI.Textures {
         /// <summary>British style speed limit textures for MPH</summary>
         public readonly IDictionary<int, Texture2D> TexturesMphUK;
 
-        public readonly Texture2D Clear;
+        // public readonly Texture2D Clear;
 
         /// <summary>
         ///     List available km/h speed limit textures and road default speed limit textures.
@@ -110,7 +113,9 @@ namespace TrafficManager.UI.Textures {
                 LoadMphTexture(mph);
             }
 
-            Clear = LoadDllResource(resourceName: "clear.png", size: new IntVector2(256));
+            //Clear = LoadDllResource(resourceName: "clear.png", size: new IntVector2(256));
+            NoOverride = LoadDllResource(resourceName: "SpeedLimits.NoOverride.png",
+                                         size: new IntVector2(200));
         }
 
         /// <summary>

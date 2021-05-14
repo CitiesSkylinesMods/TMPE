@@ -29,8 +29,8 @@
         /// The show per lane mode is disabled and editing per segment.
         /// </summary>
         /// <param name="action">What speed limit to set or clear.</param>
-        /// <param name="target"></param>
-        /// <param name="multiSegmentMode"></param>
+        /// <param name="target">The speed limit destination object (override or default, segment or lane).</param>
+        /// <param name="multiSegmentMode">True if user holds Shift to edit the road.</param>
         public void Click(in SetSpeedLimitAction action,
                           SetSpeedLimitTarget target,
                           bool multiSegmentMode) {
