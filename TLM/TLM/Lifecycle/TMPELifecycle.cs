@@ -8,13 +8,13 @@ namespace TrafficManager.Lifecycle {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using TrafficManager.API.Manager;
     using TrafficManager.Custom.PathFinding;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI;
     using TrafficManager.Util;
+    using TrafficManager.State.Asset;
     using UnityEngine.SceneManagement;
     using UnityEngine;
     using JetBrains.Annotations;
@@ -31,14 +31,7 @@ namespace TrafficManager.Lifecycle {
         }
 
         /// <summary>TMPE is in the middle of deserializing data.</summary>
-        public bool Deserializing;
-
-        // These values from `BuildConfig` class (`APPLICATION_VERSION` constants) in game file `Managed/Assembly-CSharp.dll` (use ILSpy to inspect them)
-        public const uint GAME_VERSION = 188868624U;
-        public const uint GAME_VERSION_A = 1u;
-        public const uint GAME_VERSION_B = 13u;
-        public const uint GAME_VERSION_C = 0u;
-        public const uint GAME_VERSION_BUILD = 8u;
+        public bool Deserializing { get; set; }
 
         /// <summary>
         /// Contains loaded languages and lookup functions for text translations
@@ -48,6 +41,8 @@ namespace TrafficManager.Lifecycle {
 
         public bool InGameHotReload { get; private set; }
         public bool IsGameLoaded { get; private set; }
+
+        public Dictionary<BuildingInfo, AssetData> Asset2Data { get; set; }
 
         /// <summary>
         /// determines if simulation is inside game/editor. useful to detect hot-reload.
@@ -68,10 +63,15 @@ namespace TrafficManager.Lifecycle {
         /// </summary>
         internal static bool PlayMode => AppMode != null && AppMode == ICities.AppMode.Game;
 
-
-        private static void CheckForIncompatibleMods() {
+        private static void CompatibilityCheck() {
             ModsCompatibilityChecker mcc = new ModsCompatibilityChecker();
             mcc.PerformModCheck();
+            VersionUtil.CheckGameVersion();
+        }
+
+        internal void Preload() {
+            Asset2Data = new Dictionary<BuildingInfo, AssetData>();
+            RegisterCustomManagers();
         }
 
         internal void RegisterCustomManagers() {
@@ -115,46 +115,24 @@ namespace TrafficManager.Lifecycle {
 #endif
                 TranslationDatabase.LoadAllTranslations();
 
-                Log.InfoFormat(
-                    "TM:PE enabled. Version {0}, Build {1} {2} for game version {3}.{4}.{5}-f{6}",
-                    TrafficManagerMod.VersionString,
-                    Assembly.GetExecutingAssembly().GetName().Version,
-                    TrafficManagerMod.BRANCH,
-                    GAME_VERSION_A,
-                    GAME_VERSION_B,
-                    GAME_VERSION_C,
-                    GAME_VERSION_BUILD);
-                Log.InfoFormat(
-                    "Enabled TM:PE has GUID {0}",
-                    Assembly.GetExecutingAssembly().ManifestModule.ModuleVersionId);
+                VersionUtil.LogEnvironmentDetails();
+                Log._Debug("Scene is " + Scene);
 
                 // check for incompatible mods
                 if (UIView.GetAView() != null) {
                     // when TM:PE is enabled in content manager
-                    CheckForIncompatibleMods();
+                    CompatibilityCheck();
                 } else {
                     // or when game first loads if TM:PE was already enabled
-                    LoadingManager.instance.m_introLoaded += CheckForIncompatibleMods;
+                    LoadingManager.instance.m_introLoaded += CompatibilityCheck;
                 }
-
-                // Log Mono version
-                Type monoRt = Type.GetType("Mono.Runtime");
-                if (monoRt != null) {
-                    MethodInfo displayName = monoRt.GetMethod(
-                        "GetDisplayName",
-                        BindingFlags.NonPublic | BindingFlags.Static);
-                    if (displayName != null) {
-                        Log.InfoFormat("Mono version: {0}", displayName.Invoke(null, null));
-                    }
-                }
-
-                Log._Debug("Scene is " + SceneManager.GetActiveScene().name);
 
                 HarmonyHelper.EnsureHarmonyInstalled();
-                LoadingManager.instance.m_levelPreLoaded += RegisterCustomManagers;
+                LoadingManager.instance.m_levelPreLoaded += Preload;
 
                 InGameHotReload = InGameOrEditor();
                 if (InGameHotReload) {
+                    Preload();
                     SerializableDataExtension.Load();
                     Load();
                 }
@@ -173,15 +151,16 @@ namespace TrafficManager.Lifecycle {
         void OnDestroy() {
             try {
                 Log.Info("TMPELifecycle.OnDestroy()");
-                LoadingManager.instance.m_introLoaded -= CheckForIncompatibleMods;
+                LoadingManager.instance.m_introLoaded -= CompatibilityCheck;
                 LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
+                LoadingManager.instance.m_levelPreLoaded -= Preload;
 
-                if (InGameOrEditor() && IsGameLoaded) {
+                if (IsGameLoaded) {
                     //Hot Unload
                     Unload();
                 }
                 Instance = null;
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 ex.LogException(true);
             }
         }
@@ -192,148 +171,97 @@ namespace TrafficManager.Lifecycle {
             Log._Debug("TMPELifecycle.~TMPELifecycle()");
         }
 #endif
+
         internal static void StartMod() {
             var go = new GameObject(nameof(TMPELifecycle), typeof(TMPELifecycle));
             DontDestroyOnLoad(go); // don't destroy when scene changes.
         }
 
         internal static void EndMod() {
-            Destroy(Instance?.gameObject);
+            DestroyImmediate(Instance?.gameObject);
         }
 
         internal void Load() {
-            Log.Info($"TMPELifecycle.Load() called. Mode={Mode}, UpdateMode={UpdateMode}, Scene={Scene}");
+            try {
+                Log.Info($"TMPELifecycle.Load() called. Mode={Mode}, UpdateMode={UpdateMode}, Scene={Scene}");
 
-            if (Scene == "ThemeEditor")
-                return;
+                if (Scene == "ThemeEditor")
+                    return;
 
-            InGameUtil.Instantiate();
+                IsGameLoaded = false;
 
-            IsGameLoaded = false;
+                InGameUtil.Instantiate();
 
-            if (BuildConfig.applicationVersion != BuildConfig.VersionToString(
-                    GAME_VERSION,
-                    false)) {
-                string[] majorVersionElms = BuildConfig.applicationVersion.Split('-');
-                string[] versionElms = majorVersionElms[0].Split('.');
-                uint versionA = Convert.ToUInt32(versionElms[0]);
-                uint versionB = Convert.ToUInt32(versionElms[1]);
-                uint versionC = Convert.ToUInt32(versionElms[2]);
+                VersionUtil.CheckGameVersion();
 
-                Log.Info($"Detected game version v{BuildConfig.applicationVersion}");
+                IsGameLoaded = true;
 
-                bool isModTooOld = GAME_VERSION_A < versionA ||
-                                   (GAME_VERSION_A == versionA &&
-                                    GAME_VERSION_B < versionB);
+                CustomPathManager.OnLevelLoaded();
 
-
-                bool isModNewer = GAME_VERSION_A < versionA ||
-                                  (GAME_VERSION_A == versionA &&
-                                   GAME_VERSION_B > versionB);
-
-
-                if (isModTooOld) {
-                    string msg = string.Format(
-                        "Traffic Manager: President Edition detected that you are running " +
-                        "a newer game version ({0}) than TM:PE has been built for ({1}). " +
-                        "Please be aware that TM:PE has not been updated for the newest game " +
-                        "version yet and thus it is very likely it will not work as expected.",
-                        BuildConfig.applicationVersion,
-                        BuildConfig.VersionToString(GAME_VERSION, false));
-
-                    Log.Error(msg);
-                    Singleton<SimulationManager>.instance.m_ThreadingWrapper.QueueMainThread(
-                            () => {
-                                UIView.library
-                                      .ShowModal<ExceptionPanel>("ExceptionPanel")
-                                      .SetMessage(
-                                          "TM:PE has not been updated yet",
-                                          msg,
-                                          false);
-                            });
-                } else if (isModNewer) {
-                    string msg = string.Format(
-                        "Traffic Manager: President Edition has been built for game version {0}. " +
-                        "You are running game version {1}. Some features of TM:PE will not " +
-                        "work with older game versions. Please let Steam update your game.",
-                        BuildConfig.VersionToString(GAME_VERSION, false),
-                        BuildConfig.applicationVersion);
-
-                    Log.Error(msg);
-                    Singleton<SimulationManager>
-                        .instance.m_ThreadingWrapper.QueueMainThread(
-                            () => {
-                                UIView.library
-                                      .ShowModal<ExceptionPanel>("ExceptionPanel")
-                                      .SetMessage(
-                                          "Your game should be updated",
-                                          msg,
-                                          false);
-                            });
+                ModUI.OnLevelLoaded();
+                if (PlayMode) {
+                    UIView uiView = UIView.GetAView();
+                    uiView.AddUIComponent(typeof(UITransportDemand));
+                    uiView.gameObject.AddComponent<RemoveVehicleButtonExtender>();
+                    uiView.gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
+                    uiView.gameObject.AddComponent<RoadSelectionPanels>();
                 }
+
+                Patcher.Install();
+
+                Log.Info("Notifying managers...");
+                foreach (ICustomManager manager in RegisteredManagers) {
+                    Log.Info($"OnLevelLoading: {manager.GetType().Name}");
+                    manager.OnLevelLoading();
+                }
+
+                Log.Info("OnLevelLoaded complete.");
+            } catch (Exception ex) {
+                ex.LogException(true);
             }
-
-            IsGameLoaded = true;
-
-            CustomPathManager.OnLevelLoaded();
-
-            ModUI.OnLevelLoaded();
-            if (PlayMode) {
-                UIView uiView = UIView.GetAView();
-                uiView.AddUIComponent(typeof(UITransportDemand));
-                uiView.gameObject.AddComponent<RemoveVehicleButtonExtender>();
-                uiView.gameObject.AddComponent<RemoveCitizenInstanceButtonExtender>();
-                uiView.gameObject.AddComponent<RoadSelectionPanels>();
-            }
-
-            Patcher.Install();
-
-            // Log.Info("Fixing non-created nodes with problems...");
-            // FixNonCreatedNodeProblems();
-            Log.Info("Notifying managers...");
-            foreach (ICustomManager manager in RegisteredManagers) {
-                Log.Info($"OnLevelLoading: {manager.GetType().Name}");
-                manager.OnLevelLoading();
-            }
-
-            // InitTool();
-            // Log._Debug($"Current tool: {ToolManager.instance.m_properties.CurrentTool}");
-            Log.Info("OnLevelLoaded complete.");
         }
 
         internal void Unload() {
-            CustomPathManager._instance?.OnLevelUnloading();
-            LoadingManager.instance.m_levelPreLoaded -= RegisterCustomManagers;
-
             try {
+                CustomPathManager._instance?.OnLevelUnloading();
                 foreach (ICustomManager manager in RegisteredManagers.AsEnumerable().Reverse()) {
-                    Log.Info($"OnLevelUnloading: {manager.GetType().Name}");
-                    manager.OnLevelUnloading();
+                    try {
+                        Log.Info($"OnLevelUnloading: {manager.GetType().Name}");
+                        manager.OnLevelUnloading();
+                    } catch (Exception ex) {
+                        ex.LogException(true);
+                    }
                 }
 
-                Flags.OnLevelUnloading();
+                try {
+                    Flags.OnLevelUnloading();
+                }
+                catch (Exception ex) {
+                    ex.LogException(true);
+                }
+                
                 GlobalConfig.OnLevelUnloading();
 
+                // destroy immidately to prevent duplicates after hot-reload.
                 var uiviewGO = UIView.GetAView().gameObject;
-                Destroy(uiviewGO.GetComponent<RoadSelectionPanels>());
-                Destroy(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());
-                Destroy(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
-                Destroy(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
-                Destroy(uiviewGO.GetComponent<UITransportDemand>());
+                DestroyImmediate(uiviewGO.GetComponent<RoadSelectionPanels>());
+                DestroyImmediate(uiviewGO.GetComponent<RemoveVehicleButtonExtender>());
+                DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
+                DestroyImmediate(uiviewGO.GetComponent<RemoveCitizenInstanceButtonExtender>());
+                DestroyImmediate(uiviewGO.GetComponent<UITransportDemand>());
 
                 Log.Info("Removing Controls from UI.");
-                if (ModUI.Instance != null) {
+                if (ModUI.Instance) {
                     ModUI.Instance.CloseMainMenu(); // Hide the UI ASAP
                     ModUI.Instance.Destroy();
                     Log._Debug("removed UIBase instance.");
                 }
-            } catch (Exception e) {
-                Log.Error("Exception unloading mod. " + e.Message);
-
-                // ignored - prevents collision with other mods
+            } catch (Exception ex) {
+                ex.LogException(true);
             }
 
             Patcher.Uninstall();
+
             IsGameLoaded = false;
             InGameHotReload = false;
         }

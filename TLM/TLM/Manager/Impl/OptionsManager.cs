@@ -243,6 +243,7 @@ namespace TrafficManager.Manager.Impl {
             index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR);
 
             index = LoadBool(index, OptionsVehicleRestrictionsTab.NoDoubleCrossings);
+            index = LoadBool(index, OptionsVehicleRestrictionsTab.DedicatedTurningLanes);
             return true;
         }
 
@@ -309,6 +310,7 @@ namespace TrafficManager.Manager.Impl {
                 OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR.Save(),
 
                 OptionsVehicleRestrictionsTab.NoDoubleCrossings.Save(),
+                OptionsVehicleRestrictionsTab.DedicatedTurningLanes.Save(),
             };
         }
     }

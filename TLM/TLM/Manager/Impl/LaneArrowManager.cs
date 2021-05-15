@@ -138,6 +138,38 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        /// <param name="dedicatedTurningLanes">
+        /// Narrow down updated roads to those that can have dedicated turning lanes.
+        /// </param>
+        public void UpdateAllDefaults(bool dedicatedTurningLanes) {
+            SimulationManager.instance.AddAction(delegate () {
+                for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+                    ref NetSegment segment = ref segmentId.ToSegment();
+                    if (!netService.IsSegmentValid(segmentId))
+                        continue;
+
+                    if (segment.Info?.GetAI() is not RoadBaseAI ai)
+                        continue;
+
+                    int forward = 0, backward = 0;
+                    segmentId.ToSegment().CountLanes(segmentId, LANE_TYPES, VEHICLE_TYPES, ref forward, ref backward);
+                    if (dedicatedTurningLanes && forward == 1 && backward == 1) {
+                        // one lane cannot have dedicated turning lanes.
+                        continue;
+                    }
+
+                    if (dedicatedTurningLanes &&
+                        segment.m_startNode.ToNode().CountSegments() <= 2 &&
+                        segment.m_endNode.ToNode().CountSegments() <= 2) {
+                        // no intersection.
+                        continue;
+                    }
+
+                    NetManager.instance.UpdateSegment(segmentId);
+                }
+            });
+        }
+
         private static void RecalculateFlags(uint laneId) {
             NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
             ushort segmentId = laneBuffer[laneId].m_segment;
