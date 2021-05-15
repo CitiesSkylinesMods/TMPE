@@ -33,13 +33,16 @@
             /// <summary>If not null, contains mouse position. Null means mouse is over some GUI window.</summary>+
             public Vector2? Mouse;
 
-            /// <summary>List of UI frame rectangles which will cause signs to fade.</summary>
+            /// <summary>List of UI frame rectangles which will make the signs fade if rendered over.</summary>
             public List<Rect> UiWindowRects;
 
             /// <summary>Set to true to allow bigger and clickable road signs.</summary>
             public bool InteractiveSigns;
 
-            /// <summary>Set to true when operating entire road between two junctions.</summary>
+            /// <summary>
+            /// User is holding Shift to edit multiple segments.
+            /// Set to true when operating entire road between two junctions.
+            /// </summary>
             public bool MultiSegmentMode;
 
             /// <summary>Set to true to show speed limits for each lane.</summary>
@@ -112,16 +115,14 @@
         /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
         public void RenderHelperGraphics(RenderManager.CameraInfo cameraInfo,
                                          DrawArgs args) {
-            if (args.ShowLimitsPerLane) {
-                RenderLanes(cameraInfo);
-            } else {
+            if (!args.ShowLimitsPerLane) {
                 RenderSegments(cameraInfo, args);
             }
         }
 
-        private void RenderLanes(RenderManager.CameraInfo cameraInfo) {
-        }
-
+        /// <summary>Render segment overlay (this is curves, not the signs).</summary>
+        /// <param name="cameraInfo">The camera.</param>
+        /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
         private void RenderSegments(RenderManager.CameraInfo cameraInfo,
                                     DrawArgs args) {
             if (!args.MultiSegmentMode) {
@@ -170,7 +171,7 @@
         }
 
         /// <summary>
-        /// Renders all lanes with the given <paramref name="finalDirection"/>
+        /// Renders all lane curves with the given <paramref name="finalDirection"/>
         /// if NetInfo.Direction.None, all lanes are rendered.
         /// </summary>
         private int RenderSegmentSideOverlay(
@@ -206,6 +207,10 @@
             return count;
         }
 
+        /// <summary>Draw blue lane curves overlay.</summary>
+        /// <param name="cameraInfo">The Camera.</param>
+        /// <param name="laneId">The lane.</param>
+        /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
         private void RenderLaneOverlay(RenderManager.CameraInfo cameraInfo,
                                        uint laneId,
                                        DrawArgs args) {
@@ -222,10 +227,11 @@
         }
 
         /// <summary>
+        /// Draw speed limit signs (only in GUI mode).
         /// NOTE: This must be called from GUI mode, because of GUI.DrawTexture use.
         /// Render the speed limit signs based on the current settings.
         /// </summary>
-        /// <param name="args">Parameters how to draw exactly.</param>
+        /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
         public void ShowSigns_GUI(DrawArgs args) {
             Camera camera = Camera.main;
             if (camera == null) {
@@ -239,6 +245,7 @@
             Transform currentCameraTransform = camera.transform;
             Vector3 camPos = currentCameraTransform.position;
 
+            // TODO: Can road network change while speed limit tool is active? Disasters?
             if (!lastCachedCamera_.Equals(currentCamera)) {
                 // cache visible segments
                 lastCachedCamera_ = currentCamera;
@@ -257,8 +264,8 @@
                 ushort segmentId = cachedVisibleSegmentIds_.Values[segmentIdIndex];
 
                 // If VehicleRestrictions tool is active, skip drawing the current selected segment
-                if ((mainTool_.GetToolMode() == ToolMode.VehicleRestrictions) &&
-                    (segmentId == TrafficManagerTool.SelectedSegmentId)) {
+                if (mainTool_.GetToolMode() == ToolMode.VehicleRestrictions
+                    && segmentId == TrafficManagerTool.SelectedSegmentId) {
                     continue;
                 }
 
@@ -318,7 +325,8 @@
                                            ref NetSegment segment,
                                            ref Vector3 camPos,
                                            DrawArgs args) {
-            if (args.ShowLimitsPerLane) {
+            // in defaults mode separate lanes don't make any sense, so show segments at all times
+            if (args.ShowLimitsPerLane && !args.ShowDefaultsMode) {
                 return DrawSpeedLimitHandles_PerLane(
                     segmentId,
                     ref segment,
@@ -386,10 +394,10 @@
 
                 // Get speed limit override for segment
                 SpeedValue? overrideSpeedlimit =
-                    SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId: segmentId, finalDir: e.Key);
+                    SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: e.Key);
 
                 // Get default or default-override speed limit for road type
-                NetInfo neti = GetSegmentNetinfo(segmentId: segmentId);
+                NetInfo neti = GetSegmentNetinfo(segmentId);
                 SpeedValue defaultSpeedlimit =
                     new SpeedValue(gameUnits: SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info: neti));
 

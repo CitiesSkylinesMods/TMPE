@@ -15,7 +15,7 @@ namespace TrafficManager.UI {
 
         private RoadSelectionUtil roadSelectionUtil_;
 
-        public static RoadSelectionPanels Root { get; private set; } = null;
+        public static RoadSelectionPanels Root;
 
         internal enum FunctionModes {
             None = 0,

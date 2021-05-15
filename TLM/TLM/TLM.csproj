@@ -487,6 +487,7 @@
     <Compile Include="U\ControlActiveState.cs" />
     <Compile Include="U\ControlEnabledState.cs" />
     <Compile Include="U\ControlHoveredState.cs" />
+    <Compile Include="U\FreeTooltip\UFloatingTooltip.cs" />
     <Compile Include="U\Label\ULabel.cs" />
     <Compile Include="U\Panel\BaseUWindowPanel.cs" />
     <Compile Include="U\Panel\UPanel.cs" />

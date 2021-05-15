@@ -440,10 +440,8 @@ namespace TrafficManager.Manager.Impl {
         /// Determines the game default speed limit of the given NetInfo.
         /// </summary>
         /// <param name="info">the NetInfo of which the game default speed limit should be determined</param>
-        /// <param name="roundToSignLimits">if true, custom speed limit are rounded to speed limits
-        /// available as speed limit sign</param>
         /// <returns>The vanilla speed limit, in game units.</returns>
-        public float GetVanillaNetInfoSpeedLimit(NetInfo info, bool roundToSignLimits = true) {
+        public float GetVanillaNetInfoSpeedLimit(NetInfo info) {
             if (info == null) {
                 Log._DebugOnlyWarning(
                     "SpeedLimitManager.GetVanillaNetInfoSpeedLimit: info is null!");
@@ -493,9 +491,9 @@ namespace TrafficManager.Manager.Impl {
             }
 
             string infoName = info.name;
-            return !CustomLaneSpeedLimitByNetInfoName.TryGetValue(infoName, out float speedLimit)
-                       ? GetVanillaNetInfoSpeedLimit(info: info, roundToSignLimits: true)
-                       : speedLimit;
+            return CustomLaneSpeedLimitByNetInfoName.TryGetValue(infoName, out float speedLimit)
+                       ? speedLimit
+                       : GetVanillaNetInfoSpeedLimit(info: info);
         }
 
         /// <summary>

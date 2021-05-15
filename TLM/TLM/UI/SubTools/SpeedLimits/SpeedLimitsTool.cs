@@ -113,6 +113,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 isActiveFun: _ => this.editDefaultsMode_);
 
             this.Window.modeButtonsPanel_.ToggleMphButton.uOnClick = OnClickToggleMphButton;
+            UpdateCursorTooltip();
         }
 
         private void UpdateModeInfoLabel() {
@@ -134,7 +135,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private void OnClickEditDefaultsButton(UIComponent component, UIMouseEventParameter evt) {
             this.editDefaultsMode_ = !this.editDefaultsMode_;
             MainTool.RequestOnscreenDisplayUpdate();
-            // this.Window.modeButtonsPanel_.EditDefaultsModeButton.ApplyButtonSkin();
+
+            this.UpdateCursorTooltip();
+
             UpdateModeInfoLabel();
         }
 
@@ -142,8 +145,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                                   UIMouseEventParameter evt) {
             this.showLimitsPerLane_ = !this.showLimitsPerLane_;
             MainTool.RequestOnscreenDisplayUpdate();
-            // this.Window.modeButtonsPanel_.SegmentLaneModeToggleButton.ApplyButtonSkin();
+
+            this.UpdateCursorTooltip();
+
             UpdateModeInfoLabel();
+        }
+
+        private void UpdateCursorTooltip() {
+            this.Window.cursorTooltip_.SetTooltip(this.SelectedAction.ToString());
         }
 
         public override void DeactivateTool() {
@@ -299,6 +308,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>When speed palette button clicked, touch all buttons forcing them to refresh.</summary>
         public void OnPaletteButtonClicked(SetSpeedLimitAction action) {
             this.SelectedAction = action;
+            this.Window.cursorTooltip_.SetTooltip(action.ToString());
 
             // Deactivate all palette buttons and highlight one
             Window.UpdatePaletteButtonsOnClick();

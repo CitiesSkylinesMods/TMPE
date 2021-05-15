@@ -126,5 +126,14 @@ namespace TrafficManager.API.Traffic.Data {
         }
 
         public float GetKmph() => GameUnits * ApiConstants.SPEED_TO_KMPH;
+        public float GetMPH() => GameUnits * ApiConstants.SPEED_TO_MPH;
+
+        public string ToString(bool displayMph) {
+            if (displayMph) {
+                return (int)this.GetMPH() + " MPH";
+            } else {
+                return (int)this.GetKmph() + " km/h";
+            }
+        }
     }
 }

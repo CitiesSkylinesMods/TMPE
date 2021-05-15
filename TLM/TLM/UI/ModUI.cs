@@ -45,10 +45,11 @@ namespace TrafficManager.UI {
         private bool _uiShown;
 
         /// <summary>Event to be sent when UI scale changes in the General Options tab.</summary>
-        public struct UIScaleNotification { public float NewScale; }
-
-        public class UIScaleObservable : GenericObservable<UIScaleNotification> {
+        public struct UIScaleNotification {
+            public float NewScale;
         }
+
+        public class UIScaleObservable : GenericObservable<UIScaleNotification> { }
 
         /// <summary>
         /// Subscribe to this to get notifications in your UI about UI scale changes (slider in
@@ -58,10 +59,11 @@ namespace TrafficManager.UI {
         public UIScaleObservable UiScaleObservable;
 
         /// <summary>Event to be sent when UI transparency slider changes in the General Options tab.</summary>
-        public struct UIOpacityNotification { public U.UOpacityValue Opacity; }
-
-        public class UIOpacityObservable : GenericObservable<UIOpacityNotification> {
+        public struct UIOpacityNotification {
+            public U.UOpacityValue Opacity;
         }
+
+        public class UIOpacityObservable : GenericObservable<UIOpacityNotification> { }
 
         /// <summary>
         /// Subscribe to this to get notifications in your UI about UI transparency changes
@@ -100,6 +102,7 @@ namespace TrafficManager.UI {
             catch (Exception e) {
                 Log.Error($"While creating MainMenu: {e}");
             }
+
             try {
                 MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
             }
@@ -164,7 +167,8 @@ namespace TrafficManager.UI {
         public void ShowMainMenu() {
             try {
                 ToolsModifierControl.mainToolbar.CloseEverything();
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 Log.Error("Error on Show(): " + e);
             }
 
@@ -184,12 +188,15 @@ namespace TrafficManager.UI {
 
         public void CloseMainMenu() {
             // Before hiding the menu, shut down the active tool
-            GetTrafficManagerTool(false)?.SetToolMode(UI.ToolMode.None);
+            TrafficManagerTool tool = GetTrafficManagerTool(false);
+            if (tool != null) {
+                tool.SetToolMode(UI.ToolMode.None);
+            }
 
             // Main menu is going invisible
-            GetMenu().Hide();
+            GetMenu()?.Hide();
 #if DEBUG
-            GetDebugMenu().Hide();
+            GetDebugMenu()?.Hide();
 #endif
 
             _uiShown = false;
@@ -234,9 +241,10 @@ namespace TrafficManager.UI {
             if (ModUI.Instance == null) {
                 Log._Debug("Adding UIBase instance.");
                 ModUI.Instance = ToolsModifierControl.toolController
-                    .gameObject
-                    .AddComponent<ModUI>();
+                                                     .gameObject
+                                                     .AddComponent<ModUI>();
             }
+
             TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
             TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
         }
@@ -250,7 +258,8 @@ namespace TrafficManager.UI {
             } else if (ToolsModifierControl.toolController.CurrentTool != trafficManagerTool_) {
                 Log.Info("ModUI.DisableTool: CurrentTool is not traffic manager tool!");
             } else {
-                ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
+                ToolsModifierControl.toolController.CurrentTool =
+                    ToolsModifierControl.GetTool<DefaultTool>();
                 ToolsModifierControl.SetTool<DefaultTool>();
             }
         }

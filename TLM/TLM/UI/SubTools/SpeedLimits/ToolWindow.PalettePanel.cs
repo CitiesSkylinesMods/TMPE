@@ -107,11 +107,11 @@
                 // Choose label text under the button
                 string GetSpeedButtonHintText() {
                     if (FloatUtil.NearlyEqual(speedValue.GameUnits, 0.0f)) {
-                        return "Reset";
+                        return Translation.SpeedLimits.Get("Default");
                     }
 
                     if (speedValue.GameUnits >= SpeedValue.SPECIAL_UNLIMITED_VALUE) {
-                        return "No limit";
+                        return Translation.SpeedLimits.Get("Unlimited");
                     }
 
                     return otherUnit;
@@ -165,8 +165,8 @@
                 button.normalBgSprite = button.hoveredBgSprite = "GenericPanel";
                 button.color = new Color32(128, 128, 128, 240);
 
-                button.AssignedAction =
-                    actionOnClick; // button must know what to do with its speed value
+                // button must know what to do with its speed value
+                button.AssignedAction = actionOnClick;
 
                 // The click events will be routed via the parent tool OnPaletteButtonClicked
                 button.ParentTool = parentTool;

@@ -28,6 +28,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Contains speed limits button palette.</summary>
         internal PalettePanel palettePanel_;
 
+        /// <summary>Floating label following the mouse cursor.</summary>
+        internal U.UFloatingTooltip cursorTooltip_;
+
         /// <summary>Called by Unity on instantiation once when the game is running.</summary>
         public override void Start() {
             base.Start();
@@ -68,6 +71,12 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 parent: this,
                 stack: UStackMode.None);
             palettePanel_.SetupControls(window: this, builder, parentTool);
+
+            cursorTooltip_ = builder.Label<UFloatingTooltip, UIComponent>(
+                parent: this,
+                t: string.Empty,
+                stack: UStackMode.None);
+            cursorTooltip_.SetTooltip(); // this will hide it, and update it after setup is done
 
             // Force buttons resize and show the current speed limit on the palette
             this.UpdatePaletteButtonsOnClick();

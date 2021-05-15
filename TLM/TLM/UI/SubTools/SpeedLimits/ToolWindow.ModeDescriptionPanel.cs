@@ -50,44 +50,38 @@
                                             bool editDefaults,
                                             bool showLanes) {
                 var sb = new StringBuilder(15); // initial capacity of stringBuilder
+                string t;
 
                 //--------------------------
                 // Current editing mode
                 //--------------------------
-                if (showLanes) {
-                    sb.Append("Showing each lane.");
-                } else {
-                    sb.Append("Showing averaged per segment.");
-                }
-
-                sb.Append(" ");
-
-                if (editDefaults) {
-                    sb.Append("Editing default limits per road type.");
-                } else {
-                    sb.Append("Editing limits for specific segments.");
-                }
-
+                t = editDefaults
+                        ? "Editing default limits per road type."
+                        : (showLanes
+                               ? "Editing speed limit overrides for segments."
+                               : "Editing lane speed limit overrides");
+                sb.Append(Translation.SpeedLimits.Get(t));
                 sb.Append("\n");
 
                 //--------------------------
                 // Keyboard modifier hints
                 //--------------------------
-                if (showLanes) {
-                    sb.Append(UIUtil.ColorizeKeybind("[[Ctrl]] averaged limits."));
-                } else {
-                    sb.Append(UIUtil.ColorizeKeybind("[[Ctrl]] see each lane."));
+                if (!editDefaults) {
+                    t = showLanes
+                            ? UIUtil.ColorizeKeybind("[[Ctrl]] averaged limits.")
+                            : UIUtil.ColorizeKeybind("[[Ctrl]] see each lane.");
+                    sb.Append(Translation.SpeedLimits.Get(t));
                 }
 
                 sb.Append(" ");
-                sb.Append(UIUtil.ColorizeKeybind("[[Shift]] edit multiple."));
+                t = UIUtil.ColorizeKeybind("[[Shift]] edit multiple.");
+                sb.Append(Translation.SpeedLimits.Get(t));
                 sb.Append(" ");
 
-                if (editDefaults) {
-                    sb.Append(UIUtil.ColorizeKeybind("[[Alt]] show overrides."));
-                } else {
-                    sb.Append(UIUtil.ColorizeKeybind("[[Alt]] show defaults."));
-                }
+                t = editDefaults
+                        ? UIUtil.ColorizeKeybind("[[Alt]] show overrides.")
+                        : UIUtil.ColorizeKeybind("[[Alt]] show defaults.");
+                sb.Append(Translation.SpeedLimits.Get(t));
 
                 this.modeDescriptionLabel_.text = sb.ToString();
                 UResizer.UpdateControl(this);

@@ -58,5 +58,11 @@ namespace TrafficManager.U {
                 (screenPos.x * GUI_WIDTH) / Screen.width,
                 (screenPos.y * GUI_HEIGHT) / Screen.height);
         }
+
+        internal static Vector2 MouseToGuiPoint(Vector2 mouse) {
+            return new(
+                (mouse.x * GUI_WIDTH) / Screen.width,
+                GUI_HEIGHT - (mouse.y * GUI_HEIGHT) / Screen.height);
+        }
     }
 }
