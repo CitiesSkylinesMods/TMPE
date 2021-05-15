@@ -1,6 +1,6 @@
-﻿namespace TrafficManager.UI {
+namespace TrafficManager.UI {
     public enum TransportDemandViewMode {
         Incoming,
-        Outgoing
+        Outgoing,
     }
 }

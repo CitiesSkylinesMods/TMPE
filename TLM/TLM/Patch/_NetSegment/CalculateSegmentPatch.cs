@@ -1,6 +1,5 @@
 namespace TrafficManager.Patch._NetSegment {
-    using Harmony;
-    using JetBrains;
+    using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.Manager.Impl;
 

@@ -1,4 +1,3 @@
-
 namespace TrafficManager.Util {
     using System;
     using System.Collections.Generic;
@@ -11,12 +10,12 @@ namespace TrafficManager.Util {
     using static SegmentTraverser;
 
     public class RoadSelectionUtil {
-        /// instance of singleton
-        public static RoadSelectionUtil Instance { get; private set; }
-
         public RoadSelectionUtil() : base() {
             Instance = this;
         }
+
+        // instance of singleton
+        public static RoadSelectionUtil Instance { get; private set; }
 
         public static void Release() {
             if (Instance != null) {
@@ -30,7 +29,7 @@ namespace TrafficManager.Util {
         /// This will join target segment to the same road as source segment.
         /// </summary>
         public static void CopySegmentName(ushort sourceSegmentID, ushort targetSegmentID) {
-            SimulationManager.instance.AddAction(delegate () {
+            SimulationManager.instance.AddAction(() => {
                 string sourceName = NetManager.instance.GetSegmentName(sourceSegmentID);
                 string targetName = NetManager.instance.GetSegmentName(targetSegmentID);
                 if (sourceName != targetName) {
@@ -45,7 +44,7 @@ namespace TrafficManager.Util {
         /// </summary>
         public static void SetRoad(ushort segmentId, IEnumerable<ushort> segmentIDs) {
             foreach(var targetSegmentID in segmentIDs) {
-                if(targetSegmentID!= segmentId&& targetSegmentID != 0) {
+                if(targetSegmentID != segmentId && targetSegmentID != 0) {
                     CopySegmentName(segmentId, targetSegmentID);
                 }
             }
@@ -110,7 +109,7 @@ namespace TrafficManager.Util {
         public class Threading : ThreadingExtensionBase {
             private int prev_length = -2;
             private ushort prev_segmentID = 0;
-            private string  prev_name = "";
+            private string  prev_name = string.Empty;
 
             void UpdatePath() {
                 ushort selectedSegmentID = Singleton<InstanceManager>.instance.GetSelectedInstance().NetSegment;

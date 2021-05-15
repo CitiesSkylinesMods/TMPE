@@ -27,6 +27,12 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         const bool DEFAULT_ALT_MODE = true;
         private bool alternativeMode_ = DEFAULT_ALT_MODE;
         private int framesSeparateTurningLanesModeActivated = 0;
+
+        public LaneArrowTool(TrafficManagerTool mainTool)
+            : base(mainTool) {
+            fsm_ = new Util.GenericFsm<State, Trigger>(State.Select);
+        }
+
         bool SeparateSegmentLanesModifierIsPressed => AltIsPressed;
         bool SeparateNodeLanesModifierIsPressed => ControlIsPressed;
 
@@ -64,11 +70,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
         /// <summary>If exists, contains tool panel floating on the selected node.</summary>
         private LaneArrowToolWindow ToolWindow { get; set; }
-
-        public LaneArrowTool(TrafficManagerTool mainTool)
-            : base(mainTool) {
-            fsm_ = new Util.GenericFsm<State, Trigger>(State.Select);
-        }
 
         private static string T(string key) => Translation.LaneRouting.Get(key);
 
@@ -495,7 +496,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 #endif
             ExtSegmentEndManager segEndMan = ExtSegmentEndManager.Instance;
             int segmentEndId = segEndMan.GetIndex(segmentId, nodeId);
-            if (segmentEndId <0) {
+            if (segmentEndId < 0) {
                 Log._Debug($"Node {nodeId} is not connected to segment {segmentId}");
                 return false;
             }

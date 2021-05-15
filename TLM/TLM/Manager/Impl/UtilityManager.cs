@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
     using System.Threading;
@@ -7,54 +7,46 @@
     using TrafficManager.API.Manager;
     using TrafficManager.State;
     using UnityEngine;
-
+    using TrafficManager.Lifecycle;
     public class UtilityManager : AbstractCustomManager, IUtilityManager {
-        public static UtilityManager Instance { get; }
-
         static UtilityManager() {
             Instance = new UtilityManager();
         }
 
+        public static UtilityManager Instance { get; }
+
         public void ClearTraffic() {
-            try {
-                Monitor.Enter(Singleton<VehicleManager>.instance);
-
-                VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
-                for (uint i = 0; i < vehicleManager.m_vehicles.m_size; ++i) {
-                    if ((vehicleManager.m_vehicles.m_buffer[i].m_flags & Vehicle.Flags.Created) != 0) {
-                        vehicleManager.ReleaseVehicle((ushort)i);
+            lock (Singleton<VehicleManager>.instance) {
+                try {
+                    VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+                    for (uint i = 0; i < vehicleManager.m_vehicles.m_size; ++i) {
+                        if ((vehicleManager.m_vehicles.m_buffer[i].m_flags &
+                             Vehicle.Flags.Created) != 0) {
+                            vehicleManager.ReleaseVehicle((ushort)i);
+                        }
                     }
-                }
 
-                TrafficMeasurementManager.Instance.ResetTrafficStats();
-            }
-            catch (Exception ex) {
-                Log.Error($"Error occured while trying to clear traffic: {ex}");
-            }
-            finally {
-                Monitor.Exit(Singleton<VehicleManager>.instance);
+                    TrafficMeasurementManager.Instance.ResetTrafficStats();
+                } catch (Exception ex) {
+                    Log.Error($"Error occured while trying to clear traffic: {ex}");
+                }
             }
         }
 
         public void RemoveParkedVehicles() {
-            try {
-                Monitor.Enter(Singleton<VehicleManager>.instance);
+            lock (Singleton<VehicleManager>.instance) {
+                try {
+                    VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
 
-                VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
-
-                for (uint i = 0; i < vehicleManager.m_parkedVehicles.m_size; ++i) {
-                    if ((vehicleManager.m_parkedVehicles.m_buffer[i].m_flags &
-                         (ushort)VehicleParked.Flags.Created) != 0)
-                    {
-                        vehicleManager.ReleaseParkedVehicle((ushort)i);
+                    for (uint i = 0; i < vehicleManager.m_parkedVehicles.m_size; ++i) {
+                        if ((vehicleManager.m_parkedVehicles.m_buffer[i].m_flags &
+                             (ushort)VehicleParked.Flags.Created) != 0) {
+                            vehicleManager.ReleaseParkedVehicle((ushort)i);
+                        }
                     }
+                } catch (Exception ex) {
+                    Log.Error($"Error occured while trying to remove parked vehicles: {ex}");
                 }
-            }
-            catch (Exception ex) {
-                Log.Error($"Error occured while trying to remove parked vehicles: {ex}");
-            }
-            finally {
-                Monitor.Exit(Singleton<VehicleManager>.instance);
             }
         }
 
@@ -71,7 +63,7 @@
                 Log.Error($"Error occurred while printing debug info for flags: {e}");
             }
 
-            foreach (ICustomManager manager in LoadingExtension.RegisteredManagers) {
+            foreach (ICustomManager manager in TMPELifecycle.Instance.RegisteredManagers) {
                 try {
                     manager.PrintDebugInfo();
                 }

@@ -2,7 +2,7 @@ namespace TrafficManager.Util {
     using ColossalFramework.Math;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
-    using Record;
+    using TrafficManager.Util.Record;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -75,7 +75,7 @@ namespace TrafficManager.Util {
                         Debug.LogAssertion("The road is the wrong way around.");
                         break;
                     case 1:
-                        break;// not enough lanes Use default settings.
+                        break; // not enough lanes Use default settings.
                     case 2:
                         if (bRight && bLeft) {
                             // not enough lanes, use default settings
@@ -161,7 +161,6 @@ namespace TrafficManager.Util {
                     startNode,
                     false);
             }
-
         }
 
         private static void FixSegmentMinor(ushort segmentId, ushort nodeId) {
@@ -333,26 +332,24 @@ namespace TrafficManager.Util {
             ArrowDirection dir,
             bool preferLeft) {
             ArrowDirection preferDir = preferLeft ? ArrowDirection.Left : ArrowDirection.Right;
+
             List<ushort> sortedSegList = new List<ushort>();
 
-            netService.IterateNodeSegments(
-                headNodeId,
-                ClockDirection.CounterClockwise,
-                (ushort NextSegmentId, ref NetSegment _) => {
-                    if (!IsPartofRoundabout(NextSegmentId, segmentId, headNodeId)) {
-                        return true;
-                    }
-                    if (segEndMan.GetDirection(segmentId, NextSegmentId, headNodeId) == dir) {
-                        for (int i = 0; i < sortedSegList.Count; ++i) {
-                            if (segEndMan.GetDirection(NextSegmentId, sortedSegList[i], headNodeId) == preferDir) {
-                                sortedSegList.Insert(i, NextSegmentId);
-                                return true;
-                            }
+            foreach (var nodeSegmentId in netService.GetNodeSegmentIds(headNodeId, ClockDirection.CounterClockwise)) {
+                if (!IsPartofRoundabout(nodeSegmentId, segmentId, headNodeId)) {
+                    continue;
+                }
+                if (segEndMan.GetDirection(segmentId, nodeSegmentId, headNodeId) == dir) {
+                    for (int i = 0; i < sortedSegList.Count; ++i) {
+                        if (segEndMan.GetDirection(nodeSegmentId, sortedSegList[i], headNodeId) == preferDir) {
+                            sortedSegList.Insert(i, nodeSegmentId);
+                            continue;
                         }
-                        sortedSegList.Add(NextSegmentId);
                     }
-                    return true;
-                });
+                    sortedSegList.Add(nodeSegmentId);
+                }
+            }
+
             return sortedSegList;
         }
 
@@ -429,7 +426,6 @@ namespace TrafficManager.Util {
             float r = len / Mathf.Sqrt(2 - 2 * dot); // see https://github.com/CitiesSkylinesMods/TMPE/issues/793#issuecomment-616351792
             return r;
         }
-
 
         /// <summary>
         /// calculates realisitic speed limit of input curved segment assuming it is part of a circle.

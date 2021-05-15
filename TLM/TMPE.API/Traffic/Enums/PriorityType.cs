@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     public enum PriorityType {
         None = 0,
 
@@ -15,6 +15,6 @@
         /// <summary>
         /// Yield sign
         /// </summary>
-        Yield = 3
+        Yield = 3,
     }
 }

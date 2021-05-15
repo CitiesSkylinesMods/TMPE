@@ -12,8 +12,12 @@ namespace TrafficManager.Util {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using UnityEngine;
+    using ColossalFramework.UI;
 
     internal static class Shortcuts {
+        internal static bool InSimulationThread() =>
+            System.Threading.Thread.CurrentThread == SimulationManager.instance.m_simulationThread;
+
         /// <summary>
         /// returns a new calling Clone() on all items.
         /// </summary>
@@ -39,11 +43,13 @@ namespace TrafficManager.Util {
             list[index2] = temp;
         }
 
-        private static NetNode[] _nodeBuffer => Singleton<NetManager>.instance.m_nodes.m_buffer;
+        private static NetNode[] _nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
 
-        private static NetSegment[] _segBuffer => Singleton<NetManager>.instance.m_segments.m_buffer;
+        private static NetSegment[] _segBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
-        private static NetLane[] _laneBuffer => Singleton<NetManager>.instance.m_lanes.m_buffer;
+        private static NetLane[] _laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
+
+        private static Building[] _buildingBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
 
         private static ExtSegmentEnd[] _segEndBuff => segEndMan.ExtSegmentEnds;
 
@@ -55,13 +61,18 @@ namespace TrafficManager.Util {
 
         internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
 
-        internal static ref NetNode ToNode(this ushort nodeId) => ref GetNode(nodeId);
+        internal static ref NetNode ToNode(this ushort nodeId) => ref _nodeBuffer[nodeId];
 
         internal static ref NetLane ToLane(this uint laneId) => ref _laneBuffer[laneId];
 
         internal static ref NetSegment GetSeg(ushort segmentId) => ref _segBuffer[segmentId];
 
-        internal static ref NetSegment ToSegment(this ushort segmentId) => ref GetSeg(segmentId);
+        internal static ref NetSegment ToSegment(this ushort segmentId) => ref _segBuffer[segmentId];
+
+        internal static ref Building ToBuilding(this ushort buildingId) => ref _buildingBuffer[buildingId];
+
+        internal static NetInfo.Lane GetLaneInfo(ushort segmentId, int laneIndex) =>
+            segmentId.ToSegment().Info.m_lanes[laneIndex];
 
         internal static ref ExtSegmentEnd GetSegEnd(ushort segmentId, ushort nodeId) =>
             ref _segEndBuff[segEndMan.GetIndex(segmentId, nodeId)];
@@ -109,7 +120,7 @@ namespace TrafficManager.Util {
 
         /// <summary>
         /// Creates and string of all items with enumerable inpute as {item1, item2, item3}
-        /// null argument returns "Null"
+        /// null argument returns "Null".
         /// </summary>
         internal static string ToSTR<T>(this IEnumerable<T> enumerable) {
             if (enumerable == null)
@@ -126,7 +137,7 @@ namespace TrafficManager.Util {
         internal static string ToSTR(this List<LanePos> laneList) =>
             (from lanePos in laneList select lanePos.laneId).ToSTR();
 
-        internal static void AssertEq<T>(T a, T b, string m = "") where T:IComparable {
+        internal static void AssertEq<T>(T a, T b, string m = "") where T : IComparable {
             if (a.CompareTo(b) != 0) {
                 Log.Error($"Assertion failed. Expected {a} == {b} | " + m);
             }
@@ -138,10 +149,34 @@ namespace TrafficManager.Util {
             }
         }
 
+        internal static void AssertNotNull(object obj, string m = "") {
+            if (obj == null) {
+                Log.Error("Assertion failed. Expected not null: " + m);
+            }
+        }
+
         internal static void Assert(bool con, string m = "") {
             if (!con) {
                 Log.Error("Assertion failed: " + m);
             }
+        }
+
+        internal static void LogException(this Exception ex, bool showInPanel = false) {
+            if (ex is null)
+                Log.Error("null argument ex was passed to Log.Exception()");
+            try {
+                Log.Error(ex.ToString() + "\n\t===================="); // stack trace is prited after this.
+                UnityEngine.Debug.LogException(ex);
+                if (showInPanel)
+                    UIView.ForwardException(ex);
+            } catch (Exception ex2) {
+                Log.Error(ex2.ToString());
+            }
+        }
+
+        internal static void ShowErrorDialog(string title, string message) {
+            UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel")
+                .SetMessage(title, message, true);
         }
 
         internal static bool ShiftIsPressed => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);

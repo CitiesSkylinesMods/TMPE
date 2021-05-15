@@ -3,15 +3,10 @@ namespace TrafficManager.U.Autosize {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using JetBrains.Annotations;
+    using UnityEngine;
 
     /// <summary>Stores callback info for a resizable control.</summary>
     public class UResizerConfig {
-        // /// <summary>
-        // /// Set this to true to once attempt to realign the layout of this control and all children.
-        // /// This flag is respected by <see cref="U.Panel.BaseUWindowPanel"/>.
-        // /// </summary>
-        // public bool InvalidateLayoutFlag = false;
-
         /// <summary>
         /// Handler is called at control creation and also when resize is required due to screen
         /// resolution or UI scale change. Can be null, in that case the size is preserved.
@@ -24,11 +19,21 @@ namespace TrafficManager.U.Autosize {
         /// </summary>
         public float Padding;
 
+        public USizeChoice SizeChoice = USizeChoice.ResizeFunction;
+
         /// <summary>
-        /// Set this to false, then the control will be positioned but will not contribute to
-        /// parent's all children bounding box. Useful for controls hanging outside of the parent.
+        /// Applied on resize function call if the <see cref="SizeChoice"/> is set to <value>Predefined</value>.
         /// </summary>
-        public bool ContributeToBoundingBox { get; set; }
+        public Vector2 FixedSize;
+
+        public UStackingChoice StackingChoice = UStackingChoice.ResizeFunction;
+
+        /// <summary>
+        /// Applied on resize function call if the <see cref="Stacking"/> is set to <value>Predefined</value>.
+        /// </summary>
+        public UStackMode Stacking;
+
+        public float StackingSpacing;
 
         public UResizerConfig() {
             onResize_ = null;
@@ -36,6 +41,11 @@ namespace TrafficManager.U.Autosize {
             Padding = 0f;
         }
 
+        /// <summary>
+        /// Set this to false, then the control will be positioned but will not contribute to
+        /// parent's all children bounding box. Useful for controls hanging outside of the parent.
+        /// </summary>
+        public bool ContributeToBoundingBox { get; set; }
         public static UResizerConfig From(UIComponent control) {
             return (control as ISmartSizableControl)?.GetResizerConfig();
         }
@@ -50,14 +60,28 @@ namespace TrafficManager.U.Autosize {
                                                  UBoundingBox childrenBox) {
             if (control is ISmartSizableControl currentAsResizable) {
                 UResizerConfig resizerConfig = currentAsResizable.GetResizerConfig();
+                UResizer resizer = new UResizer(
+                    control: control,
+                    config: resizerConfig,
+                    previousSibling,
+                    childrenBox);
 
+                // Apply predefined decision: fixed size
+                if (resizerConfig.SizeChoice == USizeChoice.Predefined) {
+                    resizer.Width(UValue.FixedSize(resizerConfig.FixedSize.x));
+                    resizer.Height(UValue.FixedSize(resizerConfig.FixedSize.y));
+                }
+
+                // Apply predefined decision: stacking and spacing
+                if (resizerConfig.StackingChoice == UStackingChoice.Predefined) {
+                    resizer.Stack(
+                        mode: resizerConfig.Stacking,
+                        spacing: resizerConfig.StackingSpacing);
+                }
+
+                // Call the resize function to apply user decisions on the size and position
                 if (resizerConfig.onResize_ != null) {
                     // Create helper UResizer and run it
-                    UResizer resizer = new UResizer(
-                        control: control,
-                        config: resizerConfig,
-                        previousSibling,
-                        childrenBox);
                     try {
                         resizerConfig.onResize_(resizer);
                     }

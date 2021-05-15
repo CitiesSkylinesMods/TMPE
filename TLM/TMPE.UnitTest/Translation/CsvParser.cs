@@ -24,23 +24,22 @@ namespace TMUnitTest.Translation {
         public static void InitializeClass(TestContext testContext) {
             testBlock_LF = File.ReadAllBytes("./Translation/TestFiles/TestBlock_LF.test");
             testBlock_CRLF = File.ReadAllBytes("./Translation/TestFiles/TestBlock_CRLF.test");
-            multilineTestBlock_LF =File.ReadAllBytes("./Translation/TestFiles/MultilineTestBlock_LF.test");
-            multilineTestBlock_CRLF =File.ReadAllBytes("./Translation/TestFiles/MultilineTestBlock_CRLF.test");
+            multilineTestBlock_LF = File.ReadAllBytes("./Translation/TestFiles/MultilineTestBlock_LF.test");
+            multilineTestBlock_CRLF = File.ReadAllBytes("./Translation/TestFiles/MultilineTestBlock_CRLF.test");
             PrepareData(testBlock_LF, out testBlock_LF_Columns, out testBlock_LF_DataBlock);
             PrepareData(testBlock_CRLF, out testBlock_CRLF_Columns, out testBlock_CRLF_DataBlock);
             PrepareData(multilineTestBlock_LF, out multilineTestBlock_LF_Columns, out multilineTestBlock_LF_DataBlock);
             PrepareData(multilineTestBlock_CRLF, out multilineTestBlock_CRLF_Columns, out multilineTestBlock_CRLF_DataBlock);
-
         }
 
         private static void PrepareData(byte[] testFileData, out List<string> columns, out string dataBlock) {
-                    PrivateType lookupTableType = new PrivateType(typeof(LookupTable));
+            PrivateType lookupTableType = new PrivateType(typeof(LookupTable));
             string columnsRow;
             using (var m = new MemoryStream(testFileData)) {
                 using (var sr = new StreamReader(m)) {
                     object[] args = {sr, null, null};
                     lookupTableType.InvokeStatic("ReadLines", args);
-                    columnsRow =(string)args[1];
+                    columnsRow = (string)args[1];
                     dataBlock = (string)args[2];
                 }
             }
@@ -225,7 +224,7 @@ namespace TMUnitTest.Translation {
 
         [TestMethod]
         public void TestMultiLineCellParseWithCommas_LF() {
-            TestCollectTranslations(multilineTestBlock_LF_DataBlock,multilineTestBlock_LF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
+            TestCollectTranslations(multilineTestBlock_LF_DataBlock, multilineTestBlock_LF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-comma", "test\nmulti,line text\nseparation"));
             CollectionAssert.Contains(resultMap["en"], new KeyValuePair<string, string>("multiple-new-lines-contains-comma", "test en"));
 
@@ -235,7 +234,7 @@ namespace TMUnitTest.Translation {
 
         [TestMethod]
         public void TestMultiLineCellParseWithCommas_CRLF() {
-            TestCollectTranslations(multilineTestBlock_CRLF_DataBlock,multilineTestBlock_CRLF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
+            TestCollectTranslations(multilineTestBlock_CRLF_DataBlock, multilineTestBlock_CRLF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-comma", "test\r\nmulti,line text\r\nseparation"));
             CollectionAssert.Contains(resultMap["en"], new KeyValuePair<string, string>("multiple-new-lines-contains-comma", "test en"));
 
@@ -245,7 +244,7 @@ namespace TMUnitTest.Translation {
 
         [TestMethod]
         public void TestMultiLineCellParseWithVariousData_LF() {
-            TestCollectTranslations(multilineTestBlock_LF_DataBlock,multilineTestBlock_LF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
+            TestCollectTranslations(multilineTestBlock_LF_DataBlock, multilineTestBlock_LF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks", "test\nmulti, line text with \"quote-marked text\", text between commas,\nseparation"));
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks-2", "test\nmulti, line text with \"quote-marked\n text\", text between commas,\nseparation"));
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks-3", "test \"\nline end with \"quote-marks\""));
@@ -257,7 +256,7 @@ namespace TMUnitTest.Translation {
 
         [TestMethod]
         public void TestMultiLineCellParseWithVariousData_CRLF() {
-            TestCollectTranslations(multilineTestBlock_CRLF_DataBlock,multilineTestBlock_CRLF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
+            TestCollectTranslations(multilineTestBlock_CRLF_DataBlock, multilineTestBlock_CRLF_Columns, out Dictionary<string, Dictionary<string, string>> resultMap);
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks", "test\r\nmulti, line text with \"quote-marked text\", text between commas,\r\nseparation"));
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks-2", "test\r\nmulti, line text with \"quote-marked\r\n text\", text between commas,\r\nseparation"));
             CollectionAssert.Contains(resultMap["de"], new KeyValuePair<string, string>("multiple-new-lines-contains-multiple-commas-and-quote-marks-3", "test \"\r\nline end with \"quote-marks\""));
@@ -273,8 +272,12 @@ namespace TMUnitTest.Translation {
         /// <param name="dataBlock"></param>
         /// <param name="columns"></param>
         /// <param name="result">map of translations [langCode][key][translated_string]</param>
-        private static void TestCollectTranslations(string dataBlock, List<string> columns,
-                                     out Dictionary<string, Dictionary<string, string>> result) {
+        private static void TestCollectTranslations(
+            string dataBlock,
+            List<string> columns,
+            out Dictionary<string,
+            Dictionary<string, string>> result)
+        {
             PrivateType privateType = new PrivateType(typeof(LookupTable));
             object[] args = {dataBlock, columns, null};
             privateType.InvokeStatic("CollectTranslations", args);

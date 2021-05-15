@@ -1,5 +1,4 @@
 namespace TrafficManager.TrafficLight.Impl {
-    using CSUtil.Commons.Benchmark;
     using CSUtil.Commons;
     using ExtVehicleType = global::TrafficManager.API.Traffic.Enums.ExtVehicleType;
     using System.Collections.Generic;
@@ -19,6 +18,45 @@ namespace TrafficManager.TrafficLight.Impl {
     public class TimedTrafficLightsStep
         : ITimedTrafficLightsStep
     {
+        public TimedTrafficLightsStep(ITimedTrafficLights timedNode,
+                                      int minTime,
+                                      int maxTime,
+                                      StepChangeMetric stepChangeMode,
+                                      float waitFlowBalance,
+                                      bool makeRed = false) {
+            MinTime = minTime;
+            MaxTime = maxTime;
+            ChangeMetric = stepChangeMode;
+            WaitFlowBalance = waitFlowBalance;
+            this.timedNode = timedNode;
+
+            CurrentFlow = Single.NaN;
+            CurrentWait = Single.NaN;
+
+            endTransitionStart = null;
+            stepDone = false;
+
+            ref NetNode node = ref timedNode.NodeId.ToNode();
+
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId == 0) {
+                    continue;
+                }
+
+                bool startNode =
+                    (bool)Constants.ServiceFactory.NetService.IsStartNode(
+                        segmentId,
+                        timedNode.NodeId);
+
+                if (!AddSegment(segmentId, startNode, makeRed)) {
+                    Log.Warning(
+                        $"TimedTrafficLightsStep.ctor: Failed to add segment {segmentId} " +
+                        $"@ start {startNode} to node {timedNode.NodeId}");
+                }
+            }
+        }
+
         /// <summary>
         /// The number of time units this traffic light remains in the current state at least
         /// </summary>
@@ -79,53 +117,20 @@ namespace TrafficManager.TrafficLight.Impl {
                 "\tmaxWait = {7}\n\tPreviousStepRefIndex = {8}\n\tNextStepRefIndex = {9}\n" +
                 "\tlastFlowWaitCalc = {10}\n\tCustomSegmentLights = {11}\n" +
                 "\tInvalidSegmentLights = {12}\n\twaitFlowBalance = {13}\nTimedTrafficLightsStep]",
-                MinTime, MaxTime, ChangeMetric, startFrame, stepDone, endTransitionStart, CurrentFlow,
-                CurrentWait, PreviousStepRefIndex, NextStepRefIndex, lastFlowWaitCalc, CustomSegmentLights,
-                InvalidSegmentLights.CollectionToString(), WaitFlowBalance);
-        }
-
-        public TimedTrafficLightsStep(ITimedTrafficLights timedNode,
-                                      int minTime,
-                                      int maxTime,
-                                      StepChangeMetric stepChangeMode,
-                                      float waitFlowBalance,
-                                      bool makeRed = false) {
-            MinTime = minTime;
-            MaxTime = maxTime;
-            ChangeMetric = stepChangeMode;
-            WaitFlowBalance = waitFlowBalance;
-            this.timedNode = timedNode;
-
-            CurrentFlow = Single.NaN;
-            CurrentWait = Single.NaN;
-
-            endTransitionStart = null;
-            stepDone = false;
-
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    timedNode.NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        segmentId = node.GetSegment(i);
-                        return true;
-                    });
-
-                if (segmentId == 0) {
-                    continue;
-                }
-
-                bool startNode =
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(
-                        segmentId,
-                        timedNode.NodeId);
-
-                if (!AddSegment(segmentId, startNode, makeRed)) {
-                    Log.Warning(
-                        $"TimedTrafficLightsStep.ctor: Failed to add segment {segmentId} " +
-                        $"@ start {startNode} to node {timedNode.NodeId}");
-                }
-            }
+                MinTime,
+                MaxTime,
+                ChangeMetric,
+                startFrame,
+                stepDone,
+                endTransitionStart,
+                CurrentFlow,
+                CurrentWait,
+                PreviousStepRefIndex,
+                NextStepRefIndex,
+                lastFlowWaitCalc,
+                CustomSegmentLights,
+                InvalidSegmentLights.CollectionToString(),
+                WaitFlowBalance);
         }
 
         /// <summary>
@@ -146,8 +151,12 @@ namespace TrafficManager.TrafficLight.Impl {
                 Log._DebugFormat(
                     "TimedTrafficLightsStep.isEndTransitionDone() called for master NodeId={0}. " +
                     "CurrentStep={1} getCurrentFrame()={2} endTransitionStart={3} stepDone={4} ret={5}",
-                    timedNode.NodeId, timedNode.CurrentStep, GetCurrentFrame(),
-                    endTransitionStart, stepDone, ret);
+                    timedNode.NodeId,
+                    timedNode.CurrentStep,
+                    GetCurrentFrame(),
+                    endTransitionStart,
+                    stepDone,
+                    ret);
             }
 #endif
             return ret;
@@ -171,8 +180,12 @@ namespace TrafficManager.TrafficLight.Impl {
                 Log._DebugFormat(
                     "TimedTrafficLightsStep.isInEndTransition() called for master NodeId={0}. " +
                     "CurrentStep={1} getCurrentFrame()={2} endTransitionStart={3} stepDone={4} ret={5}",
-                    timedNode.NodeId, timedNode.CurrentStep, GetCurrentFrame(), endTransitionStart,
-                    stepDone, ret);
+                    timedNode.NodeId,
+                    timedNode.CurrentStep,
+                    GetCurrentFrame(),
+                    endTransitionStart,
+                    stepDone,
+                    ret);
             }
 #endif
             return ret;
@@ -190,8 +203,12 @@ namespace TrafficManager.TrafficLight.Impl {
                 Log._DebugFormat(
                     "TimedTrafficLightsStep.isInStartTransition() called for master NodeId={0}. " +
                     "CurrentStep={1} getCurrentFrame()={2} startFrame={3} stepDone={4} ret={5}",
-                    timedNode.NodeId, timedNode.CurrentStep, GetCurrentFrame(), startFrame,
-                    stepDone, ret);
+                    timedNode.NodeId,
+                    timedNode.CurrentStep,
+                    GetCurrentFrame(),
+                    startFrame,
+                    stepDone,
+                    ret);
             }
 #endif
 
@@ -493,8 +510,13 @@ namespace TrafficManager.TrafficLight.Impl {
                             Log._DebugFormat(
                                 "TimedTrafficLightsStep.SetLights({0})     -> *SETTING* LightLeft={1} " +
                                 "LightMain={2} LightRight={3} for segmentId={4} @ NodeId={5} for vehicle {6}",
-                                noTransition, liveSegmentLight.LightLeft, liveSegmentLight.LightMain,
-                                liveSegmentLight.LightRight, segmentId, timedNode.NodeId, vehicleType);
+                                noTransition,
+                                liveSegmentLight.LightLeft,
+                                liveSegmentLight.LightMain,
+                                liveSegmentLight.LightRight,
+                                segmentId,
+                                timedNode.NodeId,
+                                vehicleType);
                         }
 #endif
 
@@ -643,9 +665,7 @@ namespace TrafficManager.TrafficLight.Impl {
             // Log._Debug($"TTL @ {timedNode.NodeId}: curFrame={curFrame} lastFlowWaitCalc={lastFlowWaitCalc}");
             if (lastFlowWaitCalc < curFrame) {
                 // Log._Debug($"TTL @ {timedNode.NodeId}: lastFlowWaitCalc<curFrame");
-                using (var bm = Benchmark.MaybeCreateBenchmark(null, "CalcWaitFlow")) {
-                    CalcWaitFlow(true, timedNode.CurrentStep, out wait, out flow);
-                }
+                CalcWaitFlow(true, timedNode.CurrentStep, out wait, out flow);
 
                 if (updateValues) {
                     lastFlowWaitCalc = curFrame;
@@ -704,7 +724,6 @@ namespace TrafficManager.TrafficLight.Impl {
             }
 
             return done;
-
         }
 
         public float GetMetric(float flow, float wait) {
@@ -744,7 +763,6 @@ namespace TrafficManager.TrafficLight.Impl {
         /// </summary>
         /// <param name="wait"></param>
         /// <param name="flow"></param>
-        /// <returns>true if the values could be calculated, false otherwise</returns>
         public void CalcWaitFlow(bool countOnlyMovingIfGreen,
                                  int stepRefIndex,
                                  out float wait,
@@ -823,15 +841,9 @@ namespace TrafficManager.TrafficLight.Impl {
                         countOnlyMovingIfGreenOnSegment = countOnlyMovingIfGreen;
 
                         if (countOnlyMovingIfGreenOnSegment) {
-                            Constants.ServiceFactory.NetService.ProcessSegment(
-                                sourceSegmentId,
-                                (ushort srcSegId, ref NetSegment segment) => {
-                                    if (restrMan.IsRailSegment(segment.Info)) {
-                                        countOnlyMovingIfGreenOnSegment = false;
-                                    }
-
-                                    return true;
-                                });
+                            if (restrMan.IsRailSegment(sourceSegmentId.ToSegment().Info)) {
+                                countOnlyMovingIfGreenOnSegment = false;
+                            }
                         }
 
                         movingVehiclesMetrics =
@@ -847,7 +859,8 @@ namespace TrafficManager.TrafficLight.Impl {
                     if (logTrafficLights) {
                         Log._DebugFormat(
                             "calcWaitFlow: Seg. {0} @ {1}, vehTypeByLaneIndex={2}",
-                            sourceSegmentId, timedNodeId,
+                            sourceSegmentId,
+                            timedNodeId,
                             string.Join(
                                 ", ",
                                 vehTypeByLaneIndex.Select(x => x == null ? "null" : x.ToString())
@@ -959,11 +972,11 @@ namespace TrafficManager.TrafficLight.Impl {
                             } else {
                                 curTotalLaneWait += numVehicles;
                                 ++numLaneWaits;
-                                    Log._DebugIf(
-                                        logTrafficLights,
-                                        () => "TimedTrafficLightsStep.calcWaitFlow: ## Vehicles @ " +
-                                        $"lane {laneIndex}, seg. {sourceSegmentId} going to seg. " +
-                                        $"{targetSegmentId}: COUTING as WAITING -- numVehicles={numVehicles}");
+                                Log._DebugIf(
+                                    logTrafficLights,
+                                    () => "TimedTrafficLightsStep.calcWaitFlow: ## Vehicles @ " +
+                                    $"lane {laneIndex}, seg. {sourceSegmentId} going to seg. " +
+                                    $"{targetSegmentId}: COUTING as WAITING -- numVehicles={numVehicles}");
                             }
 
                             Log._DebugIf(

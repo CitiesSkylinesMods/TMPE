@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
     using System;
@@ -23,10 +23,6 @@
 
         private readonly int[] meanSpeedLanes = { 0, 0 };
 
-        public LaneTrafficData[][] LaneTrafficData { get; }
-
-        public SegmentDirTrafficData[] SegmentDirTrafficData { get; }
-
         private TrafficMeasurementManager() {
             LaneTrafficData = new LaneTrafficData[NetManager.MAX_SEGMENT_COUNT][];
             SegmentDirTrafficData = new SegmentDirTrafficData[NetManager.MAX_SEGMENT_COUNT * 2];
@@ -37,6 +33,10 @@
 
             ResetTrafficStats();
         }
+
+        public LaneTrafficData[][] LaneTrafficData { get; }
+
+        public SegmentDirTrafficData[] SegmentDirTrafficData { get; }
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();

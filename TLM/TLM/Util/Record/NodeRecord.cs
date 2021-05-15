@@ -1,11 +1,16 @@
 namespace TrafficManager.Util.Record {
+    using System;
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.State;
 
-    class NodeRecord : IRecordable {
-        public ushort NodeId { get; private set; }
+    [Serializable]
+    public class NodeRecord : IRecordable {
         public NodeRecord(ushort nodeId) => NodeId = nodeId;
+
+        public ushort NodeId { get; private set; }
+        InstanceID InstanceID => new InstanceID { NetNode = NodeId};
 
         private bool trafficLight_;
         private List<LaneConnectionRecord> lanes_;
@@ -26,6 +31,12 @@ namespace TrafficManager.Util.Record {
             }
         }
 
+        public void Transfer(Dictionary<InstanceID, InstanceID> map) {
+            SetTrafficLight(map[InstanceID].NetNode, trafficLight_);
+            foreach (LaneConnectionRecord sourceLane in lanes_)
+                sourceLane.Transfer(map);
+        }
+
         private static bool SetTrafficLight(ushort nodeId, bool flag) {
             // TODO move code to manager.
             bool currentValue = tlMan.HasTrafficLight(nodeId, ref nodeId.ToNode());
@@ -41,5 +52,7 @@ namespace TrafficManager.Util.Record {
             }
             return tlMan.SetTrafficLight(nodeId, flag, ref nodeId.ToNode());
         }
+
+        public byte[] Serialize() => SerializationUtil.Serialize(this);
     }
 }

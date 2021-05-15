@@ -4,21 +4,15 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     public class ExtSegmentManager
         : AbstractCustomManager,
           IExtSegmentManager
     {
-        public static ExtSegmentManager Instance { get; }
-
         static ExtSegmentManager() {
             Instance = new ExtSegmentManager();
         }
-
-        /// <summary>
-        /// All additional data for buildings
-        /// </summary>
-        public ExtSegment[] ExtSegments { get; }
 
         private ExtSegmentManager() {
             ExtSegments = new ExtSegment[NetManager.MAX_SEGMENT_COUNT];
@@ -27,6 +21,13 @@ namespace TrafficManager.Manager.Impl {
                 ExtSegments[i] = new ExtSegment((ushort)i);
             }
         }
+
+        public static ExtSegmentManager Instance { get; }
+
+        /// <summary>
+        /// All additional data for buildings
+        /// </summary>
+        public ExtSegment[] ExtSegments { get; }
 
         public bool IsValid(ushort segmentId) {
             return Constants.ServiceFactory.NetService.IsSegmentValid(segmentId);
@@ -139,14 +140,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            bool ret = false;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    ret = CalculateHasBusLane(segment.Info);
-                    return true;
-                });
-            return ret;
+            return CalculateHasBusLane(segmentId.ToSegment().Info);
         }
 
         /// <summary>
@@ -170,14 +164,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            var ret = false;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    ret = CalculateIsHighway(segment.Info);
-                    return true;
-                });
-            return ret;
+            return CalculateIsHighway(segmentId.ToSegment().Info);
         }
 
         /// <summary>

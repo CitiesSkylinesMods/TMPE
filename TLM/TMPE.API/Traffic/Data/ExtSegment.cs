@@ -27,6 +27,14 @@
         /// </summary>
         public bool buslane;
 
+        public ExtSegment(ushort segmentId) {
+            this.segmentId = segmentId;
+            valid = false;
+            oneWay = false;
+            highway = false;
+            buslane = false;
+        }
+
         public override string ToString() {
             return string.Format(
                 "[ExtSegment {0}\n\tsegmentId={1}\n\tvalid={2}\n\toneWay={3}\n\thighway={4}\n" +
@@ -37,14 +45,6 @@
                 oneWay,
                 highway,
                 buslane);
-        }
-
-        public ExtSegment(ushort segmentId) {
-            this.segmentId = segmentId;
-            valid = false;
-            oneWay = false;
-            highway = false;
-            buslane = false;
         }
 
         public void Reset() {

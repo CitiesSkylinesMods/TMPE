@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     using System;
 
     [Flags]
@@ -16,6 +16,6 @@
         /// <summary>
         /// Travelling by means of public transport
         /// </summary>
-        PublicTransport = 2
+        PublicTransport = 2,
     }
 }

@@ -8,6 +8,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.TrafficLight;
     using TrafficManager.TrafficLight.Impl;
     using TrafficManager.TrafficLight;
+    using TrafficManager.Util;
 
     /// <summary>
     /// Manages the states of all custom traffic lights on the map
@@ -16,11 +17,11 @@ namespace TrafficManager.Manager.Impl {
         : AbstractGeometryObservingManager,
           ICustomSegmentLightsManager
     {
-        public static CustomSegmentLightsManager Instance { get; }
-
         static CustomSegmentLightsManager() {
             Instance = new CustomSegmentLightsManager();
         }
+
+        public static CustomSegmentLightsManager Instance { get; }
 
         /// <summary>
         /// custom traffic lights by segment id
@@ -159,12 +160,13 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    AddSegmentLights(segmentId, segment.m_startNode == nodeId);
-                    return true;
-                });
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    AddSegmentLights(segmentId, segmentId.ToSegment().m_startNode == nodeId);
+                }
+            }
         }
 
         /// <summary>
@@ -172,12 +174,13 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="nodeId">NodeId affected</param>
         public void RemoveNodeLights(ushort nodeId) {
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    RemoveSegmentLight(segmentId, segment.m_startNode == nodeId);
-                    return true;
-                });
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    RemoveSegmentLight(segmentId, segmentId.ToSegment().m_startNode == nodeId);
+                }
+            }
         }
 
         /// <summary>

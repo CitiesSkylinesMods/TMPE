@@ -1,5 +1,5 @@
 ﻿namespace TrafficManager.Patch._CitizenManager {
-    using Harmony;
+    using HarmonyLib;
     using JetBrains.Annotations;
 
     [HarmonyPatch(typeof(CitizenManager), "ReleaseCitizenInstance")]

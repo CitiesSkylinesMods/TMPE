@@ -9,6 +9,10 @@ namespace TrafficManager.UI.Helpers {
 
         public event ICities.OnCheckChanged OnValueChanged;
 
+        public OnCheckChanged Handler {
+            set => OnValueChanged += value;
+        }
+
         public override bool Value {
             get => base.Value;
             set {
@@ -28,14 +32,12 @@ namespace TrafficManager.UI.Helpers {
                 T(Label),
                 Value,
                 this.OnValueChanged) as UICheckBox;
-            if (Tooltip!=null) {
+            if (Tooltip != null) {
                 _ui.tooltip = T(Tooltip);
             }
             if (Indent) {
                 State.Options.Indent(_ui);
             }
         }
-
-
     }
 }

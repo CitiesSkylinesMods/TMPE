@@ -6,6 +6,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.State;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
+    using TrafficManager.Util;
     using TrafficManager.Util.Caching;
     using UnityEngine;
 
@@ -43,12 +44,7 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                HoveredNodeId,
-                (ushort nId, ref NetNode node) => {
-                    ToggleTrafficLight(HoveredNodeId, ref node);
-                    return true;
-                });
+            ToggleTrafficLight(HoveredNodeId, ref HoveredNodeId.ToNode());
         }
 
         public override void OnSecondaryClickOverlay() {
@@ -133,12 +129,11 @@ namespace TrafficManager.UI.SubTools {
 
             // For current camera store its position and cast a ray via mouse position
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-            Camera currentCamera = Camera.main;
             // Ray mouseRay = currentCamera.ScreenPointToRay(Input.mousePosition);
 
             // Check if camera pos/angle has changed then re-filter the visible nodes
             // Assumption: The states checked in this loop don't change while the tool is active
-            var currentCameraState = new CameraTransformValue(currentCamera);
+            var currentCameraState = new CameraTransformValue(InGameUtil.Instance.CachedMainCamera);
             if (!LastCachedCamera.Equals(currentCameraState)) {
                 CachedVisibleNodeIds.Clear();
                 LastCachedCamera = currentCameraState;

@@ -19,6 +19,12 @@ namespace TrafficManager.UI.SubTools {
         : LegacySubTool,
           UI.MainMenu.IOnscreenDisplayProvider
     {
+        public ParkingRestrictionsTool(TrafficManagerTool mainTool)
+            : base(mainTool) {
+            CachedVisibleSegmentIds = new GenericArrayCache<ushort>(NetManager.MAX_SEGMENT_COUNT);
+            LastCachedCamera = new CameraTransformValue();
+        }
+
         private ParkingRestrictionsManager parkingManager => ParkingRestrictionsManager.Instance;
 
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir
@@ -41,7 +47,6 @@ namespace TrafficManager.UI.SubTools {
                 !(a == b);
         }
 
-
         /// <summary>
         /// Stores potentially visible segment ids while the camera did not move
         /// </summary>
@@ -51,13 +56,6 @@ namespace TrafficManager.UI.SubTools {
         /// Stores last cached camera position in <see cref="CachedVisibleSegmentIds"/>
         /// </summary>
         private CameraTransformValue LastCachedCamera { get; set; }
-
-        public ParkingRestrictionsTool(TrafficManagerTool mainTool)
-            : base(mainTool)
-        {
-            CachedVisibleSegmentIds = new GenericArrayCache<ushort>(NetManager.MAX_SEGMENT_COUNT);
-            LastCachedCamera = new CameraTransformValue();
-        }
 
         public override void OnActivate() {
             base.OnActivate();
@@ -178,8 +176,8 @@ namespace TrafficManager.UI.SubTools {
         private void ShowSigns(bool viewOnly) {
             NetManager netManager = Singleton<NetManager>.instance;
 
-            var currentCamera = new CameraTransformValue(Camera.main);
-            Transform currentCameraTransform = Camera.main.transform;
+            var currentCamera = new CameraTransformValue(InGameUtil.Instance.CachedMainCamera);
+            Transform currentCameraTransform = InGameUtil.Instance.CachedCameraTransform;
             Vector3 camPos = currentCameraTransform.position;
 
             if (!LastCachedCamera.Equals(currentCamera)) {

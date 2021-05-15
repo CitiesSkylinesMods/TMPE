@@ -4,8 +4,6 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     using ColossalFramework;
     using CSUtil.Commons;
     using static Util.SegmentTraverser;
-    using System.Collections.Generic;
-    using System;
     using ColossalFramework.UI;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
@@ -18,14 +16,13 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     using UnityEngine;
     using TrafficManager.Util.Record;
     using static Util.Shortcuts;
-    using static TrafficManager.Util.SegmentTraverser;
 
     public class PrioritySignsTool
         : LegacySubTool,
           UI.MainMenu.IOnscreenDisplayProvider
     {
         public enum PrioritySignsMassEditMode {
-            Min=0,
+            Min = 0,
             MainYield = 0,
             MainStop = 1,
             YieldMain = 2,
@@ -93,7 +90,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         TraverseDirection.AnyDirection,
                         TraverseSide.Straight,
                         SegmentStopCriterion.None,
-                        (_)=>true);
+                        (_) => true);
                     segmentList = new List<ushort>(segments);
                 }
 
@@ -303,7 +300,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 bool showRemoveButton = false;
 
                 foreach (ushort nodeId in currentPriorityNodeIds) {
-                    if (! Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                    if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
                         continue;
                     }
 
@@ -311,23 +308,11 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         continue;
                     }
 
-                    Vector3 nodePos = default;
-                    Constants.ServiceFactory.NetService.ProcessNode(
-                        nodeId,
-                        (ushort nId, ref NetNode node) => {
-                            nodePos = node.m_position;
-                            return true;
-                        });
+                    ref NetNode node = ref nodeId.ToNode();
+                    Vector3 nodePos = node.m_position;
 
                     for (int i = 0; i < 8; ++i) {
-                        ushort segmentId = 0;
-                        Constants.ServiceFactory.NetService.ProcessNode(
-                            nodeId,
-                            (ushort nId, ref NetNode node) => {
-                                segmentId = node.GetSegment(i);
-                                return true;
-                            });
-
+                        ushort segmentId = node.GetSegment(i);
                         if (segmentId == 0) {
                             continue;
                         }
@@ -341,17 +326,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         }
 
                         // calculate sign position
-                        Vector3 signPos = nodePos;
-
-                        Constants.ServiceFactory.NetService.ProcessSegment(
-                            segmentId,
-                            (ushort sId, ref NetSegment segment) => {
-                                signPos +=
-                                    10f * (startNode
-                                               ? segment.m_startDirection
-                                               : segment.m_endDirection);
-                                return true;
-                            });
+                        ref NetSegment segment = ref segmentId.ToSegment();
+                        Vector3 signPos = nodePos + (10f * (startNode ? segment.m_startDirection : segment.m_endDirection));
 
                         if (!GeometryUtil.WorldToScreenPoint(signPos, out Vector3 _)) {
                             continue;
@@ -457,15 +433,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             Log._Debug("PrioritySignsTool.SetPrioritySign: flagging remaining segments at node " +
                        $"{nodeId} as main road.");
 
-            for (int i = 0; i < 8; ++i) {
-                ushort otherSegmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    nodeId,
-                    (ushort nId, ref NetNode node) => {
-                        otherSegmentId = node.GetSegment(i);
-                        return true;
-                    });
+            ref NetNode node = ref nodeId.ToNode();
 
+            for (int i = 0; i < 8; ++i) {
+                ushort otherSegmentId = node.GetSegment(i);
                 if (otherSegmentId == 0 || otherSegmentId == segmentId) {
                     continue;
                 }

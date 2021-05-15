@@ -10,6 +10,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.TrafficLight;
     using TrafficManager.State.ConfigData;
+    using TrafficManager.Util;
 
     /// <summary>
     /// Represents the traffic light (left, forward, right) at a specific segment end
@@ -17,6 +18,26 @@ namespace TrafficManager.TrafficLight.Impl {
     public class CustomSegmentLight
         : ICustomSegmentLight
     {
+        public CustomSegmentLight(CustomSegmentLights lights,
+                                  RoadBaseAI.TrafficLightState mainLight) {
+            this.lights_ = lights;
+
+            SetStates(mainLight, LightLeft, LightRight);
+            UpdateVisuals();
+        }
+
+        [UsedImplicitly]
+        public CustomSegmentLight(CustomSegmentLights lights,
+                                  RoadBaseAI.TrafficLightState mainLight,
+                                  RoadBaseAI.TrafficLightState leftLight,
+                                  RoadBaseAI.TrafficLightState rightLight) {
+            this.lights_ = lights;
+
+            SetStates(mainLight, leftLight, rightLight);
+
+            UpdateVisuals();
+        }
+
         [Obsolete]
         public ushort NodeId => lights_.NodeId;
 
@@ -51,7 +72,12 @@ namespace TrafficManager.TrafficLight.Impl {
             return string.Format(
                 "[CustomSegmentLight seg. {0} @ node {1}\n\tCurrentMode: {2}\n\tLightLeft: {3}\n" +
                 "\tLightMain: {4}\n\tLightRight: {5}\nCustomSegmentLight]",
-                SegmentId, NodeId, CurrentMode, LightLeft, LightMain, LightRight);
+                SegmentId,
+                NodeId,
+                CurrentMode,
+                LightLeft,
+                LightMain,
+                LightRight);
         }
 
         private void EnsureModeLights() {
@@ -96,28 +122,6 @@ namespace TrafficManager.TrafficLight.Impl {
             }
         }
 
-        public CustomSegmentLight(CustomSegmentLights lights,
-                                  RoadBaseAI.TrafficLightState mainLight) {
-            this.lights_ = lights;
-
-            SetStates(mainLight, LightLeft, LightRight);
-            UpdateVisuals();
-        }
-
-        [UsedImplicitly]
-        public CustomSegmentLight(CustomSegmentLights lights,
-                                  RoadBaseAI.TrafficLightState mainLight,
-                                  RoadBaseAI.TrafficLightState leftLight,
-                                  RoadBaseAI.TrafficLightState rightLight
-                // , RoadBaseAI.TrafficLightState pedestrianLight
-            ) {
-            this.lights_ = lights;
-
-            SetStates(mainLight, leftLight, rightLight);
-
-            UpdateVisuals();
-        }
-
         public void ToggleMode() {
             if (!Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
                 Log.Error($"CustomSegmentLight.ToggleMode: Segment {SegmentId} is invalid.");
@@ -125,15 +129,9 @@ namespace TrafficManager.TrafficLight.Impl {
             }
 
             IExtSegmentEndManager extSegMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    ToggleMode(
-                        ref extSegMan.ExtSegmentEnds[
-                            extSegMan.GetIndex(SegmentId, StartNode)],
-                        ref node);
-                    return true;
-                });
+            ToggleMode(
+                ref extSegMan.ExtSegmentEnds[extSegMan.GetIndex(SegmentId, StartNode)],
+                ref NodeId.ToNode());
         }
 
         private void ToggleMode(ref ExtSegmentEnd segEnd, ref NetNode node) {

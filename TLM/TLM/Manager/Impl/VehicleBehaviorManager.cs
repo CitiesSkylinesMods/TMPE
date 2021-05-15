@@ -1,6 +1,5 @@
 namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
-    using CSUtil.Commons.Benchmark;
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System;
@@ -47,7 +46,7 @@ namespace TrafficManager.Manager.Impl {
             1u << 16, 1u << 17, 1u << 18, 1u << 19,
             1u << 20, 1u << 21, 1u << 22, 1u << 23,
             1u << 24, 1u << 25, 1u << 26, 1u << 27,
-            1u << 28, 1u << 29, 1u << 30, 1u << 31
+            1u << 28, 1u << 29, 1u << 30, 1u << 31,
         };
 
         public static readonly VehicleBehaviorManager Instance = new VehicleBehaviorManager();
@@ -150,10 +149,21 @@ namespace TrafficManager.Manager.Impl {
                             "a parking position now (flags: {2})! CurrentPathMode={3} path={4} " +
                             "pathPositionIndex={5} segmentId={6} laneIndex={7} offset={8} nextPath={9} " +
                             "refPos={10} searchDir={11} home={12} driverCitizenId={13} driverCitizenInstanceId={14}",
-                            vehicleID, vehicleID, vehicleData.m_flags, driverExtInstance.pathMode,
-                            vehicleData.m_path, vehicleData.m_pathPositionIndex, pathPos.m_segment,
-                            pathPos.m_lane, pathPos.m_offset, nextPath, refPos, searchDir, homeID,
-                            driverCitizenId, driverCitizenInstanceId);
+                            vehicleID,
+                            vehicleID,
+                            vehicleData.m_flags,
+                            driverExtInstance.pathMode,
+                            vehicleData.m_path,
+                            vehicleData.m_pathPositionIndex,
+                            pathPos.m_segment,
+                            pathPos.m_lane,
+                            pathPos.m_offset,
+                            nextPath,
+                            refPos,
+                            searchDir,
+                            homeID,
+                            driverCitizenId,
+                            driverCitizenInstanceId);
                     }
 
                     if (driverExtInstance.pathMode == ExtPathMode.DrivingToAltParkPos
@@ -380,9 +390,15 @@ namespace TrafficManager.Manager.Impl {
                             "(flags: {2}) pathPos segment={3}, lane={4}, offset={5}. Trying to find " +
                             "parking space in the vicinity. FailedParkingAttempts={6}, " +
                             "CurrentPathMode={7} foundParkingSpace={8}",
-                            vehicleID, vehicleID, vehicleData.m_flags, pathPos.m_segment,
-                            pathPos.m_lane, pathPos.m_offset, driverExtInstance.failedParkingAttempts,
-                            driverExtInstance.pathMode, foundParkingSpace);
+                            vehicleID,
+                            vehicleID,
+                            vehicleData.m_flags,
+                            pathPos.m_segment,
+                            pathPos.m_lane,
+                            pathPos.m_offset,
+                            driverExtInstance.failedParkingAttempts,
+                            driverExtInstance.pathMode,
+                            foundParkingSpace);
                     }
 
                     // invalidate paths of all passengers in order to force path recalculation
@@ -408,7 +424,9 @@ namespace TrafficManager.Manager.Impl {
                                     Log._DebugFormat(
                                         "CustomPassengerCarAI.ExtParkVehicle({0}): Releasing path " +
                                         "for citizen instance {1} sitting in vehicle {2} (was {3}).",
-                                        vehicleID, citizenInstanceId, vehicleID,
+                                        vehicleID,
+                                        citizenInstanceId,
+                                        vehicleID,
                                         citizenManager.m_instances.m_buffer[citizenInstanceId].m_path);
                                 }
 
@@ -418,7 +436,9 @@ namespace TrafficManager.Manager.Impl {
                                             "CustomPassengerCarAI.ExtParkVehicle({0}): Resetting pathmode " +
                                             "for passenger citizen instance {1} sitting in " +
                                             "vehicle {2} (was {3}).",
-                                            vehicleID, citizenInstanceId, vehicleID,
+                                            vehicleID,
+                                            citizenInstanceId,
+                                            vehicleID,
                                             ExtCitizenInstanceManager.Instance.ExtInstances[citizenInstanceId].pathMode);
                                     }
 
@@ -579,8 +599,14 @@ namespace TrafficManager.Manager.Impl {
                     "CustomPassengerCarAI.ExtStartPathFind({0}): called for vehicle {1}, " +
                     "driverInstanceId={2}, startPos={3}, endPos={4}, sourceBuilding={5}, " +
                     "targetBuilding={6} pathMode={7}",
-                    vehicleID, vehicleID, driverInstanceId, startPos, endPos,
-                    vehicleData.m_sourceBuilding, vehicleData.m_targetBuilding, driverExtInstance.pathMode);
+                    vehicleID,
+                    vehicleID,
+                    driverInstanceId,
+                    startPos,
+                    endPos,
+                    vehicleData.m_sourceBuilding,
+                    vehicleData.m_targetBuilding,
+                    driverExtInstance.pathMode);
             }
 
             PathUnit.Position startPosA = default;
@@ -601,213 +627,211 @@ namespace TrafficManager.Manager.Impl {
             Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
             Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
 
-            using (var bm = Benchmark.MaybeCreateBenchmark(null, "ParkingAI")) {
-                if (Options.parkingAI) {
-                    // if (driverExtInstance != null) {
+            if (Options.parkingAI) {
+                // if (driverExtInstance != null) {
+                if (logParkingAi) {
+                    Log.WarningFormat(
+                        "CustomPassengerCarAI.ExtStartPathFind({0}): PathMode={1} for vehicle {2}, " +
+                        "driver citizen instance {3}!",
+                        vehicleID,
+                        driverExtInstance.pathMode,
+                        vehicleID,
+                        driverExtInstance.instanceId);
+                }
+
+                if (driverExtInstance.pathMode == ExtPathMode.RequiresMixedCarPathToTarget) {
+                    driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToTarget;
+                    startBothWays = false;
+
                     if (logParkingAi) {
-                        Log.WarningFormat(
-                            "CustomPassengerCarAI.ExtStartPathFind({0}): PathMode={1} for vehicle {2}, " +
-                            "driver citizen instance {3}!",
+                        Log._DebugFormat(
+                            "CustomPassengerCarAI.ExtStartPathFind({0}): PathMode was " +
+                            "RequiresDirectCarPathToTarget: Parking spaces will NOT be searched " +
+                            "beforehand. Setting pathMode={1}",
                             vehicleID,
-                            driverExtInstance.pathMode,
+                            driverExtInstance.pathMode);
+                    }
+                } else if (driverExtInstance.pathMode != ExtPathMode.ParkingFailed
+                           && targetBuildingId != 0
+                           && (buildingsBuffer[targetBuildingId].m_flags &
+                               Building.Flags.IncomingOutgoing)
+                           != Building.Flags.None) {
+                    // target is outside connection
+                    driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToTarget;
+
+                    if (logParkingAi) {
+                        Log._DebugFormat(
+                            "CustomPassengerCarAI.ExtStartPathFind({0}): PathMode was not ParkingFailed " +
+                            "and target is outside connection: Setting pathMode={1}",
                             vehicleID,
-                            driverExtInstance.instanceId);
+                            driverExtInstance.pathMode);
+                    }
+                } else {
+                    if (driverExtInstance.pathMode == ExtPathMode.DrivingToTarget ||
+                        driverExtInstance.pathMode == ExtPathMode.DrivingToKnownParkPos ||
+                        driverExtInstance.pathMode == ExtPathMode.ParkingFailed) {
+                        if (logParkingAi) {
+                            Log._DebugFormat(
+                                "CustomPassengerCarAI.ExtStartPathFind({0}): Skipping queue. pathMode={1}",
+                                vehicleID,
+                                driverExtInstance.pathMode);
+                        }
+
+                        skipQueue = true;
                     }
 
-                    if (driverExtInstance.pathMode == ExtPathMode.RequiresMixedCarPathToTarget) {
-                        driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToTarget;
+                    bool allowTourists = false;
+                    bool searchAtCurrentPos = false;
+
+                    if (driverExtInstance.pathMode == ExtPathMode.ParkingFailed) {
+                        // previous parking attempt failed
+                        driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToAltParkPos;
+                        allowTourists = true;
+                        searchAtCurrentPos = true;
+
+                        if (logParkingAi) {
+                            Log._DebugFormat(
+                                "CustomPassengerCarAI.ExtStartPathFind({0}): Vehicle {1} shall move " +
+                                "to an alternative parking position! CurrentPathMode={2} FailedParkingAttempts={3}",
+                                vehicleID,
+                                vehicleID,
+                                driverExtInstance.pathMode,
+                                driverExtInstance.failedParkingAttempts);
+                        }
+
+                        if (driverExtInstance.parkingPathStartPosition != null) {
+                            startPosA =
+                                (PathUnit.Position)driverExtInstance.parkingPathStartPosition;
+                            foundStartingPos = true;
+
+                            if (logParkingAi) {
+                                Log._DebugFormat(
+                                    "CustomPassengerCarAI.ExtStartPathFind({0}): Setting starting pos " +
+                                    "for {1} to segment={2}, laneIndex={3}, offset={4}",
+                                    vehicleID,
+                                    vehicleID,
+                                    startPosA.m_segment,
+                                    startPosA.m_lane,
+                                    startPosA.m_offset);
+                            }
+                        }
+
                         startBothWays = false;
 
-                        if (logParkingAi) {
-                            Log._DebugFormat(
-                                "CustomPassengerCarAI.ExtStartPathFind({0}): PathMode was " +
-                                "RequiresDirectCarPathToTarget: Parking spaces will NOT be searched " +
-                                "beforehand. Setting pathMode={1}",
-                                vehicleID,
-                                driverExtInstance.pathMode);
-                        }
-                    } else if (driverExtInstance.pathMode != ExtPathMode.ParkingFailed
-                               && targetBuildingId != 0
-                               && (buildingsBuffer[targetBuildingId].m_flags &
-                                   Building.Flags.IncomingOutgoing)
-                               != Building.Flags.None) {
-                        // target is outside connection
-                        driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToTarget;
+                        if (driverExtInstance.failedParkingAttempts
+                            > GlobalConfig.Instance.ParkingAI.MaxParkingAttempts) {
+                            // maximum number of parking attempts reached
+                            Log._DebugIf(
+                                logParkingAi,
+                                () =>
+                                    $"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Reached " +
+                                    $"maximum number of parking attempts for vehicle {vehicleID}! GIVING UP.");
 
-                        if (logParkingAi) {
+                            extCitizenInstanceManager.Reset(ref driverExtInstance);
+
+                            // pocket car fallback
+                            // vehicleData.m_flags |= Vehicle.Flags.Parking;
+                            return false;
+                        }
+
+                        if (extendedLogParkingAi) {
                             Log._DebugFormat(
-                                "CustomPassengerCarAI.ExtStartPathFind({0}): PathMode was not ParkingFailed " +
-                                "and target is outside connection: Setting pathMode={1}",
+                                "CustomPassengerCarAI.ExtStartPathFind({0}): Increased number of " +
+                                "parking attempts for vehicle {1}: {2}/{3}",
                                 vehicleID,
-                                driverExtInstance.pathMode);
+                                vehicleID,
+                                driverExtInstance.failedParkingAttempts,
+                                GlobalConfig.Instance.ParkingAI.MaxParkingAttempts);
                         }
                     } else {
-                        if (driverExtInstance.pathMode == ExtPathMode.DrivingToTarget ||
-                            driverExtInstance.pathMode == ExtPathMode.DrivingToKnownParkPos ||
-                            driverExtInstance.pathMode == ExtPathMode.ParkingFailed) {
-                            if (logParkingAi) {
-                                Log._DebugFormat(
-                                    "CustomPassengerCarAI.ExtStartPathFind({0}): Skipping queue. pathMode={1}",
-                                    vehicleID,
-                                    driverExtInstance.pathMode);
-                            }
+                        driverExtInstance.pathMode =
+                            ExtPathMode.CalculatingCarPathToKnownParkPos;
 
-                            skipQueue = true;
+                        if (logParkingAi) {
+                            Log._DebugFormat(
+                                "CustomPassengerCarAI.ExtStartPathFind({0}): No parking involved: " +
+                                "Setting pathMode={1}",
+                                vehicleID,
+                                driverExtInstance.pathMode);
                         }
+                    }
 
-                        bool allowTourists = false;
-                        bool searchAtCurrentPos = false;
+                    ushort homeId = citizensBuffer[driverCitizenId].m_homeBuilding;
+                    Vector3 returnPos =
+                        searchAtCurrentPos ? (Vector3)vehicleData.m_targetPos3 : endPos;
 
-                        if (driverExtInstance.pathMode == ExtPathMode.ParkingFailed) {
-                            // previous parking attempt failed
-                            driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToAltParkPos;
-                            allowTourists = true;
-                            searchAtCurrentPos = true;
+                    if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(
+                        returnPos,
+                        vehicleData.Info,
+                        ref driverExtInstance,
+                        homeId,
+                        targetBuildingId == homeId,
+                        vehicleID,
+                        allowTourists,
+                        out Vector3 parkPos,
+                        ref endPosA,
+                        out bool calcEndPos)) {
+                        calculateEndPos = calcEndPos;
+                        allowRandomParking = false;
+                        movingToParkingPos = true;
 
+                        if (!extCitizenInstanceManager.CalculateReturnPath(
+                                ref driverExtInstance,
+                                parkPos,
+                                returnPos)) {
                             if (logParkingAi) {
                                 Log._DebugFormat(
-                                    "CustomPassengerCarAI.ExtStartPathFind({0}): Vehicle {1} shall move " +
-                                    "to an alternative parking position! CurrentPathMode={2} FailedParkingAttempts={3}",
-                                    vehicleID,
-                                    vehicleID,
-                                    driverExtInstance.pathMode,
-                                    driverExtInstance.failedParkingAttempts);
-                            }
-
-                            if (driverExtInstance.parkingPathStartPosition != null) {
-                                startPosA =
-                                    (PathUnit.Position)driverExtInstance.parkingPathStartPosition;
-                                foundStartingPos = true;
-
-                                if (logParkingAi) {
-                                    Log._DebugFormat(
-                                        "CustomPassengerCarAI.ExtStartPathFind({0}): Setting starting pos " +
-                                        "for {1} to segment={2}, laneIndex={3}, offset={4}",
-                                        vehicleID,
-                                        vehicleID,
-                                        startPosA.m_segment,
-                                        startPosA.m_lane,
-                                        startPosA.m_offset);
-                                }
-                            }
-
-                            startBothWays = false;
-
-                            if (driverExtInstance.failedParkingAttempts
-                                > GlobalConfig.Instance.ParkingAI.MaxParkingAttempts) {
-                                // maximum number of parking attempts reached
-                                Log._DebugIf(
-                                    logParkingAi,
-                                    () =>
-                                        $"CustomPassengerCarAI.ExtStartPathFind({vehicleID}): Reached " +
-                                        $"maximum number of parking attempts for vehicle {vehicleID}! GIVING UP.");
-
-                                extCitizenInstanceManager.Reset(ref driverExtInstance);
-
-                                // pocket car fallback
-                                // vehicleData.m_flags |= Vehicle.Flags.Parking;
-                                return false;
-                            }
-
-                            if (extendedLogParkingAi) {
-                                Log._DebugFormat(
-                                    "CustomPassengerCarAI.ExtStartPathFind({0}): Increased number of " +
-                                    "parking attempts for vehicle {1}: {2}/{3}",
-                                    vehicleID,
-                                    vehicleID,
-                                    driverExtInstance.failedParkingAttempts,
-                                    GlobalConfig.Instance.ParkingAI.MaxParkingAttempts);
-                            }
-                        } else {
-                            driverExtInstance.pathMode =
-                                ExtPathMode.CalculatingCarPathToKnownParkPos;
-
-                            if (logParkingAi) {
-                                Log._DebugFormat(
-                                    "CustomPassengerCarAI.ExtStartPathFind({0}): No parking involved: " +
-                                    "Setting pathMode={1}",
-                                    vehicleID,
-                                    driverExtInstance.pathMode);
-                            }
-                        }
-
-                        ushort homeId = citizensBuffer[driverCitizenId].m_homeBuilding;
-                        Vector3 returnPos =
-                            searchAtCurrentPos ? (Vector3)vehicleData.m_targetPos3 : endPos;
-
-                        if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(
-                            returnPos,
-                            vehicleData.Info,
-                            ref driverExtInstance,
-                            homeId,
-                            targetBuildingId == homeId,
-                            vehicleID,
-                            allowTourists,
-                            out Vector3 parkPos,
-                            ref endPosA,
-                            out bool calcEndPos)) {
-                            calculateEndPos = calcEndPos;
-                            allowRandomParking = false;
-                            movingToParkingPos = true;
-
-                            if (!extCitizenInstanceManager.CalculateReturnPath(
-                                    ref driverExtInstance,
-                                    parkPos,
-                                    returnPos)) {
-                                if (logParkingAi) {
-                                    Log._DebugFormat(
-                                        "CustomPassengerCarAI.ExtStartPathFind({0}): Could not calculate " +
-                                        "return path for citizen instance {1}, vehicle {2}. Resetting instance.",
-                                        vehicleID,
-                                        driverExtInstance.instanceId,
-                                        vehicleID);
-                                }
-
-                                extCitizenInstanceManager.Reset(ref driverExtInstance);
-                                return false;
-                            }
-                        } else if (driverExtInstance.pathMode ==
-                                   ExtPathMode.CalculatingCarPathToAltParkPos) {
-                            // no alternative parking spot found: abort
-                            if (logParkingAi) {
-                                Log._DebugFormat(
-                                    "CustomPassengerCarAI.ExtStartPathFind({0}): No alternative parking " +
-                                    "spot found for vehicle {1}, citizen instance {2} with CurrentPathMode={3}! " +
-                                    "GIVING UP.",
-                                    vehicleID,
+                                    "CustomPassengerCarAI.ExtStartPathFind({0}): Could not calculate " +
+                                    "return path for citizen instance {1}, vehicle {2}. Resetting instance.",
                                     vehicleID,
                                     driverExtInstance.instanceId,
-                                    driverExtInstance.pathMode);
+                                    vehicleID);
                             }
 
                             extCitizenInstanceManager.Reset(ref driverExtInstance);
                             return false;
-                        } else {
-                            // calculate a direct path to target
-                            if (logParkingAi) {
-                                Log._DebugFormat(
-                                    "CustomPassengerCarAI.ExtStartPathFind({0}): No alternative parking " +
-                                    "spot found for vehicle {1}, citizen instance {2} with CurrentPathMode={3}! " +
-                                    "Setting CurrentPathMode to 'CalculatingCarPath'.",
-                                    vehicleID,
-                                    vehicleID,
-                                    driverExtInstance.instanceId,
-                                    driverExtInstance.pathMode);
-                            }
-
-                            driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToTarget;
                         }
-                    }
+                    } else if (driverExtInstance.pathMode ==
+                               ExtPathMode.CalculatingCarPathToAltParkPos) {
+                        // no alternative parking spot found: abort
+                        if (logParkingAi) {
+                            Log._DebugFormat(
+                                "CustomPassengerCarAI.ExtStartPathFind({0}): No alternative parking " +
+                                "spot found for vehicle {1}, citizen instance {2} with CurrentPathMode={3}! " +
+                                "GIVING UP.",
+                                vehicleID,
+                                vehicleID,
+                                driverExtInstance.instanceId,
+                                driverExtInstance.pathMode);
+                        }
 
-                    extPathType = driverExtInstance.GetPathType();
-                    driverExtInstance.atOutsideConnection =
-                        Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(
-                            driverInstanceId,
-                            ref driverInstance,
-                            ref driverExtInstance,
-                            startPos);
-                } // end if Options.ParkingAi4
-            } // end benchmark
+                        extCitizenInstanceManager.Reset(ref driverExtInstance);
+                        return false;
+                    } else {
+                        // calculate a direct path to target
+                        if (logParkingAi) {
+                            Log._DebugFormat(
+                                "CustomPassengerCarAI.ExtStartPathFind({0}): No alternative parking " +
+                                "spot found for vehicle {1}, citizen instance {2} with CurrentPathMode={3}! " +
+                                "Setting CurrentPathMode to 'CalculatingCarPath'.",
+                                vehicleID,
+                                vehicleID,
+                                driverExtInstance.instanceId,
+                                driverExtInstance.pathMode);
+                        }
+
+                        driverExtInstance.pathMode = ExtPathMode.CalculatingCarPathToTarget;
+                    }
+                }
+
+                extPathType = driverExtInstance.GetPathType();
+                driverExtInstance.atOutsideConnection =
+                    Constants.ManagerFactory.ExtCitizenInstanceManager.IsAtOutsideConnection(
+                        driverInstanceId,
+                        ref driverInstance,
+                        ref driverExtInstance,
+                        startPos);
+            } // end if Options.ParkingAi4
 
             var laneTypes = NetInfo.LaneType.Vehicle;
 
@@ -916,7 +940,7 @@ namespace TrafficManager.Manager.Impl {
                     ignoreCosts = false,
                     randomParking = randomParking,
                     stablePath = false,
-                    skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0
+                    skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0,
                 };
 
                 if (CustomPathManager._instance.CustomCreatePath(
@@ -932,10 +956,23 @@ namespace TrafficManager.Manager.Impl {
                             "startPosB.offset={8}, laneType={9}, vehicleType={10}, endPosA.segment={11}, " +
                             "endPosA.lane={12}, endPosA.offset={13}, endPosB.segment={14}, endPosB.lane={15}, " +
                             "endPosB.offset={16}",
-                            vehicleID, vehicleID, path, startPosA.m_segment, startPosA.m_lane,
-                            startPosA.m_offset, startPosB.m_segment, startPosB.m_lane, startPosB.m_offset,
-                            laneTypes, vehicleTypes, endPosA.m_segment, endPosA.m_lane, endPosA.m_offset,
-                            endPosB.m_segment, endPosB.m_lane, endPosB.m_offset);
+                            vehicleID,
+                            vehicleID,
+                            path,
+                            startPosA.m_segment,
+                            startPosA.m_lane,
+                            startPosA.m_offset,
+                            startPosB.m_segment,
+                            startPosB.m_lane,
+                            startPosB.m_offset,
+                            laneTypes,
+                            vehicleTypes,
+                            endPosA.m_segment,
+                            endPosA.m_lane,
+                            endPosA.m_offset,
+                            endPosB.m_segment,
+                            endPosB.m_lane,
+                            endPosB.m_offset);
                     }
 
                     // NON-STOCK CODE END
@@ -1495,8 +1532,11 @@ namespace TrafficManager.Manager.Impl {
                         Log._DebugFormat(
                             "VehicleBehaviorManager.MayChangeSegment({0}): Vehicle is arriving @ seg. " +
                             "{1} ({2}, {3}), node {4} which is not a traffic light.",
-                            frontVehicleId, prevPos.m_segment, position.m_segment,
-                            nextPosition.m_segment, targetNodeId);
+                            frontVehicleId,
+                            prevPos.m_segment,
+                            position.m_segment,
+                            nextPosition.m_segment,
+                            targetNodeId);
                     }
 
                     var sign = prioMan.GetPrioritySign(prevPos.m_segment, isTargetStartNode);
@@ -1508,8 +1548,13 @@ namespace TrafficManager.Manager.Impl {
                                 "@ seg. {1} ({2}, {3}), node {4} which is not a traffic light and is " +
                                 "a priority segment.\nVehicleBehaviorManager.MayChangeSegment({5}): " +
                                 "JunctionTransitState={6}",
-                                frontVehicleId, prevPos.m_segment, position.m_segment,
-                                nextPosition.m_segment, targetNodeId, frontVehicleId, transitState);
+                                frontVehicleId,
+                                prevPos.m_segment,
+                                position.m_segment,
+                                nextPosition.m_segment,
+                                targetNodeId,
+                                frontVehicleId,
+                                transitState);
                         }
 
                         if (transitState == VehicleJunctionTransitState.None) {
@@ -1552,7 +1597,9 @@ namespace TrafficManager.Manager.Impl {
                             if (logPriority) {
                                 Log._DebugFormat(
                                     "VehicleBehaviorManager.MayChangeSegment({0}): {1} sign. waittime={2}",
-                                    frontVehicleId, sign, extVehicle.waitTime);
+                                    frontVehicleId,
+                                    sign,
+                                    extVehicle.waitTime);
                             }
 
                             //skip checking of priority if simAccuracy on lowest settings
@@ -1818,11 +1865,22 @@ namespace TrafficManager.Manager.Impl {
                         "lane={3}, off={4}] next1PathPos=[seg={5}, lane={6}, off={7}] next2PathPos=[seg={8}, " +
                         "lane={9}, off={10}] next3PathPos=[seg={11}, lane={12}, off={13}] " +
                         "next4PathPos=[seg={14}, lane={15}, off={16}]",
-                        vehicleId, currentLaneId, currentPathPos.m_segment, currentPathPos.m_lane,
-                        currentPathPos.m_offset, next1PathPos.m_segment, next1PathPos.m_lane,
-                        next1PathPos.m_offset, next2PathPos.m_segment, next2PathPos.m_lane,
-                        next2PathPos.m_offset, next3PathPos.m_segment, next3PathPos.m_lane,
-                        next3PathPos.m_offset, next4PathPos.m_segment, next4PathPos.m_lane,
+                        vehicleId,
+                        currentLaneId,
+                        currentPathPos.m_segment,
+                        currentPathPos.m_lane,
+                        currentPathPos.m_offset,
+                        next1PathPos.m_segment,
+                        next1PathPos.m_lane,
+                        next1PathPos.m_offset,
+                        next2PathPos.m_segment,
+                        next2PathPos.m_lane,
+                        next2PathPos.m_offset,
+                        next3PathPos.m_segment,
+                        next3PathPos.m_lane,
+                        next3PathPos.m_offset,
+                        next4PathPos.m_segment,
+                        next4PathPos.m_lane,
                         next4PathPos.m_offset);
                 }
 
@@ -1965,7 +2023,8 @@ namespace TrafficManager.Manager.Impl {
                                 ".startNode={3})",
                                 next1FwdRoutingIndex,
                                 RoutingManager.Instance.LaneEndForwardRoutings.Length,
-                                currentFwdTransitions[i].laneId, !currentFwdTransitions[i].startNode);
+                                currentFwdTransitions[i].laneId,
+                                !currentFwdTransitions[i].startNode);
                         }
 #endif
 
@@ -1973,8 +2032,11 @@ namespace TrafficManager.Manager.Impl {
                             Log._DebugFormat(
                                 "VehicleBehaviorManager.FindBestLane({0}): Exploring transitions for " +
                                 "next1 lane id={1}, seg.={2}, index={3}, startNode={4}: {5}",
-                                vehicleId, currentFwdTransitions[i].laneId, currentFwdTransitions[i].segmentId,
-                                currentFwdTransitions[i].laneIndex, !currentFwdTransitions[i].startNode,
+                                vehicleId,
+                                currentFwdTransitions[i].laneId,
+                                currentFwdTransitions[i].segmentId,
+                                currentFwdTransitions[i].laneIndex,
+                                !currentFwdTransitions[i].startNode,
                                 RoutingManager.Instance.LaneEndForwardRoutings[next1FwdRoutingIndex]);
                         }
 
@@ -2049,8 +2111,10 @@ namespace TrafficManager.Manager.Impl {
                                     Log._DebugFormat(
                                         "VehicleBehaviorManager.FindBestLane({0}): Exploring transitions " +
                                         "for next2 lane id={1}, seg.={2}, index={3}, startNode={4}: {5}",
-                                        vehicleId, next1FwdTransitions[j].laneId,
-                                        next1FwdTransitions[j].segmentId, next1FwdTransitions[j].laneIndex,
+                                        vehicleId,
+                                        next1FwdTransitions[j].laneId,
+                                        next1FwdTransitions[j].segmentId,
+                                        next1FwdTransitions[j].laneIndex,
                                         !next1FwdTransitions[j].startNode,
                                         RoutingManager.Instance.LaneEndForwardRoutings[next2FwdRoutingIndex]);
                                 }
@@ -2139,7 +2203,8 @@ namespace TrafficManager.Manager.Impl {
                                                 "VehicleBehaviorManager.FindBestLane({0}): Exploring " +
                                                 "transitions for next3 lane id={1}, seg.={2}, index={3}, " +
                                                 "startNode={4}: {5}",
-                                                vehicleId, next2FwdTransitions[k].laneId,
+                                                vehicleId,
+                                                next2FwdTransitions[k].laneId,
                                                 next2FwdTransitions[k].segmentId,
                                                 next2FwdTransitions[k].laneIndex,
                                                 !next2FwdTransitions[k].startNode,
@@ -2207,9 +2272,13 @@ namespace TrafficManager.Manager.Impl {
                                                 if (logLaneSelection) {
                                                     Log._DebugFormat(
                                                         "VehicleBehaviorManager.FindBestLane({0}): Found candidate transition with totalLaneDist={1}: {2} -> {3} -> {4} -> {5} -> {6}",
-                                                        vehicleId, totalLaneDist, currentLaneId,
-                                                        currentFwdTransitions[i], next1FwdTransitions[j],
-                                                        next2FwdTransitions[k], next3FwdTransitions[l]);
+                                                        vehicleId,
+                                                        totalLaneDist,
+                                                        currentLaneId,
+                                                        currentFwdTransitions[i],
+                                                        next1FwdTransitions[j],
+                                                        next2FwdTransitions[k],
+                                                        next3FwdTransitions[l]);
                                                 }
                                                 break;
                                             }
@@ -2324,7 +2393,8 @@ namespace TrafficManager.Manager.Impl {
                                 "(currentFwdTransitions[i].laneId={2}, currentFwdTransitions[i].startNode={3})",
                                 next1BackRoutingIndex,
                                 RoutingManager.Instance.LaneEndForwardRoutings.Length,
-                                currentFwdTransitions[i].laneId, currentFwdTransitions[i].startNode);
+                                currentFwdTransitions[i].laneId,
+                                currentFwdTransitions[i].startNode);
                         }
 #endif
                         if (!RoutingManager.Instance.LaneEndBackwardRoutings[next1BackRoutingIndex].routed) {
@@ -2368,17 +2438,12 @@ namespace TrafficManager.Manager.Impl {
                                 Log._DebugFormat(
                                     "VehicleBehaviorManager.FindBestLane({0}): Checking for upcoming " +
                                     "traffic in front of next1 lane id={1}. Checking back transition {2}",
-                                    vehicleId, currentFwdTransitions[i].laneId, next1BackTransitions[j]);
+                                    vehicleId,
+                                    currentFwdTransitions[i].laneId,
+                                    next1BackTransitions[j]);
                             }
 
-                            Services.NetService.ProcessLane(
-                                next1BackTransitions[j].laneId,
-                                (uint prevLaneId, ref NetLane prevLane) => {
-                                    prevLanesClear =
-                                        prevLane.GetReservedSpace() <= maxReservedSpace;
-                                    return true;
-                                });
-
+                            prevLanesClear = next1BackTransitions[j].laneId.ToLane().GetReservedSpace() <= maxReservedSpace;
                             if (!prevLanesClear) {
                                 if (logLaneSelection) {
                                     Log._Debug(
@@ -2491,8 +2556,14 @@ namespace TrafficManager.Manager.Impl {
                             "VehicleBehaviorManager.FindBestLane({0}): Calculated metric for next1 lane {1}: " +
                             "next1MaxSpeed={2} next1MeanSpeed={3} targetSpeed={4} speedDiff={5} " +
                             "bestSpeedDiff={6} bestStaySpeedDiff={7}",
-                            vehicleId, currentFwdTransitions[i].laneId, next1MaxSpeed, next1MeanSpeed,
-                            targetSpeed, speedDiff, bestOptSpeedDiff, bestStaySpeedDiff);
+                            vehicleId,
+                            currentFwdTransitions[i].laneId,
+                            next1MaxSpeed,
+                            next1MeanSpeed,
+                            targetSpeed,
+                            speedDiff,
+                            bestOptSpeedDiff,
+                            bestStaySpeedDiff);
                     }
 
                     if (!laneChange) {
@@ -2542,8 +2613,14 @@ namespace TrafficManager.Manager.Impl {
                         "speed diff: {5}\nfoundClearBackLane=XXfoundClearBackLaneXX, " +
                         "foundClearFwdLane=XXfoundClearFwdLaneXX, foundSafeLaneChange={6}\n" +
                         "bestMeanSpeed={7}, bestStayMeanSpeed={8}",
-                        vehicleId, bestOptNext1LaneIndex, bestStayNext1LaneIndex, next1PathPos.m_lane,
-                        bestOptSpeedDiff, bestStaySpeedDiff, foundSafeLaneChange, bestOptMeanSpeed,
+                        vehicleId,
+                        bestOptNext1LaneIndex,
+                        bestStayNext1LaneIndex,
+                        next1PathPos.m_lane,
+                        bestOptSpeedDiff,
+                        bestStaySpeedDiff,
+                        foundSafeLaneChange,
+                        bestOptMeanSpeed,
                         bestStayMeanSpeed);
                 }
 
@@ -2622,7 +2699,10 @@ namespace TrafficManager.Manager.Impl {
                             "VehicleBehaviorManager.FindBestLane({0}): ===> edge case: continuous lane " +
                             "is optimal ({1}) / best mean speed is near zero ({2}) -- selecting " +
                             "bestStayNext1LaneIndex={3}",
-                            vehicleId, isBssDiffZero, bestOptMeanSpeed < 0.1f, bestStayNext1LaneIndex);
+                            vehicleId,
+                            isBssDiffZero,
+                            bestOptMeanSpeed < 0.1f,
+                            bestStayNext1LaneIndex);
                     }
 
                     return bestStayNext1LaneIndex;
@@ -2783,8 +2863,14 @@ namespace TrafficManager.Manager.Impl {
                     Log._DebugFormat(
                     "VehicleBehaviorManager.FindBestEmergencyLane({0}): currentLaneId={1}, " +
                     "currentPathPos=[seg={2}, lane={3}, off={4}] nextPathPos=[seg={5}, lane={6}, off={7}]",
-                    vehicleId, currentLaneId, currentPathPos.m_segment, currentPathPos.m_lane,
-                    currentPathPos.m_offset, nextPathPos.m_segment, nextPathPos.m_lane, nextPathPos.m_offset);
+                    vehicleId,
+                    currentLaneId,
+                    currentPathPos.m_segment,
+                    currentPathPos.m_lane,
+                    currentPathPos.m_offset,
+                    nextPathPos.m_segment,
+                    nextPathPos.m_lane,
+                    nextPathPos.m_offset);
                 }
 
                 // cur -> next
@@ -2805,8 +2891,11 @@ namespace TrafficManager.Manager.Impl {
                         "VehicleBehaviorManager.FindBestEmergencyLane({0}): Invalid array index: " +
                         "currentFwdRoutingIndex={1}, RoutingManager.Instance.laneEndForwardRoutings.Length={2} " +
                         "(currentLaneId={3}, startNode={4})",
-                        vehicleId, currentFwdRoutingIndex,
-                        RoutingManager.Instance.LaneEndForwardRoutings.Length, currentLaneId, startNode);
+                        vehicleId,
+                        currentFwdRoutingIndex,
+                        RoutingManager.Instance.LaneEndForwardRoutings.Length,
+                        currentLaneId,
+                        startNode);
                 }
 #endif
 
@@ -2875,30 +2964,23 @@ namespace TrafficManager.Manager.Impl {
                         () => $"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): Checking " +
                         $"for traffic on next lane id={currentFwdTransitions[i].laneId}.");
 
-                    Services.NetService.ProcessLane(
-                        currentFwdTransitions[i].laneId,
-                        (uint nextLaneId, ref NetLane nextLane) => {
-                            // similar to stock code in VehicleAI.FindBestLane
-                            float cost = nextLane.GetReservedSpace();
+                    float cost = currentFwdTransitions[i].laneId.ToLane().GetReservedSpace();
 
-                            if (currentFwdTransitions[i].laneIndex == nextPathPos.m_lane) {
-                                cost -= vehicleLength;
-                            }
+                    if (currentFwdTransitions[i].laneIndex == nextPathPos.m_lane) {
+                        cost -= vehicleLength;
+                    }
 
-                            cost += Mathf.Abs(curPosition - nextLaneInfoPos) * 0.1f;
+                    cost += Mathf.Abs(curPosition - nextLaneInfoPos) * 0.1f;
 
-                            if (cost < minCost) {
-                                minCost = cost;
-                                bestNextLaneIndex = currentFwdTransitions[i].laneIndex;
+                    if (cost < minCost) {
+                        minCost = cost;
+                        bestNextLaneIndex = currentFwdTransitions[i].laneIndex;
 
-                                Log._DebugIf(
-                                    logLaneSelection,
-                                    () => $"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): " +
-                                    $"Found better lane: bestNextLaneIndex={bestNextLaneIndex}, minCost={minCost}");
-                            }
-
-                            return true;
-                        });
+                        Log._DebugIf(
+                            logLaneSelection,
+                            () => $"VehicleBehaviorManager.FindBestEmergencyLane({vehicleId}): " +
+                            $"Found better lane: bestNextLaneIndex={bestNextLaneIndex}, minCost={minCost}");
+                    }
                 } // for each forward transition
 
                 Log._DebugIf(

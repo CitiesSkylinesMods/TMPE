@@ -17,7 +17,7 @@ namespace TrafficManager.Util {
             /// <summary>
             /// Traversal stops when a segment consists of a different number of filtered lanes than the initial segment
             /// </summary>
-            LaneCount = 1
+            LaneCount = 1,
         }
 
         public class SegmentLaneVisitData {
@@ -53,8 +53,7 @@ namespace TrafficManager.Util {
 
             public NetInfo.Lane CurLaneInfo =>
                 SegVisitData.CurSegmentInfo.m_lanes[CurLanePos.laneIndex];
-
-    }
+        }
 
         public static void Traverse(ushort initialSegmentId,
                                     TraverseDirection direction,
@@ -120,9 +119,9 @@ namespace TrafficManager.Util {
                     return true;
                 }
 
-                Constants.ServiceFactory.NetService.ProcessSegment(
-                    segData.CurSeg.segmentId,
-                    VisitorProcessFun);
+                ushort currentSegmentId = segData.CurSeg.segmentId;
+                VisitorProcessFun(currentSegmentId, ref currentSegmentId.ToSegment());
+
                 return ret;
             }
 

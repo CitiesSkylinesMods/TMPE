@@ -20,6 +20,11 @@ namespace TrafficManager.Traffic.Impl {
     /// </summary>
     [Obsolete("should be removed when implementing issue #240")]
     public class SegmentEnd : SegmentEndId, ISegmentEnd {
+        public SegmentEnd(ushort segmentId, bool startNode)
+            : base(segmentId, startNode) {
+            Update();
+        }
+
         // TODO convert to struct
         [Obsolete]
         public ushort NodeId => Constants.ServiceFactory.NetService.GetSegmentNodeId(SegmentId, StartNode);
@@ -61,16 +66,6 @@ namespace TrafficManager.Traffic.Impl {
                    "SegmentEnd]";
         }
 
-        public SegmentEnd(ushort segmentId, bool startNode)
-            : base(segmentId, startNode)
-        {
-            Update();
-        }
-
-        ~SegmentEnd() {
-            // Destroy();
-        }
-
         /// <summary>
         /// Calculates for each segment the number of cars going to this segment.
         /// We use integer arithmetic for better performance.
@@ -85,13 +80,7 @@ namespace TrafficManager.Traffic.Impl {
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             // TODO pre-calculate this
-            uint avgSegLen = 0;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                SegmentId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    avgSegLen = (uint)segment.m_averageLength;
-                    return true;
-                });
+            uint avgSegLen = (uint)SegmentId.ToSegment().m_averageLength;
 
             IDictionary<ushort, uint>[] ret =
                 includeStopped ? numVehiclesGoingToSegmentId : numVehiclesMovingToSegmentId;
@@ -172,8 +161,15 @@ namespace TrafficManager.Traffic.Impl {
                 Log._DebugFormat(
                     " MeasureOutgoingVehicle: (Segment {0}, Node {1} (start={2})) Checking vehicle {3}. " +
                     "Coming from seg. {4}, start {5}, lane {6} going to seg. {7}, lane {8}",
-                    SegmentId, NodeId, StartNode, vehicleId, state.currentSegmentId,
-                    state.currentStartNode, state.currentLaneIndex, state.nextSegmentId, state.nextLaneIndex);
+                    SegmentId,
+                    NodeId,
+                    StartNode,
+                    vehicleId,
+                    state.currentSegmentId,
+                    state.currentStartNode,
+                    state.currentLaneIndex,
+                    state.nextSegmentId,
+                    state.nextLaneIndex);
             }
 
             if ((state.flags & ExtVehicleFlags.Spawned) == ExtVehicleFlags.None) {
@@ -210,8 +206,13 @@ namespace TrafficManager.Traffic.Impl {
                     Log._DebugFormat(
                         " MeasureOutgoingVehicle: (Segment {0}, Node {1} (start={2})) Vehicle {3} is " +
                         "on lane {4} and wants to go to segment {5} but one or both are invalid: {6}",
-                        SegmentId, NodeId, StartNode, vehicleId, state.currentLaneIndex,
-                        state.nextSegmentId, ret.CollectionToString());
+                        SegmentId,
+                        NodeId,
+                        StartNode,
+                        vehicleId,
+                        state.currentLaneIndex,
+                        state.nextSegmentId,
+                        ret.CollectionToString());
                 }
 
                 return;
@@ -224,13 +225,15 @@ namespace TrafficManager.Traffic.Impl {
                 if (logDebug) {
                     Log._DebugFormat(
                         "  MeasureOutgoingVehicle: (Segment {0}, Node {1}) Vehicle {2}: too slow ({3})",
-                        SegmentId, NodeId, vehicleId, vehicle.GetLastFrameVelocity().sqrMagnitude);
+                        SegmentId,
+                        NodeId,
+                        vehicleId,
+                        vehicle.GetLastFrameVelocity().sqrMagnitude);
                 }
 
                 ++numProcessed;
                 return;
             }
-
 
             uint normLength = 10u;
 
@@ -243,7 +246,12 @@ namespace TrafficManager.Traffic.Impl {
                 Log._DebugFormat(
                     "  MeasureOutgoingVehicle: (Segment {0}, Node {1}) NormLength of vehicle {2}: " +
                     "{3} -> {4} (avgSegmentLength={5})",
-                    SegmentId, NodeId, vehicleId, state.totalLength, normLength, avgSegmentLength);
+                    SegmentId,
+                    NodeId,
+                    vehicleId,
+                    state.totalLength,
+                    normLength,
+                    avgSegmentLength);
             }
 
             ret[state.currentLaneIndex][state.nextSegmentId] += normLength;
@@ -253,8 +261,13 @@ namespace TrafficManager.Traffic.Impl {
                 Log._DebugFormat(
                     "  MeasureOutgoingVehicle: (Segment {0}, Node {1}) Vehicle {2}: ***ADDED*** " +
                     "({3}@{4} -> {5}@{6})!",
-                    SegmentId, NodeId, vehicleId, state.currentSegmentId, state.currentLaneIndex,
-                    state.nextSegmentId, state.nextLaneIndex);
+                    SegmentId,
+                    NodeId,
+                    vehicleId,
+                    state.currentSegmentId,
+                    state.currentLaneIndex,
+                    state.nextSegmentId,
+                    state.nextLaneIndex);
             }
         }
 
@@ -287,25 +300,16 @@ namespace TrafficManager.Traffic.Impl {
         // }
 
         public void Update() {
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                SegmentId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    StartNode = segment.m_startNode == NodeId;
-                    numLanes = segment.Info.m_lanes.Length;
-                    return true;
-                });
+            ref NetSegment segment = ref SegmentId.ToSegment();
+            StartNode = segment.m_startNode == NodeId;
+            numLanes = segment.Info.m_lanes.Length;
 
             if (!Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
                 Log.Error($"SegmentEnd.Update: Segment {SegmentId} is invalid.");
                 return;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    RebuildVehicleNumDicts(ref node);
-                    return true;
-                });
+            RebuildVehicleNumDicts(ref NodeId.ToNode());
         }
 
         private void RebuildVehicleNumDicts(ref NetNode node) {

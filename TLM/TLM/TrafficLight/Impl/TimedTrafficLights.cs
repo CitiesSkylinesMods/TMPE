@@ -15,9 +15,22 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.Util;
     using UnityEngine;
+    using CitiesGameBridge.Service;
 
     // TODO define TimedTrafficLights per node group, not per individual nodes
     public class TimedTrafficLights : ITimedTrafficLights {
+        public TimedTrafficLights(ushort nodeId, IEnumerable<ushort> nodeGroup) {
+            NodeId = nodeId;
+            NodeGroup = new List<ushort>(nodeGroup);
+            MasterNodeId = NodeGroup[0];
+
+            ref NetNode node = ref nodeId.ToNode();
+            UpdateDirections(ref node);
+            UpdateSegmentEnds(ref node);
+
+            started = false;
+        }
+
         public ushort NodeId {
             get;
         }
@@ -58,24 +71,14 @@ namespace TrafficManager.TrafficLight.Impl {
                 "[TimedTrafficLights\n\tNodeId = {0}\n\tmasterNodeId = {1}\n\tSteps = {2}\n" +
                 "\tNodeGroup = {3}\n\ttestMode = {4}\n\tstarted = {5}\n\tDirections = {6}\n" +
                 "\tsegmentEndIds = {7}\nTimedTrafficLights]",
-                NodeId, MasterNodeId, Steps.CollectionToString(), NodeGroup.CollectionToString(),
-                TestMode, started, Directions.DictionaryToString(), segmentEndIds.CollectionToString());
-        }
-
-        public TimedTrafficLights(ushort nodeId, IEnumerable<ushort> nodeGroup) {
-            NodeId = nodeId;
-            NodeGroup = new List<ushort>(nodeGroup);
-            MasterNodeId = NodeGroup[0];
-
-            Constants.ServiceFactory.NetService.ProcessNode(
-                nodeId,
-                (ushort nId, ref NetNode node) => {
-                    UpdateDirections(ref node);
-                    UpdateSegmentEnds(ref node);
-                    return true;
-                });
-
-            started = false;
+                NodeId,
+                MasterNodeId,
+                Steps.CollectionToString(),
+                NodeGroup.CollectionToString(),
+                TestMode,
+                started,
+                Directions.DictionaryToString(),
+                segmentEndIds.CollectionToString());
         }
 
         public void PasteSteps(ITimedTrafficLights sourceTimedLight) {
@@ -83,23 +86,10 @@ namespace TrafficManager.TrafficLight.Impl {
             Steps.Clear();
             RotationOffset = 0;
 
-            IList<ushort> clockSortedSourceSegmentIds = new List<ushort>();
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                sourceTimedLight.NodeId,
-                ClockDirection.Clockwise,
-                (ushort segmentId, ref NetSegment segment) => {
-                    clockSortedSourceSegmentIds.Add(segmentId);
-                    return true;
-                });
+            var netService = Constants.ServiceFactory.NetService;
 
-            IList<ushort> clockSortedTargetSegmentIds = new List<ushort>();
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                NodeId,
-                ClockDirection.Clockwise,
-                (ushort segmentId, ref NetSegment segment) => {
-                    clockSortedTargetSegmentIds.Add(segmentId);
-                    return true;
-                });
+            List<ushort> clockSortedSourceSegmentIds = netService.GetNodeSegmentIds(sourceTimedLight.NodeId, ClockDirection.Clockwise).ToList();
+            List<ushort> clockSortedTargetSegmentIds = netService.GetNodeSegmentIds(NodeId, ClockDirection.Clockwise).ToList();
 
             if (clockSortedTargetSegmentIds.Count != clockSortedSourceSegmentIds.Count) {
                 throw new Exception(
@@ -154,8 +144,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
             Stop();
 
-            try {
-                Monitor.Enter(rotateLock_);
+            lock(rotateLock_) {
 
                 Log._Debug($"TimedTrafficLights.Rotate({dir}) @ node {NodeId}: Rotating timed traffic light.");
 
@@ -163,16 +152,10 @@ namespace TrafficManager.TrafficLight.Impl {
                     throw new NotSupportedException();
                 }
 
-                IList<ushort> clockSortedSegmentIds = new List<ushort>();
-                Constants.ServiceFactory.NetService.IterateNodeSegments(
-                    NodeId,
-                    dir == ArrowDirection.Right
-                        ? ClockDirection.Clockwise
-                        : ClockDirection.CounterClockwise,
-                    (ushort segmentId, ref NetSegment segment) => {
-                        clockSortedSegmentIds.Add(segmentId);
-                        return true;
-                    });
+                var clockDirection = dir == ArrowDirection.Right
+                    ? ClockDirection.Clockwise
+                    : ClockDirection.CounterClockwise;
+                List<ushort> clockSortedSegmentIds = Constants.ServiceFactory.NetService.GetNodeSegmentIds(NodeId, clockDirection).ToList();
 
                 Log._Debug(
                     $"TimedTrafficLights.Rotate({dir}) @ node {NodeId}: Clock-sorted segment ids: " +
@@ -245,8 +228,6 @@ namespace TrafficManager.TrafficLight.Impl {
 
                 CurrentStep = 0;
                 SetLights(true);
-            } finally {
-                Monitor.Exit(rotateLock_);
             }
         }
 
@@ -361,14 +342,7 @@ namespace TrafficManager.TrafficLight.Impl {
             /*if (!housekeeping())
                     return;*/
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nodeId, ref NetNode node) => {
-                    Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
-                        NodeId,
-                        ref node);
-                    return true;
-                });
+            Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(NodeId, ref NodeId.ToNode());
 
             foreach (TimedTrafficLightsStep step in Steps) {
                 foreach (KeyValuePair<ushort, ICustomSegmentLights> e in step.CustomSegmentLights) {
@@ -389,15 +363,11 @@ namespace TrafficManager.TrafficLight.Impl {
             ICustomSegmentLightsManager customTrafficLightsManager = Constants.ManagerFactory.CustomSegmentLightsManager;
 
             // Log._Debug($"Checking for invalid pedestrian lights @ {NodeId}.");
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        segmentId = node.GetSegment(i);
-                        return true;
-                    });
 
+            ref NetNode node = ref NodeId.ToNode();
+
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) {
                     continue;
                 }
@@ -449,15 +419,10 @@ namespace TrafficManager.TrafficLight.Impl {
             ICustomSegmentLightsManager customTrafficLightsManager =
                 Constants.ManagerFactory.CustomSegmentLightsManager;
 
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        segmentId = node.GetSegment(i);
-                        return true;
-                    });
+            ref NetNode node = ref NodeId.ToNode();
 
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) {
                     continue;
                 }
@@ -541,10 +506,6 @@ namespace TrafficManager.TrafficLight.Impl {
             }
 
             ClearInvalidPedestrianLights();
-        }
-
-        ~TimedTrafficLights() {
-            Destroy();
         }
 
         // TODO  currently, this method must be called for each node in the node group individually
@@ -657,8 +618,12 @@ namespace TrafficManager.TrafficLight.Impl {
                         Log._DebugFormat(
                             "TimedTrafficLights.SimulationStep(): Next step {0} has minTime = 0 at " +
                             "timed light {1}. Old step {2} has waitFlowDiff={3} (flow={4}, wait={5}).",
-                            nextStepIndex, NodeId, CurrentStep, maxWaitFlowDiff,
-                            Steps[CurrentStep].CurrentFlow, Steps[CurrentStep].CurrentWait);
+                            nextStepIndex,
+                            NodeId,
+                            CurrentStep,
+                            maxWaitFlowDiff,
+                            Steps[CurrentStep].CurrentFlow,
+                            Steps[CurrentStep].CurrentWait);
                     }
 
                     while (nextStepIndex != prevStepIndex) {
@@ -681,8 +646,13 @@ namespace TrafficManager.TrafficLight.Impl {
                                 "TimedTrafficLights.SimulationStep(): Checking upcoming step {0} " +
                                 "@ node {1}: flow={2} wait={3} minTime={4}. bestWaitFlowDiff={5}, " +
                                 "bestNextStepIndex={6}",
-                                nextStepIndex, NodeId, flow, wait, Steps[nextStepIndex].MinTime,
-                                bestNextStepIndex, bestNextStepIndex);
+                                nextStepIndex,
+                                NodeId,
+                                flow,
+                                wait,
+                                Steps[nextStepIndex].MinTime,
+                                bestNextStepIndex,
+                                bestNextStepIndex);
                         }
 
                         if (Steps[nextStepIndex].MinTime != 0) {
@@ -772,7 +742,8 @@ namespace TrafficManager.TrafficLight.Impl {
                     "done. NodeGroup={1}, nodeId={2}, NumSteps={3}",
                     NodeId,
                     string.Join(", ", NodeGroup.Select(x => x.ToString()).ToArray()),
-                    NodeId, NumSteps());
+                    NodeId,
+                    NumSteps());
             }
 
             // using (var bm = Benchmark.MaybeCreateBenchmark(null, "ChangeStep")) {
@@ -928,26 +899,18 @@ namespace TrafficManager.TrafficLight.Impl {
             Log._Trace(
                 $"TimedTrafficLights.OnGeometryUpdate: called for timed traffic light @ {NodeId}.");
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    UpdateDirections(ref node);
-                    UpdateSegmentEnds(ref node);
-                    return true;
-                });
+            ref NetNode node = ref NodeId.ToNode();
+
+            UpdateDirections(ref node);
+            UpdateSegmentEnds(ref node);
 
             if (NumSteps() <= 0) {
                 Log._Debug($"TimedTrafficLights.OnGeometryUpdate: no steps @ {NodeId}");
                 return;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    BackUpInvalidStepSegments(ref node);
-                    HandleNewSegments(ref node);
-                    return true;
-                });
+            BackUpInvalidStepSegments(ref node);
+            HandleNewSegments(ref node);
         }
 
         /// <summary>
@@ -1007,12 +970,13 @@ namespace TrafficManager.TrafficLight.Impl {
                     step.CustomSegmentLights.Remove(invalidSegmentId);
                 }
 
-
                 if (logTrafficLights) {
                     Log._DebugFormat(
                         "TimedTrafficLights.BackUpInvalidStepSegments finished for TTL step {0} @ " +
                         "node {1}: step.CustomSegmentLights={2} step.InvalidSegmentLights={3}",
-                        i, NodeId, step.CustomSegmentLights.DictionaryToString(),
+                        i,
+                        NodeId,
+                        step.CustomSegmentLights.DictionaryToString(),
                         step.InvalidSegmentLights.CollectionToString());
                 }
 

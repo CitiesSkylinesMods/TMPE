@@ -1,9 +1,9 @@
-﻿namespace CSUtil.Commons {
+namespace CSUtil.Commons {
     using System.Collections.Generic;
     using System.Linq;
 
     public static class ToStringExt {
-        public static string DictionaryToString<K, V>(this IDictionary<K, V> element) {
+        public static string DictionaryToString<TKey, TValue>(this IDictionary<TKey, TValue> element) {
             return string.Join(", ", element.Keys.Select(x => $"{ToString(x)}={ToString(element[x])}").ToArray());
         }
 

@@ -67,7 +67,6 @@ namespace TrafficManager.API.Manager {
         /// <returns>compass direction</returns>
         ArrowDirection GetDirection(ushort segmentId0, ushort segmentId1, ushort nodeId = 0);
 
-
         /// <summary>
         /// Determines whether the segment end is connected to highways only.
         /// </summary>

@@ -6,12 +6,13 @@ namespace TrafficManager.UI.MainMenu {
     using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using CSUtil.Commons.Benchmark;
     using global::TrafficManager.API.Manager;
     using global::TrafficManager.Custom.PathFinding;
     using global::TrafficManager.State;
     using JetBrains.Annotations;
     using UnityEngine;
+    using TrafficManager.Util;
+    using TrafficManager.Lifecycle;
 
 #if DEBUG // whole class coverage
     public class DebugMenuPanel : UIPanel
@@ -38,8 +39,6 @@ namespace TrafficManager.UI.MainMenu {
         private static UIButton _noneToVehicleButton = null;
         private static UIButton _vehicleToNoneButton = null;
         private static UIButton _printFlagsDebugInfoButton;
-        private static UIButton _resetBenchmarksDataButton;
-        private static UIButton _printBenchmarkReportButton;
 #endif
 
 #if QUEUEDSTATS
@@ -61,7 +60,7 @@ namespace TrafficManager.UI.MainMenu {
             relativePosition = new Vector3(resolution.x - Translation.GetMenuWidth() - 30f, 65f);
 
             _title = AddUIComponent<UILabel>();
-            _title.text = "Version " + TrafficManagerMod.VersionString;
+            _title.text = "Version " + VersionUtil.VersionString;
             _title.relativePosition = new Vector3(50.0f, 5.0f);
 
             int y = 30;
@@ -110,12 +109,6 @@ namespace TrafficManager.UI.MainMenu {
 #endif
 #if DEBUG
             _printFlagsDebugInfoButton = CreateButton("Print flags debug info", y, ClickPrintFlagsDebugInfo);
-            y += 40;
-            height += 40;
-            _resetBenchmarksDataButton = CreateButton("Reset benchmarks data", y, ClickResetBenchmarks);
-            y += 40;
-            height += 40;
-            _printBenchmarkReportButton = CreateButton("Print benchmark report", y, ClickPrintBenchmarkReport);
             y += 40;
             height += 40;
 #endif
@@ -180,7 +173,7 @@ namespace TrafficManager.UI.MainMenu {
             CSUtil.CameraControl.CameraController.Instance.GoToPos(
                 new Vector3(
                     float.Parse(vectorElms[0]),
-                    Camera.main.transform.position.y,
+                    InGameUtil.Instance.CachedCameraTransform.position.y,
                     float.Parse(vectorElms[1])));
         }
 
@@ -206,7 +199,7 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
             Constants.ServiceFactory.SimulationService.AddAction(
                 () => {
-                    foreach (ICustomManager customManager in LoadingExtension
+                    foreach (ICustomManager customManager in TMPELifecycle.Instance
                         .RegisteredManagers) {
                         customManager.PrintDebugInfo();
                     }
@@ -254,8 +247,10 @@ namespace TrafficManager.UI.MainMenu {
 
                 Log.InfoFormat(
                     "\tFlags: {0}, cat: {1}, type: {2}, name: {3}",
-                    linesBuffer[i].m_flags, linesBuffer[i].Info.category,
-                    linesBuffer[i].Info.m_transportType, TransportManager.instance.GetLineName((ushort)i));
+                    linesBuffer[i].m_flags,
+                    linesBuffer[i].Info.category,
+                    linesBuffer[i].Info.m_transportType,
+                    TransportManager.instance.GetLineName((ushort)i));
 
                 ushort firstStopNodeId = linesBuffer[i].m_stops;
                 ushort stopNodeId = firstStopNodeId;
@@ -268,9 +263,13 @@ namespace TrafficManager.UI.MainMenu {
                     Log.InfoFormat(
                         "\tStop node #{0} -- {1}: Flags: {2}, Transport line: {3}, Problems: {4} " +
                         "Pos: {5}, Dist. to lat pos: {6}",
-                        index, stopNodeId, nodesBuffer[stopNodeId].m_flags,
-                        nodesBuffer[stopNodeId].m_transportLine, nodesBuffer[stopNodeId].m_problems,
-                        pos, (lastNodePos - pos).magnitude);
+                        index,
+                        stopNodeId,
+                        nodesBuffer[stopNodeId].m_flags,
+                        nodesBuffer[stopNodeId].m_transportLine,
+                        nodesBuffer[stopNodeId].m_problems,
+                        pos,
+                        (lastNodePos - pos).magnitude);
 
                     if (nodesBuffer[stopNodeId].m_problems != Notification.Problem.None) {
                         Log.Warning("\t*** PROBLEMS DETECTED ***");
@@ -346,7 +345,6 @@ namespace TrafficManager.UI.MainMenu {
 #if QUEUEDSTATS
         private void ClickTogglePathFindStats(UIComponent component,
                                               UIMouseEventParameter eventParam) {
-            Update();
             showPathFindStats = !showPathFindStats;
         }
 #endif
@@ -356,17 +354,6 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickPrintFlagsDebugInfo(UIComponent component,
                                               UIMouseEventParameter eventParam) {
             Flags.PrintDebugInfo();
-        }
-
-        private void ClickPrintBenchmarkReport(UIComponent component,
-                                               UIMouseEventParameter eventParam) {
-            Constants.ServiceFactory.SimulationService.AddAction(
-                () => { Log.Info(BenchmarkProfileProvider.Instance.CreateReport()); });
-        }
-
-        private void ClickResetBenchmarks(UIComponent component, UIMouseEventParameter eventParam) {
-            Constants.ServiceFactory.SimulationService.AddAction(
-                () => { BenchmarkProfileProvider.Instance.ClearProfiles(); });
         }
 
         [UsedImplicitly]

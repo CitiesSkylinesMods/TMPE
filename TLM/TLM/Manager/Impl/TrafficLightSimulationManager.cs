@@ -1,5 +1,4 @@
 namespace TrafficManager.Manager.Impl {
-    using CSUtil.Commons.Benchmark;
     using CSUtil.Commons;
     using ExtVehicleType = global::TrafficManager.Traffic.ExtVehicleType;
     using static RoadBaseAI;
@@ -15,24 +14,14 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using TrafficManager.Traffic;
     using TrafficManager.TrafficLight.Impl;
+    using TrafficManager.Util;
 
     public class TrafficLightSimulationManager
         : AbstractGeometryObservingManager,
           ICustomDataManager<List<Configuration.TimedTrafficLights>>,
           ITrafficLightSimulationManager
     {
-        public static readonly TrafficLightSimulationManager Instance =
-            new TrafficLightSimulationManager();
-
         private const int SIM_MOD = 64;
-
-        /// <summary>
-        /// For each node id: traffic light simulation assigned to the node
-        /// </summary>
-        public TrafficLightSimulation[] TrafficLightSimulations { get; }
-
-        // public Dictionary<ushort, TrafficLightSimulation> TrafficLightSimulations
-        // = new Dictionary<ushort, TrafficLightSimulation>();
 
         private TrafficLightSimulationManager() {
             TrafficLightSimulations = new TrafficLightSimulation[NetManager.MAX_NODE_COUNT];
@@ -42,12 +31,23 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        public static readonly TrafficLightSimulationManager Instance =
+            new TrafficLightSimulationManager();
+
+        /// <summary>
+        /// For each node id: traffic light simulation assigned to the node
+        /// </summary>
+        public TrafficLightSimulation[] TrafficLightSimulations { get; }
+
+        // public Dictionary<ushort, TrafficLightSimulation> TrafficLightSimulations
+        // = new Dictionary<ushort, TrafficLightSimulation>();
+
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
             Log._Debug($"Traffic light simulations:");
 
             for (int i = 0; i < TrafficLightSimulations.Length; ++i) {
-                if (! TrafficLightSimulations[i].HasSimulation()) {
+                if (!TrafficLightSimulations[i].HasSimulation()) {
                     continue;
                 }
 
@@ -69,12 +69,8 @@ namespace TrafficManager.Manager.Impl {
             out TrafficLightState vehicleLightState,
             out TrafficLightState pedestrianLightState)
         {
-            bool callStockMethod = true;
-            using (var bm = Benchmark.MaybeCreateBenchmark(null, "callStockMethod")) {
-                callStockMethod = !Options.timedLightsEnabled
-                                  || !Instance
-                                      .TrafficLightSimulations[nodeId].IsSimulationRunning();
-            }
+            bool callStockMethod = !Options.timedLightsEnabled
+                || !Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
 
             if (callStockMethod) {
                 RoadBaseAI.GetTrafficLightState(
@@ -84,20 +80,18 @@ namespace TrafficManager.Manager.Impl {
                     out vehicleLightState,
                     out pedestrianLightState);
             } else {
-                using (var bm = Benchmark.MaybeCreateBenchmark(null, "GetCustomTrafficLightState")) {
-                    GetCustomTrafficLightState(
+                GetCustomTrafficLightState(
 #if DEBUG
-                        vehicleId,
-                        ref vehicleData,
+                    vehicleId,
+                    ref vehicleData,
 #endif
-                        nodeId,
-                        fromSegmentId,
-                        fromLaneIndex,
-                        toSegmentId,
-                        out vehicleLightState,
-                        out pedestrianLightState,
-                        ref Instance.TrafficLightSimulations[nodeId]);
-                }
+                    nodeId,
+                    fromSegmentId,
+                    fromLaneIndex,
+                    toSegmentId,
+                    out vehicleLightState,
+                    out pedestrianLightState,
+                    ref Instance.TrafficLightSimulations[nodeId]);
             }
         }
 
@@ -117,12 +111,8 @@ namespace TrafficManager.Manager.Impl {
             out bool vehicles,
             out bool pedestrians)
         {
-            bool callStockMethod;
-
-            using (var bm = Benchmark.MaybeCreateBenchmark(null, "callStockMethod")) {
-                callStockMethod = !Options.timedLightsEnabled ||
-                                  !Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
-            }
+            bool callStockMethod = !Options.timedLightsEnabled
+                || !Instance.TrafficLightSimulations[nodeId].IsSimulationRunning();
 
             if (callStockMethod) {
                 RoadBaseAI.GetTrafficLightState(
@@ -134,20 +124,18 @@ namespace TrafficManager.Manager.Impl {
                     out vehicles,
                     out pedestrians);
             } else {
-                using (var bm = Benchmark.MaybeCreateBenchmark(null, "GetCustomTrafficLightState")) {
-                    GetCustomTrafficLightState(
+                GetCustomTrafficLightState(
 #if DEBUG
-                        vehicleId,
-                        ref vehicleData,
+                    vehicleId,
+                    ref vehicleData,
 #endif
-                        nodeId,
-                        fromSegmentId,
-                        fromLaneIndex,
-                        toSegmentId,
-                        out vehicleLightState,
-                        out pedestrianLightState,
-                        ref Instance.TrafficLightSimulations[nodeId]);
-                }
+                    nodeId,
+                    fromSegmentId,
+                    fromLaneIndex,
+                    toSegmentId,
+                    out vehicleLightState,
+                    out pedestrianLightState,
+                    ref Instance.TrafficLightSimulations[nodeId]);
 
                 vehicles = false;
                 pedestrians = false;
@@ -351,12 +339,7 @@ namespace TrafficManager.Manager.Impl {
                         // TrafficLightSimulations[timedNodeId].Destroy();
                         RemoveNodeFromSimulation(timedNodeId);
                         if (removeTrafficLight) {
-                            Constants.ServiceFactory.NetService.ProcessNode(
-                                timedNodeId,
-                                (ushort nId, ref NetNode node) => {
-                                    tlm.RemoveTrafficLight(timedNodeId, ref node);
-                                    return true;
-                                });
+                            tlm.RemoveTrafficLight(timedNodeId, ref timedNodeId.ToNode());
                         }
                     } else {
                         if (TrafficLightSimulations[timedNodeId].IsTimedLight()) {
@@ -372,12 +355,7 @@ namespace TrafficManager.Manager.Impl {
             RemoveNodeFromSimulation(nodeId);
 
             if (removeTrafficLight) {
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    nodeId,
-                    (ushort nId, ref NetNode node) => {
-                        tlm.RemoveTrafficLight(nodeId, ref node);
-                        return true;
-                    });
+                tlm.RemoveTrafficLight(nodeId, ref nodeId.ToNode());
             }
         }
 
@@ -419,14 +397,9 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
+            Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
                 sim.nodeId,
-                (ushort nId, ref NetNode node) => {
-                    Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
-                        nId,
-                        ref node);
-                    return true;
-                });
+                ref sim.nodeId.ToNode());
 
             Constants.ManagerFactory.CustomSegmentLightsManager.AddNodeLights(sim.nodeId);
             sim.type = TrafficLightSimulationType.Manual;
@@ -458,14 +431,9 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
+            Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
                 sim.nodeId,
-                (ushort nId, ref NetNode node) => {
-                    Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
-                        nId,
-                        ref node);
-                    return true;
-                });
+                ref sim.nodeId.ToNode());
 
             Constants.ManagerFactory.CustomSegmentLightsManager.AddNodeLights(sim.nodeId);
             sim.timedLight = new TimedTrafficLights(sim.nodeId, nodeGroup);
@@ -783,7 +751,7 @@ namespace TrafficManager.Manager.Impl {
                     var cnfTimedLights = new Configuration.TimedTrafficLights {
                         nodeId = timedNode.NodeId,
                         nodeGroup = new List<ushort>(timedNode.NodeGroup),
-                        started = timedNode.IsStarted()
+                        started = timedNode.IsStarted(),
                     };
                     ret.Add(cnfTimedLights);
 
@@ -807,7 +775,7 @@ namespace TrafficManager.Manager.Impl {
                             maxTime = timedStep.MaxTime,
                             changeMetric = (int)timedStep.ChangeMetric,
                             waitFlowBalance = timedStep.WaitFlowBalance,
-                            segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>()
+                            segmentLights = new Dictionary<ushort, Configuration.CustomSegmentLights>(),
                         };
                         cnfTimedLights.timedSteps.Add(cnfTimedStep);
 
@@ -825,7 +793,7 @@ namespace TrafficManager.Manager.Impl {
                                 segmentId = segLights.SegmentId, // TODO not needed
                                 customLights = new Dictionary<ExtVehicleType, Configuration.CustomSegmentLight>(),
                                 pedestrianLightState = segLights.PedestrianLightState,
-                                manualPedestrianMode = segLights.ManualPedestrianMode
+                                manualPedestrianMode = segLights.ManualPedestrianMode,
                             };
 
                             if (lightsNodeId == 0 || lightsNodeId != timedNode.NodeId) {
@@ -856,7 +824,7 @@ namespace TrafficManager.Manager.Impl {
                                     currentMode = (int)segLight.CurrentMode,
                                     leftLight = segLight.LightLeft,
                                     mainLight = segLight.LightMain,
-                                    rightLight = segLight.LightRight
+                                    rightLight = segLight.LightRight,
                                 };
 
                                 cnfSegLights.customLights.Add(
