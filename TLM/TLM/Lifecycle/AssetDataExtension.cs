@@ -54,7 +54,7 @@ namespace TrafficManager.Lifecycle {
                 as Dictionary<PrefabInfo, Dictionary<string, byte[]>>;
 
             if (assets2UserData == null) {
-                UnityEngine.Debug.LogWarning("Could not hot reload assets because LoadOrderMod was not found");
+                Log.Warning("Could not hot reload assets because LoadOrderMod was not found");
                 return;
             }
 
