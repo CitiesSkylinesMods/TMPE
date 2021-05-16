@@ -837,7 +837,7 @@ namespace TrafficManager.Custom.PathFinding {
                             PathUnits.m_buffer[currentPathUnitId].m_laneTypes =
                                 (byte)finalBufferItem.LanesUsed;
                             PathUnits.m_buffer[currentPathUnitId].m_vehicleTypes =
-                                (ushort)finalBufferItem.VehiclesUsed;
+                                (uint)finalBufferItem.VehiclesUsed;
 
                             sumOfPositionCounts += currentItemPositionCount;
                             Singleton<PathManager>.instance.m_pathUnitCount =
@@ -1567,7 +1567,8 @@ namespace TrafficManager.Custom.PathFinding {
                 }
 
                 ushort nextSegmentId;
-                if ((vehicleTypes_ & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
+                if ((queueItem_.vehicleType & (ExtVehicleType.CargoVehicle | ExtVehicleType.Service)) == ExtVehicleType.None &&
+                    (vehicleTypes_ & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
                     // ferry (/ monorail)
                     if (isLogEnabled) {
                         DebugLog(
