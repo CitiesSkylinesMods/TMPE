@@ -13,8 +13,8 @@ namespace TrafficManager.Util {
     [SuppressMessage("Performance", "HAA0302:Display class allocation to capture closure", Justification = "Not performance critical")]
     public static class VersionUtil {
         public const string BRANCH =
-#if LABS
-            "LABS";
+#if TEST
+            "TEST";
 #elif DEBUG
             "DEBUG";
 #else
