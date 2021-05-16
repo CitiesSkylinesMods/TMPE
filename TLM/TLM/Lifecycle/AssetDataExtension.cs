@@ -1,4 +1,5 @@
 namespace TrafficManager.Lifecycle {
+    using System;
     using CSUtil.Commons;
     using ICities;
     using System.Collections.Generic;
@@ -43,6 +44,24 @@ namespace TrafficManager.Lifecycle {
                 Log._Debug("AssetDataExtension.OnAssetSavedImpl(): assetData=" + assetData);
                 userData = new Dictionary<string, byte[]>();
                 userData.Add(TMPE_RECORD_ID, SerializationUtil.Serialize(assetData));
+            }
+        }
+        public static void HotReload() {
+            var assets2UserData =
+                Type.GetType("LoadOrderMod.LOMAssetDataExtension, LoadOrderMod", throwOnError: false)
+                ?.GetField("Assets2UserData")
+                ?.GetValue(null)
+                as Dictionary<PrefabInfo, Dictionary<string, byte[]>>;
+
+            if (assets2UserData == null) {
+                UnityEngine.Debug.LogWarning("Could not hot reload assets because LoadOrderMod was not found");
+                return;
+            }
+
+            foreach (var asset2UserData in assets2UserData) {
+                var asset = asset2UserData.Key;
+                var userData = asset2UserData.Value;
+                OnAssetLoadedImpl(asset.name, asset, userData);
             }
         }
     }

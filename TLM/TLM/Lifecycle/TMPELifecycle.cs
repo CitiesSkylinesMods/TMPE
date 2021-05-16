@@ -133,6 +133,7 @@ namespace TrafficManager.Lifecycle {
                 InGameHotReload = InGameOrEditor();
                 if (InGameHotReload) {
                     Preload();
+                    AssetDataExtension.HotReload();
                     SerializableDataExtension.Load();
                     Load();
                 }
