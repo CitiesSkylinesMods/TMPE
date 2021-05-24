@@ -1629,7 +1629,7 @@
                 }
 
                 ushort nextSegmentId;
-                if ((queueItem_.vehicleType & (ExtVehicleType.CargoVehicle | ExtVehicleType.Service)) == ExtVehicleType.None &&
+                if (((laneTypes_ & NetInfo.LaneType.CargoVehicle) == NetInfo.LaneType.None || BelongsToFerryNetwork(ref nextNode)) &&
                     (vehicleTypes_ & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
                     // ferry (/ monorail)
                     if (isLogEnabled) {
@@ -4250,6 +4250,26 @@
             }
         }
 #endif
+        private static bool BelongsToFerryNetwork(ref NetNode node) {
+            for (var index = 0; index < 8; ++index) {
+                var segment = node.GetSegment(index);
+                if (segment == 0) {
+                    continue;
+                }
+
+                var segmentInfo = NetManager.instance.m_segments.m_buffer[segment].Info;
+                if (segmentInfo == null) {
+                    continue;
+                }
+
+                if ((segmentInfo.m_vehicleTypes & VehicleInfo.VehicleType.Ferry) ==
+                    VehicleInfo.VehicleType.None) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         private void PathFindThread() {
             while (true) {
