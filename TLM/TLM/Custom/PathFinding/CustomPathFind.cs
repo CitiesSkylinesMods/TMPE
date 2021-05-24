@@ -4250,6 +4250,12 @@
             }
         }
 #endif
+
+        /// <summary>
+        /// Checks if node belongs to ferry path network
+        /// </summary>
+        /// <param name="node">tested node</param>
+        /// <returns>true if all valid segments allows ferries, otherwise false</returns>
         private static bool BelongsToFerryNetwork(ref NetNode node) {
             for (var index = 0; index < 8; ++index) {
                 var segment = node.GetSegment(index);
