@@ -137,6 +137,11 @@ namespace TrafficManager.State {
                 return false;
             }
 
+            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
+                NetNode.Flags.Untouchable) != NetNode.Flags.None) {
+                return false;
+            }
+
             ItemClass connectionClass = Singleton<NetManager>
                                         .instance.m_nodes.m_buffer[nodeId].Info
                                         .GetConnectionClass();
