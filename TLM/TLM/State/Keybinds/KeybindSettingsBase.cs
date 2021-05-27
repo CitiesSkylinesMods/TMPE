@@ -16,9 +16,9 @@ namespace TrafficManager.State.Keybinds {
         // detection code in KeybindUI.FindConflict(inTmpe) which expects these below
         // to be fields of type KeybindSetting.
 
-        /// <value>
+        /// <summary>
         /// This input key can not be changed and is not checked, instead it is display only
-        /// </value>
+        /// </summary>
         // Not editable
         internal static KeybindSetting Esc = new KeybindSetting(
             cat: "Global",
@@ -108,8 +108,11 @@ namespace TrafficManager.State.Keybinds {
         /// <param name="keybind"></param>
         /// <param name="editable1">Whether main key binding is editable or readonly</param>
         /// <param name="editable2">Whether alt key binding is editable or readonly</param>
-        protected void AddAlternateKeybindUI(string title, KeybindSetting keybind,
-                                             bool editable1, bool editable2) {
+        protected void AddAlternateKeybindUI(
+            string title,
+            KeybindSetting keybind,
+            bool editable1,
+            bool editable2) {
             var settingsRow = keybindUi_.CreateRowPanel();
             if (uiRowCount_ % 2 == 1) {
                 // color the panel but do not increment uiRowCount

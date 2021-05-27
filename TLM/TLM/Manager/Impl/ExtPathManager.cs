@@ -1,6 +1,8 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using System;
+    using System.Linq;
+    using State;
     using TrafficManager.API.Manager;
     using TrafficManager.Util;
     using UnityEngine;
@@ -9,9 +11,99 @@
         : AbstractCustomManager,
           IExtPathManager
     {
-        public static readonly ExtPathManager Instance = new ExtPathManager();
+        private readonly Spiral _spiral;
 
-        private ExtPathManager() {
+        public static readonly ExtPathManager Instance =
+            new ExtPathManager(SingletonLite<Spiral>.instance);
+
+        private ExtPathManager(Spiral spiral) {
+            _spiral = spiral ?? throw new ArgumentNullException(nameof(spiral));
+        }
+
+        /// <summary>
+        /// Finds a suitable path position for a walking citizen with the given world position.
+        /// If secondary lane constraints are given also checks whether there exists another lane that matches those constraints.
+        /// </summary>
+        /// <param name="pos">world position</param>
+        /// <param name="laneTypes">allowed lane types</param>
+        /// <param name="vehicleTypes">allowed vehicle types</param>
+        /// <param name="otherLaneTypes">allowed lane types for secondary lane</param>
+        /// <param name="otherVehicleTypes">other vehicle types for secondary lane</param>
+        /// <param name="allowTransport">public transport allowed?</param>
+        /// <param name="allowUnderground">underground position allowed?</param>
+        /// <param name="position">resulting path position</param>
+        /// <returns><code>true</code> if a position could be found, <code>false</code> otherwise</returns>
+        public bool FindCitizenPathPosition(Vector3 pos,
+                                                   NetInfo.LaneType laneTypes,
+                                                   VehicleInfo.VehicleType vehicleTypes,
+                                                   NetInfo.LaneType otherLaneTypes,
+                                                   VehicleInfo.VehicleType otherVehicleTypes,
+                                                   bool allowTransport,
+                                                   bool allowUnderground,
+                                                   out PathUnit.Position position) {
+            position = default(PathUnit.Position);
+            float minDist = 1E+10f;
+            if (FindPathPositionWithSpiralLoop(
+                    position: pos,
+                    service: ItemClass.Service.Road,
+                    laneType: laneTypes,
+                    vehicleType: vehicleTypes,
+                    otherLaneType: otherLaneTypes,
+                    otherVehicleType: otherVehicleTypes,
+                    allowUnderground: allowUnderground,
+                    requireConnect: false,
+                    maxDistance: Options.parkingAI
+                                     ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
+                                     : 32f,
+                    pathPosA: out PathUnit.Position posA,
+                    pathPosB: out _,
+                    distanceSqrA: out float distA,
+                    distanceSqrB: out _) && distA < minDist) {
+                minDist = distA;
+                position = posA;
+            }
+
+            if (FindPathPositionWithSpiralLoop(
+                    pos,
+                    ItemClass.Service.Beautification,
+                    laneTypes,
+                    vehicleTypes,
+                    otherLaneTypes,
+                    otherVehicleTypes,
+                    allowUnderground,
+                    false,
+                    Options.parkingAI
+                        ? GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
+                        : 32f,
+                    out posA,
+                    out _,
+                    out distA,
+                    out _) && distA < minDist) {
+                minDist = distA;
+                position = posA;
+            }
+
+            if (allowTransport && FindPathPositionWithSpiralLoop(
+                    pos,
+                    ItemClass.Service.PublicTransport,
+                    laneTypes,
+                    vehicleTypes,
+                    otherLaneTypes,
+                    otherVehicleTypes,
+                    allowUnderground,
+                    false,
+                    Options.parkingAI
+                        ? GlobalConfig
+                          .Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance
+                        : 32f,
+                    out posA,
+                    out _,
+                    out distA,
+                    out _) && distA < minDist) {
+                position = posA;
+            }
+
+            return position.m_segment != 0;
         }
 
         public bool FindPathPositionWithSpiralLoop(Vector3 position,
@@ -202,6 +294,8 @@
             int centerJ = (int)(position.x / NetManager.NODEGRID_CELL_SIZE +
                                 NetManager.NODEGRID_RESOLUTION / 2f);
 
+            int radius = Math.Max(1, (int)(maxDistance / (BuildingManager.BUILDINGGRID_CELL_SIZE / 2f)) + 1);
+
             NetManager netManager = Singleton<NetManager>.instance;
             /*pathPosA.m_segment = 0;
             pathPosA.m_lane = 0;
@@ -344,7 +438,12 @@
                 return true;
             }
 
-            LoopUtil.SpiralLoop(centerI, centerJ, width, height, FindHelper);
+            var coords = _spiral.GetCoords(radius);
+            for (int i = 0; i < radius * radius; i++) {
+                if (!FindHelper((int)(centerI + coords[i].x), (int)(centerJ + coords[i].y))) {
+                    break;
+                }
+            }
 
             pathPosA = myPathPosA;
             distanceSqrA = myDistanceSqrA;

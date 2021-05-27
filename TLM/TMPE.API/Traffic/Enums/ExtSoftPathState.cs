@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     public enum ExtSoftPathState {
         /// <summary>
         /// No path
@@ -28,6 +28,6 @@
         /// <summary>
         /// Path-finding result must not be handled by the citizen because the path will be transferred to a vehicle
         /// </summary>
-        Ignore = 5
+        Ignore = 5,
     }
 }

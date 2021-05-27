@@ -40,6 +40,19 @@ namespace TrafficManager.API.Traffic.Data
         /// </summary>
         public ushort firstVehicleId;
 
+        public ExtSegmentEnd(ushort segmentId, bool startNode) {
+            this.segmentId = segmentId;
+            this.startNode = startNode;
+            nodeId = 0;
+            outgoing = false;
+            incoming = false;
+            firstVehicleId = 0;
+            LeftCorner = Vector3.zero;
+            LeftCornerDir = Vector3.zero;
+            RightCorner = Vector3.zero;
+            RightCornerDir = Vector3.zero;
+        }
+
         public override string ToString()
         {
             return string.Format(
@@ -58,20 +71,6 @@ namespace TrafficManager.API.Traffic.Data
                 LeftCornerDir,
                 RightCorner,
                 RightCornerDir);
-        }
-
-        public ExtSegmentEnd(ushort segmentId, bool startNode)
-        {
-            this.segmentId = segmentId;
-            this.startNode = startNode;
-            nodeId = 0;
-            outgoing = false;
-            incoming = false;
-            firstVehicleId = 0;
-            LeftCorner = Vector3.zero;
-            LeftCornerDir = Vector3.zero;
-            RightCorner = Vector3.zero;
-            RightCornerDir = Vector3.zero;
         }
 
         public bool Equals(ExtSegmentEnd otherSegEnd)

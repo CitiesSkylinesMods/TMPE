@@ -1,8 +1,8 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using TrafficManager.Custom.PathFinding;
     using UnityEngine;
 
-    public class StatsLabel : U.Label.ULabel {
+    public class StatsLabel : U.ULabel {
         private uint _previousValue = 0;
 
         public override void Start() {

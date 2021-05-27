@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.Textures {
+    using TrafficManager.Util;
     using UnityEngine;
     using static TextureResources;
 
@@ -25,58 +26,24 @@ namespace TrafficManager.UI.Textures {
         public static readonly Texture2D PedestrianCrossingForbidden;
 
         static JunctionRestrictions() {
-            LaneChangeAllowed = LoadDllResource(
-                "JunctionRestrictions.lanechange_allowed.png",
-                200,
-                200);
-            LaneChangeForbidden = LoadDllResource(
-                "JunctionRestrictions.lanechange_forbidden.png",
-                200,
-                200);
+            IntVector2 size = new IntVector2(200);
 
-            UturnAllowed = LoadDllResource(
-                "JunctionRestrictions.uturn_allowed.png",
-                200,
-                200);
-            UturnForbidden = LoadDllResource(
-                "JunctionRestrictions.uturn_forbidden.png",
-                200,
-                200);
+            LaneChangeAllowed = LoadDllResource("JunctionRestrictions.lanechange_allowed.png", size);
+            LaneChangeForbidden = LoadDllResource("JunctionRestrictions.lanechange_forbidden.png", size);
 
-            RightOnRedAllowed = LoadDllResource(
-                "JunctionRestrictions.right_on_red_allowed.png",
-                200,
-                200);
-            RightOnRedForbidden = LoadDllResource(
-                "JunctionRestrictions.right_on_red_forbidden.png",
-                200,
-                200);
-            LeftOnRedAllowed = LoadDllResource(
-                "JunctionRestrictions.left_on_red_allowed.png",
-                200,
-                200);
-            LeftOnRedForbidden = LoadDllResource(
-                "JunctionRestrictions.left_on_red_forbidden.png",
-                200,
-                200);
+            UturnAllowed = LoadDllResource("JunctionRestrictions.uturn_allowed.png", size);
+            UturnForbidden = LoadDllResource("JunctionRestrictions.uturn_forbidden.png", size);
 
-            EnterBlockedJunctionAllowed = LoadDllResource(
-                "JunctionRestrictions.enterblocked_allowed.png",
-                200,
-                200);
-            EnterBlockedJunctionForbidden = LoadDllResource(
-                "JunctionRestrictions.enterblocked_forbidden.png",
-                200,
-                200);
+            RightOnRedAllowed = LoadDllResource("JunctionRestrictions.right_on_red_allowed.png", size);
+            RightOnRedForbidden = LoadDllResource("JunctionRestrictions.right_on_red_forbidden.png", size);
+            LeftOnRedAllowed = LoadDllResource("JunctionRestrictions.left_on_red_allowed.png", size);
+            LeftOnRedForbidden = LoadDllResource("JunctionRestrictions.left_on_red_forbidden.png", size);
 
-            PedestrianCrossingAllowed = LoadDllResource(
-                "JunctionRestrictions.crossing_allowed.png",
-                200,
-                200);
-            PedestrianCrossingForbidden = LoadDllResource(
-                "JunctionRestrictions.crossing_forbidden.png",
-                200,
-                200);
+            EnterBlockedJunctionAllowed = LoadDllResource("JunctionRestrictions.enterblocked_allowed.png", size);
+            EnterBlockedJunctionForbidden = LoadDllResource("JunctionRestrictions.enterblocked_forbidden.png", size);
+
+            PedestrianCrossingAllowed = LoadDllResource("JunctionRestrictions.crossing_allowed.png", size);
+            PedestrianCrossingForbidden = LoadDllResource("JunctionRestrictions.crossing_forbidden.png", size);
         }
     }
 }

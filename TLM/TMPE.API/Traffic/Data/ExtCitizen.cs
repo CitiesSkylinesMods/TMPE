@@ -19,6 +19,13 @@
         /// </summary>
         public Citizen.Location lastLocation;
 
+        public ExtCitizen(uint citizenId) {
+            this.citizenId = citizenId;
+            transportMode = ExtTransportMode.None;
+            lastTransportMode = ExtTransportMode.None;
+            lastLocation = Citizen.Location.Moving;
+        }
+
         public override string ToString() {
             return string.Format(
                 "[ExtCitizen\n\tcitizenId = {0}\n\ttransportMode = {1}\n\tlastTransportMode = {2}\n" +
@@ -27,13 +34,6 @@
                 transportMode,
                 transportMode,
                 lastLocation);
-        }
-
-        public ExtCitizen(uint citizenId) {
-            this.citizenId = citizenId;
-            transportMode = ExtTransportMode.None;
-            lastTransportMode = ExtTransportMode.None;
-            lastLocation = Citizen.Location.Moving;
         }
     }
 }

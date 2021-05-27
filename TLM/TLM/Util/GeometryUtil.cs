@@ -18,7 +18,7 @@ namespace TrafficManager.Util {
         /// use <see cref="UIScaler.ScreenPointToGuiPoint"/>.
         /// </returns>
         internal static bool WorldToScreenPoint(Vector3 worldPos, out Vector3 screenPos) {
-            screenPos = Camera.main.WorldToScreenPoint(worldPos);
+            screenPos = InGameUtil.Instance.CachedMainCamera.WorldToScreenPoint(worldPos);
             screenPos.y = Screen.height - screenPos.y;
 
             return screenPos.z >= 0;

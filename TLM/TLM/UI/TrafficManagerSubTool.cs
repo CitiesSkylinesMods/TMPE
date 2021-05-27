@@ -4,11 +4,11 @@ namespace TrafficManager.UI {
     /// (which is a CO.DefaultTool).
     /// </summary>
     public abstract class TrafficManagerSubTool {
-        protected TrafficManagerTool MainTool { get; }
-
         public TrafficManagerSubTool(TrafficManagerTool mainTool) {
             MainTool = mainTool;
         }
+
+        protected TrafficManagerTool MainTool { get; }
 
         /// <summary>Current hovered node. Overridden by some tools.</summary>
         protected virtual ushort HoveredNodeId {

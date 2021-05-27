@@ -12,7 +12,7 @@ namespace TrafficManager.Util {
             None = 0,
             Incoming = 1,
             Outgoing = 1 << 1,
-            AnyDirection = Incoming | Outgoing
+            AnyDirection = Incoming | Outgoing,
         }
 
         [Flags]
@@ -21,7 +21,7 @@ namespace TrafficManager.Util {
             Left = 1,
             Straight = 1 << 1,
             Right = 1 << 2,
-            AnySide = Left | Straight | Right
+            AnySide = Left | Straight | Right,
         }
 
         public delegate bool SegmentVisitor(SegmentVisitData data);
@@ -138,44 +138,29 @@ namespace TrafficManager.Util {
 
             IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
-            ushort startNodeId =
-                Constants.ServiceFactory.NetService.GetSegmentNodeId(initialSegmentId, true);
-            Constants.ServiceFactory.NetService.ProcessNode(
-                startNodeId,
-                (ushort nId, ref NetNode node) => {
-                    TraverseRec(
-                        ref initialSeg,
-                        ref extSegEndMan.ExtSegmentEnds[
-                            extSegEndMan.GetIndex(initialSegmentId, true)],
-                        ref node,
-                        true,
-                        direction,
-                        side,
-                        stopCrit,
-                        visitorFun,
-                        visitedSegmentIds);
-                    return true;
-                });
+            ushort startNodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(initialSegmentId, true);
+            TraverseRec(
+                ref initialSeg,
+                ref extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(initialSegmentId, true)],
+                ref startNodeId.ToNode(),
+                true,
+                direction,
+                side,
+                stopCrit,
+                visitorFun,
+                visitedSegmentIds);
 
-            ushort endNodeId = Constants.ServiceFactory.NetService.
-                GetSegmentNodeId(initialSegmentId,false);
-
-            Constants.ServiceFactory.NetService.ProcessNode(
-                endNodeId,
-                (ushort nId, ref NetNode node) => {
-                    TraverseRec(
-                        ref initialSeg,
-                        ref extSegEndMan.ExtSegmentEnds[
-                            extSegEndMan.GetIndex(initialSegmentId, false)],
-                        ref node,
-                        false,
-                        direction,
-                        side,
-                        stopCrit,
-                        visitorFun,
-                        visitedSegmentIds);
-                    return true;
-                });
+            ushort endNodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(initialSegmentId, false);
+            TraverseRec(
+                ref initialSeg,
+                ref extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(initialSegmentId, false)],
+                ref endNodeId.ToNode(),
+                false,
+                direction,
+                side,
+                stopCrit,
+                visitorFun,
+                visitedSegmentIds);
 
             // Log._Debug($"SegmentTraverser: Traversal finished.");
             return visitedSegmentIds;
@@ -277,21 +262,16 @@ namespace TrafficManager.Util {
                 ExtSegmentEnd nextSegEnd
                     = extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex( nextSegmentId, nextNodeIsStartNode)];
 
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    nextSegEnd.nodeId,
-                    (ushort nId, ref NetNode nextNode) => {
-                        TraverseRec(
-                            ref extSegMan.ExtSegments[nextSegmentId],
-                            ref nextSegEnd,
-                            ref nextNode,
-                            viaInitialStartNode,
-                            direction,
-                            side,
-                            stopCrit,
-                            visitorFun,
-                            visitedSegmentIds);
-                        return true;
-                    });
+                TraverseRec(
+                    ref extSegMan.ExtSegments[nextSegmentId],
+                    ref nextSegEnd,
+                    ref nextSegEnd.nodeId.ToNode(),
+                    viaInitialStartNode,
+                    direction,
+                    side,
+                    stopCrit,
+                    visitorFun,
+                    visitedSegmentIds);
             } // end foreach
         }
     } // end class

@@ -3,43 +3,12 @@ namespace GenericGameBridge.Service {
 
     public delegate bool NetSegmentHandler(ushort segmentId, ref NetSegment segment);
 
-    public delegate bool NetNodeHandler(ushort nodeId, ref NetNode node);
-
-    public delegate bool NetLaneHandler(uint laneId, ref NetLane lane);
-
     public delegate bool NetSegmentLaneHandler(uint laneId,
                                                ref NetLane lane,
                                                NetInfo.Lane laneInfo,
                                                ushort segmentId,
                                                ref NetSegment segment,
                                                byte laneIndex);
-
-    public struct LanePos {
-        public uint laneId;
-        public byte laneIndex;
-        public float position;
-        public VehicleInfo.VehicleType vehicleType;
-        public NetInfo.LaneType laneType;
-
-        public LanePos(uint laneId,
-                       byte laneIndex,
-                       float position,
-                       VehicleInfo.VehicleType vehicleType,
-                       NetInfo.LaneType laneType) {
-            this.laneId = laneId;
-            this.laneIndex = laneIndex;
-            this.position = position;
-            this.vehicleType = vehicleType;
-            this.laneType = laneType;
-        }
-    }
-
-
-    public enum ClockDirection {
-        None,
-        Clockwise,
-        CounterClockwise
-    }
 
     public interface INetService {
         bool CheckLaneFlags(uint laneId,
@@ -91,21 +60,13 @@ namespace GenericGameBridge.Service {
 
         bool IsSegmentValid(ushort segmentId);
 
-        void IterateNodeSegments(ushort nodeId, NetSegmentHandler handler);
-
-        void IterateNodeSegments(ushort nodeId, ClockDirection dir, NetSegmentHandler handler);
-
         void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler);
 
         void IterateSegmentLanes(ushort segmentId,
                                  ref NetSegment segment,
                                  NetSegmentLaneHandler handler);
 
-        void ProcessLane(uint laneId, NetLaneHandler handler);
-
-        void ProcessNode(ushort nodeId, NetNodeHandler handler);
-
-        void ProcessSegment(ushort segmentId, NetSegmentHandler handler);
+        GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection);
 
         void PublishSegmentChanges(ushort segmentId);
 
@@ -122,5 +83,30 @@ namespace GenericGameBridge.Service {
 
         /// <summary>tail node>-------->head node</summary>
         ushort GetTailNode(ref NetSegment segment);
+    }
+
+    public struct LanePos {
+        public uint laneId;
+        public byte laneIndex;
+        public float position;
+        public VehicleInfo.VehicleType vehicleType;
+        public NetInfo.LaneType laneType;
+
+        public LanePos(uint laneId,
+                       byte laneIndex,
+                       float position,
+                       VehicleInfo.VehicleType vehicleType,
+                       NetInfo.LaneType laneType) {
+            this.laneId = laneId;
+            this.laneIndex = laneIndex;
+            this.position = position;
+            this.vehicleType = vehicleType;
+            this.laneType = laneType;
+        }
+    }
+
+    public enum ClockDirection {
+        Clockwise,
+        CounterClockwise,
     }
 }

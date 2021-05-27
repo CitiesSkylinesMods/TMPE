@@ -49,6 +49,15 @@ namespace TrafficManager.State {
 
         private static object laneSpeedLimitLock = new object();
 
+        static Flags() {
+            laneConnections = new uint[NetManager.MAX_LANE_COUNT][][];
+            laneSpeedLimitArray = new float?[NetManager.MAX_SEGMENT_COUNT][];
+            laneSpeedLimit = new Dictionary<uint, float>();
+            laneAllowedVehicleTypesArray = new ExtVehicleType?[NetManager.MAX_SEGMENT_COUNT][];
+            laneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
+            highwayLaneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
+        }
+
         internal static void PrintDebugInfo() {
             Log.Info("------------------------");
             Log.Info("--- LANE ARROW FLAGS ---");
@@ -183,44 +192,23 @@ namespace TrafficManager.State {
                 return false;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                nodeId,
-                (ushort nId, ref NetNode node) => {
-                    NetNode.Flags flags =
-                        node.m_flags | NetNode.Flags.CustomTrafficLights;
-                    if (flag) {
+            ref NetNode node = ref nodeId.ToNode();
+            NetNode.Flags flags = node.m_flags | NetNode.Flags.CustomTrafficLights;
+            if (flag) {
 #if DEBUGFLAGS
-                        Log._Debug($"Adding traffic light @ node {nId}");
+                Log._Debug($"Adding traffic light @ node {nId}");
 #endif
-                        flags |= NetNode.Flags.TrafficLights;
-                    } else {
+                flags |= NetNode.Flags.TrafficLights;
+            } else {
 #if DEBUGFLAGS
-                        Log._Debug($"Removing traffic light @ node {nId}");
+                Log._Debug($"Removing traffic light @ node {nId}");
 #endif
-                        flags &= ~NetNode.Flags.TrafficLights;
-                    }
+                flags &= ~NetNode.Flags.TrafficLights;
+            }
 
-                    node.m_flags = flags;
-                    return true;
-                });
+            node.m_flags = flags;
+
             return true;
-        }
-
-        [Obsolete]
-        [UsedImplicitly]
-        // Not used
-        internal static bool IsNodeTrafficLight(ushort nodeId) {
-            if (nodeId <= 0) {
-                return false;
-            }
-
-            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
-                 (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created) {
-                return false;
-            }
-
-            return (Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
-                    NetNode.Flags.TrafficLights) != NetNode.Flags.None;
         }
 
         /// <summary>
@@ -520,38 +508,6 @@ namespace TrafficManager.State {
             SetLaneSpeedLimit(laneId, null);
         }
 
-        [UsedImplicitly]
-        // Not used
-        public static void SetLaneSpeedLimit(ushort segmentId, uint laneIndex, float speedLimit) {
-            if (segmentId <= 0) {
-                return;
-            }
-
-            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags &
-                 (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
-                return;
-            }
-
-            NetInfo segmentInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-
-            if (laneIndex >= segmentInfo.m_lanes.Length) {
-                return;
-            }
-
-            // find the lane id
-            uint laneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
-
-            for (var i = 0; i < laneIndex; ++i) {
-                if (laneId == 0) {
-                    return; // no valid lane found
-                }
-
-                laneId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_nextLane;
-            }
-
-            SetLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
-        }
-
         public static void SetLaneSpeedLimit(ushort segmentId,
                                              uint laneIndex,
                                              uint laneId,
@@ -576,8 +532,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            try {
-                Monitor.Enter(laneSpeedLimitLock);
+            lock(laneSpeedLimitLock) {
 #if DEBUGFLAGS
                 Log._Debug(
                     $"Flags.setLaneSpeedLimit: setting speed limit of lane index {laneIndex} @ seg. " +
@@ -611,9 +566,6 @@ namespace TrafficManager.State {
                     // (2) insert the custom speed limit
                     laneSpeedLimitArray[segmentId][laneIndex] = speedLimit;
                 }
-            }
-            finally {
-                Monitor.Exit(laneSpeedLimitLock);
             }
         }
 
@@ -905,8 +857,7 @@ namespace TrafficManager.State {
         }
 
         public static float? GetLaneSpeedLimit(uint laneId) {
-            try {
-                Monitor.Enter(laneSpeedLimitLock);
+            lock(laneSpeedLimitLock) {
 
                 if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out float speedLimit)) {
                     return null;
@@ -914,20 +865,12 @@ namespace TrafficManager.State {
 
                 return speedLimit;
             }
-            finally {
-                Monitor.Exit(laneSpeedLimitLock);
-            }
         }
 
         internal static IDictionary<uint, float> GetAllLaneSpeedLimits() {
-            IDictionary<uint, float> ret = new Dictionary<uint, float>();
-            try {
-                Monitor.Enter(laneSpeedLimitLock);
-
+            IDictionary<uint, float> ret;
+            lock(laneSpeedLimitLock) {
                 ret = new Dictionary<uint, float>(laneSpeedLimit);
-            }
-            finally {
-                Monitor.Exit(laneSpeedLimitLock);
             }
 
             return ret;
@@ -936,7 +879,7 @@ namespace TrafficManager.State {
         internal static IDictionary<uint, ExtVehicleType> GetAllLaneAllowedVehicleTypes() {
             IDictionary<uint, ExtVehicleType> ret = new Dictionary<uint, ExtVehicleType>();
 
-            for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+            for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 // Begin local function
                 bool ForEachLane(ushort segId, ref NetSegment segment) {
                     if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) !=
@@ -981,9 +924,7 @@ namespace TrafficManager.State {
 
                 // ↑↑↑
                 // end local function
-                Constants.ServiceFactory.NetService.ProcessSegment(
-                    (ushort)segmentId,
-                    ForEachLane);
+                ForEachLane(segmentId, ref segmentId.ToSegment());
             }
 
             return ret;
@@ -1069,13 +1010,8 @@ namespace TrafficManager.State {
                 ret &= ~lfr; // remove all arrows
                 ret |= (uint)flags; // add desired arrows
             } else {
-                Constants.ServiceFactory.NetService.ProcessLane(
-                    laneId,
-                    (uint lId, ref NetLane lane) => {
-                        ret = lane.m_flags;
-                        ret &= (uint)LaneArrows.LeftForwardRight;
-                        return true;
-                    });
+                ret = laneId.ToLane().m_flags;
+                ret &= (uint)LaneArrows.LeftForwardRight;
             }
 
             return (LaneArrows)ret;
@@ -1127,17 +1063,13 @@ namespace TrafficManager.State {
         }
 
         public static void ResetSpeedLimits() {
-            try {
-                Monitor.Enter(laneSpeedLimitLock);
+            lock(laneSpeedLimitLock) {
                 laneSpeedLimit.Clear();
 
                 uint segmentsCount = Singleton<NetManager>.instance.m_segments.m_size;
                 for (int i = 0; i < segmentsCount; ++i) {
                     laneSpeedLimitArray[i] = null;
                 }
-            }
-            finally {
-                Monitor.Exit(laneSpeedLimitLock);
             }
         }
 
@@ -1150,12 +1082,8 @@ namespace TrafficManager.State {
                 laneSpeedLimitArray[i] = null;
             }
 
-            try {
-                Monitor.Enter(laneSpeedLimitLock);
+            lock (laneSpeedLimitLock) {
                 laneSpeedLimit.Clear();
-            }
-            finally {
-                Monitor.Exit(laneSpeedLimitLock);
             }
 
             for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
@@ -1169,15 +1097,6 @@ namespace TrafficManager.State {
             for (uint i = 0; i < highwayLaneArrowFlags.Length; ++i) {
                 highwayLaneArrowFlags[i] = null;
             }
-        }
-
-        static Flags() {
-            laneConnections = new uint[NetManager.MAX_LANE_COUNT][][];
-            laneSpeedLimitArray = new float?[NetManager.MAX_SEGMENT_COUNT][];
-            laneSpeedLimit = new Dictionary<uint, float>();
-            laneAllowedVehicleTypesArray = new ExtVehicleType?[NetManager.MAX_SEGMENT_COUNT][];
-            laneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
-            highwayLaneArrowFlags = new LaneArrows?[NetManager.MAX_LANE_COUNT];
         }
 
         public static void OnBeforeLoadData() { }

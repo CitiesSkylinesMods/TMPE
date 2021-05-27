@@ -20,7 +20,6 @@
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,7 +29,6 @@
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>..\TMPE.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <SteamPath>~/Library/Application Support/Steam/</SteamPath>
@@ -76,9 +74,6 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Geometry\ISegmentEndGeometry.cs" />
-    <Compile Include="Geometry\INodeGeometry.cs" />
-    <Compile Include="Geometry\ISegmentGeometry.cs" />
     <Compile Include="Geometry\SegmentEndReplacement.cs" />
     <Compile Include="Manager\IAdvancedParkingManager.cs" />
     <Compile Include="Manager\ICustomDataManager.cs" />
@@ -163,10 +158,8 @@
     <Compile Include="Traffic\Enums\VehicleRestrictionsMode.cs" />
     <Compile Include="Traffic\ISegmentEnd.cs" />
     <Compile Include="Traffic\ISegmentEndId.cs" />
-    <Compile Include="Util\Functional.cs" />
     <Compile Include="Util\IObservable.cs" />
     <Compile Include="Util\IObserver.cs" />
-    <Compile Include="Util\IVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSUtil.Commons\CSUtil.Commons.csproj">

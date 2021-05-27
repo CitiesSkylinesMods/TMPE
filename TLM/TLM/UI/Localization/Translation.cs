@@ -7,6 +7,7 @@ namespace TrafficManager.UI {
     using ColossalFramework.Globalization;
     using CSUtil.Commons;
     using TrafficManager.State;
+    using TrafficManager.Lifecycle;
 
     /// <summary>
     /// Adding a new language step by step:
@@ -44,65 +45,59 @@ namespace TrafficManager.UI {
 
         private Localization.LookupTable menuLookup_;
         public static Localization.LookupTable Menu =>
-            LoadingExtension.TranslationDatabase.menuLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.menuLookup_;
 
         private Localization.LookupTable optionsLookup_;
         public static Localization.LookupTable Options =>
-            LoadingExtension.TranslationDatabase.optionsLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.optionsLookup_;
 
         private Localization.LookupTable junctionRestrictionsLookup_;
         public static Localization.LookupTable JunctionRestrictions =>
-            LoadingExtension.TranslationDatabase.junctionRestrictionsLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.junctionRestrictionsLookup_;
 
         private Localization.LookupTable laneRoutingLookup_;
         public static Localization.LookupTable LaneRouting =>
-            LoadingExtension.TranslationDatabase.laneRoutingLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.laneRoutingLookup_;
 
         private Localization.LookupTable modConflictsLookup_;
         public static Localization.LookupTable ModConflicts =>
-            LoadingExtension.TranslationDatabase.modConflictsLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.modConflictsLookup_;
 
         private Localization.LookupTable parkingRestrictionsLookup_;
         public static Localization.LookupTable ParkingRestrictions =>
-            LoadingExtension.TranslationDatabase.parkingRestrictionsLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.parkingRestrictionsLookup_;
 
         private Localization.LookupTable prioritySignsLookup_;
         public static Localization.LookupTable PrioritySigns =>
-            LoadingExtension.TranslationDatabase.prioritySignsLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.prioritySignsLookup_;
 
         private Localization.LookupTable speedLimitsLookup_;
         public static Localization.LookupTable SpeedLimits =>
-            LoadingExtension.TranslationDatabase.speedLimitsLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.speedLimitsLookup_;
 
         private Localization.LookupTable trafficLightsLookup_;
         public static Localization.LookupTable TrafficLights =>
-            LoadingExtension.TranslationDatabase.trafficLightsLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.trafficLightsLookup_;
 
         private Localization.LookupTable vehicleRestrictionsLookup_;
         public static Localization.LookupTable VehicleRestrictions =>
-            LoadingExtension.TranslationDatabase.vehicleRestrictionsLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.vehicleRestrictionsLookup_;
 
         private Localization.LookupTable tutorialsLookup_;
         public static Localization.LookupTable Tutorials =>
-            LoadingExtension.TranslationDatabase.tutorialsLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.tutorialsLookup_;
 
         private Localization.LookupTable guideLookup_;
         public static Localization.LookupTable Guide =>
-            LoadingExtension.TranslationDatabase.guideLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.guideLookup_;
 
         private Localization.LookupTable aiCitizenLookup_;
         public static Localization.LookupTable AICitizen =>
-            LoadingExtension.TranslationDatabase.aiCitizenLookup_;
+            TMPELifecycle.Instance.TranslationDatabase.aiCitizenLookup_;
 
         private Localization.LookupTable aiCarLookup_;
         public static Localization.LookupTable AICar =>
-            LoadingExtension.TranslationDatabase.aiCarLookup_;
-
-        /// <summary>
-        /// Gets or sets a value indicating whether we're currently listening to the event fired when user changes game langauge.
-        /// The event is hooked in <see cref="TrafficManagerMod.OnSettingsUI"/> and unhooked in <see cref="TrafficManagerMod.OnDisabled"/>.
-        /// </summary>
-        public static bool IsListeningToGameLocaleChanged { get; set; } = false;
+            TMPELifecycle.Instance.TranslationDatabase.aiCarLookup_;
 
         /// <summary>
         /// Gets or sets a value indicating the current lanugage to use for translations.
@@ -113,6 +108,7 @@ namespace TrafficManager.UI {
         public void LoadAllTranslations() {
             CsvColumnsToLocales
                 = new Dictionary<string, string> {
+                    { "Arabic", "ar"},
                     { "English", "en" }, // DEFAULT_LANGUAGE_CODE
                     { "Chinese Simplified", "zh" },
                     { "Chinese Traditional", "zh-tw" },
@@ -125,10 +121,14 @@ namespace TrafficManager.UI {
                     { "Italian", "it" },
                     { "Japanese", "ja" },
                     { "Korean", "ko" },
+                    { "Occitan", "oc"},
                     { "Polish", "pl" },
                     { "Portuguese", "pt" },
+                    { "Romanian", "ro" },
                     { "Russian", "ru" },
+                    { "Slovak", "sk"},
                     { "Spanish", "es" },
+                    { "Thai", "th"},
                     { "Turkish", "tr"},
                     { "Ukrainian", "uk"},
                 };
@@ -201,12 +201,11 @@ namespace TrafficManager.UI {
                 BindingFlags.Instance | BindingFlags.NonPublic)
             ?.GetValue(SingletonLite<LocaleManager>.instance);
 
-        /// Reset is private method used to delete the key before re-adding it
+        // Reset is private method used to delete the key before re-adding it
         MethodInfo resetFun = typeof(Locale)
             .GetMethod(
             "ResetOverriddenLocalizedStrings",
             BindingFlags.Instance | BindingFlags.NonPublic);
-
 
         public void ReloadTutorialTranslations() {
             var locale = this.locale;
@@ -216,7 +215,6 @@ namespace TrafficManager.UI {
             }
 
             string lang = GetCurrentLanguage();
-
 
             foreach (KeyValuePair<string, string> entry in tutorialsLookup_.AllLanguages[lang]) {
                 if (!entry.Key.StartsWith(TUTORIAL_KEY_PREFIX)) {
@@ -241,7 +239,7 @@ namespace TrafficManager.UI {
 
                 var key = new Locale.Key() {
                     m_Identifier = identifier,
-                    m_Key = tutorialKey
+                    m_Key = tutorialKey,
                 };
 
                 resetFun?.Invoke(locale, new object[] { key });
@@ -290,7 +288,7 @@ namespace TrafficManager.UI {
 
                 var key = new Locale.Key() {
                     m_Identifier = identifier,
-                    m_Key = guideKey
+                    m_Key = guideKey,
                 };
 
                 resetFun?.Invoke(locale, new object[] { key });

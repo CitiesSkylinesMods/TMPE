@@ -5,21 +5,15 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Geometry.Impl;
     using TrafficManager.Geometry;
+    using TrafficManager.Util;
 
     public class ExtNodeManager
         : AbstractCustomManager,
           IExtNodeManager
     {
-        public static ExtNodeManager Instance { get; }
-
         static ExtNodeManager() {
             Instance = new ExtNodeManager();
         }
-
-        /// <summary>
-        /// All additional data for nodes
-        /// </summary>
-        public ExtNode[] ExtNodes { get; }
 
         private ExtNodeManager() {
             ExtNodes = new ExtNode[NetManager.MAX_NODE_COUNT];
@@ -29,10 +23,17 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        public static ExtNodeManager Instance { get; }
+
+        /// <summary>
+        /// All additional data for nodes
+        /// </summary>
+        public ExtNode[] ExtNodes { get; }
+
         /// <summary>
         /// assuming highway rules are on, does the junction follow highway rules?
         /// </summary>
-        /// <param name=""></param>
+        /// <param name="nodeId">NodeId of the node to test.</param>
         /// <returns></returns>
         public static bool JunctionHasHighwayRules(ushort nodeId) {
             return JunctionHasOnlyHighwayRoads(nodeId) && !LaneConnectionManager.Instance.HasNodeConnections(nodeId);
@@ -45,14 +46,17 @@ namespace TrafficManager.Manager.Impl {
         /// <returns></returns>
         public static bool JunctionHasOnlyHighwayRoads(ushort nodeId) {
             IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
-            bool ret = true;
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    ret &= segMan.CalculateIsHighway(segmentId);
-                    return ret;
-                });
-            return ret;
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    if(!segMan.CalculateIsHighway(segmentId)) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
         public bool IsValid(ushort nodeId) {
@@ -67,7 +71,7 @@ namespace TrafficManager.Manager.Impl {
                     oldSegmentEndId = ExtNodes[nodeId].removedSegmentEndId,
                     newSegmentEndId = new SegmentEndId(
                         segmentId,
-                        (bool)Services.NetService.IsStartNode(segmentId, nodeId))
+                        (bool)Services.NetService.IsStartNode(segmentId, nodeId)),
                 };
                 ExtNodes[nodeId].removedSegmentEndId = null;
                 Constants.ManagerFactory.GeometryManager.OnSegmentEndReplacement(replacement);

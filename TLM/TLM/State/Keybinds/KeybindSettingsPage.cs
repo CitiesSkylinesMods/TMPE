@@ -54,8 +54,11 @@ namespace TrafficManager.State.Keybinds {
                             LaneConnectorStayInLane);
 
             // First key binding is readonly (editable1=false)
-            AddAlternateKeybindUI(Translation.Options.Get("Keybind.LaneConnector:Delete"),
-                                  RestoreDefaultsKey, false, true);
+            AddAlternateKeybindUI(
+                Translation.Options.Get("Keybind.LaneConnector:Delete"),
+                RestoreDefaultsKey,
+                false,
+                true);
         }
     }
 }

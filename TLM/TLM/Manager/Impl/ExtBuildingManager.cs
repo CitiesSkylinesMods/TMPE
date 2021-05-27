@@ -11,16 +11,9 @@
         : AbstractCustomManager,
           IExtBuildingManager
     {
-        public static ExtBuildingManager Instance { get; }
-
         static ExtBuildingManager() {
             Instance = new ExtBuildingManager();
         }
-
-        /// <summary>
-        /// All additional data for buildings
-        /// </summary>
-        public ExtBuilding[] ExtBuildings { get; }
 
         private ExtBuildingManager() {
             ExtBuildings = new ExtBuilding[BuildingManager.MAX_BUILDING_COUNT];
@@ -28,6 +21,13 @@
                 ExtBuildings[i] = new ExtBuilding((ushort)i);
             }
         }
+
+        public static ExtBuildingManager Instance { get; }
+
+        /// <summary>
+        /// All additional data for buildings
+        /// </summary>
+        public ExtBuilding[] ExtBuildings { get; }
 
         public void OnBeforeSimulationStep(ushort buildingId, ref Building data) {
             // slowly decrease parking space demand / public transport demand if Parking AI is active

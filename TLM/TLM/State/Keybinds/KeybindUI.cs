@@ -129,8 +129,11 @@ namespace TrafficManager.State.Keybinds {
             return label;
         }
 
-        public void CreateKeybindButton(UIPanel parent, KeybindSetting setting, SavedInputKey editKey,
-                                        float widthFraction) {
+        public void CreateKeybindButton(
+            UIPanel parent,
+            KeybindSetting setting,
+            SavedInputKey editKey,
+            float widthFraction) {
             var btn = parent.AddUIComponent<UIButton>();
             btn.size = new Vector2(ROW_WIDTH * widthFraction, ROW_HEIGHT);
             btn.text = Keybind.ToLocalizedString(editKey);
@@ -210,7 +213,7 @@ namespace TrafficManager.State.Keybinds {
 
                 var keybindButton = evParam.source as UIButton;
                 var inputKey = SavedInputKey.Encode(evParam.keycode, evParam.control, evParam.shift, evParam.alt);
-                var editable = (KeybindSetting.Editable) evParam.source.objectUserData;
+                var editable = (KeybindSetting.Editable)evParam.source.objectUserData;
                 var category = editable.Target.Category;
 
                 if (evParam.keycode != KeyCode.Escape) {
@@ -229,11 +232,13 @@ namespace TrafficManager.State.Keybinds {
 
                 keybindButton.text = Keybind.ToLocalizedString(editedBinding.Value.TargetKey);
                 currentlyEditedBinding_ = null;
-            } catch (Exception e) {Log.Error($"{e}");}
+            } catch (Exception e) {
+                Log.Error($"{e}");
+            }
         }
 
         private void OnBindingMouseDown(UIComponent comp, UIMouseEventParameter evParam) {
-            var editable = (KeybindSetting.Editable) evParam.source.objectUserData;
+            var editable = (KeybindSetting.Editable)evParam.source.objectUserData;
             var keybindButton = evParam.source as UIButton;
 
             // This will only work if the user is not in the process of changing the shortcut
@@ -367,7 +372,7 @@ namespace TrafficManager.State.Keybinds {
 
             var obj = field.GetValue(null);
             if (obj is InputKey) {
-                return (InputKey) obj;
+                return (InputKey)obj;
             }
 
             return 0;

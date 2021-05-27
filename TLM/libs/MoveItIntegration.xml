@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MoveItIntegration</name>
+    </assembly>
+    <members>
+        <member name="M:MoveItIntegration.EncodeUtil.BinaryDecode64(System.String)">
+            <summary>
+            Converts Base64 string to object
+            </summary>
+        </member>
+        <member name="M:MoveItIntegration.EncodeUtil.BinaryEncode64(System.Object)">
+            <summary>
+            Converts object to Base64 string
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:MoveItIntegration.EncodeUtil.XMLEncode(System.String,System.Type)" -->
+        <member name="M:MoveItIntegration.EncodeUtil.XMLDecode(System.Object)">
+            <summary>
+            Converts XML to string
+            </summary>
+        </member>
+        <member name="T:MoveItIntegration.MoveItIntegrationBase">
+            <summary>
+            implementation of <see cref="T:MoveItIntegration.IMoveItIntegrationFactory"/> is required to get instance of this class.
+            </summary>
+        </member>
+        <member name="P:MoveItIntegration.MoveItIntegrationBase.ID">
+            <summary>
+            unique ID to identify the integration. must not change for the sake of backward compatibility.
+            </summary>
+        </member>
+        <member name="P:MoveItIntegration.MoveItIntegrationBase.Name">
+            <summary>
+            (future feature)
+            Display name in move it options. if null, The integration will not be added to the MoveIT options.
+            </summary>
+        </member>
+        <member name="P:MoveItIntegration.MoveItIntegrationBase.Description">
+            <summary>
+            (future feature)
+            Description of the integration item in move it options. if null, no description is displayed.
+            </summary>
+        </member>
+        <member name="P:MoveItIntegration.MoveItIntegrationBase.DataVersion">
+            <summary>
+            the version of data that can be read later for backward compatibility.
+            </summary>
+        </member>
+        <member name="M:MoveItIntegration.MoveItIntegrationBase.Paste(InstanceID,System.Object,System.Collections.Generic.Dictionary{InstanceID,InstanceID})">
+            <summary>Paste segment data</summary>
+            <param name="record">data returned by <see cref="!:CopySegment(ushort)"/></param>
+            <param name="map">a dictionary of source instance ID to target instance ID.
+            this maps all the nodes, segments and lanes. 
+            please contact mod owner if you need buildings, props, etc to be mapped as well</param>
+                    public abstract object Paste(InstanceID instanceID);
+        </member>
+        <member name="M:MoveItIntegration.MoveItIntegrationBase.Encode64(System.Object)">
+            <summary>converts data to base 64 string.</summary>
+            <param name="record">record returned by <see cref="!:Copy(ushort)"/> </param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:MoveItIntegration.MoveItIntegrationBase.Decode64(System.String,System.Version)" -->
+    </members>
+</doc>

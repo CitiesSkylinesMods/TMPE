@@ -128,7 +128,7 @@ namespace TrafficManager.UI.SubTools {
                         continue;
                     }
 
-                    Vector3 diff = position - Camera.main.transform.position;
+                    Vector3 diff = position - InGameUtil.Instance.CachedCameraTransform.position;
                     float zoom = 1.0f / diff.magnitude * 100f;
 
                     // original / 2.5
@@ -959,25 +959,6 @@ namespace TrafficManager.UI.SubTools {
 
             segmentDict.ChangeRightLight();
             return true;
-        }
-
-        // Not used
-        [UsedImplicitly]
-        private Vector3 CalculateNodePositionForSegment(NetNode node, int segmentId) {
-            Vector3 position = node.m_position;
-
-            NetSegment segment = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            if (segment.m_startNode == SelectedNodeId) {
-                position.x += segment.m_startDirection.x * 10f;
-                position.y += segment.m_startDirection.y * 10f;
-                position.z += segment.m_startDirection.z * 10f;
-            } else {
-                position.x += segment.m_endDirection.x * 10f;
-                position.y += segment.m_endDirection.y * 10f;
-                position.z += segment.m_endDirection.z * 10f;
-            }
-
-            return position;
         }
 
         private Vector3 CalculateNodePositionForSegment(NetNode node, ref NetSegment segment) {

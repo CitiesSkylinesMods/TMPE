@@ -23,21 +23,14 @@ namespace TrafficManager.Manager.Impl {
         private ParkingRestrictionsManager() { }
 
         public bool MayHaveParkingRestriction(ushort segmentId) {
-            bool ret = false;
-            Services.NetService.ProcessSegment(
-                segmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    if ((segment.m_flags & NetSegment.Flags.Created) ==
-                        NetSegment.Flags.None) {
-                        return true;
-                    }
+            ref NetSegment segment = ref segmentId.ToSegment();
+            if ((segment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
+                return true;
+            }
 
-                    ItemClass connectionClass = segment.Info.GetConnectionClass();
-                    ret = connectionClass.m_service == ItemClass.Service.Road
-                          && segment.Info.m_hasParkingSpaces;
-                    return true;
-                });
-            return ret;
+            ItemClass connectionClass = segment.Info.GetConnectionClass();
+
+            return connectionClass.m_service == ItemClass.Service.Road && segment.Info.m_hasParkingSpaces;
         }
 
         public bool IsParkingAllowed(ushort segmentId, NetInfo.Direction finalDir) {
@@ -73,7 +66,6 @@ namespace TrafficManager.Manager.Impl {
                         Log.Error($"parking lane with bad m_finalDirection:{lane.m_finalDirection}, expected forward or backward");
                     }
                 }
-
             }
 #endif
 
@@ -85,16 +77,9 @@ namespace TrafficManager.Manager.Impl {
             parkingAllowed[segmentId][dirIndex] = flag;
 
             if (!flag || !parkingAllowed[segmentId][1 - dirIndex]) {
+                // force relocation of illegaly parked vehicles
                 Services.SimulationService.AddAction(
-                    () => {
-                        // force relocation of illegaly parked vehicles
-                        Services.NetService.ProcessSegment(
-                            segmentId,
-                            (ushort segId, ref NetSegment segment) => {
-                                segment.UpdateSegment(segmentId);
-                                return true;
-                            });
-                    });
+                    () => segmentId.ToSegment().UpdateSegment(segmentId));
             }
 
             return true;
@@ -106,7 +91,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected override void HandleValidSegment(ref ExtSegment seg) {
-            if (! MayHaveParkingRestriction(seg.segmentId)) {
+            if (!MayHaveParkingRestriction(seg.segmentId)) {
                 parkingAllowed[seg.segmentId][0] = true;
                 parkingAllowed[seg.segmentId][1] = true;
             }
@@ -170,7 +155,7 @@ namespace TrafficManager.Manager.Impl {
 
                     var restr = new Configuration.ParkingRestriction((ushort)segmentId) {
                         forwardParkingAllowed = parkingAllowed[segmentId][0],
-                        backwardParkingAllowed = parkingAllowed[segmentId][1]
+                        backwardParkingAllowed = parkingAllowed[segmentId][1],
                     };
 
                     Log._Trace(

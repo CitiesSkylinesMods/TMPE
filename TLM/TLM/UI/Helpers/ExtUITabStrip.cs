@@ -78,7 +78,7 @@ namespace TrafficManager.UI.Helpers {
             return scrollablePanel;
         }
 
-        public UIHelper AddTabPage(string name, bool scrollBars=true) {
+        public UIHelper AddTabPage(string name, bool scrollBars = true) {
             UIButton tabButton = base.AddTab(name);
             tabButton.normalBgSprite = "SubBarButtonBase";
             tabButton.disabledBgSprite = "SubBarButtonBaseDisabled";
@@ -104,13 +104,12 @@ namespace TrafficManager.UI.Helpers {
             return panelHelper;
         }
 
-        public static ExtUITabstrip Create(UIHelperBase helperBase) {
-            UIHelper actualHelper = helperBase as UIHelper;
-            UIComponent optionsContainer = actualHelper.self as UIComponent;
+        public static ExtUITabstrip Create(UIHelper helper) {
+            UIComponent optionsContainer = helper.self as UIComponent;
             float orgOptsContainerWidth = optionsContainer.height;
             float orgOptsContainerHeight = optionsContainer.width;
 
-            int paddingRight = 10;//Options container is Scrollable panel itself(reserves space for scroll - which we don't use)
+            int paddingRight = 10; //Options container is Scrollable panel itself(reserves space for scroll - which we don't use)
             optionsContainer.size = new Vector2(orgOptsContainerWidth + paddingRight, orgOptsContainerHeight);
 
             ExtUITabstrip tabStrip = optionsContainer.AddUIComponent<ExtUITabstrip>();
@@ -129,7 +128,7 @@ namespace TrafficManager.UI.Helpers {
 #if DEBUG
         public static class Test {
             private static int n = 0;
-            public static void OnSettingsUI(UIHelperBase helperBase) {
+            public static void OnSettingsUI(UIHelper helperBase) {
                 n = 0;
                 ExtUITabstrip tabStrip = ExtUITabstrip.Create(helperBase);
                 AddTab(tabStrip, "A");

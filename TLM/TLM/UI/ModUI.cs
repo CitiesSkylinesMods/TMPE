@@ -5,23 +5,15 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.MainMenu;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Lifecycle;
 
     /// <summary>
     /// Globally available UI manager class which contains the main menu button and the panel.
     /// Access via ThreadingExtension.ModUi.
     /// </summary>
     public class ModUI : UICustomControl {
-        /// <summary>Singleton storage.</summary>
-        public static ModUI instance_;
-
         /// <summary>Singleton accessor.</summary>
-        public static ModUI Instance {
-            get => instance_;
-        }
-
-        public static void SetSingletonInstance(ModUI newInstance) {
-            instance_ = newInstance;
-        }
+        public static ModUI Instance { get; private set; }
 
         /// <summary>Gets the floating draggable button which shows and hides TM:PE UI.</summary>
         public UI.MainMenu.MainMenuButton MainMenuButton { get; set; }
@@ -78,7 +70,7 @@ namespace TrafficManager.UI {
         [NonSerialized]
         public UIOpacityObservable uiOpacityObservable;
 
-        public ModUI() {
+        public void Awake() {
             UiScaleObservable = new UIScaleObservable();
             uiOpacityObservable = new UIOpacityObservable();
 
@@ -93,8 +85,8 @@ namespace TrafficManager.UI {
             ToolMode = TrafficManagerMode.None;
 
             // One time load
-            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
-            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
         }
 
         private void CreateMainMenuButtonAndWindow() {
@@ -113,11 +105,13 @@ namespace TrafficManager.UI {
             }
         }
 
-        ~ModUI() {
+        public void Destroy() {
             Log._Debug("ModUI destructor is called.");
-            Destroy(MainMenuButton);
-            Destroy(MainMenu);
+            DestroyImmediate(MainMenuButton);
+            DestroyImmediate(MainMenu);
             ReleaseTool();
+            Instance = null;
+            DestroyImmediate(this);
         }
 
         public bool IsVisible() {
@@ -178,8 +172,8 @@ namespace TrafficManager.UI {
 #if DEBUG
             GetDebugMenu().Show();
 #endif
-            SetToolMode(TrafficManagerMode.Activated);
             _uiShown = true;
+            SetToolMode(TrafficManagerMode.Activated);
             MainMenuButton.UpdateButtonImageAndTooltip();
             UIView.SetFocus(MainMenu);
         }
@@ -194,8 +188,8 @@ namespace TrafficManager.UI {
             GetDebugMenu().Hide();
 #endif
 
-            SetToolMode(TrafficManagerMode.None);
             _uiShown = false;
+            SetToolMode(TrafficManagerMode.None);
             MainMenuButton.UpdateButtonImageAndTooltip();
         }
 
@@ -235,11 +229,12 @@ namespace TrafficManager.UI {
             Log._Debug("ModUI.OnLevelLoaded: called");
             if (ModUI.Instance == null) {
                 Log._Debug("Adding UIBase instance.");
-                ModUI.SetSingletonInstance(
-                    ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>());
+                ModUI.Instance = ToolsModifierControl.toolController
+                    .gameObject
+                    .AddComponent<ModUI>();
             }
-            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
-            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
         }
 
         public static void DisableTool() {

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Traffic {
+namespace TrafficManager.Traffic {
     using System;
     using JetBrains.Annotations;
 
@@ -64,16 +64,6 @@
         Ferry = PassengerFerry,
 
         [UsedImplicitly]
-        Blimp = PassengerBlimp
-    }
-
-    public static class LegacyExtVehicleType {
-        public static API.Traffic.Enums.ExtVehicleType ToNew(ExtVehicleType old) {
-            return (API.Traffic.Enums.ExtVehicleType)(int)old;
-        }
-
-        public static ExtVehicleType ToOld(API.Traffic.Enums.ExtVehicleType new_) {
-            return (ExtVehicleType)(int)new_;
-        }
+        Blimp = PassengerBlimp,
     }
 }

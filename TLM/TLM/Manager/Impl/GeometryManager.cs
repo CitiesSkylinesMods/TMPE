@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
@@ -70,8 +70,7 @@
                 return;
             }
 
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
 
                 bool updatesMissing = onlyFirstPass;
 
@@ -178,8 +177,6 @@
                 }
 
                 stateUpdated = false;
-            } finally {
-                Monitor.Exit(updateLock);
             }
         }
 
@@ -202,8 +199,7 @@
                     $"GeometryManager.MarkAsUpdated(segment {seg.segmentId}): Marking segment as updated");
             }
 #endif
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
 
                 updatedSegmentBuckets[seg.segmentId >> 6] |= 1uL << (seg.segmentId & 63);
                 stateUpdated = true;
@@ -218,8 +214,6 @@
                 if (!seg.valid) {
                     SimulationStep(true);
                 }
-            } finally {
-                Monitor.Exit(updateLock);
             }
         }
 
@@ -230,8 +224,7 @@
                     $"GeometryManager.MarkAsUpdated(node {nodeId}): Marking node as updated");
             }
 #endif
-            try {
-                Monitor.Enter(updateLock);
+            lock(updateLock) {
 
                 if (nodeId == 0) {
                     return;
@@ -241,24 +234,20 @@
                 stateUpdated = true;
 
                 if (updateSegments) {
-                    Services.NetService.IterateNodeSegments(
-                        nodeId,
-                        (ushort segmentId, ref NetSegment _) => {
+                    ref NetNode node = ref nodeId.ToNode();
+                    for (int i = 0; i < 8; ++i) {
+                        ushort segmentId = node.GetSegment(i);
+                        if (segmentId != 0) {
                             MarkAsUpdated(
-                                ref Constants
-                                    .ManagerFactory.ExtSegmentManager
-                                    .ExtSegments[segmentId],
+                                ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId],
                                 false);
-                            return true;
-                        });
+                        }
+                    }
                 }
 
                 if (!Services.NetService.IsNodeValid(nodeId)) {
                     SimulationStep(true);
                 }
-            }
-            finally {
-                Monitor.Exit(updateLock);
             }
         }
 
@@ -270,14 +259,9 @@
                     $"{replacement.oldSegmentEndId.SegmentId} -> {replacement.newSegmentEndId.SegmentId}");
             }
 #endif
-            try {
-                Monitor.Enter(updateLock);
-
+            lock(updateLock) {
                 segmentReplacements.Enqueue(replacement);
                 stateUpdated = true;
-            }
-            finally {
-                Monitor.Exit(updateLock);
             }
         }
 

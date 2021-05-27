@@ -20,6 +20,13 @@
         /// </summary>
         public byte outgoingPublicTransportDemand;
 
+        public ExtBuilding(ushort buildingId) {
+            this.buildingId = buildingId;
+            parkingSpaceDemand = 0;
+            incomingPublicTransportDemand = 0;
+            outgoingPublicTransportDemand = 0;
+        }
+
         public override string ToString() {
             return string.Format(
                 "[ExtBuilding {0}\n\tbuildingId = {1}\n\tparkingSpaceDemand = {2}\n" +
@@ -30,13 +37,6 @@
                 parkingSpaceDemand,
                 incomingPublicTransportDemand,
                 outgoingPublicTransportDemand);
-        }
-
-        public ExtBuilding(ushort buildingId) {
-            this.buildingId = buildingId;
-            parkingSpaceDemand = 0;
-            incomingPublicTransportDemand = 0;
-            outgoingPublicTransportDemand = 0;
         }
     }
 }

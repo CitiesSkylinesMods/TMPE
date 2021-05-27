@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.State {
+namespace TrafficManager.State {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System.IO;
@@ -6,6 +6,7 @@
     using System;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Lifecycle;
 
     [XmlRootAttribute("GlobalConfig", Namespace = "http://www.viathinksoft.de/tmpe", IsNullable = false)]
     public class GlobalConfig : GenericObservable<GlobalConfig> {
@@ -105,7 +106,7 @@
             return conf;
         }
 
-        private static DateTime WriteConfig(GlobalConfig config, string filename=FILENAME) {
+        private static DateTime WriteConfig(GlobalConfig config, string filename = FILENAME) {
             try {
                 Log.Info($"Writing global config to file '{filename}'...");
                 XmlSerializer serializer = new XmlSerializer(typeof(GlobalConfig));
@@ -133,7 +134,7 @@
                     XmlSerializer serializer = new XmlSerializer(typeof(GlobalConfig));
                     Log.Info($"Global config loaded.");
                     GlobalConfig conf = (GlobalConfig)serializer.Deserialize(fs);
-                    if (LoadingExtension.IsGameLoaded
+                    if (TMPELifecycle.Instance.IsGameLoaded
 #if DEBUG
                         && !DebugSwitch.NoRoutingRecalculationOnConfigReload.Get()
 #endif
@@ -183,7 +184,7 @@
             }
         }
 
-        public static void Reload(bool checkVersion=true) {
+        public static void Reload(bool checkVersion = true) {
             DateTime modifiedTime;
             GlobalConfig conf = Load(out modifiedTime);
             if (checkVersion && conf.Version != -1 && conf.Version < LATEST_VERSION) {
@@ -208,7 +209,7 @@
             }
         }
 
-        public static void Reset(GlobalConfig oldConfig, bool resetAll=false) {
+        public static void Reset(GlobalConfig oldConfig, bool resetAll = false) {
             Log.Info($"Resetting global config.");
             DateTime modifiedTime;
             Instance = WriteDefaultConfig(oldConfig, resetAll, out modifiedTime);

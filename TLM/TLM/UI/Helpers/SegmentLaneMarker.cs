@@ -2,6 +2,8 @@ using ColossalFramework.Math;
 using UnityEngine;
 
 namespace TrafficManager.UI.Helpers {
+    using Util;
+
     // code revived from the old Traffic++ mod : https://github.com/joaofarias/csl-traffic/blob/a4c5609e030c5bde91811796b9836aad60ddde20/CSL-Traffic/Tools/RoadCustomizerTool.cs
     internal class SegmentLaneMarker {
         internal SegmentLaneMarker(Bezier3 bezier) {
@@ -25,8 +27,7 @@ namespace TrafficManager.UI.Helpers {
         /// <param name="hitH">vertical hit position of the raycast</param>
         /// <param name="hitH">vertical raycast hit position.</param>
         internal bool IntersectRay() {
-            Camera currentCamera = Camera.main;
-            Ray mouseRay = currentCamera.ScreenPointToRay(Input.mousePosition);
+            Ray mouseRay = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
             float hitH = TrafficManagerTool.GetAccurateHitHeight();
 
             CalculateBounds(hitH);

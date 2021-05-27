@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Traffic.Enums {
+namespace TrafficManager.API.Traffic.Enums {
     using System;
 
     /// <summary>
@@ -33,7 +33,7 @@
         CargoVehicle = CargoTruck | CargoTrain | CargoShip | CargoPlane,
         PublicTransport = Bus | Taxi | Tram | PassengerTrain | Trolleybus,
         RoadPublicTransport = Bus | Taxi | Trolleybus,
-        RoadVehicle = PassengerCar | Bus | Taxi | CargoTruck | Service | Emergency,//may perform u-turn
+        RoadVehicle = PassengerCar | Bus | Taxi | CargoTruck | Service | Emergency, //may perform u-turn
         RailVehicle = PassengerTrain | CargoTrain,
         NonTransportRoadVehicle = RoadVehicle & ~PublicTransport,
         Ferry = PassengerFerry,
