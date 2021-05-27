@@ -877,6 +877,10 @@ namespace TrafficManager.Custom.PathFinding {
                     + $"ITEM({item})\n" + message);
         }
 
+        // be aware:
+        //   (1) path-finding works from target to start. the "next" segment is always the previous and the "previous" segment is always the next segment on the path!
+        //   (2) when I use the term "lane index from outer" this means outer right lane for right-hand traffic systems and outer-left lane for left-hand traffic systems.
+        //
         // main item processor
         // 1
         private void ProcessItemMain(
