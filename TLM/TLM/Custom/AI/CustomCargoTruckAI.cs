@@ -99,8 +99,8 @@ namespace TrafficManager.Custom.AI {
                 out _)) {
                 if (!startPosFound
                     || (startAltDistSqrA < startDistSqrA
-                        && (Mathf.Abs(startPos.x) > 8000f
-                            || Mathf.Abs(startPos.z) > 8000f)))
+                        && (Mathf.Abs(startPos.x) > 8540f
+                            || Mathf.Abs(startPos.z) > 8540f)))
                 {
                     startPosA = startAltPosA;
                     startPosB = startAltPosB;
@@ -141,8 +141,8 @@ namespace TrafficManager.Custom.AI {
                 out _)) {
                 if (!endPosFound
                     || (endAltDistSqrA < endDistSqrA
-                        && (Mathf.Abs(endPos.x) > 8000f
-                            || Mathf.Abs(endPos.z) > 8000f)))
+                        && (Mathf.Abs(endPos.x) > 8540f
+                            || Mathf.Abs(endPos.z) > 8540f)))
                 {
                     endPosA = endAltPosA;
                     endPosB = endAltPosB;

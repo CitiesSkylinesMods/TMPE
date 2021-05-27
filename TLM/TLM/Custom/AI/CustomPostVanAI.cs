@@ -77,8 +77,8 @@
                 out _)) {
                 if (!startPosFound
                     || (altStartDistSqrA < startDistSqrA
-                        && (Mathf.Abs(startPos.x) > 4800f
-                            || Mathf.Abs(startPos.z) > 4800f))) {
+                        && (Mathf.Abs(startPos.x) > 8540f
+                            || Mathf.Abs(startPos.z) > 8540f))) {
                     startPosA = altStartPosA;
                     startPosB = altStartPosB;
                     startDistSqrA = altStartDistSqrA;
@@ -116,8 +116,8 @@
                 out _)) {
                 if (!endPosFound
                     || (altEndDistSqrA < endDistSqrA
-                        && (Mathf.Abs(endPos.x) > 4800f
-                            || Mathf.Abs(endPos.z) > 4800f))) {
+                        && (Mathf.Abs(endPos.x) > 8540f
+                            || Mathf.Abs(endPos.z) > 8540f))) {
                     endPosA = altEndPosA;
                     endPosB = altEndPosB;
                     endDistSqrA = altEndDistSqrA;
