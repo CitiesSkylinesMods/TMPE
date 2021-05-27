@@ -23,11 +23,11 @@ namespace TrafficManager {
 #endif
 
         // These values from `BuildConfig` class (`APPLICATION_VERSION` constants) in game file `Managed/Assembly-CSharp.dll` (use ILSpy to inspect them)
-        public const uint GAME_VERSION = 188868624U;
+        public const uint GAME_VERSION = 189262096U;
         public const uint GAME_VERSION_A = 1u;
         public const uint GAME_VERSION_B = 13u;
-        public const uint GAME_VERSION_C = 1u;
-        public const uint GAME_VERSION_BUILD = 1u;
+        public const uint GAME_VERSION_C = 3u;
+        public const uint GAME_VERSION_BUILD = 9u;
 
         // Use SharedAssemblyInfo.cs to modify TM:PE version
         // External mods (eg. CSUR Toolbox) reference the versioning for compatibility purposes
