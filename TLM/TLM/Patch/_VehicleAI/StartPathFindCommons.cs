@@ -33,7 +33,7 @@ namespace TrafficManager.Patch._VehicleAI {
             // TODO [issue #952] Should this be done in TMPE?
             // see https://github.com/CitiesSkylinesMods/TMPE/issues/895#issuecomment-643111138
             const float vanilaMaxPos = 4800f; // vanilla 25 tiles compatible value
-            const float newMaxPos = 8000f; // 81 tiles compatible value.
+            const float newMaxPos = 8540f; // 81 tiles compatible value.
 
             int counter = 0;
             foreach (var instruction in instructions) {
@@ -49,7 +49,7 @@ namespace TrafficManager.Patch._VehicleAI {
 
             if (counter == 0) {
                 // if another mod has already made such replacement then we would know :)
-                Log.Warning("Warning: redundant transpiler (counter == 0) - Another mod must have changed these values already.");
+                Log.Warning("Warning: redundant transpiler (counter == 0) - Another mod must have changed these values already (probably 81-tiles).");
             }
             Log._Debug($"StartPathFindCommons.ReplaceMaxPosTranspiler() successfully " +
                 $"replaced {counter} instances of ldc.r4 {vanilaMaxPos} with {newMaxPos}");
