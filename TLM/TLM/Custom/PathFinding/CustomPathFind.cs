@@ -92,55 +92,16 @@ namespace TrafficManager.Custom.PathFinding {
             }
         }
 
-//        private enum LaneChangingCostCalculationMode {
-//            None,
-//            ByLaneDistance,
-//            ByGivenDistance
-//        }
-
         // private stock fields
-        private FieldInfo pathUnitsField_;
-        private FieldInfo queueFirstField_;
-        private FieldInfo queueLastField_;
-        private FieldInfo queueLockField_;
-        private FieldInfo calculatingField_;
-        private FieldInfo terminatedField_;
-        private FieldInfo pathFindThreadField_;
+        private Array32<PathUnit> pathUnits_;
+        private uint queueFirst_;
+        private uint queueLast_;
+        private uint calculating_;
+        private object queueLock_;
+        private Thread customPathFindThread_;
+        private bool terminated_;
 
-        private Array32<PathUnit> PathUnits {
-            get => pathUnitsField_.GetValue(this) as Array32<PathUnit>;
-            set => pathUnitsField_.SetValue(this, value);
-        }
-
-        private uint QueueFirst {
-            get => (uint)queueFirstField_.GetValue(this);
-            set => queueFirstField_.SetValue(this, value);
-        }
-
-        private uint QueueLast {
-            get => (uint)queueLastField_.GetValue(this);
-            set => queueLastField_.SetValue(this, value);
-        }
-
-        private uint Calculating {
-            get => (uint)calculatingField_.GetValue(this);
-            set => calculatingField_.SetValue(this, value);
-        }
-
-        private object QueueLock {
-            get => queueLockField_.GetValue(this);
-            set => queueLockField_.SetValue(this, value);
-        }
-
-        private Thread CustomPathFindThread {
-            get => (Thread)pathFindThreadField_.GetValue(this);
-            set => pathFindThreadField_.SetValue(this, value);
-        }
-
-        private bool Terminated {
-            get => (bool)terminatedField_.GetValue(this);
-            set => terminatedField_.SetValue(this, value);
-        }
+        public bool IsAvailable => customPathFindThread_.IsAlive;
 
         // stock fields
         public ThreadProfiler m_pathfindProfiler;
@@ -200,13 +161,10 @@ namespace TrafficManager.Custom.PathFinding {
             Type stockPathFindType = typeof(PathFind);
             const BindingFlags FIELD_FLAGS = BindingFlags.NonPublic | BindingFlags.Instance;
 
-            pathUnitsField_ = stockPathFindType.GetField("m_pathUnits", FIELD_FLAGS);
-            queueFirstField_ = stockPathFindType.GetField("m_queueFirst", FIELD_FLAGS);
-            queueLastField_ = stockPathFindType.GetField("m_queueLast", FIELD_FLAGS);
-            queueLockField_ = stockPathFindType.GetField("m_queueLock", FIELD_FLAGS);
-            terminatedField_ = stockPathFindType.GetField("m_terminated", FIELD_FLAGS);
-            calculatingField_ = stockPathFindType.GetField("m_calculating", FIELD_FLAGS);
-            pathFindThreadField_ = stockPathFindType.GetField("m_pathFindThread", FIELD_FLAGS);
+            queueFirst_ = 0;
+            queueLast_ = 0;
+            terminated_ = false;
+            calculating_ = 0u;
 
             m_pathfindProfiler = new ThreadProfiler();
             laneLocation_ = new uint[262144];
@@ -214,23 +172,36 @@ namespace TrafficManager.Custom.PathFinding {
             buffer_ = new BufferItem[65536];
             bufferMin_ = new int[1024];
             bufferMax_ = new int[1024];
-            QueueLock = new object();
+            queueLock_ = new object();
             bufferLock_ = Singleton<PathManager>.instance.m_bufferLock;
-            PathUnits = Singleton<PathManager>.instance.m_pathUnits;
-            CustomPathFindThread = new Thread(PathFindThread);
-            CustomPathFindThread.Name = "Pathfind";
-            CustomPathFindThread.Priority = SimulationManager.SIMULATION_PRIORITY;
-            CustomPathFindThread.Start();
+            pathUnits_ = Singleton<PathManager>.instance.m_pathUnits;
+            customPathFindThread_= new Thread(PathFindThread);
+            customPathFindThread_.Name = "Pathfind";
+            customPathFindThread_.Priority = SimulationManager.SIMULATION_PRIORITY;
+            customPathFindThread_.Start();
 
-            if (!CustomPathFindThread.IsAlive) {
+            stockPathFindType.GetField("m_queueLock", FIELD_FLAGS) .SetValue(this, queueLock_);
+            stockPathFindType.GetField("m_pathFindThread", FIELD_FLAGS).SetValue(this, customPathFindThread_);
+            if (!customPathFindThread_.IsAlive) {
                 CODebugBase<LogChannel>.Error(LogChannel.Core, "Path find thread failed to start!");
             }
         }
 
         private void OnDestroy() {
-            lock (QueueLock) {
-                Terminated = true;
-                Monitor.PulseAll(QueueLock);
+            lock (queueLock_) {
+                terminated_ = true;
+                Monitor.PulseAll(queueLock_);
+            }
+        }
+
+        public new void WaitForAllPaths() {
+            while (!Monitor.TryEnter(queueLock_, SimulationManager.SYNCHRONIZE_TIMEOUT)) { }
+
+            try {
+                while ((queueFirst_ != 0U || calculating_ != 0U) && !terminated_)
+                    Monitor.Wait(queueLock_);
+            } finally {
+                Monitor.Exit(queueLock_);
             }
         }
 
@@ -243,34 +214,34 @@ namespace TrafficManager.Custom.PathFinding {
                 return false;
             }
 
-            lock(QueueLock) {
+            lock(queueLock_) {
 
                 if (skipQueue) {
-                    if (QueueLast == 0) {
-                        QueueLast = unit;
+                    if (queueLast_ == 0) {
+                        queueLast_ = unit;
                     } else {
                         // NON-STOCK CODE START
-                        CustomPathManager._instance.QueueItems[unit].nextPathUnitId = QueueFirst;
+                        CustomPathManager._instance.QueueItems[unit].nextPathUnitId = queueFirst_;
                         // NON-STOCK CODE END
-                        // PathUnits.m_buffer[unit].m_nextPathUnit = QueueFirst; // stock code commented
+                        // PathUnits.m_buffer[unit].m_nextPathUnit = queueFirst_; // stock code commented
                     }
-                    QueueFirst = unit;
+                    queueFirst_ = unit;
                 } else {
-                    if (QueueLast == 0) {
-                        QueueFirst = unit;
+                    if (queueLast_ == 0) {
+                        queueFirst_ = unit;
                     } else {
                         // NON-STOCK CODE START
-                        CustomPathManager._instance.QueueItems[QueueLast].nextPathUnitId = unit;
+                        CustomPathManager._instance.QueueItems[queueLast_].nextPathUnitId = unit;
                         // NON-STOCK CODE END
-                        // PathUnits.m_buffer[QueueLast].m_nextPathUnit = unit; // stock code commented
+                        // PathUnits.m_buffer[queueLast_].m_nextPathUnit = unit; // stock code commented
                     }
-                    QueueLast = unit;
+                    queueLast_ = unit;
                 }
 
-                PathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_CREATED;
+                pathUnits_.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_CREATED;
                 m_queuedPathFindCount++;
 
-                Monitor.Pulse(QueueLock);
+                Monitor.Pulse(queueLock_);
             }
 
             return true;
@@ -281,35 +252,35 @@ namespace TrafficManager.Custom.PathFinding {
 
             NetManager netManager = Singleton<NetManager>.instance;
 
-            laneTypes_ = (NetInfo.LaneType)PathUnits.m_buffer[unit].m_laneTypes;
-            vehicleTypes_ = (VehicleInfo.VehicleType)PathUnits.m_buffer[unit].m_vehicleTypes;
-            maxLength_ = PathUnits.m_buffer[unit].m_length;
+            laneTypes_ = (NetInfo.LaneType)pathUnits_.m_buffer[unit].m_laneTypes;
+            vehicleTypes_ = (VehicleInfo.VehicleType)pathUnits_.m_buffer[unit].m_vehicleTypes;
+            maxLength_ = pathUnits_.m_buffer[unit].m_length;
             pathFindIndex_ = pathFindIndex_ + 1 & 0x7FFF;
             pathRandomizer_ = new Randomizer(unit);
             carBanMask_ = NetSegment.Flags.CarBan;
 
             isHeavyVehicle_ =
-                (PathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IS_HEAVY) !=
+                (pathUnits_.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IS_HEAVY) !=
                 0; // NON-STOCK CODE (refactored)
 
             if (isHeavyVehicle_) {
                 carBanMask_ |= NetSegment.Flags.HeavyBan;
             }
 
-            if ((PathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_READY) != 0) {
+            if ((pathUnits_.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_READY) != 0) {
                 carBanMask_ |= NetSegment.Flags.WaitingPath;
             }
 
-            ignoreBlocked_ = (PathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IGNORE_BLOCKED) != 0;
-            stablePath_ = (PathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_STABLE_PATH) != 0;
-            randomParking_ = (PathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_RANDOM_PARKING) != 0;
+            ignoreBlocked_ = (pathUnits_.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IGNORE_BLOCKED) != 0;
+            stablePath_ = (pathUnits_.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_STABLE_PATH) != 0;
+            randomParking_ = (pathUnits_.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_RANDOM_PARKING) != 0;
             transportVehicle_ = (laneTypes_ & NetInfo.LaneType.TransportVehicle) != NetInfo.LaneType.None;
             ignoreCost_ = stablePath_ ||
-                          (PathUnits.m_buffer[unit].m_simulationFlags &
+                          (pathUnits_.m_buffer[unit].m_simulationFlags &
                            PathUnit.FLAG_IGNORE_COST) != 0;
             disableMask_ = NetSegment.Flags.Collapsed | NetSegment.Flags.PathFailed;
 
-            if ((PathUnits.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IGNORE_FLOODED) == 0) {
+            if ((pathUnits_.m_buffer[unit].m_simulationFlags & PathUnit.FLAG_IGNORE_FLOODED) == 0) {
                 disableMask_ |= NetSegment.Flags.Flooded;
             }
 
@@ -347,8 +318,8 @@ namespace TrafficManager.Custom.PathFinding {
             }
 #endif
 
-            int posCount = PathUnits.m_buffer[unit].m_positionCount & 0xF;
-            int vehiclePosIndicator = PathUnits.m_buffer[unit].m_positionCount >> 4;
+            int posCount = pathUnits_.m_buffer[unit].m_positionCount & 0xF;
+            int vehiclePosIndicator = pathUnits_.m_buffer[unit].m_positionCount >> 4;
             BufferItem bufferItemStartA = default(BufferItem);
 
             if (data.m_position00.m_segment != 0 && posCount >= 1) {
@@ -685,7 +656,7 @@ namespace TrafficManager.Custom.PathFinding {
             }
 
             if (!canFindPath) {
-                PathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
+                pathUnits_.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
 
                 // NON-STOCK CODE START
 #if DEBUG
@@ -722,16 +693,16 @@ namespace TrafficManager.Custom.PathFinding {
                     (laneTypes_ & NetInfo.LaneType.Pedestrian) != NetInfo.LaneType.None
                         ? finalBufferItem.Duration
                         : finalBufferItem.MethodDistance;
-                PathUnits.m_buffer[unit].m_length = duration;
-                PathUnits.m_buffer[unit].m_speed = (byte)Mathf.Clamp(
+                pathUnits_.m_buffer[unit].m_length = duration;
+                pathUnits_.m_buffer[unit].m_speed = (byte)Mathf.Clamp(
                     finalBufferItem.MethodDistance * 100f / Mathf.Max(
                         0.01f,
                         finalBufferItem.Duration),
                     0f,
                     255f);
 
-                PathUnits.m_buffer[unit].m_laneTypes = (byte)finalBufferItem.LanesUsed;
-                PathUnits.m_buffer[unit].m_vehicleTypes = (uint)finalBufferItem.VehiclesUsed;
+                pathUnits_.m_buffer[unit].m_laneTypes = (byte)finalBufferItem.LanesUsed;
+                pathUnits_.m_buffer[unit].m_vehicleTypes = (uint)finalBufferItem.VehiclesUsed;
 
                 uint currentPathUnitId = unit;
                 int currentItemPositionCount = 0;
@@ -747,19 +718,19 @@ namespace TrafficManager.Custom.PathFinding {
                     if (startOffset != currentPosition.m_offset) {
                         PathUnit.Position position2 = currentPosition;
                         position2.m_offset = startOffset;
-                        PathUnits.m_buffer[currentPathUnitId].SetPosition(
+                        pathUnits_.m_buffer[currentPathUnitId].SetPosition(
                             currentItemPositionCount++,
                             position2);
                     }
 
-                    PathUnits.m_buffer[currentPathUnitId].SetPosition(
+                    pathUnits_.m_buffer[currentPathUnitId].SetPosition(
                         currentItemPositionCount++,
                         currentPosition);
                     currentPosition = laneTarget_[finalBufferItem.LaneId];
                 }
 
                 for (int k = 0; k < 262144; k++) {
-                    PathUnits.m_buffer[currentPathUnitId].SetPosition(
+                    pathUnits_.m_buffer[currentPathUnitId].SetPosition(
                         currentItemPositionCount++,
                         currentPosition);
 
@@ -770,22 +741,22 @@ namespace TrafficManager.Custom.PathFinding {
                          currentPosition.m_lane == bufferItemEndB.Position.m_lane &&
                          currentPosition.m_offset == bufferItemEndB.Position.m_offset))
                     {
-                        PathUnits.m_buffer[currentPathUnitId].m_positionCount =
+                        pathUnits_.m_buffer[currentPathUnitId].m_positionCount =
                             (byte)currentItemPositionCount;
                         sumOfPositionCounts += currentItemPositionCount;
 
                         if (sumOfPositionCounts != 0) {
-                            currentPathUnitId = PathUnits.m_buffer[unit].m_nextPathUnit;
-                            currentItemPositionCount = PathUnits.m_buffer[unit].m_positionCount;
+                            currentPathUnitId = pathUnits_.m_buffer[unit].m_nextPathUnit;
+                            currentItemPositionCount = pathUnits_.m_buffer[unit].m_positionCount;
                             int numIter = 0;
                             while (currentPathUnitId != 0) {
-                                PathUnits.m_buffer[currentPathUnitId].m_length =
+                                pathUnits_.m_buffer[currentPathUnitId].m_length =
                                     duration * (sumOfPositionCounts - currentItemPositionCount) /
                                     sumOfPositionCounts;
                                 currentItemPositionCount +=
-                                    PathUnits.m_buffer[currentPathUnitId].m_positionCount;
+                                    pathUnits_.m_buffer[currentPathUnitId].m_positionCount;
                                 currentPathUnitId =
-                                    PathUnits.m_buffer[currentPathUnitId].m_nextPathUnit;
+                                    pathUnits_.m_buffer[currentPathUnitId].m_nextPathUnit;
                                 if (++numIter >= 262144) {
                                     CODebugBase<LogChannel>.Error(
                                         LogChannel.Core,
@@ -795,7 +766,7 @@ namespace TrafficManager.Custom.PathFinding {
                             }
                         }
 
-                        PathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_READY;
+                        pathUnits_.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_READY;
 
                         // NON-STOCK CODE START
 #if DEBUG
@@ -813,8 +784,8 @@ namespace TrafficManager.Custom.PathFinding {
                         uint createdPathUnitId;
                         lock(bufferLock_) {
 
-                            if (!PathUnits.CreateItem(out createdPathUnitId, ref pathRandomizer_)) {
-                                PathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
+                            if (!pathUnits_.CreateItem(out createdPathUnitId, ref pathRandomizer_)) {
+                                pathUnits_.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
                                 // NON-STOCK CODE START
 #if DEBUG
                                 ++m_failedPathFinds;
@@ -827,21 +798,21 @@ namespace TrafficManager.Custom.PathFinding {
                                 return;
                             }
 
-                            PathUnits.m_buffer[createdPathUnitId] = PathUnits.m_buffer[currentPathUnitId];
-                            PathUnits.m_buffer[createdPathUnitId].m_referenceCount = 1;
-                            PathUnits.m_buffer[createdPathUnitId].m_pathFindFlags = PathUnit.FLAG_READY;
-                            PathUnits.m_buffer[currentPathUnitId].m_nextPathUnit = createdPathUnitId;
-                            PathUnits.m_buffer[currentPathUnitId].m_positionCount = (byte)currentItemPositionCount;
+                            pathUnits_.m_buffer[createdPathUnitId] = pathUnits_.m_buffer[currentPathUnitId];
+                            pathUnits_.m_buffer[createdPathUnitId].m_referenceCount = 1;
+                            pathUnits_.m_buffer[createdPathUnitId].m_pathFindFlags = PathUnit.FLAG_READY;
+                            pathUnits_.m_buffer[currentPathUnitId].m_nextPathUnit = createdPathUnitId;
+                            pathUnits_.m_buffer[currentPathUnitId].m_positionCount = (byte)currentItemPositionCount;
 
                             // (this is not accurate!)
-                            PathUnits.m_buffer[currentPathUnitId].m_laneTypes =
+                            pathUnits_.m_buffer[currentPathUnitId].m_laneTypes =
                                 (byte)finalBufferItem.LanesUsed;
-                            PathUnits.m_buffer[currentPathUnitId].m_vehicleTypes =
+                            pathUnits_.m_buffer[currentPathUnitId].m_vehicleTypes =
                                 (uint)finalBufferItem.VehiclesUsed;
 
                             sumOfPositionCounts += currentItemPositionCount;
                             Singleton<PathManager>.instance.m_pathUnitCount =
-                                (int)(PathUnits.ItemCount() - 1);
+                                (int)(pathUnits_.ItemCount() - 1);
                         }
 
                         currentPathUnitId = createdPathUnitId;
@@ -852,7 +823,7 @@ namespace TrafficManager.Custom.PathFinding {
                     currentPosition = laneTarget_[laneId];
                 }
 
-                PathUnits.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
+                pathUnits_.m_buffer[unit].m_pathFindFlags |= PathUnit.FLAG_FAILED;
                 // NON-STOCK CODE START
 #if DEBUG
                 ++m_failedPathFinds;
@@ -906,6 +877,7 @@ namespace TrafficManager.Custom.PathFinding {
                     + $"ITEM({item})\n" + message);
         }
 
+        // main item processor
         // 1
         private void ProcessItemMain(
 #if DEBUG
@@ -4184,41 +4156,41 @@ namespace TrafficManager.Custom.PathFinding {
 
         private void PathFindThread() {
             while (true) {
-                lock(QueueLock) {
+                lock(queueLock_) {
 
-                    while (QueueFirst == 0 && !Terminated) {
-                        Monitor.Wait(QueueLock);
+                    while (queueFirst_ == 0 && !terminated_) {
+                        Monitor.Wait(queueLock_);
                     }
 
-                    if (Terminated) {
+                    if (terminated_) {
                         break;
                     }
 
-                    Calculating = QueueFirst;
+                    calculating_ = queueFirst_;
 
                     // NON-STOCK CODE START
-                    QueueFirst = CustomPathManager._instance.QueueItems[Calculating].nextPathUnitId;
+                    queueFirst_ = CustomPathManager._instance.QueueItems[calculating_].nextPathUnitId;
 
                     // NON-STOCK CODE END
-                    // QueueFirst = PathUnits.m_buffer[Calculating].m_nextPathUnit; // stock code commented
-                    if (QueueFirst == 0) {
-                        QueueLast = 0u;
+                    // queueFirst_ = pathUnits_.m_buffer[calculating_].m_nextPathUnit; // stock code commented
+                    if (queueFirst_ == 0) {
+                        queueLast_ = 0u;
                         m_queuedPathFindCount = 0;
                     } else {
                         m_queuedPathFindCount--;
                     }
 
                     // NON-STOCK CODE START
-                    CustomPathManager._instance.QueueItems[Calculating].nextPathUnitId = 0u;
+                    CustomPathManager._instance.QueueItems[calculating_].nextPathUnitId = 0u;
 
                     // NON-STOCK CODE END
-                    // PathUnits.m_buffer[Calculating].m_nextPathUnit = 0u; // stock code commented
-                    PathUnits.m_buffer[Calculating].m_pathFindFlags =
-                        (byte)((PathUnits.m_buffer[Calculating].m_pathFindFlags &
+                    // pathUnits_.m_buffer[calculating_].m_nextPathUnit = 0u; // stock code commented
+                    pathUnits_.m_buffer[calculating_].m_pathFindFlags =
+                        (byte)((pathUnits_.m_buffer[calculating_].m_pathFindFlags &
                                 ~PathUnit.FLAG_CREATED) | PathUnit.FLAG_CALCULATING);
 
                     // NON-STOCK CODE START
-                    queueItem_ = CustomPathManager._instance.QueueItems[Calculating];
+                    queueItem_ = CustomPathManager._instance.QueueItems[calculating_];
 
                     // NON-STOCK CODE END
                 }
@@ -4226,7 +4198,7 @@ namespace TrafficManager.Custom.PathFinding {
                 try {
                     m_pathfindProfiler.BeginStep();
                     try {
-                        PathFindImplementation(Calculating, ref PathUnits.m_buffer[Calculating]);
+                        PathFindImplementation(calculating_, ref pathUnits_.m_buffer[calculating_]);
                     }
                     finally {
                         m_pathfindProfiler.EndStep();
@@ -4237,7 +4209,7 @@ namespace TrafficManager.Custom.PathFinding {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         "Path find error: " + ex.Message + "\n" + ex.StackTrace);
-                    PathUnits.m_buffer[Calculating].m_pathFindFlags |= PathUnit.FLAG_FAILED;
+                    pathUnits_.m_buffer[calculating_].m_pathFindFlags |= PathUnit.FLAG_FAILED;
 
                     // NON-STOCK CODE START
 #if DEBUG
@@ -4247,22 +4219,22 @@ namespace TrafficManager.Custom.PathFinding {
                     // NON-STOCK CODE END
                 }
 
-                lock(QueueLock) {
+                lock(queueLock_) {
 
-                    PathUnits.m_buffer[Calculating].m_pathFindFlags =
-                        (byte)(PathUnits.m_buffer[Calculating].m_pathFindFlags &
+                    pathUnits_.m_buffer[calculating_].m_pathFindFlags =
+                        (byte)(pathUnits_.m_buffer[calculating_].m_pathFindFlags &
                                ~PathUnit.FLAG_CALCULATING);
 
                     // NON-STOCK CODE START
                     lock(bufferLock_) {
-                        CustomPathManager._instance.QueueItems[Calculating].queued = false;
-                        CustomPathManager._instance.CustomReleasePath(Calculating);
+                        CustomPathManager._instance.QueueItems[calculating_].queued = false;
+                        CustomPathManager._instance.CustomReleasePath(calculating_);
                     }
 
                     // NON-STOCK CODE END
-                    // Singleton<PathManager>.instance.CustomReleasePath(Calculating); // stock code commented
-                    Calculating = 0u;
-                    Monitor.Pulse(QueueLock);
+                    // Singleton<PathManager>.instance.CustomReleasePath(calculating_); // stock code commented
+                    calculating_ = 0u;
+                    Monitor.Pulse(queueLock_);
                 }
             }
         }
