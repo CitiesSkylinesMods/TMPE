@@ -136,28 +136,31 @@ namespace TrafficManager.State {
                 return false;
             }
 
-            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
+            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+
+            if ((node.m_flags &
                  (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created)
             {
                 // Log._Debug($"Flags: Node {nodeId} may not have a traffic light (not created).
                 // flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}");
-                Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags
-                    &= ~NetNode.Flags.TrafficLights;
+                node.m_flags &= ~NetNode.Flags.TrafficLights;
+                return false;
+            }
+
+            if ((node.m_flags & NetNode.Flags.Untouchable) != NetNode.Flags.None) {
                 return false;
             }
 
             ItemClass connectionClass = Singleton<NetManager>
                                         .instance.m_nodes.m_buffer[nodeId].Info
                                         .GetConnectionClass();
-            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
-                 NetNode.Flags.Junction) == NetNode.Flags.None &&
+            if ((node.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None &&
                 connectionClass.m_service != ItemClass.Service.PublicTransport)
             {
                 // Log._Debug($"Flags: Node {nodeId} may not have a traffic light (no junction or
                 // not public transport). flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}
                 // connectionClass={connectionClass?.m_service}");
-                Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags
-                    &= ~NetNode.Flags.TrafficLights;
+                node.m_flags &= ~NetNode.Flags.TrafficLights;
                 return false;
             }
 
@@ -167,8 +170,7 @@ namespace TrafficManager.State {
             {
                 // Log._Debug($"Flags: Node {nodeId} may not have a traffic light (no connection class).
                 // connectionClass={connectionClass?.m_service}");
-                Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags
-                    &= ~NetNode.Flags.TrafficLights;
+                node.m_flags &= ~NetNode.Flags.TrafficLights;
                 return false;
             }
 
