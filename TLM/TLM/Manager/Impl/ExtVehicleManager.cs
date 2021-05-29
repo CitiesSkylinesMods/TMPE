@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework.Math;
     using ColossalFramework;
     using CSUtil.Commons;
@@ -10,6 +10,7 @@
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
     using UnityEngine;
+    using TrafficManager.Util;
 
     public class ExtVehicleManager
         : AbstractCustomManager,
@@ -201,6 +202,9 @@
                     ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[connectedVehicleId],
                     vehicleType);
             }
+
+            if (vehicleType == ExtVehicleType.None)
+                Log._DebugOnlyWarning($"Vehicle {vehicleId} does not have a valid vehicle type!");
 
             return ret;
         }
@@ -837,23 +841,20 @@
         private static ushort GetTransitNodeId(ref PathUnit.Position curPos,
                                                ref PathUnit.Position nextPos) {
             bool startNode = IsTransitNodeCurStartNode(ref curPos, ref nextPos);
-            ushort transitNodeId1 = 0;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                curPos.m_segment,
-                (ushort segmentId, ref NetSegment segment) => {
-                    transitNodeId1 = startNode ? segment.m_startNode : segment.m_endNode;
-                    return true;
-                });
 
-            ushort transitNodeId2 = 0;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                nextPos.m_segment,
-                (ushort segmentId, ref NetSegment segment) => {
-                    transitNodeId2 = startNode ? segment.m_startNode : segment.m_endNode;
-                    return true;
-                });
+            ref NetSegment curPosSegment = ref curPos.m_segment.ToSegment();
+            var transitNodeId1 = startNode
+                ? curPosSegment.m_startNode
+                : curPosSegment.m_endNode;
 
-            return transitNodeId1 != transitNodeId2 ? (ushort)0 : transitNodeId1;
+            ref NetSegment nextPosSegment = ref nextPos.m_segment.ToSegment();
+            var transitNodeId2 = startNode
+                ? nextPosSegment.m_startNode
+                : nextPosSegment.m_endNode;
+
+            return transitNodeId1 != transitNodeId2
+                ? (ushort)0
+                : transitNodeId1;
         }
 
         private static bool IsTransitNodeCurStartNode(ref PathUnit.Position curPos,

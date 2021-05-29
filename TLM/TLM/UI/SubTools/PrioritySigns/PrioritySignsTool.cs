@@ -73,7 +73,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 if (!isRoundabout) {
                     record_ = PriorityRoad.FixRoad(HoveredSegmentId);
                 }
-                // TODO: benchmark why bulk setup takes a long time. 
+                // TODO: benchmark why bulk setup takes a long time.
                 Log.Info("After FixRoundabout/FixRoad. Before RefreshMassEditOverlay"); // log time for benchmarking.
                 RefreshMassEditOverlay();
                 Log.Info("After RefreshMassEditOverlay."); // log time for benchmarking.
@@ -122,12 +122,16 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     massEditMode = PrioritySignsMassEditMode.Min;
                 }
             }
-            
+
             // refresh cache
             if(ControlIsPressed)
                 RefreshMassEditOverlay();
             else
                 RefreshCurrentPriorityNodeIds();
+        }
+
+        public override void OnSecondaryClickOverlay() {
+            MainTool.SetToolMode(ToolMode.None);
         }
 
         public override void OnToolGUI(Event e) { }
@@ -304,23 +308,11 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         continue;
                     }
 
-                    Vector3 nodePos = default;
-                    Constants.ServiceFactory.NetService.ProcessNode(
-                        nodeId,
-                        (ushort nId, ref NetNode node) => {
-                            nodePos = node.m_position;
-                            return true;
-                        });
+                    ref NetNode node = ref nodeId.ToNode();
+                    Vector3 nodePos = node.m_position;
 
                     for (int i = 0; i < 8; ++i) {
-                        ushort segmentId = 0;
-                        Constants.ServiceFactory.NetService.ProcessNode(
-                            nodeId,
-                            (ushort nId, ref NetNode node) => {
-                                segmentId = node.GetSegment(i);
-                                return true;
-                            });
-
+                        ushort segmentId = node.GetSegment(i);
                         if (segmentId == 0) {
                             continue;
                         }
@@ -334,17 +326,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         }
 
                         // calculate sign position
-                        Vector3 signPos = nodePos;
-
-                        Constants.ServiceFactory.NetService.ProcessSegment(
-                            segmentId,
-                            (ushort sId, ref NetSegment segment) => {
-                                signPos +=
-                                    10f * (startNode
-                                               ? segment.m_startDirection
-                                               : segment.m_endDirection);
-                                return true;
-                            });
+                        ref NetSegment segment = ref segmentId.ToSegment();
+                        Vector3 signPos = nodePos + (10f * (startNode ? segment.m_startDirection : segment.m_endDirection));
 
                         if (!GeometryUtil.WorldToScreenPoint(signPos, out Vector3 _)) {
                             continue;
@@ -450,15 +433,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             Log._Debug("PrioritySignsTool.SetPrioritySign: flagging remaining segments at node " +
                        $"{nodeId} as main road.");
 
-            for (int i = 0; i < 8; ++i) {
-                ushort otherSegmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    nodeId,
-                    (ushort nId, ref NetNode node) => {
-                        otherSegmentId = node.GetSegment(i);
-                        return true;
-                    });
+            ref NetNode node = ref nodeId.ToNode();
 
+            for (int i = 0; i < 8; ++i) {
+                ushort otherSegmentId = node.GetSegment(i);
                 if (otherSegmentId == 0 || otherSegmentId == segmentId) {
                     continue;
                 }

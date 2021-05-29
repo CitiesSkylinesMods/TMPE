@@ -1,56 +1,13 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace TrafficManager.Util {
     public static class LoopUtil {
-        public delegate bool TwoDimLoopHandler(int x, int y);
-
-        [Obsolete("Use 'GenerateSpiralGridCoordsClockwise' instead.")]
-        public static void SpiralLoop(int xCenter,
-                                      int yCenter,
-                                      int width,
-                                      int height,
-                                      TwoDimLoopHandler handler) {
-            SpiralLoop(
-                width,
-                height,
-                (x, y) => handler(xCenter + x, yCenter + y));
-        }
-
-        [Obsolete("Use 'GenerateSpiralGridCoordsClockwise' instead.")]
-        public static void SpiralLoop(int width, int height, TwoDimLoopHandler handler) {
-            int x, y, dx, dy;
-            x = y = dx = 0;
-            dy = -1;
-            int t = width > height ? width : height;
-            int maxI = t * t;
-            for (int i = 0; i < maxI; i++) {
-                if ((-width / 2 <= x) && (x <= width / 2) && (-height / 2 <= y)
-                    && (y <= height / 2))
-                {
-                    if (!handler(x, y)) {
-                        break;
-                    }
-                }
-
-                if ((x == y) || ((x < 0) && (x == -y)) || ((x > 0) && (x == 1 - y))) {
-                    t = dx;
-                    dx = -dy;
-                    dy = t;
-                }
-
-                x += dx;
-                y += dy;
-            }
-        }
-
         /// <summary>
-        /// Generates a non halting stream of spiral grid coordinates clockwise.
+        /// Generates a stream of spiral grid coordinates clockwise.
         /// </summary>
-        /// <param name="radius">Maximum grid width/height of the spiral.</param>
-        /// <returns>Non halting stream of spiral grid coordinates.</returns>
-        public static IEnumerable<Vector2> GenerateSpiralGridCoordsClockwise(int radius) {
+        /// <returns>Stream of spiral grid coordinates until int.MaxValue + 1 elements were returned.</returns>
+        public static IEnumerable<Vector2> GenerateSpiralGridCoordsClockwise() {
             var cursorX = 0;
             var cursorY = 0;
 
@@ -60,8 +17,7 @@ namespace TrafficManager.Util {
             var segmentLength = 1;
             var segmentsPassed = 0;
 
-            var maxSteps = radius * radius;
-            for (var n = 0; n < maxSteps; n++) {
+            for (var n = 0; n <= int.MaxValue; n++) {
                 yield return new Vector2(cursorX, cursorY);
 
                 cursorX += directionX;

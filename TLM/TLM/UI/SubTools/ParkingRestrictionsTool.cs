@@ -47,7 +47,6 @@ namespace TrafficManager.UI.SubTools {
                 !(a == b);
         }
 
-
         /// <summary>
         /// Stores potentially visible segment ids while the camera did not move
         /// </summary>
@@ -64,6 +63,10 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnPrimaryClickOverlay() { }
+
+        public override void OnSecondaryClickOverlay() {
+            MainTool.SetToolMode(ToolMode.None);
+        }
 
         private void RenderSegmentParkings(RenderManager.CameraInfo cameraInfo) {
             bool allowed = parkingManager.IsParkingAllowed(renderInfo_.SegmentId, renderInfo_.FinalDirection);
@@ -173,8 +176,8 @@ namespace TrafficManager.UI.SubTools {
         private void ShowSigns(bool viewOnly) {
             NetManager netManager = Singleton<NetManager>.instance;
 
-            var currentCamera = new CameraTransformValue(Camera.main);
-            Transform currentCameraTransform = Camera.main.transform;
+            var currentCamera = new CameraTransformValue(InGameUtil.Instance.CachedMainCamera);
+            Transform currentCameraTransform = InGameUtil.Instance.CachedCameraTransform;
             Vector3 camPos = currentCameraTransform.position;
 
             if (!LastCachedCamera.Equals(currentCamera)) {

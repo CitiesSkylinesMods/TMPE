@@ -36,15 +36,10 @@ namespace TrafficManager.TrafficLight.Impl {
             endTransitionStart = null;
             stepDone = false;
 
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    timedNode.NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        segmentId = node.GetSegment(i);
-                        return true;
-                    });
+            ref NetNode node = ref timedNode.NodeId.ToNode();
 
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) {
                     continue;
                 }
@@ -846,15 +841,9 @@ namespace TrafficManager.TrafficLight.Impl {
                         countOnlyMovingIfGreenOnSegment = countOnlyMovingIfGreen;
 
                         if (countOnlyMovingIfGreenOnSegment) {
-                            Constants.ServiceFactory.NetService.ProcessSegment(
-                                sourceSegmentId,
-                                (ushort srcSegId, ref NetSegment segment) => {
-                                    if (restrMan.IsRailSegment(segment.Info)) {
-                                        countOnlyMovingIfGreenOnSegment = false;
-                                    }
-
-                                    return true;
-                                });
+                            if (restrMan.IsRailSegment(sourceSegmentId.ToSegment().Info)) {
+                                countOnlyMovingIfGreenOnSegment = false;
+                            }
                         }
 
                         movingVehiclesMetrics =
@@ -983,11 +972,11 @@ namespace TrafficManager.TrafficLight.Impl {
                             } else {
                                 curTotalLaneWait += numVehicles;
                                 ++numLaneWaits;
-                                    Log._DebugIf(
-                                        logTrafficLights,
-                                        () => "TimedTrafficLightsStep.calcWaitFlow: ## Vehicles @ " +
-                                        $"lane {laneIndex}, seg. {sourceSegmentId} going to seg. " +
-                                        $"{targetSegmentId}: COUTING as WAITING -- numVehicles={numVehicles}");
+                                Log._DebugIf(
+                                    logTrafficLights,
+                                    () => "TimedTrafficLightsStep.calcWaitFlow: ## Vehicles @ " +
+                                    $"lane {laneIndex}, seg. {sourceSegmentId} going to seg. " +
+                                    $"{targetSegmentId}: COUTING as WAITING -- numVehicles={numVehicles}");
                             }
 
                             Log._DebugIf(

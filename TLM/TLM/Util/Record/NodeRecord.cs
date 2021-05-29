@@ -3,6 +3,7 @@ namespace TrafficManager.Util.Record {
     using System.Collections.Generic;
     using TrafficManager.Manager.Impl;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.State;
 
     [Serializable]
     public class NodeRecord : IRecordable {
@@ -52,6 +53,6 @@ namespace TrafficManager.Util.Record {
             return tlMan.SetTrafficLight(nodeId, flag, ref nodeId.ToNode());
         }
 
-        public byte[] Serialize() => RecordUtil.Serialize(this);
+        public byte[] Serialize() => SerializationUtil.Serialize(this);
     }
 }

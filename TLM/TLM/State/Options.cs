@@ -7,7 +7,10 @@ namespace TrafficManager.State {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI;
+    using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Lifecycle;
+    using System;
 
     public class Options : MonoBehaviour {
 #if DEBUG
@@ -71,6 +74,8 @@ namespace TrafficManager.State {
         public static byte altLaneSelectionRatio;
         public static bool highwayRules;
         public static bool automaticallyAddTrafficLightsIfApplicable = true;
+        public static bool NoDoubleCrossings = false;
+        public static bool DedicatedTurningLanes = false;
 #if DEBUG
         public static bool showLanes = true;
 #else
@@ -124,22 +129,26 @@ namespace TrafficManager.State {
                     ModUI.Instance.MainMenuButton.UpdateButtonImageAndTooltip();
                 }
 
-                LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
-                LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
+                TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
+                TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
             } else {
                 Log._Debug("Rebuilding the TM:PE menu: ignored, ModUI is null");
             }
         }
 
-        public static void MakeSettings(UIHelperBase helper) {
-            ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
-            OptionsGeneralTab.MakeSettings_General(tabStrip);
-            OptionsGameplayTab.MakeSettings_Gameplay(tabStrip);
-            OptionsVehicleRestrictionsTab.MakeSettings_VehicleRestrictions(tabStrip);
-            OptionsOverlaysTab.MakeSettings_Overlays(tabStrip);
-            OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip);
-            OptionsKeybindsTab.MakeSettings_Keybinds(tabStrip);
-            tabStrip.Invalidate();
+        public static void MakeSettings(UIHelper helper) {
+            try {
+                ExtUITabstrip tabStrip = ExtUITabstrip.Create(helper);
+                OptionsGeneralTab.MakeSettings_General(tabStrip);
+                OptionsGameplayTab.MakeSettings_Gameplay(tabStrip);
+                OptionsVehicleRestrictionsTab.MakeSettings_VehicleRestrictions(tabStrip);
+                OptionsOverlaysTab.MakeSettings_Overlays(tabStrip);
+                OptionsMaintenanceTab.MakeSettings_Maintenance(tabStrip);
+                OptionsKeybindsTab.MakeSettings_Keybinds(tabStrip);
+                tabStrip.Invalidate();
+            } catch (Exception ex) {
+                ex.LogException();
+            }
         }
 
         internal static void Indent<T>(T component) where T : UIComponent {
@@ -163,7 +172,7 @@ namespace TrafficManager.State {
         /// <param name="warn">Whether to display a warning popup</param>
         /// <returns>The game is loaded</returns>
         internal static bool IsGameLoaded(bool warn = true) {
-            if (SerializableDataExtension.StateLoading || LoadingExtension.IsGameLoaded) {
+            if (TMPELifecycle.InGameOrEditor()) {
                 return true;
             }
 

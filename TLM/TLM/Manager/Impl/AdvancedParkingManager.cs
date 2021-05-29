@@ -5,32 +5,36 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using JetBrains.Annotations;
     using System;
+    using Patch._VehicleAI._PassengerCarAI.Connection;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.Custom.AI;
     using TrafficManager.Custom.PathFinding;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
     using TrafficManager.UI;
     using TrafficManager.Util;
     using UnityEngine;
-    using System.Linq;
 
     public class AdvancedParkingManager
         : AbstractFeatureManager,
           IAdvancedParkingManager
     {
-        private readonly Vector2[] _spiralGridCoordsCache;
+        private readonly Spiral _spiral;
 
-        public static readonly AdvancedParkingManager Instance = new AdvancedParkingManager();
+        public static readonly AdvancedParkingManager Instance
+            = new AdvancedParkingManager(SingletonLite<Spiral>.instance);
 
-        public AdvancedParkingManager() {
-            var radius = Math.Max(
-                1,
-                (int)(GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding / (BuildingManager.BUILDINGGRID_CELL_SIZE / 2f)) + 1);
+        private FindParkingSpaceDelegate _findParkingSpaceDelegate;
+        private FindParkingSpacePropDelegate _findParkingSpacePropDelegate;
+        private FindParkingSpaceRoadSideDelegate _findParkingSpaceRoadSideDelegate;
 
-            _spiralGridCoordsCache = LoopUtil.GenerateSpiralGridCoordsClockwise(radius).ToArray();
+        public AdvancedParkingManager(Spiral spiral) {
+            _spiral = spiral ?? throw new ArgumentNullException(nameof(spiral));
+
+            _findParkingSpaceDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpace;
+            _findParkingSpacePropDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpaceProp;
+            _findParkingSpaceRoadSideDelegate = GameConnectionManager.Instance.PassengerCarAIConnection.FindParkingSpaceRoadSide;
         }
 
         protected override void OnDisableFeatureInternal() {
@@ -1311,11 +1315,11 @@ namespace TrafficManager.Manager.Impl {
                 default: {
                     // ... and a path to a parking spot was calculated: dismiss path and
                     // restart path-finding for walking
-                Log._DebugIf(
-                    logParkingAi,
-                    () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
-                    "A parking space car path was queried but it turned out that no car is " +
-                    "needed. Retrying path-finding for walking.");
+                    Log._DebugIf(
+                        logParkingAi,
+                        () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
+                        "A parking space car path was queried but it turned out that no car is " +
+                        "needed. Retrying path-finding for walking.");
 
                     extCitInstMan.Reset(ref extInstance);
                     extInstance.pathMode = ExtPathMode.RequiresWalkingPathToTarget;
@@ -2422,15 +2426,15 @@ namespace TrafficManager.Manager.Impl {
                                      VehicleRestrictionsMode.Configured)
                                  & ExtVehicleType.PassengerCar) != ExtVehicleType.None)
                             {
-                                if (CustomPassengerCarAI.FindParkingSpaceRoadSide(
-                                    ignoreParked,
-                                    segmentId,
-                                    innerParkPos,
-                                    width,
-                                    length,
-                                    out innerParkPos,
-                                    out Quaternion innerParkRot,
-                                    out float innerParkOffset))
+                                if (_findParkingSpaceRoadSideDelegate(
+                                    ignoreParked: ignoreParked,
+                                    requireSegment: segmentId,
+                                    refPos: innerParkPos,
+                                    width: width,
+                                    length: length,
+                                    parkPos: out innerParkPos,
+                                    parkRot: out Quaternion innerParkRot,
+                                    parkOffset: out float innerParkOffset))
                                 {
                                     Log._DebugIf(
                                         logParkingAi,
@@ -2464,9 +2468,9 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            for (int i = 0; i < _spiralGridCoordsCache.Length; i++) {
-                var coords = _spiralGridCoordsCache[i];
-                if (!LoopHandler((int)(centerI + coords.x), (int)(centerJ + coords.y))) {
+            var coords = _spiral.GetCoords(radius);
+            for (int i = 0; i < radius * radius; i++) {
+                if (!LoopHandler((int)(centerI + coords[i].x), (int)(centerJ + coords[i].y))) {
                     break;
                 }
             }
@@ -2573,9 +2577,9 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
-            for (int i = 0; i < _spiralGridCoordsCache.Length; i++) {
-                var coords = _spiralGridCoordsCache[i];
-                if (!LoopHandler((int)(centerI + coords.x), (int)(centerJ + coords.y))) {
+            var coords = _spiral.GetCoords(radius);
+            for (int i = 0; i < radius * radius; i++) {
+                if (!LoopHandler((int)(centerI + coords[i].x), (int)(centerJ + coords[i].y))) {
                     break;
                 }
             }
@@ -2691,19 +2695,19 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     Vector3 position = transformMatrix.MultiplyPoint(prop.m_position);
-                    if (CustomPassengerCarAI.FindParkingSpaceProp(
-                        isElectric,
-                        ignoreParked,
-                        propInfo,
-                        position,
-                        building.m_angle + prop.m_radAngle,
-                        prop.m_fixedHeight,
-                        refPos,
-                        vehicleInfo.m_generatedInfo.m_size.x,
-                        vehicleInfo.m_generatedInfo.m_size.z,
-                        ref propMinDistance,
-                        ref parkPos,
-                        ref parkRot))
+                    if (_findParkingSpacePropDelegate(
+                            isElectric: isElectric,
+                            ignoreParked: ignoreParked,
+                            info: propInfo,
+                            position: position,
+                            angle: building.m_angle + prop.m_radAngle,
+                            fixedHeight: prop.m_fixedHeight,
+                            refPos: refPos,
+                            width: vehicleInfo.m_generatedInfo.m_size.x,
+                            length: vehicleInfo.m_generatedInfo.m_size.z,
+                            maxDistance: ref propMinDistance,
+                            parkPos: ref parkPos,
+                            parkRot: ref parkRot))
                     {
                         // NON-STOCK CODE
                         result = true;
@@ -2822,15 +2826,16 @@ namespace TrafficManager.Manager.Impl {
                             netManager.m_segments.m_buffer[segmentId].Info
                                       .m_lanes[laneIndex].m_finalDirection))
                     {
-                        if (CustomPassengerCarAI.FindParkingSpaceRoadSide(
-                            ignoreParked,
-                            segmentId,
-                            parkPos,
-                            width,
-                            length,
-                            out parkPos,
-                            out parkRot,
-                            out parkOffset)) {
+                        if (_findParkingSpaceRoadSideDelegate(
+                            ignoreParked: ignoreParked,
+                            requireSegment: segmentId,
+                            refPos: parkPos,
+                            width: width,
+                            length: length,
+                            parkPos: out parkPos,
+                            parkRot: out parkRot,
+                            parkOffset: out parkOffset))
+                        {
                             if (logParkingAi) {
                                 Log._Debug(
                                     "FindParkingSpaceRoadSideForVehiclePos: Found a parking space " +
@@ -2894,6 +2899,50 @@ namespace TrafficManager.Manager.Impl {
                        out parkPos,
                        out parkRot,
                        out parkOffset) != 0;
+        }
+
+        public bool VanillaFindParkingSpaceWithoutRestrictions(bool isElectric,
+                                                                ushort homeId,
+                                                                Vector3 refPos,
+                                                                Vector3 searchDir,
+                                                                ushort segment,
+                                                                float width,
+                                                                float length,
+                                                                out Vector3 parkPos,
+                                                                out Quaternion parkRot,
+                                                                out float parkOffset) {
+            if (!_findParkingSpaceDelegate(isElectric: isElectric,
+                                           homeId: homeId,
+                                           refPos: refPos,
+                                           searchDir: searchDir,
+                                           segment: segment,
+                                           width: width,
+                                           length: length,
+                                           parkPos: out parkPos,
+                                           parkRot: out parkRot,
+                                           parkOffset: out parkOffset)) {
+                return false;
+            }
+
+            // in vanilla parkOffset is always >= 0 for RoadSideParkingSpace
+            if (Options.parkingRestrictionsEnabled && parkOffset >= 0) {
+                if (Singleton<NetManager>.instance.m_segments.m_buffer[segment].GetClosestLanePosition(
+                        refPos,
+                        NetInfo.LaneType.Parking,
+                        VehicleInfo.VehicleType.Car,
+                        out _,
+                        out _,
+                        out int laneIndex,
+                        out _)) {
+                    NetInfo.Direction direction
+                        = Singleton<NetManager>.instance.m_segments.m_buffer[segment].Info.m_lanes[laneIndex].m_finalDirection;
+                    if (!ParkingRestrictionsManager.Instance.IsParkingAllowed(segment, direction)) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
         public bool GetBuildingInfoViewColor(ushort buildingId,

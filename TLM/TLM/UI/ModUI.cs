@@ -5,6 +5,7 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.MainMenu;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Lifecycle;
 
     /// <summary>
     /// Globally available UI manager class which contains the main menu button and the panel.
@@ -69,7 +70,7 @@ namespace TrafficManager.UI {
         [NonSerialized]
         public UIOpacityObservable uiOpacityObservable;
 
-        public ModUI() {
+        public void Awake() {
             UiScaleObservable = new UIScaleObservable();
             uiOpacityObservable = new UIOpacityObservable();
 
@@ -84,8 +85,8 @@ namespace TrafficManager.UI {
             ToolMode = TrafficManagerMode.None;
 
             // One time load
-            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
-            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
         }
 
         private void CreateMainMenuButtonAndWindow() {
@@ -106,11 +107,11 @@ namespace TrafficManager.UI {
 
         public void Destroy() {
             Log._Debug("ModUI destructor is called.");
-            Destroy(MainMenuButton);
-            Destroy(MainMenu);
+            DestroyImmediate(MainMenuButton);
+            DestroyImmediate(MainMenu);
             ReleaseTool();
             Instance = null;
-            Destroy(this);
+            DestroyImmediate(this);
         }
 
         public bool IsVisible() {
@@ -232,8 +233,8 @@ namespace TrafficManager.UI {
                     .gameObject
                     .AddComponent<ModUI>();
             }
-            LoadingExtension.TranslationDatabase.ReloadTutorialTranslations();
-            LoadingExtension.TranslationDatabase.ReloadGuideTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
+            TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
         }
 
         public static void DisableTool() {

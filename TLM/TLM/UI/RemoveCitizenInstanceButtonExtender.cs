@@ -3,9 +3,7 @@ namespace TrafficManager.UI {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using TrafficManager.U;
-    using TrafficManager.U.Button;
-    using TrafficManager.UI.MainMenu;
-    using TrafficManager.UI.Textures;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class RemoveCitizenInstanceButtonExtender : MonoBehaviour {
@@ -61,12 +59,17 @@ namespace TrafficManager.UI {
                     ForegroundHovered = true,
                     ForegroundActive = true,
                 };
-                this.atlas = this.Skin.CreateAtlas(
-                    "Clear",
-                    50,
-                    50,
-                    256,
-                    this.Skin.CreateAtlasKeyset());
+
+                // This creates an atlas for a single button
+                var atlasBuilder = new U.AtlasBuilder();
+                this.Skin.UpdateAtlasBuilder(
+                    atlasBuilder: atlasBuilder,
+                    spriteSize: new IntVector2(50));
+                this.atlas = atlasBuilder.CreateAtlas(
+                    atlasName: "RemoveCitizenButton_Atlas",
+                    loadingPath: "Clear",
+                    atlasSizeHint: new IntVector2(256));
+
                 UpdateButtonImageAndTooltip();
                 width = height = 30;
             }
@@ -105,7 +108,7 @@ namespace TrafficManager.UI {
 
             protected override bool IsActive() => false;
 
-            protected override string GetTooltip() =>
+            protected override string U_OverrideTooltipText() =>
                 Translation.Menu.Get("Button:Remove this citizen");
 
             protected override bool IsVisible() => true;

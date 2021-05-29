@@ -61,17 +61,10 @@ namespace TrafficManager.Manager.Impl {
                 invalidSegmentFlags[oldSegmentEndId.SegmentId].endNodeFlags.Reset();
             }
 
-            Services.NetService.ProcessNode(
-                segEnd.nodeId,
-                (ushort nId, ref NetNode node) => {
-                    UpdateDefaults(
-                        ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(
-                                                         newSegmentEndId.SegmentId,
-                                                         newSegmentEndId.StartNode)],
-                        ref flags,
-                        ref node);
-                    return true;
-                });
+            UpdateDefaults(
+                ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(newSegmentEndId.SegmentId, newSegmentEndId.StartNode)],
+                ref flags,
+                ref segEnd.nodeId.ToNode());
 
             Log._Debug(
                 $"JunctionRestrictionsManager.HandleSegmentEndReplacement({replacement}): " +
@@ -118,47 +111,38 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            bool ret = false;
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    if (segmentId == 0) {
-                        return true;
-                    }
-
-                    bool startNode = segment.m_startNode == nodeId;
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    bool startNode = segmentId.ToSegment().m_startNode == nodeId;
                     bool isDefault = startNode
-                                         ? segmentFlags_[segmentId].startNodeFlags.IsDefault()
-                                         : segmentFlags_[segmentId].endNodeFlags.IsDefault();
+                        ? segmentFlags_[segmentId].startNodeFlags.IsDefault()
+                        : segmentFlags_[segmentId].endNodeFlags.IsDefault();
 
                     if (!isDefault) {
-                        ret = true;
-                        return false;
+                        return true;
                     }
+                }
+            }
 
-                    return true;
-                });
-
-            return ret;
+            return false;
         }
 
         private void RemoveJunctionRestrictions(ushort nodeId) {
             Log._Debug($"JunctionRestrictionsManager.RemoveJunctionRestrictions({nodeId}) called.");
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    if (segmentId == 0) {
-                        return true;
-                    }
 
-                    if (segment.m_startNode == nodeId) {
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    if (segmentId.ToSegment().m_startNode == nodeId) {
                         segmentFlags_[segmentId].startNodeFlags.Reset(false);
                     } else {
                         segmentFlags_[segmentId].endNodeFlags.Reset(false);
                     }
-
-                    return true;
-                });
+                }
+            }
         }
 
         [UsedImplicitly]
@@ -194,12 +178,13 @@ namespace TrafficManager.Manager.Impl {
 
         public void UpdateAllDefaults() {
             IExtSegmentManager extSegmentManager = Constants.ManagerFactory.ExtSegmentManager;
-            for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+            for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 if (!Services.NetService.IsSegmentValid((ushort)segmentId)) {
                     continue;
                 }
 
                 UpdateDefaults(ref extSegmentManager.ExtSegments[segmentId]);
+                netService.PublishSegmentChanges(segmentId);
             }
         }
 
@@ -208,26 +193,16 @@ namespace TrafficManager.Manager.Impl {
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             ushort startNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, true);
-            Services.NetService.ProcessNode(
-                startNodeId,
-                (ushort nId, ref NetNode node) => {
-                    UpdateDefaults(
-                        ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, true)],
-                        ref segmentFlags_[segmentId].startNodeFlags,
-                        ref node);
-                    return true;
-                });
+            UpdateDefaults(
+                ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, true)],
+                ref segmentFlags_[segmentId].startNodeFlags,
+                ref startNodeId.ToNode());
 
             ushort endNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, false);
-            Services.NetService.ProcessNode(
-                endNodeId,
-                (ushort nId, ref NetNode node) => {
-                    UpdateDefaults(
-                        ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, false)],
-                        ref segmentFlags_[segmentId].endNodeFlags,
-                        ref node);
-                    return true;
-                });
+            UpdateDefaults(
+                ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, false)],
+                ref segmentFlags_[segmentId].endNodeFlags,
+                ref endNodeId.ToNode());
         }
 
         private void UpdateDefaults(ref ExtSegmentEnd segEnd,
@@ -668,6 +643,45 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
+            if (OptionsVehicleRestrictionsTab.NoDoubleCrossings &&
+                node.m_flags.IsFlagSet(NetNode.Flags.Junction) &&
+                !node.m_flags.IsFlagSet(NetNode.Flags.Untouchable) &&
+                node.CountSegments() == 2) {
+
+                // there are only two segments so left segment is the same as right.
+                ushort otherSegmentID = startNode
+                    ? segmentId.ToSegment().m_startLeftSegment
+                    : segmentId.ToSegment().m_endLeftSegment;
+
+                NetInfo info1 = segmentId.ToSegment().Info;
+                NetInfo info2 = otherSegmentID.ToSegment().Info;
+                bool hasPedestrianLanes1 = info1.m_hasPedestrianLanes;
+                bool hasPedestrianLanes2 = info2.m_hasPedestrianLanes;
+
+                // if only one of them has pedestrian lane then
+                // only the segment with pedestrian lanes need crossings
+                // also if neither have pedestrian lanes then none need crossing.
+                if (!hasPedestrianLanes1)
+                    return false;
+                if (!hasPedestrianLanes2)
+                    return true;
+
+                float sizeDiff = info1.m_halfWidth - info2.m_halfWidth;
+                if (sizeDiff == 0)
+                    return true; //if same size then both will get crossings.
+
+                // at bridge/tunnel entracnes, pedestrian crossing is on ground road.
+                bool isRoad1 = info1.m_netAI is RoadAI;
+                bool isRoad2 = info2.m_netAI is RoadAI;
+                if (isRoad1 && !isRoad2)
+                    return true; // only this segment needs pedestrian crossing.
+                if (isRoad2 && !isRoad1)
+                    return false; // only the other segment needs pedestrian crossing.
+
+                if (sizeDiff > 0)
+                    return false; // only the smaller segment needs pedestrian crossing.
+            }
+
             // crossing is allowed at junctions and at untouchable nodes (for example: spiral
             // underground parking)
             bool ret = (node.m_flags & (NetNode.Flags.Junction | NetNode.Flags.Untouchable)) !=
@@ -836,7 +850,6 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-
         private static ref NetNode GetNode(ushort segmentId, bool startNode) {
             ref NetSegment segment = ref GetSeg(segmentId);
             ushort nodeId = startNode ? segment.m_startNode : segment.m_endNode;
@@ -961,7 +974,6 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-
             segmentFlags_[segmentId].SetPedestrianCrossingAllowed(startNode, value);
             OnSegmentChange(
                 segmentId,
@@ -1018,77 +1030,73 @@ namespace TrafficManager.Manager.Impl {
                             Services.NetService.GetSegmentNodeId(segNodeConf.segmentId, true);
                         if (startNodeId != 0) {
                             Configuration.SegmentNodeFlags flags = segNodeConf.startNodeFlags;
-                            Services.NetService.ProcessNode(
-                                startNodeId,
-                                (ushort nId, ref NetNode node) => {
-                                    if (flags.uturnAllowed != null &&
+                            ref NetNode startNode = ref startNodeId.ToNode();
+
+                            if (flags.uturnAllowed != null &&
                                         IsUturnAllowedConfigurable(
                                             segNodeConf.segmentId,
                                             true,
-                                            ref node)) {
-                                        SetUturnAllowed(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            (bool)flags.uturnAllowed);
-                                    }
+                                            ref startNode)) {
+                                SetUturnAllowed(
+                                    segNodeConf.segmentId,
+                                    true,
+                                    (bool)flags.uturnAllowed);
+                            }
 
-                                    if (flags.turnOnRedAllowed != null &&
-                                        IsNearTurnOnRedAllowedConfigurable(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            ref node)) {
-                                        SetNearTurnOnRedAllowed(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            (bool)flags.turnOnRedAllowed);
-                                    }
+                            if (flags.turnOnRedAllowed != null &&
+                                IsNearTurnOnRedAllowedConfigurable(
+                                    segNodeConf.segmentId,
+                                    true,
+                                    ref startNode)) {
+                                SetNearTurnOnRedAllowed(
+                                    segNodeConf.segmentId,
+                                    true,
+                                    (bool)flags.turnOnRedAllowed);
+                            }
 
-                                    if (flags.farTurnOnRedAllowed != null &&
-                                        IsFarTurnOnRedAllowedConfigurable(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            ref node)) {
-                                        SetFarTurnOnRedAllowed(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            (bool)flags.farTurnOnRedAllowed);
-                                    }
+                            if (flags.farTurnOnRedAllowed != null &&
+                                IsFarTurnOnRedAllowedConfigurable(
+                                    segNodeConf.segmentId,
+                                    true,
+                                    ref startNode)) {
+                                SetFarTurnOnRedAllowed(
+                                    segNodeConf.segmentId,
+                                    true,
+                                    (bool)flags.farTurnOnRedAllowed);
+                            }
 
-                                    if (flags.straightLaneChangingAllowed != null &&
-                                        IsLaneChangingAllowedWhenGoingStraightConfigurable(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            ref node)) {
-                                        SetLaneChangingAllowedWhenGoingStraight(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            (bool)flags.straightLaneChangingAllowed);
-                                    }
+                            if (flags.straightLaneChangingAllowed != null &&
+                                IsLaneChangingAllowedWhenGoingStraightConfigurable(
+                                    segNodeConf.segmentId,
+                                    true,
+                                    ref startNode)) {
+                                SetLaneChangingAllowedWhenGoingStraight(
+                                    segNodeConf.segmentId,
+                                    true,
+                                    (bool)flags.straightLaneChangingAllowed);
+                            }
 
-                                    if (flags.enterWhenBlockedAllowed != null &&
-                                        IsEnteringBlockedJunctionAllowedConfigurable(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            ref node)) {
-                                        SetEnteringBlockedJunctionAllowed(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            (bool)flags.enterWhenBlockedAllowed);
-                                    }
+                            if (flags.enterWhenBlockedAllowed != null &&
+                                IsEnteringBlockedJunctionAllowedConfigurable(
+                                    segNodeConf.segmentId,
+                                    true,
+                                    ref startNode)) {
+                                SetEnteringBlockedJunctionAllowed(
+                                    segNodeConf.segmentId,
+                                    true,
+                                    (bool)flags.enterWhenBlockedAllowed);
+                            }
 
-                                    if (flags.pedestrianCrossingAllowed != null &&
-                                        IsPedestrianCrossingAllowedConfigurable(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            ref node)) {
-                                        SetPedestrianCrossingAllowed(
-                                            segNodeConf.segmentId,
-                                            true,
-                                            (bool)flags.pedestrianCrossingAllowed);
-                                    }
-
-                                    return true;
-                                });
+                            if (flags.pedestrianCrossingAllowed != null &&
+                                IsPedestrianCrossingAllowedConfigurable(
+                                    segNodeConf.segmentId,
+                                    true,
+                                    ref startNode)) {
+                                SetPedestrianCrossingAllowed(
+                                    segNodeConf.segmentId,
+                                    true,
+                                    (bool)flags.pedestrianCrossingAllowed);
+                            }
                         } else {
                             Log.Warning(
                                 "JunctionRestrictionsManager.LoadData(): Could not get segment " +
@@ -1101,77 +1109,73 @@ namespace TrafficManager.Manager.Impl {
                             Services.NetService.GetSegmentNodeId(segNodeConf.segmentId, false);
                         if (endNodeId != 0) {
                             Configuration.SegmentNodeFlags flags1 = segNodeConf.endNodeFlags;
-                            Services.NetService.ProcessNode(
-                                endNodeId,
-                                (ushort nId, ref NetNode node) => {
-                                    if (flags1.uturnAllowed != null &&
-                                        IsUturnAllowedConfigurable(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            ref node)) {
-                                        SetUturnAllowed(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            (bool)flags1.uturnAllowed);
-                                    }
+                            ref NetNode node = ref endNodeId.ToNode();
 
-                                    if (flags1.straightLaneChangingAllowed != null &&
-                                        IsLaneChangingAllowedWhenGoingStraightConfigurable(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            ref node)) {
-                                        SetLaneChangingAllowedWhenGoingStraight(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            (bool)flags1.straightLaneChangingAllowed);
-                                    }
+                            if (flags1.uturnAllowed != null &&
+                                IsUturnAllowedConfigurable(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    ref node)) {
+                                SetUturnAllowed(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    (bool)flags1.uturnAllowed);
+                            }
 
-                                    if (flags1.enterWhenBlockedAllowed != null &&
-                                        IsEnteringBlockedJunctionAllowedConfigurable(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            ref node)) {
-                                        SetEnteringBlockedJunctionAllowed(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            (bool)flags1.enterWhenBlockedAllowed);
-                                    }
+                            if (flags1.straightLaneChangingAllowed != null &&
+                                IsLaneChangingAllowedWhenGoingStraightConfigurable(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    ref node)) {
+                                SetLaneChangingAllowedWhenGoingStraight(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    (bool)flags1.straightLaneChangingAllowed);
+                            }
 
-                                    if (flags1.pedestrianCrossingAllowed != null &&
-                                        IsPedestrianCrossingAllowedConfigurable(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            ref node)) {
-                                        SetPedestrianCrossingAllowed(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            (bool)flags1.pedestrianCrossingAllowed);
-                                    }
+                            if (flags1.enterWhenBlockedAllowed != null &&
+                                IsEnteringBlockedJunctionAllowedConfigurable(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    ref node)) {
+                                SetEnteringBlockedJunctionAllowed(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    (bool)flags1.enterWhenBlockedAllowed);
+                            }
 
-                                    if (flags1.turnOnRedAllowed != null &&
-                                        IsNearTurnOnRedAllowedConfigurable(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            ref node)) {
-                                        SetNearTurnOnRedAllowed(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            (bool)flags1.turnOnRedAllowed);
-                                    }
+                            if (flags1.pedestrianCrossingAllowed != null &&
+                                IsPedestrianCrossingAllowedConfigurable(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    ref node)) {
+                                SetPedestrianCrossingAllowed(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    (bool)flags1.pedestrianCrossingAllowed);
+                            }
 
-                                    if (flags1.farTurnOnRedAllowed != null &&
-                                        IsFarTurnOnRedAllowedConfigurable(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            ref node)) {
-                                        SetFarTurnOnRedAllowed(
-                                            segNodeConf.segmentId,
-                                            false,
-                                            (bool)flags1.farTurnOnRedAllowed);
-                                    }
+                            if (flags1.turnOnRedAllowed != null &&
+                                IsNearTurnOnRedAllowedConfigurable(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    ref node)) {
+                                SetNearTurnOnRedAllowed(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    (bool)flags1.turnOnRedAllowed);
+                            }
 
-                                    return true;
-                                });
+                            if (flags1.farTurnOnRedAllowed != null &&
+                                IsFarTurnOnRedAllowedConfigurable(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    ref node)) {
+                                SetFarTurnOnRedAllowed(
+                                    segNodeConf.segmentId,
+                                    false,
+                                    (bool)flags1.farTurnOnRedAllowed);
+                            }
                         } else {
                             Log.Warning(
                                 "JunctionRestrictionsManager.LoadData(): Could not get segment " +

@@ -34,14 +34,15 @@ namespace TrafficManager.UI.SubTools {
         public override void OnToolGUI(Event e) {
             // handle delete
             if (KeybindSettingsBase.RestoreDefaultsKey.KeyDown(e)) {
-                netService.IterateNodeSegments(
-                    SelectedNodeId,
-                    (ushort segmmentId, ref NetSegment segment) => {
+                ref NetNode node = ref SelectedNodeId.ToNode();
+                for (int i = 0; i < 8; ++i) {
+                    ushort segmentId = node.GetSegment(i);
+                    if (segmentId != 0) {
                         // TODO: #568 provide unified delete key for all managers.
-                        bool startNode = (bool)netService.IsStartNode(segmmentId, SelectedNodeId);
-                        JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmmentId, startNode);
-                        return true;
-                    });
+                        bool startNode = (bool)netService.IsStartNode(segmentId, SelectedNodeId);
+                        JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
+                    }
+                }
             }
         }
 
@@ -164,8 +165,12 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnSecondaryClickOverlay() {
-            SelectedNodeId = 0;
-            MainTool.RequestOnscreenDisplayUpdate();
+            if (SelectedNodeId != 0) {
+                SelectedNodeId = 0;
+                MainTool.RequestOnscreenDisplayUpdate();
+            } else {
+                MainTool.SetToolMode(ToolMode.None);
+            }
         }
 
         public override void OnActivate() {

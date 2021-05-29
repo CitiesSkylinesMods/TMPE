@@ -15,7 +15,10 @@ namespace TrafficManager.Patch._InfoManager
         [UsedImplicitly]
         public static void Prefix(InfoMode mode, SubInfoMode subMode)
         {
-            if (RoadSelectionPanels.Root?.RoadWorldInfoPanelExt != null) {
+            if (!RoadSelectionPanels.Root)
+                return;
+
+            if (RoadSelectionPanels.Root.RoadWorldInfoPanelExt != null) {
                 RoadSelectionPanels.Root.RoadWorldInfoPanelExt.isVisible =
                     mode == InfoMode.None ||
                     RoadSelectionUtil.IsNetAdjustMode(mode, (int)subMode);
@@ -25,7 +28,7 @@ namespace TrafficManager.Patch._InfoManager
                 // UI to be handled by Default tool
                 ModUI.Instance.CloseMainMenu();
 
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(delegate () {
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
                     DefaultTool.OpenWorldInfoPanel(
                     Singleton<InstanceManager>.instance.GetSelectedInstance(),
                     Input.mousePosition);

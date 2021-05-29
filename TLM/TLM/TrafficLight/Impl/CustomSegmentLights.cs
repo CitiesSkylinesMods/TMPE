@@ -371,12 +371,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 e.Value.SetStates(lightState, lightState, lightState, false);
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    CalculateAutoPedestrianLightState(ref node);
-                    return true;
-                });
+            CalculateAutoPedestrianLightState(ref NodeId.ToNode());
         }
 
         public void SetLights(ICustomSegmentLights otherLights) {
@@ -419,12 +414,7 @@ namespace TrafficManager.TrafficLight.Impl {
             LastChangeFrame = GetCurrentFrame();
 
             if (calculateAutoPedLight) {
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        CalculateAutoPedestrianLightState(ref node);
-                        return true;
-                    });
+                CalculateAutoPedestrianLightState(ref NodeId.ToNode());
             }
         }
 
@@ -494,12 +484,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
             ItemClass prevConnectionClass = null;
 
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                SegmentId,
-                (ushort prevSegId, ref NetSegment segment) => {
-                    prevConnectionClass = segment.Info.GetConnectionClass();
-                    return true;
-                });
+            prevConnectionClass = SegmentId.ToSegment().Info.GetConnectionClass();
 
             var autoPedestrianLightState = RoadBaseAI.TrafficLightState.Green;
             bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
@@ -537,14 +522,7 @@ namespace TrafficManager.TrafficLight.Impl {
                         continue;
                     }
 
-                    ItemClass nextConnectionClass = null;
-                    Constants.ServiceFactory.NetService.ProcessSegment(
-                        otherSegmentId,
-                        (ushort otherSegId, ref NetSegment segment) => {
-                            nextConnectionClass = segment.Info.GetConnectionClass();
-                            return true;
-                        });
-
+                    ItemClass nextConnectionClass = otherSegmentId.ToSegment().Info.GetConnectionClass();
                     if (nextConnectionClass.m_service != prevConnectionClass.m_service) {
                         if (logTrafficLights) {
                             Log._DebugFormat(
@@ -641,16 +619,8 @@ namespace TrafficManager.TrafficLight.Impl {
             // bool addPedestrianLight = false;
             uint separateLanes = 0;
             int defaultLanes = 0;
-            NetInfo segmentInfo = null;
-
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                SegmentId,
-                (ushort segId, ref NetSegment segment) => {
-                    VehicleTypeByLaneIndex =
-                        new ExtVehicleType?[segment.Info.m_lanes.Length];
-                    segmentInfo = segment.Info;
-                    return true;
-                });
+            NetInfo segmentInfo = SegmentId.ToSegment().Info;
+            VehicleTypeByLaneIndex = new ExtVehicleType?[segmentInfo.m_lanes.Length];
 
             // TODO improve
             var laneIndicesWithoutSeparateLights = new HashSet<byte>(allAllowedTypes.Keys);
@@ -796,11 +766,11 @@ namespace TrafficManager.TrafficLight.Impl {
                     VehicleTypeByLaneIndex[laneIndex] = ExtVehicleType.None;
                 }
 
-                    Log._DebugIf(
-                        logHouseKeeping,
-                        () => $"CustomSegmentLights.Housekeeping({mayDelete}, {calculateAutoPedLight}): " +
-                        $"housekeeping @ seg. {SegmentId}, node {nodeId}: Added default main vehicle " +
-                        $"light: {defaultSegmentLight}");
+                Log._DebugIf(
+                    logHouseKeeping,
+                    () => $"CustomSegmentLights.Housekeeping({mayDelete}, {calculateAutoPedLight}): " +
+                    $"housekeeping @ seg. {SegmentId}, node {nodeId}: Added default main vehicle " +
+                    $"light: {defaultSegmentLight}");
 
                     // addPedestrianLight = true;
             } else {

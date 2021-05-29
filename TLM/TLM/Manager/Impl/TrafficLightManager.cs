@@ -7,6 +7,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
+    using TrafficManager.Util;
 
     /// <summary>
     /// Manages traffic light toggling
@@ -143,7 +144,8 @@ namespace TrafficManager.Manager.Impl {
 
             if (flag &&
                 (!Services.NetService.IsNodeValid(nodeId)
-                || !Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Junction))) {
+                || !Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Junction)
+                || Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Untouchable))) {
 
                 reason = ToggleTrafficLightError.NoJunction;
 
@@ -168,10 +170,11 @@ namespace TrafficManager.Manager.Impl {
             int numTrainTracks = 0;
             int numMonorailTracks = 0;
             int numPedSegments = 0;
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    NetInfo info = segment.Info;
+
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    NetInfo info = segmentId.ToSegment().Info;
                     if (info.m_class.m_service == ItemClass.Service.Road) {
                         ++numRoads;
                     } else if ((info.m_vehicleTypes & VehicleInfo.VehicleType.Train) !=
@@ -185,9 +188,8 @@ namespace TrafficManager.Manager.Impl {
                     if (info.m_hasPedestrianLanes) {
                         ++numPedSegments;
                     }
-
-                    return true;
-                });
+                }
+            }
 
             if (numRoads >= 2 || numTrainTracks >= 2 || numMonorailTracks >= 2 || numPedSegments != 0) {
                 if (logTrafficLights) {
@@ -287,17 +289,10 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUGLOAD
                     Log._Debug($"Setting traffic light @ {nodeLight.nodeId} to {nodeLight.trafficLight}");
 #endif
-                    Services.NetService.ProcessNode(
+                    SetTrafficLight(
                         nodeLight.nodeId,
-                        (ushort nodeId, ref NetNode node) => {
-                            SetTrafficLight(
-                                nodeLight.nodeId,
-                                nodeLight.trafficLight,
-                                ref node);
-                            return true;
-                        });
-
-                    // Flags.setNodeTrafficLight(nodeLight.nodeId, nodeLight.trafficLight);
+                        nodeLight.trafficLight,
+                        ref nodeLight.nodeId.ToNode());
                 } catch (Exception e) {
                     // ignore as it's probably bad save data.
                     Log.Error($"Error setting the NodeTrafficLights @ {nodeLight.nodeId}: {e}");

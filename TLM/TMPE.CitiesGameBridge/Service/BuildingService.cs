@@ -39,11 +39,5 @@ namespace CitiesGameBridge.Service {
 
             return expectedResult == null ? result != 0 : result == expectedResult;
         }
-
-        public void ProcessBuilding(ushort buildingId, BuildingHandler handler) {
-            handler(
-                buildingId,
-                ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId]);
-        }
     }
 }

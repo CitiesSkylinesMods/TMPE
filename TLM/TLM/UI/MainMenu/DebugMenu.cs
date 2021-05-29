@@ -11,6 +11,8 @@ namespace TrafficManager.UI.MainMenu {
     using global::TrafficManager.State;
     using JetBrains.Annotations;
     using UnityEngine;
+    using TrafficManager.Util;
+    using TrafficManager.Lifecycle;
 
 #if DEBUG // whole class coverage
     public class DebugMenuPanel : UIPanel
@@ -58,7 +60,7 @@ namespace TrafficManager.UI.MainMenu {
             relativePosition = new Vector3(resolution.x - Translation.GetMenuWidth() - 30f, 65f);
 
             _title = AddUIComponent<UILabel>();
-            _title.text = "Version " + TrafficManagerMod.VersionString;
+            _title.text = "Version " + VersionUtil.VersionString;
             _title.relativePosition = new Vector3(50.0f, 5.0f);
 
             int y = 30;
@@ -171,7 +173,7 @@ namespace TrafficManager.UI.MainMenu {
             CSUtil.CameraControl.CameraController.Instance.GoToPos(
                 new Vector3(
                     float.Parse(vectorElms[0]),
-                    Camera.main.transform.position.y,
+                    InGameUtil.Instance.CachedCameraTransform.position.y,
                     float.Parse(vectorElms[1])));
         }
 
@@ -197,7 +199,7 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
             Constants.ServiceFactory.SimulationService.AddAction(
                 () => {
-                    foreach (ICustomManager customManager in LoadingExtension
+                    foreach (ICustomManager customManager in TMPELifecycle.Instance
                         .RegisteredManagers) {
                         customManager.PrintDebugInfo();
                     }
@@ -343,7 +345,6 @@ namespace TrafficManager.UI.MainMenu {
 #if QUEUEDSTATS
         private void ClickTogglePathFindStats(UIComponent component,
                                               UIMouseEventParameter eventParam) {
-            Update();
             showPathFindStats = !showPathFindStats;
         }
 #endif

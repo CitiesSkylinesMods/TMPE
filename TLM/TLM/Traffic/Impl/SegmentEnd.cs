@@ -80,13 +80,7 @@ namespace TrafficManager.Traffic.Impl {
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             // TODO pre-calculate this
-            uint avgSegLen = 0;
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                SegmentId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    avgSegLen = (uint)segment.m_averageLength;
-                    return true;
-                });
+            uint avgSegLen = (uint)SegmentId.ToSegment().m_averageLength;
 
             IDictionary<ushort, uint>[] ret =
                 includeStopped ? numVehiclesGoingToSegmentId : numVehiclesMovingToSegmentId;
@@ -241,7 +235,6 @@ namespace TrafficManager.Traffic.Impl {
                 return;
             }
 
-
             uint normLength = 10u;
 
             if (avgSegmentLength > 0) {
@@ -307,25 +300,16 @@ namespace TrafficManager.Traffic.Impl {
         // }
 
         public void Update() {
-            Constants.ServiceFactory.NetService.ProcessSegment(
-                SegmentId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    StartNode = segment.m_startNode == NodeId;
-                    numLanes = segment.Info.m_lanes.Length;
-                    return true;
-                });
+            ref NetSegment segment = ref SegmentId.ToSegment();
+            StartNode = segment.m_startNode == NodeId;
+            numLanes = segment.Info.m_lanes.Length;
 
             if (!Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
                 Log.Error($"SegmentEnd.Update: Segment {SegmentId} is invalid.");
                 return;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    RebuildVehicleNumDicts(ref node);
-                    return true;
-                });
+            RebuildVehicleNumDicts(ref NodeId.ToNode());
         }
 
         private void RebuildVehicleNumDicts(ref NetNode node) {

@@ -16,6 +16,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.TrafficLight;
     using UnityEngine;
+    using TrafficManager.Util;
 
     public class TrafficPriorityManager
         : AbstractGeometryObservingManager,
@@ -201,23 +202,23 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
-            var ret = false;
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    if (HasSegmentPrioritySign(segmentId, nodeId == segment.m_startNode)) {
-                        // TODO rewrite this without modifying external ret variable
-                        ret = true;
-                        return false;
+
+            var res = false;
+
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    if (HasSegmentPrioritySign(segmentId, nodeId == segmentId.ToSegment().m_startNode)) {
+                        res = true;
+                        break;
                     }
+                }
+            }
 
-                    return true;
-                });
+            Log._DebugIf(logPriority, () => $"TrafficPriorityManager.HasNodePrioritySign: nodeId={nodeId}, result={res}");
 
-            Log._DebugIf(
-                logPriority,
-                () => $"TrafficPriorityManager.HasNodePrioritySign: nodeId={nodeId}, result={ret}");
-            return ret;
+            return res;
         }
 
         public bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType type) {
@@ -252,12 +253,7 @@ namespace TrafficManager.Manager.Impl {
 
             if (type != PriorityType.None) {
                 ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
-                Services.NetService.ProcessNode(
-                    nodeId,
-                    (ushort nId, ref NetNode node) => {
-                        TrafficLightManager.Instance.RemoveTrafficLight(nodeId, ref node);
-                        return true;
-                    });
+                TrafficLightManager.Instance.RemoveTrafficLight(nodeId, ref nodeId.ToNode());
             }
 
             if (startNode) {
@@ -287,14 +283,13 @@ namespace TrafficManager.Manager.Impl {
                 logPriority,
                 () => $"TrafficPriorityManager.RemovePrioritySignsFromNode: nodeId={nodeId}");
 
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    RemovePrioritySignFromSegmentEnd(
-                        segmentId,
-                        nodeId == segment.m_startNode);
-                    return true;
-                });
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    RemovePrioritySignFromSegmentEnd(segmentId, nodeId == segmentId.ToSegment().m_startNode);
+                }
+            }
         }
 
         public void RemovePrioritySignsFromSegment(ushort segmentId) {
@@ -350,21 +345,22 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
             byte ret = 0;
-            Services.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    if (GetPrioritySign(
-                            segmentId,
-                            segment.m_startNode == nodeId) == sign) {
+
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    if (GetPrioritySign(segmentId, segmentId.ToSegment().m_startNode == nodeId) == sign) {
                         ++ret;
                     }
+                }
+            }
 
-                    return true;
-                });
             Log._DebugIf(
                 logPriority,
                 () => $"TrafficPriorityManager.CountPrioritySignsAtNode: nodeId={nodeId}, " +
                       $"sign={sign}, result={ret}");
+
             return ret;
         }
 
@@ -1112,11 +1108,11 @@ namespace TrafficManager.Manager.Impl {
                     wouldCollide = true;
                 } else {
                     // both are going to a different lane: check lane order
-                        Log._DebugIf(
-                            logPriority,
-                            () => $"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): " +
-                            "Target and incoming are going to the same segment BUT NOT to the same lane. " +
-                            "Determining if lane order is correct.");
+                    Log._DebugIf(
+                        logPriority,
+                        () => $"  TrafficPriorityManager.DetectCollision({vehicleId}, {incomingVehicleId}): " +
+                        "Target and incoming are going to the same segment BUT NOT to the same lane. " +
+                        "Determining if lane order is correct.");
 
                     switch (targetToDir) {
                         case ArrowDirection.Left:

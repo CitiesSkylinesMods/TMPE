@@ -15,6 +15,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.Util;
     using UnityEngine;
+    using CitiesGameBridge.Service;
 
     // TODO define TimedTrafficLights per node group, not per individual nodes
     public class TimedTrafficLights : ITimedTrafficLights {
@@ -23,13 +24,9 @@ namespace TrafficManager.TrafficLight.Impl {
             NodeGroup = new List<ushort>(nodeGroup);
             MasterNodeId = NodeGroup[0];
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                nodeId,
-                (ushort nId, ref NetNode node) => {
-                    UpdateDirections(ref node);
-                    UpdateSegmentEnds(ref node);
-                    return true;
-                });
+            ref NetNode node = ref nodeId.ToNode();
+            UpdateDirections(ref node);
+            UpdateSegmentEnds(ref node);
 
             started = false;
         }
@@ -89,23 +86,10 @@ namespace TrafficManager.TrafficLight.Impl {
             Steps.Clear();
             RotationOffset = 0;
 
-            IList<ushort> clockSortedSourceSegmentIds = new List<ushort>();
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                sourceTimedLight.NodeId,
-                ClockDirection.Clockwise,
-                (ushort segmentId, ref NetSegment segment) => {
-                    clockSortedSourceSegmentIds.Add(segmentId);
-                    return true;
-                });
+            var netService = Constants.ServiceFactory.NetService;
 
-            IList<ushort> clockSortedTargetSegmentIds = new List<ushort>();
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                NodeId,
-                ClockDirection.Clockwise,
-                (ushort segmentId, ref NetSegment segment) => {
-                    clockSortedTargetSegmentIds.Add(segmentId);
-                    return true;
-                });
+            List<ushort> clockSortedSourceSegmentIds = netService.GetNodeSegmentIds(sourceTimedLight.NodeId, ClockDirection.Clockwise).ToList();
+            List<ushort> clockSortedTargetSegmentIds = netService.GetNodeSegmentIds(NodeId, ClockDirection.Clockwise).ToList();
 
             if (clockSortedTargetSegmentIds.Count != clockSortedSourceSegmentIds.Count) {
                 throw new Exception(
@@ -160,8 +144,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
             Stop();
 
-            try {
-                Monitor.Enter(rotateLock_);
+            lock(rotateLock_) {
 
                 Log._Debug($"TimedTrafficLights.Rotate({dir}) @ node {NodeId}: Rotating timed traffic light.");
 
@@ -169,16 +152,10 @@ namespace TrafficManager.TrafficLight.Impl {
                     throw new NotSupportedException();
                 }
 
-                IList<ushort> clockSortedSegmentIds = new List<ushort>();
-                Constants.ServiceFactory.NetService.IterateNodeSegments(
-                    NodeId,
-                    dir == ArrowDirection.Right
-                        ? ClockDirection.Clockwise
-                        : ClockDirection.CounterClockwise,
-                    (ushort segmentId, ref NetSegment segment) => {
-                        clockSortedSegmentIds.Add(segmentId);
-                        return true;
-                    });
+                var clockDirection = dir == ArrowDirection.Right
+                    ? ClockDirection.Clockwise
+                    : ClockDirection.CounterClockwise;
+                List<ushort> clockSortedSegmentIds = Constants.ServiceFactory.NetService.GetNodeSegmentIds(NodeId, clockDirection).ToList();
 
                 Log._Debug(
                     $"TimedTrafficLights.Rotate({dir}) @ node {NodeId}: Clock-sorted segment ids: " +
@@ -251,8 +228,6 @@ namespace TrafficManager.TrafficLight.Impl {
 
                 CurrentStep = 0;
                 SetLights(true);
-            } finally {
-                Monitor.Exit(rotateLock_);
             }
         }
 
@@ -367,14 +342,7 @@ namespace TrafficManager.TrafficLight.Impl {
             /*if (!housekeeping())
                     return;*/
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nodeId, ref NetNode node) => {
-                    Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(
-                        NodeId,
-                        ref node);
-                    return true;
-                });
+            Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(NodeId, ref NodeId.ToNode());
 
             foreach (TimedTrafficLightsStep step in Steps) {
                 foreach (KeyValuePair<ushort, ICustomSegmentLights> e in step.CustomSegmentLights) {
@@ -395,15 +363,11 @@ namespace TrafficManager.TrafficLight.Impl {
             ICustomSegmentLightsManager customTrafficLightsManager = Constants.ManagerFactory.CustomSegmentLightsManager;
 
             // Log._Debug($"Checking for invalid pedestrian lights @ {NodeId}.");
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        segmentId = node.GetSegment(i);
-                        return true;
-                    });
 
+            ref NetNode node = ref NodeId.ToNode();
+
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) {
                     continue;
                 }
@@ -455,15 +419,10 @@ namespace TrafficManager.TrafficLight.Impl {
             ICustomSegmentLightsManager customTrafficLightsManager =
                 Constants.ManagerFactory.CustomSegmentLightsManager;
 
-            for (int i = 0; i < 8; ++i) {
-                ushort segmentId = 0;
-                Constants.ServiceFactory.NetService.ProcessNode(
-                    NodeId,
-                    (ushort nId, ref NetNode node) => {
-                        segmentId = node.GetSegment(i);
-                        return true;
-                    });
+            ref NetNode node = ref NodeId.ToNode();
 
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) {
                     continue;
                 }
@@ -940,26 +899,18 @@ namespace TrafficManager.TrafficLight.Impl {
             Log._Trace(
                 $"TimedTrafficLights.OnGeometryUpdate: called for timed traffic light @ {NodeId}.");
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    UpdateDirections(ref node);
-                    UpdateSegmentEnds(ref node);
-                    return true;
-                });
+            ref NetNode node = ref NodeId.ToNode();
+
+            UpdateDirections(ref node);
+            UpdateSegmentEnds(ref node);
 
             if (NumSteps() <= 0) {
                 Log._Debug($"TimedTrafficLights.OnGeometryUpdate: no steps @ {NodeId}");
                 return;
             }
 
-            Constants.ServiceFactory.NetService.ProcessNode(
-                NodeId,
-                (ushort nId, ref NetNode node) => {
-                    BackUpInvalidStepSegments(ref node);
-                    HandleNewSegments(ref node);
-                    return true;
-                });
+            BackUpInvalidStepSegments(ref node);
+            HandleNewSegments(ref node);
         }
 
         /// <summary>
@@ -1018,7 +969,6 @@ namespace TrafficManager.TrafficLight.Impl {
 
                     step.CustomSegmentLights.Remove(invalidSegmentId);
                 }
-
 
                 if (logTrafficLights) {
                     Log._DebugFormat(

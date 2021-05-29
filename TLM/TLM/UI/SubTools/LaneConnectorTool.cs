@@ -148,7 +148,7 @@ namespace TrafficManager.UI.SubTools {
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
             // Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
-            Camera currentCamera = Camera.main;
+            Camera currentCamera = InGameUtil.Instance.CachedMainCamera;
 
             // Check if camera pos/angle has changed then re-filter the visible nodes
             // Assumption: The states checked in this loop don't change while the tool is active
@@ -244,7 +244,7 @@ namespace TrafficManager.UI.SubTools {
                         // draw source marker in source selection mode,
                         // make exception for markers that have no target:
                         foreach(var targetLaneEnd in laneEnds) {
-                            if (CanConnect(laneEnd, targetLaneEnd)){
+                            if (CanConnect(laneEnd, targetLaneEnd)) {
                                 drawMarker = true;
                                 break;
                             }
@@ -274,29 +274,30 @@ namespace TrafficManager.UI.SubTools {
                         bool highlightMarker = laneEnd == selectedLaneEnd || markerIsHovered;
                         laneEnd.RenderOverlay(cameraInfo, color, highlightMarker);
                     } // if drawMarker
-
-                    if (selectedLaneEnd != null) {
-                        // lane curves for selectedMarker will be drawn last to
-                        // be on the top of other lane markers.
-                        foreach (LaneEnd targetLaneEnd in selectedLaneEnd.ConnectedLaneEnds) {
-                            if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
-                                continue;
-                            }
-
-                            Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, targetLaneEnd);
-                            Vector3 height = bezier.Max();
-
-                            DrawLaneCurve(
-                                cameraInfo: cameraInfo,
-                                bezier: bezier,
-                                color: selectedLaneEnd.Color,
-                                outlineColor: Color.grey,
-                                size: 0.18f,// Embolden
-                                underground: (height.y - 1f) < intersectionY);
-                        } // end foreach selectedMarker.ConnectedMarkers
-                    } // end if selectedMarker != null
                 } // end foreach lanemarker in node markers
             } // end for node in all nodes
+
+            if (this.selectedLaneEnd != null) {
+                // lane curves for selectedMarker will be drawn last to
+                // be on the top of other lane markers.
+                float intersectionY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(netManager.m_nodes.m_buffer[this.selectedLaneEnd.NodeId].m_position);
+                foreach (LaneEnd targetLaneEnd in this.selectedLaneEnd.ConnectedLaneEnds) {
+                    if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
+                        continue;
+                    }
+
+                    Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, targetLaneEnd);
+                    Vector3 height = bezier.Max();
+
+                    DrawLaneCurve(
+                        cameraInfo: cameraInfo,
+                        bezier: bezier,
+                        color: this.selectedLaneEnd.Color,
+                        outlineColor: Color.grey,
+                        size: 0.18f, // Embolden
+                        underground: (height.y - 1f) < intersectionY);
+                } // end foreach selectedMarker.ConnectedMarkers
+            } // end if selectedMarker != null
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -336,7 +337,7 @@ namespace TrafficManager.UI.SubTools {
                         middlePoint: selNodePos,
                         color: Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f),
                         outlineColor: Color.white,
-                        size:0.11f);
+                        size: 0.11f);
                 }
 
                 NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
@@ -794,7 +795,6 @@ namespace TrafficManager.UI.SubTools {
         internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
         internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
 
-
         public override void OnPrimaryClickOverlay() {
 #if DEBUG
             bool logLaneConn = DebugSwitch.LaneConnections.Get();
@@ -937,6 +937,8 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
+            ushort previouslySelectedNodeId = SelectedNodeId;
+
             switch (GetSelectionMode()) {
                 // also: case MarkerSelectionMode.None:
                 default: {
@@ -967,6 +969,10 @@ namespace TrafficManager.UI.SubTools {
                         MainTool.RequestOnscreenDisplayUpdate();
                         break;
                     }
+            }
+
+            if (GetSelectionMode() == SelectionMode.None && previouslySelectedNodeId == 0) {
+                MainTool.SetToolMode(ToolMode.None);
             }
         }
 

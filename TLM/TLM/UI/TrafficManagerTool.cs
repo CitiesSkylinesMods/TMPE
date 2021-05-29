@@ -27,6 +27,7 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.SubTools.LaneArrows;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.TimedTrafficLights;
+    using TrafficManager.Lifecycle;
 
     using static TrafficManager.Util.Shortcuts;
     using static TrafficManager.Util.SegmentTraverser;
@@ -94,6 +95,13 @@ namespace TrafficManager.UI {
 
         static TrafficManagerTool() { }
 
+        /// <summary>
+        /// Determines if the current tool is traffic manager tool.
+        /// </summary>
+        public static bool IsCurrentTool =>
+            ToolsModifierControl.toolController?.CurrentTool != null
+            && ToolsModifierControl.toolController.CurrentTool is TrafficManagerTool;
+
         protected override void OnDestroy() {
             Log.Info("TrafficManagerTool.OnDestroy() called");
             base.OnDestroy();
@@ -121,14 +129,7 @@ namespace TrafficManager.UI {
 
         // TODO: Move to UI.Helpers
         internal static bool IsNodeWithinViewDistance(ushort nodeId) {
-            bool ret = false;
-            Constants.ServiceFactory.NetService.ProcessNode(
-                nodeId,
-                (ushort nId, ref NetNode node) => {
-                    ret = IsPosWithinOverlayDistance(node.m_position);
-                    return true;
-                });
-            return ret;
+            return IsPosWithinOverlayDistance(nodeId.ToNode().m_position);
         }
 
         // TODO: Move to UI.Helpers
@@ -211,7 +212,6 @@ namespace TrafficManager.UI {
             Log.Info("TrafficManagerTool: Initialization completed.");
         }
 
-
         public void OnUpdate(GlobalConfig config) {
             InitializeSubTools();
         }
@@ -245,7 +245,7 @@ namespace TrafficManager.UI {
         public void SetToolMode(ToolMode newToolMode) {
             ToolMode oldToolMode = toolMode_;
 
-            if(toolMode_ != ToolMode.None) {
+            if(toolMode_ != ToolMode.None && TMPELifecycle.PlayMode) {
                 // Make it impossible for user to undo changes performed by Road selection panels
                 // after changing traffic rule vis other tools.
                 // TODO: This code will not be necessary when we implement intent.
@@ -253,7 +253,6 @@ namespace TrafficManager.UI {
                 RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
             }
 
-            // ToolModeChanged does not count timed traffic light submodes as a same tool
             bool toolModeChanged = newToolMode != toolMode_;
 
             if (!toolModeChanged) {
@@ -262,7 +261,6 @@ namespace TrafficManager.UI {
             }
 
             SetToolMode_DeactivateTool();
-
             // Try figure out whether legacy subtool or a new subtool is selected
             if (!legacySubTools_.TryGetValue(newToolMode, out activeLegacySubTool_)
                 && !subTools_.TryGetValue(newToolMode, out activeSubTool_)) {
@@ -271,6 +269,8 @@ namespace TrafficManager.UI {
                 toolMode_ = ToolMode.None;
 
                 Log._Debug($"SetToolMode: reset because toolmode not found {newToolMode}");
+                OnscreenDisplay.DisplayIdle();
+                ModUI.Instance.MainMenu.UpdateButtons();
                 return;
             }
 
@@ -324,6 +324,14 @@ namespace TrafficManager.UI {
                     e.Value.Cleanup();
                 }
             }
+
+            // Disabled camera may indicate the main camera change.
+            // Reinitialize camera cache to make sure we will use the correct one
+            if (!InGameUtil.Instance.CachedMainCamera.enabled) {
+                Log.Info("CachedMainCamera disabled - camera cache reinitialization");
+                InGameUtil.Instantiate();
+            }
+
             // no call to base method to disable base class behavior
         }
 
@@ -331,6 +339,9 @@ namespace TrafficManager.UI {
             // If TMPE was disabled by switching to another tool, hide main menue panel.
             if (ModUI.Instance != null && ModUI.Instance.IsVisible())
                 ModUI.Instance.CloseMainMenu();
+
+            //hide speed limit overlay if necessary
+            SubTools.PrioritySigns.MassEditOverlay.Show = RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
             // no call to base method to disable base class behavior
         }
 
@@ -378,6 +389,9 @@ namespace TrafficManager.UI {
         /// </summary>
         void DefaultRenderOverlay(RenderManager.CameraInfo cameraInfo)
         {
+            if (!TMPELifecycle.PlayMode) {
+                return; // world info view panels are not availble in edit mode
+            }
             SubTools.PrioritySigns.MassEditOverlay.Show
                 = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
 
@@ -451,7 +465,7 @@ namespace TrafficManager.UI {
             }
 
             bool primaryMouseClicked = Input.GetMouseButtonDown(0);
-            bool secondaryMouseClicked = Input.GetMouseButtonDown(1);
+            bool secondaryMouseClicked = Input.GetMouseButtonUp(1);
 
             // check if clicked
             if (!primaryMouseClicked && !secondaryMouseClicked) {
@@ -477,8 +491,17 @@ namespace TrafficManager.UI {
                 }
 
                 if (secondaryMouseClicked) {
-                    activeLegacySubTool_?.OnSecondaryClickOverlay();
-                    activeSubTool_?.OnToolRightClick();
+                    if (GetToolMode() == ToolMode.None) {
+                        RoadSelectionPanels roadSelectionPanels = UIView.GetAView().GetComponent<RoadSelectionPanels>();
+                        if (roadSelectionPanels && roadSelectionPanels.RoadWorldInfoPanelExt && roadSelectionPanels.RoadWorldInfoPanelExt.isVisible) {
+                            RoadSelectionPanels.RoadWorldInfoPanel.Hide();
+                        } else {
+                            ModUI.Instance.CloseMainMenu();
+                        }
+                    } else {
+                        activeLegacySubTool_?.OnSecondaryClickOverlay();
+                        activeSubTool_?.OnToolRightClick();
+                    }
                 }
             }
         }
@@ -541,6 +564,9 @@ namespace TrafficManager.UI {
         }
 
         void DefaultOnToolGUI(Event e) {
+            if (!TMPELifecycle.PlayMode) {
+                return; // world info view panels are not availble in edit mode
+            }
             if (e.type == EventType.MouseDown && e.button == 0) {
                 bool isRoad = HoveredSegmentId != 0 && HoveredSegmentId.ToSegment().Info.m_netAI is RoadBaseAI;
                 if (!isRoad)
@@ -564,13 +590,11 @@ namespace TrafficManager.UI {
                     NetSegment = HoveredSegmentId,
                 };
 
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(delegate () {
+                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(() => {
                     OpenWorldInfoPanel(
                         instanceID,
                         HitPos);
                 });
-            } else if (e.type == EventType.MouseDown && e.button == 1) {
-                SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(RoadSelectionPanels.RoadWorldInfoPanel.Hide);
             }
         }
 
@@ -602,13 +626,15 @@ namespace TrafficManager.UI {
         private static float CalculateNodeRadius(ushort nodeId) {
             float sumHalfWidth = 0;
             int count = 0;
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                nodeId,
-                (ushort segmentId, ref NetSegment segment) => {
-                    sumHalfWidth += segment.Info.m_halfWidth;
+            ref NetNode node = ref nodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    sumHalfWidth += segmentId.ToSegment().Info.m_halfWidth;
                     count++;
-                    return true;
-                });
+                }
+            }
+
             return sumHalfWidth / count;
         }
 
@@ -976,7 +1002,7 @@ namespace TrafficManager.UI {
         /// <summary>Shows a tutorial message. Must be called by a Unity thread.</summary>
         /// <param name="localeKey">Tutorial key.</param>
         public static void ShowAdvisor(string localeKey) {
-            if (!GlobalConfig.Instance.Main.EnableTutorial) {
+            if (!GlobalConfig.Instance.Main.EnableTutorial || !TMPELifecycle.PlayMode) {
                 return;
             }
 
@@ -1167,20 +1193,20 @@ namespace TrafficManager.UI {
         /// </summary>
         internal ushort GetHoveredSegmentFromNode(Vector3 hitPos) {
             ushort minSegId = 0;
-            NetNode node = NetManager.instance.m_nodes.m_buffer[HoveredNodeId];
             float minDistance = float.MaxValue;
-            Constants.ServiceFactory.NetService.IterateNodeSegments(
-                HoveredNodeId,
-                (ushort segmentId, ref NetSegment segment) =>
-                {
-                    Vector3 pos = segment.GetClosestPosition(hitPos);
+            ref NetNode node = ref HoveredNodeId.ToNode();
+            for (int i = 0; i < 8; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    Vector3 pos = segmentId.ToSegment().GetClosestPosition(hitPos);
                     float distance = (hitPos - pos).sqrMagnitude;
                     if (distance < minDistance) {
                         minDistance = distance;
                         minSegId = segmentId;
                     }
-                    return true;
-                });
+                }
+            }
+
             return minSegId;
         }
 
@@ -1841,7 +1867,6 @@ namespace TrafficManager.UI {
         internal static bool IsMouseOver(Rect boundingBox) {
             return boundingBox.Contains(Event.current.mousePosition);
         }
-
 
         /// <summary>
         /// this method should be used in OnToolGUI() instead of Input.GetMouseButtonDown(0).

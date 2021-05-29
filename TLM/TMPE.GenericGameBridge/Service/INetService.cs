@@ -3,10 +3,6 @@ namespace GenericGameBridge.Service {
 
     public delegate bool NetSegmentHandler(ushort segmentId, ref NetSegment segment);
 
-    public delegate bool NetNodeHandler(ushort nodeId, ref NetNode node);
-
-    public delegate bool NetLaneHandler(uint laneId, ref NetLane lane);
-
     public delegate bool NetSegmentLaneHandler(uint laneId,
                                                ref NetLane lane,
                                                NetInfo.Lane laneInfo,
@@ -64,21 +60,13 @@ namespace GenericGameBridge.Service {
 
         bool IsSegmentValid(ushort segmentId);
 
-        void IterateNodeSegments(ushort nodeId, NetSegmentHandler handler);
-
-        void IterateNodeSegments(ushort nodeId, ClockDirection dir, NetSegmentHandler handler);
-
         void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler);
 
         void IterateSegmentLanes(ushort segmentId,
                                  ref NetSegment segment,
                                  NetSegmentLaneHandler handler);
 
-        void ProcessLane(uint laneId, NetLaneHandler handler);
-
-        void ProcessNode(ushort nodeId, NetNodeHandler handler);
-
-        void ProcessSegment(ushort segmentId, NetSegmentHandler handler);
+        GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection);
 
         void PublishSegmentChanges(ushort segmentId);
 
@@ -117,9 +105,7 @@ namespace GenericGameBridge.Service {
         }
     }
 
-
     public enum ClockDirection {
-        None,
         Clockwise,
         CounterClockwise,
     }

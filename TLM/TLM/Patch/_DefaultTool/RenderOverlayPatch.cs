@@ -2,6 +2,7 @@ namespace TrafficManager.Patch._DefaultTool {
     using HarmonyLib;
     using JetBrains.Annotations;
     using TrafficManager.UI;
+    using TrafficManager.Lifecycle;
 
     [HarmonyPatch(typeof(DefaultTool), "RenderOverlay")]
     [UsedImplicitly]
@@ -12,7 +13,7 @@ namespace TrafficManager.Patch._DefaultTool {
         [HarmonyPostfix]
         [UsedImplicitly]
         public static void Postfix(RenderManager.CameraInfo cameraInfo) {
-            if (ToolsModifierControl.toolController.CurrentTool.GetType() != typeof(TrafficManagerTool)) {
+            if (TMPELifecycle.PlayMode && !TrafficManagerTool.IsCurrentTool) {
                 if (UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                     ModUI.GetTrafficManagerTool(true).RenderOverlayImpl(cameraInfo);
                 }
