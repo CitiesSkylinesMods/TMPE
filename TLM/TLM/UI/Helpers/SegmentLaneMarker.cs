@@ -8,6 +8,8 @@ namespace TrafficManager.UI.Helpers {
     internal class SegmentLaneMarker {
         internal SegmentLaneMarker(Bezier3 bezier) {
             Bezier = bezier;
+            IsUnderground = CheckIsUnderground(Bezier.a) ||
+                            CheckIsUnderground(Bezier.d);
         }
 
         internal Bezier3 Bezier;
@@ -19,6 +21,8 @@ namespace TrafficManager.UI.Helpers {
         /// previous vertical hit position stored for caching.
         /// </summary>
         private float prev_H;
+
+        public bool IsUnderground { get; private set; }
 
         /// <summary>
         ///  Intersects mouse ray with lane bounds.
@@ -47,7 +51,7 @@ namespace TrafficManager.UI.Helpers {
             // maximum vertical postion of the bezier.
             float maxH = Mathf.Max(Bezier.a.y, Bezier.d.y);
 
-            float mouseH = ModUI.GetTrafficManagerTool(false).MousePosition.y;
+            float mouseH = TrafficManagerTool.GetAccurateHitHeight();// ModUI.GetTrafficManagerTool(false).MousePosition.y;
 
             if ((hitH == prev_H || hitH == maxH || prev_H == mouseH) && bounds != null) {
                 // use cached results if mouse has not moved or hitH is ignored.
@@ -98,10 +102,11 @@ namespace TrafficManager.UI.Helpers {
         /// <summary>
         /// Renders lane overlay.
         /// </summary>
-        internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false) {
+        internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false, bool renderLimits = false) {
             float minH = Mathf.Min(Bezier.a.y, Bezier.d.y);
             float maxH = Mathf.Max(Bezier.a.y, Bezier.d.y);
 
+            float overdrawHeight = IsUnderground || renderLimits ? 1f : 5f;
             ColossalFramework.Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             RenderManager.instance.OverlayEffect.DrawBezier(
                 cameraInfo,
@@ -110,10 +115,16 @@ namespace TrafficManager.UI.Helpers {
                 enlarge ? Size * 1.41f : Size,
                 0,
                 0,
-                minH - 100f,
-                maxH + 100f,
-                true,
+                minH - overdrawHeight,
+                maxH + overdrawHeight,
+                IsUnderground || renderLimits,
                 false);
+        }
+
+        private bool CheckIsUnderground(Vector3 position) {
+            float maxY = position.y;
+            float sampledHeight = TerrainManager.instance.SampleDetailHeightSmooth(position);
+            return sampledHeight > maxY;
         }
     }
 }

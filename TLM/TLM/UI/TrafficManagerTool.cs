@@ -50,6 +50,8 @@ namespace TrafficManager.UI {
 
         private NetTool netTool_;
 
+        private CursorInfo nopeCursor_;
+
         /// <summary>Maximum error of HitPos field.</summary>
         internal const float MAX_HIT_ERROR = 2.5f;
 
@@ -93,6 +95,8 @@ namespace TrafficManager.UI {
 
         private static IDisposable _confDisposable;
 
+        public bool IsUndergroundMode => InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
+
         static TrafficManagerTool() { }
 
         /// <summary>
@@ -104,6 +108,10 @@ namespace TrafficManager.UI {
 
         protected override void OnDestroy() {
             Log.Info("TrafficManagerTool.OnDestroy() called");
+            if (nopeCursor_) {
+                Destroy(nopeCursor_);
+                nopeCursor_ = null;
+            }
             base.OnDestroy();
         }
 
@@ -223,7 +231,10 @@ namespace TrafficManager.UI {
         }
 
         protected override void Awake() {
-            Log._Debug($"TrafficLightTool: Awake {GetHashCode()}");
+            Log._Debug($"TrafficManagerTool: Awake {GetHashCode()}");
+            nopeCursor_ = ScriptableObject.CreateInstance<CursorInfo>();
+            nopeCursor_.m_texture = UIView.GetAView().defaultAtlas["Niet"]?.texture;
+            nopeCursor_.m_hotspot = new Vector2(45,45);
             base.Awake();
         }
 
@@ -340,6 +351,10 @@ namespace TrafficManager.UI {
             if (ModUI.Instance != null && ModUI.Instance.IsVisible())
                 ModUI.Instance.CloseMainMenu();
 
+            // revert to normal mode if underground
+            if (IsUndergroundMode)
+                InfoManager.instance.SetCurrentMode(InfoManager.InfoMode.None, InfoManager.SubInfoMode.Default);
+
             //hide speed limit overlay if necessary
             SubTools.PrioritySigns.MassEditOverlay.Show = RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
             // no call to base method to disable base class behavior
@@ -450,7 +465,7 @@ namespace TrafficManager.UI {
             // Log._Debug($"OnToolUpdate");
             if (Input.GetKeyUp(KeyCode.PageDown)) {
                 InfoManager.instance.SetCurrentMode(
-                    InfoManager.InfoMode.Traffic,
+                    InfoManager.InfoMode.Underground,
                     InfoManager.SubInfoMode.Default);
                 UIView.library.Hide("TrafficInfoViewPanel");
             } else if (Input.GetKeyUp(KeyCode.PageUp)) {
@@ -462,6 +477,11 @@ namespace TrafficManager.UI {
             bool elementsHovered = DetermineHoveredElements();
             if (activeLegacySubTool_ != null && NetTool != null && elementsHovered) {
                 ToolCursor = NetTool.m_upgradeCursor;
+
+                if (activeLegacySubTool_ is LaneConnectorTool && HoveredNodeId != 0 && !IsNodeVisible(HoveredNodeId)) {
+                    ToolCursor = nopeCursor_;
+                    return;
+                }
             }
 
             bool primaryMouseClicked = Input.GetMouseButtonDown(0);
@@ -598,6 +618,10 @@ namespace TrafficManager.UI {
             }
         }
 
+        public bool IsNodeVisible(ushort node) {
+            return node.IsUndergroundNode() == IsUndergroundMode;
+        }
+
         public void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                    ushort nodeId,
                                    bool warning = false,
@@ -645,7 +669,8 @@ namespace TrafficManager.UI {
                                    bool alpha = false) {
             float r = CalculateNodeRadius(nodeId);
             Vector3 pos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
-            DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha);
+            bool renderLimits = TerrainManager.instance.SampleDetailHeightSmooth(pos) > pos.y;
+            DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha, renderLimits);
         }
 
         /// <summary>
@@ -739,6 +764,8 @@ namespace TrafficManager.UI {
                 out bezier.c);
 
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+
+            Bounds bezierBounds = bezier.GetBounds();
             Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
                 cameraInfo,
                 color,
@@ -746,28 +773,29 @@ namespace TrafficManager.UI {
                 width * 2f,
                 0,
                 0,
-                -1f,
-                1280f,
+                bezierBounds.center.y - 1f,
+                bezierBounds.center.y + 1f,
                 false,
                 alphaBlend);
         }
 
-        [UsedImplicitly]
         // TODO: move to UI.Helpers (Highlight)
         private static void DrawOverlayCircle(RenderManager.CameraInfo cameraInfo,
                                               Color color,
                                               Vector3 position,
                                               float width,
-                                              bool alpha) {
+                                              bool alpha,
+                                              bool renderLimits = false) {
+            float overdrawHeight = renderLimits ? 1f : 5f;
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(
                 cameraInfo,
                 color,
                 position,
                 width,
-                position.y - 100f,
-                position.y + 100f,
-                false,
+                position.y - overdrawHeight,
+                position.y + overdrawHeight,
+                renderLimits,
                 alpha);
         }
 

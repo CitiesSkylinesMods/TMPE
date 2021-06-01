@@ -18,11 +18,7 @@ namespace TrafficManager.UI.Helpers {
             float hitH = TrafficManagerTool.GetAccurateHitHeight();
 
             Vector3 pos = Position;
-            float mouseH = ModUI.GetTrafficManagerTool(false).MousePosition.y;
-            if (hitH < mouseH - TrafficManagerTool.MAX_HIT_ERROR) {
-                // For metros use projection on the terrain.
-                pos = TerrainPosition;
-            } else if (hitH - pos.y > TrafficManagerTool.MAX_HIT_ERROR) {
+            if (hitH - pos.y > TrafficManagerTool.MAX_HIT_ERROR) {
                 // if marker is projected on road plane above then modify its height
                 pos.y = hitH;
             }
@@ -32,25 +28,26 @@ namespace TrafficManager.UI.Helpers {
             return bounds.IntersectRay(mouseRay);
         }
 
-        internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false) {
+        internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false, bool renderLimits = false) {
             float magnification = enlarge ? 2f : 1f;
+            float overdrawHeight = renderLimits ? 1f : 5f;
             RenderManager.instance.OverlayEffect.DrawCircle(
                 cameraInfo,
                 color,
-                TerrainPosition,
+                Position,
                 Radius * magnification,
-                TerrainPosition.y - 100f, // through all the geometry -100..100
-                TerrainPosition.y + 100f,
-                false,
+                Position.y - overdrawHeight,
+                Position.y + overdrawHeight,
+                renderLimits,
                 true);
             RenderManager.instance.OverlayEffect.DrawCircle(
                 cameraInfo,
                 Color.black,
-                TerrainPosition,
+                Position,
                 Radius * 0.75f * magnification, // inner black
-                TerrainPosition.y - 100f, // through all the geometry -100..100
-                TerrainPosition.y + 100f,
-                false,
+                Position.y - overdrawHeight,
+                Position.y + overdrawHeight,
+                renderLimits,
                 false);
         }
     }
