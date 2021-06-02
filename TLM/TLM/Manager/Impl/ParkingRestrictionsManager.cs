@@ -7,6 +7,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using ColossalFramework;
+    using TrafficManager.Util.Extensions;
 
     public class ParkingRestrictionsManager
         : AbstractGeometryObservingManager,
