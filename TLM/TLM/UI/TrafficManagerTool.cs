@@ -478,7 +478,7 @@ namespace TrafficManager.UI {
             if (activeLegacySubTool_ != null && NetTool != null && elementsHovered) {
                 ToolCursor = NetTool.m_upgradeCursor;
 
-                if (activeLegacySubTool_ is LaneConnectorTool && HoveredNodeId != 0 && !IsNodeVisible(HoveredNodeId)) {
+                if (activeLegacySubTool_ is LaneConnectorTool lcs && HoveredNodeId != 0 && !IsNodeVisible(HoveredNodeId) && lcs.CanShowNopeCursor) {
                     ToolCursor = nopeCursor_;
                 }
             }

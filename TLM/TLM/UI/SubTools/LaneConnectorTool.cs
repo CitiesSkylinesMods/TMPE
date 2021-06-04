@@ -78,6 +78,8 @@ namespace TrafficManager.UI.SubTools {
         /// </summary>
         private CameraTransformValue LastCachedCamera { get; set; }
 
+        public bool CanShowNopeCursor => GetSelectionMode() == SelectionMode.None;
+
         private class LaneEnd {
             internal ushort SegmentId;
             internal ushort NodeId;
