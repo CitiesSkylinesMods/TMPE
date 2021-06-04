@@ -189,6 +189,10 @@ namespace TrafficManager.UI.SubTools {
                         continue; // do not draw if too distant
                     }
 
+                    if (NetManager.instance.m_nodes.m_buffer[nodeId].CountSegments() < 2) {
+                        continue; // skip non-configurable nodes
+                    }
+
                     // Add
                     CachedVisibleNodeIds.Add(nodeId);
                 }
@@ -233,7 +237,7 @@ namespace TrafficManager.UI.SubTools {
                                 bezier: bezier,
                                 color: laneEnd.Color,
                                 outlineColor: Color.black,
-                                underground: (height.y + 1f) < intersectionY);
+                                underground: (height.y + 1f) < intersectionY || laneEnd.NodeId == SelectedNodeId);
                         }
                     }
 
@@ -321,7 +325,12 @@ namespace TrafficManager.UI.SubTools {
 
                     // Draw a currently dragged curve
                     if (hoveredLaneEnd == null) {
-                        Vector3 pos = HitPos.ChangeY(selNodePos.y);
+                        // get accurate position on a plane positioned at node height
+                        Plane plane = new Plane(Vector3.up, Vector3.zero.ChangeY(selNodePos.y));
+                        Ray ray = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
+                        Vector3 pos = plane.Raycast(ray, out float distance)
+                                          ? ray.GetPoint(distance)
+                                          : MousePosition;
 
                         DrawLaneCurve(
                             cameraInfo: cameraInfo,
@@ -407,13 +416,14 @@ namespace TrafficManager.UI.SubTools {
                 } // end if quick setup
             } // end if selected node
 
-            if ((GetSelectionMode() == SelectionMode.None) && (HoveredNodeId != 0)) {
+            if ((GetSelectionMode() == SelectionMode.None) && (HoveredNodeId != 0) && MainTool.IsNodeVisible(HoveredNodeId)) {
                 // draw hovered node
                 MainTool.DrawNodeCircle(
                     cameraInfo: cameraInfo,
                     nodeId: HoveredNodeId,
                     warning: Input.GetMouseButton(0),
-                    alpha: true);
+                    alpha: true,
+                    overrideRenderLimits: true);
             }
         }
 
