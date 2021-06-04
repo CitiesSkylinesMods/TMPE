@@ -17,20 +17,15 @@ namespace TrafficManager.UI.Helpers {
             Ray mouseRay = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
             float hitH = TrafficManagerTool.GetAccurateHitHeight();
 
-            Vector3 pos = Position;
-            if (hitH - pos.y > TrafficManagerTool.MAX_HIT_ERROR) {
-                // if marker is projected on road plane above then modify its height
-                pos.y = hitH;
-            }
             Bounds bounds = new Bounds(Vector3.zero, Vector3.one * Radius) {
-                center = pos,
+                center = Position
             };
             return bounds.IntersectRay(mouseRay);
         }
 
         internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false, bool renderLimits = false) {
             float magnification = enlarge ? 2f : 1f;
-            float overdrawHeight = renderLimits ? 1f : 5f;
+            float overdrawHeight = renderLimits ? 0f : 5f;
             RenderManager.instance.OverlayEffect.DrawCircle(
                 cameraInfo,
                 color,

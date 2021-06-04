@@ -788,7 +788,7 @@ namespace TrafficManager.UI {
                                               float width,
                                               bool alpha,
                                               bool renderLimits = false) {
-            float overdrawHeight = renderLimits ? 1f : 5f;
+            float overdrawHeight = renderLimits ? 0f : 5f;
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(
                 cameraInfo,

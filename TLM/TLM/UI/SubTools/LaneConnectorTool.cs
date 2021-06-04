@@ -1123,13 +1123,12 @@ namespace TrafficManager.UI.SubTools {
                             float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
                             var terrainPos = new Vector3(pos.x, terrainY, pos.z);
 
+                            SegmentLaneMarker segmentMarker = new SegmentLaneMarker(bezier);
                             if (isUnderground) {
                                 // force overlay height to match node position
-                                bezier = bezier.ForceHeight(node.m_position.y);
+                                segmentMarker.ForceBezierHeight(node.m_position.y);
                                 pos.y = node.m_position.y;
                             }
-
-                            SegmentLaneMarker segmentMarker = new SegmentLaneMarker(bezier);
                             NodeLaneMarker nodeMarker = new NodeLaneMarker {
                                 TerrainPosition = terrainPos,
                                 Position = (Vector3)pos,
@@ -1306,7 +1305,7 @@ namespace TrafficManager.UI.SubTools {
                 middlePos2: out bezier.c);
             Bounds bounds = bezier.GetBounds();
 
-            float overdrawHeight = renderLimits ? 1f : 5f;
+            float overdrawHeight = renderLimits ? 0f : 5f;
             // Draw black outline
             RenderManager.instance.OverlayEffect.DrawBezier(
                 cameraInfo: cameraInfo,
