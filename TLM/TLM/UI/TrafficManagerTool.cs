@@ -475,7 +475,6 @@ namespace TrafficManager.UI {
             }
             ToolCursor = null;
             bool elementsHovered = DetermineHoveredElements(activeLegacySubTool_ is not LaneConnectorTool);
-            ShowToolInfo(true, $"N: {HoveredNodeId} S: {HoveredSegmentId}\nPos: {HitPos}", m_mousePosition);
             if (activeLegacySubTool_ != null && NetTool != null && elementsHovered) {
                 ToolCursor = NetTool.m_upgradeCursor;
 
