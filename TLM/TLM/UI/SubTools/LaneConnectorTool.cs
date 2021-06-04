@@ -827,7 +827,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             if (GetSelectionMode() == SelectionMode.None) {
-                if (HoveredNodeId != 0) {
+                if (HoveredNodeId != 0 && MainTool.IsNodeVisible(HoveredNodeId)) {
                     Log._DebugIf(
                         logLaneConn,
                         () => "LaneConnectorTool: HoveredNode != 0");
