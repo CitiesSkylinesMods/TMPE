@@ -8,7 +8,7 @@ namespace TrafficManager.Patch._PathManager {
 
         [UsedImplicitly]
         public static bool Prefix() {
-            if (CustomPathManager._instance) {
+            if (CustomPathManager._instance != null) {
                 CustomPathManager._instance.WaitForAllPaths();
                 return false;
             }

@@ -17,6 +17,7 @@ namespace TrafficManager.Custom.PathFinding {
     using ColossalFramework.UI;
 
     public class CustomPathManager : PathManager {
+        public const int DEFAULT_SIM_SLEEP_TIME = 100;
         /// <summary>
         /// Holds a linked list of path units waiting to be calculated
         /// </summary>
@@ -30,7 +31,7 @@ namespace TrafficManager.Custom.PathFinding {
 
         private bool terminated_;
 
-        private int simSleepMultiplier_ = 100;//vanilla value
+        private int simSleepMultiplier_ = DEFAULT_SIM_SLEEP_TIME;//vanilla value
 
         private static FastList<ISimulationManager> GetSimulationManagers() =>
             typeof(SimulationManager)
@@ -99,8 +100,10 @@ namespace TrafficManager.Custom.PathFinding {
 
             PathFind[] stockPathFinds = GetComponents<PathFind>();
             int numOfStockPathFinds = stockPathFinds.Length;
-            // utilize more threads if possible (systems with 8+ threads (9-n))
-            int numCustomPathFinds = Mathf.Clamp(SystemInfo.processorCount / 2, 1, 6);
+            // utilize more threads if possible (systems with 8+) otherwise use vanilla calculation
+            int numCustomPathFinds = SystemInfo.processorCount < 8
+                                         ? SystemInfo.processorCount / 2
+                                         : SystemInfo.processorCount - 4;
             simSleepMultiplier_ = CalculateBestSimSleepMultiplier(numCustomPathFinds);
 
             Log._Debug("Creating " + numCustomPathFinds + " custom PathFind objects.");
@@ -446,7 +449,7 @@ namespace TrafficManager.Custom.PathFinding {
 
         public int CalculateBestSimSleepMultiplier(int numberOfThreads) {
             if (numberOfThreads < 4)
-                return 100; //vanilla value
+                return DEFAULT_SIM_SLEEP_TIME; //vanilla value
 
             /*
              * 4 - 200

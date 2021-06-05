@@ -45,8 +45,6 @@ namespace TrafficManager.Patch._PathManager {
                 // CreatePath called for customized AI
                 Vehicle[] vehicleBuffer = VehicleManager.instance.m_vehicles.m_buffer;
                 ref Vehicle vehicleData = ref vehicleBuffer[VehicleID];
-                info = vehicleData.Info;
-                VehicleAI ai = info.m_vehicleAI;
 
                 args.vehicleId = VehicleID;
                 args.extPathType = ExtPathType;
@@ -54,8 +52,8 @@ namespace TrafficManager.Patch._PathManager {
                 args.spawned = vehicleData.m_flags.IsFlagSet(Vehicle.Flags.Spawned);
                 args.skipQueue = skipQueue;
 
-                if (ai is ShipAI)
-                    args.skipQueue = false; // TODO [issue #952] why ShipAI should be different than others?
+                if (vehicleData.Info.m_vehicleAI is ShipAI)
+                    args.skipQueue = false;
 
             } else {
                 // CreatePath called for vanilla AI
