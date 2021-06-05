@@ -69,5 +69,20 @@ namespace TrafficManager.UI.Textures {
             VehicleInfoSignTextures[ExtVehicleType.Taxi] = LoadDllResource("RoadUI.taxi_infosign.png", signSize);
             VehicleInfoSignTextures[ExtVehicleType.Tram] = LoadDllResource("RoadUI.tram_infosign.png", signSize);
        }
+
+        public static void ReloadTexturesWithTranslation() {
+            IntVector2 size = new IntVector2(200);
+            Texture2D stopTexture = PrioritySignTextures[PriorityType.Stop];
+            if (stopTexture)
+                UnityEngine.GameObject.Destroy(stopTexture);
+
+            PrioritySignTextures[PriorityType.Stop] = LoadDllResource(Translation.GetTranslatedFileName("RoadUI.sign_stop.png"), size);
+
+            Texture2D yieldTexture = PrioritySignTextures[PriorityType.Yield];
+            if (yieldTexture)
+                UnityEngine.GameObject.Destroy(yieldTexture);
+
+            PrioritySignTextures[PriorityType.Yield] = LoadDllResource(Translation.GetTranslatedFileName("RoadUI.sign_yield.png"), size);
+        }
     }
 }
