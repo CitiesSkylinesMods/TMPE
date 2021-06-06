@@ -55,6 +55,9 @@ namespace TrafficManager.UI {
         /// <summary>Maximum error of HitPos field.</summary>
         internal const float MAX_HIT_ERROR = 2.5f;
 
+        /// <summary>Maximum detection radius of segment raycast hit position.</summary>
+        internal const float NODE_DETECTION_RADIUS = 15f;
+
         internal static ushort HoveredNodeId;
 
         internal static ushort HoveredSegmentId;
@@ -1204,9 +1207,9 @@ namespace TrafficManager.UI {
                                                                 .m_position).magnitude;
                     float endDist = (segmentOutput.m_hitPos - nodesBuffer[endNodeId]
                                                               .m_position).magnitude;
-                    if (startDist < endDist && startDist < 15f) {
+                    if (startDist < endDist && startDist < NODE_DETECTION_RADIUS) {
                         HoveredNodeId = startNodeId;
-                    } else if (endDist < startDist && endDist < 15f) {
+                    } else if (endDist < startDist && endDist < NODE_DETECTION_RADIUS) {
                         HoveredNodeId = endNodeId;
                     }
                 }

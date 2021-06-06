@@ -236,7 +236,7 @@ namespace TrafficManager.UI.SubTools {
                             Vector3 height = bezier.Max();
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
-                                bezier: bezier,
+                                bezier: ref bezier,
                                 color: laneEnd.Color,
                                 outlineColor: Color.black,
                                 underground: (height.y + 1f) < intersectionY || laneEnd.NodeId == SelectedNodeId);
@@ -300,7 +300,7 @@ namespace TrafficManager.UI.SubTools {
 
                     DrawLaneCurve(
                         cameraInfo: cameraInfo,
-                        bezier: bezier,
+                        bezier: ref bezier,
                         color: this.selectedLaneEnd.Color,
                         outlineColor: Color.grey,
                         size: 0.18f, // Embolden
@@ -348,7 +348,7 @@ namespace TrafficManager.UI.SubTools {
                         Bezier3 bezier = CalculateBezierConnection(selectedLaneEnd, hoveredLaneEnd);
                         DrawLaneCurve(
                             cameraInfo: cameraInfo,
-                            bezier: bezier,
+                            bezier: ref bezier,
                             color: this.selectedLaneEnd.Color,
                             outlineColor:  Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f),
                             size: 0.11f, // Embolden
@@ -1301,13 +1301,13 @@ namespace TrafficManager.UI.SubTools {
                 startDir: (middlePoint - bezier.a).normalized,
                 endPos: bezier.d,
                 endDir: (middlePoint - bezier.d).normalized,
-                smoothStart: false,
-                smoothEnd: false,
+                smoothStart: true,
+                smoothEnd: true,
                 middlePos1: out bezier.b,
                 middlePos2: out bezier.c);
             Bounds bounds = bezier.GetBounds();
 
-            float overdrawHeight = renderLimits ? 0f : 5f;
+            float overdrawHeight = renderLimits && MainTool.IsUndergroundMode ? 0f : 2f;
             // Draw black outline
             RenderManager.instance.OverlayEffect.DrawBezier(
                 cameraInfo: cameraInfo,
@@ -1346,7 +1346,7 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="size">Bezier line thickness</param>
         /// <param name="underground">Should be visible through obstacles like terrain or other objects</param>
         private void DrawLaneCurve(RenderManager.CameraInfo cameraInfo,
-                                   Bezier3 bezier,
+                                   ref Bezier3 bezier,
                                    Color color,
                                    Color outlineColor,
                                    float size = 0.08f,

@@ -207,6 +207,12 @@ namespace TrafficManager.Util {
             LHT ? segment.GetRightSegment(nodeId) : segment.GetLeftSegment(nodeId);
         #endregion
 
+        /// <summary>
+        /// Creates copy of bezier at designated height
+        /// </summary>
+        /// <param name="bezier">source bezier</param>
+        /// <param name="height">height</param>
+        /// <returns></returns>
         internal static Bezier3 ForceHeight(this Bezier3 bezier, float height) {
             bezier.a.y = height;
             bezier.b.y = height;
@@ -215,6 +221,12 @@ namespace TrafficManager.Util {
             return bezier;
         }
 
+        /// <summary>
+        /// Creates copy of Vector3 with new y
+        /// </summary>
+        /// <param name="vector">source vector</param>
+        /// <param name="newY">new y value</param>
+        /// <returns></returns>
         internal static Vector3 ChangeY(this Vector3 vector, float newY) {
             vector.y = newY;
             return vector;
