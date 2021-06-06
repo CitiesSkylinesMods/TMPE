@@ -9,7 +9,7 @@ namespace TrafficManager.UI.Textures {
 
     public static class TextureResources {
         internal static Texture2D LoadDllResource(string resourceName,
-                                                  IntVector2 size,
+                                                  ValueTuple<int, int> size,
                                                   bool mip = false) {
 #if DEBUG
             bool debug = DebugSwitch.ResourceLoading.Get();
@@ -29,8 +29,8 @@ namespace TrafficManager.UI.Textures {
                 }
 
                 var texture = new Texture2D(
-                    width: size.x,
-                    height: size.y,
+                    width: size.Item1,
+                    height: size.Item2,
                     format: TextureFormat.ARGB32,
                     mipmap: mip);
 

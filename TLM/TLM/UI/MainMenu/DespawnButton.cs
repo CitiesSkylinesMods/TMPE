@@ -29,7 +29,7 @@ namespace TrafficManager.UI.MainMenu {
             };
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: futureAtlas,
-                spriteSize: new IntVector2(50));
+                spriteSize: ValueTuple.Create(50, 50));
         }
 
         protected override void OnClick(UIMouseEventParameter p) {

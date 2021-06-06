@@ -107,7 +107,7 @@ namespace TrafficManager.U {
         /// </summary>
         /// <param name="atlasBuilder">Will later load sprites and form a texture atlas.</param>
         /// <param name="spriteSize">The size to assume for all sprites.</param>
-        public void UpdateAtlasBuilder(AtlasBuilder atlasBuilder, IntVector2 spriteSize) {
+        public void UpdateAtlasBuilder(AtlasBuilder atlasBuilder, ValueTuple<int, int> spriteSize) {
             // Two normal textures (bg and fg) are always assumed to exist.
             List<string> names = new List<string>();
             bool haveBackgroundPrefix = !string.IsNullOrEmpty(BackgroundPrefix);

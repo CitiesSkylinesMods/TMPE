@@ -19,7 +19,7 @@ namespace TrafficManager.U {
         public static UITextureAtlas CreateAtlas(string atlasName,
                                                  string resourcePrefix,
                                                  U.AtlasSpriteDef[] spriteDefs,
-                                                 IntVector2 atlasSizeHint) {
+                                                 ValueTuple<int, int> atlasSizeHint) {
             var loadedTextures = new List<Texture2D>(spriteDefs.Length);
             var loadedSpriteNames = new List<string>();
 
@@ -52,19 +52,19 @@ namespace TrafficManager.U {
         }
 
         private static UITextureAtlas PackTextures(string atlasName,
-                                                   IntVector2 atlasSizeHint,
+                                                   ValueTuple<int, int> atlasSizeHint,
                                                    List<Texture2D> loadedTextures,
                                                    List<string> loadedSpriteNames) {
             Texture2D texture2D = new Texture2D(
-                width: atlasSizeHint.x,
-                height: atlasSizeHint.y,
+                width: atlasSizeHint.Item1,
+                height: atlasSizeHint.Item2,
                 format: TextureFormat.ARGB32,
                 mipmap: false);
 
             Rect[] regions = texture2D.PackTextures(
                 textures: loadedTextures.ToArray(),
                 padding: 2,
-                maximumAtlasSize: Math.Max(atlasSizeHint.x, atlasSizeHint.y));
+                maximumAtlasSize: Math.Max(atlasSizeHint.Item1, atlasSizeHint.Item2));
 
             // Now using loaded and packed textures, create the atlas with sprites
             UITextureAtlas newAtlas = ScriptableObject.CreateInstance<UITextureAtlas>();

@@ -26,7 +26,7 @@ namespace TrafficManager.UI.Textures {
         public static readonly Texture2D PedestrianCrossingForbidden;
 
         static JunctionRestrictions() {
-            IntVector2 size = new IntVector2(200);
+            ValueTuple<int, int> size = new(200, 200);
 
             LaneChangeAllowed = LoadDllResource("JunctionRestrictions.lanechange_allowed.png", size);
             LaneChangeForbidden = LoadDllResource("JunctionRestrictions.lanechange_forbidden.png", size);

@@ -64,11 +64,11 @@ namespace TrafficManager.UI {
                 var atlasBuilder = new U.AtlasBuilder();
                 this.Skin.UpdateAtlasBuilder(
                     atlasBuilder: atlasBuilder,
-                    spriteSize: new IntVector2(50));
+                    spriteSize: ValueTuple.Create(50, 50));
                 this.atlas = atlasBuilder.CreateAtlas(
                     atlasName: "RemoveCitizenButton_Atlas",
                     loadingPath: "Clear",
-                    atlasSizeHint: new IntVector2(256));
+                    atlasSizeHint: ValueTuple.Create(256, 256));
 
                 UpdateButtonImageAndTooltip();
                 width = height = 30;

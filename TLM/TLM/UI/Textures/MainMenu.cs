@@ -8,7 +8,7 @@ namespace TrafficManager.UI.Textures {
         public static readonly Texture2D WindowBackground;
 
         static MainMenu() {
-            WindowBackground = LoadDllResource("MainMenu.WindowBackground.png", new IntVector2(16, 60));
+            WindowBackground = LoadDllResource("MainMenu.WindowBackground.png", ValueTuple.Create(16, 60));
         }
     }
 }

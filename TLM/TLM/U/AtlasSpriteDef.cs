@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.U {
+namespace TrafficManager.U {
     using System;
     using TrafficManager.Util;
 
@@ -14,9 +14,9 @@
         public string Name;
 
         /// <summary>Texture size assumed by the developer.</summary>
-        public IntVector2 Size;
+        public ValueTuple<int, int> Size;
 
-        public AtlasSpriteDef(string name, IntVector2 size, string prefix = "") {
+        public AtlasSpriteDef(string name, ValueTuple<int, int> size, string prefix = "") {
             Name = name;
             Size = size;
             ResourcePrefix = prefix;

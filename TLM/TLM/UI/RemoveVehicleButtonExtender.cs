@@ -73,11 +73,11 @@ namespace TrafficManager.UI {
                 var futureAtlas = new U.AtlasBuilder();
                 this.Skin.UpdateAtlasBuilder(
                     atlasBuilder: futureAtlas,
-                    spriteSize: new IntVector2(50));
+                    spriteSize: ValueTuple.Create(50, 50));
                 this.atlas = futureAtlas.CreateAtlas(
                     atlasName: "RemoveVehButton_Atlas",
                     loadingPath: "Clear",
-                    atlasSizeHint: new IntVector2(256));
+                    atlasSizeHint: ValueTuple.Create(256, 256));
 
                 UpdateButtonImageAndTooltip();
                 width = height = 30f;

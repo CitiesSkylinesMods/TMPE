@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.U {
+namespace TrafficManager.U {
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework.UI;
@@ -30,7 +30,7 @@
         /// <returns>New UI atlas.</returns>
         public UITextureAtlas CreateAtlas(string atlasName,
                                           string loadingPath,
-                                          IntVector2 atlasSizeHint) {
+                                          ValueTuple<int,int> atlasSizeHint) {
             string fullName = $"TMPE_U_{atlasName}";
             UITextureAtlas foundAtlas = TextureUtil.FindAtlas(fullName);
 

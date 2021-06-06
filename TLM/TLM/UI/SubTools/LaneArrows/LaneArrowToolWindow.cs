@@ -42,7 +42,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             var futureAtlas = new U.AtlasBuilder();
             backgroundOnlySkin.UpdateAtlasBuilder(
                 atlasBuilder: futureAtlas,
-                spriteSize: new IntVector2(64));
+                spriteSize: ValueTuple.Create(64, 64));
 
             // Merge names of all foreground sprites for 3 directions into atlasKeySet
             foreach (string prefix in new[]
@@ -53,14 +53,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 // Create keysets for lane arrow button icons and merge to the shared atlas
                 skin.UpdateAtlasBuilder(
                     atlasBuilder: futureAtlas,
-                    spriteSize: new IntVector2(64));
+                    spriteSize: ValueTuple.Create(64, 64));
             }
 
             // Load actual graphics into an atlas
             laneArrowButtonAtlas_ = futureAtlas.CreateAtlas(
                 atlasName: "LaneArrowsTool_Atlas",
                 loadingPath: "LaneArrows",
-                atlasSizeHint: new IntVector2(256));
+                atlasSizeHint: ValueTuple.Create(256, 256));
             return laneArrowButtonAtlas_;
         }
 

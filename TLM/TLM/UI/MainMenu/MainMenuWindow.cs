@@ -200,7 +200,7 @@ namespace TrafficManager.UI.MainMenu {
             var atlasBuilder = new U.AtlasBuilder();
             tmpSkin.UpdateAtlasBuilder(
                 atlasBuilder: atlasBuilder,
-                spriteSize: new IntVector2(50));
+                spriteSize: ValueTuple.Create(50, 50));
 
             // Create Version Label and Help button:
             // [ TM:PE 11.x ] [?]
@@ -229,7 +229,7 @@ namespace TrafficManager.UI.MainMenu {
             allButtonsAtlas_ = atlasBuilder.CreateAtlas(
                 atlasName: "MainMenu_Atlas",
                 loadingPath: "MainMenu.Tool",
-                atlasSizeHint: new IntVector2(512));
+                atlasSizeHint: ValueTuple.Create(512, 512));
 
             foreach (BaseMenuButton b in ToolButtonsList) {
                 b.atlas = allButtonsAtlas_;
@@ -308,7 +308,7 @@ namespace TrafficManager.UI.MainMenu {
                 };
                 skin.UpdateAtlasBuilder(
                     atlasBuilder,
-                    spriteSize: new IntVector2(50));
+                    spriteSize: ValueTuple.Create(50, 50));
 
                 control.Skin = skin;
                 control.UpdateButtonImage();

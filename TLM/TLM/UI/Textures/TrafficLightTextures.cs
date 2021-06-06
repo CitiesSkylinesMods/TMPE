@@ -50,7 +50,7 @@ namespace TrafficManager.UI.Textures {
         public static readonly Texture2D TrafficLightDisabled;
 
         static TrafficLightTextures() {
-            IntVector2 tlSize = new IntVector2(103, 243);
+            ValueTuple<int, int> tlSize = new(103, 243);
 
             RedLight = LoadDllResource("TrafficLights.light_1_1.png", tlSize);
             YellowRedLight = LoadDllResource("TrafficLights.light_1_2.png", tlSize);
@@ -85,7 +85,7 @@ namespace TrafficManager.UI.Textures {
             YellowLight = LoadDllResource("TrafficLights.light_yellow.png", tlSize);
 
             // pedestrian
-            IntVector2 pedSize = new IntVector2(73, 123);
+            ValueTuple<int, int> pedSize = new(73, 123);
             PedestrianRedLight = LoadDllResource("TrafficLights.pedestrian_light_1.png", pedSize);
             PedestrianGreenLight = LoadDllResource("TrafficLights.pedestrian_light_2.png", pedSize);
 
@@ -93,7 +93,7 @@ namespace TrafficManager.UI.Textures {
             // Timed TL Editor
             //--------------------------
             // light mode
-            IntVector2 tlModeSize = new IntVector2(103, 95);
+            ValueTuple<int, int> tlModeSize = new(103, 95);
 
             LightMode = LoadDllResource(
                 Translation.GetTranslatedFileName("TrafficLights.light_mode.png"),
@@ -103,7 +103,7 @@ namespace TrafficManager.UI.Textures {
                 tlModeSize);
 
             // pedestrian mode
-            IntVector2 pedModeSize = new IntVector2(73, 70);
+            ValueTuple<int, int> pedModeSize = new(73, 70);
             
             PedestrianModeAutomatic = LoadDllResource(
                 Translation.GetTranslatedFileName("TrafficLights.pedestrian_mode_1.png"),
@@ -113,7 +113,7 @@ namespace TrafficManager.UI.Textures {
                 pedModeSize);
 
             // timer
-            IntVector2 timerSize = new IntVector2(512);
+            ValueTuple<int, int> timerSize = new(512, 512);
 
             ClockPlay = LoadDllResource("TrafficLights.clock_play.png", timerSize);
             ClockPause = LoadDllResource("TrafficLights.clock_pause.png", timerSize);
@@ -122,7 +122,7 @@ namespace TrafficManager.UI.Textures {
             //--------------------------
             // Toggle TL Tool
             //--------------------------
-            IntVector2 toggleSize = new IntVector2(64);
+            ValueTuple<int, int> toggleSize = new(64, 64);
             TrafficLightEnabled = LoadDllResource("TrafficLights.IconJunctionTrafficLights.png", toggleSize);
             TrafficLightEnabledTimed = LoadDllResource("TrafficLights.IconJunctionTimedTL.png", toggleSize);
             TrafficLightDisabled = LoadDllResource("TrafficLights.IconJunctionNoTrafficLights.png", toggleSize);

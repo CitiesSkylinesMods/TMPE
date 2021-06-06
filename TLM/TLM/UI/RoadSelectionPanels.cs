@@ -317,19 +317,19 @@ namespace TrafficManager.UI {
                 var atlasBuilder = new AtlasBuilder();
                 tmpSkin.UpdateAtlasBuilder(
                     atlasBuilder: atlasBuilder,
-                    spriteSize: new IntVector2(50));
+                    spriteSize: ValueTuple.Create(50, 50));
 
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
                     button.Skin.UpdateAtlasBuilder(
                         atlasBuilder: atlasBuilder,
-                        spriteSize: new IntVector2(50));
+                        spriteSize: ValueTuple.Create(50, 50));
                 }
 
                 // Create atlas and give it to all buttons
                 allButtonsAtlas_ = atlasBuilder.CreateAtlas(
                     atlasName: "RoadSelectionPanelAtlas",
                     loadingPath: "RoadSelectionPanel",
-                    atlasSizeHint: new IntVector2(512));
+                    atlasSizeHint: ValueTuple.Create(512, 512));
 
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
                     button.atlas = allButtonsAtlas_;

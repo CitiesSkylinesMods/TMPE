@@ -29,8 +29,8 @@ namespace TrafficManager.UI.Textures {
             TexturesMphUS = new TinyDictionary<int, Texture2D>();
             TexturesMphUK = new TinyDictionary<int, Texture2D>();
 
-            IntVector2 size = new IntVector2(200);
-            IntVector2 sizeUS = new IntVector2(200, 250);
+            ValueTuple<int, int> size = new(200, 200);
+            ValueTuple<int, int> sizeUS = new(200, 250);
 
             // Load shared speed limit signs for Kmph and Mph
             // Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no limit sign
@@ -55,7 +55,7 @@ namespace TrafficManager.UI.Textures {
                 TexturesMphUK.Add(speedLimit, resourceUk ? resourceUk : TexturesMphUK[5]);
             }
 
-            Clear = LoadDllResource("clear.png", new IntVector2(256));
+            Clear = LoadDllResource("clear.png", ValueTuple.Create(256, 256));
         }
 
         /// <summary>

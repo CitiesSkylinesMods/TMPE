@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.Util;
@@ -17,7 +17,7 @@
             };
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: futureAtlas,
-                spriteSize: new IntVector2(50));
+                spriteSize: ValueTuple.Create(50, 50));
         }
 
         protected override string U_OverrideTooltipText() =>

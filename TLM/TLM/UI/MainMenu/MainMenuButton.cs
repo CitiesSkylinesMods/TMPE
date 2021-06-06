@@ -39,11 +39,11 @@ namespace TrafficManager.UI.MainMenu {
             var atlasBuilder = new U.AtlasBuilder();
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: atlasBuilder,
-                spriteSize: new IntVector2(50));
+                spriteSize: ValueTuple.Create(50, 50));
             this.atlas = atlasBuilder.CreateAtlas(
                 atlasName: "MainTMPEButton_Atlas",
                 loadingPath: "MainMenu",
-                atlasSizeHint: new IntVector2(256));
+                atlasSizeHint: ValueTuple.Create(256, 256));
             UpdateButtonImageAndTooltip();
 
             // Set the button dimensions to smallest of 2.6% of screen width or 4.6% of screen height

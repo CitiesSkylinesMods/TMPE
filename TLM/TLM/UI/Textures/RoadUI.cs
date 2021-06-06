@@ -14,7 +14,7 @@ namespace TrafficManager.UI.Textures {
         public static readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
 
         static RoadUI() {
-            IntVector2 size = new IntVector2(200);
+            ValueTuple<int, int> size = new(200, 200);
 
             // priority signs
             PrioritySignTextures = new TinyDictionary<PriorityType, Texture2D> {
@@ -25,7 +25,7 @@ namespace TrafficManager.UI.Textures {
             };
 
             // delete priority sign
-            SignClear = LoadDllResource("clear.png", new IntVector2(256));
+            SignClear = LoadDllResource("clear.png", ValueTuple.Create(256, 256));
 
             VehicleRestrictionTextures =
                 new TinyDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> {
@@ -53,7 +53,7 @@ namespace TrafficManager.UI.Textures {
             ParkingRestrictionTextures[true] = LoadDllResource("RoadUI.parking_allowed.png", size);
             ParkingRestrictionTextures[false] = LoadDllResource("RoadUI.parking_disallowed.png", size);
 
-            IntVector2 signSize = new IntVector2(449, 411);
+            ValueTuple<int, int> signSize = new(449, 411);
 
             VehicleInfoSignTextures = new TinyDictionary<ExtVehicleType, Texture2D> {
                 [ExtVehicleType.Bicycle] = LoadDllResource("RoadUI.bicycle_infosign.png", signSize),
