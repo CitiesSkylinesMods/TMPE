@@ -1391,18 +1391,18 @@ namespace TrafficManager.UI.SubTools {
             bezier3.d = targetLaneEnd.NodeMarker.Position;
 
             Vector3 sourceLaneDirection =
-                NetManager.instance.m_lanes.m_buffer[sourceLaneEnd.LaneId].m_bezier
-                          .Tangent(sourceLaneEnd.StartNode ? 0f : 1f) *
-                (sourceLaneEnd.StartNode ? -1 : 1);
+                (NetManager.instance.m_lanes.m_buffer[sourceLaneEnd.LaneId].m_bezier
+                           .Tangent(sourceLaneEnd.StartNode ? 0f : 1f) *
+                 (sourceLaneEnd.StartNode ? -1 : 1)).normalized;
             Vector3 targetLaneDirection =
-                NetManager.instance.m_lanes.m_buffer[targetLaneEnd.LaneId].m_bezier
-                          .Tangent(targetLaneEnd.StartNode ? 0f : 1f) *
-                (targetLaneEnd.StartNode ? -1 : 1);
+                (NetManager.instance.m_lanes.m_buffer[targetLaneEnd.LaneId].m_bezier
+                           .Tangent(targetLaneEnd.StartNode ? 0f : 1f) *
+                 (targetLaneEnd.StartNode ? -1 : 1)).normalized;
             NetSegment.CalculateMiddlePoints(
                 bezier3.a,
-                sourceLaneDirection.normalized,
+                sourceLaneDirection,
                 bezier3.d,
-                targetLaneDirection.normalized,
+                targetLaneDirection,
                 false,
                 false,
                 out bezier3.b,
