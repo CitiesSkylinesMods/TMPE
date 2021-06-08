@@ -16,6 +16,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using TrafficManager.Util.Caching;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.Util.Extensions;
 
     public class SpeedLimitsTool : LegacySubTool {
         public const int
