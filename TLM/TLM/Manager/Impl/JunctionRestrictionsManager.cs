@@ -15,6 +15,7 @@ namespace TrafficManager.Manager.Impl {
     using static TrafficManager.Util.Shortcuts;
     using static CSUtil.Commons.TernaryBoolUtil;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class JunctionRestrictionsManager
         : AbstractGeometryObservingManager,

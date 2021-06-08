@@ -16,6 +16,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.MainMenu.OSD;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.UI.SubTools.PrioritySigns;
+    using TrafficManager.Util.Extensions;
 
     public class LaneConnectorTool
         : LegacySubTool,
