@@ -2,30 +2,24 @@ namespace TrafficManager.UI {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using TrafficManager.API.Manager;
-    using TrafficManager.API.Traffic.Data;
-    using TrafficManager.API.Traffic.Enums;
-    using TrafficManager.API.Util;
     using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using TrafficManager.Manager.Impl;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.Util;
+    using TrafficManager.Lifecycle;
     using TrafficManager.State;
-#if DEBUG
-    using TrafficManager.State.ConfigData;
-#endif
+    using TrafficManager.U;
+    using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu;
+    using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.SubTools;
     using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
-    using TrafficManager.UI.Helpers;
-    using TrafficManager.UI.MainMenu.OSD;
-    using TrafficManager.Lifecycle;
-    using static TrafficManager.Util.Shortcuts;
     using static TrafficManager.Util.SegmentTraverser;
+    using static TrafficManager.Util.Shortcuts;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -44,8 +38,13 @@ namespace TrafficManager.UI {
 
         private NetTool netTool_;
 
+        private CursorInfo nopeCursor_;
+
         /// <summary>Maximum error of HitPos field.</summary>
         internal const float MAX_HIT_ERROR = 2.5f;
+
+        /// <summary>Maximum detection radius of segment raycast hit position.</summary>
+        internal const float NODE_DETECTION_RADIUS = 15f;
 
         internal static ushort HoveredNodeId;
 
@@ -98,6 +97,11 @@ namespace TrafficManager.UI {
 
         protected override void OnDestroy() {
             Log.Info("TrafficManagerTool.OnDestroy() called");
+            if (nopeCursor_) {
+                Destroy(nopeCursor_);
+                nopeCursor_ = null;
+            }
+
             base.OnDestroy();
         }
 
@@ -214,7 +218,10 @@ namespace TrafficManager.UI {
         }
 
         protected override void Awake() {
-            Log._Debug($"TrafficLightTool: Awake {GetHashCode()}");
+            Log._Debug($"TrafficManagerTool: Awake {GetHashCode()}");
+            nopeCursor_ = ScriptableObject.CreateInstance<CursorInfo>();
+            nopeCursor_.m_texture = UIView.GetAView().defaultAtlas["Niet"]?.texture;
+            nopeCursor_.m_hotspot = new Vector2(45, 45);
             base.Awake();
         }
 
@@ -243,7 +250,8 @@ namespace TrafficManager.UI {
                 SimulationManager.instance.m_ThreadingWrapper.QueueMainThread(
                     RoadSelectionPanels.RoadWorldInfoPanel.Hide);
 
-                if (RoadSelectionPanels.Root != null) { // this can be null on mod reload
+                if (RoadSelectionPanels.Root != null) {
+                    // this can be null on mod reload
                     RoadSelectionPanels.Root.Function = RoadSelectionPanels.FunctionModes.None;
                 }
             }
@@ -332,12 +340,21 @@ namespace TrafficManager.UI {
 
         protected override void OnDisable() {
             // If TMPE was disabled by switching to another tool, hide main menue panel.
-            if (ModUI.Instance != null && ModUI.Instance.IsVisible())
+            if (ModUI.Instance != null && ModUI.Instance.IsVisible()) {
                 ModUI.Instance.CloseMainMenu();
+            }
 
-            //hide speed limit overlay if necessary
+            // revert to normal mode if underground
+            if (Highlight.IsUndergroundMode) {
+                InfoManager.instance.SetCurrentMode(
+                    mode: InfoManager.InfoMode.None,
+                    InfoManager.SubInfoMode.Default);
+            }
+
+            // hide speed limit overlay if necessary
             SubTools.PrioritySigns.MassEditOverlay.Show =
                 RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+
             // no call to base method to disable base class behavior
         }
 
@@ -460,7 +477,7 @@ namespace TrafficManager.UI {
             // Log._Debug($"OnToolUpdate");
             if (Input.GetKeyUp(KeyCode.PageDown)) {
                 InfoManager.instance.SetCurrentMode(
-                    InfoManager.InfoMode.Traffic,
+                    InfoManager.InfoMode.Underground,
                     InfoManager.SubInfoMode.Default);
                 UIView.library.Hide("TrafficInfoViewPanel");
             } else if (Input.GetKeyUp(KeyCode.PageUp)) {
@@ -470,9 +487,17 @@ namespace TrafficManager.UI {
             }
 
             ToolCursor = null;
-            bool elementsHovered = DetermineHoveredElements();
+            bool elementsHovered =
+                DetermineHoveredElements(activeLegacySubTool_ is not LaneConnectorTool);
             if (activeLegacySubTool_ != null && NetTool != null && elementsHovered) {
                 ToolCursor = NetTool.m_upgradeCursor;
+
+                if (activeLegacySubTool_ is LaneConnectorTool lcs
+                    && HoveredNodeId != 0
+                    && !Highlight.IsNodeVisible(HoveredNodeId)
+                    && lcs.CanShowNopeCursor) {
+                    ToolCursor = nopeCursor_;
+                }
             }
 
             bool primaryMouseClicked = Input.GetMouseButtonDown(0);
@@ -681,9 +706,16 @@ namespace TrafficManager.UI {
             string key = Translation.TUTORIAL_KEY_PREFIX + localeKey;
 
             if (GlobalConfig.Instance.Main.DisplayedTutorialMessages.Contains(localeKey)) {
-                tutorialPanel.Refresh(key, "ToolbarIconZoomOutGlobe", string.Empty);
+                tutorialPanel.Refresh(
+                    localeID: key,
+                    icon: "ToolbarIconZoomOutGlobe",
+                    sprite: string.Empty);
             } else {
-                tutorialPanel.Show(key, "ToolbarIconZoomOutGlobe", string.Empty, 0f);
+                tutorialPanel.Show(
+                    localeID: key,
+                    icon: "ToolbarIconZoomOutGlobe",
+                    sprite: string.Empty,
+                    timeout: 0f);
                 GlobalConfig.Instance.Main.AddDisplayedTutorialMessage(localeKey);
                 GlobalConfig.WriteConfig();
             }
@@ -691,7 +723,7 @@ namespace TrafficManager.UI {
 
         private static Vector3 prevMousePosition;
 
-        private bool DetermineHoveredElements() {
+        private bool DetermineHoveredElements(bool raycastSegment = true) {
             if (prevMousePosition == m_mousePosition) {
                 // if mouse ray is not changing use cached results.
                 // the assumption is that its practically impossible to change mouse ray
@@ -754,6 +786,7 @@ namespace TrafficManager.UI {
                     }
                 }
 
+                ushort segmentId = 0;
                 // find currently hovered segment
                 var segmentInput = new RaycastInput(m_mouseRay, m_mouseRayLength) {
                     m_netService = {
@@ -767,7 +800,7 @@ namespace TrafficManager.UI {
                 // segmentInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
 
                 if (RayCast(segmentInput, out RaycastOutput segmentOutput)) {
-                    HoveredSegmentId = segmentOutput.m_netSegment;
+                    segmentId = segmentOutput.m_netSegment;
                 } else {
                     // find train segments
                     segmentInput.m_netService.m_itemLayers =
@@ -780,7 +813,7 @@ namespace TrafficManager.UI {
                     // segmentInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
 
                     if (RayCast(segmentInput, out segmentOutput)) {
-                        HoveredSegmentId = segmentOutput.m_netSegment;
+                        segmentId = segmentOutput.m_netSegment;
                     } else {
                         // find metro segments
                         segmentInput.m_netService.m_itemLayers =
@@ -792,37 +825,37 @@ namespace TrafficManager.UI {
                         // segmentInput.m_ignoreSegmentFlags = NetSegment.Flags.Untouchable;
 
                         if (RayCast(segmentInput, out segmentOutput)) {
-                            HoveredSegmentId = segmentOutput.m_netSegment;
+                            segmentId = segmentOutput.m_netSegment;
                         }
                     }
                 }
 
-                if (HoveredSegmentId != 0) {
+                if (segmentId != 0 && raycastSegment) {
                     HitPos = segmentOutput.m_hitPos;
+                    HoveredSegmentId = segmentId;
                 }
 
-                if (HoveredNodeId <= 0 && HoveredSegmentId > 0) {
+                if (HoveredNodeId <= 0 && segmentId > 0) {
                     // alternative way to get a node hit: check distance to start and end nodes
                     // of the segment
                     ushort startNodeId = Singleton<NetManager>
-                                         .instance.m_segments.m_buffer[HoveredSegmentId]
-                                         .m_startNode;
+                                         .instance.m_segments.m_buffer[segmentId].m_startNode;
                     ushort endNodeId = Singleton<NetManager>
-                                       .instance.m_segments.m_buffer[HoveredSegmentId].m_endNode;
+                                       .instance.m_segments.m_buffer[segmentId].m_endNode;
 
                     NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
                     float startDist = (segmentOutput.m_hitPos - nodesBuffer[startNodeId]
                                            .m_position).magnitude;
                     float endDist = (segmentOutput.m_hitPos - nodesBuffer[endNodeId]
                                          .m_position).magnitude;
-                    if (startDist < endDist && startDist < 75f) {
+                    if (startDist < endDist && startDist < NODE_DETECTION_RADIUS) {
                         HoveredNodeId = startNodeId;
-                    } else if (endDist < startDist && endDist < 75f) {
+                    } else if (endDist < startDist && endDist < NODE_DETECTION_RADIUS) {
                         HoveredNodeId = endNodeId;
                     }
                 }
 
-                if (HoveredNodeId != 0 && HoveredSegmentId != 0) {
+                if (HoveredNodeId != 0 && HoveredSegmentId != 0 && raycastSegment) {
                     HoveredSegmentId = GetHoveredSegmentFromNode(segmentOutput.m_hitPos);
                 }
             }

@@ -145,7 +145,8 @@ namespace TrafficManager.Manager.Impl {
 
             if (flag &&
                 (!Services.NetService.IsNodeValid(nodeId)
-                || !Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Junction))) {
+                || !Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Junction)
+                || Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Untouchable))) {
 
                 reason = ToggleTrafficLightError.NoJunction;
 

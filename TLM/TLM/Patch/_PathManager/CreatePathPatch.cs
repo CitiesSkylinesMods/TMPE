@@ -12,6 +12,7 @@ namespace TrafficManager.Patch._PathManager {
     using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     [HarmonyPatch]
     [UsedImplicitly]

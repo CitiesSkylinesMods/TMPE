@@ -13,8 +13,8 @@ namespace TrafficManager.Util {
     [SuppressMessage("Performance", "HAA0302:Display class allocation to capture closure", Justification = "Not performance critical")]
     public static class VersionUtil {
         public const string BRANCH =
-#if LABS
-            "LABS";
+#if TEST
+            "TEST";
 #elif DEBUG
             "DEBUG";
 #else
@@ -29,10 +29,10 @@ namespace TrafficManager.Util {
         // we could alternatively use BuildConfig.APPLICATION_VERSION because const values are evaluated at compile time.
         // but I have decided not to do this because I don't want this to happen automatically with a rebuild if
         // CS updates. these values should be changed manaually so as to force us to acknowledge that they have changed.
-        public const uint EXPECTED_GAME_VERSION_U = 188997904u;
+        public const uint EXPECTED_GAME_VERSION_U = 188868624U;
 
         // see comments for EXPECTED_GAME_VERSION_U.
-        public static Version ExpectedGameVersion => new Version(1, 13, 1, 1);
+        public static Version ExpectedGameVersion => new Version(1, 13, 3, 9);
 
         public static string ExpectedGameVersionString => BuildConfig.VersionToString(EXPECTED_GAME_VERSION_U, false);
 

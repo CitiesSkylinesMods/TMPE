@@ -9,6 +9,7 @@ namespace TrafficManager.Lifecycle {
 
     public class TrafficManagerMod : ILoadingExtension, IUserMod {
         public static string ModName => $"TM:PE {VersionUtil.VersionString} {VersionUtil.BRANCH}";
+
         public string Name => ModName;
 
         public string Description => "Manage your city's traffic";

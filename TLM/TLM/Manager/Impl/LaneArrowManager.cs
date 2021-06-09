@@ -138,6 +138,7 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        /// <summary>updates all road segments. Call this when policy changes.</summary>
         /// <param name="dedicatedTurningLanes">
         /// Narrow down updated roads to those that can have dedicated turning lanes.
         /// </param>

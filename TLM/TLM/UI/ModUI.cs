@@ -1,11 +1,11 @@
 namespace TrafficManager.UI {
+    using System;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using System;
+    using TrafficManager.Lifecycle;
     using TrafficManager.UI.MainMenu;
     using TrafficManager.Util;
     using UnityEngine;
-    using TrafficManager.Lifecycle;
 
     /// <summary>
     /// Globally available UI manager class which contains the main menu button and the panel.

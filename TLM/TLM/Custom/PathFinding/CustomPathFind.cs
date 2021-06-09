@@ -837,7 +837,7 @@ namespace TrafficManager.Custom.PathFinding {
                             PathUnits.m_buffer[currentPathUnitId].m_laneTypes =
                                 (byte)finalBufferItem.LanesUsed;
                             PathUnits.m_buffer[currentPathUnitId].m_vehicleTypes =
-                                (ushort)finalBufferItem.VehiclesUsed;
+                                (uint)finalBufferItem.VehiclesUsed;
 
                             sumOfPositionCounts += currentItemPositionCount;
                             Singleton<PathManager>.instance.m_pathUnitCount =
@@ -1567,7 +1567,8 @@ namespace TrafficManager.Custom.PathFinding {
                 }
 
                 ushort nextSegmentId;
-                if ((vehicleTypes_ & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
+                if (((laneTypes_ & NetInfo.LaneType.CargoVehicle) == NetInfo.LaneType.None || BelongsToFerryNetwork(ref nextNode)) &&
+                    (vehicleTypes_ & VehicleInfo.VehicleType.Ferry) != VehicleInfo.VehicleType.None) {
                     // ferry (/ monorail)
                     if (isLogEnabled) {
                         DebugLog(
@@ -4180,6 +4181,32 @@ namespace TrafficManager.Custom.PathFinding {
             }
         }
 #endif
+
+        /// <summary>
+        /// Checks if node belongs to ferry path network
+        /// </summary>
+        /// <param name="node">tested node</param>
+        /// <returns>true if all valid segments allows ferries, otherwise false</returns>
+        private static bool BelongsToFerryNetwork(ref NetNode node) {
+            for (var index = 0; index < 8; ++index) {
+                var segment = node.GetSegment(index);
+                if (segment == 0) {
+                    continue;
+                }
+
+                var segmentInfo = NetManager.instance.m_segments.m_buffer[segment].Info;
+                if (segmentInfo == null) {
+                    continue;
+                }
+
+                if ((segmentInfo.m_vehicleTypes & VehicleInfo.VehicleType.Ferry) ==
+                    VehicleInfo.VehicleType.None) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         private void PathFindThread() {
             while (true) {

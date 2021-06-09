@@ -1485,8 +1485,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
                 Vector3 diff = nodePos - InGameUtil.Instance.CachedCameraTransform.position;
                 float zoom = 1.0f / diff.magnitude * 100f * U.UIScaler.GetScale();
-                var roadUiTextures = TMPELifecycle.Instance.Textures.RoadUI;
-                var tlTextures = TMPELifecycle.Instance.Textures.TrafficLight;
+                var roadUiTextures = RoadUITextures.Instance;
+                var tlTextures = TrafficLightTextures.Instance;
                 ref NetNode node = ref nodeId.ToNode();
 
                 for (int i = 0; i < 8; ++i) {

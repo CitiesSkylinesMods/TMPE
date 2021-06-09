@@ -15,6 +15,7 @@ namespace TrafficManager.Manager.Impl {
     using static TrafficManager.Util.Shortcuts;
     using static CSUtil.Commons.TernaryBoolUtil;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class JunctionRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -187,6 +188,10 @@ namespace TrafficManager.Manager.Impl {
             UpdateDefaults(ref seg);
         }
 
+        /// <summary>
+        /// called when deserailizing or when policy changes.
+        /// TODO [issue #1116]: publish segment changes? if so it should be done only when policy changes not when deserializing.
+        /// </summary>
         public void UpdateAllDefaults() {
             IExtSegmentManager extSegmentManager = Constants.ManagerFactory.ExtSegmentManager;
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
@@ -195,7 +200,6 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 UpdateDefaults(ref extSegmentManager.ExtSegments[segmentId]);
-                netService.PublishSegmentChanges(segmentId);
             }
         }
 

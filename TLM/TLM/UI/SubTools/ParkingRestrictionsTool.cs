@@ -15,6 +15,7 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework.UI;
     using TrafficManager.Lifecycle;
     using TrafficManager.UI.MainMenu.OSD;
+    using TrafficManager.Util.Extensions;
 
     public class ParkingRestrictionsTool
         : LegacySubTool,

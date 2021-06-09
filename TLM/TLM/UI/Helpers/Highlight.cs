@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager.UI {
     using ColossalFramework;
     using ColossalFramework.Math;
+    using TrafficManager.UI.SubTools.TimedTrafficLights;
     using TrafficManager.Util;
     using UnityEngine;
 
@@ -158,13 +159,61 @@
             return sumHalfWidth / count;
         }
 
+        public static bool IsUndergroundMode =>
+            InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
+
+        public static bool IsNodeVisible(ushort node) {
+            return node.IsUndergroundNode() == IsUndergroundMode;
+        }
+
+        //--- Use DrawNodeCircle with color instead of warning, and call tool.GetToolColor to get the color
+        // public static void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
+        //                                   ushort nodeId,
+        //                                   bool warning = false,
+        //                                   bool alpha = false,
+        //                                   bool overrideRenderLimits = false) {
+        //     DrawNodeCircle(
+        //         cameraInfo: cameraInfo,
+        //         nodeId: nodeId,
+        //         color: tool.GetToolColor(warning: warning, error: false),
+        //         alpha: alpha,
+        //         overrideRenderLimits: overrideRenderLimits);
+        // }
+
         public static void DrawNodeCircle(RenderManager.CameraInfo cameraInfo,
                                           ushort nodeId,
                                           Color color,
-                                          bool alpha = false) {
+                                          bool alpha = false,
+                                          bool overrideRenderLimits = false) {
             float r = CalculateNodeRadius(nodeId);
             Vector3 pos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
-            DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha);
+            bool renderLimits = TerrainManager.instance.SampleDetailHeightSmooth(pos) > pos.y;
+            DrawOverlayCircle(
+                cameraInfo,
+                color,
+                pos,
+                width: r * 2,
+                alpha,
+                renderLimits: renderLimits || overrideRenderLimits);
+        }
+
+        private static void DrawOverlayCircle(RenderManager.CameraInfo cameraInfo,
+                                              Color color,
+                                              Vector3 position,
+                                              float width,
+                                              bool alpha,
+                                              bool renderLimits = false) {
+            float overdrawHeight = renderLimits ? 0f : 5f;
+            Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
+            Singleton<RenderManager>.instance.OverlayEffect.DrawCircle(
+                cameraInfo,
+                color,
+                position,
+                size: width,
+                minY: position.y - overdrawHeight,
+                maxY: position.y + overdrawHeight,
+                renderLimits,
+                alpha);
         }
 
         /// <summary>
@@ -173,25 +222,20 @@
         /// <param name="segmentId"></param>
         /// <param name="cut">The lenght of the highlight [0~1] </param>
         /// <param name="bStartNode">Determines the direction of the half sausage.</param>
-        // TODO: move to UI.Helpers (Highlight)
         public static void DrawCutSegmentEnd(RenderManager.CameraInfo cameraInfo,
-                                             ushort segmentId,
-                                             float cut,
-                                             bool bStartNode,
-                                             Color color,
-                                             bool alpha = false) {
-            if (segmentId == 0) {
+                                      ushort segmentId,
+                                      float cut,
+                                      bool bStartNode,
+                                      Color color,
+                                      bool alpha = false) {
+            if( segmentId == 0) {
                 return;
             }
-
-            ref NetSegment segment =
-                ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             float width = segment.Info.m_halfWidth;
 
             NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-
-            bool IsMiddle(ushort nodeId) =>
-                (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
+            bool IsMiddle(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
 
             Bezier3 bezier;
             bezier.a = GetNodePos(segment.m_startNode);
@@ -215,16 +259,16 @@
 
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
-                cameraInfo,
-                color,
-                bezier,
+                cameraInfo: cameraInfo,
+                color: color,
+                bezier: bezier,
                 size: width * 2f,
                 cutStart: bStartNode ? 0 : width,
                 cutEnd: bStartNode ? width : 0,
                 minY: -1f,
                 maxY: 1280f,
                 renderLimits: false,
-                alpha);
+                alphaBlend: alpha);
         }
 
         /// <summary>

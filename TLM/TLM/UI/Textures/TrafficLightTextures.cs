@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.Textures {
+    using TrafficManager.Lifecycle;
     using TrafficManager.Util;
     using UnityEngine;
     using static TextureResources;
@@ -7,6 +8,8 @@ namespace TrafficManager.UI.Textures {
     /// Textures for UI controlling the traffic lights
     /// </summary>
     public class TrafficLightTextures {
+        public static TrafficLightTextures Instance => TMPELifecycle.Instance.Textures.TrafficLight;
+
         public readonly Texture2D RedLight;
         public readonly Texture2D RedLightForwardLeft;
         public readonly Texture2D RedLightForwardRight;
@@ -34,13 +37,13 @@ namespace TrafficManager.UI.Textures {
         //--------------------------
         // Timed TL Editor
         //--------------------------
-        public readonly Texture2D LightMode;
-        public readonly Texture2D LightCounter;
+        public Texture2D LightMode;
+        public Texture2D LightCounter;
         public readonly Texture2D ClockPlay;
         public readonly Texture2D ClockPause;
         public readonly Texture2D ClockTest;
-        public readonly Texture2D PedestrianModeAutomatic;
-        public readonly Texture2D PedestrianModeManual;
+        public Texture2D PedestrianModeAutomatic;
+        public Texture2D PedestrianModeManual;
 
         //--------------------------
         // Toggle TL Tool
@@ -92,25 +95,7 @@ namespace TrafficManager.UI.Textures {
             //--------------------------
             // Timed TL Editor
             //--------------------------
-            // light mode
-            IntVector2 tlModeSize = new IntVector2(103, 95);
-
-            LightMode = LoadDllResource(
-                Translation.GetTranslatedFileName("TrafficLights.light_mode.png"),
-                tlModeSize);
-            LightCounter = LoadDllResource(
-                Translation.GetTranslatedFileName("TrafficLights.light_counter.png"),
-                tlModeSize);
-
-            // pedestrian mode
-            IntVector2 pedModeSize = new IntVector2(73, 70);
-            
-            PedestrianModeAutomatic = LoadDllResource(
-                Translation.GetTranslatedFileName("TrafficLights.pedestrian_mode_1.png"),
-                pedModeSize);
-            PedestrianModeManual = LoadDllResource(
-                Translation.GetTranslatedFileName("TrafficLights.pedestrian_mode_2.png"),
-                pedModeSize);
+            LoadTexturesWithTranslation();
 
             // timer
             IntVector2 timerSize = new IntVector2(512);
@@ -126,6 +111,36 @@ namespace TrafficManager.UI.Textures {
             TrafficLightEnabled = LoadDllResource("TrafficLights.IconJunctionTrafficLights.png", toggleSize);
             TrafficLightEnabledTimed = LoadDllResource("TrafficLights.IconJunctionTimedTL.png", toggleSize);
             TrafficLightDisabled = LoadDllResource("TrafficLights.IconJunctionNoTrafficLights.png", toggleSize);
+        }
+
+        public void ReloadTexturesWithTranslation() {
+            if (LightMode) UnityEngine.GameObject.Destroy(LightMode);
+            if (LightCounter) UnityEngine.GameObject.Destroy(LightCounter);
+            if (PedestrianModeAutomatic) UnityEngine.GameObject.Destroy(PedestrianModeAutomatic);
+            if (PedestrianModeManual) UnityEngine.GameObject.Destroy(PedestrianModeManual);
+            LoadTexturesWithTranslation();
+        }
+
+        private void LoadTexturesWithTranslation() {
+            // light mode
+            IntVector2 tlModeSize = new IntVector2(103, 95);
+
+            LightMode = LoadDllResource(
+                Translation.GetTranslatedFileName("TrafficLights.light_mode.png"),
+                tlModeSize);
+            LightCounter = LoadDllResource(
+                Translation.GetTranslatedFileName("TrafficLights.light_counter.png"),
+                tlModeSize);
+
+            // pedestrian mode
+            IntVector2 pedModeSize = new IntVector2(73, 70);
+
+            PedestrianModeAutomatic = LoadDllResource(
+                Translation.GetTranslatedFileName("TrafficLights.pedestrian_mode_1.png"),
+                pedModeSize);
+            PedestrianModeManual = LoadDllResource(
+                Translation.GetTranslatedFileName("TrafficLights.pedestrian_mode_2.png"),
+                pedModeSize);
         }
     }
 }
