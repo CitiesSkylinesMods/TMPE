@@ -4,6 +4,7 @@ namespace TrafficManager.Patch._RoadBaseAI {
     using JetBrains.Annotations;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.Util.Extensions;
 
     [HarmonyPatch(typeof(RoadBaseAI), "UpdateNode")]
     [UsedImplicitly]

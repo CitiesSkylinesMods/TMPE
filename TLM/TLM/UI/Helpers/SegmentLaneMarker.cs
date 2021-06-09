@@ -8,6 +8,9 @@ namespace TrafficManager.UI.Helpers {
     internal class SegmentLaneMarker {
         internal SegmentLaneMarker(Bezier3 bezier) {
             Bezier = bezier;
+            IsUnderground = CheckIsUnderground(Bezier.a) ||
+                            CheckIsUnderground(Bezier.d);
+            CalculateBounds();
         }
 
         internal Bezier3 Bezier;
@@ -20,6 +23,8 @@ namespace TrafficManager.UI.Helpers {
         /// </summary>
         private float prev_H;
 
+        public bool IsUnderground { get; private set; }
+
         /// <summary>
         ///  Intersects mouse ray with lane bounds.
         /// </summary>
@@ -28,9 +33,7 @@ namespace TrafficManager.UI.Helpers {
         /// <param name="hitH">vertical raycast hit position.</param>
         internal bool IntersectRay() {
             Ray mouseRay = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
-            float hitH = TrafficManagerTool.GetAccurateHitHeight();
 
-            CalculateBounds(hitH);
             foreach (Bounds bounds in bounds) {
                 if (bounds.IntersectRay(mouseRay))
                     return true;
@@ -40,48 +43,19 @@ namespace TrafficManager.UI.Helpers {
         }
 
         /// <summary>
+        /// Forces render height.
+        /// </summary>
+        /// <param name="height">New height</param>
+        internal void ForceBezierHeight(float height) {
+            Bezier = Bezier.ForceHeight(height);
+        }
+
+        /// <summary>
         /// Initializes/recalculates bezier bounds.
         /// </summary>
         /// <param name="hitH">vertical raycast hit position.</param>
-        private void CalculateBounds(float hitH) {
-            // maximum vertical postion of the bezier.
-            float maxH = Mathf.Max(Bezier.a.y, Bezier.d.y);
-
-            float mouseH = ModUI.GetTrafficManagerTool(false).MousePosition.y;
-
-            if ((hitH == prev_H || hitH == maxH || prev_H == mouseH) && bounds != null) {
-                // use cached results if mouse has not moved or hitH is ignored.
-                return;
-            }
-
+        private void CalculateBounds() {
             Bezier3 bezier0 = Bezier;
-            if (hitH < mouseH - TrafficManagerTool.MAX_HIT_ERROR) {
-                // For Metros use projection on the terrain.
-                bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = mouseH;
-                prev_H = mouseH;
-            } else if (hitH > maxH + TrafficManagerTool.MAX_HIT_ERROR) {
-                // if marker is projected on another road plane then modify its height
-                bezier0.a.y = bezier0.b.y = bezier0.c.y = bezier0.d.y = hitH;
-                prev_H = hitH;
-            } else {
-                // ignore hitH
-                prev_H = maxH;
-            }
-
-            float angle = Vector3.Angle(bezier0.a, bezier0.b);
-            if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
-                angle = Vector3.Angle(bezier0.b, bezier0.c);
-                if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
-                    angle = Vector3.Angle(bezier0.c, bezier0.d);
-                    if (Mathf.Approximately(angle, 0f) || Mathf.Approximately(angle, 180f)) {
-                        // linear bezier
-                        Bounds bounds = bezier0.GetBounds();
-                        bounds.Expand(0.4f);
-                        this.bounds = new Bounds[] { bounds };
-                        return;
-                    }
-                }
-            }
 
             // split bezier in 10 parts to correctly raycast curves
             int n = 10;
@@ -98,10 +72,11 @@ namespace TrafficManager.UI.Helpers {
         /// <summary>
         /// Renders lane overlay.
         /// </summary>
-        internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false) {
+        internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool enlarge = false, bool renderLimits = false) {
             float minH = Mathf.Min(Bezier.a.y, Bezier.d.y);
             float maxH = Mathf.Max(Bezier.a.y, Bezier.d.y);
 
+            float overdrawHeight = IsUnderground || renderLimits ? 0f : 5f;
             ColossalFramework.Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             RenderManager.instance.OverlayEffect.DrawBezier(
                 cameraInfo,
@@ -110,10 +85,16 @@ namespace TrafficManager.UI.Helpers {
                 enlarge ? Size * 1.41f : Size,
                 0,
                 0,
-                minH - 100f,
-                maxH + 100f,
-                true,
+                minH - overdrawHeight,
+                maxH + overdrawHeight,
+                IsUnderground || renderLimits,
                 false);
+        }
+
+        private bool CheckIsUnderground(Vector3 position) {
+            float maxY = position.y;
+            float sampledHeight = TerrainManager.instance.SampleDetailHeightSmooth(position);
+            return sampledHeight > maxY;
         }
     }
 }

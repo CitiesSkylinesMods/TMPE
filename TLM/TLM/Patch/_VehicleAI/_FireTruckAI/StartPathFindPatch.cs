@@ -6,6 +6,7 @@ namespace TrafficManager.Patch._VehicleAI._FireTruckAI {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using ColossalFramework;
+    using TrafficManager.Util.Extensions;
 
     [HarmonyPatch]
     public class StartPathFindPatch {
