@@ -237,6 +237,8 @@ namespace TrafficManager.Manager.Impl {
                     RecalculateLaneEndRoutingData(segmentId, laneIndex, laneId, false);
                     return true;
                 });
+
+            API.Notifier.OnSegmentNodesMofied(segmentId, this);
         }
 
         protected void ResetIncomingHighwayLaneArrows(ushort segmentId) {

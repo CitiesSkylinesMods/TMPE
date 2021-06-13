@@ -107,6 +107,7 @@
     <Compile Include="Manager\IVehicleRestrictionsManager.cs" />
     <Compile Include="Manager\IExtVehicleManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Notifier.cs" />
     <Compile Include="TrafficLight\Data\TrafficLightSimulation.cs" />
     <Compile Include="TrafficLight\ICustomSegmentLight.cs" />
     <Compile Include="TrafficLight\ICustomSegmentLights.cs" />

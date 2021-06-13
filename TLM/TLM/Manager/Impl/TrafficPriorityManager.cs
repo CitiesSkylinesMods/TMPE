@@ -251,8 +251,8 @@ namespace TrafficManager.Manager.Impl {
                 type = PriorityType.None;
             }
 
+            ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
             if (type != PriorityType.None) {
-                ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
                 TrafficLightManager.Instance.RemoveTrafficLight(nodeId, ref nodeId.ToNode());
             }
 
@@ -269,6 +269,7 @@ namespace TrafficManager.Manager.Impl {
                     $"startNode={startNode}, type={type}, result={ret}, reason={reason}");
             }
 
+            API.Notifier.OnNodeModified(nodeId, this);
             return ret;
         }
 
@@ -328,6 +329,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             SegmentEndManager.Instance.UpdateSegmentEnd(segmentId, startNode);
+            API.Notifier.OnNodeModified(segmentId.ToSegment().GetNode(startNode), this);
         }
 
         public PriorityType GetPrioritySign(ushort segmentId, bool startNode) {

@@ -285,6 +285,7 @@ namespace TrafficManager.Manager.Impl {
                     endFlags.defaultPedestrianCrossingAllowed);
             }
 #endif
+            API.Notifier.OnNodeModified(segEnd.nodeId, this);
         }
 
         public bool IsUturnAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
@@ -998,6 +999,8 @@ namespace TrafficManager.Manager.Impl {
                     Services.NetService.PublishSegmentChanges(segmentId);
                 }
             }
+
+            API.Notifier.OnNodeModified(segmentId.ToSegment().GetNode(startNode), this);
         }
 
         public override void OnLevelUnloading() {

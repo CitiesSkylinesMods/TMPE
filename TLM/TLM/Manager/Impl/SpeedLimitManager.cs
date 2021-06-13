@@ -356,6 +356,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 Flags.SetLaneSpeedLimit(laneId, GetCustomSpeedLimit(laneId));
+                API.Notifier.OnSegmentModified(segmentId, this);
             }
         }
 
@@ -569,9 +570,11 @@ namespace TrafficManager.Manager.Impl {
 
             if (speedLimit != null) {
                 Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
-            } else {
+            }
+            else {
                 Flags.RemoveLaneSpeedLimit(laneId);
             }
+            API.Notifier.OnSegmentModified(segmentId, this);
             return true;
         }
 
@@ -642,7 +645,8 @@ namespace TrafficManager.Manager.Impl {
                         $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
                         $"to {speedLimit * Constants.SPEED_TO_KMPH}");
                     Flags.SetLaneSpeedLimit(curLaneId, speedLimit);
-                } else {
+                }
+                else {
                     Log._Debug(
                         $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
                         $"to default");
@@ -654,6 +658,7 @@ namespace TrafficManager.Manager.Impl {
                 laneIndex++;
             }
 
+            API.Notifier.OnSegmentModified(segmentId, this);
             return true;
         }
 

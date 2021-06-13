@@ -30,6 +30,8 @@ namespace TrafficManager.Lifecycle {
             private set;
         }
 
+        public IDisposable GeometryNotifierDisposable;
+
         /// <summary>TMPE is in the middle of deserializing data.</summary>
         public bool Deserializing { get; set; }
 
@@ -215,6 +217,8 @@ namespace TrafficManager.Lifecycle {
                     manager.OnLevelLoading();
                 }
 
+                GeometryNotifierDisposable = GeometryManager.Instance.Subscribe(new GeometryNotifier());
+                API.Notifier.OnLevelLoaded();
                 Log.Info("OnLevelLoaded complete.");
             } catch (Exception ex) {
                 ex.LogException(true);
@@ -223,6 +227,9 @@ namespace TrafficManager.Lifecycle {
 
         internal void Unload() {
             try {
+                GeometryNotifierDisposable?.Dispose();
+                GeometryNotifierDisposable = null;
+
                 CustomPathManager._instance?.OnLevelUnloading();
                 foreach (ICustomManager manager in RegisteredManagers.AsEnumerable().Reverse()) {
                     try {
