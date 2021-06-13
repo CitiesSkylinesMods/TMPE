@@ -5,6 +5,7 @@ namespace TrafficManager.Util {
     using System.Reflection;
     using System.Diagnostics;
     using ColossalFramework;
+    using ColossalFramework.Math;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
@@ -71,6 +72,8 @@ namespace TrafficManager.Util {
 
         internal static ref Building ToBuilding(this ushort buildingId) => ref _buildingBuffer[buildingId];
 
+        internal static bool IsUndergroundNode(this ushort node) => (_nodeBuffer[node].m_flags & NetNode.Flags.Underground) != NetNode.Flags.None;
+
         internal static NetInfo.Lane GetLaneInfo(ushort segmentId, int laneIndex) =>
             segmentId.ToSegment().Info.m_lanes[laneIndex];
 
@@ -113,7 +116,7 @@ namespace TrafficManager.Util {
         }
 #else
         internal static void LogAndWait(string m, ushort ID) {
-            
+
         }
 #endif
         internal static string CenterString(this string stringToCenter, int totalLength) {
@@ -206,5 +209,30 @@ namespace TrafficManager.Util {
         internal static ushort GetFarSegment(this ref NetSegment segment, ushort nodeId) =>
             LHT ? segment.GetRightSegment(nodeId) : segment.GetLeftSegment(nodeId);
         #endregion
+
+        /// <summary>
+        /// Creates copy of bezier at designated height
+        /// </summary>
+        /// <param name="bezier">source bezier</param>
+        /// <param name="height">height</param>
+        /// <returns></returns>
+        internal static Bezier3 ForceHeight(this Bezier3 bezier, float height) {
+            bezier.a.y = height;
+            bezier.b.y = height;
+            bezier.c.y = height;
+            bezier.d.y = height;
+            return bezier;
+        }
+
+        /// <summary>
+        /// Creates copy of Vector3 with new y
+        /// </summary>
+        /// <param name="vector">source vector</param>
+        /// <param name="newY">new y value</param>
+        /// <returns></returns>
+        internal static Vector3 ChangeY(this Vector3 vector, float newY) {
+            vector.y = newY;
+            return vector;
+        }
     }
 }
