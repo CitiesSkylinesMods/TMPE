@@ -6,6 +6,7 @@ namespace TrafficManager.Patch._PathManager {
     using HarmonyLib;
     using JetBrains.Annotations;
     using System;
+    using System.ComponentModel.Design;
     using System.Reflection;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Custom.PathFinding;
@@ -39,23 +40,26 @@ namespace TrafficManager.Patch._PathManager {
             NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle,
             bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost)
         {
-            if (VehicleID == 0) {
-                Log.Error("unexpected VehcileID == 0. " +
-                    "StartPathFind() is not ptched or it failed to set VehicleID. " +
-                    "Falling back to Vanilla path find");
-                return true; // fall back to Vanilla path find.
+            PathCreationArgs args = default;
+            VehicleInfo info = null;
+            if (VehicleID != 0) {
+                // CreatePath called for customized AI
+                Vehicle[] vehicleBuffer = VehicleManager.instance.m_vehicles.m_buffer;
+                ref Vehicle vehicleData = ref vehicleBuffer[VehicleID];
+
+                args.vehicleId = VehicleID;
+                args.extPathType = ExtPathType;
+                args.extVehicleType = ExtVehicleType;
+                args.spawned = vehicleData.m_flags.IsFlagSet(Vehicle.Flags.Spawned);
+                args.skipQueue = skipQueue;
+
+                if (vehicleData.Info.m_vehicleAI is ShipAI)
+                    args.skipQueue = false;
+
+            } else {
+                // CreatePath called for vanilla AI
+                args.skipQueue = skipQueue;
             }
-
-            var vehicleBuffer = VehicleManager.instance.m_vehicles.m_buffer;
-            ref Vehicle vehicleData = ref vehicleBuffer[VehicleID];
-            var info = vehicleData.Info;
-            var ai = info.m_vehicleAI;
-
-            PathCreationArgs args;
-            args.vehicleId = VehicleID;
-            args.extPathType = ExtPathType;
-            args.extVehicleType = ExtVehicleType;
-            args.spawned = vehicleData.m_flags.IsFlagSet(Vehicle.Flags.Spawned);
 
             // vanilla values
             args.buildIndex = buildIndex;
@@ -77,12 +81,8 @@ namespace TrafficManager.Patch._PathManager {
             args.endPosA = endPosA;
             args.endPosB = endPosB;
 
-            // overridden vanilla values:
-            args.skipQueue = args.spawned;
-            if (ai is ShipAI) args.skipQueue = false; // TODO [issue #952] why ShipAI should be different than others?
-
             __result = CustomPathManager._instance.CustomCreatePath(out unit, ref randomizer, args);
-            if (__result) {
+            if (__result && VehicleID != 0) {
 #if DEBUG
                 bool vehDebug = DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == VehicleID;
                 bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
@@ -95,7 +95,7 @@ namespace TrafficManager.Patch._PathManager {
                     () => $"CreatePathPatch.Prefix({args.vehicleId}): " +
                     $"Path-finding starts for vehicle {args.vehicleId}, path={path}, " +
                     $"extVehicleType={ExtVehicleType}, startPosA.segment={startPosA.m_segment}, " +
-                    $"startPosA.lane={startPosA.m_lane}, info.m_vehicleType={info.m_vehicleType}, " +
+                    $"startPosA.lane={startPosA.m_lane}, info.m_vehicleType={info?.m_vehicleType}, " +
                     $"endPosA.segment={endPosA.m_segment}, endPosA.lane={endPosA.m_lane}");
             }
 
