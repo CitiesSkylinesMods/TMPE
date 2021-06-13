@@ -1,4 +1,4 @@
-\namespace TrafficManager.Util {
+namespace TrafficManager.Util {
     using ColossalFramework;
     using CSUtil.Commons;
     using GenericGameBridge.Service;
