@@ -217,6 +217,8 @@ namespace TrafficManager.Lifecycle {
                     manager.OnLevelLoading();
                 }
 
+                // must be subscribed last to notify other mods about TMPE changes
+                // after all TMPE rules are applied.
                 GeometryNotifierDisposable = GeometryManager.Instance.Subscribe(new GeometryNotifier());
                 API.Notifier.OnLevelLoaded();
                 Log.Info("OnLevelLoaded complete.");

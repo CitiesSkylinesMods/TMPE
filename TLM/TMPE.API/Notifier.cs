@@ -2,8 +2,6 @@ using System;
 
 namespace TrafficManager.API
 {
-    using TrafficManager.API.Manager;
-
     public class OnModifiedEventArgs
     {
         /// <summary>
