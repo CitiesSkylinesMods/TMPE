@@ -115,6 +115,11 @@ namespace TrafficManager.UI {
                 Destroy(nopeCursor_);
                 nopeCursor_ = null;
             }
+            foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
+                e.Value.OnDestroy();
+            }
+            legacySubTools_.Clear();
+            legacySubTools_ = null;
             base.OnDestroy();
         }
 
@@ -163,7 +168,7 @@ namespace TrafficManager.UI {
         internal const float MAX_ZOOM = 0.05f;
 
         internal static float GetWindowAlpha() {
-            return TransparencyToAlpha(GlobalConfig.Instance.Main.GuiTransparency);
+            return Mathf.Clamp(GlobalConfig.Instance.Main.GuiOpacity, 0f, 100f) / 100f;
         }
 
         internal static float GetHandleAlpha(bool hovered) {

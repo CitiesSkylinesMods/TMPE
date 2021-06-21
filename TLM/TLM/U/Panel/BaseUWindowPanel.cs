@@ -45,6 +45,13 @@ namespace TrafficManager.U.Panel {
         /// <summary>Called by UResizer for every control after it is to be 'resized'.</summary>
         public virtual void OnAfterResizerUpdate() { }
 
+        /// <summary>Called by UnityEngine when component gets destroyed</summary>
+        public override void OnDestroy() {
+            uiScaleUnbsubscriber_.Dispose();
+            uiTransparencyUnbsubscriber_.Dispose();
+            base.OnDestroy();
+        }
+
         /// <summary>Invoke rescaling handler, because possibly it has the new size now.</summary>
         /// <param name="previousResolution">Previous.</param>
         /// <param name="currentResolution">New.</param>

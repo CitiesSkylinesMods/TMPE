@@ -1,14 +1,17 @@
 namespace TrafficManager.UI {
     using System;
+    using API.Util;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.U;
     using UnityEngine;
 
     [Obsolete("Refactor tools to the new TrafficManagerSubTool class instead of LegacySubTool")]
-    public abstract class LegacySubTool {
+    public abstract class LegacySubTool : IObserver<ModUI.UIOpacityNotification> {
         public LegacySubTool(TrafficManagerTool mainTool) {
             MainTool = mainTool;
+            uiTransparencyUnbsubscriber_ = ModUI.Instance.uiOpacityObservable.Subscribe(this);
         }
 
         protected TrafficManagerTool MainTool { get; }
@@ -91,6 +94,8 @@ namespace TrafficManager.UI {
 
         private GUIStyle borderlessStyle_;
 
+        private readonly IDisposable uiTransparencyUnbsubscriber_;
+
         protected virtual Vector3 HitPos => TrafficManagerTool.HitPos;
 
         protected virtual Vector3 MousePosition => MainTool.MousePosition;
@@ -152,6 +157,21 @@ namespace TrafficManager.UI {
         public virtual void OnActivate() {
         }
 
+        public virtual void OnDestroy() {
+            if (borderlessTexture_) {
+                UnityEngine.Object.Destroy(borderlessTexture_);
+                borderlessTexture_ = null;
+            }
+            borderlessStyle_ = null;
+
+            if (windowTexture_) {
+                UnityEngine.Object.Destroy(windowTexture_);
+                windowTexture_ = null;
+            }
+            windowStyle_ = null;
+            uiTransparencyUnbsubscriber_.Dispose();
+        }
+
         /// <summary>
         /// Renders current situation overlay, called while the tool is not active to assist
         /// other tools.
@@ -181,6 +201,21 @@ namespace TrafficManager.UI {
             bool primaryMouseDown = Input.GetMouseButton(0);
             if (primaryMouseDown) {
                 GUI.DragWindow();
+            }
+        }
+
+        public void OnUpdate(ModUI.UIOpacityNotification subject) {
+            Texture2D windowTexture = windowTexture_;
+            windowTexture_ = null;
+            windowStyle_ = null; // rebuild style with new window texture
+            if (windowTexture) {
+                UnityEngine.Object.Destroy(windowTexture);
+            }
+            Texture2D borderlessTexture = borderlessTexture_;
+            borderlessTexture_ = null;
+            borderlessStyle_ = null; // rebuild style with new borderless texture
+            if (borderlessTexture) {
+                UnityEngine.Object.Destroy(borderlessTexture);
             }
         }
     }
