@@ -333,6 +333,7 @@ namespace TrafficManager.Util {
             bool preferLeft) {
             ArrowDirection preferDir = preferLeft ? ArrowDirection.Left : ArrowDirection.Right;
 
+            HashSet<ushort> hashSet = new HashSet<ushort>();
             List<ushort> sortedSegList = new List<ushort>();
 
             foreach (var nodeSegmentId in netService.GetNodeSegmentIds(headNodeId, ClockDirection.CounterClockwise)) {
@@ -342,9 +343,15 @@ namespace TrafficManager.Util {
                 if (segEndMan.GetDirection(segmentId, nodeSegmentId, headNodeId) == dir) {
                     for (int i = 0; i < sortedSegList.Count; ++i) {
                         if (segEndMan.GetDirection(nodeSegmentId, sortedSegList[i], headNodeId) == preferDir) {
+                            if (!hashSet.Add(nodeSegmentId)) {
+                                break;
+                            }
                             sortedSegList.Insert(i, nodeSegmentId);
                             continue;
                         }
+                    }
+                    if (!hashSet.Add(nodeSegmentId)) {
+                        break;
                     }
                     sortedSegList.Add(nodeSegmentId);
                 }
