@@ -93,7 +93,7 @@ namespace TrafficManager.State {
 
             _guiOpacitySlider = generalGroup.AddSlider(
                                         text: T("General.Slider:Window transparency") + ":",
-                                        min: 10,
+                                        min: 0,
                                         max: 100,
                                         step: 5,
                                         defaultValue: GlobalConfig.Instance.Main.GuiOpacity,
@@ -103,7 +103,7 @@ namespace TrafficManager.State {
             _overlayTransparencySlider = generalGroup.AddSlider(
                                              text: T("General.Slider:Overlay transparency") + ":",
                                              min: 0,
-                                             max: 90,
+                                             max: 100,
                                              step: 5,
                                              defaultValue: GlobalConfig.Instance.Main.OverlayTransparency,
                                              eventCallback: OnOverlayTransparencyChanged) as UISlider;
