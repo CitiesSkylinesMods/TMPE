@@ -22,12 +22,12 @@ namespace TrafficManager.API
 
     public static class Notifier
     {
-        public static event Action EventLevelLaoded;
+        public static event Action EventLevelLoaded;
 
         // TODO [issue #967]: notify TTL Start/Stop events
         public static event Action<OnModifiedEventArgs> EventModified;
 
-        public static void OnLevelLoaded() => EventLevelLaoded?.Invoke();
+        public static void OnLevelLoaded() => EventLevelLoaded?.Invoke();
 
         public static void OnModified(OnModifiedEventArgs args)
         {
