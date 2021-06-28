@@ -179,6 +179,8 @@
         /// </summary>
         /// <param name="netInfo">Used for setting default speed limit for all roads if this type.</param>
         /// <param name="laneInfo">Used for setting override for one lane.</param>
+        /// <param name="action">What limit setting to apply on click.</param>
+        /// <param name="target">Where to apply the limit setting.</param>
         private static void Apply(ushort segmentId,
                                   uint laneIndex,
                                   uint laneId,
@@ -191,10 +193,13 @@
                     SpeedLimitManager.Instance.SetLaneSpeedLimit(segmentId, laneIndex, laneInfo, laneId, action);
                     break;
                 case SetSpeedLimitTarget.LaneDefault:
-                    // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
-                    SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(
-                        info: netInfo,
-                        customSpeedLimit: action.Override.Value.GameUnits);
+                    if (action.Override.HasValue) {
+                        // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
+                        SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(
+                            info: netInfo,
+                            customSpeedLimit: action.Override.Value.GameUnits);
+                    }
+
                     // TODO: The speed limit manager only supports default speed limit overrides per road type, not per lane
                     break;
                 default:

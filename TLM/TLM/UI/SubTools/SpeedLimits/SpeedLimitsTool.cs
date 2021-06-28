@@ -22,20 +22,20 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private SetSpeedLimitAction selectedActionMph_ = SetSpeedLimitAction.ResetToDefault();
 
         /// <summary>
-        /// Currently selected speed limit on the limits palette.
+        /// Gets currently selected speed limit on the limits palette.
         /// units less than 0: invalid (not selected)
         /// units = 0: no limit.
         /// </summary>
         public SetSpeedLimitAction SelectedAction {
             get =>
                 GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
-                    ? selectedActionMph_
-                    : selectedActionKmph_;
+                    ? this.selectedActionMph_
+                    : this.selectedActionKmph_;
             private set {
                 if (GlobalConfig.Instance.Main.DisplaySpeedLimitsMph) {
-                    selectedActionMph_ = value;
+                    this.selectedActionMph_ = value;
                 } else {
-                    selectedActionKmph_ = value;
+                    this.selectedActionKmph_ = value;
                 }
             }
         }
@@ -49,7 +49,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Whether limits per lane are to be shown.</summary>
         /// <returns>Gets <see cref="showLimitsPerLane_"/> but also holding Ctrl would invert it.</returns>
-        private bool GetShowLimitsPerLane() => showLimitsPerLane_ ^ Shortcuts.ControlIsPressed;
+        private bool GetShowLimitsPerLane() => this.showLimitsPerLane_ ^ Shortcuts.ControlIsPressed;
 
         /// <summary>
         /// True if user is editing road defaults. False if user is editing speed limit overrides.
@@ -62,7 +62,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private SpeedLimitsOverlay.DrawArgs overlayDrawArgs_ = SpeedLimitsOverlay.DrawArgs.Create();
         private SpeedLimitsOverlay overlay_;
 
-        /// <summary>If exists, contains tool panel floating on the selected node.</summary>
+        /// <summary>Gets or sets the <see cref="ToolWindow"/> floating on the selected node.</summary>
         private ToolWindow Window { get; set; }
 
         /// <summary>
@@ -71,16 +71,16 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <param name="mainTool">Reference to the parent maintool.</param>
         public SpeedLimitsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
-            overlay_ = new SpeedLimitsOverlay(mainTool: this.MainTool);
+            this.overlay_ = new SpeedLimitsOverlay(mainTool: this.MainTool);
         }
 
         private static string T(string key) => Translation.SpeedLimits.Get(key);
 
         public override void ActivateTool() {
-            RecreateToolWindow();
+            this.RecreateToolWindow();
 
             // this.fsm_ = InitFiniteStateMachine();
-            MainTool.RequestOnscreenDisplayUpdate();
+            this.MainTool.RequestOnscreenDisplayUpdate();
         }
 
         /// <summary>Drop tool window if it existed, and create again.</summary>
@@ -98,22 +98,22 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             this.Window.SetPadding(UPadding.Const());
             this.Window.SetupControls(b, parentTool: this);
 
-            UpdateModeInfoLabel();
+            this.UpdateModeInfoLabel();
 
             //--------------------------------------------------
             // Click handlers for the window are located here
             // to have insight into SpeedLimits Tool internals
             //--------------------------------------------------
             this.Window.modeButtonsPanel_.SegmentLaneModeToggleButton.SetupToggleButton(
-                onClickFun: OnClickSegmentLaneModeButton,
+                onClickFun: this.OnClickSegmentLaneModeButton,
                 isActiveFun: _ => this.showLimitsPerLane_);
 
             this.Window.modeButtonsPanel_.EditDefaultsModeButton.SetupToggleButton(
-                onClickFun: OnClickEditDefaultsButton,
+                onClickFun: this.OnClickEditDefaultsButton,
                 isActiveFun: _ => this.editDefaultsMode_);
 
-            this.Window.modeButtonsPanel_.ToggleMphButton.uOnClick = OnClickToggleMphButton;
-            UpdateCursorTooltip();
+            this.Window.modeButtonsPanel_.ToggleMphButton.uOnClick = this.OnClickToggleMphButton;
+            this.UpdateCursorTooltip();
         }
 
         private void UpdateModeInfoLabel() {
@@ -134,21 +134,20 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         private void OnClickEditDefaultsButton(UIComponent component, UIMouseEventParameter evt) {
             this.editDefaultsMode_ = !this.editDefaultsMode_;
-            MainTool.RequestOnscreenDisplayUpdate();
+            this.MainTool.RequestOnscreenDisplayUpdate();
 
             this.UpdateCursorTooltip();
 
-            UpdateModeInfoLabel();
+            this.UpdateModeInfoLabel();
         }
 
         private void OnClickSegmentLaneModeButton(UIComponent component,
                                                   UIMouseEventParameter evt) {
             this.showLimitsPerLane_ = !this.showLimitsPerLane_;
-            MainTool.RequestOnscreenDisplayUpdate();
+            this.MainTool.RequestOnscreenDisplayUpdate();
 
             this.UpdateCursorTooltip();
-
-            UpdateModeInfoLabel();
+            this.UpdateModeInfoLabel();
         }
 
         private void UpdateCursorTooltip() {
@@ -162,35 +161,35 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Render overlay segments/lanes in non-GUI mode, as overlays.</summary>
         public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
-            CreateOverlayDrawArgs(interactive: true);
+            this.CreateOverlayDrawArgs(interactive: true);
 
             // Draw hovered lanes or segments
-            overlay_.RenderHelperGraphics(cameraInfo: cameraInfo, args: this.overlayDrawArgs_);
+            this.overlay_.RenderHelperGraphics(cameraInfo: cameraInfo, args: this.overlayDrawArgs_);
         }
 
         /// <summary>Render overlay speed limit signs in GUI mode.</summary>
         public override void RenderActiveToolOverlay_GUI() {
-            CreateOverlayDrawArgs(interactive: true);
+            this.CreateOverlayDrawArgs(interactive: true);
 
             // Draw the clickable speed limit signs
-            overlay_.ShowSigns_GUI(args: this.overlayDrawArgs_);
+            this.overlay_.ShowSigns_GUI(args: this.overlayDrawArgs_);
         }
 
         /// <summary>Copies important values for rendering the overlay into its args struct.</summary>
         /// <param name="interactive">True if icons will be clickable.</param>
         private void CreateOverlayDrawArgs(bool interactive) {
-            overlayDrawArgs_.ClearHovered();
+            this.overlayDrawArgs_.ClearHovered();
 
-            overlayDrawArgs_.UiWindowRects.Clear();
-            overlayDrawArgs_.UiWindowRects.Add(Window.GetScreenRectInGuiSpace());
-            overlayDrawArgs_.UiWindowRects.Add(ModUI.Instance.MainMenu.GetScreenRectInGuiSpace());
+            this.overlayDrawArgs_.UiWindowRects.Clear();
+            this.overlayDrawArgs_.UiWindowRects.Add(this.Window.GetScreenRectInGuiSpace());
+            this.overlayDrawArgs_.UiWindowRects.Add(ModUI.Instance.MainMenu.GetScreenRectInGuiSpace());
 
-            overlayDrawArgs_.Mouse = GetMouseForOverlay();
-            overlayDrawArgs_.InteractiveSigns = interactive;
-            overlayDrawArgs_.MultiSegmentMode = this.GetMultiSegmentMode();
-            overlayDrawArgs_.ShowLimitsPerLane = this.GetShowLimitsPerLane();
-            overlayDrawArgs_.ShowDefaultsMode = this.editDefaultsMode_;
-            overlayDrawArgs_.ShowOtherPerLaneModeTemporary = interactive && Shortcuts.AltIsPressed;
+            this.overlayDrawArgs_.Mouse = this.GetMouseForOverlay();
+            this.overlayDrawArgs_.InteractiveSigns = interactive;
+            this.overlayDrawArgs_.MultiSegmentMode = this.GetMultiSegmentMode();
+            this.overlayDrawArgs_.ShowLimitsPerLane = this.GetShowLimitsPerLane();
+            this.overlayDrawArgs_.ShowDefaultsMode = this.editDefaultsMode_;
+            this.overlayDrawArgs_.ShowOtherPerLaneModeTemporary = interactive && Shortcuts.AltIsPressed;
         }
 
         /// <summary>Create value of null (if mouse is over some essential UI window) or return
@@ -210,16 +209,15 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         /// <summary>Called in the GUI mode for GUI.DrawTexture.</summary>
-        /// <param name="cameraInfo">The camera.</param>
         public override void RenderGenericInfoOverlay_GUI() {
             if (!Options.speedLimitsOverlay && !MassEditOverlay.IsActive) {
                 return;
             }
 
-            CreateOverlayDrawArgs(interactive: false);
+            this.CreateOverlayDrawArgs(interactive: false);
 
             // Draw the NON-clickable speed limit signs
-            overlay_.ShowSigns_GUI(args: this.overlayDrawArgs_);
+            this.overlay_.ShowSigns_GUI(args: this.overlayDrawArgs_);
         }
 
         /// <inheritdoc/>
@@ -235,7 +233,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                                  ? SetSpeedLimitTarget.LaneDefault
                                                  : SetSpeedLimitTarget.LaneOverride;
 
-                foreach (var h in overlayDrawArgs_.HoveredLaneHandles) {
+                foreach (var h in this.overlayDrawArgs_.HoveredLaneHandles) {
                     // per lane
                     h.Click(
                         action: this.SelectedAction,
@@ -248,7 +246,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                                  ? SetSpeedLimitTarget.SegmentDefault
                                                  : SetSpeedLimitTarget.SegmentOverride;
 
-                foreach (var h in overlayDrawArgs_.HoveredSegmentHandles) {
+                foreach (var h in this.overlayDrawArgs_.HoveredSegmentHandles) {
                     h.Click(
                         action: this.SelectedAction,
                         multiSegmentMode: this.GetMultiSegmentMode(),
@@ -265,13 +263,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         /// <inheritdoc/>
-        public override void UpdateEveryFrame() { }
+        public override void UpdateEveryFrame() {
+        }
 
         /// <summary>Called when the tool must update onscreen keyboard/mouse hints.</summary>
         public void UpdateOnscreenDisplayPanel() {
-            //     t: "Hold [Alt] to see default speed limits temporarily",
-            //     t: "Hold [Ctrl] to see per lane limits temporarily",
-            //     t: "Hold [Shift] to modify entire road between two junctions",
+            // t: "Hold [Alt] to see default speed limits temporarily",
+            // t: "Hold [Ctrl] to see per lane limits temporarily",
+            // t: "Hold [Shift] to modify entire road between two junctions",
             string toggleDefaultStr =
                 this.editDefaultsMode_
                     ? T("SpeedLimits.Alt:See speed limits overrides temporarily")
@@ -311,7 +310,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             this.Window.cursorTooltip_.SetTooltip(action.ToString());
 
             // Deactivate all palette buttons and highlight one
-            Window.UpdatePaletteButtonsOnClick();
+            this.Window.UpdatePaletteButtonsOnClick();
         }
     } // end class
 }

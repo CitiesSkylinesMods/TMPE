@@ -1,5 +1,12 @@
 root=true
 
+[*]
+charset=utf-8
+end_of_line=crlf
+indent_style=space
+indent_size=4
+tab_width=8
+
 [*.cs]
 max_line_length=100
 insert_final_newline=true
@@ -46,13 +53,6 @@ dotnet_diagnostic.SA1637.severity = none
 dotnet_diagnostic.SA1638.severity = none
 dotnet_diagnostic.SA1640.severity = none
 dotnet_diagnostic.SA1652.severity = none
-
-[*]
-charset=utf-8
-end_of_line=crlf
-indent_style=space
-indent_size=4
-tab_width=8
 
 # Microsoft .NET properties
 csharp_new_line_before_else=false
@@ -108,7 +108,7 @@ resharper_wrap_before_first_type_parameter_constraint=true
 # ReSharper inspection severities
 resharper_sa1012_highlighting=none
 resharper_sa1101_highlighting=none
-resharper_sa1116_highlighting=hint
+resharper_sa1116_highlighting=none
 resharper_sa1118_highlighting=hint
 resharper_sa1305_highlighting=none
 resharper_sa1309_highlighting=hint

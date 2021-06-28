@@ -1,5 +1,4 @@
 ﻿namespace TrafficManager.State {
-    using System;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.UI;
@@ -30,10 +29,10 @@
         public readonly SpeedValue? Override;
 
         public override string ToString() {
-            switch (Type) {
+            switch (this.Type) {
                 case ActionType.SetOverride:
-                    return Override != null
-                               ? Override.Value.ToString(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph)
+                    return this.Override != null
+                               ? this.Override.Value.ToString(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph)
                                : string.Empty;
                 case ActionType.Unlimited: return Translation.SpeedLimits.Get("Unlimited");
                 case ActionType.ResetToDefault: return Translation.SpeedLimits.Get("Default");
