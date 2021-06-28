@@ -14,7 +14,7 @@
         /// <summary>Button width if it contains value less than 100 and is not selected in the palette.</summary>
         public const float DEFAULT_WIDTH = 40f;
 
-        /// <summary>Narrow width is used for speeds < 100.</summary>
+        /// <summary>Narrow width is used for speeds below 100.</summary>
         public const float DEFAULT_WIDTH_NARROW = 30f;
 
         /// <summary>Width when the button is active (a bit larger to fit the larger text).</summary>
@@ -36,7 +36,7 @@
 
             // Tell the parent to update all buttons this will unmark all inactive buttons and
             // mark one which is active. The call turns back here to this.UpdateSpeedlimitButton()
-            ParentTool.OnPaletteButtonClicked(this.AssignedAction);
+            this.ParentTool.OnPaletteButtonClicked(this.AssignedAction);
         }
 
         private bool IsSpecialSpeedValue() {
@@ -47,16 +47,16 @@
         /// <summary>If button active state changes, update visual to highlight it.</summary>
         public void UpdateSpeedlimitButton() {
             if (this.IsActive()) {
-                UpdateSpeedlimitButton_Active();
+                this.UpdateSpeedlimitButton_Active();
             } else {
-                UpdateSpeedlimitButton_Inactive();
+                this.UpdateSpeedlimitButton_Inactive();
             }
         }
 
         /// <summary>Active button has large text and is blue.</summary>
         public void UpdateSpeedlimitButton_Active() {
             // Special values (reset and default do not become larger)
-            if (IsSpecialSpeedValue()) {
+            if (this.IsSpecialSpeedValue()) {
                 // Red for special buttons, when active
                 this.ColorizeAllStates(Color.red);
             } else {
@@ -78,7 +78,7 @@
         /// <summary>Inactive button has normal-size text and is silver-gray.</summary>
         public void UpdateSpeedlimitButton_Inactive() {
             // Special values (reset and default do not become larger)
-            if (!IsSpecialSpeedValue()) {
+            if (!this.IsSpecialSpeedValue()) {
                 this.textScale = 1.0f;
 
                 // Can't set width directly, but can via the resizer
@@ -96,7 +96,7 @@
         public override bool CanActivate() => true;
 
         protected override bool IsActive() {
-            return this.AssignedAction.NearlyEqual(ParentTool.SelectedAction);
+            return this.AssignedAction.NearlyEqual(this.ParentTool.SelectedAction);
         }
     }
 }

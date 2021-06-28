@@ -12,7 +12,7 @@
 
     internal partial class ToolWindow {
         internal class PalettePanel : UPanel {
-            internal readonly List<SpeedLimitPaletteButton> paletteButtons_ = new();
+            internal readonly List<SpeedLimitPaletteButton> PaletteButtons = new();
 
             /// <summary>Create speeds palette based on the current options choices.</summary>
             /// <param name="window">Containing <see cref="ToolWindow"/>.</param>
@@ -41,7 +41,7 @@
                 actions.Add(SetSpeedLimitAction.Unlimited()); // add: Unlimited
                 actions.Add(SetSpeedLimitAction.ResetToDefault()); // add: Default
 
-                this.paletteButtons_.Clear();
+                this.PaletteButtons.Clear();
 
                 foreach (SetSpeedLimitAction action in actions) {
                     SpeedLimitPaletteButton nextButton = this.SetupControls_SpeedPalette_Button(
@@ -50,7 +50,7 @@
                         parentTool: parentTool,
                         showMph: showMph,
                         actionOnClick: action);
-                    this.paletteButtons_.Add(nextButton);
+                    this.PaletteButtons.Add(nextButton);
                 }
             }
 

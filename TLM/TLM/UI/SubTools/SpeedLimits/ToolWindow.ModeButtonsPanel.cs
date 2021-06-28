@@ -75,7 +75,7 @@
                                                        backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
                                                    .CanActivate(background: false)
                                                    .CanHover(foreground: false);
-                EditDefaultsModeButton.ApplyButtonSkin();
+                this.EditDefaultsModeButton.ApplyButtonSkin();
 
                 // the onclick handler is set by SpeedLimitsTool outside of this module
 

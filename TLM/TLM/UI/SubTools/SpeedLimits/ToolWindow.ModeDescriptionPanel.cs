@@ -7,7 +7,7 @@
     internal partial class ToolWindow {
         internal class ModeDescriptionPanel : UPanel {
             /// <summary>Describes what user currently sees. Can use color codes for keyboard hints.</summary>
-            internal ULabel modeDescriptionLabel_;
+            internal ULabel ModeDescriptionLabel;
 
             /// <summary>
             /// Sets up two stacked labels: for mode description (what the user sees) and for hint.
@@ -31,12 +31,12 @@
                         r.FitToChildren();
                     });
 
-                modeDescriptionLabel_ = builder.Label_(
+                this.ModeDescriptionLabel = builder.Label_(
                     parent: this,
                     t: string.Empty,
                     stack: UStackMode.Below,
                     processMarkup: true);
-                modeDescriptionLabel_.SetPadding(
+                this.ModeDescriptionLabel.SetPadding(
                     new UPadding(top: 12f, right: 0f, bottom: 0f, left: 0f));
             }
 
@@ -83,7 +83,7 @@
                         : UIUtil.ColorizeKeybind("[[Alt]] show defaults.");
                 sb.Append(Translation.SpeedLimits.Get(t));
 
-                this.modeDescriptionLabel_.text = sb.ToString();
+                this.ModeDescriptionLabel.text = sb.ToString();
                 UResizer.UpdateControl(this);
             }
         }

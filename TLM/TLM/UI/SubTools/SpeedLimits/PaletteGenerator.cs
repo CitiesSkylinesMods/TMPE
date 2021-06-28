@@ -1,21 +1,21 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Data;
-    using TrafficManager.Lifecycle;
     using TrafficManager.State;
     using TrafficManager.UI.Textures;
 
     /// <summary>Produces list of speed limits to offer to user in the palette.</summary>
     public class PaletteGenerator {
         /// <summary>Produces list of speed limits to offer user in the palette.</summary>
-        /// <param name="unit">What kind of speed limit list is required</param>
+        /// <param name="unit">What kind of speed limit list is required.</param>
         /// <returns>
         ///     List from smallest to largest speed with the given unit. Zero (no limit) is
         ///     not added to the list. The values are in-game speeds as float.
         /// </returns>
         public static List<SetSpeedLimitAction> AllSpeedLimits(SpeedUnit unit) {
             var result = new List<SetSpeedLimitAction>();
-            SpeedLimitTextures textures = TMPELifecycle.Instance.Textures.SpeedLimits;
+
+            // SpeedLimitTextures textures = TMPELifecycle.Instance.Textures.SpeedLimits;
 
             switch (unit) {
                 case SpeedUnit.Kmph:
