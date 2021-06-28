@@ -32,7 +32,7 @@
             switch (this.Type) {
                 case ActionType.SetOverride:
                     return this.Override != null
-                               ? this.Override.Value.ToString(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph)
+                               ? this.Override.Value.FormatStr(GlobalConfig.Instance.Main.DisplaySpeedLimitsMph)
                                : string.Empty;
                 case ActionType.Unlimited: return Translation.SpeedLimits.Get("Unlimited");
                 case ActionType.ResetToDefault: return Translation.SpeedLimits.Get("Default");

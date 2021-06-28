@@ -654,9 +654,11 @@ namespace TrafficManager.Manager.Impl {
                             $"to default");
                         Flags.RemoveLaneSpeedLimit(curLaneId);
                     } else {
+                        bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+                        string overrideStr = action.Override.Value.FormatStr(showMph);
+
                         Log._Debug(
-                            $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
-                            $"to {action.Override.ToString()}");
+                            $"SpeedLimitManager: Setting lane {curLaneId} to {overrideStr}");
                         Flags.SetLaneSpeedLimit(curLaneId, action);
                     }
                 }

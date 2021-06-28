@@ -110,7 +110,7 @@ namespace TrafficManager.API.Traffic.Data {
 
         public float GetMph() => this.GameUnits * ApiConstants.SPEED_TO_MPH;
 
-        public string ToString(bool displayMph) {
+        public string FormatStr(bool displayMph) {
             return displayMph
                        ? (int)this.GetMph() + " MPH"
                        : (int)this.GetKmph() + " km/h";
