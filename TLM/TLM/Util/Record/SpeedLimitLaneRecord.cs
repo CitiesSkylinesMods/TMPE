@@ -2,10 +2,9 @@ namespace TrafficManager.Util.Record {
     using System;
     using System.Collections.Generic;
     using GenericGameBridge.Service;
-    using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
-    using static TrafficManager.Util.Shortcuts;
     using TrafficManager.State;
+    using static TrafficManager.Util.Shortcuts;
 
     [Serializable]
     public class SpeedLimitLaneRecord : IRecordable {
@@ -20,29 +19,29 @@ namespace TrafficManager.Util.Record {
 
         private float? speedLimit_; // game units
 
-        InstanceID InstanceID => new() {NetLane = LaneId};
+        InstanceID InstanceID => new() {NetLane = this.LaneId};
 
         public void Record() {
-            GetSpeedLimitResult gsl = SpeedLimitManager.Instance.GetCustomSpeedLimit(LaneId);
+            GetSpeedLimitResult gsl = SpeedLimitManager.Instance.GetCustomSpeedLimit(this.LaneId);
             this.speedLimit_ = gsl.OverrideValue.HasValue && gsl.OverrideValue.Value.GameUnits > 0f
                                    ? gsl.OverrideValue.Value.GameUnits
                                    : (float?)null;
         }
 
-        public void Restore() => Transfer(LaneId);
+        public void Restore() => this.Transfer(this.LaneId);
 
         public void Transfer(Dictionary<InstanceID, InstanceID> map) =>
-            Transfer(map[this.InstanceID].NetLane);
+            this.Transfer(map[this.InstanceID].NetLane);
 
         public void Transfer(uint laneId) {
             ushort segmentId = laneId.ToLane().m_segment;
-            NetInfo.Lane laneInfo = GetLaneInfo(segmentId, LaneIndex);
+            NetInfo.Lane laneInfo = GetLaneInfo(segmentId, this.LaneIndex);
             SpeedLimitManager.Instance.SetLaneSpeedLimit(
                 segmentId: segmentId,
-                laneIndex: LaneIndex,
+                laneIndex: this.LaneIndex,
                 laneInfo: laneInfo,
-                laneId: LaneId,
-                action: SetSpeedLimitAction.FromNullableFloat(speedLimit_));
+                laneId: this.LaneId,
+                action: SetSpeedLimitAction.FromNullableFloat(this.speedLimit_));
         }
 
         public static List<SpeedLimitLaneRecord> GetLanes(ushort segmentId) {
