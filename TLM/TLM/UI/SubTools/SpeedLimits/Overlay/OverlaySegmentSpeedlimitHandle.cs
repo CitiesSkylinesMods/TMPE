@@ -135,12 +135,7 @@
                     break;
                 case SetSpeedLimitTarget.SegmentDefault:
                     // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
-                    if (action.Override.HasValue) {
-                        SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(
-                            info: netInfo,
-                            customSpeedLimit: action.Override.Value.GameUnits);
-                    }
-
+                    OverlayLaneSpeedlimitHandle.SetDefaultSpeedLimit(segmentId, netInfo, action);
                     break;
                 default:
                     Log.Error(
