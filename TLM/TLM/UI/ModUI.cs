@@ -12,13 +12,13 @@ namespace TrafficManager.UI {
     /// Access via ThreadingExtension.ModUi.
     /// </summary>
     public class ModUI : UICustomControl {
-        /// <summary>Singleton accessor.</summary>
+        /// <summary>Gets singleton.</summary>
         public static ModUI Instance { get; private set; }
 
-        /// <summary>Gets the floating draggable button which shows and hides TM:PE UI.</summary>
+        /// <summary>Gets or sets the floating draggable button which shows and hides TM:PE UI.</summary>
         public UI.MainMenu.MainMenuButton MainMenuButton { get; set; }
 
-        /// <summary>Gets the floating tool panel with TM:PE tool buttons.</summary>
+        /// <summary>Gets or sets the floating tool panel with TM:PE tool buttons.</summary>
         public UI.MainMenu.MainMenuWindow MainMenu { get; set; }
 
 #if DEBUG
@@ -42,7 +42,7 @@ namespace TrafficManager.UI {
 
         public static TrafficManagerMode ToolMode { get; set; }
 
-        private bool _uiShown;
+        private bool isUiVisible_;
 
         /// <summary>Event to be sent when UI scale changes in the General Options tab.</summary>
         public struct UIScaleNotification {
@@ -70,21 +70,24 @@ namespace TrafficManager.UI {
         /// (slider in General options tab).
         /// </summary>
         [NonSerialized]
-        public UIOpacityObservable uiOpacityObservable;
+        public UIOpacityObservable UiOpacityObservable;
 
-        const string TMPE_DEBUGMENU_NAME = "DebugMenu";
+        private const string TMPE_DEBUGMENU_NAME = "DebugMenu";
 
         public void Awake() {
-            UiScaleObservable = new UIScaleObservable();
-            uiOpacityObservable = new UIOpacityObservable();
+            this.UiScaleObservable = new UIScaleObservable();
+            this.UiOpacityObservable = new UIOpacityObservable();
 
             Log._Debug("##### Initializing ModUI.");
 
-            CreateMainMenuButtonAndWindow();
+            this.CreateMainMenuButtonAndWindow();
 #if DEBUG
             UIView uiView = UIView.GetAView();
-            DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
-            U.UIUtil.MakeUniqueAndSetName(DebugMenu.gameObject, TMPE_DEBUGMENU_NAME);
+            this.DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
+
+            U.UIUtil.MakeUniqueAndSetName(
+                toMakeUnique: this.DebugMenu.gameObject,
+                name: TMPE_DEBUGMENU_NAME);
 #endif
 
             ToolMode = TrafficManagerMode.None;
@@ -97,14 +100,14 @@ namespace TrafficManager.UI {
         private void CreateMainMenuButtonAndWindow() {
             UIView uiView = UIView.GetAView();
             try {
-                MainMenu = MainMenuWindow.CreateMainMenuWindow();
+                this.MainMenu = MainMenuWindow.CreateMainMenuWindow();
             }
             catch (Exception e) {
                 Log.Error($"While creating MainMenu: {e}");
             }
 
             try {
-                MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
+                this.MainMenuButton = (MainMenuButton)uiView.AddUIComponent(typeof(MainMenuButton));
             }
             catch (Exception e) {
                 Log.Error($"While creating MainButton: {e}");
@@ -113,22 +116,22 @@ namespace TrafficManager.UI {
 
         public void Destroy() {
             Log._Debug("ModUI destructor is called.");
-            DestroyImmediate(MainMenuButton);
-            DestroyImmediate(MainMenu);
+            DestroyImmediate(this.MainMenuButton);
+            DestroyImmediate(this.MainMenu);
             ReleaseTool();
             Instance = null;
             DestroyImmediate(this);
         }
 
         public bool IsVisible() {
-            return _uiShown;
+            return this.isUiVisible_;
         }
 
         public void ToggleMainMenu() {
-            if (IsVisible()) {
-                CloseMainMenu();
+            if (this.IsVisible()) {
+                this.CloseMainMenu();
             } else {
-                ShowMainMenu();
+                this.ShowMainMenu();
                 GetTrafficManagerTool().RequestOnscreenDisplayUpdate();
             }
         }
@@ -138,29 +141,32 @@ namespace TrafficManager.UI {
         /// which might require rebuilding the main menu buttons.
         /// </summary>
         internal void RebuildMenu() {
-            CloseMainMenu();
+            this.CloseMainMenu();
 
-            if (MainMenu != null) {
-                CustomKeyHandler keyHandler = MainMenu.GetComponent<CustomKeyHandler>();
+            if (this.MainMenu != null) {
+                CustomKeyHandler keyHandler = this.MainMenu.GetComponent<CustomKeyHandler>();
                 if (keyHandler != null) {
                     UnityEngine.Object.Destroy(keyHandler);
                 }
 
-                UnityEngine.Object.Destroy(MainMenu);
-                UnityEngine.Object.Destroy(MainMenuButton);
-                MainMenu = null;
-                MainMenuButton = null;
+                UnityEngine.Object.Destroy(this.MainMenu);
+                UnityEngine.Object.Destroy(this.MainMenuButton);
+                this.MainMenu = null;
+                this.MainMenuButton = null;
 #if DEBUG
-                UnityEngine.Object.Destroy(DebugMenu);
-                DebugMenu = null;
+                UnityEngine.Object.Destroy(this.DebugMenu);
+                this.DebugMenu = null;
 #endif
             }
 
-            CreateMainMenuButtonAndWindow();
+            this.CreateMainMenuButtonAndWindow();
 #if DEBUG
             UIView uiView = UIView.GetAView();
-            DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
-            U.UIUtil.MakeUniqueAndSetName(DebugMenu.gameObject, TMPE_DEBUGMENU_NAME);
+            this.DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
+
+            U.UIUtil.MakeUniqueAndSetName(
+                toMakeUnique: this.DebugMenu.gameObject,
+                name: TMPE_DEBUGMENU_NAME);
 #endif
         }
 
@@ -172,18 +178,18 @@ namespace TrafficManager.UI {
                 Log.Error("Error on Show(): " + e);
             }
 
-            MainMenuWindow menuWindow = GetMenu();
+            MainMenuWindow menuWindow = this.GetMenu();
             menuWindow.UpdateButtons();
             menuWindow.Show();
 
             TrafficManagerTool.ShowAdvisor("MainMenu");
 #if DEBUG
-            GetDebugMenu().Show();
+            this.GetDebugMenu().Show();
 #endif
-            _uiShown = true;
+            this.isUiVisible_ = true;
             SetToolMode(TrafficManagerMode.Activated);
-            MainMenuButton.UpdateButtonSkinAndTooltip();
-            UIView.SetFocus(MainMenu);
+            this.MainMenuButton.UpdateButtonSkinAndTooltip();
+            UIView.SetFocus(this.MainMenu);
         }
 
         public void CloseMainMenu() {
@@ -194,23 +200,23 @@ namespace TrafficManager.UI {
             }
 
             // Main menu is going invisible
-            GetMenu()?.Hide();
+            this.GetMenu()?.Hide();
 #if DEBUG
-            GetDebugMenu()?.Hide();
+            this.GetDebugMenu()?.Hide();
 #endif
 
-            _uiShown = false;
+            this.isUiVisible_ = false;
             SetToolMode(TrafficManagerMode.None);
-            MainMenuButton.UpdateButtonSkinAndTooltip();
+            this.MainMenuButton.UpdateButtonSkinAndTooltip();
         }
 
         internal MainMenuWindow GetMenu() {
-            return MainMenu;
+            return this.MainMenu;
         }
 
 #if DEBUG
         internal DebugMenuPanel GetDebugMenu() {
-            return DebugMenu;
+            return this.DebugMenu;
         }
 #endif
 
@@ -230,7 +236,7 @@ namespace TrafficManager.UI {
 
         public static void EnableTool() {
             Log._Debug("ModUI.EnableTool: called");
-            TrafficManagerTool tmTool = GetTrafficManagerTool(true);
+            TrafficManagerTool tmTool = GetTrafficManagerTool(createIfRequired: true);
 
             ToolsModifierControl.toolController.CurrentTool = tmTool;
             ToolsModifierControl.SetTool<TrafficManagerTool>();

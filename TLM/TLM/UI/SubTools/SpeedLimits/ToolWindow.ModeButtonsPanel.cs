@@ -38,47 +38,52 @@
                 //----------------
                 // Edit Segments/Lanes mode button
                 //----------------
-                SegmentLaneModeToggleButton = builder.Button<UButton, UIComponent>(
+                this.SegmentLaneModeToggleButton = builder.Button<UButton, UIComponent>(
                     parent: this,
                     text: string.Empty,
                     tooltip: "Edit segments. Click to edit lanes.",
                     size: buttonSize,
                     stack: UStackMode.Below);
-                SegmentLaneModeToggleButton.atlas = uiAtlas;
+                this.SegmentLaneModeToggleButton.atlas = uiAtlas;
+
                 // Note the atlas is loaded before this skin is created in window.GetUiAtlas()
-                SegmentLaneModeToggleButton.Skin =
+                this.SegmentLaneModeToggleButton.Skin =
                     ButtonSkin.CreateSimple(
                                   foregroundPrefix: "EditSegments",
                                   backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
                               .CanActivate(background: false)
                               .CanHover(foreground: false);
-                SegmentLaneModeToggleButton.ApplyButtonSkin();
+                this.SegmentLaneModeToggleButton.ApplyButtonSkin();
+
                 // the onclick handler is set by SpeedLimitsTool outside of this module
 
                 //----------------
                 // Edit Defaults mode button
                 //----------------
-                EditDefaultsModeButton = builder.Button<UButton, UIComponent>(
+                this.EditDefaultsModeButton = builder.Button<UButton, UIComponent>(
                     parent: this,
                     text: string.Empty,
                     tooltip: "Default speed limits per road type",
                     size: buttonSize,
                     stack: UStackMode.Below);
-                EditDefaultsModeButton.atlas = uiAtlas;
+                this.EditDefaultsModeButton.atlas = uiAtlas;
+
                 // Note the atlas is loaded before this skin is created in window.GetUiAtlas()
-                EditDefaultsModeButton.Skin = ButtonSkin.CreateSimple(
-                                                            foregroundPrefix: "EditDefaults",
-                                                            backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
-                                                        .CanActivate(background: false)
-                                                        .CanHover(foreground: false);
+                this.EditDefaultsModeButton.Skin = ButtonSkin
+                                                   .CreateSimple(
+                                                       foregroundPrefix: "EditDefaults",
+                                                       backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
+                                                   .CanActivate(background: false)
+                                                   .CanHover(foreground: false);
                 EditDefaultsModeButton.ApplyButtonSkin();
+
                 // the onclick handler is set by SpeedLimitsTool outside of this module
 
                 //----------------
                 // MPH/Kmph switch
                 //----------------
                 bool displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-                ToggleMphButton = builder.Button<MphToggleButton, UIComponent>(
+                this.ToggleMphButton = builder.Button<MphToggleButton, UIComponent>(
                     parent: this,
                     text: string.Empty,
                     tooltip: displayMph
@@ -86,14 +91,16 @@
                                  : Translation.SpeedLimits.Get("Kilometers per hour"),
                     size: buttonSize,
                     stack: UStackMode.Below);
-                ToggleMphButton.atlas = uiAtlas;
+                this.ToggleMphButton.atlas = uiAtlas;
+
                 // Note the atlas is loaded before this skin is created in window.GetUiAtlas()
-                ToggleMphButton.Skin = ButtonSkin.CreateSimple(
+                this.ToggleMphButton.Skin = ButtonSkin.CreateSimple(
                                                      foregroundPrefix: "MphToggle",
                                                      backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
                                                  .CanActivate(background: false)
                                                  .CanHover(foreground: false);
-                ToggleMphButton.ApplyButtonSkin();
+                this.ToggleMphButton.ApplyButtonSkin();
+
                 // the onclick handler is set by SpeedLimitsTool outside of this module
             }
         }

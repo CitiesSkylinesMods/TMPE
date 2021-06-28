@@ -32,7 +32,7 @@ namespace TrafficManager.U.Panel {
         public override void Start() {
             base.Start();
             uiScaleUnbsubscriber_ = ModUI.Instance.UiScaleObservable.Subscribe(this);
-            uiTransparencyUnbsubscriber_ = ModUI.Instance.uiOpacityObservable.Subscribe(this);
+            uiTransparencyUnbsubscriber_ = ModUI.Instance.UiOpacityObservable.Subscribe(this);
         }
 
         public UResizerConfig GetResizerConfig() {
