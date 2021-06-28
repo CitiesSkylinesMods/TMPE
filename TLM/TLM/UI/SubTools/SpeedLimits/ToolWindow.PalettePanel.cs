@@ -8,10 +8,11 @@
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
+    using Debug = System.Diagnostics.Debug;
 
     internal partial class ToolWindow {
         internal class PalettePanel : UPanel {
-            internal List<SpeedLimitPaletteButton> paletteButtons_ = new();
+            private readonly List<SpeedLimitPaletteButton> paletteButtons_ = new();
 
             /// <summary>Create speeds palette based on the current options choices.</summary>
             /// <param name="window">Containing <see cref="ToolWindow"/>.</param>
@@ -43,7 +44,7 @@
                 this.paletteButtons_.Clear();
 
                 foreach (SetSpeedLimitAction action in actions) {
-                    SpeedLimitPaletteButton nextButton = SetupControls_SpeedPalette_Button(
+                    SpeedLimitPaletteButton nextButton = this.SetupControls_SpeedPalette_Button(
                         builder: builder,
                         parent: this,
                         parentTool: parentTool,
@@ -59,10 +60,13 @@
                                                   bool showMph,
                                                   SetSpeedLimitAction actionOnClick,
                                                   SpeedLimitsTool parentTool) {
+                Debug.Assert(actionOnClick.Override != null, "actionOnClick.Override != null");
+
                 SpeedValue speedValue =
                     actionOnClick.Type == SetSpeedLimitAction.ActionType.ResetToDefault
                         ? default
                         : actionOnClick.Override.Value;
+
                 int speedInteger = showMph
                                        ? speedValue.ToMphRounded(SpeedLimitTextures.MPH_STEP).Mph
                                        : speedValue.ToKmphRounded(SpeedLimitTextures.KMPH_STEP).Kmph;
@@ -81,7 +85,7 @@
                         r.FitToChildren();
                     });
 
-                SpeedLimitPaletteButton button = CreatePaletteButton(
+                SpeedLimitPaletteButton button = this.CreatePaletteButton(
                     builder,
                     actionOnClick,
                     parentTool,
@@ -89,8 +93,7 @@
                     speedInteger,
                     speedValue);
 
-                CreatePaletteButtonHintLabel(builder, showMph, speedValue, button, buttonPanel);
-
+                this.CreatePaletteButtonHintLabel(builder, showMph, speedValue, button, buttonPanel);
                 return button;
             }
 

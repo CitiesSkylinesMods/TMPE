@@ -1,9 +1,9 @@
 namespace TrafficManager.UI {
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
     using TrafficManager.U;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util;
