@@ -671,7 +671,7 @@ namespace TrafficManager.Manager.Impl {
                     } else {
                         Log._Debug(
                             $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
-                            $"to {action.Override}");
+                            $"to {action.Override.ToString()}");
                         Flags.SetLaneSpeedLimit(curLaneId, action);
                     }
                 }
