@@ -13,15 +13,15 @@
     /// </summary>
     public readonly struct OverlaySegmentSpeedlimitHandle {
         /// <summary>Segment id where the speedlimit sign was displayed.</summary>
-        public readonly ushort SegmentId;
+        private readonly ushort segmentId_;
 
         /// <summary>Segment side, where the speedlimit sign was.</summary>
-        public readonly NetInfo.Direction FinalDirection;
+        private readonly NetInfo.Direction finalDirection_;
 
         public OverlaySegmentSpeedlimitHandle(ushort segmentId,
                                               NetInfo.Direction finalDirection) {
-            SegmentId = segmentId;
-            FinalDirection = finalDirection;
+            this.segmentId_ = segmentId;
+            this.finalDirection_ = finalDirection;
         }
 
         /// <summary>
@@ -38,14 +38,14 @@
             NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
 
             Apply(
-                segmentId: this.SegmentId,
-                finalDir: this.FinalDirection,
-                netInfo: segmentsBuffer[this.SegmentId].Info,
+                segmentId: this.segmentId_,
+                finalDir: this.finalDirection_,
+                netInfo: segmentsBuffer[this.segmentId_].Info,
                 action: action,
                 target: target);
 
             if (multiSegmentMode) {
-                ClickMultiSegment(action, target);
+                this.ClickMultiSegment(action, target);
             }
         }
 
@@ -58,7 +58,7 @@
                                        SetSpeedLimitTarget target) {
             NetManager netManager = Singleton<NetManager>.instance;
 
-            if (new RoundaboutMassEdit().TraverseLoop(this.SegmentId, out var segmentList)) {
+            if (new RoundaboutMassEdit().TraverseLoop(this.segmentId_, out var segmentList)) {
                 foreach (ushort segId in segmentList) {
                     SpeedLimitManager.Instance.SetSegmentSpeedLimit(segId, action);
                 }
@@ -66,10 +66,10 @@
                 return;
             }
 
-            NetInfo.Direction normDir = this.FinalDirection;
+            NetInfo.Direction normDir = this.finalDirection_;
             NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
 
-            if ((segmentsBuffer[this.SegmentId].m_flags &
+            if ((segmentsBuffer[this.segmentId_].m_flags &
                  NetSegment.Flags.Invert) != NetSegment.Flags.None) {
                 normDir = NetInfo.InvertDirection(normDir);
             }
@@ -110,7 +110,7 @@
             }
 
             SegmentLaneTraverser.Traverse(
-                initialSegmentId: this.SegmentId,
+                initialSegmentId: this.segmentId_,
                 direction: SegmentTraverser.TraverseDirection.AnyDirection,
                 side: SegmentTraverser.TraverseSide.AnySide,
                 laneStopCrit: SegmentLaneTraverser.LaneStopCriterion.LaneCount,
@@ -135,10 +135,12 @@
                     break;
                 case SetSpeedLimitTarget.SegmentDefault:
                     // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
-                    // TODO: Null pointer exception if action.Type=ResetToDefault
-                    SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(
-                        info: netInfo,
-                        customSpeedLimit: action.Override.Value.GameUnits);
+                    if (action.Override.HasValue) {
+                        SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(
+                            info: netInfo,
+                            customSpeedLimit: action.Override.Value.GameUnits);
+                    }
+
                     break;
                 default:
                     Log.Error(

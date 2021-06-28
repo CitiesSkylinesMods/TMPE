@@ -15,23 +15,22 @@
     /// </summary>
     public readonly struct OverlayLaneSpeedlimitHandle {
         /// <summary>Segment id where the speedlimit sign was displayed.</summary>
-        public readonly ushort SegmentId;
-
-        public readonly uint LaneId;
-        public readonly byte LaneIndex;
-        public readonly NetInfo.Lane LaneInfo;
-        private readonly int SortedLaneIndex;
+        private readonly ushort segmentId_;
+        private readonly uint laneId_;
+        private readonly byte laneIndex_;
+        private readonly NetInfo.Lane laneInfo_;
+        private readonly int sortedLaneIndex_;
 
         public OverlayLaneSpeedlimitHandle(ushort segmentId,
                                            uint laneId,
                                            byte laneIndex,
                                            NetInfo.Lane laneInfo,
                                            int sortedLaneIndex) {
-            this.SegmentId = segmentId;
-            this.LaneId = laneId;
-            this.LaneIndex = laneIndex;
-            this.LaneInfo = laneInfo;
-            this.SortedLaneIndex = sortedLaneIndex;
+            this.segmentId_ = segmentId;
+            this.laneId_ = laneId;
+            this.laneIndex_ = laneIndex;
+            this.laneInfo_ = laneInfo;
+            this.sortedLaneIndex_ = sortedLaneIndex;
         }
 
         /// <summary>
@@ -48,16 +47,16 @@
             NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
 
             Apply(
-                segmentId: this.SegmentId,
-                laneIndex: this.LaneIndex,
-                laneId: this.LaneId,
-                netInfo: segmentsBuffer[this.SegmentId].Info,
-                laneInfo: this.LaneInfo,
+                segmentId: this.segmentId_,
+                laneIndex: this.laneIndex_,
+                laneId: this.laneId_,
+                netInfo: segmentsBuffer[this.segmentId_].Info,
+                laneInfo: this.laneInfo_,
                 action: action,
                 target: target);
 
             if (multiSegmentMode) {
-                ClickMultiSegment(action, target);
+                this.ClickMultiSegment(action, target);
             }
         }
 
@@ -65,25 +64,24 @@
         /// Called if speed limit icon was clicked in segment display mode,
         /// but also multisegment mode was enabled (like holding Shift).
         /// </summary>
-        /// <param name="speedLimitToSet">The active speed limit on the palette.</param>
         private void ClickMultiSegment(SetSpeedLimitAction action,
                                        SetSpeedLimitTarget target) {
-            if (new RoundaboutMassEdit().TraverseLoop(this.SegmentId, out var segmentList)) {
-                IEnumerable<LanePos> lanes = FollowRoundaboutLane(
+            if (new RoundaboutMassEdit().TraverseLoop(this.segmentId_, out var segmentList)) {
+                IEnumerable<LanePos> lanes = this.FollowRoundaboutLane(
                     segmentList,
-                    this.SegmentId,
-                    this.SortedLaneIndex);
+                    this.segmentId_,
+                    this.sortedLaneIndex_);
 
                 foreach (LanePos lane in lanes) {
                     // the speed limit for this lane has already been set.
-                    if (lane.laneId == this.LaneId) {
+                    if (lane.laneId == this.laneId_) {
                         continue;
                     }
 
                     SpeedLimitsTool.SetSpeedLimit(lane, action);
                 }
             } else {
-                int slIndexCopy = this.SortedLaneIndex;
+                int slIndexCopy = this.sortedLaneIndex_;
 
                 // Apply this to each lane
                 bool LaneVisitorFn(SegmentLaneTraverser.SegmentLaneVisitData data) {
@@ -118,7 +116,7 @@
                 }
 
                 SegmentLaneTraverser.Traverse(
-                    initialSegmentId: this.SegmentId,
+                    initialSegmentId: this.segmentId_,
                     direction: SegmentTraverser.TraverseDirection.AnyDirection,
                     side: SegmentTraverser.TraverseSide.AnySide,
                     laneStopCrit: SegmentLaneTraverser.LaneStopCriterion.LaneCount,
@@ -131,10 +129,10 @@
 
         /// <summary>
         /// iterates through the given roundabout <paramref name="segmentList"/> returning an enumeration
-        /// of all lanes with a matching <paramref name="sortedLaneIndex"/> based on <paramref name="segmentId0"/>
+        /// of all lanes with a matching <paramref name="sortedLaneIndex"/> based on <paramref name="segmentId0"/>.
         /// </summary>
         /// <param name="segmentList">input list of roundabout segments (must be oneway, and in the same direction).</param>
-        /// <param name="segmentId0">The segment to match lane agaisnt</param>
+        /// <param name="segmentId0">The segment to match lane agaisnt.</param>
         /// <param name="sortedLaneIndex">Index.</param>
         private IEnumerable<LanePos> FollowRoundaboutLane(
                     List<ushort> segmentList,

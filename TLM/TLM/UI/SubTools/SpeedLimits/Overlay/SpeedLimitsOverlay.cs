@@ -2,9 +2,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework;
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
     using GenericGameBridge.Service;
+    using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
@@ -21,7 +20,7 @@
     /// overlay for segments/lanes.
     /// </summary>
     public class SpeedLimitsOverlay {
-        const float SMALL_ICON_SCALE = 0.66f;
+        private const float SMALL_ICON_SCALE = 0.66f;
 
         private ushort segmentId_;
         private NetInfo.Direction finalDirection_ = NetInfo.Direction.None;
@@ -92,17 +91,16 @@
         /// <summary>
         /// Stores potentially visible segment ids while the camera did not move.
         /// </summary>
-        private GenericArrayCache<ushort> cachedVisibleSegmentIds_;
+        [NotNull]
+        private readonly GenericArrayCache<ushort> cachedVisibleSegmentIds_;
 
-        /// <summary>
-        /// Stores last cached camera position in <see cref="cachedVisibleSegmentIds_"/>
-        /// </summary>
+        /// <summary>Stores last cached camera position in <see cref="cachedVisibleSegmentIds_"/>.</summary>
         private CameraTransformValue lastCachedCamera_;
 
         private const float SPEED_LIMIT_SIGN_SIZE = 70f;
 
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>
-            segmentCenterByDir = new();
+            segmentCenterByDir_ = new();
 
         public SpeedLimitsOverlay(TrafficManagerTool mainTool) {
             this.mainTool_ = mainTool;
@@ -116,7 +114,7 @@
         public void RenderHelperGraphics(RenderManager.CameraInfo cameraInfo,
                                          DrawArgs args) {
             if (!args.ShowLimitsPerLane) {
-                RenderSegments(cameraInfo, args);
+                this.RenderSegments(cameraInfo, args);
             }
         }
 
@@ -129,7 +127,7 @@
                 //------------------------
                 // Single segment highlight
                 //------------------------
-                RenderSegmentSideOverlay(
+                this.RenderSegmentSideOverlay(
                     cameraInfo: cameraInfo,
                     segmentId: this.segmentId_,
                     args: args,
@@ -142,7 +140,7 @@
                     segmentId: this.segmentId_,
                     segList: out var segmentList)) {
                     foreach (ushort segmentId in segmentList) {
-                        RenderSegmentSideOverlay(
+                        this.RenderSegmentSideOverlay(
                             cameraInfo: cameraInfo,
                             segmentId: segmentId,
                             args: args);
@@ -159,7 +157,7 @@
                                 finalDirection = NetInfo.InvertDirection(finalDirection);
                             }
 
-                            RenderSegmentSideOverlay(
+                            this.RenderSegmentSideOverlay(
                                 cameraInfo: cameraInfo,
                                 segmentId: data.CurSeg.segmentId,
                                 args: args,
@@ -174,14 +172,11 @@
         /// Renders all lane curves with the given <paramref name="finalDirection"/>
         /// if NetInfo.Direction.None, all lanes are rendered.
         /// </summary>
-        private int RenderSegmentSideOverlay(
-            RenderManager.CameraInfo cameraInfo,
-            ushort segmentId,
-            DrawArgs args,
-            NetInfo.Direction finalDirection = NetInfo.Direction.None)
+        private void RenderSegmentSideOverlay(RenderManager.CameraInfo cameraInfo,
+                                              ushort segmentId,
+                                              DrawArgs args,
+                                              NetInfo.Direction finalDirection = NetInfo.Direction.None)
         {
-            int count = 0;
-
             // ------ visitor function
             bool ForEachLane(uint laneId,
                              ref NetLane lane,
@@ -195,16 +190,13 @@
                           || finalDirection == NetInfo.Direction.None;
 
                 if (render) {
-                    RenderLaneOverlay(cameraInfo: cameraInfo, laneId: laneId, args: args);
-                    count++;
+                    this.RenderLaneOverlay(cameraInfo: cameraInfo, laneId: laneId, args: args);
                 }
 
                 return true;
-            }
-            // end visitor function ------
+            } // end visitor function ------
 
             Shortcuts.netService.IterateSegmentLanes(segmentId, handler: ForEachLane);
-            return count;
         }
 
         /// <summary>Draw blue lane curves overlay.</summary>
@@ -246,31 +238,31 @@
             Vector3 camPos = currentCameraTransform.position;
 
             // TODO: Can road network change while speed limit tool is active? Disasters?
-            if (!lastCachedCamera_.Equals(currentCamera)) {
+            if (!this.lastCachedCamera_.Equals(currentCamera)) {
                 // cache visible segments
-                lastCachedCamera_ = currentCamera;
-                cachedVisibleSegmentIds_.Clear();
+                this.lastCachedCamera_ = currentCamera;
+                this.cachedVisibleSegmentIds_.Clear();
 
-                ShowSigns_CacheVisibleSegments(
+                this.ShowSigns_CacheVisibleSegments(
                     netManager: netManager,
                     camPos: camPos,
                     speedLimitManager: speedLimitManager);
             }
 
             bool hover = false;
-            for (int segmentIdIndex = cachedVisibleSegmentIds_.Size - 1;
+            for (int segmentIdIndex = this.cachedVisibleSegmentIds_.Size - 1;
                  segmentIdIndex >= 0;
                  segmentIdIndex--) {
-                ushort segmentId = cachedVisibleSegmentIds_.Values[segmentIdIndex];
+                ushort segmentId = this.cachedVisibleSegmentIds_.Values[segmentIdIndex];
 
                 // If VehicleRestrictions tool is active, skip drawing the current selected segment
-                if (mainTool_.GetToolMode() == ToolMode.VehicleRestrictions
+                if (this.mainTool_.GetToolMode() == ToolMode.VehicleRestrictions
                     && segmentId == TrafficManagerTool.SelectedSegmentId) {
                     continue;
                 }
 
                 // no speed limit overlay on selected segment when in vehicle restrictions mode
-                hover |= DrawSpeedLimitHandles(
+                hover |= this.DrawSpeedLimitHandles(
                     segmentId: segmentId,
                     segment: ref netManager.m_segments.m_buffer[segmentId],
                     camPos: ref camPos,
@@ -317,7 +309,7 @@
                     continue;
                 }
 
-                cachedVisibleSegmentIds_.Add((ushort)segmentId);
+                this.cachedVisibleSegmentIds_.Add((ushort)segmentId);
             } // end for all segments
         }
 
@@ -327,14 +319,14 @@
                                            DrawArgs args) {
             // in defaults mode separate lanes don't make any sense, so show segments at all times
             if (args.ShowLimitsPerLane && !args.ShowDefaultsMode) {
-                return DrawSpeedLimitHandles_PerLane(
+                return this.DrawSpeedLimitHandles_PerLane(
                     segmentId,
                     ref segment,
                     camPos,
                     args);
             }
 
-            return DrawSpeedLimitHandles_PerSegment(
+            return this.DrawSpeedLimitHandles_PerSegment(
                 segmentId,
                 camPos,
                 args);
@@ -344,18 +336,17 @@
         /// <param name="segmentId">Seg id.</param>
         /// <param name="camPos">Camera.</param>
         /// <param name="args">Render args.</param>
-        /// <param name="speedLimitSignVerticalScale">Whether sign is square or rectangular.</param>
         private bool DrawSpeedLimitHandles_PerSegment(ushort segmentId,
                                                       Vector3 camPos,
                                                       DrawArgs args) {
             bool ret = false;
 
             // draw speedlimits over mean middle points of lane beziers
-            if (!segmentCenterByDir.TryGetValue(
+            if (!this.segmentCenterByDir_.TryGetValue(
                 key: segmentId,
                 value: out Dictionary<NetInfo.Direction, Vector3> segCenter)) {
                 segCenter = new Dictionary<NetInfo.Direction, Vector3>();
-                segmentCenterByDir.Add(key: segmentId, value: segCenter);
+                this.segmentCenterByDir_.Add(key: segmentId, value: segCenter);
                 GeometryUtil.CalculateSegmentCenterByDir(
                     segmentId: segmentId,
                     segmentCenterByDir: segCenter,
@@ -397,7 +388,7 @@
                     SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: e.Key);
 
                 // Get default or default-override speed limit for road type
-                NetInfo neti = GetSegmentNetinfo(segmentId);
+                NetInfo neti = this.GetSegmentNetinfo(segmentId);
                 SpeedValue defaultSpeedlimit =
                     new SpeedValue(gameUnits: SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info: neti));
 
@@ -466,7 +457,6 @@
         /// <param name="segment">Segment reference from the game data.</param>
         /// <param name="camPos">Camera.</param>
         /// <param name="args">Render args.</param>
-        /// <param name="speedLimitSignVerticalScale">Whether signs are square or rectangular.</param>
         private bool DrawSpeedLimitHandles_PerLane(ushort segmentId,
                                                    ref NetSegment segment,
                                                    Vector3 camPos,
@@ -500,9 +490,6 @@
                 vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES);
 
             bool onlyMonorailLanes = sortedLanes.Count > 0;
-
-            // bool isMouseButtonDown =
-            //     Input.GetMouseButtonDown(0) && !args.ParentTool.ContainsMouse();
 
             if (args.InteractiveSigns) {
                 foreach (LanePos laneData in sortedLanes) {
@@ -615,7 +602,7 @@
                     && ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None))
                 {
                     Texture2D tex1 = textures.VehicleInfoSignTextures[
-                        LegacyExtVehicleType.ToNew(ExtVehicleType.PassengerTrain)];
+                        LegacyExtVehicleType.ToNew(old: ExtVehicleType.PassengerTrain)];
 
                     // TODO: Replace with direct call to GUI.DrawTexture as in the func above
                     grid.DrawStaticSquareOverlayGridTexture(
