@@ -1,45 +1,46 @@
 namespace TrafficManager.State {
-    using TrafficManager.API.Traffic.Enums;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using ICities;
     using JetBrains.Annotations;
+    using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Lifecycle;
     using TrafficManager.U;
+    using TrafficManager.UI;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.SubTools.SpeedLimits;
-    using TrafficManager.UI;
     using UnityEngine;
-    using TrafficManager.Lifecycle;
+    using Debug = System.Diagnostics.Debug;
 
     public static class OptionsGeneralTab {
-        private static UICheckBox _instantEffectsToggle;
+        private static UICheckBox instantEffectsToggle_;
 
         [UsedImplicitly]
-        private static UIDropDown _languageDropdown;
-        private static UIDropDown _simulationAccuracyDropdown;
+        private static UIDropDown languageDropdown_;
+        private static UIDropDown simulationAccuracyDropdown_;
 
         [UsedImplicitly]
-        private static UICheckBox _lockButtonToggle;
+        private static UICheckBox lockButtonToggle_;
 
         [UsedImplicitly]
-        private static UICheckBox _lockMenuToggle;
+        private static UICheckBox lockMenuToggle_;
 
-        private static UISlider _guiOpacitySlider;
-        private static UISlider _guiScaleSlider;
-        private static UISlider _overlayTransparencySlider;
-
-        [UsedImplicitly]
-        private static UICheckBox _enableTutorialToggle;
+        private static UISlider guiOpacitySlider_;
+        private static UISlider guiScaleSlider_;
+        private static UISlider overlayTransparencySlider_;
 
         [UsedImplicitly]
-        private static UICheckBox _showCompatibilityCheckErrorToggle;
+        private static UICheckBox enableTutorialToggle_;
 
-        private static UICheckBox _scanForKnownIncompatibleModsToggle;
-        private static UICheckBox _ignoreDisabledModsToggle;
+        [UsedImplicitly]
+        private static UICheckBox showCompatibilityCheckErrorToggle_;
 
-        private static UICheckBox _displayMphToggle;
-        private static UIDropDown _roadSignsMphThemeDropdown;
-        private static int _roadSignMphStyleInt;
+        private static UICheckBox scanForKnownIncompatibleModsToggle_;
+        private static UICheckBox ignoreDisabledModsToggle_;
+
+        private static UICheckBox displayMphToggle_;
+        private static UIDropDown roadSignsMphThemeDropdown_;
+        private static int roadSignMphStyleInt_;
 
         private static string T(string key) => Translation.Options.Get(key);
 
@@ -68,72 +69,78 @@ namespace TrafficManager.State {
                 }
             }
 
-            _languageDropdown = generalGroup.AddDropdown(
+            languageDropdown_ = generalGroup.AddDropdown(
                                     text: T("General.Dropdown:Select language") + ":",
                                     options: languageLabels,
                                     defaultSelection: languageIndex,
                                     eventCallback: OnLanguageChanged) as UIDropDown;
-            _lockButtonToggle = generalGroup.AddCheckbox(
+            lockButtonToggle_ = generalGroup.AddCheckbox(
                                     text: T("General.Checkbox:Lock main menu button position"),
                                     defaultValue: GlobalConfig.Instance.Main.MainMenuButtonPosLocked,
                                     eventCallback: OnLockButtonChanged) as UICheckBox;
-            _lockMenuToggle = generalGroup.AddCheckbox(
+            lockMenuToggle_ = generalGroup.AddCheckbox(
                                   text: T("General.Checkbox:Lock main menu window position"),
                                   defaultValue: GlobalConfig.Instance.Main.MainMenuPosLocked,
                                   eventCallback: OnLockMenuChanged) as UICheckBox;
 
-            _guiScaleSlider = generalGroup.AddSlider(
+            guiScaleSlider_ = generalGroup.AddSlider(
                                         text: T("General.Slider:GUI scale") + ":",
                                         min: 50,
                                         max: 200,
                                         step: 5,
                                         defaultValue: GlobalConfig.Instance.Main.GuiScale,
                                         eventCallback: OnGuiScaleChanged) as UISlider;
-            _guiScaleSlider.parent.Find<UILabel>("Label").width = 500;
 
-            _guiOpacitySlider = generalGroup.AddSlider(
+            Debug.Assert(guiScaleSlider_ != null, nameof(guiScaleSlider_) + " != null");
+            guiScaleSlider_.parent.Find<UILabel>("Label").width = 500;
+
+            guiOpacitySlider_ = generalGroup.AddSlider(
                                         text: T("General.Slider:Window transparency") + ":",
                                         min: 10,
                                         max: 100,
                                         step: 5,
                                         defaultValue: GlobalConfig.Instance.Main.GuiOpacity,
                                         eventCallback: OnGuiOpacityChanged) as UISlider;
-            _guiOpacitySlider.parent.Find<UILabel>("Label").width = 500;
 
-            _overlayTransparencySlider = generalGroup.AddSlider(
+            Debug.Assert(guiOpacitySlider_ != null, nameof(guiOpacitySlider_) + " != null");
+            guiOpacitySlider_.parent.Find<UILabel>("Label").width = 500;
+
+            overlayTransparencySlider_ = generalGroup.AddSlider(
                                              text: T("General.Slider:Overlay transparency") + ":",
                                              min: 0,
                                              max: 90,
                                              step: 5,
                                              defaultValue: GlobalConfig.Instance.Main.OverlayTransparency,
                                              eventCallback: OnOverlayTransparencyChanged) as UISlider;
-            _overlayTransparencySlider.parent.Find<UILabel>("Label").width = 500;
-            _enableTutorialToggle = generalGroup.AddCheckbox(
+
+            Debug.Assert(overlayTransparencySlider_ != null, nameof(overlayTransparencySlider_) + " != null");
+            overlayTransparencySlider_.parent.Find<UILabel>("Label").width = 500;
+            enableTutorialToggle_ = generalGroup.AddCheckbox(
                                         T("General.Checkbox:Enable tutorials"),
                                         GlobalConfig.Instance.Main.EnableTutorial,
                                         OnEnableTutorialsChanged) as UICheckBox;
-            _showCompatibilityCheckErrorToggle
+            showCompatibilityCheckErrorToggle_
                 = generalGroup.AddCheckbox(
                       T("General.Checkbox:Notify me about TM:PE startup conflicts"),
                       GlobalConfig.Instance.Main.ShowCompatibilityCheckErrorMessage,
                       OnShowCompatibilityCheckErrorChanged) as UICheckBox;
-            _scanForKnownIncompatibleModsToggle
+            scanForKnownIncompatibleModsToggle_
                 = generalGroup.AddCheckbox(
                       Translation.ModConflicts.Get("Checkbox:Scan for known incompatible mods on startup"),
                       GlobalConfig.Instance.Main.ScanForKnownIncompatibleModsAtStartup,
                       OnScanForKnownIncompatibleModsChanged) as UICheckBox;
-            _ignoreDisabledModsToggle = generalGroup.AddCheckbox(
+            ignoreDisabledModsToggle_ = generalGroup.AddCheckbox(
                                             text: Translation.ModConflicts.Get("Checkbox:Ignore disabled mods"),
                                             defaultValue: GlobalConfig.Instance.Main.IgnoreDisabledMods,
                                             eventCallback: OnIgnoreDisabledModsChanged) as UICheckBox;
-            Options.Indent(_ignoreDisabledModsToggle);
+            Options.Indent(ignoreDisabledModsToggle_);
 
             // General: Speed Limits
             SetupSpeedLimitsPanel(generalGroup);
 
             // General: Simulation
             UIHelperBase simGroup = panelHelper.AddGroup(T("General.Group:Simulation"));
-            _simulationAccuracyDropdown = simGroup.AddDropdown(
+            simulationAccuracyDropdown_ = simGroup.AddDropdown(
                                        text: T("General.Dropdown:Simulation accuracy") + ":",
                                        options: new[] {
                                                           T("General.Dropdown.Option:Very low"),
@@ -145,14 +152,14 @@ namespace TrafficManager.State {
                                        defaultSelection: (int)Options.simulationAccuracy,
                                        eventCallback: OnSimulationAccuracyChanged) as UIDropDown;
 
-            _instantEffectsToggle = simGroup.AddCheckbox(
+            instantEffectsToggle_ = simGroup.AddCheckbox(
                                        text: T("General.Checkbox:Apply AI changes right away"),
                                        defaultValue: Options.instantEffects,
                                        eventCallback: OnInstantEffectsChanged) as UICheckBox;
         }
 
         private static void SetupSpeedLimitsPanel(UIHelperBase generalGroup) {
-            _displayMphToggle = generalGroup.AddCheckbox(
+            displayMphToggle_ = generalGroup.AddCheckbox(
                                     text: Translation.SpeedLimits.Get("Checkbox:Display speed limits mph"),
                                     defaultValue: GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
                                     eventCallback: OnDisplayMphChanged) as UICheckBox;
@@ -161,14 +168,16 @@ namespace TrafficManager.State {
                 Translation.SpeedLimits.Get("General.Theme.Option:Round UK"),
                 Translation.SpeedLimits.Get("General.Theme.Option:Round German"),
             };
-            _roadSignMphStyleInt = (int)GlobalConfig.Instance.Main.MphRoadSignStyle;
-            _roadSignsMphThemeDropdown
+            roadSignMphStyleInt_ = (int)GlobalConfig.Instance.Main.MphRoadSignStyle;
+            roadSignsMphThemeDropdown_
                 = generalGroup.AddDropdown(
                       text: Translation.SpeedLimits.Get("General.Dropdown:Road signs theme mph") + ":",
                       options: mphThemeOptions,
-                      defaultSelection: _roadSignMphStyleInt,
+                      defaultSelection: roadSignMphStyleInt_,
                       eventCallback: OnRoadSignsMphThemeChanged) as UIDropDown;
-            _roadSignsMphThemeDropdown.width = 400;
+
+            Debug.Assert(roadSignsMphThemeDropdown_ != null, nameof(roadSignsMphThemeDropdown_) + " != null");
+            roadSignsMphThemeDropdown_.width = 400;
         }
 
         private static void OnLanguageChanged(int newLanguageIndex) {
@@ -240,12 +249,12 @@ namespace TrafficManager.State {
             }
 
             SetGuiTransparency((byte)Mathf.RoundToInt(newVal));
-            _guiOpacitySlider.tooltip
+            guiOpacitySlider_.tooltip
                 = string.Format(
                     T("General.Tooltip.Format:Window transparency: {0}%"),
                     GlobalConfig.Instance.Main.GuiOpacity);
             if (TMPELifecycle.Instance.IsGameLoaded) {
-                _guiOpacitySlider.RefreshTooltip();
+                guiOpacitySlider_.RefreshTooltip();
             }
 
             GlobalConfig.WriteConfig();
@@ -254,12 +263,12 @@ namespace TrafficManager.State {
 
         private static void OnGuiScaleChanged(float newVal) {
             SetGuiScale(newVal);
-            _guiScaleSlider.tooltip
+            guiScaleSlider_.tooltip
                 = string.Format(
                     T("General.Tooltip.Format:GUI scale: {0}%"),
                     GlobalConfig.Instance.Main.GuiScale);
             if (TMPELifecycle.Instance.IsGameLoaded) {
-                _guiScaleSlider.RefreshTooltip();
+                guiScaleSlider_.RefreshTooltip();
             }
 
             GlobalConfig.WriteConfig();
@@ -272,12 +281,12 @@ namespace TrafficManager.State {
             }
 
             SetOverlayTransparency((byte)Mathf.RoundToInt(newVal));
-            _overlayTransparencySlider.tooltip = string.Format(
+            overlayTransparencySlider_.tooltip = string.Format(
                 T("General.Tooltip.Format:Overlay transparency: {0}%"),
                 GlobalConfig.Instance.Main.OverlayTransparency);
             GlobalConfig.WriteConfig();
             if (TMPELifecycle.Instance.IsGameLoaded) {
-                _overlayTransparencySlider.RefreshTooltip();
+                overlayTransparencySlider_.RefreshTooltip();
             }
 
             Log._Debug($"Overlay transparency changed to {GlobalConfig.Instance.Main.OverlayTransparency}");
@@ -296,8 +305,8 @@ namespace TrafficManager.State {
         }
 
         public static void SetDisplayInMph(bool value) {
-            if (_displayMphToggle != null) {
-                _displayMphToggle.isChecked = value;
+            if (displayMphToggle_ != null) {
+                displayMphToggle_.isChecked = value;
             }
         }
 
@@ -341,8 +350,8 @@ namespace TrafficManager.State {
 
         public static void SetIgnoreDisabledMods(bool value) {
             Options.ignoreDisabledModsEnabled = value;
-            if (_ignoreDisabledModsToggle != null) {
-                _ignoreDisabledModsToggle.isChecked = value;
+            if (ignoreDisabledModsToggle_ != null) {
+                ignoreDisabledModsToggle_.isChecked = value;
             }
         }
 
@@ -350,11 +359,11 @@ namespace TrafficManager.State {
             bool isChanged = val != GlobalConfig.Instance.Main.GuiOpacity;
             GlobalConfig.Instance.Main.GuiOpacity = val;
 
-            if (isChanged && _guiOpacitySlider != null) {
-                _guiOpacitySlider.value = val;
+            if (isChanged && guiOpacitySlider_ != null) {
+                guiOpacitySlider_.value = val;
 
                 U.UOpacityValue opacity = UOpacityValue.FromOpacity(0.01f * val);
-                ModUI.Instance.uiOpacityObservable.NotifyObservers(
+                ModUI.Instance.UiOpacityObservable.NotifyObservers(
                           new ModUI.UIOpacityNotification {
                                                               Opacity = opacity,
                                                           });
@@ -365,8 +374,8 @@ namespace TrafficManager.State {
             bool changed = (int)val != (int)GlobalConfig.Instance.Main.GuiScale;
             GlobalConfig.Instance.Main.GuiScale = val;
 
-            if (changed && _guiScaleSlider != null) {
-                _guiScaleSlider.value = val;
+            if (changed && guiScaleSlider_ != null) {
+                guiScaleSlider_.value = val;
                 ModUI.Instance.UiScaleObservable.NotifyObservers(
                     new ModUI.UIScaleNotification { NewScale = val });
             }
@@ -376,30 +385,30 @@ namespace TrafficManager.State {
             bool changed = val != GlobalConfig.Instance.Main.OverlayTransparency;
             GlobalConfig.Instance.Main.OverlayTransparency = val;
 
-            if (changed && _overlayTransparencySlider != null) {
-                _overlayTransparencySlider.value = val;
+            if (changed && overlayTransparencySlider_ != null) {
+                overlayTransparencySlider_.value = val;
             }
         }
 
         public static void SetSimulationAccuracy(SimulationAccuracy newAccuracy) {
             Options.simulationAccuracy = newAccuracy;
-            if (_simulationAccuracyDropdown != null) {
-                _simulationAccuracyDropdown.selectedIndex = (int)newAccuracy;
+            if (simulationAccuracyDropdown_ != null) {
+                simulationAccuracyDropdown_.selectedIndex = (int)newAccuracy;
             }
         }
 
         public static void SetInstantEffects(bool value) {
             Options.instantEffects = value;
 
-            if (_instantEffectsToggle != null) {
-                _instantEffectsToggle.isChecked = value;
+            if (instantEffectsToggle_ != null) {
+                instantEffectsToggle_.isChecked = value;
             }
         }
 
         public static void SetScanForKnownIncompatibleMods(bool value) {
             Options.scanForKnownIncompatibleModsEnabled = value;
-            if (_scanForKnownIncompatibleModsToggle != null) {
-                _scanForKnownIncompatibleModsToggle.isChecked = value;
+            if (scanForKnownIncompatibleModsToggle_ != null) {
+                scanForKnownIncompatibleModsToggle_.isChecked = value;
             }
 
             if (!value) {

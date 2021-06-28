@@ -1,7 +1,7 @@
 namespace TrafficManager.State {
     using ICities;
-    using TrafficManager.UI.Helpers;
     using TrafficManager.UI;
+    using TrafficManager.UI.Helpers;
 
     public static class OptionsMassEditTab {
         #region Roundabout options
@@ -60,7 +60,7 @@ namespace TrafficManager.State {
         };
 
         #endregion
-        #region Prioirty road options
+        #region Priority road options
         public static CheckboxOption PriorityRoad_CrossMainR =
             new("PriorityRoad_CrossMainR") {
                 Label = "Priority roads.Option:Allow pedestrian crossings on main road",

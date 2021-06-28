@@ -12,7 +12,7 @@
 
     internal partial class ToolWindow {
         internal class PalettePanel : UPanel {
-            private readonly List<SpeedLimitPaletteButton> paletteButtons_ = new();
+            internal readonly List<SpeedLimitPaletteButton> paletteButtons_ = new();
 
             /// <summary>Create speeds palette based on the current options choices.</summary>
             /// <param name="window">Containing <see cref="ToolWindow"/>.</param>

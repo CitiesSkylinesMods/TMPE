@@ -201,7 +201,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// Forces speedlimit palette buttons to be updated, and active button also is highlighted.
         /// </summary>
         public void UpdatePaletteButtonsOnClick() {
-            foreach (SpeedLimitPaletteButton b in this.palettePanel_.PaletteButtons) {
+            foreach (SpeedLimitPaletteButton b in this.palettePanel_.paletteButtons_) {
                 b.ApplyButtonSkin();
                 b.UpdateSpeedlimitButton();
             }

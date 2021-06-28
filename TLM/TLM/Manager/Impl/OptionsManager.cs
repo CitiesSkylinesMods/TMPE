@@ -179,7 +179,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (data.Length >= 35) {
-                OptionsGameplayTab.SetDLSPercentage(data[34]);
+                OptionsGameplayTab.SetDlsPercentage(data[34]);
             }
 
             if (data.Length >= 36) {
@@ -242,8 +242,8 @@ namespace TrafficManager.Manager.Impl {
             index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR);
             index = LoadBool(index, OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR);
 
-            index = LoadBool(index, OptionsVehicleRestrictionsTab.NoDoubleCrossings);
-            index = LoadBool(index, OptionsVehicleRestrictionsTab.DedicatedTurningLanes);
+            index = LoadBool(index, OptionsVehicleRestrictionsTab.noDoubleCrossings);
+            index = LoadBool(index, OptionsVehicleRestrictionsTab.dedicatedTurningLanes);
             return true;
         }
 
@@ -309,8 +309,8 @@ namespace TrafficManager.Manager.Impl {
                 OptionsMassEditTab.RoundAboutQuickFix_ParkingBanMainR.Save(),
                 OptionsMassEditTab.RoundAboutQuickFix_ParkingBanYieldR.Save(),
 
-                OptionsVehicleRestrictionsTab.NoDoubleCrossings.Save(),
-                OptionsVehicleRestrictionsTab.DedicatedTurningLanes.Save(),
+                OptionsVehicleRestrictionsTab.noDoubleCrossings.Save(),
+                OptionsVehicleRestrictionsTab.dedicatedTurningLanes.Save(),
             };
         }
     }
