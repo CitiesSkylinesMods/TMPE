@@ -570,8 +570,7 @@ namespace TrafficManager.Manager.Impl {
 
             if (speedLimit != null) {
                 Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
-            }
-            else {
+            } else {
                 Flags.RemoveLaneSpeedLimit(laneId);
             }
             API.Notifier.OnSegmentModified(segmentId, this);
