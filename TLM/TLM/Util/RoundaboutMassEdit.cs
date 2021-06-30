@@ -326,6 +326,10 @@ namespace TrafficManager.Util {
             return list0;
         }
 
+        /// <summary>
+        /// get segments that can be part of the round about and match the given direction.
+        /// segments are sorted by angle.
+        /// </summary>
         private static List<ushort> GetSortedSegmentsHelper(
             ushort headNodeId,
             ushort segmentId,
@@ -334,26 +338,16 @@ namespace TrafficManager.Util {
                 netService.GetNodeSegmentIds(headNodeId, ClockDirection.CounterClockwise)
                 .Where(_segmentId =>
                     IsPartofRoundabout(_segmentId, segmentId, headNodeId) &&
-                    segEndMan.GetDirection(segmentId, _segmentId, headNodeId) == dir)
-                .ToList();
+                    segEndMan.GetDirection(segmentId, _segmentId, headNodeId) == dir);
 
             Vector3 endDir = segmentId.ToSegment().GetDirection(headNodeId);
-            segmentList.Sort(Comparison);
-            return segmentList;
 
-            // segment closer to 180 degree comes first
-            int Comparison(ushort segmentID1, ushort segmentID2) {
-                Vector3 endDir1 = segmentID1.ToSegment().GetDirection(headNodeId);
-                Vector3 endDir2 = segmentID2.ToSegment().GetDirection(headNodeId);
-                var dot1 = VectorUtils.DotXZ(endDir1, endDir);
-                var dot2 = VectorUtils.DotXZ(endDir2, endDir);
-                return Sign(dot2 - dot1); // bigger dot product means closer to 180 degree.
-            }
+            return segmentList.OrderBy(Dot).ToList();
 
-            int Sign(float x) {
-                if (x < 0) return -1;
-                if (x > 0) return 1;
-                return 0;
+            // more negative dot-product => angle is closer to 180
+            float Dot(ushort _segmentID) {
+                Vector3 _endDir = _segmentID.ToSegment().GetDirection(headNodeId);
+                return VectorUtils.DotXZ(_endDir, endDir);
             }
         }
 
