@@ -312,13 +312,13 @@ namespace TrafficManager.Util {
         private static List<ushort> GetSortedSegments(ushort segmentId) {
             ushort headNodeId = netService.GetHeadNode(segmentId);
             bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
-            var list0 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Forward, !lht);
-            var list1 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Left, lht);
-            var list2 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Right, !lht);
+            var list0 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Forward);
+            var list1 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Left);
+            var list2 = GetSortedSegmentsHelper(headNodeId, segmentId, ArrowDirection.Right);
 
             if (lht) {
-                list0.AddRange(list1);
                 list0.AddRange(list2);
+                list0.AddRange(list1);
             } else {
                 list0.AddRange(list1);
                 list0.AddRange(list2);
@@ -329,35 +329,32 @@ namespace TrafficManager.Util {
         private static List<ushort> GetSortedSegmentsHelper(
             ushort headNodeId,
             ushort segmentId,
-            ArrowDirection dir,
-            bool preferLeft) {
-            ArrowDirection preferDir = preferLeft ? ArrowDirection.Left : ArrowDirection.Right;
+            ArrowDirection dir) {
+            var segmentList =
+                netService.GetNodeSegmentIds(headNodeId, ClockDirection.CounterClockwise)
+                .Where(_segmentId =>
+                    IsPartofRoundabout(_segmentId, segmentId, headNodeId) &&
+                    segEndMan.GetDirection(segmentId, _segmentId, headNodeId) == dir)
+                .ToList();
 
-            HashSet<ushort> hashSet = new HashSet<ushort>();
-            List<ushort> sortedSegList = new List<ushort>();
+            Vector3 endDir = segmentId.ToSegment().GetDirection(headNodeId);
+            segmentList.Sort(Comparison);
+            return segmentList;
 
-            foreach (var nodeSegmentId in netService.GetNodeSegmentIds(headNodeId, ClockDirection.CounterClockwise)) {
-                if (!IsPartofRoundabout(nodeSegmentId, segmentId, headNodeId)) {
-                    continue;
-                }
-                if (segEndMan.GetDirection(segmentId, nodeSegmentId, headNodeId) == dir) {
-                    for (int i = 0; i < sortedSegList.Count; ++i) {
-                        if (segEndMan.GetDirection(nodeSegmentId, sortedSegList[i], headNodeId) == preferDir) {
-                            if (!hashSet.Add(nodeSegmentId)) {
-                                break;
-                            }
-                            sortedSegList.Insert(i, nodeSegmentId);
-                            continue;
-                        }
-                    }
-                    if (!hashSet.Add(nodeSegmentId)) {
-                        break;
-                    }
-                    sortedSegList.Add(nodeSegmentId);
-                }
+            // segment closer to 180 degree comes first
+            int Comparison(ushort segmentID1, ushort segmentID2) {
+                Vector3 endDir1 = segmentID1.ToSegment().GetDirection(headNodeId);
+                Vector3 endDir2 = segmentID2.ToSegment().GetDirection(headNodeId);
+                var dot1 = VectorUtils.DotXZ(endDir1, endDir);
+                var dot2 = VectorUtils.DotXZ(endDir2, endDir);
+                return Sign(dot2 - dot1); // bigger dot product means closer to 180 degree.
             }
 
-            return sortedSegList;
+            int Sign(float x) {
+                if (x < 0) return -1;
+                if (x > 0) return 1;
+                return 0;
+            }
         }
 
         /// <summary>
