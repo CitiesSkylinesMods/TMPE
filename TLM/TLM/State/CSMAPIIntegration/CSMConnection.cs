@@ -21,7 +21,7 @@ namespace TrafficManager.State.MultiplayerAPIIntegration
         public CSMConnection()
         {
             this.name = "Traffic Manger: PE";
-            Notifier.EventLevelLaoded += this.OnLevelLoad;
+            Notifier.EventLevelLoaded += this.OnLevelLoad;
         }
 
         private void NotificationListener(OnModifiedEventArgs eventArgs)
