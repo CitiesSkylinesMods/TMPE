@@ -213,6 +213,9 @@
     <Compile Include="State\Asset\AssetData.cs" />
     <Compile Include="Lifecycle\AssetDataExtension.cs" />
     <Compile Include="State\Asset\SegmentNetworkIDs.cs" />
+    <Compile Include="State\CSMAPIIntegration\Commands\Data\TMPENotification.cs" />
+    <Compile Include="State\CSMAPIIntegration\Commands\Handlers\TMPENotificationHandler.cs" />
+    <Compile Include="State\CSMAPIIntegration\CSMConnection.cs" />
     <Compile Include="State\SerializationUtil.cs" />
     <Compile Include="State\TMPEMoveItIntegration.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
