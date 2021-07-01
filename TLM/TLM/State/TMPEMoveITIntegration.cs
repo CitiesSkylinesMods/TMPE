@@ -36,8 +36,13 @@ namespace TrafficManager.State {
         }
 
         public override void Paste(InstanceID targetInstanceID, object record, Dictionary<InstanceID, InstanceID> map) {
-            if(record is IRecordable r) {
-                r.Transfer(map);
+            if (record is IRecordable r) {
+                if (map != null) {
+                    r.Transfer(map);
+                }
+                else {
+                    r.Restore();
+                }
             }
         }
 
