@@ -41,7 +41,8 @@ namespace TrafficManager.State.ConfigData {
             false, // 23: debug lane connections
             false, // 24: debug resource loading
             false, // 25: debug turn-on-red
-            false  // 26: debug speed limits (also lists NetInfos skipped due to m_netAI in SpeedLimitsManager.cs)
+            false, // 26: debug speed limits (also lists NetInfos skipped due to m_netAI in SpeedLimitsManager.cs)
+            false  // 27: debug CSM API Integration
         };
 
         private int nodeId_ = 0;
@@ -128,7 +129,8 @@ namespace TrafficManager.State.ConfigData {
         LaneConnections = 23,
         ResourceLoading = 24,
         TurnOnRed = 25,
-        SpeedLimits = 26
+        SpeedLimits = 26,
+        CSMNotification = 27
     }
 
     static class DebugSwitchExtensions {
