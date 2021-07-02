@@ -12,8 +12,8 @@ namespace TrafficManager.State.MultiplayerAPIIntegration
     /// Allows TMPE to connect to CSM (Cities Skylines Multiplayer),
     /// sending notification to all clients.
     /// </summary>
-    internal class CSMConnection : Connection
-    {
+    internal class CSMConnection : Connection {
+        public static IgnoreHelper ignoreHelper;
         /// <summary>
         /// Initializes a new instance of the <see cref="CSMConnection"/> class.
         /// Sets name, and Level loaded event listener.
@@ -21,6 +21,7 @@ namespace TrafficManager.State.MultiplayerAPIIntegration
         public CSMConnection()
         {
             this.name = "Traffic Manger: PE";
+            ignoreHelper = new IgnoreHelper();
             Notifier.EventLevelLoaded += this.OnLevelLoad;
         }
 
@@ -31,7 +32,7 @@ namespace TrafficManager.State.MultiplayerAPIIntegration
 #else
             const bool logCSMNotification = false;
 #endif
-            if (IgnoreHelper.Instance.IsIgnored())
+            if (ignoreHelper.IsIgnored())
             {
                 return;
             }
