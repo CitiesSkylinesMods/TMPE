@@ -15,13 +15,13 @@ namespace TrafficManager.State.MultiplayerAPIIntegration.Commands {
         /// <param name="command">The TMPE Notification containing other players changes.</param>
         protected override void Handle(TMPENotification command)
         {
-            IgnoreHelper.Instance.StartIgnore();
+            SimulationManager.instance.AddAction(() => IgnoreHelper.Instance.StartIgnore());
             TMPEMoveItIntegrationFactory moveItIntegrationFactory = new TMPEMoveItIntegrationFactory();
             MoveItIntegrationBase moveItIntegration = moveItIntegrationFactory.GetInstance();
             System.Version version = new System.Version(command.DataVersion);
             object record = moveItIntegration.Decode64(command.Base64RecordObject, version);
             moveItIntegration.Paste(InstanceID.Empty, record, null);
-            IgnoreHelper.Instance.EndIgnore();
+            SimulationManager.instance.AddAction(() =>IgnoreHelper.Instance.EndIgnore());
         }
     }
 }
