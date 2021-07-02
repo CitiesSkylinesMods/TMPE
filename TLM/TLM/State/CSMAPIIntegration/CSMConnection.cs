@@ -31,13 +31,12 @@ namespace TrafficManager.State.MultiplayerAPIIntegration
 #else
             const bool logCSMNotification = false;
 #endif
+            if (IgnoreHelper.Instance.IsIgnored())
+            {
+                return;
+            }
             SimulationManager.instance.AddAction(() =>
             {
-                if (IgnoreHelper.Instance.IsIgnored())
-                {
-                    return;
-                }
-
                 string base64Data = null;
                 TMPEMoveItIntegration moveItIntegration = new TMPEMoveItIntegration();
                 object data = moveItIntegration.Copy(eventArgs.InstanceID);
