@@ -12,6 +12,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
     using TrafficManager.Util;
+    using UnityEngine;
 
     public class RoutingManager
         : AbstractGeometryObservingManager,
@@ -461,8 +462,13 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    bool start = (bool)Constants.ServiceFactory.NetService.IsStartNode(segId, nextNodeId);
-                    ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segId, start)];
+                    bool? start = Constants.ServiceFactory.NetService.IsStartNode(segId, nextNodeId);
+                    if (!start.HasValue) {
+                        Log.Error($"Segment with id: {segId} is not connected to the node {nextNodeId}");
+                        Debug.LogError($"TM:PE RecalculateLaneRoutings - Segment with id {segId} is not connected to the node {nextNodeId}");
+                        continue;
+                    }
+                    ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segId, start.Value)];
 
                     if (segEnd.incoming) {
                         ++numIncoming;
