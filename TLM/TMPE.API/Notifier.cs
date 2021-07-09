@@ -20,22 +20,26 @@ namespace TrafficManager.API
         public object Data;
     }
 
-    public static class Notifier
+    public class Notifier
     {
-        public static event Action EventLevelLoaded;
+        public static Notifier _instance;
+        public static Notifier Instance => _instance ??= new Notifier();
+
+
+        public static Action EventLevelLoaded;
 
         // TODO [issue #967]: notify TTL Start/Stop events
-        public static event Action<OnModifiedEventArgs> EventModified;
+        public static Action<OnModifiedEventArgs> EventModified;
 
-        public static void OnLevelLoaded() => EventLevelLoaded?.Invoke();
+        public void OnLevelLoaded() => EventLevelLoaded?.Invoke();
 
-        public static void OnModified(OnModifiedEventArgs args)
+        public void OnModified(OnModifiedEventArgs args)
         {
             SimulationManager.instance.AddAction(() =>
                 EventModified?.Invoke(args));
         }
 
-        public static void OnSegmentModified(ushort segmentId, object sender = null, object data = null) {
+        public void OnSegmentModified(ushort segmentId, object sender = null, object data = null) {
             OnModified(new OnModifiedEventArgs {
                 InstanceID = new InstanceID { NetSegment = segmentId },
                 Sender = sender,
@@ -43,7 +47,7 @@ namespace TrafficManager.API
             });
         }
 
-        public static void OnNodeModified(ushort nodeId, object sender = null, object data = null)
+        public void OnNodeModified(ushort nodeId, object sender = null, object data = null)
         {
             OnModified(new OnModifiedEventArgs
             {
@@ -53,7 +57,7 @@ namespace TrafficManager.API
             });
         }
 
-        public static void OnSegmentNodesMofied(ushort segmentId, object sender = null, object data = null)
+        public void OnSegmentNodesMofied(ushort segmentId, object sender = null, object data = null)
         {
             var segments = NetManager.instance.m_segments.m_buffer;
             OnNodeModified(segments[segmentId].m_startNode, sender, data);
