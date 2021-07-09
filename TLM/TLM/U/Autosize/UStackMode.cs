@@ -3,6 +3,8 @@ namespace TrafficManager.U.Autosize {
     /// Defines how <see cref="UResizer.Stack"/> will operate.
     /// </summary>
     public enum UStackMode {
+        None,
+
         /// <summary>
         /// The stacked control will be placed to the bottom left corner of the
         /// reference control or the previous sibling.

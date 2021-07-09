@@ -20,52 +20,52 @@ namespace TrafficManager.State.Keybinds {
         /// This input key can not be changed and is not checked, instead it is display only
         /// </summary>
         // Not editable
-        internal static KeybindSetting Esc = new KeybindSetting(
+        internal static KeybindSetting Esc = new(
             cat: "Global",
             configFileKey: "Key_ExitSubtool",
             defaultKey1: SavedInputKey.Encode(key: KeyCode.Escape, control: false, shift: false, alt: false));
 
         // Not editable
-        internal static KeybindSetting RightClick = new KeybindSetting(
+        internal static KeybindSetting RightClick = new(
             cat: "Global",
             configFileKey: "Key_RightClick",
             defaultKey1: SavedInputKey.Encode(key: KeyCode.Mouse1, control: false, shift: false, alt: false));
 
-        public static KeybindSetting ToggleMainMenu = new KeybindSetting(
+        public static KeybindSetting ToggleMainMenu = new(
             cat: "Global",
             configFileKey: "Key_ToggleTMPEMainMenu",
             defaultKey1: SavedInputKey.Encode(key: KeyCode.Semicolon, control: false, shift: true, alt: false));
 
         public static KeybindSetting ToggleTrafficLightTool =
-            new KeybindSetting("Global", "Key_ToggleTrafficLightTool");
+            new("Global", "Key_ToggleTrafficLightTool");
 
         public static KeybindSetting LaneArrowTool =
-            new KeybindSetting("Global", "Key_LaneArrowTool");
+            new("Global", "Key_LaneArrowTool");
 
         public static KeybindSetting LaneConnectionsTool =
-            new KeybindSetting("Global", "Key_LaneConnectionsTool");
+            new("Global", "Key_LaneConnectionsTool");
 
         public static KeybindSetting PrioritySignsTool =
-            new KeybindSetting("Global", "Key_PrioritySignsTool");
+            new("Global", "Key_PrioritySignsTool");
 
         public static KeybindSetting JunctionRestrictionsTool =
-            new KeybindSetting("Global", "Key_JunctionRestrictionsTool");
+            new("Global", "Key_JunctionRestrictionsTool");
 
         public static KeybindSetting SpeedLimitsTool =
-            new KeybindSetting("Global", "Key_SpeedLimitsTool");
+            new("Global", "Key_SpeedLimitsTool");
 
-        public static KeybindSetting LaneConnectorStayInLane = new KeybindSetting(
+        public static KeybindSetting LaneConnectorStayInLane = new(
             "LaneConnector",
             "Key_LaneConnector_StayInLane",
             SavedInputKey.Encode(KeyCode.S, control:true, shift:false, alt:false));
 
-        public static KeybindSetting RestoreDefaultsKey = new KeybindSetting(
+        public static KeybindSetting RestoreDefaultsKey = new(
             "Global",
             "Key_RestoreDefaults",
             SavedInputKey.Encode(KeyCode.Delete, false, false, false),
             SavedInputKey.Encode(KeyCode.Backspace, false, false, false));
 
-        protected KeybindUI keybindUi_ = new KeybindUI();
+        protected KeybindUI keybindUi_ = new();
 
         /// <summary>
         /// Counter to produce alternating UI row colors (dark and light).

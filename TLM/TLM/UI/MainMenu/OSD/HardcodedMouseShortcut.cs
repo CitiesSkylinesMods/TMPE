@@ -1,8 +1,10 @@
 namespace TrafficManager.UI.MainMenu.OSD {
     using System;
+    using System.Collections.Generic;
     using System.Text;
     using ColossalFramework;
     using ColossalFramework.UI;
+    using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
 
@@ -20,10 +22,10 @@ namespace TrafficManager.UI.MainMenu.OSD {
         private InputKey inputKey_;
 
         public HardcodedMouseShortcut(UIMouseButton button,
-                            bool shift,
-                            bool ctrl,
-                            bool alt,
-                            string localizedText) {
+                                      string localizedText,
+                                      bool shift = false,
+                                      bool ctrl = false,
+                                      bool alt = false) {
             button_ = button;
             shift_ = shift;
             ctrl_ = ctrl;
@@ -31,35 +33,37 @@ namespace TrafficManager.UI.MainMenu.OSD {
             localizedText_ = localizedText;
         }
 
-        public override void Build(U.UiBuilder<U.UPanel> builder) {
+        public override void Build(UIComponent parent,
+                                   U.UBuilder builder) {
             // Capacity 9 will fit all modifiers and separators and the text
             StringBuilder text = new StringBuilder(capacity: 9);
 
-            text.Append($"<color {UConst.SHORTCUT_TEXT_HEX}>");
+            text.Append(UConst.GetKeyboardShortcutColorTagOpener());
 
             if (this.shift_) {
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Shift"));
                 text.Append("+");
             }
+
             if (this.ctrl_) {
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Ctrl"));
                 text.Append("+");
             }
+
             if (this.alt_) {
                 text.Append(Translation.Options.Get("Shortcut.Modifier:Alt"));
                 text.Append("+");
             }
 
             text.Append(TranslationForMouseButton(this.button_));
-
-            text.Append("</color> ");
+            text.Append(UConst.KEYBOARD_SHORTCUT_CLOSING_TAG + " ");
             text.Append(this.localizedText_);
 
-            using (UiBuilder<ULabel> labelB = builder.Label<U.ULabel>(text.ToString())) {
-                labelB.Control.processMarkup = true;
-                labelB.ResizeFunction(
-                    r => { r.Stack(mode: UStackMode.NewRowBelow); });
-            }
+            builder.Label<U.ULabel, UIComponent>(
+                parent,
+                t: text.ToString(),
+                stack: UStackMode.NewRowBelow,
+                processMarkup: true);
         }
 
         private static string TranslationForMouseButton(UIMouseButton button) {

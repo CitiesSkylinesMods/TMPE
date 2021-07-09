@@ -2,6 +2,7 @@ namespace TrafficManager.UI.SubTools {
     using System.Collections.Generic;
     using ColossalFramework;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Lifecycle;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI.MainMenu.OSD;
@@ -90,6 +91,7 @@ namespace TrafficManager.UI.SubTools {
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
             NetManager netManager = Singleton<NetManager>.instance;
             NetNode[] nodesBuffer = netManager.m_nodes.m_buffer;
+            var textures = TMPELifecycle.Instance.Textures.TrafficLight;
 
             //--------------------------------
             // Render all visible node states
@@ -100,25 +102,26 @@ namespace TrafficManager.UI.SubTools {
                 // Check whether there is a traffic light and CAN be any at all
                 Texture2D overlayTex;
                 if (TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
-                    overlayTex = TrafficLightTextures.TrafficLightEnabledTimed;
+                    overlayTex = textures.TrafficLightEnabledTimed;
                 } else
                 if (TrafficLightManager.Instance.HasTrafficLight(
                     nodeId,
                     ref nodesBuffer[nodeId])) {
                     // Render traffic light icon
-                    overlayTex = TrafficLightTextures.TrafficLightEnabled;
+                    overlayTex = textures.TrafficLightEnabled;
                 } else {
                     // Render traffic light possible but disabled icon
-                    overlayTex = TrafficLightTextures.TrafficLightDisabled;
+                    overlayTex = textures.TrafficLightDisabled;
                 }
 
-                MainTool.DrawGenericOverlayTexture(
-                    overlayTex,
-                    camPos,
-                    nodesBuffer[nodeId].m_position,
-                    SIGN_SIZE,
-                    SIGN_SIZE,
-                    false);
+                Highlight.DrawGenericOverlayTexture(
+                    texture: overlayTex,
+                    camPos: camPos,
+                    worldPos: nodesBuffer[nodeId].m_position,
+                    width: SIGN_SIZE,
+                    height: SIGN_SIZE,
+                    canHover: false,
+                    screenRect: out _);
             }
         }
 
@@ -143,11 +146,11 @@ namespace TrafficManager.UI.SubTools {
 
             // Render the current hovered node as blue
             if ((HoveredNodeId != 0) && Flags.MayHaveTrafficLight(HoveredNodeId)) {
-                MainTool.DrawNodeCircle(
-                    cameraInfo,
-                    HoveredNodeId,
-                    Input.GetMouseButton(0),
-                    false);
+                Highlight.DrawNodeCircle(
+                    cameraInfo: cameraInfo,
+                    nodeId: HoveredNodeId,
+                    warning: Input.GetMouseButton(0),
+                    alpha: false);
             }
         }
 

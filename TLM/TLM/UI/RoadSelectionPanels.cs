@@ -1,9 +1,9 @@
 namespace TrafficManager.UI {
-    using ColossalFramework.UI;
-    using CSUtil.Commons;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using ColossalFramework.UI;
+    using CSUtil.Commons;
     using TrafficManager.U;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.Util;
@@ -15,7 +15,7 @@ namespace TrafficManager.UI {
 
         private RoadSelectionUtil roadSelectionUtil_;
 
-        public static RoadSelectionPanels Root { get; private set; } = null;
+        public static RoadSelectionPanels Root;
 
         internal enum FunctionModes {
             None = 0,
@@ -52,17 +52,21 @@ namespace TrafficManager.UI {
         }
 
         public UIPanel RoadWorldInfoPanelExt;
-        public static RoadWorldInfoPanel RoadWorldInfoPanel => UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
+
+        public static RoadWorldInfoPanel RoadWorldInfoPanel =>
+            UIView.library.Get<RoadWorldInfoPanel>("RoadWorldInfoPanel");
 
         /// <summary>
         ///  list all instances of road selection panels.
         /// </summary>
         private IList<PanelExt> panels_;
+
         private UIComponent priorityRoadToggle_;
 
         public IRecordable Record;
 
         #region Load
+
         public void Awake() {
             _function = FunctionModes.None;
         }
@@ -81,14 +85,17 @@ namespace TrafficManager.UI {
                 // TODO [issue #710] add panel when able to get road by name.
                 PanelExt panel = AddPanel(roadWorldInfoPanel.component);
                 panel.relativePosition += new Vector3(-10f, -10f);
-                priorityRoadToggle_ = roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
+                priorityRoadToggle_ =
+                    roadWorldInfoPanel.component.Find<UICheckBox>("PriorityRoadCheckbox");
                 if (priorityRoadToggle_ != null) {
                     priorityRoadToggle_.eventVisibilityChanged += HidePriorityRoadToggleEvent;
                 }
+
                 panel.eventVisibilityChanged += ShowAdvisorOnEvent;
                 RoadWorldInfoPanelExt = panel;
 
-                UISprite icon = roadWorldInfoPanel.Find<UISlicedSprite>("Caption")?.Find<UISprite>("Sprite");
+                UISprite icon = roadWorldInfoPanel.Find<UISlicedSprite>("Caption")
+                                                  ?.Find<UISprite>("Sprite");
                 if (icon != null) {
                     icon.spriteName = "ToolbarIconRoads";
                     icon.Invalidate();
@@ -101,6 +108,7 @@ namespace TrafficManager.UI {
                 if (CREATE_NET_ADJUST_SUBPANEL) {
                     AddPanel(roadAdjustPanel);
                 }
+
                 roadAdjustPanel.eventVisibilityChanged += ShowAdvisorOnEvent;
             }
 
@@ -121,9 +129,11 @@ namespace TrafficManager.UI {
             panels_.Add(panel);
             return panel;
         }
+
         #endregion
 
         #region Unload
+
         public void OnDestroy() {
             if (roadSelectionUtil_ != null) {
                 roadSelectionUtil_ = null;
@@ -156,6 +166,7 @@ namespace TrafficManager.UI {
             if (Root == this)
                 Root = null;
         }
+
         #endregion Unload
 
         #region Event handling
@@ -169,6 +180,7 @@ namespace TrafficManager.UI {
             if (reset) {
                 _function = FunctionModes.None;
             }
+
             foreach (var panel in panels_ ?? Enumerable.Empty<PanelExt>()) {
                 panel.Refresh();
             }
@@ -203,6 +215,7 @@ namespace TrafficManager.UI {
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -214,6 +227,7 @@ namespace TrafficManager.UI {
                 if (panel.isVisible)
                     return true;
             }
+
             return NetManager.instance.NetAdjust.PathVisible;
         }
 
@@ -227,7 +241,7 @@ namespace TrafficManager.UI {
         }
 
         private void HidePriorityRoadToggleEvent(UIComponent component, bool value) =>
-             component.isVisible = false;
+            component.isVisible = false;
 
         private void HideRoadAdjustPanelElements(UIPanel roadAdjustPanel) {
             UILabel roadSelectLabel = roadAdjustPanel.Find<UILabel>("Label");
@@ -247,6 +261,7 @@ namespace TrafficManager.UI {
                 Log.Error("ModUI.GetTrafficManagerTool(true) returned null");
                 return;
             }
+
             UI.SubTools.PrioritySigns.MassEditOverlay.Show = true;
             tmTool.SetToolMode(ToolMode.None);
             tmTool.InitializeSubTools();
@@ -265,6 +280,7 @@ namespace TrafficManager.UI {
                 });
             }
         }
+
         #endregion
 
         /// <summary>
@@ -304,17 +320,19 @@ namespace TrafficManager.UI {
             private void SetupAtlas() {
                 // Create and populate list of background atlas keys, used by all buttons
                 // And also each button will have a chance to add their own atlas keys for loading.
-                var tmpSkin = new ButtonSkin() {
-                    Prefix = "RoadSelection",
-                    BackgroundPrefix = "RoundButton",
-                    ForegroundNormal = false,
-                    BackgroundHovered = true,
-                    BackgroundActive = true,
-                    BackgroundDisabled = true,
-                };
+                var tmpSkin = ButtonSkin.CreateSimple(
+                                            foregroundPrefix: "RoadSelection",
+                                            backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
+                                        .CanHover(foreground: false)
+                                        .CanActivate(foreground: false)
+                                        .CanDisable(foreground: false)
+                                        .NormalForeground(false);
 
                 // By default the atlas will include backgrounds: DefaultRound-bg-normal
-                var atlasBuilder = new AtlasBuilder();
+                var atlasBuilder = new AtlasBuilder(
+                    atlasName: "RoadSelectionPanelAtlas",
+                    loadingPath: "RoadSelectionPanel",
+                    sizeHint: new IntVector2(512));
                 tmpSkin.UpdateAtlasBuilder(
                     atlasBuilder: atlasBuilder,
                     spriteSize: new IntVector2(50));
@@ -326,10 +344,7 @@ namespace TrafficManager.UI {
                 }
 
                 // Create atlas and give it to all buttons
-                allButtonsAtlas_ = atlasBuilder.CreateAtlas(
-                    atlasName: "RoadSelectionPanelAtlas",
-                    loadingPath: "RoadSelectionPanel",
-                    atlasSizeHint: new IntVector2(512));
+                allButtonsAtlas_ = atlasBuilder.CreateAtlas();
 
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
                     button.atlas = allButtonsAtlas_;
@@ -338,9 +353,11 @@ namespace TrafficManager.UI {
 
             internal bool HasHoveringButton() {
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
-                    if (button.IsHovered && button.isEnabled)
+                    if (button.IsHovered && button.isEnabled) {
                         return true;
+                    }
                 }
+
                 return false;
             }
 
@@ -351,42 +368,69 @@ namespace TrafficManager.UI {
             }
 
             public class ClearButtton : ButtonExt {
-                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Clear");
-                public override string SkinPrefix => Function.ToString(); // remove _RHT/_LHT postFix.
+                protected override string U_OverrideTooltipText() =>
+                    Translation.Menu.Get("RoadSelection.Tooltip:Clear");
+
+                public override string SkinPrefix =>
+                    Function.ToString(); // remove _RHT/_LHT postFix.
+
                 internal override FunctionModes Function => FunctionModes.Clear;
                 public override IRecordable Do() => PriorityRoad.ClearRoad(Selection);
             }
+
             public class StopButtton : ButtonExt {
-                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
+                protected override string U_OverrideTooltipText() =>
+                    Translation.Menu.Get("RoadSelection.Tooltip:Stop entry");
+
                 internal override FunctionModes Function => FunctionModes.Stop;
+
                 public override IRecordable Do() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsTool.PrioritySignsMassEditMode.MainStop, Selection);
+                    PriorityRoad.FixPrioritySigns(
+                        PrioritySignsTool.PrioritySignsMassEditMode.MainStop,
+                        Selection);
             }
+
             public class YieldButton : ButtonExt {
-                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
+                protected override string U_OverrideTooltipText() =>
+                    Translation.Menu.Get("RoadSelection.Tooltip:Yield entry");
+
                 internal override FunctionModes Function => FunctionModes.Yield;
+
                 public override IRecordable Do() =>
-                    PriorityRoad.FixPrioritySigns(PrioritySignsTool.PrioritySignsMassEditMode.MainYield, Selection);
+                    PriorityRoad.FixPrioritySigns(
+                        PrioritySignsTool.PrioritySignsMassEditMode.MainYield,
+                        Selection);
             }
+
             public class HighPriorityButtton : ButtonExt {
-                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:High priority");
+                protected override string U_OverrideTooltipText() =>
+                    Translation.Menu.Get("RoadSelection.Tooltip:High priority");
+
                 internal override FunctionModes Function => FunctionModes.HighPriority;
                 public override IRecordable Do() => PriorityRoad.FixRoad(Selection);
             }
+
             public class RoundaboutButtton : ButtonExt {
-                protected override string U_OverrideTooltipText() => Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
+                protected override string U_OverrideTooltipText() =>
+                    Translation.Menu.Get("RoadSelection.Tooltip:Roundabout");
+
                 internal override FunctionModes Function => FunctionModes.Roundabout;
-                public override IRecordable Do() => RoundaboutMassEdit.Instance.FixRoundabout(Selection);
+
+                public override IRecordable Do() =>
+                    RoundaboutMassEdit.Instance.FixRoundabout(Selection);
+
                 public override bool ShouldDisable() {
                     if (Length <= 1) {
                         return true;
                     }
+
                     var segmentList = Selection;
                     bool isRoundabout = RoundaboutMassEdit.IsRoundabout(segmentList, semi: true);
                     if (!isRoundabout) {
                         segmentList.Reverse();
                         isRoundabout = RoundaboutMassEdit.IsRoundabout(segmentList, semi: true);
                     }
+
                     return !isRoundabout;
                 }
             }
@@ -396,7 +440,8 @@ namespace TrafficManager.UI {
 
                 public RoadSelectionPanels Root => RoadSelectionPanels.Root;
 
-                public virtual string ButtonName => "TMPE.RoadSelectionPanel" + this.GetType().ToString();
+                public virtual string ButtonName =>
+                    "TMPE.RoadSelectionPanel" + this.GetType().ToString();
 
                 private static string TrafficSidePostFix => Shortcuts.RHT ? "_RHT" : "_LHT";
 
@@ -426,29 +471,24 @@ namespace TrafficManager.UI {
                 public override void Awake() {
                     base.Awake();
                     name = ButtonName;
-                    Skin = new U.ButtonSkin() {
-                        Prefix = SkinPrefix,
+                    Skin = ButtonSkin.CreateSimple(
+                                         foregroundPrefix: SkinPrefix,
+                                         backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
+                                     .CanDisable()
+                                     .CanHover(foreground: false)
+                                     .CanActivate(foreground: false);
 
-                        BackgroundPrefix = "RoundButton",
-                        BackgroundHovered = true,
-                        BackgroundActive = true,
-                        BackgroundDisabled = true,
-
-                        ForegroundNormal = true,
-                        ForegroundHovered = false,
-                        ForegroundActive = false,
-                        ForegroundDisabled = true,
-                    };
                     width = height = REFERENCE_SIZE; //TODO move to start?
                 }
 
                 public void Refresh() {
                     isEnabled = !ShouldDisable();
-                    UpdateButtonImageAndTooltip();
+                    UpdateButtonSkinAndTooltip();
                     Show();
                 }
 
                 #region related to click
+
                 public override void HandleClick(UIMouseEventParameter p) =>
                     throw new Exception("Unreachable code");
 
@@ -469,6 +509,7 @@ namespace TrafficManager.UI {
                         Root.EnqueueAction(Root.ShowMassEditOverlay);
                     }
                 }
+
                 #endregion
             } // end class QuickEditButton
         } // end class PanelExt

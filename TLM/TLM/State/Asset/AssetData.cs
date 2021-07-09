@@ -32,7 +32,7 @@ namespace TrafficManager.State.Asset {
         /// gathers all data for the given asset.
         /// </summary>
         public static AssetData GetAssetData(BuildingInfo prefab) {
-            return new AssetData {
+            return new() {
                 Version = VersionUtil.ModVersion,
                 Record = RecordAll(),
                 PathNetworkIDs = GetPathsNetworkIDs(prefab),

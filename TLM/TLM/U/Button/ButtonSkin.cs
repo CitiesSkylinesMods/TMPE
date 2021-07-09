@@ -1,8 +1,5 @@
 namespace TrafficManager.U {
     using System.Collections.Generic;
-    using System.Linq;
-    using ColossalFramework.UI;
-    using JetBrains.Annotations;
     using TrafficManager.Util;
 
     /// <summary>
@@ -12,14 +9,13 @@ namespace TrafficManager.U {
     /// Skin setup example.
     /// -------------------------------------------------------------------------------
     /// In button constructor write:
-    /// this.Skin = new ButtonSkin {
-    ///     Prefix = "MainMenuButton",
-    ///     BackgroundPrefix = "MainMenuButton", // this also loads the *-bg-normal
-    ///     BackgroundHovered = true,
-    ///     BackgroundActive = true,
-    ///     ForegroundHovered = true,
-    ///     ForegroundActive = true,
-    /// };
+    /// this.Skin = ButtonSkin.CreateSimple(
+    ///     foregroundPrefix: "MainMenuButton",
+    ///     backgroundPrefix: "MainMenuButton")
+    /// You can chain more modifier calls to allow hovering, active and disabled textures:
+    ///     .CanHover()
+    ///     .CanActivate()
+    ///     .CanDisable().
     /// this.atlas = this.Skin.CreateAtlas("MainMenu", 50, 50, 256, Skin.CreateAtlasKeyset());
     /// -------------------------------------------------------------------------------
     /// Background is always loaded if "BackgroundPrefix" is not empty.
@@ -27,77 +23,56 @@ namespace TrafficManager.U {
     /// Rest of the skin sprites you can control using the boolean variables provided.
     /// </summary>
     public class ButtonSkin {
-        /// <summary>Foreground sprites are loaded with this prefix.</summary>
-        public string Prefix;
+        private struct BackgroundSprite {
+            /// <summary>Background sprites are loaded with prefix taken from this field, allows
+            /// multiple buttons sharing same background sprites within the same atlas.</summary>
+            public string Prefix;
 
-        /// <summary>Background sprites are loaded with prefix taken from this field, allows
-        /// multiple buttons sharing same background sprites within the same atlas.</summary>
-        public string BackgroundPrefix = string.Empty;
-
-        public bool BackgroundDisabled = false;
-        public bool BackgroundHovered = false;
-        public bool BackgroundActive = false;
-
-        /// <summary>
-        /// Allows loading foreground-normal sprite. Set this to false to only load backgrounds.
-        /// </summary>
-        public bool ForegroundNormal = true;
-
-        public bool ForegroundDisabled = false;
-        public bool ForegroundHovered = false;
-        public bool ForegroundActive = false;
-
-        /// <summary>
-        /// Create Button Skin for a given button name, which can be hovered, active,
-        /// but not disabled.
-        /// </summary>
-        /// <param name="prefix">Prefix of the filenames to use for this button.</param>
-        /// <returns>Button skin object.</returns>
-        public static ButtonSkin CreateDefault(string prefix, string backgroundPrefix) {
-            return new ButtonSkin {
-                Prefix = prefix,
-                BackgroundPrefix = backgroundPrefix,
-
-                BackgroundHovered = true,
-                BackgroundActive = true,
-                BackgroundDisabled = false,
-
-                ForegroundNormal = true,
-                ForegroundActive = true,
-            };
+            public bool Disabled;
+            public bool Hovered;
+            public bool Active;
         }
 
-        /// <summary>Create background only button skin.</summary>
-        /// <param name="buttonName">Prefix.</param>
-        /// <returns>New skin.</returns>
-        public static ButtonSkin CreateDefaultNoForeground(string buttonName) {
-            return new ButtonSkin {
-                Prefix = buttonName,
-                BackgroundPrefix = buttonName, // filename prefix
+        private BackgroundSprite background_;
 
-                BackgroundHovered = true,
-                BackgroundActive = true,
-                BackgroundDisabled = false,
+        private struct ForegroundSprite {
+            /// <summary>Foreground sprites are loaded with this prefix.</summary>
+            public string Prefix;
 
-                ForegroundNormal = false,
-                ForegroundActive = false,
-            };
+            /// <summary>
+            /// Allows loading foreground-normal sprite. Set this to false to only load backgrounds.
+            /// </summary>
+            public bool Normal;
+
+            public bool Disabled;
+            public bool Hovered;
+            public bool Active;
         }
 
-        /// <summary>Create foreground-only button skin.</summary>
-        /// <param name="buttonName">Prefix.</param>
-        /// <returns>New skin.</returns>
-        public static ButtonSkin CreateDefaultNoBackground(string buttonName) {
-            return new ButtonSkin {
-                Prefix = buttonName,
-                BackgroundPrefix = string.Empty, // no background
+        private ForegroundSprite foreground_;
 
-                BackgroundHovered = false,
-                BackgroundActive = false,
-                BackgroundDisabled = false,
+        public string ForegroundPrefix {
+            set => foreground_.Prefix = value;
+        }
 
-                ForegroundNormal = true,
-                ForegroundActive = true,
+        /// <summary>
+        /// Create a simple button skin which has no background and one foreground (normal).
+        /// If the prefix begins with / you can write absolute resource path instead, and the atlas
+        /// loading path will be ignored. Example: "/MainMenu.Tool.RoundButton".
+        /// </summary>
+        /// <param name="foregroundPrefix">Texture prefix in the directory specified when loading the atlas.</param>
+        /// <param name="backgroundPrefix">Sprite prefix for backgrounds.</param>
+        /// <returns>New skin for a hoverable toggle button.</returns>
+        public static ButtonSkin CreateSimple(string foregroundPrefix,
+                                              string backgroundPrefix) {
+            return new() {
+                background_ = new BackgroundSprite {
+                    Prefix = backgroundPrefix,
+                },
+                foreground_ = new ForegroundSprite {
+                    Prefix = foregroundPrefix,
+                    Normal = true,
+                },
             };
         }
 
@@ -110,31 +85,38 @@ namespace TrafficManager.U {
         public void UpdateAtlasBuilder(AtlasBuilder atlasBuilder, IntVector2 spriteSize) {
             // Two normal textures (bg and fg) are always assumed to exist.
             List<string> names = new List<string>();
-            bool haveBackgroundPrefix = !string.IsNullOrEmpty(BackgroundPrefix);
+            bool haveBackgroundPrefix = !string.IsNullOrEmpty(background_.Prefix);
+
             if (haveBackgroundPrefix) {
-                names.Add($"{BackgroundPrefix}-bg-normal");
+                names.Add($"{background_.Prefix}-bg-normal");
             }
 
-            if (ForegroundNormal && !string.IsNullOrEmpty(Prefix)) {
-                names.Add($"{Prefix}-fg-normal");
+            if (foreground_.Normal && !string.IsNullOrEmpty(foreground_.Prefix)) {
+                names.Add($"{foreground_.Prefix}-fg-normal");
             }
-            if (BackgroundDisabled && haveBackgroundPrefix) {
-                names.Add($"{BackgroundPrefix}-bg-disabled");
+
+            if (background_.Disabled && haveBackgroundPrefix) {
+                names.Add($"{background_.Prefix}-bg-disabled");
             }
-            if (BackgroundHovered && haveBackgroundPrefix) {
-                names.Add($"{BackgroundPrefix}-bg-hovered");
+
+            if (background_.Hovered && haveBackgroundPrefix) {
+                names.Add($"{background_.Prefix}-bg-hovered");
             }
-            if (BackgroundActive && haveBackgroundPrefix) {
-                names.Add($"{BackgroundPrefix}-bg-active");
+
+            if (background_.Active && haveBackgroundPrefix) {
+                names.Add($"{background_.Prefix}-bg-active");
             }
-            if (ForegroundDisabled && !string.IsNullOrEmpty(Prefix)) {
-                names.Add($"{Prefix}-fg-disabled");
+
+            if (foreground_.Disabled && !string.IsNullOrEmpty(foreground_.Prefix)) {
+                names.Add($"{foreground_.Prefix}-fg-disabled");
             }
-            if (ForegroundHovered && !string.IsNullOrEmpty(Prefix)) {
-                names.Add($"{Prefix}-fg-hovered");
+
+            if (foreground_.Hovered && !string.IsNullOrEmpty(foreground_.Prefix)) {
+                names.Add($"{foreground_.Prefix}-fg-hovered");
             }
-            if (ForegroundActive && !string.IsNullOrEmpty(Prefix)) {
-                names.Add($"{Prefix}-fg-active");
+
+            if (foreground_.Active && !string.IsNullOrEmpty(foreground_.Prefix)) {
+                names.Add($"{foreground_.Prefix}-fg-active");
             }
 
             // Convert string hashset into spritedefs hashset
@@ -151,23 +133,23 @@ namespace TrafficManager.U {
         internal string GetBackgroundTextureId(ControlEnabledState enabledState,
                                                ControlHoveredState hoveredState,
                                                ControlActiveState activeState) {
-            string chosenPrefix = string.IsNullOrEmpty(BackgroundPrefix)
-                                      ? Prefix
-                                      : BackgroundPrefix;
+            string chosenPrefix = string.IsNullOrEmpty(background_.Prefix)
+                                      ? foreground_.Prefix
+                                      : background_.Prefix;
             string ret = chosenPrefix + "-bg";
 
             if (enabledState == ControlEnabledState.Disabled) {
-                return BackgroundDisabled ? ret + "-disabled" : ret + "-normal";
+                return background_.Disabled ? ret + "-disabled" : ret + "-normal";
+            }
+
+            // Hovered foreground before active, we want hover icon to be used even if active
+            if (hoveredState == ControlHoveredState.Hovered) {
+                return background_.Hovered ? ret + "-hovered" : ret + "-normal";
             }
 
             if (activeState == ControlActiveState.Active) {
-                return BackgroundActive ? ret + "-active" : ret + "-normal";
+                return background_.Active ? ret + "-active" : ret + "-normal";
             }
-
-            if (hoveredState == ControlHoveredState.Hovered) {
-                return BackgroundHovered ? ret + "-hovered" : ret + "-normal";
-            }
-
             return ret + "-normal";
         }
 
@@ -178,23 +160,57 @@ namespace TrafficManager.U {
         /// <returns>Atlas sprite id.</returns>
         internal string GetForegroundTextureId(ControlEnabledState enabledState,
                                                ControlHoveredState hoveredState,
-                                               ControlActiveState activeState)
-        {
-            string ret = Prefix + "-fg";
+                                               ControlActiveState activeState) {
+            string ret = foreground_.Prefix + "-fg";
 
             if (enabledState == ControlEnabledState.Disabled) {
-                return ForegroundDisabled ? ret + "-disabled" : ret + "-normal";
+                return foreground_.Disabled ? ret + "-disabled" : ret + "-normal";
             }
 
             if (activeState == ControlActiveState.Active) {
-                return ForegroundActive ? ret + "-active" : ret + "-normal";
+                return foreground_.Active ? ret + "-active" : ret + "-normal";
             }
 
+            // Hovered foreground after active, we don't want hover icon to cover active icon
             if (hoveredState == ControlHoveredState.Hovered) {
-                return ForegroundHovered ? ret + "-hovered" : ret + "-normal";
+                return foreground_.Hovered ? ret + "-hovered" : ret + "-normal";
             }
 
             return ret + "-normal";
+        }
+
+        /// <summary>
+        /// Call this to allow Active state and using background and foreground sprites.
+        /// </summary>
+        public ButtonSkin CanActivate(bool foreground = true, bool background = true) {
+            background_.Active = background;
+            foreground_.Active = foreground;
+            return this;
+        }
+
+        /// <summary>
+        /// Call this to allow Hovered (mouse hover) state and using background and foreground
+        /// sprites.
+        /// </summary>
+        public ButtonSkin CanHover(bool foreground = true, bool background = true) {
+            background_.Hovered = background;
+            foreground_.Hovered = foreground;
+            return this;
+        }
+
+        /// <summary>
+        /// Call this to allow Hovered (mouse hover) state and using background and foreground
+        /// sprites.
+        /// </summary>
+        public ButtonSkin CanDisable(bool foreground = true, bool background = true) {
+            background_.Disabled = background;
+            foreground_.Disabled = foreground;
+            return this;
+        }
+
+        public ButtonSkin NormalForeground(bool value = true) {
+            foreground_.Normal = value;
+            return this;
         }
     } // end class
 }

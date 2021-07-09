@@ -50,10 +50,11 @@ namespace TrafficManager.UI.MainMenu.OSD {
             // mainMenu.KeybindsPanel.transform.DetachChildren();
 
             // Populate the panel with the items
-            using (var builder = new UiBuilder<U.UPanel>(mainMenu.OnscreenDisplayPanel)) {
-                foreach (var item in items) {
-                    item.Build(builder);
-                }
+            var builder = new UBuilder();
+            foreach (OsdItem item in items) {
+                item.Build(
+                    parent: mainMenu.OnscreenDisplayPanel,
+                    builder);
             }
 
             if (items.Count > 0
@@ -70,7 +71,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
         /// <returns>New OsdItem to pass to the <see cref="Display"/>.</returns>
         [UsedImplicitly]
         public static Shortcut Esc_CancelAndHideTMPE() {
-            return new Shortcut(
+            return new(
                 keybindSetting: KeybindSettingsBase.Esc,
                 localizedText: Translation.Options.Get("Keybind.Esc:Cancel tool"));
         }
@@ -78,7 +79,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
         /// <summary>Create OsdItem with generic "RightClick Leave node" text.</summary>
         /// <returns>New OsdItem to pass to the <see cref="Display"/>.</returns>
         public static Shortcut RightClick_LeaveNode() {
-            return new Shortcut(
+            return new(
                 keybindSetting: KeybindSettingsBase.RightClick,
                 localizedText: Translation.Options.Get("Keybind.RightClick:Leave node"));
         }
@@ -86,7 +87,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
         /// <summary>Create OsdItem with generic "RightClick Leave lane" text.</summary>
         /// <returns>New OsdItem to pass to the <see cref="Display"/>.</returns>
         public static Shortcut RightClick_LeaveLane() {
-            return new Shortcut(
+            return new(
                 keybindSetting: KeybindSettingsBase.RightClick,
                 localizedText: Translation.Options.Get("Keybind.RightClick:Leave lane"));
         }
@@ -94,7 +95,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
         /// <summary>Create OsdItem with generic "RightClick Leave segment" text.</summary>
         /// <returns>New OsdItem to pass to the <see cref="Display"/>.</returns>
         public static Shortcut RightClick_LeaveSegment() {
-            return new Shortcut(
+            return new(
                 keybindSetting: KeybindSettingsBase.RightClick,
                 localizedText: Translation.Options.Get("Keybind.RightClick:Leave segment"));
         }

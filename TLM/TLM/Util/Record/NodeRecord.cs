@@ -10,7 +10,7 @@ namespace TrafficManager.Util.Record {
         public NodeRecord(ushort nodeId) => NodeId = nodeId;
 
         public ushort NodeId { get; private set; }
-        InstanceID InstanceID => new InstanceID { NetNode = NodeId};
+        InstanceID InstanceID => new() { NetNode = NodeId};
 
         private bool trafficLight_;
         private List<LaneConnectionRecord> lanes_;

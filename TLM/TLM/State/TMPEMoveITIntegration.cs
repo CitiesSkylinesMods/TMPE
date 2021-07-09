@@ -9,6 +9,7 @@ namespace TrafficManager.State {
     public class TMPEMoveItIntegrationFactory : IMoveItIntegrationFactory {
         public MoveItIntegrationBase GetInstance() => new TMPEMoveItIntegration();
     }
+
     public class TMPEMoveItIntegration : MoveItIntegrationBase {
         public override string ID => "me.tmpe";
 
@@ -19,7 +20,7 @@ namespace TrafficManager.State {
         public override string Description => "Traffic rules";
 
         public override object Copy(InstanceID sourceInstanceID) {
-            switch(sourceInstanceID.Type) {
+            switch (sourceInstanceID.Type) {
                 case InstanceType.NetNode:
                     var nodeRecord = new NodeRecord(sourceInstanceID.NetNode);
                     nodeRecord.Record();
@@ -30,13 +31,15 @@ namespace TrafficManager.State {
                     segmentRecord.Record();
                     return segmentRecord;
                 default:
-                    Log.Info( $"instance type {sourceInstanceID.Type} is not supported.");
+                    Log.Info($"instance type {sourceInstanceID.Type} is not supported.");
                     return null;
             }
         }
 
-        public override void Paste(InstanceID targetInstanceID, object record, Dictionary<InstanceID, InstanceID> map) {
-            if(record is IRecordable r) {
+        public override void Paste(InstanceID targetInstanceID,
+                                   object record,
+                                   Dictionary<InstanceID, InstanceID> map) {
+            if (record is IRecordable r) {
                 r.Transfer(map);
             }
         }
@@ -45,6 +48,7 @@ namespace TrafficManager.State {
             if (record is IRecordable r) {
                 return Convert.ToBase64String(r.Serialize());
             }
+
             return null;
         }
 
@@ -52,10 +56,12 @@ namespace TrafficManager.State {
             return SerializationUtil.Deserialize(Convert.FromBase64String(base64Data));
         }
 
-        public override void Mirror(InstanceID targetInstanceID, object record, Dictionary<InstanceID, InstanceID> map) {
+        public override void Mirror(InstanceID targetInstanceID,
+                                    object record,
+                                    Dictionary<InstanceID, InstanceID> map) {
             // TODO [issue #] better mirror support.
             // no special considerations for now.
-            Paste(targetInstanceID, record, map);  
+            Paste(targetInstanceID, record, map);
         }
     }
 }

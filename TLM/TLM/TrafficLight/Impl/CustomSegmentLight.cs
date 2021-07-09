@@ -9,6 +9,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.TrafficLight;
+    using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
 
@@ -423,7 +424,8 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public void MakeRedOrGreen() {
 #if DEBUG
-            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == NodeId)
+            if (GlobalConfig.Instance.Debug.TimedTrafficLights
+                && DebugSettings.NodeId == NodeId)
                 Log._Debug($"CustomSegmentLight.MakeRedOrGreen: called for segment {SegmentId} @ {NodeId}");
 #endif
 
@@ -448,7 +450,8 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public void MakeRed() {
 #if DEBUG
-            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == NodeId)
+            if (GlobalConfig.Instance.Debug.TimedTrafficLights
+                && DebugSettings.NodeId == NodeId)
                 Log._Debug($"CustomSegmentLight.MakeRed: called for segment {SegmentId} @ {NodeId}");
 #endif
 
@@ -482,7 +485,8 @@ namespace TrafficManager.TrafficLight.Impl {
             }
 
 #if DEBUG
-            if (DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == NodeId) {
+            if (GlobalConfig.Instance.Debug.TimedTrafficLights
+                && DebugSettings.NodeId == NodeId) {
                 Log._Debug(
                     $"CustomSegmentLight.SetStates({setMain}, {setLeft}, {setRight}, {calcAutoPedLight}) for segment {SegmentId} @ {NodeId}: Main={LightMain} L={LightLeft} R={LightRight}");
             }

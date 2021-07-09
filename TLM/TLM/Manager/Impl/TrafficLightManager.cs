@@ -18,7 +18,7 @@ namespace TrafficManager.Manager.Impl {
           ICustomDataManager<string>,
           ITrafficLightManager
     {
-        public static readonly TrafficLightManager Instance = new TrafficLightManager();
+        public static readonly TrafficLightManager Instance = new();
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
@@ -35,8 +35,8 @@ namespace TrafficManager.Manager.Impl {
                                     ref NetNode node,
                                     out ToggleTrafficLightError reason) {
 #if DEBUG
-            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
-                                      && DebugSettings.NodeId == nodeId;
+            bool logTrafficLights = GlobalConfig.Instance.Debug.TimedTrafficLights
+                                    && DebugSettings.NodeId == nodeId;
 #else
             const bool logTrafficLights = false;
 #endif
@@ -129,7 +129,8 @@ namespace TrafficManager.Manager.Impl {
                                           out ToggleTrafficLightError reason)
         {
 #if DEBUG
-            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get() && DebugSettings.NodeId == nodeId;
+            bool logTrafficLights = GlobalConfig.Instance.Debug.TimedTrafficLights
+                                    && DebugSettings.NodeId == nodeId;
 #else
             const bool logTrafficLights = false;
 #endif

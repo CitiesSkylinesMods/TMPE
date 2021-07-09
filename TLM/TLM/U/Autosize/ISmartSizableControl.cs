@@ -12,6 +12,7 @@ namespace TrafficManager.U.Autosize {
         /// Labels use this for UI scaling of their font.
         /// </summary>
         void OnBeforeResizerUpdate();
+
         void OnAfterResizerUpdate();
     }
 }

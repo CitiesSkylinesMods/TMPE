@@ -32,7 +32,7 @@ namespace TrafficManager.Manager.Impl {
         public const ExtVehicleType EXT_VEHICLE_TYPES =
             ExtVehicleType.RoadVehicle & ~ExtVehicleType.Emergency;
 
-        public static readonly LaneArrowManager Instance = new LaneArrowManager();
+        public static readonly LaneArrowManager Instance = new();
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();

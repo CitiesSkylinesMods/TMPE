@@ -15,7 +15,7 @@ namespace TrafficManager.Util {
     using static UI.SubTools.LaneConnectorTool;
 
     public class RoundaboutMassEdit {
-        public static RoundaboutMassEdit Instance = new RoundaboutMassEdit();
+        public static RoundaboutMassEdit Instance = new();
         public RoundaboutMassEdit() {
             segmentList_ = new List<ushort>();
         }
@@ -27,11 +27,18 @@ namespace TrafficManager.Util {
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, false);
             }
             if (OptionsMassEditTab.RoundAboutQuickFix_RealisticSpeedLimits) {
-                float? targetSpeed = CalculatePreferedSpeed(segmentId)?.GameUnits;
+                SpeedValue? targetSpeed = CalculatePreferedSpeed(segmentId);
                 float defaultSpeed = SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(segmentId.ToSegment().Info);
-                if (targetSpeed != null && targetSpeed < defaultSpeed) {
-                    SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Forward, targetSpeed);
-                    SpeedLimitManager.Instance.SetSpeedLimit(segmentId, NetInfo.Direction.Backward, targetSpeed);
+
+                if (targetSpeed != null && targetSpeed.Value.GetKmph() < defaultSpeed) {
+                    SpeedLimitManager.Instance.SetSegmentSpeedLimit(
+                        segmentId: segmentId,
+                        finalDir: NetInfo.Direction.Forward,
+                        action: SetSpeedLimitAction.SetOverride(targetSpeed.Value));
+                    SpeedLimitManager.Instance.SetSegmentSpeedLimit(
+                        segmentId: segmentId,
+                        finalDir: NetInfo.Direction.Backward,
+                        action: SetSpeedLimitAction.SetOverride(targetSpeed.Value));
                 }
             }
             ushort nodeId = netService.GetHeadNode(segmentId);

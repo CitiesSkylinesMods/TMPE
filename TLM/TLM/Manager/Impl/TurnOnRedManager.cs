@@ -2,6 +2,7 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
 
@@ -13,7 +14,7 @@ namespace TrafficManager.Manager.Impl {
             TurnOnRedSegments = new TurnOnRedSegments[2 * NetManager.MAX_SEGMENT_COUNT];
         }
 
-        public static TurnOnRedManager Instance { get; } = new TurnOnRedManager();
+        public static TurnOnRedManager Instance { get; } = new();
 
         public TurnOnRedSegments[] TurnOnRedSegments { get; }
 
@@ -61,7 +62,7 @@ namespace TrafficManager.Manager.Impl {
 
         protected void UpdateSegment(ref ExtSegment seg) {
 #if DEBUG
-            if (DebugSwitch.TurnOnRed.Get()) {
+            if (GlobalConfig.Instance.Debug.TurnOnRed) {
                 Log._Debug($"TurnOnRedManager.UpdateSegment({seg.segmentId}) called.");
             }
 #endif
@@ -90,7 +91,7 @@ namespace TrafficManager.Manager.Impl {
 
         protected void UpdateSegmentEnd(ref ExtSegment seg, ref ExtSegmentEnd end) {
 #if DEBUG
-            bool logTurnOnRed = DebugSwitch.TurnOnRed.Get();
+            bool logTurnOnRed = GlobalConfig.Instance.Debug.TurnOnRed;
 #else
             const bool logTurnOnRed = false;
 #endif

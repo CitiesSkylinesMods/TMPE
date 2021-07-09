@@ -20,8 +20,7 @@ namespace TrafficManager.UI.SubTools {
 
     public class LaneConnectorTool
         : LegacySubTool,
-          UI.MainMenu.IOnscreenDisplayProvider
-    {
+          UI.MainMenu.IOnscreenDisplayProvider {
         public LaneConnectorTool(TrafficManagerTool mainTool)
             : base(mainTool) {
             // Log._Debug($"LaneConnectorTool: Constructor called");
@@ -48,17 +47,17 @@ namespace TrafficManager.UI.SubTools {
             Backward,
         }
 
-        private static bool verbose_ =>
 #if DEBUG
-            DebugSwitch.LaneConnections.Get();
+        private static bool verbose_ => GlobalConfig.Instance.Debug.LaneConnections;
 #else
-            false;
+        private static bool verbose_ => false;
 #endif
-        private static readonly Color DefaultLaneEndColor = new Color(1f, 1f, 1f, 0.4f);
-        private static readonly Color DefaultDisabledLaneEndColor = new Color(1f, 0.48f, 0.16f, 0.63f);
+        private static readonly Color DefaultDisabledLaneEndColor = new(1f, 0.48f, 0.16f, 0.63f);
+        private static readonly Color DefaultLaneEndColor = new(1f, 1f, 1f, 0.4f);
         private LaneEnd selectedLaneEnd;
         private LaneEnd hoveredLaneEnd;
         private readonly Dictionary<ushort, List<LaneEnd>> currentLaneEnds;
+
         private StayInLaneMode stayInLaneMode = StayInLaneMode.None;
         // private bool initDone = false;
 
@@ -91,7 +90,7 @@ namespace TrafficManager.UI.SubTools {
             internal int OuterSimilarLaneIndex;
             internal int InnerSimilarLaneIndex; // used for stay in lane.
             internal int SegmentIndex; // index accesable by NetNode.GetSegment(SegmentIndex);
-            internal readonly List<LaneEnd> ConnectedLaneEnds = new List<LaneEnd>();
+            internal readonly List<LaneEnd> ConnectedLaneEnds = new();
             internal Color Color;
 
             internal SegmentLaneMarker SegmentMarker;
@@ -110,10 +109,14 @@ namespace TrafficManager.UI.SubTools {
             /// renders lane overlay. If highlighted, renders englarged sheath(lane+circle) overlay. Otherwise
             /// renders circle at lane end.
             /// </summary>
-            internal void RenderOverlay(RenderManager.CameraInfo cameraInfo, Color color, bool highlight = false, bool renderLimits = false) {
+            internal void RenderOverlay(RenderManager.CameraInfo cameraInfo,
+                                        Color color,
+                                        bool highlight = false,
+                                        bool renderLimits = false) {
                 if (highlight) {
                     SegmentMarker.RenderOverlay(cameraInfo, color, enlarge: true, renderLimits);
                 }
+
                 NodeMarker.RenderOverlay(cameraInfo, color, enlarge: highlight, renderLimits);
             }
         }
@@ -144,7 +147,7 @@ namespace TrafficManager.UI.SubTools {
 
         private void ShowOverlay(bool viewOnly, RenderManager.CameraInfo cameraInfo) {
             if (viewOnly && !(Options.connectedLanesOverlay ||
-                MassEditOverlay.IsActive)) {
+                              MassEditOverlay.IsActive)) {
                 return;
             }
 
@@ -177,9 +180,12 @@ namespace TrafficManager.UI.SubTools {
                     if ((connectionClass == null) ||
                         !((connectionClass.m_service == ItemClass.Service.Road) ||
                           ((connectionClass.m_service == ItemClass.Service.PublicTransport) &&
-                           ((connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain) ||
-                            (connectionClass.m_subService == ItemClass.SubService.PublicTransportMetro) ||
-                            (connectionClass.m_subService == ItemClass.SubService.PublicTransportMonorail))))) {
+                           ((connectionClass.m_subService ==
+                             ItemClass.SubService.PublicTransportTrain) ||
+                            (connectionClass.m_subService ==
+                             ItemClass.SubService.PublicTransportMetro) ||
+                            (connectionClass.m_subService ==
+                             ItemClass.SubService.PublicTransportMonorail))))) {
                         continue;
                     }
 
@@ -201,17 +207,19 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
-            bool isUndergroundMode = MainTool.IsUndergroundMode;
+            bool isUndergroundMode = Highlight.IsUndergroundMode;
             for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
                 var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
 
-                bool hasMarkers = currentLaneEnds.TryGetValue((ushort)nodeId, out List<LaneEnd> laneEnds);
-                bool isNodeVisible = MainTool.IsNodeVisible(nodeId);
+                bool hasMarkers = currentLaneEnds.TryGetValue(
+                    (ushort)nodeId,
+                    out List<LaneEnd> laneEnds);
+                bool isNodeVisible = Highlight.IsNodeVisible(nodeId);
                 if (!viewOnly && (GetSelectionMode() == SelectionMode.None)) {
-                    MainTool.DrawNodeCircle(
+                    Highlight.DrawNodeCircle(
                         cameraInfo: cameraInfo,
                         nodeId: (ushort)nodeId,
-                        color: isNodeVisible? DefaultLaneEndColor : DefaultDisabledLaneEndColor,
+                        color: isNodeVisible ? DefaultLaneEndColor : DefaultDisabledLaneEndColor,
                         alpha: true);
                 }
 
@@ -219,17 +227,21 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                float intersectionY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(netManager.m_nodes.m_buffer[nodeId].m_position);
+                float intersectionY =
+                    Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(
+                        netManager.m_nodes.m_buffer[nodeId].m_position);
 
                 foreach (LaneEnd laneEnd in laneEnds) {
-                    if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(laneEnd.LaneId)) {
+                    if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(
+                            laneEnd.LaneId)) {
                         continue;
                     }
 
                     if (laneEnd != selectedLaneEnd) {
                         foreach (LaneEnd targetLaneEnd in laneEnd.ConnectedLaneEnds) {
                             // render lane connection from laneEnd to targetLaneEnd
-                            if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
+                            if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(
+                                    targetLaneEnd.LaneId)) {
                                 continue;
                             }
 
@@ -240,7 +252,8 @@ namespace TrafficManager.UI.SubTools {
                                 bezier: ref bezier,
                                 color: laneEnd.Color,
                                 outlineColor: Color.black,
-                                underground: (height.y + 1f) < intersectionY || laneEnd.NodeId == SelectedNodeId);
+                                underground: (height.y + 1f) < intersectionY ||
+                                             laneEnd.NodeId == SelectedNodeId);
                         }
                     }
 
@@ -251,10 +264,10 @@ namespace TrafficManager.UI.SubTools {
                     bool drawMarker = false;
                     bool SourceMode = GetSelectionMode() == SelectionMode.SelectSource;
                     bool TargetMode = GetSelectionMode() == SelectionMode.SelectTarget;
-                    if ( SourceMode & laneEnd.IsSource) {
+                    if (SourceMode & laneEnd.IsSource) {
                         // draw source marker in source selection mode,
                         // make exception for markers that have no target:
-                        foreach(var targetLaneEnd in laneEnds) {
+                        foreach (var targetLaneEnd in laneEnds) {
                             if (CanConnect(laneEnd, targetLaneEnd)) {
                                 drawMarker = true;
                                 break;
@@ -292,7 +305,8 @@ namespace TrafficManager.UI.SubTools {
                 // lane curves for selectedMarker will be drawn last to
                 // be on the top of other lane markers.
                 foreach (LaneEnd targetLaneEnd in this.selectedLaneEnd.ConnectedLaneEnds) {
-                    if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
+                    if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(
+                            targetLaneEnd.LaneId)) {
                         continue;
                     }
 
@@ -330,7 +344,8 @@ namespace TrafficManager.UI.SubTools {
                     if (hoveredLaneEnd == null) {
                         // get accurate position on a plane positioned at node height
                         Plane plane = new Plane(Vector3.up, Vector3.zero.ChangeY(selNodePos.y));
-                        Ray ray = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(Input.mousePosition);
+                        Ray ray = InGameUtil.Instance.CachedMainCamera.ScreenPointToRay(
+                            Input.mousePosition);
                         Vector3 pos = plane.Raycast(ray, out float distance)
                                           ? ray.GetPoint(distance)
                                           : MousePosition;
@@ -351,7 +366,10 @@ namespace TrafficManager.UI.SubTools {
                             cameraInfo: cameraInfo,
                             bezier: ref bezier,
                             color: this.selectedLaneEnd.Color,
-                            outlineColor:  Color.Lerp(a: selectedLaneEnd.Color, b: Color.white, t: 0.33f),
+                            outlineColor: Color.Lerp(
+                                a: selectedLaneEnd.Color,
+                                b: Color.white,
+                                t: 0.33f),
                             size: 0.11f, // Embolden
                             underground: true);
                     }
@@ -369,7 +387,7 @@ namespace TrafficManager.UI.SubTools {
 
                 // Must press Shift+S (or another shortcut) within last 20 frames for this to work
                 bool quickSetup = (frameStayInLanePressed > 0)
-                                 && ((Time.frameCount - frameStayInLanePressed) < 20); // 0.33 sec
+                                  && ((Time.frameCount - frameStayInLanePressed) < 20); // 0.33 sec
                 if (quickSetup) {
                     frameStayInLanePressed = 0; // not pressed anymore (consumed)
                     frameClearPressed = 0; // consumed
@@ -377,33 +395,37 @@ namespace TrafficManager.UI.SubTools {
                     ref NetNode node = ref SelectedNodeId.ToNode();
 
                     bool stayInLane = GetSortedSegments(SelectedNodeId, out List<ushort> segList);
-                    bool oneway = segMan.CalculateIsOneWay(segList[0]) || segMan.CalculateIsOneWay(segList[1]);
+                    bool oneway = segMan.CalculateIsOneWay(segList[0]) ||
+                                  segMan.CalculateIsOneWay(segList[1]);
 
                     if (stayInLane) {
                         switch (stayInLaneMode) {
                             case StayInLaneMode.None: {
-                                    stayInLaneMode = !oneway ? StayInLaneMode.Both : StayInLaneMode.Forward;
-                                    break;
-                                }
+                                stayInLaneMode =
+                                    !oneway ? StayInLaneMode.Both : StayInLaneMode.Forward;
+                                break;
+                            }
 
                             case StayInLaneMode.Both: {
-                                    stayInLaneMode = StayInLaneMode.Forward;
-                                    break;
-                                }
+                                stayInLaneMode = StayInLaneMode.Forward;
+                                break;
+                            }
 
                             case StayInLaneMode.Forward: {
-                                    stayInLaneMode = !oneway ? StayInLaneMode.Backward : StayInLaneMode.None;
-                                    break;
-                                }
+                                stayInLaneMode =
+                                    !oneway ? StayInLaneMode.Backward : StayInLaneMode.None;
+                                break;
+                            }
 
                             case StayInLaneMode.Backward: {
-                                    stayInLaneMode = StayInLaneMode.None;
-                                    break;
-                                }
+                                stayInLaneMode = StayInLaneMode.None;
+                                break;
+                            }
                         }
                     }
 
-                    Log._Debug($"stayInLane:{stayInLane} stayInLaneMode:{stayInLaneMode}\n" +
+                    Log._Debug(
+                        $"stayInLane:{stayInLane} stayInLaneMode:{stayInLaneMode}\n" +
                         $"GetMarkerSelectionMode()={GetSelectionMode()} SelectedNodeId={SelectedNodeId}");
 
                     if (stayInLane) {
@@ -412,19 +434,23 @@ namespace TrafficManager.UI.SubTools {
                     } // end if stay in lane
 
                     if (stayInLane) {
-                        MainTool.Guide.Deactivate("LaneConnectorTool:stay-in-lane is not supported for this setup");
+                        MainTool.Guide.Deactivate(
+                            "LaneConnectorTool:stay-in-lane is not supported for this setup");
                     } else {
-                        MainTool.Guide.Activate("LaneConnectorTool:stay-in-lane is not supported for this setup");
+                        MainTool.Guide.Activate(
+                            "LaneConnectorTool:stay-in-lane is not supported for this setup");
                     }
                 } // end if quick setup
             } // end if selected node
 
-            if ((GetSelectionMode() == SelectionMode.None) && (HoveredNodeId != 0) && MainTool.IsNodeVisible(HoveredNodeId)) {
+            if ((GetSelectionMode() == SelectionMode.None)
+                && (HoveredNodeId != 0)
+                && Highlight.IsNodeVisible(HoveredNodeId)) {
                 // draw hovered node
-                MainTool.DrawNodeCircle(
+                Highlight.DrawNodeCircle(
                     cameraInfo: cameraInfo,
                     nodeId: HoveredNodeId,
-                    warning: Input.GetMouseButton(0),
+                    color: MainTool.GetToolColor(warning: Input.GetMouseButton(0), error: false),
                     alpha: true,
                     overrideRenderLimits: true);
             }
@@ -444,7 +470,7 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="segments">list of segments. size must be 4. last element must be zero if there are only 3 segments</param>
         /// <returns><c>true</c> if the scenario is supported</returns>
         private static bool ArrangeOneWay(ushort nodeId, List<ushort> segments) {
-            if(verbose_)
+            if (verbose_)
                 Log._Debug($"called ArrangeOneWay({nodeId}, {segments.ToSTR()}");
             if (nodeId.ToNode().CountSegments() > 4)
                 return false;
@@ -452,13 +478,18 @@ namespace TrafficManager.UI.SubTools {
                 if (segmentId != 0 && !segMan.CalculateIsOneWay(segmentId))
                     return false;
             }
+
             int sourceCount = segments
-                .Where(segmentId => segmentId != 0 && netService.GetHeadNode(segmentId) == nodeId)
-                .Count();
+                              .Where(
+                                  segmentId =>
+                                      segmentId != 0 && netService.GetHeadNode(segmentId) == nodeId)
+                              .Count();
 
             int targetCount = segments
-                .Where(segmentId => segmentId != 0 && netService.GetTailNode(segmentId) == nodeId)
-                .Count();
+                              .Where(
+                                  segmentId =>
+                                      segmentId != 0 && netService.GetTailNode(segmentId) == nodeId)
+                              .Count();
 
             if (sourceCount == 1) {
                 ushort sourceSegment = segments.FirstOrDefault(
@@ -467,8 +498,9 @@ namespace TrafficManager.UI.SubTools {
 
                 ushort outerSegment = sourceSegment.ToSegment().GetNearSegment(nodeId);
                 ushort middleTargetSegment = outerSegment.ToSegment().GetNearSegment(nodeId);
-                ushort innerSegment = segments[3] == 0 ? (ushort)0 :
-                                      middleTargetSegment.ToSegment().GetNearSegment(nodeId);
+                ushort innerSegment = segments[3] == 0
+                                          ? (ushort)0
+                                          : middleTargetSegment.ToSegment().GetNearSegment(nodeId);
 
                 segments[0] = sourceSegment;
                 segments[1] = middleTargetSegment;
@@ -482,8 +514,9 @@ namespace TrafficManager.UI.SubTools {
 
                 ushort outerSegment = targetSegment.ToSegment().GetFarSegment(nodeId);
                 ushort middleSourceSegment = outerSegment.ToSegment().GetFarSegment(nodeId);
-                ushort innerSegment = segments[3] == 0 ? (ushort)0 :
-                                      middleSourceSegment.ToSegment().GetFarSegment(nodeId);
+                ushort innerSegment = segments[3] == 0
+                                          ? (ushort)0
+                                          : middleSourceSegment.ToSegment().GetFarSegment(nodeId);
 
                 segments[0] = middleSourceSegment;
                 segments[1] = targetSegment;
@@ -513,9 +546,10 @@ namespace TrafficManager.UI.SubTools {
             if (n == 2) {
                 segments.Add(0);
                 segments.Add(0);
-                if(netService.GetHeadNode(segments[1]) == netService.GetTailNode(segments[0])) {
+                if (netService.GetHeadNode(segments[1]) == netService.GetTailNode(segments[0])) {
                     segments.Swap(0, 1);
                 }
+
                 ret = true;
             } else if (n == 3) {
                 if (!PriorityRoad.ArrangeT(segments)) {
@@ -525,12 +559,13 @@ namespace TrafficManager.UI.SubTools {
                 // Prevent confusion if all roads are the same.
                 ret = PriorityRoad.CompareSegments(segments[1], segments[2]) != 0;
                 segments.Add(0);
-            } else if(n == 4) {
+            } else if (n == 4) {
                 segments.Sort(PriorityRoad.CompareSegments);
 
                 // Prevent confusion if all roads are the same.
                 ret = PriorityRoad.CompareSegments(segments[1], segments[2]) != 0;
             }
+
             if (ret) {
                 if (segments[2] != 0) {
                     // in case where all segments are oneway make sure:
@@ -593,9 +628,11 @@ namespace TrafficManager.UI.SubTools {
             if (mode == StayInLaneMode.Both || mode == StayInLaneMode.Forward) {
                 ret |= StayInLane(nodeId, segments[0], segments[1], segments[2], innerMinor);
             }
-            if(mode == StayInLaneMode.Both || mode == StayInLaneMode.Backward) {
+
+            if (mode == StayInLaneMode.Both || mode == StayInLaneMode.Backward) {
                 ret |= StayInLane(nodeId, segments[1], segments[0], segments[3], 0);
             }
+
             return ret;
         }
 
@@ -629,10 +666,12 @@ namespace TrafficManager.UI.SubTools {
             ushort minorSegmentId,
             ushort minorSegment2Id) {
             if (verbose_) {
-                Log._Debug($"StayInLane(nodeId:{nodeId}, " +
+                Log._Debug(
+                    $"StayInLane(nodeId:{nodeId}, " +
                     $"mainSegmentSourceId:{mainSegmentSourceId}, mainSegmentTargetId:{mainSegmentTargetId}, " +
                     $"minorSegmentId:{minorSegmentId}, minorSegment2Id:{minorSegment2Id})");
             }
+
             ref NetSegment segment = ref minorSegmentId.ToSegment();
             ref NetNode node = ref nodeId.ToNode();
             bool oneway0 = segMan.CalculateIsOneWay(mainSegmentTargetId);
@@ -644,25 +683,36 @@ namespace TrafficManager.UI.SubTools {
             bool splitOuter = oneway && minorSegmentId == 0 && minorSegment2Id != 0;
             bool splitInner = !splitMiddle && !splitOuter;
             if (verbose_) {
-                Log._Debug($"splitOuter={splitOuter}  " +
+                Log._Debug(
+                    $"splitOuter={splitOuter}  " +
                     $"splitInner={splitInner} " +
                     $"splitMiddle={splitMiddle}");
             }
 
             // count relavent source(going toward the junction) lanes and
             // target (going aginst the junction) lanes on each segment.
-            int laneCountMinorSource = minorSegmentId == 0 ? 0 : CountLanesTowardJunction(minorSegmentId, nodeId);
-            int laneCountMinorTarget = minorSegmentId == 0 ? 0 : CountLanesAgainstJunction(minorSegmentId, nodeId);
-            int laneCountMinor2Source = minorSegment2Id == 0 ? 0 : CountLanesTowardJunction(minorSegment2Id, nodeId);
-            int laneCountMinor2Target = minorSegment2Id == 0 ? 0 : CountLanesAgainstJunction(minorSegment2Id, nodeId);
+            int laneCountMinorSource = minorSegmentId == 0
+                                           ? 0
+                                           : CountLanesTowardJunction(minorSegmentId, nodeId);
+            int laneCountMinorTarget = minorSegmentId == 0
+                                           ? 0
+                                           : CountLanesAgainstJunction(minorSegmentId, nodeId);
+            int laneCountMinor2Source = minorSegment2Id == 0
+                                            ? 0
+                                            : CountLanesTowardJunction(minorSegment2Id, nodeId);
+            int laneCountMinor2Target = minorSegment2Id == 0
+                                            ? 0
+                                            : CountLanesAgainstJunction(minorSegment2Id, nodeId);
             int laneCountMainSource = CountLanesTowardJunction(mainSegmentSourceId, nodeId);
             int laneCountMainTarget = CountLanesAgainstJunction(mainSegmentTargetId, nodeId);
             int totalSource = laneCountMinorSource + laneCountMainSource + laneCountMinor2Source;
             int totalTarget = laneCountMinorTarget + laneCountMainTarget + laneCountMinor2Target;
 
             if (verbose_) {
-                bool laneArithmaticWorks = totalSource == totalTarget && laneCountMainSource >= laneCountMinorTarget;
-                Log._Debug($"StayInLane: " +
+                bool laneArithmaticWorks = totalSource == totalTarget &&
+                                           laneCountMainSource >= laneCountMinorTarget;
+                Log._Debug(
+                    $"StayInLane: " +
                     $"laneCountMinorSource={laneCountMinorSource} " +
                     $"laneCountMinorTarget={laneCountMinorTarget} " +
                     $"laneCountMainSource={laneCountMainSource} " +
@@ -678,13 +728,14 @@ namespace TrafficManager.UI.SubTools {
             if (!nodeId.ToNode().m_flags.IsFlagSet(NetNode.Flags.Junction)) {
                 ret &= totalSource > 1 || totalTarget > 1;
             }
+
             if (!ret)
                 return false;
 
             float ratio =
-                totalSource >= totalTarget ?
-                totalSource / (float)totalTarget :
-                totalTarget / (float)totalSource;
+                totalSource >= totalTarget
+                    ? totalSource / (float)totalTarget
+                    : totalTarget / (float)totalSource;
 
             /* here we are trying to create bounds based on the ratio of source VS target lanes.
              * these bounds determine which two lanes are matched (should be connected)
@@ -709,11 +760,12 @@ namespace TrafficManager.UI.SubTools {
             // calculates if input lane indeces match(ie should be cannected) according to ratio of source lanes VS target lanes.
             // if totalSource > totalTarget then source and target swap sides.
             bool IndexesMatch(int sourceIdx, int targetIdx) =>
-                totalSource <= totalTarget ?
-                IndexesMatchHelper(sourceIdx, targetIdx) :
-                IndexesMatchHelper(targetIdx, sourceIdx);
+                totalSource <= totalTarget
+                    ? IndexesMatchHelper(sourceIdx, targetIdx)
+                    : IndexesMatchHelper(targetIdx, sourceIdx);
 
             const float EPSILON = 1e-10f;
+
             // rounding approach controls which lanes will split/merge in case totoalSource != totalTarget.
             int Round(float f) {
                 if (splitInner)
@@ -727,17 +779,17 @@ namespace TrafficManager.UI.SubTools {
             // determines if the lanes on the main road should be
             // connected to minorSegmentId.
             bool ConnectToMinor(int sourceIdx, int targetIdx) {
-                return totalSource >= totalTarget ?
-                       sourceIdx < UpperBound(laneCountMinorTarget - 1) :
-                       targetIdx < UpperBound(laneCountMinorSource - 1);
+                return totalSource >= totalTarget
+                           ? sourceIdx < UpperBound(laneCountMinorTarget - 1)
+                           : targetIdx < UpperBound(laneCountMinorSource - 1);
             }
 
             // determines wheather the lanes on the main road should be
             // connected to minorSegment2Id.
             bool ConnectToMinor2(int sourceIdx, int targetIdx) {
-                return totalSource >= totalTarget ?
-                       sourceIdx >= LowerBound(totalTarget - laneCountMinor2Target) :
-                       targetIdx >= LowerBound(totalSource - laneCountMinor2Source);
+                return totalSource >= totalTarget
+                           ? sourceIdx >= LowerBound(totalTarget - laneCountMinor2Target)
+                           : targetIdx >= LowerBound(totalSource - laneCountMinor2Source);
             }
 
             List<LaneEnd> laneEnds = GetLaneEnds(nodeId, ref node);
@@ -746,6 +798,7 @@ namespace TrafficManager.UI.SubTools {
                     sourceLaneEnd.SegmentId == mainSegmentTargetId) {
                     continue;
                 }
+
                 foreach (LaneEnd targetLaneEnd in laneEnds) {
                     if (!targetLaneEnd.IsTarget ||
                         targetLaneEnd.SegmentId == sourceLaneEnd.SegmentId ||
@@ -754,24 +807,34 @@ namespace TrafficManager.UI.SubTools {
                         ) {
                         continue;
                     }
+
                     bool connect = false;
                     if (
                         sourceLaneEnd.SegmentId == mainSegmentSourceId &&
                         targetLaneEnd.SegmentId == minorSegmentId &&
-                        IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex, targetLaneEnd.OuterSimilarLaneIndex)) {
+                        IndexesMatch(
+                            sourceLaneEnd.OuterSimilarLaneIndex,
+                            targetLaneEnd.OuterSimilarLaneIndex)) {
                         connect = true;
                     } else if (
                         sourceLaneEnd.SegmentId == minorSegmentId &&
                         targetLaneEnd.SegmentId == mainSegmentTargetId &&
-                        IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex, targetLaneEnd.OuterSimilarLaneIndex)) {
+                        IndexesMatch(
+                            sourceLaneEnd.OuterSimilarLaneIndex,
+                            targetLaneEnd.OuterSimilarLaneIndex)) {
                         connect = true;
                     } else if (
-                        sourceLaneEnd.SegmentId == mainSegmentSourceId &&
-                        targetLaneEnd.SegmentId == mainSegmentTargetId &&
-                        !ConnectToMinor(sourceLaneEnd.OuterSimilarLaneIndex, targetLaneEnd.OuterSimilarLaneIndex) &&
-                        !ConnectToMinor2(sourceLaneEnd.OuterSimilarLaneIndex, targetLaneEnd.OuterSimilarLaneIndex) &&
-                        IndexesMatch(sourceLaneEnd.OuterSimilarLaneIndex + laneCountMinorSource,
-                                     targetLaneEnd.OuterSimilarLaneIndex + laneCountMinorTarget)
+                            sourceLaneEnd.SegmentId == mainSegmentSourceId &&
+                            targetLaneEnd.SegmentId == mainSegmentTargetId &&
+                            !ConnectToMinor(
+                                sourceLaneEnd.OuterSimilarLaneIndex,
+                                targetLaneEnd.OuterSimilarLaneIndex) &&
+                            !ConnectToMinor2(
+                                sourceLaneEnd.OuterSimilarLaneIndex,
+                                targetLaneEnd.OuterSimilarLaneIndex) &&
+                            IndexesMatch(
+                                sourceLaneEnd.OuterSimilarLaneIndex + laneCountMinorSource,
+                                targetLaneEnd.OuterSimilarLaneIndex + laneCountMinorTarget)
                         ) {
                         connect = true;
                     } else if (
@@ -779,13 +842,15 @@ namespace TrafficManager.UI.SubTools {
                         targetLaneEnd.SegmentId == minorSegment2Id &&
                         IndexesMatch(
                             sourceLaneEnd.OuterSimilarLaneIndex + laneCountMinorSource,
-                            targetLaneEnd.OuterSimilarLaneIndex + laneCountMinorTarget + laneCountMainTarget)) {
+                            targetLaneEnd.OuterSimilarLaneIndex + laneCountMinorTarget +
+                            laneCountMainTarget)) {
                         connect = true;
                     } else if (
                         sourceLaneEnd.SegmentId == minorSegment2Id &&
                         targetLaneEnd.SegmentId == mainSegmentTargetId &&
                         IndexesMatch(
-                            sourceLaneEnd.OuterSimilarLaneIndex + laneCountMinorSource + laneCountMainSource,
+                            sourceLaneEnd.OuterSimilarLaneIndex + laneCountMinorSource +
+                            laneCountMainSource,
                             targetLaneEnd.OuterSimilarLaneIndex + laneCountMinorTarget)) {
                         connect = true;
                     }
@@ -798,39 +863,46 @@ namespace TrafficManager.UI.SubTools {
                     }
                 } // foreach
             } // foreach
+
             return true;
         }
 
         private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
             return netService.GetSortedLanes(
-                                segmentId,
-                                ref segmentId.ToSegment(),
-                                netService.IsStartNode(segmentId, nodeId) ^ (!toward),
-                                LaneConnectionManager.LANE_TYPES,
-                                LaneConnectionManager.VEHICLE_TYPES,
-                                true).Count;
+                segmentId,
+                ref segmentId.ToSegment(),
+                netService.IsStartNode(segmentId, nodeId) ^ (!toward),
+                LaneConnectionManager.LANE_TYPES,
+                LaneConnectionManager.VEHICLE_TYPES,
+                true).Count;
         }
-        internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, true);
-        internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
+
+        internal static int CountLanesTowardJunction(ushort segmentId, ushort nodeId) =>
+            CountLanes(segmentId, nodeId, true);
+
+        internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) =>
+            CountLanes(segmentId, nodeId, false);
 
         public override void OnPrimaryClickOverlay() {
 #if DEBUG
-            bool logLaneConn = DebugSwitch.LaneConnections.Get();
+            bool logLaneConn = GlobalConfig.Instance.Debug.LaneConnections;
 #else
             const bool logLaneConn = false;
 #endif
             Log._DebugIf(
                 logLaneConn,
-                () => $"LaneConnectorTool: OnPrimaryClickOverlay. SelectedNodeId={SelectedNodeId} " +
-                $"SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId} " +
-                $"HoveredSegmentId={HoveredSegmentId}");
+                () =>
+                    $"LaneConnectorTool: OnPrimaryClickOverlay. SelectedNodeId={SelectedNodeId} " +
+                    $"SelectedSegmentId={SelectedSegmentId} HoveredNodeId={HoveredNodeId} " +
+                    $"HoveredSegmentId={HoveredSegmentId}");
 
             if (IsCursorInPanel()) {
                 return;
             }
 
             if (GetSelectionMode() == SelectionMode.None) {
-                if (HoveredNodeId != 0 && MainTool.IsNodeVisible(HoveredNodeId)) {
+                if (HoveredNodeId != 0
+                    && Highlight.IsNodeVisible(HoveredNodeId)) {
                     Log._DebugIf(
                         logLaneConn,
                         () => "LaneConnectorTool: HoveredNode != 0");
@@ -911,13 +983,13 @@ namespace TrafficManager.UI.SubTools {
                     selectedLaneEnd.LaneId,
                     hoveredLaneEnd.LaneId,
                     selectedLaneEnd.StartNode)) {
-
                     // try to remove connection
                     selectedLaneEnd.ConnectedLaneEnds.Remove(hoveredLaneEnd);
                     Log._DebugIf(
                         logLaneConn,
-                        () => $"LaneConnectorTool: removed lane connection: {selectedLaneEnd.LaneId}, " +
-                        $"{hoveredLaneEnd.LaneId}");
+                        () =>
+                            $"LaneConnectorTool: removed lane connection: {selectedLaneEnd.LaneId}, " +
+                            $"{hoveredLaneEnd.LaneId}");
 
                     // success = true;
                 } else if (LaneConnectionManager.Instance.AddLaneConnection(
@@ -928,8 +1000,9 @@ namespace TrafficManager.UI.SubTools {
                     selectedLaneEnd.ConnectedLaneEnds.Add(hoveredLaneEnd);
                     Log._DebugIf(
                         logLaneConn,
-                        () => $"LaneConnectorTool: added lane connection: {selectedLaneEnd.LaneId}, " +
-                        $"{hoveredLaneEnd.LaneId}");
+                        () =>
+                            $"LaneConnectorTool: added lane connection: {selectedLaneEnd.LaneId}, " +
+                            $"{hoveredLaneEnd.LaneId}");
 
                     // success = true;
                 }
@@ -946,7 +1019,7 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnSecondaryClickOverlay() {
 #if DEBUG
-            bool logLaneConn = DebugSwitch.LaneConnections.Get();
+            bool logLaneConn = GlobalConfig.Instance.Debug.LaneConnections;
 #else
             const bool logLaneConn = false;
 #endif
@@ -960,33 +1033,34 @@ namespace TrafficManager.UI.SubTools {
             switch (GetSelectionMode()) {
                 // also: case MarkerSelectionMode.None:
                 default: {
-                        Log._DebugIf(
-                            logLaneConn,
-                            () => "LaneConnectorTool: OnSecondaryClickOverlay: nothing to do");
-                        stayInLaneMode = StayInLaneMode.None;
-                        MainTool.RequestOnscreenDisplayUpdate();
-                        break;
-                    }
+                    Log._DebugIf(
+                        logLaneConn,
+                        () => "LaneConnectorTool: OnSecondaryClickOverlay: nothing to do");
+                    stayInLaneMode = StayInLaneMode.None;
+                    MainTool.RequestOnscreenDisplayUpdate();
+                    break;
+                }
 
                 case SelectionMode.SelectSource: {
-                        // deselect node
-                        Log._DebugIf(
-                            logLaneConn,
-                            () => "LaneConnectorTool: OnSecondaryClickOverlay: selected node id = 0");
-                        SelectedNodeId = 0;
-                        MainTool.RequestOnscreenDisplayUpdate();
-                        break;
-                    }
+                    // deselect node
+                    Log._DebugIf(
+                        logLaneConn,
+                        () => "LaneConnectorTool: OnSecondaryClickOverlay: selected node id = 0");
+                    SelectedNodeId = 0;
+                    MainTool.RequestOnscreenDisplayUpdate();
+                    break;
+                }
 
                 case SelectionMode.SelectTarget: {
-                        // deselect source marker
-                        Log._DebugIf(
-                            logLaneConn,
-                            () => "LaneConnectorTool: OnSecondaryClickOverlay: switch to selected source mode");
-                        selectedLaneEnd = null;
-                        MainTool.RequestOnscreenDisplayUpdate();
-                        break;
-                    }
+                    // deselect source marker
+                    Log._DebugIf(
+                        logLaneConn,
+                        () =>
+                            "LaneConnectorTool: OnSecondaryClickOverlay: switch to selected source mode");
+                    selectedLaneEnd = null;
+                    MainTool.RequestOnscreenDisplayUpdate();
+                    break;
+                }
             }
 
             if (GetSelectionMode() == SelectionMode.None && previouslySelectedNodeId == 0) {
@@ -997,7 +1071,7 @@ namespace TrafficManager.UI.SubTools {
         public override void OnActivate() {
             base.OnActivate();
 #if DEBUG
-            bool logLaneConn = DebugSwitch.LaneConnections.Get();
+            bool logLaneConn = GlobalConfig.Instance.Debug.LaneConnections;
             if (logLaneConn) {
                 Log._Debug("LaneConnectorTool: OnActivate");
             }
@@ -1101,7 +1175,8 @@ namespace TrafficManager.UI.SubTools {
                 for (byte laneIndex = 0; (laneIndex < lanes.Length) && (laneId != 0); laneIndex++) {
                     NetInfo.Lane laneInfo = lanes[laneIndex];
 
-                    if (((laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != NetInfo.LaneType.None)
+                    if (((laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) !=
+                         NetInfo.LaneType.None)
                         && ((laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES)
                             != VehicleInfo.VehicleType.None)) {
                         if (connManager.GetLaneEndPoint(
@@ -1112,8 +1187,7 @@ namespace TrafficManager.UI.SubTools {
                             laneInfo: laneInfo,
                             outgoing: out bool isSource,
                             incoming: out bool isTarget,
-                            pos: out _))
-                        {
+                            pos: out _)) {
                             Vector3 pos;
                             Bezier3 bezier = laneId.ToLane().m_bezier;
                             if (startNode) {
@@ -1123,7 +1197,9 @@ namespace TrafficManager.UI.SubTools {
                                 bezier = bezier.Cut(0, 1f - offsetT);
                                 pos = bezier.d;
                             }
-                            float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
+
+                            float terrainY = Singleton<TerrainManager>.instance
+                                .SampleDetailHeightSmooth(pos);
                             var terrainPos = new Vector3(pos.x, terrainY, pos.z);
 
                             SegmentLaneMarker segmentMarker = new SegmentLaneMarker(bezier);
@@ -1132,24 +1208,30 @@ namespace TrafficManager.UI.SubTools {
                                 segmentMarker.ForceBezierHeight(node.m_position.y);
                                 pos.y = node.m_position.y;
                             }
+
                             NodeLaneMarker nodeMarker = new NodeLaneMarker {
                                 TerrainPosition = terrainPos,
                                 Position = (Vector3)pos,
                             };
 
                             Color32 nodeMarkerColor = isSource
-                                      ? COLOR_CHOICES[nodeMarkerColorIndex % COLOR_CHOICES.Length]
-                                      : default; // transparent
+                                                          ? COLOR_CHOICES[
+                                                              nodeMarkerColorIndex %
+                                                              COLOR_CHOICES.Length]
+                                                          : default; // transparent
 
-                            bool isForward = (laneInfo.m_direction & NetInfo.Direction.Forward) != 0;
+                            bool isForward =
+                                (laneInfo.m_direction & NetInfo.Direction.Forward) != 0;
                             int innerSimilarLaneIndex;
                             if (isForward) {
                                 innerSimilarLaneIndex = laneInfo.m_similarLaneIndex;
                             } else {
                                 innerSimilarLaneIndex = laneInfo.m_similarLaneCount -
-                                              laneInfo.m_similarLaneIndex - 1;
+                                                        laneInfo.m_similarLaneIndex - 1;
                             }
-                            int outerSimilarLaneIndex = laneInfo.m_similarLaneCount - innerSimilarLaneIndex - 1;
+
+                            int outerSimilarLaneIndex =
+                                laneInfo.m_similarLaneCount - innerSimilarLaneIndex - 1;
 
                             laneEnds.Add(
                                 new LaneEnd {
@@ -1224,12 +1306,12 @@ namespace TrafficManager.UI.SubTools {
 
             // check track turning angles are within bounds
             ret &= isRoad || CheckSegmentsTurningAngle(
-                    sourceSegmentId: source.SegmentId,
-                    sourceSegment: ref GetSeg(source.SegmentId),
-                    sourceStartNode: source.StartNode,
-                    targetSegmentId: target.SegmentId,
-                    targetSegment: ref GetSeg(target.SegmentId),
-                    targetStartNode: target.StartNode);
+                       sourceSegmentId: source.SegmentId,
+                       sourceSegment: ref GetSeg(source.SegmentId),
+                       sourceStartNode: source.StartNode,
+                       targetSegmentId: target.SegmentId,
+                       targetSegment: ref GetSeg(target.SegmentId),
+                       targetStartNode: target.StartNode);
 
             return ret;
         }
@@ -1308,7 +1390,9 @@ namespace TrafficManager.UI.SubTools {
                 middlePos2: out bezier.c);
             Bounds bounds = bezier.GetBounds();
 
-            float overdrawHeight = renderLimits && MainTool.IsUndergroundMode ? 0f : 2f;
+            float overdrawHeight = renderLimits
+                                   && Highlight.IsUndergroundMode ? 0f : 2f;
+
             // Draw black outline
             RenderManager.instance.OverlayEffect.DrawBezier(
                 cameraInfo: cameraInfo,
@@ -1418,33 +1502,33 @@ namespace TrafficManager.UI.SubTools {
         /// </summary>
         private static readonly Color32[] COLOR_CHOICES
             = {
-                  new Color32(240, 30, 30, 255),
-                  new Color32(80, 214, 0, 255),
-                  new Color32(30, 30, 214, 255),
-                  new Color32(214, 136, 107, 255),
-                  new Color32(189, 186, 142, 255),
-                  new Color32(106, 41, 163, 255),
-                  new Color32(0, 99, 53, 255),
-                  new Color32(54, 118, 214, 255),
-                  new Color32(163, 57, 41, 255),
-                  new Color32(54, 161, 214, 255),
-                  new Color32(107, 214, 193, 255),
-                  new Color32(214, 161, 175, 255),
-                  new Color32(214, 0, 171, 255),
-                  new Color32(151, 178, 201, 255),
-                  new Color32(189, 101, 0, 255),
-                  new Color32(163, 41, 73, 255),
-                  new Color32(154, 142, 189, 255),
-                  new Color32(176, 88, 147, 255),
-                  new Color32(150, 140, 0, 255),
-                  new Color32(0, 140, 150, 255),
-                  new Color32(0, 0, 138, 255),
-                  new Color32(0, 60, 112, 255),
-                  new Color32(120, 189, 94, 255),
-                  new Color32(112, 86, 56, 255),
-                  new Color32(88, 112, 84, 255),
-                  new Color32(75, 75, 99, 255),
-                  new Color32(99, 75, 85, 255),
+                new(240, 30, 30, 255),
+                new(80, 214, 0, 255),
+                new(30, 30, 214, 255),
+                new(214, 136, 107, 255),
+                new(189, 186, 142, 255),
+                new(106, 41, 163, 255),
+                new(0, 99, 53, 255),
+                new(54, 118, 214, 255),
+                new(163, 57, 41, 255),
+                new(54, 161, 214, 255),
+                new(107, 214, 193, 255),
+                new(214, 161, 175, 255),
+                new(214, 0, 171, 255),
+                new(151, 178, 201, 255),
+                new(189, 101, 0, 255),
+                new(163, 41, 73, 255),
+                new(154, 142, 189, 255),
+                new(176, 88, 147, 255),
+                new(150, 140, 0, 255),
+                new(0, 140, 150, 255),
+                new(0, 0, 138, 255),
+                new(0, 60, 112, 255),
+                new(120, 189, 94, 255),
+                new(112, 86, 56, 255),
+                new(88, 112, 84, 255),
+                new(75, 75, 99, 255),
+                new(99, 75, 85, 255),
             };
 
         private static string T(string key) => Translation.LaneRouting.Get(key);
@@ -1463,20 +1547,24 @@ namespace TrafficManager.UI.SubTools {
                 case SelectionMode.SelectTarget:
                 case SelectionMode.SelectSource: {
                     var items = new List<OsdItem>();
-                    items.Add(new ModeDescription(
-                                  m == SelectionMode.SelectSource
-                                      ? T("LaneConnector.Mode:Source")
-                                      : T("LaneConnector.Mode:Target")));
-                    items.Add(new Shortcut(
-                                  keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
-                                  localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
-                    items.Add(new Shortcut(
-                                  keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
-                                  localizedText: T("LaneConnector.Label:Reset to default")));
+                    items.Add(
+                        new ModeDescription(
+                            m == SelectionMode.SelectSource
+                                ? T("LaneConnector.Mode:Source")
+                                : T("LaneConnector.Mode:Target")));
+                    items.Add(
+                        new Shortcut(
+                            keybindSetting: KeybindSettingsBase.LaneConnectorStayInLane,
+                            localizedText: T("LaneConnector.Label:Stay in lane, multiple modes")));
+                    items.Add(
+                        new Shortcut(
+                            keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
+                            localizedText: T("LaneConnector.Label:Reset to default")));
 
-                    items.Add(m == SelectionMode.SelectSource
-                                  ? OnscreenDisplay.RightClick_LeaveNode()
-                                  : OnscreenDisplay.RightClick_LeaveLane());
+                    items.Add(
+                        m == SelectionMode.SelectSource
+                            ? OnscreenDisplay.RightClick_LeaveNode()
+                            : OnscreenDisplay.RightClick_LeaveLane());
                     OnscreenDisplay.Display(items);
                     return;
                 }

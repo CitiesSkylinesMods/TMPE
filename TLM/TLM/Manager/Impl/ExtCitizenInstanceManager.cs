@@ -24,7 +24,7 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        public static readonly ExtCitizenInstanceManager Instance = new ExtCitizenInstanceManager();
+        public static readonly ExtCitizenInstanceManager Instance = new();
 
         /// <summary>
         /// Gets all additional data for citizen instance. Index: citizen instance id.
@@ -410,8 +410,10 @@ namespace TrafficManager.Manager.Impl {
                   && (DebugSettings.TargetBuildingId == 0
                       || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 
 #else
             bool logParkingAi = adhocDebugLog;
@@ -798,16 +800,16 @@ namespace TrafficManager.Manager.Impl {
 
                         // find a parking space in the vicinity of the target
                         if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(
-                                endPos,
-                                vehicleInfo,
-                                ref extInstance,
-                                homeId,
-                                instanceData.m_targetBuilding == homeId,
-                                0,
-                                false,
-                                out Vector3 parkPos,
-                                ref endPosA,
-                                out bool calcEndPos)
+                                endPos: endPos,
+                                vehicleInfo: vehicleInfo,
+                                extDriverInstance: ref extInstance,
+                                homeId: homeId,
+                                goingHome: instanceData.m_targetBuilding == homeId,
+                                vehicleId: 0,
+                                allowTourists: false,
+                                parkPos: out Vector3 parkPos,
+                                endPathPos: ref endPosA,
+                                calculateEndPos: out bool calcEndPos)
                             && CalculateReturnPath(
                                 ref extInstance,
                                 parkPos,
@@ -1203,8 +1205,9 @@ namespace TrafficManager.Manager.Impl {
             bool citizenDebug = DebugSettings.CitizenId == 0
                                 || DebugSettings.CitizenId == GetCitizenId(extInstance.instanceId);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            // bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            // bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog && citizenDebug;
 #else
             const bool logParkingAi = false;
 #endif
@@ -1228,8 +1231,10 @@ namespace TrafficManager.Manager.Impl {
             bool citizenDebug = DebugSettings.CitizenId == 0
                                 || DebugSettings.CitizenId == GetCitizenId(extInstance.instanceId);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 
             if (extendedLogParkingAi) {
                 Log._Debug(
@@ -1275,8 +1280,9 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0
                                 || DebugSettings.CitizenId == GetCitizenId(extInstance.instanceId);
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            // bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            // bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog && citizenDebug;
 #else
             const bool logParkingAi = false;
 #endif
@@ -1468,8 +1474,9 @@ namespace TrafficManager.Manager.Impl {
                  || DebugSettings.TargetBuildingId ==
                  citizensBuffer[extInstance.instanceId].m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            // bool fineDebug = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            // bool fineDebug = GlobalConfig.Instance.Debug.ExtendedParkingAILog.Get() && citizenDebug;
 
             if (logParkingAi) {
                 Log._Debug(

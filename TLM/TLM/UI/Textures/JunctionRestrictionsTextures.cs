@@ -6,26 +6,26 @@ namespace TrafficManager.UI.Textures {
     /// <summary>
     /// Textures for UI controlling crossings, junctions and nodes
     /// </summary>
-    public static class JunctionRestrictions {
-        public static readonly Texture2D LaneChangeForbidden;
-        public static readonly Texture2D LaneChangeAllowed;
+    public class JunctionRestrictionsTextures {
+        public readonly Texture2D LaneChangeForbidden;
+        public readonly Texture2D LaneChangeAllowed;
 
-        public static readonly Texture2D UturnAllowed;
-        public static readonly Texture2D UturnForbidden;
+        public readonly Texture2D UturnAllowed;
+        public readonly Texture2D UturnForbidden;
 
-        public static readonly Texture2D RightOnRedForbidden;
-        public static readonly Texture2D RightOnRedAllowed;
+        public readonly Texture2D RightOnRedForbidden;
+        public readonly Texture2D RightOnRedAllowed;
 
-        public static readonly Texture2D LeftOnRedForbidden;
-        public static readonly Texture2D LeftOnRedAllowed;
+        public readonly Texture2D LeftOnRedForbidden;
+        public readonly Texture2D LeftOnRedAllowed;
 
-        public static readonly Texture2D EnterBlockedJunctionAllowed;
-        public static readonly Texture2D EnterBlockedJunctionForbidden;
+        public readonly Texture2D EnterBlockedJunctionAllowed;
+        public readonly Texture2D EnterBlockedJunctionForbidden;
 
-        public static readonly Texture2D PedestrianCrossingAllowed;
-        public static readonly Texture2D PedestrianCrossingForbidden;
+        public readonly Texture2D PedestrianCrossingAllowed;
+        public readonly Texture2D PedestrianCrossingForbidden;
 
-        static JunctionRestrictions() {
+        public JunctionRestrictionsTextures() {
             IntVector2 size = new IntVector2(200);
 
             LaneChangeAllowed = LoadDllResource("JunctionRestrictions.lanechange_allowed.png", size);

@@ -2,18 +2,21 @@ namespace TrafficManager.UI.Textures {
     using static TextureResources;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.Lifecycle;
     using TrafficManager.Util;
     using UnityEngine;
 
     /// <summary>UI Textures for controlling road segments.</summary>
-    public static class RoadUI {
-        public static readonly IDictionary<PriorityType, Texture2D> PrioritySignTextures;
-        public static readonly Texture2D SignClear;
-        public static readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
-        public static readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
-        public static readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
+    public class RoadUITextures {
+        public readonly IDictionary<PriorityType, Texture2D> PrioritySignTextures;
+        public readonly Texture2D SignClear;
+        public readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
+        public readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
+        public readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
 
-        static RoadUI() {
+        public static RoadUITextures Instance => TMPELifecycle.Instance.Textures.RoadUI;
+
+        public RoadUITextures() {
             IntVector2 size = new IntVector2(200);
 
             // priority signs
@@ -70,7 +73,7 @@ namespace TrafficManager.UI.Textures {
             VehicleInfoSignTextures[ExtVehicleType.Tram] = LoadDllResource("RoadUI.tram_infosign.png", signSize);
        }
 
-        public static void ReloadTexturesWithTranslation() {
+        public void ReloadTexturesWithTranslation() {
             IntVector2 size = new IntVector2(200);
             Texture2D stopTexture = PrioritySignTextures[PriorityType.Stop];
             if (stopTexture)

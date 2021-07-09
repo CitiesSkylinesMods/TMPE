@@ -226,7 +226,7 @@ namespace TrafficManager.Manager.Impl {
         /// <returns></returns>
         internal bool RemoveLaneConnection(uint laneId1, uint laneId2, bool startNode1) {
 #if DEBUG
-            bool logLaneConnections = DebugSwitch.LaneConnections.Get();
+            bool logLaneConnections = GlobalConfig.Instance.Debug.LaneConnections;
 #else
             const bool logLaneConnections = false;
 #endif
@@ -279,7 +279,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="nodeId">Affected node</param>
         internal void RemoveLaneConnectionsFromNode(ushort nodeId) {
 #if DEBUG
-            if (DebugSwitch.LaneConnections.Get()) {
+            if (GlobalConfig.Instance.Debug.LaneConnections) {
                 Log._Debug($"LaneConnectionManager.RemoveLaneConnectionsFromNode({nodeId}) called.");
             }
 #endif
@@ -302,7 +302,7 @@ namespace TrafficManager.Manager.Impl {
                                                        bool startNode,
                                                        bool recalcAndPublish = true) {
 #if DEBUG
-            bool logLaneConnections = DebugSwitch.LaneConnections.Get();
+            bool logLaneConnections = GlobalConfig.Instance.Debug.LaneConnections;
 #else
             const bool logLaneConnections = false;
 #endif
@@ -348,7 +348,7 @@ namespace TrafficManager.Manager.Impl {
                                             bool startNode,
                                             bool recalcAndPublish = true) {
 #if DEBUG
-            bool logLaneConnections = DebugSwitch.LaneConnections.Get();
+            bool logLaneConnections = GlobalConfig.Instance.Debug.LaneConnections;
 #else
             const bool logLaneConnections = false;
 #endif
@@ -382,7 +382,7 @@ namespace TrafficManager.Manager.Impl {
             }*/
 
             Flags.RemoveLaneConnections(laneId, startNode);
-            
+
             if (recalcAndPublish) {
                 ushort segment = laneId.ToLane().m_segment;
                 RoutingManager.Instance.RequestRecalculation(segment);
@@ -410,7 +410,7 @@ namespace TrafficManager.Manager.Impl {
             bool ret = Flags.AddLaneConnection(sourceLaneId, targetLaneId, sourceStartNode);
 
 #if DEBUG
-            bool logLaneConnections = DebugSwitch.LaneConnections.Get();
+            bool logLaneConnections = GlobalConfig.Instance.Debug.LaneConnections;
 #else
             const bool logLaneConnections = false;
 #endif
@@ -460,7 +460,7 @@ namespace TrafficManager.Manager.Impl {
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
 #if DEBUG
-            bool logLaneConnections = DebugSwitch.LaneConnections.Get();
+            bool logLaneConnections = GlobalConfig.Instance.Debug.LaneConnections;
 #else
             const bool logLaneConnections = false;
 #endif
@@ -597,7 +597,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="nodeId">Affected node</param>
         private void RecalculateLaneArrows(uint laneId, ushort nodeId, bool startNode) {
 #if DEBUG
-            bool logLaneConnections = DebugSwitch.LaneConnections.Get();
+            bool logLaneConnections = GlobalConfig.Instance.Debug.LaneConnections;
 #else
             const bool logLaneConnections = false;
 #endif

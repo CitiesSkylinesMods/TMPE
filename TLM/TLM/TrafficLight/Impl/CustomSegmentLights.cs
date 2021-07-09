@@ -11,6 +11,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.TrafficLight;
     using TrafficManager.Geometry.Impl;
+    using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
 
@@ -76,7 +77,7 @@ namespace TrafficManager.TrafficLight.Impl {
         // TODO replace collection
         public LinkedList<ExtVehicleType> VehicleTypes {
             get; private set;
-        } = new LinkedList<ExtVehicleType>();
+        } = new();
 
         public ExtVehicleType?[] VehicleTypeByLaneIndex {
             get; private set;
@@ -420,7 +421,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public void CalculateAutoPedestrianLightState(ref NetNode node, bool propagate = true) {
 #if DEBUG
-            bool logTrafficLights = DebugSwitch.TimedTrafficLights.Get()
+            bool logTrafficLights = GlobalConfig.Instance.Debug.TimedTrafficLights
                                     && DebugSettings.NodeId == NodeId;
 #else
             const bool logTrafficLights = false;
@@ -578,7 +579,7 @@ namespace TrafficManager.TrafficLight.Impl {
         // TODO improve & remove
         public void Housekeeping(bool mayDelete, bool calculateAutoPedLight) {
 #if DEBUGHK
-            bool logHouseKeeping = DebugSwitch.TimedTrafficLights.Get()
+            bool logHouseKeeping = GlobalConfig.Instance.Debug.TimedTrafficLights
                                    && DebugSettings.NodeId == NodeId;
 #else
             const bool logHouseKeeping = false;

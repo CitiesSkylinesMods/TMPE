@@ -9,6 +9,8 @@
 
 #if DEBUG
     using State.ConfigData;
+    using TrafficManager.State;
+
 #endif
 
     public class ExtCitizenManager
@@ -25,7 +27,7 @@
             }
         }
 
-        public static ExtCitizenManager Instance = new ExtCitizenManager();
+        public static ExtCitizenManager Instance = new();
 
         /// <summary>
         /// All additional data for citizens. Index: citizen id
@@ -54,7 +56,8 @@
             bool citizenDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
 
             // bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 
             if (extendedLogParkingAi) {
                 Log._Debug($"ExtCitizenManager.OnArriveAtDestination({citizenId}) called");

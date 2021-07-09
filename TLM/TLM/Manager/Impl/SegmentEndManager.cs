@@ -7,6 +7,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Traffic.Impl;
     using TrafficManager.Traffic;
     using CitiesGameBridge.Service;
+    using TrafficManager.State;
     using TrafficManager.Util;
 
     [Obsolete("should be removed when implementing issue #240")]
@@ -14,7 +15,7 @@ namespace TrafficManager.Manager.Impl {
         : AbstractCustomManager,
           ISegmentEndManager
     {
-        public static readonly SegmentEndManager Instance = new SegmentEndManager();
+        public static readonly SegmentEndManager Instance = new();
 
         private ISegmentEnd[] SegmentEnds;
 
@@ -74,7 +75,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void RemoveSegmentEnd(ushort segmentId, bool startNode) {
 #if DEBUG
-            bool logPriority = DebugSwitch.PriorityRules.Get()
+            bool logPriority = GlobalConfig.Instance.Debug.PriorityRules
                                && (DebugSettings.SegmentId <= 0
                                    || segmentId == DebugSettings.SegmentId);
 #else
@@ -99,7 +100,7 @@ namespace TrafficManager.Manager.Impl {
 
         public bool UpdateSegmentEnd(ushort segmentId, bool startNode) {
 #if DEBUG
-            bool logPriority = DebugSwitch.PriorityRules.Get()
+            bool logPriority = GlobalConfig.Instance.Debug.PriorityRules
                                && (DebugSettings.SegmentId <= 0
                                    || segmentId == DebugSettings.SegmentId);
 #else

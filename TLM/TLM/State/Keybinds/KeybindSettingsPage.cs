@@ -28,7 +28,7 @@ namespace TrafficManager.State.Keybinds {
             ToggleMainMenu.OnKeyChanged(() => {
                 if (ModUI.Instance != null &&
                     ModUI.Instance.MainMenuButton != null) {
-                    ModUI.Instance.MainMenuButton.UpdateButtonImageAndTooltip();
+                    ModUI.Instance.MainMenuButton.UpdateButtonSkinAndTooltip();
                 }
             });
 

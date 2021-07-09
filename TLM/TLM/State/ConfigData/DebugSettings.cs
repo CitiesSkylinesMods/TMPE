@@ -1,48 +1,86 @@
 namespace TrafficManager.State.ConfigData {
-    using ExtVehicleType = TrafficManager.Traffic.ExtVehicleType;
-    using JetBrains.Annotations;
     using System;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Traffic;
+    using ExtVehicleType = TrafficManager.Traffic.ExtVehicleType;
 
-#if DEBUG
     /// <summary>
     /// DebugSettings is a part of GlobalConfig, enabled only in Debug mode
     /// </summary>
     public class DebugSettings {
-        /// <summary>
-        /// Do not use directly.
-        /// Use DebugSwitch.$EnumName$.Get() to access the switch values.
-        /// </summary>
-        public bool[] Switches = {
-            false, // 0: path-finding debug log
-            false, // 1: routing basic debug log
-            false, // 2: parking ai debug log (basic)
-            false, // 3: do not actually repair stuck vehicles/cims, just report
-            false, // 4: parking ai debug log (extended)
-            false, // 5: geometry debug log
-            false, // 6: debug parking AI distance issue
-            false, // 7: debug Timed Traffic Lights
-            false, // 8: debug routing
-            false, // 9: debug vehicle to segment end linking
-            false, // 10: prevent routing recalculation on global configuration reload
-            false, // 11: debug junction restrictions
-            false, // 12: debug pedestrian pathfinding
-            false, // 13: priority rules debug
-            false, // 14: disable GUI overlay of citizens having a valid path
-            false, // 15: disable checking of other vehicles for trams
-            false, // 16: debug TramBaseAI.SimulationStep (2)
-            false, // 17: debug alternative lane selection
-            false, // 18: transport line path-find debugging
-            false, // 19: enable obligation to drive on the right hand side of the road
-            false, // 20: debug realistic public transport
-            false, // 21: debug "CalculateSegmentPosition"
-            false, // 22: parking ai debug log (vehicles)
-            false, // 23: debug lane connections
-            false, // 24: debug resource loading
-            false, // 25: debug turn-on-red
-            false  // 26: debug speed limits (also lists NetInfos skipped due to m_netAI in SpeedLimitsManager.cs)
-        };
+#if DEBUG
+        //-------------------------------------------------------
+        // All fields below are loaded from a section in TMPE_GlobalConfig.xml
+        //-------------------------------------------------------
+        public readonly bool AlternativeLaneSelection = false;
+        public readonly bool ApplyTrafficRules = false; // log calls to apply traffic rules
+        public readonly bool BasicParkingAILog = false;
+        public readonly bool CalculateSegmentPosition = false;
+        public readonly bool CustomCarAI = false;
+        public readonly bool ExtendedParkingAILog = false;
+        public readonly bool GeometryDebug = false;
+        public readonly bool Guide = false;
+        public readonly bool JunctionRestrictions = false;
+        public readonly bool LaneConnections = false;
+        public readonly bool NoRoutingRecalculationOnConfigReload = false;
+        public readonly bool NoValidPathCitizensOverlay = false; // disable GUI overlay of citizens having a valid path
+        public readonly bool ParkingAIDistanceIssue = false;
+        public readonly bool PathFindingLog = false;
+        public readonly bool PedestrianPathfinding = false;
+        public readonly bool PriorityRules = false;
+        public readonly bool RealisticPublicTransport = false;
+        public readonly bool Redirection = false; // debug DLL loading/redirection events
+        public readonly bool ResourceLoading = false;
+        public readonly bool RoadSelection = false; // debug log for road/loop selection routines
+        public readonly bool Routing = false;
+        public readonly bool RoutingBasicLog = false;
+        public readonly bool SpeedLimits = false;
+        public readonly bool TimedTrafficLights = false;
+        public readonly bool TrafficLights = false;
+        public readonly bool TramBaseAISimulationStep = false;
+        public readonly bool TransportLinePathfind = false;
+        public readonly bool TurnOnRed = false;
+        public readonly bool LogUEvents = false; // debug U GUI subsystem
+        public readonly bool VehicleLinkingToSegmentEnd = false;
+        public readonly bool VehicleParkingAILog = false;
+        // sorted A..Z
+#else
+        //-------------------------------------------------------
+        // All properties below cannot be modified, always false
+        //-------------------------------------------------------
+        public bool AlternativeLaneSelection => false;
+        public bool ApplyTrafficRules => false; // log calls to apply traffic rules
+        public bool BasicParkingAILog => false;
+        public bool CalculateSegmentPosition => false;
+        public bool CustomCarAI => false;
+        public bool ExtendedParkingAILog => false;
+        public bool GeometryDebug => false;
+        public bool Guide => false;
+        public bool JunctionRestrictions => false;
+        public bool LaneConnections => false;
+        public bool NoRoutingRecalculationOnConfigReload => false;
+        public bool NoValidPathCitizensOverlay => false; // disable GUI overlay of citizens having a valid path
+        public bool ParkingAIDistanceIssue => false;
+        public bool PathFindingLog => false;
+        public bool PedestrianPathfinding => false;
+        public bool PriorityRules => false;
+        public bool RealisticPublicTransport => false;
+        public bool Redirection => false; // debug DLL loading/redirection events
+        public bool ResourceLoading => false;
+        public bool RoadSelection => false; // debug log for road/loop selection routines
+        public bool Routing => false;
+        public bool RoutingBasicLog => false;
+        public bool SpeedLimits => false;
+        public bool TimedTrafficLights => false;
+        public bool TrafficLights => false;
+        public bool TramBaseAISimulationStep => false;
+        public bool TransportLinePathfind => false;
+        public bool TurnOnRed => false;
+        public bool LogUEvents => false; // debug U GUI subsystem
+        public bool VehicleLinkingToSegmentEnd => false;
+        public bool VehicleParkingAILog => false;
+        // sorted A..Z
+#endif // DEBUG
 
         private int nodeId_ = 0;
 
@@ -94,47 +132,4 @@ namespace TrafficManager.State.ConfigData {
 
         public ExtPathMode ExtPathMode = ExtPathMode.None;
     }
-
-    /// <summary>
-    /// Indexes into Debug.Switches
-    /// </summary>
-    public enum DebugSwitch {
-        PathFindingLog = 0,
-        RoutingBasicLog = 1,
-        BasicParkingAILog = 2,
-        [UsedImplicitly]
-        NoRepairStuckVehiclesCims = 3,
-        ExtendedParkingAILog = 4,
-        GeometryDebug = 5,
-        ParkingAIDistanceIssue = 6,
-        TimedTrafficLights = 7,
-        Routing = 8,
-        VehicleLinkingToSegmentEnd = 9,
-        NoRoutingRecalculationOnConfigReload = 10,
-        JunctionRestrictions = 11,
-        PedestrianPathfinding = 12,
-        PriorityRules = 13,
-        NoValidPathCitizensOverlay = 14,
-        [UsedImplicitly]
-        TramsNoOtherVehiclesChecking = 15,
-        TramBaseAISimulationStep = 16,
-        AlternativeLaneSelection = 17,
-        TransportLinePathfind = 18,
-        [UsedImplicitly]
-        ObligationToRHD = 19,
-        RealisticPublicTransport = 20,
-        CalculateSegmentPosition = 21,
-        VehicleParkingAILog = 22,
-        LaneConnections = 23,
-        ResourceLoading = 24,
-        TurnOnRed = 25,
-        SpeedLimits = 26
-    }
-
-    static class DebugSwitchExtensions {
-        public static bool Get(this DebugSwitch sw) {
-            return GlobalConfig.Instance.Debug.Switches[(int)sw];
-        }
-    }
-#endif
 }

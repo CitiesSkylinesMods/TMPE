@@ -3,6 +3,7 @@ namespace TrafficManager.Manager.Impl {
     using CSUtil.Commons;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
 
@@ -46,7 +47,7 @@ namespace TrafficManager.Manager.Impl {
             ushort segmentId = extSegment.segmentId;
 
 #if DEBUG
-            bool logGeometry = DebugSwitch.GeometryDebug.Get();
+            bool logGeometry = GlobalConfig.Instance.Debug.GeometryDebug;
 #else
             const bool logGeometry = false;
 #endif

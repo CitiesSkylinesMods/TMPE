@@ -3,7 +3,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
     /// <summary>Thread safe handling of mass edit overlay.</summary>
     public static class MassEditOverlay {
-        private static object _lock = new object();
+        private static object _lock = new();
 
         private static bool _show = false;
 

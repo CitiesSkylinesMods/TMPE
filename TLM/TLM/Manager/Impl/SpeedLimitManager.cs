@@ -1,151 +1,101 @@
 namespace TrafficManager.Manager.Impl {
+    using System;
+    using System.Collections.Generic;
     using ColossalFramework;
     using CSUtil.Commons;
     using JetBrains.Annotations;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
 #if DEBUG
     using TrafficManager.State.ConfigData;
 #endif
-    using TrafficManager.UI.SubTools.SpeedLimits;
+    using System.Text;
+    using TrafficManager.API.Traffic;
     using TrafficManager.Util;
     using UnityEngine;
-    using System.Text;
+    using Debug = System.Diagnostics.Debug;
 
+    /// <summary>
+    /// Handles mod-global storage for speed limit overrides/default speed overrides.
+    /// </summary>
     public class SpeedLimitManager
         : AbstractGeometryObservingManager,
           ICustomDataManager<List<Configuration.LaneSpeedLimit>>,
           ICustomDataManager<Dictionary<string, float>>,
           ISpeedLimitManager {
-
+        /// <summary>Lane types which can have speed limits override.</summary>
         public const NetInfo.LaneType LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
+        /// <summary>
+        /// Vehicle types to filter the roads/lanes which can have speed limit override.
+        /// </summary>
         public const VehicleInfo.VehicleType VEHICLE_TYPES =
             VehicleInfo.VehicleType.Car | VehicleInfo.VehicleType.Tram |
             VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train |
             VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
 
-        /// <summary>Ingame speed units, max possible speed</summary>
-        public const float MAX_SPEED = 10f * 2f; // 1000 km/h
+        /// <summary>Ingame speed units, max possible speed.</summary>
+        public const float MAX_SPEED = SpeedValue.SPECIAL_UNLIMITED_VALUE; // 1000 km/h
 
-        public static readonly SpeedLimitManager Instance = new SpeedLimitManager();
+        /// <summary>Singleton for this class.</summary>
+        public static readonly SpeedLimitManager Instance = new();
 
-        // For each NetInfo (by name) and lane index: custom speed limit
-        internal Dictionary<string, float> CustomLaneSpeedLimitByNetInfoName;
+        /// <summary>For each NetInfo (by name) and lane index: custom speed limit.</summary>
+        internal readonly Dictionary<string, float> CustomLaneSpeedLimitByNetInfoName;
 
-        // For each name: NetInfo
-        internal Dictionary<string, NetInfo> NetInfoByName;
+        /// <summary>For each name: NetInfo.</summary>
+        private readonly Dictionary<string, NetInfo> netInfoByName_;
 
-        /// <summary>Ingame speed units, minimal speed</summary>
+        /// <summary>Ingame speed units, minimal speed.</summary>
         private const float MIN_SPEED = 0.1f; // 5 km/h
 
-        // For each NetInfo (by name) and lane index: game default speed limit
-        private Dictionary<string, float[]> vanillaLaneSpeedLimitsByNetInfoName;
+        /// <summary>For each NetInfo (by name) and lane index: game default speed limit.</summary>
+        private readonly Dictionary<string, float[]> vanillaLaneSpeedLimitsByNetInfoName_;
 
-        // For each NetInfo (by name): Parent NetInfo (name)
-        private Dictionary<string, List<string>> childNetInfoNamesByCustomizableNetInfoName;
+        /// <summary>For each NetInfo (by name): Parent NetInfo (name).</summary>
+        private readonly Dictionary<string, List<string>>
+            childNetInfoNamesByCustomizableNetInfoName_;
 
-        private List<NetInfo> customizableNetInfos;
+        private List<NetInfo> customizableNetInfos_;
 
         private SpeedLimitManager() {
-            vanillaLaneSpeedLimitsByNetInfoName = new Dictionary<string, float[]>();
-            CustomLaneSpeedLimitByNetInfoName = new Dictionary<string, float>();
-            customizableNetInfos = new List<NetInfo>();
-            childNetInfoNamesByCustomizableNetInfoName = new Dictionary<string, List<string>>();
-            NetInfoByName = new Dictionary<string, NetInfo>();
+            this.vanillaLaneSpeedLimitsByNetInfoName_ = new Dictionary<string, float[]>();
+            this.CustomLaneSpeedLimitByNetInfoName = new Dictionary<string, float>();
+            this.customizableNetInfos_ = new List<NetInfo>();
+            this.childNetInfoNamesByCustomizableNetInfoName_ = new Dictionary<string, List<string>>();
+            this.netInfoByName_ = new Dictionary<string, NetInfo>();
         }
 
-        /// <summary>
-        /// Determines if custom speed limits may be assigned to the given segment.
-        /// </summary>
-        /// <param name="segmentId">Affected segment id</param>
-        /// <param name="segment">Reference to affected segment</param>
-        /// <returns>Success</returns>
-        public bool MayHaveCustomSpeedLimits(ushort segmentId, ref NetSegment segment) {
-            if ((segment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+        /// <summary>Determines if custom speed limits may be assigned to the given segment.</summary>
+        /// <param name="segment">Reference to affected segment.</param>
+        /// <returns>Success.</returns>
+        public bool MayHaveCustomSpeedLimits(ref NetSegment segment) {
+            if ((segment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
                 return false;
+            }
+
             ItemClass connectionClass = segment.Info.GetConnectionClass();
-            return connectionClass.m_service == ItemClass.Service.Road
-                   || (connectionClass.m_service == ItemClass.Service.PublicTransport
-                       && (connectionClass.m_subService == ItemClass.SubService.PublicTransportTrain
-                           || connectionClass.m_subService ==
-                           ItemClass.SubService.PublicTransportTram
-                           || connectionClass.m_subService ==
-                           ItemClass.SubService.PublicTransportMetro
-                           || connectionClass.m_subService ==
-                           ItemClass.SubService.PublicTransportMonorail));
+            ItemClass.SubService subService = connectionClass.m_subService;
+            ItemClass.Service service = connectionClass.m_service;
+
+            return service == ItemClass.Service.Road
+                   || (service == ItemClass.Service.PublicTransport
+                       && (subService == ItemClass.SubService.PublicTransportTrain
+                           || subService == ItemClass.SubService.PublicTransportTram
+                           || subService == ItemClass.SubService.PublicTransportMetro
+                           || subService == ItemClass.SubService.PublicTransportMonorail));
         }
 
         /// <summary>
         /// Determines if custom speed limits may be assigned to the given lane info.
         /// </summary>
         /// <param name="laneInfo">The <see cref="NetInfo.Lane"/> that you wish to check.</param>
-        /// <returns></returns>
+        /// <returns>Whether lane can have custom speed limits.</returns>
         public bool MayHaveCustomSpeedLimits(NetInfo.Lane laneInfo) {
             return (laneInfo.m_laneType & LANE_TYPES) != NetInfo.LaneType.None
                    && (laneInfo.m_vehicleType & VEHICLE_TYPES) != VehicleInfo.VehicleType.None;
-        }
-
-        /// <summary>
-        /// Determines the currently set speed limit for the given segment and lane direction in
-        /// terms of discrete speed limit levels. An in-game speed limit of 2.0 (e.g. on highway) is
-        /// hereby translated into a discrete speed limit value of 100 (km/h).
-        /// </summary>
-        /// <param name="segmentId">Interested in this segment</param>
-        /// <param name="finalDir">Direction</param>
-        /// <returns>Mean speed limit, average for custom and default lane speeds</returns>
-        public float GetCustomSpeedLimit(ushort segmentId, NetInfo.Direction finalDir) {
-            // calculate the currently set mean speed limit
-            if (segmentId == 0 ||
-                (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags &
-                 NetSegment.Flags.Created) == NetSegment.Flags.None) {
-                return 0f;
-            }
-
-            NetInfo segmentInfo =
-                Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-            uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
-            var laneIndex = 0;
-            var meanSpeedLimit = 0f;
-            uint validLanes = 0;
-
-            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
-                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-                NetInfo.Direction d = laneInfo.m_finalDirection;
-
-                if (d != finalDir) {
-                    goto nextIter;
-                }
-
-                if (!MayHaveCustomSpeedLimits(laneInfo)) {
-                    goto nextIter;
-                }
-
-                float? setSpeedLimit = Flags.GetLaneSpeedLimit(curLaneId);
-
-                if (setSpeedLimit != null) {
-                    meanSpeedLimit += ToGameSpeedLimit(setSpeedLimit.Value); // custom speed limit
-                } else {
-                    meanSpeedLimit += laneInfo.m_speedLimit; // game default
-                }
-
-                ++validLanes;
-
-            nextIter:
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
-                laneIndex++;
-            }
-
-            if (validLanes > 0) {
-                meanSpeedLimit /= validLanes;
-            }
-
-            return meanSpeedLimit;
         }
 
         /// <summary>
@@ -153,9 +103,9 @@ namespace TrafficManager.Manager.Impl {
         /// discrete speed limit levels. An in-game speed limit of 2.0 (e.g. on highway) is hereby
         /// translated into a discrete speed limit value of 100 (km/h).
         /// </summary>
-        /// <param name="segmentInfo">Interested in this segment</param>
-        /// <param name="finalDir">Direction</param>
-        /// <returns>Result</returns>
+        /// <param name="segmentInfo">Interested in this segment.</param>
+        /// <param name="finalDir">Direction.</param>
+        /// <returns>Result.</returns>
         [UsedImplicitly]
         public float GetAverageDefaultCustomSpeedLimit(NetInfo segmentInfo,
                                                        NetInfo.Direction? finalDir = null) {
@@ -168,7 +118,7 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                if (!MayHaveCustomSpeedLimits(laneInfo)) {
+                if (!this.MayHaveCustomSpeedLimits(laneInfo)) {
                     continue;
                 }
 
@@ -188,9 +138,9 @@ namespace TrafficManager.Manager.Impl {
         /// discrete speed limit levels. An in-game speed limit of 2.0 (e.g. on highway) is hereby
         /// translated into a discrete speed limit value of 100 (km/h).
         /// </summary>
-        /// <param name="segmentInfo">Interested in this segment</param>
-        /// <param name="finalDir">Directoin</param>
-        /// <returns>Result</returns>
+        /// <param name="segmentInfo">Interested in this segment.</param>
+        /// <param name="finalDir">Direction.</param>
+        /// <returns>Result.</returns>
         [UsedImplicitly]
         public ushort GetAverageCustomSpeedLimit(ushort segmentId,
                                                  ref NetSegment segment,
@@ -209,11 +159,11 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                if (!MayHaveCustomSpeedLimits(laneInfo)) {
+                if (!this.MayHaveCustomSpeedLimits(laneInfo)) {
                     continue;
                 }
 
-                meanSpeedLimit += GetLockFreeGameSpeedLimit(
+                meanSpeedLimit += this.GetLockFreeGameSpeedLimit(
                     segmentId,
                     laneIndex,
                     curLaneId,
@@ -231,63 +181,131 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
+        /// Determines the currently set speed limit for the given segment and lane direction in
+        /// terms of discrete speed limit levels. An in-game speed limit of 2.0 (e.g. on highway) is
+        /// hereby translated into a discrete speed limit value of 100 (km/h).
+        /// </summary>
+        /// <param name="segmentId">Interested in this segment.</param>
+        /// <param name="finalDir">Direction.</param>
+        /// <returns>
+        /// Mean speed limit, average for custom and default lane speeds or null
+        /// if cannot be determined.
+        /// </returns>
+        public SpeedValue? GetCustomSpeedLimit(ushort segmentId, NetInfo.Direction finalDir) {
+            // calculate the currently set mean speed limit
+            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            if (segmentId == 0 ||
+                (segmentsBuffer[segmentId].m_flags & NetSegment.Flags.Created) ==
+                NetSegment.Flags.None) {
+                return null;
+            }
+
+            NetInfo segmentInfo = segmentsBuffer[segmentId].Info;
+            uint curLaneId = segmentsBuffer[segmentId].m_lanes;
+            var laneIndex = 0;
+            uint validLanes = 0;
+            SpeedValue meanSpeedLimit = default;
+
+            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
+                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+                NetInfo.Direction d = laneInfo.m_finalDirection;
+
+                if (d != finalDir) {
+                    goto nextIter;
+                }
+
+                if (!this.MayHaveCustomSpeedLimits(laneInfo)) {
+                    goto nextIter;
+                }
+
+                SpeedValue? setSpeedLimit = Flags.GetLaneSpeedLimit(curLaneId);
+
+                if (setSpeedLimit.HasValue) {
+                    // custom speed limit
+                    meanSpeedLimit += setSpeedLimit.Value;
+                } else {
+                    // game default (in game units where 1.0f = 50kmph)
+                    meanSpeedLimit += new SpeedValue(laneInfo.m_speedLimit);
+                }
+
+                ++validLanes;
+
+                nextIter:
+                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+                laneIndex++;
+            }
+
+            if (validLanes > 0) {
+                meanSpeedLimit = meanSpeedLimit.Scale(1.0f / validLanes);
+            }
+
+            return meanSpeedLimit;
+        }
+
+        /// <summary>
         /// Determines the currently set speed limit for the given lane in terms of discrete speed
         /// limit levels. An in-game speed limit of 2.0 (e.g. on highway) is hereby translated into
         /// a discrete speed limit value of 100 (km/h).
         /// </summary>
-        /// <param name="laneId">Interested in this lane</param>
-        /// <returns>Speed limit if set for lane, otherwise 0</returns>
-        public float GetCustomSpeedLimit(uint laneId) {
-            // check custom speed limit
-            float? setSpeedLimit = Flags.GetLaneSpeedLimit(laneId);
-            if (setSpeedLimit != null) {
-                return setSpeedLimit.Value;
-            }
+        /// <param name="laneId">Interested in this lane.</param>
+        /// <returns>Speed limit if set for lane, otherwise 0.</returns>
+        public GetSpeedLimitResult GetCustomSpeedLimit(uint laneId) {
+            //----------------------------------------
+            // check custom speed limit for the lane
+            //----------------------------------------
+            SpeedValue? overrideValue = Flags.GetLaneSpeedLimit(laneId);
 
+            //----------------------------
             // check default speed limit
-            ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
-            if (!MayHaveCustomSpeedLimits(
-                    segmentId,
-                    ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId])) {
-                return 0;
+            //----------------------------
+            NetLane[] laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
+            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            ushort segmentId = laneBuffer[laneId].m_segment;
+
+            if (!this.MayHaveCustomSpeedLimits(ref segmentsBuffer[segmentId])) {
+                // Don't have override, and default is not known
+                return new GetSpeedLimitResult(
+                    overrideValue: null,
+                    defaultValue: null);
             }
 
-            NetInfo segmentInfo =
-                Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-
-            uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
+            NetInfo segmentInfo = segmentsBuffer[segmentId].Info;
+            uint curLaneId = segmentsBuffer[segmentId].m_lanes;
             int laneIndex = 0;
 
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
                 if (curLaneId == laneId) {
                     NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-                    return !MayHaveCustomSpeedLimits(laneInfo) ? 0 : laneInfo.m_speedLimit;
+                    SpeedValue knownDefault = new SpeedValue(laneInfo.m_speedLimit);
+
+                    if (this.MayHaveCustomSpeedLimits(laneInfo)) {
+                        // May possibly have override, also the default is known
+                        return new GetSpeedLimitResult(
+                            overrideValue: overrideValue,
+                            defaultValue: knownDefault);
+                    }
+
+                    // No override, but the default is known
+                    return new GetSpeedLimitResult(
+                        overrideValue: null,
+                        defaultValue: knownDefault);
                 }
 
                 laneIndex++;
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+                curLaneId = laneBuffer[curLaneId].m_nextLane;
             }
 
             Log.Warning($"Speed limit for lane {laneId} could not be determined.");
-            return 0; // no speed limit found
-        }
-
-        /// <summary>
-        /// Determines the currently set speed limit for the given lane in terms of game (floating
-        /// point) speed limit levels.
-        /// </summary>
-        /// <param name="laneId">Interested in this lane</param>
-        /// <returns>Km/h in lane converted to game speed float</returns>
-        [UsedImplicitly]
-        public float GetGameSpeedLimit(uint laneId) {
-            return ToGameSpeedLimit(GetCustomSpeedLimit(laneId));
+            return new GetSpeedLimitResult(
+                overrideValue: null,
+                defaultValue: null);
         }
 
         public float GetLockFreeGameSpeedLimit(ushort segmentId,
                                                byte laneIndex,
                                                uint laneId,
                                                NetInfo.Lane laneInfo) {
-            if (!Options.customSpeedLimitsEnabled || !MayHaveCustomSpeedLimits(laneInfo)) {
+            if (!Options.customSpeedLimitsEnabled || !this.MayHaveCustomSpeedLimits(laneInfo)) {
                 return laneInfo.m_speedLimit;
             }
 
@@ -297,7 +315,7 @@ namespace TrafficManager.Manager.Impl {
             if (fastArray != null
                 && fastArray.Length > laneIndex
                 && fastArray[laneIndex] != null) {
-                speedLimit = ToGameSpeedLimit((float)fastArray[laneIndex]);
+                speedLimit = this.ToGameSpeedLimit((float)fastArray[laneIndex]);
             } else {
                 speedLimit = laneInfo.m_speedLimit;
             }
@@ -308,7 +326,7 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Converts a possibly zero (no limit) custom speed limit to a game speed limit.
         /// </summary>
-        /// <param name="customSpeedLimit">Custom speed limit which can be zero</param>
+        /// <param name="customSpeedLimit">Custom speed limit which can be zero.</param>
         /// <returns>Speed limit in game speed units</returns>
         public float ToGameSpeedLimit(float customSpeedLimit) {
             return FloatUtil.IsZero(customSpeedLimit)
@@ -316,10 +334,12 @@ namespace TrafficManager.Manager.Impl {
                        : customSpeedLimit;
         }
 
+#if FGSFDS_DISABLED_CODE
         /// <summary>
         /// Explicitly stores currently set speed limits for all segments of the specified NetInfo
         /// </summary>
         /// <param name="info">The <see cref="NetInfo"/> for which speed limits should be stored.</param>
+        [Obsolete("Not used, delete this")]
         public void FixCurrentSpeedLimits(NetInfo info) {
             if (info == null) {
 #if DEBUG
@@ -334,7 +354,7 @@ namespace TrafficManager.Manager.Impl {
             //    return;
             // }
 
-            if (!customizableNetInfos.Contains(info)) {
+            if (!customizableNetInfos_.Contains(info)) {
                 return;
             }
 
@@ -343,26 +363,32 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                ushort segmentId =
-                    Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
-                NetInfo laneInfo =
-                    Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+                NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
+                NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+                ushort segmentId = lanesBuffer[laneId].m_segment;
+                NetInfo laneInfo = segmentsBuffer[segmentId].Info;
 
                 if (laneInfo.name != info.name
-                    && (!childNetInfoNamesByCustomizableNetInfoName.ContainsKey(info.name)
-                        || !childNetInfoNamesByCustomizableNetInfoName[info.name]
-                            .Contains(laneInfo.name))) {
+                    && (!childNetInfoNamesByCustomizableNetInfoName_.ContainsKey(info.name)
+                        || !childNetInfoNamesByCustomizableNetInfoName_[info.name].Contains(laneInfo.name))) {
                     continue;
                 }
 
-                Flags.SetLaneSpeedLimit(laneId, GetCustomSpeedLimit(laneId));
+                GetSpeedLimitResult laneCustomSpeedLimit = GetCustomSpeedLimit(laneId);
+                if (laneCustomSpeedLimit.OverrideValue.HasValue) {
+                    Flags.SetLaneSpeedLimit(
+                        laneId: laneId,
+                        action: SetSpeedLimitAction.SetSpeed(laneCustomSpeedLimit.OverrideValue.Value));
+                }
             }
         }
+#endif // disabled code
 
         /// <summary>
         /// Explicitly clear currently set speed limits for all segments of the specified NetInfo
         /// </summary>
         /// <param name="info">The <see cref="NetInfo"/> for which speed limits should be cleared.</param>
+        [UsedImplicitly] // TODO: Delete this
         public void ClearCurrentSpeedLimits(NetInfo info) {
             if (info == null) {
                 Log._DebugOnlyWarning("SpeedLimitManager.ClearCurrentSpeedLimits: info is null!");
@@ -375,12 +401,12 @@ namespace TrafficManager.Manager.Impl {
             //    return;
             // }
 
-            if (!customizableNetInfos.Contains(info)) {
+            if (!this.customizableNetInfos_.Contains(info)) {
                 return;
             }
 
             for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+                if (!this.Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -391,8 +417,8 @@ namespace TrafficManager.Manager.Impl {
                                    .Info;
 
                 if (laneInfo.name != info.name &&
-                    (!childNetInfoNamesByCustomizableNetInfoName.ContainsKey(info.name) ||
-                     !childNetInfoNamesByCustomizableNetInfoName[info.name]
+                    (!this.childNetInfoNamesByCustomizableNetInfoName_.ContainsKey(info.name) ||
+                     !this.childNetInfoNamesByCustomizableNetInfoName_[info.name]
                          .Contains(laneInfo.name))) {
                     continue;
                 }
@@ -404,18 +430,18 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Determines the game default speed limit of the given NetInfo.
         /// </summary>
-        /// <param name="info">the NetInfo of which the game default speed limit should be determined</param>
-        /// <param name="roundToSignLimits">if true, custom speed limit are rounded to speed limits
-        /// available as speed limit sign</param>
+        /// <param name="info">the NetInfo of which the game default speed limit should be determined.</param>
         /// <returns>The vanilla speed limit, in game units.</returns>
-        public float GetVanillaNetInfoSpeedLimit(NetInfo info, bool roundToSignLimits = true) {
+        public float GetVanillaNetInfoSpeedLimit(NetInfo info) {
             if (info == null) {
-                Log._DebugOnlyWarning("SpeedLimitManager.GetVanillaNetInfoSpeedLimit: info is null!");
+                Log._DebugOnlyWarning(
+                    "SpeedLimitManager.GetVanillaNetInfoSpeedLimit: info is null!");
                 return 0;
             }
 
             if (info.m_netAI == null) {
-                Log._DebugOnlyWarning("SpeedLimitManager.GetVanillaNetInfoSpeedLimit: info.m_netAI is null!");
+                Log._DebugOnlyWarning(
+                    "SpeedLimitManager.GetVanillaNetInfoSpeedLimit: info.m_netAI is null!");
                 return 0;
             }
 
@@ -426,7 +452,7 @@ namespace TrafficManager.Manager.Impl {
             // }
 
             string infoName = info.name;
-            if (!vanillaLaneSpeedLimitsByNetInfoName.TryGetValue(
+            if (!this.vanillaLaneSpeedLimitsByNetInfoName_.TryGetValue(
                     infoName,
                     out float[] vanillaSpeedLimits)) {
                 return 0;
@@ -446,64 +472,55 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Determines the custom speed limit of the given NetInfo.
         /// </summary>
-        /// <param name="info">the NetInfo of which the custom speed limit should be determined</param>
-        /// <returns>-1 if no custom speed limit was set</returns>
+        /// <param name="info">the NetInfo of which the custom speed limit should be determined.</param>
+        /// <returns>-1 if no custom speed limit was set.</returns>
         public float GetCustomNetInfoSpeedLimit(NetInfo info) {
             if (info == null) {
                 Log._DebugOnlyWarning(
-                    $"SpeedLimitManager.SetCustomNetInfoSpeedLimitIndex: info is null!");
+                    "SpeedLimitManager.GetCustomNetInfoSpeedLimit: info is null!");
                 return -1;
             }
 
-            // Resharper warning: condition always false
-            // if (info.name == null) {
-            //    Log._DebugOnlyWarning($"SpeedLimitManager.SetCustomNetInfoSpeedLimitIndex: info.name is null!");
-            //    return -1;
-            // }
-
             string infoName = info.name;
-            return !CustomLaneSpeedLimitByNetInfoName.TryGetValue(infoName, out float speedLimit)
-                       ? GetVanillaNetInfoSpeedLimit(info, true)
-                       : speedLimit;
+            return this.CustomLaneSpeedLimitByNetInfoName.TryGetValue(infoName, out float speedLimit)
+                       ? speedLimit
+                       : this.GetVanillaNetInfoSpeedLimit(info: info);
         }
 
         /// <summary>
         /// Sets the custom speed limit of the given NetInfo.
         /// </summary>
-        /// <param name="info">the NetInfo for which the custom speed limit should be set</param>
-        /// <param name="customSpeedLimit">The speed value to set in game speed units</param>
+        /// <param name="info">the NetInfo for which the custom speed limit should be set.</param>
+        /// <param name="customSpeedLimit">The speed value to set in game speed units.</param>
+        // TODO: The speed limit manager only supports default speed limit overrides per road type, not per lane
         public void SetCustomNetInfoSpeedLimit(NetInfo info, float customSpeedLimit) {
             if (info == null) {
                 Log._DebugOnlyWarning($"SetCustomNetInfoSpeedLimitIndex: info is null!");
                 return;
             }
 
-            // Resharper warning: condition always false
-            // if (info.name == null) {
-            //    Log._DebugOnlyWarning($"SetCustomNetInfoSpeedLimitIndex: info.name is null!");
-            //    return;
-            // }
-
             string infoName = info.name;
-            CustomLaneSpeedLimitByNetInfoName[infoName] = customSpeedLimit;
+
+            this.CustomLaneSpeedLimitByNetInfoName[infoName] = customSpeedLimit;
+
             float gameSpeedLimit = ToGameSpeedLimit(customSpeedLimit);
 
             // save speed limit in all NetInfos
 #if DEBUGLOAD
             Log._Debug($"Updating parent NetInfo {infoName}: Setting speed limit to {gameSpeedLimit}");
 #endif
-            UpdateNetInfoGameSpeedLimit(info, gameSpeedLimit);
+            this.UpdateNetInfoGameSpeedLimit(info, gameSpeedLimit);
 
-            if (childNetInfoNamesByCustomizableNetInfoName.TryGetValue(
+            if (this.childNetInfoNamesByCustomizableNetInfoName_.TryGetValue(
                 infoName,
                 out List<string> childNetInfoNames)) {
                 foreach (string childNetInfoName in childNetInfoNames) {
-                    if (NetInfoByName.TryGetValue(childNetInfoName, out NetInfo childNetInfo)) {
+                    if (this.netInfoByName_.TryGetValue(childNetInfoName, out NetInfo childNetInfo)) {
 #if DEBUGLOAD
                         Log._Debug($"Updating child NetInfo {childNetInfoName}: Setting speed limit to {gameSpeedLimit}");
 #endif
-                        CustomLaneSpeedLimitByNetInfoName[childNetInfoName] = customSpeedLimit;
-                        UpdateNetInfoGameSpeedLimit(childNetInfo, gameSpeedLimit);
+                        this.CustomLaneSpeedLimitByNetInfoName[childNetInfoName] = customSpeedLimit;
+                        this.UpdateNetInfoGameSpeedLimit(childNetInfo, gameSpeedLimit);
                     }
                 }
             }
@@ -520,12 +537,6 @@ namespace TrafficManager.Manager.Impl {
                     $"SpeedLimitManager.UpdateNetInfoGameSpeedLimit: info is null!");
                 return;
             }
-
-            // Resharper warning: condition always false
-            // if (info.name == null) {
-            //    Log._DebugOnlyWarning($"SpeedLimitManager.UpdateNetInfoGameSpeedLimit: info.name is null!");
-            //    return;
-            // }
 
             if (info.m_lanes == null) {
                 Log._DebugOnlyWarning(
@@ -544,113 +555,115 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>Sets the speed limit of a given lane.</summary>
-        /// <param name="segmentId"></param>
-        /// <param name="laneIndex"></param>
-        /// <param name="laneInfo"></param>
-        /// <param name="laneId"></param>
-        /// <param name="speedLimit">Game speed units, 0=unlimited, null=default</param>
-        /// <returns>Returns <c>true</c> if successful, otherwise <c>false</c>.</returns>
-        public bool SetSpeedLimit(ushort segmentId,
-                                  uint laneIndex,
-                                  NetInfo.Lane laneInfo,
-                                  uint laneId,
-                                  float ?speedLimit) {
-            if (!MayHaveCustomSpeedLimits(laneInfo)) {
+        /// <param name="action">Game speed units, unlimited, or default.</param>
+        /// <returns>Success.</returns>
+        public bool SetLaneSpeedLimit(ushort segmentId,
+                                      uint laneIndex,
+                                      NetInfo.Lane laneInfo,
+                                      uint laneId,
+                                      SetSpeedLimitAction action) {
+            if (!this.MayHaveCustomSpeedLimits(laneInfo)) {
                 return false;
             }
 
-            if (speedLimit != null && !IsValidRange((float)speedLimit)) {
+            Debug.Assert(action.Override != null, "action.Override != null");
+
+            if (action.Type != SetSpeedLimitAction.ActionType.ResetToDefault
+                && !IsValidRange(action.Override.Value.GameUnits)) {
                 return false;
             }
 
-            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+            if (!this.Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
                 return false;
             }
 
-            if (speedLimit != null) {
-                Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, speedLimit);
+            if (action.Type != SetSpeedLimitAction.ActionType.ResetToDefault) {
+                Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, action);
             } else {
                 Flags.RemoveLaneSpeedLimit(laneId);
             }
+
             return true;
         }
 
-        /// <summary>
-        /// Sets speed limit for all configurable lanes.
-        /// </summary>
-        /// <param name="speedLimit">Speed limit in game units, or null to restore defaults</param>
-        /// <returns><c>false</c>if there are no configurable lanes. <c>true</c> if any speed limits were applied.</returns>
-        public bool SetSpeedLimit(ushort segmentId, float? speedLimit) {
+        /// <summary>Sets speed limit for all configurable lanes.</summary>
+        /// <param name="action">Speed limit in game units, or null to restore defaults.</param>
+        /// <returns>
+        /// <c>false</c>if there are no configurable lanes.
+        /// <c>true</c> if any speed limits were applied.
+        /// </returns>
+        public bool SetSegmentSpeedLimit(ushort segmentId, SetSpeedLimitAction action) {
             bool ret = false;
-            foreach(NetInfo.Direction finaldir in Enum.GetValues(typeof(NetInfo.Direction))) {
-                ret |= SetSpeedLimit(segmentId, finaldir, speedLimit);
+
+            foreach (NetInfo.Direction finaldir in Enum.GetValues(typeof(NetInfo.Direction))) {
+                ret |= this.SetSegmentSpeedLimit(segmentId, finaldir, action);
             }
+
             return ret;
         }
 
-        /// <summary>
-        /// Sets the speed limit of a given segment and lane direction.
-        /// </summary>
-        /// <param name="segmentId"></param>
-        /// <param name="finalDir"></param>
-        /// <param name="speedLimit">Game speed units, 0=unlimited, null=default</param>
-        /// <returns></returns>
-        public bool SetSpeedLimit(ushort segmentId, NetInfo.Direction finalDir, float ?speedLimit) {
-            if (!MayHaveCustomSpeedLimits(
-                    segmentId,
-                    ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId])) {
+        /// <summary>Sets the speed limit of a given segment and lane direction.</summary>
+        /// <param name="segmentId">Segment id.</param>
+        /// <param name="finalDir">Direction.</param>
+        /// <param name="action">Game speed units, unlimited, or reset to default.</param>
+        /// <returns>Success.</returns>
+        public bool SetSegmentSpeedLimit(ushort segmentId,
+                                         NetInfo.Direction finalDir,
+                                         SetSpeedLimitAction action) {
+            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+
+            if (!this.MayHaveCustomSpeedLimits(ref segmentsBuffer[segmentId])) {
                 return false;
             }
 
-            if (speedLimit != null && !IsValidRange((float)speedLimit)) {
+            Debug.Assert(action.Override != null, "action.Override != null");
+
+            if (action.Type == SetSpeedLimitAction.ActionType.SetOverride
+                && !IsValidRange(action.Override.Value.GameUnits)) {
                 return false;
             }
 
-            NetInfo segmentInfo =
-                Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+            NetInfo segmentInfo = segmentsBuffer[segmentId].Info;
 
             if (segmentInfo == null) {
-#if DEBUG
-                Log.Warning($"SpeedLimitManager.SetSpeedLimit: info is null!");
-#endif
+                Log._DebugOnlyWarning($"SpeedLimitManager.SetSpeedLimit: info is null!");
                 return false;
             }
 
             if (segmentInfo.m_lanes == null) {
-#if DEBUG
-                Log.Warning($"SpeedLimitManager.SetSpeedLimit: info.m_lanes is null!");
-#endif
+                Log._DebugOnlyWarning($"SpeedLimitManager.SetSpeedLimit: info.m_lanes is null!");
                 return false;
             }
 
-            uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
+            uint curLaneId = segmentsBuffer[segmentId].m_lanes;
             int laneIndex = 0;
+            NetLane[] laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
 
+            //-------------------------
+            // For each affected lane
+            //-------------------------
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
                 NetInfo.Direction d = laneInfo.m_finalDirection;
-                if (d != finalDir) {
-                    goto nextIter;
+
+                if (d == finalDir && this.MayHaveCustomSpeedLimits(laneInfo)) {
+                    if (action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
+                        // Setting to 'Default' will instead remove the override
+                        Log._Debug(
+                            $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
+                            $"to default");
+                        Flags.RemoveLaneSpeedLimit(curLaneId);
+                    } else {
+                        bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+                        string overrideStr = action.Override.Value.FormatStr(showMph);
+
+                        Log._Debug(
+                            $"SpeedLimitManager: Setting lane {curLaneId} to {overrideStr}");
+                        Flags.SetLaneSpeedLimit(curLaneId, action);
+                    }
                 }
 
-                if (!MayHaveCustomSpeedLimits(laneInfo)) {
-                    goto nextIter;
-                }
-
-                if (speedLimit != null) {
-                    Log._Debug(
-                        $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
-                        $"to {speedLimit * Constants.SPEED_TO_KMPH}");
-                    Flags.SetLaneSpeedLimit(curLaneId, speedLimit);
-                } else {
-                    Log._Debug(
-                        $"SpeedLimitManager: Setting speed limit of lane {curLaneId} " +
-                        $"to default");
-                    Flags.RemoveLaneSpeedLimit(curLaneId);
-                }
-
-            nextIter:
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
+                curLaneId = laneBuffer[curLaneId].m_nextLane;
                 laneIndex++;
             }
 
@@ -658,14 +671,14 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public List<NetInfo> GetCustomizableNetInfos() {
-            return customizableNetInfos;
+            return this.customizableNetInfos_;
         }
 
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
 
 #if DEBUG
-            bool debugSpeedLimits = DebugSwitch.SpeedLimits.Get();
+            bool debugSpeedLimits = GlobalConfig.Instance.Debug.SpeedLimits;
 #endif
 
             // determine vanilla speed limits and customizable NetInfos
@@ -674,11 +687,11 @@ namespace TrafficManager.Manager.Impl {
             int numLoaded = PrefabCollection<NetInfo>.LoadedCount();
 
             // todo: move this to a Reset() or Clear() method?
-            vanillaLaneSpeedLimitsByNetInfoName.Clear();
-            customizableNetInfos.Clear();
-            CustomLaneSpeedLimitByNetInfoName.Clear();
-            childNetInfoNamesByCustomizableNetInfoName.Clear();
-            NetInfoByName.Clear();
+            this.vanillaLaneSpeedLimitsByNetInfoName_.Clear();
+            this.customizableNetInfos_.Clear();
+            this.CustomLaneSpeedLimitByNetInfoName.Clear();
+            this.childNetInfoNamesByCustomizableNetInfoName_.Clear();
+            this.netInfoByName_.Clear();
 
             List<NetInfo> mainNetInfos = new List<NetInfo>();
 
@@ -723,11 +736,14 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 // Must be road or track based
-                if (!(info.m_netAI is RoadBaseAI || info.m_netAI is TrainTrackBaseAI || info.m_netAI is MetroTrackAI)) {
+                if (!(info.m_netAI is RoadBaseAI || info.m_netAI is TrainTrackBaseAI ||
+                      info.m_netAI is MetroTrackAI)) {
 #if DEBUG
                     // Only outputting these in debug as there are loads of them
-                    Log._DebugIf(debugSpeedLimits, () =>
-                        $"- Skipped: NetInfo #{i} ({infoName}) - m_netAI is not applicable: {info.m_netAI}.");
+                    Log._DebugIf(
+                        debugSpeedLimits,
+                        () =>
+                            $"- Skipped: NetInfo #{i} ({infoName}) - m_netAI is not applicable: {info.m_netAI}.");
 #endif
                     continue;
                 }
@@ -742,7 +758,8 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 // #510: Filter out decorative networks (`None`) and bike paths (`Bicycle`)
-                if (info.m_vehicleTypes == VehicleInfo.VehicleType.None || info.m_vehicleTypes == VehicleInfo.VehicleType.Bicycle) {
+                if (info.m_vehicleTypes == VehicleInfo.VehicleType.None ||
+                    info.m_vehicleTypes == VehicleInfo.VehicleType.Bicycle) {
                     log.AppendFormat(
                         "- Skipped: NetInfo #{0} ({1}) - no vehicle support (decorative or bike path?)\n",
                         i,
@@ -750,7 +767,7 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                if (!vanillaLaneSpeedLimitsByNetInfoName.ContainsKey(infoName)) {
+                if (!this.vanillaLaneSpeedLimitsByNetInfoName_.ContainsKey(infoName)) {
                     if (info.m_lanes == null) {
                         log.AppendFormat(
                             "- Skipped: NetInfo #{0} ({1}) - m_lanes is null!\n",
@@ -764,7 +781,7 @@ namespace TrafficManager.Manager.Impl {
 
                     Log._Trace($"- Loaded road NetInfo: {infoName}");
 
-                    NetInfoByName[infoName] = info;
+                    this.netInfoByName_[infoName] = info;
                     mainNetInfos.Add(info);
 
                     float[] vanillaLaneSpeedLimits = new float[info.m_lanes.Length];
@@ -773,7 +790,7 @@ namespace TrafficManager.Manager.Impl {
                         vanillaLaneSpeedLimits[k] = info.m_lanes[k].m_speedLimit;
                     }
 
-                    vanillaLaneSpeedLimitsByNetInfoName[infoName] = vanillaLaneSpeedLimits;
+                    this.vanillaLaneSpeedLimitsByNetInfoName_[infoName] = vanillaLaneSpeedLimits;
                 }
             }
 
@@ -781,7 +798,8 @@ namespace TrafficManager.Manager.Impl {
             Log.Info(log.ToString());
 
             mainNetInfos.Sort(
-                (NetInfo a, NetInfo b) => { // todo: move arrow function somewhere else?
+                (NetInfo a, NetInfo b) => {
+                    // todo: move arrow function somewhere else?
                     bool aRoad = a.m_netAI is RoadBaseAI;
                     bool bRoad = b.m_netAI is RoadBaseAI;
 
@@ -821,16 +839,17 @@ namespace TrafficManager.Manager.Impl {
 
                     int bNumVehicleLanes = 0;
                     foreach (NetInfo.Lane lane in b.m_lanes) {
-                        if ((lane.m_laneType & LANE_TYPES) != NetInfo.LaneType.None)
+                        if ((lane.m_laneType & LANE_TYPES) != NetInfo.LaneType.None) {
                             ++bNumVehicleLanes;
+                        }
                     }
 
                     int res = aNumVehicleLanes.CompareTo(bNumVehicleLanes);
                     if (res == 0) {
-                        return a.name.CompareTo(b.name);
-                    } else {
-                        return res;
+                        return String.Compare(a.name, b.name, StringComparison.Ordinal);
                     }
+
+                    return res;
                 });
 
             // identify parent NetInfos
@@ -848,15 +867,15 @@ namespace TrafficManager.Manager.Impl {
                         Log._Trace(
                             $"Identified child NetInfo {infoName} of parent {parentInfo.name}");
 
-                        if (!childNetInfoNamesByCustomizableNetInfoName.TryGetValue(
+                        if (!this.childNetInfoNamesByCustomizableNetInfoName_.TryGetValue(
                                 parentInfo.name,
                                 out List<string> childNetInfoNames)) {
-                            childNetInfoNamesByCustomizableNetInfoName[parentInfo.name] =
+                            this.childNetInfoNamesByCustomizableNetInfoName_[parentInfo.name] =
                                 childNetInfoNames = new List<string>();
                         }
 
                         childNetInfoNames.Add(info.name);
-                        NetInfoByName[infoName] = info;
+                        this.netInfoByName_[infoName] = info;
                         foundParent = true;
                         break;
                     }
@@ -869,7 +888,7 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            customizableNetInfos = mainNetInfos;
+            this.customizableNetInfos_ = mainNetInfos;
         }
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
@@ -880,9 +899,7 @@ namespace TrafficManager.Manager.Impl {
             int laneIndex = 0;
 
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
-                // NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-                // float? setSpeedLimit = Flags.getLaneSpeedLimit(curLaneId);
-                Flags.SetLaneSpeedLimit(curLaneId, null);
+                Flags.SetLaneSpeedLimit(curLaneId, SetSpeedLimitAction.ResetToDefault());
 
                 curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
                 laneIndex++;
@@ -895,14 +912,16 @@ namespace TrafficManager.Manager.Impl {
             bool success = true;
             Log.Info($"Loading lane speed limit data. {data.Count} elements");
 #if DEBUG
-            bool debugSpeedLimits = DebugSwitch.SpeedLimits.Get();
+            bool debugSpeedLimits = GlobalConfig.Instance.Debug.SpeedLimits;
 #endif
             foreach (Configuration.LaneSpeedLimit laneSpeedLimit in data) {
                 try {
-                    if (!Services.NetService.IsLaneAndItsSegmentValid(laneSpeedLimit.laneId)) {
+                    if (!this.Services.NetService.IsLaneAndItsSegmentValid(laneSpeedLimit.laneId)) {
 #if DEBUG
-                        Log._DebugIf(debugSpeedLimits, () =>
-                            $"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: Lane is invalid");
+                        Log._DebugIf(
+                            debugSpeedLimits,
+                            () =>
+                                $"SpeedLimitManager.LoadData: Skipping lane {laneSpeedLimit.laneId}: Lane is invalid");
 #endif
                         continue;
                     }
@@ -913,31 +932,40 @@ namespace TrafficManager.Manager.Impl {
                                                             .m_segment;
                     NetInfo info = Singleton<NetManager>
                                    .instance.m_segments.m_buffer[segmentId].Info;
-                    float customSpeedLimit = GetCustomNetInfoSpeedLimit(info);
+                    float customSpeedLimit = this.GetCustomNetInfoSpeedLimit(info);
 #if DEBUG
-                    Log._DebugIf(debugSpeedLimits, () =>
-                        $"SpeedLimitManager.LoadData: Handling lane {laneSpeedLimit.laneId}: " +
-                        $"Custom speed limit of segment {segmentId} info ({info}, name={info?.name}, " +
-                        $"lanes={info?.m_lanes} is {customSpeedLimit}");
+                    Log._DebugIf(
+                        debugSpeedLimits,
+                        () =>
+                            $"SpeedLimitManager.LoadData: Handling lane {laneSpeedLimit.laneId}: " +
+                            $"Custom speed limit of segment {segmentId} info ({info}, name={info?.name}, " +
+                            $"lanes={info?.m_lanes} is {customSpeedLimit}");
 #endif
 
                     if (IsValidRange(customSpeedLimit)) {
                         // lane speed limit differs from default speed limit
 #if DEBUG
-                        Log._DebugIf(debugSpeedLimits, () =>
-                            "SpeedLimitManager.LoadData: Loading lane speed limit: " +
-                            $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit} km/h");
+                        Log._DebugIf(
+                            debugSpeedLimits,
+                            () =>
+                                "SpeedLimitManager.LoadData: Loading lane speed limit: " +
+                                $"lane {laneSpeedLimit.laneId} = {laneSpeedLimit.speedLimit} km/h");
 #endif
-                        float kmph = laneSpeedLimit.speedLimit /
-                                     Constants.SPEED_TO_KMPH; // convert to game units
 
-                        Flags.SetLaneSpeedLimit(laneSpeedLimit.laneId, kmph);
+                        // convert to game units
+                        float units = laneSpeedLimit.speedLimit / ApiConstants.SPEED_TO_KMPH;
+
+                        Flags.SetLaneSpeedLimit(
+                            laneSpeedLimit.laneId,
+                            SetSpeedLimitAction.SetOverride(new SpeedValue(units)));
                     } else {
 #if DEBUG
-                    Log._DebugIf(debugSpeedLimits, () =>
-                        "SpeedLimitManager.LoadData: " +
-                        $"Skipping lane speed limit of lane {laneSpeedLimit.laneId} " +
-                        $"({laneSpeedLimit.speedLimit} km/h)");
+                        Log._DebugIf(
+                            debugSpeedLimits,
+                            () =>
+                                "SpeedLimitManager.LoadData: " +
+                                $"Skipping lane speed limit of lane {laneSpeedLimit.laneId} " +
+                                $"({laneSpeedLimit.speedLimit} km/h)");
 #endif
                     }
                 }
@@ -956,7 +984,9 @@ namespace TrafficManager.Manager.Impl {
             var ret = new List<Configuration.LaneSpeedLimit>();
             foreach (KeyValuePair<uint, float> e in Flags.GetAllLaneSpeedLimits()) {
                 try {
-                    var laneSpeedLimit = new Configuration.LaneSpeedLimit(e.Key, new SpeedValue(e.Value));
+                    var laneSpeedLimit = new Configuration.LaneSpeedLimit(
+                        e.Key,
+                        new SpeedValue(e.Value));
 #if DEBUGSAVE
                     Log._Debug($"Saving speed limit of lane {laneSpeedLimit.laneId}: " +
                         $"{laneSpeedLimit.speedLimit*SpeedLimit.SPEED_TO_KMPH} km/h");
@@ -975,12 +1005,12 @@ namespace TrafficManager.Manager.Impl {
         public bool LoadData(Dictionary<string, float> data) {
             Log.Info($"Loading custom default speed limit data. {data.Count} elements");
             foreach (KeyValuePair<string, float> e in data) {
-                if (!NetInfoByName.TryGetValue(e.Key, out NetInfo netInfo)) {
+                if (!this.netInfoByName_.TryGetValue(e.Key, out NetInfo netInfo)) {
                     continue;
                 }
 
                 if (e.Value >= 0f) {
-                    SetCustomNetInfoSpeedLimit(netInfo, e.Value);
+                    this.SetCustomNetInfoSpeedLimit(netInfo, e.Value);
                 }
             }
 
@@ -990,9 +1020,9 @@ namespace TrafficManager.Manager.Impl {
         Dictionary<string, float> ICustomDataManager<Dictionary<string, float>>.SaveData(
             ref bool success) {
             var ret = new Dictionary<string, float>();
-            foreach (KeyValuePair<string, float> e in CustomLaneSpeedLimitByNetInfoName) {
+            foreach (KeyValuePair<string, float> e in this.CustomLaneSpeedLimitByNetInfoName) {
                 try {
-                    float gameSpeedLimit = ToGameSpeedLimit(e.Value);
+                    float gameSpeedLimit = this.ToGameSpeedLimit(e.Value);
 
                     ret.Add(e.Key, gameSpeedLimit);
                 }
@@ -1006,50 +1036,21 @@ namespace TrafficManager.Manager.Impl {
             return ret;
         }
 
-#if DEBUG
-//        public Dictionary<NetInfo, ushort> GetDefaultSpeedLimits() {
-//            Dictionary<NetInfo, ushort> ret = new Dictionary<NetInfo, ushort>();
-//            int numLoaded = PrefabCollection<NetInfo>.LoadedCount();
-//            for (uint i = 0; i < numLoaded; ++i) {
-//                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-//                var defaultSpeedLimit =
-//                    (ushort)GetAverageDefaultCustomSpeedLimit(info, NetInfo.Direction.Forward);
-//                ret.Add(info, defaultSpeedLimit);
-//                Log._DebugFormat(
-//                    "Loaded NetInfo: {0}, placementStyle={1}, availableIn={2}, thumbnail={3} " +
-//                    "connectionClass.service: {4}, connectionClass.subService: {5}, " +
-//                    "avg. default speed limit: {6}",
-//                    info.name,
-//                    info.m_placementStyle,
-//                    info.m_availableIn,
-//                    info.m_Thumbnail,
-//                    info.GetConnectionClass().m_service,
-//                    info.GetConnectionClass().m_subService,
-//                    defaultSpeedLimit);
-//            }
-//
-//            return ret;
-//        }
-#endif
-
-        /// <summary>
-        /// Used for loading and saving lane speed limits
-        /// </summary>
-        /// <returns>ICustomDataManager with custom lane speed limits</returns>
+        /// <summary>Used for loading and saving lane speed limits.</summary>
+        /// <returns>ICustomDataManager with custom lane speed limits.</returns>
         public static ICustomDataManager<List<Configuration.LaneSpeedLimit>> AsLaneSpeedLimitsDM() {
             return Instance;
         }
 
-        /// <summary>
-        /// Used for loading and saving custom default speed limits
-        /// </summary>
-        /// <returns>ICustomDataManager with custom default speed limits</returns>
+        /// <summary>Used for loading and saving custom default speed limits.</summary>
+        /// <returns>ICustomDataManager with custom default speed limits.</returns>
         public static ICustomDataManager<Dictionary<string, float>> AsCustomDefaultSpeedLimitsDM() {
             return Instance;
         }
 
-        public static bool IsValidRange(float speed) {
-            return FloatUtil.IsZero(speed) || (speed >= MIN_SPEED && speed <= MAX_SPEED);
+        public static bool IsValidRange(float gameUnits) {
+            return FloatUtil.IsZero(gameUnits)
+                   || (gameUnits >= MIN_SPEED && gameUnits <= MAX_SPEED);
         }
     } // end class
 }

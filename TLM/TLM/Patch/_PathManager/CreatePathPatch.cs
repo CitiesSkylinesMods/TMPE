@@ -10,6 +10,7 @@ namespace TrafficManager.Patch._PathManager {
     using System.Reflection;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Custom.PathFinding;
+    using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
@@ -85,7 +86,7 @@ namespace TrafficManager.Patch._PathManager {
             if (__result && VehicleID != 0) {
 #if DEBUG
                 bool vehDebug = DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == VehicleID;
-                bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && vehDebug;
+                bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog && vehDebug;
 #else
                 var logParkingAi = false;
 #endif

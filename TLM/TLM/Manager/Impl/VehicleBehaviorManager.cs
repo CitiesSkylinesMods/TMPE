@@ -49,7 +49,7 @@ namespace TrafficManager.Manager.Impl {
             1u << 28, 1u << 29, 1u << 30, 1u << 31,
         };
 
-        public static readonly VehicleBehaviorManager Instance = new VehicleBehaviorManager();
+        public static readonly VehicleBehaviorManager Instance = new();
 
         private VehicleBehaviorManager() { }
 
@@ -79,8 +79,10 @@ namespace TrafficManager.Manager.Impl {
                   && (DebugSettings.TargetBuildingId == 0
                       || DebugSettings.TargetBuildingId == driverInstance.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             const bool logParkingAi = false;
             const bool extendedLogParkingAi = false;
@@ -190,15 +192,15 @@ namespace TrafficManager.Manager.Impl {
 
                                 foundParkingSpace =
                                     AdvancedParkingManager.Instance.FindParkingSpaceRoadSideForVehiclePos(
-                                            vehicleInfo,
-                                            0,
-                                            driverExtInstance.parkingSpaceLocationId,
-                                            refPos,
-                                            out parkPos,
-                                            out parkRot,
-                                            out parkOffset,
-                                            out uint _,
-                                            out int _);
+                                            vehicleInfo: vehicleInfo,
+                                            ignoreParked: 0,
+                                            segmentId: driverExtInstance.parkingSpaceLocationId,
+                                            refPos: refPos,
+                                            parkPos: out parkPos,
+                                            parkRot: out parkRot,
+                                            parkOffset: out parkOffset,
+                                            laneId: out uint _,
+                                            laneIndex: out int _);
                                 break;
                             }
 
@@ -233,17 +235,17 @@ namespace TrafficManager.Manager.Impl {
 
                                 foundParkingSpace =
                                     Constants.ManagerFactory.AdvancedParkingManager.FindParkingSpaceInVicinity(
-                                                 refPos,
-                                                 searchDir,
-                                                 vehicleInfo,
-                                                 homeID,
-                                                 vehicleID,
-                                                 GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance,
-                                                 out ExtParkingSpaceLocation _,
-                                                 out ushort _,
-                                                 out parkPos,
-                                                 out parkRot,
-                                                 out parkOffset);
+                                                 targetPos: refPos,
+                                                 searchDir: searchDir,
+                                                 vehicleInfo: vehicleInfo,
+                                                 homeId: homeID,
+                                                 vehicleId: vehicleID,
+                                                 maxDist: GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance,
+                                                 parkingSpaceLocation: out ExtParkingSpaceLocation _,
+                                                 parkingSpaceLocationId: out ushort _,
+                                                 parkPos: out parkPos,
+                                                 parkRot: out parkRot,
+                                                 parkOffset: out parkOffset);
                                 break;
                             }
                         }
@@ -254,16 +256,16 @@ namespace TrafficManager.Manager.Impl {
                     bool isElectric = vehicleInfo.m_class.m_subService != ItemClass.SubService.ResidentialLow;
                     foundParkingSpace =
                         Constants.ManagerFactory.AdvancedParkingManager.VanillaFindParkingSpaceWithoutRestrictions(
-                            isElectric,
-                            homeID,
-                            refPos,
-                            searchDir,
-                            pathPos.m_segment,
-                            vehicleInfo.m_generatedInfo.m_size.x,
-                            vehicleInfo.m_generatedInfo.m_size.z,
-                            out parkPos,
-                            out parkRot,
-                            out parkOffset);
+                            isElectric: isElectric,
+                            homeId: homeID,
+                            refPos: refPos,
+                            searchDir: searchDir,
+                            segment: pathPos.m_segment,
+                            width: vehicleInfo.m_generatedInfo.m_size.x,
+                            length: vehicleInfo.m_generatedInfo.m_size.z,
+                            parkPos: out parkPos,
+                            parkRot: out parkRot,
+                            parkOffset: out parkOffset);
 
                     if (logParkingAi) {
                         Log._Debug(
@@ -588,8 +590,10 @@ namespace TrafficManager.Manager.Impl {
                   && (DebugSettings.TargetBuildingId == 0
                       || DebugSettings.TargetBuildingId == driverInstance.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             const bool logParkingAi = false;
             const bool extendedLogParkingAi = false;
@@ -761,16 +765,16 @@ namespace TrafficManager.Manager.Impl {
                         searchAtCurrentPos ? (Vector3)vehicleData.m_targetPos3 : endPos;
 
                     if (AdvancedParkingManager.Instance.FindParkingSpaceForCitizen(
-                        returnPos,
-                        vehicleData.Info,
-                        ref driverExtInstance,
-                        homeId,
-                        targetBuildingId == homeId,
-                        vehicleID,
-                        allowTourists,
-                        out Vector3 parkPos,
-                        ref endPosA,
-                        out bool calcEndPos)) {
+                        endPos: returnPos,
+                        vehicleInfo: vehicleData.Info,
+                        extDriverInstance: ref driverExtInstance,
+                        homeId: homeId,
+                        goingHome: targetBuildingId == homeId,
+                        vehicleId: vehicleID,
+                        allowTourists: allowTourists,
+                        parkPos: out Vector3 parkPos,
+                        endPathPos: ref endPosA,
+                        calculateEndPos: out bool calcEndPos)) {
                         calculateEndPos = calcEndPos;
                         allowRandomParking = false;
                         movingToParkingPos = true;
@@ -1154,8 +1158,9 @@ namespace TrafficManager.Manager.Impl {
             out float maxSpeed)
         {
 #if DEBUG
-            bool logPriority = DebugSwitch.PriorityRules.Get() &&
-                         (DebugSettings.NodeId <= 0 || targetNodeId == DebugSettings.NodeId);
+            bool logPriority = GlobalConfig.Instance.Debug.PriorityRules
+                               && (DebugSettings.NodeId <= 0
+                                   || targetNodeId == DebugSettings.NodeId);
 #else
             const bool logPriority = false;
 #endif
@@ -1847,7 +1852,8 @@ namespace TrafficManager.Manager.Impl {
                 // GlobalConfig conf = GlobalConfig.Instance;
 #if DEBUG
                 bool logLaneSelection = false;
-                if (DebugSwitch.AlternativeLaneSelection.Get()) {
+
+                if (GlobalConfig.Instance.Debug.AlternativeLaneSelection) {
                     ushort nodeId = Services.NetService.GetSegmentNodeId(
                         currentPathPos.m_segment,
                         currentPathPos.m_offset < 128);
@@ -2847,7 +2853,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
                 bool logLaneSelection = false;
 
-                if (DebugSwitch.AlternativeLaneSelection.Get()) {
+                if (GlobalConfig.Instance.Debug.AlternativeLaneSelection) {
                     ushort nodeId = Services.NetService.GetSegmentNodeId(
                         currentPathPos.m_segment,
                         currentPathPos.m_offset < 128);
@@ -2999,8 +3005,9 @@ namespace TrafficManager.Manager.Impl {
         public bool MayFindBestLane(ushort vehicleId, ref Vehicle vehicleData, ref ExtVehicle vehicleState) {
             GlobalConfig conf = GlobalConfig.Instance;
 #if DEBUG
-            bool logLaneSelection = DebugSwitch.AlternativeLaneSelection.Get()
-                 && (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId);
+            bool logLaneSelection = GlobalConfig.Instance.Debug.AlternativeLaneSelection
+                                    && (DebugSettings.VehicleId == 0
+                                        || DebugSettings.VehicleId == vehicleId);
 
             if (logLaneSelection) {
                 Log._Debug($"VehicleBehaviorManager.MayFindBestLane({vehicleId}) called.");

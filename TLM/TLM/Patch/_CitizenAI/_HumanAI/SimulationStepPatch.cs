@@ -57,7 +57,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                                || DebugSettings.SourceBuildingId == data.m_sourceBuilding)
                            && (DebugSettings.TargetBuildingId == 0
                                || DebugSettings.TargetBuildingId == data.m_targetBuilding);
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog && citizenDebug;
 #else
             var logParkingAi = false;
 #endif
@@ -296,8 +296,10 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                       || DebugSettings.SourceBuildingId == data.m_sourceBuilding)
                   && (DebugSettings.TargetBuildingId == 0
                       || DebugSettings.TargetBuildingId == data.m_targetBuilding);
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             var logParkingAi = false;
             var extendedLogParkingAi = false;

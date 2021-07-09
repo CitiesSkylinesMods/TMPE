@@ -1,4 +1,7 @@
-// TODO this class should be moved to TrafficManager.State, but the deserialization fails if we just do that now. Anyway, we should get rid of these crazy lists of arrays. So let's move the class when we decide rework the load/save system.
+// TODO
+// this class should be moved to TrafficManager.State, but the deserialization fails
+// if we just do that now. Anyway, we should get rid of these crazy lists of arrays.
+// So let's move the class when we decide rework the load/save system.
 namespace TrafficManager {
     using JetBrains.Annotations;
     using System.Collections.Generic;
@@ -13,9 +16,7 @@ namespace TrafficManager {
         public class LaneSpeedLimit {
             public uint laneId;
 
-            /// <summary>
-            /// Unit: km/h.
-            /// </summary>
+            /// <summary>Unit: km/h.</summary>
             public ushort speedLimit;
 
             public LaneSpeedLimit(uint laneId, SpeedValue speed) {
@@ -259,62 +260,62 @@ namespace TrafficManager {
         /// <summary>
         /// Stored ext. citizen data
         /// </summary>
-        public List<ExtCitizenData> ExtCitizens = new List<ExtCitizenData>();
+        public List<ExtCitizenData> ExtCitizens = new();
 
         /// <summary>
         /// Stored ext. citizen instance data
         /// </summary>
-        public List<ExtCitizenInstanceData> ExtCitizenInstances = new List<ExtCitizenInstanceData>();
+        public List<ExtCitizenInstanceData> ExtCitizenInstances = new();
 
         /// <summary>
         /// Stored toggled traffic lights
         /// </summary>
-        public List<NodeTrafficLight> ToggledTrafficLights = new List<NodeTrafficLight>();
+        public List<NodeTrafficLight> ToggledTrafficLights = new();
 
         /// <summary>
         /// Stored lane connections
         /// </summary>
-        public List<LaneConnection> LaneConnections = new List<LaneConnection>();
+        public List<LaneConnection> LaneConnections = new();
 
         /// <summary>
         /// Stored lane arrows
         /// </summary>
-        public List<LaneArrowData> LaneArrows = new List<LaneArrowData>();
+        public List<LaneArrowData> LaneArrows = new();
 
         /// <summary>
         /// Stored lane speed limits
         /// </summary>
-        public List<LaneSpeedLimit> LaneSpeedLimits = new List<LaneSpeedLimit>();
+        public List<LaneSpeedLimit> LaneSpeedLimits = new();
 
         /// <summary>
         /// Stored vehicle restrictions
         /// </summary>
-        public List<LaneVehicleTypes> LaneAllowedVehicleTypes = new List<LaneVehicleTypes>();
+        public List<LaneVehicleTypes> LaneAllowedVehicleTypes = new();
 
         /// <summary>
         /// Timed traffic lights
         /// </summary>
-        public List<TimedTrafficLights> TimedLights = new List<TimedTrafficLights>();
+        public List<TimedTrafficLights> TimedLights = new();
 
         /// <summary>
         /// Segment-at-Node configurations
         /// </summary>
-        public List<SegmentNodeConf> SegmentNodeConfs = new List<SegmentNodeConf>();
+        public List<SegmentNodeConf> SegmentNodeConfs = new();
 
         /// <summary>
         /// Custom default speed limits (in game speed units)
         /// </summary>
-        public Dictionary<string, float> CustomDefaultSpeedLimits = new Dictionary<string, float>();
+        public Dictionary<string, float> CustomDefaultSpeedLimits = new();
 
         /// <summary>
         /// Priority segments
         /// </summary>
-        public List<PrioritySegment> CustomPrioritySegments = new List<PrioritySegment>();
+        public List<PrioritySegment> CustomPrioritySegments = new();
 
         /// <summary>
         /// Parking restrictions
         /// </summary>
-        public List<ParkingRestriction> ParkingRestrictions = new List<ParkingRestriction>();
+        public List<ParkingRestriction> ParkingRestrictions = new();
 
         [Obsolete]
         public string NodeTrafficLights = string.Empty;
@@ -327,30 +328,30 @@ namespace TrafficManager {
         public string LaneFlags = string.Empty;
 
         [Obsolete]
-        public List<int[]> PrioritySegments = new List<int[]>();
+        public List<int[]> PrioritySegments = new();
 
         [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        public List<int[]> NodeDictionary = new List<int[]>();
+        public List<int[]> NodeDictionary = new();
 
         [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        public List<int[]> ManualSegments = new List<int[]>();
+        public List<int[]> ManualSegments = new();
 
         [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        public List<int[]> TimedNodes = new List<int[]>();
+        public List<int[]> TimedNodes = new();
 
         [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        public List<ushort[]> TimedNodeGroups = new List<ushort[]>();
+        public List<ushort[]> TimedNodeGroups = new();
 
         [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        public List<int[]> TimedNodeSteps = new List<int[]>();
+        public List<int[]> TimedNodeSteps = new();
 
         [Obsolete("Not used anymore.")]
         [UsedImplicitly]
-        public List<int[]> TimedNodeStepSegments = new List<int[]>();
+        public List<int[]> TimedNodeStepSegments = new();
     }
 }

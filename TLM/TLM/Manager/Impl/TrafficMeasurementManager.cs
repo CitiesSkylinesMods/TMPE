@@ -17,7 +17,7 @@ namespace TrafficManager.Manager.Impl {
 
         public const ushort REF_REL_SPEED = 10000;
 
-        public static readonly TrafficMeasurementManager Instance = new TrafficMeasurementManager();
+        public static readonly TrafficMeasurementManager Instance = new();
 
         private readonly uint[] meanSpeeds = { 0, 0 };
 

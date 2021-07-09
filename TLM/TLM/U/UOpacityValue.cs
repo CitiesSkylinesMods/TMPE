@@ -12,7 +12,7 @@ namespace TrafficManager.U {
         /// <param name="v">Range 0..1f.</param>
         /// <returns>New Opacity struct.</returns>
         public static UOpacityValue FromOpacity(float v) {
-            return new UOpacityValue {
+            return new() {
                                     value_ = Mathf.Clamp(value: v, min: 0f, max: 1f),
                                 };
         }
@@ -22,7 +22,7 @@ namespace TrafficManager.U {
         /// <returns>New Opacity struct.</returns>
         [UsedImplicitly]
         public static UOpacityValue FromTransparency(float v) {
-            return new UOpacityValue {
+            return new() {
                                     value_ = 1f - Mathf.Clamp(value: v, min: 0f, max: 1f),
                                 };
         }

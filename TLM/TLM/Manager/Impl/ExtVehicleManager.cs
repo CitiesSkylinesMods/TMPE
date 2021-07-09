@@ -27,7 +27,7 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        public static readonly ExtVehicleManager Instance = new ExtVehicleManager();
+        public static readonly ExtVehicleManager Instance = new();
 
         private const int STATE_UPDATE_SHIFT = 6;
         public const int JUNCTION_RECHECK_SHIFT = 4;
@@ -126,7 +126,7 @@ namespace TrafficManager.Manager.Impl {
             OnReleaseVehicle(vehicleId, ref vehicleData);
 
 #if DEBUG
-            bool logVehicleLinking = DebugSwitch.VehicleLinkingToSegmentEnd.Get();
+            bool logVehicleLinking = GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd;
 #else
             const bool logVehicleLinking = false;
 #endif
@@ -157,7 +157,7 @@ namespace TrafficManager.Manager.Impl {
                                               ref Vehicle vehicleData,
                                               ExtVehicleType? vehicleType) {
 #if DEBUG
-            bool logVehicleLinking = DebugSwitch.VehicleLinkingToSegmentEnd.Get();
+            bool logVehicleLinking = GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd;
 #else
             const bool logVehicleLinking = false;
 #endif
@@ -211,7 +211,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void OnSpawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {
 #if DEBUG
-            bool logVehicleLinking = DebugSwitch.VehicleLinkingToSegmentEnd.Get();
+            bool logVehicleLinking = GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd;
 #else
             const bool logVehicleLinking = false;
 #endif
@@ -261,7 +261,7 @@ namespace TrafficManager.Manager.Impl {
 
         private void UpdateVehiclePosition(ref Vehicle vehicleData, ref ExtVehicle extVehicle) {
 #if DEBUG
-            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get()) {
+            if (GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd) {
                 Log._Debug($"ExtVehicleManager.UpdateVehiclePosition({extVehicle.vehicleId}) called");
             }
 #endif
@@ -296,7 +296,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void OnDespawnVehicle(ushort vehicleId, ref Vehicle vehicleData) {
 #if DEBUG
-            bool logVehicleLinking = DebugSwitch.VehicleLinkingToSegmentEnd.Get();
+            bool logVehicleLinking = GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd;
 #else
             const bool logVehicleLinking = false;
 #endif
@@ -330,7 +330,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void OnReleaseVehicle(ushort vehicleId, ref Vehicle vehicleData) {
 #if DEBUG
-            bool logVehicleLinking = DebugSwitch.VehicleLinkingToSegmentEnd.Get();
+            bool logVehicleLinking = GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd;
 #else
             const bool logVehicleLinking = false;
 #endif
@@ -362,7 +362,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void Unlink(ref ExtVehicle extVehicle) {
 #if DEBUG
-            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get()) {
+            if (GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd) {
                 Log._Debug(
                     $"ExtVehicleManager.Unlink({extVehicle.vehicleId}) called: Unlinking vehicle " +
                     $"from all segment ends\nstate:{extVehicle}");
@@ -408,7 +408,7 @@ namespace TrafficManager.Manager.Impl {
             extVehicle.lastPathPositionIndex = 0;
 
 #if DEBUG
-            if (DebugSwitch.PedestrianPathfinding.Get()) {
+            if (GlobalConfig.Instance.Debug.PedestrianPathfinding) {
                 string vehicleChainDebugInfo =
                     ExtSegmentEndManager.Instance.GenerateVehicleChainDebugInfo(
                         prevSegmentId,
@@ -429,7 +429,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="laneIndex">lane index</param>
         private void Link(ref ExtVehicle extVehicle, ref ExtSegmentEnd end, byte laneIndex) {
 #if DEBUG
-            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get()) {
+            if (GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd) {
                 Log._Debug(
                     $"ExtVehicleManager.Link({extVehicle.vehicleId}) called: Linking vehicle to " +
                     $"segment end {end}\nstate:{extVehicle}");
@@ -448,7 +448,7 @@ namespace TrafficManager.Manager.Impl {
             end.firstVehicleId = extVehicle.vehicleId;
 
 #if DEBUG
-            if (DebugSwitch.PedestrianPathfinding.Get()) {
+            if (GlobalConfig.Instance.Debug.PedestrianPathfinding) {
                 string vehicleChainDebugInfo =
                     ExtSegmentEndManager.Instance.GenerateVehicleChainDebugInfo(
                         extVehicle.currentSegmentId,
@@ -463,7 +463,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void OnCreate(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
 #if DEBUG
-            bool logVehicleLinking = DebugSwitch.VehicleLinkingToSegmentEnd.Get();
+            bool logVehicleLinking = GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd;
 #else
             const bool logVehicleLinking = false;
 #endif
@@ -494,7 +494,7 @@ namespace TrafficManager.Manager.Impl {
                                               ref Vehicle vehicleData,
                                               ExtVehicleType? vehicleType) {
 #if DEBUG
-            bool logVehicleLinking = DebugSwitch.VehicleLinkingToSegmentEnd.Get();
+            bool logVehicleLinking = GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd;
 #else
             const bool logVehicleLinking = false;
 #endif
@@ -538,7 +538,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void OnSpawn(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
 #if DEBUG
-            bool logVehicleLinking = DebugSwitch.VehicleLinkingToSegmentEnd.Get();
+            bool logVehicleLinking = GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd;
 #else
             const bool logVehicleLinking = false;
 #endif
@@ -596,7 +596,7 @@ namespace TrafficManager.Manager.Impl {
                                    ref PathUnit.Position curPos,
                                    ref PathUnit.Position nextPos) {
 #if DEBUG
-            bool logVehicleLinking = DebugSwitch.VehicleLinkingToSegmentEnd.Get();
+            bool logVehicleLinking = GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd;
 #else
             const bool logVehicleLinking = false;
 #endif
@@ -671,7 +671,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void OnDespawn(ref ExtVehicle extVehicle) {
 #if DEBUG
-            bool logVehicleLinking = DebugSwitch.VehicleLinkingToSegmentEnd.Get();
+            bool logVehicleLinking = GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd;
 #else
             const bool logVehicleLinking = false;
 #endif
@@ -709,7 +709,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void OnRelease(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
 #if DEBUG
-            bool logVehicleLinking = DebugSwitch.VehicleLinkingToSegmentEnd.Get();
+            bool logVehicleLinking = GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd;
 #else
             const bool logVehicleLinking = false;
 #endif
@@ -778,7 +778,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void UpdateDynamicLaneSelectionParameters(ref ExtVehicle extVehicle) {
 #if DEBUG
-            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get()) {
+            if (GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd) {
                 Log._Debug("VehicleState.UpdateDynamicLaneSelectionParameters" +
                            $"({extVehicle.vehicleId}) called.");
             }
@@ -902,7 +902,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
 #if DEBUG
-            if (DebugSwitch.VehicleLinkingToSegmentEnd.Get()) {
+            if (GlobalConfig.Instance.Debug.VehicleLinkingToSegmentEnd) {
                 Log._Debug(
                     $"ExtVehicleManager.DetermineVehicleType({extVehicle.vehicleId}): " +
                     $"vehicleType={extVehicle.vehicleType}, heavyVehicle={extVehicle.heavyVehicle}. " +

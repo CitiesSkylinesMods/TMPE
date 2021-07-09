@@ -79,16 +79,16 @@ namespace TrafficManager.UI.Helpers {
             float overdrawHeight = IsUnderground || renderLimits ? 0f : 5f;
             ColossalFramework.Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             RenderManager.instance.OverlayEffect.DrawBezier(
-                cameraInfo,
-                color,
-                Bezier,
-                enlarge ? Size * 1.41f : Size,
-                0,
-                0,
-                minH - overdrawHeight,
-                maxH + overdrawHeight,
-                IsUnderground || renderLimits,
-                false);
+                cameraInfo: cameraInfo,
+                color: color,
+                bezier: Bezier,
+                size: enlarge ? Size * 1.41f : Size,
+                cutStart: 0,
+                cutEnd: 0,
+                minY: minH - overdrawHeight,
+                maxY: maxH + overdrawHeight,
+                renderLimits: IsUnderground || renderLimits,
+                alphaBlend: false);
         }
 
         private bool CheckIsUnderground(Vector3 position) {

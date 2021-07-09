@@ -20,13 +20,11 @@ namespace TrafficManager.UI.MainMenu {
 
         public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
-            this.Skin = new U.ButtonSkin() {
-                Prefix = "TrafficDespawning",
-                BackgroundPrefix = "RoundButton",
-                BackgroundHovered = true,
-                BackgroundActive = true,
-                ForegroundActive = true,
-            };
+            this.Skin = ButtonSkin.CreateSimple(
+                                      foregroundPrefix: "TrafficDespawning",
+                                      backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
+                                  .CanHover(foreground: false)
+                                  .CanActivate();
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: futureAtlas,
                 spriteSize: new IntVector2(50));
@@ -34,14 +32,14 @@ namespace TrafficManager.UI.MainMenu {
 
         protected override void OnClick(UIMouseEventParameter p) {
             // Immediately unclick the tool button, but toggle the option
-            ModUI.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
+            ModUI.GetTrafficManagerTool(createIfRequired: true).SetToolMode(ToolMode.None);
 
             // Toggle the despawning value
             OptionsGameplayTab.SetDisableDespawning(!Options.disableDespawning);
 
             // Update currently visible tooltip
             this.UpdateTooltip(refreshTooltip: true);
-            this.UpdateButtonImage();
+            this.ApplyButtonSkin();
             // do not call base -- base.OnClick(p);
         }
     }

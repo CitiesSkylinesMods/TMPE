@@ -1,4 +1,5 @@
 namespace TrafficManager.UI.Textures {
+    using TrafficManager.Lifecycle;
     using TrafficManager.Util;
     using UnityEngine;
     using static TextureResources;
@@ -6,50 +7,52 @@ namespace TrafficManager.UI.Textures {
     /// <summary>
     /// Textures for UI controlling the traffic lights
     /// </summary>
-    public static class TrafficLightTextures {
-        public static readonly Texture2D RedLight;
-        public static readonly Texture2D RedLightForwardLeft;
-        public static readonly Texture2D RedLightForwardRight;
-        public static readonly Texture2D RedLightLeft;
-        public static readonly Texture2D RedLightRight;
-        public static readonly Texture2D RedLightStraight;
-        public static readonly Texture2D PedestrianRedLight;
+    public class TrafficLightTextures {
+        public static TrafficLightTextures Instance => TMPELifecycle.Instance.Textures.TrafficLight;
 
-        public static readonly Texture2D YellowLight;
-        public static readonly Texture2D YellowLightForwardLeft;
-        public static readonly Texture2D YellowLightForwardRight;
-        public static readonly Texture2D YellowLightLeft;
-        public static readonly Texture2D YellowLightRight;
-        public static readonly Texture2D YellowLightStraight;
-        public static readonly Texture2D YellowRedLight;
+        public readonly Texture2D RedLight;
+        public readonly Texture2D RedLightForwardLeft;
+        public readonly Texture2D RedLightForwardRight;
+        public readonly Texture2D RedLightLeft;
+        public readonly Texture2D RedLightRight;
+        public readonly Texture2D RedLightStraight;
+        public readonly Texture2D PedestrianRedLight;
 
-        public static readonly Texture2D GreenLight;
-        public static readonly Texture2D GreenLightForwardLeft;
-        public static readonly Texture2D GreenLightForwardRight;
-        public static readonly Texture2D GreenLightLeft;
-        public static readonly Texture2D GreenLightRight;
-        public static readonly Texture2D GreenLightStraight;
-        public static readonly Texture2D PedestrianGreenLight;
+        public readonly Texture2D YellowLight;
+        public readonly Texture2D YellowLightForwardLeft;
+        public readonly Texture2D YellowLightForwardRight;
+        public readonly Texture2D YellowLightLeft;
+        public readonly Texture2D YellowLightRight;
+        public readonly Texture2D YellowLightStraight;
+        public readonly Texture2D YellowRedLight;
+
+        public readonly Texture2D GreenLight;
+        public readonly Texture2D GreenLightForwardLeft;
+        public readonly Texture2D GreenLightForwardRight;
+        public readonly Texture2D GreenLightLeft;
+        public readonly Texture2D GreenLightRight;
+        public readonly Texture2D GreenLightStraight;
+        public readonly Texture2D PedestrianGreenLight;
 
         //--------------------------
         // Timed TL Editor
         //--------------------------
-        public static Texture2D LightMode;
-        public static Texture2D LightCounter;
-        public static readonly Texture2D ClockPlay;
-        public static readonly Texture2D ClockPause;
-        public static readonly Texture2D ClockTest;
-        public static Texture2D PedestrianModeAutomatic;
-        public static Texture2D PedestrianModeManual;
+        public Texture2D LightMode;
+        public Texture2D LightCounter;
+        public readonly Texture2D ClockPlay;
+        public readonly Texture2D ClockPause;
+        public readonly Texture2D ClockTest;
+        public Texture2D PedestrianModeAutomatic;
+        public Texture2D PedestrianModeManual;
 
         //--------------------------
         // Toggle TL Tool
         //--------------------------
-        public static readonly Texture2D TrafficLightEnabled;
-        public static readonly Texture2D TrafficLightEnabledTimed;
-        public static readonly Texture2D TrafficLightDisabled;
+        public readonly Texture2D TrafficLightEnabled;
+        public readonly Texture2D TrafficLightEnabledTimed;
+        public readonly Texture2D TrafficLightDisabled;
 
-        static TrafficLightTextures() {
+        public TrafficLightTextures() {
             IntVector2 tlSize = new IntVector2(103, 243);
 
             RedLight = LoadDllResource("TrafficLights.light_1_1.png", tlSize);
@@ -110,7 +113,7 @@ namespace TrafficManager.UI.Textures {
             TrafficLightDisabled = LoadDllResource("TrafficLights.IconJunctionNoTrafficLights.png", toggleSize);
         }
 
-        public static void ReloadTexturesWithTranslation() {
+        public void ReloadTexturesWithTranslation() {
             if (LightMode) UnityEngine.GameObject.Destroy(LightMode);
             if (LightCounter) UnityEngine.GameObject.Destroy(LightCounter);
             if (PedestrianModeAutomatic) UnityEngine.GameObject.Destroy(PedestrianModeAutomatic);
@@ -118,7 +121,7 @@ namespace TrafficManager.UI.Textures {
             LoadTexturesWithTranslation();
         }
 
-        private static void LoadTexturesWithTranslation() {
+        private void LoadTexturesWithTranslation() {
             // light mode
             IntVector2 tlModeSize = new IntVector2(103, 95);
 

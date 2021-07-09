@@ -10,7 +10,7 @@ namespace TrafficManager.Util.Record {
     [Serializable]
     public class LaneArrowsRecord : IRecordable {
         public uint LaneId;
-        InstanceID InstanceID => new InstanceID { NetLane = LaneId };
+        InstanceID InstanceID => new() { NetLane = LaneId };
 
         private LaneArrows? arrows_;
 

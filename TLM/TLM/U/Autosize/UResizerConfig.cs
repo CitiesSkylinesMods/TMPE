@@ -3,6 +3,7 @@ namespace TrafficManager.U.Autosize {
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using JetBrains.Annotations;
+    using TrafficManager.State;
     using UnityEngine;
 
     /// <summary>Stores callback info for a resizable control.</summary>
@@ -16,8 +17,9 @@ namespace TrafficManager.U.Autosize {
 
         /// <summary>
         /// Distance from control border to child controls, also affects autosizing.
+        /// Indexes are same as in CSS padding: 0=Up, 1=Right, 2=Bottom, 3=Left
         /// </summary>
-        public float Padding;
+        public UPadding Padding;
 
         public USizeChoice SizeChoice = USizeChoice.ResizeFunction;
 
@@ -38,7 +40,7 @@ namespace TrafficManager.U.Autosize {
         public UResizerConfig() {
             onResize_ = null;
             ContributeToBoundingBox = true;
-            Padding = 0f;
+            Padding = UPadding.Zero();
         }
 
         /// <summary>
@@ -46,9 +48,6 @@ namespace TrafficManager.U.Autosize {
         /// parent's all children bounding box. Useful for controls hanging outside of the parent.
         /// </summary>
         public bool ContributeToBoundingBox { get; set; }
-        public static UResizerConfig From(UIComponent control) {
-            return (control as ISmartSizableControl)?.GetResizerConfig();
-        }
 
         /// <summary>Calls <see cref="onResize_"/> if it is not null.</summary>
         /// <param name="control">The control which is to be refreshed.</param>
@@ -58,6 +57,7 @@ namespace TrafficManager.U.Autosize {
         public static UBoundingBox? CallOnResize([NotNull] UIComponent control,
                                                  [CanBeNull] UIComponent previousSibling,
                                                  UBoundingBox childrenBox) {
+            bool logUEvents = GlobalConfig.Instance.Debug.LogUEvents;
             if (control is ISmartSizableControl currentAsResizable) {
                 UResizerConfig resizerConfig = currentAsResizable.GetResizerConfig();
                 UResizer resizer = new UResizer(
@@ -86,7 +86,9 @@ namespace TrafficManager.U.Autosize {
                         resizerConfig.onResize_(resizer);
                     }
                     catch (Exception e) {
-                        Log.Error($"While calling OnResize on {control.name}: {e}");
+                        Log.ErrorIf(
+                            logUEvents,
+                            $"While calling OnResize on {control.name}: {e}");
                     }
                 }
 
@@ -94,7 +96,9 @@ namespace TrafficManager.U.Autosize {
                     return null;
                 }
             } else {
-                Log._Debug("CallOnResize for a non-ISmartSizableControl");
+                if (logUEvents) {
+                    Log._Debug("CallOnResize for a non-ISmartSizableControl");
+                }
             }
             return new UBoundingBox(control);
         }
@@ -103,8 +107,8 @@ namespace TrafficManager.U.Autosize {
             this.onResize_ = resizeFn;
         }
 
-        public void Destroy() {
-            this.onResize_ = null;
-        }
+        // public void Destroy() {
+        //     this.onResize_ = null;
+        // }
     }
 }

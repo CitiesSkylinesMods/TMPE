@@ -4,7 +4,7 @@ namespace TrafficManager.U {
 
     /// <summary>Base panel for smart sizeable panels.</summary>
     public class UPanel : UIPanel, ISmartSizableControl {
-        private UResizerConfig resizerConfig_ = new UResizerConfig();
+        private UResizerConfig resizerConfig_ = new();
 
         public UResizerConfig GetResizerConfig() {
             return resizerConfig_;

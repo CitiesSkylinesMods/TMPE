@@ -9,8 +9,31 @@
     /// same atlas for all UI controls on a form.
     /// </summary>
     public class AtlasBuilder {
-        private HashSet<U.AtlasSpriteDef> spriteDefs_ = new HashSet<AtlasSpriteDef>();
+        /// <summary>
+        /// Parameter used in <see cref="CreateAtlas"/> call.
+        /// The name to append to "TMPE_U_***".
+        /// </summary>
+        private readonly string atlasName_;
 
+        /// <summary>
+        /// Parameter used in <see cref="CreateAtlas"/> call.
+        /// Path inside Resources. directory (dot separated).
+        /// </summary>
+        private readonly string loadingPath_;
+
+        /// <summary>
+        /// Parameter used in <see cref="CreateAtlas"/> call.
+        /// Square atlas of this size is created.
+        /// </summary>
+        private readonly IntVector2 sizeHint_;
+
+        private HashSet<U.AtlasSpriteDef> spriteDefs_ = new();
+
+        public AtlasBuilder(string atlasName, string loadingPath, IntVector2 sizeHint) {
+            atlasName_ = atlasName;
+            loadingPath_ = loadingPath;
+            sizeHint_ = sizeHint;
+        }
         public HashSet<AtlasSpriteDef> SpriteDefs => spriteDefs_;
 
         /// <summary>
@@ -24,14 +47,9 @@
 
         /// <summary>Following the settings in the Skin fields, load sprites into an UI atlas.
         /// Longer list of atlas keys can be loaded into one atlas.</summary>
-        /// <param name="atlasName">The name to append to "TMPE_U_***".</param>
-        /// <param name="loadingPath">Path inside Resources. directory (dot separated).</param>
-        /// <param name="atlasSizeHint">Square atlas of this size is created.</param>
         /// <returns>New UI atlas.</returns>
-        public UITextureAtlas CreateAtlas(string atlasName,
-                                          string loadingPath,
-                                          IntVector2 atlasSizeHint) {
-            string fullName = $"TMPE_U_{atlasName}";
+        public UITextureAtlas CreateAtlas() {
+            string fullName = $"TMPE_U_{this.atlasName_}";
             UITextureAtlas foundAtlas = TextureUtil.FindAtlas(fullName);
 
             // If is NOT the same as UI default, means the atlas is already loaded (return cached)
@@ -41,9 +59,9 @@
 
             return TextureUtil.CreateAtlas(
                 atlasName: fullName,
-                resourcePrefix: loadingPath,
+                resourcePrefix: this.loadingPath_,
                 spriteDefs: spriteDefs_.ToArray(),
-                atlasSizeHint: atlasSizeHint);
+                atlasSizeHint: this.sizeHint_);
         }
     }
 }

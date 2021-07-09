@@ -32,7 +32,7 @@ namespace TrafficManager.Manager.Impl {
 
         public static readonly float[] PATHFIND_PENALTIES = { 10f, 100f, 1000f };
 
-        public static readonly VehicleRestrictionsManager Instance = new VehicleRestrictionsManager();
+        public static readonly VehicleRestrictionsManager Instance = new();
 
         private VehicleRestrictionsManager() { }
 

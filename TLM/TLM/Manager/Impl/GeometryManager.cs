@@ -9,6 +9,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Util;
     using TrafficManager.Geometry;
+    using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
 
@@ -16,7 +17,7 @@ namespace TrafficManager.Manager.Impl {
         : AbstractCustomManager,
           IGeometryManager
     {
-        public static GeometryManager Instance { get; } = new GeometryManager();
+        public static GeometryManager Instance { get; } = new();
 
         private class GeometryUpdateObservable : GenericObservable<GeometryUpdate> {
         }
@@ -49,7 +50,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void SimulationStep(bool onlyFirstPass = false) {
 #if DEBUG
-            bool logGeometry = DebugSwitch.GeometryDebug.Get();
+            bool logGeometry = GlobalConfig.Instance.Debug.GeometryDebug;
 #else
             const bool logGeometry = false;
 #endif
@@ -194,7 +195,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void MarkAsUpdated(ref ExtSegment seg, bool updateNodes = true) {
 #if DEBUG
-            if (DebugSwitch.GeometryDebug.Get()) {
+            if (GlobalConfig.Instance.Debug.GeometryDebug) {
                 Log._Debug(
                     $"GeometryManager.MarkAsUpdated(segment {seg.segmentId}): Marking segment as updated");
             }
@@ -219,7 +220,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void MarkAsUpdated(ushort nodeId, bool updateSegments = false) {
 #if DEBUG
-            if (DebugSwitch.GeometryDebug.Get()) {
+            if (GlobalConfig.Instance.Debug.GeometryDebug) {
                 Log._Debug(
                     $"GeometryManager.MarkAsUpdated(node {nodeId}): Marking node as updated");
             }
@@ -253,7 +254,7 @@ namespace TrafficManager.Manager.Impl {
 
         public void OnSegmentEndReplacement(SegmentEndReplacement replacement) {
 #if DEBUG
-            if (DebugSwitch.GeometryDebug.Get()) {
+            if (GlobalConfig.Instance.Debug.GeometryDebug) {
                 Log._Debug(
                     "GeometryManager.OnSegmentEndReplacement(): Detected segment replacement: " +
                     $"{replacement.oldSegmentEndId.SegmentId} -> {replacement.newSegmentEndId.SegmentId}");
@@ -267,7 +268,7 @@ namespace TrafficManager.Manager.Impl {
 
         public IDisposable Subscribe(IObserver<GeometryUpdate> observer) {
 #if DEBUG
-            if (DebugSwitch.GeometryDebug.Get()) {
+            if (GlobalConfig.Instance.Debug.GeometryDebug) {
                 Log._Debug(
                     $"GeometryManager.Subscribe(): Subscribing observer {observer.GetType().Name}");
             }

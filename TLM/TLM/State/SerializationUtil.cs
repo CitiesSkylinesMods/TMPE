@@ -5,11 +5,12 @@ namespace TrafficManager.State {
 
     public static class SerializationUtil {
         static BinaryFormatter GetBinaryFormatter =>
-            new BinaryFormatter() { AssemblyFormat = FormatterAssemblyStyle.Simple };
+            new() { AssemblyFormat = FormatterAssemblyStyle.Simple };
 
         public static object Deserialize(byte[] data) {
-            if (data == null)
+            if (data == null) {
                 return null;
+            }
 
             var memoryStream = new MemoryStream();
             memoryStream.Write(data, 0, data.Length);

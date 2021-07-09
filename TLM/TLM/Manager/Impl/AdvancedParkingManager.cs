@@ -23,7 +23,7 @@ namespace TrafficManager.Manager.Impl {
         private readonly Spiral _spiral;
 
         public static readonly AdvancedParkingManager Instance
-            = new AdvancedParkingManager(SingletonLite<Spiral>.instance);
+            = new(SingletonLite<Spiral>.instance);
 
         private FindParkingSpaceDelegate _findParkingSpaceDelegate;
         private FindParkingSpacePropDelegate _findParkingSpacePropDelegate;
@@ -96,8 +96,10 @@ namespace TrafficManager.Manager.Impl {
                 && (DebugSettings.TargetBuildingId == 0
                     || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 
             Log._DebugIf(
                 logParkingAi,
@@ -252,8 +254,10 @@ namespace TrafficManager.Manager.Impl {
                 && (DebugSettings.TargetBuildingId == 0
                     || DebugSettings.TargetBuildingId == citizenInstance.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             const bool logParkingAi = false;
             const bool extendedLogParkingAi = false;
@@ -397,8 +401,10 @@ namespace TrafficManager.Manager.Impl {
                   && (DebugSettings.TargetBuildingId == 0
                       || DebugSettings.TargetBuildingId == driverInstance.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             const bool logParkingAi = false;
             const bool extendedLogParkingAi = false;
@@ -611,8 +617,10 @@ namespace TrafficManager.Manager.Impl {
                     && (DebugSettings.TargetBuildingId == 0
                         || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             bool logParkingAi = false;
             bool extendedLogParkingAi = false;
@@ -706,7 +714,7 @@ namespace TrafficManager.Manager.Impl {
                     }
 
 #if DEBUG
-                    if (DebugSwitch.ParkingAIDistanceIssue.Get()) {
+                    if (GlobalConfig.Instance.Debug.ParkingAIDistanceIssue) {
                         Log._Debug(
                             "AdvancedParkingManager.CitizenApproachingParkedCarSimulationStep" +
                             $"({instanceId}): FORCED PAUSE. Distance increased! " +
@@ -848,8 +856,10 @@ namespace TrafficManager.Manager.Impl {
                 && (DebugSettings.TargetBuildingId == 0
                     || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             const bool logParkingAi = false;
             const bool extendedLogParkingAi = false;
@@ -928,8 +938,10 @@ namespace TrafficManager.Manager.Impl {
                 && (DebugSettings.TargetBuildingId == 0
                     || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             bool logParkingAi = false;
             bool extendedLogParkingAi = false;
@@ -1425,12 +1437,12 @@ namespace TrafficManager.Manager.Impl {
 
                         // spawn a passenger car near the current position
                         if (AdvancedParkingManager.Instance.TrySpawnParkedPassengerCar(
-                            instanceData.m_citizen,
-                            homeId,
-                            currentPos,
-                            vehicleInfo,
-                            out Vector3 parkPos,
-                            out ParkingError parkReason)) {
+                            citizenId: instanceData.m_citizen,
+                            homeId: homeId,
+                            refPos: currentPos,
+                            vehicleInfo: vehicleInfo,
+                            parkPos: out Vector3 parkPos,
+                            reason: out ParkingError parkReason)) {
                             parkedVehicleId = Singleton<CitizenManager>
                                               .instance.m_citizens.m_buffer[instanceData.m_citizen]
                                               .m_parkedVehicle;
@@ -1550,8 +1562,10 @@ namespace TrafficManager.Manager.Impl {
                   && (DebugSettings.TargetBuildingId == 0
                       || DebugSettings.TargetBuildingId == instanceData.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             const bool logParkingAi = false;
             const bool extendedLogParkingAi = false;
@@ -1628,11 +1642,11 @@ namespace TrafficManager.Manager.Impl {
                                 // parked car is far away from current location
                                 // -> relocate parked car and try again
                                 movedCar = TryMoveParkedVehicle(
-                                    parkedVehicleId,
-                                    ref parkedVehicle,
-                                    citizenPos,
-                                    GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome,
-                                    homeId);
+                                    parkedVehicleId: parkedVehicleId,
+                                    parkedVehicle: ref parkedVehicle,
+                                    refPos: citizenPos,
+                                    maxDistance: GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome,
+                                    homeId: homeId);
                             }
 
                             return true;
@@ -1739,8 +1753,10 @@ namespace TrafficManager.Manager.Impl {
                   && (DebugSettings.TargetBuildingId == 0
                       || DebugSettings.TargetBuildingId == driverInstanceData.m_targetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             const bool logParkingAi = false;
             const bool extendedLogParkingAi = false;
@@ -1828,17 +1844,17 @@ namespace TrafficManager.Manager.Impl {
             Quaternion parkRot;
 
             found = Instance.FindParkingSpaceInVicinity(
-                    refPos,
-                    Vector3.zero,
-                    parkedVehicle.Info,
-                    homeId,
-                    0,
-                    maxDistance,
-                    out _,
-                    out _,
-                    out parkPos,
-                    out parkRot,
-                    out _);
+                    targetPos: refPos,
+                    searchDir: Vector3.zero,
+                    vehicleInfo: parkedVehicle.Info,
+                    homeId: homeId,
+                    vehicleId: 0,
+                    maxDist: maxDistance,
+                    parkingSpaceLocation: out _,
+                    parkingSpaceLocationId: out _,
+                    parkPos: out parkPos,
+                    parkRot: out parkRot,
+                    parkOffset: out _);
 
             if (found) {
                 Singleton<VehicleManager>.instance.RemoveFromGrid(parkedVehicleId, ref parkedVehicle);
@@ -1879,8 +1895,10 @@ namespace TrafficManager.Manager.Impl {
                       && (DebugSettings.TargetBuildingId == 0
                           || DebugSettings.TargetBuildingId == ctzTargetBuilding);
 
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             const bool logParkingAi = false;
             const bool extendedLogParkingAi = false;
@@ -1910,19 +1928,19 @@ namespace TrafficManager.Manager.Impl {
 
             // find a free parking space
             bool success = FindParkingSpaceInVicinity(
-                endPos,
-                Vector3.zero,
-                vehicleInfo,
-                homeId,
-                vehicleId,
-                goingHome
-                    ? GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome
-                    : GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding,
-                out ExtParkingSpaceLocation knownParkingSpaceLocation,
-                out ushort knownParkingSpaceLocationId,
-                out parkPos,
-                out _,
-                out float parkOffset);
+                targetPos: endPos,
+                searchDir: Vector3.zero,
+                vehicleInfo: vehicleInfo,
+                homeId: homeId,
+                vehicleId: vehicleId,
+                maxDist: goingHome
+                             ? GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome
+                             : GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding,
+                parkingSpaceLocation: out ExtParkingSpaceLocation knownParkingSpaceLocation,
+                parkingSpaceLocationId: out ushort knownParkingSpaceLocationId,
+                parkPos: out parkPos,
+                parkRot: out _,
+                parkOffset: out float parkOffset);
 
             extDriverInstance.parkingSpaceLocation = knownParkingSpaceLocation;
             extDriverInstance.parkingSpaceLocationId = knownParkingSpaceLocationId;
@@ -2027,8 +2045,9 @@ namespace TrafficManager.Manager.Impl {
                                                out ParkingError reason) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
-            // var logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            // var logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog.Get() && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             // const bool logParkingAi = false;
             const bool extendedLogParkingAi = false;
@@ -2039,19 +2058,19 @@ namespace TrafficManager.Manager.Impl {
                 $"home {homeId} @ {refPos}");
 
             bool roadParkSuccess = TrySpawnParkedPassengerCarRoadSide(
-                citizenId,
-                refPos,
-                vehicleInfo,
-                out Vector3 roadParkPos,
-                out ParkingError roadParkReason);
+                citizenId: citizenId,
+                refPos: refPos,
+                vehicleInfo: vehicleInfo,
+                parkPos: out Vector3 roadParkPos,
+                reason: out ParkingError roadParkReason);
 
             bool buildingParkSuccess = TrySpawnParkedPassengerCarBuilding(
-                citizenId,
-                homeId,
-                refPos,
-                vehicleInfo,
-                out Vector3 buildingParkPos,
-                out ParkingError buildingParkReason);
+                citizenId: citizenId,
+                homeId: homeId,
+                refPos: refPos,
+                vehicleInfo: vehicleInfo,
+                parkPos: out Vector3 buildingParkPos,
+                reason: out ParkingError buildingParkReason);
 
             if ((!roadParkSuccess && !buildingParkSuccess)
                 || (roadParkSuccess && !buildingParkSuccess)) {
@@ -2084,9 +2103,10 @@ namespace TrafficManager.Manager.Impl {
                                                        out ParkingError reason) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
 
-            // bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            // bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog.Get() && citizenDebug;
 #else
             const bool logParkingAi = false;
             // const bool extendedLogParkingAi = false;
@@ -2099,14 +2119,14 @@ namespace TrafficManager.Manager.Impl {
             parkPos = Vector3.zero;
 
             if (FindParkingSpaceRoadSide(
-                0,
-                refPos,
-                vehicleInfo.m_generatedInfo.m_size.x,
-                vehicleInfo.m_generatedInfo.m_size.z,
-                GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding,
-                out parkPos,
-                out Quaternion parkRot,
-                out _))
+                ignoreParked: 0,
+                refPos: refPos,
+                width: vehicleInfo.m_generatedInfo.m_size.x,
+                length: vehicleInfo.m_generatedInfo.m_size.z,
+                maxDistance: GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding,
+                parkPos: out parkPos,
+                parkRot: out Quaternion parkRot,
+                parkOffset: out _))
             {
                 // position found, spawn a parked vehicle
                 if (Singleton<VehicleManager>.instance.CreateParkedVehicle(
@@ -2153,8 +2173,10 @@ namespace TrafficManager.Manager.Impl {
                                                        out ParkingError reason) {
 #if DEBUG
             bool citizenDebug = DebugSettings.CitizenId == 0 || DebugSettings.CitizenId == citizenId;
-            bool logParkingAi = DebugSwitch.BasicParkingAILog.Get() && citizenDebug;
-            bool extendedLogParkingAi = DebugSwitch.ExtendedParkingAILog.Get() && citizenDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.BasicParkingAILog
+                                && citizenDebug;
+            bool extendedLogParkingAi = GlobalConfig.Instance.Debug.ExtendedParkingAILog
+                                        && citizenDebug;
 #else
             const bool logParkingAi = false;
             const bool extendedLogParkingAi = false;
@@ -2168,16 +2190,16 @@ namespace TrafficManager.Manager.Impl {
             parkPos = Vector3.zero;
 
             if (FindParkingSpaceBuilding(
-                vehicleInfo,
-                homeId,
-                0,
-                0,
-                refPos,
-                GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding,
-                GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding,
-                out parkPos,
-                out Quaternion parkRot,
-                out _))
+                vehicleInfo: vehicleInfo,
+                homeId: homeId,
+                ignoreParked: 0,
+                segmentId: 0,
+                refPos: refPos,
+                maxBuildingDistance: GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding,
+                maxParkingSpaceDistance: GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToBuilding,
+                parkPos: out parkPos,
+                parkRot: out Quaternion parkRot,
+                parkOffset: out _))
             {
                 // position found, spawn a parked vehicle
                 if (Singleton<VehicleManager>.instance.CreateParkedVehicle(
@@ -2229,7 +2251,8 @@ namespace TrafficManager.Manager.Impl {
                                                out float parkOffset) {
 #if DEBUG
             bool vehDebug = DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId;
-            bool logParkingAi = DebugSwitch.VehicleParkingAILog.Get() && vehDebug;
+            bool logParkingAi = GlobalConfig.Instance.Debug.VehicleParkingAILog
+                                && vehDebug;
 #else
             const bool logParkingAi = false;
 #endif
@@ -2239,28 +2262,28 @@ namespace TrafficManager.Manager.Impl {
 
             // TODO depending on simulation accuracy, disable searching for both road-side and building parking spaces
             ushort parkingSpaceSegmentId = FindParkingSpaceAtRoadSide(
-                0,
-                refPos,
-                vehicleInfo.m_generatedInfo.m_size.x,
-                vehicleInfo.m_generatedInfo.m_size.z,
-                maxDist,
-                true,
-                out Vector3 roadParkPos,
-                out Quaternion roadParkRot,
-                out float roadParkOffset);
+                ignoreParked: 0,
+                refPos: refPos,
+                width: vehicleInfo.m_generatedInfo.m_size.x,
+                length: vehicleInfo.m_generatedInfo.m_size.z,
+                maxDistance: maxDist,
+                randomize: true,
+                parkPos: out Vector3 roadParkPos,
+                parkRot: out Quaternion roadParkRot,
+                parkOffset: out float roadParkOffset);
 
             ushort parkingBuildingId = FindParkingSpaceBuilding(
-                vehicleInfo,
-                homeId,
-                0,
-                0,
-                refPos,
-                maxDist,
-                maxDist,
-                true,
-                out Vector3 buildingParkPos,
-                out Quaternion buildingParkRot,
-                out float buildingParkOffset);
+                vehicleInfo: vehicleInfo,
+                homeID: homeId,
+                ignoreParked: 0,
+                segmentId: 0,
+                refPos: refPos,
+                maxBuildingDistance: maxDist,
+                maxParkingSpaceDistance: maxDist,
+                randomize: true,
+                parkPos: out Vector3 buildingParkPos,
+                parkRot: out Quaternion buildingParkRot,
+                parkOffset: out float buildingParkOffset);
 
             if (parkingSpaceSegmentId != 0) {
                 if (parkingBuildingId != 0) {
@@ -2351,7 +2374,7 @@ namespace TrafficManager.Manager.Impl {
                                                     out Quaternion parkRot,
                                                     out float parkOffset) {
 #if DEBUG
-            bool logParkingAi = DebugSwitch.VehicleParkingAILog.Get();
+            bool logParkingAi = GlobalConfig.Instance.Debug.VehicleParkingAILog;
 #else
             const bool logParkingAi = false;
 #endif
@@ -2501,7 +2524,7 @@ namespace TrafficManager.Manager.Impl {
                                                   out Quaternion parkRot,
                                                   out float parkOffset) {
 #if DEBUG
-            bool logParkingAi = DebugSwitch.VehicleParkingAILog.Get();
+            bool logParkingAi = GlobalConfig.Instance.Debug.VehicleParkingAILog;
 #else
             const bool logParkingAi = false;
 #endif
@@ -2611,7 +2634,7 @@ namespace TrafficManager.Manager.Impl {
                                                    out Quaternion parkRot,
                                                    out float parkOffset) {
 #if DEBUG
-            bool logParkingAi = DebugSwitch.VehicleParkingAILog.Get();
+            bool logParkingAi = GlobalConfig.Instance.Debug.VehicleParkingAILog;
 #else
             const bool logParkingAi = false;
 #endif
@@ -2800,7 +2823,7 @@ namespace TrafficManager.Manager.Impl {
                                                           out uint laneId,
                                                           out int laneIndex) {
 #if DEBUG
-            bool logParkingAi = DebugSwitch.VehicleParkingAILog.Get();
+            bool logParkingAi = GlobalConfig.Instance.Debug.VehicleParkingAILog;
 #else
             const bool logParkingAi = false;
 #endif

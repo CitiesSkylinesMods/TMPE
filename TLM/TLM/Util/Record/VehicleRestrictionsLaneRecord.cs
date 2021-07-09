@@ -19,7 +19,7 @@ namespace TrafficManager.Util.Record {
 
         private ExtVehicleType? allowedVehicleTypes_;
 
-        InstanceID InstanceID => new InstanceID { NetLane = LaneId };
+        InstanceID InstanceID => new() { NetLane = LaneId };
 
         public void Record() {
             allowedVehicleTypes_ = VehicleRestrictionsManager.Instance.GetAllowedVehicleTypesRaw(SegmentId, LaneIndex);

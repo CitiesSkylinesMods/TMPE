@@ -13,6 +13,7 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework.Math;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using ColossalFramework.UI;
+    using TrafficManager.Lifecycle;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util.Extensions;
 
@@ -29,7 +30,7 @@ namespace TrafficManager.UI.SubTools {
         private ParkingRestrictionsManager parkingManager => ParkingRestrictionsManager.Instance;
 
         private readonly Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>> segmentCenterByDir
-            = new Dictionary<ushort, Dictionary<NetInfo.Direction, Vector3>>();
+            = new();
 
         private const float SIGN_SIZE = 80f;
 
@@ -277,6 +278,8 @@ namespace TrafficManager.UI.SubTools {
                     SIGN_SIZE * TrafficManagerTool.MAX_ZOOM);
             }
 
+            var textures = TMPELifecycle.Instance.Textures.RoadUI;
+
             foreach (KeyValuePair<NetInfo.Direction, Vector3> e in segCenter) {
                 bool allowed = parkingManager.IsParkingAllowed(segmentId, e.Key);
                 if (allowed && viewOnly) {
@@ -289,14 +292,14 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                float zoom = (1.0f / (e.Value - camPos).magnitude) * 100f * MainTool.GetBaseZoom();
+                float zoom = (1.0f / (e.Value - camPos).magnitude) * 100f * U.UIScaler.GetScale();
                 float size = (viewOnly ? 0.8f : 1f) * SIGN_SIZE * zoom;
                 Color guiColor = GUI.color;
                 Rect boundingBox = new Rect(
-                    screenPos.x - (size / 2),
-                    screenPos.y - (size / 2),
-                    size,
-                    size);
+                    x: screenPos.x - (size / 2),
+                    y: screenPos.y - (size / 2),
+                    width: size,
+                    height: size);
 
                 if (Options.speedLimitsOverlay || MassEditOverlay.IsActive) {
                     boundingBox.y -= size + 10f;
@@ -312,7 +315,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 GUI.color = guiColor;
-                GUI.DrawTexture(boundingBox, RoadUI.ParkingRestrictionTextures[allowed]);
+                GUI.DrawTexture(boundingBox, textures.ParkingRestrictionTextures[allowed]);
 
                 if (hoveredHandle && clicked && !IsCursorInPanel() &&
                     parkingManager.ToggleParkingAllowed(segmentId, hoveredDirection)) {

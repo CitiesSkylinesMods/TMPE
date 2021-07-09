@@ -4,6 +4,7 @@ namespace TrafficManager.Manager.Impl {
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.State;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using UnityEngine;
@@ -233,7 +234,7 @@ namespace TrafficManager.Manager.Impl {
             bool startNode = segEnd.startNode;
 
 #if DEBUG
-            bool logGeometry = DebugSwitch.GeometryDebug.Get();
+            bool logGeometry = GlobalConfig.Instance.Debug.GeometryDebug;
 #else
             const bool logGeometry = false;
 #endif
@@ -377,7 +378,7 @@ namespace TrafficManager.Manager.Impl {
         public bool CalculateOnlyHighways(ushort segmentId, bool startNode) {
             ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
 #if DEBUG
-            bool logGeometry = DebugSwitch.GeometryDebug.Get();
+            bool logGeometry = GlobalConfig.Instance.Debug.GeometryDebug;
 #else
             const bool logGeometry = false;
 #endif
