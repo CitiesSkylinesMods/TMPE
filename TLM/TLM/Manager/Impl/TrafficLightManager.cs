@@ -82,6 +82,7 @@ namespace TrafficManager.Manager.Impl {
 
             node.m_flags = flags;
             Constants.ManagerFactory.GeometryManager.MarkAsUpdated(nodeId, true);
+            Notifier.Instance.OnNodeModified(nodeId, this);
             return true;
         }
 
