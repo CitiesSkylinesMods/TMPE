@@ -3,6 +3,7 @@ namespace TrafficManager {
     using JetBrains.Annotations;
     using TrafficManager.API.Manager;
     using UnityEngine;
+    using TrafficManager.API.Notifier;
 
     public static class Constants {
         /// <summary>
@@ -41,5 +42,7 @@ namespace TrafficManager {
         }
 
         public static IManagerFactory ManagerFactory => Manager.Impl.ManagerFactory.Instance;
+
+        public static INotifier Notifier => TrafficManager.Notifier.Instance;
     }
 }

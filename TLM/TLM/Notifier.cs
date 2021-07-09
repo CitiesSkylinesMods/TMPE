@@ -1,33 +1,15 @@
-using System;
-
-namespace TrafficManager.API
+namespace TrafficManager
 {
-    public class OnModifiedEventArgs
+    using System;
+    using TrafficManager.API.Notifier;
+    public class Notifier : INotifier
     {
-        /// <summary>
-        /// node/segment (citizen/vehicle in future) that has been modified.
-        /// </summary>
-        public InstanceID InstanceID;
-
-        /// <summary>
-        /// Reserved: the sender that caused the rule to be modified.
-        /// </summary>
-        public object Sender;
-
-        /// <summary>
-        /// Reserved: The rule that has been modified. object type is decided by sender.
-        /// </summary>
-        public object Data;
-    }
-
-    public class Notifier
-    {
-        public static Notifier Instance { get; } = new Notifier();
-
-        public static Action EventLevelLoaded;
+        public event Action EventLevelLoaded;
 
         // TODO [issue #967]: notify TTL Start/Stop events
-        public static Action<OnModifiedEventArgs> EventModified;
+        public event Action<OnModifiedEventArgs> EventModified;
+
+        public static Notifier Instance { get; } = new Notifier();
 
         public void OnLevelLoaded() => EventLevelLoaded?.Invoke();
 

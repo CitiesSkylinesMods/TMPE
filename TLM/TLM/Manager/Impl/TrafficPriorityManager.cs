@@ -269,7 +269,7 @@ namespace TrafficManager.Manager.Impl {
                     $"startNode={startNode}, type={type}, result={ret}, reason={reason}");
             }
 
-            API.Notifier.OnNodeModified(nodeId, this);
+            Notifier.Instance.OnNodeModified(nodeId, this);
             return ret;
         }
 
@@ -329,7 +329,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             SegmentEndManager.Instance.UpdateSegmentEnd(segmentId, startNode);
-            API.Notifier.OnNodeModified(segmentId.ToSegment().GetNode(startNode), this);
+            Notifier.Instance.OnNodeModified(segmentId.ToSegment().GetNode(startNode), this);
         }
 
         public PriorityType GetPrioritySign(ushort segmentId, bool startNode) {

@@ -239,7 +239,7 @@ namespace TrafficManager.Manager.Impl {
                     return true;
                 });
 
-            API.Notifier.OnSegmentNodesMofied(segmentId, this);
+            Notifier.Instance.OnSegmentNodesMofied(segmentId, this);
         }
 
         protected void ResetIncomingHighwayLaneArrows(ushort segmentId) {

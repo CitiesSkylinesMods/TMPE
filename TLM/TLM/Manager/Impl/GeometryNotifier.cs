@@ -11,12 +11,12 @@ namespace TrafficManager.Manager.Impl {
         void IObserver<GeometryUpdate>.OnUpdate(GeometryUpdate subject) {
             try {
                 if (subject.nodeId is ushort nodeId) {
-                    Notifier.OnNodeModified(nodeId, this);
+                    Notifier.Instance.OnNodeModified(nodeId, this);
                 } else if (subject.segment is ExtSegment segmentExt) {
-                    Notifier.OnSegmentModified(segmentExt.segmentId, this);
+                    Notifier.Instance.OnSegmentModified(segmentExt.segmentId, this);
                 }else  if (subject.replacement.newSegmentEndId is ISegmentEndId newSegmentEndId) {
                     ushort nodeId2 = newSegmentEndId.SegmentId.ToSegment().GetNode(newSegmentEndId.StartNode);
-                    Notifier.OnNodeModified(nodeId2, this);
+                    Notifier.Instance.OnNodeModified(nodeId2, this);
                 }
             } catch (Exception ex) {
                 Shortcuts.LogException(ex);
