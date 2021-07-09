@@ -22,9 +22,7 @@ namespace TrafficManager.API
 
     public class Notifier
     {
-        public static Notifier _instance;
-        public static Notifier Instance => _instance ??= new Notifier();
-
+        public static Notifier Instance { get; } = new Notifier();
 
         public static Action EventLevelLoaded;
 
