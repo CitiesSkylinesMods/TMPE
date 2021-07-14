@@ -301,6 +301,18 @@ namespace TrafficManager.Manager.Impl {
                 defaultValue: null);
         }
 
+        public float GetGameSpeedLimit(uint laneId) {
+            GetSpeedLimitResult overrideSpeedlimit = this.GetCustomSpeedLimit(laneId);
+            if (overrideSpeedlimit.DefaultValue != null) {
+                SpeedValue activeLimit = overrideSpeedlimit.OverrideValue != null
+                                             ? overrideSpeedlimit.OverrideValue.Value
+                                             : overrideSpeedlimit.DefaultValue.Value;
+                return ToGameSpeedLimit(activeLimit.GameUnits);
+            }
+
+            return 0f;
+        }
+
         public float GetLockFreeGameSpeedLimit(ushort segmentId,
                                                byte laneIndex,
                                                uint laneId,
