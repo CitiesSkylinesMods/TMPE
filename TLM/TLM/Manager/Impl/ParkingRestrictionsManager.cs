@@ -82,7 +82,7 @@ namespace TrafficManager.Manager.Impl {
                 Services.SimulationService.AddAction(
                     () => segmentId.ToSegment().UpdateSegment(segmentId));
             }
-
+            Notifier.Instance.OnSegmentModified(segmentId, this);
             return true;
         }
 

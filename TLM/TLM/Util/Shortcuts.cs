@@ -83,6 +83,9 @@ namespace TrafficManager.Util {
         internal static ref ExtSegmentEnd GetSegEnd(ushort segmentId, bool startNode) =>
             ref _segEndBuff[segEndMan.GetIndex(segmentId, startNode)];
 
+        internal static ushort GetNode(this ref NetSegment segment, bool startNode) =>
+            startNode ? segment.m_startNode : segment.m_endNode;
+
         internal static bool HasJunctionFlag(ushort nodeId) => HasJunctionFlag(ref GetNode(nodeId));
 
         internal static bool HasJunctionFlag(ref NetNode node) =>

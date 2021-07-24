@@ -799,6 +799,8 @@ namespace TrafficManager.Manager.Impl {
             if (endNodeId != 0) {
                 Constants.ManagerFactory.GeometryManager.MarkAsUpdated(endNodeId);
             }
+
+            Notifier.Instance.OnSegmentModified(segmentId, this);
         }
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
