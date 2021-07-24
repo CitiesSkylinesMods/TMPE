@@ -100,6 +100,8 @@ namespace TrafficManager.UI {
 
         public bool IsUndergroundMode => InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
 
+        internal static float OverlayAlpha => TransparencyToAlpha(GlobalConfig.Instance.Main.OverlayTransparency);
+
         static TrafficManagerTool() { }
 
         /// <summary>
