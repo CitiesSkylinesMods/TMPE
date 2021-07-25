@@ -238,8 +238,8 @@ namespace TrafficManager.UI.SubTools {
                             DrawLaneCurve(
                                 cameraInfo: cameraInfo,
                                 bezier: ref bezier,
-                                color: !viewOnly ? laneEnd.Color : laneEnd.Color.WithAlpha(TrafficManagerTool.OverlayAlpha),
-                                outlineColor: !viewOnly ? Color.black : Color.black.WithAlpha(TrafficManagerTool.OverlayAlpha),
+                                color: laneEnd.Color.WithAlpha(TrafficManagerTool.OverlayAlpha),
+                                outlineColor: Color.black.WithAlpha(TrafficManagerTool.OverlayAlpha),
                                 underground: (height.y + 1f) < intersectionY || laneEnd.NodeId == SelectedNodeId);
                         }
                     }
