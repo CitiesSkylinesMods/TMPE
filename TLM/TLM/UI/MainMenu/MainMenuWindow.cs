@@ -543,6 +543,7 @@ namespace TrafficManager.UI.MainMenu {
         public override void OnDestroy() {
             eventVisibilityChanged -= OnVisibilityChanged;
             confDisposable?.Dispose();
+            base.OnDestroy();
         }
 
         internal void SetPosLock(bool lck) {
