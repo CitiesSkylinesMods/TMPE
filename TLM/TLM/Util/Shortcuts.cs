@@ -185,6 +185,11 @@ namespace TrafficManager.Util {
                 .SetMessage(title, message, true);
         }
 
+        internal static Color WithAlpha(this Color color, float alpha) {
+            color.a = alpha;
+            return color;
+        }
+
         internal static bool ShiftIsPressed => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         internal static bool ControlIsPressed => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
