@@ -24,7 +24,11 @@ namespace TrafficManager.U {
                                                  IntVector2 atlasSizeHint) {
             var loadedTextures = new List<Texture2D>(spriteDefs.Length);
             var loadedSpriteNames = new List<string>();
+#if DEBUG
             bool debugResourceLoading = DebugSwitch.ResourceLoading.Get();
+#else
+            const bool debugResourceLoading = false;
+#endif
 
             // Load separate sprites and then pack it in a texture together
             foreach (U.AtlasSpriteDef spriteDef in spriteDefs) {

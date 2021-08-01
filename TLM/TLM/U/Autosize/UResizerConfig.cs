@@ -58,7 +58,11 @@ namespace TrafficManager.U.Autosize {
         public static UBoundingBox? CallOnResize([NotNull] UIComponent control,
                                                  [CanBeNull] UIComponent previousSibling,
                                                  UBoundingBox childrenBox) {
+#if DEBUG
             bool logUEvents = DebugSwitch.ULibraryEvents.Get();
+#else
+            const bool logUEvents = false;
+#endif
             if (control is ISmartSizableControl currentAsResizable) {
                 UResizerConfig resizerConfig = currentAsResizable.GetResizerConfig();
                 UResizer resizer = new UResizer(
