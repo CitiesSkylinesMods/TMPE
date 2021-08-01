@@ -67,5 +67,15 @@ namespace TrafficManager.U {
             //     + $"moving by {xMotion};{yMotion} newpos={pos}");
             return true;
         }
+
+        /// <summary>
+        /// Replace special markup with UI shortcut color tag (orange). And place closing tag.
+        /// </summary>
+        /// <param name="s">String with keybind wrapped in [[Ctrl]] double square brackets.</param>
+        /// <returns>Updated string.</returns>
+        public static string ColorizeKeybind(string s) {
+            return s.Replace("[[", UConst.GetKeyboardShortcutColorTagOpener())
+                    .Replace("]]", UConst.KEYBOARD_SHORTCUT_CLOSING_TAG);
+        }
     }
 }

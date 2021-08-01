@@ -1,5 +1,4 @@
 namespace TrafficManager.U {
-    using ColossalFramework;
     using ColossalFramework.UI;
     using TrafficManager.State;
     using UnityEngine;
@@ -14,7 +13,7 @@ namespace TrafficManager.U {
         /// <summary>Caching because UIView.Instance.uiCamera can be null sometimes.</summary>
         private static float cachedGuiHeight = GUI_HEIGHT;
 
-        /// <summary>Screen width for GUI is always fixed at 1920.</summary>
+        /// <summary>Gets screen width for GUI (always fixed at 1920).</summary>
         public static float GuiWidth {
             // TODO: Double check if GUI never changes width, the code below can be a const
             get {
@@ -27,7 +26,7 @@ namespace TrafficManager.U {
             }
         }
 
-        /// <summary>Screen height for GUI is always fixed at 1080.</summary>
+        /// <summary>Gets screen height for GUI (always fixed at 1080).</summary>
         public static float GuiHeight {
             // TODO: Double check if GUI never changes height, the code below can be a const
             get {
@@ -54,9 +53,15 @@ namespace TrafficManager.U {
         /// <param name="screenPos">Pixel position.</param>
         /// <returns>GUI space position.</returns>
         internal static Vector2 ScreenPointToGuiPoint(Vector2 screenPos) {
-            return new Vector2(
-                (screenPos.x * GUI_WIDTH) / Screen.width,
-                (screenPos.y * GUI_HEIGHT) / Screen.height);
+            return new(
+                x: (screenPos.x * GUI_WIDTH) / Screen.width,
+                y: (screenPos.y * GUI_HEIGHT) / Screen.height);
+        }
+
+        internal static Vector2 MouseToGuiPoint(Vector2 mouse) {
+            return new(
+                x: (mouse.x * GUI_WIDTH) / Screen.width,
+                y: GUI_HEIGHT - ((mouse.y * GUI_HEIGHT) / Screen.height));
         }
     }
 }

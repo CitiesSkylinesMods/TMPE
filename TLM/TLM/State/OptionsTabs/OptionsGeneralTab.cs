@@ -354,7 +354,7 @@ namespace TrafficManager.State {
                 _guiOpacitySlider.value = val;
 
                 U.UOpacityValue opacity = UOpacityValue.FromOpacity(0.01f * val);
-                ModUI.Instance.uiOpacityObservable.NotifyObservers(
+                ModUI.Instance.UiOpacityObservable.NotifyObservers(
                           new ModUI.UIOpacityNotification {
                                                               Opacity = opacity,
                                                           });

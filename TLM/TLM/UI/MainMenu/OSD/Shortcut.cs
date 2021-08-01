@@ -1,6 +1,7 @@
 namespace TrafficManager.UI.MainMenu.OSD {
     using System.Collections.Generic;
     using System.Text;
+    using ColossalFramework.UI;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
@@ -19,32 +20,32 @@ namespace TrafficManager.UI.MainMenu.OSD {
             localizedText_ = localizedText;
         }
 
-        public override void Build(U.UiBuilder<U.UPanel> builder) {
+        public override void Build(UIComponent parent,
+                                   U.UBuilder builder) {
             StringBuilder text = new StringBuilder();
             List<string> keybindStrings = this.keybindSetting_.ToLocalizedStringList();
             bool firstShortcut = true; // tracking | separators between multiple keybinds
 
-            using (UiBuilder<ULabel> labelB = builder.Label<U.ULabel>(string.Empty)) {
-                labelB.Control.processMarkup = true;
-                labelB.ResizeFunction(
-                    r => {
-                        r.Stack(mode: UStackMode.NewRowBelow);
-                    });
-
-                foreach (string keybindStr in keybindStrings) {
-                    if (!firstShortcut) {
-                        text.Append("| ");
-                    } else {
-                        firstShortcut = false;
-                    }
-
-                    text.Append($"<color {UConst.SHORTCUT_TEXT_HEX}>{keybindStr}</color>");
+            foreach (string keybindStr in keybindStrings) {
+                if (!firstShortcut) {
+                    text.Append("| ");
+                } else {
+                    firstShortcut = false;
                 }
 
-                text.Append(" ");
-                text.Append(this.localizedText_);
-                labelB.Control.text = text.ToString();
+                text.Append(UConst.GetKeyboardShortcutColorTagOpener());
+                text.Append(keybindStr);
+                text.Append(UConst.KEYBOARD_SHORTCUT_CLOSING_TAG);
             }
+
+            text.Append(" ");
+            text.Append(this.localizedText_);
+
+            builder.Label<U.ULabel, UIComponent>(
+                parent,
+                t: text.ToString(),
+                stack: UStackMode.NewRowBelow,
+                processMarkup: true);
         }
     }
 }

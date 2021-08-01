@@ -1,9 +1,10 @@
 namespace TrafficManager.UI.MainMenu.OSD {
+    using ColossalFramework.UI;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
 
     /// <summary>
-    /// Displays a single text row with different background.
+    /// Displays a single text row, no markup, help text for the current edit mode.
     /// </summary>
     public class ModeDescription : OsdItem {
         private readonly string localizedText_;
@@ -12,12 +13,15 @@ namespace TrafficManager.UI.MainMenu.OSD {
             localizedText_ = localizedText;
         }
 
-        public override void Build(U.UiBuilder<U.UPanel> builder) {
-            using (UiBuilder<ULabel> labelB = builder.Label<U.ULabel>(string.Empty)) {
-                labelB.ResizeFunction(r => { r.Stack(mode: UStackMode.NewRowBelow); });
-                labelB.Control.text = this.localizedText_;
-                labelB.Control.opacity = 0.8f;
-            }
+        public override void Build(UIComponent parent,
+                                   U.UBuilder builder) {
+            ULabel l = builder.Label<U.ULabel, UIComponent>(
+                parent,
+                this.localizedText_,
+                stack: UStackMode.NewRowBelow,
+                processMarkup: false);
+
+            l.opacity = 0.8f;
         }
     }
 }

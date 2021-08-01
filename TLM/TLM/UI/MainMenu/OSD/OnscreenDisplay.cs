@@ -50,10 +50,11 @@ namespace TrafficManager.UI.MainMenu.OSD {
             // mainMenu.KeybindsPanel.transform.DetachChildren();
 
             // Populate the panel with the items
-            using (var builder = new UiBuilder<U.UPanel>(mainMenu.OnscreenDisplayPanel)) {
-                foreach (var item in items) {
-                    item.Build(builder);
-                }
+            var builder = new UBuilder();
+            foreach (OsdItem item in items) {
+                item.Build(
+                    parent: mainMenu.OnscreenDisplayPanel,
+                    builder);
             }
 
             if (items.Count > 0

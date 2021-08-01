@@ -3,7 +3,7 @@ namespace TrafficManager.U {
     using TrafficManager.U.Autosize;
 
     public class ULabel: UILabel, ISmartSizableControl {
-        private UResizerConfig resizerConfig_ = new UResizerConfig();
+        private UResizerConfig resizerConfig_ = new();
 
         public UResizerConfig GetResizerConfig() {
             return resizerConfig_;
