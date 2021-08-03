@@ -43,6 +43,7 @@ namespace TrafficManager.State.ConfigData {
             false, // 25: debug turn-on-red
             false, // 26: debug speed limits (also lists NetInfos skipped due to m_netAI in SpeedLimitsManager.cs)
             false, // 27: allow U library UI and event debugging
+            // Added a new flag? Bump LATEST_VERSION in GlobalConfig!
         };
 
         private int nodeId_ = 0;
@@ -131,6 +132,7 @@ namespace TrafficManager.State.ConfigData {
         TurnOnRed = 25,
         SpeedLimits = 26,
         ULibraryEvents = 27,
+        // Added a new flag? Bump LATEST_VERSION in GlobalConfig!
     }
 
     static class DebugSwitchExtensions {
