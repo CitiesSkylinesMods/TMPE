@@ -180,23 +180,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// </summary>
         /// <param name="numLanes">How many groups of buttons.</param>
         private void CreateLaneArrowsWindow(int numLanes) {
-            // var parent = UIView.GetAView();
-            // ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
-            // ToolWindow.SetOpacity(
-            //     U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
-            //
-            // RepositionWindowToNode(); // reposition 1st time to avoid visible window jump
-            //
-            // using (var builder = new U.UiBuilder<LaneArrowToolWindow>(ToolWindow)) {
-            //     builder.ResizeFunction(r => { r.FitToChildren(); });
-            //     builder.SetPadding(UConst.UIPADDING);
-            //
-            //     ToolWindow.SetupControls(builder, numLanes);
-            //
-            //     // Resize everything correctly
-            //     builder.Done();
-            //     RepositionWindowToNode(); // reposition again 2nd time now that size is known
-            // }
             var builder = UBuilder.Create(
                 abAtlasName: "TMPE_LaneArrowsTool_Atlas",
                 abLoadingPath: "LaneArrows",

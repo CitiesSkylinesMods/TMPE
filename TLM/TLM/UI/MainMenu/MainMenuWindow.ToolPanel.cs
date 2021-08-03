@@ -5,6 +5,7 @@
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
     using UnityEngine;
+    using Debug = System.Diagnostics.Debug;
 
     public partial class MainMenuWindow {
         internal class ToolPanel : UPanel {
@@ -14,14 +15,15 @@
             }
 
             /// <summary>Create buttons and add them to the given panel UIBuilder.</summary>
+            /// <param name="window">The parent window.</param>
+            /// <param name="parentComponent">The parent panel component to host the buttons.</param>
             /// <param name="builder">UI builder to use.</param>
-            /// <param name="atlasKeysSet">Atlas keys to update for button images.</param>
-            /// <param name="buttonDefs">Button defs collection to create from it.</param>
-            /// <param name="minRowLength">Longest the row can be without breaking.</param>
+            /// <param name="buttonDefs">The button definitions array.</param>
+            /// <param name="minRowLength">Shortest horizontal row length allowed before breaking new row.</param>
             /// <returns>A list of created buttons.</returns>
             private AddButtonsResult AddButtonsFromButtonDefinitions(
                 MainMenuWindow window,
-                UIComponent parent,
+                UIComponent parentComponent,
                 UBuilder builder,
                 MenuButtonDef[] buttonDefs,
                 int minRowLength) {
@@ -40,7 +42,7 @@
                     }
 
                     // Create and populate the panel with buttons
-                    var button = parent.AddUIComponent(buttonDef.ButtonType) as BaseMenuButton;
+                    var button = parentComponent.AddUIComponent(buttonDef.ButtonType) as BaseMenuButton;
 
                     // Count buttons in a row and break the line
                     bool doRowBreak = result.Layout.IsRowBreak(placedInARow, minRowLength);
@@ -84,7 +86,7 @@
                 // Create 1 or 2 rows of button objects
                 var toolButtonsResult = AddButtonsFromButtonDefinitions(
                     window,
-                    parent: this,
+                    parentComponent: this,
                     builder,
                     buttonDefs: TOOL_BUTTON_DEFS,
                     minRowLength: 4);
@@ -118,7 +120,7 @@
                 // Use as many rows as in the other panel.
                 var extraButtonsResult = AddButtonsFromButtonDefinitions(
                     window,
-                    parent: this,
+                    parentComponent: this,
                     builder,
                     buttonDefs: EXTRA_BUTTON_DEFS,
                     minRowLength: toolButtonsResult.Layout.Rows == 2 ? 1 : 2);

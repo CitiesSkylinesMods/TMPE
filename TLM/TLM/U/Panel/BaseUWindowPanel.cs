@@ -106,5 +106,12 @@ namespace TrafficManager.U.Panel {
 
             SetOpacity(UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
         }
+
+        /// <summary>Called by UnityEngine when component gets destroyed</summary>
+        public override void OnDestroy() {
+            uiScaleUnbsubscriber_.Dispose();
+            uiTransparencyUnbsubscriber_.Dispose();
+            base.OnDestroy();
+        }
     }
 }

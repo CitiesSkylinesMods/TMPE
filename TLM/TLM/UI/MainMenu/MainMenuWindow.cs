@@ -120,12 +120,7 @@ namespace TrafficManager.UI.MainMenu {
 
         IDisposable confDisposable;
 
-        private bool isStarted_;
-
         private UITextureAtlas allButtonsAtlas_;
-
-        /// <summary>Defines button placement on the main menu since last layout reset.</summary>
-        private MainMenuLayout menuLayout_;
 
         public override void Start() {
             base.Start();
@@ -416,6 +411,7 @@ namespace TrafficManager.UI.MainMenu {
         public override void OnDestroy() {
             eventVisibilityChanged -= OnVisibilityChanged;
             confDisposable?.Dispose();
+            base.OnDestroy();
         }
 
         internal void SetPosLock(bool lck) {
