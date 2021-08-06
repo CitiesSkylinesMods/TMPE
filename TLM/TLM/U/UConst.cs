@@ -1,9 +1,9 @@
 namespace TrafficManager.U {
     public static class UConst {
         /// <summary>Orange color for shortcut text.</summary>
-        public static readonly string SHORTCUT_TEXT_HEX = "#cc994c";
+        private const string SHORTCUT_TEXT_HEX = "#cc994c";
 
-        public static string KEYBOARD_SHORTCUT_CLOSING_TAG = "</color>";
+        public const string KEYBOARD_SHORTCUT_CLOSING_TAG = "</color>";
 
         /// <summary>
         /// Default padding value does not scale with screen resolution, and is used in new U GUI
@@ -23,6 +23,6 @@ namespace TrafficManager.U {
         /// blue/ hover, light blue active and light grey disabled circle, like the
         /// main menu is using.
         /// </summary>
-        public static string MAINMENU_ROUND_BUTTON_BG = "/MainMenu.Tool.RoundButton";
+        public const string MAINMENU_ROUND_BUTTON_BG = "/MainMenu.Tool.RoundButton";
     }
 }

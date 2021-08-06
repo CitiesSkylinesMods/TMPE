@@ -15,7 +15,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
 
         public override void Build(UIComponent parent,
                                    U.UBuilder builder) {
-            ULabel l = builder.Label<U.ULabel, UIComponent>(
+            ULabel l = builder.Label<U.ULabel>(
                 parent,
                 this.localizedText_,
                 stack: UStackMode.NewRowBelow,

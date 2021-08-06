@@ -59,7 +59,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
             text.Append(UConst.KEYBOARD_SHORTCUT_CLOSING_TAG + " ");
             text.Append(this.localizedText_);
 
-            builder.Label<U.ULabel, UIComponent>(
+            builder.Label<U.ULabel>(
                 parent,
                 t: text.ToString(),
                 stack: UStackMode.NewRowBelow,

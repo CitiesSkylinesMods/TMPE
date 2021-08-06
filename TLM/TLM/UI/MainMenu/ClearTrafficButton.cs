@@ -26,9 +26,9 @@
 
         protected override void OnClick(UIMouseEventParameter p) {
             ConfirmPanel.ShowModal(
-                Translation.Menu.Get("Tooltip:Clear traffic"),
-                Translation.Menu.Get("Dialog.Text:Clear traffic, confirmation"),
-                (comp, ret) => {
+                title: Translation.Menu.Get("Tooltip:Clear traffic"),
+                message: Translation.Menu.Get("Dialog.Text:Clear traffic, confirmation"),
+                callback: (comp, ret) => {
                     if (ret == 1) {
                         Constants.ServiceFactory.SimulationService.AddAction(
                             () => { UtilityManager.Instance.ClearTraffic(); });

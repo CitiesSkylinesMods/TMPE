@@ -17,13 +17,14 @@ namespace TrafficManager.U {
     public class UBuilder {
         public AtlasBuilder AtlasBuilder;
 
-        public UBuilder([CanBeNull] AtlasBuilder atlasBuilder = null) {
+        public UBuilder([CanBeNull]
+                        AtlasBuilder atlasBuilder = null) {
             AtlasBuilder = atlasBuilder;
         }
 
         public static UBuilder Create(string abAtlasName,
-                                       string abLoadingPath,
-                                       IntVector2 abSizeHint) {
+                                      string abLoadingPath,
+                                      IntVector2 abSizeHint) {
             var ab = new AtlasBuilder(
                 atlasName: abAtlasName,
                 loadingPath: abLoadingPath,
@@ -44,7 +45,7 @@ namespace TrafficManager.U {
             var window = (TWindow)parent.AddUIComponent(typeof(TWindow));
 
             window.ResizeFunction((UResizer r) => { r.FitToChildren(); });
-            window.SetPadding(UPadding.Const());
+            window.SetPadding(UPadding.Default);
 
             return window;
         }
@@ -53,21 +54,19 @@ namespace TrafficManager.U {
         /// Create a button as a child of current UIBuilder. A new UIBuilder is returned.
         /// </summary>
         /// <typeparam name="TButton">The type of UIButton and ISmartSizableControl.</typeparam>
-        public TButton Button<TButton, TParent>(TParent parent)
-            where TButton : UIButton, ISmartSizableControl
-            where TParent : UIComponent {
+        public TButton Button<TButton>(UIComponent parent)
+            where TButton : UIButton, ISmartSizableControl {
             return parent.AddUIComponent(typeof(TButton)) as TButton;
         }
 
-        public TButton Button<TButton, TParent>(TParent parent,
-                                                string text,
-                                                [CanBeNull] string tooltip,
-                                                Vector2 size,
-                                                UStackMode stack = UStackMode.ToTheRight)
-            where TButton : UIButton, ISmartSizableControl
-            where TParent : UIComponent {
-
-            TButton b = this.Button<TButton, TParent>(parent);
+        public TButton Button<TButton>(UIComponent parent,
+                                       string text,
+                                       [CanBeNull]
+                                       string tooltip,
+                                       Vector2 size,
+                                       UStackMode stack = UStackMode.ToTheRight)
+            where TButton : UIButton, ISmartSizableControl {
+            TButton b = this.Button<TButton>(parent);
             b.text = text;
 
             if (tooltip != null) {
@@ -87,22 +86,21 @@ namespace TrafficManager.U {
         /// <param name="stack">Stacking mode related to previous sibling.</param>
         /// <param name="processMarkup">Whether label text contains C:S color markup.</param>
         /// <returns>New label.</returns>
-        public TLabel Label<TLabel, TParent>(TParent parent,
-                                             string t,
-                                             UStackMode stack = UStackMode.ToTheRight,
-                                             bool processMarkup = false)
-            where TLabel : UILabel, ISmartSizableControl
-            where TParent : UIComponent {
-            var l = parent.AddUIComponent(typeof(TLabel)) as TLabel;
-            l.text = t;
+        public TLabel Label<TLabel>(UIComponent parent,
+                                    string t,
+                                    UStackMode stack = UStackMode.ToTheRight,
+                                    bool processMarkup = false)
+            where TLabel : UILabel, ISmartSizableControl {
+            var label = parent.AddUIComponent(typeof(TLabel)) as TLabel;
+            label.text = t;
 
             if (stack != UStackMode.None) {
-                l.SetStacking(stack);
+                label.SetStacking(stack);
             }
 
-            l.processMarkup = processMarkup;
+            label.processMarkup = processMarkup;
 
-            return l;
+            return label;
         }
 
         /// <summary>Calls <see cref="Label{TLabel,TParent}"/> with default type arguments:
@@ -112,14 +110,12 @@ namespace TrafficManager.U {
                              string t,
                              UStackMode stack = UStackMode.ToTheRight,
                              bool processMarkup = false) {
-            return Label<ULabel, UIComponent>(parent, t, stack, processMarkup);
+            return Label<ULabel>(parent, t, stack, processMarkup);
         }
 
-        public TPanel Panel<TPanel, TParent>(TParent parent,
-                                             UStackMode stack = UStackMode.None)
-            where TPanel : UIPanel, ISmartSizableControl
-            where TParent : UIComponent {
-
+        public TPanel Panel<TPanel>(UIComponent parent,
+                                    UStackMode stack = UStackMode.None)
+            where TPanel : UIPanel, ISmartSizableControl {
             var p = parent.AddUIComponent(typeof(TPanel)) as TPanel;
             if (stack != UStackMode.None) {
                 p.SetStacking(stack);
@@ -130,7 +126,7 @@ namespace TrafficManager.U {
 
         public UPanel Panel_(UIComponent parent,
                              UStackMode stack = UStackMode.None) {
-            return Panel<UPanel, UIComponent>(parent, stack);
+            return Panel<UPanel>(parent, stack);
         }
     }
 }

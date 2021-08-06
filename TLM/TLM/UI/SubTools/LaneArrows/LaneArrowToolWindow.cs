@@ -92,7 +92,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             var buttonRowPanel = builder.Panel_(parent: this, stack: UStackMode.NewRowBelow);
             buttonRowPanel.name = "TMPE_ButtonRow";
-            buttonRowPanel.SetPadding(UPadding.Const());
+            buttonRowPanel.SetPadding(UPadding.Default);
             buttonRowPanel.ResizeFunction((UResizer r) => { r.FitToChildren(); });
 
             // -----------------------------------
@@ -112,7 +112,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 int i1 = i; // copy of the loop variable, for the resizeFunction below
 
                 buttonGroupPanel.ResizeFunction((UResizer r) => { r.FitToChildren(); });
-                buttonGroupPanel.SetPadding(UPadding.Const());
+                buttonGroupPanel.SetPadding(UPadding.Default);
 
                 // Create a label with "Lane #" title
                 string labelText = Translation.LaneRouting.Get("Format.Label:Lane") + " " +
@@ -132,7 +132,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     "LaneArrowForward",
                     "LaneArrowRight",
                 }) {
-                    LaneArrowButton arrowButton = builder.Button<LaneArrowButton, UIComponent>(
+                    LaneArrowButton arrowButton = builder.Button<LaneArrowButton>(
                         parent: buttonGroupPanel,
                         text: string.Empty,
                         tooltip: null,

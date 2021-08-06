@@ -41,7 +41,7 @@ namespace TrafficManager.UI.MainMenu.OSD {
             text.Append(" ");
             text.Append(this.localizedText_);
 
-            builder.Label<U.ULabel, UIComponent>(
+            builder.Label<U.ULabel>(
                 parent,
                 t: text.ToString(),
                 stack: UStackMode.NewRowBelow,

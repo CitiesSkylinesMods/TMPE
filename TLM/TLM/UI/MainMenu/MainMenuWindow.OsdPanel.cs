@@ -8,7 +8,7 @@
         internal class OsdPanel : U.UPanel {
             public void SetupControls(MainMenuWindow window, UBuilder builder) {
                 this.name = "TMPE_MainMenu_KeybindsPanel";
-                
+
                 // the GenericPanel sprite is Light Silver, make it dark
                 this.atlas = TextureUtil.FindAtlas("Ingame");
                 this.backgroundSprite = "GenericPanel";
@@ -17,7 +17,7 @@
                                    ? 1f
                                    : 0f;
 
-                this.SetPadding(UPadding.Const());
+                this.SetPadding(UPadding.Default);
 
                 // The keybinds panel belongs to main menu but does not expand it to fit
                 this.ContributeToBoundingBox(false);

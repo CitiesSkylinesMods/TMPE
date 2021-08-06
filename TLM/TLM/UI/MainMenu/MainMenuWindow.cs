@@ -153,7 +153,7 @@ namespace TrafficManager.UI.MainMenu {
             window.gameObject.AddComponent<CustomKeyHandler>();
 
             window.ResizeFunction((UResizer r) => { r.FitToChildren(); });
-            window.SetPadding(UPadding.Const());
+            window.SetPadding(UPadding.Default);
             window.SetupControls(builder);
 
             // Resize everything correctly
@@ -241,7 +241,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private void SetupControls_OnscreenDisplayPanel(UBuilder builder) {
-            this.OnscreenDisplayPanel = builder.Panel<OsdPanel, UIComponent>(
+            this.OnscreenDisplayPanel = builder.Panel<OsdPanel>(
                 parent: this,
                 stack: UStackMode.NewRowBelow);
             this.OnscreenDisplayPanel.SetupControls(this, builder);
@@ -251,7 +251,7 @@ namespace TrafficManager.UI.MainMenu {
             //-------------------------------------------------------
             // Mod name/version label (also serves as a drag handle)
             //-------------------------------------------------------
-            UILabel versionLabel = builder.Label<U.ULabel, MainMenuWindow>(
+            UILabel versionLabel = builder.Label<U.ULabel>(
                 parent: this,
                 t: TrafficManagerMod.ModName,
                 stack: UStackMode.Below);
@@ -260,7 +260,7 @@ namespace TrafficManager.UI.MainMenu {
             //-------------------------------------------------------
             // (?) button which toggles On-Screen Display help panel
             //-------------------------------------------------------
-            var osdToggle = builder.Button<U.UButton, MainMenuWindow>(
+            var osdToggle = builder.Button<U.UButton>(
                 parent: this,
                 text: string.Empty,
                 tooltip: Translation.Menu.Get("Tooltip:Toggle onscreen display panel"),
@@ -317,7 +317,7 @@ namespace TrafficManager.UI.MainMenu {
                                                UIComponent stackUnder) {
             // Pathfinder stats label (debug only)
             if (Options.showPathFindStats) {
-                var statsLabel = builder.Label<StatsLabel, UIComponent>(
+                var statsLabel = builder.Label<StatsLabel>(
                     parent: this,
                     t: string.Empty);
 
@@ -339,7 +339,7 @@ namespace TrafficManager.UI.MainMenu {
             if (TMPELifecycle.Instance.InGameHotReload) {
                 // Hot Reload version label (debug only)
                 var text = $"HOT RELOAD {Assembly.GetExecutingAssembly().GetName().Version}";
-                ULabel hotReloadLabel = builder.Label<U.ULabel, UIComponent>(parent: this, t: text);
+                ULabel hotReloadLabel = builder.Label<U.ULabel>(parent: this, t: text);
 
                 // Allow the label to hang outside the parent box
                 hotReloadLabel.ContributeToBoundingBox(false);
@@ -365,7 +365,7 @@ namespace TrafficManager.UI.MainMenu {
         private ToolPanel.AddButtonsResult
             SetupControls_ToolPanel(UPanel parent, UBuilder builder) {
             // This is tool buttons panel
-            toolPanel = builder.Panel<ToolPanel, UIComponent>(parent: this);
+            toolPanel = builder.Panel<ToolPanel>(parent: this);
             return toolPanel.SetupToolButtons(this, builder);
         }
 
@@ -373,7 +373,7 @@ namespace TrafficManager.UI.MainMenu {
                                               UBuilder builder,
                                               ToolPanel.AddButtonsResult toolButtonsResult) {
             // This is toggle despawn and clear traffic panel
-            rightPanel = builder.Panel<ToolPanel, UIComponent>(parent: this);
+            rightPanel = builder.Panel<ToolPanel>(parent: this);
             rightPanel.SetupExtraButtons(this, builder, toolButtonsResult);
         }
 

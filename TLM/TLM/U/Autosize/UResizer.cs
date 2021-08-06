@@ -172,7 +172,7 @@ namespace TrafficManager.U.Autosize {
             UPadding padding =
                 this.Control.parent.GetComponent<UIComponent>() is ISmartSizableControl parent
                     ? parent.GetResizerConfig().Padding
-                    : UPadding.Zero();
+                    : UPadding.Zero;
 
             // Stack reference: either what user has provided, or the previous sibling
             if (stackRef == null) {

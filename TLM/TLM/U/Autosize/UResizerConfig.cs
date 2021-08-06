@@ -41,7 +41,7 @@ namespace TrafficManager.U.Autosize {
         public UResizerConfig() {
             onResize_ = null;
             ContributeToBoundingBox = true;
-            Padding = UPadding.Zero();
+            Padding = UPadding.Zero;
         }
 
         /// <summary>
