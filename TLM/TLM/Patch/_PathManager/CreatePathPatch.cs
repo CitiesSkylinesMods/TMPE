@@ -3,19 +3,13 @@ namespace TrafficManager.Patch._PathManager {
     using ColossalFramework;
     using ColossalFramework.Math;
     using CSUtil.Commons;
-    using HarmonyLib;
-    using JetBrains.Annotations;
     using System;
-    using System.ComponentModel.Design;
     using System.Reflection;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Custom.PathFinding;
-    using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
 
-    [HarmonyPatch]
-    [UsedImplicitly]
     public class CreatePathPatch {
         //public bool CreatePath(out uint unit, ref Randomizer randomizer, uint buildIndex,
         //  PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition,
@@ -23,7 +17,6 @@ namespace TrafficManager.Patch._PathManager {
         //  bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost)
         delegate bool TargetDelegate(out uint unit, ref Randomizer randomizer, uint buildIndex, PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition, NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle, bool ignoreBlocked, bool stablePath, bool skipQueue, bool randomParking, bool ignoreFlooded, bool combustionEngine, bool ignoreCost);
 
-        [UsedImplicitly]
         public static MethodBase TargetMethod() =>
             TranspilerUtil.DeclaredMethod<TargetDelegate>(typeof(PathManager), nameof(PathManager.CreatePath));
 
@@ -34,7 +27,6 @@ namespace TrafficManager.Patch._PathManager {
         /// <summary>
         /// precondition: Args.extVehicleType, Args.extPathType, Args.vehicleId, and Args.stablePath are initialized.
         /// </summary>
-        [UsedImplicitly]
         public static bool Prefix(ref bool __result, ref uint unit, ref Randomizer randomizer, uint buildIndex,
             PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition,
             NetInfo.LaneType laneTypes, VehicleInfo.VehicleType vehicleTypes, float maxLength, bool isHeavyVehicle,

@@ -72,7 +72,10 @@ namespace TrafficManager.Lifecycle {
         }
 
         internal void Preload() {
+            Log.Info("Preloading Managers");
             Asset2Data = new Dictionary<BuildingInfo, AssetData>();
+            CustomPathManager.Initialize();
+            RegisteredManagers.Clear();
             RegisterCustomManagers();
         }
 
@@ -157,6 +160,7 @@ namespace TrafficManager.Lifecycle {
                 LocaleManager.eventLocaleChanged -= Translation.HandleGameLocaleChange;
                 LoadingManager.instance.m_levelPreLoaded -= Preload;
 
+                CustomPathManager._instance?.Unload();
                 if (IsGameLoaded) {
                     //Hot Unload
                     Unload();
@@ -198,8 +202,6 @@ namespace TrafficManager.Lifecycle {
 
                 IsGameLoaded = true;
 
-                CustomPathManager.OnLevelLoaded();
-
                 ModUI.OnLevelLoaded();
                 if (PlayMode) {
                     UIView uiView = UIView.GetAView();
@@ -232,7 +234,6 @@ namespace TrafficManager.Lifecycle {
                 GeometryNotifierDisposable?.Dispose();
                 GeometryNotifierDisposable = null;
 
-                CustomPathManager._instance?.OnLevelUnloading();
                 foreach (ICustomManager manager in RegisteredManagers.AsEnumerable().Reverse()) {
                     try {
                         Log.Info($"OnLevelUnloading: {manager.GetType().Name}");
@@ -248,7 +249,7 @@ namespace TrafficManager.Lifecycle {
                 catch (Exception ex) {
                     ex.LogException(true);
                 }
-                
+
                 GlobalConfig.OnLevelUnloading();
 
                 // destroy immidately to prevent duplicates after hot-reload.

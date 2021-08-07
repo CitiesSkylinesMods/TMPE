@@ -15,6 +15,7 @@ namespace TrafficManager.Custom.PathFinding {
     using TrafficManager.State;
     using UnityEngine;
     using ColossalFramework.UI;
+    using Lifecycle;
 
     public class CustomPathManager : PathManager {
         public const int DEFAULT_SIM_SLEEP_TIME = 100;
@@ -51,10 +52,17 @@ namespace TrafficManager.Custom.PathFinding {
         public static uint TotalQueuedPathFinds { get; private set; }
 #endif
 
-        public static void OnLevelLoaded() {
+        /// <summary>
+        /// Initializes CustomPathManager if necessary, applies PF compatibility patches
+        /// </summary>
+        public static void Initialize() {
             try {
-                Log.Info("CustomPathManager.OnLevelLoaded() called.");
-                PathManager.instance.gameObject.AddComponent<CustomPathManager>();
+                Log.Info("CustomPathManager.Initialize() called.");
+                var pathManager = PathManager.instance.gameObject.GetComponent<CustomPathManager>();
+                if (!pathManager) {
+                    Log.Info("CustomPathManager.Initialize() CustomPathManager not found, creating new instance.");
+                    PathManager.instance.gameObject.AddComponent<CustomPathManager>();
+                }
             } catch (Exception ex) {
                 string error =
                     "Traffic Manager: President Edition failed to load. You can continue " +
@@ -72,6 +80,9 @@ namespace TrafficManager.Custom.PathFinding {
             // but retain the original version for future replace
             // also suppress call to base class.
             _instance = this;
+            //install PathFinding patches
+            Patcher.InstallPathFinding();
+
             stockPathManager_ = PathManager.instance
                                 ?? throw new Exception("stockPathManager is null");
             Log._Debug($"Got stock PathManager instance {stockPathManager_?.GetName()}");
@@ -442,8 +453,12 @@ namespace TrafficManager.Custom.PathFinding {
             return extVehicleType;
         }
 
-        public void OnLevelUnloading() {
-            Log.Info("CustomPathManager.OnLevelUnloading()");
+        /// <summary>
+        /// Unloads CustomPathManager - destroys the instance, removes PF patches,
+        /// recovers vanilla PathManager along with vanilla PF threads,
+        /// </summary>
+        public void Unload() {
+            Log.Info("Unloading CustomPathManager");
             DestroyImmediate(this);
         }
 
@@ -475,7 +490,11 @@ namespace TrafficManager.Custom.PathFinding {
             }
         }
 
+        /// <summary>
+        /// Waits for all custom PF threads to finish their work
+        /// </summary>
         public new void WaitForAllPaths() {
+            Log.Info("CustomPathManager.WaitForAllPaths()");
             for (int i = 0; i < _replacementPathFinds.Length; i++) {
                 _replacementPathFinds[i].WaitForAllPaths();
             }
@@ -484,6 +503,9 @@ namespace TrafficManager.Custom.PathFinding {
         protected virtual void OnDestroy() {
             Log._Debug("CustomPathManager: OnDestroy");
             WaitForAllPaths();
+
+            // Uninstall pathfinding patches
+            Patcher.UninstallPathFinding();
 
             PathManagerInstance.SetValue(null, stockPathManager_);
             Log._Debug("Should be stock: " + PathManager.instance.GetType());
