@@ -24,7 +24,7 @@
         }
 
         private void UpdateTooltipPosition() {
-            Vector2 pos = UIScaler.MouseToGuiPoint(Input.mousePosition);
+            Vector2 pos = UIScaler.MousePosition;
             pos += new Vector2(16f, 24f); // offset slightly below and to the right of mouse
             this.absolutePosition = pos;
         }

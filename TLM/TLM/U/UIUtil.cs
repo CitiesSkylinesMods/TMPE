@@ -44,10 +44,12 @@ namespace TrafficManager.U {
                 size: alwaysVisible.size);
 
             Rect clampedRect = new Rect(origRect);
+            Vector2 resolution = new Vector2(Screen.width, Screen.height);
+            UIScaler.TryGetScreenResolution(out resolution);
 
             VectorUtil.ClampRectToScreen(
                 rect: ref clampedRect,
-                resolution: new Vector2(UIScaler.GUI_WIDTH, UIScaler.GUI_HEIGHT));
+                resolution: resolution);
 
             float xMotion = clampedRect.x - origRect.x;
             float yMotion = clampedRect.y - origRect.y;

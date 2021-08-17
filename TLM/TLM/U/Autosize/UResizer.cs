@@ -98,19 +98,19 @@ namespace TrafficManager.U.Autosize {
                     return 0f;
 
                 case URule.FixedSize:
-                    return val.Value * UIScaler.GetScale();
+                    return val.Value * UIScaler.UIScale;
 
                 case URule.FractionScreenWidth:
-                    return UIScaler.GuiWidth * val.Value * UIScaler.GetScale();
+                    return UIScaler.MaxWidth * val.Value * UIScaler.UIScale;
 
                 case URule.MultipleOfWidth:
-                    return self.width * val.Value * UIScaler.GetScale();
+                    return self.width * val.Value * UIScaler.UIScale;
 
                 case URule.FractionScreenHeight:
-                    return UIScaler.GuiHeight * val.Value * UIScaler.GetScale();
+                    return UIScaler.MaxHeight * val.Value * UIScaler.UIScale;
 
                 case URule.MultipleOfHeight:
-                    return self.height * val.Value * UIScaler.GetScale();
+                    return self.height * val.Value * UIScaler.UIScale;
 
                 case URule.FitChildrenWidth:
                     // If there's children controls, take their width + right padding

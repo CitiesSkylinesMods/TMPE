@@ -11,7 +11,7 @@ namespace TrafficManager.U {
 
         /// <summary>Called by UResizer for every control before it is to be 'resized'.</summary>
         public virtual void OnBeforeResizerUpdate() {
-            this.textScale = UIScaler.GetScale();
+            this.textScale = UIScaler.UIScale;
         }
 
         /// <summary>Called by UResizer for every control after it is to be 'resized'.</summary>
