@@ -98,28 +98,30 @@ namespace TrafficManager.U.Autosize {
                     return 0f;
 
                 case URule.FixedSize:
-                    return val.Value * UIScaler.GetScale();
+                    return val.Value * UIScaler.UIScale;
 
                 case URule.FractionScreenWidth:
-                    return UIScaler.GuiWidth * val.Value * UIScaler.GetScale();
+                    return UIScaler.MaxWidth * val.Value * UIScaler.UIScale;
 
                 case URule.MultipleOfWidth:
-                    return self.width * val.Value * UIScaler.GetScale();
+                    return self.width * val.Value * UIScaler.UIScale;
 
                 case URule.FractionScreenHeight:
-                    return UIScaler.GuiHeight * val.Value * UIScaler.GetScale();
+                    return UIScaler.MaxHeight * val.Value * UIScaler.UIScale;
 
                 case URule.MultipleOfHeight:
-                    return self.height * val.Value * UIScaler.GetScale();
+                    return self.height * val.Value * UIScaler.UIScale;
 
                 case URule.FitChildrenWidth:
+                    // If there's children controls, take their width + right padding
                     return this.ChildrenBox.Width > 0
-                               ? this.ChildrenBox.B.x + this.Config.Padding
+                               ? this.ChildrenBox.B.x + this.Config.Padding.Right
                                : 0f;
 
                 case URule.FitChildrenHeight:
+                    // If there's children controls, take their height + bottom padding
                     return this.ChildrenBox.Height > 0
-                               ? this.ChildrenBox.B.y + this.Config.Padding
+                               ? this.ChildrenBox.B.y + this.Config.Padding.Bottom
                                : 0f;
             }
 
@@ -167,27 +169,25 @@ namespace TrafficManager.U.Autosize {
                 return; // do nothing on destroyed controls
             }
 
-            var padding = 0f;
-            if (this.Control.parent.GetComponent<UIComponent>() is ISmartSizableControl parent) {
-                padding = parent.GetResizerConfig().Padding;
-            }
+            UPadding padding =
+                this.Control.parent.GetComponent<UIComponent>() is ISmartSizableControl parent
+                    ? parent.GetResizerConfig().Padding
+                    : UPadding.Zero;
 
             // Stack reference: either what user has provided, or the previous sibling
             if (stackRef == null) {
                 stackRef = this.PreviousSibling;
             }
 
-            Vector3 pos;
-
             switch (mode) {
                 case UStackMode.Below: {
                     this.Control.relativePosition =
                         stackRef == null
-                            ? new Vector3(padding, padding, 0f)
+                            ? new Vector3(padding.Left, padding.Top, 0f)
                             : stackRef.relativePosition + new Vector3(
-                                  0f,
-                                  stackRef.height + spacing,
-                                  0f);
+                                  x: 0f,
+                                  y: stackRef.height + spacing,
+                                  z: 0f);
                     return;
                 }
                 // case UStackMode.Above: {
@@ -196,11 +196,11 @@ namespace TrafficManager.U.Autosize {
                 case UStackMode.ToTheRight: {
                     this.Control.relativePosition =
                         stackRef == null
-                        ? new Vector3(padding, padding, 0f)
+                        ? new Vector3(padding.Left, padding.Top, 0f)
                         : stackRef.relativePosition + new Vector3(
-                              stackRef.width + spacing,
-                              0f,
-                              0f);
+                              x: stackRef.width + spacing,
+                              y: 0f,
+                              z: 0f);
                     return;
                 }
                 // case UStackMode.ToTheLeft: {
@@ -209,11 +209,11 @@ namespace TrafficManager.U.Autosize {
                 case UStackMode.NewRowBelow: {
                     this.Control.relativePosition =
                         stackRef == null
-                            ? new Vector3(padding, padding, 0f)
+                            ? new Vector3(padding.Left, padding.Top, 0f)
                             : new Vector3(
-                                padding,
-                                stackRef.relativePosition.y + stackRef.height + spacing,
-                                0f);
+                                x: padding.Left,
+                                y: stackRef.relativePosition.y + stackRef.height + spacing,
+                                z: 0f);
                     return;
                 }
                 default: {

@@ -1,51 +1,84 @@
 namespace TrafficManager.U {
-    using ColossalFramework;
     using ColossalFramework.UI;
     using TrafficManager.State;
     using UnityEngine;
 
+    /// <summary>
+    /// Code of UIScaler from ModTools by Kian Zarrin
+    /// https://github.com/kianzarrin/Skylines-ModTools/blob/master/Debugger/UI/UIScaler.cs
+    /// </summary>
     public static class UIScaler {
-        public const float GUI_WIDTH = 1920f;
-        public const float GUI_HEIGHT = 1080f;
+        public static bool TryGetScreenResolution(out Vector2 resolution) {
+            UIView uIView = UIView.GetAView();
+            if (uIView) {
+                resolution = uIView.GetScreenResolution();
+                return true;
+            }
 
-        /// <summary>Caching because UIView.Instance.uiCamera can be null sometimes.</summary>
-        private static float cachedGuiWidth = GUI_WIDTH;
+            resolution = default;
+            return false;
+        }
 
-        /// <summary>Caching because UIView.Instance.uiCamera can be null sometimes.</summary>
-        private static float cachedGuiHeight = GUI_HEIGHT;
-
-        /// <summary>Screen width for GUI is always fixed at 1920.</summary>
-        public static float GuiWidth {
-            // TODO: Double check if GUI never changes width, the code below can be a const
+        private static float BaseResolutionX {
             get {
-                UIView uiView = UIView.GetAView();
-                if (uiView != null) {
-                    UIScaler.cachedGuiWidth = uiView.uiCamera.pixelWidth;
+                if (TryGetScreenResolution(out Vector2 resolution)) {
+                    // 1920f if aspect ratio is 16:9;
+                    return resolution.x;
                 }
 
-                return UIScaler.cachedGuiWidth;
+                return 1080f * AspectRatio;
             }
         }
 
-        /// <summary>Screen height for GUI is always fixed at 1080.</summary>
-        public static float GuiHeight {
-            // TODO: Double check if GUI never changes height, the code below can be a const
+        private static float BaseResolutionY {
             get {
-                UIView uiView = UIView.GetAView();
-                if (uiView != null) {
-                    UIScaler.cachedGuiHeight = uiView.uiCamera.pixelHeight;
+                if (TryGetScreenResolution(out Vector2 resolution)) {
+                    // always 1080f. But we keep this code for the sake of future proofing
+                    return resolution.y;
                 }
 
-                return UIScaler.cachedGuiHeight;
+                return 1080f;
             }
         }
 
-        /// <summary>
-        /// Calculate UI scale based on GUI scale slider in options multiplied by uiView's scale.
-        /// </summary>
-        /// <returns>UI scale combined.</returns>
-        public static float GetScale() {
-            return GlobalConfig.Instance.Main.GuiScale * 0.01f;
+        public static float AspectRatio => Screen.width / (float)Screen.height;
+
+        /// <summary>Shortcut to reach global main config containing GuiScale.</summary>
+        private static State.ConfigData.Main Config => GlobalConfig.Instance.Main;
+
+        public static float MaxWidth {
+            get {
+                float ret = Config.GuiScaleToResolution ? BaseResolutionX : Screen.width;
+                return ret / Config.GuiScale;
+            }
+        }
+
+        public static float MaxHeight {
+            get {
+                float ret = Config.GuiScaleToResolution ? BaseResolutionY : Screen.height;
+                return ret / Config.GuiScale;
+            }
+        }
+
+        public static float UIAspectScale {
+            get {
+                var horizontalScale = Screen.width / MaxWidth;
+                var verticalScale = Screen.height / MaxHeight;
+                return Mathf.Min(horizontalScale, verticalScale);
+            }
+        }
+
+        public static float UIScale => GlobalConfig.Instance.Main.GuiScale * 0.01f;
+
+
+        public static Matrix4x4 ScaleMatrix => Matrix4x4.Scale(Vector3.one * UIScaler.UIScale);
+
+        public static Vector2 MousePosition {
+            get {
+                var mouse = Input.mousePosition;
+                mouse.y = Screen.height - mouse.y;
+                return mouse / UIScaler.UIAspectScale;
+            }
         }
 
         /// <summary>
@@ -54,9 +87,10 @@ namespace TrafficManager.U {
         /// <param name="screenPos">Pixel position.</param>
         /// <returns>GUI space position.</returns>
         internal static Vector2 ScreenPointToGuiPoint(Vector2 screenPos) {
-            return new Vector2(
-                (screenPos.x * GUI_WIDTH) / Screen.width,
-                (screenPos.y * GUI_HEIGHT) / Screen.height);
+            // TODO: Optimize, this is frequently called
+            return new(
+                x: screenPos.x * BaseResolutionX / Screen.width,
+                y: screenPos.y * BaseResolutionY / Screen.height);
         }
     }
 }
