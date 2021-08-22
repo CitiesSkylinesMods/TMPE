@@ -22,7 +22,7 @@ namespace TrafficManager.U {
         public Func<UIComponent, bool> uIsActive;
         public Func<UIComponent, bool> uCanActivate;
 
-        private UResizerConfig resizerConfig_ = new UResizerConfig();
+        private UResizerConfig resizerConfig_ = new();
 
         public UResizerConfig GetResizerConfig() {
             return resizerConfig_;
@@ -43,7 +43,7 @@ namespace TrafficManager.U {
 
         public override void Start() {
             m_ForegroundSpriteMode = UIForegroundSpriteMode.Scale;
-            UpdateButtonImageAndTooltip();
+            UpdateButtonSkinAndTooltip();
 
             // Enable button sounds.
             playAudioEvents = true;
@@ -79,11 +79,11 @@ namespace TrafficManager.U {
         protected override void OnClick(UIMouseEventParameter p) {
             this.HandleClick(p);
             uOnClick?.Invoke(this, p);
-            UpdateButtonImageAndTooltip();
+            UpdateButtonSkinAndTooltip();
         }
 
-        internal void UpdateButtonImageAndTooltip() {
-            UpdateButtonImage();
+        internal void UpdateButtonSkinAndTooltip() {
+            ApplyButtonSkin();
             UpdateTooltip(refreshTooltip: true);
 
             this.isVisible = IsVisible();
@@ -102,7 +102,10 @@ namespace TrafficManager.U {
             }
         }
 
-        internal void UpdateButtonImage() {
+        /// <summary>
+        /// Following the Button Skin settings, update the sprites for the button.
+        /// </summary>
+        internal void ApplyButtonSkin() {
             if (this.Skin == null) {
                 // No skin, no textures, nothing to be updated
                 return;
@@ -118,16 +121,16 @@ namespace TrafficManager.U {
                 = m_BackgroundSprites.m_Disabled =
                       m_BackgroundSprites.m_Focused =
                           Skin.GetBackgroundTextureId(
-                              enabledState: enabledState,
+                              enabledState,
                               hoveredState: ControlHoveredState.Normal,
-                              activeState: activeState);
+                              activeState);
             m_BackgroundSprites.m_Hovered
                 = Skin.GetBackgroundTextureId(
-                    enabledState: enabledState,
+                    enabledState,
                     hoveredState: ControlHoveredState.Hovered,
-                    activeState: activeState);
+                    activeState);
             m_PressedBgSprite = Skin.GetBackgroundTextureId(
-                enabledState: enabledState,
+                enabledState,
                 hoveredState: ControlHoveredState.Normal,
                 activeState: ControlActiveState.Active);
 
@@ -135,15 +138,15 @@ namespace TrafficManager.U {
                 m_ForegroundSprites.m_Disabled =
                     m_ForegroundSprites.m_Focused =
                         Skin.GetForegroundTextureId(
-                            enabledState: enabledState,
+                            enabledState,
                             hoveredState: ControlHoveredState.Normal,
-                            activeState: activeState);
+                            activeState);
             m_ForegroundSprites.m_Hovered
                 = m_PressedFgSprite
                       = Skin.GetForegroundTextureId(
-                          enabledState: enabledState,
+                          enabledState,
                           hoveredState: ControlHoveredState.Hovered,
-                          activeState: activeState);
+                          activeState);
         }
 
         /// <summary>
@@ -161,7 +164,10 @@ namespace TrafficManager.U {
         /// <summary>Colorizes button in all states.</summary>
         /// <param name="c">Color hue.</param>
         public void ColorizeAllStates(Color32 c) {
-            this.color = this.hoveredColor = this.focusedColor = this.disabledColor = c;
+            this.color = this.focusedColor = this.disabledColor = c;
+
+            // Add 25% white to hover
+            this.hoveredColor = Color.Lerp(c, Color.white, 0.25f);
         }
     }
 }

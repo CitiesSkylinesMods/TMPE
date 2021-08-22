@@ -10,6 +10,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.State;
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
+    using TrafficManager.U.Autosize;
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util;
@@ -179,23 +180,21 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// </summary>
         /// <param name="numLanes">How many groups of buttons.</param>
         private void CreateLaneArrowsWindow(int numLanes) {
-            var parent = UIView.GetAView();
-            ToolWindow = (LaneArrowToolWindow)parent.AddUIComponent(typeof(LaneArrowToolWindow));
-            ToolWindow.SetOpacity(
-                U.UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
+            var builder = UBuilder.Create(
+                abAtlasName: "TMPE_LaneArrowsTool_Atlas",
+                abLoadingPath: "LaneArrows",
+                abSizeHint: new IntVector2(256));
 
+            ToolWindow = builder.CreateWindow<LaneArrowToolWindow>();
             RepositionWindowToNode(); // reposition 1st time to avoid visible window jump
 
-            using (var builder = new U.UiBuilder<LaneArrowToolWindow>(ToolWindow)) {
-                builder.ResizeFunction(r => { r.FitToChildren(); });
-                builder.SetPadding(UConst.UIPADDING);
+            ToolWindow.SetOpacity(
+                UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
+            ToolWindow.SetupControls(builder, numLanes);
 
-                ToolWindow.SetupControls(builder, numLanes);
-
-                // Resize everything correctly
-                builder.Done();
-                RepositionWindowToNode(); // reposition again 2nd time now that size is known
-            }
+            // Resize everything correctly
+            ToolWindow.ForceUpdateLayout();
+            RepositionWindowToNode(); // reposition again 2nd time now that size is known
         }
 
         /// <summary>
@@ -212,7 +211,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonLeft.NetlaneFlagsMask = NetLane.Flags.Left;
                 buttonLeft.StartNode = startNode;
                 buttonLeft.ToggleFlag = API.Traffic.Enums.LaneArrows.Left;
-                buttonLeft.UpdateButtonImageAndTooltip();
+                buttonLeft.UpdateButtonSkinAndTooltip();
                 buttonLeft.ParentTool = this; // to access error reporting function on click
 
                 LaneArrowButton buttonForward = ToolWindow.Buttons[(i * 3) + 1];
@@ -220,7 +219,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonForward.NetlaneFlagsMask = NetLane.Flags.Forward;
                 buttonForward.StartNode = startNode;
                 buttonForward.ToggleFlag = API.Traffic.Enums.LaneArrows.Forward;
-                buttonForward.UpdateButtonImageAndTooltip();
+                buttonForward.UpdateButtonSkinAndTooltip();
                 buttonForward.ParentTool = this; // to access error reporting function on click
 
                 LaneArrowButton buttonRight = ToolWindow.Buttons[(i * 3) + 2];
@@ -228,7 +227,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 buttonRight.NetlaneFlagsMask = NetLane.Flags.Right;
                 buttonRight.StartNode = startNode;
                 buttonRight.ToggleFlag = API.Traffic.Enums.LaneArrows.Right;
-                buttonRight.UpdateButtonImageAndTooltip();
+                buttonRight.UpdateButtonSkinAndTooltip();
                 buttonRight.ParentTool = this; // to access error reporting function on click
             }
         }
@@ -236,7 +235,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         private void UpdateAllButtons() {
             // For all lanes, go through our buttons and update states
             foreach (LaneArrowButton b in ToolWindow.Buttons) {
-                b.UpdateButtonImageAndTooltip();
+                b.UpdateButtonSkinAndTooltip();
             }
         }
 

@@ -8,11 +8,14 @@ namespace TrafficManager.State {
     using TrafficManager.Util;
     using TrafficManager.Lifecycle;
 
-    [XmlRootAttribute("GlobalConfig", Namespace = "http://www.viathinksoft.de/tmpe", IsNullable = false)]
+    [XmlRootAttribute(
+        "GlobalConfig",
+        Namespace = "http://www.viathinksoft.de/tmpe",
+        IsNullable = false)]
     public class GlobalConfig : GenericObservable<GlobalConfig> {
         public const string FILENAME = "TMPE_GlobalConfig.xml";
         public const string BACKUP_FILENAME = FILENAME + ".bak";
-        private static int LATEST_VERSION = 17;
+        private static int LATEST_VERSION = 18;
 
         public static GlobalConfig Instance {
             get => instance;
@@ -42,8 +45,7 @@ namespace TrafficManager.State {
             Reload();
         }
 
-        internal static void OnLevelUnloading() {
-        }
+        internal static void OnLevelUnloading() { }
 
         private static DateTime ModifiedTime = DateTime.MinValue;
 
@@ -59,30 +61,32 @@ namespace TrafficManager.State {
         public string LanguageCode = null;
 
 #if DEBUG
-        public DebugSettings Debug = new DebugSettings();
+        public ConfigData.DebugSettings Debug = new DebugSettings();
 #endif
 
-        public AdvancedVehicleAI AdvancedVehicleAI = new AdvancedVehicleAI();
+        public ConfigData.AdvancedVehicleAI AdvancedVehicleAI = new();
 
-        public DynamicLaneSelection DynamicLaneSelection = new DynamicLaneSelection();
+        public ConfigData.DynamicLaneSelection DynamicLaneSelection = new();
 
-        public Gameplay Gameplay = new Gameplay();
+        public ConfigData.Gameplay Gameplay = new();
 
-        public Main Main = new Main();
+        public ConfigData.Main Main = new();
 
-        public ParkingAI ParkingAI = new ParkingAI();
+        public ConfigData.ParkingAI ParkingAI = new();
 
-        public PathFinding PathFinding = new PathFinding();
+        public ConfigData.PathFinding PathFinding = new();
 
-        public PriorityRules PriorityRules = new PriorityRules();
+        public ConfigData.PriorityRules PriorityRules = new();
 
-        public TimedTrafficLights TimedTrafficLights = new TimedTrafficLights();
+        public ConfigData.TimedTrafficLights TimedTrafficLights = new();
 
         internal static void WriteConfig() {
             ModifiedTime = WriteConfig(Instance);
         }
 
-        private static GlobalConfig WriteDefaultConfig(GlobalConfig oldConfig, bool resetAll, out DateTime modifiedTime) {
+        private static GlobalConfig WriteDefaultConfig(GlobalConfig oldConfig,
+                                                       bool resetAll,
+                                                       out DateTime modifiedTime) {
             Log._Debug($"Writing default config...");
             GlobalConfig conf = new GlobalConfig();
 
@@ -102,6 +106,7 @@ namespace TrafficManager.State {
                 conf.Main.EnableTutorial = oldConfig.Main.EnableTutorial;
                 conf.Main.DisplayedTutorialMessages = oldConfig.Main.DisplayedTutorialMessages;
             }
+
             modifiedTime = WriteConfig(conf);
             return conf;
         }
@@ -113,14 +118,17 @@ namespace TrafficManager.State {
                 using (TextWriter writer = new StreamWriter(filename)) {
                     serializer.Serialize(writer, config);
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 Log.Error($"Could not write global config: {e.ToString()}");
             }
 
             try {
                 return File.GetLastWriteTime(FILENAME);
-            } catch (Exception e) {
-                Log.Warning($"Could not determine modification date of global config: {e.ToString()}");
+            }
+            catch (Exception e) {
+                Log.Warning(
+                    $"Could not determine modification date of global config: {e.ToString()}");
                 return DateTime.Now;
             }
         }
@@ -178,7 +186,8 @@ namespace TrafficManager.State {
 
                     return conf;
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 Log.Warning($"Could not load global config: {e} Generating default config.");
                 return WriteDefaultConfig(null, false, out modifiedTime);
             }
@@ -198,8 +207,10 @@ namespace TrafficManager.State {
                     }
 
                     WriteConfig(conf, filename);
-                } catch (Exception e) {
-                    Log.Warning($"Error occurred while saving backup config to '{filename}': {e.ToString()}");
+                }
+                catch (Exception e) {
+                    Log.Warning(
+                        $"Error occurred while saving backup config to '{filename}': {e.ToString()}");
                 }
 
                 Reset(conf);
@@ -224,7 +235,8 @@ namespace TrafficManager.State {
                     Log.Info($"Detected modification of global config.");
                     Reload(false);
                 }
-            } catch (Exception) {
+            }
+            catch (Exception) {
                 Log.Warning("Could not determine modification date of global config.");
             }
         }
