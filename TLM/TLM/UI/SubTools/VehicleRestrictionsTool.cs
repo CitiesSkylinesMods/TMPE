@@ -451,12 +451,6 @@ namespace TrafficManager.UI.SubTools {
             }
 
             Vector3 center = segment.m_middlePosition;
-            float terrainY = TerrainManager.instance.SampleDetailHeightSmooth(center);
-            if (terrainY > center.y) {
-                //if underground force Y at terrain level (usability improvement for really sunken segments)
-                center = center.ChangeY(terrainY);
-            }
-
             bool visible = GeometryUtil.WorldToScreenPoint(center, out Vector3 _);
 
             if (!visible) {
