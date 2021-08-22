@@ -11,7 +11,7 @@ namespace TrafficManager.UI {
     public abstract class LegacySubTool : IObserver<ModUI.UIOpacityNotification> {
         public LegacySubTool(TrafficManagerTool mainTool) {
             MainTool = mainTool;
-            uiTransparencyUnbsubscriber_ = ModUI.Instance.uiOpacityObservable.Subscribe(this);
+            uiTransparencyUnbsubscriber_ = ModUI.Instance.UiOpacityObservable.Subscribe(this);
         }
 
         protected TrafficManagerTool MainTool { get; }
