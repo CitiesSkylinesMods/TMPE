@@ -505,7 +505,7 @@ namespace TrafficManager.Custom.PathFinding {
             WaitForAllPaths();
 
             // Uninstall pathfinding patches
-            Patcher.UninstallPathFinding();
+            Patcher.Uninstall(Patcher.HARMONY_ID_PF);
 
             PathManagerInstance.SetValue(null, stockPathManager_);
             Log._Debug("Should be stock: " + PathManager.instance.GetType());

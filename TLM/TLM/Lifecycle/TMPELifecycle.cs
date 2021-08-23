@@ -270,7 +270,7 @@ namespace TrafficManager.Lifecycle {
                 ex.LogException(true);
             }
 
-            Patcher.Uninstall();
+            Patcher.Uninstall(Patcher.HARMONY_ID);
 
             IsGameLoaded = false;
             InGameHotReload = false;

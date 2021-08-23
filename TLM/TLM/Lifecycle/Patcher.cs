@@ -7,12 +7,13 @@ namespace TrafficManager.Lifecycle {
     using System.Reflection;
     using TrafficManager.Util;
     using System.Linq;
+    using Patch;
     using Patch._PathFind;
     using Patch._PathManager;
 
     public static class Patcher {
-        private const string HARMONY_ID = "de.viathinksoft.tmpe";
-        private const string HARMONY_ID_PF = "de.viathinksoft.tmpe.pathfinding";
+        internal const string HARMONY_ID = "de.viathinksoft.tmpe";
+        internal const string HARMONY_ID_PF = "de.viathinksoft.tmpe.pathfinding";
 
         private const string ERROR_MESSAGE =
             "****** ERRRROOORRRRRR!!!!!!!!!! **************\n" +
@@ -42,7 +43,7 @@ namespace TrafficManager.Lifecycle {
             Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
             AssertCitiesHarmonyInstalled();
-            fail = !PatchAll();
+            fail = !PatchAll(forbidden: typeof(CustomPathFindPatchAttribute));
 
             if (fail) {
                 Log.Info("patcher failed");
@@ -62,7 +63,7 @@ namespace TrafficManager.Lifecycle {
             Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
             AssertCitiesHarmonyInstalled();
-            fail = !PatchPathfinding();
+            fail = !PatchAll(typeof(CustomPathFindPatchAttribute));;
 
             if (fail) {
                 Log.Info("TMPE Path-finding patcher failed");
@@ -76,76 +77,23 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
-        public static void UninstallPathFinding() {
-            bool fail = false;
-#if DEBUG
-            Harmony.DEBUG = false; // set to true to get harmony debug info.
-#endif
-            AssertCitiesHarmonyInstalled();
-            fail = !UnPatchPathfinding();
-
-            if (fail) {
-                Log.Info("TMPE Path-finding unpatcher failed");
-                Shortcuts.ShowErrorDialog(
-                    "TM:PE failed to unpatch Path-finding",
-                    "Traffic Manager: President Edition failed to unload patches.\nTraffic Manager will " +
-                    "not work as expected.");
-            } else {
-                Log.Info("TMPE Path-finding patches uninstalled successfully");
-            }
-        }
-
-        /// <summary>
-        /// Applies all PathFinding harmony patches.
-        /// continues on error.
-        /// </summary>
-        /// <returns>false if exception happens, true otherwise</returns>
-        private static bool PatchPathfinding() {
-            try {
-                var harmony = new Harmony(HARMONY_ID_PF);
-                harmony.Patch(CalculatePathPatch.TargetMethod(), prefix: new HarmonyMethod(AccessTools.Method(typeof(CalculatePathPatch), nameof(CalculatePathPatch.Prefix))));
-                harmony.Patch(CreatePathPatch.TargetMethod(), prefix: new HarmonyMethod(AccessTools.Method(typeof(CreatePathPatch), nameof(CreatePathPatch.Prefix))));
-                harmony.Patch(ReleasePathPatch.TargetMethod(), prefix: new HarmonyMethod(AccessTools.Method(typeof(ReleasePathPatch), nameof(ReleasePathPatch.Prefix))));
-                harmony.Patch(WaitForAllPathsPatch.TargetMethod(), prefix: new HarmonyMethod(AccessTools.Method(typeof(WaitForAllPathsPatch), nameof(WaitForAllPathsPatch.Prefix))));
-                return true;
-            } catch (Exception ex) {
-                ex.LogException();
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Removes all PathFinding harmony patches.
-        /// continues on error.
-        /// </summary>
-        /// <returns>false if exception happens, true otherwise</returns>
-        private static bool UnPatchPathfinding() {
-            try {
-                var harmony = new Harmony(HARMONY_ID_PF);
-                harmony.Unpatch(CalculatePathPatch.TargetMethod(), HarmonyPatchType.Prefix, HARMONY_ID_PF);
-                harmony.Unpatch(CreatePathPatch.TargetMethod(), HarmonyPatchType.Prefix, HARMONY_ID_PF);
-                harmony.Unpatch(ReleasePathPatch.TargetMethod(), HarmonyPatchType.Prefix, HARMONY_ID_PF);
-                harmony.Unpatch(WaitForAllPathsPatch.TargetMethod(), HarmonyPatchType.Prefix, HARMONY_ID_PF);
-                return true;
-            } catch (Exception ex) {
-                ex.LogException();
-                return false;
-            }
-        }
-
         /// <summary>
         /// applies all attribute driven harmony patches.
         /// continues on error.
         /// </summary>
         /// <returns>false if exception happens, true otherwise</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool PatchAll() {
+        private static bool PatchAll(Type required = null, Type forbidden = null) {
             try {
                 bool success = true;
                 var harmony = new Harmony(HARMONY_ID);
                 var assembly = Assembly.GetExecutingAssembly();
                 foreach (var type in AccessTools.GetTypesFromAssembly(assembly)) {
                     try {
+                        if (required is not null && !type.IsDefined(required, true))
+                            continue;
+                        if (forbidden is not null && type.IsDefined(forbidden, true))
+                            continue;
                         var methods = harmony.CreateClassProcessor(type).Patch();
                         if (methods != null && methods.Any()) {
                             var strMethods = methods.Select(_method => _method.Name).ToArray();
@@ -162,10 +110,10 @@ namespace TrafficManager.Lifecycle {
             }
         }
 
-        public static void Uninstall() {
+        public static void Uninstall(string harmonyId) {
             try {
-                new Harmony(HARMONY_ID).UnpatchAll(HARMONY_ID);
-                Log.Info("TMPE patches uninstalled.");
+                new Harmony(harmonyId).UnpatchAll(harmonyId);
+                Log.Info($"TMPE patches in [{harmonyId}] uninstalled.");
             } catch(Exception ex) {
                 ex.LogException(true);
             }
