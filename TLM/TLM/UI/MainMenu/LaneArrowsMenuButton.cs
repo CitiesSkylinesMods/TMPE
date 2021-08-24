@@ -8,13 +8,11 @@
 
         public override void SetupButtonSkin(AtlasBuilder futureAtlas) {
             // Button backround (from BackgroundPrefix) is provided by MainMenuPanel.Start
-            this.Skin = new U.ButtonSkin() {
-                Prefix = "LaneArrows",
-                BackgroundPrefix = "RoundButton",
-                BackgroundHovered = true,
-                BackgroundActive = true,
-                ForegroundActive = true,
-            };
+            this.Skin = ButtonSkin.CreateSimple(
+                                      foregroundPrefix: "LaneArrows",
+                                      backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
+                                  .CanHover(foreground: false)
+                                  .CanActivate();
             this.Skin.UpdateAtlasBuilder(
                 atlasBuilder: futureAtlas,
                 spriteSize: new IntVector2(50));

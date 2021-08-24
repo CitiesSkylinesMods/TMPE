@@ -44,10 +44,12 @@ namespace TrafficManager.U {
                 size: alwaysVisible.size);
 
             Rect clampedRect = new Rect(origRect);
+            Vector2 resolution = new Vector2(Screen.width, Screen.height);
+            UIScaler.TryGetScreenResolution(out resolution);
 
             VectorUtil.ClampRectToScreen(
                 rect: ref clampedRect,
-                resolution: new Vector2(UIScaler.GUI_WIDTH, UIScaler.GUI_HEIGHT));
+                resolution: resolution);
 
             float xMotion = clampedRect.x - origRect.x;
             float yMotion = clampedRect.y - origRect.y;
@@ -66,6 +68,16 @@ namespace TrafficManager.U {
             //     $"Clamping origRect={origRect} to new={clampedRect} "
             //     + $"moving by {xMotion};{yMotion} newpos={pos}");
             return true;
+        }
+
+        /// <summary>
+        /// Replace special markup with UI shortcut color tag (orange). And place closing tag.
+        /// </summary>
+        /// <param name="s">String with keybind wrapped in [[Ctrl]] double square brackets.</param>
+        /// <returns>Updated string.</returns>
+        public static string ColorizeKeybind(string s) {
+            return s.Replace("[[", UConst.GetKeyboardShortcutColorTagOpener())
+                    .Replace("]]", UConst.KEYBOARD_SHORTCUT_CLOSING_TAG);
         }
     }
 }

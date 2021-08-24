@@ -1090,8 +1090,8 @@ namespace TrafficManager.TrafficLight.Impl {
 
             if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
                 Log.ErrorIf(
-                    logTrafficLights,
-                    () => $"TimedTrafficLights.ChangeLightMode: Segment {segmentId} is invalid");
+                    cond: logTrafficLights,
+                    formatFn: () => $"TimedTrafficLights.ChangeLightMode: Segment {segmentId} is invalid");
 
                 return;
             }

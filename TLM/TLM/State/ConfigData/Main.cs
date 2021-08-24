@@ -46,6 +46,12 @@
         public float GuiScale = 100f;
 
         /// <summary>
+        /// If checked, will use <see cref="ColossalFramework.UI.UIView"/> resolution instead of
+        /// what <see cref="UnityEngine.Screen"/> object returns.
+        /// </summary>
+        public bool GuiScaleToResolution = true;
+
+        /// <summary>
         /// Overlay transparency
         /// </summary>
         public byte OverlayTransparency = 40;
