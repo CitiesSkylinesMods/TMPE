@@ -43,7 +43,7 @@ namespace TrafficManager.Lifecycle {
             Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
             AssertCitiesHarmonyInstalled();
-            fail = !PatchAll(forbidden: typeof(CustomPathFindPatchAttribute));
+            fail = !PatchAll(HARMONY_ID, forbidden: typeof(CustomPathFindPatchAttribute));
 
             if (fail) {
                 Log.Info("patcher failed");
@@ -63,7 +63,7 @@ namespace TrafficManager.Lifecycle {
             Harmony.DEBUG = false; // set to true to get harmony debug info.
 #endif
             AssertCitiesHarmonyInstalled();
-            fail = !PatchAll(typeof(CustomPathFindPatchAttribute));;
+            fail = !PatchAll(HARMONY_ID_PF , required: typeof(CustomPathFindPatchAttribute));;
 
             if (fail) {
                 Log.Info("TMPE Path-finding patcher failed");
@@ -83,10 +83,10 @@ namespace TrafficManager.Lifecycle {
         /// </summary>
         /// <returns>false if exception happens, true otherwise</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool PatchAll(Type required = null, Type forbidden = null) {
+        private static bool PatchAll(string harmonyId, Type required = null, Type forbidden = null) {
             try {
                 bool success = true;
-                var harmony = new Harmony(HARMONY_ID);
+                var harmony = new Harmony(harmonyId);
                 var assembly = Assembly.GetExecutingAssembly();
                 foreach (var type in AccessTools.GetTypesFromAssembly(assembly)) {
                     try {
