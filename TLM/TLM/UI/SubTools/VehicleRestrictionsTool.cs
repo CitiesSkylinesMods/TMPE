@@ -450,8 +450,7 @@ namespace TrafficManager.UI.SubTools {
                 return false;
             }
 
-            Vector3 center = segment.m_bounds.center;
-
+            Vector3 center = segment.m_middlePosition;
             bool visible = GeometryUtil.WorldToScreenPoint(center, out Vector3 _);
 
             if (!visible) {
