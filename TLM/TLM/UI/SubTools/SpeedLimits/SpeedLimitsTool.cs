@@ -1125,7 +1125,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     break;
             }
 
-            result.Add(SpeedValue.Unlimited());
+            result.Add(new SpeedValue(0)); //add last item: no limit
 
             return result.ToArray();
         }
