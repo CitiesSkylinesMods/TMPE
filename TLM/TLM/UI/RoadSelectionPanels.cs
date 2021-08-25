@@ -304,17 +304,19 @@ namespace TrafficManager.UI {
             private void SetupAtlas() {
                 // Create and populate list of background atlas keys, used by all buttons
                 // And also each button will have a chance to add their own atlas keys for loading.
-                var tmpSkin = new ButtonSkin() {
-                    Prefix = "RoadSelection",
-                    BackgroundPrefix = "RoundButton",
-                    ForegroundNormal = false,
-                    BackgroundHovered = true,
-                    BackgroundActive = true,
-                    BackgroundDisabled = true,
-                };
+                var tmpSkin = ButtonSkin.CreateSimple(
+                                            foregroundPrefix: "RoadSelection",
+                                            backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
+                                        .CanHover(foreground: false)
+                                        .CanActivate(foreground: false)
+                                        .CanDisable(foreground: false)
+                                        .NormalForeground(false);
 
                 // By default the atlas will include backgrounds: DefaultRound-bg-normal
-                var atlasBuilder = new AtlasBuilder();
+                var atlasBuilder = new AtlasBuilder(
+                    atlasName: "RoadSelectionPanelAtlas",
+                    loadingPath: "RoadSelectionPanel",
+                    sizeHint: new IntVector2(512));
                 tmpSkin.UpdateAtlasBuilder(
                     atlasBuilder: atlasBuilder,
                     spriteSize: new IntVector2(50));
@@ -326,10 +328,7 @@ namespace TrafficManager.UI {
                 }
 
                 // Create atlas and give it to all buttons
-                allButtonsAtlas_ = atlasBuilder.CreateAtlas(
-                    atlasName: "RoadSelectionPanelAtlas",
-                    loadingPath: "RoadSelectionPanel",
-                    atlasSizeHint: new IntVector2(512));
+                allButtonsAtlas_ = atlasBuilder.CreateAtlas();
 
                 foreach (var button in buttons_ ?? Enumerable.Empty<ButtonExt>()) {
                     button.atlas = allButtonsAtlas_;
@@ -426,25 +425,18 @@ namespace TrafficManager.UI {
                 public override void Awake() {
                     base.Awake();
                     name = ButtonName;
-                    Skin = new U.ButtonSkin() {
-                        Prefix = SkinPrefix,
-
-                        BackgroundPrefix = "RoundButton",
-                        BackgroundHovered = true,
-                        BackgroundActive = true,
-                        BackgroundDisabled = true,
-
-                        ForegroundNormal = true,
-                        ForegroundHovered = false,
-                        ForegroundActive = false,
-                        ForegroundDisabled = true,
-                    };
+                    Skin = ButtonSkin.CreateSimple(
+                                         foregroundPrefix: SkinPrefix,
+                                         backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
+                                     .CanDisable()
+                                     .CanHover(foreground: false)
+                                     .CanActivate(foreground: false);
                     width = height = REFERENCE_SIZE; //TODO move to start?
                 }
 
                 public void Refresh() {
                     isEnabled = !ShouldDisable();
-                    UpdateButtonImageAndTooltip();
+                    UpdateButtonSkinAndTooltip();
                     Show();
                 }
 

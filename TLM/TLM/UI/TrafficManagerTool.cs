@@ -56,7 +56,8 @@ namespace TrafficManager.UI {
         internal const float MAX_HIT_ERROR = 2.5f;
 
         /// <summary>Maximum detection radius of segment raycast hit position.</summary>
-        internal const float NODE_DETECTION_RADIUS = 15f;
+        internal const float NODE_DETECTION_RADIUS = 75f;
+        internal const float PRECISE_NODE_DETECTION_RADIUS = 15f;
 
         internal static ushort HoveredNodeId;
 
@@ -100,6 +101,8 @@ namespace TrafficManager.UI {
 
         public bool IsUndergroundMode => InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
 
+        internal static float OverlayAlpha => TransparencyToAlpha(GlobalConfig.Instance.Main.OverlayTransparency);
+
         static TrafficManagerTool() { }
 
         /// <summary>
@@ -115,6 +118,11 @@ namespace TrafficManager.UI {
                 Destroy(nopeCursor_);
                 nopeCursor_ = null;
             }
+            foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
+                e.Value.OnDestroy();
+            }
+            legacySubTools_.Clear();
+            legacySubTools_ = null;
             base.OnDestroy();
         }
 
@@ -163,7 +171,7 @@ namespace TrafficManager.UI {
         internal const float MAX_ZOOM = 0.05f;
 
         internal static float GetWindowAlpha() {
-            return TransparencyToAlpha(GlobalConfig.Instance.Main.GuiTransparency);
+            return Mathf.Clamp(GlobalConfig.Instance.Main.GuiOpacity, 0f, 100f) / 100f;
         }
 
         internal static float GetHandleAlpha(bool hovered) {
@@ -1207,9 +1215,10 @@ namespace TrafficManager.UI {
                                                                 .m_position).magnitude;
                     float endDist = (segmentOutput.m_hitPos - nodesBuffer[endNodeId]
                                                               .m_position).magnitude;
-                    if (startDist < endDist && startDist < NODE_DETECTION_RADIUS) {
+                    float detectionRadius = raycastSegment ? NODE_DETECTION_RADIUS : PRECISE_NODE_DETECTION_RADIUS;
+                    if (startDist < endDist && startDist < detectionRadius) {
                         HoveredNodeId = startNodeId;
-                    } else if (endDist < startDist && endDist < NODE_DETECTION_RADIUS) {
+                    } else if (endDist < startDist && endDist < detectionRadius) {
                         HoveredNodeId = endNodeId;
                     }
                 }
