@@ -18,11 +18,6 @@ namespace TrafficManager.UI.Helpers {
 
         private Bounds[] bounds;
 
-        /// <summary>
-        /// previous vertical hit position stored for caching.
-        /// </summary>
-        private float prev_H;
-
         public bool IsUnderground { get; private set; }
 
         /// <summary>
