@@ -68,6 +68,8 @@ namespace TrafficManager.API.Traffic.Data {
         public static SpeedValue FromMph(MphValue mph)
             => new SpeedValue(mph.Mph / ApiConstants.SPEED_TO_MPH);
 
+        public static SpeedValue Unlimited() => new SpeedValue(0);
+
         /// <summary>
         /// Subtracts two speed values
         /// </summary>

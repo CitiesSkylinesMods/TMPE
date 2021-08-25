@@ -29,9 +29,13 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         public const ushort UPPER_KMPH = 140;
         public const ushort KMPH_STEP = 10;
 
+        private SpeedValue[] _kmphSpeedLimits;
+
         private const ushort LOWER_MPH = 5;
         public const ushort UPPER_MPH = 90;
         public const ushort MPH_STEP = 5;
+
+        private SpeedValue[] _mphSpeedLimits;
 
         /// <summary>Visible sign size, slightly reduced from 100 to accomodate another column for MPH</summary>
         private const int GUI_SPEED_SIGN_SIZE = 80;
@@ -101,6 +105,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         public SpeedLimitsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
+            _kmphSpeedLimits = EnumerateSpeedLimits(SpeedUnit.Kmph);
+            _mphSpeedLimits = EnumerateSpeedLimits(SpeedUnit.Mph);
+
             _guiDefaultsWindowDelegate = GuiDefaultsWindow;
             _guiSpeedLimitsWindowDelegate = GuiSpeedLimitsWindow;
 
@@ -632,8 +639,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             GUILayout.FlexibleSpace();
 
             Color oldColor = GUI.color;
-            List<SpeedValue> allSpeedLimits = EnumerateSpeedLimits(SpeedUnit.CurrentlyConfigured);
-            allSpeedLimits.Add(new SpeedValue(0)); // add last item: no limit
+            SpeedValue[] allSpeedLimits = GetSpeedLimits(GlobalConfig.Instance.Main.GetDisplaySpeedUnit());
 
             bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
             var column = 0u; // break palette to a new line at breakColumn
@@ -1102,8 +1108,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <param name="unit">What kind of speed limit list is required</param>
         /// <returns>List from smallest to largest speed with the given unit. Zero (no limit) is not added to the list.
         /// The values are in-game speeds as float.</returns>
-        public static List<SpeedValue> EnumerateSpeedLimits(SpeedUnit unit) {
-            var result = new List<SpeedValue>();
+        public static SpeedValue[] EnumerateSpeedLimits(SpeedUnit unit) {
+            var result = new FastList<SpeedValue>();
             switch (unit) {
                 case SpeedUnit.Kmph:
                     for (var km = LOWER_KMPH; km <= UPPER_KMPH; km += KMPH_STEP) {
@@ -1117,15 +1123,18 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     }
 
                     break;
-                case SpeedUnit.CurrentlyConfigured:
-                    // Automatically choose from the config
-                    return GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
-                               ? EnumerateSpeedLimits(SpeedUnit.Mph)
-                               : EnumerateSpeedLimits(SpeedUnit.Kmph);
             }
 
-            return result;
+            result.Add(SpeedValue.Unlimited());
+
+            return result.ToArray();
         }
+
+        private SpeedValue[] GetSpeedLimits(SpeedUnit speedUnit) => speedUnit switch {
+            SpeedUnit.Kmph => _kmphSpeedLimits,
+            SpeedUnit.Mph => _mphSpeedLimits,
+            _ => throw new Exception($"Unknown SpeedUnit '{speedUnit}'")
+        };
 
         /// <summary>
         /// Based on the MPH/KMPH settings round the current speed to the nearest STEP and
