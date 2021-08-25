@@ -6,6 +6,7 @@ namespace TrafficManager.Patch._PathManager {
     using Util;
 
     [UsedImplicitly]
+    [CustomPathFindPatch]
     [HarmonyPatch]
     public class ReleasePathPatch {
         private delegate void TargetDelegate(uint unit);

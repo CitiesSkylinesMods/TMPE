@@ -3,6 +3,8 @@ namespace TrafficManager.Patch._PathManager {
     using HarmonyLib;
     using JetBrains.Annotations;
 
+    [UsedImplicitly]
+    [CustomPathFindPatch]
     [HarmonyPatch(typeof(PathManager), nameof(PathManager.WaitForAllPaths))]
     public class WaitForAllPathsPatch {
 
