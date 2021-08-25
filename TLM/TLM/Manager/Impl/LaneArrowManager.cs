@@ -142,31 +142,37 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="dedicatedTurningLanes">
         /// Narrow down updated roads to those that can have dedicated turning lanes.
         /// </param>
-        public void UpdateAllDefaults(bool dedicatedTurningLanes) {
+        public void UpdateDedicatedTurningLanePolicy() {
+            Log.Info("UpdateAllDefaults(dedicatedTurningLanes:{dedicatedTurningLanes}) was called.");
             SimulationManager.instance.AddAction(delegate () {
-                for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                    ref NetSegment segment = ref segmentId.ToSegment();
-                    if (!netService.IsSegmentValid(segmentId))
-                        continue;
+                try {
+                    Log._Debug($"Executing UpdateDedicatedTurningLanePolicy() in simulation thread ...");
+                    for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+                        ref NetSegment segment = ref segmentId.ToSegment();
+                        if (!netService.IsSegmentValid(segmentId))
+                            continue;
 
-                    if (segment.Info?.GetAI() is not RoadBaseAI ai)
-                        continue;
+                        if (segment.Info?.GetAI() is not RoadBaseAI ai)
+                            continue;
 
-                    int forward = 0, backward = 0;
-                    segmentId.ToSegment().CountLanes(segmentId, LANE_TYPES, VEHICLE_TYPES, ref forward, ref backward);
-                    if (dedicatedTurningLanes && forward == 1 && backward == 1) {
-                        // one lane cannot have dedicated turning lanes.
-                        continue;
+                        int forward = 0, backward = 0;
+                        segmentId.ToSegment().CountLanes(segmentId, LANE_TYPES, VEHICLE_TYPES, ref forward, ref backward);
+                        if (forward == 1 && backward == 1) {
+                            // one lane cannot have dedicated turning lanes.
+                            continue;
+                        }
+
+                        if (segment.m_startNode.ToNode().CountSegments() <= 2 &&
+                            segment.m_endNode.ToNode().CountSegments() <= 2) {
+                            // no intersection.
+                            continue;
+                        }
+
+                        ai.UpdateLanes(segmentId, ref segment, true);
+                        NetManager.instance.UpdateSegmentRenderer(segmentId, true);
                     }
-
-                    if (dedicatedTurningLanes &&
-                        segment.m_startNode.ToNode().CountSegments() <= 2 &&
-                        segment.m_endNode.ToNode().CountSegments() <= 2) {
-                        // no intersection.
-                        continue;
-                    }
-
-                    NetManager.instance.UpdateSegment(segmentId);
+                } catch(Exception ex) {
+                    ex.LogException();
                 }
             });
         }
@@ -198,6 +204,14 @@ namespace TrafficManager.Manager.Impl {
         private void ApplyFlags() {
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
                 Flags.ApplyLaneArrowFlags(laneId);
+            }
+        }
+
+        public override void OnLevelLoading() {
+            base.OnLevelLoading();
+            if (OptionsVehicleRestrictionsTab.DedicatedTurningLanes) {
+                // update dedicated turning lanes after patch has been applied.
+                UpdateDedicatedTurningLanePolicy();
             }
         }
 
