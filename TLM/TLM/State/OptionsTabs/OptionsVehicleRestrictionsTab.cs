@@ -33,14 +33,14 @@ namespace TrafficManager.State {
         public static CheckboxOption DedicatedTurningLanes =
             new CheckboxOption("DedicatedTurningLanes") {
                 Label = "VR.Option:Dedicated turning lanes",
-                Handler = LaneArrowsUpdateHandler,
+                Handler = UpdateDedicatedTurningLanePolicyHandler,
         };
 
         static void JunctionRestrictionsUpdateHandler(bool value ) =>
             JunctionRestrictionsManager.Instance.UpdateAllDefaults();
 
-        static void LaneArrowsUpdateHandler(bool value) =>
-            LaneArrowManager.Instance.UpdateAllDefaults(true);
+        static void UpdateDedicatedTurningLanePolicyHandler(bool value) =>
+            LaneArrowManager.Instance.UpdateDedicatedTurningLanePolicy();
 
         internal static void MakeSettings_VehicleRestrictions(ExtUITabstrip tabStrip) {
             UIHelper panelHelper = tabStrip.AddTabPage(Translation.Options.Get("Tab:Policies & Restrictions"));
