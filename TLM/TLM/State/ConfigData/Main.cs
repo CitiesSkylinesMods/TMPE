@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.State.ConfigData {
+namespace TrafficManager.State.ConfigData {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -76,6 +76,10 @@
         /// but internally Kmph are still used).
         /// </summary>
         public bool DisplaySpeedLimitsMph = false;
+
+        public SpeedUnit GetDisplaySpeedUnit() => DisplaySpeedLimitsMph
+            ? SpeedUnit.Mph
+            : SpeedUnit.Kmph;
 
         /// <summary>
         /// Selected theme for road signs when MPH is active.
