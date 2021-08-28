@@ -7,6 +7,7 @@ namespace TrafficManager.Patch._PathManager {
     using JetBrains.Annotations;
     using System;
     using System.Reflection;
+    using State.ConfigData;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Custom.PathFinding;
     using TrafficManager.Util;

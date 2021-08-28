@@ -6,6 +6,8 @@ namespace TrafficManager.Manager.Impl {
     using System.Linq;
     using System.Threading;
     using System;
+    using CitiesGameBridge.Service;
+    using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -206,6 +208,11 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected void RecalculateSegment(ushort segmentId) {
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            if (segment.Info == null) {
+                return;
+            }
+
 #if DEBUG
             bool logRouting = DebugSwitch.RoutingBasicLog.Get() &&
                          (DebugSettings.SegmentId <= 0 || DebugSettings.SegmentId == segmentId);
@@ -226,18 +233,10 @@ namespace TrafficManager.Manager.Impl {
 
             RecalculateSegmentRoutingData(segmentId);
 
-            Services.NetService.IterateSegmentLanes(
-                segmentId,
-                (uint laneId,
-                 ref NetLane lane,
-                 NetInfo.Lane laneInfo,
-                 ushort segId,
-                 ref NetSegment segment,
-                 byte laneIndex) => {
-                    RecalculateLaneEndRoutingData(segmentId, laneIndex, laneId, true);
-                    RecalculateLaneEndRoutingData(segmentId, laneIndex, laneId, false);
-                    return true;
-                });
+            foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                RecalculateLaneEndRoutingData(segmentId, laneIdAndLaneIndex.laneIndex, laneIdAndLaneIndex.laneId, true);
+                RecalculateLaneEndRoutingData(segmentId, laneIdAndLaneIndex.laneIndex, laneIdAndLaneIndex.laneId, false);
+            }
 
             Notifier.Instance.OnSegmentNodesMofied(segmentId, this);
         }
@@ -275,23 +274,15 @@ namespace TrafficManager.Manager.Impl {
                             continue;
                         }
 
-                        Services.NetService.IterateSegmentLanes(
-                            segId,
-                            (uint laneId,
-                             ref NetLane lane,
-                             NetInfo.Lane laneInfo,
-                             ushort sId,
-                             ref NetSegment seg,
-                             byte laneIndex) => {
-                                 if (IsIncomingLane(
-                                     segId,
-                                     seg.m_startNode == nodeId,
-                                     laneIndex)) {
-                                     Flags.RemoveHighwayLaneArrowFlags(laneId);
-                                 }
-
-                                 return true;
-                             });
+                        ref NetSegment currentSegment = ref segId.ToSegment();
+                        foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                            if (IsIncomingLane(
+                                segId,
+                                currentSegment.m_startNode == nodeId,
+                                laneIdAndLaneIndex.laneIndex)) {
+                                Flags.RemoveHighwayLaneArrowFlags(laneIdAndLaneIndex.laneId);
+                            }
+                        }
                     }
                 }
             }
@@ -317,24 +308,15 @@ namespace TrafficManager.Manager.Impl {
             SegmentRoutings[segmentId].Reset();
             ResetIncomingHighwayLaneArrows(segmentId);
 
-            Services.NetService.IterateSegmentLanes(
-                segmentId,
-                (uint laneId,
-                 ref NetLane lane,
-                 NetInfo.Lane laneInfo,
-                 ushort segId,
-                 ref NetSegment segment,
-                 byte laneIndex) => {
-                    if (extendedLogRouting) {
-                        Log._Debug($"RoutingManager.ResetRoutingData: Resetting lane {laneId}, " +
-                                   $"idx {laneIndex} @ seg. {segmentId}");
-                    }
+            foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                if (extendedLogRouting) {
+                    Log._Debug($"RoutingManager.ResetRoutingData: Resetting lane {laneIdAndLaneIndex.laneId}, " +
+                               $"idx {laneIdAndLaneIndex.laneIndex} @ seg. {segmentId}");
+                }
 
-                    ResetLaneRoutings(laneId, true);
-                    ResetLaneRoutings(laneId, false);
-
-                    return true;
-                });
+                ResetLaneRoutings(laneIdAndLaneIndex.laneId, true);
+                ResetLaneRoutings(laneIdAndLaneIndex.laneId, false);
+            }
         }
 
         protected void RecalculateSegmentRoutingData(ushort segmentId) {

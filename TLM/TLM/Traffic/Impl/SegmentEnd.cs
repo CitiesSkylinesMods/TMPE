@@ -5,6 +5,8 @@ namespace TrafficManager.Traffic.Impl {
     using System.Collections.Generic;
     using System.Linq;
     using System;
+    using CitiesGameBridge.Service;
+    using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -316,23 +318,13 @@ namespace TrafficManager.Traffic.Impl {
             numVehiclesMovingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
             numVehiclesGoingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
 
-            Constants.ServiceFactory.NetService.IterateSegmentLanes(
-                SegmentId,
-                (uint laneId,
-                 ref NetLane lane,
-                 NetInfo.Lane laneInfo,
-                 ushort segmentId,
-                 ref NetSegment segment,
-                 byte laneIndex) =>
-                {
-                    IDictionary<ushort, uint> numVehicleMoving = new TinyDictionary<ushort, uint>();
-                    IDictionary<ushort, uint> numVehicleGoing = new TinyDictionary<ushort, uint>();
+            foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(SegmentId)) {
+                IDictionary<ushort, uint> numVehicleMoving = new TinyDictionary<ushort, uint>();
+                IDictionary<ushort, uint> numVehicleGoing = new TinyDictionary<ushort, uint>();
 
-                    numVehiclesMovingToSegmentId[laneIndex] = numVehicleMoving;
-                    numVehiclesGoingToSegmentId[laneIndex] = numVehicleGoing;
-
-                    return true;
-                });
+                numVehiclesMovingToSegmentId[laneIdAndLaneIndex.laneIndex] = numVehicleMoving;
+                numVehiclesGoingToSegmentId[laneIdAndLaneIndex.laneIndex] = numVehicleGoing;
+            }
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 

@@ -2,6 +2,7 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
     using static Util.SegmentLaneTraverser;
     using System.Collections.Generic;
+    using CitiesGameBridge.Service;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI.Textures;
@@ -13,6 +14,7 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework.Math;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using ColossalFramework.UI;
+    using GenericGameBridge.Service;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util.Extensions;
 
@@ -82,22 +84,22 @@ namespace TrafficManager.UI.SubTools {
             }
 
             Bezier3 bezier = default;
-            netService.IterateSegmentLanes(
-                renderInfo_.SegmentId,
-                (uint laneId,
-                ref NetLane lane,
-                NetInfo.Lane laneInfo,
-                ushort _,
-                ref NetSegment segment,
-                byte laneIndex) => {
-                    bool isParking = laneInfo.m_laneType.IsFlagSet(NetInfo.LaneType.Parking);
-                    if (isParking && laneInfo.m_finalDirection == renderInfo_.FinalDirection) {
-                        bezier = lane.m_bezier;
-                        laneMarker_ = new SegmentLaneMarker(bezier);
-                        laneMarker_.RenderOverlay(cameraInfo, color, enlarge: pressed);
-                    }
-                    return true;
-                });
+            ref NetSegment segment = ref renderInfo_.SegmentId.ToSegment();
+            NetInfo netInfo = segment.Info;
+            if (netInfo == null) {
+                return;
+            }
+
+            foreach(LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(renderInfo_.SegmentId)) {
+                NetLane netLane = NetManager.instance.m_lanes.m_buffer[laneIdAndLaneIndex.laneId];
+                NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndLaneIndex.laneIndex];
+                bool isParking = laneInfo.m_laneType.IsFlagSet(NetInfo.LaneType.Parking);
+                if (isParking && laneInfo.m_finalDirection == renderInfo_.FinalDirection) {
+                    bezier = netLane.m_bezier;
+                    laneMarker_ = new SegmentLaneMarker(bezier);
+                    laneMarker_.RenderOverlay(cameraInfo, color, enlarge: pressed);
+                }
+            }
         }
 
         private void RenderRoadParkings(RenderManager.CameraInfo cameraInfo) {

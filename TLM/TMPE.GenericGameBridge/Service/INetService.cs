@@ -1,15 +1,6 @@
 namespace GenericGameBridge.Service {
     using System.Collections.Generic;
 
-    public delegate bool NetSegmentHandler(ushort segmentId, ref NetSegment segment);
-
-    public delegate bool NetSegmentLaneHandler(uint laneId,
-                                               ref NetLane lane,
-                                               NetInfo.Lane laneInfo,
-                                               ushort segmentId,
-                                               ref NetSegment segment,
-                                               byte laneIndex);
-
     public interface INetService {
         bool CheckLaneFlags(uint laneId,
                             NetLane.Flags flagMask,
@@ -60,13 +51,9 @@ namespace GenericGameBridge.Service {
 
         bool IsSegmentValid(ushort segmentId);
 
-        void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler);
-
-        void IterateSegmentLanes(ushort segmentId,
-                                 ref NetSegment segment,
-                                 NetSegmentLaneHandler handler);
-
         GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection);
+
+        GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId);
 
         void PublishSegmentChanges(ushort segmentId);
 
