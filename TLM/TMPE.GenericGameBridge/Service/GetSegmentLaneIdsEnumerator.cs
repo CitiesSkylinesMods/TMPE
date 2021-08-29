@@ -46,8 +46,8 @@ namespace GenericGameBridge.Service {
                 _laneBuffer[_currentLaneIdAndLaneIndex.laneId].m_nextLane,
                 _currentLaneIdAndLaneIndex.laneIndex + 1);
 
-            return _currentLaneIdAndLaneIndex.laneId == 0
-                || _netInfoLanesLength - 1 < _currentLaneIdAndLaneIndex.laneIndex;
+            return _currentLaneIdAndLaneIndex.laneId != 0
+                && _currentLaneIdAndLaneIndex.laneIndex < _netInfoLanesLength;
         }
 
         public void Reset() {
