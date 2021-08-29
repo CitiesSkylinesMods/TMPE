@@ -898,17 +898,17 @@ namespace TrafficManager.State {
                         NetInfo.Lane laneInfo = segment.Info.m_lanes[laneIdAndLaneIndex.laneIndex];
 
                         if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
-                            return true;
+                            continue;
                         }
 
                         if (laneIdAndLaneIndex.laneIndex >= allowedTypes.Length) {
-                            return true;
+                            continue;
                         }
 
                         ExtVehicleType? allowedType = allowedTypes[laneIdAndLaneIndex.laneIndex];
 
                         if (allowedType == null) {
-                            return true;
+                            continue;
                         }
 
                         ret.Add(laneIdAndLaneIndex.laneId, (ExtVehicleType)allowedType);
