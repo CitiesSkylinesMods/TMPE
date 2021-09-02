@@ -7,9 +7,9 @@ namespace CSUtil.Commons {
     using Debug = UnityEngine.Debug;
 
 #if !DEBUG
-#if TRACE
-    #error TRACE is defined outside of a DEBUG build, please remove
-#endif
+    #if TRACE
+        #error TRACE is defined outside of a DEBUG build, please remove
+    #endif
 #endif
 
     /// <summary>
