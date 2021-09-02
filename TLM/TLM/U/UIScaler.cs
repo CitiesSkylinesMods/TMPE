@@ -1,5 +1,6 @@
 namespace TrafficManager.U {
     using ColossalFramework.UI;
+    using CSUtil.Commons;
     using TrafficManager.State;
     using UnityEngine;
 
@@ -64,14 +65,14 @@ namespace TrafficManager.U {
             get {
                 var horizontalScale = Screen.width / MaxWidth;
                 var verticalScale = Screen.height / MaxHeight;
+                Log.Info($"horizontalScale={horizontalScale} verticalScale={verticalScale}");
                 return Mathf.Min(horizontalScale, verticalScale);
             }
         }
 
         public static float UIScale => GlobalConfig.Instance.Main.GuiScale * 0.01f;
 
-
-        public static Matrix4x4 ScaleMatrix => Matrix4x4.Scale(Vector3.one * UIScaler.UIScale);
+        public static Matrix4x4 ScaleMatrix => Matrix4x4.Scale(Vector3.one * UIAspectScale);
 
         public static Vector2 MousePosition {
             get {
