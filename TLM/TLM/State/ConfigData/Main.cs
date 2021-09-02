@@ -49,7 +49,7 @@ namespace TrafficManager.State.ConfigData {
         /// If checked, will use <see cref="ColossalFramework.UI.UIView"/> resolution instead of
         /// what <see cref="UnityEngine.Screen"/> object returns.
         /// </summary>
-        public bool GuiScaleToResolution = false;
+        public bool GuiScaleToResolution = true;
 
         /// <summary>
         /// Overlay transparency

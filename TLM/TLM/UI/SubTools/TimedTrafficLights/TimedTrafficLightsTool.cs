@@ -11,6 +11,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
     using TrafficManager.API.TrafficLight;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.U;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
@@ -308,6 +309,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
         public override void OnToolGUI(Event e) {
             base.OnToolGUI(e);
+            var oldMatrix = GUI.matrix;
+            GUI.matrix = UIScaler.ScaleMatrix;
 
             switch (ttlToolMode_) {
                 case TTLToolMode.SelectNode: {
@@ -330,6 +333,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     break;
                 }
             }
+
+            GUI.matrix = oldMatrix;
         }
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -1125,10 +1130,6 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
             _cursorInSecondaryPanel = _windowRect.Contains(Event.current.mousePosition);
 
-            GUI.matrix = Matrix4x4.TRS(
-                new Vector3(0, 0, 0),
-                Quaternion.identity,
-                new Vector3(1, 1, 1)); // revert scaling
             ShowGUI();
         }
 

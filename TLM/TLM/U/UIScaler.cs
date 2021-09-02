@@ -1,6 +1,5 @@
 namespace TrafficManager.U {
     using ColossalFramework.UI;
-    using CSUtil.Commons;
     using TrafficManager.State;
     using UnityEngine;
 
@@ -50,14 +49,14 @@ namespace TrafficManager.U {
         public static float MaxWidth {
             get {
                 float ret = Config.GuiScaleToResolution ? BaseResolutionX : Screen.width;
-                return ret / Config.GuiScale;
+                return ret / (Config.GuiScale * 0.01f);
             }
         }
 
         public static float MaxHeight {
             get {
                 float ret = Config.GuiScaleToResolution ? BaseResolutionY : Screen.height;
-                return ret / Config.GuiScale;
+                return ret / (Config.GuiScale * 0.01f);
             }
         }
 
@@ -65,7 +64,6 @@ namespace TrafficManager.U {
             get {
                 var horizontalScale = Screen.width / MaxWidth;
                 var verticalScale = Screen.height / MaxHeight;
-                Log.Info($"horizontalScale={horizontalScale} verticalScale={verticalScale}");
                 return Mathf.Min(horizontalScale, verticalScale);
             }
         }
