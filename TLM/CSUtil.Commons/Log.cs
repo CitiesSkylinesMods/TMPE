@@ -2,16 +2,13 @@ namespace CSUtil.Commons {
     using System;
     using System.Diagnostics;
     using System.IO;
-    using System.Threading;
+    using System.Linq;
     using UnityEngine;
     using Debug = UnityEngine.Debug;
-    using System.Linq;
-    using System.Collections;
-    using System.Collections.Generic;
 
 #if !DEBUG
 #if TRACE
-#error TRACE is defined outside of a DEBUG build, please remove
+    #error TRACE is defined outside of a DEBUG build, please remove
 #endif
 #endif
 
