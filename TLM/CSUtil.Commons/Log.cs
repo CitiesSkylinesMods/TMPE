@@ -40,7 +40,7 @@ namespace CSUtil.Commons {
     public static class Log {
         private static readonly object LogLock = new object();
 
-        const string LOG_FILE_NAME = "TMPE.log";
+        private const string LOG_FILE_NAME = "TMPE.log";
 
         private static readonly string LogFilePath;
 
