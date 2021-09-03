@@ -160,17 +160,20 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
-            foreach (bool startNode in Constants.ALL_BOOL) {
-                SegmentEndFlags flags = startNode
-                                            ? segmentFlags_[seg.segmentId].startNodeFlags
-                                            : segmentFlags_[seg.segmentId].endNodeFlags;
+            HandleInvalidSegment(ref seg, false);
+            HandleInvalidSegment(ref seg, true);
+        }
 
-                if (!flags.IsDefault()) {
-                    AddInvalidSegmentEndFlags(seg.segmentId, startNode, ref flags);
-                }
+        private void HandleInvalidSegment(ref ExtSegment seg, bool startNode) {
+            SegmentEndFlags flags = startNode
+                                        ? segmentFlags_[seg.segmentId].startNodeFlags
+                                        : segmentFlags_[seg.segmentId].endNodeFlags;
 
-                segmentFlags_[seg.segmentId].Reset(startNode, true);
+            if (!flags.IsDefault()) {
+                AddInvalidSegmentEndFlags(seg.segmentId, startNode, ref flags);
             }
+
+            segmentFlags_[seg.segmentId].Reset(startNode, true);
         }
 
         protected override void HandleValidSegment(ref ExtSegment seg) {
