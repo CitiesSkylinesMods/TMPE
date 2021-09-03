@@ -1,4 +1,4 @@
-namespace TrafficManager.UI.MainMenu {
+    namespace TrafficManager.UI.MainMenu {
     using System;
     using ColossalFramework.UI;
     using CSUtil.Commons;
@@ -7,6 +7,7 @@ namespace TrafficManager.UI.MainMenu {
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.Util;
+    using TrafficManager.State.ConfigData;
     using UnityEngine;
 
     public class MainMenuButton
@@ -104,36 +105,6 @@ namespace TrafficManager.UI.MainMenu {
             base.OnPositionChanged();
         }
 
-        // internal void UpdateSprites() {
-        //     if (!ModUI.Instance.IsVisible()) {
-        //         m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
-        //                                            m_BackgroundSprites.m_Focused =
-        //                                                ATLASKEY_BG_NORMAL;
-        //         m_BackgroundSprites.m_Hovered = ATLASKEY_BG_HOVERED;
-        //         m_PressedBgSprite = ATLASKEY_BG_ACTIVE;
-        //
-        //         m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
-        //                                            m_ForegroundSprites.m_Focused =
-        //                                                ATLASKEY_FG_NORMAL;
-        //         m_ForegroundSprites.m_Hovered = ATLASKEY_FG_HOVERED;
-        //         m_PressedFgSprite = ATLASKEY_FG_ACTIVE;
-        //     } else {
-        //         m_BackgroundSprites.m_Normal = m_BackgroundSprites.m_Disabled =
-        //                                            m_BackgroundSprites.m_Focused =
-        //                                                m_BackgroundSprites.m_Hovered =
-        //                                                    ATLASKEY_BG_ACTIVE;
-        //         m_PressedBgSprite = ATLASKEY_BG_HOVERED;
-        //
-        //         m_ForegroundSprites.m_Normal = m_ForegroundSprites.m_Disabled =
-        //                                            m_ForegroundSprites.m_Focused =
-        //                                                m_ForegroundSprites.m_Hovered =
-        //                                                    ATLASKEY_FG_ACTIVE;
-        //         m_PressedFgSprite = ATLASKEY_FG_HOVERED;
-        //     }
-        //
-        //     this.Invalidate();
-        // }
-
         public void OnUpdate(GlobalConfig config) {
             UpdatePosition(new Vector2(config.Main.MainMenuButtonX, config.Main.MainMenuButtonY));
         }
@@ -153,6 +124,7 @@ namespace TrafficManager.UI.MainMenu {
         public void OnGUI() {
             if (!UIView.HasModalInput()
                 && !UIView.HasInputFocus()
+                && !(ModUI.GetTrafficManagerTool(false)?.UUIButton) // handled by UUI
                 && KeybindSettingsBase.ToggleMainMenu.IsPressed(Event.current)) {
                 if (ModUI.Instance != null) {
                     ModUI.Instance.ToggleMainMenu();
@@ -167,7 +139,7 @@ namespace TrafficManager.UI.MainMenu {
 
         public override KeybindSetting U_OverrideTooltipShortcutKey() => KeybindSettingsBase.ToggleMainMenu;
 
-        protected override bool IsVisible() => true;
+        protected override bool IsVisible() => Main.UseUUI && !Main.NoUUIButton;
 
         public override void HandleClick(UIMouseEventParameter p) {
             try {

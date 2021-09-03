@@ -52,6 +52,17 @@ namespace TrafficManager.State.ConfigData {
         public bool GuiScaleToResolution = true;
 
         /// <summary>
+        /// Put button inisde UUI and use the UUI Hotkey conflict resolution.
+        /// </summary>
+        public static bool UseUUI = true;
+
+        /// <summary>
+        /// If UseUUI enabled, this uses the independant TMPE button but keeps the UUI hotkey conflict resolution.
+        /// This simply hides the UUIButton to keep the hotkey conflict resolution functionality.
+        /// </summary>
+        public static bool NoUUIButton = true;
+
+        /// <summary>
         /// Overlay transparency
         /// </summary>
         public byte OverlayTransparency = 40;
