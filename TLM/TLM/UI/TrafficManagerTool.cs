@@ -1986,11 +1986,16 @@ namespace TrafficManager.UI {
                     tool: this,
                     icon: TextureResources.LoadDllResource("MainMenu.MainMenuButton-fg-normal.png", new IntVector2(40)),
                     hotkeys: hotkeys);
+
+                UUIButton.isVisible = !GlobalConfig.Instance.Main.NoUUIButton;
             } catch(Exception ex) {
                 ex.LogException();
             }
         }
 
-        public void RemoveUUIButton() => Destroy(UUIButton?.gameObject);
+        public void RemoveUUIButton() {
+            Destroy(UUIButton?.gameObject);
+            UUIButton = null;
+        }
     }
 }

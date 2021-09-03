@@ -124,7 +124,7 @@
         public void OnGUI() {
             if (!UIView.HasModalInput()
                 && !UIView.HasInputFocus()
-                && !(ModUI.GetTrafficManagerTool(false)?.UUIButton) // handled by UUI
+                && !GlobalConfig.Instance.Main.UseUUI // handled by UUI
                 && KeybindSettingsBase.ToggleMainMenu.IsPressed(Event.current)) {
                 if (ModUI.Instance != null) {
                     ModUI.Instance.ToggleMainMenu();
@@ -139,7 +139,7 @@
 
         public override KeybindSetting U_OverrideTooltipShortcutKey() => KeybindSettingsBase.ToggleMainMenu;
 
-        protected override bool IsVisible() => Main.UseUUI && !Main.NoUUIButton;
+        protected override bool IsVisible() => !GlobalConfig.Instance.Main.UseUUI || GlobalConfig.Instance.Main.NoUUIButton;
 
         public override void HandleClick(UIMouseEventParameter p) {
             try {

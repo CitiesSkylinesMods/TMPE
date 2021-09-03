@@ -22,6 +22,17 @@ namespace TrafficManager.State.ConfigData {
         public bool MainMenuPosLocked = false;
 
         /// <summary>
+        /// Put button inisde UUI and use the UUI Hotkey conflict resolution.
+        /// </summary>
+        public bool UseUUI = true;
+
+        /// <summary>
+        /// If UseUUI enabled, this uses the independant TMPE button but keeps the UUI hotkey conflict resolution.
+        /// This simply hides the UUIButton to keep the hotkey conflict resolution functionality.
+        /// </summary>
+        public bool NoUUIButton = true;
+
+        /// <summary>
         /// Already displayed tutorial messages
         /// </summary>
         public string[] DisplayedTutorialMessages = new string[0];
@@ -50,17 +61,6 @@ namespace TrafficManager.State.ConfigData {
         /// what <see cref="UnityEngine.Screen"/> object returns.
         /// </summary>
         public bool GuiScaleToResolution = true;
-
-        /// <summary>
-        /// Put button inisde UUI and use the UUI Hotkey conflict resolution.
-        /// </summary>
-        public static bool UseUUI = true;
-
-        /// <summary>
-        /// If UseUUI enabled, this uses the independant TMPE button but keeps the UUI hotkey conflict resolution.
-        /// This simply hides the UUIButton to keep the hotkey conflict resolution functionality.
-        /// </summary>
-        public static bool NoUUIButton = true;
 
         /// <summary>
         /// Overlay transparency
