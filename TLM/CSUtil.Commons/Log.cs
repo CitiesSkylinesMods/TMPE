@@ -40,6 +40,8 @@ namespace CSUtil.Commons {
     public static class Log {
         private static readonly object LogLock = new object();
 
+        const string LOG_FILE_NAME = "TMPE.log";
+
         private static readonly string LogFilePath;
 
         private enum LogLevel {
@@ -54,9 +56,8 @@ namespace CSUtil.Commons {
 
         static Log() {
             try {
-                string logFileName = "TMPE.log";
                 string dir = Application.dataPath;
-                LogFilePath = Path.Combine(dir, logFileName);
+                LogFilePath = Path.Combine(dir, LOG_FILE_NAME);
                 if (File.Exists(LogFilePath)) {
                     File.Delete(LogFilePath); // delete old file to avoid confusion.
                 }
@@ -66,7 +67,7 @@ namespace CSUtil.Commons {
                 if (index >= 0) {
                     dir = args[index + 1];
                     dir = Path.GetDirectoryName(dir); // drop output_log.txt
-                    LogFilePath = Path.Combine(dir, logFileName);
+                    LogFilePath = Path.Combine(dir, LOG_FILE_NAME);
                     if (File.Exists(LogFilePath)) {
                         File.Delete(LogFilePath);
                     }
