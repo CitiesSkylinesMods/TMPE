@@ -115,9 +115,7 @@ namespace TrafficManager.Lifecycle {
             try {
                 Log.Info("TMPELifecycle.Awake()");
                 Instance = this;
-#if BENCHMARK
-            Benchmark.BenchmarkManager.Setup();
-#endif
+
                 TranslationDatabase.LoadAllTranslations();
 
                 VersionUtil.LogEnvironmentDetails();
