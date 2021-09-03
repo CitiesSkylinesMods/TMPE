@@ -106,31 +106,34 @@ namespace TrafficManager.Util {
         }
 
         internal static void FixRulesRoundabout(ushort segmentId) {
-            foreach (bool startNode in Constants.ALL_BOOL) {
-                if (OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns) {
-                    TrafficPriorityManager.Instance.SetPrioritySign(
-                        segmentId,
-                        startNode,
-                        PriorityType.Main);
-                }
+            FixRulesRoundabout(segmentId, false);
+            FixRulesRoundabout(segmentId, true);
+        }
 
-                ushort nodeId = netService.GetSegmentNodeId(
-                    segmentId,
-                    startNode);
-
-                ExtSegmentEnd curEnd = GetSegEnd(segmentId, startNode);
-
-                if (OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR) {
-                    JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
-                        segmentId,
-                        startNode,
-                        false);
-                }
-                JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
+        private static void FixRulesRoundabout(ushort segmentId, bool startNode) {
+            if (OptionsMassEditTab.RoundAboutQuickFix_PrioritySigns) {
+                TrafficPriorityManager.Instance.SetPrioritySign(
                     segmentId,
                     startNode,
-                    true);
+                    PriorityType.Main);
             }
+
+            ushort nodeId = netService.GetSegmentNodeId(
+                segmentId,
+                startNode);
+
+            ExtSegmentEnd curEnd = GetSegEnd(segmentId, startNode);
+
+            if (OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR) {
+                JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
+                    segmentId,
+                    startNode,
+                    false);
+            }
+            JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(
+                segmentId,
+                startNode,
+                true);
         }
 
         internal static void FixRulesMinor(ushort segmentId, ushort nodeId) {
