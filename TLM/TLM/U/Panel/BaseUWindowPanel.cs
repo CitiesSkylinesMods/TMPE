@@ -18,7 +18,7 @@ namespace TrafficManager.U.Panel {
           IObserver<ModUI.UIScaleNotification>,
           IObserver<ModUI.UIOpacityNotification>
     {
-        private UResizerConfig resizerConfig_ = new UResizerConfig();
+        private readonly UResizerConfig resizerConfig_ = new();
 
         /// <summary>On destroy this will unsubscribe from the UI Scale observable.</summary>
         [UsedImplicitly]
@@ -32,7 +32,7 @@ namespace TrafficManager.U.Panel {
         public override void Start() {
             base.Start();
             uiScaleUnbsubscriber_ = ModUI.Instance.UiScaleObservable.Subscribe(this);
-            uiTransparencyUnbsubscriber_ = ModUI.Instance.uiOpacityObservable.Subscribe(this);
+            uiTransparencyUnbsubscriber_ = ModUI.Instance.UiOpacityObservable.Subscribe(this);
         }
 
         public UResizerConfig GetResizerConfig() {
@@ -105,6 +105,13 @@ namespace TrafficManager.U.Panel {
             this.color = new Color32(64, 64, 64, 240);
 
             SetOpacity(UOpacityValue.FromOpacity(0.01f * GlobalConfig.Instance.Main.GuiOpacity));
+        }
+
+        /// <summary>Called by UnityEngine when component gets destroyed</summary>
+        public override void OnDestroy() {
+            uiScaleUnbsubscriber_.Dispose();
+            uiTransparencyUnbsubscriber_.Dispose();
+            base.OnDestroy();
         }
     }
 }

@@ -146,6 +146,9 @@ namespace TrafficManager.UI.SubTools {
             if (SelectedSegmentId != 0) {
                 cursorInSecondaryPanel = false;
 
+                Color oldColor = GUI.color;
+                GUI.color = GUI.color.WithAlpha(TrafficManagerTool.GetWindowAlpha());
+
                 windowRect = GUILayout.Window(
                     255,
                     windowRect,
@@ -154,7 +157,7 @@ namespace TrafficManager.UI.SubTools {
                     WindowStyle,
                     EmptyOptionsArray);
                 cursorInSecondaryPanel = windowRect.Contains(Event.current.mousePosition);
-
+                GUI.color = oldColor;
                 // overlayHandleHovered = false;
             }
 
@@ -277,26 +280,25 @@ namespace TrafficManager.UI.SubTools {
         private void GuiVehicleRestrictionsWindow(int num) {
             // use blue color when shift is pressed.
             Color oldColor = GUI.color;
+            GUI.color = GUI.color.WithAlpha(TrafficManagerTool.GetWindowAlpha());
             if (RoadMode) {
                 GUI.color = HighlightColor;
             }
 
-            {
-                // uses pressed sprite when delete is pressed
-                // uses blue color when shift is pressed.
-                KeyCode hotkey = KeyCode.Delete;
-                GUIStyle style = new GUIStyle("button");
-                if (Input.GetKey(hotkey)) {
-                    style.normal.background = style.active.background;
-                }
-                if (GUILayout.Button(
-                   T("Button:Allow all vehicles") + " [delete]",
-                   style,
-                   EmptyOptionsArray) || Input.GetKeyDown(hotkey)) {
-                    AllVehiclesFunc(true);
-                    if (RoadMode) {
-                        ApplyRestrictionsToAllSegments();
-                    }
+            // uses pressed sprite when delete is pressed
+            // uses blue color when shift is pressed.
+            KeyCode hotkey = KeyCode.Delete;
+            GUIStyle style = new GUIStyle("button");
+            if (Input.GetKey(hotkey)) {
+                style.normal.background = style.active.background;
+            }
+            if (GUILayout.Button(
+               T("Button:Allow all vehicles") + " [delete]",
+               style,
+               EmptyOptionsArray) || Input.GetKeyDown(hotkey)) {
+                AllVehiclesFunc(true);
+                if (RoadMode) {
+                    ApplyRestrictionsToAllSegments();
                 }
             }
 
@@ -307,7 +309,9 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
-            GUI.color = oldColor;
+            if (RoadMode) {
+                GUI.color = oldColor;
+            }
 
             if (GUILayout.Button(
                T("Button:Apply to entire road"),
@@ -315,6 +319,7 @@ namespace TrafficManager.UI.SubTools {
                 ApplyRestrictionsToAllSegments();
             }
 
+            GUI.color = oldColor;
             DragWindow(ref windowRect);
         }
 
@@ -445,8 +450,7 @@ namespace TrafficManager.UI.SubTools {
                 return false;
             }
 
-            Vector3 center = segment.m_bounds.center;
-
+            Vector3 center = segment.m_middlePosition;
             bool visible = GeometryUtil.WorldToScreenPoint(center, out Vector3 _);
 
             if (!visible) {
@@ -557,12 +561,15 @@ namespace TrafficManager.UI.SubTools {
 
                 ++y;
 #endif
+                Color guiColor2 = GUI.color;
+                GUI.color = GUI.color.WithAlpha(TrafficManagerTool.OverlayAlpha);
                 foreach (ExtVehicleType vehicleType in possibleVehicleTypes) {
                     bool allowed = VehicleRestrictionsManager.Instance.IsAllowed(allowedTypes, vehicleType);
 
                     if (allowed && viewOnly) {
                         continue; // do not draw allowed vehicles in view-only mode
                     }
+
 
                     bool hoveredHandle = MainTool.DrawGenericSquareOverlayGridTexture(
                         RoadUI.VehicleRestrictionTextures[vehicleType][allowed],
@@ -606,6 +613,8 @@ namespace TrafficManager.UI.SubTools {
 
                     ++y;
                 }
+
+                GUI.color = guiColor2;
 
                 ++x;
             }

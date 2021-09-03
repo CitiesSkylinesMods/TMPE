@@ -7,6 +7,7 @@ namespace TrafficManager.Patch._PathFind {
     using Util;
 
     [UsedImplicitly]
+    [CustomPathFindPatch]
     [HarmonyPatch]
     public class CalculatePathPatch {
         private delegate bool TargetDelegate(uint unit, bool skipQueue);

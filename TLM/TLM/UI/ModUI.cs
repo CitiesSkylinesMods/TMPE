@@ -68,11 +68,11 @@ namespace TrafficManager.UI {
         /// (slider in General options tab).
         /// </summary>
         [NonSerialized]
-        public UIOpacityObservable uiOpacityObservable;
+        public UIOpacityObservable UiOpacityObservable;
 
         public void Awake() {
             UiScaleObservable = new UIScaleObservable();
-            uiOpacityObservable = new UIOpacityObservable();
+            UiOpacityObservable = new UIOpacityObservable();
 
             Log._Debug("##### Initializing ModUI.");
 
@@ -174,7 +174,7 @@ namespace TrafficManager.UI {
 #endif
             _uiShown = true;
             SetToolMode(TrafficManagerMode.Activated);
-            MainMenuButton.UpdateButtonImageAndTooltip();
+            MainMenuButton.UpdateButtonSkinAndTooltip();
             UIView.SetFocus(MainMenu);
         }
 
@@ -190,7 +190,7 @@ namespace TrafficManager.UI {
 
             _uiShown = false;
             SetToolMode(TrafficManagerMode.None);
-            MainMenuButton.UpdateButtonImageAndTooltip();
+            MainMenuButton.UpdateButtonSkinAndTooltip();
         }
 
         internal MainMenuWindow GetMenu() {

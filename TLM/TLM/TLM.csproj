@@ -142,6 +142,7 @@
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
     <Compile Include="Notifier.cs" />
+    <Compile Include="Patch\CustomPathFindPatchAttribute.cs" />
     <Compile Include="Patch\PatchCommons.cs" />
     <Compile Include="Patch\_BuildingAI\GetColorPatch.cs" />
     <Compile Include="Patch\_BuildingDecoration\LoadPathsPatch.cs" />
@@ -288,6 +289,18 @@
     <Compile Include="Custom\PathFinding\CustomPathManager.cs" />
     <Compile Include="Traffic\ExtVehicleType.cs" />
     <Compile Include="Traffic\Impl\SegmentEnd.cs" />
+    <Compile Include="UI\MainMenu\MainMenuWindow.MainMenuLayout.cs">
+      <DependentUpon>MainMenuWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\MainMenu\MainMenuWindow.MenuButtonDef.cs">
+      <DependentUpon>MainMenuWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\MainMenu\MainMenuWindow.OsdPanel.cs">
+      <DependentUpon>MainMenuWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\MainMenu\MainMenuWindow.ToolPanel.cs">
+      <DependentUpon>MainMenuWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\RoadSelectionPanels.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\Helpers\GuideHandler.cs" />
@@ -300,7 +313,6 @@
     <Compile Include="UI\MainMenu\BaseMenuToolModeButton.cs" />
     <Compile Include="UI\MainMenu\IOnscreenDisplayProvider.cs" />
     <Compile Include="UI\MainMenu\MainMenuButton.cs" />
-    <Compile Include="UI\MainMenu\MainMenuLayout.cs" />
     <Compile Include="UI\MainMenu\MenuButtonDef.cs" />
     <Compile Include="UI\MainMenu\OSD\ModeDescription.cs" />
     <Compile Include="UI\MainMenu\OSD\OnscreenDisplay.cs" />
@@ -408,7 +420,9 @@
     <Compile Include="U\AtlasBuilder.cs" />
     <Compile Include="U\AtlasSpriteDef.cs" />
     <Compile Include="U\Autosize\ISmartSizableControl.cs" />
+    <Compile Include="U\Autosize\SmartResizeExtensions.cs" />
     <Compile Include="U\Autosize\UBoundingBox.cs" />
+    <Compile Include="U\Autosize\UPadding.cs" />
     <Compile Include="U\Autosize\UResizer.cs" />
     <Compile Include="U\Autosize\UResizerConfig.cs" />
     <Compile Include="U\Autosize\URule.cs" />
@@ -422,12 +436,14 @@
     <Compile Include="U\ControlActiveState.cs" />
     <Compile Include="U\ControlEnabledState.cs" />
     <Compile Include="U\ControlHoveredState.cs" />
+    <Compile Include="U\FreeTooltip\UFloatingTooltip.cs" />
+    <Compile Include="U\HelperExtensions.cs" />
     <Compile Include="U\Label\ULabel.cs" />
     <Compile Include="U\Panel\BaseUWindowPanel.cs" />
     <Compile Include="U\Panel\UPanel.cs" />
     <Compile Include="U\TextureUtil.cs" />
+    <Compile Include="U\UBuilder.cs" />
     <Compile Include="U\UConst.cs" />
-    <Compile Include="U\UIBuilder.cs" />
     <Compile Include="U\UIScaler.cs" />
     <Compile Include="U\UIUtil.cs" />
     <Compile Include="U\UOpacityValue.cs" />

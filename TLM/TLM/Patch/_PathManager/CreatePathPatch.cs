@@ -6,16 +6,15 @@ namespace TrafficManager.Patch._PathManager {
     using HarmonyLib;
     using JetBrains.Annotations;
     using System;
-    using System.ComponentModel.Design;
     using System.Reflection;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Custom.PathFinding;
-    using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
 
-    [HarmonyPatch]
     [UsedImplicitly]
+    [CustomPathFindPatch]
+    [HarmonyPatch]
     public class CreatePathPatch {
         //public bool CreatePath(out uint unit, ref Randomizer randomizer, uint buildIndex,
         //  PathUnit.Position startPosA, PathUnit.Position startPosB, PathUnit.Position endPosA, PathUnit.Position endPosB, PathUnit.Position vehiclePosition,

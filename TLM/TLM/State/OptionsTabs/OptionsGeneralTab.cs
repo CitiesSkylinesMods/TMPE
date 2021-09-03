@@ -83,17 +83,17 @@ namespace TrafficManager.State {
                                   eventCallback: OnLockMenuChanged) as UICheckBox;
 
             _guiScaleSlider = generalGroup.AddSlider(
-                                        text: T("General.Slider:GUI scale") + ":",
-                                        min: 50,
-                                        max: 200,
-                                        step: 5,
-                                        defaultValue: GlobalConfig.Instance.Main.GuiScale,
-                                        eventCallback: OnGuiScaleChanged) as UISlider;
+                                  text: T("General.Slider:GUI scale") + ":",
+                                  min: 50,
+                                  max: 200,
+                                  step: 5,
+                                  defaultValue: GlobalConfig.Instance.Main.GuiScale,
+                                  eventCallback: OnGuiScaleChanged) as UISlider;
             _guiScaleSlider.parent.Find<UILabel>("Label").width = 500;
 
             _guiOpacitySlider = generalGroup.AddSlider(
                                         text: T("General.Slider:Window transparency") + ":",
-                                        min: 10,
+                                        min: 0,
                                         max: 100,
                                         step: 5,
                                         defaultValue: GlobalConfig.Instance.Main.GuiOpacity,
@@ -103,7 +103,7 @@ namespace TrafficManager.State {
             _overlayTransparencySlider = generalGroup.AddSlider(
                                              text: T("General.Slider:Overlay transparency") + ":",
                                              min: 0,
-                                             max: 90,
+                                             max: 100,
                                              step: 5,
                                              defaultValue: GlobalConfig.Instance.Main.OverlayTransparency,
                                              eventCallback: OnOverlayTransparencyChanged) as UISlider;
@@ -253,11 +253,24 @@ namespace TrafficManager.State {
         }
 
         private static void OnGuiScaleChanged(float newVal) {
+            ModUI.Instance.UiScaleObservable.NotifyObservers(
+                new ModUI.UIScaleNotification { NewScale = newVal });
             SetGuiScale(newVal);
             _guiScaleSlider.tooltip
                 = string.Format(
                     T("General.Tooltip.Format:GUI scale: {0}%"),
                     GlobalConfig.Instance.Main.GuiScale);
+            if (TMPELifecycle.Instance.IsGameLoaded) {
+                _guiScaleSlider.RefreshTooltip();
+            }
+
+            GlobalConfig.WriteConfig();
+            Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScale}");
+        }
+
+        /// <summary>User clicked [scale GUI to screen resolution] checkbox.</summary>
+        private static void OnGuiScaleToResChanged(float newVal) {
+            SetGuiScale(newVal);
             if (TMPELifecycle.Instance.IsGameLoaded) {
                 _guiScaleSlider.RefreshTooltip();
             }
@@ -354,7 +367,7 @@ namespace TrafficManager.State {
                 _guiOpacitySlider.value = val;
 
                 U.UOpacityValue opacity = UOpacityValue.FromOpacity(0.01f * val);
-                ModUI.Instance.uiOpacityObservable.NotifyObservers(
+                ModUI.Instance.UiOpacityObservable.NotifyObservers(
                           new ModUI.UIOpacityNotification {
                                                               Opacity = opacity,
                                                           });

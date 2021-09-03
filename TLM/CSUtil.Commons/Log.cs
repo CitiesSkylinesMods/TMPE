@@ -101,12 +101,12 @@ namespace CSUtil.Commons {
         /// then you can not use a lambda, instead use `if (cond) { Log._Debug }`
         /// </summary>
         /// <param name="cond">The condition</param>
-        /// <param name="s">The function which returns text to log</param>
+        /// <param name="formatFn">The function which returns text to log</param>
         // TODO: Add log thread and replace formatted strings with lists to perform late formatting in that thread
         [Conditional("DEBUG")]
-        public static void _DebugIf(bool cond, Func<string> s) {
+        public static void _DebugIf(bool cond, Func<string> formatFn) {
             if (cond) {
-                LogToFile(s(), LogLevel.Debug);
+                LogToFile(formatFn(), LogLevel.Debug);
             }
         }
 
@@ -138,11 +138,11 @@ namespace CSUtil.Commons {
         /// then you can not use a lambda, instead use `if (cond) { Log._DebugOnlyWarning() }`
         /// </summary>
         /// <param name="cond">The condition</param>
-        /// <param name="s">The function which returns text to log</param>
+        /// <param name="formatFn">The function which returns text to log</param>
         [Conditional("DEBUG")]
-        public static void _DebugOnlyWarningIf(bool cond, Func<string> s) {
+        public static void _DebugOnlyWarningIf(bool cond, Func<string> formatFn) {
             if (cond) {
-                LogToFile(s(), LogLevel.Warning);
+                LogToFile(formatFn(), LogLevel.Warning);
             }
         }
 
@@ -160,10 +160,10 @@ namespace CSUtil.Commons {
         /// then you can not use a lambda, instead use `if (cond) { Log.Warning() }`
         /// </summary>
         /// <param name="cond">The condition</param>
-        /// <param name="s">The function which returns text to log</param>
-        public static void WarningIf(bool cond, Func<string> s) {
+        /// <param name="formatFn">The function which returns text to log</param>
+        public static void WarningIf(bool cond, Func<string> formatFn) {
             if (cond) {
-                LogToFile(s(), LogLevel.Warning);
+                LogToFile(formatFn(), LogLevel.Warning);
             }
         }
 
@@ -175,16 +175,9 @@ namespace CSUtil.Commons {
             LogToFile(string.Format(format, args), LogLevel.Error);
         }
 
-        /// <summary>
-        /// Log an error only if cond is true
-        /// NOTE: If a lambda contains values from `out` and `ref` scope args,
-        /// then you can not use a lambda, instead use `if (cond) { Log.Error() }`
-        /// </summary>
-        /// <param name="cond">The condition</param>
-        /// <param name="s">The function which returns text to log</param>
-        public static void ErrorIf(bool cond, Func<string> s) {
+        public static void ErrorIf(bool cond, Func<string> formatFn) {
             if (cond) {
-                LogToFile(s(), LogLevel.Error);
+                LogToFile(formatFn(), LogLevel.Error);
             }
         }
 

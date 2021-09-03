@@ -311,8 +311,9 @@ namespace TrafficManager.UI.SubTools {
                     hoveredDirection = e.Key;
                 }
 
-                GUI.color = guiColor;
+                GUI.color = GUI.color.WithAlpha(TrafficManagerTool.OverlayAlpha);
                 GUI.DrawTexture(boundingBox, RoadUI.ParkingRestrictionTextures[allowed]);
+                GUI.color = guiColor;
 
                 if (hoveredHandle && clicked && !IsCursorInPanel() &&
                     parkingManager.ToggleParkingAllowed(segmentId, hoveredDirection)) {
