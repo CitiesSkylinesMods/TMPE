@@ -60,26 +60,23 @@ namespace TrafficManager.UI {
         public class RemoveVehicleButton : BaseUButton {
             public override void Start() {
                 base.Start();
-                this.Skin = new ButtonSkin {
-                    BackgroundPrefix = "Clear",
-                    Prefix = "Clear",
-                    BackgroundHovered = true,
-                    BackgroundActive = true,
-                    ForegroundHovered = true,
-                    ForegroundActive = true,
-                };
+                this.Skin = ButtonSkin.CreateSimple(
+                                          foregroundPrefix: "Clear",
+                                          backgroundPrefix: "Clear")
+                                      .CanHover()
+                                      .CanActivate();
 
                 // This creates an atlas for a single button
-                var futureAtlas = new U.AtlasBuilder();
+                var futureAtlas = new U.AtlasBuilder(
+                    atlasName: "RemoveVehButton_Atlas",
+                    loadingPath: "Clear",
+                    sizeHint: new IntVector2(256));
                 this.Skin.UpdateAtlasBuilder(
                     atlasBuilder: futureAtlas,
                     spriteSize: new IntVector2(50));
-                this.atlas = futureAtlas.CreateAtlas(
-                    atlasName: "RemoveVehButton_Atlas",
-                    loadingPath: "Clear",
-                    atlasSizeHint: new IntVector2(256));
+                this.atlas = futureAtlas.CreateAtlas();
 
-                UpdateButtonImageAndTooltip();
+                UpdateButtonSkinAndTooltip();
                 width = height = 30f;
             }
 

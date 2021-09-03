@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.State.ConfigData {
+namespace TrafficManager.State.ConfigData {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -46,6 +46,12 @@
         public float GuiScale = 100f;
 
         /// <summary>
+        /// If checked, will use <see cref="ColossalFramework.UI.UIView"/> resolution instead of
+        /// what <see cref="UnityEngine.Screen"/> object returns.
+        /// </summary>
+        public bool GuiScaleToResolution = true;
+
+        /// <summary>
         /// Overlay transparency
         /// </summary>
         public byte OverlayTransparency = 40;
@@ -70,6 +76,10 @@
         /// but internally Kmph are still used).
         /// </summary>
         public bool DisplaySpeedLimitsMph = false;
+
+        public SpeedUnit GetDisplaySpeedUnit() => DisplaySpeedLimitsMph
+            ? SpeedUnit.Mph
+            : SpeedUnit.Kmph;
 
         /// <summary>
         /// Selected theme for road signs when MPH is active.

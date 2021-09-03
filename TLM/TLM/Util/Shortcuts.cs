@@ -185,6 +185,11 @@ namespace TrafficManager.Util {
                 .SetMessage(title, message, true);
         }
 
+        internal static Color WithAlpha(this Color color, float alpha) {
+            color.a = alpha;
+            return color;
+        }
+
         internal static bool ShiftIsPressed => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         internal static bool ControlIsPressed => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
@@ -233,6 +238,22 @@ namespace TrafficManager.Util {
         internal static Vector3 ChangeY(this Vector3 vector, float newY) {
             vector.y = newY;
             return vector;
+        }
+
+        /// <summary>
+        /// Appends DLC_BitMasks not assigned in SteamHelper.GetOwnedDLCMask() (probably vanilla bug)
+        /// </summary>
+        /// <param name="dlcBitMask">bitMask value to append missing flags</param>
+        /// <returns></returns>
+        internal static SteamHelper.DLC_BitMask IncludingMissingGameDlcBitmasks(this SteamHelper.DLC_BitMask dlcBitMask) {
+            if (SteamHelper.IsDLCOwned(SteamHelper.DLC.ModderPack7)) {
+                dlcBitMask |= SteamHelper.DLC_BitMask.ModderPack7; //Bridges & Piers
+            }
+            if (SteamHelper.IsDLCOwned(SteamHelper.DLC.ModderPack8)) {
+                dlcBitMask |= SteamHelper.DLC_BitMask.ModderPack8; //Train Stations
+            }
+
+            return dlcBitMask;
         }
     }
 }

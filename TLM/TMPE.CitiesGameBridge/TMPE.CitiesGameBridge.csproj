@@ -77,7 +77,6 @@
     <Compile Include="Service\CitizenService.cs" />
     <Compile Include="Service\NetService.cs" />
     <Compile Include="Service\SimulationService.cs" />
-    <Compile Include="Service\BuildingService.cs" />
     <Compile Include="Service\VehicleService.cs" />
   </ItemGroup>
   <ItemGroup>

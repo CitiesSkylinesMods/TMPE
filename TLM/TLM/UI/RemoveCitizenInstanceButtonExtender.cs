@@ -51,26 +51,23 @@ namespace TrafficManager.UI {
         public class RemoveCitizenInstanceButton : BaseUButton {
             public override void Start() {
                 base.Start();
-                this.Skin = new ButtonSkin {
-                    BackgroundPrefix = "Clear",
-                    Prefix = "Clear",
-                    BackgroundHovered = true,
-                    BackgroundActive = true,
-                    ForegroundHovered = true,
-                    ForegroundActive = true,
-                };
+                this.Skin = ButtonSkin.CreateSimple(
+                                          backgroundPrefix: "Clear",
+                                          foregroundPrefix: "Clear")
+                                      .CanActivate()
+                                      .CanHover();
 
                 // This creates an atlas for a single button
-                var atlasBuilder = new U.AtlasBuilder();
+                var atlasBuilder = new U.AtlasBuilder(
+                    atlasName: "RemoveCitizenButton_Atlas",
+                    loadingPath: "Clear",
+                    sizeHint: new IntVector2(256));
                 this.Skin.UpdateAtlasBuilder(
                     atlasBuilder: atlasBuilder,
                     spriteSize: new IntVector2(50));
-                this.atlas = atlasBuilder.CreateAtlas(
-                    atlasName: "RemoveCitizenButton_Atlas",
-                    loadingPath: "Clear",
-                    atlasSizeHint: new IntVector2(256));
+                this.atlas = atlasBuilder.CreateAtlas();
 
-                UpdateButtonImageAndTooltip();
+                UpdateButtonSkinAndTooltip();
                 width = height = 30;
             }
 

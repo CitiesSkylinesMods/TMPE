@@ -127,7 +127,7 @@ namespace TrafficManager.State {
 
                 // TM:PE main button also needs to be uidated
                 if (ModUI.Instance.MainMenuButton != null) {
-                    ModUI.Instance.MainMenuButton.UpdateButtonImageAndTooltip();
+                    ModUI.Instance.MainMenuButton.UpdateButtonSkinAndTooltip();
                 }
 
                 RoadUI.ReloadTexturesWithTranslation();

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
     using System;
@@ -56,7 +56,10 @@
         }
 
         public bool IsValid(ushort buildingId) {
-            return Constants.ServiceFactory.BuildingService.IsBuildingValid(buildingId);
+            return CheckBuildingFlags(
+                buildingId,
+                Building.Flags.Created | Building.Flags.Collapsed | Building.Flags.Deleted,
+                Building.Flags.Created);
         }
 
         public void Reset(ref ExtBuilding extBuilding) {
@@ -160,6 +163,24 @@
             for (var i = 0; i < ExtBuildings.Length; ++i) {
                 Reset(ref ExtBuildings[i]);
             }
+        }
+
+        /// <summary>
+        /// Check building flags contain at least one of the flags in <paramref name="flagMask"/>.
+        /// </summary>
+        /// 
+        /// <param name="buildingId">The id of the building to inspect.</param>
+        /// <param name="flagMask">The flags to test.</param>
+        /// <param name="expectedResult">If specified, ensure only the expected flags are found.</param>
+        /// 
+        /// <returns>Returns <c>true</c> if the test passes, otherwise <c>false</c>.</returns>
+        public bool CheckBuildingFlags(ushort buildingId,
+                                       Building.Flags flagMask,
+                                       Building.Flags? expectedResult = null) {
+
+            Building.Flags result = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId].m_flags & flagMask;
+
+            return expectedResult == null ? result != 0 : result == expectedResult;
         }
     }
 }

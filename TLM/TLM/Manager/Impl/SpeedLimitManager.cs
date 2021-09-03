@@ -673,7 +673,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
             // determine vanilla speed limits and customizable NetInfos
-            SteamHelper.DLC_BitMask dlcMask = SteamHelper.GetOwnedDLCMask();
+            SteamHelper.DLC_BitMask dlcMask = SteamHelper.GetOwnedDLCMask().IncludingMissingGameDlcBitmasks();
 
             int numLoaded = PrefabCollection<NetInfo>.LoadedCount();
 

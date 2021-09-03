@@ -3,6 +3,8 @@ namespace TrafficManager.U {
     using System.Collections.Generic;
     using ColossalFramework.UI;
     using CSUtil.Commons;
+    using TrafficManager.State;
+    using TrafficManager.State.ConfigData;
     using TrafficManager.UI.Textures;
     using UnityEngine;
     using TrafficManager.Util;
@@ -22,19 +24,32 @@ namespace TrafficManager.U {
                                                  IntVector2 atlasSizeHint) {
             var loadedTextures = new List<Texture2D>(spriteDefs.Length);
             var loadedSpriteNames = new List<string>();
+#if DEBUG
+            bool debugResourceLoading = DebugSwitch.ResourceLoading.Get();
+#else
+            const bool debugResourceLoading = false;
+#endif
 
             // Load separate sprites and then pack it in a texture together
             foreach (U.AtlasSpriteDef spriteDef in spriteDefs) {
                 // Allow spritedef resouce prefix to override prefix given to this func
-                string prefix = string.IsNullOrEmpty(spriteDef.ResourcePrefix)
-                    ? resourcePrefix
-                    : spriteDef.ResourcePrefix;
+                string prefix = resourcePrefix;
+                string resourceName;
+
+                if (spriteDef.Name.StartsWith("/")) {
+                    // If sprite name starts with /, use it as full resource path without .PNG
+                    resourceName = $"{spriteDef.Name.Substring(1)}.png";
+                } else {
+                    // Otherwise use prefix + sprite name + .PNG
+                    resourceName = $"{prefix}.{spriteDef.Name}.png";
+                }
 
                 //--------------------------
                 // Try loading the texture
                 //--------------------------
-                string resourceName = $"{prefix}.{spriteDef.Name}.png";
-                Log._Debug($"TextureUtil: Loading {resourceName} for sprite={spriteDef.Name}");
+                if (debugResourceLoading) {
+                    Log._Debug($"TextureUtil: Loading {resourceName} for sprite={spriteDef.Name}");
+                }
 
                 Texture2D tex = TextureResources.LoadDllResource(
                     resourceName: resourceName,
@@ -47,7 +62,12 @@ namespace TrafficManager.U {
                 // No error reporting, it is done in LoadDllResource
             }
 
-            Log._Debug($"TextureUtil: Atlas textures loaded, in {spriteDefs.Length}, success {loadedTextures.Count}");
+            if (debugResourceLoading) {
+                Log._Debug(
+                    $"TextureUtil: Atlas textures loaded, in {spriteDefs.Length}, " +
+                    $"success {loadedTextures.Count}");
+            }
+
             return PackTextures(atlasName, atlasSizeHint, loadedTextures, loadedSpriteNames);
         }
 
