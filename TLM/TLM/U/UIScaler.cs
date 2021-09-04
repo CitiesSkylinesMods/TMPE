@@ -49,14 +49,14 @@ namespace TrafficManager.U {
         public static float MaxWidth {
             get {
                 float ret = Config.GuiScaleToResolution ? BaseResolutionX : Screen.width;
-                return ret / (Config.GuiScale * 0.01f);
+                return ret / UIScale;
             }
         }
 
         public static float MaxHeight {
             get {
                 float ret = Config.GuiScaleToResolution ? BaseResolutionY : Screen.height;
-                return ret / (Config.GuiScale * 0.01f);
+                return ret / UIScale;
             }
         }
 
