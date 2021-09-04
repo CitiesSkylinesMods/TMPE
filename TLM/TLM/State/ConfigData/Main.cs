@@ -43,7 +43,7 @@ namespace TrafficManager.State.ConfigData {
         public byte GuiOpacity = 75;
 
         /// <summary>User interface scale for TM:PE. Unit: percents, range: 30..200f.</summary>
-        public float GuiScalePercent = 100f;
+        public float GuiScale = 100f;
 
         /// <summary>
         /// if checked, size remains constnat but pixel count changes when resolution changes. Quality drops with lower resolutions.

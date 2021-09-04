@@ -499,5 +499,16 @@ namespace TrafficManager.UI.MainMenu {
                 button.UpdateButtonSkinAndTooltip();
             }
         }
+
+        public override void Awake() {
+            UIScaler.Reset();
+            base.Awake();
+        }
+
+        protected override void OnResolutionChanged(Vector2 previousResolution, Vector2 currentResolution) {
+            UIScaler.Reset();
+            base.OnResolutionChanged(previousResolution, currentResolution);
+        }
+
     } // end class
 }

@@ -87,7 +87,7 @@ namespace TrafficManager.State {
                                   min: 50,
                                   max: 200,
                                   step: 5,
-                                  defaultValue: GlobalConfig.Instance.Main.GuiScalePercent,
+                                  defaultValue: GlobalConfig.Instance.Main.GuiScale,
                                   eventCallback: OnGuiScaleChanged) as UISlider;
             _guiScaleSlider.parent.Find<UILabel>("Label").width = 500;
 
@@ -259,13 +259,13 @@ namespace TrafficManager.State {
             _guiScaleSlider.tooltip
                 = string.Format(
                     T("General.Tooltip.Format:GUI scale: {0}%"),
-                    GlobalConfig.Instance.Main.GuiScalePercent);
+                    GlobalConfig.Instance.Main.GuiScale);
             if (TMPELifecycle.Instance.IsGameLoaded) {
                 _guiScaleSlider.RefreshTooltip();
             }
 
             GlobalConfig.WriteConfig();
-            Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScalePercent}");
+            Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScale}");
         }
 
         /// <summary>User clicked [scale GUI to screen resolution] checkbox.</summary>
@@ -276,7 +276,7 @@ namespace TrafficManager.State {
             }
 
             GlobalConfig.WriteConfig();
-            Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScalePercent}");
+            Log._Debug($"GuiScale changed to {GlobalConfig.Instance.Main.GuiScale}");
         }
 
         private static void OnOverlayTransparencyChanged(float newVal) {
@@ -375,8 +375,8 @@ namespace TrafficManager.State {
         }
 
         public static void SetGuiScale(float val) {
-            bool changed = (int)val != (int)GlobalConfig.Instance.Main.GuiScalePercent;
-            GlobalConfig.Instance.Main.GuiScalePercent = val;
+            bool changed = (int)val != (int)GlobalConfig.Instance.Main.GuiScale;
+            GlobalConfig.Instance.Main.GuiScale = val;
 
             if (changed && _guiScaleSlider != null) {
                 _guiScaleSlider.value = val;

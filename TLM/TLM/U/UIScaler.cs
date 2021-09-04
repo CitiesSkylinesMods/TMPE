@@ -1,6 +1,8 @@
 namespace TrafficManager.U {
     using ColossalFramework.UI;
+    using System;
     using TrafficManager.State;
+    using TrafficManager.Util;
     using UnityEngine;
 
     /// <summary>
@@ -8,21 +10,20 @@ namespace TrafficManager.U {
     /// https://github.com/kianzarrin/Skylines-ModTools/blob/master/Debugger/UI/UIScaler.cs
     /// </summary>
     public static class UIScaler {
-        private static float BaseResolutionX => UIView.GetAView().GetScreenResolution().x;
+        private static State.ConfigData.Main Config => GlobalConfig.Instance.Main;
 
-        private static float BaseResolutionY => UIView.GetAView().GetScreenResolution().y;
+        internal static Vector2 BaseResolution { get; private set; }
 
-        public static float AspectRatio => Screen.width / (float)Screen.height;
+        internal static float AspectRatio => Screen.width / (float)Screen.height;
 
         /// <summary>Shortcut to reach global main config containing GuiScale.</summary>
-        private static State.ConfigData.Main Config => GlobalConfig.Instance.Main;
 
         /// <summary>
         /// Maximum projected width of GUI space when GUI.matrix = ScaleMatrix
         /// </summary>
-        public static float MaxWidth {
+        internal static float MaxWidth {
             get {
-                float ret = Config.GuiScaleToResolution ? BaseResolutionX : Screen.width;
+                float ret = Config.GuiScaleToResolution ? BaseResolution.x : Screen.width;
                 return ret / UIScale;
             }
         }
@@ -30,14 +31,14 @@ namespace TrafficManager.U {
         /// <summary>
         /// Maximum projected height of GUI space when GUI.matrix = ScaleMatrix
         /// </summary>
-        public static float MaxHeight {
+        internal static float MaxHeight {
             get {
-                float ret = Config.GuiScaleToResolution ? BaseResolutionY : Screen.height;
+                float ret = Config.GuiScaleToResolution ? BaseResolution.y : Screen.height;
                 return ret / UIScale;
             }
         }
 
-        public static float UIAspectScale {
+        internal static float UIAspectScale {
             get {
                 var horizontalScale = Screen.width / MaxWidth;
                 var verticalScale = Screen.height / MaxHeight;
@@ -45,14 +46,14 @@ namespace TrafficManager.U {
             }
         }
 
-        public static float UIScale => Config.GuiScalePercent * 0.01f;
+        internal static float UIScale => Config.GuiScale * 0.01f;
 
-        public static Matrix4x4 ScaleMatrix => Matrix4x4.Scale(Vector3.one * UIAspectScale);
+        internal static Matrix4x4 ScaleMatrix => Matrix4x4.Scale(Vector3.one * UIAspectScale);
 
         /// <summary>
         /// Mouse position in GUI space when GUI.matrix = ScaleMatrix
         /// </summary>
-        public static Vector2 MousePosition {
+        internal static Vector2 MousePosition {
             get {
                 var mouse = Input.mousePosition;
                 mouse.y = Screen.height - mouse.y;
@@ -67,8 +68,16 @@ namespace TrafficManager.U {
         /// <returns>GUI space position.</returns>
         internal static Vector2 ScreenPointToGuiPoint(Vector2 screenPos) {
             return new(
-                x: screenPos.x * BaseResolutionX / Screen.width,
-                y: screenPos.y * BaseResolutionY / Screen.height);
+                x: screenPos.x * BaseResolution.x / Screen.width,
+                y: screenPos.y * BaseResolution.y / Screen.height);
+        }
+
+        internal static void Reset() {
+            try {
+                BaseResolution = UIView.GetAView().GetScreenResolution();
+            } catch (Exception ex) {
+                ex.LogException();
+            }
         }
     }
 }
