@@ -43,11 +43,11 @@ namespace TrafficManager.State.ConfigData {
         public byte GuiOpacity = 75;
 
         /// <summary>User interface scale for TM:PE. Unit: percents, range: 30..200f.</summary>
-        public float GuiScale = 100f;
+        public float GuiScalePercent = 100f;
 
         /// <summary>
-        /// If checked, will use <see cref="ColossalFramework.UI.UIView"/> resolution instead of
-        /// what <see cref="UnityEngine.Screen"/> object returns.
+        /// if checked, size remains constnat but pixel count changes when resolution changes. Quality drops with lower resolutions.
+        /// if unchecked checked, size changes constnat but pixel count remains the same. Maintains same image quality for all resolution.
         /// </summary>
         public bool GuiScaleToResolution = true;
 
