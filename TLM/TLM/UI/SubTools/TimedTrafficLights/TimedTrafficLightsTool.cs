@@ -11,6 +11,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
     using TrafficManager.API.TrafficLight;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.U;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
@@ -1098,6 +1099,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         private void GuiTimedTrafficLightsNode() {
             _cursorInSecondaryPanel = false;
 
+            var oldMatrix = GUI.matrix;
+            GUI.matrix = UIScaler.ScaleMatrix;
             _windowRect2 = GUILayout.Window(
                 id: 252,
                 screenRect: _windowRect2,
@@ -1105,6 +1108,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                 text: T("TTL.Window.Title:Select nodes"),
                 style: WindowStyle,
                 options: EmptyOptionsArray);
+            GUI.matrix = oldMatrix;
 
             _cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
         }
@@ -1115,6 +1119,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         private void GuiTimedTrafficLights() {
             _cursorInSecondaryPanel = false;
 
+            var oldMatrix = GUI.matrix;
+            GUI.matrix = UIScaler.ScaleMatrix;
             _windowRect = GUILayout.Window(
                 id: 253,
                 screenRect: _windowRect,
@@ -1124,11 +1130,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                 options: EmptyOptionsArray);
 
             _cursorInSecondaryPanel = _windowRect.Contains(Event.current.mousePosition);
+            GUI.matrix = oldMatrix;
 
-            GUI.matrix = Matrix4x4.TRS(
-                new Vector3(0, 0, 0),
-                Quaternion.identity,
-                new Vector3(1, 1, 1)); // revert scaling
             ShowGUI();
         }
 
@@ -1138,6 +1141,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         private void GuiTimedTrafficLightsCopy() {
             _cursorInSecondaryPanel = false;
 
+            var oldMatrix = GUI.matrix;
+            GUI.matrix = UIScaler.ScaleMatrix;
             _windowRect2 = GUILayout.Window(
                 id: 255,
                 screenRect: _windowRect2,
@@ -1147,6 +1152,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                 options: EmptyOptionsArray);
 
             _cursorInSecondaryPanel = _windowRect2.Contains(Event.current.mousePosition);
+            GUI.matrix = oldMatrix;
         }
 
         private void GuiTimedTrafficLightsPasteWindow(int num) {

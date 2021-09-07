@@ -195,8 +195,8 @@ namespace TrafficManager.UI {
 
         protected void DragWindow(ref Rect window) {
             Vector2 resolution = UIView.GetAView().GetScreenResolution();
-            window.x = Mathf.Clamp(window.x, 0, resolution.x - window.width);
-            window.y = Mathf.Clamp(window.y, 0, resolution.y - window.height);
+            window.x = Mathf.Clamp(window.x, 0, UIScaler.MaxWidth - window.width);
+            window.y = Mathf.Clamp(window.y, 0, UIScaler.MaxHeight - window.height);
 
             bool primaryMouseDown = Input.GetMouseButton(0);
             if (primaryMouseDown) {

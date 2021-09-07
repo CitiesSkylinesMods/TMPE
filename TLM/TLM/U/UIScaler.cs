@@ -49,14 +49,14 @@ namespace TrafficManager.U {
         public static float MaxWidth {
             get {
                 float ret = Config.GuiScaleToResolution ? BaseResolutionX : Screen.width;
-                return ret / Config.GuiScale;
+                return ret / UIScale;
             }
         }
 
         public static float MaxHeight {
             get {
                 float ret = Config.GuiScaleToResolution ? BaseResolutionY : Screen.height;
-                return ret / Config.GuiScale;
+                return ret / UIScale;
             }
         }
 
@@ -70,8 +70,7 @@ namespace TrafficManager.U {
 
         public static float UIScale => GlobalConfig.Instance.Main.GuiScale * 0.01f;
 
-
-        public static Matrix4x4 ScaleMatrix => Matrix4x4.Scale(Vector3.one * UIScaler.UIScale);
+        public static Matrix4x4 ScaleMatrix => Matrix4x4.Scale(Vector3.one * UIAspectScale);
 
         public static Vector2 MousePosition {
             get {
