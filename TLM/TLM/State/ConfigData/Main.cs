@@ -27,12 +27,6 @@ namespace TrafficManager.State.ConfigData {
         public bool UseUUI = true;
 
         /// <summary>
-        /// If UseUUI enabled, this uses the independant TMPE button but keeps the UUI hotkey conflict resolution.
-        /// This simply hides the UUIButton to keep the hotkey conflict resolution functionality.
-        /// </summary>
-        public bool NoUUIButton = true;
-
-        /// <summary>
         /// Already displayed tutorial messages
         /// </summary>
         public string[] DisplayedTutorialMessages = new string[0];

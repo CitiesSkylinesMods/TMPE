@@ -42,7 +42,6 @@ namespace TrafficManager.State {
         private static int _roadSignMphStyleInt;
 
         private static UICheckBox _useUUI;
-        private static UICheckBox _noUUIButton;
 
 
         private static string T(string key) => Translation.Options.Get(key);
@@ -90,13 +89,6 @@ namespace TrafficManager.State {
                 text: T("General.Checkbox:Use UnifedUI"),
                 defaultValue: GlobalConfig.Instance.Main.UseUUI,
                 eventCallback: OnUseUUIChanged) as UICheckBox;
-            _noUUIButton = generalGroup.AddCheckbox(
-                text: T("General.Checkbox:Put TMPE button outside UUI panel"), // (only use UUI's cross-mod hotkey resolution)
-                defaultValue: GlobalConfig.Instance.Main.NoUUIButton,
-                eventCallback: OnNoUUIButtonChanged) as UICheckBox;
-            Options.Indent(_noUUIButton);
-            _noUUIButton.isEnabled = GlobalConfig.Instance.Main.UseUUI;
-
 
             _guiScaleSlider = generalGroup.AddSlider(
                                   text: T("General.Slider:GUI scale") + ":",
@@ -229,32 +221,13 @@ namespace TrafficManager.State {
 
         private static void OnUseUUIChanged(bool newValue) {
             Log._Debug($"Use UUI set to {newValue}");
-            _noUUIButton.isEnabled = newValue;
             GlobalConfig.Instance.Main.UseUUI = newValue;
             GlobalConfig.WriteConfig();
-
-            if (Options.IsGameLoaded(false)) {
-                if (newValue) {
-                    ModUI.GetTrafficManagerTool(true).AddUUIButton();
-                } else {
-                    ModUI.GetTrafficManagerTool(true).RemoveUUIButton();
-                }
-                ModUI.Instance?.MainMenuButton?.UpdateButtonSkinAndTooltip();
+            var button = ModUI.GetTrafficManagerTool(false)?.UUIButton;
+            if (button) {
+                button.isVisible = newValue;
             }
-        }
-
-        private static void OnNoUUIButtonChanged(bool newValue) {
-            Log._Debug($"No UUI button set to {newValue}");
-            GlobalConfig.Instance.Main.NoUUIButton = newValue;
-            GlobalConfig.WriteConfig();
-
-            if (Options.IsGameLoaded(false)) {
-                var button = ModUI.GetTrafficManagerTool(false)?.UUIButton;
-                if (button) {
-                    button.isVisible = !newValue;
-                }
-                ModUI.Instance?.MainMenuButton?.UpdateButtonSkinAndTooltip();
-            }
+            ModUI.Instance?.MainMenuButton?.UpdateButtonSkinAndTooltip();
         }
 
         private static void OnEnableTutorialsChanged(bool newValue) {

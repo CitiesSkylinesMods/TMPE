@@ -1987,7 +1987,7 @@ namespace TrafficManager.UI {
                     icon: TextureResources.LoadDllResource("MainMenu.MainMenuButton-fg-normal.png", new IntVector2(40)),
                     hotkeys: hotkeys);
 
-                UUIButton.isVisible = !GlobalConfig.Instance.Main.NoUUIButton;
+                UUIButton.isVisible = GlobalConfig.Instance.Main.UseUUI;
             } catch(Exception ex) {
                 ex.LogException();
             }

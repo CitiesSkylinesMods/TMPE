@@ -121,17 +121,6 @@
             Invalidate();
         }
 
-        public void OnGUI() {
-            if (!UIView.HasModalInput()
-                && !UIView.HasInputFocus()
-                && !GlobalConfig.Instance.Main.UseUUI // handled by UUI
-                && KeybindSettingsBase.ToggleMainMenu.IsPressed(Event.current)) {
-                if (ModUI.Instance != null) {
-                    ModUI.Instance.ToggleMainMenu();
-                }
-            }
-        }
-
         protected override string U_OverrideTooltipText() {
             return Translation.Menu.Get("Tooltip:Toggle Main Menu");
             // return KeybindSettingsBase.ToggleMainMenu.ToLocalizedString("\n");
@@ -139,7 +128,7 @@
 
         public override KeybindSetting U_OverrideTooltipShortcutKey() => KeybindSettingsBase.ToggleMainMenu;
 
-        protected override bool IsVisible() => !GlobalConfig.Instance.Main.UseUUI || GlobalConfig.Instance.Main.NoUUIButton;
+        protected override bool IsVisible() => !GlobalConfig.Instance.Main.UseUUI;
 
         public override void HandleClick(UIMouseEventParameter p) {
             try {
