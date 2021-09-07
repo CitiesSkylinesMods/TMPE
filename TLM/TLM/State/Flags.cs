@@ -880,51 +880,44 @@ namespace TrafficManager.State {
             IDictionary<uint, ExtVehicleType> ret = new Dictionary<uint, ExtVehicleType>();
 
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                // Begin local function
-                bool ForEachLane(ushort segId, ref NetSegment segment) {
-                    if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) !=
-                        NetSegment.Flags.Created) {
-                        return true;
-                    }
-
-                    ExtVehicleType?[] allowedTypes = laneAllowedVehicleTypesArray[segId];
-                    if (allowedTypes == null) {
-                        return true;
-                    }
-
-                    Constants.ServiceFactory.NetService.IterateSegmentLanes(
-                        segId,
-                        ref segment,
-                        (uint laneId,
-                         ref NetLane lane,
-                         NetInfo.Lane laneInfo,
-                         ushort sId,
-                         ref NetSegment seg,
-                         byte laneIndex) =>
-                        {
-                            if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
-                                return true;
-                            }
-
-                            if (laneIndex >= allowedTypes.Length) {
-                                return true;
-                            }
-
-                            ExtVehicleType? allowedType = allowedTypes[laneIndex];
-
-                            if (allowedType == null) {
-                                return true;
-                            }
-
-                            ret.Add(laneId, (ExtVehicleType)allowedType);
-                            return true;
-                        });
-                    return true;
+                ref NetSegment segment = ref segmentId.ToSegment();
+                if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) !=
+                    NetSegment.Flags.Created) {
+                    continue;
                 }
 
-                // ↑↑↑
-                // end local function
-                ForEachLane(segmentId, ref segmentId.ToSegment());
+                ExtVehicleType?[] allowedTypes = laneAllowedVehicleTypesArray[segmentId];
+                if (allowedTypes == null) {
+                    continue;
+                }
+
+                Constants.ServiceFactory.NetService.IterateSegmentLanes(
+                    segmentId,
+                    ref segment,
+                    (uint laneId,
+                     ref NetLane lane,
+                     NetInfo.Lane laneInfo,
+                     ushort sId,
+                     ref NetSegment seg,
+                     byte laneIndex) =>
+                    {
+                        if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
+                            return true;
+                        }
+
+                        if (laneIndex >= allowedTypes.Length) {
+                            return true;
+                        }
+
+                        ExtVehicleType? allowedType = allowedTypes[laneIndex];
+
+                        if (allowedType == null) {
+                            return true;
+                        }
+
+                        ret.Add(laneId, (ExtVehicleType)allowedType);
+                        return true;
+                    });
             }
 
             return ret;

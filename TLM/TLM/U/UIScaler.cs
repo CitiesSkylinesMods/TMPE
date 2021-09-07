@@ -54,6 +54,7 @@ namespace TrafficManager.U {
         /// Mouse position in GUI space when GUI.matrix = ScaleMatrix
         /// </summary>
         internal static Vector2 MousePosition {
+
             get {
                 var mouse = Input.mousePosition;
                 mouse.y = Screen.height - mouse.y;

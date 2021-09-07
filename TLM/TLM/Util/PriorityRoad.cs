@@ -155,17 +155,21 @@ namespace TrafficManager.Util {
             }
 
             foreach (ushort segmentId in segmentList) {
-                foreach (bool startNode in Constants.ALL_BOOL) {
-                    ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
-                    bool isEndNode = nodeId == firstNodeId || nodeId == lastNodeId;
-                    if (isEndNode) {
-                        FixHighPriorityJunction(nodeId);
-                    } else {
-                        FixHighPriorityJunction(nodeId, segmentList);
-                    }
-                }
+                FixHighPriorityJunction(segmentId, firstNodeId, lastNodeId, segmentList, false);
+                FixHighPriorityJunction(segmentId, firstNodeId, lastNodeId, segmentList, true);
             }
+
             return record;
+        }
+
+        private static void FixHighPriorityJunction(ushort segmentId, ushort firstNodeId, ushort lastNodeId, List<ushort> segmentList, bool startNode) {
+            ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
+            bool isEndNode = nodeId == firstNodeId || nodeId == lastNodeId;
+            if (isEndNode) {
+                FixHighPriorityJunction(nodeId);
+            } else {
+                FixHighPriorityJunction(nodeId, segmentList);
+            }
         }
 
         private static bool IsStraighOneWay(ushort segmentId0, ushort segmentId1) {
