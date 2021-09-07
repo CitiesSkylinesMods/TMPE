@@ -86,7 +86,7 @@ namespace TrafficManager.State {
                                   eventCallback: OnLockMenuChanged) as UICheckBox;
 
             _useUUI = generalGroup.AddCheckbox(
-                text: T("General.Checkbox:Use UnifedUI"),
+                text: T("General.Checkbox:Use UnifiedUI"),
                 defaultValue: GlobalConfig.Instance.Main.UseUUI,
                 eventCallback: OnUseUUIChanged) as UICheckBox;
 
