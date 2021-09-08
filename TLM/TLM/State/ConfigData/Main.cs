@@ -46,8 +46,8 @@ namespace TrafficManager.State.ConfigData {
         public float GuiScale = 100f;
 
         /// <summary>
-        /// If checked, will use <see cref="ColossalFramework.UI.UIView"/> resolution instead of
-        /// what <see cref="UnityEngine.Screen"/> object returns.
+        /// if checked, size remains constnat but pixel count changes when resolution changes. Quality drops with lower resolutions.
+        /// if unchecked checked, size changes constnat but pixel count remains the same. Maintains same image quality for all resolution.
         /// </summary>
         public bool GuiScaleToResolution = true;
 
