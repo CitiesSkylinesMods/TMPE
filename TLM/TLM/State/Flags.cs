@@ -3,9 +3,7 @@
 namespace TrafficManager.State {
     using ColossalFramework;
     using CSUtil.Commons;
-    using JetBrains.Annotations;
     using System.Collections.Generic;
-    using System.Threading;
     using System;
     using CitiesGameBridge.Service;
     using GenericGameBridge.Service;
