@@ -219,7 +219,9 @@
     <Compile Include="State\Asset\AssetData.cs" />
     <Compile Include="Lifecycle\AssetDataExtension.cs" />
     <Compile Include="State\Asset\SegmentNetworkIDs.cs" />
+    <Compile Include="State\GetSpeedLimitResult.cs" />
     <Compile Include="State\SerializationUtil.cs" />
+    <Compile Include="State\SetSpeedLimitAction.cs" />
     <Compile Include="State\TMPEMoveItIntegration.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />

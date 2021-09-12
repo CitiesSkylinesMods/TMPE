@@ -10,6 +10,7 @@ namespace TrafficManager.Patch._PathManager {
     using State.ConfigData;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Custom.PathFinding;
+    using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
     using TrafficManager.Util.Extensions;
 

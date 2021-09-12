@@ -8,6 +8,14 @@ namespace TrafficManager.API.Traffic.Data {
     /// </summary>
     [Serializable]
     public readonly struct SpeedValue {
+        /// <summary>Speed value in game units corresponding to Unlimited speed on that lane.</summary>
+        public const float UNLIMITED = 20.0f;
+
+        public static readonly SpeedValue UNLIMITED_SPEEDVALUE = new(UNLIMITED);
+
+        /// <summary>Special speed value for no override.</summary>
+        public static readonly SpeedValue NO_OVERRIDE = new(-1f);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SpeedValue"/> struct from game units float.
         /// </summary>
@@ -24,7 +32,7 @@ namespace TrafficManager.API.Traffic.Data {
         /// <summary>
         /// Converts stored value in game units into velocity magnitude (8x the game units)
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Velocity unit used by the game for moving objects.</returns>
         [UsedImplicitly]
         public float ToVelocity() => GameUnits * ApiConstants.SPEED_TO_VELOCITY;
 
@@ -34,15 +42,15 @@ namespace TrafficManager.API.Traffic.Data {
         /// <param name="vel">The velocity value originating from a vehicle velocity</param>
         /// <returns>A new SpeedValue downscaled to game units</returns>
         public static SpeedValue FromVelocity(float vel)
-            => new SpeedValue(vel / ApiConstants.SPEED_TO_VELOCITY);
+            => new(vel / ApiConstants.SPEED_TO_VELOCITY);
 
         /// <summary>
         /// Constructs a SpeedValue from km/hour given as an integer
         /// </summary>
         /// <param name="kmph">A speed in kilometres/hour</param>
         /// <returns>A new speedvalue converted to the game units</returns>
-        public static SpeedValue FromKmph(ushort kmph)
-            => new SpeedValue(kmph / ApiConstants.SPEED_TO_KMPH);
+        public static SpeedValue FromKmph(float kmph)
+            => new(kmph / ApiConstants.SPEED_TO_KMPH);
 
         /// <summary>
         /// Constructs a speed value from km/hour given as a KmphValue
@@ -50,15 +58,15 @@ namespace TrafficManager.API.Traffic.Data {
         /// <param name="kmph">Km/hour typed value</param>
         /// <returns>A new SpeedValue scaled to the game units</returns>
         public static SpeedValue FromKmph(KmphValue kmph)
-            => new SpeedValue(kmph.Kmph / ApiConstants.SPEED_TO_KMPH);
+            => new(kmph.Kmph / ApiConstants.SPEED_TO_KMPH);
 
         /// <summary>
         /// Constructs a SpeedValue from miles/hour given as an integer
         /// </summary>
         /// <param name="mph">A speed in miles/hour</param>
         /// <returns>A new speedvalue converted to the game units</returns>
-        public static SpeedValue FromMph(ushort mph)
-            => new SpeedValue(mph / ApiConstants.SPEED_TO_MPH);
+        public static SpeedValue FromMph(float mph)
+            => new(mph / ApiConstants.SPEED_TO_MPH);
 
         /// <summary>
         /// Constructs a speed value from miles/hour given as a MphValue
@@ -66,7 +74,7 @@ namespace TrafficManager.API.Traffic.Data {
         /// <param name="mph">Miles/hour typed value</param>
         /// <returns>A new SpeedValue scaled to the game units</returns>
         public static SpeedValue FromMph(MphValue mph)
-            => new SpeedValue(mph.Mph / ApiConstants.SPEED_TO_MPH);
+            => new(mph.Mph / ApiConstants.SPEED_TO_MPH);
 
         /// <summary>
         /// Subtracts two speed values
@@ -75,7 +83,7 @@ namespace TrafficManager.API.Traffic.Data {
         /// <param name="y">Second value</param>
         /// <returns>A new SpeedValue which is a difference between x and y</returns>
         public static SpeedValue operator -(SpeedValue x, SpeedValue y)
-            => new SpeedValue(x.GameUnits - y.GameUnits);
+            => new(x.GameUnits - y.GameUnits);
 
         /// <summary>
         /// Convert float game speed to mph and round to nearest STEP
@@ -102,49 +110,32 @@ namespace TrafficManager.API.Traffic.Data {
         /// </summary>
         /// <returns>A typed mph value with integer miles/hour</returns>
         public MphValue ToMphPrecise()
-            => new MphValue((ushort)Mathf.Round(GameUnits * ApiConstants.SPEED_TO_MPH));
+            => new((ushort)Mathf.Round(GameUnits * ApiConstants.SPEED_TO_MPH));
 
         /// <summary>
         /// Converts this SpeedValue into km/hour
         /// </summary>
         /// <returns>A typed km/h value with integer km/hour</returns>
         public KmphValue ToKmphPrecise()
-            => new KmphValue((ushort)Mathf.Round(GameUnits * ApiConstants.SPEED_TO_KMPH));
-    }
+            => new((ushort)Mathf.Round(GameUnits * ApiConstants.SPEED_TO_KMPH));
 
-    /// <summary>
-    /// Represents a speed value expressed in km/hour.
-    /// </summary>
-    [Serializable]
-    public readonly struct KmphValue {
-        public KmphValue(ushort kmph) {
-            Kmph = kmph;
+        public static SpeedValue operator +(SpeedValue left, SpeedValue right)
+            => new(left.GameUnits + right.GameUnits);
+
+        /// <summary>Scales the value by the multiplier.</summary>
+        /// <param name="n">Scale.</param>
+        public SpeedValue Scale(float n) {
+            return new SpeedValue(this.GameUnits * n);
         }
 
-        public override string ToString() => $"{Kmph:0.0} km/h";
+        public float GetKmph() => this.GameUnits * ApiConstants.SPEED_TO_KMPH;
 
-        public ushort Kmph { get; }
+        public float GetMph() => this.GameUnits * ApiConstants.SPEED_TO_MPH;
 
-        /// <returns>A new KmphValue increased by right</returns>
-        public static KmphValue operator +(KmphValue left, ushort right)
-            => new KmphValue((ushort)(left.Kmph + right));
-    }
-
-    /// <summary>
-    /// Represents a speed value expressed in miles/hour.
-    /// </summary>
-    [Serializable]
-    public readonly struct MphValue {
-        public MphValue(ushort mph) {
-            Mph = mph;
+        public string FormatStr(bool displayMph) {
+            return displayMph
+                       ? (int)this.GetMph() + " MPH"
+                       : (int)this.GetKmph() + " km/h";
         }
-
-        public override string ToString() => $"{Mph} MPH";
-
-        public ushort Mph { get; }
-
-        /// <returns>A new MphValue increased by right</returns>
-        public static MphValue operator +(MphValue left, ushort right)
-            => new MphValue((ushort)(left.Mph + right));
     }
 }

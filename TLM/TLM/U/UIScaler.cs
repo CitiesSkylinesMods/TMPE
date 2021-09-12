@@ -68,6 +68,7 @@ namespace TrafficManager.U {
         /// <param name="screenPos">Pixel position.</param>
         /// <returns>GUI space position.</returns>
         internal static Vector2 ScreenPointToGuiPoint(Vector2 screenPos) {
+            // TODO: Optimize, this is frequently called
             return new(
                 x: screenPos.x * BaseResolution.x / Screen.width,
                 y: screenPos.y * BaseResolution.y / Screen.height);
