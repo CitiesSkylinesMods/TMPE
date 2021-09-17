@@ -71,7 +71,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
         public IDictionary<ExtVehicleType, ICustomSegmentLight> CustomLights {
             get;
-        } = new TinyDictionary<ExtVehicleType, ICustomSegmentLight>();
+        } = new Dictionary<ExtVehicleType, ICustomSegmentLight>();
 
         // TODO replace collection
         public LinkedList<ExtVehicleType> VehicleTypes {

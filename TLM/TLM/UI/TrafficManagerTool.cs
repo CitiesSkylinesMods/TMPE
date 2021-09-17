@@ -206,10 +206,10 @@ namespace TrafficManager.UI {
 
             LegacySubTool timedLightsTool = new TimedTrafficLightsTool(this);
 
-            subTools_ = new TinyDictionary<ToolMode, TrafficManagerSubTool> {
+            subTools_ = new Dictionary<ToolMode, TrafficManagerSubTool> {
                 [ToolMode.LaneArrows] = new LaneArrowTool(this),
             };
-            legacySubTools_ = new TinyDictionary<ToolMode, LegacySubTool> {
+            legacySubTools_ = new Dictionary<ToolMode, LegacySubTool> {
                 [ToolMode.ToggleTrafficLight] = new ToggleTrafficLightsTool(this),
                 [ToolMode.AddPrioritySigns] = new PrioritySignsTool(this),
                 [ToolMode.ManualSwitch] = new ManualTrafficLightsTool(this),
