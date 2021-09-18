@@ -191,8 +191,8 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public bool IsAnyGreen() {
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                if (e.Value.IsAnyGreen()) {
+            foreach (ICustomSegmentLight v in CustomLights.Values) {
+                if (v.IsAnyGreen()) {
                     return true;
                 }
             }
@@ -201,8 +201,8 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public bool IsAnyInTransition() {
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                if (e.Value.IsAnyInTransition()) {
+            foreach (ICustomSegmentLight v in CustomLights.Values) {
+                if (v.IsAnyInTransition()) {
                     return true;
                 }
             }
@@ -211,8 +211,8 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public bool IsAnyLeftGreen() {
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                if (e.Value.IsLeftGreen()) {
+            foreach (ICustomSegmentLight v in CustomLights.Values) {
+                if (v.IsLeftGreen()) {
                     return true;
                 }
             }
@@ -221,8 +221,8 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public bool IsAnyMainGreen() {
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                if (e.Value.IsMainGreen()) {
+            foreach (ICustomSegmentLight v in CustomLights.Values) {
+                if (v.IsMainGreen()) {
                     return true;
                 }
             }
@@ -231,8 +231,8 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public bool IsAnyRightGreen() {
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                if (e.Value.IsRightGreen()) {
+            foreach (ICustomSegmentLight v in CustomLights.Values) {
+                if (v.IsRightGreen()) {
                     return true;
                 }
             }
@@ -241,8 +241,8 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public bool IsAllLeftRed() {
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                if (!e.Value.IsLeftRed()) {
+            foreach (ICustomSegmentLight v in CustomLights.Values) {
+                if (!v.IsLeftRed()) {
                     return false;
                 }
             }
@@ -251,8 +251,8 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public bool IsAllMainRed() {
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                if (!e.Value.IsMainRed()) {
+            foreach (ICustomSegmentLight v in CustomLights.Values) {
+                if (!v.IsMainRed()) {
                     return false;
                 }
             }
@@ -261,8 +261,8 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public bool IsAllRightRed() {
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                if (!e.Value.IsRightRed()) {
+            foreach (ICustomSegmentLight v in CustomLights.Values) {
+                if (!v.IsRightRed()) {
                     return false;
                 }
             }
@@ -355,20 +355,20 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public void MakeRed() {
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                e.Value.MakeRed();
+            foreach (ICustomSegmentLight v in CustomLights.Values) {
+                v.MakeRed();
             }
         }
 
         public void MakeRedOrGreen() {
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                e.Value.MakeRedOrGreen();
+            foreach (ICustomSegmentLight v in CustomLights.Values) {
+                v.MakeRedOrGreen();
             }
         }
 
         public void SetLights(RoadBaseAI.TrafficLightState lightState) {
-            foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
-                e.Value.SetStates(lightState, lightState, lightState, false);
+            foreach (ICustomSegmentLight v in CustomLights.Values) {
+                v.SetStates(lightState, lightState, lightState, false);
             }
 
             CalculateAutoPedestrianLightState(ref NodeId.ToNode());
@@ -794,12 +794,12 @@ namespace TrafficManager.TrafficLight.Impl {
                 // delete traffic lights for non-existing vehicle-separated configurations
                 var vehicleTypesToDelete = new HashSet<ExtVehicleType>();
 
-                foreach (KeyValuePair<ExtVehicleType, ICustomSegmentLight> e in CustomLights) {
+                foreach (ExtVehicleType key in CustomLights.Keys) {
                     // if (e.Key == DEFAULT_MAIN_VEHICLETYPE) {
                     //        continue;
                     // }
-                    if (!setupLights.Contains(e.Key)) {
-                        vehicleTypesToDelete.Add(e.Key);
+                    if (!setupLights.Contains(key)) {
+                        vehicleTypesToDelete.Add(key);
                     }
                 }
 

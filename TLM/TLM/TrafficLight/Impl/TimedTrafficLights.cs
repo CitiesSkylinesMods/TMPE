@@ -345,8 +345,8 @@ namespace TrafficManager.TrafficLight.Impl {
             Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(NodeId, ref NodeId.ToNode());
 
             foreach (TimedTrafficLightsStep step in Steps) {
-                foreach (KeyValuePair<ushort, ICustomSegmentLights> e in step.CustomSegmentLights) {
-                    e.Value.Housekeeping(true, true);
+                foreach (ICustomSegmentLights value in step.CustomSegmentLights.Values) {
+                    value.Housekeeping(true, true);
                 }
             }
 
