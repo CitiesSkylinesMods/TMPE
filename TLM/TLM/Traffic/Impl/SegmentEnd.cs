@@ -88,8 +88,8 @@ namespace TrafficManager.Traffic.Impl {
             // reset
             for (byte laneIndex = 0; laneIndex < ret.Length; ++laneIndex) {
                 IDictionary<ushort, uint> laneMetrics = ret[laneIndex];
-                foreach (KeyValuePair<ushort, uint> e in laneMetrics) {
-                    laneMetrics[e.Key] = 0;
+                foreach (ushort key in laneMetrics.Keys.ToList()) {
+                    laneMetrics[key] = 0;
                 }
             }
 
