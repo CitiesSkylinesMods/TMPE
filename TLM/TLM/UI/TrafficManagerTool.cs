@@ -14,9 +14,7 @@ namespace TrafficManager.UI {
     using JetBrains.Annotations;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
-#if DEBUG
     using TrafficManager.State.ConfigData;
-#endif
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.SubTools;
     using TrafficManager.UI.SubTools.SpeedLimits;
@@ -28,9 +26,12 @@ namespace TrafficManager.UI {
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.TimedTrafficLights;
     using TrafficManager.Lifecycle;
+    using UnifiedUI.Helpers;
 
     using static TrafficManager.Util.Shortcuts;
     using static TrafficManager.Util.SegmentTraverser;
+    using TrafficManager.UI.Textures;
+    using TrafficManager.State.Keybinds;
 
     [UsedImplicitly]
     public class TrafficManagerTool
@@ -45,6 +46,8 @@ namespace TrafficManager.UI {
         // public bool InvalidateOnscreenDisplayFlag { get; set; }
 
         public GuideHandler Guide;
+
+        public UIComponent UUIButton;
 
         private ToolMode toolMode_;
 
@@ -114,6 +117,8 @@ namespace TrafficManager.UI {
 
         protected override void OnDestroy() {
             Log.Info("TrafficManagerTool.OnDestroy() called");
+            RemoveUUIButton();
+
             if (nopeCursor_) {
                 Destroy(nopeCursor_);
                 nopeCursor_ = null;
@@ -228,6 +233,7 @@ namespace TrafficManager.UI {
             _confDisposable?.Dispose();
             _confDisposable = GlobalConfig.Instance.Subscribe(this);
 
+            AddUUIButton();
             Log.Info("TrafficManagerTool: Initialization completed.");
         }
 
@@ -1961,6 +1967,35 @@ namespace TrafficManager.UI {
                 // No tool hint support was available means we have to show the default
                 OnscreenDisplay.DisplayIdle();
             }
+        }
+        public void AddUUIButton() {
+            try {
+                var hotkeys = new UUIHotKeys { ActivationKey = KeybindSettingsBase.ToggleMainMenu.Key };
+                hotkeys.AddInToolKey(KeybindSettingsBase.ToggleTrafficLightTool.Key);
+                hotkeys.AddInToolKey(KeybindSettingsBase.LaneArrowTool.Key);
+                hotkeys.AddInToolKey(KeybindSettingsBase.LaneConnectionsTool.Key, () => Options.laneConnectorEnabled);
+                hotkeys.AddInToolKey(KeybindSettingsBase.PrioritySignsTool.Key, () => Options.prioritySignsEnabled);
+                hotkeys.AddInToolKey(KeybindSettingsBase.JunctionRestrictionsTool.Key, () => Options.junctionRestrictionsEnabled);
+                hotkeys.AddInToolKey(KeybindSettingsBase.SpeedLimitsTool.Key, () => Options.customSpeedLimitsEnabled);
+                hotkeys.AddInToolKey(KeybindSettingsBase.LaneConnectorStayInLane.Key, () => activeLegacySubTool_ is LaneConnectorTool);
+
+                UUIButton = UUIHelpers.RegisterToolButton(
+                    name: "TMPE",
+                    groupName: null, // default group
+                    tooltip: "TMPE",
+                    tool: this,
+                    icon: TextureResources.LoadDllResource("MainMenu.MainMenuButton-fg-normal.png", new IntVector2(40)),
+                    hotkeys: hotkeys);
+
+                UUIButton.isVisible = GlobalConfig.Instance.Main.UseUUI;
+            } catch(Exception ex) {
+                ex.LogException();
+            }
+        }
+
+        public void RemoveUUIButton() {
+            Destroy(UUIButton?.gameObject);
+            UUIButton = null;
         }
     }
 }
