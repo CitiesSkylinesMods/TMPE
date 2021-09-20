@@ -22,9 +22,9 @@ namespace TrafficManager.State.ConfigData {
         public bool MainMenuPosLocked = false;
 
         /// <summary>
-        /// Put button inisde UUI and use the UUI Hotkey conflict resolution.
+        /// Put button inisde UUI.
         /// </summary>
-        public bool UseUUI = true;
+        public bool UseUUI = false;
 
         /// <summary>
         /// Already displayed tutorial messages
