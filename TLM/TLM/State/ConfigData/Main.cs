@@ -22,6 +22,11 @@ namespace TrafficManager.State.ConfigData {
         public bool MainMenuPosLocked = false;
 
         /// <summary>
+        /// Put button inisde UUI.
+        /// </summary>
+        public bool UseUUI = false;
+
+        /// <summary>
         /// Already displayed tutorial messages
         /// </summary>
         public string[] DisplayedTutorialMessages = new string[0];
