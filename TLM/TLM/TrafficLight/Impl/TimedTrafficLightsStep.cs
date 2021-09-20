@@ -103,7 +103,7 @@ namespace TrafficManager.TrafficLight.Impl {
         private ITimedTrafficLights timedNode;
 
         public IDictionary<ushort, ICustomSegmentLights> CustomSegmentLights { get; }
-            = new TinyDictionary<ushort, ICustomSegmentLights>();
+            = new Dictionary<ushort, ICustomSegmentLights>();
 
         public LinkedList<ICustomSegmentLights> InvalidSegmentLights { get; }
             = new LinkedList<ICustomSegmentLights>();

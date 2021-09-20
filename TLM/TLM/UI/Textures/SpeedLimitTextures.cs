@@ -25,9 +25,9 @@ namespace TrafficManager.UI.Textures {
 
         static SpeedLimitTextures() {
             // TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
-            TexturesKmph = new TinyDictionary<int, Texture2D>();
-            TexturesMphUS = new TinyDictionary<int, Texture2D>();
-            TexturesMphUK = new TinyDictionary<int, Texture2D>();
+            TexturesKmph = new Dictionary<int, Texture2D>();
+            TexturesMphUS = new Dictionary<int, Texture2D>();
+            TexturesMphUK = new Dictionary<int, Texture2D>();
 
             IntVector2 size = new IntVector2(200);
             IntVector2 sizeUS = new IntVector2(200, 250);

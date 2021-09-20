@@ -97,7 +97,7 @@ namespace TrafficManager.Manager.Impl {
             ushort nodeId,
             VehicleRestrictionsMode busLaneMode)
         {
-            IDictionary<byte, ExtVehicleType> ret = new TinyDictionary<byte, ExtVehicleType>();
+            IDictionary<byte, ExtVehicleType> ret = new Dictionary<byte, ExtVehicleType>();
             NetManager netManager = Singleton<NetManager>.instance;
 
             if (segmentId == 0
