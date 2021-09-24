@@ -147,7 +147,15 @@ namespace TrafficManager.State {
                 return false;
             }
 
-            if ((node.m_flags & NetNode.Flags.Untouchable) != NetNode.Flags.None) {
+            if (node.CountSegments() < 2) {
+                // ignore dead-ends.
+                return false;
+            }
+
+
+            if ((node.m_flags & NetNode.Flags.Untouchable) != NetNode.Flags.None
+                && (node.m_flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None){
+                // untouchable & level_crossing - Movable Bridges mod nodes, not allowed to be controlled by TMPE
                 return false;
             }
 
