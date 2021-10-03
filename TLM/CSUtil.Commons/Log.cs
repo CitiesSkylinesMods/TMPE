@@ -62,7 +62,7 @@ namespace CSUtil.Commons {
                 }
 
                 var args = Environment.GetCommandLineArgs();
-                int index = Array.FindIndex(args, x => x == "-logFile");
+                int index = Array.IndexOf(args, "-logFile");
                 if (index >= 0) {
                     dir = args[index + 1];
                     dir = Path.GetDirectoryName(dir); // drop output_log.txt
