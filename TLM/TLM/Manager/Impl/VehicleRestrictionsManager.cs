@@ -98,7 +98,7 @@ namespace TrafficManager.Manager.Impl {
             ushort nodeId,
             VehicleRestrictionsMode busLaneMode)
         {
-            IDictionary<byte, ExtVehicleType> ret = new TinyDictionary<byte, ExtVehicleType>();
+            IDictionary<byte, ExtVehicleType> ret = new Dictionary<byte, ExtVehicleType>();
             NetManager netManager = Singleton<NetManager>.instance;
 
             if (segmentId == 0
@@ -556,8 +556,8 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
-                NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndLaneIndex.laneIndex];
+            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndIndex.laneIndex];
 
                 ExtVehicleType defaultMask = GetDefaultAllowedVehicleTypes(
                     laneInfo,
@@ -566,7 +566,7 @@ namespace TrafficManager.Manager.Impl {
                 ExtVehicleType currentMask = GetAllowedVehicleTypes(
                     segmentId,
                     netSegment.Info,
-                    (uint)laneIdAndLaneIndex.laneIndex,
+                    (uint)laneIdAndIndex.laneIndex,
                     laneInfo,
                     VehicleRestrictionsMode.Configured);
 

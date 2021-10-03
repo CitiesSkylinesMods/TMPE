@@ -25,7 +25,7 @@ namespace Benchmarks {
 
         [Benchmark]
         public void Foreach_ViaInterface() {
-            IEnumerable<LaneIdAndLaneIndex> nodeSegmentIds = new GetSegmentLaneIdsEnumerable(0, testLanes.Length, testLanes);
+            IEnumerable<LaneIdAndIndex> nodeSegmentIds = new GetSegmentLaneIdsEnumerable(0, testLanes.Length, testLanes);
             foreach (var item in nodeSegmentIds) {
             }
         }

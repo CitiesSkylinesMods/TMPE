@@ -154,7 +154,7 @@ namespace TrafficManager.State {
             }
         }
 
-        internal static void Indent<T>(T component) where T : UIComponent {
+        internal static void Indent(UIComponent component) {
             UILabel label = component.Find<UILabel>("Label");
 
             if (label != null) {

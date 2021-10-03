@@ -349,8 +349,8 @@ namespace TrafficManager.Manager.Impl {
                             // check if any lane is present that matches the given conditions
                             otherPassed = false;
 
-                            foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
-                                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIdAndLaneIndex.laneIndex];
+                            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIdAndIndex.laneIndex];
                                 if ((otherLaneType == NetInfo.LaneType.None ||
                                          (laneInfo.m_laneType & otherLaneType) !=
                                          NetInfo.LaneType.None) &&

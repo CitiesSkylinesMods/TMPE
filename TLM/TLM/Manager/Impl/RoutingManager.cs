@@ -233,9 +233,9 @@ namespace TrafficManager.Manager.Impl {
 
             RecalculateSegmentRoutingData(segmentId);
 
-            foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
-                RecalculateLaneEndRoutingData(segmentId, laneIdAndLaneIndex.laneIndex, laneIdAndLaneIndex.laneId, true);
-                RecalculateLaneEndRoutingData(segmentId, laneIdAndLaneIndex.laneIndex, laneIdAndLaneIndex.laneId, false);
+            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                RecalculateLaneEndRoutingData(segmentId, laneIdAndIndex.laneIndex, laneIdAndIndex.laneId, true);
+                RecalculateLaneEndRoutingData(segmentId, laneIdAndIndex.laneIndex, laneIdAndIndex.laneId, false);
             }
 
             Notifier.Instance.OnSegmentNodesMofied(segmentId, this);
@@ -275,12 +275,12 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         ref NetSegment currentSegment = ref segId.ToSegment();
-                        foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                        foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                             if (IsIncomingLane(
                                 segId,
                                 currentSegment.m_startNode == nodeId,
-                                laneIdAndLaneIndex.laneIndex)) {
-                                Flags.RemoveHighwayLaneArrowFlags(laneIdAndLaneIndex.laneId);
+                                laneIdAndIndex.laneIndex)) {
+                                Flags.RemoveHighwayLaneArrowFlags(laneIdAndIndex.laneId);
                             }
                         }
                     }
@@ -308,14 +308,14 @@ namespace TrafficManager.Manager.Impl {
             SegmentRoutings[segmentId].Reset();
             ResetIncomingHighwayLaneArrows(segmentId);
 
-            foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 if (extendedLogRouting) {
-                    Log._Debug($"RoutingManager.ResetRoutingData: Resetting lane {laneIdAndLaneIndex.laneId}, " +
-                               $"idx {laneIdAndLaneIndex.laneIndex} @ seg. {segmentId}");
+                    Log._Debug($"RoutingManager.ResetRoutingData: Resetting lane {laneIdAndIndex.laneId}, " +
+                               $"idx {laneIdAndIndex.laneIndex} @ seg. {segmentId}");
                 }
 
-                ResetLaneRoutings(laneIdAndLaneIndex.laneId, true);
-                ResetLaneRoutings(laneIdAndLaneIndex.laneId, false);
+                ResetLaneRoutings(laneIdAndIndex.laneId, true);
+                ResetLaneRoutings(laneIdAndIndex.laneId, false);
             }
         }
 

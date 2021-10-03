@@ -149,7 +149,15 @@ namespace TrafficManager.State {
                 return false;
             }
 
-            if ((node.m_flags & NetNode.Flags.Untouchable) != NetNode.Flags.None) {
+            if (node.CountSegments() < 2) {
+                // ignore dead-ends.
+                return false;
+            }
+
+
+            if ((node.m_flags & NetNode.Flags.Untouchable) != NetNode.Flags.None
+                && (node.m_flags & NetNode.Flags.LevelCrossing) != NetNode.Flags.None){
+                // untouchable & level_crossing - Movable Bridges mod nodes, not allowed to be controlled by TMPE
                 return false;
             }
 
@@ -882,44 +890,35 @@ namespace TrafficManager.State {
             IDictionary<uint, ExtVehicleType> ret = new Dictionary<uint, ExtVehicleType>();
 
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                // Begin local function
-                bool ForEachLane(ushort segId, ref NetSegment segment) {
-                    if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) !=
-                        NetSegment.Flags.Created) {
-                        return true;
-                    }
-
-                    ExtVehicleType?[] allowedTypes = laneAllowedVehicleTypesArray[segId];
-                    if (allowedTypes == null) {
-                        return true;
-                    }
-
-                    foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segId)) {
-                        NetInfo.Lane laneInfo = segment.Info.m_lanes[laneIdAndLaneIndex.laneIndex];
-
-                        if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
-                            continue;
-                        }
-
-                        if (laneIdAndLaneIndex.laneIndex >= allowedTypes.Length) {
-                            continue;
-                        }
-
-                        ExtVehicleType? allowedType = allowedTypes[laneIdAndLaneIndex.laneIndex];
-
-                        if (allowedType == null) {
-                            continue;
-                        }
-
-                        ret.Add(laneIdAndLaneIndex.laneId, (ExtVehicleType)allowedType);
-                    }
-
-                    return true;
+                ref NetSegment segment = ref segmentId.ToSegment();
+                if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
+                    continue;
                 }
 
-                // ↑↑↑
-                // end local function
-                ForEachLane(segmentId, ref segmentId.ToSegment());
+                ExtVehicleType?[] allowedTypes = laneAllowedVehicleTypesArray[segmentId];
+                if (allowedTypes == null) {
+                    continue;
+                }
+
+                foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                    NetInfo.Lane laneInfo = segment.Info.m_lanes[laneIdAndIndex.laneIndex];
+
+                    if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
+                        continue;
+                    }
+
+                    if (laneIdAndIndex.laneIndex >= allowedTypes.Length) {
+                        continue;
+                    }
+
+                    ExtVehicleType? allowedType = allowedTypes[laneIdAndIndex.laneIndex];
+
+                    if (allowedType == null) {
+                        continue;
+                    }
+
+                    ret.Add(laneIdAndIndex.laneId, (ExtVehicleType)allowedType);
+                }
             }
 
             return ret;

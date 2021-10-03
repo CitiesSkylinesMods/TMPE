@@ -18,6 +18,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.Util.Extensions;
+    using TrafficManager.U;
 
     public class SpeedLimitsTool : LegacySubTool {
         public const int
@@ -143,6 +144,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         public override void OnToolGUI(Event e) {
             base.OnToolGUI(e);
+            var oldMatrix = GUI.matrix;
+            GUI.matrix = UIScaler.ScaleMatrix;
 
             string unitTitle = string.Format(
                 " ({0})",
@@ -177,8 +180,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                          && defaultsWindowRect.Contains(
                                              Event.current.mousePosition));
 
-            // overlayHandleHovered = false;
-            // ShowSigns(false);
+            GUI.matrix = oldMatrix;
         }
 
         private static NetLane[] laneBuffer => NetManager.instance.m_lanes.m_buffer;
@@ -205,14 +207,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             bool pressed = Input.GetMouseButton(0);
             Color color = MainTool.GetToolColor(pressed, false);
             ref NetSegment netSegment = ref segmentId.ToSegment();
-            foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
-                NetInfo.Lane laneInfo = netSegment.Info.m_lanes[laneIdAndLaneIndex.laneIndex];
+            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                NetInfo.Lane laneInfo = netSegment.Info.m_lanes[laneIdAndIndex.laneIndex];
 
                 bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
                 render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
                 render &= laneInfo.m_finalDirection == finalDirection || finalDirection == NetInfo.Direction.None;
                 if (render) {
-                    RenderLaneOverlay(cameraInfo, laneIdAndLaneIndex.laneId);
+                    RenderLaneOverlay(cameraInfo, laneIdAndIndex.laneId);
                     count++;
                 }
             }

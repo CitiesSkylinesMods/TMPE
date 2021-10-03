@@ -44,8 +44,7 @@ namespace TrafficManager.U {
                 size: alwaysVisible.size);
 
             Rect clampedRect = new Rect(origRect);
-            Vector2 resolution = new Vector2(Screen.width, Screen.height);
-            UIScaler.TryGetScreenResolution(out resolution);
+            Vector2 resolution = UIScaler.BaseResolution;
 
             VectorUtil.ClampRectToScreen(
                 rect: ref clampedRect,

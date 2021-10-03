@@ -92,8 +92,8 @@ namespace TrafficManager.Util.Record {
                     continue;
                 }
 
-                foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
-                    NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndLaneIndex.laneIndex];
+                foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                    NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndIndex.laneIndex];
                     bool match = (laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != 0 &&
                                  (laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != 0;
                     if (!match) {
@@ -101,8 +101,8 @@ namespace TrafficManager.Util.Record {
                     }
 
                     var laneData = new LaneConnectionRecord {
-                        LaneId = laneIdAndLaneIndex.laneId,
-                        LaneIndex = (byte)laneIdAndLaneIndex.laneIndex,
+                        LaneId = laneIdAndIndex.laneId,
+                        LaneIndex = (byte)laneIdAndIndex.laneIndex,
                         StartNode = (bool)netService.IsStartNode(segmentId, nodeId),
                     };
                     ret.Add(laneData);

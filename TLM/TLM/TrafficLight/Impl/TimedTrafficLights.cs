@@ -251,7 +251,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 () => $">>>>> TimedTrafficLights.UpdateDirections: called for node {NodeId}");
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            Directions = new TinyDictionary<ushort, IDictionary<ushort, ArrowDirection>>();
+            Directions = new Dictionary<ushort, IDictionary<ushort, ArrowDirection>>();
 
             for (int i = 0; i < 8; ++i) {
                 ushort sourceSegmentId = node.GetSegment(i);
@@ -264,7 +264,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     logTrafficLights,
                     () => $"TimedTrafficLights.UpdateDirections: Processing source segment {sourceSegmentId}");
 
-                IDictionary<ushort, ArrowDirection> dirs = new TinyDictionary<ushort, ArrowDirection>();
+                IDictionary<ushort, ArrowDirection> dirs = new Dictionary<ushort, ArrowDirection>();
                 Directions.Add(sourceSegmentId, dirs);
                 int endIndex = segEndMan.GetIndex(
                     sourceSegmentId,
@@ -345,8 +345,8 @@ namespace TrafficManager.TrafficLight.Impl {
             Constants.ManagerFactory.TrafficLightManager.AddTrafficLight(NodeId, ref NodeId.ToNode());
 
             foreach (TimedTrafficLightsStep step in Steps) {
-                foreach (KeyValuePair<ushort, ICustomSegmentLights> e in step.CustomSegmentLights) {
-                    e.Value.Housekeeping(true, true);
+                foreach (ICustomSegmentLights value in step.CustomSegmentLights.Values) {
+                    value.Housekeeping(true, true);
                 }
             }
 

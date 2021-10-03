@@ -2,7 +2,7 @@ namespace CSUtil.Commons {
     using System;
     using System.Diagnostics;
     using System.IO;
-    using System.Threading;
+    using System.Linq;
     using UnityEngine;
     using Debug = UnityEngine.Debug;
 
@@ -40,9 +40,9 @@ namespace CSUtil.Commons {
     public static class Log {
         private static readonly object LogLock = new object();
 
-        // TODO refactor log filename to configuration
-        private static readonly string LogFilename
-            = Path.Combine(Application.dataPath, "TMPE.log");
+        private const string LOG_FILE_NAME = "TMPE.log";
+
+        private static readonly string LogFilePath;
 
         private enum LogLevel {
             Trace,
@@ -56,8 +56,21 @@ namespace CSUtil.Commons {
 
         static Log() {
             try {
-                if (File.Exists(LogFilename)) {
-                    File.Delete(LogFilename);
+                string dir = Application.dataPath;
+                LogFilePath = Path.Combine(dir, LOG_FILE_NAME);
+                if (File.Exists(LogFilePath)) {
+                    File.Delete(LogFilePath); // delete old file to avoid confusion.
+                }
+
+                var args = Environment.GetCommandLineArgs().ToList();
+                int index = args.IndexOf("-logFile");
+                if (index >= 0) {
+                    dir = args[index + 1];
+                    dir = Path.GetDirectoryName(dir); // drop output_log.txt
+                    LogFilePath = Path.Combine(dir, LOG_FILE_NAME);
+                    if (File.Exists(LogFilePath)) {
+                        File.Delete(LogFilePath);
+                    }
                 }
             }
             catch (Exception e) {
@@ -189,7 +202,7 @@ namespace CSUtil.Commons {
 
         private static void LogToFile(string log, LogLevel level) {
             lock(LogLock){
-                using (StreamWriter w = File.AppendText(LogFilename)) {
+                using (StreamWriter w = File.AppendText(LogFilePath)) {
                     long secs = _sw.ElapsedTicks / Stopwatch.Frequency;
                     long fraction = _sw.ElapsedTicks % Stopwatch.Frequency;
                     w.WriteLine(

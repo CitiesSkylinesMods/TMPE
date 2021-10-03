@@ -49,8 +49,8 @@ namespace TrafficManager.Traffic.Impl {
         /// Number of vehicles / vehicle length going to a certain segment.
         /// First key: source lane index, second key: target segment id, value: total normalized vehicle length
         /// </summary>
-        private IDictionary<ushort, uint>[] numVehiclesMovingToSegmentId; // minimum speed required
-        private IDictionary<ushort, uint>[] numVehiclesGoingToSegmentId; // no minimum speed required
+        private Dictionary<ushort, uint>[] numVehiclesMovingToSegmentId; // minimum speed required
+        private Dictionary<ushort, uint>[] numVehiclesGoingToSegmentId; // no minimum speed required
 
         public override string ToString() {
             return $"[SegmentEnd {base.ToString()}\n" +
@@ -84,14 +84,14 @@ namespace TrafficManager.Traffic.Impl {
             // TODO pre-calculate this
             uint avgSegLen = (uint)SegmentId.ToSegment().m_averageLength;
 
-            IDictionary<ushort, uint>[] ret =
+            Dictionary<ushort, uint>[] ret =
                 includeStopped ? numVehiclesGoingToSegmentId : numVehiclesMovingToSegmentId;
 
             // reset
             for (byte laneIndex = 0; laneIndex < ret.Length; ++laneIndex) {
                 IDictionary<ushort, uint> laneMetrics = ret[laneIndex];
-                foreach (KeyValuePair<ushort, uint> e in laneMetrics) {
-                    laneMetrics[e.Key] = 0;
+                foreach (ushort key in laneMetrics.Keys.ToList()) {
+                    laneMetrics[key] = 0;
                 }
             }
 
@@ -315,15 +315,15 @@ namespace TrafficManager.Traffic.Impl {
         }
 
         private void RebuildVehicleNumDicts(ref NetNode node) {
-            numVehiclesMovingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
-            numVehiclesGoingToSegmentId = new TinyDictionary<ushort, uint>[numLanes];
+            numVehiclesMovingToSegmentId = new Dictionary<ushort, uint>[numLanes];
+            numVehiclesGoingToSegmentId = new Dictionary<ushort, uint>[numLanes];
 
-            foreach (LaneIdAndLaneIndex laneIdAndLaneIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(SegmentId)) {
-                IDictionary<ushort, uint> numVehicleMoving = new TinyDictionary<ushort, uint>();
-                IDictionary<ushort, uint> numVehicleGoing = new TinyDictionary<ushort, uint>();
+            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(SegmentId)) {
+                var numVehicleMoving = new Dictionary<ushort, uint>();
+                var numVehicleGoing = new Dictionary<ushort, uint>();
 
-                numVehiclesMovingToSegmentId[laneIdAndLaneIndex.laneIndex] = numVehicleMoving;
-                numVehiclesGoingToSegmentId[laneIdAndLaneIndex.laneIndex] = numVehicleGoing;
+                numVehiclesMovingToSegmentId[laneIdAndIndex.laneIndex] = numVehicleMoving;
+                numVehiclesGoingToSegmentId[laneIdAndIndex.laneIndex] = numVehicleGoing;
             }
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
@@ -342,12 +342,9 @@ namespace TrafficManager.Traffic.Impl {
                     continue;
                 }
 
-                foreach (TinyDictionary<ushort, uint> numVehiclesMovingToSegId in numVehiclesMovingToSegmentId) {
-                    numVehiclesMovingToSegId[segId] = 0;
-                }
-
-                foreach (TinyDictionary<ushort, uint> numVehiclesGoingToSegId in numVehiclesGoingToSegmentId) {
-                    numVehiclesGoingToSegId[segId] = 0;
+                for (int j = 0; j < numLanes; j++) {
+                    numVehiclesMovingToSegmentId[j][segId] = 0;
+                    numVehiclesGoingToSegmentId[j][segId] = 0;
                 }
             }
         } // end RebuildVehicleNumDicts

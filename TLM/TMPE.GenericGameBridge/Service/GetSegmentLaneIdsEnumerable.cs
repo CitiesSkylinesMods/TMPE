@@ -7,7 +7,7 @@ namespace GenericGameBridge.Service {
     /// This implementation is just for perf optimizations and should be handled with care since it returns a mutable struct!
     /// This should be fine for the regular foreach use case, but could cause bugs if used for anything else inappropriately.
     /// </summary>
-    public readonly struct GetSegmentLaneIdsEnumerable : IEnumerable<LaneIdAndLaneIndex> {
+    public readonly struct GetSegmentLaneIdsEnumerable : IEnumerable<LaneIdAndIndex> {
         private readonly uint _initialLaneId;
         private readonly int _netInfoLaneLength;
         private readonly NetLane[] _laneBuffer;
@@ -30,7 +30,7 @@ namespace GenericGameBridge.Service {
         /// Explicit interface implementation.
         /// </summary>
         /// <returns>Returns a boxed GetSegmentLaneIdsEnumerator struct.</returns>
-        IEnumerator<LaneIdAndLaneIndex> IEnumerable<LaneIdAndLaneIndex>.GetEnumerator() {
+        IEnumerator<LaneIdAndIndex> IEnumerable<LaneIdAndIndex>.GetEnumerator() {
             return new GetSegmentLaneIdsEnumerator(_initialLaneId, _netInfoLaneLength, _laneBuffer);
         }
 
