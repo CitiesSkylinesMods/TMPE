@@ -163,36 +163,17 @@ namespace CitiesGameBridge.Service {
             return 0;
         }
 
-        public void IterateSegmentLanes(ushort segmentId, NetSegmentLaneHandler handler) {
-            IterateSegmentLanes(
-                segmentId,
-                ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
-                handler);
-        }
-
-        public void IterateSegmentLanes(ushort segmentId,
-                                        ref NetSegment segment,
-                                        NetSegmentLaneHandler handler) {
-            NetInfo segmentInfo = segment.Info;
-            if (segmentInfo == null) {
-                return;
+        public GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId) {
+            NetManager netManager = Singleton<NetManager>.instance;
+            ref NetSegment netSegment = ref netManager.m_segments.m_buffer[segmentId];
+            uint initialLaneId = netSegment.m_lanes;
+            NetInfo netInfo = netSegment.Info;
+            NetLane[] laneBuffer = netManager.m_lanes.m_buffer;
+            if (netInfo == null) {
+                return new GetSegmentLaneIdsEnumerable(0, 0, laneBuffer);
             }
 
-            byte laneIndex = 0;
-            uint curLaneId = segment.m_lanes;
-            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
-                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
-                handler(
-                    curLaneId,
-                    ref Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId],
-                    laneInfo,
-                    segmentId,
-                    ref segment,
-                    laneIndex);
-
-                curLaneId = Singleton<NetManager>.instance.m_lanes.m_buffer[curLaneId].m_nextLane;
-                ++laneIndex;
-            }
+            return new GetSegmentLaneIdsEnumerable(initialLaneId, netInfo.m_lanes.Length, laneBuffer);
         }
 
         public NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId, bool startNode) {

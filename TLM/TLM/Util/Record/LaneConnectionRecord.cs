@@ -3,6 +3,8 @@ namespace TrafficManager.Util.Record {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using CitiesGameBridge.Service;
+    using GenericGameBridge.Service;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using static TrafficManager.Util.Shortcuts;
@@ -81,29 +83,30 @@ namespace TrafficManager.Util.Record {
             ref NetNode node = ref nodeId.ToNode();
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
-                if (segmentId == 0) continue;
-                bool Handler(
-                    uint laneId,
-                    ref NetLane lane,
-                    NetInfo.Lane laneInfo,
-                    ushort currentSegmentId,
-                    ref NetSegment segment,
-                    byte laneIndex) {
+                if (segmentId == 0) {
+                    continue;
+                }
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+                NetInfo netInfo = netSegment.Info;
+                if (netInfo == null) {
+                    continue;
+                }
+
+                foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                    NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndIndex.laneIndex];
                     bool match = (laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != 0 &&
-                                  (laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != 0;
-                    if (!match)
-                        return true;
+                                 (laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != 0;
+                    if (!match) {
+                        continue;
+                    }
+
                     var laneData = new LaneConnectionRecord {
-                        LaneId = laneId,
-                        LaneIndex = laneIndex,
-                        StartNode = (bool)netService.IsStartNode(currentSegmentId, nodeId),
+                        LaneId = laneIdAndIndex.laneId,
+                        LaneIndex = (byte)laneIdAndIndex.laneIndex,
+                        StartNode = (bool)netService.IsStartNode(segmentId, nodeId),
                     };
                     ret.Add(laneData);
-                    return true;
                 }
-                netService.IterateSegmentLanes(
-                    segmentId,
-                    Handler);
             }
             return ret;
         }

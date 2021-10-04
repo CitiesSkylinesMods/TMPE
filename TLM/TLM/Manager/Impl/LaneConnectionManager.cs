@@ -5,6 +5,8 @@ namespace TrafficManager.Manager.Impl {
     using System.Collections.Generic;
     using System.Linq;
     using System;
+    using CitiesGameBridge.Service;
+    using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -114,24 +116,17 @@ namespace TrafficManager.Manager.Impl {
             if (!Options.laneConnectorEnabled) {
                 return false;
             }
-            bool ret = false;
-            Services.NetService.IterateSegmentLanes(
-              segmentId,
-              (uint laneId,
-               ref NetLane lane,
-               NetInfo.Lane laneInfo,
-               ushort segId,
-               ref NetSegment seg,
-               byte laneIndex) => {
-                   if (HasConnections(
-                        laneId,
-                        seg.m_startNode == nodeId)) {
-                       ret = true;
-                       return false;
-                   }
-                   return true;
-               });
-            return ret;
+
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                if (HasConnections(
+                    laneIdAndIndex.laneId,
+                    netSegment.m_startNode == nodeId)) {
+                    return true;
+                }
+            }
+
+            return false;
        }
 
             /// <summary>
@@ -312,23 +307,15 @@ namespace TrafficManager.Manager.Impl {
                     $"{startNode}) called.");
             }
 
-            Services.NetService.IterateSegmentLanes(
-                segmentId,
-                (uint laneId,
-                 ref NetLane lane,
-                 NetInfo.Lane laneInfo,
-                 ushort segId,
-                 ref NetSegment segment,
-                 byte laneIndex) => {
-                    if (logLaneConnections) {
-                        Log._Debug(
-                            "LaneConnectionManager.RemoveLaneConnectionsFromSegment: Removing " +
-                            $"lane connections from segment {segmentId}, lane {laneId}.");
-                    }
+            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                if (logLaneConnections) {
+                    Log._Debug(
+                        "LaneConnectionManager.RemoveLaneConnectionsFromSegment: Removing " +
+                        $"lane connections from segment {segmentId}, lane {laneIdAndIndex.laneId}.");
+                }
 
-                    RemoveLaneConnections(laneId, startNode, false);
-                    return true;
-                });
+                RemoveLaneConnections(laneIdAndIndex.laneId, startNode, false);
+            }
 
             if (recalcAndPublish) {
                 RoutingManager.Instance.RequestRecalculation(segmentId);
@@ -382,7 +369,7 @@ namespace TrafficManager.Manager.Impl {
             }*/
 
             Flags.RemoveLaneConnections(laneId, startNode);
-            
+
             if (recalcAndPublish) {
                 ushort segment = laneId.ToLane().m_segment;
                 RoutingManager.Instance.RequestRecalculation(segment);
