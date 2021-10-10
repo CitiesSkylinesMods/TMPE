@@ -275,7 +275,7 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         ref NetSegment currentSegment = ref segId.ToSegment();
-                        foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                        foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segId)) {
                             if (IsIncomingLane(
                                 segId,
                                 currentSegment.m_startNode == nodeId,
