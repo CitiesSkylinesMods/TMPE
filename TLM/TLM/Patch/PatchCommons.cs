@@ -23,13 +23,13 @@ namespace TrafficManager.Patch {
 
             bool found = false;
             foreach (CodeInstruction instruction in codes) {
-                if (!found && instruction.opcode.Equals(OpCodes.Brfalse_S)) {
+                if (!found && (instruction.opcode.Equals(OpCodes.Brfalse_S) || instruction.opcode.Equals(OpCodes.Brfalse))) {
                     found = true;
                     yield return instruction; // return found instruction
                     yield return new CodeInstruction(OpCodes.Ldsfld, _vehicleBehaviourManagerInstanceField); // loadInstFiled
                     yield return new CodeInstruction(OpCodes.Ldarg_2); // loadVehicleData
                     yield return new CodeInstruction(OpCodes.Callvirt, _mayDespawnMethod); // callMayDespawn
-                    yield return instruction.Clone(); //brfalse_s clone including label!
+                    yield return instruction.Clone(); //brfalse_s || brfalse - clone including label!
                 } else {
                     yield return instruction;
                 }
