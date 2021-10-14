@@ -20,9 +20,10 @@ namespace TrafficManager.Util.Record {
         InstanceID InstanceID => new InstanceID { NetLane = LaneId };
 
         public void Record() {
-            speedLimit_ = SpeedLimitManager.Instance.GetCustomSpeedLimit(LaneId);
-            if (speedLimit_ == 0)
-                speedLimit_ = null;
+            GetSpeedLimitResult gsl = SpeedLimitManager.Instance.GetCustomSpeedLimit(this.LaneId);
+            this.speedLimit_ = gsl.OverrideValue.HasValue && gsl.OverrideValue.Value.GameUnits > 0f
+                                   ? gsl.OverrideValue.Value.GameUnits
+                                   : (float?)null;
         }
 
         public void Restore() => Transfer(LaneId);
@@ -33,12 +34,12 @@ namespace TrafficManager.Util.Record {
         public void Transfer(uint laneId) {
             ushort segmentId = laneId.ToLane().m_segment;
             var laneInfo = GetLaneInfo(segmentId, LaneIndex);
-            SpeedLimitManager.Instance.SetSpeedLimit(
+            SpeedLimitManager.Instance.SetLaneSpeedLimit(
                 segmentId: segmentId,
-                laneIndex: LaneIndex,
+                laneIndex: this.LaneIndex,
                 laneInfo: laneInfo,
-                laneId: laneId,
-                speedLimit: speedLimit_);
+                laneId: this.LaneId,
+                action: SetSpeedLimitAction.FromNullableFloat(this.speedLimit_));
         }
 
         public static List<SpeedLimitLaneRecord> GetLanes(ushort segmentId) {

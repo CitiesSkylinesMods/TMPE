@@ -1,5 +1,9 @@
 namespace TrafficManager.U {
+    using UnityEngine;
+
     public static class UConst {
+        internal static Color UI_ORANGE = new Color(0xcc / 255f, 0x99 / 255f,0x4c / 255f);
+
         /// <summary>Orange color for shortcut text.</summary>
         private const string SHORTCUT_TEXT_HEX = "#cc994c";
 
