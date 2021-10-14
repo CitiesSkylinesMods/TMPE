@@ -5,6 +5,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using GenericGameBridge.Service;
     using System;
     using System.Collections.Generic;
+    using CitiesGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
@@ -208,23 +209,19 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             int count = 0;
             bool pressed = Input.GetMouseButton(0);
             Color color = MainTool.GetToolColor(pressed, false);
-            netService.IterateSegmentLanes(
-                segmentId,
-                (uint laneId,
-                ref NetLane lane,
-                NetInfo.Lane laneInfo,
-                ushort _,
-                ref NetSegment segment,
-                byte laneIndex) => {
-                    bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
-                    render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
-                    render &= laneInfo.m_finalDirection == finalDirection || finalDirection == NetInfo.Direction.None;
-                    if (render) {
-                        RenderLaneOverlay(cameraInfo, laneId);
-                        count++;
-                    }
-                    return true;
-                });
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                NetInfo.Lane laneInfo = netSegment.Info.m_lanes[laneIdAndIndex.laneIndex];
+
+                bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
+                render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
+                render &= laneInfo.m_finalDirection == finalDirection || finalDirection == NetInfo.Direction.None;
+                if (render) {
+                    RenderLaneOverlay(cameraInfo, laneIdAndIndex.laneId);
+                    count++;
+                }
+            }
+
             return count;
         }
 

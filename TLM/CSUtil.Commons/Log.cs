@@ -2,7 +2,6 @@ namespace CSUtil.Commons {
     using System;
     using System.Diagnostics;
     using System.IO;
-    using System.Linq;
     using UnityEngine;
     using Debug = UnityEngine.Debug;
 
@@ -62,8 +61,8 @@ namespace CSUtil.Commons {
                     File.Delete(LogFilePath); // delete old file to avoid confusion.
                 }
 
-                var args = Environment.GetCommandLineArgs().ToList();
-                int index = args.IndexOf("-logFile");
+                var args = Environment.GetCommandLineArgs();
+                int index = Array.IndexOf(args, "-logFile");
                 if (index >= 0) {
                     dir = args[index + 1];
                     dir = Path.GetDirectoryName(dir); // drop output_log.txt

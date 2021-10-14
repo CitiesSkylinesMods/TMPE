@@ -5,6 +5,7 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using System.Collections.Generic;
     using System;
+    using CitiesGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -549,37 +550,32 @@ namespace TrafficManager.Manager.Impl {
 
         // TODO clean up restrictions (currently we do not check if restrictions are equal with the base type)
         public bool HasSegmentRestrictions(ushort segmentId) {
-            bool ret = false;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            NetInfo netInfo = netSegment.Info;
+            if (netInfo == null) {
+                return false;
+            }
 
-            Services.NetService.IterateSegmentLanes(
-                segmentId,
-                (uint laneId,
-                 ref NetLane lane,
-                 NetInfo.Lane laneInfo,
-                 ushort segId,
-                 ref NetSegment segment,
-                 byte laneIndex) =>
-                {
-                    ExtVehicleType defaultMask = GetDefaultAllowedVehicleTypes(
-                        laneInfo,
-                        VehicleRestrictionsMode.Unrestricted);
+            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndIndex.laneIndex];
 
-                    ExtVehicleType currentMask = GetAllowedVehicleTypes(
-                        segmentId,
-                        segment.Info,
-                        laneIndex,
-                        laneInfo,
-                        VehicleRestrictionsMode.Configured);
+                ExtVehicleType defaultMask = GetDefaultAllowedVehicleTypes(
+                    laneInfo,
+                    VehicleRestrictionsMode.Unrestricted);
 
-                    if (defaultMask != currentMask) {
-                        ret = true;
-                        return false;
-                    }
+                ExtVehicleType currentMask = GetAllowedVehicleTypes(
+                    segmentId,
+                    netSegment.Info,
+                    (uint)laneIdAndIndex.laneIndex,
+                    laneInfo,
+                    VehicleRestrictionsMode.Configured);
 
+                if (defaultMask != currentMask) {
                     return true;
-                });
+                }
+            }
 
-            return ret;
+            return false;
         }
 
         /// <summary>

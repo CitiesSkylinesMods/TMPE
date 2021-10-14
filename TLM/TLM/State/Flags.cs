@@ -7,6 +7,8 @@ namespace TrafficManager.State {
     using System.Collections.Generic;
     using System.Threading;
     using System;
+    using CitiesGameBridge.Service;
+    using GenericGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
@@ -902,8 +904,7 @@ namespace TrafficManager.State {
 
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 ref NetSegment segment = ref segmentId.ToSegment();
-                if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) !=
-                    NetSegment.Flags.Created) {
+                if ((segment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
                     continue;
                 }
 
@@ -912,33 +913,25 @@ namespace TrafficManager.State {
                     continue;
                 }
 
-                Constants.ServiceFactory.NetService.IterateSegmentLanes(
-                    segmentId,
-                    ref segment,
-                    (uint laneId,
-                     ref NetLane lane,
-                     NetInfo.Lane laneInfo,
-                     ushort sId,
-                     ref NetSegment seg,
-                     byte laneIndex) =>
-                    {
-                        if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
-                            return true;
-                        }
+                foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                    NetInfo.Lane laneInfo = segment.Info.m_lanes[laneIdAndIndex.laneIndex];
 
-                        if (laneIndex >= allowedTypes.Length) {
-                            return true;
-                        }
+                    if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {
+                        continue;
+                    }
 
-                        ExtVehicleType? allowedType = allowedTypes[laneIndex];
+                    if (laneIdAndIndex.laneIndex >= allowedTypes.Length) {
+                        continue;
+                    }
 
-                        if (allowedType == null) {
-                            return true;
-                        }
+                    ExtVehicleType? allowedType = allowedTypes[laneIdAndIndex.laneIndex];
 
-                        ret.Add(laneId, (ExtVehicleType)allowedType);
-                        return true;
-                    });
+                    if (allowedType == null) {
+                        continue;
+                    }
+
+                    ret.Add(laneIdAndIndex.laneId, (ExtVehicleType)allowedType);
+                }
             }
 
             return ret;

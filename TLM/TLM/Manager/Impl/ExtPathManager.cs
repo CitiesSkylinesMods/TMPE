@@ -2,6 +2,8 @@ namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using System;
     using System.Linq;
+    using CitiesGameBridge.Service;
+    using GenericGameBridge.Service;
     using State;
     using TrafficManager.API.Manager;
     using TrafficManager.Util;
@@ -346,27 +348,20 @@ namespace TrafficManager.Manager.Impl {
                         {
                             // check if any lane is present that matches the given conditions
                             otherPassed = false;
-                            Constants.ServiceFactory.NetService.IterateSegmentLanes(
-                                segmentId,
-                                (uint laneId,
-                                 ref NetLane lane,
-                                 NetInfo.Lane laneInfo,
-                                 ushort segtId,
-                                 ref NetSegment segment,
-                                 byte laneIndex) => {
-                                    if ((otherLaneType == NetInfo.LaneType.None ||
+
+                            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIdAndIndex.laneIndex];
+                                if ((otherLaneType == NetInfo.LaneType.None ||
                                          (laneInfo.m_laneType & otherLaneType) !=
                                          NetInfo.LaneType.None) &&
                                         (otherVehicleType ==
                                          VehicleInfo.VehicleType.None ||
                                          (laneInfo.m_vehicleType & otherVehicleType) !=
                                          VehicleInfo.VehicleType.None)) {
-                                        otherPassed = true;
-                                        return false;
-                                    }
-
-                                    return true;
-                                });
+                                    otherPassed = true;
+                                    break;
+                                }
+                            }
                         }
 
                         if (otherPassed) {

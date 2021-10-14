@@ -75,13 +75,16 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Factory\IServiceFactory.cs" />
+    <Compile Include="Service\GetSegmentLaneIdsEnumerable.cs" />
     <Compile Include="Service\GetNodeSegmentIdsEnumerable.cs" />
+    <Compile Include="Service\GetSegmentLaneIdsEnumerator.cs" />
     <Compile Include="Service\GetNodeSegmentIdsEnumerator.cs" />
     <Compile Include="Service\ICitizenService.cs" />
     <Compile Include="Service\IVehicleService.cs" />
     <Compile Include="Service\INetService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\ISimulationService.cs" />
+    <Compile Include="Service\LaneIdAndIndex.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
