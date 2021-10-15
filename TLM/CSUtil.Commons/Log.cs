@@ -181,13 +181,21 @@ namespace CSUtil.Commons {
             }
         }
 
-        /// <summary>
-        /// Log error only in debug mode
-        /// </summary>
+        /// <summary>Log error only in debug mode.</summary>
         /// <param name="s">The text</param>
         [Conditional("DEBUG")]
         public static void _DebugOnlyError(string s) {
             LogToFile(s, LogLevel.Error);
+        }
+
+        /// <summary>Log error text only in debug mode and if the condition is false.</summary>
+        /// <param name="cond">The condition must be false to log.</param>
+        /// <param name="s">The error text.</param>
+        [Conditional("DEBUG")]
+        public static void _Assert(bool cond, string s) {
+            if (!cond) {
+                LogToFile(s, LogLevel.Error);
+            }
         }
 
         /// <summary>

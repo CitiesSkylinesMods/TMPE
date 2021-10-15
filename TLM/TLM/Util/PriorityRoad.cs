@@ -633,7 +633,11 @@ namespace TrafficManager.Util {
             IRecordable record = RecordRoad(segmentList);
             foreach (ushort segmentId in segmentList) {
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, true);
-                SpeedLimitManager.Instance.SetSpeedLimit(segmentId, null);
+
+                SpeedLimitManager.Instance.SetSegmentSpeedLimit(
+                    segmentId,
+                    SetSpeedLimitAction.ResetToDefault());
+
                 VehicleRestrictionsManager.Instance.ClearVehicleRestrictions(segmentId);
                 ClearNode(netService.GetSegmentNodeId(segmentId, true));
                 ClearNode(netService.GetSegmentNodeId(segmentId, false));
