@@ -241,49 +241,50 @@ namespace TrafficManager.Manager.Impl {
             Notifier.Instance.OnSegmentNodesMofied(segmentId, this);
         }
 
-        protected void ResetIncomingHighwayLaneArrows(ushort segmentId) {
-            ushort[] nodeIds = new ushort[2]; //TODO remove due to unnecessary allocation
+        protected void ResetIncomingHighwayLaneArrows(ushort centerSegmentId) {
+            ref NetSegment centerSegment = ref centerSegmentId.ToSegment();
 
-            ref NetSegment segment = ref segmentId.ToSegment();
-            nodeIds[0] = segment.m_startNode;
-            nodeIds[1] = segment.m_endNode;
-
-#if DEBUG
-            bool logRouting = DebugSwitch.RoutingBasicLog.Get()
-                              && (DebugSettings.SegmentId <= 0
-                                  || DebugSettings.SegmentId == segmentId);
-#else
-            const bool logRouting = false;
-#endif
-            if (logRouting) {
-                Log._Debug("RoutingManager.ResetRoutingData: Identify nodes connected to " +
-                           $"{segmentId}: nodeIds={nodeIds.ArrayToString()}");
+            if (centerSegment.m_startNode != 0) {
+                ResetIncomingHighwayLaneArrowsOfNode(centerSegmentId, centerSegment.m_startNode);
             }
 
-            // reset highway lane arrows on all incoming lanes
-            foreach (ushort nodeId in nodeIds) {
-                if (nodeId == 0) {
+            if (centerSegment.m_endNode != 0) {
+                ResetIncomingHighwayLaneArrowsOfNode(centerSegmentId, centerSegment.m_endNode);
+            }
+
+#if DEBUG
+            if (DebugSwitch.RoutingBasicLog.Get()
+                && (DebugSettings.SegmentId <= 0
+                    || DebugSettings.SegmentId == segmentId)) {
+                Log._Debug($"RoutingManager.ResetRoutingData: Identify nodes connected to {segmentId}: nodeIds={segment.m_startNode}, {segment.m_endNode}");
+            }
+#endif
+        }
+
+        /// <summary>
+        /// Reset highway lane arrows on all incoming lanes into a segment.
+        /// </summary>
+        /// <param name="centerSegmentId">The segment in the center.</param>
+        /// <param name="centerSegmentNodeId">The node of the segment in the center.</param>
+        private void ResetIncomingHighwayLaneArrowsOfNode(ushort centerSegmentId, ushort centerSegmentNodeId) {
+            ref NetNode node = ref centerSegmentNodeId.ToNode();
+
+            for (int i = 0; i < Constants.MAX_SEGMENTS_OF_NODE; ++i) {
+                ushort neighbourSegmentId = node.GetSegment(i);
+                if (neighbourSegmentId == 0 || neighbourSegmentId == centerSegmentId) {
                     continue;
                 }
 
-                ref NetNode node = ref nodeId.ToNode();
-                for (int i = 0; i < 8; ++i) {
-                    ushort segId = node.GetSegment(i);
-                    if (segId != 0) {
-                        if (segId == segmentId) {
-                            continue;
-                        }
-
-                        ref NetSegment currentSegment = ref segId.ToSegment();
-                        foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segId)) {
-                            if (IsIncomingLane(
-                                segId,
-                                currentSegment.m_startNode == nodeId,
-                                laneIdAndIndex.laneIndex)) {
-                                Flags.RemoveHighwayLaneArrowFlags(laneIdAndIndex.laneId);
-                            }
-                        }
+                ref NetSegment neighbourSegment = ref neighbourSegmentId.ToSegment();
+                foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(neighbourSegmentId)) {
+                    if (!IsIncomingLane(
+                        neighbourSegmentId,
+                        neighbourSegment.m_startNode == centerSegmentNodeId,
+                        laneIdAndIndex.laneIndex)) {
+                        continue;
                     }
+
+                    Flags.RemoveHighwayLaneArrowFlags(laneIdAndIndex.laneId);
                 }
             }
         }
