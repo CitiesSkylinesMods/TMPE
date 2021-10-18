@@ -2,6 +2,7 @@
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.UI;
+    using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
 
     /// <summary>

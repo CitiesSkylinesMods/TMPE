@@ -224,7 +224,9 @@
     <Compile Include="State\SetSpeedLimitAction.cs" />
     <Compile Include="State\TMPEMoveItIntegration.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
+    <Compile Include="UI\Helpers\Highlight.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
+    <Compile Include="UI\Helpers\OverlayHandleColorController.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
     <Compile Include="UI\Helpers\SegmentLaneMarker.cs" />
     <Compile Include="UI\Helpers\ExtUITabStrip.cs" />
@@ -306,6 +308,7 @@
     <Compile Include="UI\MainMenu\MainMenuWindow.ToolPanel.cs">
       <DependentUpon>MainMenuWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\MainMenu\OSD\HoldModifier.cs" />
     <Compile Include="UI\RoadSelectionPanels.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\Helpers\GuideHandler.cs" />
@@ -348,8 +351,32 @@
     <Compile Include="UI\Helpers\TrafficRulesOverlay.cs" />
     <Compile Include="UI\SubTools\PrioritySigns\PrioritySignsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\MphSignStyle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\OverlayLaneSpeedlimitHandle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\OverlaySegmentSpeedlimitHandle.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\SpeedLimitsOverlay.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\SpeedLimitsOverlaySign.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\PaletteGenerator.cs">
+      <DependentUpon>ToolWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\SubTools\SpeedLimits\SetSpeedLimitTarget.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitPaletteButton.cs">
+      <DependentUpon>ToolWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\ToolWindow.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\ToolWindow.ModeButtonsPanel.cs">
+      <DependentUpon>ToolWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\SubTools\SpeedLimits\ToolWindow.ModeDescriptionPanel.cs">
+      <DependentUpon>ToolWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\SubTools\SpeedLimits\ToolWindow.MphToggleButton.cs">
+      <DependentUpon>ToolWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\SubTools\SpeedLimits\ToolWindow.PalettePanel.cs">
+      <DependentUpon>ToolWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\SubTools\TimedTrafficLights\TimedTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\TimedTrafficLights\TTLToolMode.cs" />
     <Compile Include="UI\Textures\JunctionRestrictions.cs" />
@@ -742,7 +769,44 @@
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout_RHT-fg-disabled.png" />
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Roundabout_RHT-fg-normal.png" />
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop_LHT-fg-disabled.png" />
-    <Content Include="Resources\Translations\Strings.csv" />
+    <EmbeddedResource Include="Resources\SpeedLimits\EditDefaults-fg-active.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\EditDefaults-fg-normal.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\EditSegments-fg-active.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\EditSegments-fg-normal.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\MphToggle-fg-active.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\MphToggle-fg-normal.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\NoOverride.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\0.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\10.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\100.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\105.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\110.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\115.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\120.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\125.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\130.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\135.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\140.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\15.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\20.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\25.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\30.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\35.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\40.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\45.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\5.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\50.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\55.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\60.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\65.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\70.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\75.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\80.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\85.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\90.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\95.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\RoadDefaults\roadsigns-default.svg" />
+    <EmbeddedResource Include="Resources\Translations\Strings.csv" />
     <EmbeddedResource Include="Resources\Translations\TrafficLights.csv" />
     <EmbeddedResource Include="Resources\Translations\Tutorials.csv" />
     <EmbeddedResource Include="Resources\Translations\VehicleRestrictions.csv" />

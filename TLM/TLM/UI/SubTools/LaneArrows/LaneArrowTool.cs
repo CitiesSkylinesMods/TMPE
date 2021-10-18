@@ -551,7 +551,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
         }
 
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
+        public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
             switch (fsm_.State) {
                 case State.Select:
                     RenderOverlay_Select(cameraInfo);
@@ -561,6 +561,19 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     RenderOverlay_EditLaneArrows(cameraInfo);
                     break;
             }
+        }
+
+        public override void RenderActiveToolOverlay_GUI() {
+            // No GUI-specific info overlay for lane arrows
+        }
+
+        /// <summary>No generic overlay for other tool modes is provided by this tool, render nothing.</summary>
+        public override void RenderGenericInfoOverlay(RenderManager.CameraInfo cameraInfo) {
+            // No info overlay for other tools
+        }
+
+        public override void RenderGenericInfoOverlay_GUI() {
+            // No GUI-specific info overlay to show while other tools active
         }
 
         /// <summary>Render info overlay for active tool, when UI is in Select state.</summary>

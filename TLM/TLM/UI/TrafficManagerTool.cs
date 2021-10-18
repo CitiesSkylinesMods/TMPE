@@ -213,6 +213,7 @@ namespace TrafficManager.UI {
 
             subTools_ = new Dictionary<ToolMode, TrafficManagerSubTool> {
                 [ToolMode.LaneArrows] = new LaneArrowTool(this),
+                [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
             };
             legacySubTools_ = new Dictionary<ToolMode, LegacySubTool> {
                 [ToolMode.ToggleTrafficLight] = new ToggleTrafficLightsTool(this),
@@ -220,7 +221,6 @@ namespace TrafficManager.UI {
                 [ToolMode.ManualSwitch] = new ManualTrafficLightsTool(this),
                 [ToolMode.TimedTrafficLights] = timedLightsTool,
                 [ToolMode.VehicleRestrictions] = new VehicleRestrictionsTool(this),
-                [ToolMode.SpeedLimits] = new SpeedLimitsTool(this),
                 [ToolMode.LaneConnector] = new LaneConnectorTool(this),
                 [ToolMode.JunctionRestrictions] = new JunctionRestrictionsTool(this),
                 [ToolMode.ParkingRestrictions] = new ParkingRestrictionsTool(this),
@@ -385,6 +385,7 @@ namespace TrafficManager.UI {
 
         public override void RenderOverlay(RenderManager.CameraInfo cameraInfo) {
             RenderOverlayImpl(cameraInfo);
+
             if (GetToolMode() == ToolMode.None) {
                 DefaultRenderOverlay(cameraInfo);
             }
@@ -401,17 +402,23 @@ namespace TrafficManager.UI {
             }
 
             activeLegacySubTool_?.RenderOverlay(cameraInfo);
-            activeSubTool_?.RenderOverlay(cameraInfo);
+            activeSubTool_?.RenderActiveToolOverlay(cameraInfo);
 
-            ToolMode currentMode = GetToolMode();
+            ToolMode currentMode = this.GetToolMode();
 
             // For all _other_ legacy subtools let them render something too
-            foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
+            foreach (KeyValuePair<ToolMode, LegacySubTool> e in this.legacySubTools_) {
                 if (e.Key == currentMode) {
                     continue;
                 }
 
-                e.Value.RenderOverlayForOtherTools(cameraInfo);
+                e.Value?.RenderOverlayForOtherTools(cameraInfo);
+            }
+
+            foreach (var st in this.subTools_) {
+                if (st.Key != this.GetToolMode()) {
+                    st.Value.RenderGenericInfoOverlay(cameraInfo);
+                }
             }
         }
 
@@ -424,8 +431,7 @@ namespace TrafficManager.UI {
             if (!TMPELifecycle.PlayMode) {
                 return; // world info view panels are not availble in edit mode
             }
-            SubTools.PrioritySigns.MassEditOverlay.Show
-                = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+            MassEditOverlay.Show = ControlIsPressed || RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
 
             NetManager.instance.NetAdjust.PathVisible =
                 RoadSelectionPanels.Root.ShouldPathBeVisible();
@@ -433,11 +439,15 @@ namespace TrafficManager.UI {
                 base.RenderOverlay(cameraInfo); // render path.
             }
 
-            if (HoveredSegmentId == 0)
+            if (HoveredSegmentId == 0) {
                 return;
+            }
+
             var netAdjust = NetManager.instance?.NetAdjust;
-            if (netAdjust == null)
+
+            if (netAdjust == null) {
                 return;
+            }
 
             // use the same color as in NetAdjust
             ref NetSegment segment = ref HoveredSegmentId.ToSegment();
@@ -453,20 +463,20 @@ namespace TrafficManager.UI {
                 bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 if (!isRoundabout) {
                     var segments = SegmentTraverser.Traverse(
-                        HoveredSegmentId,
-                        TraverseDirection.AnyDirection,
-                        TraverseSide.Straight,
-                        SegmentStopCriterion.None,
-                        (_) => true);
+                        initialSegmentId: HoveredSegmentId,
+                        direction: TraverseDirection.AnyDirection,
+                        side: TraverseSide.Straight,
+                        stopCrit: SegmentStopCriterion.None,
+                        visitorFun: (_) => true);
                     segmentList = new List<ushort>(segmentList);
                 }
                 foreach (ushort segmentId in segmentList ?? Enumerable.Empty<ushort>()) {
                     ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                     NetTool.RenderOverlay(
-                        cameraInfo,
-                        ref seg,
-                        color,
-                        color);
+                        cameraInfo: cameraInfo,
+                        segment: ref seg,
+                        importantColor: color,
+                        nonImportantColor: color);
                 }
             } else {
                 NetTool.RenderOverlay(cameraInfo, ref segment, color, color);
@@ -581,8 +591,22 @@ namespace TrafficManager.UI {
                     DebugGuiDisplayBuildings();
                 }
 
-                foreach (KeyValuePair<ToolMode, LegacySubTool> en in legacySubTools_) {
-                    en.Value.ShowGUIOverlay(en.Key, en.Key != GetToolMode());
+                //----------------------
+                // Render legacy GUI overlay, and new style GUI mode overlays need to render too
+                ToolMode toolMode = this.GetToolMode();
+
+                foreach (KeyValuePair<ToolMode, LegacySubTool> en in this.legacySubTools_) {
+                    en.Value.ShowGUIOverlay(
+                        toolMode: en.Key,
+                        viewOnly: en.Key != toolMode);
+                }
+
+                foreach (KeyValuePair<ToolMode, TrafficManagerSubTool> st in this.subTools_) {
+                    if (st.Key == toolMode) {
+                        st.Value.RenderActiveToolOverlay_GUI();
+                    } else {
+                        st.Value.RenderGenericInfoOverlay_GUI();
+                    }
                 }
 
                 Color guiColor = GUI.color;

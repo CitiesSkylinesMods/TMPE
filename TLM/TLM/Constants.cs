@@ -22,9 +22,13 @@ namespace TrafficManager {
         [UsedImplicitly]
         public const float SPEED_TO_MPH = 32.06f; // 50 km/h converted to mph
 
-        /// <summary>
-        /// The maximum amount of segments a node can hold.
-        /// </summary>
+        /// <summary>Size for clickable signs used in overlays. Larger than readonly signs.</summary>
+        public const float OVERLAY_INTERACTIVE_SIGN_SIZE = 6.0f;
+
+        /// <summary>Size for readonly signs used in overlays.</summary>
+        public const float OVERLAY_READONLY_SIGN_SIZE = 3.8f;
+
+        /// <summary>The maximum amount of segments a node can hold.</summary>
         public const int MAX_SEGMENTS_OF_NODE = 8;
 
         public static float ByteToFloat(byte b) {
