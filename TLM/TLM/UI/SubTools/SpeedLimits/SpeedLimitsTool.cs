@@ -159,7 +159,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void DeactivateTool() {
-            Object.Destroy(this.Window);
+            UnityEngine.Object.Destroy(this.Window);
             this.Window = null;
         }
 

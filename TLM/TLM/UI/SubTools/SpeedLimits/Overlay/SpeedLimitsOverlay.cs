@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using System.Collections.Generic;
     using System.Linq;
+    using CitiesGameBridge.Service;
     using ColossalFramework;
     using GenericGameBridge.Service;
     using JetBrains.Annotations;
@@ -176,26 +177,19 @@
                                               DrawArgs args,
                                               NetInfo.Direction finalDirection = NetInfo.Direction.None)
         {
-            // ------ visitor function
-            bool ForEachLane(uint laneId,
-                             ref NetLane lane,
-                             NetInfo.Lane laneInfo,
-                             ushort _,
-                             ref NetSegment segment,
-                             byte laneIndex) {
+            bool pressed = Input.GetMouseButton(0);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                NetInfo.Lane laneInfo = netSegment.Info.m_lanes[laneIdAndIndex.laneIndex];
+
                 bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
                 render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
-                render &= laneInfo.m_finalDirection == finalDirection
-                          || finalDirection == NetInfo.Direction.None;
+                render &= laneInfo.m_finalDirection == finalDirection || finalDirection == NetInfo.Direction.None;
 
                 if (render) {
-                    this.RenderLaneOverlay(cameraInfo: cameraInfo, laneId: laneId, args: args);
+                    RenderLaneOverlay(cameraInfo, laneIdAndIndex.laneId, args);
                 }
-
-                return true;
-            } // end visitor function ------
-
-            Shortcuts.netService.IterateSegmentLanes(segmentId, handler: ForEachLane);
+            }
         }
 
         /// <summary>Draw blue lane curves overlay.</summary>

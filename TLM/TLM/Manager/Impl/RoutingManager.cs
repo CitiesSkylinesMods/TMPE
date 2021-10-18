@@ -252,13 +252,13 @@ namespace TrafficManager.Manager.Impl {
                 ResetIncomingHighwayLaneArrowsOfNode(centerSegmentId, centerSegment.m_endNode);
             }
 
-#if DEBUG
-            if (DebugSwitch.RoutingBasicLog.Get()
-                && (DebugSettings.SegmentId <= 0
-                    || DebugSettings.SegmentId == segmentId)) {
-                Log._Debug($"RoutingManager.ResetRoutingData: Identify nodes connected to {segmentId}: nodeIds={segment.m_startNode}, {segment.m_endNode}");
-            }
-#endif
+// #if DEBUG
+//             if (DebugSwitch.RoutingBasicLog.Get()
+//                 && (DebugSettings.SegmentId <= 0
+//                     || DebugSettings.SegmentId == segmentId)) {
+//                 Log._Debug($"RoutingManager.ResetRoutingData: Identify nodes connected to {segmentId}: nodeIds={segment.m_startNode}, {segment.m_endNode}");
+//             }
+// #endif
         }
 
         /// <summary>
