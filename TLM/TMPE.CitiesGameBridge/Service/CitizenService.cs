@@ -61,12 +61,6 @@ namespace CitiesGameBridge.Service {
             return CheckCitizenFlags(citizenId, Citizen.Flags.Created);
         }
 
-        public void ProcessCitizen(uint citizenId, CitizenHandler handler) {
-            handler(
-                citizenId,
-                ref Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId]);
-        }
-
         public void ReleaseCitizenInstance(ushort citizenInstanceId) {
             Singleton<CitizenManager>.instance.ReleaseCitizenInstance(citizenInstanceId);
         }
