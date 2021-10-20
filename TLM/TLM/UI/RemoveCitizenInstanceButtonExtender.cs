@@ -77,13 +77,7 @@ namespace TrafficManager.UI {
                 Log._Debug($"Current citizen: {instance.Citizen}");
 
                 if (instance.Citizen != 0) {
-                    ushort citizenInstanceId = 0;
-                    Constants.ServiceFactory.CitizenService.ProcessCitizen(
-                        instance.Citizen,
-                        (uint citId, ref Citizen cit) => {
-                            citizenInstanceId = cit.m_instance;
-                            return true;
-                        });
+                    ushort citizenInstanceId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instance.Citizen].m_instance;
 
                     Log._Debug(
                         $"Current citizen: {instance.Citizen} Instance: {citizenInstanceId}");
