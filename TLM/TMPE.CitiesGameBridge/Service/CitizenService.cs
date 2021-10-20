@@ -73,9 +73,5 @@ namespace CitiesGameBridge.Service {
                 citizenInstanceId,
                 ref Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId]);
         }
-
-        public void ReleaseCitizenInstance(ushort citizenInstanceId) {
-            Singleton<CitizenManager>.instance.ReleaseCitizenInstance(citizenInstanceId);
-        }
     }
 }
