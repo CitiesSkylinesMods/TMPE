@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
@@ -76,12 +76,8 @@
             ExtCitizens[citizenId].transportMode = ExtTransportMode.None;
 
             ushort targetBuildingId = instanceData.m_targetBuilding;
-            Services.CitizenService.ProcessCitizen(
-                citizenId,
-                (uint citId, ref Citizen cit) => {
-                    cit.SetLocationByBuilding(citId, targetBuildingId);
-                    return true;
-                });
+
+            Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].SetLocationByBuilding(citizenId, targetBuildingId);
 
             if (citizenData.CurrentLocation != Citizen.Location.Moving) {
                 ExtCitizens[citizenId].lastLocation = citizenData.CurrentLocation;
@@ -104,14 +100,7 @@
         }
 
         private void ResetLastLocation(ref ExtCitizen extCitizen) {
-            var loc = Citizen.Location.Moving;
-            Constants.ServiceFactory.CitizenService.ProcessCitizen(
-                extCitizen.citizenId,
-                (uint citId, ref Citizen citizen) => {
-                    loc = citizen.CurrentLocation;
-                    return true;
-                });
-            extCitizen.lastLocation = loc;
+            extCitizen.lastLocation = Singleton<CitizenManager>.instance.m_citizens.m_buffer[extCitizen.citizenId].CurrentLocation;
         }
 
         // stock code

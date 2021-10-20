@@ -50,7 +50,7 @@ namespace TrafficManager.Manager.Impl {
                     case ExtPathMode.ApproachingParkedCar: {
                         // citizen requires a path to their parked car: release instance to prevent
                         // it from floating
-                        Services.CitizenService.ReleaseCitizenInstance((ushort)citizenInstanceId);
+                        Singleton<CitizenManager>.instance.ReleaseCitizenInstance((ushort)citizenInstanceId);
                         break;
                     }
 
@@ -65,8 +65,7 @@ namespace TrafficManager.Manager.Impl {
                             CitizenInstance.Flags.Character)) {
                             // citizen instance requires a car but is walking: release instance to
                             // prevent it from floating
-                            Services.CitizenService.ReleaseCitizenInstance(
-                                (ushort)citizenInstanceId);
+                            Singleton<CitizenManager>.instance.ReleaseCitizenInstance((ushort)citizenInstanceId);
                         }
 
                         break;
@@ -1600,18 +1599,12 @@ namespace TrafficManager.Manager.Impl {
             // relocate parked car if abandoned
             if (extInstance.pathMode == ExtPathMode.CalculatingWalkingPathToParkedCar) {
                 // parked car is unreachable
-                Citizen[] citizensBuffer = Singleton<CitizenManager> .instance.m_citizens.m_buffer;
+                Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
                 ushort parkedVehicleId = citizensBuffer[instanceData.m_citizen].m_parkedVehicle;
 
                 if (parkedVehicleId != 0) {
                     // parked car is present
-                    ushort homeId = 0;
-                    Services.CitizenService.ProcessCitizen(
-                        extCitizen.citizenId,
-                        (uint citId, ref Citizen cit) => {
-                            homeId = cit.m_homeBuilding;
-                            return true;
-                        });
+                    ushort homeId = citizensBuffer[extCitizen.citizenId].m_homeBuilding;
 
                     // calculate distance between citizen and parked car
                     var movedCar = false;
