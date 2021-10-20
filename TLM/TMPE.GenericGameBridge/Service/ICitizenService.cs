@@ -1,6 +1,4 @@
 namespace GenericGameBridge.Service {
-    public delegate bool CitizenHandler(uint citizenId, ref Citizen citizen);
-
     public delegate bool CitizenInstanceHandler(ushort citizenInstanceId,
                                                 ref CitizenInstance citizenInstance);
 
@@ -10,8 +8,6 @@ namespace GenericGameBridge.Service {
                                Citizen.Flags? expectedResult = default);
 
         bool IsCitizenValid(uint citizenId);
-
-        void ProcessCitizen(uint citizenId, CitizenHandler handler);
 
         bool CheckCitizenInstanceFlags(ushort citizenInstanceId,
                                        CitizenInstance.Flags flagMask,
