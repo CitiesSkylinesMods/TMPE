@@ -4,8 +4,6 @@ namespace GenericGameBridge.Service {
                                Citizen.Flags flagMask,
                                Citizen.Flags? expectedResult = default);
 
-        bool IsCitizenValid(uint citizenId);
-
         bool CheckCitizenInstanceFlags(ushort citizenInstanceId,
                                        CitizenInstance.Flags flagMask,
                                        CitizenInstance.Flags? expectedResult =

@@ -55,10 +55,5 @@ namespace CitiesGameBridge.Service {
                 CitizenInstance.Flags.Created | CitizenInstance.Flags.Deleted,
                 CitizenInstance.Flags.Created);
         }
-
-        // TODO: check collapsed flag?
-        public bool IsCitizenValid(uint citizenId) {
-            return CheckCitizenFlags(citizenId, Citizen.Flags.Created);
-        }
     }
 }
