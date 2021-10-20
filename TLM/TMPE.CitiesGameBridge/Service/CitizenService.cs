@@ -60,9 +60,5 @@ namespace CitiesGameBridge.Service {
         public bool IsCitizenValid(uint citizenId) {
             return CheckCitizenFlags(citizenId, Citizen.Flags.Created);
         }
-
-        public void ReleaseCitizenInstance(ushort citizenInstanceId) {
-            Singleton<CitizenManager>.instance.ReleaseCitizenInstance(citizenInstanceId);
-        }
     }
 }

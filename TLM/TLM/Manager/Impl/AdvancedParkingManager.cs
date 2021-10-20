@@ -50,7 +50,7 @@ namespace TrafficManager.Manager.Impl {
                     case ExtPathMode.ApproachingParkedCar: {
                         // citizen requires a path to their parked car: release instance to prevent
                         // it from floating
-                        Services.CitizenService.ReleaseCitizenInstance((ushort)citizenInstanceId);
+                        Singleton<CitizenManager>.instance.ReleaseCitizenInstance((ushort)citizenInstanceId);
                         break;
                     }
 
@@ -65,8 +65,7 @@ namespace TrafficManager.Manager.Impl {
                             CitizenInstance.Flags.Character)) {
                             // citizen instance requires a car but is walking: release instance to
                             // prevent it from floating
-                            Services.CitizenService.ReleaseCitizenInstance(
-                                (ushort)citizenInstanceId);
+                            Singleton<CitizenManager>.instance.ReleaseCitizenInstance((ushort)citizenInstanceId);
                         }
 
                         break;
