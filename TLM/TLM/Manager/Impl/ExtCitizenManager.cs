@@ -36,8 +36,9 @@
             base.InternalPrintDebugInfo();
             Log._Debug($"Extended citizen data:");
 
+            Citizen[] citizenBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
             for (var i = 0; i < ExtCitizens.Length; ++i) {
-                if (!IsValid((uint)i)) {
+                if ((citizenBuffer[(uint)i].m_flags & Citizen.Flags.Created) == 0) {
                     continue;
                 }
 
@@ -100,10 +101,6 @@
             extCitizen.transportMode = ExtTransportMode.None;
             extCitizen.lastTransportMode = ExtTransportMode.None;
             ResetLastLocation(ref extCitizen);
-        }
-
-        private bool IsValid(uint citizenId) {
-            return Constants.ServiceFactory.CitizenService.IsCitizenValid(citizenId);
         }
 
         private void ResetLastLocation(ref ExtCitizen extCitizen) {
