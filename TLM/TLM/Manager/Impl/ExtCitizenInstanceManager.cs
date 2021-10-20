@@ -1185,14 +1185,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public uint GetCitizenId(ushort instanceId) {
-            uint ret = 0;
-            Constants.ServiceFactory.CitizenService.ProcessCitizenInstance(
-                instanceId,
-                (ushort citInstId, ref CitizenInstance citizenInst) => {
-                    ret = citizenInst.m_citizen;
-                    return true;
-                });
-            return ret;
+            return Singleton<CitizenManager>.instance.m_instances.m_buffer[instanceId].m_citizen;
         }
 
         /// <summary>
