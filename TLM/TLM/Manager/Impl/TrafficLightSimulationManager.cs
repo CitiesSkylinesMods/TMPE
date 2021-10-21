@@ -553,7 +553,7 @@ namespace TrafficManager.Manager.Impl {
                     for (int i = 0; i < currentNodeGroup.Count;) {
                         ushort nodeId = currentNodeGroup[i];
 
-                        if (!Services.NetService.IsNodeValid(currentNodeGroup[i])) {
+                        if (!ExtNodeManager.Instance.IsValid(currentNodeGroup[i])) {
                             currentNodeGroup.RemoveAt(i);
                             continue;
                         }
