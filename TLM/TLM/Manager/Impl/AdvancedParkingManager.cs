@@ -60,11 +60,9 @@ namespace TrafficManager.Manager.Impl {
                     case ExtPathMode.CalculatingCarPathToTarget:
                     case ExtPathMode.DrivingToKnownParkPos:
                     case ExtPathMode.DrivingToTarget: {
-                        if (Services.CitizenService.CheckCitizenInstanceFlags(
-                            (ushort)citizenInstanceId,
-                            CitizenInstance.Flags.Character)) {
-                            // citizen instance requires a car but is walking: release instance to
-                            // prevent it from floating
+                        // citizen instance requires a car but is walking: release instance to
+                        // prevent it from floating
+                        if ((Singleton<CitizenManager>.instance.m_instances.m_buffer[(ushort)citizenInstanceId].m_flags & CitizenInstance.Flags.Character) != 0) {
                             Singleton<CitizenManager>.instance.ReleaseCitizenInstance((ushort)citizenInstanceId);
                         }
 
