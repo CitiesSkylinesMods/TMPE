@@ -9,26 +9,6 @@ namespace CitiesGameBridge.Service {
         private CitizenService() { }
 
         /// <summary>
-        /// Check citizen flags contain at least one of the flags in <paramref name="flagMask"/>.
-        /// </summary>
-        /// 
-        /// <param name="citizenId">The id of the citizen to inspect.</param>
-        /// <param name="flagMask">The flags to test.</param>
-        /// <param name="expectedResult">If specified, ensure only the expected flags are found.</param>
-        /// 
-        /// <returns>Returns <c>true</c> if the test passes, otherwise <c>false</c>.</returns>
-        public bool CheckCitizenFlags(uint citizenId,
-                                      Citizen.Flags flagMask,
-                                      Citizen.Flags? expectedResult = null) {
-
-            Citizen.Flags result =
-                Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].m_flags
-                & flagMask;
-
-            return expectedResult == null ? result != 0 : result == expectedResult;
-        }
-
-        /// <summary>
         /// Check citizen instance flags contain at least one of the flags in <paramref name="flagMask"/>.
         /// </summary>
         /// 
