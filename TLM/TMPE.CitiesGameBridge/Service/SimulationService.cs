@@ -14,10 +14,6 @@ namespace CitiesGameBridge.Service {
             Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic
             == SimulationMetaData.MetaBool.True;
 
-        [Obsolete]
-        public bool LeftHandDrive =>
-            TrafficDrivesOnLeft;
-
         public uint CurrentBuildIndex {
             get => Singleton<SimulationManager>.instance.m_currentBuildIndex;
             set => Singleton<SimulationManager>.instance.m_currentBuildIndex = value;
@@ -37,22 +33,6 @@ namespace CitiesGameBridge.Service {
 
         public AsyncAction AddAction(Action action) {
             return Singleton<SimulationManager>.instance.AddAction(action);
-        }
-
-        public void PauseSimulation(bool forced) {
-            if (forced) {
-                Singleton<SimulationManager>.instance.ForcedSimulationPaused = true;
-            } else {
-                Singleton<SimulationManager>.instance.SimulationPaused = true;
-            }
-        }
-
-        public void ResumeSimulation(bool forced) {
-            if (forced) {
-                Singleton<SimulationManager>.instance.ForcedSimulationPaused = false;
-            } else {
-                Singleton<SimulationManager>.instance.SimulationPaused = false;
-            }
         }
     }
 }

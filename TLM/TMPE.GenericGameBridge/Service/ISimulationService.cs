@@ -4,9 +4,6 @@ namespace GenericGameBridge.Service {
     using UnityEngine;
 
     public interface ISimulationService {
-        [Obsolete]
-        bool LeftHandDrive { get; }
-
         bool TrafficDrivesOnLeft { get; }
 
         uint CurrentBuildIndex { get; set; }
@@ -22,9 +19,5 @@ namespace GenericGameBridge.Service {
         bool ForcedSimulationPaused { get; }
 
         AsyncAction AddAction(System.Action action);
-
-        void PauseSimulation(bool forced);
-
-        void ResumeSimulation(bool forced);
     }
 }
