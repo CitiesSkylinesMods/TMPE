@@ -20,9 +20,5 @@ namespace GenericGameBridge.Service {
         void ProcessVehicle(ushort vehicleId, VehicleHandler handler);
 
         void ProcessParkedVehicle(ushort parkedVehicleId, ParkedVehicleHandler handler);
-
-        void ReleaseVehicle(ushort vehicleId);
-
-        void ReleaseParkedVehicle(ushort parkedVehicleId);
     }
 }

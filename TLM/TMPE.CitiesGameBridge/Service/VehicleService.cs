@@ -68,13 +68,5 @@ namespace CitiesGameBridge.Service {
                 vehicleId,
                 ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
         }
-
-        public void ReleaseParkedVehicle(ushort parkedVehicleId) {
-            Singleton<VehicleManager>.instance.ReleaseParkedVehicle(parkedVehicleId);
-        }
-
-        public void ReleaseVehicle(ushort vehicleId) {
-            Singleton<VehicleManager>.instance.ReleaseVehicle(vehicleId);
-        }
     }
 }
