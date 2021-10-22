@@ -7,8 +7,6 @@ namespace CitiesGameBridge.Factory {
 
         private ServiceFactory() { }
 
-        public ICitizenService CitizenService => Service.CitizenService.Instance;
-
         public INetService NetService => Service.NetService.Instance;
 
         public ISimulationService SimulationService => Service.SimulationService.Instance;

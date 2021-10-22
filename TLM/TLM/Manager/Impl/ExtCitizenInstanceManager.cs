@@ -1180,8 +1180,14 @@ namespace TrafficManager.Manager.Impl {
             return position.m_segment != 0;
         }
 
-        public bool IsValid(ushort instanceId) {
-            return Constants.ServiceFactory.CitizenService.IsCitizenInstanceValid(instanceId);
+        /// <summary>
+        /// Checks if CitizenInstance is Created and not Deleted.
+        /// </summary>
+        public bool IsValid(ushort citizenInstanceId) {
+            var createdDeleted = Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_flags
+                & (CitizenInstance.Flags.Created | CitizenInstance.Flags.Deleted);
+
+            return createdDeleted == CitizenInstance.Flags.Created;
         }
 
         public uint GetCitizenId(ushort instanceId) {
