@@ -13,6 +13,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.State;
     using TrafficManager.Traffic;
     using TrafficManager.Util;
+    using ColossalFramework;
 
     // TODO class should be completely reworked, approx. in version 1.10
     public class TimedTrafficLightsStep
@@ -285,7 +286,7 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         internal static uint GetCurrentFrame() {
-            return Constants.ServiceFactory.SimulationService.CurrentFrameIndex >> 6;
+            return Singleton<SimulationManager>.instance.m_currentFrameIndex >> 6;
         }
 
         /// <summary>

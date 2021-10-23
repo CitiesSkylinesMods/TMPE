@@ -1187,7 +1187,7 @@ namespace TrafficManager.Manager.Impl {
                 return VehicleJunctionTransitState.Leave;
             }
 
-            uint currentFrameIndex = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
+            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
             if ((extVehicle.junctionTransitState == VehicleJunctionTransitState.Stop
                  || extVehicle.junctionTransitState == VehicleJunctionTransitState.Blocked)
                 && extVehicle.lastTransitStateUpdate >> ExtVehicleManager.JUNCTION_RECHECK_SHIFT
