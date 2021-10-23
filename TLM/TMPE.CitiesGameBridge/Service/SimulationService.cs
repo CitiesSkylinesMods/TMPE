@@ -26,11 +26,6 @@ namespace CitiesGameBridge.Service {
 
         public Randomizer Randomizer => Singleton<SimulationManager>.instance.m_randomizer;
 
-        public bool SimulationPaused => Singleton<SimulationManager>.instance.SimulationPaused;
-
-        public bool ForcedSimulationPaused =>
-            Singleton<SimulationManager>.instance.ForcedSimulationPaused;
-
         public AsyncAction AddAction(Action action) {
             return Singleton<SimulationManager>.instance.AddAction(action);
         }

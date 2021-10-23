@@ -142,8 +142,8 @@ namespace TrafficManager.Manager.Impl {
                 Flags.ClearHighwayLaneArrows();
                 segmentsUpdated = true;
 
-                if (Services.SimulationService.SimulationPaused ||
-                    Services.SimulationService.ForcedSimulationPaused) {
+                if (Singleton<SimulationManager>.instance.SimulationPaused ||
+                    Singleton<SimulationManager>.instance.ForcedSimulationPaused) {
                     SimulationStep();
                 }
             }
