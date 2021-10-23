@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -404,7 +404,6 @@
     <Compile Include="Util\RoundaboutMassEdit.cs" />
     <Compile Include="Util\SegmentLaneTraverser.cs" />
     <Compile Include="Util\VersionUtil.cs" />
-    <Compile Include="Util\TinyDictionary.cs" />
     <Compile Include="Lifecycle\SerializableDataExtension.cs" />
     <Compile Include="Lifecycle\ThreadingExtension.cs" />
     <Compile Include="TrafficLight\Impl\CustomSegment.cs" />
