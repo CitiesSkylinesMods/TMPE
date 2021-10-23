@@ -766,7 +766,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public void StepRand(ref ExtVehicle extVehicle, bool force) {
-            Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
+            Randomizer rand = Singleton<SimulationManager>.instance.m_randomizer;
             if (force
                 || (rand.UInt32(GlobalConfig.Instance.Gameplay.VehicleTimedRandModulo) == 0))
             {

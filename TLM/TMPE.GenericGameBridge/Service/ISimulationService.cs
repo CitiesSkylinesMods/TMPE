@@ -9,8 +9,6 @@ namespace GenericGameBridge.Service {
 
         uint CurrentFrameIndex { get; }
 
-        Randomizer Randomizer { get; }
-
         AsyncAction AddAction(Action action);
     }
 }

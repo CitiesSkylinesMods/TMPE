@@ -20,8 +20,6 @@ namespace CitiesGameBridge.Service {
 
         public uint CurrentFrameIndex => Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
-        public Randomizer Randomizer => Singleton<SimulationManager>.instance.m_randomizer;
-
         public AsyncAction AddAction(Action action) {
             return Singleton<SimulationManager>.instance.AddAction(action);
         }

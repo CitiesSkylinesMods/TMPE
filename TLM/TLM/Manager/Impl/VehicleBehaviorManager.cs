@@ -2507,7 +2507,7 @@ namespace TrafficManager.Manager.Impl {
 
                     if (vehicleState.laneSpeedRandInterval > 0) {
                         float randSpeed =
-                            Services.SimulationService.Randomizer.Int32(
+                            Singleton<SimulationManager>.instance.m_randomizer.Int32(
                                 (uint)vehicleState.laneSpeedRandInterval + 1u) -
                             (vehicleState.laneSpeedRandInterval / 2f);
 
