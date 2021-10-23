@@ -5,8 +5,6 @@ namespace GenericGameBridge.Service {
     public interface ISimulationService {
         bool TrafficDrivesOnLeft { get; }
 
-        uint CurrentBuildIndex { get; set; }
-
         uint CurrentFrameIndex { get; }
 
         AsyncAction AddAction(Action action);

@@ -13,11 +13,6 @@ namespace CitiesGameBridge.Service {
             Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic
             == SimulationMetaData.MetaBool.True;
 
-        public uint CurrentBuildIndex {
-            get => Singleton<SimulationManager>.instance.m_currentBuildIndex;
-            set => Singleton<SimulationManager>.instance.m_currentBuildIndex = value;
-        }
-
         public uint CurrentFrameIndex => Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
         public AsyncAction AddAction(Action action) {
