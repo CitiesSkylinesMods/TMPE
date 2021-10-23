@@ -9,10 +9,6 @@ namespace CitiesGameBridge.Service {
 
         private SimulationService() { }
 
-        public bool TrafficDrivesOnLeft =>
-            Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic
-            == SimulationMetaData.MetaBool.True;
-
         public AsyncAction AddAction(Action action) {
             return Singleton<SimulationManager>.instance.AddAction(action);
         }

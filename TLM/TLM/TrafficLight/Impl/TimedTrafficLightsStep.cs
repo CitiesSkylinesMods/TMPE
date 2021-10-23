@@ -938,10 +938,9 @@ namespace TrafficManager.TrafficLight.Impl {
 
                             switch (dir) {
                                 case ArrowDirection.Turn: {
-                                    addToFlow =
-                                        Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft
-                                            ? segLight.IsRightGreen()
-                                            : segLight.IsLeftGreen();
+                                    addToFlow = Shortcuts.LHT
+                                        ? segLight.IsRightGreen()
+                                        : segLight.IsLeftGreen();
                                     break;
                                 }
 

@@ -1436,19 +1436,18 @@ namespace TrafficManager.Manager.Impl {
                         IJunctionRestrictionsManager junctionRestrictionsManager
                             = Constants.ManagerFactory.JunctionRestrictionsManager;
                         ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
-                        bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
                         int torIndex = turnOnRedMan.GetIndex(prevPos.m_segment, isTargetStartNode);
 
                         if ((turnOnRedMan.TurnOnRedSegments[torIndex].leftSegmentId ==
                              position.m_segment
                              && junctionRestrictionsManager.IsTurnOnRedAllowed(
-                                 lht,
+                                 Shortcuts.LHT,
                                  prevPos.m_segment,
                                  isTargetStartNode))
                             || (turnOnRedMan.TurnOnRedSegments[torIndex].rightSegmentId ==
                                 position.m_segment
                                 && junctionRestrictionsManager.IsTurnOnRedAllowed(
-                                    !lht,
+                                    !Shortcuts.LHT,
                                     prevPos.m_segment,
                                     isTargetStartNode)))
                         {

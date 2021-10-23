@@ -954,7 +954,7 @@ namespace TrafficManager.Manager.Impl {
                     incomingToRelDir);
             }
 
-            if (Services.SimulationService.TrafficDrivesOnLeft) {
+            if (Shortcuts.LHT) {
                 // mirror situation if traffic drives on left
                 targetToDir = ArrowDirectionUtil.InvertLeftRight(targetToDir);
                 incomingFromDir = ArrowDirectionUtil.InvertLeftRight(incomingFromDir);
@@ -1464,7 +1464,7 @@ namespace TrafficManager.Manager.Impl {
                       NetSegment.Flags.Invert) == NetSegment.Flags.None)
                         ? dir
                         : NetInfo.InvertDirection(dir);
-                NetInfo.Direction dir3 = Services.SimulationService.TrafficDrivesOnLeft
+                NetInfo.Direction dir3 = Shortcuts.LHT
                                              ? NetInfo.InvertDirection(dir2)
                                              : dir2;
 

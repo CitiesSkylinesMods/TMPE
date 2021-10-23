@@ -197,7 +197,7 @@ namespace TrafficManager.Util {
         internal static bool AltIsPressed => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 
         #region directions
-        internal static bool LHT => Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
+        internal static bool LHT => Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True;
         internal static bool RHT => !LHT;
 
         internal static LaneArrows LaneArrows_Near => RHT ? LaneArrows.Right : LaneArrows.Left;

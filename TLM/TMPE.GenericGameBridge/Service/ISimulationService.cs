@@ -3,8 +3,6 @@ namespace GenericGameBridge.Service {
     using System;
 
     public interface ISimulationService {
-        bool TrafficDrivesOnLeft { get; }
-
         AsyncAction AddAction(Action action);
     }
 }
