@@ -82,7 +82,6 @@
     <Compile Include="Service\IVehicleService.cs" />
     <Compile Include="Service\INetService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service\ISimulationService.cs" />
     <Compile Include="Service\LaneIdAndIndex.cs" />
   </ItemGroup>
   <ItemGroup>
