@@ -3,6 +3,5 @@ namespace GenericGameBridge.Service {
     using System;
 
     public interface ISimulationService {
-        AsyncAction AddAction(Action action);
     }
 }

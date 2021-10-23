@@ -1,4 +1,5 @@
 namespace TrafficManager.UI {
+    using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System.Collections.Generic;
@@ -85,10 +86,10 @@ namespace TrafficManager.UI {
                 Log._Debug($"Current vehicle instance: {instance.Vehicle}");
 
                 if (instance.Vehicle != 0) {
-                    Constants.ServiceFactory.SimulationService.AddAction(
+                    Singleton<SimulationManager>.instance.AddAction(
                         () => Constants.ServiceFactory.VehicleService.ReleaseVehicle(instance.Vehicle));
                 } else if (instance.ParkedVehicle != 0) {
-                    Constants.ServiceFactory.SimulationService.AddAction(
+                    Singleton<SimulationManager>.instance.AddAction(
                         () => Constants.ServiceFactory.VehicleService.ReleaseParkedVehicle(instance.ParkedVehicle));
                 }
             }

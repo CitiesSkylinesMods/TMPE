@@ -8,9 +8,5 @@ namespace CitiesGameBridge.Service {
         public static readonly ISimulationService Instance = new SimulationService();
 
         private SimulationService() { }
-
-        public AsyncAction AddAction(Action action) {
-            return Singleton<SimulationManager>.instance.AddAction(action);
-        }
     }
 }
