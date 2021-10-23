@@ -3,7 +3,6 @@ namespace CitiesGameBridge.Service {
     using ColossalFramework;
     using ColossalFramework.Math;
     using GenericGameBridge.Service;
-    using UnityEngine;
 
     public class SimulationService : ISimulationService {
         public static readonly ISimulationService Instance = new SimulationService();
@@ -20,9 +19,6 @@ namespace CitiesGameBridge.Service {
         }
 
         public uint CurrentFrameIndex => Singleton<SimulationManager>.instance.m_currentFrameIndex;
-
-        public Vector3 CameraPosition =>
-            Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
         public Randomizer Randomizer => Singleton<SimulationManager>.instance.m_randomizer;
 

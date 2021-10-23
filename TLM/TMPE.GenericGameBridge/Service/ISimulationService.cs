@@ -1,7 +1,6 @@
 namespace GenericGameBridge.Service {
     using ColossalFramework.Math;
     using System;
-    using UnityEngine;
 
     public interface ISimulationService {
         bool TrafficDrivesOnLeft { get; }
@@ -10,10 +9,8 @@ namespace GenericGameBridge.Service {
 
         uint CurrentFrameIndex { get; }
 
-        Vector3 CameraPosition { get; }
-
         Randomizer Randomizer { get; }
 
-        AsyncAction AddAction(System.Action action);
+        AsyncAction AddAction(Action action);
     }
 }
