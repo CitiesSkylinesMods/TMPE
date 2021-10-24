@@ -641,7 +641,7 @@ namespace TrafficManager.Manager.Impl {
                            $"startNode? {startNode}");
             }
 
-            if (!Services.NetService.IsNodeValid(nodeId)) {
+            if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                 if (logLaneConnections) {
                     Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
                                "Node is invalid");
