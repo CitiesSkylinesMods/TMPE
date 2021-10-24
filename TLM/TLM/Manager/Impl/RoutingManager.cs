@@ -255,8 +255,8 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
             if (DebugSwitch.RoutingBasicLog.Get()
                 && (DebugSettings.SegmentId <= 0
-                    || DebugSettings.SegmentId == segmentId)) {
-                Log._Debug($"RoutingManager.ResetRoutingData: Identify nodes connected to {segmentId}: nodeIds={segment.m_startNode}, {segment.m_endNode}");
+                    || DebugSettings.SegmentId == centerSegmentId)) {
+                Log._Debug($"RoutingManager.ResetRoutingData: Identify nodes connected to {centerSegmentId}: nodeIds={centerSegment.m_startNode}, {centerSegment.m_endNode}");
             }
 #endif
         }

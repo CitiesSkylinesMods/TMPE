@@ -13,20 +13,6 @@ namespace CitiesGameBridge.Service {
         // NODE BASICS --------------------------------------------------------------------------------
 
         /// <summary>
-        /// Check if a node id is valid.
-        /// </summary>
-        ///
-        /// <param name="nodeId">The id of the node to check.</param>
-        ///
-        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
-        public bool IsNodeValid(ushort nodeId) {
-            return CheckNodeFlags(
-                nodeId,
-                NetNode.Flags.Created | NetNode.Flags.Collapsed | NetNode.Flags.Deleted,
-                NetNode.Flags.Created);
-        }
-
-        /// <summary>
         /// Check node flags contain at least one of the flags in <paramref name="flagMask"/>.
         /// </summary>
         ///

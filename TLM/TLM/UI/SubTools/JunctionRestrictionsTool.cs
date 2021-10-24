@@ -98,7 +98,7 @@ namespace TrafficManager.UI.SubTools {
                 handleClick: !cursorInPanel);
 
             foreach (ushort nodeId in currentRestrictedNodeIds) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                     continue;
                 }
 
@@ -210,7 +210,7 @@ namespace TrafficManager.UI.SubTools {
             for (uint nodeId = forceNodeId == 0 ? 1u : forceNodeId;
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
                  ++nodeId) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid((ushort)nodeId)) {
                     continue;
                 }
 

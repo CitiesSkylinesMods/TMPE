@@ -47,8 +47,6 @@ namespace GenericGameBridge.Service {
 
         bool IsLaneAndItsSegmentValid(uint laneId);
 
-        bool IsNodeValid(ushort nodeId);
-
         bool IsSegmentValid(ushort segmentId);
 
         GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection);

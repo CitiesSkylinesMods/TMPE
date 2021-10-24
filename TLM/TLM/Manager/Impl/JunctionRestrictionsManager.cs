@@ -104,11 +104,11 @@ namespace TrafficManager.Manager.Impl {
 
             return
                 Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Junction | NetNode.Flags.Bend)
-                && Services.NetService.IsNodeValid(nodeId);
+                && ExtNodeManager.Instance.IsValid(nodeId);
         }
 
         public bool HasJunctionRestrictions(ushort nodeId) {
-            if (!Services.NetService.IsNodeValid(nodeId)) {
+            if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                 return false;
             }
 
@@ -1217,7 +1217,7 @@ namespace TrafficManager.Manager.Impl {
 
                     ushort startNodeId = netManager.m_segments.m_buffer[segmentId].m_startNode;
 
-                    if (Services.NetService.IsNodeValid(startNodeId)) {
+                    if (ExtNodeManager.Instance.IsValid(startNodeId)) {
                         SegmentEndFlags endFlags = segmentFlags_[segmentId].startNodeFlags;
 
                         if (!endFlags.IsDefault()) {
@@ -1245,7 +1245,7 @@ namespace TrafficManager.Manager.Impl {
 
                     ushort endNodeId = netManager.m_segments.m_buffer[segmentId].m_endNode;
 
-                    if (Services.NetService.IsNodeValid(endNodeId)) {
+                    if (ExtNodeManager.Instance.IsValid(endNodeId)) {
                         SegmentEndFlags endFlags = segmentFlags_[segmentId].endNodeFlags;
 
                         if (!endFlags.IsDefault()) {

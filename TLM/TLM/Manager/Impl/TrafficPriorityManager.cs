@@ -1583,7 +1583,7 @@ namespace TrafficManager.Manager.Impl {
                     var segmentId = (ushort)segment[1];
                     var sign = (PriorityType)segment[2];
 
-                    if (!Services.NetService.IsNodeValid(nodeId)) {
+                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                         continue;
                     }
 
@@ -1623,7 +1623,7 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    if (!Services.NetService.IsNodeValid(prioSegData.nodeId)) {
+                    if (!ExtNodeManager.Instance.IsValid(prioSegData.nodeId)) {
                         continue;
                     }
 
@@ -1678,7 +1678,7 @@ namespace TrafficManager.Manager.Impl {
                     if (startSign != PriorityType.None) {
                         ushort startNodeId = Services.NetService.GetSegmentNodeId((ushort)segmentId, true);
 
-                        if (Services.NetService.IsNodeValid(startNodeId)) {
+                        if (ExtNodeManager.Instance.IsValid(startNodeId)) {
 #if DEBUGSAVE
                             Log._Debug($"Saving priority sign of type {startSign} @ start node "+
                             $"{startNodeId} of segment {segmentId}");
@@ -1696,7 +1696,7 @@ namespace TrafficManager.Manager.Impl {
                     if (endSign != PriorityType.None) {
                         ushort endNodeId = Services.NetService.GetSegmentNodeId((ushort)segmentId, false);
 
-                        if (Services.NetService.IsNodeValid(endNodeId)) {
+                        if (ExtNodeManager.Instance.IsValid(endNodeId)) {
 #if DEBUGSAVE
                             Log._Debug($"Saving priority sign of type {endSign} @ end node "+
                             $"{endNodeId} of segment {segmentId}");

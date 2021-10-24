@@ -246,7 +246,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
             currentPriorityNodeIds.Clear();
             for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid((ushort)nodeId)) {
                     continue;
                 }
 
@@ -300,7 +300,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 bool showRemoveButton = false;
 
                 foreach (ushort nodeId in currentPriorityNodeIds) {
-                    if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                         continue;
                     }
 
