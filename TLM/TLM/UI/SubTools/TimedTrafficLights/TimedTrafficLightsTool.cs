@@ -83,7 +83,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
                  ++nodeId)
             {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid((ushort)nodeId)) {
                     continue;
                 }
 
@@ -103,7 +103,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
             nodeSelectionLocked = false;
             foreach (ushort nodeId in currentTimedNodeIds) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                     continue;
                 }
 
@@ -1422,7 +1422,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
             foreach (ushort nodeId in currentTimedNodeIds) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                     continue;
                 }
 

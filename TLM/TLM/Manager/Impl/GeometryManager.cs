@@ -132,7 +132,7 @@ namespace TrafficManager.Manager.Impl {
                             }
 
                             ushort nodeId = (ushort)(i << 6 | m);
-                            bool valid = Services.NetService.IsNodeValid(nodeId);
+                            bool valid = ExtNodeManager.Instance.IsValid(nodeId);
 
                             if (firstPass ^ !valid) {
                                 if (!firstPass) {
@@ -245,7 +245,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
 
-                if (!Services.NetService.IsNodeValid(nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                     SimulationStep(true);
                 }
             }
