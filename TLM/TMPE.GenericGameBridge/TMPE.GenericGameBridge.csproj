@@ -79,7 +79,6 @@
     <Compile Include="Service\GetNodeSegmentIdsEnumerable.cs" />
     <Compile Include="Service\GetSegmentLaneIdsEnumerator.cs" />
     <Compile Include="Service\GetNodeSegmentIdsEnumerator.cs" />
-    <Compile Include="Service\ICitizenService.cs" />
     <Compile Include="Service\IVehicleService.cs" />
     <Compile Include="Service\INetService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
