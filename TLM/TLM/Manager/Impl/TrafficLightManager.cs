@@ -144,7 +144,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (flag &&
-                (!Services.NetService.IsNodeValid(nodeId)
+                (!ExtNodeManager.Instance.IsValid(nodeId)
                 || !Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Junction)
                 || (Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Untouchable)
                     && (!node.Info.m_class || node.Info.m_class.m_service != ItemClass.Service.Road)))) {
@@ -238,7 +238,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool HasTrafficLight(ushort nodeId, ref NetNode node) {
-            return Services.NetService.IsNodeValid(nodeId)
+            return ExtNodeManager.Instance.IsValid(nodeId)
                 && Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.TrafficLights);
         }
 
@@ -259,7 +259,7 @@ namespace TrafficManager.Manager.Impl {
                     ushort nodeId = Convert.ToUInt16(split[0]);
                     uint flag = Convert.ToUInt16(split[1]);
 
-                    if (!Services.NetService.IsNodeValid(nodeId)) {
+                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                         continue;
                     }
 
@@ -285,7 +285,7 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.NodeTrafficLight nodeLight in data) {
                 try {
-                    if (!Services.NetService.IsNodeValid(nodeLight.nodeId))
+                    if (!ExtNodeManager.Instance.IsValid(nodeLight.nodeId))
                         continue;
 
 #if DEBUGLOAD

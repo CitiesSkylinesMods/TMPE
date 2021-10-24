@@ -157,7 +157,7 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="camPos">Position of the camera</param>
         private void FilterVisibleNodes(Vector3 camPos) {
             for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                     continue;
                 }
 

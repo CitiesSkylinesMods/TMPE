@@ -156,7 +156,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="nodeId">NodeId affected</param>
         public void AddNodeLights(ushort nodeId) {
-            if (!Services.NetService.IsNodeValid(nodeId)) {
+            if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                 return;
             }
 
