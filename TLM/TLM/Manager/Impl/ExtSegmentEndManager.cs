@@ -38,6 +38,8 @@ namespace TrafficManager.Manager.Impl {
             string ret = string.Empty;
             int numIter = 0;
 
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+
             while (vehicleId != 0) {
                 ref ExtVehicle extVehicle = ref Constants.ManagerFactory.ExtVehicleManager
                                                          .ExtVehicles[vehicleId];
@@ -51,7 +53,7 @@ namespace TrafficManager.Manager.Impl {
 
                 vehicleId = extVehicle.nextVehicleIdOnSegment;
 
-                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                if (++numIter > maxVehicleCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         "Invalid list detected!\n" + Environment.StackTrace);
@@ -72,10 +74,12 @@ namespace TrafficManager.Manager.Impl {
             IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
             int numIter = 0;
 
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+
             while (extSegmentEnd.firstVehicleId != 0) {
                 extVehicleMan.Unlink(ref extVehicleMan.ExtVehicles[extSegmentEnd.firstVehicleId]);
 
-                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                if (++numIter > maxVehicleCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         $"Invalid list detected!\n{Environment.StackTrace}");
@@ -121,11 +125,13 @@ namespace TrafficManager.Manager.Impl {
             uint ret = 0;
             int numIter = 0;
 
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+
             while (vehicleId != 0) {
                 ++ret;
                 vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 
-                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                if (++numIter > maxVehicleCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         $"Invalid list detected!\n{Environment.StackTrace}");

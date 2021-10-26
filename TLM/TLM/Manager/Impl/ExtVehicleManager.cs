@@ -21,8 +21,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private ExtVehicleManager() {
-            ExtVehicles = new ExtVehicle[Constants.ServiceFactory.VehicleService.MaxVehicleCount];
-            for (uint i = 0; i < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++i) {
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+            ExtVehicles = new ExtVehicle[maxVehicleCount];
+            for (uint i = 0; i < maxVehicleCount; ++i) {
                 ExtVehicles[i] = new ExtVehicle((ushort)i);
             }
         }
@@ -1024,8 +1025,10 @@ namespace TrafficManager.Manager.Impl {
         private void InitAllVehicles() {
             Log._Debug("ExtVehicleManager: InitAllVehicles()");
 
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+
             for (uint vehicleId = 0;
-                 vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount;
+                 vehicleId < maxVehicleCount;
                  ++vehicleId) {
 
                 ushort vId = (ushort)vehicleId;

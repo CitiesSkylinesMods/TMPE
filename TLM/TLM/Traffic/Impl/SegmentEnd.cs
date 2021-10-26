@@ -104,6 +104,7 @@ namespace TrafficManager.Traffic.Impl {
             ushort vehicleId = segEndMan.ExtSegmentEnds[endIndex].firstVehicleId;
             int numProcessed = 0;
             int numIter = 0;
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
 
             while (vehicleId != 0) {
                 ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
@@ -126,7 +127,7 @@ namespace TrafficManager.Traffic.Impl {
 
                 vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 
-                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                if (++numIter > maxVehicleCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         $"Invalid list detected!\n{Environment.StackTrace}");
