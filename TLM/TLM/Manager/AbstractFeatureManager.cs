@@ -1,4 +1,5 @@
-﻿namespace TrafficManager.Manager {
+namespace TrafficManager.Manager {
+    using ColossalFramework;
     using TrafficManager.API.Manager;
 
     /// <summary>
@@ -6,13 +7,13 @@
     /// </summary>
     public abstract class AbstractFeatureManager : AbstractCustomManager, IFeatureManager {
         public void OnDisableFeature() {
-            Services.SimulationService.AddAction(() => {
+            Singleton<SimulationManager>.instance.AddAction(() => {
                 OnDisableFeatureInternal();
             });
         }
 
         public void OnEnableFeature() {
-            Services.SimulationService.AddAction(() => {
+            Singleton<SimulationManager>.instance.AddAction(() => {
                 OnEnableFeatureInternal();
             });
         }

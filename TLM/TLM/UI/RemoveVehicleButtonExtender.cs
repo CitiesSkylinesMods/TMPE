@@ -86,10 +86,10 @@ namespace TrafficManager.UI {
                 Log._Debug($"Current vehicle instance: {instance.Vehicle}");
 
                 if (instance.Vehicle != 0) {
-                    Constants.ServiceFactory.SimulationService.AddAction(
+                    Singleton<SimulationManager>.instance.AddAction(
                         () => Singleton<VehicleManager>.instance.ReleaseVehicle(instance.Vehicle));
                 } else if (instance.ParkedVehicle != 0) {
-                    Constants.ServiceFactory.SimulationService.AddAction(
+                    Singleton<SimulationManager>.instance.AddAction(
                         () => Singleton<VehicleManager>.instance.ReleaseParkedVehicle(instance.ParkedVehicle));
                 }
             }

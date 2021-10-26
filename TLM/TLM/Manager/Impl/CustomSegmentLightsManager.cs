@@ -53,7 +53,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
-            uint currentFrameIndex = Services.SimulationService.CurrentFrameIndex;
+            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
             RoadBaseAI.GetTrafficLightState(
                 nodeId,

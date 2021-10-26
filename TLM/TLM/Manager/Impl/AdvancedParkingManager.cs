@@ -2255,7 +2255,7 @@ namespace TrafficManager.Manager.Impl {
 
             if (parkingSpaceSegmentId != 0) {
                 if (parkingBuildingId != 0) {
-                    Randomizer rng = Services.SimulationService.Randomizer;
+                    Randomizer rng = Singleton<SimulationManager>.instance.m_randomizer;
 
                     // choose nearest parking position, after a bit of randomization
                     if ((roadParkPos - targetPos).magnitude < (buildingParkPos - targetPos).magnitude

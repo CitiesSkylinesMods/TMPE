@@ -14,6 +14,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.Util;
 
     public class LaneConnectionManager
         : AbstractGeometryObservingManager,
@@ -668,7 +669,7 @@ namespace TrafficManager.Manager.Impl {
                     // check if arrow has already been set for this direction
                     switch (dir) {
                         case ArrowDirection.Turn: {
-                                if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
+                                if (LHT) {
                                     if ((arrows & LaneArrows.Right) != LaneArrows.None) {
                                         continue;
                                     }
@@ -754,7 +755,7 @@ namespace TrafficManager.Manager.Impl {
 
                     switch (dir) {
                         case ArrowDirection.Turn: {
-                                if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
+                                if (LHT) {
                                     arrows |= LaneArrows.Right;
                                 } else {
                                     arrows |= LaneArrows.Left;

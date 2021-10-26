@@ -30,7 +30,6 @@ namespace TrafficManager.Util {
         private static readonly bool AllowCollidingShortTurns = false;
 
         //Shortcuts:
-        private static bool RHT => !Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
         private static TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
         private static INetService netService = Constants.ServiceFactory.NetService;
         private static CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
@@ -64,9 +63,9 @@ namespace TrafficManager.Util {
         /// <param name="nodeId">the junction</param>
         /// <returns>a list of segments aranged in counter clockwise direction.</returns>
         private static List<ushort> ArrangedSegments(ushort nodeId) {
-            ClockDirection clockDirection = RHT
-                ? ClockDirection.Clockwise
-                : ClockDirection.CounterClockwise;
+            ClockDirection clockDirection = Shortcuts.LHT
+                ? ClockDirection.CounterClockwise
+                : ClockDirection.Clockwise;
 
             List<ushort> segList = new List<ushort>();
 
@@ -253,8 +252,9 @@ namespace TrafficManager.Util {
                             ref ExtSegmentEnd segEnd = ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
                             ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
                             segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out bool bLeft, out bool bForward, out bool bRight);
-                            bool bShort = RHT ? bRight : bLeft;
-                            bool bLong = RHT ? bLeft : bRight;
+                            bool lht = Shortcuts.LHT;
+                            bool bShort = lht ? bLeft : bRight;
+                            bool bLong = lht ? bRight : bLeft;
 
                             if (bShort) {
                                 SetStates(liveSegmentLight, red, red, green);
@@ -285,10 +285,10 @@ namespace TrafficManager.Util {
             RoadBaseAI.TrafficLightState sForard,
             RoadBaseAI.TrafficLightState sFar,
             RoadBaseAI.TrafficLightState sShort) {
-            if (RHT) {
-                liveSegmentLight.SetStates(mainLight:sForard, leftLight: sFar, rightLight:sShort);
-            } else {
+            if (Shortcuts.LHT) {
                 liveSegmentLight.SetStates(mainLight: sForard, leftLight: sShort, rightLight: sFar);
+            } else {
+                liveSegmentLight.SetStates(mainLight: sForard, leftLight: sFar, rightLight: sShort);
             }
         }
 
@@ -361,14 +361,15 @@ namespace TrafficManager.Util {
                 return true;
             }
             ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            ArrowDirection shortDir = RHT ? ArrowDirection.Right : ArrowDirection.Left;
+            bool lht = Shortcuts.LHT;
+            ArrowDirection shortDir = lht ? ArrowDirection.Left : ArrowDirection.Right;
             int nShort = CountDirSegs(segmentId, nodeId, shortDir);
 
             if (nShort > 1) {
                 return false;
             }
             if (nShort == 1) {
-                ushort nextSegmentId = RHT ? seg.GetRightSegment(nodeId) : seg.GetLeftSegment(nodeId);
+                ushort nextSegmentId = lht ? seg.GetLeftSegment(nodeId) : seg.GetRightSegment(nodeId);
                 return !segMan.CalculateIsOneWay(nextSegmentId);
             }
             int nForward = CountDirSegs(segmentId, nodeId, ArrowDirection.Forward);
@@ -378,7 +379,7 @@ namespace TrafficManager.Util {
             if (nForward == 1) {
                 // RHT: if there are not segments to the right GetRightSegment() returns the forward segment.
                 // LHT: if there are not segments to the left GetLeftSegment() returns the forward segment.
-                ushort nextSegmentId = RHT ? seg.GetRightSegment(nodeId) : seg.GetLeftSegment(nodeId);
+                ushort nextSegmentId = lht ? seg.GetLeftSegment(nodeId) : seg.GetRightSegment(nodeId);
                 return !segMan.CalculateIsOneWay(nextSegmentId);
             }
             return false;

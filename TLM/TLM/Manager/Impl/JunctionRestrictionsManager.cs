@@ -382,7 +382,7 @@ namespace TrafficManager.Manager.Impl {
                                                    ref NetNode node) {
             ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
             int index = turnOnRedMan.GetIndex(segmentId, startNode);
-            bool lht = Services.SimulationService.TrafficDrivesOnLeft;
+            bool lht = LHT;
             bool ret =
                 (node.m_flags & NetNode.Flags.TrafficLights) != NetNode.Flags.None &&
                 (((lht == near) && turnOnRedMan.TurnOnRedSegments[index].leftSegmentId != 0) ||

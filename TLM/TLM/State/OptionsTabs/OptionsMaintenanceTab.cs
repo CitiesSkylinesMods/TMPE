@@ -7,6 +7,8 @@ namespace TrafficManager.State {
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI;
     using TrafficManager.Lifecycle;
+    using ColossalFramework;
+
     public static class OptionsMaintenanceTab {
         [UsedImplicitly]
         private static UIButton _resetStuckEntitiesBtn;
@@ -134,7 +136,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Constants.ServiceFactory.SimulationService.AddAction(
+            Singleton<SimulationManager>.instance.AddAction(
                 () => { UtilityManager.Instance.ResetStuckEntities(); });
         }
 
@@ -143,7 +145,7 @@ namespace TrafficManager.State {
                 return;
             }
 
-            Constants.ServiceFactory.SimulationService.AddAction(() => {
+            Singleton<SimulationManager>.instance.AddAction(() => {
                 UtilityManager.Instance.RemoveParkedVehicles();
             });
         }
@@ -162,7 +164,8 @@ namespace TrafficManager.State {
                 }
 
                 Log._Debug("Removing all existing Traffic Lights");
-                Constants.ServiceFactory.SimulationService.AddAction(() => TrafficLightManager.Instance.RemoveAllExistingTrafficLights());
+                Singleton<SimulationManager>.instance.AddAction(() =>
+                    TrafficLightManager.Instance.RemoveAllExistingTrafficLights());
             });
         }
 
