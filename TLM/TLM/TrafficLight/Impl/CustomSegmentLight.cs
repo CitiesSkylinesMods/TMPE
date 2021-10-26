@@ -260,9 +260,9 @@ namespace TrafficManager.TrafficLight.Impl {
                 }
 
                 case ArrowDirection.Turn: {
-                    return Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft
-                               ? LightRight
-                               : LightLeft;
+                    return Shortcuts.LHT
+                        ? LightRight
+                        : LightLeft;
                 }
 
                 // also: case ArrowDirection.Forward:

@@ -283,11 +283,11 @@ namespace CitiesGameBridge.Service {
 
         public void PublishSegmentChanges(ushort segmentId) {
             Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
-            ISimulationService simService = SimulationService.Instance;
+            SimulationManager simulationManager = Singleton<SimulationManager>.instance;
 
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            uint currentBuildIndex = simService.CurrentBuildIndex;
-            simService.CurrentBuildIndex = currentBuildIndex + 1;
+            uint currentBuildIndex = simulationManager.m_currentBuildIndex;
+            simulationManager.m_currentBuildIndex = currentBuildIndex + 1;
             segment.m_modifiedIndex = currentBuildIndex;
             ++segment.m_buildIndex;
         }
@@ -306,7 +306,7 @@ namespace CitiesGameBridge.Service {
         public ushort GetHeadNode(ref NetSegment segment) {
             // tail node>-------->head node
             bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ SimulationService.Instance.TrafficDrivesOnLeft;
+            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
             if (invert) {
                 return segment.m_startNode;
             } else {
@@ -319,7 +319,7 @@ namespace CitiesGameBridge.Service {
 
         public ushort GetTailNode(ref NetSegment segment) {
             bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ SimulationService.Instance.TrafficDrivesOnLeft;
+            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
             if (!invert) {
                 return segment.m_startNode;
             } else {

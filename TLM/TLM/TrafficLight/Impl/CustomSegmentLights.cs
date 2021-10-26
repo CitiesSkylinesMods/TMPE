@@ -487,7 +487,6 @@ namespace TrafficManager.TrafficLight.Impl {
             prevConnectionClass = SegmentId.ToSegment().Info.GetConnectionClass();
 
             var autoPedestrianLightState = RoadBaseAI.TrafficLightState.Green;
-            bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
 
             if (!(segEnd.incoming && seg.oneWay)) {
                 for (int i = 0; i < 8; ++i) {
@@ -540,7 +539,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     }
 
                     ArrowDirection dir = segEndMan.GetDirection(ref segEnd, otherSegmentId);
-
+                    bool lht = Shortcuts.LHT;
                     if (dir == ArrowDirection.Forward) {
                         if (!otherLights.IsAllMainRed()) {
                             Log._DebugIf(

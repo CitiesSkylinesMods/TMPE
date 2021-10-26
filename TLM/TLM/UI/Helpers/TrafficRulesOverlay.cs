@@ -380,7 +380,7 @@ namespace TrafficManager.UI.Helpers {
                 //--------------------------------
                 // TURN ON RED ENABLED
                 //--------------------------------
-                bool leftSideTraffic = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
+                bool leftSideTraffic = Shortcuts.LHT;
 
                 // draw "turn-left-on-red allowed" sign at (2; 0)
                 allowed = junctionRManager.IsTurnOnRedAllowed(

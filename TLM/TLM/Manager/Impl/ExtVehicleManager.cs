@@ -59,7 +59,7 @@ namespace TrafficManager.Manager.Impl {
                                             VehicleJunctionTransitState transitState) {
             if (transitState != extVehicle.junctionTransitState) {
                 extVehicle.junctionTransitState = transitState;
-                extVehicle.lastTransitStateUpdate = Now();
+                extVehicle.lastTransitStateUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex;
             }
         }
 
@@ -371,7 +371,7 @@ namespace TrafficManager.Manager.Impl {
             ushort prevSegmentId = extVehicle.currentSegmentId;
             bool prevStartNode = extVehicle.currentStartNode;
 #endif
-            extVehicle.lastPositionUpdate = Now();
+            extVehicle.lastPositionUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
             if (extVehicle.previousVehicleIdOnSegment != 0) {
                 ExtVehicles[extVehicle.previousVehicleIdOnSegment].nextVehicleIdOnSegment =
@@ -752,7 +752,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsJunctionTransitStateNew(ref ExtVehicle extVehicle) {
-            uint frame = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
+            uint frame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
             return (extVehicle.lastTransitStateUpdate >> STATE_UPDATE_SHIFT) >=
                    (frame >> STATE_UPDATE_SHIFT);
         }
@@ -766,7 +766,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public void StepRand(ref ExtVehicle extVehicle, bool force) {
-            Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
+            Randomizer rand = Singleton<SimulationManager>.instance.m_randomizer;
             if (force
                 || (rand.UInt32(GlobalConfig.Instance.Gameplay.VehicleTimedRandModulo) == 0))
             {
@@ -872,10 +872,6 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return startNode;
-        }
-
-        private static uint Now() {
-            return Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
         }
 
         private void DetermineVehicleType(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {

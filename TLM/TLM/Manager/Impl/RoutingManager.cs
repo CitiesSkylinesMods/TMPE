@@ -142,8 +142,8 @@ namespace TrafficManager.Manager.Impl {
                 Flags.ClearHighwayLaneArrows();
                 segmentsUpdated = true;
 
-                if (Services.SimulationService.SimulationPaused ||
-                    Services.SimulationService.ForcedSimulationPaused) {
+                if (Singleton<SimulationManager>.instance.SimulationPaused ||
+                    Singleton<SimulationManager>.instance.ForcedSimulationPaused) {
                     SimulationStep();
                 }
             }
@@ -388,8 +388,6 @@ namespace TrafficManager.Manager.Impl {
             NetInfo prevSegmentInfo = segment.Info;
             bool prevSegIsInverted = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
 
-            bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
-
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             ExtSegment prevSeg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId];
             ExtSegmentEnd prevEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
@@ -516,7 +514,7 @@ namespace TrafficManager.Manager.Impl {
                     laneId,
                     startNode,
                     prevSegIsInverted,
-                    lht);
+                    Shortcuts.LHT);
                 Log._DebugFormat(
                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                     "prevSimilarLaneCount={4} prevInnerSimilarLaneIndex={5} prevOuterSimilarLaneIndex={6} " +
@@ -908,8 +906,8 @@ namespace TrafficManager.Manager.Impl {
                                         (nextIncomingDir == ArrowDirection.Turn
                                          && (!nextIsRealJunction
                                              || nextIsEndOrOneWayOut
-                                             || ((lht && hasRightArrow)
-                                                 || (!lht && hasLeftArrow))))) // valid turning lane
+                                             || ((Shortcuts.LHT && hasRightArrow)
+                                                 || (!Shortcuts.LHT && hasLeftArrow))))) // valid turning lane
                                     {
                                         if (extendedLogRouting) {
                                             Log._DebugFormat(
@@ -2085,7 +2083,7 @@ namespace TrafficManager.Manager.Impl {
 
                 if (iterateViaGeometry) {
                     ref NetSegment nextSegment2 = ref nextSegmentId.ToSegment();
-                    nextSegmentId = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft
+                    nextSegmentId = Shortcuts.LHT
                         ? nextSegment2.GetLeftSegment(nextNodeId)
                         : nextSegment2.GetRightSegment(nextNodeId);
 

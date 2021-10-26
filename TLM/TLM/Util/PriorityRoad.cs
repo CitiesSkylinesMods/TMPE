@@ -438,7 +438,6 @@ namespace TrafficManager.Util {
         internal static int CountLanesAgainstJunction(ushort segmentId, ushort nodeId) => CountLanes(segmentId, nodeId, false);
 
         internal static bool HasAccelerationLane(List<ushort> segmentList, ushort segmentId, ushort nodeId) {
-            bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
             if (!segMan.CalculateIsOneWay(segmentId)) {
                 return false;
             }
@@ -448,7 +447,7 @@ namespace TrafficManager.Util {
             ref NetSegment seg = ref segmentId.ToSegment();
 
             ushort MainAgainst, MainToward;
-            if (lht) {
+            if (LHT) {
                 MainAgainst = seg.GetLeftSegment(nodeId);
                 MainToward = seg.GetRightSegment(nodeId);
             } else {
@@ -480,7 +479,7 @@ namespace TrafficManager.Util {
             ref NetSegment seg = ref segmentId.ToSegment();
             ref NetNode node = ref nodeId.ToNode();
             bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
-            bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
+            bool lht = LHT;
 
             //list of outgoing lanes from current segment to current node.
             IList<LanePos> laneList =
@@ -547,7 +546,7 @@ namespace TrafficManager.Util {
             segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out bLeft, out bForward, out bRight);
 
             // LHD vs RHD variables.
-            bool lht = LaneArrowManager.Instance.Services.SimulationService.TrafficDrivesOnLeft;
+            bool lht = Shortcuts.LHT;
             ArrowDirection nearDir = lht ? ArrowDirection.Left : ArrowDirection.Right;
             LaneArrows nearArrow = lht ? LaneArrows.Left : LaneArrows.Right;
             bool bnear = lht ? bLeft : bRight;

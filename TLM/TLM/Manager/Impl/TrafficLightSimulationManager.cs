@@ -15,6 +15,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.TrafficLight.Impl;
     using TrafficManager.Util;
+    using ColossalFramework;
 
     public class TrafficLightSimulationManager
         : AbstractGeometryObservingManager,
@@ -264,7 +265,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public void SimulationStep() {
-            var frame = (int)(Services.SimulationService.CurrentFrameIndex & (SIM_MOD - 1));
+            var frame = (int)(Singleton<SimulationManager>.instance.m_currentFrameIndex & (SIM_MOD - 1));
             int minIndex = frame * (NetManager.MAX_NODE_COUNT / SIM_MOD);
             int maxIndex = ((frame + 1) * (NetManager.MAX_NODE_COUNT / SIM_MOD)) - 1;
 

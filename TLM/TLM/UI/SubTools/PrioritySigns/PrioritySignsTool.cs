@@ -292,7 +292,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
                 TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
-                Vector3 camPos = Constants.ServiceFactory.SimulationService.CameraPosition;
+                Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
                 bool clicked = !viewOnly && MainTool.CheckClicked();
 

@@ -129,8 +129,6 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            bool lht = Services.SimulationService.TrafficDrivesOnLeft;
-
             // check node
             // note that we must not check for the `TrafficLights` flag here because the flag might not be loaded yet
             ref NetNode node = ref nodeId.ToNode();
@@ -205,6 +203,7 @@ namespace TrafficManager.Manager.Impl {
                 rightSegmentId = 0;
             }
 
+            bool lht = Shortcuts.LHT;
             if (seg.oneWay) {
                 if ((lht && rightSegmentId != 0) || (!lht && leftSegmentId != 0)) {
                     // special case: one-way to one-way in non-preferred direction

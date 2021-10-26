@@ -1187,7 +1187,7 @@ namespace TrafficManager.Manager.Impl {
                 return VehicleJunctionTransitState.Leave;
             }
 
-            uint currentFrameIndex = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
+            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
             if ((extVehicle.junctionTransitState == VehicleJunctionTransitState.Stop
                  || extVehicle.junctionTransitState == VehicleJunctionTransitState.Blocked)
                 && extVehicle.lastTransitStateUpdate >> ExtVehicleManager.JUNCTION_RECHECK_SHIFT
@@ -1436,19 +1436,18 @@ namespace TrafficManager.Manager.Impl {
                         IJunctionRestrictionsManager junctionRestrictionsManager
                             = Constants.ManagerFactory.JunctionRestrictionsManager;
                         ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
-                        bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
                         int torIndex = turnOnRedMan.GetIndex(prevPos.m_segment, isTargetStartNode);
 
                         if ((turnOnRedMan.TurnOnRedSegments[torIndex].leftSegmentId ==
                              position.m_segment
                              && junctionRestrictionsManager.IsTurnOnRedAllowed(
-                                 lht,
+                                 Shortcuts.LHT,
                                  prevPos.m_segment,
                                  isTargetStartNode))
                             || (turnOnRedMan.TurnOnRedSegments[torIndex].rightSegmentId ==
                                 position.m_segment
                                 && junctionRestrictionsManager.IsTurnOnRedAllowed(
-                                    !lht,
+                                    !Shortcuts.LHT,
                                     prevPos.m_segment,
                                     isTargetStartNode)))
                         {
@@ -2507,7 +2506,7 @@ namespace TrafficManager.Manager.Impl {
 
                     if (vehicleState.laneSpeedRandInterval > 0) {
                         float randSpeed =
-                            Services.SimulationService.Randomizer.Int32(
+                            Singleton<SimulationManager>.instance.m_randomizer.Int32(
                                 (uint)vehicleState.laneSpeedRandInterval + 1u) -
                             (vehicleState.laneSpeedRandInterval / 2f);
 

@@ -83,7 +83,7 @@ namespace TrafficManager.UI {
                         $"Current citizen: {instance.Citizen} Instance: {citizenInstanceId}");
                     if (citizenInstanceId != 0) {
                         bool isTourist = CitizenManager.instance.m_instances.m_buffer[citizenInstanceId].Info.m_citizenAI is TouristAI;
-                        Constants.ServiceFactory.SimulationService.AddAction(
+                        Singleton<SimulationManager>.instance.AddAction(
                             () => Singleton<CitizenManager>.instance.ReleaseCitizenInstance(citizenInstanceId));
                         // InfoPanel needs to be closed manually because method responsible for hiding it testing against type Citizen instead of CitizenInstance
                         // We are not removing Citizen but only instance
