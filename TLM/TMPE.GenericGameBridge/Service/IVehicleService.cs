@@ -1,6 +1,4 @@
 namespace GenericGameBridge.Service {
-    public delegate bool VehicleHandler(ushort vehicleId, ref Vehicle vehicle);
-
     public delegate bool ParkedVehicleHandler(ushort parkedVehicleId,
                                               ref VehicleParked parkedVehicle);
 
@@ -16,8 +14,6 @@ namespace GenericGameBridge.Service {
                                 Vehicle.Flags2? expectedResult = default(Vehicle.Flags2?));
 
         bool IsVehicleValid(ushort vehicleId);
-
-        void ProcessVehicle(ushort vehicleId, VehicleHandler handler);
 
         void ProcessParkedVehicle(ushort parkedVehicleId, ParkedVehicleHandler handler);
     }

@@ -62,11 +62,5 @@ namespace CitiesGameBridge.Service {
                 parkedVehicleId,
                 ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId]);
         }
-
-        public void ProcessVehicle(ushort vehicleId, VehicleHandler handler) {
-            handler(
-                vehicleId,
-                ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId]);
-        }
     }
 }

@@ -1015,9 +1015,15 @@ namespace TrafficManager.Manager.Impl {
         private void InitAllVehicles() {
             Log._Debug("ExtVehicleManager: InitAllVehicles()");
 
-            bool HandleVehicle(ushort vId, ref Vehicle vehicle) {
+            for (uint vehicleId = 0;
+                 vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount;
+                 ++vehicleId) {
+
+                ushort vId = (ushort)vehicleId;
+                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vId];
+
                 if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
-                    return true;
+                    continue;
                 }
 
                 OnCreateVehicle(vId, ref vehicle);
@@ -1027,18 +1033,10 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 if ((vehicle.m_flags & Vehicle.Flags.Spawned) == 0) {
-                    return true;
+                    continue;
                 }
 
                 OnSpawnVehicle(vId, ref vehicle);
-
-                return true;
-            }
-
-            for (uint vehicleId = 0;
-                 vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount;
-                 ++vehicleId) {
-                Services.VehicleService.ProcessVehicle((ushort)vehicleId, HandleVehicle);
             }
         }
 
@@ -1054,12 +1052,9 @@ namespace TrafficManager.Manager.Impl {
             base.OnLevelUnloading();
 
             for (int i = 0; i < ExtVehicles.Length; ++i) {
-                Services.VehicleService.ProcessVehicle(
-                    (ushort)i,
-                    (ushort vehId, ref Vehicle veh) => {
-                        OnRelease(ref ExtVehicles[i], ref veh);
-                        return true;
-                    });
+                ushort vId = (ushort)i;
+                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vId];
+                OnRelease(ref ExtVehicles[i], ref vehicle);
             }
         }
 
