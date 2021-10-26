@@ -1,7 +1,4 @@
 namespace GenericGameBridge.Service {
-    public delegate bool ParkedVehicleHandler(ushort parkedVehicleId,
-                                              ref VehicleParked parkedVehicle);
-
     public interface IVehicleService {
         int MaxVehicleCount { get; }
 
@@ -14,7 +11,5 @@ namespace GenericGameBridge.Service {
                                 Vehicle.Flags2? expectedResult = default(Vehicle.Flags2?));
 
         bool IsVehicleValid(ushort vehicleId);
-
-        void ProcessParkedVehicle(ushort parkedVehicleId, ParkedVehicleHandler handler);
     }
 }

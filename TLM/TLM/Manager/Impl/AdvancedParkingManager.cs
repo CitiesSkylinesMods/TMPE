@@ -1607,27 +1607,21 @@ namespace TrafficManager.Manager.Impl {
                     // calculate distance between citizen and parked car
                     var movedCar = false;
                     Vector3 citizenPos = instanceData.GetLastFramePosition();
-                    var parkedToCitizen = 0f;
-                    Vector3 oldParkedVehiclePos = default;
 
-                    Services.VehicleService.ProcessParkedVehicle(
-                        parkedVehicleId,
-                        (ushort parkedVehId, ref VehicleParked parkedVehicle) => {
-                            oldParkedVehiclePos = parkedVehicle.m_position;
-                            parkedToCitizen = (parkedVehicle.m_position - citizenPos).magnitude;
-                            if (parkedToCitizen > GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome) {
-                                // parked car is far away from current location
-                                // -> relocate parked car and try again
-                                movedCar = TryMoveParkedVehicle(
-                                    parkedVehicleId,
-                                    ref parkedVehicle,
-                                    citizenPos,
-                                    GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome,
-                                    homeId);
-                            }
+                    ref VehicleParked parkedVehicle = ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId];
 
-                            return true;
-                        });
+                    Vector3 oldParkedVehiclePos = parkedVehicle.m_position;
+                    var parkedToCitizen = (parkedVehicle.m_position - citizenPos).magnitude;
+                    if (parkedToCitizen > GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome) {
+                        // parked car is far away from current location
+                        // -> relocate parked car and try again
+                        movedCar = TryMoveParkedVehicle(
+                            parkedVehicleId,
+                            ref parkedVehicle,
+                            citizenPos,
+                            GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome,
+                            homeId);
+                    }
 
                     if (movedCar) {
                         // successfully moved the parked car to a closer location

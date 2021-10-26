@@ -56,11 +56,5 @@ namespace CitiesGameBridge.Service {
                 Vehicle.Flags.Created | Vehicle.Flags.Deleted,
                 Vehicle.Flags.Created);
         }
-
-        public void ProcessParkedVehicle(ushort parkedVehicleId, ParkedVehicleHandler handler) {
-            handler(
-                parkedVehicleId,
-                ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId]);
-        }
     }
 }
