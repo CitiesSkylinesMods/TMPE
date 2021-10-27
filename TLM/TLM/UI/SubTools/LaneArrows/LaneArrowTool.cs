@@ -488,7 +488,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return false;
             }
 #if DEBUG
-            if(!Constants.ServiceFactory.NetService.IsNodeValid(nodeId) ||
+            if(!ExtNodeManager.Instance.IsValid(nodeId) ||
                !Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
                 Debug.LogError("Invalid node or segment ID");
             }

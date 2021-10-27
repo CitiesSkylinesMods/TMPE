@@ -21,8 +21,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private ExtVehicleManager() {
-            ExtVehicles = new ExtVehicle[Constants.ServiceFactory.VehicleService.MaxVehicleCount];
-            for (uint i = 0; i < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++i) {
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+            ExtVehicles = new ExtVehicle[maxVehicleCount];
+            for (uint i = 0; i < maxVehicleCount; ++i) {
                 ExtVehicles[i] = new ExtVehicle((ushort)i);
             }
         }
@@ -53,6 +54,19 @@ namespace TrafficManager.Manager.Impl {
 
                 Log._Debug($"Vehicle {i}: {ExtVehicles[i]}");
             }
+        }
+
+        /// <summary>
+        /// Check if a vehicle is valid.
+        /// This is the case if the vehicle is Created but not Deleted.
+        /// </summary>
+        /// <param name="vehicleId">The id of the vehicle to check.</param>
+        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
+        public bool IsVehicleValid(ushort vehicleId) {
+            var createdDeleted = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags
+                & (Vehicle.Flags.Created | Vehicle.Flags.Deleted);
+
+            return createdDeleted == Vehicle.Flags.Created;
         }
 
         public void SetJunctionTransitState(ref ExtVehicle extVehicle,
@@ -1011,9 +1025,17 @@ namespace TrafficManager.Manager.Impl {
         private void InitAllVehicles() {
             Log._Debug("ExtVehicleManager: InitAllVehicles()");
 
-            bool HandleVehicle(ushort vId, ref Vehicle vehicle) {
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+
+            for (uint vehicleId = 0;
+                 vehicleId < maxVehicleCount;
+                 ++vehicleId) {
+
+                ushort vId = (ushort)vehicleId;
+                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vId];
+
                 if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
-                    return true;
+                    continue;
                 }
 
                 OnCreateVehicle(vId, ref vehicle);
@@ -1023,18 +1045,10 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 if ((vehicle.m_flags & Vehicle.Flags.Spawned) == 0) {
-                    return true;
+                    continue;
                 }
 
                 OnSpawnVehicle(vId, ref vehicle);
-
-                return true;
-            }
-
-            for (uint vehicleId = 0;
-                 vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount;
-                 ++vehicleId) {
-                Services.VehicleService.ProcessVehicle((ushort)vehicleId, HandleVehicle);
             }
         }
 
@@ -1050,12 +1064,9 @@ namespace TrafficManager.Manager.Impl {
             base.OnLevelUnloading();
 
             for (int i = 0; i < ExtVehicles.Length; ++i) {
-                Services.VehicleService.ProcessVehicle(
-                    (ushort)i,
-                    (ushort vehId, ref Vehicle veh) => {
-                        OnRelease(ref ExtVehicles[i], ref veh);
-                        return true;
-                    });
+                ushort vId = (ushort)i;
+                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vId];
+                OnRelease(ref ExtVehicles[i], ref vehicle);
             }
         }
 

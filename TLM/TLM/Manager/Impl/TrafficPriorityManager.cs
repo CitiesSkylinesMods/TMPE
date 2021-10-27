@@ -532,6 +532,7 @@ namespace TrafficManager.Manager.Impl {
                 int otherEndIndex = extSegEndMan.GetIndex(otherSegmentId, otherStartNode);
                 ushort incomingVehicleId = extSegEndMan.ExtSegmentEnds[otherEndIndex].firstVehicleId;
                 int numIter = 0;
+                var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
 
                 while (incomingVehicleId != 0) {
                     Log._DebugIf(
@@ -571,7 +572,7 @@ namespace TrafficManager.Manager.Impl {
                     // check next incoming vehicle
                     incomingVehicleId = vehStateManager.ExtVehicles[incomingVehicleId].nextVehicleIdOnSegment;
 
-                    if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                    if (++numIter > maxVehicleCount) {
                         CODebugBase<LogChannel>.Error(
                             LogChannel.Core,
                             $"Invalid list detected!\n{Environment.StackTrace}");

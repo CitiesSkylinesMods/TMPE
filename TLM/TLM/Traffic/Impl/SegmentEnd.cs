@@ -104,22 +104,20 @@ namespace TrafficManager.Traffic.Impl {
             ushort vehicleId = segEndMan.ExtSegmentEnds[endIndex].firstVehicleId;
             int numProcessed = 0;
             int numIter = 0;
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
 
             while (vehicleId != 0) {
-                Constants.ServiceFactory.VehicleService.ProcessVehicle(
-                    vehicleId,
-                    (ushort vId, ref Vehicle veh) => {
-                        MeasureOutgoingVehicle(
+                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
+
+                MeasureOutgoingVehicle(
                             logDebug,
                             ret,
                             includeStopped,
                             avgSegLen,
                             vehicleId,
-                            ref veh,
+                            ref vehicle,
                             ref vehStateManager.ExtVehicles[vehicleId],
                             ref numProcessed);
-                        return true;
-                    });
 
                 if ((Options.simulationAccuracy <= SimulationAccuracy.Low && numProcessed >= 3) ||
                     (Options.simulationAccuracy == SimulationAccuracy.Medium && numProcessed >= 5) ||
@@ -129,7 +127,7 @@ namespace TrafficManager.Traffic.Impl {
 
                 vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 
-                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                if (++numIter > maxVehicleCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         $"Invalid list detected!\n{Environment.StackTrace}");
