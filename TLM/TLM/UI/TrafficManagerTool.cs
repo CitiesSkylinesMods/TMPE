@@ -1656,23 +1656,22 @@ namespace TrafficManager.UI {
             SimulationManager simManager = Singleton<SimulationManager>.instance;
             ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
             VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+            Vehicle[] vehicleBuffer = vehicleManager.m_vehicles.m_buffer;
 
             int startVehicleId = 1;
-            int endVehicleId = Constants.ServiceFactory.VehicleService.MaxVehicleCount - 1;
+            int endVehicleId = vehicleBuffer.Length - 1;
 #if DEBUG
             if (DebugSettings.VehicleId != 0) {
                 startVehicleId = endVehicleId = DebugSettings.VehicleId;
             }
 #endif
-            Vehicle[] vehiclesBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
-
             for (int i = startVehicleId; i <= endVehicleId; ++i) {
-                if (vehicleManager.m_vehicles.m_buffer[i].m_flags == 0) {
+                if (vehicleBuffer[i].m_flags == 0) {
                     // node is unused
                     continue;
                 }
 
-                Vector3 vehPos = vehicleManager.m_vehicles.m_buffer[i].GetSmoothPosition((ushort)i);
+                Vector3 vehPos = vehicleBuffer[i].GetSmoothPosition((ushort)i);
                 bool visible = GeometryUtil.WorldToScreenPoint(vehPos, out Vector3 screenPos);
 
                 if (!visible) {
@@ -1697,12 +1696,12 @@ namespace TrafficManager.UI {
                         Constants.ManagerFactory.ExtVehicleManager
                                  .GetDriverInstanceId(
                                      (ushort)i,
-                                     ref vehiclesBuffer[i])];
+                                     ref vehicleBuffer[i])];
                 // bool startNode = vState.currentStartNode;
                 // ushort segmentId = vState.currentSegmentId;
 
                 // Converting magnitudes into game speed float, and then into km/h
-                SpeedValue vehSpeed = SpeedValue.FromVelocity(vehicleManager.m_vehicles.m_buffer[i].GetLastFrameVelocity().magnitude);
+                SpeedValue vehSpeed = SpeedValue.FromVelocity(vehicleBuffer[i].GetLastFrameVelocity().magnitude);
 #if DEBUG
                 if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None &&
                     driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {

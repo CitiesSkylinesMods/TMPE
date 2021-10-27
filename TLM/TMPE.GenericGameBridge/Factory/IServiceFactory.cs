@@ -3,7 +3,5 @@ namespace GenericGameBridge.Factory {
 
     public interface IServiceFactory {
         INetService NetService { get; }
-
-        IVehicleService VehicleService { get; }
     }
 }
