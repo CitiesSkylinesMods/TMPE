@@ -808,7 +808,7 @@ namespace TrafficManager.UI.SubTools {
             return netService.GetSortedLanes(
                                 segmentId,
                                 ref segmentId.ToSegment(),
-                                netService.IsStartNode(segmentId, nodeId) ^ (!toward),
+                                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!toward),
                                 LaneConnectionManager.LANE_TYPES,
                                 LaneConnectionManager.VEHICLE_TYPES,
                                 true).Count;

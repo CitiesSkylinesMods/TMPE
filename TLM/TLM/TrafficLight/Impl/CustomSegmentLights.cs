@@ -13,6 +13,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Geometry.Impl;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Manager.Impl;
 
     /// <summary>
     /// Represents the set of custom traffic lights located at a node
@@ -482,11 +483,9 @@ namespace TrafficManager.TrafficLight.Impl {
                 () => "CustomSegmentLights.CalculateAutoPedestrianLightState: Querying incoming " +
                 $"segments at seg. {SegmentId} @ {NodeId}");
 
-            ItemClass prevConnectionClass = null;
-
-            prevConnectionClass = SegmentId.ToSegment().Info.GetConnectionClass();
-
+            ItemClass prevConnectionClass = SegmentId.ToSegment().Info.GetConnectionClass();
             var autoPedestrianLightState = RoadBaseAI.TrafficLightState.Green;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             if (!(segEnd.incoming && seg.oneWay)) {
                 for (int i = 0; i < 8; ++i) {
@@ -499,7 +498,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     // ExtSegment otherSeg = segMan.ExtSegments[otherSegmentId];
                     int index0 = segEndMan.GetIndex(
                         otherSegmentId,
-                        (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, NodeId));
+                        (bool)extSegmentManager.IsStartNode(otherSegmentId, NodeId));
 
                     if (!segEndMan.ExtSegmentEnds[index0].incoming) {
                         continue;

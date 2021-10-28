@@ -56,6 +56,17 @@ namespace TrafficManager.Manager.Impl {
         public ushort GetTailNode(ushort segmentId) =>
             GetTailNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
 
+        public bool? IsStartNode(ushort segmentId, ushort nodeId) {
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            if (segment.m_startNode == nodeId) {
+                return true;
+            } else if (segment.m_endNode == nodeId) {
+                return false;
+            } else {
+                return null;
+            }
+        }
+
         public bool IsValid(ushort segmentId) {
             return Constants.ServiceFactory.NetService.IsSegmentValid(segmentId);
         }

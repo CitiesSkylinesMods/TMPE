@@ -35,11 +35,12 @@ namespace TrafficManager.UI.SubTools {
             // handle delete
             if (KeybindSettingsBase.RestoreDefaultsKey.KeyDown(e)) {
                 ref NetNode node = ref SelectedNodeId.ToNode();
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 for (int i = 0; i < 8; ++i) {
                     ushort segmentId = node.GetSegment(i);
                     if (segmentId != 0) {
                         // TODO: #568 provide unified delete key for all managers.
-                        bool startNode = (bool)netService.IsStartNode(segmentId, SelectedNodeId);
+                        bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, SelectedNodeId);
                         JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
                     }
                 }

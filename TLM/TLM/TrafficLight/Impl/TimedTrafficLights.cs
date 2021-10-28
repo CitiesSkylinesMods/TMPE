@@ -112,7 +112,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     ushort targetSegmentId = clockSortedTargetSegmentIds[i];
 
                     bool targetStartNode =
-                        (bool)Constants.ServiceFactory.NetService.IsStartNode(
+                        (bool)ExtSegmentManager.Instance.IsStartNode(
                             targetSegmentId,
                             NodeId);
 
@@ -199,7 +199,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
                         sourceLights.Relocate(
                             targetSegmentId,
-                            (bool)Constants.ServiceFactory.NetService.IsStartNode(
+                            (bool)ExtSegmentManager.Instance.IsStartNode(
                                 targetSegmentId,
                                 NodeId));
 
@@ -268,7 +268,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 Directions.Add(sourceSegmentId, dirs);
                 int endIndex = segEndMan.GetIndex(
                     sourceSegmentId,
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(sourceSegmentId, NodeId));
+                    (bool)ExtSegmentManager.Instance.IsStartNode(sourceSegmentId, NodeId));
 
                 for (int k = 0; k < 8; ++k) {
                     ushort targetSegmentId = node.GetSegment(k);
@@ -372,8 +372,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     continue;
                 }
 
-                bool startNode =
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, NodeId);
+                bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, NodeId);
 
                 ICustomSegmentLights lights = customTrafficLightsManager.GetSegmentLights(segmentId, startNode);
                 if (lights == null) {
@@ -420,6 +419,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 Constants.ManagerFactory.CustomSegmentLightsManager;
 
             ref NetNode node = ref NodeId.ToNode();
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
@@ -427,8 +427,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     continue;
                 }
 
-                bool startNode =
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, NodeId);
+                bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, NodeId);
 
                 ICustomSegmentLights lights =
                     customTrafficLightsManager.GetSegmentLights(segmentId, startNode);
@@ -997,6 +996,8 @@ namespace TrafficManager.TrafficLight.Impl {
             const bool logTrafficLights = false;
 #endif
             // Log._Debug($"Checking for invalid pedestrian lights @ {NodeId}.");
+
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             for (int k = 0; k < 8; ++k) {
                 ushort segmentId = node.GetSegment(k);
 
@@ -1004,7 +1005,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     continue;
                 }
 
-                var startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, NodeId);
+                var startNode = (bool)extSegmentManager.IsStartNode(segmentId, NodeId);
 
                 Log._DebugIf(
                     logTrafficLights,
@@ -1096,7 +1097,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 return;
             }
 
-            bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(segmentId, NodeId);
+            bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, NodeId);
 
             if (startNode == null) {
                 return;
@@ -1300,7 +1301,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     continue;
                 }
 
-                var startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, NodeId);
+                var startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, NodeId);
                 ISegmentEndId endId = new SegmentEndId(segmentId, startNode);
 
                 if (segmentEndIds.Contains(endId)) {

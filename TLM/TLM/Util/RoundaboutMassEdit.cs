@@ -59,7 +59,7 @@ namespace TrafficManager.Util {
                     segmentId, nodeId) == SetLaneArrow_Result.Success &&
                     isStraight) {
 
-                bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+                bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
                 IList<LanePos> laneList =
                     netService.GetSortedLanes(
                         segmentId,
@@ -146,7 +146,7 @@ namespace TrafficManager.Util {
         }
 
         internal static void FixRulesMinor(ushort segmentId, ushort nodeId) {
-            bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             bool isHighway = ExtNodeManager.JunctionHasOnlyHighwayRoads(nodeId);
 
             if (OptionsMassEditTab.RoundAboutQuickFix_NoCrossYieldR) {

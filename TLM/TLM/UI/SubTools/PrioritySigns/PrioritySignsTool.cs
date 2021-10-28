@@ -288,7 +288,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
         private void ShowGUI(bool viewOnly) {
             try {
-                IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
                 TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
@@ -317,7 +317,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             continue;
                         }
 
-                        bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+                        bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, nodeId);
                         ExtSegment seg = segMan.ExtSegments[segmentId];
                         ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
@@ -434,6 +434,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                        $"{nodeId} as main road.");
 
             ref NetNode node = ref nodeId.ToNode();
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             for (int i = 0; i < 8; ++i) {
                 ushort otherSegmentId = node.GetSegment(i);
@@ -441,7 +442,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     continue;
                 }
 
-                bool otherStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, nodeId);
+                bool otherStartNode = (bool)extSegmentManager.IsStartNode(otherSegmentId, nodeId);
 
                 if (TrafficPriorityManager.Instance.GetPrioritySign(otherSegmentId, otherStartNode)
                     == PriorityType.None)

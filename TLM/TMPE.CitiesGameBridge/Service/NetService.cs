@@ -291,16 +291,5 @@ namespace CitiesGameBridge.Service {
             segment.m_modifiedIndex = currentBuildIndex;
             ++segment.m_buildIndex;
         }
-
-        public bool? IsStartNode(ushort segmentId, ushort nodeId) {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            if (segment.m_startNode == nodeId) {
-                return true;
-            } else if (segment.m_endNode == nodeId) {
-                return false;
-            } else {
-                return null;
-            }
-        }
     }
 }

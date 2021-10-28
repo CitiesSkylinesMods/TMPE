@@ -325,7 +325,7 @@ namespace TrafficManager.Traffic.Impl {
             }
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             for (int i = 0; i < 8; ++i) {
                 ushort segId = node.GetSegment(i);
                 if (segId == 0) {
@@ -334,7 +334,7 @@ namespace TrafficManager.Traffic.Impl {
 
                 int index0 = segEndMan.GetIndex(
                     segId,
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(segId, NodeId));
+                    (bool)extSegmentManager.IsStartNode(segId, NodeId));
 
                 if (!segEndMan.ExtSegmentEnds[index0].outgoing) {
                     continue;
