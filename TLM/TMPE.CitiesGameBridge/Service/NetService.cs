@@ -162,27 +162,6 @@ namespace CitiesGameBridge.Service {
             return new GetSegmentLaneIdsEnumerable(initialLaneId, netInfo.m_lanes.Length, laneBuffer);
         }
 
-        public NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId, bool startNode) {
-            return GetFinalSegmentEndDirection(
-                segmentId,
-                ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
-                startNode);
-        }
-
-        public NetInfo.Direction GetFinalSegmentEndDirection(
-            ushort segmentId,
-            ref NetSegment segment,
-            bool startNode) {
-            var dir = startNode ? NetInfo.Direction.Backward : NetInfo.Direction.Forward;
-
-            if ((segment.m_flags & NetSegment.Flags.Invert) !=
-                NetSegment.Flags.None /*^ SimulationService.Instance.LeftHandDrive*/) {
-                dir = NetInfo.InvertDirection(dir);
-            }
-
-            return dir;
-        }
-
         public IList<LanePos> GetSortedLanes(ushort segmentId,
                                              ref NetSegment segment,
                                              bool? startNode,

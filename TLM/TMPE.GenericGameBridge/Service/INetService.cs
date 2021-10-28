@@ -14,12 +14,6 @@ namespace GenericGameBridge.Service {
                                NetSegment.Flags flagMask,
                                NetSegment.Flags? expectedResult = default);
 
-        NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId, bool startNode);
-
-        NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId,
-                                                      ref NetSegment segment,
-                                                      bool startNode);
-
         ushort GetSegmentNodeId(ushort segmentId, bool startNode);
 
         /// <summary>
