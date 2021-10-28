@@ -442,7 +442,7 @@ namespace TrafficManager.Manager.Impl {
             NotifyStartEndNode(segmentId);
 
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                Services.NetService.PublishSegmentChanges(segmentId);
+                ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
             }
 
             return true;
@@ -487,7 +487,7 @@ namespace TrafficManager.Manager.Impl {
             NotifyStartEndNode(segmentId);
 
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                Services.NetService.PublishSegmentChanges(segmentId);
+                ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
             }
         }
 
@@ -530,7 +530,7 @@ namespace TrafficManager.Manager.Impl {
             NotifyStartEndNode(segmentId);
 
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                Services.NetService.PublishSegmentChanges(segmentId);
+                ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
             }
         }
 

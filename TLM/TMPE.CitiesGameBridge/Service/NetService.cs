@@ -259,16 +259,5 @@ namespace CitiesGameBridge.Service {
             }
             return laneList;
         }
-
-        public void PublishSegmentChanges(ushort segmentId) {
-            Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
-            SimulationManager simulationManager = Singleton<SimulationManager>.instance;
-
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            uint currentBuildIndex = simulationManager.m_currentBuildIndex;
-            simulationManager.m_currentBuildIndex = currentBuildIndex + 1;
-            segment.m_modifiedIndex = currentBuildIndex;
-            ++segment.m_buildIndex;
-        }
     }
 }

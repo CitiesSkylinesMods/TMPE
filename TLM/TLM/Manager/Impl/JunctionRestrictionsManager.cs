@@ -1002,7 +1002,7 @@ namespace TrafficManager.Manager.Impl {
             if (requireRecalc) {
                 RoutingManager.Instance.RequestRecalculation(segmentId);
                 if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                    Services.NetService.PublishSegmentChanges(segmentId);
+                    ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
                 }
             }
 

@@ -46,8 +46,6 @@ namespace GenericGameBridge.Service {
         GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection);
 
         GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId);
-
-        void PublishSegmentChanges(ushort segmentId);
     }
 
     public struct LanePos {
