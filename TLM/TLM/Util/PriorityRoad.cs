@@ -181,12 +181,13 @@ namespace TrafficManager.Util {
                 return false;
             }
 
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             ushort nodeId;
-            if ((nodeId = netService.GetHeadNode(segmentId0)) == netService.GetTailNode(segmentId1)) {
+            if ((nodeId = extSegmentManager.GetHeadNode(segmentId0)) == extSegmentManager.GetTailNode(segmentId1)) {
                 if (GetDirection(segmentId0, segmentId1, nodeId) == ArrowDirection.Forward) {
                     return true;
                 }
-            } else if ((nodeId = netService.GetHeadNode(segmentId1)) == netService.GetTailNode(segmentId0)) {
+            } else if ((nodeId = extSegmentManager.GetHeadNode(segmentId1)) == extSegmentManager.GetTailNode(segmentId0)) {
                 if (GetDirection(segmentId1, segmentId0, nodeId) == ArrowDirection.Forward) {
                     return true;
                 }
@@ -223,14 +224,15 @@ namespace TrafficManager.Util {
                 segmentList.Swap(1, 2);
             }
 
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             // slot 0: incomming road.
             // slot 1: outgoing road.
-            if (netService.GetHeadNode(segmentList[1]) == netService.GetTailNode(segmentList[0])) {
+            if (extSegmentManager.GetHeadNode(segmentList[1]) == extSegmentManager.GetTailNode(segmentList[0])) {
                 segmentList.Swap(0, 1);
                 return true;
             }
 
-            return netService.GetHeadNode(segmentList[0]) == netService.GetTailNode(segmentList[1]);
+            return extSegmentManager.GetHeadNode(segmentList[0]) == extSegmentManager.GetTailNode(segmentList[1]);
         }
 
         private static void HandleSplitAvenue(List<ushort> segmentList, ushort nodeId) {
