@@ -99,11 +99,12 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private bool MayHaveJunctionRestrictions(ushort nodeId) {
-            Log._Debug($"JunctionRestrictionsManager.MayHaveJunctionRestrictions({nodeId}): " +
-                       $"flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}");
+            ref NetNode netNode = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
 
-            return
-                Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Junction | NetNode.Flags.Bend)
+            Log._Debug($"JunctionRestrictionsManager.MayHaveJunctionRestrictions({nodeId}): " +
+                       $"flags={netNode.m_flags}");
+
+            return netNode.m_flags.IsFlagSet(NetNode.Flags.Junction | NetNode.Flags.Bend)
                 && ExtNodeManager.Instance.IsValid(nodeId);
         }
 

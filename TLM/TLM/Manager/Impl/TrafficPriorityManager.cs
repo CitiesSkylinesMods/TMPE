@@ -17,6 +17,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.TrafficLight;
     using UnityEngine;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class TrafficPriorityManager
         : AbstractGeometryObservingManager,
@@ -68,10 +69,10 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
-            if (!Services.NetService.CheckNodeFlags(
-                    nodeId,
-                    NetNode.Flags.Created | NetNode.Flags.Deleted |
-                    NetNode.Flags.Junction,
+            ref NetNode netNode = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+
+            if (!netNode.m_flags.CheckFlags(
+                    NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction,
                     NetNode.Flags.Created | NetNode.Flags.Junction)) {
                 reason = SetPrioritySignError.NoJunction;
                 Log._DebugIf(
