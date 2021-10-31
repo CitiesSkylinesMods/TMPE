@@ -28,6 +28,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
         private static CalculateMaxSpeedDelegate CalculateMaxSpeed;
         private static ReverseDelegate Reverse;
         private static CalculateTargetSpeedTrainDelegate CalculateTargetSpeed;
+        private static ForceTrafficLightsDelegate ForceTrafficLights;
 
         [UsedImplicitly]
         public static void Prepare() {
@@ -37,6 +38,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
             CalculateMaxSpeed = GameConnectionManager.Instance.TrainAIConnection.CalculateMaxSpeed;
             Reverse = GameConnectionManager.Instance.TrainAIConnection.Reverse;
             CalculateTargetSpeed = GameConnectionManager.Instance.TrainAIConnection.CalculateTargetSpeed;
+            ForceTrafficLights = GameConnectionManager.Instance.TrainAIConnection.ForceTrafficLights;
         }
 
         [UsedImplicitly]
@@ -353,7 +355,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                 if ((leaderData.m_flags & (Vehicle.Flags.WaitingPath
                                            | Vehicle.Flags.Stopped)) == 0
                     && ___m_info.m_vehicleType != VehicleInfo.VehicleType.Monorail) {
-                    // this.ForceTrafficLights(vehicleID, ref vehicleData, curSpeed > 0.1f);
+                    ForceTrafficLights(__instance, vehicleID, ref vehicleData, curSpeed > 0.1f);
                     // NON-STOCK CODE
                 }
 
