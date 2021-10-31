@@ -74,7 +74,7 @@ namespace TrafficManager.UI.SubTools {
         }
 
         public override void OnToolGUI(Event e) {
-            IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             var hoveredSegment = false;
 
@@ -105,7 +105,7 @@ namespace TrafficManager.UI.SubTools {
                     }
 
                     bool startNode =
-                        (bool)Constants.ServiceFactory.NetService.IsStartNode(
+                        (bool)extSegmentManager.IsStartNode(
                             segmentId,
                             SelectedNodeId);
                     Vector3 position = CalculateNodePositionForSegment(
@@ -256,7 +256,7 @@ namespace TrafficManager.UI.SubTools {
                             }
                         }
 
-                        ExtSegment seg = segMan.ExtSegments[segmentId];
+                        ExtSegment seg = extSegmentManager.ExtSegments[segmentId];
                         ExtSegmentEnd segEnd =
                             segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
                         if (seg.oneWay && segEnd.outgoing) {

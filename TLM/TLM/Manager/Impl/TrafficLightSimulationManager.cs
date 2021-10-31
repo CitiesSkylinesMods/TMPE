@@ -170,7 +170,7 @@ namespace TrafficManager.Manager.Impl {
 
             // determine node position at `fromSegment` (start/end)
             // bool isStartNode = geometry.StartNodeId == nodeId;
-            bool? isStartNode = Services.NetService.IsStartNode(fromSegmentId, nodeId);
+            bool? isStartNode = ExtSegmentManager.Instance.IsStartNode(fromSegmentId, nodeId);
 
             if (isStartNode == null) {
                 Log.Error($"GetTrafficLightState: Invalid node {nodeId} for segment {fromSegmentId}.");
@@ -500,7 +500,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 var startNode =
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+                    (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
 
                 if (logTrafficLights) {
                     Log._Debug($"TrafficLightSimulationManager.HandleValidNode({nodeId}): Adding " +

@@ -68,6 +68,8 @@ namespace TrafficManager.Util {
                     startNode,
                     primaryPrioType);
 
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
                 for (int i = 0; i < 8; ++i) {
                     ushort otherSegmentId = nodeId.ToNode().GetSegment(i);
                     if (otherSegmentId == 0 ||
@@ -78,7 +80,7 @@ namespace TrafficManager.Util {
 
                     TrafficPriorityManager.Instance.SetPrioritySign(
                         otherSegmentId,
-                        (bool)netService.IsStartNode(otherSegmentId, nodeId),
+                        (bool)extSegmentManager.IsStartNode(otherSegmentId, nodeId),
                         secondaryPrioType);
                 }
             }
@@ -181,12 +183,13 @@ namespace TrafficManager.Util {
                 return false;
             }
 
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             ushort nodeId;
-            if ((nodeId = netService.GetHeadNode(segmentId0)) == netService.GetTailNode(segmentId1)) {
+            if ((nodeId = extSegmentManager.GetHeadNode(segmentId0)) == extSegmentManager.GetTailNode(segmentId1)) {
                 if (GetDirection(segmentId0, segmentId1, nodeId) == ArrowDirection.Forward) {
                     return true;
                 }
-            } else if ((nodeId = netService.GetHeadNode(segmentId1)) == netService.GetTailNode(segmentId0)) {
+            } else if ((nodeId = extSegmentManager.GetHeadNode(segmentId1)) == extSegmentManager.GetTailNode(segmentId0)) {
                 if (GetDirection(segmentId1, segmentId0, nodeId) == ArrowDirection.Forward) {
                     return true;
                 }
@@ -223,24 +226,26 @@ namespace TrafficManager.Util {
                 segmentList.Swap(1, 2);
             }
 
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             // slot 0: incomming road.
             // slot 1: outgoing road.
-            if (netService.GetHeadNode(segmentList[1]) == netService.GetTailNode(segmentList[0])) {
+            if (extSegmentManager.GetHeadNode(segmentList[1]) == extSegmentManager.GetTailNode(segmentList[0])) {
                 segmentList.Swap(0, 1);
                 return true;
             }
 
-            return netService.GetHeadNode(segmentList[0]) == netService.GetTailNode(segmentList[1]);
+            return extSegmentManager.GetHeadNode(segmentList[0]) == extSegmentManager.GetTailNode(segmentList[1]);
         }
 
         private static void HandleSplitAvenue(List<ushort> segmentList, ushort nodeId) {
             Log._Debug($"HandleSplitAvenue(segmentList, {nodeId}) was called");
             void SetArrows(ushort segmentIdSrc, ushort segmentIdDst) {
                 LaneArrows arrow = ToLaneArrows(GetDirection(segmentIdSrc, segmentIdDst, nodeId));
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 IList<LanePos> lanes = netService.GetSortedLanes(
                                 segmentIdSrc,
                                 ref GetSeg(segmentIdSrc),
-                                netService.IsStartNode(segmentIdSrc, nodeId),
+                                extSegmentManager.IsStartNode(segmentIdSrc, nodeId),
                                 LaneArrowManager.LANE_TYPES,
                                 LaneArrowManager.VEHICLE_TYPES,
                                 true);
@@ -402,7 +407,7 @@ namespace TrafficManager.Util {
 
         private static void FixMajorSegmentRules(ushort segmentId, ushort nodeId) {
             Log._Debug($"FixMajorSegmentRules({segmentId}, {nodeId}) was called");
-            bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
             if (!OptionsMassEditTab.PriorityRoad_CrossMainR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(segmentId, startNode, false);
@@ -412,7 +417,7 @@ namespace TrafficManager.Util {
 
         private static void FixMinorSegmentRules(ushort segmentId, ushort nodeId, List<ushort> segmentList) {
             Log._Debug($"FixMinorSegmentRules({segmentId}, {nodeId}, segmentList) was called");
-            bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             if (OptionsMassEditTab.PriorityRoad_EnterBlockedYeild) {
                 JunctionRestrictionsManager.Instance.SetEnteringBlockedJunctionAllowed(segmentId, startNode, true);
             }
@@ -429,7 +434,7 @@ namespace TrafficManager.Util {
             return netService.GetSortedLanes(
                                 segmentId,
                                 ref segmentId.ToSegment(),
-                                netService.IsStartNode(segmentId, nodeId) ^ (!toward),
+                                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!toward),
                                 LaneArrowManager.LANE_TYPES,
                                 LaneArrowManager.VEHICLE_TYPES,
                                 true).Count;
@@ -478,7 +483,7 @@ namespace TrafficManager.Util {
 
             ref NetSegment seg = ref segmentId.ToSegment();
             ref NetNode node = ref nodeId.ToNode();
-            bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             bool lht = LHT;
 
             //list of outgoing lanes from current segment to current node.
@@ -528,7 +533,7 @@ namespace TrafficManager.Util {
             }
             ref NetSegment seg = ref segmentId.ToSegment();
             ref NetNode node = ref nodeId.ToNode();
-            bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
 
             //list of outgoing lanes from current segment to current node.
             IList<LanePos> laneList =
@@ -609,12 +614,12 @@ namespace TrafficManager.Util {
         /// <param name="segmentList"></param>
         public static void ClearNode(ushort nodeId) {
             LaneConnectionManager.Instance.RemoveLaneConnectionsFromNode(nodeId);
-
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             ref NetNode node = ref nodeId.ToNode();
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
                 if (segmentId != 0) {
-                    bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+                    bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, nodeId);
                     TrafficPriorityManager.Instance.SetPrioritySign(segmentId, startNode, PriorityType.None);
                     JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
                     LaneArrowManager.Instance.ResetLaneArrows(segmentId, startNode);

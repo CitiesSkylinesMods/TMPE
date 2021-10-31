@@ -162,27 +162,6 @@ namespace CitiesGameBridge.Service {
             return new GetSegmentLaneIdsEnumerable(initialLaneId, netInfo.m_lanes.Length, laneBuffer);
         }
 
-        public NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId, bool startNode) {
-            return GetFinalSegmentEndDirection(
-                segmentId,
-                ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
-                startNode);
-        }
-
-        public NetInfo.Direction GetFinalSegmentEndDirection(
-            ushort segmentId,
-            ref NetSegment segment,
-            bool startNode) {
-            var dir = startNode ? NetInfo.Direction.Backward : NetInfo.Direction.Forward;
-
-            if ((segment.m_flags & NetSegment.Flags.Invert) !=
-                NetSegment.Flags.None /*^ SimulationService.Instance.LeftHandDrive*/) {
-                dir = NetInfo.InvertDirection(dir);
-            }
-
-            return dir;
-        }
-
         public IList<LanePos> GetSortedLanes(ushort segmentId,
                                              ref NetSegment segment,
                                              bool? startNode,
@@ -280,54 +259,5 @@ namespace CitiesGameBridge.Service {
             }
             return laneList;
         }
-
-        public void PublishSegmentChanges(ushort segmentId) {
-            Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
-            SimulationManager simulationManager = Singleton<SimulationManager>.instance;
-
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            uint currentBuildIndex = simulationManager.m_currentBuildIndex;
-            simulationManager.m_currentBuildIndex = currentBuildIndex + 1;
-            segment.m_modifiedIndex = currentBuildIndex;
-            ++segment.m_buildIndex;
-        }
-
-        public bool? IsStartNode(ushort segmentId, ushort nodeId) {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            if (segment.m_startNode == nodeId) {
-                return true;
-            } else if (segment.m_endNode == nodeId) {
-                return false;
-            } else {
-                return null;
-            }
-        }
-
-        public ushort GetHeadNode(ref NetSegment segment) {
-            // tail node>-------->head node
-            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
-            if (invert) {
-                return segment.m_startNode;
-            } else {
-                return segment.m_endNode;
-            }
-        }
-
-        public ushort GetHeadNode(ushort segmentId) =>
-            GetHeadNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
-
-        public ushort GetTailNode(ref NetSegment segment) {
-            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
-            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
-            if (!invert) {
-                return segment.m_startNode;
-            } else {
-                return segment.m_endNode;
-            }//endif
-        }
-
-        public ushort GetTailNode(ushort segmentId) =>
-            GetTailNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
     }
 }

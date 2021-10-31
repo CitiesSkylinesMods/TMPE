@@ -444,7 +444,7 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    bool? start = Constants.ServiceFactory.NetService.IsStartNode(segId, nextNodeId);
+                    bool? start = ExtSegmentManager.Instance.IsStartNode(segId, nextNodeId);
                     if (!start.HasValue) {
                         Log.Error($"Segment with id: {segId} is not connected to the node {nextNodeId}");
                         Debug.LogError($"TM:PE RecalculateLaneRoutings - Segment with id {segId} is not connected to the node {nextNodeId}");

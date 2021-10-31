@@ -81,6 +81,7 @@ namespace TrafficManager.Util.Record {
         public static List<LaneConnectionRecord> GetLanes(ushort nodeId) {
             var ret = new List<LaneConnectionRecord>();
             ref NetNode node = ref nodeId.ToNode();
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
                 if (segmentId == 0) {
@@ -103,7 +104,7 @@ namespace TrafficManager.Util.Record {
                     var laneData = new LaneConnectionRecord {
                         LaneId = laneIdAndIndex.laneId,
                         LaneIndex = (byte)laneIdAndIndex.laneIndex,
-                        StartNode = (bool)netService.IsStartNode(segmentId, nodeId),
+                        StartNode = (bool)extSegmentManager.IsStartNode(segmentId, nodeId),
                     };
                     ret.Add(laneData);
                 }

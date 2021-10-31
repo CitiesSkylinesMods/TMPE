@@ -131,7 +131,7 @@ namespace TrafficManager.Manager.Impl {
         public bool SetSegmentLights(ushort nodeId,
                                      ushort segmentId,
                                      ICustomSegmentLights lights) {
-            bool? startNode = Services.NetService.IsStartNode(segmentId, nodeId);
+            bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             if (startNode == null) {
                 return false;
             }
@@ -313,7 +313,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public ICustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
-            bool? startNode = Services.NetService.IsStartNode(segmentId, nodeId);
+            bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             return startNode == null ? null : GetSegmentLights(segmentId, (bool)startNode, false);
         }
 
