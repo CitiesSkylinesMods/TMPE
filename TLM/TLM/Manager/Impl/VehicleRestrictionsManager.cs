@@ -421,11 +421,11 @@ namespace TrafficManager.Manager.Impl {
                                              NetInfo.Lane laneInfo,
                                              uint laneId,
                                              ExtVehicleType allowedTypes) {
-            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
                 return false;
             }
 
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return false;
             }
@@ -463,11 +463,11 @@ namespace TrafficManager.Manager.Impl {
                                    uint laneId,
                                    NetInfo.Lane laneInfo,
                                    ExtVehicleType vehicleType) {
-            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
                 return;
             }
 
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return;
             }
@@ -506,11 +506,11 @@ namespace TrafficManager.Manager.Impl {
                                       uint laneId,
                                       NetInfo.Lane laneInfo,
                                       ExtVehicleType vehicleType) {
-            if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
                 return;
             }
 
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return;
             }
@@ -817,7 +817,7 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneVehicleTypes laneVehicleTypes in data) {
                 try {
-                    if (!Services.NetService.IsLaneAndItsSegmentValid(laneVehicleTypes.laneId))
+                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneVehicleTypes.laneId))
                         continue;
 
                     ExtVehicleType baseMask = GetBaseMask(

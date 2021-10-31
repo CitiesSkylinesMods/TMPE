@@ -127,12 +127,6 @@ namespace TrafficManager.Util {
                     PriorityType.Main);
             }
 
-            ushort nodeId = netService.GetSegmentNodeId(
-                segmentId,
-                startNode);
-
-            ExtSegmentEnd curEnd = GetSegEnd(segmentId, startNode);
-
             if (OptionsMassEditTab.RoundAboutQuickFix_NoCrossMainR) {
                 JunctionRestrictionsManager.Instance.SetPedestrianCrossingAllowed(
                     segmentId,

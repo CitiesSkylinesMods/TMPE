@@ -48,11 +48,12 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="segmentId">SegmentId affected</param>
         /// <param name="startNode">NodeId affected</param>
         private ICustomSegmentLights AddLiveSegmentLights(ushort segmentId, bool startNode) {
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return null;
             }
 
-            ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
             uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
             RoadBaseAI.GetTrafficLightState(
@@ -88,7 +89,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
             Log._Trace($"CustomTrafficLights.AddSegmentLights: Adding segment light: {segmentId} @ startNode={startNode}");
 #endif
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return null;
             }
 

@@ -181,8 +181,10 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public void MarkAllAsUpdated() {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                if (!Services.NetService.IsSegmentValid((ushort)segmentId)) {
+                if (!extSegmentManager.IsSegmentValid((ushort)segmentId)) {
                     continue;
                 }
 
@@ -205,10 +207,10 @@ namespace TrafficManager.Manager.Impl {
                 stateUpdated = true;
 
                 if (updateNodes) {
-                    MarkAsUpdated(
-                        Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, true));
-                    MarkAsUpdated(
-                        Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, false));
+                    ref NetSegment netSegment = ref seg.segmentId.ToSegment();
+
+                    MarkAsUpdated(netSegment.m_startNode);
+                    MarkAsUpdated(netSegment.m_endNode);
                 }
 
                 if (!seg.valid) {

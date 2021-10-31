@@ -58,7 +58,7 @@ namespace TrafficManager.Manager.Impl {
                 return end;
             }
 
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 Log.Warning(
                     $"SegmentEndManager.GetOrAddSegmentEnd({segmentId}, {startNode}): Refusing to " +
                     "add segment end for invalid segment.");
@@ -106,7 +106,7 @@ namespace TrafficManager.Manager.Impl {
             const bool logPriority = false;
 #endif
 
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 if (logPriority) {
                     Log._Debug(
                         $"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment " +
@@ -117,11 +117,11 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
+
             if (TrafficPriorityManager.Instance.HasSegmentPrioritySign(segmentId, startNode)
-                || TrafficLightSimulationManager.Instance.HasTimedSimulation(
-                    Services.NetService.GetSegmentNodeId(
-                        segmentId,
-                        startNode))) {
+                || TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
                 if (logPriority) {
                     Log._DebugFormat(
                         "SegmentEndManager.UpdateSegmentEnd({0}, {1}): Segment {2} @ {3} has timed " +

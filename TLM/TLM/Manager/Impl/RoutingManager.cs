@@ -71,7 +71,7 @@ namespace TrafficManager.Manager.Impl {
             string buf = $"Segment routings:\n";
 
             for (var i = 0; i < SegmentRoutings.Length; ++i) {
-                if (!Services.NetService.IsSegmentValid((ushort)i)) {
+                if (!ExtSegmentManager.Instance.IsSegmentValid((ushort)i)) {
                     continue;
                 }
 
@@ -81,7 +81,7 @@ namespace TrafficManager.Manager.Impl {
             buf += $"\nLane end backward routings:\n";
 
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -92,7 +92,7 @@ namespace TrafficManager.Manager.Impl {
             buf += $"\nLane end forward routings:\n";
 
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -171,8 +171,9 @@ namespace TrafficManager.Manager.Impl {
             if (propagate) {
                 //TODO refactor into RequestRecalculation(ushort nodeId)
 
-                ushort startNodeId = Services.NetService.GetSegmentNodeId(segmentId, true);
-                ref NetNode startNode = ref startNodeId.ToNode();
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                ref NetNode startNode = ref netSegment.m_startNode.ToNode();
                 for (int i = 0; i < 8; ++i) {
                     ushort otherSegmentId = startNode.GetSegment(i);
                     if (otherSegmentId != 0) {
@@ -180,8 +181,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
 
-                ushort endNodeId = Services.NetService.GetSegmentNodeId(segmentId, false);
-                ref NetNode endNode = ref endNodeId.ToNode();
+                ref NetNode endNode = ref netSegment.m_endNode.ToNode();
                 for (int i = 0; i < 8; ++i) {
                     ushort otherSegmentId = endNode.GetSegment(i);
                     if (otherSegmentId != 0) {
@@ -223,7 +223,7 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"RoutingManager.RecalculateSegment({segmentId}) called.");
             }
 
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 if (logRouting) {
                     Log._Debug($"RoutingManager.RecalculateSegment({segmentId}): " +
                                "Segment is invalid. Skipping recalculation");

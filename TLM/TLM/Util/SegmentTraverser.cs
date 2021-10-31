@@ -139,7 +139,9 @@ namespace TrafficManager.Util {
 
             IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
-            ushort startNodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(initialSegmentId, true);
+            ref NetSegment initialSegment = ref initialSegmentId.ToSegment();
+
+            ushort startNodeId = initialSegment.m_startNode;
             TraverseRec(
                 ref initialSeg,
                 ref extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(initialSegmentId, true)],
@@ -151,7 +153,7 @@ namespace TrafficManager.Util {
                 visitorFun,
                 visitedSegmentIds);
 
-            ushort endNodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(initialSegmentId, false);
+            ushort endNodeId = initialSegment.m_endNode;
             TraverseRec(
                 ref initialSeg,
                 ref extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(initialSegmentId, false)],
@@ -242,8 +244,7 @@ namespace TrafficManager.Util {
                 visitedSegmentIds.Add(nextSegmentId);
 
                 // Log._Debug($"SegmentTraverser: Traversing segment {nextSegmentId}");
-                ushort nextStartNodeId =
-                    Constants.ServiceFactory.NetService.GetSegmentNodeId(nextSegmentId, true);
+                ushort nextStartNodeId = nextSegmentId.ToSegment().m_startNode;
 
                 if (!visitorFun(
                         new SegmentVisitData(

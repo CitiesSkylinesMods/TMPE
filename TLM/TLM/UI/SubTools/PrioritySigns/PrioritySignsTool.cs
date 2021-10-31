@@ -413,7 +413,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
         }
 
         private bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType sign) {
-            ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
 
             // check for restrictions
             if (!MayNodeHavePrioritySigns(nodeId)) {

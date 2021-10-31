@@ -489,7 +489,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
 #if DEBUG
             if(!ExtNodeManager.Instance.IsValid(nodeId) ||
-               !Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+               !ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 Debug.LogError("Invalid node or segment ID");
             }
 #endif

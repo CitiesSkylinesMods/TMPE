@@ -149,7 +149,7 @@ namespace TrafficManager.Manager.Impl {
                     Log._Debug($"Executing UpdateDedicatedTurningLanePolicy() in simulation thread ...");
                     for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                         ref NetSegment segment = ref segmentId.ToSegment();
-                        if (!netService.IsSegmentValid(segmentId))
+                        if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId))
                             continue;
 
                         if (segment.Info?.GetAI() is not RoadBaseAI ai)
@@ -248,7 +248,7 @@ namespace TrafficManager.Manager.Impl {
                     var laneId = Convert.ToUInt32(split[0]);
                     uint flags = Convert.ToUInt32(split[1]);
 
-                    if (!Services.NetService.IsLaneAndItsSegmentValid(laneId))
+                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId))
                         continue;
 
                     if (flags > ushort.MaxValue)
@@ -292,7 +292,7 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneArrowData laneArrowData in data) {
                 try {
-                    if (!Services.NetService.IsLaneAndItsSegmentValid(laneArrowData.laneId)) {
+                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneArrowData.laneId)) {
                         continue;
                     }
 

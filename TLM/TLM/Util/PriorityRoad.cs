@@ -59,9 +59,8 @@ namespace TrafficManager.Util {
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             void ApplyPrioritySigns(ushort segmentId, bool startNode) {
-                ushort nodeId = netService.GetSegmentNodeId(
-                    segmentId,
-                    startNode);
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+                ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
 
                 TrafficPriorityManager.Instance.SetPrioritySign(
                     segmentId,
@@ -165,7 +164,8 @@ namespace TrafficManager.Util {
         }
 
         private static void FixHighPriorityJunction(ushort segmentId, ushort firstNodeId, ushort lastNodeId, List<ushort> segmentList, bool startNode) {
-            ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
             bool isEndNode = nodeId == firstNodeId || nodeId == lastNodeId;
             if (isEndNode) {
                 FixHighPriorityJunction(nodeId);
@@ -636,6 +636,8 @@ namespace TrafficManager.Util {
                 return null;
             IRecordable record = RecordRoad(segmentList);
             foreach (ushort segmentId in segmentList) {
+                ref NetSegment segment = ref segmentId.ToSegment();
+
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, true);
 
                 SpeedLimitManager.Instance.SetSegmentSpeedLimit(
@@ -643,8 +645,9 @@ namespace TrafficManager.Util {
                     SetSpeedLimitAction.ResetToDefault());
 
                 VehicleRestrictionsManager.Instance.ClearVehicleRestrictions(segmentId);
-                ClearNode(netService.GetSegmentNodeId(segmentId, true));
-                ClearNode(netService.GetSegmentNodeId(segmentId, false));
+
+                ClearNode(segment.m_startNode);
+                ClearNode(segment.m_endNode);
             }
             return record;
         }
