@@ -808,11 +808,11 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneConnection conn in data) {
                 try {
-                    if (!Services.NetService.IsLaneAndItsSegmentValid(conn.lowerLaneId)) {
+                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(conn.lowerLaneId)) {
                         continue;
                     }
 
-                    if (!Services.NetService.IsLaneAndItsSegmentValid(conn.higherLaneId)) {
+                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(conn.higherLaneId)) {
                         continue;
                     }
 
@@ -865,7 +865,7 @@ namespace TrafficManager.Manager.Impl {
                                 continue;
                             }
 
-                            if (!Services.NetService.IsLaneAndItsSegmentValid(otherHigherLaneId)) {
+                            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(otherHigherLaneId)) {
                                 continue;
                             }
 

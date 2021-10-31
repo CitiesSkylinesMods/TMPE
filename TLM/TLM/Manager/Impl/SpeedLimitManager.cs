@@ -276,7 +276,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -325,7 +325,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -509,7 +509,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (!this.Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
                 return false;
             }
 
@@ -854,7 +854,7 @@ namespace TrafficManager.Manager.Impl {
 #endif
             foreach (Configuration.LaneSpeedLimit laneSpeedLimit in data) {
                 try {
-                    if (!Services.NetService.IsLaneAndItsSegmentValid(laneSpeedLimit.laneId)) {
+                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneSpeedLimit.laneId)) {
 #if DEBUG
                         Log._DebugIf(
                             debugSpeedLimits,

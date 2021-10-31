@@ -67,40 +67,6 @@ namespace CitiesGameBridge.Service {
         // LANE BASICS --------------------------------------------------------------------------------
 
         /// <summary>
-        /// Check if a lane id is valid, optionally also checking validity of parent segment.
-        /// </summary>
-        ///
-        /// <param name="laneId">The id of the lane to check.</param>
-        /// <param name="checkSegment">If <c>true</c>, validity of parent segment will also be checked.</param>
-        ///
-        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
-        public bool IsLaneValid(uint laneId, bool checkSegment) {
-
-            if (checkSegment &&
-                !IsSegmentValid(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment)) {
-
-                return false;
-            }
-
-            return CheckLaneFlags(
-                laneId,
-                NetLane.Flags.Created | NetLane.Flags.Deleted,
-                NetLane.Flags.Created);
-        }
-
-        /// <summary>
-        /// Check if a lane id and its parent segment are valid.
-        /// </summary>
-        ///
-        /// <param name="laneId">The id of the lane to check.</param>
-        ///
-        /// <returns>Returns <c>true</c> if both lane and segment are valid, otherwise <c>false</c>.</returns>
-        [Obsolete("Use IsLaneValid(uint, bool) instead; ideally only check parent segment validity once per collection of lanes.")]
-        public bool IsLaneAndItsSegmentValid(uint laneId) {
-            return IsLaneValid(laneId, true);
-        }
-
-        /// <summary>
         /// Check lane flags contain at least one of the flags in <paramref name="flagMask"/>.
         /// </summary>
         ///

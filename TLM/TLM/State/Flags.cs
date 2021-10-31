@@ -67,7 +67,7 @@ namespace TrafficManager.State {
             Log.Info("------------------------");
             for (uint i = 0; i < laneArrowFlags.Length; ++i) {
                 if (highwayLaneArrowFlags[i] != null || laneArrowFlags[i] != null) {
-                    Log.Info($"Lane {i}: valid? {Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(i)}");
+                    Log.Info($"Lane {i}: valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(i)}");
                 }
 
                 if (highwayLaneArrowFlags[i] != null) {
@@ -87,7 +87,7 @@ namespace TrafficManager.State {
                     continue;
 
                 ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
-                Log.Info($"Lane {i}: valid? {Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(i)}, seg. valid? {Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)}");
+                Log.Info($"Lane {i}: valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(i)}, seg. valid? {Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)}");
                 for (int x = 0; x < 2; ++x) {
                     if (laneConnections[i][x] == null)
                         continue;
@@ -99,7 +99,7 @@ namespace TrafficManager.State {
                         if (laneConnections[i][x][y] == 0)
                             continue;
 
-                        Log.Info($"\t\tEntry {y}: {laneConnections[i][x][y]} (valid? {Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(laneConnections[i][x][y])})");
+                        Log.Info($"\t\tEntry {y}: {laneConnections[i][x][y]} (valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneConnections[i][x][y])})");
                     }
                 }
             }

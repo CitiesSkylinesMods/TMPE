@@ -67,8 +67,27 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        public bool IsLaneAndItsSegmentValid(uint laneId) {
+            return IsLaneValid(laneId)
+                && IsValid(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment);
+        }
+
         public bool IsValid(ushort segmentId) {
             return Constants.ServiceFactory.NetService.IsSegmentValid(segmentId);
+        }
+
+        /// <summary>
+        /// Check if a lane id is valid.
+        /// </summary>
+        ///
+        /// <param name="laneId">The id of the lane to check.</param>
+        ///
+        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
+        public bool IsLaneValid(uint laneId) {
+            var createdDeleted = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags
+                & (uint)(NetLane.Flags.Created | NetLane.Flags.Deleted);
+
+            return createdDeleted == (uint)NetLane.Flags.Created;
         }
 
         public void PublishSegmentChanges(ushort segmentId) {
