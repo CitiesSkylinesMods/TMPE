@@ -2,18 +2,6 @@ namespace GenericGameBridge.Service {
     using System.Collections.Generic;
 
     public interface INetService {
-        bool CheckLaneFlags(uint laneId,
-                            NetLane.Flags flagMask,
-                            NetLane.Flags? expectedResult = default);
-
-        bool CheckNodeFlags(ushort nodeId,
-                            NetNode.Flags flagMask,
-                            NetNode.Flags? expectedResult = default);
-
-        bool CheckSegmentFlags(ushort segmentId,
-                               NetSegment.Flags flagMask,
-                               NetSegment.Flags? expectedResult = default);
-
         ushort GetSegmentNodeId(ushort segmentId, bool startNode);
 
         /// <summary>

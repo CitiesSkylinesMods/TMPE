@@ -10,66 +10,6 @@ namespace CitiesGameBridge.Service {
 
         private NetService() { }
 
-        // NODE BASICS --------------------------------------------------------------------------------
-
-        /// <summary>
-        /// Check node flags contain at least one of the flags in <paramref name="flagMask"/>.
-        /// </summary>
-        ///
-        /// <param name="nodeId">The id of the node to inspect.</param>
-        /// <param name="flagMask">The flags to test.</param>
-        /// <param name="expectedResult">If specified, ensure only the expected flags are found.</param>
-        ///
-        /// <returns>Returns <c>true</c> if the test passes, otherwise <c>false</c>.</returns>
-        public bool CheckNodeFlags(ushort nodeId,
-                                   NetNode.Flags flagMask,
-                                   NetNode.Flags? expectedResult = null) {
-
-            NetNode.Flags result = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags & flagMask;
-
-            return expectedResult == null ? result != 0 : result == expectedResult;
-        }
-
-        // SEGMENT BASICS --------------------------------------------------------------------------------
-
-        /// <summary>
-        /// Check segment flags contain at least one of the flags in <paramref name="flagMask"/>.
-        /// </summary>
-        ///
-        /// <param name="segmentId">The id of the segment to inspect.</param>
-        /// <param name="flagMask">The flags to test.</param>
-        /// <param name="expectedResult">If specified, ensure only the expected flags are found.</param>
-        ///
-        /// <returns>Returns <c>true</c> if the test passes, otherwise <c>false</c>.</returns>
-        public bool CheckSegmentFlags(ushort segmentId,
-                                      NetSegment.Flags flagMask,
-                                      NetSegment.Flags? expectedResult = null) {
-
-            NetSegment.Flags result = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags & flagMask;
-
-            return expectedResult == null ? result != 0 : result == expectedResult;
-        }
-
-        // LANE BASICS --------------------------------------------------------------------------------
-
-        /// <summary>
-        /// Check lane flags contain at least one of the flags in <paramref name="flagMask"/>.
-        /// </summary>
-        ///
-        /// <param name="laneId">The id of the lane to inspect.</param>
-        /// <param name="flagMask">The flags to test for.</param>
-        /// <param name="expectedResult">If specified, ensure only the expected flags are found.</param>
-        ///
-        /// <returns>Returns <c>true</c> if the test passes, otherwise <c>false</c>.</returns>
-        public bool CheckLaneFlags(uint laneId,
-                                   NetLane.Flags flagMask,
-                                   NetLane.Flags? expectedResult = null) {
-
-            uint result = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags & (uint)flagMask;
-
-            return expectedResult == null ? result != 0 : result == (uint)expectedResult;
-        }
-
         // OTHER STUFF --------------------------------------------------------------------------------
 
         public ushort GetSegmentNodeId(ushort segmentId, bool startNode) {
