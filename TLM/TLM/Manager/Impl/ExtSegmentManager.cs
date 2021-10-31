@@ -69,11 +69,14 @@ namespace TrafficManager.Manager.Impl {
 
         public bool IsLaneAndItsSegmentValid(uint laneId) {
             return IsLaneValid(laneId)
-                && IsValid(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment);
+                && IsSegmentValid(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment);
         }
 
-        public bool IsValid(ushort segmentId) {
-            return Constants.ServiceFactory.NetService.IsSegmentValid(segmentId);
+        public bool IsSegmentValid(ushort segmentId) {
+            var createdCollapsedDeleted = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags
+                    & (NetSegment.Flags.Created | NetSegment.Flags.Collapsed | NetSegment.Flags.Deleted);
+
+            return createdCollapsedDeleted == NetSegment.Flags.Created;
         }
 
         /// <summary>
@@ -122,7 +125,7 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($">>> ExtSegmentManager.Recalculate({segmentId}) called.");
             }
 
-            if (!IsValid(segmentId)) {
+            if (!IsSegmentValid(segmentId)) {
                 if (extSegment.valid) {
                     Reset(ref extSegment);
                     extSegment.valid = false;
@@ -158,7 +161,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateIsOneWay(ushort segmentId) {
-            if (!IsValid(segmentId)) {
+            if (!IsSegmentValid(segmentId)) {
                 return false;
             }
 
@@ -204,7 +207,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateHasBusLane(ushort segmentId) {
-            if (!IsValid(segmentId)) {
+            if (!IsSegmentValid(segmentId)) {
                 return false;
             }
 
@@ -228,7 +231,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateIsHighway(ushort segmentId) {
-            if (!IsValid(segmentId)) {
+            if (!IsSegmentValid(segmentId)) {
                 return false;
             }
 
@@ -250,7 +253,7 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug($"Extended segment data:");
 
             for (int i = 0; i < ExtSegments.Length; ++i) {
-                if (!IsValid((ushort)i)) {
+                if (!IsSegmentValid((ushort)i)) {
                     continue;
                 }
 

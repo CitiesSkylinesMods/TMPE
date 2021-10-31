@@ -87,7 +87,7 @@ namespace TrafficManager.State {
                     continue;
 
                 ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
-                Log.Info($"Lane {i}: valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(i)}, seg. valid? {Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)}");
+                Log.Info($"Lane {i}: valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(i)}, seg. valid? {ExtSegmentManager.Instance.IsSegmentValid(segmentId)}");
                 for (int x = 0; x < 2; ++x) {
                     if (laneConnections[i][x] == null)
                         continue;
@@ -110,7 +110,7 @@ namespace TrafficManager.State {
             for (uint i = 0; i < laneSpeedLimitArray.Length; ++i) {
                 if (laneSpeedLimitArray[i] == null)
                     continue;
-                Log.Info($"Segment {i}: valid? {Constants.ServiceFactory.NetService.IsSegmentValid((ushort)i)}");
+                Log.Info($"Segment {i}: valid? {ExtSegmentManager.Instance.IsSegmentValid((ushort)i)}");
                 for (int x = 0; x < laneSpeedLimitArray[i].Length; ++x) {
                     if (laneSpeedLimitArray[i][x] == null)
                         continue;
@@ -124,7 +124,7 @@ namespace TrafficManager.State {
             for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
                 if (laneAllowedVehicleTypesArray[i] == null)
                     continue;
-                Log.Info($"Segment {i}: valid? {Constants.ServiceFactory.NetService.IsSegmentValid((ushort)i)}");
+                Log.Info($"Segment {i}: valid? {ExtSegmentManager.Instance.IsSegmentValid((ushort)i)}");
                 for (int x = 0; x < laneAllowedVehicleTypesArray[i].Length; ++x) {
                     if (laneAllowedVehicleTypesArray[i][x] == null)
                         continue;

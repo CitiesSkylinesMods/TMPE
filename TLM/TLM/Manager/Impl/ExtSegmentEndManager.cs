@@ -251,7 +251,7 @@ namespace TrafficManager.Manager.Impl {
             ushort nodeIdBeforeRecalc = segEnd.nodeId;
             Reset(ref segEnd);
 
-            if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 if (nodeIdBeforeRecalc != 0) {
                     Constants.ManagerFactory.ExtNodeManager.RemoveSegment(
                         nodeIdBeforeRecalc,
@@ -286,7 +286,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="segmentId"></param>
         /// <param name="startNode"></param>
         public void CalculateCorners(ushort segmentId, bool startNode) {
-            if (!Shortcuts.netService.IsSegmentValid(segmentId))
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId))
                 return;
             if (!segmentId.ToSegment().Info) {
                 Log.Warning($"segment {segmentId} has null info");

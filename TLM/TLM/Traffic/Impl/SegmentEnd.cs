@@ -304,7 +304,7 @@ namespace TrafficManager.Traffic.Impl {
             StartNode = segment.m_startNode == NodeId;
             numLanes = segment.Info.m_lanes.Length;
 
-            if (!Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(SegmentId)) {
                 Log.Error($"SegmentEnd.Update: Segment {SegmentId} is invalid.");
                 return;
             }

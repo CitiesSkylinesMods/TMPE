@@ -71,7 +71,7 @@ namespace TrafficManager.Manager.Impl {
             string buf = $"Segment routings:\n";
 
             for (var i = 0; i < SegmentRoutings.Length; ++i) {
-                if (!Services.NetService.IsSegmentValid((ushort)i)) {
+                if (!ExtSegmentManager.Instance.IsSegmentValid((ushort)i)) {
                     continue;
                 }
 
@@ -223,7 +223,7 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"RoutingManager.RecalculateSegment({segmentId}) called.");
             }
 
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 if (logRouting) {
                     Log._Debug($"RoutingManager.RecalculateSegment({segmentId}): " +
                                "Segment is invalid. Skipping recalculation");

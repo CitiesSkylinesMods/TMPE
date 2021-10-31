@@ -425,7 +425,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return false;
             }
@@ -467,7 +467,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return;
             }
@@ -510,7 +510,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return;
             }

@@ -149,7 +149,7 @@ namespace TrafficManager.Manager.Impl {
                     Log._Debug($"Executing UpdateDedicatedTurningLanePolicy() in simulation thread ...");
                     for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                         ref NetSegment segment = ref segmentId.ToSegment();
-                        if (!netService.IsSegmentValid(segmentId))
+                        if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId))
                             continue;
 
                         if (segment.Info?.GetAI() is not RoadBaseAI ai)

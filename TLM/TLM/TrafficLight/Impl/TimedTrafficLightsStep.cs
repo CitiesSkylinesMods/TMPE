@@ -1221,7 +1221,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 return false;
             }
 
-            if (!Constants.ServiceFactory.NetService.IsSegmentValid(targetSegmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(targetSegmentId)) {
                 Log.Error(
                     $"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): " +
                     $"Target segment {targetSegmentId} is invalid");
@@ -1262,7 +1262,7 @@ namespace TrafficManager.TrafficLight.Impl {
             }
 #endif
 
-            if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 Log.Error(
                     $"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): " +
                     $"Segment {segmentId} is invalid");
@@ -1317,7 +1317,7 @@ namespace TrafficManager.TrafficLight.Impl {
             }
 #endif
 
-            if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 Log.Error($"TimedTrafficLightsStep.SetSegmentLights({segmentId}): Segment {segmentId} is invalid");
                 return false;
             }

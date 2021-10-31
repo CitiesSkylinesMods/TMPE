@@ -33,20 +33,6 @@ namespace CitiesGameBridge.Service {
         // SEGMENT BASICS --------------------------------------------------------------------------------
 
         /// <summary>
-        /// Check if a segment id is valid.
-        /// </summary>
-        ///
-        /// <param name="segmentId">The id of the segment to check.</param>
-        ///
-        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
-        public bool IsSegmentValid(ushort segmentId) {
-            return CheckSegmentFlags(
-                segmentId,
-                NetSegment.Flags.Created | NetSegment.Flags.Collapsed | NetSegment.Flags.Deleted,
-                NetSegment.Flags.Created);
-        }
-
-        /// <summary>
         /// Check segment flags contain at least one of the flags in <paramref name="flagMask"/>.
         /// </summary>
         ///

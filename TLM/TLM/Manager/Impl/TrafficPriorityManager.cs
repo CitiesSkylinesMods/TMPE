@@ -111,7 +111,7 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 reason = SetPrioritySignError.InvalidSegment;
                 Log._DebugIf(
                     logPriority,
@@ -167,7 +167,7 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 reason = SetPrioritySignError.InvalidSegment;
                 Log._DebugIf(
                     logPriority,
@@ -1585,7 +1585,7 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    if (!Services.NetService.IsSegmentValid(segmentId)) {
+                    if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                         continue;
                     }
 
@@ -1626,7 +1626,7 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    if (!Services.NetService.IsSegmentValid(prioSegData.segmentId)) {
+                    if (!ExtSegmentManager.Instance.IsSegmentValid(prioSegData.segmentId)) {
                         continue;
                     }
 
@@ -1667,7 +1667,7 @@ namespace TrafficManager.Manager.Impl {
 
             for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 try {
-                    if (!Services.NetService.IsSegmentValid((ushort)segmentId) ||
+                    if (!ExtSegmentManager.Instance.IsSegmentValid((ushort)segmentId) ||
                         !HasSegmentPrioritySign((ushort)segmentId)) {
                         continue;
                     }
