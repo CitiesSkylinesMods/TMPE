@@ -593,7 +593,8 @@ namespace TrafficManager.Manager.Impl {
             if (Options.allowEnterBlockedJunctions) {
                 ret = true;
             } else {
-                ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+                ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
                 int numOutgoing = 0;
                 int numIncoming = 0;
                 node.CountLanes(

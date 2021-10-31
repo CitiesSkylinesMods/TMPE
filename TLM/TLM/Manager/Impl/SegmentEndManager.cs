@@ -117,11 +117,11 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
+
             if (TrafficPriorityManager.Instance.HasSegmentPrioritySign(segmentId, startNode)
-                || TrafficLightSimulationManager.Instance.HasTimedSimulation(
-                    Services.NetService.GetSegmentNodeId(
-                        segmentId,
-                        startNode))) {
+                || TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
                 if (logPriority) {
                     Log._DebugFormat(
                         "SegmentEndManager.UpdateSegmentEnd({0}, {1}): Segment {2} @ {3} has timed " +

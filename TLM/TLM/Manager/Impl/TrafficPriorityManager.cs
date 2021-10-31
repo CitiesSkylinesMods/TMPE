@@ -121,9 +121,10 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (!MayNodeHavePrioritySigns(
-                    Services.NetService.GetSegmentNodeId(segmentId, startNode),
-                    out reason)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
+
+            if (!MayNodeHavePrioritySigns(nodeId, out reason)) {
                 var reasonCopy = reason;
                 Log._DebugIf(
                     logPriority,
@@ -252,7 +253,8 @@ namespace TrafficManager.Manager.Impl {
                 type = PriorityType.None;
             }
 
-            ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
             if (type != PriorityType.None) {
                 TrafficLightManager.Instance.RemoveTrafficLight(nodeId, ref nodeId.ToNode());
             }

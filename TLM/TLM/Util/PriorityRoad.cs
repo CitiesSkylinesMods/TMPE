@@ -59,9 +59,8 @@ namespace TrafficManager.Util {
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             void ApplyPrioritySigns(ushort segmentId, bool startNode) {
-                ushort nodeId = netService.GetSegmentNodeId(
-                    segmentId,
-                    startNode);
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+                ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
 
                 TrafficPriorityManager.Instance.SetPrioritySign(
                     segmentId,
@@ -165,7 +164,8 @@ namespace TrafficManager.Util {
         }
 
         private static void FixHighPriorityJunction(ushort segmentId, ushort firstNodeId, ushort lastNodeId, List<ushort> segmentList, bool startNode) {
-            ushort nodeId = netService.GetSegmentNodeId(segmentId, startNode);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
             bool isEndNode = nodeId == firstNodeId || nodeId == lastNodeId;
             if (isEndNode) {
                 FixHighPriorityJunction(nodeId);

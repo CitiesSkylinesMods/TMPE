@@ -2,8 +2,6 @@ namespace GenericGameBridge.Service {
     using System.Collections.Generic;
 
     public interface INetService {
-        ushort GetSegmentNodeId(ushort segmentId, bool startNode);
-
         /// <summary>
         /// Assembles a geometrically sorted list of lanes for the given segment.
         /// If the <paramref name="startNode"/> parameter is set only lanes supporting traffic to flow towards the given node are added to the list, otherwise all matched lanes are added.

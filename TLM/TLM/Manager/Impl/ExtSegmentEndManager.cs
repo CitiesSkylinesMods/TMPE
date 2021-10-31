@@ -261,7 +261,8 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
             segEnd.nodeId = nodeId;
             CalculateIncomingOutgoing(segmentId, nodeId, out segEnd.incoming, out segEnd.outgoing);
 
@@ -381,7 +382,8 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateOnlyHighways(ushort segmentId, bool startNode) {
-            ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
 #if DEBUG
             bool logGeometry = DebugSwitch.GeometryDebug.Get();
 #else

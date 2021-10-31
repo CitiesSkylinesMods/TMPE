@@ -1262,6 +1262,9 @@ namespace TrafficManager.TrafficLight.Impl {
             }
 #endif
 
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
+
             if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 Log.Error(
                     $"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): " +
@@ -1269,7 +1272,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 return false;
             }
 
-            if (Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode) != timedNode.NodeId) {
+            if (nodeId != timedNode.NodeId) {
                 Log.Error(
                     $"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): " +
                     $"Segment {segmentId} is not connected to node {timedNode.NodeId} @ start {startNode}");

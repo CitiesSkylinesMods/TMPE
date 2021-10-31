@@ -29,7 +29,9 @@ namespace TrafficManager.Traffic.Impl {
 
         // TODO convert to struct
         [Obsolete]
-        public ushort NodeId => Constants.ServiceFactory.NetService.GetSegmentNodeId(SegmentId, StartNode);
+        public ushort NodeId => StartNode
+            ? SegmentId.ToSegment().m_startNode
+            : SegmentId.ToSegment().m_endNode;
 
         private int numLanes;
 
