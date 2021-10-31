@@ -1,11 +1,11 @@
 namespace TrafficManager.Util {
-    using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Util.Extensions;
 
     public class SegmentTraverser {
         [Flags]
