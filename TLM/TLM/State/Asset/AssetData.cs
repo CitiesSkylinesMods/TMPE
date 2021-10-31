@@ -6,6 +6,7 @@ namespace TrafficManager.State.Asset {
     using TrafficManager.Util.Record;
     using static Util.Shortcuts;
     using TrafficManager.Util;
+    using TrafficManager.Manager.Impl;
 
     [Serializable]
     public class AssetData {
@@ -42,8 +43,10 @@ namespace TrafficManager.State.Asset {
         public static IRecordable RecordAll() {
             NetSegment[] segmentBuffer = NetManager.instance.m_segments.m_buffer;
             TrafficRulesRecord record = new TrafficRulesRecord();
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                bool valid = netService.IsSegmentValid(segmentId) && segmentBuffer[segmentId].Info;
+                bool valid = extSegmentManager.IsSegmentValid(segmentId) && segmentBuffer[segmentId].Info;
                 if (!valid)
                     continue;
                 record.AddCompleteSegment(segmentId);
@@ -71,8 +74,9 @@ namespace TrafficManager.State.Asset {
                 }
             }
 
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; segmentId++) {
-                if (netService.IsSegmentValid(segmentId)) {
+                if (extSegmentManager.IsSegmentValid(segmentId)) {
                     if (!assetSegmentIds.Contains(segmentId)) {
                         ret.Add(new SegmentNetworkIDs(segmentId));
                     }

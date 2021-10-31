@@ -9,6 +9,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.TrafficLight;
+    using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
 
@@ -123,7 +124,7 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public void ToggleMode() {
-            if (!Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(SegmentId)) {
                 Log.Error($"CustomSegmentLight.ToggleMode: Segment {SegmentId} is invalid.");
                 return;
             }

@@ -144,7 +144,7 @@ namespace TrafficManager.Manager.Impl {
 
         public ArrowDirection GetDirection(ref ExtSegmentEnd sourceEnd, ushort targetSegmentId) {
             IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
-            if (!extSegMan.IsValid(sourceEnd.segmentId) || !extSegMan.IsValid(targetSegmentId)) {
+            if (!extSegMan.IsSegmentValid(sourceEnd.segmentId) || !extSegMan.IsSegmentValid(targetSegmentId)) {
                 return ArrowDirection.None;
             }
 
@@ -479,7 +479,7 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug($"Extended segment end data:");
 
             for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-                if (!Constants.ManagerFactory.ExtSegmentManager.IsValid((ushort)i)) {
+                if (!Constants.ManagerFactory.ExtSegmentManager.IsSegmentValid((ushort)i)) {
                     continue;
                 }
 

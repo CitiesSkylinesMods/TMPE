@@ -20,9 +20,11 @@ namespace TrafficManager.Manager.Impl {
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
 
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             // JunctionRestrictionsManager requires our data during loading of custom data
             for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-                if (!Services.NetService.IsSegmentValid((ushort)i)) {
+                if (!extSegmentManager.IsSegmentValid((ushort)i)) {
                     continue;
                 }
 

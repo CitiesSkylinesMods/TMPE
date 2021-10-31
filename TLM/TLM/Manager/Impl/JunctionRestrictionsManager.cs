@@ -185,9 +185,9 @@ namespace TrafficManager.Manager.Impl {
         /// TODO [issue #1116]: publish segment changes? if so it should be done only when policy changes not when deserializing.
         /// </summary>
         public void UpdateAllDefaults() {
-            IExtSegmentManager extSegmentManager = Constants.ManagerFactory.ExtSegmentManager;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                if (!Services.NetService.IsSegmentValid((ushort)segmentId)) {
+                if (!extSegmentManager.IsSegmentValid(segmentId)) {
                     continue;
                 }
 
@@ -295,7 +295,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsUturnAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return false;
             }
 
@@ -455,7 +455,7 @@ namespace TrafficManager.Manager.Impl {
             ushort segmentId,
             bool startNode,
             ref NetNode node) {
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return false;
             }
 
@@ -527,7 +527,7 @@ namespace TrafficManager.Manager.Impl {
             ushort segmentId,
             bool startNode,
             ref NetNode node) {
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return false;
             }
 
@@ -565,7 +565,7 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logLogic = false;
 #endif
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return false;
             }
 
@@ -867,7 +867,7 @@ namespace TrafficManager.Manager.Impl {
         #region Set<Traffic Rule>Allowed: TernaryBool 
 
         public bool SetUturnAllowed(ushort segmentId, bool startNode, TernaryBool value) {
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return false;
             }
             if(GetUturnAllowed(segmentId, startNode) == value) {
@@ -901,7 +901,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool SetTurnOnRedAllowed(bool near, ushort segmentId, bool startNode, TernaryBool value) {
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return false;
             }
             if (GetTurnOnRedAllowed(near, segmentId, startNode) == value) {
@@ -930,7 +930,7 @@ namespace TrafficManager.Manager.Impl {
             ushort segmentId,
             bool startNode,
             TernaryBool value) {
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return false;
             }
             if (GetLaneChangingAllowedWhenGoingStraight(segmentId, startNode) == value) {
@@ -950,7 +950,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool SetEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode, TernaryBool value) {
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return false;
             }
             if (GetEnteringBlockedJunctionAllowed(segmentId, startNode) == value) {
@@ -972,7 +972,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool SetPedestrianCrossingAllowed(ushort segmentId, bool startNode, TernaryBool value) {
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return false;
             }
             if(GetPedestrianCrossingAllowed(segmentId, startNode) == value) {
@@ -1025,9 +1025,11 @@ namespace TrafficManager.Manager.Impl {
             bool success = true;
             Log.Info($"Loading junction restrictions. {data.Count} elements");
 
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             foreach (Configuration.SegmentNodeConf segNodeConf in data) {
                 try {
-                    if (!Services.NetService.IsSegmentValid(segNodeConf.segmentId)) {
+                    if (!extSegmentManager.IsSegmentValid(segNodeConf.segmentId)) {
                         continue;
                     }
 
@@ -1206,9 +1208,11 @@ namespace TrafficManager.Manager.Impl {
             var ret = new List<Configuration.SegmentNodeConf>();
             NetManager netManager = Singleton<NetManager>.instance;
 
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; segmentId++) {
                 try {
-                    if (!Services.NetService.IsSegmentValid((ushort)segmentId)) {
+                    if (!extSegmentManager.IsSegmentValid((ushort)segmentId)) {
                         continue;
                     }
 
