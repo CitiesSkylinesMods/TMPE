@@ -219,7 +219,7 @@ namespace TrafficManager.Util {
         /// <param name="segmentId"></param>
         /// <param name="m">Determines which directions are green</param>
         private static void SetupHelper(ITimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m) {
-            bool startNode = (bool)netService.IsStartNode(segmentId, nodeId);
+            bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
 
             //get step data for side seg
             ICustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, startNode);
@@ -396,7 +396,7 @@ namespace TrafficManager.Util {
             return netService.GetSortedLanes(
                                 segmentId,
                                 ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
-                                netService.IsStartNode(segmentId, nodeId) ^ (!outgoing),
+                                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!outgoing),
                                 LaneArrowManager.LANE_TYPES,
                                 LaneArrowManager.VEHICLE_TYPES,
                                 true).Count;

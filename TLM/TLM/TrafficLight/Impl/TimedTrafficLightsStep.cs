@@ -46,7 +46,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 }
 
                 bool startNode =
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(
+                    (bool)ExtSegmentManager.Instance.IsStartNode(
                         segmentId,
                         timedNode.NodeId);
 
@@ -1228,8 +1228,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 return false;
             }
 
-            bool? startNode =
-                Constants.ServiceFactory.NetService.IsStartNode(targetSegmentId, timedNode.NodeId);
+            bool? startNode = ExtSegmentManager.Instance.IsStartNode(targetSegmentId, timedNode.NodeId);
 
             if (startNode == null) {
                 Log.Error(
@@ -1323,7 +1322,7 @@ namespace TrafficManager.TrafficLight.Impl {
                 return false;
             }
 
-            bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(segmentId, timedNode.NodeId);
+            bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, timedNode.NodeId);
 
             if (startNode == null) {
                 Log.Error($"TimedTrafficLightsStep.SetSegmentLights: Segment {segmentId} is not " +

@@ -490,10 +490,7 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                bool otherStartNode =
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(
-                        otherSegmentId,
-                        transitNodeId);
+                bool otherStartNode = (bool)ExtSegmentManager.Instance.IsStartNode(otherSegmentId, transitNodeId);
 
                 // ISegmentEnd incomingEnd =
                 //    SegmentEndManager.Instance.GetSegmentEnd(otherSegmentId, otherStartNode);
@@ -1569,7 +1566,7 @@ namespace TrafficManager.Manager.Impl {
         public bool LoadData(List<int[]> data) {
             bool success = true;
             Log.Info($"Loading {data.Count} priority segments (old method)");
-
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             foreach (int[] segment in data) {
                 try {
                     if (segment.Length < 3) {
@@ -1592,7 +1589,7 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    bool? startNode = Services.NetService.IsStartNode(segmentId, nodeId);
+                    bool? startNode = extSegmentManager.IsStartNode(segmentId, nodeId);
                     if (startNode == null) {
                         Log.Error("TrafficPriorityManager.LoadData: No node found for node id " +
                                   $"{nodeId} @ seg. {segmentId}");
@@ -1618,6 +1615,7 @@ namespace TrafficManager.Manager.Impl {
         public bool LoadData(List<Configuration.PrioritySegment> data) {
             bool success = true;
             Log.Info($"Loading {data.Count} priority segments (new method)");
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             foreach (var prioSegData in data) {
                 try {
                     if ((PriorityType)prioSegData.priorityType == PriorityType.None) {
@@ -1632,7 +1630,7 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    bool? startNode = Services.NetService.IsStartNode(
+                    bool? startNode = extSegmentManager.IsStartNode(
                         prioSegData.segmentId,
                         prioSegData.nodeId);
 

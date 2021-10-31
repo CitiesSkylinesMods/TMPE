@@ -191,7 +191,7 @@ namespace TrafficManager.Manager.Impl {
             ushort segment = laneId.ToLane().m_segment;
             RoutingManager.Instance.RequestRecalculation(segment);
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                Services.NetService.PublishSegmentChanges(segment);
+                ExtSegmentManager.Instance.PublishSegmentChanges(segment);
             }
         }
 

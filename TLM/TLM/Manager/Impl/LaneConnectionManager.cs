@@ -261,8 +261,9 @@ namespace TrafficManager.Manager.Impl {
             RoutingManager.Instance.RequestRecalculation(segmentId2, false);
 
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                Services.NetService.PublishSegmentChanges(segmentId1);
-                Services.NetService.PublishSegmentChanges(segmentId2);
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+                extSegmentManager.PublishSegmentChanges(segmentId1);
+                extSegmentManager.PublishSegmentChanges(segmentId2);
             }
 
             // at this point ret is always true
@@ -322,7 +323,7 @@ namespace TrafficManager.Manager.Impl {
                 RoutingManager.Instance.RequestRecalculation(segmentId);
 
                 if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                    Services.NetService.PublishSegmentChanges(segmentId);
+                    ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
                 }
             }
         }
@@ -376,7 +377,7 @@ namespace TrafficManager.Manager.Impl {
                 RoutingManager.Instance.RequestRecalculation(segment);
 
                 if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                    Services.NetService.PublishSegmentChanges(segment);
+                    ExtSegmentManager.Instance.PublishSegmentChanges(segment);
                 }
             }
         }
@@ -438,8 +439,9 @@ namespace TrafficManager.Manager.Impl {
             RoutingManager.Instance.RequestRecalculation(targetSegmentId, false);
 
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                Services.NetService.PublishSegmentChanges(sourceSegmentId);
-                Services.NetService.PublishSegmentChanges(targetSegmentId);
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+                extSegmentManager.PublishSegmentChanges(sourceSegmentId);
+                extSegmentManager.PublishSegmentChanges(targetSegmentId);
             }
 
             // return ret, ret is true at this point

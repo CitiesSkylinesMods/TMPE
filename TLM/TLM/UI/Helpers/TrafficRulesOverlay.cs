@@ -188,6 +188,7 @@ namespace TrafficManager.UI.Helpers {
             // NetManager netManager = Singleton<NetManager>.instance;
             Color guiColor = GUI.color;
             // Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             for (int i = 0; i < 8; ++i) {
@@ -198,7 +199,7 @@ namespace TrafficManager.UI.Helpers {
                 }
 
                 bool isStartNode =
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+                    (bool)extSegmentManager.IsStartNode(segmentId, nodeId);
 
                 bool isIncoming = segEndMan
                                   .ExtSegmentEnds[segEndMan.GetIndex(segmentId, isStartNode)]

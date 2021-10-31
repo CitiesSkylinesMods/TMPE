@@ -148,7 +148,7 @@ namespace TrafficManager.Manager.Impl {
                 return ArrowDirection.None;
             }
 
-            bool? targetStartNode = Services.NetService.IsStartNode(targetSegmentId, sourceEnd.nodeId);
+            bool? targetStartNode = ExtSegmentManager.Instance.IsStartNode(targetSegmentId, sourceEnd.nodeId);
 
             if (targetStartNode == null) {
                 return ArrowDirection.None;
@@ -447,8 +447,7 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                var otherStartNode = Constants.ServiceFactory.NetService
-                                                    .IsStartNode(otherSegmentId, segEnd.nodeId);
+                var otherStartNode = ExtSegmentManager.Instance.IsStartNode(otherSegmentId, segEnd.nodeId);
                 if (otherStartNode == null) {
                     Log.Warning($"Incorrect ExtSegmentEnd.nodeId - data integrity problem! Segment {otherSegmentId} is not connected to Node {segEnd.nodeId}");
                     continue;

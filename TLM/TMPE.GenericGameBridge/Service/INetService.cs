@@ -14,12 +14,6 @@ namespace GenericGameBridge.Service {
                                NetSegment.Flags flagMask,
                                NetSegment.Flags? expectedResult = default);
 
-        NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId, bool startNode);
-
-        NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId,
-                                                      ref NetSegment segment,
-                                                      bool startNode);
-
         ushort GetSegmentNodeId(ushort segmentId, bool startNode);
 
         /// <summary>
@@ -52,22 +46,6 @@ namespace GenericGameBridge.Service {
         GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection);
 
         GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId);
-
-        void PublishSegmentChanges(ushort segmentId);
-
-        bool? IsStartNode(ushort segmentId, ushort nodeId);
-
-        /// <summary>tail node>-------->head node</summary>
-        ushort GetHeadNode(ushort segmentId);
-
-        /// <summary>tail node>-------->head node</summary>
-        ushort GetHeadNode(ref NetSegment segment);
-
-        /// <summary>tail node>-------->head node</summary>
-        ushort GetTailNode(ushort segmentId);
-
-        /// <summary>tail node>-------->head node</summary>
-        ushort GetTailNode(ref NetSegment segment);
     }
 
     public struct LanePos {

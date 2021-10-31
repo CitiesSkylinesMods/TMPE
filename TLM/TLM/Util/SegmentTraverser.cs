@@ -5,6 +5,7 @@ namespace TrafficManager.Util {
     using System;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
+    using TrafficManager.Manager.Impl;
 
     public class SegmentTraverser {
         [Flags]
@@ -186,7 +187,7 @@ namespace TrafficManager.Util {
                 throw new ArgumentException($"Invalid side {side} given.");
             }
 
-            IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             IExtSegmentEndManager extSegEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             HashSet<ushort> nextSegmentIds = new HashSet<ushort>();
@@ -196,10 +197,7 @@ namespace TrafficManager.Util {
                     continue;
                 }
 
-                bool nextIsStartNode =
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(
-                        nextSegmentId,
-                        prevSegEnd.nodeId);
+                bool nextIsStartNode = (bool)extSegmentManager.IsStartNode(nextSegmentId, prevSegEnd.nodeId);
                 ExtSegmentEnd nextSegEnd =
                     extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex(nextSegmentId, nextIsStartNode)];
 
@@ -250,7 +248,7 @@ namespace TrafficManager.Util {
                 if (!visitorFun(
                         new SegmentVisitData(
                             ref prevSeg,
-                            ref extSegMan.ExtSegments[nextSegmentId],
+                            ref extSegmentManager.ExtSegments[nextSegmentId],
                             viaInitialStartNode,
                             prevSegEnd.nodeId == nextStartNodeId,
                             false))) {
@@ -263,7 +261,7 @@ namespace TrafficManager.Util {
                     = extSegEndMan.ExtSegmentEnds[extSegEndMan.GetIndex( nextSegmentId, nextNodeIsStartNode)];
 
                 TraverseRec(
-                    ref extSegMan.ExtSegments[nextSegmentId],
+                    ref extSegmentManager.ExtSegments[nextSegmentId],
                     ref nextSegEnd,
                     ref nextSegEnd.nodeId.ToNode(),
                     viaInitialStartNode,
