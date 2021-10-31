@@ -41,6 +41,11 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI.Connection {
                         typeof(TrainAI),
                         "CheckOverlap",
                         false);
+                ForceTrafficLightsDelegate forceTrafficLightsDelegate =
+                    TranspilerUtil.CreateDelegate<ForceTrafficLightsDelegate>(
+                        typeof(TrainAI),
+                        "ForceTrafficLights",
+                        true);
 
                 return new TrainAIConnection(
                     updatePathTargetPositionsDelegate,
@@ -49,7 +54,8 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI.Connection {
                     calculateMaxSpeedDelegate,
                     reverseDelegate,
                     calculateTargetSpeedDelegate,
-                    checkOverlapDelegate);
+                    checkOverlapDelegate,
+                    forceTrafficLightsDelegate);
             } catch (Exception e) {
                 Log.Error(e.Message);
                 return null;
