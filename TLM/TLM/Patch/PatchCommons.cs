@@ -1,6 +1,7 @@
 namespace TrafficManager.Patch {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
     using API.Manager;
@@ -76,8 +77,12 @@ namespace TrafficManager.Patch {
             if (index > -1) {
                 int target1 = index + 2;
                 Label label = il.DefineLabel();
+                List<Label> oldLabels = codes[target1].labels.ToList();
+                codes[target1].labels.Clear(); // clear labels -> they are moved to new instruction
                 codes[target1].labels.Add(label);//add label to next instruction (if() false jump)
-                codes.InsertRange(target1,GetUpdatePositionInstructions(label));
+                List<CodeInstruction> newInstructions = GetUpdatePositionInstructions(label);
+                newInstructions[0].labels.AddRange(oldLabels); // add old labels to redirect here
+                codes.InsertRange(target1, newInstructions); // insert new instructions
 
                 CodeInstruction searchInstruction2 = new CodeInstruction(OpCodes.Ldfld, typeof(Vehicle).GetField(nameof(Vehicle.m_blockCounter)));
                 int index2 = codes.FindIndex( instruction => TranspilerUtil.IsSameInstruction(instruction, searchInstruction2));
