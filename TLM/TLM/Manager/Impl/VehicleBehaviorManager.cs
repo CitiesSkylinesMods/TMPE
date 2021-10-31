@@ -1847,9 +1847,10 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
                 bool logLaneSelection = false;
                 if (DebugSwitch.AlternativeLaneSelection.Get()) {
-                    ushort nodeId = Services.NetService.GetSegmentNodeId(
-                        currentPathPos.m_segment,
-                        currentPathPos.m_offset < 128);
+                    ref NetSegment netSegment = ref currentPathPos.m_segment.ToSegment();
+                    ushort nodeId = currentPathPos.m_offset < 128
+                        ? netSegment.m_startNode
+                        : netSegment.m_endNode;
                     logLaneSelection =
                         (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId)
                         && (DebugSettings.NodeId == 0 || DebugSettings.NodeId == nodeId);
@@ -2847,9 +2848,10 @@ namespace TrafficManager.Manager.Impl {
                 bool logLaneSelection = false;
 
                 if (DebugSwitch.AlternativeLaneSelection.Get()) {
-                    ushort nodeId = Services.NetService.GetSegmentNodeId(
-                        currentPathPos.m_segment,
-                        currentPathPos.m_offset < 128);
+                    ref NetSegment netSegment = ref currentPathPos.m_segment.ToSegment();
+                    ushort nodeId = currentPathPos.m_offset < 128
+                        ? netSegment.m_startNode
+                        : netSegment.m_endNode;
                     logLaneSelection =
                         (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId)
                         && (DebugSettings.NodeId == 0 || DebugSettings.NodeId == nodeId);

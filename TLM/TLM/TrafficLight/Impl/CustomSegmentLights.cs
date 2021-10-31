@@ -36,7 +36,7 @@ namespace TrafficManager.TrafficLight.Impl {
             : this(
                 lightsManager,
                 segmentId,
-                nodeId == Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, true),
+                nodeId == segmentId.ToSegment().m_startNode,
                 calculateAutoPedLight) { }
 
         public CustomSegmentLights(ICustomSegmentLightsManager lightsManager,

@@ -207,10 +207,10 @@ namespace TrafficManager.Manager.Impl {
                 stateUpdated = true;
 
                 if (updateNodes) {
-                    MarkAsUpdated(
-                        Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, true));
-                    MarkAsUpdated(
-                        Constants.ServiceFactory.NetService.GetSegmentNodeId(seg.segmentId, false));
+                    ref NetSegment netSegment = ref seg.segmentId.ToSegment();
+
+                    MarkAsUpdated(netSegment.m_startNode);
+                    MarkAsUpdated(netSegment.m_endNode);
                 }
 
                 if (!seg.valid) {

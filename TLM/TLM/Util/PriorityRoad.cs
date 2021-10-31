@@ -636,6 +636,8 @@ namespace TrafficManager.Util {
                 return null;
             IRecordable record = RecordRoad(segmentList);
             foreach (ushort segmentId in segmentList) {
+                ref NetSegment segment = ref segmentId.ToSegment();
+
                 ParkingRestrictionsManager.Instance.SetParkingAllowed(segmentId, true);
 
                 SpeedLimitManager.Instance.SetSegmentSpeedLimit(
@@ -643,8 +645,9 @@ namespace TrafficManager.Util {
                     SetSpeedLimitAction.ResetToDefault());
 
                 VehicleRestrictionsManager.Instance.ClearVehicleRestrictions(segmentId);
-                ClearNode(netService.GetSegmentNodeId(segmentId, true));
-                ClearNode(netService.GetSegmentNodeId(segmentId, false));
+
+                ClearNode(segment.m_startNode);
+                ClearNode(segment.m_endNode);
             }
             return record;
         }
