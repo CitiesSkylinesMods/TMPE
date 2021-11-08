@@ -27,12 +27,14 @@ namespace TrafficManager.UI {
         public DebugMenuPanel DebugMenu { get; private set; }
 #endif
 
-        public static TrafficManagerTool GetTrafficManagerTool() => GetTrafficManagerTool(false);
+        /// <returns>returns TMPE tool if it is alive, null otherwise</returns>
+        public static TrafficManagerTool GetTrafficManagerTool() =>
+            trafficManagerTool_ ?? null; // ?? is overloaded.
 
-        private static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired) {
+        private static void EnsureTrafficManagerTool() {
             try {
-                if(trafficManagerTool_ == null && createIfRequired) {
-                    Log.Info("Initializing traffic manager tool..." + Environment.StackTrace);
+                if(!trafficManagerTool_) {
+                    Log.Info("Initializing traffic manager tool...");
                     GameObject toolModControl = ToolsModifierControl.toolController.gameObject;
                     trafficManagerTool_ =
                         toolModControl.GetComponent<TrafficManagerTool>()
@@ -41,7 +43,6 @@ namespace TrafficManager.UI {
             } catch (Exception ex) {
                 ex.LogException(showInPanel: true);
             }
-            return trafficManagerTool_ ?? null; // ?? is overloaded. if trafficManagerTool_ is destroyed, return null.
         }
 
         private static TrafficManagerTool trafficManagerTool_;
@@ -201,7 +202,7 @@ namespace TrafficManager.UI {
 
         public void CloseMainMenu() {
             // Before hiding the menu, shut down the active tool
-            GetTrafficManagerTool(false)?.SetToolMode(UI.ToolMode.None);
+            GetTrafficManagerTool()?.SetToolMode(UI.ToolMode.None);
 
             // Main menu is going invisible
             GetMenu().Hide();
@@ -240,9 +241,9 @@ namespace TrafficManager.UI {
 
         public static void EnableTool() {
             Log._Debug("ModUI.EnableTool: called");
-            TrafficManagerTool tmTool = GetTrafficManagerTool(true);
+            EnsureTrafficManagerTool();
 
-            ToolsModifierControl.toolController.CurrentTool = tmTool;
+            ToolsModifierControl.toolController.CurrentTool = GetTrafficManagerTool();
             ToolsModifierControl.SetTool<TrafficManagerTool>();
         }
 
@@ -260,15 +261,14 @@ namespace TrafficManager.UI {
 
         public static void DisableTool() {
             Log._Debug("ModUI.DisableTool: called");
-            if (ToolsModifierControl.toolController == null) {
+            if (ToolsModifierControl.toolController is null) {
                 Log.Warning("ModUI.DisableTool: ToolsModifierControl.toolController is null!");
-            } else if (trafficManagerTool_ == null) {
-                Log.Warning("ModUI.DisableTool: tool is null!");
+            } else if (!trafficManagerTool_) {
+                Log.Warning("ModUI.DisableTool: trafficManagerTool_ does not exist!");
             } else if (ToolsModifierControl.toolController.CurrentTool != trafficManagerTool_) {
                 Log.Info("ModUI.DisableTool: CurrentTool is not traffic manager tool!");
             } else {
-                ToolsModifierControl.toolController.CurrentTool = ToolsModifierControl.GetTool<DefaultTool>();
-                ToolsModifierControl.SetTool<DefaultTool>();
+                trafficManagerTool_.enabled = false;
             }
         }
 
