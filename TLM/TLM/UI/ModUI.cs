@@ -244,7 +244,6 @@ namespace TrafficManager.UI {
             EnsureTrafficManagerTool();
 
             ToolsModifierControl.toolController.CurrentTool = GetTrafficManagerTool();
-            ToolsModifierControl.SetTool<TrafficManagerTool>();
         }
 
         public static void OnLevelLoaded() {
@@ -268,7 +267,7 @@ namespace TrafficManager.UI {
             } else if (ToolsModifierControl.toolController.CurrentTool != trafficManagerTool_) {
                 Log.Info("ModUI.DisableTool: CurrentTool is not traffic manager tool!");
             } else {
-                trafficManagerTool_.enabled = false;
+                ToolsModifierControl.SetTool<DefaultTool>();
             }
         }
 
