@@ -310,7 +310,7 @@ namespace TrafficManager.UI.MainMenu {
             Log._Debug($"Toggle value of KeybindsPanelVisible to {value}");
 
             // Refer to the TrafficManager tool asking it to request help from the current tool
-            ModUI.GetTrafficManagerTool().RequestOnscreenDisplayUpdate();
+            ModUI.GetTrafficManagerTool()?.RequestOnscreenDisplayUpdate();
         }
 
         private void SetupControls_DebugLabels(UBuilder builder,

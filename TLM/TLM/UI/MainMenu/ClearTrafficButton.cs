@@ -35,7 +35,7 @@ namespace TrafficManager.UI.MainMenu {
                             () => UtilityManager.Instance.ClearTraffic());
                     }
 
-                    ModUI.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
+                    ModUI.GetTrafficManagerTool()?.SetToolMode(ToolMode.None);
                 });
             base.OnClick(p);
         }

@@ -6,6 +6,8 @@ namespace TrafficManager.UI {
     using TrafficManager.Util;
     using UnityEngine;
     using TrafficManager.Lifecycle;
+    using JetBrains.Annotations;
+    using System.Collections;
 
     /// <summary>
     /// Globally available UI manager class which contains the main menu button and the panel.
@@ -25,17 +27,21 @@ namespace TrafficManager.UI {
         public DebugMenuPanel DebugMenu { get; private set; }
 #endif
 
-        public static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired = true) {
-            if (trafficManagerTool_ == null && createIfRequired) {
-                Log.Info("Initializing traffic manager tool...");
-                GameObject toolModControl = ToolsModifierControl.toolController.gameObject;
-                trafficManagerTool_ =
-                    toolModControl.GetComponent<TrafficManagerTool>()
-                    ?? toolModControl.AddComponent<TrafficManagerTool>();
-                trafficManagerTool_.Initialize();
-            }
+        public static TrafficManagerTool GetTrafficManagerTool() => GetTrafficManagerTool(false);
 
-            return trafficManagerTool_;
+        private static TrafficManagerTool GetTrafficManagerTool(bool createIfRequired) {
+            try {
+                if(trafficManagerTool_ == null && createIfRequired) {
+                    Log.Info("Initializing traffic manager tool..." + Environment.StackTrace);
+                    GameObject toolModControl = ToolsModifierControl.toolController.gameObject;
+                    trafficManagerTool_ =
+                        toolModControl.GetComponent<TrafficManagerTool>()
+                        ?? toolModControl.AddComponent<TrafficManagerTool>();
+                }
+            } catch (Exception ex) {
+                ex.LogException(showInPanel: true);
+            }
+            return trafficManagerTool_ ?? null; // ?? is overloaded. if trafficManagerTool_ is destroyed, return null.
         }
 
         private static TrafficManagerTool trafficManagerTool_;
@@ -70,6 +76,7 @@ namespace TrafficManager.UI {
         [NonSerialized]
         public UIOpacityObservable UiOpacityObservable;
 
+        [UsedImplicitly]
         public void Awake() {
             UiScaleObservable = new UIScaleObservable();
             UiOpacityObservable = new UIOpacityObservable();
@@ -87,6 +94,20 @@ namespace TrafficManager.UI {
             // One time load
             TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
             TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
+
+            StartCoroutine(StartTMPEToolCoroutine());
+        }
+
+        private static IEnumerator StartTMPEToolCoroutine() {
+            // delay this to make sure everything else is ready.
+            yield return 0;
+            try {
+                EnableTool();
+                DisableTool();
+            } catch(Exception ex) {
+                ex.LogException();
+            }
+            yield break;
         }
 
         private void CreateMainMenuButtonAndWindow() {
@@ -123,7 +144,7 @@ namespace TrafficManager.UI {
                 CloseMainMenu();
             } else {
                 ShowMainMenu();
-                GetTrafficManagerTool().RequestOnscreenDisplayUpdate();
+                GetTrafficManagerTool()?.RequestOnscreenDisplayUpdate();
             }
         }
 

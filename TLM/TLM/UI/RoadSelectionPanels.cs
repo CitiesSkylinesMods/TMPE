@@ -69,9 +69,6 @@ namespace TrafficManager.UI {
 
         public void Start() {
             Root = this;
-            // this code prevents a rare bug that RoadWorldInfoPanel some times does not show.
-            EnqueueAction(ModUI.Instance.ShowMainMenu);
-            EnqueueAction(ModUI.Instance.CloseMainMenu);
 
             panels_ = new List<PanelExt>();
 
@@ -184,7 +181,8 @@ namespace TrafficManager.UI {
         }
 
         internal void UpdateMassEditOverlay() {
-            if (ModUI.GetTrafficManagerTool().GetToolMode() == ToolMode.None) {
+            var tool = ModUI.GetTrafficManagerTool();
+            if (tool && tool.GetToolMode() == ToolMode.None) {
                 if (!UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
                     if (ShouldShowMassEditOverlay()) {
                         ShowMassEditOverlay();
@@ -242,9 +240,9 @@ namespace TrafficManager.UI {
         /// Enables and refreshes overrlay for various traffic rules influenced by road selection pannel.
         /// </summary>
         private void ShowMassEditOverlay() {
-            var tmTool = ModUI.GetTrafficManagerTool(true);
+            var tmTool = ModUI.GetTrafficManagerTool();
             if (tmTool == null) {
-                Log.Error("ModUI.GetTrafficManagerTool(true) returned null");
+                Log.Error("ModUI.GetTrafficManagerTool() returned null");
                 return;
             }
             UI.SubTools.PrioritySigns.MassEditOverlay.Show = true;
