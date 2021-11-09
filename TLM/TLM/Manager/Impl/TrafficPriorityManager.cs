@@ -72,8 +72,8 @@ namespace TrafficManager.Manager.Impl {
             ref NetNode netNode = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
 
             if (!netNode.m_flags.CheckFlags(
-                    NetNode.Flags.Created | NetNode.Flags.Junction,
-                    NetNode.Flags.Created | NetNode.Flags.Deleted | NetNode.Flags.Junction)) {
+                    required: NetNode.Flags.Created | NetNode.Flags.Junction,
+                    forbidden: NetNode.Flags.Deleted)) {
                 reason = SetPrioritySignError.NoJunction;
                 Log._DebugIf(
                     logPriority,
