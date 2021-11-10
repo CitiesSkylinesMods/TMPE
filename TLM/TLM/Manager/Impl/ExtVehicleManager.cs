@@ -81,6 +81,7 @@ namespace TrafficManager.Manager.Impl {
             // (stock code from PassengerCarAI.GetDriverInstance)
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitId = data.m_citizenUnits;
+            uint maxUnitCount = citizenManager.m_units.m_size;
             int numIter = 0;
 
             while (citizenUnitId != 0) {
@@ -99,7 +100,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 citizenUnitId = nextCitizenUnitId;
-                if (++numIter > CitizenManager.MAX_UNIT_COUNT) {
+                if (++numIter > maxUnitCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         "Invalid list detected!\n" + Environment.StackTrace);
