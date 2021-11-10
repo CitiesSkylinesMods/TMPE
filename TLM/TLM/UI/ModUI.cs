@@ -31,6 +31,9 @@ namespace TrafficManager.UI {
         public static TrafficManagerTool GetTrafficManagerTool() =>
             trafficManagerTool_ ?? null; // ?? is overloaded.
 
+        /// <summary>
+        /// must only be called from EnableTool to avoid recursion.
+        /// </summary>
         private static void EnsureTrafficManagerTool() {
             try {
                 if(!trafficManagerTool_) {
@@ -79,36 +82,34 @@ namespace TrafficManager.UI {
 
         [UsedImplicitly]
         public void Awake() {
-            UiScaleObservable = new UIScaleObservable();
-            UiOpacityObservable = new UIOpacityObservable();
+            try {
+                Instance = this;
+                UiScaleObservable = new UIScaleObservable();
+                UiOpacityObservable = new UIOpacityObservable();
 
-            Log._Debug("##### Initializing ModUI.");
+                Log._Debug("##### Initializing ModUI.");
 
-            CreateMainMenuButtonAndWindow();
+                CreateMainMenuButtonAndWindow();
 #if DEBUG
-            UIView uiView = UIView.GetAView();
-            DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
+                UIView uiView = UIView.GetAView();
+                DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
 #endif
 
-            ToolMode = TrafficManagerMode.None;
+                ToolMode = TrafficManagerMode.None;
 
-            // One time load
-            TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
-            TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
+                // One time load
+                TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
+                TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
 
-            StartCoroutine(StartTMPEToolCoroutine());
+            } catch(Exception ex) {
+                ex.LogException(true);
+            }
         }
 
-        private static IEnumerator StartTMPEToolCoroutine() {
-            // delay this to make sure everything else is ready.
-            yield return 0;
-            try {
-                EnableTool();
-                DisableTool();
-            } catch(Exception ex) {
-                ex.LogException();
-            }
-            yield break;
+        public void Start() {
+            // Tool must only be created from EnableTool to avoid recursion.
+            EnableTool();
+            DisableTool();
         }
 
         private void CreateMainMenuButtonAndWindow() {
@@ -250,9 +251,7 @@ namespace TrafficManager.UI {
             Log._Debug("ModUI.OnLevelLoaded: called");
             if (ModUI.Instance == null) {
                 Log._Debug("Adding UIBase instance.");
-                ModUI.Instance = ToolsModifierControl.toolController
-                    .gameObject
-                    .AddComponent<ModUI>();
+                ToolsModifierControl.toolController.gameObject.AddComponent<ModUI>();
             }
             TMPELifecycle.Instance.TranslationDatabase.ReloadTutorialTranslations();
             TMPELifecycle.Instance.TranslationDatabase.ReloadGuideTranslations();
