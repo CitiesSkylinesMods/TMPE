@@ -19,6 +19,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                                   int nextPositionIndex,
                                   out byte segmentOffset) {
              CitizenManager citizenManager = Singleton<CitizenManager>.instance;
+            uint maxUnitCount = citizenManager.m_units.m_size;
 
             uint driverCitizenId = 0u;
             ushort driverCitizenInstanceId = 0;
@@ -49,7 +50,7 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                 }
 
                 curCitizenUnitId = nextUnit;
-                if (++numIterations > CitizenManager.MAX_UNIT_COUNT) {
+                if (++numIterations > maxUnitCount) {
                     CODebugBase<LogChannel>.Error(LogChannel.Core,
                                                   $"Invalid list detected!\n{Environment.StackTrace}");
                     break;
