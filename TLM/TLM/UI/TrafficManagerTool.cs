@@ -248,11 +248,16 @@ namespace TrafficManager.UI {
         }
 
         protected override void Awake() {
-            Log._Debug($"TrafficManagerTool: Awake {GetHashCode()}");
-            nopeCursor_ = ScriptableObject.CreateInstance<CursorInfo>();
-            nopeCursor_.m_texture = UIView.GetAView().defaultAtlas["Niet"]?.texture;
-            nopeCursor_.m_hotspot = new Vector2(45,45);
-            base.Awake();
+            try {
+                Log._Debug($"TrafficManagerTool: Awake {GetHashCode()}");
+                base.Awake();
+                nopeCursor_ = ScriptableObject.CreateInstance<CursorInfo>();
+                nopeCursor_.m_texture = UIView.GetAView().defaultAtlas["Niet"]?.texture;
+                nopeCursor_.m_hotspot = new Vector2(45, 45);
+                Initialize();
+            } catch(Exception ex) {
+                ex.LogException();
+            }
         }
 
         /// <summary>Only used from CustomRoadBaseAI.</summary>

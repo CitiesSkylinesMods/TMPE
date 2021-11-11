@@ -32,7 +32,7 @@ namespace TrafficManager.UI.MainMenu {
 
         protected override void OnClick(UIMouseEventParameter p) {
             // Immediately unclick the tool button, but toggle the option
-            ModUI.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
+            ModUI.GetTrafficManagerTool()?.SetToolMode(ToolMode.None);
 
             // Toggle the despawning value
             OptionsGameplayTab.SetDisableDespawning(!Options.disableDespawning);

@@ -5,9 +5,9 @@ namespace TrafficManager.Patch._RoadBaseAI {
     using System.Reflection.Emit;
     using HarmonyLib;
     using JetBrains.Annotations;
-    using UI;
-    using UI.SubTools;
-    using Util;
+    using TrafficManager.UI;
+    using TrafficManager.UI.SubTools;
+    using TrafficManager.Util;
 
     [UsedImplicitly]
     [HarmonyPatch(typeof(RoadBaseAI), nameof(RoadBaseAI.ClickNodeButton))]
@@ -20,14 +20,19 @@ namespace TrafficManager.Patch._RoadBaseAI {
 
             int minus1OpIndex = TranspilerUtil.SearchInstruction(codes, new CodeInstruction(OpCodes.Ldc_I4_M1), 0);
             //check index and previous instruction
-            if (minus1OpIndex != -1 && codes[minus1OpIndex + 1].opcode.Equals(OpCodes.Bne_Un)) {
+            if(minus1OpIndex != -1 && codes[minus1OpIndex + 1].opcode.Equals(OpCodes.Bne_Un)) {
                 int ldArg0Index = TranspilerUtil.SearchInstruction(codes, new CodeInstruction(OpCodes.Ldarg_0), minus1OpIndex);
                 //check index and previous instruction
-                if (ldArg0Index != -1 && codes[ldArg0Index -1].opcode.Equals(OpCodes.Stfld)) {
+                if(ldArg0Index != -1 && codes[ldArg0Index - 1].opcode.Equals(OpCodes.Stfld)) {
                     int targetIndex = minus1OpIndex + 2;//move index to first item to remove
                     // replace all instruction between targetIndex and Ldarg_0
                     codes.RemoveRange(targetIndex, ldArg0Index - targetIndex);
-                    codes.InsertRange(targetIndex, GetReplacementInstructions());
+
+                    var newInstructions = new[] {
+                        new CodeInstruction(OpCodes.Ldarg_1), // load node id
+                        new CodeInstruction(OpCodes.Call, typeof(ClickNodeButtonPatch).GetMethod(nameof(ClickNodeButtonPatch.ToggleTrafficLight))),
+                    };
+                    codes.InsertRange(targetIndex, newInstructions);
                 } else {
                     throw new Exception("Could not found Ldarg_0 Instruction or instruction was already patched!");
                 }
@@ -38,31 +43,17 @@ namespace TrafficManager.Patch._RoadBaseAI {
             return codes;
         }
 
-        private static List<CodeInstruction> GetReplacementInstructions() {
-            MethodBase getTMTool = typeof(ModUI).GetMethod(nameof(ModUI.GetTrafficManagerTool));
-            MethodBase getSubTool = typeof(TrafficManagerTool).GetMethod(nameof(TrafficManagerTool.GetSubTool));
-            Type toggleTLTool = typeof(ToggleTrafficLightsTool);
-            MethodBase toggleTL = toggleTLTool.GetMethod(nameof(ToggleTrafficLightsTool.ToggleTrafficLight));
-
-            return new List<CodeInstruction> {
-                new CodeInstruction(OpCodes.Ldc_I4_1),
-                new CodeInstruction(OpCodes.Call, getTMTool),
-                new CodeInstruction(OpCodes.Ldc_I4_1),
-                new CodeInstruction(OpCodes.Callvirt, getSubTool),
-                new CodeInstruction(OpCodes.Castclass, toggleTLTool),
-                new CodeInstruction(OpCodes.Ldarg_1),
-                new CodeInstruction(OpCodes.Ldarg_2),
-                new CodeInstruction(OpCodes.Ldc_I4_0),
-                new CodeInstruction(OpCodes.Callvirt, toggleTL)
-            };
+        public static void ToggleTrafficLight(ushort nodeId) {
+            ToggleTrafficLightsTool toggleTool =
+                ModUI.GetTrafficManagerTool()?.GetSubTool(ToolMode.ToggleTrafficLight) as ToggleTrafficLightsTool;
+            toggleTool?.ToggleTrafficLight(nodeId, ref nodeId.ToNode(), false);
         }
     }
-
     /*
      *  Replace
         -------------------------
-	data.m_flags ^= NetNode.Flags.TrafficLights;
-	data.m_flags |= NetNode.Flags.CustomTrafficLights;
+        data.m_flags ^= NetNode.Flags.TrafficLights;
+        data.m_flags |= NetNode.Flags.CustomTrafficLights;
         -------------------------
 
         IL_0039: ldarg.2
@@ -80,21 +71,10 @@ namespace TrafficManager.Patch._RoadBaseAI {
 
         With
         -------------------------
-        ToggleTrafficLightsTool toggleTool = (ToggleTrafficLightsTool)ModUI.GetTrafficManagerTool(true)
-                                                                           .GetSubTool(ToolMode.ToggleTrafficLight);
-        toggleTool.ToggleTrafficLight(nodeId, ref data, false);
+        Replacement(nodeId);
         -------------------------
 
-        IL_002e: ldc.i4.1
-        IL_002f: call         class TrafficManager.UI.TrafficManagerTool TrafficManager.UI.ModUI::GetTrafficManagerTool(bool)
-        IL_0034: ldc.i4.1
-        IL_0035: callvirt     instance class TrafficManager.UI.LegacySubTool TrafficManager.UI.TrafficManagerTool::GetSubTool(valuetype TrafficManager.UI.ToolMode)
-        IL_003a: castclass    TrafficManager.UI.SubTools.ToggleTrafficLightsTool
-
-        IL_003f: ldarg.1      // nodeId
-        IL_0040: ldarg.2      // data
-        IL_0041: ldc.i4.0
-        IL_0042: callvirt     instance void TrafficManager.UI.SubTools.ToggleTrafficLightsTool::ToggleTrafficLight(unsigned int16, valuetype ['Assembly-CSharp']NetNode&, bool)
-
+        IL_002e: ldarg.1      // nodeId
+        IL_002f: call         void ClickNodeButtonPatch::ToggleTrafficLight(bool)
      */
 }

@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using ColossalFramework.UI;
     using TrafficManager.UI;
 
@@ -9,11 +9,11 @@
         protected abstract ToolMode ToolMode { get; }
 
         protected override bool IsActive() =>
-            ToolMode.Equals(ModUI.GetTrafficManagerTool(false)?.GetToolMode());
+            ToolMode.Equals(ModUI.GetTrafficManagerTool()?.GetToolMode());
 
         protected override void OnClick(UIMouseEventParameter p) {
             ModUI.GetTrafficManagerTool()
-                 .SetToolMode(IsActive() ? ToolMode.None : ToolMode);
+                 ?.SetToolMode(IsActive() ? ToolMode.None : ToolMode);
             base.OnClick(p);
         }
     }
