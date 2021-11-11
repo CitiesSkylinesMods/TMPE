@@ -90,6 +90,7 @@ namespace TrafficManager.Manager.Impl {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             NetManager netManager = Singleton<NetManager>.instance;
             VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+            uint maxUnitCount = citizenManager.m_units.m_size;
 
             // NON-STOCK CODE START
             bool prohibitPocketCars = false;
@@ -456,7 +457,7 @@ namespace TrafficManager.Manager.Impl {
 
                         curUnitId = nextUnit;
 
-                        if (++numIter > CitizenManager.MAX_UNIT_COUNT) {
+                        if (++numIter > maxUnitCount) {
                             CODebugBase<LogChannel>.Error(
                                 LogChannel.Core,
                                 $"Invalid list detected!\n{Environment.StackTrace}");
@@ -531,7 +532,7 @@ namespace TrafficManager.Manager.Impl {
 
                     curCitizenUnitId = nextUnit;
 
-                    if (++numIter > CitizenManager.MAX_UNIT_COUNT) {
+                    if (++numIter > maxUnitCount) {
                         CODebugBase<LogChannel>.Error(
                             LogChannel.Core,
                             $"Invalid list detected!\n{Environment.StackTrace}");
