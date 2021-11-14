@@ -2,8 +2,6 @@ namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using System;
     using System.Linq;
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using State;
     using TrafficManager.API.Manager;
     using TrafficManager.Util;

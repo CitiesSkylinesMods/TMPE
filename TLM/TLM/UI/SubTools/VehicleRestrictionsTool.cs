@@ -1,6 +1,5 @@
 namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
-    using GenericGameBridge.Service;
     using static Util.SegmentLaneTraverser;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Enums;

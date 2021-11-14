@@ -6,7 +6,6 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State.ConfigData;
     using TrafficManager.Traffic.Impl;
     using TrafficManager.Traffic;
-    using CitiesGameBridge.Service;
     using TrafficManager.Util;
 
     [Obsolete("should be removed when implementing issue #240")]

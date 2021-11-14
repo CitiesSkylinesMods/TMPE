@@ -1,7 +1,6 @@
 namespace TrafficManager.Util {
     using ColossalFramework;
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using System.Collections.Generic;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
@@ -31,7 +30,6 @@ namespace TrafficManager.Util {
 
         //Shortcuts:
         private static TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
-        private static INetService netService = Constants.ServiceFactory.NetService;
         private static CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
         private static IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
         private static IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;

@@ -5,8 +5,6 @@ namespace TrafficManager.Traffic.Impl {
     using System.Collections.Generic;
     using System.Linq;
     using System;
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;

@@ -2,7 +2,6 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
     using static Util.SegmentLaneTraverser;
     using System.Collections.Generic;
-    using CitiesGameBridge.Service;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI.Textures;
@@ -14,7 +13,6 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework.Math;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using ColossalFramework.UI;
-    using GenericGameBridge.Service;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util.Extensions;
 

@@ -3,8 +3,6 @@ namespace TrafficManager.Util.Record {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using static TrafficManager.Util.Shortcuts;

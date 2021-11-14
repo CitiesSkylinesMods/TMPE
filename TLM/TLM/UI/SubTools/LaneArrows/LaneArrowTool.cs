@@ -3,7 +3,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;

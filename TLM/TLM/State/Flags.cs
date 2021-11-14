@@ -7,8 +7,6 @@ namespace TrafficManager.State {
     using System.Collections.Generic;
     using System.Threading;
     using System;
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;

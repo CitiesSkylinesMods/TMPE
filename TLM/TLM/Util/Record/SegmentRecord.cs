@@ -1,6 +1,4 @@
 namespace TrafficManager.Util.Record {
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using System;
     using System.Collections.Generic;
     using System.Linq;

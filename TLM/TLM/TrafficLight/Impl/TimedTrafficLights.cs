@@ -1,6 +1,5 @@
 namespace TrafficManager.TrafficLight.Impl {
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -15,7 +14,6 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.Util;
     using UnityEngine;
-    using CitiesGameBridge.Service;
 
     // TODO define TimedTrafficLights per node group, not per individual nodes
     public class TimedTrafficLights : ITimedTrafficLights {

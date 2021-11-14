@@ -5,14 +5,12 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using System.Collections.Generic;
     using System;
-    using CitiesGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State;
     using TrafficManager.Traffic;
     using TrafficManager.Util;
-    using GenericGameBridge.Service;
 
     public class VehicleRestrictionsManager
         : AbstractGeometryObservingManager,

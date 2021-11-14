@@ -2,10 +2,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using System;
     using System.Collections.Generic;
-    using CitiesGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
