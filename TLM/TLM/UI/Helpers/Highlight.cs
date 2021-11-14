@@ -122,8 +122,7 @@
             DrawNodeCircle(
                 cameraInfo: cameraInfo,
                 nodeId: nodeId,
-                color: ModUI.GetTrafficManagerTool(createIfRequired: false)
-                            .GetToolColor(warning: warning, error: false),
+                color: ModUI.GetTrafficManagerTool() .GetToolColor(warning, error: false),
                 alpha: alpha);
             // TODO: Potentially we do not need to refer to a TrafficManagerTool object
         }
