@@ -233,7 +233,8 @@ namespace TrafficManager.Manager.Impl {
 
             RecalculateSegmentRoutingData(segmentId);
 
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 RecalculateLaneEndRoutingData(segmentId, laneIdAndIndex.laneIndex, laneIdAndIndex.laneId, true);
                 RecalculateLaneEndRoutingData(segmentId, laneIdAndIndex.laneIndex, laneIdAndIndex.laneId, false);
             }
@@ -267,6 +268,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="centerSegmentId">The segment in the center.</param>
         /// <param name="centerSegmentNodeId">The node of the segment in the center.</param>
         private void ResetIncomingHighwayLaneArrowsOfNode(ushort centerSegmentId, ushort centerSegmentNodeId) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             ref NetNode node = ref centerSegmentNodeId.ToNode();
 
             for (int i = 0; i < Constants.MAX_SEGMENTS_OF_NODE; ++i) {
@@ -276,7 +278,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 ref NetSegment neighbourSegment = ref neighbourSegmentId.ToSegment();
-                foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(neighbourSegmentId)) {
+                foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(neighbourSegmentId)) {
                     if (!IsIncomingLane(
                         neighbourSegmentId,
                         neighbourSegment.m_startNode == centerSegmentNodeId,
@@ -309,7 +311,8 @@ namespace TrafficManager.Manager.Impl {
             SegmentRoutings[segmentId].Reset();
             ResetIncomingHighwayLaneArrows(segmentId);
 
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 if (extendedLogRouting) {
                     Log._Debug($"RoutingManager.ResetRoutingData: Resetting lane {laneIdAndIndex.laneId}, " +
                                $"idx {laneIdAndIndex.laneIndex} @ seg. {segmentId}");

@@ -209,8 +209,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             int count = 0;
             bool pressed = Input.GetMouseButton(0);
             Color color = MainTool.GetToolColor(pressed, false);
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             ref NetSegment netSegment = ref segmentId.ToSegment();
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 NetInfo.Lane laneInfo = netSegment.Info.m_lanes[laneIdAndIndex.laneIndex];
 
                 bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;

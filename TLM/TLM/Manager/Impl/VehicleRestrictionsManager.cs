@@ -556,7 +556,8 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndIndex.laneIndex];
 
                 ExtVehicleType defaultMask = GetDefaultAllowedVehicleTypes(

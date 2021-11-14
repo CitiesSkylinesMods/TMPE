@@ -118,8 +118,10 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             ref NetSegment netSegment = ref segmentId.ToSegment();
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 if (HasConnections(
                     laneIdAndIndex.laneId,
                     netSegment.m_startNode == nodeId)) {
@@ -309,7 +311,8 @@ namespace TrafficManager.Manager.Impl {
                     $"{startNode}) called.");
             }
 
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 if (logLaneConnections) {
                     Log._Debug(
                         "LaneConnectionManager.RemoveLaneConnectionsFromSegment: Removing " +

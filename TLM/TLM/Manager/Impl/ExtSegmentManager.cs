@@ -248,6 +248,19 @@ namespace TrafficManager.Manager.Impl {
                    && ((RoadBaseAI)segmentInfo.m_netAI).m_highwayRules;
         }
 
+        public GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId) {
+            NetManager netManager = Singleton<NetManager>.instance;
+            ref NetSegment netSegment = ref netManager.m_segments.m_buffer[segmentId];
+            uint initialLaneId = netSegment.m_lanes;
+            NetInfo netInfo = netSegment.Info;
+            NetLane[] laneBuffer = netManager.m_lanes.m_buffer;
+            if (netInfo == null) {
+                return new GetSegmentLaneIdsEnumerable(0, 0, laneBuffer);
+            }
+
+            return new GetSegmentLaneIdsEnumerable(initialLaneId, netInfo.m_lanes.Length, laneBuffer);
+        }
+
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
             Log._Debug($"Extended segment data:");

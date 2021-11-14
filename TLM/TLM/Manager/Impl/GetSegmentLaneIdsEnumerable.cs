@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace GenericGameBridge.Service {
+namespace TrafficManager.Manager.Impl {
     /// <summary>
     /// Struct enumerable to be returned from the GetSegmentLaneIds method.
     /// This implementation is just for perf optimizations and should be handled with care since it returns a mutable struct!

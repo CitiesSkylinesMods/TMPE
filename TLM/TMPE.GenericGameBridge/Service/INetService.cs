@@ -24,8 +24,6 @@ namespace GenericGameBridge.Service {
                                           default,
                                       bool reverse = false,
                                       bool sort = true);
-
-        GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId);
     }
 
     public struct LanePos {

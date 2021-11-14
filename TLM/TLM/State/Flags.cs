@@ -901,6 +901,7 @@ namespace TrafficManager.State {
 
         internal static IDictionary<uint, ExtVehicleType> GetAllLaneAllowedVehicleTypes() {
             IDictionary<uint, ExtVehicleType> ret = new Dictionary<uint, ExtVehicleType>();
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 ref NetSegment segment = ref segmentId.ToSegment();
@@ -913,7 +914,7 @@ namespace TrafficManager.State {
                     continue;
                 }
 
-                foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                     NetInfo.Lane laneInfo = segment.Info.m_lanes[laneIdAndIndex.laneIndex];
 
                     if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {

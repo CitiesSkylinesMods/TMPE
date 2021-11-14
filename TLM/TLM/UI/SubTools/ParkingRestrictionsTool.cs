@@ -90,7 +90,8 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            foreach(LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(renderInfo_.SegmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(renderInfo_.SegmentId)) {
                 NetLane netLane = NetManager.instance.m_lanes.m_buffer[laneIdAndIndex.laneId];
                 NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndIndex.laneIndex];
                 bool isParking = laneInfo.m_laneType.IsFlagSet(NetInfo.LaneType.Parking);
