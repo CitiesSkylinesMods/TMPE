@@ -60,8 +60,9 @@ namespace TrafficManager.Util {
                     isStraight) {
 
                 bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 IList<LanePos> laneList =
-                    netService.GetSortedLanes(
+                    extSegmentManager.GetSortedLanes(
                         segmentId,
                         ref GetSeg(segmentId),
                         startNode,

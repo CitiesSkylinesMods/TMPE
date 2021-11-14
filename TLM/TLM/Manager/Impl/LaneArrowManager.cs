@@ -118,7 +118,8 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="startNode">determines the segment end to reset. if <c>null</c>
         /// both ends are reset</param>
         public void ResetLaneArrows(ushort segmentId, bool? startNode = null) {
-            foreach (var lane in netService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (var lane in extSegmentManager.GetSortedLanes(
                 segmentId,
                 ref GetSeg(segmentId),
                 startNode,

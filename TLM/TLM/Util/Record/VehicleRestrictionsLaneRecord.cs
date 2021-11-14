@@ -55,7 +55,8 @@ namespace TrafficManager.Util.Record {
         public static List<VehicleRestrictionsLaneRecord> GetLanes(ushort segmentId) {
             int maxLaneCount = segmentId.ToSegment().Info.m_lanes.Length;
             var ret = new List<VehicleRestrictionsLaneRecord>(maxLaneCount);
-            var lanes = netService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            var lanes = extSegmentManager.GetSortedLanes(
                 segmentId,
                 ref segmentId.ToSegment(),
                 null,

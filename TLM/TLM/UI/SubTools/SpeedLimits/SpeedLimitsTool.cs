@@ -263,7 +263,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <param name="sortedLaneIndex"></param>
         private IEnumerable<LanePos> FollowRoundaboutLane(List<ushort> segmentList, ushort segmentId0, int sortedLaneIndex) {
             bool invert0 = segmentId0.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-            int count0 = netService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            int count0 = extSegmentManager.GetSortedLanes(
                segmentId: segmentId0,
                segment: ref segmentId0.ToSegment(),
                startNode: null,
@@ -272,7 +273,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                sort: false).Count;
             foreach (ushort segmentId in segmentList) {
                 bool invert = segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-                var lanes = netService.GetSortedLanes(
+                var lanes = extSegmentManager.GetSortedLanes(
                     segmentId: segmentId,
                     segment: ref segmentId.ToSegment(),
                     startNode: null,
@@ -840,7 +841,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 Vector3 zero = center - (0.5f * (((numLanes - 1) + numDirections) - 1) * f * xu);
 
                 uint x = 0;
-                IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+                IList<LanePos> sortedLanes = extSegmentManager.GetSortedLanes(
                     segmentId: segmentId,
                     segment: ref segment,
                     startNode: null,

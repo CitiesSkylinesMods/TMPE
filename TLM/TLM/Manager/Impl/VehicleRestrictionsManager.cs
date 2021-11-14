@@ -383,7 +383,8 @@ namespace TrafficManager.Manager.Impl {
         internal bool ClearVehicleRestrictions(ushort segmentId) {
             NetInfo segmentInfo = segmentId.ToSegment().Info;
             bool ret = false;
-            IList<LanePos> lanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            IList<LanePos> lanes = extSegmentManager.GetSortedLanes(
                 segmentId,
                 ref segmentId.ToSegment(),
                 null,

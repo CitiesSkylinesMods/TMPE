@@ -394,7 +394,8 @@ namespace TrafficManager.Util {
         /// <param name="outgoing">true if lanes our going out toward the junction</param>
         /// <returns></returns>
         private static int CountLanes(ushort segmentId, ushort nodeId, bool outgoing = true) {
-            return netService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            return extSegmentManager.GetSortedLanes(
                                 segmentId,
                                 ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
                                 ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!outgoing),
