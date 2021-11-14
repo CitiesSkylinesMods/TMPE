@@ -136,6 +136,7 @@
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
     <Compile Include="Lifecycle\Patcher.cs" />
     <Compile Include="Lifecycle\TMPELifecycle.cs" />
+    <Compile Include="Manager\Impl\ClockDirection.cs" />
     <Compile Include="Manager\Impl\GameConnectionManager.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
@@ -144,6 +145,8 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="Manager\Impl\GetNodeSegmentIdsEnumerable.cs" />
+    <Compile Include="Manager\Impl\GetNodeSegmentIdsEnumerator.cs" />
     <Compile Include="Notifier.cs" />
     <Compile Include="Patch\CustomPathFindPatchAttribute.cs" />
     <Compile Include="Patch\PatchCommons.cs" />

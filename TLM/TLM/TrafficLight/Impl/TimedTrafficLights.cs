@@ -86,10 +86,10 @@ namespace TrafficManager.TrafficLight.Impl {
             Steps.Clear();
             RotationOffset = 0;
 
-            var netService = Constants.ServiceFactory.NetService;
+            ExtNodeManager extNodeManager = ExtNodeManager.Instance;
 
-            List<ushort> clockSortedSourceSegmentIds = netService.GetNodeSegmentIds(sourceTimedLight.NodeId, ClockDirection.Clockwise).ToList();
-            List<ushort> clockSortedTargetSegmentIds = netService.GetNodeSegmentIds(NodeId, ClockDirection.Clockwise).ToList();
+            List<ushort> clockSortedSourceSegmentIds = extNodeManager.GetNodeSegmentIds(sourceTimedLight.NodeId, ClockDirection.Clockwise).ToList();
+            List<ushort> clockSortedTargetSegmentIds = extNodeManager.GetNodeSegmentIds(NodeId, ClockDirection.Clockwise).ToList();
 
             if (clockSortedTargetSegmentIds.Count != clockSortedSourceSegmentIds.Count) {
                 throw new Exception(
@@ -152,10 +152,12 @@ namespace TrafficManager.TrafficLight.Impl {
                     throw new NotSupportedException();
                 }
 
+                ExtNodeManager extNodeManager = ExtNodeManager.Instance;
+
                 var clockDirection = dir == ArrowDirection.Right
                     ? ClockDirection.Clockwise
                     : ClockDirection.CounterClockwise;
-                List<ushort> clockSortedSegmentIds = Constants.ServiceFactory.NetService.GetNodeSegmentIds(NodeId, clockDirection).ToList();
+                List<ushort> clockSortedSegmentIds = extNodeManager.GetNodeSegmentIds(NodeId, clockDirection).ToList();
 
                 Log._Debug(
                     $"TimedTrafficLights.Rotate({dir}) @ node {NodeId}: Clock-sorted segment ids: " +

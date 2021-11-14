@@ -340,8 +340,10 @@ namespace TrafficManager.Util {
             ushort headNodeId,
             ushort segmentId,
             ArrowDirection dir) {
+            ExtNodeManager extNodeManager = ExtNodeManager.Instance;
+
             var segmentList =
-                netService.GetNodeSegmentIds(headNodeId, ClockDirection.CounterClockwise)
+                extNodeManager.GetNodeSegmentIds(headNodeId, ClockDirection.CounterClockwise)
                 .Where(_segmentId =>
                     IsPartofRoundabout(_segmentId, segmentId, headNodeId) &&
                     segEndMan.GetDirection(segmentId, _segmentId, headNodeId) == dir);

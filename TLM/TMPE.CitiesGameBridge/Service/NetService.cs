@@ -12,28 +12,6 @@ namespace CitiesGameBridge.Service {
 
         // OTHER STUFF --------------------------------------------------------------------------------
 
-        public GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection) {
-            var initialSegmentId = GetInitialSegment(ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]);
-            var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            return new GetNodeSegmentIdsEnumerable(nodeId, initialSegmentId, clockDirection, segmentBuffer);
-        }
-
-        /// <summary>
-        /// Gets the initial segment.
-        /// </summary>
-        /// <param name="node">The node with the segments.</param>
-        /// <returns>First non 0 segmentId.</returns>
-        public ushort GetInitialSegment(ref NetNode node) {
-            for (int i = 0; i < 8; ++i) {
-                var segmentId = node.GetSegment(i);
-                if (segmentId != 0) {
-                    return segmentId;
-                }
-            }
-
-            return 0;
-        }
-
         public GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId) {
             NetManager netManager = Singleton<NetManager>.instance;
             ref NetSegment netSegment = ref netManager.m_segments.m_buffer[segmentId];

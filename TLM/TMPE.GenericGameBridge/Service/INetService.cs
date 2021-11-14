@@ -25,8 +25,6 @@ namespace GenericGameBridge.Service {
                                       bool reverse = false,
                                       bool sort = true);
 
-        GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection);
-
         GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId);
     }
 
@@ -48,10 +46,5 @@ namespace GenericGameBridge.Service {
             this.vehicleType = vehicleType;
             this.laneType = laneType;
         }
-    }
-
-    public enum ClockDirection {
-        Clockwise,
-        CounterClockwise,
     }
 }

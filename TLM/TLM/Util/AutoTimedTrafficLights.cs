@@ -69,7 +69,8 @@ namespace TrafficManager.Util {
 
             List<ushort> segList = new List<ushort>();
 
-            foreach (var segmentId in netService.GetNodeSegmentIds(nodeId, clockDirection)) {
+            ExtNodeManager extNodeManager = ExtNodeManager.Instance;
+            foreach (var segmentId in extNodeManager.GetNodeSegmentIds(nodeId, clockDirection)) {
                 if (CountOutgoingLanes(segmentId, nodeId) > 0) {
                     segList.Add(segmentId);
                 }
