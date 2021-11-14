@@ -21,8 +21,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private ExtVehicleManager() {
-            ExtVehicles = new ExtVehicle[Constants.ServiceFactory.VehicleService.MaxVehicleCount];
-            for (uint i = 0; i < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++i) {
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+            ExtVehicles = new ExtVehicle[maxVehicleCount];
+            for (uint i = 0; i < maxVehicleCount; ++i) {
                 ExtVehicles[i] = new ExtVehicle((ushort)i);
             }
         }
@@ -55,11 +56,24 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
+        /// <summary>
+        /// Check if a vehicle is valid.
+        /// This is the case if the vehicle is Created but not Deleted.
+        /// </summary>
+        /// <param name="vehicleId">The id of the vehicle to check.</param>
+        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
+        public bool IsVehicleValid(ushort vehicleId) {
+            var createdDeleted = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags
+                & (Vehicle.Flags.Created | Vehicle.Flags.Deleted);
+
+            return createdDeleted == Vehicle.Flags.Created;
+        }
+
         public void SetJunctionTransitState(ref ExtVehicle extVehicle,
                                             VehicleJunctionTransitState transitState) {
             if (transitState != extVehicle.junctionTransitState) {
                 extVehicle.junctionTransitState = transitState;
-                extVehicle.lastTransitStateUpdate = Now();
+                extVehicle.lastTransitStateUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex;
             }
         }
 
@@ -67,6 +81,7 @@ namespace TrafficManager.Manager.Impl {
             // (stock code from PassengerCarAI.GetDriverInstance)
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             uint citizenUnitId = data.m_citizenUnits;
+            uint maxUnitCount = citizenManager.m_units.m_size;
             int numIter = 0;
 
             while (citizenUnitId != 0) {
@@ -85,7 +100,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 citizenUnitId = nextCitizenUnitId;
-                if (++numIter > CitizenManager.MAX_UNIT_COUNT) {
+                if (++numIter > maxUnitCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         "Invalid list detected!\n" + Environment.StackTrace);
@@ -371,7 +386,7 @@ namespace TrafficManager.Manager.Impl {
             ushort prevSegmentId = extVehicle.currentSegmentId;
             bool prevStartNode = extVehicle.currentStartNode;
 #endif
-            extVehicle.lastPositionUpdate = Now();
+            extVehicle.lastPositionUpdate = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
             if (extVehicle.previousVehicleIdOnSegment != 0) {
                 ExtVehicles[extVehicle.previousVehicleIdOnSegment].nextVehicleIdOnSegment =
@@ -752,7 +767,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsJunctionTransitStateNew(ref ExtVehicle extVehicle) {
-            uint frame = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
+            uint frame = Singleton<SimulationManager>.instance.m_currentFrameIndex;
             return (extVehicle.lastTransitStateUpdate >> STATE_UPDATE_SHIFT) >=
                    (frame >> STATE_UPDATE_SHIFT);
         }
@@ -766,7 +781,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public void StepRand(ref ExtVehicle extVehicle, bool force) {
-            Randomizer rand = Constants.ServiceFactory.SimulationService.Randomizer;
+            Randomizer rand = Singleton<SimulationManager>.instance.m_randomizer;
             if (force
                 || (rand.UInt32(GlobalConfig.Instance.Gameplay.VehicleTimedRandModulo) == 0))
             {
@@ -872,10 +887,6 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return startNode;
-        }
-
-        private static uint Now() {
-            return Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
         }
 
         private void DetermineVehicleType(ref ExtVehicle extVehicle, ref Vehicle vehicleData) {
@@ -1015,9 +1026,17 @@ namespace TrafficManager.Manager.Impl {
         private void InitAllVehicles() {
             Log._Debug("ExtVehicleManager: InitAllVehicles()");
 
-            bool HandleVehicle(ushort vId, ref Vehicle vehicle) {
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+
+            for (uint vehicleId = 0;
+                 vehicleId < maxVehicleCount;
+                 ++vehicleId) {
+
+                ushort vId = (ushort)vehicleId;
+                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vId];
+
                 if ((vehicle.m_flags & Vehicle.Flags.Created) == 0) {
-                    return true;
+                    continue;
                 }
 
                 OnCreateVehicle(vId, ref vehicle);
@@ -1027,18 +1046,10 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 if ((vehicle.m_flags & Vehicle.Flags.Spawned) == 0) {
-                    return true;
+                    continue;
                 }
 
                 OnSpawnVehicle(vId, ref vehicle);
-
-                return true;
-            }
-
-            for (uint vehicleId = 0;
-                 vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount;
-                 ++vehicleId) {
-                Services.VehicleService.ProcessVehicle((ushort)vehicleId, HandleVehicle);
             }
         }
 
@@ -1054,12 +1065,9 @@ namespace TrafficManager.Manager.Impl {
             base.OnLevelUnloading();
 
             for (int i = 0; i < ExtVehicles.Length; ++i) {
-                Services.VehicleService.ProcessVehicle(
-                    (ushort)i,
-                    (ushort vehId, ref Vehicle veh) => {
-                        OnRelease(ref ExtVehicles[i], ref veh);
-                        return true;
-                    });
+                ushort vId = (ushort)i;
+                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vId];
+                OnRelease(ref ExtVehicles[i], ref vehicle);
             }
         }
 

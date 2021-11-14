@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.Manager.Impl {
+namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
     using System.Collections.Generic;
@@ -36,8 +36,9 @@
             base.InternalPrintDebugInfo();
             Log._Debug($"Extended citizen data:");
 
+            Citizen[] citizenBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
             for (var i = 0; i < ExtCitizens.Length; ++i) {
-                if (!IsValid((uint)i)) {
+                if ((citizenBuffer[(uint)i].m_flags & Citizen.Flags.Created) == 0) {
                     continue;
                 }
 
@@ -75,12 +76,8 @@
             ExtCitizens[citizenId].transportMode = ExtTransportMode.None;
 
             ushort targetBuildingId = instanceData.m_targetBuilding;
-            Services.CitizenService.ProcessCitizen(
-                citizenId,
-                (uint citId, ref Citizen cit) => {
-                    cit.SetLocationByBuilding(citId, targetBuildingId);
-                    return true;
-                });
+
+            Singleton<CitizenManager>.instance.m_citizens.m_buffer[citizenId].SetLocationByBuilding(citizenId, targetBuildingId);
 
             if (citizenData.CurrentLocation != Citizen.Location.Moving) {
                 ExtCitizens[citizenId].lastLocation = citizenData.CurrentLocation;
@@ -102,19 +99,8 @@
             ResetLastLocation(ref extCitizen);
         }
 
-        private bool IsValid(uint citizenId) {
-            return Constants.ServiceFactory.CitizenService.IsCitizenValid(citizenId);
-        }
-
         private void ResetLastLocation(ref ExtCitizen extCitizen) {
-            var loc = Citizen.Location.Moving;
-            Constants.ServiceFactory.CitizenService.ProcessCitizen(
-                extCitizen.citizenId,
-                (uint citId, ref Citizen citizen) => {
-                    loc = citizen.CurrentLocation;
-                    return true;
-                });
-            extCitizen.lastLocation = loc;
+            extCitizen.lastLocation = Singleton<CitizenManager>.instance.m_citizens.m_buffer[extCitizen.citizenId].CurrentLocation;
         }
 
         // stock code

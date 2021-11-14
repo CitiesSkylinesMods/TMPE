@@ -20,9 +20,11 @@ namespace TrafficManager.Manager.Impl {
         public override void OnBeforeLoadData() {
             base.OnBeforeLoadData();
 
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             // JunctionRestrictionsManager requires our data during loading of custom data
             for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-                if (!Services.NetService.IsSegmentValid((ushort)i)) {
+                if (!extSegmentManager.IsSegmentValid((ushort)i)) {
                     continue;
                 }
 
@@ -65,22 +67,21 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"TurnOnRedManager.UpdateSegment({seg.segmentId}) called.");
             }
 #endif
+            ref NetSegment netSegment = ref seg.segmentId.ToSegment();
+
             ResetSegment(seg.segmentId);
 
             IExtSegmentEndManager extSegmentEndManager =
                 Constants.ManagerFactory.ExtSegmentEndManager;
-            ushort startNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, true);
 
-            if (startNodeId != 0) {
+            if (netSegment.m_startNode != 0) {
                 int index0 = extSegmentEndManager.GetIndex(seg.segmentId, true);
                 UpdateSegmentEnd(
                     ref seg,
                     ref extSegmentEndManager.ExtSegmentEnds[index0]);
             }
 
-            ushort endNodeId = Services.NetService.GetSegmentNodeId(seg.segmentId, false);
-
-            if (endNodeId != 0) {
+            if (netSegment.m_endNode != 0) {
                 int index1 = extSegmentEndManager.GetIndex(seg.segmentId, false);
                 UpdateSegmentEnd(
                     ref seg,
@@ -128,8 +129,6 @@ namespace TrafficManager.Manager.Impl {
 
                 return;
             }
-
-            bool lht = Services.SimulationService.TrafficDrivesOnLeft;
 
             // check node
             // note that we must not check for the `TrafficLights` flag here because the flag might not be loaded yet
@@ -205,6 +204,7 @@ namespace TrafficManager.Manager.Impl {
                 rightSegmentId = 0;
             }
 
+            bool lht = Shortcuts.LHT;
             if (seg.oneWay) {
                 if ((lht && rightSegmentId != 0) || (!lht && leftSegmentId != 0)) {
                     // special case: one-way to one-way in non-preferred direction

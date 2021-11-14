@@ -163,7 +163,7 @@ namespace TrafficManager.UI.SubTools {
                 LastCachedCamera = currentCameraState;
 
                 for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                    if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                         continue;
                     }
 
@@ -222,14 +222,14 @@ namespace TrafficManager.UI.SubTools {
                 float intersectionY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(netManager.m_nodes.m_buffer[nodeId].m_position);
 
                 foreach (LaneEnd laneEnd in laneEnds) {
-                    if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(laneEnd.LaneId)) {
+                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneEnd.LaneId)) {
                         continue;
                     }
 
                     if (laneEnd != selectedLaneEnd) {
                         foreach (LaneEnd targetLaneEnd in laneEnd.ConnectedLaneEnds) {
                             // render lane connection from laneEnd to targetLaneEnd
-                            if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
+                            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
                                 continue;
                             }
 
@@ -292,7 +292,7 @@ namespace TrafficManager.UI.SubTools {
                 // lane curves for selectedMarker will be drawn last to
                 // be on the top of other lane markers.
                 foreach (LaneEnd targetLaneEnd in this.selectedLaneEnd.ConnectedLaneEnds) {
-                    if (!Constants.ServiceFactory.NetService.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
+                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
                         continue;
                     }
 
@@ -452,17 +452,20 @@ namespace TrafficManager.UI.SubTools {
                 if (segmentId != 0 && !segMan.CalculateIsOneWay(segmentId))
                     return false;
             }
+
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             int sourceCount = segments
-                .Where(segmentId => segmentId != 0 && netService.GetHeadNode(segmentId) == nodeId)
+                .Where(segmentId => segmentId != 0 && extSegmentManager.GetHeadNode(segmentId) == nodeId)
                 .Count();
 
             int targetCount = segments
-                .Where(segmentId => segmentId != 0 && netService.GetTailNode(segmentId) == nodeId)
+                .Where(segmentId => segmentId != 0 && extSegmentManager.GetTailNode(segmentId) == nodeId)
                 .Count();
 
             if (sourceCount == 1) {
                 ushort sourceSegment = segments.FirstOrDefault(
-                    segmentId => segmentId != 0 && netService.GetHeadNode(segmentId) == nodeId);
+                    segmentId => segmentId != 0 && extSegmentManager.GetHeadNode(segmentId) == nodeId);
                 Assert(sourceSegment != 0, "sourceSegment != 0");
 
                 ushort outerSegment = sourceSegment.ToSegment().GetNearSegment(nodeId);
@@ -477,7 +480,7 @@ namespace TrafficManager.UI.SubTools {
                 return true;
             } else if (targetCount == 1) {
                 ushort targetSegment = segments.FirstOrDefault(
-                    segmentId => segmentId != 0 && netService.GetTailNode(segmentId) == nodeId);
+                    segmentId => segmentId != 0 && extSegmentManager.GetTailNode(segmentId) == nodeId);
                 Assert(targetSegment != 0, "targetSegment != 0");
 
                 ushort outerSegment = targetSegment.ToSegment().GetFarSegment(nodeId);
@@ -510,10 +513,11 @@ namespace TrafficManager.UI.SubTools {
             segments = PriorityRoad.GetNodeSegments(nodeId);
             bool ret = false;
             int n = segments.Count;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             if (n == 2) {
                 segments.Add(0);
                 segments.Add(0);
-                if(netService.GetHeadNode(segments[1]) == netService.GetTailNode(segments[0])) {
+                if(extSegmentManager.GetHeadNode(segments[1]) == extSegmentManager.GetTailNode(segments[0])) {
                     segments.Swap(0, 1);
                 }
                 ret = true;
@@ -539,15 +543,14 @@ namespace TrafficManager.UI.SubTools {
                     bool oneway = segMan.CalculateIsOneWay(segments[0]) &&
                                   segMan.CalculateIsOneWay(segments[1]);
                     if (oneway) {
-                        if (netService.GetTailNode(segments[0]) == nodeId) {
+                        if (extSegmentManager.GetTailNode(segments[0]) == nodeId) {
                             segments.Swap(0, 1);
                         }
 
                         // if the near side segment to segments[2] is going toward the junction
                         // then we know segment[2] is connected from inside.
                         var nearSegment = segments[2].ToSegment().GetNearSegment(nodeId);
-                        bool connectedFromInside =
-                            netService.GetHeadNode(nearSegment) == nodeId;
+                        bool connectedFromInside = extSegmentManager.GetHeadNode(nearSegment) == nodeId;
                         if (connectedFromInside) {
                             segments.Swap(2, 3);
                         }
@@ -805,7 +808,7 @@ namespace TrafficManager.UI.SubTools {
             return netService.GetSortedLanes(
                                 segmentId,
                                 ref segmentId.ToSegment(),
-                                netService.IsStartNode(segmentId, nodeId) ^ (!toward),
+                                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!toward),
                                 LaneConnectionManager.LANE_TYPES,
                                 LaneConnectionManager.VEHICLE_TYPES,
                                 true).Count;
@@ -1020,7 +1023,7 @@ namespace TrafficManager.UI.SubTools {
             for (ushort nodeId = forceNodeId == 0 ? (ushort)1 : forceNodeId;
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
                  ++nodeId) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                     continue;
                 }
 

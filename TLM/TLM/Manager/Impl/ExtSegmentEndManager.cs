@@ -38,6 +38,8 @@ namespace TrafficManager.Manager.Impl {
             string ret = string.Empty;
             int numIter = 0;
 
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+
             while (vehicleId != 0) {
                 ref ExtVehicle extVehicle = ref Constants.ManagerFactory.ExtVehicleManager
                                                          .ExtVehicles[vehicleId];
@@ -51,7 +53,7 @@ namespace TrafficManager.Manager.Impl {
 
                 vehicleId = extVehicle.nextVehicleIdOnSegment;
 
-                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                if (++numIter > maxVehicleCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         "Invalid list detected!\n" + Environment.StackTrace);
@@ -72,10 +74,12 @@ namespace TrafficManager.Manager.Impl {
             IExtVehicleManager extVehicleMan = Constants.ManagerFactory.ExtVehicleManager;
             int numIter = 0;
 
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+
             while (extSegmentEnd.firstVehicleId != 0) {
                 extVehicleMan.Unlink(ref extVehicleMan.ExtVehicles[extSegmentEnd.firstVehicleId]);
 
-                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                if (++numIter > maxVehicleCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         $"Invalid list detected!\n{Environment.StackTrace}");
@@ -121,11 +125,13 @@ namespace TrafficManager.Manager.Impl {
             uint ret = 0;
             int numIter = 0;
 
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
+
             while (vehicleId != 0) {
                 ++ret;
                 vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 
-                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                if (++numIter > maxVehicleCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         $"Invalid list detected!\n{Environment.StackTrace}");
@@ -138,11 +144,11 @@ namespace TrafficManager.Manager.Impl {
 
         public ArrowDirection GetDirection(ref ExtSegmentEnd sourceEnd, ushort targetSegmentId) {
             IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
-            if (!extSegMan.IsValid(sourceEnd.segmentId) || !extSegMan.IsValid(targetSegmentId)) {
+            if (!extSegMan.IsSegmentValid(sourceEnd.segmentId) || !extSegMan.IsSegmentValid(targetSegmentId)) {
                 return ArrowDirection.None;
             }
 
-            bool? targetStartNode = Services.NetService.IsStartNode(targetSegmentId, sourceEnd.nodeId);
+            bool? targetStartNode = ExtSegmentManager.Instance.IsStartNode(targetSegmentId, sourceEnd.nodeId);
 
             if (targetStartNode == null) {
                 return ArrowDirection.None;
@@ -245,7 +251,7 @@ namespace TrafficManager.Manager.Impl {
             ushort nodeIdBeforeRecalc = segEnd.nodeId;
             Reset(ref segEnd);
 
-            if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 if (nodeIdBeforeRecalc != 0) {
                     Constants.ManagerFactory.ExtNodeManager.RemoveSegment(
                         nodeIdBeforeRecalc,
@@ -255,7 +261,8 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
             segEnd.nodeId = nodeId;
             CalculateIncomingOutgoing(segmentId, nodeId, out segEnd.incoming, out segEnd.outgoing);
 
@@ -280,7 +287,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="segmentId"></param>
         /// <param name="startNode"></param>
         public void CalculateCorners(ushort segmentId, bool startNode) {
-            if (!Shortcuts.netService.IsSegmentValid(segmentId))
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId))
                 return;
             if (!segmentId.ToSegment().Info) {
                 Log.Warning($"segment {segmentId} has null info");
@@ -375,7 +382,8 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateOnlyHighways(ushort segmentId, bool startNode) {
-            ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
 #if DEBUG
             bool logGeometry = DebugSwitch.GeometryDebug.Get();
 #else
@@ -441,8 +449,7 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                var otherStartNode = Constants.ServiceFactory.NetService
-                                                    .IsStartNode(otherSegmentId, segEnd.nodeId);
+                var otherStartNode = ExtSegmentManager.Instance.IsStartNode(otherSegmentId, segEnd.nodeId);
                 if (otherStartNode == null) {
                     Log.Warning($"Incorrect ExtSegmentEnd.nodeId - data integrity problem! Segment {otherSegmentId} is not connected to Node {segEnd.nodeId}");
                     continue;
@@ -474,7 +481,7 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug($"Extended segment end data:");
 
             for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-                if (!Constants.ManagerFactory.ExtSegmentManager.IsValid((ushort)i)) {
+                if (!Constants.ManagerFactory.ExtSegmentManager.IsSegmentValid((ushort)i)) {
                     continue;
                 }
 

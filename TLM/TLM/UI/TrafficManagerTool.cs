@@ -248,11 +248,16 @@ namespace TrafficManager.UI {
         }
 
         protected override void Awake() {
-            Log._Debug($"TrafficManagerTool: Awake {GetHashCode()}");
-            nopeCursor_ = ScriptableObject.CreateInstance<CursorInfo>();
-            nopeCursor_.m_texture = UIView.GetAView().defaultAtlas["Niet"]?.texture;
-            nopeCursor_.m_hotspot = new Vector2(45,45);
-            base.Awake();
+            try {
+                Log._Debug($"TrafficManagerTool: Awake {GetHashCode()}");
+                base.Awake();
+                nopeCursor_ = ScriptableObject.CreateInstance<CursorInfo>();
+                nopeCursor_.m_texture = UIView.GetAView().defaultAtlas["Niet"]?.texture;
+                nopeCursor_.m_hotspot = new Vector2(45, 45);
+                Initialize();
+            } catch(Exception ex) {
+                ex.LogException();
+            }
         }
 
         /// <summary>Only used from CustomRoadBaseAI.</summary>
@@ -364,7 +369,7 @@ namespace TrafficManager.UI {
         }
 
         protected override void OnDisable() {
-            // If TMPE was disabled by switching to another tool, hide main menue panel.
+            // If TMPE was disabled by switching to another tool, hide main menu panel.
             if (ModUI.Instance != null && ModUI.Instance.IsVisible())
                 ModUI.Instance.CloseMainMenu();
 
@@ -372,8 +377,7 @@ namespace TrafficManager.UI {
             if (IsUndergroundMode)
                 InfoManager.instance.SetCurrentMode(InfoManager.InfoMode.None, InfoManager.SubInfoMode.Default);
 
-            //hide speed limit overlay if necessary
-            SubTools.PrioritySigns.MassEditOverlay.Show = RoadSelectionPanels.Root.ShouldShowMassEditOverlay();
+            MassEditOverlay.Show = RoadSelectionPanels.Root?.ShouldShowMassEditOverlay() ?? false;
             // no call to base method to disable base class behavior
         }
 
@@ -1680,23 +1684,22 @@ namespace TrafficManager.UI {
             SimulationManager simManager = Singleton<SimulationManager>.instance;
             ExtVehicleManager vehStateManager = ExtVehicleManager.Instance;
             VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+            Vehicle[] vehicleBuffer = vehicleManager.m_vehicles.m_buffer;
 
             int startVehicleId = 1;
-            int endVehicleId = Constants.ServiceFactory.VehicleService.MaxVehicleCount - 1;
+            int endVehicleId = vehicleBuffer.Length - 1;
 #if DEBUG
             if (DebugSettings.VehicleId != 0) {
                 startVehicleId = endVehicleId = DebugSettings.VehicleId;
             }
 #endif
-            Vehicle[] vehiclesBuffer = Singleton<VehicleManager>.instance.m_vehicles.m_buffer;
-
             for (int i = startVehicleId; i <= endVehicleId; ++i) {
-                if (vehicleManager.m_vehicles.m_buffer[i].m_flags == 0) {
+                if (vehicleBuffer[i].m_flags == 0) {
                     // node is unused
                     continue;
                 }
 
-                Vector3 vehPos = vehicleManager.m_vehicles.m_buffer[i].GetSmoothPosition((ushort)i);
+                Vector3 vehPos = vehicleBuffer[i].GetSmoothPosition((ushort)i);
                 bool visible = GeometryUtil.WorldToScreenPoint(vehPos, out Vector3 screenPos);
 
                 if (!visible) {
@@ -1721,12 +1724,12 @@ namespace TrafficManager.UI {
                         Constants.ManagerFactory.ExtVehicleManager
                                  .GetDriverInstanceId(
                                      (ushort)i,
-                                     ref vehiclesBuffer[i])];
+                                     ref vehicleBuffer[i])];
                 // bool startNode = vState.currentStartNode;
                 // ushort segmentId = vState.currentSegmentId;
 
                 // Converting magnitudes into game speed float, and then into km/h
-                SpeedValue vehSpeed = SpeedValue.FromVelocity(vehicleManager.m_vehicles.m_buffer[i].GetLastFrameVelocity().magnitude);
+                SpeedValue vehSpeed = SpeedValue.FromVelocity(vehicleBuffer[i].GetLastFrameVelocity().magnitude);
 #if DEBUG
                 if (GlobalConfig.Instance.Debug.ExtPathMode != ExtPathMode.None &&
                     driverInst.pathMode != GlobalConfig.Instance.Debug.ExtPathMode) {

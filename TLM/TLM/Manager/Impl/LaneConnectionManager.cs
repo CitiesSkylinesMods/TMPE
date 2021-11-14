@@ -14,6 +14,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.Util;
 
     public class LaneConnectionManager
         : AbstractGeometryObservingManager,
@@ -260,8 +261,9 @@ namespace TrafficManager.Manager.Impl {
             RoutingManager.Instance.RequestRecalculation(segmentId2, false);
 
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                Services.NetService.PublishSegmentChanges(segmentId1);
-                Services.NetService.PublishSegmentChanges(segmentId2);
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+                extSegmentManager.PublishSegmentChanges(segmentId1);
+                extSegmentManager.PublishSegmentChanges(segmentId2);
             }
 
             // at this point ret is always true
@@ -321,7 +323,7 @@ namespace TrafficManager.Manager.Impl {
                 RoutingManager.Instance.RequestRecalculation(segmentId);
 
                 if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                    Services.NetService.PublishSegmentChanges(segmentId);
+                    ExtSegmentManager.Instance.PublishSegmentChanges(segmentId);
                 }
             }
         }
@@ -375,7 +377,7 @@ namespace TrafficManager.Manager.Impl {
                 RoutingManager.Instance.RequestRecalculation(segment);
 
                 if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                    Services.NetService.PublishSegmentChanges(segment);
+                    ExtSegmentManager.Instance.PublishSegmentChanges(segment);
                 }
             }
         }
@@ -437,8 +439,9 @@ namespace TrafficManager.Manager.Impl {
             RoutingManager.Instance.RequestRecalculation(targetSegmentId, false);
 
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
-                Services.NetService.PublishSegmentChanges(sourceSegmentId);
-                Services.NetService.PublishSegmentChanges(targetSegmentId);
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+                extSegmentManager.PublishSegmentChanges(sourceSegmentId);
+                extSegmentManager.PublishSegmentChanges(targetSegmentId);
             }
 
             // return ret, ret is true at this point
@@ -641,7 +644,7 @@ namespace TrafficManager.Manager.Impl {
                            $"startNode? {startNode}");
             }
 
-            if (!Services.NetService.IsNodeValid(nodeId)) {
+            if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                 if (logLaneConnections) {
                     Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
                                "Node is invalid");
@@ -668,7 +671,7 @@ namespace TrafficManager.Manager.Impl {
                     // check if arrow has already been set for this direction
                     switch (dir) {
                         case ArrowDirection.Turn: {
-                                if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
+                                if (LHT) {
                                     if ((arrows & LaneArrows.Right) != LaneArrows.None) {
                                         continue;
                                     }
@@ -754,7 +757,7 @@ namespace TrafficManager.Manager.Impl {
 
                     switch (dir) {
                         case ArrowDirection.Turn: {
-                                if (Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft) {
+                                if (LHT) {
                                     arrows |= LaneArrows.Right;
                                 } else {
                                     arrows |= LaneArrows.Left;
@@ -805,11 +808,11 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneConnection conn in data) {
                 try {
-                    if (!Services.NetService.IsLaneAndItsSegmentValid(conn.lowerLaneId)) {
+                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(conn.lowerLaneId)) {
                         continue;
                     }
 
-                    if (!Services.NetService.IsLaneAndItsSegmentValid(conn.higherLaneId)) {
+                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(conn.higherLaneId)) {
                         continue;
                     }
 
@@ -862,7 +865,7 @@ namespace TrafficManager.Manager.Impl {
                                 continue;
                             }
 
-                            if (!Services.NetService.IsLaneAndItsSegmentValid(otherHigherLaneId)) {
+                            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(otherHigherLaneId)) {
                                 continue;
                             }
 

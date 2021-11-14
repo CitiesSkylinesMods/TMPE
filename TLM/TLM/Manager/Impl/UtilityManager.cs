@@ -136,8 +136,9 @@ namespace TrafficManager.Manager.Impl {
 
             Log.Info("UtilityManager.RemoveStuckEntities(): Resetting vehicles that are waiting for a path.");
             VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+            var maxVehicleCount = vehicleManager.m_vehicles.m_buffer.Length;
 
-            for (uint vehicleId = 1; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount; ++vehicleId) {
+            for (uint vehicleId = 1; vehicleId < maxVehicleCount; ++vehicleId) {
                 // Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
                 if ((vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags & Vehicle.Flags.WaitingPath) != 0) {
                     if (vehicleManager.m_vehicles.m_buffer[vehicleId].m_path != 0u) {
@@ -155,8 +156,7 @@ namespace TrafficManager.Manager.Impl {
                 "UtilityManager.RemoveStuckEntities(): Resetting vehicles that are parking and " +
                 "where no parked vehicle is assigned to the driver.");
 
-            for (uint vehicleId = 1; vehicleId < Constants.ServiceFactory.VehicleService.MaxVehicleCount;
-                 ++vehicleId) {
+            for (uint vehicleId = 1; vehicleId < maxVehicleCount; ++vehicleId) {
                 // Log._Debug($"UtilityManager.RemoveStuckEntities(): Processing vehicle {vehicleId}.");
                 if ((vehicleManager.m_vehicles.m_buffer[vehicleId].m_flags
                      & Vehicle.Flags.Parking) != 0)

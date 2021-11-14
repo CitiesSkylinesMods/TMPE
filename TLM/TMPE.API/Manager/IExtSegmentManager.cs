@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     using TrafficManager.API.Traffic.Data;
 
     public interface IExtSegmentManager {
@@ -12,7 +12,7 @@
         /// </summary>
         /// <param name="segmentId">segment id</param>
         /// <returns><code>true</code> if the segment is valid, <code>false</code> otherwise</returns>
-        bool IsValid(ushort segmentId);
+        bool IsSegmentValid(ushort segmentId);
 
         /// <summary>
         /// Performs recalcution of the segment with the given id

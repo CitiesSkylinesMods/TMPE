@@ -48,12 +48,13 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="segmentId">SegmentId affected</param>
         /// <param name="startNode">NodeId affected</param>
         private ICustomSegmentLights AddLiveSegmentLights(ushort segmentId, bool startNode) {
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return null;
             }
 
-            ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
-            uint currentFrameIndex = Services.SimulationService.CurrentFrameIndex;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
+            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
             RoadBaseAI.GetTrafficLightState(
                 nodeId,
@@ -88,7 +89,7 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
             Log._Trace($"CustomTrafficLights.AddSegmentLights: Adding segment light: {segmentId} @ startNode={startNode}");
 #endif
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 return null;
             }
 
@@ -131,7 +132,7 @@ namespace TrafficManager.Manager.Impl {
         public bool SetSegmentLights(ushort nodeId,
                                      ushort segmentId,
                                      ICustomSegmentLights lights) {
-            bool? startNode = Services.NetService.IsStartNode(segmentId, nodeId);
+            bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             if (startNode == null) {
                 return false;
             }
@@ -156,7 +157,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="nodeId">NodeId affected</param>
         public void AddNodeLights(ushort nodeId) {
-            if (!Services.NetService.IsNodeValid(nodeId)) {
+            if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                 return;
             }
 
@@ -313,7 +314,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public ICustomSegmentLights GetSegmentLights(ushort nodeId, ushort segmentId) {
-            bool? startNode = Services.NetService.IsStartNode(segmentId, nodeId);
+            bool? startNode = ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             return startNode == null ? null : GetSegmentLights(segmentId, (bool)startNode, false);
         }
 

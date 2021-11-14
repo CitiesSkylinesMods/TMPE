@@ -149,7 +149,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             // even when the user lets go of the mass edit overlay hotkey.
             MassEditOverlay.SetTimer(float.MaxValue);
 
-            ModUI.GetTrafficManagerTool(false)?.InitializeSubTools();
+            ModUI.GetTrafficManagerTool()?.InitializeSubTools();
             RefreshCurrentPriorityNodeIds();
 
             // keep active for one more second so that the user
@@ -246,7 +246,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
             currentPriorityNodeIds.Clear();
             for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid((ushort)nodeId)) {
                     continue;
                 }
 
@@ -277,7 +277,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 return;
             }
 
-            if (ModUI.GetTrafficManagerTool(false)?.GetToolMode()
+            if (ModUI.GetTrafficManagerTool()?.GetToolMode()
                 == ToolMode.JunctionRestrictions)
             {
                 return;
@@ -288,11 +288,11 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
         private void ShowGUI(bool viewOnly) {
             try {
-                IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
                 TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
 
-                Vector3 camPos = Constants.ServiceFactory.SimulationService.CameraPosition;
+                Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
 
                 bool clicked = !viewOnly && MainTool.CheckClicked();
 
@@ -300,7 +300,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 bool showRemoveButton = false;
 
                 foreach (ushort nodeId in currentPriorityNodeIds) {
-                    if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                         continue;
                     }
 
@@ -317,7 +317,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                             continue;
                         }
 
-                        bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+                        bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, nodeId);
                         ExtSegment seg = segMan.ExtSegments[segmentId];
                         ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
 
@@ -413,7 +413,8 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
         }
 
         private bool SetPrioritySign(ushort segmentId, bool startNode, PriorityType sign) {
-            ushort nodeId = Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, startNode);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
 
             // check for restrictions
             if (!MayNodeHavePrioritySigns(nodeId)) {
@@ -434,6 +435,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                        $"{nodeId} as main road.");
 
             ref NetNode node = ref nodeId.ToNode();
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             for (int i = 0; i < 8; ++i) {
                 ushort otherSegmentId = node.GetSegment(i);
@@ -441,7 +443,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                     continue;
                 }
 
-                bool otherStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, nodeId);
+                bool otherStartNode = (bool)extSegmentManager.IsStartNode(otherSegmentId, nodeId);
 
                 if (TrafficPriorityManager.Instance.GetPrioritySign(otherSegmentId, otherStartNode)
                     == PriorityType.None)

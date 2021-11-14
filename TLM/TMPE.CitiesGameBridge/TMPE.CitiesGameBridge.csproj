@@ -74,10 +74,7 @@
     </Compile>
     <Compile Include="Factory\ServiceFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service\CitizenService.cs" />
     <Compile Include="Service\NetService.cs" />
-    <Compile Include="Service\SimulationService.cs" />
-    <Compile Include="Service\VehicleService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSUtil.Commons\CSUtil.Commons.csproj">

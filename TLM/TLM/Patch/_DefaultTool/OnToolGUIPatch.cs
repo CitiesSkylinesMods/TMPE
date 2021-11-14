@@ -15,7 +15,8 @@ namespace TrafficManager.Patch._DefaultTool {
         public static void Postfix(Event e) {
             if (TMPELifecycle.PlayMode && !TrafficManagerTool.IsCurrentTool) {
                 if (UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
-                    ModUI.GetTrafficManagerTool(true).OnToolGUIImpl(e);
+                    ModUI.
+                        GetTrafficManagerTool()?.OnToolGUIImpl(e);
                 }
             }
         }

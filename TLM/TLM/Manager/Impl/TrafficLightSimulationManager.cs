@@ -15,6 +15,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.TrafficLight.Impl;
     using TrafficManager.Util;
+    using ColossalFramework;
 
     public class TrafficLightSimulationManager
         : AbstractGeometryObservingManager,
@@ -169,7 +170,7 @@ namespace TrafficManager.Manager.Impl {
 
             // determine node position at `fromSegment` (start/end)
             // bool isStartNode = geometry.StartNodeId == nodeId;
-            bool? isStartNode = Services.NetService.IsStartNode(fromSegmentId, nodeId);
+            bool? isStartNode = ExtSegmentManager.Instance.IsStartNode(fromSegmentId, nodeId);
 
             if (isStartNode == null) {
                 Log.Error($"GetTrafficLightState: Invalid node {nodeId} for segment {fromSegmentId}.");
@@ -264,7 +265,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public void SimulationStep() {
-            var frame = (int)(Services.SimulationService.CurrentFrameIndex & (SIM_MOD - 1));
+            var frame = (int)(Singleton<SimulationManager>.instance.m_currentFrameIndex & (SIM_MOD - 1));
             int minIndex = frame * (NetManager.MAX_NODE_COUNT / SIM_MOD);
             int maxIndex = ((frame + 1) * (NetManager.MAX_NODE_COUNT / SIM_MOD)) - 1;
 
@@ -499,7 +500,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 var startNode =
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(segmentId, nodeId);
+                    (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
 
                 if (logTrafficLights) {
                     Log._Debug($"TrafficLightSimulationManager.HandleValidNode({nodeId}): Adding " +
@@ -553,7 +554,7 @@ namespace TrafficManager.Manager.Impl {
                     for (int i = 0; i < currentNodeGroup.Count;) {
                         ushort nodeId = currentNodeGroup[i];
 
-                        if (!Services.NetService.IsNodeValid(currentNodeGroup[i])) {
+                        if (!ExtNodeManager.Instance.IsValid(currentNodeGroup[i])) {
                             currentNodeGroup.RemoveAt(i);
                             continue;
                         }
@@ -630,7 +631,7 @@ namespace TrafficManager.Manager.Impl {
                         foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in
                             cnfTimedStep.segmentLights)
                         {
-                            if (!Services.NetService.IsSegmentValid(e.Key)) {
+                            if (!ExtSegmentManager.Instance.IsSegmentValid(e.Key)) {
                                 continue;
                             }
 

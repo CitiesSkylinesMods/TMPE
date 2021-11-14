@@ -71,7 +71,7 @@ namespace TrafficManager.Manager.Impl {
             string buf = $"Segment routings:\n";
 
             for (var i = 0; i < SegmentRoutings.Length; ++i) {
-                if (!Services.NetService.IsSegmentValid((ushort)i)) {
+                if (!ExtSegmentManager.Instance.IsSegmentValid((ushort)i)) {
                     continue;
                 }
 
@@ -81,7 +81,7 @@ namespace TrafficManager.Manager.Impl {
             buf += $"\nLane end backward routings:\n";
 
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -92,7 +92,7 @@ namespace TrafficManager.Manager.Impl {
             buf += $"\nLane end forward routings:\n";
 
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!Services.NetService.IsLaneAndItsSegmentValid(laneId)) {
+                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
                     continue;
                 }
 
@@ -142,8 +142,8 @@ namespace TrafficManager.Manager.Impl {
                 Flags.ClearHighwayLaneArrows();
                 segmentsUpdated = true;
 
-                if (Services.SimulationService.SimulationPaused ||
-                    Services.SimulationService.ForcedSimulationPaused) {
+                if (Singleton<SimulationManager>.instance.SimulationPaused ||
+                    Singleton<SimulationManager>.instance.ForcedSimulationPaused) {
                     SimulationStep();
                 }
             }
@@ -171,8 +171,9 @@ namespace TrafficManager.Manager.Impl {
             if (propagate) {
                 //TODO refactor into RequestRecalculation(ushort nodeId)
 
-                ushort startNodeId = Services.NetService.GetSegmentNodeId(segmentId, true);
-                ref NetNode startNode = ref startNodeId.ToNode();
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                ref NetNode startNode = ref netSegment.m_startNode.ToNode();
                 for (int i = 0; i < 8; ++i) {
                     ushort otherSegmentId = startNode.GetSegment(i);
                     if (otherSegmentId != 0) {
@@ -180,8 +181,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
 
-                ushort endNodeId = Services.NetService.GetSegmentNodeId(segmentId, false);
-                ref NetNode endNode = ref endNodeId.ToNode();
+                ref NetNode endNode = ref netSegment.m_endNode.ToNode();
                 for (int i = 0; i < 8; ++i) {
                     ushort otherSegmentId = endNode.GetSegment(i);
                     if (otherSegmentId != 0) {
@@ -223,7 +223,7 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"RoutingManager.RecalculateSegment({segmentId}) called.");
             }
 
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 if (logRouting) {
                     Log._Debug($"RoutingManager.RecalculateSegment({segmentId}): " +
                                "Segment is invalid. Skipping recalculation");
@@ -252,13 +252,13 @@ namespace TrafficManager.Manager.Impl {
                 ResetIncomingHighwayLaneArrowsOfNode(centerSegmentId, centerSegment.m_endNode);
             }
 
-// #if DEBUG
-//             if (DebugSwitch.RoutingBasicLog.Get()
-//                 && (DebugSettings.SegmentId <= 0
-//                     || DebugSettings.SegmentId == segmentId)) {
-//                 Log._Debug($"RoutingManager.ResetRoutingData: Identify nodes connected to {segmentId}: nodeIds={segment.m_startNode}, {segment.m_endNode}");
-//             }
-// #endif
+#if DEBUG
+            if (DebugSwitch.RoutingBasicLog.Get()
+                && (DebugSettings.SegmentId <= 0
+                    || DebugSettings.SegmentId == centerSegmentId)) {
+                Log._Debug($"RoutingManager.ResetRoutingData: Identify nodes connected to {centerSegmentId}: nodeIds={centerSegment.m_startNode}, {centerSegment.m_endNode}");
+            }
+#endif
         }
 
         /// <summary>
@@ -388,8 +388,6 @@ namespace TrafficManager.Manager.Impl {
             NetInfo prevSegmentInfo = segment.Info;
             bool prevSegIsInverted = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
 
-            bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
-
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             ExtSegment prevSeg = Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId];
             ExtSegmentEnd prevEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
@@ -446,7 +444,7 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    bool? start = Constants.ServiceFactory.NetService.IsStartNode(segId, nextNodeId);
+                    bool? start = ExtSegmentManager.Instance.IsStartNode(segId, nextNodeId);
                     if (!start.HasValue) {
                         Log.Error($"Segment with id: {segId} is not connected to the node {nextNodeId}");
                         Debug.LogError($"TM:PE RecalculateLaneRoutings - Segment with id {segId} is not connected to the node {nextNodeId}");
@@ -516,7 +514,7 @@ namespace TrafficManager.Manager.Impl {
                     laneId,
                     startNode,
                     prevSegIsInverted,
-                    lht);
+                    Shortcuts.LHT);
                 Log._DebugFormat(
                     "RoutingManager.RecalculateLaneEndRoutingData({0}, {1}, {2}, {3}): " +
                     "prevSimilarLaneCount={4} prevInnerSimilarLaneIndex={5} prevOuterSimilarLaneIndex={6} " +
@@ -908,8 +906,8 @@ namespace TrafficManager.Manager.Impl {
                                         (nextIncomingDir == ArrowDirection.Turn
                                          && (!nextIsRealJunction
                                              || nextIsEndOrOneWayOut
-                                             || ((lht && hasRightArrow)
-                                                 || (!lht && hasLeftArrow))))) // valid turning lane
+                                             || ((Shortcuts.LHT && hasRightArrow)
+                                                 || (!Shortcuts.LHT && hasLeftArrow))))) // valid turning lane
                                     {
                                         if (extendedLogRouting) {
                                             Log._DebugFormat(
@@ -2085,7 +2083,7 @@ namespace TrafficManager.Manager.Impl {
 
                 if (iterateViaGeometry) {
                     ref NetSegment nextSegment2 = ref nextSegmentId.ToSegment();
-                    nextSegmentId = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft
+                    nextSegmentId = Shortcuts.LHT
                         ? nextSegment2.GetLeftSegment(nextNodeId)
                         : nextSegment2.GetRightSegment(nextNodeId);
 

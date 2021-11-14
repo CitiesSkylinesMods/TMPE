@@ -50,7 +50,7 @@ namespace TrafficManager.Manager.Impl {
                     case ExtPathMode.ApproachingParkedCar: {
                         // citizen requires a path to their parked car: release instance to prevent
                         // it from floating
-                        Services.CitizenService.ReleaseCitizenInstance((ushort)citizenInstanceId);
+                        Singleton<CitizenManager>.instance.ReleaseCitizenInstance((ushort)citizenInstanceId);
                         break;
                     }
 
@@ -60,13 +60,10 @@ namespace TrafficManager.Manager.Impl {
                     case ExtPathMode.CalculatingCarPathToTarget:
                     case ExtPathMode.DrivingToKnownParkPos:
                     case ExtPathMode.DrivingToTarget: {
-                        if (Services.CitizenService.CheckCitizenInstanceFlags(
-                            (ushort)citizenInstanceId,
-                            CitizenInstance.Flags.Character)) {
-                            // citizen instance requires a car but is walking: release instance to
-                            // prevent it from floating
-                            Services.CitizenService.ReleaseCitizenInstance(
-                                (ushort)citizenInstanceId);
+                        // citizen instance requires a car but is walking: release instance to
+                        // prevent it from floating
+                        if ((Singleton<CitizenManager>.instance.m_instances.m_buffer[(ushort)citizenInstanceId].m_flags & CitizenInstance.Flags.Character) != 0) {
+                            Singleton<CitizenManager>.instance.ReleaseCitizenInstance((ushort)citizenInstanceId);
                         }
 
                         break;
@@ -1600,43 +1597,31 @@ namespace TrafficManager.Manager.Impl {
             // relocate parked car if abandoned
             if (extInstance.pathMode == ExtPathMode.CalculatingWalkingPathToParkedCar) {
                 // parked car is unreachable
-                Citizen[] citizensBuffer = Singleton<CitizenManager> .instance.m_citizens.m_buffer;
+                Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
                 ushort parkedVehicleId = citizensBuffer[instanceData.m_citizen].m_parkedVehicle;
 
                 if (parkedVehicleId != 0) {
                     // parked car is present
-                    ushort homeId = 0;
-                    Services.CitizenService.ProcessCitizen(
-                        extCitizen.citizenId,
-                        (uint citId, ref Citizen cit) => {
-                            homeId = cit.m_homeBuilding;
-                            return true;
-                        });
+                    ushort homeId = citizensBuffer[extCitizen.citizenId].m_homeBuilding;
 
                     // calculate distance between citizen and parked car
                     var movedCar = false;
                     Vector3 citizenPos = instanceData.GetLastFramePosition();
-                    var parkedToCitizen = 0f;
-                    Vector3 oldParkedVehiclePos = default;
 
-                    Services.VehicleService.ProcessParkedVehicle(
-                        parkedVehicleId,
-                        (ushort parkedVehId, ref VehicleParked parkedVehicle) => {
-                            oldParkedVehiclePos = parkedVehicle.m_position;
-                            parkedToCitizen = (parkedVehicle.m_position - citizenPos).magnitude;
-                            if (parkedToCitizen > GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome) {
-                                // parked car is far away from current location
-                                // -> relocate parked car and try again
-                                movedCar = TryMoveParkedVehicle(
-                                    parkedVehicleId,
-                                    ref parkedVehicle,
-                                    citizenPos,
-                                    GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome,
-                                    homeId);
-                            }
+                    ref VehicleParked parkedVehicle = ref Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer[parkedVehicleId];
 
-                            return true;
-                        });
+                    Vector3 oldParkedVehiclePos = parkedVehicle.m_position;
+                    var parkedToCitizen = (parkedVehicle.m_position - citizenPos).magnitude;
+                    if (parkedToCitizen > GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome) {
+                        // parked car is far away from current location
+                        // -> relocate parked car and try again
+                        movedCar = TryMoveParkedVehicle(
+                            parkedVehicleId,
+                            ref parkedVehicle,
+                            citizenPos,
+                            GlobalConfig.Instance.ParkingAI.MaxParkedCarDistanceToHome,
+                            homeId);
+                    }
 
                     if (movedCar) {
                         // successfully moved the parked car to a closer location
@@ -2264,7 +2249,7 @@ namespace TrafficManager.Manager.Impl {
 
             if (parkingSpaceSegmentId != 0) {
                 if (parkingBuildingId != 0) {
-                    Randomizer rng = Services.SimulationService.Randomizer;
+                    Randomizer rng = Singleton<SimulationManager>.instance.m_randomizer;
 
                     // choose nearest parking position, after a bit of randomization
                     if ((roadParkPos - targetPos).magnitude < (buildingParkPos - targetPos).magnitude

@@ -173,6 +173,16 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Render overlay speed limit signs in GUI mode.</summary>
         public override void RenderActiveToolOverlay_GUI() {
+            // TODO: Cache camera
+            // if (!LastCachedCamera.Equals(currentCamera)) {
+            //     // cache visible segments
+            //     LastCachedCamera = currentCamera;
+            //     CachedVisibleSegmentIds.Clear();
+            //     ...
+            //     for ... {
+            //          CachedVisibleSegmentIds.Add((ushort)segmentId);
+            //     } // end for all segments
+            // }
             this.CreateOverlayDrawArgs(interactive: true);
 
             // Draw the clickable speed limit signs

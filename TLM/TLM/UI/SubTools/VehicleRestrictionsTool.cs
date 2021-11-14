@@ -85,7 +85,7 @@ namespace TrafficManager.UI.SubTools {
                                    ? NetManager.MAX_SEGMENT_COUNT - 1
                                    : forceSegmentId);
                  ++segmentId) {
-                if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+                if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                     continue;
                 }
 
@@ -244,7 +244,7 @@ namespace TrafficManager.UI.SubTools {
             bool handleHovered = false;
 
             foreach (ushort segmentId in currentRestrictedSegmentIds) {
-                if (!Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+                if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                     continue;
                 }
 

@@ -223,7 +223,7 @@ namespace TrafficManager.State {
             Log._Debug($"Use UUI set to {newValue}");
             GlobalConfig.Instance.Main.UseUUI = newValue;
             GlobalConfig.WriteConfig();
-            var button = ModUI.GetTrafficManagerTool(false)?.UUIButton;
+            var button = ModUI.GetTrafficManagerTool()?.UUIButton;
             if (button) {
                 button.isVisible = newValue;
             }

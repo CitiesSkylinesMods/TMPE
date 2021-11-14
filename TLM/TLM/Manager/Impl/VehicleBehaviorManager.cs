@@ -90,6 +90,7 @@ namespace TrafficManager.Manager.Impl {
             CitizenManager citizenManager = Singleton<CitizenManager>.instance;
             NetManager netManager = Singleton<NetManager>.instance;
             VehicleManager vehicleManager = Singleton<VehicleManager>.instance;
+            uint maxUnitCount = citizenManager.m_units.m_size;
 
             // NON-STOCK CODE START
             bool prohibitPocketCars = false;
@@ -456,7 +457,7 @@ namespace TrafficManager.Manager.Impl {
 
                         curUnitId = nextUnit;
 
-                        if (++numIter > CitizenManager.MAX_UNIT_COUNT) {
+                        if (++numIter > maxUnitCount) {
                             CODebugBase<LogChannel>.Error(
                                 LogChannel.Core,
                                 $"Invalid list detected!\n{Environment.StackTrace}");
@@ -531,7 +532,7 @@ namespace TrafficManager.Manager.Impl {
 
                     curCitizenUnitId = nextUnit;
 
-                    if (++numIter > CitizenManager.MAX_UNIT_COUNT) {
+                    if (++numIter > maxUnitCount) {
                         CODebugBase<LogChannel>.Error(
                             LogChannel.Core,
                             $"Invalid list detected!\n{Environment.StackTrace}");
@@ -1187,7 +1188,7 @@ namespace TrafficManager.Manager.Impl {
                 return VehicleJunctionTransitState.Leave;
             }
 
-            uint currentFrameIndex = Constants.ServiceFactory.SimulationService.CurrentFrameIndex;
+            uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
             if ((extVehicle.junctionTransitState == VehicleJunctionTransitState.Stop
                  || extVehicle.junctionTransitState == VehicleJunctionTransitState.Blocked)
                 && extVehicle.lastTransitStateUpdate >> ExtVehicleManager.JUNCTION_RECHECK_SHIFT
@@ -1436,19 +1437,18 @@ namespace TrafficManager.Manager.Impl {
                         IJunctionRestrictionsManager junctionRestrictionsManager
                             = Constants.ManagerFactory.JunctionRestrictionsManager;
                         ITurnOnRedManager turnOnRedMan = Constants.ManagerFactory.TurnOnRedManager;
-                        bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
                         int torIndex = turnOnRedMan.GetIndex(prevPos.m_segment, isTargetStartNode);
 
                         if ((turnOnRedMan.TurnOnRedSegments[torIndex].leftSegmentId ==
                              position.m_segment
                              && junctionRestrictionsManager.IsTurnOnRedAllowed(
-                                 lht,
+                                 Shortcuts.LHT,
                                  prevPos.m_segment,
                                  isTargetStartNode))
                             || (turnOnRedMan.TurnOnRedSegments[torIndex].rightSegmentId ==
                                 position.m_segment
                                 && junctionRestrictionsManager.IsTurnOnRedAllowed(
-                                    !lht,
+                                    !Shortcuts.LHT,
                                     prevPos.m_segment,
                                     isTargetStartNode)))
                         {
@@ -1848,9 +1848,10 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
                 bool logLaneSelection = false;
                 if (DebugSwitch.AlternativeLaneSelection.Get()) {
-                    ushort nodeId = Services.NetService.GetSegmentNodeId(
-                        currentPathPos.m_segment,
-                        currentPathPos.m_offset < 128);
+                    ref NetSegment netSegment = ref currentPathPos.m_segment.ToSegment();
+                    ushort nodeId = currentPathPos.m_offset < 128
+                        ? netSegment.m_startNode
+                        : netSegment.m_endNode;
                     logLaneSelection =
                         (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId)
                         && (DebugSettings.NodeId == 0 || DebugSettings.NodeId == nodeId);
@@ -2507,7 +2508,7 @@ namespace TrafficManager.Manager.Impl {
 
                     if (vehicleState.laneSpeedRandInterval > 0) {
                         float randSpeed =
-                            Services.SimulationService.Randomizer.Int32(
+                            Singleton<SimulationManager>.instance.m_randomizer.Int32(
                                 (uint)vehicleState.laneSpeedRandInterval + 1u) -
                             (vehicleState.laneSpeedRandInterval / 2f);
 
@@ -2848,9 +2849,10 @@ namespace TrafficManager.Manager.Impl {
                 bool logLaneSelection = false;
 
                 if (DebugSwitch.AlternativeLaneSelection.Get()) {
-                    ushort nodeId = Services.NetService.GetSegmentNodeId(
-                        currentPathPos.m_segment,
-                        currentPathPos.m_offset < 128);
+                    ref NetSegment netSegment = ref currentPathPos.m_segment.ToSegment();
+                    ushort nodeId = currentPathPos.m_offset < 128
+                        ? netSegment.m_startNode
+                        : netSegment.m_endNode;
                     logLaneSelection =
                         (DebugSettings.VehicleId == 0 || DebugSettings.VehicleId == vehicleId)
                         && (DebugSettings.NodeId == 0 || DebugSettings.NodeId == nodeId);

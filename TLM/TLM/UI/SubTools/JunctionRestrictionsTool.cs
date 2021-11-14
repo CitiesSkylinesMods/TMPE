@@ -35,11 +35,12 @@ namespace TrafficManager.UI.SubTools {
             // handle delete
             if (KeybindSettingsBase.RestoreDefaultsKey.KeyDown(e)) {
                 ref NetNode node = ref SelectedNodeId.ToNode();
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 for (int i = 0; i < 8; ++i) {
                     ushort segmentId = node.GetSegment(i);
                     if (segmentId != 0) {
                         // TODO: #568 provide unified delete key for all managers.
-                        bool startNode = (bool)netService.IsStartNode(segmentId, SelectedNodeId);
+                        bool startNode = (bool)extSegmentManager.IsStartNode(segmentId, SelectedNodeId);
                         JunctionRestrictionsManager.Instance.ClearSegmentEnd(segmentId, startNode);
                     }
                 }
@@ -98,7 +99,7 @@ namespace TrafficManager.UI.SubTools {
                 handleClick: !cursorInPanel);
 
             foreach (ushort nodeId in currentRestrictedNodeIds) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                     continue;
                 }
 
@@ -210,7 +211,7 @@ namespace TrafficManager.UI.SubTools {
             for (uint nodeId = forceNodeId == 0 ? 1u : forceNodeId;
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
                  ++nodeId) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid((ushort)nodeId)) {
                     continue;
                 }
 

@@ -29,7 +29,9 @@ namespace TrafficManager.Traffic.Impl {
 
         // TODO convert to struct
         [Obsolete]
-        public ushort NodeId => Constants.ServiceFactory.NetService.GetSegmentNodeId(SegmentId, StartNode);
+        public ushort NodeId => StartNode
+            ? SegmentId.ToSegment().m_startNode
+            : SegmentId.ToSegment().m_endNode;
 
         private int numLanes;
 
@@ -104,22 +106,20 @@ namespace TrafficManager.Traffic.Impl {
             ushort vehicleId = segEndMan.ExtSegmentEnds[endIndex].firstVehicleId;
             int numProcessed = 0;
             int numIter = 0;
+            var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
 
             while (vehicleId != 0) {
-                Constants.ServiceFactory.VehicleService.ProcessVehicle(
-                    vehicleId,
-                    (ushort vId, ref Vehicle veh) => {
-                        MeasureOutgoingVehicle(
+                ref Vehicle vehicle = ref Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId];
+
+                MeasureOutgoingVehicle(
                             logDebug,
                             ret,
                             includeStopped,
                             avgSegLen,
                             vehicleId,
-                            ref veh,
+                            ref vehicle,
                             ref vehStateManager.ExtVehicles[vehicleId],
                             ref numProcessed);
-                        return true;
-                    });
 
                 if ((Options.simulationAccuracy <= SimulationAccuracy.Low && numProcessed >= 3) ||
                     (Options.simulationAccuracy == SimulationAccuracy.Medium && numProcessed >= 5) ||
@@ -129,7 +129,7 @@ namespace TrafficManager.Traffic.Impl {
 
                 vehicleId = vehStateManager.ExtVehicles[vehicleId].nextVehicleIdOnSegment;
 
-                if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                if (++numIter > maxVehicleCount) {
                     CODebugBase<LogChannel>.Error(
                         LogChannel.Core,
                         $"Invalid list detected!\n{Environment.StackTrace}");
@@ -306,7 +306,7 @@ namespace TrafficManager.Traffic.Impl {
             StartNode = segment.m_startNode == NodeId;
             numLanes = segment.Info.m_lanes.Length;
 
-            if (!Constants.ServiceFactory.NetService.IsSegmentValid(SegmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(SegmentId)) {
                 Log.Error($"SegmentEnd.Update: Segment {SegmentId} is invalid.");
                 return;
             }
@@ -327,7 +327,7 @@ namespace TrafficManager.Traffic.Impl {
             }
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             for (int i = 0; i < 8; ++i) {
                 ushort segId = node.GetSegment(i);
                 if (segId == 0) {
@@ -336,7 +336,7 @@ namespace TrafficManager.Traffic.Impl {
 
                 int index0 = segEndMan.GetIndex(
                     segId,
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(segId, NodeId));
+                    (bool)extSegmentManager.IsStartNode(segId, NodeId));
 
                 if (!segEndMan.ExtSegmentEnds[index0].outgoing) {
                     continue;

@@ -97,7 +97,6 @@
     <Compile Include="Util\GetNodeSegmentIdsEnumerableTests.cs" />
     <Compile Include="Util\SpiralTests.cs" />
     <Compile Include="Util\LoopUtilTests.cs" />
-    <Compile Include="Util\TinyDictionaryUnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSUtil.Commons\CSUtil.Commons.csproj">

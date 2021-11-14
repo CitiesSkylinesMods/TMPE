@@ -2,26 +2,6 @@ namespace GenericGameBridge.Service {
     using System.Collections.Generic;
 
     public interface INetService {
-        bool CheckLaneFlags(uint laneId,
-                            NetLane.Flags flagMask,
-                            NetLane.Flags? expectedResult = default);
-
-        bool CheckNodeFlags(ushort nodeId,
-                            NetNode.Flags flagMask,
-                            NetNode.Flags? expectedResult = default);
-
-        bool CheckSegmentFlags(ushort segmentId,
-                               NetSegment.Flags flagMask,
-                               NetSegment.Flags? expectedResult = default);
-
-        NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId, bool startNode);
-
-        NetInfo.Direction GetFinalSegmentEndDirection(ushort segmentId,
-                                                      ref NetSegment segment,
-                                                      bool startNode);
-
-        ushort GetSegmentNodeId(ushort segmentId, bool startNode);
-
         /// <summary>
         /// Assembles a geometrically sorted list of lanes for the given segment.
         /// If the <paramref name="startNode"/> parameter is set only lanes supporting traffic to flow towards the given node are added to the list, otherwise all matched lanes are added.
@@ -45,31 +25,9 @@ namespace GenericGameBridge.Service {
                                       bool reverse = false,
                                       bool sort = true);
 
-        bool IsLaneAndItsSegmentValid(uint laneId);
-
-        bool IsNodeValid(ushort nodeId);
-
-        bool IsSegmentValid(ushort segmentId);
-
         GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection);
 
         GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId);
-
-        void PublishSegmentChanges(ushort segmentId);
-
-        bool? IsStartNode(ushort segmentId, ushort nodeId);
-
-        /// <summary>tail node>-------->head node</summary>
-        ushort GetHeadNode(ushort segmentId);
-
-        /// <summary>tail node>-------->head node</summary>
-        ushort GetHeadNode(ref NetSegment segment);
-
-        /// <summary>tail node>-------->head node</summary>
-        ushort GetTailNode(ushort segmentId);
-
-        /// <summary>tail node>-------->head node</summary>
-        ushort GetTailNode(ref NetSegment segment);
     }
 
     public struct LanePos {

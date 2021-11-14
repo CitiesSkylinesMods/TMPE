@@ -1,4 +1,5 @@
 namespace TrafficManager.UI {
+    using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using System.Collections.Generic;
@@ -76,22 +77,14 @@ namespace TrafficManager.UI {
                 Log._Debug($"Current citizen: {instance.Citizen}");
 
                 if (instance.Citizen != 0) {
-                    ushort citizenInstanceId = 0;
-                    Constants.ServiceFactory.CitizenService.ProcessCitizen(
-                        instance.Citizen,
-                        (uint citId, ref Citizen cit) => {
-                            citizenInstanceId = cit.m_instance;
-                            return true;
-                        });
+                    ushort citizenInstanceId = Singleton<CitizenManager>.instance.m_citizens.m_buffer[instance.Citizen].m_instance;
 
                     Log._Debug(
                         $"Current citizen: {instance.Citizen} Instance: {citizenInstanceId}");
                     if (citizenInstanceId != 0) {
                         bool isTourist = CitizenManager.instance.m_instances.m_buffer[citizenInstanceId].Info.m_citizenAI is TouristAI;
-                        Constants.ServiceFactory.SimulationService.AddAction(
-                            () => Constants
-                                  .ServiceFactory.CitizenService
-                                  .ReleaseCitizenInstance(citizenInstanceId));
+                        Singleton<SimulationManager>.instance.AddAction(
+                            () => Singleton<CitizenManager>.instance.ReleaseCitizenInstance(citizenInstanceId));
                         // InfoPanel needs to be closed manually because method responsible for hiding it testing against type Citizen instead of CitizenInstance
                         // We are not removing Citizen but only instance
                         if (isTourist) {

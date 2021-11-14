@@ -29,8 +29,79 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         public ExtSegment[] ExtSegments { get; }
 
-        public bool IsValid(ushort segmentId) {
-            return Constants.ServiceFactory.NetService.IsSegmentValid(segmentId);
+        public ushort GetHeadNode(ref NetSegment segment) {
+            // tail node>-------->head node
+            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
+            if (invert) {
+                return segment.m_startNode;
+            } else {
+                return segment.m_endNode;
+            }
+        }
+
+        public ushort GetHeadNode(ushort segmentId) =>
+            GetHeadNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
+
+        public ushort GetTailNode(ref NetSegment segment) {
+            bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+            invert = invert ^ (Singleton<SimulationManager>.instance.m_metaData.m_invertTraffic == SimulationMetaData.MetaBool.True);
+            if (!invert) {
+                return segment.m_startNode;
+            } else {
+                return segment.m_endNode;
+            }//endif
+        }
+
+        public ushort GetTailNode(ushort segmentId) =>
+            GetTailNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
+
+        public bool? IsStartNode(ushort segmentId, ushort nodeId) {
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            if (segment.m_startNode == nodeId) {
+                return true;
+            } else if (segment.m_endNode == nodeId) {
+                return false;
+            } else {
+                return null;
+            }
+        }
+
+        public bool IsLaneAndItsSegmentValid(uint laneId) {
+            return IsLaneValid(laneId)
+                && IsSegmentValid(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment);
+        }
+
+        public bool IsSegmentValid(ushort segmentId) {
+            var createdCollapsedDeleted = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags
+                    & (NetSegment.Flags.Created | NetSegment.Flags.Collapsed | NetSegment.Flags.Deleted);
+
+            return createdCollapsedDeleted == NetSegment.Flags.Created;
+        }
+
+        /// <summary>
+        /// Check if a lane id is valid.
+        /// </summary>
+        ///
+        /// <param name="laneId">The id of the lane to check.</param>
+        ///
+        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
+        public bool IsLaneValid(uint laneId) {
+            var createdDeleted = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags
+                & (uint)(NetLane.Flags.Created | NetLane.Flags.Deleted);
+
+            return createdDeleted == (uint)NetLane.Flags.Created;
+        }
+
+        public void PublishSegmentChanges(ushort segmentId) {
+            Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
+            SimulationManager simulationManager = Singleton<SimulationManager>.instance;
+
+            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            uint currentBuildIndex = simulationManager.m_currentBuildIndex;
+            simulationManager.m_currentBuildIndex = currentBuildIndex + 1;
+            segment.m_modifiedIndex = currentBuildIndex;
+            ++segment.m_buildIndex;
         }
 
         private void Reset(ref ExtSegment extSegment) {
@@ -54,7 +125,7 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($">>> ExtSegmentManager.Recalculate({segmentId}) called.");
             }
 
-            if (!IsValid(segmentId)) {
+            if (!IsSegmentValid(segmentId)) {
                 if (extSegment.valid) {
                     Reset(ref extSegment);
                     extSegment.valid = false;
@@ -90,7 +161,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateIsOneWay(ushort segmentId) {
-            if (!IsValid(segmentId)) {
+            if (!IsSegmentValid(segmentId)) {
                 return false;
             }
 
@@ -136,7 +207,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateHasBusLane(ushort segmentId) {
-            if (!IsValid(segmentId)) {
+            if (!IsSegmentValid(segmentId)) {
                 return false;
             }
 
@@ -160,7 +231,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateIsHighway(ushort segmentId) {
-            if (!IsValid(segmentId)) {
+            if (!IsSegmentValid(segmentId)) {
                 return false;
             }
 
@@ -182,7 +253,7 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug($"Extended segment data:");
 
             for (int i = 0; i < ExtSegments.Length; ++i) {
-                if (!IsValid((ushort)i)) {
+                if (!IsSegmentValid((ushort)i)) {
                     continue;
                 }
 

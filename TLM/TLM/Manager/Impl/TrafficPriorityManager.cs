@@ -17,6 +17,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.TrafficLight;
     using UnityEngine;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class TrafficPriorityManager
         : AbstractGeometryObservingManager,
@@ -68,11 +69,11 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
-            if (!Services.NetService.CheckNodeFlags(
-                    nodeId,
-                    NetNode.Flags.Created | NetNode.Flags.Deleted |
-                    NetNode.Flags.Junction,
-                    NetNode.Flags.Created | NetNode.Flags.Junction)) {
+            ref NetNode netNode = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+
+            if (!netNode.m_flags.CheckFlags(
+                    required: NetNode.Flags.Created | NetNode.Flags.Junction,
+                    forbidden: NetNode.Flags.Deleted)) {
                 reason = SetPrioritySignError.NoJunction;
                 Log._DebugIf(
                     logPriority,
@@ -111,7 +112,7 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 reason = SetPrioritySignError.InvalidSegment;
                 Log._DebugIf(
                     logPriority,
@@ -120,9 +121,10 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (!MayNodeHavePrioritySigns(
-                    Services.NetService.GetSegmentNodeId(segmentId, startNode),
-                    out reason)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
+
+            if (!MayNodeHavePrioritySigns(nodeId, out reason)) {
                 var reasonCopy = reason;
                 Log._DebugIf(
                     logPriority,
@@ -167,7 +169,7 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
-            if (!Services.NetService.IsSegmentValid(segmentId)) {
+            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 reason = SetPrioritySignError.InvalidSegment;
                 Log._DebugIf(
                     logPriority,
@@ -251,7 +253,8 @@ namespace TrafficManager.Manager.Impl {
                 type = PriorityType.None;
             }
 
-            ushort nodeId = Services.NetService.GetSegmentNodeId(segmentId, startNode);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
             if (type != PriorityType.None) {
                 TrafficLightManager.Instance.RemoveTrafficLight(nodeId, ref nodeId.ToNode());
             }
@@ -490,10 +493,7 @@ namespace TrafficManager.Manager.Impl {
                     continue;
                 }
 
-                bool otherStartNode =
-                    (bool)Constants.ServiceFactory.NetService.IsStartNode(
-                        otherSegmentId,
-                        transitNodeId);
+                bool otherStartNode = (bool)ExtSegmentManager.Instance.IsStartNode(otherSegmentId, transitNodeId);
 
                 // ISegmentEnd incomingEnd =
                 //    SegmentEndManager.Instance.GetSegmentEnd(otherSegmentId, otherStartNode);
@@ -532,6 +532,7 @@ namespace TrafficManager.Manager.Impl {
                 int otherEndIndex = extSegEndMan.GetIndex(otherSegmentId, otherStartNode);
                 ushort incomingVehicleId = extSegEndMan.ExtSegmentEnds[otherEndIndex].firstVehicleId;
                 int numIter = 0;
+                var maxVehicleCount = VehicleManager.instance.m_vehicles.m_buffer.Length;
 
                 while (incomingVehicleId != 0) {
                     Log._DebugIf(
@@ -571,7 +572,7 @@ namespace TrafficManager.Manager.Impl {
                     // check next incoming vehicle
                     incomingVehicleId = vehStateManager.ExtVehicles[incomingVehicleId].nextVehicleIdOnSegment;
 
-                    if (++numIter > Constants.ServiceFactory.VehicleService.MaxVehicleCount) {
+                    if (++numIter > maxVehicleCount) {
                         CODebugBase<LogChannel>.Error(
                             LogChannel.Core,
                             $"Invalid list detected!\n{Environment.StackTrace}");
@@ -954,7 +955,7 @@ namespace TrafficManager.Manager.Impl {
                     incomingToRelDir);
             }
 
-            if (Services.SimulationService.TrafficDrivesOnLeft) {
+            if (Shortcuts.LHT) {
                 // mirror situation if traffic drives on left
                 targetToDir = ArrowDirectionUtil.InvertLeftRight(targetToDir);
                 incomingFromDir = ArrowDirectionUtil.InvertLeftRight(incomingFromDir);
@@ -1464,7 +1465,7 @@ namespace TrafficManager.Manager.Impl {
                       NetSegment.Flags.Invert) == NetSegment.Flags.None)
                         ? dir
                         : NetInfo.InvertDirection(dir);
-                NetInfo.Direction dir3 = Services.SimulationService.TrafficDrivesOnLeft
+                NetInfo.Direction dir3 = Shortcuts.LHT
                                              ? NetInfo.InvertDirection(dir2)
                                              : dir2;
 
@@ -1504,16 +1505,18 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected override void HandleValidSegment(ref ExtSegment seg) {
+            ref NetSegment netSegment = ref seg.segmentId.ToSegment();
+
             if (!MaySegmentHavePrioritySign(seg.segmentId, true)) {
                 RemovePrioritySignFromSegmentEnd(seg.segmentId, true);
             } else {
-                UpdateNode(Services.NetService.GetSegmentNodeId(seg.segmentId, true));
+                UpdateNode(netSegment.m_startNode);
             }
 
             if (!MaySegmentHavePrioritySign(seg.segmentId, false)) {
                 RemovePrioritySignFromSegmentEnd(seg.segmentId, false);
             } else {
-                UpdateNode(Services.NetService.GetSegmentNodeId(seg.segmentId, false));
+                UpdateNode(netSegment.m_endNode);
             }
         }
 
@@ -1568,7 +1571,7 @@ namespace TrafficManager.Manager.Impl {
         public bool LoadData(List<int[]> data) {
             bool success = true;
             Log.Info($"Loading {data.Count} priority segments (old method)");
-
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             foreach (int[] segment in data) {
                 try {
                     if (segment.Length < 3) {
@@ -1583,15 +1586,15 @@ namespace TrafficManager.Manager.Impl {
                     var segmentId = (ushort)segment[1];
                     var sign = (PriorityType)segment[2];
 
-                    if (!Services.NetService.IsNodeValid(nodeId)) {
+                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                         continue;
                     }
 
-                    if (!Services.NetService.IsSegmentValid(segmentId)) {
+                    if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                         continue;
                     }
 
-                    bool? startNode = Services.NetService.IsStartNode(segmentId, nodeId);
+                    bool? startNode = extSegmentManager.IsStartNode(segmentId, nodeId);
                     if (startNode == null) {
                         Log.Error("TrafficPriorityManager.LoadData: No node found for node id " +
                                   $"{nodeId} @ seg. {segmentId}");
@@ -1617,21 +1620,22 @@ namespace TrafficManager.Manager.Impl {
         public bool LoadData(List<Configuration.PrioritySegment> data) {
             bool success = true;
             Log.Info($"Loading {data.Count} priority segments (new method)");
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             foreach (var prioSegData in data) {
                 try {
                     if ((PriorityType)prioSegData.priorityType == PriorityType.None) {
                         continue;
                     }
 
-                    if (!Services.NetService.IsNodeValid(prioSegData.nodeId)) {
+                    if (!ExtNodeManager.Instance.IsValid(prioSegData.nodeId)) {
                         continue;
                     }
 
-                    if (!Services.NetService.IsSegmentValid(prioSegData.segmentId)) {
+                    if (!ExtSegmentManager.Instance.IsSegmentValid(prioSegData.segmentId)) {
                         continue;
                     }
 
-                    bool? startNode = Services.NetService.IsStartNode(
+                    bool? startNode = extSegmentManager.IsStartNode(
                         prioSegData.segmentId,
                         prioSegData.nodeId);
 
@@ -1665,10 +1669,13 @@ namespace TrafficManager.Manager.Impl {
             ICustomDataManager<List<Configuration.PrioritySegment>>.SaveData(ref bool success)
         {
             var ret = new List<Configuration.PrioritySegment>();
+            var segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
             for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 try {
-                    if (!Services.NetService.IsSegmentValid((ushort)segmentId) ||
+                    ref NetSegment netSegment = ref segmentsBuffer[segmentId];
+
+                    if (!ExtSegmentManager.Instance.IsSegmentValid((ushort)segmentId) ||
                         !HasSegmentPrioritySign((ushort)segmentId)) {
                         continue;
                     }
@@ -1676,9 +1683,9 @@ namespace TrafficManager.Manager.Impl {
                     PriorityType startSign = GetPrioritySign((ushort)segmentId, true);
 
                     if (startSign != PriorityType.None) {
-                        ushort startNodeId = Services.NetService.GetSegmentNodeId((ushort)segmentId, true);
+                        ushort startNodeId = netSegment.m_startNode;
 
-                        if (Services.NetService.IsNodeValid(startNodeId)) {
+                        if (ExtNodeManager.Instance.IsValid(startNodeId)) {
 #if DEBUGSAVE
                             Log._Debug($"Saving priority sign of type {startSign} @ start node "+
                             $"{startNodeId} of segment {segmentId}");
@@ -1694,9 +1701,9 @@ namespace TrafficManager.Manager.Impl {
                     PriorityType endSign = GetPrioritySign((ushort)segmentId, false);
 
                     if (endSign != PriorityType.None) {
-                        ushort endNodeId = Services.NetService.GetSegmentNodeId((ushort)segmentId, false);
+                        ushort endNodeId = netSegment.m_endNode;
 
-                        if (Services.NetService.IsNodeValid(endNodeId)) {
+                        if (ExtNodeManager.Instance.IsValid(endNodeId)) {
 #if DEBUGSAVE
                             Log._Debug($"Saving priority sign of type {endSign} @ end node "+
                             $"{endNodeId} of segment {segmentId}");

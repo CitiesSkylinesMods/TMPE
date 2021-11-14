@@ -83,7 +83,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
                  ++nodeId)
             {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid((ushort)nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid((ushort)nodeId)) {
                     continue;
                 }
 
@@ -103,7 +103,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
             nodeSelectionLocked = false;
             foreach (ushort nodeId in currentTimedNodeIds) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                     continue;
                 }
 
@@ -1422,7 +1422,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
             foreach (ushort nodeId in currentTimedNodeIds) {
-                if (!Constants.ServiceFactory.NetService.IsNodeValid(nodeId)) {
+                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                     continue;
                 }
 
@@ -1451,7 +1451,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
             CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
             JunctionRestrictionsManager junctionRestrictionsManager = JunctionRestrictionsManager.Instance;
-            IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
             var hoveredSegment = false;
@@ -1482,7 +1482,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                         continue;
                     }
 
-                    bool startNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(srcSegmentId, nodeId);
+                    bool startNode = (bool)extSegmentManager.IsStartNode(srcSegmentId, nodeId);
 
                     ICustomSegmentLights liveSegmentLights =
                         customTrafficLightsManager.GetSegmentLights(srcSegmentId, startNode, false);
@@ -1785,7 +1785,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                             }
                         }
 
-                        ExtSegment seg = segMan.ExtSegments[srcSegmentId];
+                        ExtSegment seg = extSegmentManager.ExtSegments[srcSegmentId];
                         ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(srcSegmentId, startNode)];
 
                         if (seg.oneWay && segEnd.outgoing) {

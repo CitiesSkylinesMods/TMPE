@@ -8,6 +8,8 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
+    using ColossalFramework;
 
     /// <summary>
     /// Manages traffic light toggling
@@ -134,6 +136,8 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logTrafficLights = false;
 #endif
+            ref NetNode netNode = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+
             if (!flag && TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
                 reason = ToggleTrafficLightError.HasTimedLight;
                 if (logTrafficLights) {
@@ -144,9 +148,9 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (flag &&
-                (!Services.NetService.IsNodeValid(nodeId)
-                || !Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Junction)
-                || (Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.Untouchable)
+                (!ExtNodeManager.Instance.IsValid(nodeId)
+                || !netNode.m_flags.IsFlagSet(NetNode.Flags.Junction)
+                || (netNode.m_flags.IsFlagSet(NetNode.Flags.Untouchable)
                     && (!node.Info.m_class || node.Info.m_class.m_service != ItemClass.Service.Road)))) {
 
                 reason = ToggleTrafficLightError.NoJunction;
@@ -158,7 +162,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (!flag && Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.LevelCrossing)) {
+            if (!flag && netNode.m_flags.IsFlagSet(NetNode.Flags.LevelCrossing)) {
                 reason = ToggleTrafficLightError.IsLevelCrossing;
 
                 if (logTrafficLights) {
@@ -238,8 +242,8 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool HasTrafficLight(ushort nodeId, ref NetNode node) {
-            return Services.NetService.IsNodeValid(nodeId)
-                && Services.NetService.CheckNodeFlags(nodeId, NetNode.Flags.TrafficLights);
+            return ExtNodeManager.Instance.IsValid(nodeId)
+                && node.m_flags.IsFlagSet(NetNode.Flags.TrafficLights);
         }
 
         [Obsolete]
@@ -259,7 +263,7 @@ namespace TrafficManager.Manager.Impl {
                     ushort nodeId = Convert.ToUInt16(split[0]);
                     uint flag = Convert.ToUInt16(split[1]);
 
-                    if (!Services.NetService.IsNodeValid(nodeId)) {
+                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
                         continue;
                     }
 
@@ -285,7 +289,7 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.NodeTrafficLight nodeLight in data) {
                 try {
-                    if (!Services.NetService.IsNodeValid(nodeLight.nodeId))
+                    if (!ExtNodeManager.Instance.IsValid(nodeLight.nodeId))
                         continue;
 
 #if DEBUGLOAD

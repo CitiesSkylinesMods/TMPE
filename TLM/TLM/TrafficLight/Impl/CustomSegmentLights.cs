@@ -13,6 +13,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Geometry.Impl;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Manager.Impl;
 
     /// <summary>
     /// Represents the set of custom traffic lights located at a node
@@ -35,7 +36,7 @@ namespace TrafficManager.TrafficLight.Impl {
             : this(
                 lightsManager,
                 segmentId,
-                nodeId == Constants.ServiceFactory.NetService.GetSegmentNodeId(segmentId, true),
+                nodeId == segmentId.ToSegment().m_startNode,
                 calculateAutoPedLight) { }
 
         public CustomSegmentLights(ICustomSegmentLightsManager lightsManager,
@@ -62,7 +63,9 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         [Obsolete]
-        public ushort NodeId => Constants.ServiceFactory.NetService.GetSegmentNodeId(SegmentId, StartNode);
+        public ushort NodeId => StartNode
+            ? SegmentId.ToSegment().m_startNode
+            : SegmentId.ToSegment().m_endNode;
 
         private uint LastChangeFrame;
 
@@ -482,12 +485,9 @@ namespace TrafficManager.TrafficLight.Impl {
                 () => "CustomSegmentLights.CalculateAutoPedestrianLightState: Querying incoming " +
                 $"segments at seg. {SegmentId} @ {NodeId}");
 
-            ItemClass prevConnectionClass = null;
-
-            prevConnectionClass = SegmentId.ToSegment().Info.GetConnectionClass();
-
+            ItemClass prevConnectionClass = SegmentId.ToSegment().Info.GetConnectionClass();
             var autoPedestrianLightState = RoadBaseAI.TrafficLightState.Green;
-            bool lht = Constants.ServiceFactory.SimulationService.TrafficDrivesOnLeft;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             if (!(segEnd.incoming && seg.oneWay)) {
                 for (int i = 0; i < 8; ++i) {
@@ -500,7 +500,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     // ExtSegment otherSeg = segMan.ExtSegments[otherSegmentId];
                     int index0 = segEndMan.GetIndex(
                         otherSegmentId,
-                        (bool)Constants.ServiceFactory.NetService.IsStartNode(otherSegmentId, NodeId));
+                        (bool)extSegmentManager.IsStartNode(otherSegmentId, NodeId));
 
                     if (!segEndMan.ExtSegmentEnds[index0].incoming) {
                         continue;
@@ -540,7 +540,7 @@ namespace TrafficManager.TrafficLight.Impl {
                     }
 
                     ArrowDirection dir = segEndMan.GetDirection(ref segEnd, otherSegmentId);
-
+                    bool lht = Shortcuts.LHT;
                     if (dir == ArrowDirection.Forward) {
                         if (!otherLights.IsAllMainRed()) {
                             Log._DebugIf(

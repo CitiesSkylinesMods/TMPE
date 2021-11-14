@@ -161,7 +161,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 LaneArrowManager.VEHICLE_TYPES,
                 true);
 
-            bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+            bool? startNode = ExtSegmentManager.Instance.IsStartNode(SelectedSegmentId, SelectedNodeId);
             if (startNode == null) {
                 Log.Error(
                     $"LaneArrowTool._guiLaneChangeWindow: Segment {SelectedSegmentId} " +
@@ -488,8 +488,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return false;
             }
 #if DEBUG
-            if(!Constants.ServiceFactory.NetService.IsNodeValid(nodeId) ||
-               !Constants.ServiceFactory.NetService.IsSegmentValid(segmentId)) {
+            if(!ExtNodeManager.Instance.IsValid(nodeId) ||
+               !ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
                 Debug.LogError("Invalid node or segment ID");
             }
 #endif
@@ -605,7 +605,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                      || netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId)
                     && (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)
                 {
-                    bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(HoveredSegmentId, HoveredNodeId);
+                    bool bStartNode = (bool)ExtSegmentManager.Instance.IsStartNode(HoveredSegmentId, HoveredNodeId);
                     Color color = MainTool.GetToolColor(leftMouseDown, false);
                     bool alpha = !SeparateSegmentLanesModifierIsPressed;
                     DrawSegmentEnd(cameraInfo, HoveredSegmentId, bStartNode, color, alpha);
@@ -620,14 +620,14 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             if (SelectedSegmentId != 0) {
                 Color color = MainTool.GetToolColor(true, false);
-                bool bStartNode = (bool)Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+                bool bStartNode = (bool)ExtSegmentManager.Instance.IsStartNode(SelectedSegmentId, SelectedNodeId);
                 bool alpha = !altDown && HoveredSegmentId == SelectedSegmentId;
                 DrawSegmentEnd(cameraInfo, SelectedSegmentId, bStartNode, color, alpha);
             }
         }
 
         private void OnResetToDefaultPressed() {
-            bool? startNode = Constants.ServiceFactory.NetService.IsStartNode(SelectedSegmentId, SelectedNodeId);
+            bool? startNode = ExtSegmentManager.Instance.IsStartNode(SelectedSegmentId, SelectedNodeId);
             if (!CanReset(SelectedSegmentId, (bool)startNode)) {
                 return;
             }

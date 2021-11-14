@@ -1,5 +1,6 @@
-﻿namespace TrafficManager.UI.MainMenu {
+namespace TrafficManager.UI.MainMenu {
     using System.Collections.Generic;
+    using ColossalFramework;
     using ColossalFramework.UI;
     using TrafficManager.Manager.Impl;
     using TrafficManager.U;
@@ -30,11 +31,11 @@
                 message: Translation.Menu.Get("Dialog.Text:Clear traffic, confirmation"),
                 callback: (comp, ret) => {
                     if (ret == 1) {
-                        Constants.ServiceFactory.SimulationService.AddAction(
-                            () => { UtilityManager.Instance.ClearTraffic(); });
+                        Singleton<SimulationManager>.instance.AddAction(
+                            () => UtilityManager.Instance.ClearTraffic());
                     }
 
-                    ModUI.GetTrafficManagerTool(true).SetToolMode(ToolMode.None);
+                    ModUI.GetTrafficManagerTool()?.SetToolMode(ToolMode.None);
                 });
             base.OnClick(p);
         }

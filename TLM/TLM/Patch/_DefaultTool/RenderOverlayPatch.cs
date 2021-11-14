@@ -15,7 +15,7 @@ namespace TrafficManager.Patch._DefaultTool {
         public static void Postfix(RenderManager.CameraInfo cameraInfo) {
             if (TMPELifecycle.PlayMode && !TrafficManagerTool.IsCurrentTool) {
                 if (UI.SubTools.PrioritySigns.MassEditOverlay.IsActive) {
-                    ModUI.GetTrafficManagerTool(true).RenderOverlayImpl(cameraInfo);
+                    ModUI.GetTrafficManagerTool()?.RenderOverlayImpl(cameraInfo);
                 }
                 RoadSelectionPanels.Root.RenderOverlay();
             }

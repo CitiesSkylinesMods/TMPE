@@ -35,7 +35,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            uint frameIndex = Constants.ServiceFactory.SimulationService.CurrentFrameIndex >> 8;
+            uint frameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex >> 8;
             if ((frameIndex & 1u) == 0u) {
                 RemoveDemand(ref ExtBuildings[buildingId]);
             }

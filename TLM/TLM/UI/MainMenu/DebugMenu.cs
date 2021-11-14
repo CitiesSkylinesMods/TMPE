@@ -197,7 +197,7 @@ namespace TrafficManager.UI.MainMenu {
         }
 
         private void ClickPrintDebugInfo(UIComponent component, UIMouseEventParameter eventParam) {
-            Constants.ServiceFactory.SimulationService.AddAction(
+            Singleton<SimulationManager>.instance.AddAction(
                 () => {
                     foreach (ICustomManager customManager in TMPELifecycle.Instance
                         .RegisteredManagers) {

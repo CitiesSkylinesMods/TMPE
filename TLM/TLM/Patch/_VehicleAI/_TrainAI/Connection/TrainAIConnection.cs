@@ -34,6 +34,11 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI.Connection {
     public delegate void ReverseDelegate(ushort leaderID,
                                          ref Vehicle leaderData);
 
+    public delegate void ForceTrafficLightsDelegate(TrainAI trainAI,
+                                        ushort vehicleID,
+                                        ref Vehicle vehicleData,
+                                        bool reserveSpace);
+
     internal class TrainAIConnection {
         internal TrainAIConnection(UpdatePathTargetPositionsDelegate updatePathTargetPositionsDelegate,
                                    GetNoiseLevelDelegate getNoiseLevelDelegate,
@@ -41,7 +46,8 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI.Connection {
                                    CalculateMaxSpeedDelegate calculateMaxSpeedDelegate,
                                    ReverseDelegate reverseDelegate,
                                    CalculateTargetSpeedTrainDelegate calculateTargetSpeedDelegate,
-                                   CheckOverlapDelegate checkOverlapDelegate) {
+                                   CheckOverlapDelegate checkOverlapDelegate,
+                                   ForceTrafficLightsDelegate forceTrafficLightsDelegate) {
             UpdatePathTargetPositions = updatePathTargetPositionsDelegate ?? throw new ArgumentNullException(nameof(updatePathTargetPositionsDelegate));
             GetNoiseLevel = getNoiseLevelDelegate ?? throw new ArgumentNullException(nameof(getNoiseLevelDelegate));
             GetMaxSpeed = getMaxSpeedDelegate ?? throw new ArgumentNullException(nameof(getMaxSpeedDelegate));
@@ -49,6 +55,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI.Connection {
             Reverse = reverseDelegate ?? throw new ArgumentNullException(nameof(reverseDelegate));
             CalculateTargetSpeed = calculateTargetSpeedDelegate ?? throw new ArgumentNullException( nameof(calculateTargetSpeedDelegate));
             CheckOverlap = checkOverlapDelegate ?? throw new ArgumentNullException(nameof(checkOverlapDelegate));
+            ForceTrafficLights = forceTrafficLightsDelegate ?? throw new ArgumentNullException(nameof(forceTrafficLightsDelegate));
         }
 
         public UpdatePathTargetPositionsDelegate UpdatePathTargetPositions { get; }
@@ -58,5 +65,6 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI.Connection {
         public ReverseDelegate Reverse { get; }
         public CalculateTargetSpeedTrainDelegate CalculateTargetSpeed { get; }
         public CheckOverlapDelegate CheckOverlap { get; }
+        public ForceTrafficLightsDelegate ForceTrafficLights { get; }
     }
 }
