@@ -502,7 +502,14 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            Log._Assert(action.Override != null, "action.Override != null");
+            if (action.Override == null
+                || action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
+                Log._Assert(
+                    action.Type == SetSpeedLimitAction.ActionType.ResetToDefault,
+                    "action.Override can only be null in ResetToDefault action");
+                Flags.RemoveLaneSpeedLimit(laneId);
+                return true;
+            }
 
             if (action.Type != SetSpeedLimitAction.ActionType.ResetToDefault
                 && !IsValidRange(action.Override.Value.GameUnits)) {
@@ -513,11 +520,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (action.Type != SetSpeedLimitAction.ActionType.ResetToDefault) {
-                Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, action);
-            } else {
-                Flags.RemoveLaneSpeedLimit(laneId);
-            }
+            Flags.SetLaneSpeedLimit(segmentId, laneIndex, laneId, action);
 
             return true;
         }
