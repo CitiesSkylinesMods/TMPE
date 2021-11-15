@@ -30,13 +30,11 @@ namespace TrafficManager.State {
         /// </summary>
         internal static uint[][][] laneConnections;
 
-        /// <summary>
-        /// For each lane: Defines the currently set speed limit
-        /// </summary>
-        private static Dictionary<uint, float> laneSpeedLimit; // TODO remove
+        /// <summary>For each lane: Defines the currently set speed limit. Units: Game speed units (1.0 = 50 km/h).</summary>
+        private static readonly Dictionary<uint, float> laneSpeedLimit;
 
-        // for faster, lock-free access, 1st index: segment id, 2nd index: lane index
-        internal static float?[][] laneSpeedLimitArray;
+        /// <summary>For faster, lock-free access, 1st index: segment id, 2nd index: lane index.</summary>
+        internal static readonly float?[][] laneSpeedLimitArray;
 
         /// <summary>
         /// For each lane: Defines the lane arrows which are set in highway rule mode (they are not saved)
@@ -106,9 +104,12 @@ namespace TrafficManager.State {
             Log.Info("--- LANE SPEED LIMITS ---");
             Log.Info("-------------------------");
             for (uint i = 0; i < laneSpeedLimitArray.Length; ++i) {
-                if (laneSpeedLimitArray[i] == null)
+                if (laneSpeedLimitArray[i] == null) {
                     continue;
+                }
+
                 Log.Info($"Segment {i}: valid? {ExtSegmentManager.Instance.IsSegmentValid((ushort)i)}");
+
                 for (int x = 0; x < laneSpeedLimitArray[i].Length; ++x) {
                     if (laneSpeedLimitArray[i][x] == null)
                         continue;
@@ -568,10 +569,12 @@ namespace TrafficManager.State {
                     }
                     case SetSpeedLimitAction.ActionType.Unlimited:
                     case SetSpeedLimitAction.ActionType.SetOverride: {
-                        laneSpeedLimit[laneId] = action.Override.Value.GetKmph();
+                        float gameUnits = action.Override.GetValueOrDefault(SpeedValue.NO_OVERRIDE).GameUnits;
+                        laneSpeedLimit[laneId] = gameUnits;
 
                         // save speed limit into the fast-access array.
                         // (1) ensure that the array is defined and large enough
+                        //-----------------------------------------------------
                         if (laneSpeedLimitArray[segmentId] == null) {
                             laneSpeedLimitArray[segmentId] = new float?[segmentInfo.m_lanes.Length];
                         } else if (laneSpeedLimitArray[segmentId].Length < segmentInfo.m_lanes.Length) {
@@ -583,7 +586,8 @@ namespace TrafficManager.State {
                         }
 
                         // (2) insert the custom speed limit
-                        laneSpeedLimitArray[segmentId][laneIndex] = action.Override.Value.GetKmph();
+                        //-----------------------------------------------------
+                        laneSpeedLimitArray[segmentId][laneIndex] = gameUnits;
                         break;
                     }
                 }
@@ -879,17 +883,18 @@ namespace TrafficManager.State {
 
         public static SpeedValue? GetLaneSpeedLimit(uint laneId) {
             lock(laneSpeedLimitLock) {
-                if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out float kmphOverride)) {
+                if (laneId <= 0 || !laneSpeedLimit.TryGetValue(laneId, out float gameUnitsOverride)) {
                     return null;
                 }
 
                 // assumption: speed limit is stored in km/h
-                return SpeedValue.FromKmph(kmphOverride);
+                return new SpeedValue(gameUnitsOverride);
             }
         }
 
         internal static IDictionary<uint, float> GetAllLaneSpeedLimits() {
             IDictionary<uint, float> ret;
+
             lock(laneSpeedLimitLock) {
                 ret = new Dictionary<uint, float>(laneSpeedLimit);
             }
@@ -1072,6 +1077,7 @@ namespace TrafficManager.State {
                 laneSpeedLimit.Clear();
 
                 uint segmentsCount = Singleton<NetManager>.instance.m_segments.m_size;
+
                 for (int i = 0; i < segmentsCount; ++i) {
                     laneSpeedLimitArray[i] = null;
                 }
