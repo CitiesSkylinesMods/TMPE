@@ -16,8 +16,7 @@ namespace TrafficManager.U.Panel {
         : UIPanel,
           ISmartSizableControl,
           IObserver<ModUI.UIScaleNotification>,
-          IObserver<ModUI.UIOpacityNotification>
-    {
+          IObserver<ModUI.UIOpacityNotification> {
         private readonly UResizerConfig resizerConfig_ = new();
 
         /// <summary>On destroy this will unsubscribe from the UI Scale observable.</summary>
@@ -50,8 +49,7 @@ namespace TrafficManager.U.Panel {
         /// <param name="currentResolution">New.</param>
         protected override void OnResolutionChanged(Vector2 previousResolution,
                                                     Vector2 currentResolution) {
-            // Call resize on all controls and recalculate again
-            UResizer.UpdateControlRecursive(this, null);
+            UResizer.UpdateControl(this); // force window relayout
         }
 
         /// <summary>
@@ -60,8 +58,7 @@ namespace TrafficManager.U.Panel {
         /// </summary>
         /// <param name="optionsEvent">New UI scale.</param>
         public void OnUpdate(ModUI.UIScaleNotification optionsEvent) {
-            // Call resize on all controls and recalculate again
-            UResizer.UpdateControlRecursive(this, null);
+            UResizer.UpdateControl(this); // force window relayout
         }
 
         /// <summary>

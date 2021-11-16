@@ -164,6 +164,7 @@
 
                 var button = builder.Button<SpeedLimitPaletteButton>(parent: buttonPanel);
                 button.text = GetSpeedButtonText();
+                button.textScale = UIScaler.UIScale;
                 button.textHorizontalAlignment = UIHorizontalAlignment.Center;
 
                 button.normalBgSprite = button.hoveredBgSprite = "GenericPanel";

@@ -60,7 +60,7 @@
                 // Red for special buttons, when active
                 this.ColorizeAllStates(Color.red);
             } else {
-                this.textScale = 2.0f;
+                this.textScale = 2.0f * UIScaler.UIScale;
 
                 // Can't set width directly, but can via the resizer
                 var w = this.text.Length <= 2 ? DEFAULT_WIDTH_NARROW : DEFAULT_WIDTH;
@@ -79,7 +79,7 @@
         public void UpdateSpeedlimitButton_Inactive() {
             // Special values (reset and default do not become larger)
             if (!this.IsSpecialSpeedValue()) {
-                this.textScale = 1.0f;
+                this.textScale = UIScaler.UIScale;
 
                 // Can't set width directly, but can via the resizer
                 var w = this.text.Length <= 2 ? DEFAULT_WIDTH_NARROW : DEFAULT_WIDTH;
