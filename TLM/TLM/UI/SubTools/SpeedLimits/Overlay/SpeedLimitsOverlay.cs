@@ -94,6 +94,9 @@
         [NotNull]
         private readonly GenericArrayCache<ushort> cachedVisibleSegmentIds_;
 
+        /// <summary>If set to true, prompts one-time cache reset.</summary>
+        private bool resetCacheFlag_ = false;
+
         /// <summary>Stores last cached camera position in <see cref="cachedVisibleSegmentIds_"/>.</summary>
         private CameraTransformValue lastCachedCamera_;
 
@@ -211,6 +214,12 @@
             marker.RenderOverlay(cameraInfo, color, pressed);
         }
 
+        /// <summary>Called by the parent tool on activation. Reset the cached segments cache and
+        /// camera cache.</summary>
+        public void ResetCache() {
+            this.resetCacheFlag_ = true;
+        }
+
         /// <summary>
         /// Draw speed limit signs (only in GUI mode).
         /// NOTE: This must be called from GUI mode, because of GUI.DrawTexture use.
@@ -231,10 +240,12 @@
             Vector3 camPos = currentCameraTransform.position;
 
             // TODO: Can road network change while speed limit tool is active? Disasters?
-            if (!this.lastCachedCamera_.Equals(currentCamera)) {
+            if (this.resetCacheFlag_ || !this.lastCachedCamera_.Equals(currentCamera)) {
                 // cache visible segments
                 this.lastCachedCamera_ = currentCamera;
                 this.cachedVisibleSegmentIds_.Clear();
+                this.segmentCenterByDir_.Clear();
+                this.resetCacheFlag_ = false;
 
                 this.ShowSigns_CacheVisibleSegments(
                     netManager: netManager,

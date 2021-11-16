@@ -87,6 +87,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 this.RecreateToolWindow();
             }
             this.Window.Show();
+            this.overlay_.ResetCache();
 
             // this.fsm_ = InitFiniteStateMachine();
             this.MainTool.RequestOnscreenDisplayUpdate();
