@@ -4,7 +4,7 @@
     using TrafficManager.U.Autosize;
     using UnityEngine;
 
-    internal partial class ToolWindow {
+    internal partial class SpeedLimitsToolWindow {
         internal class ModeDescriptionPanel : UPanel {
             /// <summary>Describes what user currently sees. Can use color codes for keyboard hints.</summary>
             internal ULabel ModeDescriptionLabel;
@@ -13,7 +13,7 @@
             /// Sets up two stacked labels: for mode description (what the user sees) and for hint.
             /// The text is empty but is updated after every mode or view change.
             /// </summary>
-            public void SetupControls(ToolWindow window,
+            public void SetupControls(SpeedLimitsToolWindow window,
                                       UBuilder builder,
                                       SpeedLimitsTool parentTool) {
                 this.position = Vector3.zero;

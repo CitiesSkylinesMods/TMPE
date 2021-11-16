@@ -2,7 +2,7 @@
     using ColossalFramework.UI;
     using TrafficManager.State;
 
-    internal partial class ToolWindow {
+    internal partial class SpeedLimitsToolWindow {
         /// <summary>Button to toggle MPH/Kmph display.</summary>
         public class MphToggleButton : U.BaseUButton {
             protected override bool IsVisible() => true;

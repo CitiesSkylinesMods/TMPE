@@ -8,8 +8,15 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using UnityEngine;
 
     /// <summary>Implements U window for Speed Limits palette and speed defaults.</summary>
-    internal partial class ToolWindow : U.Panel.BaseUWindowPanel {
+    internal partial class SpeedLimitsToolWindow : U.Panel.BaseUWindowPanel {
         private const string GAMEOBJECT_NAME = "TMPE_SpeedLimits";
+
+        /// <summary>
+        /// Stores copy of Mph config variable. Only used to monitor whether window buttons
+        /// match the current global config MPH setting. If they don't, then on tool re-activation
+        /// the button palette must be rebuilt.
+        /// </summary>
+        public bool DisplaySpeedLimitsMph;
 
         /// <summary>Stores window title label also overlaid with the drag handle. </summary>
         private ULabel windowTitleLabel_;
@@ -71,6 +78,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 parent: this,
                 stack: UStackMode.None);
             palettePanel_.SetupControls(window: this, builder, parentTool);
+
+            // palette was built for the current configured MPH/KM display
+            this.DisplaySpeedLimitsMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
 
             cursorTooltip_ = builder.Label<UFloatingTooltip>(
                 parent: this,

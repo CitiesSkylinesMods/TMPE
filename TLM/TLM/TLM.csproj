@@ -356,26 +356,26 @@
     <Compile Include="UI\SubTools\SpeedLimits\Overlay\SpeedLimitsOverlay.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\Overlay\SpeedLimitsOverlaySign.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\PaletteGenerator.cs">
-      <DependentUpon>ToolWindow.cs</DependentUpon>
+      <DependentUpon>SpeedLimitsToolWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\SubTools\SpeedLimits\SetSpeedLimitTarget.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitPaletteButton.cs">
-      <DependentUpon>ToolWindow.cs</DependentUpon>
+      <DependentUpon>SpeedLimitsToolWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
-    <Compile Include="UI\SubTools\SpeedLimits\ToolWindow.cs" />
-    <Compile Include="UI\SubTools\SpeedLimits\ToolWindow.ModeButtonsPanel.cs">
-      <DependentUpon>ToolWindow.cs</DependentUpon>
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsToolWindow.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsToolWindow.ModeButtonsPanel.cs">
+      <DependentUpon>SpeedLimitsToolWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\SubTools\SpeedLimits\ToolWindow.ModeDescriptionPanel.cs">
-      <DependentUpon>ToolWindow.cs</DependentUpon>
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsToolWindow.ModeDescriptionPanel.cs">
+      <DependentUpon>SpeedLimitsToolWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\SubTools\SpeedLimits\ToolWindow.MphToggleButton.cs">
-      <DependentUpon>ToolWindow.cs</DependentUpon>
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsToolWindow.MphToggleButton.cs">
+      <DependentUpon>SpeedLimitsToolWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\SubTools\SpeedLimits\ToolWindow.PalettePanel.cs">
-      <DependentUpon>ToolWindow.cs</DependentUpon>
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsToolWindow.PalettePanel.cs">
+      <DependentUpon>SpeedLimitsToolWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\SubTools\TimedTrafficLights\TimedTrafficLightsTool.cs" />
     <Compile Include="UI\SubTools\TimedTrafficLights\TTLToolMode.cs" />

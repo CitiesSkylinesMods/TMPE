@@ -5,7 +5,7 @@
     using TrafficManager.U.Autosize;
     using UnityEngine;
 
-    internal partial class ToolWindow {
+    internal partial class SpeedLimitsToolWindow {
         /// <summary>
         /// Wrapper panel around mode toggle buttons.
         /// <see cref="SegmentLaneModeToggleButton"/>, <see cref="EditDefaultsModeButton"/>,
@@ -19,7 +19,7 @@
 
             public MphToggleButton ToggleMphButton;
 
-            public void SetupControls(ToolWindow window, UBuilder builder) {
+            public void SetupControls(SpeedLimitsToolWindow window, UBuilder builder) {
                 this.name = GAMEOBJECT_NAME + "_ModesPanel";
 
                 void ButtonpanelResizeFn(UResizer r) {

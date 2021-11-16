@@ -66,8 +66,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private SpeedLimitsOverlay.DrawArgs overlayDrawArgs_ = SpeedLimitsOverlay.DrawArgs.Create();
         private SpeedLimitsOverlay overlay_;
 
-        /// <summary>Gets or sets the <see cref="ToolWindow"/> floating on the selected node.</summary>
-        private ToolWindow Window { get; set; }
+        /// <summary>Gets or sets the <see cref="SpeedLimitsToolWindow"/> floating on the selected node.</summary>
+        private SpeedLimitsToolWindow Window { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SpeedLimitsTool"/> class.
@@ -81,7 +81,12 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private static string T(string key) => Translation.SpeedLimits.Get(key);
 
         public override void ActivateTool() {
-            this.RecreateToolWindow();
+            if (this.Window == null
+                || GlobalConfig.Instance.Main.DisplaySpeedLimitsMph != this.Window.DisplaySpeedLimitsMph) {
+                // Avoid multiple window rebuilds, unless Mph setting has changed while the window was closed
+                this.RecreateToolWindow();
+            }
+            this.Window.Show();
 
             // this.fsm_ = InitFiniteStateMachine();
             this.MainTool.RequestOnscreenDisplayUpdate();
@@ -98,7 +103,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             }
 
             UBuilder b = new UBuilder();
-            this.Window = b.CreateWindow<ToolWindow>();
+            this.Window = b.CreateWindow<SpeedLimitsToolWindow>();
             this.Window.SetPadding(UPadding.Default);
             this.Window.SetupControls(b, parentTool: this);
 
@@ -159,8 +164,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void DeactivateTool() {
-            UnityEngine.Object.Destroy(this.Window);
-            this.Window = null;
+            this.Window.Hide();
+            // UnityEngine.Object.Destroy(this.Window);
+            // this.Window = null;
         }
 
         /// <summary>Render overlay segments/lanes in non-GUI mode, as overlays.</summary>

@@ -11,15 +11,15 @@
     using Debug = System.Diagnostics.Debug;
 
     /// <summary>Code handling speed palette panel.</summary>
-    internal partial class ToolWindow {
+    internal partial class SpeedLimitsToolWindow {
         internal class PalettePanel : UPanel {
             internal readonly List<SpeedLimitPaletteButton> PaletteButtons = new();
 
             /// <summary>Create speeds palette based on the current options choices.</summary>
-            /// <param name="window">Containing <see cref="ToolWindow"/>.</param>
+            /// <param name="window">Containing <see cref="SpeedLimitsToolWindow"/>.</param>
             /// <param name="builder">The UI builder to use.</param>
             /// <param name="parentTool">The tool object.</param>
-            public void SetupControls(ToolWindow window, UBuilder builder, SpeedLimitsTool parentTool) {
+            public void SetupControls(SpeedLimitsToolWindow window, UBuilder builder, SpeedLimitsTool parentTool) {
                 this.name = GAMEOBJECT_NAME + "_PalettePanel";
                 this.position = Vector3.zero;
                 this.SetPadding(UPadding.Default);
