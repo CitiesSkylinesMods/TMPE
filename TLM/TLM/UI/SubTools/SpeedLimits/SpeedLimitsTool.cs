@@ -202,7 +202,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             this.overlayDrawArgs_.ClearHovered();
 
             this.overlayDrawArgs_.UiWindowRects.Clear();
-            this.overlayDrawArgs_.UiWindowRects.Add(this.Window.GetScreenRectInGuiSpace());
+            if (this.Window != null) {
+                this.overlayDrawArgs_.UiWindowRects.Add(this.Window.GetScreenRectInGuiSpace());
+            }
 
             if (ModUI.Instance.MainMenu != null) { // can be null if no tool selected
                 this.overlayDrawArgs_.UiWindowRects.Add(
