@@ -9,6 +9,7 @@ namespace TrafficManager.Util {
     using System.IO;
     using System.Reflection;
     using System;
+    using System.Text;
     using TrafficManager.State;
     using TrafficManager.UI;
     using UnityEngine;
@@ -23,9 +24,11 @@ namespace TrafficManager.Util {
 
         // parsed contents of incompatible_mods.txt
         private readonly Dictionary<ulong, string> knownIncompatibleMods;
+        private readonly HashSet<string> gameBreaking;
 
         public ModsCompatibilityChecker() {
             knownIncompatibleMods = LoadListOfIncompatibleMods();
+            gameBreaking = new HashSet<string>(new[] { "Cities: Skylines Multiplayer" });
         }
 
         /// <summary>
@@ -70,14 +73,15 @@ namespace TrafficManager.Util {
             bool filterToEnabled = GlobalConfig.Instance.Main.IgnoreDisabledMods;
 
             // batch all logging in to a single log message
-            string logStr = $"TM:PE Incompatible Mod Checker ({checkKnown},{filterToEnabled}):\n\n";
+            StringBuilder logBuilder = new StringBuilder();
+            logBuilder.Append("TM:PE Incompatible Mod Checker (").Append(checkKnown).Append(",").Append(filterToEnabled).AppendLine("):").AppendLine();
 
             // list of installed incompatible mods
             var results = new Dictionary<PluginInfo, string>();
 
             // iterate plugins
             foreach (PluginInfo mod in Singleton<PluginManager>.instance.GetPluginsInfo()) {
-                if (!mod.isBuiltin && !mod.isCameraScript) {
+                if (!mod.isCameraScript) {
                     string strModName = GetModName(mod);
                     ulong workshopID = mod.publishedFileID.AsUInt64;
                     bool isLocal = workshopID == LOCAL_MOD;
@@ -92,6 +96,10 @@ namespace TrafficManager.Util {
                             Debug.Log("[TM:PE] Incompatible mod detected: " + strModName);
                             results.Add(mod, strModName);
                         }
+                    } else if (gameBreaking.Contains(strModName)) {
+                        strIncompatible = "!";
+                        Debug.Log("[TM:PE] Incompatible, potentially game breaking mod detected: " + strModName);
+                        results.Add(mod, strModName);
                     } else if (strModName.Contains("TM:PE") ||
                                strModName.Contains("Traffic Manager")) {
                         if (GetModGuid(mod) != selfGuid) {
@@ -104,12 +112,14 @@ namespace TrafficManager.Util {
                         }
                     }
 
-                    logStr +=
-                        $"{strIncompatible} {strEnabled} {strWorkshopId.PadRight(12)} {strModName}\n";
+                    logBuilder.Append(strIncompatible).Append(" ")
+                              .Append(strEnabled).Append(" ")
+                              .Append(strWorkshopId.PadRight(12)).Append(" ")
+                              .AppendLine(strModName);
                 }
             }
 
-            Log.Info(logStr);
+            Log.Info(logBuilder.ToString());
             Log.Info("Scan complete: " + results.Count + " incompatible mod(s) found");
 
             return results;
