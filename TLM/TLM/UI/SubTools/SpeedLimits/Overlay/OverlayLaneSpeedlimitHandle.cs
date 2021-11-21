@@ -202,18 +202,21 @@
         }
 
         internal static void SetDefaultSpeedLimit(ushort segmentId, NetInfo netInfo, SetSpeedLimitAction action) {
-            if (action.Override.HasValue) {
-                bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-                string overrideStr = action.Override.Value.FormatStr(showMph);
-                Log._Debug(
-                    $"SpeedLimitManager: Setting default speed limit for road segment {segmentId} " +
-                    $"to {overrideStr}");
-
-                // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
-                SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(
-                    info: netInfo,
-                    customSpeedLimit: action.Override.Value.GameUnits);
+            if (action.Type != SetSpeedLimitAction.ActionType.SetOverride) {
+                // Do nothing
+                return;
             }
+
+            bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+            string overrideStr = action.GuardedValue.Override.FormatStr(showMph);
+            Log._Debug(
+                $"SpeedLimitManager: Setting default speed limit for road segment {segmentId} " +
+                $"to {overrideStr}");
+
+            // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
+            SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(
+                info: netInfo,
+                customSpeedLimit: action.GuardedValue.Override.GameUnits);
         }
     } // end struct
 } // end namespace

@@ -61,12 +61,11 @@
                                                   bool showMph,
                                                   SetSpeedLimitAction actionOnClick,
                                                   SpeedLimitsTool parentTool) {
-                Debug.Assert(actionOnClick.Override != null, "actionOnClick.Override != null");
 
                 SpeedValue speedValue =
                     actionOnClick.Type == SetSpeedLimitAction.ActionType.ResetToDefault
                         ? default
-                        : actionOnClick.Override.Value;
+                        : actionOnClick.GuardedValue.Override;
 
                 int speedInteger = showMph
                                        ? speedValue.ToMphRounded(SpeedLimitTextures.MPH_STEP).Mph

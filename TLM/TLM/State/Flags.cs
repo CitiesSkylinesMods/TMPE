@@ -569,7 +569,7 @@ namespace TrafficManager.State {
                     }
                     case SetSpeedLimitAction.ActionType.Unlimited:
                     case SetSpeedLimitAction.ActionType.SetOverride: {
-                        float gameUnits = action.Override.GetValueOrDefault(SpeedValue.NO_OVERRIDE).GameUnits;
+                        float gameUnits = action.GuardedValue.Override.GameUnits;
                         laneSpeedLimit[laneId] = gameUnits;
 
                         // save speed limit into the fast-access array.

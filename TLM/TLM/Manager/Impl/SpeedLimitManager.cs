@@ -502,17 +502,13 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (action.Override == null
-                || action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
-                Log._Assert(
-                    action.Type == SetSpeedLimitAction.ActionType.ResetToDefault,
-                    "action.Override can only be null in ResetToDefault action");
+            if (action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
                 Flags.RemoveLaneSpeedLimit(laneId);
                 return true;
             }
 
             if (action.Type != SetSpeedLimitAction.ActionType.ResetToDefault
-                && !IsValidRange(action.Override.Value.GameUnits)) {
+                && !IsValidRange(action.GuardedValue.Override.GameUnits)) {
                 return false;
             }
 
@@ -555,10 +551,8 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            Log._Assert(action.Override != null, "action.Override != null");
-
             if (action.Type == SetSpeedLimitAction.ActionType.SetOverride
-                && !IsValidRange(action.Override.Value.GameUnits)) {
+                && !IsValidRange(action.GuardedValue.Override.GameUnits)) {
                 return false;
             }
 
@@ -594,7 +588,7 @@ namespace TrafficManager.Manager.Impl {
                         Flags.RemoveLaneSpeedLimit(curLaneId);
                     } else {
                         bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-                        string overrideStr = action.Override.Value.FormatStr(showMph);
+                        string overrideStr = action.GuardedValue.Override.FormatStr(showMph);
 
                         Log._Debug(
                             $"SpeedLimitManager: Setting lane {curLaneId} to {overrideStr}");
