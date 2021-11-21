@@ -1,7 +1,6 @@
 namespace TrafficManager.Util {
     using ColossalFramework;
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using System.Collections.Generic;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
@@ -31,7 +30,6 @@ namespace TrafficManager.Util {
 
         //Shortcuts:
         private static TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
-        private static INetService netService = Constants.ServiceFactory.NetService;
         private static CustomSegmentLightsManager customTrafficLightsManager = CustomSegmentLightsManager.Instance;
         private static IExtSegmentManager segMan = Constants.ManagerFactory.ExtSegmentManager;
         private static IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
@@ -69,7 +67,8 @@ namespace TrafficManager.Util {
 
             List<ushort> segList = new List<ushort>();
 
-            foreach (var segmentId in netService.GetNodeSegmentIds(nodeId, clockDirection)) {
+            ExtNodeManager extNodeManager = ExtNodeManager.Instance;
+            foreach (var segmentId in extNodeManager.GetNodeSegmentIds(nodeId, clockDirection)) {
                 if (CountOutgoingLanes(segmentId, nodeId) > 0) {
                     segList.Add(segmentId);
                 }
@@ -393,7 +392,8 @@ namespace TrafficManager.Util {
         /// <param name="outgoing">true if lanes our going out toward the junction</param>
         /// <returns></returns>
         private static int CountLanes(ushort segmentId, ushort nodeId, bool outgoing = true) {
-            return netService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            return extSegmentManager.GetSortedLanes(
                                 segmentId,
                                 ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
                                 ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!outgoing),

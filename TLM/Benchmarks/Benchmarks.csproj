@@ -80,10 +80,6 @@
       <Project>{7422ae58-8b0a-401c-9404-f4a438effe10}</Project>
       <Name>TLM</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TMPE.GenericGameBridge\TMPE.GenericGameBridge.csproj">
-      <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
-      <Name>TMPE.GenericGameBridge</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet">

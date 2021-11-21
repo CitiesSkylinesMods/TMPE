@@ -4,7 +4,6 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Geometry.Impl;
-    using TrafficManager.Geometry;
     using TrafficManager.Util;
     using ColossalFramework;
 
@@ -38,6 +37,28 @@ namespace TrafficManager.Manager.Impl {
         /// <returns></returns>
         public static bool JunctionHasHighwayRules(ushort nodeId) {
             return JunctionHasOnlyHighwayRoads(nodeId) && !LaneConnectionManager.Instance.HasNodeConnections(nodeId);
+        }
+
+        public GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection) {
+            var initialSegmentId = GetInitialSegment(ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]);
+            var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            return new GetNodeSegmentIdsEnumerable(nodeId, initialSegmentId, clockDirection, segmentBuffer);
+        }
+
+        /// <summary>
+        /// Gets the initial segment.
+        /// </summary>
+        /// <param name="node">The node with the segments.</param>
+        /// <returns>First non 0 segmentId.</returns>
+        public ushort GetInitialSegment(ref NetNode node) {
+            for (int i = 0; i < 8; ++i) {
+                var segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    return segmentId;
+                }
+            }
+
+            return 0;
         }
 
         /// <summary>

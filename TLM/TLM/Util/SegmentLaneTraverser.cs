@@ -1,7 +1,7 @@
 namespace TrafficManager.Util {
     using System;
     using System.Collections.Generic;
-    using GenericGameBridge.Service;
+    using TrafficManager.Manager.Impl;
     using static SegmentTraverser;
 
     public class SegmentLaneTraverser {
@@ -80,7 +80,8 @@ namespace TrafficManager.Util {
                     // Log._Debug($"SegmentLaneTraverser: Reached segment {segmentId}:
                     //     isInitialSeg={isInitialSeg} viaStartNode={segData.viaStartNode}
                     //     viaInitialStartNode={segData.viaInitialStartNode} reverse={reverse}");
-                    IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+                    ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+                    IList<LanePos> sortedLanes = extSegmentManager.GetSortedLanes(
                         segmentId,
                         ref segment,
                         null,

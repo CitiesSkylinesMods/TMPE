@@ -1,6 +1,5 @@
 namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
-    using GenericGameBridge.Service;
     using static Util.SegmentLaneTraverser;
     using System.Collections.Generic;
     using TrafficManager.API.Traffic.Enums;
@@ -326,8 +325,8 @@ namespace TrafficManager.UI.SubTools {
         private void AllVehiclesFunc(bool allow) {
             // allow all vehicle types
             NetInfo segmentInfo = SelectedSegmentId.ToSegment().Info;
-
-            IList<LanePos> lanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            IList<LanePos> lanes = extSegmentManager.GetSortedLanes(
                 SelectedSegmentId,
                 ref SelectedSegmentId.ToSegment(),
                 null,
@@ -496,7 +495,8 @@ namespace TrafficManager.UI.SubTools {
 
             uint x = 0;
             Color guiColor = GUI.color;
-            IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            IList<LanePos> sortedLanes = extSegmentManager.GetSortedLanes(
                 segmentId,
                 ref segment,
                 null,

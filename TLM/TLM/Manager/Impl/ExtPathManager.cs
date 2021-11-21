@@ -2,8 +2,6 @@ namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using System;
     using System.Linq;
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using State;
     using TrafficManager.API.Manager;
     using TrafficManager.Util;
@@ -333,6 +331,8 @@ namespace TrafficManager.Manager.Impl {
                 ushort segmentId = netManager.m_segmentGrid[i * NetManager.NODEGRID_RESOLUTION + j];
                 int iterations = 0;
 
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
                 while (segmentId != 0) {
                     NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
 
@@ -349,7 +349,7 @@ namespace TrafficManager.Manager.Impl {
                             // check if any lane is present that matches the given conditions
                             otherPassed = false;
 
-                            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                                 NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIdAndIndex.laneIndex];
                                 if ((otherLaneType == NetInfo.LaneType.None ||
                                          (laneInfo.m_laneType & otherLaneType) !=

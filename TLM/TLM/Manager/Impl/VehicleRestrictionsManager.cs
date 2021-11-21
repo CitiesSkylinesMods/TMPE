@@ -5,14 +5,12 @@ namespace TrafficManager.Manager.Impl {
     using JetBrains.Annotations;
     using System.Collections.Generic;
     using System;
-    using CitiesGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.State;
     using TrafficManager.Traffic;
     using TrafficManager.Util;
-    using GenericGameBridge.Service;
 
     public class VehicleRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -383,7 +381,8 @@ namespace TrafficManager.Manager.Impl {
         internal bool ClearVehicleRestrictions(ushort segmentId) {
             NetInfo segmentInfo = segmentId.ToSegment().Info;
             bool ret = false;
-            IList<LanePos> lanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            IList<LanePos> lanes = extSegmentManager.GetSortedLanes(
                 segmentId,
                 ref segmentId.ToSegment(),
                 null,
@@ -556,7 +555,8 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndIndex.laneIndex];
 
                 ExtVehicleType defaultMask = GetDefaultAllowedVehicleTypes(

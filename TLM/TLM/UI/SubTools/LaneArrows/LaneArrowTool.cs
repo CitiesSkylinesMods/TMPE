@@ -3,7 +3,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
@@ -153,7 +152,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             // }
             // Calculate lanes and arrows
             NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            IList<LanePos> laneList = extSegmentManager.GetSortedLanes(
                 SelectedSegmentId,
                 ref segmentsBuffer[SelectedSegmentId],
                 segmentsBuffer[SelectedSegmentId].m_startNode == SelectedNodeId,
@@ -257,7 +257,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// </summary>
         /// <returns>true if the segemnt can be reset.</returns>
         private static bool CanReset(ushort segmentId, bool startNode) {
-            foreach (var lanePos in netService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (var lanePos in extSegmentManager.GetSortedLanes(
                 segmentId,
                 ref GetSeg(segmentId),
                 startNode,
