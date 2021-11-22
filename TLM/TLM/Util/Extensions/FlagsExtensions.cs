@@ -2,6 +2,8 @@ namespace TrafficManager.Util.Extensions {
     internal static class FlagsExtensions {
         internal static bool IsFlagSet(this Building.Flags value, Building.Flags flag) => (value & flag) != 0;
 
+        internal static bool IsFlagSet(this Citizen.Flags value, Citizen.Flags flag) => (value & flag) != 0;
+
         internal static bool IsFlagSet(this CitizenInstance.Flags value, CitizenInstance.Flags flag) => (value & flag) != 0;
 
         internal static bool IsFlagSet(this NetInfo.LaneType value, NetInfo.LaneType flag) => (value & flag) != 0;
