@@ -387,6 +387,7 @@
     <Compile Include="Util\Extensions\NetLaneExtensions.cs" />
     <Compile Include="Util\Extensions\NetNodeExtensions.cs" />
     <Compile Include="Util\Extensions\NetSegmentExtensions.cs" />
+    <Compile Include="Util\Extensions\VehicleExtensions.cs" />
     <Compile Include="Util\InGameUtil.cs" />
     <Compile Include="Util\IntVector2.cs" />
     <Compile Include="Util\Spiral.cs" />
