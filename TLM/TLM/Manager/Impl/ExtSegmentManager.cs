@@ -71,22 +71,10 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsLaneAndItsSegmentValid(uint laneId) {
-            return IsLaneValid(laneId)
-                && laneId.ToLane().m_segment.ToSegment().IsValid();
-        }
+            ref NetLane netLane = ref laneId.ToLane();
 
-        /// <summary>
-        /// Check if a lane id is valid.
-        /// </summary>
-        ///
-        /// <param name="laneId">The id of the lane to check.</param>
-        ///
-        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
-        public bool IsLaneValid(uint laneId) {
-            var createdDeleted = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags
-                & (uint)(NetLane.Flags.Created | NetLane.Flags.Deleted);
-
-            return createdDeleted == (uint)NetLane.Flags.Created;
+            return netLane.IsValid()
+                && netLane.m_segment.ToSegment().IsValid();
         }
 
         public void PublishSegmentChanges(ushort segmentId) {

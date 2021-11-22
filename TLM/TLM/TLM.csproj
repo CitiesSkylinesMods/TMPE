@@ -384,6 +384,7 @@
     <Compile Include="Util\Extensions\BuildingExtensions.cs" />
     <Compile Include="Util\Extensions\CitizenInstanceExtensions.cs" />
     <Compile Include="Util\Extensions\FlagsExtensions.cs" />
+    <Compile Include="Util\Extensions\NetLaneExtensions.cs" />
     <Compile Include="Util\Extensions\NetNodeExtensions.cs" />
     <Compile Include="Util\Extensions\NetSegmentExtensions.cs" />
     <Compile Include="Util\InGameUtil.cs" />

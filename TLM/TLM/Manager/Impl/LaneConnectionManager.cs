@@ -861,7 +861,7 @@ namespace TrafficManager.Manager.Impl {
                         // ret.AddRange(
                         //     from otherHigherLaneId in connectedLaneIds
                         //     where otherHigherLaneId > i
-                        //     where Services.NetService.IsLaneValid(otherHigherLaneId)
+                        //     where otherHigherLaneId.ToLane().IsValid()
                         //     select new Configuration.LaneConnection(i, otherHigherLaneId, startNode));
                         //-------------------------------------------------------------
                         foreach (uint otherHigherLaneId in connectedLaneIds) {
