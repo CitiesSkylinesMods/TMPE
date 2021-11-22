@@ -5,6 +5,8 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
+    using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     public class ExtBuildingManager
@@ -53,13 +55,6 @@ namespace TrafficManager.Manager.Impl {
                 ref extBuilding,
                 GlobalConfig.Instance.ParkingAI.PublicTransportDemandDecrement,
                 false);
-        }
-
-        public bool IsValid(ushort buildingId) {
-            return CheckBuildingFlags(
-                buildingId,
-                Building.Flags.Created | Building.Flags.Collapsed | Building.Flags.Deleted,
-                Building.Flags.Created);
         }
 
         public void Reset(ref ExtBuilding extBuilding) {
@@ -150,7 +145,8 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug("Extended building data:");
 
             for (var i = 0; i < ExtBuildings.Length; ++i) {
-                if (!IsValid((ushort)i)) {
+                ref Building building = ref ExtBuildings[i].buildingId.ToBuilding();
+                if (!building.IsValid()) {
                     continue;
                 }
 
