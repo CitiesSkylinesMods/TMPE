@@ -356,7 +356,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 CachedVisibleSegmentIds.Clear();
 
                 for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                    if (!ExtSegmentManager.Instance.IsSegmentValid((ushort)segmentId)) {
+                    ref NetSegment netSegment = ref ((ushort)segmentId).ToSegment();
+
+                    if (!netSegment.IsValid()) {
                         continue;
                     }
 

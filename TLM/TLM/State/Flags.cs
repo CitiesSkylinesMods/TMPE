@@ -85,13 +85,17 @@ namespace TrafficManager.State {
                 if (laneConnections[i] == null)
                     continue;
 
-                ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
-                Log.Info($"Lane {i}: valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(i)}, seg. valid? {ExtSegmentManager.Instance.IsSegmentValid(segmentId)}");
+                ushort segmentId = i.ToLane().m_segment;
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                Log.Info($"Lane {i}: valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(i)}, seg. valid? {netSegment.IsValid()}");
+
+                //TODO: refactor this
                 for (int x = 0; x < 2; ++x) {
                     if (laneConnections[i][x] == null)
                         continue;
 
-                    ushort nodeId = x == 0 ? Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode : Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
+                    ushort nodeId = x == 0 ? netSegment.m_startNode : netSegment.m_endNode;
                     ref NetNode netNode = ref nodeId.ToNode();
                     Log.Info($"\tNode idx {x} ({nodeId}, seg. {segmentId}): valid? {netNode.IsValid()}");
 
@@ -108,9 +112,11 @@ namespace TrafficManager.State {
             Log.Info("--- LANE SPEED LIMITS ---");
             Log.Info("-------------------------");
             for (uint i = 0; i < laneSpeedLimitArray.Length; ++i) {
+                ref NetSegment netSegment = ref ((ushort)i).ToSegment();
+
                 if (laneSpeedLimitArray[i] == null)
                     continue;
-                Log.Info($"Segment {i}: valid? {ExtSegmentManager.Instance.IsSegmentValid((ushort)i)}");
+                Log.Info($"Segment {i}: valid? {netSegment.IsValid()}");
                 for (int x = 0; x < laneSpeedLimitArray[i].Length; ++x) {
                     if (laneSpeedLimitArray[i][x] == null)
                         continue;
@@ -122,9 +128,11 @@ namespace TrafficManager.State {
             Log.Info("--- LANE VEHICLE RESTRICTIONS ---");
             Log.Info("---------------------------------");
             for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
+                ref NetSegment netSegment = ref ((ushort)i).ToSegment();
+
                 if (laneAllowedVehicleTypesArray[i] == null)
                     continue;
-                Log.Info($"Segment {i}: valid? {ExtSegmentManager.Instance.IsSegmentValid((ushort)i)}");
+                Log.Info($"Segment {i}: valid? {netSegment.IsValid()}");
                 for (int x = 0; x < laneAllowedVehicleTypesArray[i].Length; ++x) {
                     if (laneAllowedVehicleTypesArray[i][x] == null)
                         continue;

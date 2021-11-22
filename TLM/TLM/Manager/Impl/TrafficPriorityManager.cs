@@ -112,7 +112,9 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 reason = SetPrioritySignError.InvalidSegment;
                 Log._DebugIf(
                     logPriority,
@@ -121,7 +123,6 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            ref NetSegment netSegment = ref segmentId.ToSegment();
             ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
 
             if (!MayNodeHavePrioritySigns(nodeId, out reason)) {
@@ -169,7 +170,9 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 reason = SetPrioritySignError.InvalidSegment;
                 Log._DebugIf(
                     logPriority,
@@ -1590,7 +1593,9 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+                    ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                    if (!netSegment.IsValid()) {
                         continue;
                     }
 
@@ -1632,7 +1637,8 @@ namespace TrafficManager.Manager.Impl {
                         continue;
                     }
 
-                    if (!ExtSegmentManager.Instance.IsSegmentValid(prioSegData.segmentId)) {
+                    ref NetSegment netSegment = ref prioSegData.segmentId.ToSegment();
+                    if (!netSegment.IsValid()) {
                         continue;
                     }
 
@@ -1670,13 +1676,12 @@ namespace TrafficManager.Manager.Impl {
             ICustomDataManager<List<Configuration.PrioritySegment>>.SaveData(ref bool success)
         {
             var ret = new List<Configuration.PrioritySegment>();
-            var segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
             for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 try {
-                    ref NetSegment netSegment = ref segmentsBuffer[segmentId];
+                    ref NetSegment netSegment = ref ((ushort)segmentId).ToSegment();
 
-                    if (!ExtSegmentManager.Instance.IsSegmentValid((ushort)segmentId) ||
+                    if (!netSegment.IsValid() ||
                         !HasSegmentPrioritySign((ushort)segmentId)) {
                         continue;
                     }

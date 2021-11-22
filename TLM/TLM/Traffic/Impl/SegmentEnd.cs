@@ -13,6 +13,7 @@ namespace TrafficManager.Traffic.Impl {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// A segment end describes a directional traffic segment connected to a controlled node
@@ -300,11 +301,11 @@ namespace TrafficManager.Traffic.Impl {
         // }
 
         public void Update() {
-            ref NetSegment segment = ref SegmentId.ToSegment();
-            StartNode = segment.m_startNode == NodeId;
-            numLanes = segment.Info.m_lanes.Length;
+            ref NetSegment netSegment = ref SegmentId.ToSegment();
+            StartNode = netSegment.m_startNode == NodeId;
+            numLanes = netSegment.Info.m_lanes.Length;
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(SegmentId)) {
+            if (!netSegment.IsValid()) {
                 Log.Error($"SegmentEnd.Update: Segment {SegmentId} is invalid.");
                 return;
             }

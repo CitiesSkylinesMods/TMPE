@@ -185,7 +185,9 @@ namespace TrafficManager.Manager.Impl {
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                if (!extSegmentManager.IsSegmentValid((ushort)segmentId)) {
+                ref NetSegment netSegment = ref ((ushort)segmentId).ToSegment();
+
+                if (!netSegment.IsValid()) {
                     continue;
                 }
 

@@ -14,6 +14,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Util.Extensions;
 
     // TODO define TimedTrafficLights per node group, not per individual nodes
     public class TimedTrafficLights : ITimedTrafficLights {
@@ -1088,8 +1089,9 @@ namespace TrafficManager.TrafficLight.Impl {
 #else
             const bool logTrafficLights = false;
 #endif
+            ref NetSegment netSegment = ref segmentId.ToSegment();
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            if (!netSegment.IsValid()) {
                 Log.ErrorIf(
                     cond: logTrafficLights,
                     formatFn: () => $"TimedTrafficLights.ChangeLightMode: Segment {segmentId} is invalid");

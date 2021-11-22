@@ -13,6 +13,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Util.Extensions;
 
     public class RoutingManager
         : AbstractGeometryObservingManager,
@@ -69,7 +70,9 @@ namespace TrafficManager.Manager.Impl {
             string buf = $"Segment routings:\n";
 
             for (var i = 0; i < SegmentRoutings.Length; ++i) {
-                if (!ExtSegmentManager.Instance.IsSegmentValid((ushort)i)) {
+                ref NetSegment netSegment = ref ((ushort)i).ToSegment();
+
+                if (!netSegment.IsValid()) {
                     continue;
                 }
 
@@ -206,8 +209,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected void RecalculateSegment(ushort segmentId) {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            if (segment.Info == null) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (netSegment.Info == null) {
                 return;
             }
 
@@ -221,7 +225,7 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"RoutingManager.RecalculateSegment({segmentId}) called.");
             }
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            if (!netSegment.IsValid()) {
                 if (logRouting) {
                     Log._Debug($"RoutingManager.RecalculateSegment({segmentId}): " +
                                "Segment is invalid. Skipping recalculation");

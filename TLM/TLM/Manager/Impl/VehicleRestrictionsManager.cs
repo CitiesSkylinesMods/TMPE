@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using TrafficManager.Traffic;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class VehicleRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -424,7 +425,9 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return false;
             }
@@ -466,7 +469,9 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return;
             }
@@ -509,7 +514,9 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return;
             }

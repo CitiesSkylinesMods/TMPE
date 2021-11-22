@@ -633,7 +633,9 @@ namespace TrafficManager.Manager.Impl {
                         foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in
                             cnfTimedStep.segmentLights)
                         {
-                            if (!ExtSegmentManager.Instance.IsSegmentValid(e.Key)) {
+                            ref NetSegment netSegment = ref e.Key.ToSegment();
+
+                            if (!netSegment.IsValid()) {
                                 continue;
                             }
 
