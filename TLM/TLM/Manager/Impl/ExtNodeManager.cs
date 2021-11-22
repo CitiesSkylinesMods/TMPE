@@ -6,6 +6,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Geometry.Impl;
     using TrafficManager.Util;
     using ColossalFramework;
+    using TrafficManager.Util.Extensions;
 
     public class ExtNodeManager
         : AbstractCustomManager,
@@ -81,21 +82,6 @@ namespace TrafficManager.Manager.Impl {
             return true;
         }
 
-        /// <summary>
-        /// Check if a node is valid.
-        /// This is the case if the node is Created, but not Collapsed or Deleted.
-        /// </summary>
-        ///
-        /// <param name="nodeId">The id of the node to check.</param>
-        ///
-        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
-        public bool IsValid(ushort nodeId) {
-            var createdCollapsedDeleted = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags
-                & (NetNode.Flags.Created | NetNode.Flags.Collapsed | NetNode.Flags.Deleted);
-
-            return createdCollapsedDeleted == NetNode.Flags.Created;
-        }
-
         public void AddSegment(ushort nodeId, ushort segmentId) {
             if (ExtNodes[nodeId].segmentIds.Add(segmentId) &&
                 ExtNodes[nodeId].removedSegmentEndId != null)
@@ -132,7 +118,8 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug($"Extended node data:");
 
             for (uint i = 0; i < ExtNodes.Length; ++i) {
-                if (!IsValid((ushort)i)) {
+                ref NetNode netNode = ref ((ushort)i).ToNode();
+                if (!netNode.IsValid()) {
                     continue;
                 }
 

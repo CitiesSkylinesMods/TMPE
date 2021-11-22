@@ -15,6 +15,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     public class TimedTrafficLightsTool
@@ -83,7 +84,9 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
                  ++nodeId)
             {
-                if (!ExtNodeManager.Instance.IsValid((ushort)nodeId)) {
+                ref NetNode netNode = ref ((ushort)nodeId).ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 
@@ -103,7 +106,9 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
             nodeSelectionLocked = false;
             foreach (ushort nodeId in currentTimedNodeIds) {
-                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                ref NetNode netNode = ref nodeId.ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 
@@ -1422,7 +1427,9 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
             foreach (ushort nodeId in currentTimedNodeIds) {
-                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                ref NetNode netNode = ref nodeId.ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 

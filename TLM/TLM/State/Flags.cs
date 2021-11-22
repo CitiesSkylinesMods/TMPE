@@ -12,6 +12,7 @@ namespace TrafficManager.State {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.Util.Extensions;
 
     [Obsolete]
     public class Flags {
@@ -91,7 +92,8 @@ namespace TrafficManager.State {
                         continue;
 
                     ushort nodeId = x == 0 ? Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode : Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
-                    Log.Info($"\tNode idx {x} ({nodeId}, seg. {segmentId}): valid? {ExtNodeManager.Instance.IsValid(nodeId)}");
+                    ref NetNode netNode = ref nodeId.ToNode();
+                    Log.Info($"\tNode idx {x} ({nodeId}, seg. {segmentId}): valid? {netNode.IsValid()}");
 
                     for (int y = 0; y < laneConnections[i][x].Length; ++y) {
                         if (laneConnections[i][x][y] == 0)

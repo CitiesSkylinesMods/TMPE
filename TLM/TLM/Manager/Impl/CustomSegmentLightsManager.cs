@@ -9,6 +9,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.TrafficLight.Impl;
     using TrafficManager.TrafficLight;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Manages the states of all custom traffic lights on the map
@@ -157,11 +158,11 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="nodeId">NodeId affected</param>
         public void AddNodeLights(ushort nodeId) {
-            if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+            ref NetNode node = ref nodeId.ToNode();
+            if (!node.IsValid()) {
                 return;
             }
 
-            ref NetNode node = ref nodeId.ToNode();
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
                 if (segmentId != 0) {

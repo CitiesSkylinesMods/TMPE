@@ -163,7 +163,8 @@ namespace TrafficManager.UI.SubTools {
                 LastCachedCamera = currentCameraState;
 
                 for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                    ref NetNode netNode = ref nodeId.ToNode();
+                    if (!netNode.IsValid()) {
                         continue;
                     }
 
@@ -1024,7 +1025,9 @@ namespace TrafficManager.UI.SubTools {
             for (ushort nodeId = forceNodeId == 0 ? (ushort)1 : forceNodeId;
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
                  ++nodeId) {
-                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                ref NetNode netNode = ref nodeId.ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 
