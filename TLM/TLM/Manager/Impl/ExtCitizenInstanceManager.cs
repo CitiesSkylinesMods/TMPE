@@ -11,6 +11,8 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State.ConfigData;
     using TrafficManager.State;
     using UnityEngine;
+    using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class ExtCitizenInstanceManager
         : AbstractCustomManager,
@@ -36,7 +38,8 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug("Extended citizen instance data:");
 
             for (var i = 0; i < ExtInstances.Length; ++i) {
-                if (!IsValid((ushort)i)) {
+                ref CitizenInstance citizenInstance = ref ((ushort)i).ToCitizenInstance();
+                if (!citizenInstance.IsValid()) {
                     continue;
                 }
 
@@ -1178,16 +1181,6 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return position.m_segment != 0;
-        }
-
-        /// <summary>
-        /// Checks if CitizenInstance is Created and not Deleted.
-        /// </summary>
-        public bool IsValid(ushort citizenInstanceId) {
-            var createdDeleted = Singleton<CitizenManager>.instance.m_instances.m_buffer[citizenInstanceId].m_flags
-                & (CitizenInstance.Flags.Created | CitizenInstance.Flags.Deleted);
-
-            return createdDeleted == CitizenInstance.Flags.Created;
         }
 
         public uint GetCitizenId(ushort instanceId) {

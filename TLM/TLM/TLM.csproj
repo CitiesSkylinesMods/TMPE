@@ -382,6 +382,7 @@
     <Compile Include="UI\UITransportDemand.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
     <Compile Include="Util\Extensions\BuildingExtensions.cs" />
+    <Compile Include="Util\Extensions\CitizenInstanceExtensions.cs" />
     <Compile Include="Util\Extensions\FlagsExtensions.cs" />
     <Compile Include="Util\InGameUtil.cs" />
     <Compile Include="Util\IntVector2.cs" />

@@ -15,6 +15,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.UI;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Util.Extensions;
 
     public class AdvancedParkingManager
         : AbstractFeatureManager,
@@ -427,7 +428,7 @@ namespace TrafficManager.Manager.Impl {
 
             // ExtCitizenInstance driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(
             // CustomPassengerCarAI.GetDriverInstance(vehicleId, ref vehicleData));
-            if (!extCitInstMan.IsValid(driverExtInstance.instanceId)) {
+            if (!driverInstance.IsValid()) {
                 // no driver
                 Log._DebugIf(
                     logParkingAi,
