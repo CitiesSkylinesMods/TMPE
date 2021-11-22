@@ -812,11 +812,13 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneConnection conn in data) {
                 try {
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(conn.lowerLaneId)) {
+                    ref NetLane lowerLane = ref conn.lowerLaneId.ToLane();
+                    if (!lowerLane.IsValidWithSegment()) {
                         continue;
                     }
 
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(conn.higherLaneId)) {
+                    ref NetLane higherLane = ref conn.higherLaneId.ToLane();
+                    if (!higherLane.IsValidWithSegment()) {
                         continue;
                     }
 
@@ -869,7 +871,8 @@ namespace TrafficManager.Manager.Impl {
                                 continue;
                             }
 
-                            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(otherHigherLaneId)) {
+                            ref NetLane otherHigherLane = ref otherHigherLaneId.ToLane();
+                            if (!otherHigherLane.IsValidWithSegment()) {
                                 continue;
                             }
 

@@ -82,7 +82,8 @@ namespace TrafficManager.Manager.Impl {
             buf += $"\nLane end backward routings:\n";
 
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
+                ref NetLane netLane = ref laneId.ToLane();
+                if (!netLane.IsValidWithSegment()) {
                     continue;
                 }
 
@@ -93,7 +94,8 @@ namespace TrafficManager.Manager.Impl {
             buf += $"\nLane end forward routings:\n";
 
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
+                ref NetLane netLane = ref laneId.ToLane();
+                if (!netLane.IsValidWithSegment()) {
                     continue;
                 }
 

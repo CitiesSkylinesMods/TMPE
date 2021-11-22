@@ -65,8 +65,10 @@ namespace TrafficManager.State {
             Log.Info("--- LANE ARROW FLAGS ---");
             Log.Info("------------------------");
             for (uint i = 0; i < laneArrowFlags.Length; ++i) {
+                ref NetLane netLane = ref i.ToLane();
+
                 if (highwayLaneArrowFlags[i] != null || laneArrowFlags[i] != null) {
-                    Log.Info($"Lane {i}: valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(i)}");
+                    Log.Info($"Lane {i}: valid? {netLane.IsValidWithSegment()}");
                 }
 
                 if (highwayLaneArrowFlags[i] != null) {
@@ -85,10 +87,12 @@ namespace TrafficManager.State {
                 if (laneConnections[i] == null)
                     continue;
 
-                ushort segmentId = i.ToLane().m_segment;
+                ref NetLane netLane = ref i.ToLane();
+
+                ushort segmentId = netLane.m_segment;
                 ref NetSegment netSegment = ref segmentId.ToSegment();
 
-                Log.Info($"Lane {i}: valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(i)}, seg. valid? {netSegment.IsValid()}");
+                Log.Info($"Lane {i}: valid? {netLane.IsValidWithSegment()}, seg. valid? {netSegment.IsValid()}");
 
                 //TODO: refactor this
                 for (int x = 0; x < 2; ++x) {
@@ -100,10 +104,14 @@ namespace TrafficManager.State {
                     Log.Info($"\tNode idx {x} ({nodeId}, seg. {segmentId}): valid? {netNode.IsValid()}");
 
                     for (int y = 0; y < laneConnections[i][x].Length; ++y) {
-                        if (laneConnections[i][x][y] == 0)
+                        uint laneIdOfConnection = laneConnections[i][x][y];
+
+                        if (laneIdOfConnection == 0)
                             continue;
 
-                        Log.Info($"\t\tEntry {y}: {laneConnections[i][x][y]} (valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneConnections[i][x][y])})");
+                        ref NetLane netLaneOfConnection = ref laneIdOfConnection.ToLane();
+
+                        Log.Info($"\t\tEntry {y}: {laneIdOfConnection} (valid? {netLaneOfConnection.IsValidWithSegment()})");
                     }
                 }
             }

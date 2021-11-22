@@ -248,9 +248,11 @@ namespace TrafficManager.Manager.Impl {
                     Log._Debug($"Split Data: {split[0]} , {split[1]}");
 #endif
                     var laneId = Convert.ToUInt32(split[0]);
+                    ref NetLane netLane = ref laneId.ToLane();
+
                     uint flags = Convert.ToUInt32(split[1]);
 
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId))
+                    if (!netLane.IsValidWithSegment())
                         continue;
 
                     if (flags > ushort.MaxValue)
@@ -294,7 +296,9 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneArrowData laneArrowData in data) {
                 try {
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneArrowData.laneId)) {
+                    ref NetLane netLane = ref laneArrowData.laneId.ToLane();
+
+                    if (!netLane.IsValidWithSegment()) {
                         continue;
                     }
 

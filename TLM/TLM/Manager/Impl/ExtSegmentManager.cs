@@ -70,13 +70,6 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        public bool IsLaneAndItsSegmentValid(uint laneId) {
-            ref NetLane netLane = ref laneId.ToLane();
-
-            return netLane.IsValid()
-                && netLane.m_segment.ToSegment().IsValid();
-        }
-
         public void PublishSegmentChanges(ushort segmentId) {
             Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
             SimulationManager simulationManager = Singleton<SimulationManager>.instance;
