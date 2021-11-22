@@ -1,7 +1,7 @@
 namespace TrafficManager.Util.Extensions {
     public static class NetNodeExtensions {
         /// <summary>
-        /// Checks if the netNode is Created, but neither Collapsed not Deleted.
+        /// Checks if the netNode is Created, but neither Collapsed nor Deleted.
         /// </summary>
         /// <param name="netNode">netNode</param>
         /// <returns>True if the netNode is valid, otherwise false.</returns>
