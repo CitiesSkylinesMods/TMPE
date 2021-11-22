@@ -128,7 +128,7 @@
                                     DrawArgs args) {
             if (!args.MultiSegmentMode) {
                 //------------------------
-                // Single segment highlight
+                // Single segment highlight. User is NOT holding Shift.
                 //------------------------
                 this.RenderSegmentSideOverlay(
                     cameraInfo: cameraInfo,
@@ -137,7 +137,7 @@
                     finalDirection: this.finalDirection_);
             } else {
                 //------------------------
-                // Entire street highlight
+                // Entire street highlight. User is holding Shift.
                 //------------------------
                 if (RoundaboutMassEdit.Instance.TraverseLoop(
                     segmentId: this.segmentId_,
@@ -180,7 +180,6 @@
                                               DrawArgs args,
                                               NetInfo.Direction finalDirection = NetInfo.Direction.None)
         {
-            bool pressed = Input.GetMouseButton(0);
             ref NetSegment netSegment = ref segmentId.ToSegment();
             foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 NetInfo.Lane laneInfo = netSegment.Info.m_lanes[laneIdAndIndex.laneIndex];
