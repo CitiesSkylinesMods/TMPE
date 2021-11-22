@@ -13,6 +13,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using Debug = UnityEngine.Debug;
@@ -488,9 +489,12 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             if(nodeId == 0 || segmentId == 0) {
                 return false;
             }
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ref NetNode netNode = ref nodeId.ToNode();
+
 #if DEBUG
-            if(!ExtNodeManager.Instance.IsValid(nodeId) ||
-               !ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            if (!netNode.IsValid() ||
+               !netSegment.IsValid()) {
                 Debug.LogError("Invalid node or segment ID");
             }
 #endif
