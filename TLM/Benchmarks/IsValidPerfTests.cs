@@ -4,7 +4,7 @@ namespace Benchmarks {
     public class IsValidPerfTests {
         [GlobalSetup]
         public void Setup() {
-
+            _ = MyNetSegmentService.Instance;
         }
 
         [Benchmark]
