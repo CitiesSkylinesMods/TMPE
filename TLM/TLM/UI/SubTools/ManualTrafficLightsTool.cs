@@ -47,15 +47,12 @@ namespace TrafficManager.UI.SubTools {
 
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
             TrafficPriorityManager prioMan = TrafficPriorityManager.Instance;
+            ref NetNode hoveredNetNode = ref HoveredNodeId.ToNode();
 
             if (!tlsMan.TrafficLightSimulations[HoveredNodeId].IsTimedLight()) {
-                if ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags &
-                     NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
+                if ((hoveredNetNode.m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
                     prioMan.RemovePrioritySignsFromNode(HoveredNodeId);
-                    TrafficLightManager.Instance.AddTrafficLight(
-                        HoveredNodeId,
-                        ref Singleton<NetManager>.instance.m_nodes.m_buffer[
-                            HoveredNodeId]);
+                    TrafficLightManager.Instance.AddTrafficLight(HoveredNodeId, ref hoveredNetNode);
                 }
 
                 if (tlsMan.SetUpManualTrafficLight(HoveredNodeId)) {
@@ -89,17 +86,17 @@ namespace TrafficManager.UI.SubTools {
 
                 tlsMan.TrafficLightSimulations[SelectedNodeId].Housekeeping();
 
+                ref NetNode selectedNode = ref SelectedNodeId.ToNode();
+
                 // TODO check
-                // if (Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode].CountSegments() == 2) {
-                //     _guiManualTrafficLightsCrosswalk(
-                //         ref Singleton<NetManager>.instance.m_nodes.m_buffer[SelectedNode]);
+                // if (selectedNode.CountSegments() == 2) {
+                //     _guiManualTrafficLightsCrosswalk(ref selectedNode);
                 //     return;
                 // }
-                NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
                 NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
                 for (int i = 0; i < 8; ++i) {
-                    ushort segmentId = nodesBuffer[SelectedNodeId].GetSegment(i);
+                    ushort segmentId = selectedNode.GetSegment(i);
                     if (segmentId == 0) {
                         continue;
                     }
@@ -108,9 +105,8 @@ namespace TrafficManager.UI.SubTools {
                         (bool)extSegmentManager.IsStartNode(
                             segmentId,
                             SelectedNodeId);
-                    Vector3 position = CalculateNodePositionForSegment(
-                        nodesBuffer[SelectedNodeId],
-                        ref segmentsBuffer[segmentId]);
+                    Vector3 position =
+                        CalculateNodePositionForSegment(ref selectedNode, ref segmentsBuffer[segmentId]);
                     ICustomSegmentLights segmentLights =
                         customTrafficLightsManager.GetSegmentLights(segmentId, startNode, false);
 
@@ -265,7 +261,7 @@ namespace TrafficManager.UI.SubTools {
 
                         segEndMan.CalculateOutgoingLeftStraightRightSegments(
                             ref segEnd,
-                            ref nodesBuffer[SelectedNodeId],
+                            ref selectedNode,
                             out bool hasLeftSegment,
                             out bool hasForwardSegment,
                             out bool hasRightSegment);
@@ -961,7 +957,7 @@ namespace TrafficManager.UI.SubTools {
             return true;
         }
 
-        private Vector3 CalculateNodePositionForSegment(NetNode node, ref NetSegment segment) {
+        private Vector3 CalculateNodePositionForSegment(ref NetNode node, ref NetSegment segment) {
             Vector3 position = node.m_position;
 
             const float offset = 25f;

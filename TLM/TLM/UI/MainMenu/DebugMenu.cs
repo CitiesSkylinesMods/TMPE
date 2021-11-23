@@ -190,8 +190,7 @@ namespace TrafficManager.UI.MainMenu {
         private void ClickGoToNode(UIComponent component, UIMouseEventParameter eventParam) {
             ushort nodeId = Convert.ToUInt16(_goToField.text);
 
-            if ((Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags &
-                 NetNode.Flags.Created) != NetNode.Flags.None) {
+            if ((nodeId.ToNode().m_flags & NetNode.Flags.Created) != NetNode.Flags.None) {
                 CSUtil.CameraControl.CameraController.Instance.GoToNode(nodeId);
             }
         }
@@ -234,7 +233,6 @@ namespace TrafficManager.UI.MainMenu {
 
         private static void PrintTransportStats() {
             TransportLine[] linesBuffer = TransportManager.instance.m_lines.m_buffer;
-            NetNode[] nodesBuffer = NetManager.instance.m_nodes.m_buffer;
 
             for (int i = 0; i < TransportManager.MAX_LINE_COUNT; ++i) {
                 Log.Info("Transport line " + i + ":");
@@ -258,20 +256,22 @@ namespace TrafficManager.UI.MainMenu {
                 int index = 1;
 
                 while (stopNodeId != 0) {
-                    Vector3 pos = nodesBuffer[stopNodeId].m_position;
+                    ref NetNode stopNode = ref stopNodeId.ToNode();
+
+                    Vector3 pos = stopNode.m_position;
 
                     Log.InfoFormat(
                         "\tStop node #{0} -- {1}: Flags: {2}, Transport line: {3}, Problems: {4} " +
                         "Pos: {5}, Dist. to lat pos: {6}",
                         index,
                         stopNodeId,
-                        nodesBuffer[stopNodeId].m_flags,
-                        nodesBuffer[stopNodeId].m_transportLine,
-                        nodesBuffer[stopNodeId].m_problems,
+                        stopNode.m_flags,
+                        stopNode.m_transportLine,
+                        stopNode.m_problems,
                         pos,
                         (lastNodePos - pos).magnitude);
 
-                    if (nodesBuffer[stopNodeId].m_problems != Notification.Problem.None) {
+                    if (stopNode.m_problems != Notification.Problem.None) {
                         Log.Warning("\t*** PROBLEMS DETECTED ***");
                     }
 

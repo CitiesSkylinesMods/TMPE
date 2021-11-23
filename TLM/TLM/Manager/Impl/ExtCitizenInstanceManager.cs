@@ -127,10 +127,7 @@ namespace TrafficManager.Manager.Impl {
                                 return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
                             }
 
-                            ushort transportLine = Singleton<NetManager>
-                                               .instance.m_nodes.m_buffer[targetBuildingId]
-                                               .m_transportLine;
-
+                            ushort transportLine = targetBuildingId.ToNode().m_transportLine;
                             if (vehicle.m_transportLine != transportLine) {
                                 target.NetNode = targetBuildingId;
                                 return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");
@@ -258,10 +255,7 @@ namespace TrafficManager.Manager.Impl {
                                 return Locale.Get("CITIZEN_STATUS_WAITING_TAXI");
                             }
 
-                            ushort transportLine = Singleton<NetManager>
-                                                   .instance.m_nodes.m_buffer[targetBuildingId]
-                                                   .m_transportLine;
-
+                            ushort transportLine = targetBuildingId.ToNode().m_transportLine;
                             if (vehicle.m_transportLine != transportLine) {
                                 target.NetNode = targetBuildingId;
                                 return Locale.Get("CITIZEN_STATUS_TRAVELLINGTO");

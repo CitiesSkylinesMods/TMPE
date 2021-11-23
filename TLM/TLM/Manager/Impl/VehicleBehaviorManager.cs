@@ -1271,13 +1271,13 @@ namespace TrafficManager.Manager.Impl {
                         if (nextPosition.m_segment != 0 &&
                             netManager.m_lanes.m_buffer[laneId].m_length < 30f)
                         {
-                            NetNode.Flags nextTargetNodeFlags =
-                                netManager.m_nodes.m_buffer[nextTargetNodeId].m_flags;
+                            ref NetNode nextTargetNetNode = ref nextTargetNodeId.ToNode();
+                            NetNode.Flags nextTargetNodeFlags = nextTargetNetNode.m_flags;
 
                             if ((nextTargetNodeFlags &
                                  (NetNode.Flags.Junction | NetNode.Flags.OneWayOut |
                                   NetNode.Flags.OneWayIn)) != NetNode.Flags.Junction ||
-                                netManager.m_nodes.m_buffer[nextTargetNodeId].CountSegments() == 2)
+                                nextTargetNetNode.CountSegments() == 2)
                             {
                                 uint nextLaneId = PathManager.GetLaneID(nextPosition);
                                 if (nextLaneId != 0u) {

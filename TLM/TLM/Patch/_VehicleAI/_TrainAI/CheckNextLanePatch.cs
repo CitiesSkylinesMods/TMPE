@@ -204,7 +204,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                         prevLaneID,
                         ref position,
                         refTargetNodeId,
-                        ref netManager.m_nodes.m_buffer[refTargetNodeId],
+                        ref refTargetNodeId.ToNode(),
                         laneID,
                         out maxSpeed)) {
 #if DEBUG

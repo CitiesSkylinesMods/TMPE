@@ -569,10 +569,8 @@ namespace TrafficManager.Patch._VehicleAI {
                 ushort nextSegStartNodeId = netManager.m_segments.m_buffer[nextPosition.m_segment].m_startNode;
                 ushort nextSegEndNodeId = netManager.m_segments.m_buffer[nextPosition.m_segment].m_endNode;
 
-                NetNode.Flags flags1 = netManager.m_nodes.m_buffer[curSegStartNodeId].m_flags
-                             | netManager.m_nodes.m_buffer[curSegEndNodeId].m_flags;
-                NetNode.Flags flags2 = netManager.m_nodes.m_buffer[nextSegStartNodeId].m_flags
-                             | netManager.m_nodes.m_buffer[nextSegEndNodeId].m_flags;
+                NetNode.Flags flags1 = curSegStartNodeId.ToNode().m_flags | curSegEndNodeId.ToNode().m_flags;
+                NetNode.Flags flags2 = nextSegStartNodeId.ToNode().m_flags | nextSegEndNodeId.ToNode().m_flags;
 
                 if (nextSegStartNodeId != curSegStartNodeId
                     && nextSegStartNodeId != curSegEndNodeId
@@ -976,7 +974,7 @@ namespace TrafficManager.Patch._VehicleAI {
                                     vehicleID,
                                     ref vehicleData,
                                     nextNodeId,
-                                    ref netManager.m_nodes.m_buffer[nextNodeId],
+                                    ref nextNodeId.ToNode(),
                                     ref targetPos,
                                     index);
                                 if (logLogic) {

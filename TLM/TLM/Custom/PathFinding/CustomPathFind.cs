@@ -19,6 +19,7 @@ namespace TrafficManager.Custom.PathFinding {
 #if DEBUG
     using System.Collections.Generic;
     using State.ConfigData;
+    using TrafficManager.Util;
 #endif
 
     /// <summary>
@@ -558,9 +559,12 @@ namespace TrafficManager.Custom.PathFinding {
                     ushort startNodeId = netManager
                                       .m_segments.m_buffer[candidateItem.Position.m_segment]
                                       .m_startNode;
+                    ref NetNode startNode = ref startNodeId.ToNode();
+
                     ushort endNodeId = netManager
                                     .m_segments.m_buffer[candidateItem.Position.m_segment]
                                     .m_endNode;
+                    ref NetNode endNode = ref endNodeId.ToNode();
 
                     if ((candidateItem.Direction & NetInfo.Direction.Forward) !=
                         NetInfo.Direction.None) {
@@ -572,7 +576,7 @@ namespace TrafficManager.Custom.PathFinding {
                             ref netManager.m_segments.m_buffer[candidateItem.Position.m_segment],
                             ref netManager.m_lanes.m_buffer[candidateItem.LaneId],
                             startNodeId,
-                            ref netManager.m_nodes.m_buffer[startNodeId],
+                            ref startNode,
                             0,
                             false);
                     }
@@ -587,25 +591,24 @@ namespace TrafficManager.Custom.PathFinding {
                             ref netManager.m_segments.m_buffer[candidateItem.Position.m_segment],
                             ref netManager.m_lanes.m_buffer[candidateItem.LaneId],
                             endNodeId,
-                            ref netManager.m_nodes.m_buffer[endNodeId],
+                            ref endNode,
                             255,
                             false);
                     }
 
                     int numIter = 0;
                     ushort specialNodeId = netManager.m_lanes.m_buffer[candidateItem.LaneId].m_nodes;
+
                     if (specialNodeId == 0) {
                         continue;
                     }
 
-                    bool nodesDisabled =
-                        ((netManager.m_nodes.m_buffer[startNodeId].m_flags |
-                          netManager.m_nodes.m_buffer[endNodeId].m_flags) &
-                         NetNode.Flags.Disabled) != NetNode.Flags.None;
+                    bool nodesDisabled = ((startNode.m_flags | endNode.m_flags) & NetNode.Flags.Disabled) != NetNode.Flags.None;
 
                     while (specialNodeId != 0) {
+                        ref NetNode specialNode = ref specialNodeId.ToNode();
                         NetInfo.Direction direction = NetInfo.Direction.None;
-                        byte laneOffset = netManager.m_nodes.m_buffer[specialNodeId].m_laneOffset;
+                        byte laneOffset = specialNode.m_laneOffset;
 
                         if (laneOffset <= candidateItem.Position.m_offset) {
                             direction |= NetInfo.Direction.Forward;
@@ -615,10 +618,8 @@ namespace TrafficManager.Custom.PathFinding {
                             direction |= NetInfo.Direction.Backward;
                         }
 
-                        if ((candidateItem.Direction & direction) != NetInfo.Direction.None &&
-                            (!nodesDisabled ||
-                             (netManager.m_nodes.m_buffer[specialNodeId].m_flags &
-                              NetNode.Flags.Disabled) != NetNode.Flags.None)) {
+                        if ((candidateItem.Direction & direction) != NetInfo.Direction.None
+                            && (!nodesDisabled || (specialNode.m_flags & NetNode.Flags.Disabled) != NetNode.Flags.None)) {
 #if DEBUG
                             if (debugLog_ && (DebugSettings.NodeId <= 0 || specialNodeId == DebugSettings.NodeId)) {
                                 DebugLog(
@@ -641,12 +642,12 @@ namespace TrafficManager.Custom.PathFinding {
                                 ref netManager.m_segments.m_buffer[candidateItem.Position.m_segment],
                                 ref netManager.m_lanes.m_buffer[candidateItem.LaneId],
                                 specialNodeId,
-                                ref netManager.m_nodes.m_buffer[specialNodeId],
+                                ref specialNode,
                                 laneOffset,
                                 true);
                         }
 
-                        specialNodeId = netManager.m_nodes.m_buffer[specialNodeId].m_nextLaneNode;
+                        specialNodeId = specialNode.m_nextLaneNode;
 
                         if (++numIter == 32768) {
                             break;
@@ -2051,10 +2052,11 @@ namespace TrafficManager.Custom.PathFinding {
             }
 
             NetManager netManager = Singleton<NetManager>.instance;
-            if (targetDisabled &&
-                ((netManager.m_nodes.m_buffer[nextSegment.m_startNode].m_flags |
-                  netManager.m_nodes.m_buffer[nextSegment.m_endNode].m_flags) &
-                 NetNode.Flags.Disabled) == NetNode.Flags.None) {
+            if (targetDisabled
+                && (
+                    (nextSegment.m_startNode.ToNode().m_flags
+                    | nextSegment.m_endNode.ToNode().m_flags)
+                    & NetNode.Flags.Disabled) == NetNode.Flags.None) {
                 if (isLogEnabled) {
                     DebugLog(
                         unitId,
