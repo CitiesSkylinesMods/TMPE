@@ -258,8 +258,8 @@ namespace TrafficManager.Manager.Impl {
             RecalculateLaneArrows(laneId1, commonNodeId, startNode1);
             RecalculateLaneArrows(laneId2, commonNodeId, startNode2);
 
-            RoutingManager.Instance.RequestRecalculation(segmentId1, false);
-            RoutingManager.Instance.RequestRecalculation(segmentId2, false);
+            ref NetNode commonNode = ref commonNodeId.ToNode();
+            RoutingManager.Instance.RequestNodeRecalculation(ref commonNode);
 
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
