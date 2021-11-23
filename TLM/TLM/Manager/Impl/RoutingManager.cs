@@ -167,24 +167,21 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (propagate) {
-                //TODO refactor into RequestRecalculation(ushort nodeId)
-
                 ref NetSegment netSegment = ref segmentId.ToSegment();
 
                 ref NetNode startNode = ref netSegment.m_startNode.ToNode();
-                for (int i = 0; i < 8; ++i) {
-                    ushort otherSegmentId = startNode.GetSegment(i);
-                    if (otherSegmentId != 0) {
-                        RequestRecalculation(otherSegmentId, false);
-                    }
-                }
+                RequestNodeRecalculation(ref startNode);
 
                 ref NetNode endNode = ref netSegment.m_endNode.ToNode();
-                for (int i = 0; i < 8; ++i) {
-                    ushort otherSegmentId = endNode.GetSegment(i);
-                    if (otherSegmentId != 0) {
-                        RequestRecalculation(otherSegmentId, false);
-                    }
+                RequestNodeRecalculation(ref endNode);
+            }
+        }
+
+        public void RequestNodeRecalculation(ref NetNode node) {
+            for (int i = 0; i < 8; ++i) {
+                ushort otherSegmentId = node.GetSegment(i);
+                if (otherSegmentId != 0) {
+                    RequestRecalculation(otherSegmentId, false);
                 }
             }
         }
