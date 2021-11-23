@@ -178,10 +178,10 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public void RequestNodeRecalculation(ref NetNode node) {
-            for (int i = 0; i < 8; ++i) {
-                ushort otherSegmentId = node.GetSegment(i);
-                if (otherSegmentId != 0) {
-                    RequestRecalculation(otherSegmentId, false);
+            for (int i = 0; i < Constants.MAX_SEGMENTS_OF_NODE; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    RequestRecalculation(segmentId, false);
                 }
             }
         }
