@@ -16,6 +16,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
     using UnityEngine;
     using TrafficManager.Util.Record;
     using static Util.Shortcuts;
+    using TrafficManager.Util.Extensions;
 
     public class PrioritySignsTool
         : LegacySubTool,
@@ -246,7 +247,9 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
 
             currentPriorityNodeIds.Clear();
             for (uint nodeId = 0; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                if (!ExtNodeManager.Instance.IsValid((ushort)nodeId)) {
+                ref NetNode netNode = ref ((ushort)nodeId).ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 
@@ -300,7 +303,9 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 bool showRemoveButton = false;
 
                 foreach (ushort nodeId in currentPriorityNodeIds) {
-                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                    ref NetNode netNode = ref nodeId.ToNode();
+
+                    if (!netNode.IsValid()) {
                         continue;
                     }
 

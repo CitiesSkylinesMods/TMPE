@@ -9,6 +9,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.TrafficLight.Impl;
     using TrafficManager.TrafficLight;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Manages the states of all custom traffic lights on the map
@@ -48,11 +49,12 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="segmentId">SegmentId affected</param>
         /// <param name="startNode">NodeId affected</param>
         private ICustomSegmentLights AddLiveSegmentLights(ushort segmentId, bool startNode) {
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return null;
             }
 
-            ref NetSegment netSegment = ref segmentId.ToSegment();
             ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
             uint currentFrameIndex = Singleton<SimulationManager>.instance.m_currentFrameIndex;
 
@@ -89,7 +91,9 @@ namespace TrafficManager.Manager.Impl {
 #if DEBUG
             Log._Trace($"CustomTrafficLights.AddSegmentLights: Adding segment light: {segmentId} @ startNode={startNode}");
 #endif
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return null;
             }
 
@@ -157,11 +161,11 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="nodeId">NodeId affected</param>
         public void AddNodeLights(ushort nodeId) {
-            if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+            ref NetNode node = ref nodeId.ToNode();
+            if (!node.IsValid()) {
                 return;
             }
 
-            ref NetNode node = ref nodeId.ToNode();
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
                 if (segmentId != 0) {

@@ -8,6 +8,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using TrafficManager.Util.Caching;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     public class ToggleTrafficLightsTool
@@ -157,7 +158,9 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="camPos">Position of the camera</param>
         private void FilterVisibleNodes(Vector3 camPos) {
             for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                ref NetNode netNode = ref nodeId.ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 
@@ -171,8 +174,7 @@ namespace TrafficManager.UI.SubTools {
                 //--------------------------------------------
                 // Only allow traffic lights on normal roads, not rail or metro etc.
                 //--------------------------------------------
-                ItemClass connectionClass =
-                    NetManager.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
+                ItemClass connectionClass = netNode.Info.GetConnectionClass();
 
                 if ((connectionClass == null) ||
                     (connectionClass.m_service != ItemClass.Service.Road)) {
@@ -182,7 +184,7 @@ namespace TrafficManager.UI.SubTools {
                 //--------------------------
                 // Check the camera distance
                 //--------------------------
-                Vector3 diff = NetManager.instance.m_nodes.m_buffer[nodeId].m_position - camPos;
+                Vector3 diff = netNode.m_position - camPos;
 
                 if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
                     continue; // do not draw if too distant

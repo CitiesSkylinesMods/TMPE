@@ -16,6 +16,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.TrafficLight.Impl;
     using TrafficManager.Util;
     using ColossalFramework;
+    using TrafficManager.Util.Extensions;
 
     public class TrafficLightSimulationManager
         : AbstractGeometryObservingManager,
@@ -553,8 +554,9 @@ namespace TrafficManager.Manager.Impl {
 
                     for (int i = 0; i < currentNodeGroup.Count;) {
                         ushort nodeId = currentNodeGroup[i];
+                        ref NetNode netNode = ref nodeId.ToNode();
 
-                        if (!ExtNodeManager.Instance.IsValid(currentNodeGroup[i])) {
+                        if (!netNode.IsValid()) {
                             currentNodeGroup.RemoveAt(i);
                             continue;
                         }
@@ -631,7 +633,9 @@ namespace TrafficManager.Manager.Impl {
                         foreach (KeyValuePair<ushort, Configuration.CustomSegmentLights> e in
                             cnfTimedStep.segmentLights)
                         {
-                            if (!ExtSegmentManager.Instance.IsSegmentValid(e.Key)) {
+                            ref NetSegment netSegment = ref e.Key.ToSegment();
+
+                            if (!netSegment.IsValid()) {
                                 continue;
                             }
 

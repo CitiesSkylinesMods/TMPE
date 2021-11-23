@@ -7,6 +7,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class ExtSegmentManager
         : AbstractCustomManager,
@@ -69,32 +70,6 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        public bool IsLaneAndItsSegmentValid(uint laneId) {
-            return IsLaneValid(laneId)
-                && IsSegmentValid(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment);
-        }
-
-        public bool IsSegmentValid(ushort segmentId) {
-            var createdCollapsedDeleted = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags
-                    & (NetSegment.Flags.Created | NetSegment.Flags.Collapsed | NetSegment.Flags.Deleted);
-
-            return createdCollapsedDeleted == NetSegment.Flags.Created;
-        }
-
-        /// <summary>
-        /// Check if a lane id is valid.
-        /// </summary>
-        ///
-        /// <param name="laneId">The id of the lane to check.</param>
-        ///
-        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
-        public bool IsLaneValid(uint laneId) {
-            var createdDeleted = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags
-                & (uint)(NetLane.Flags.Created | NetLane.Flags.Deleted);
-
-            return createdDeleted == (uint)NetLane.Flags.Created;
-        }
-
         public void PublishSegmentChanges(ushort segmentId) {
             Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
             SimulationManager simulationManager = Singleton<SimulationManager>.instance;
@@ -127,7 +102,8 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($">>> ExtSegmentManager.Recalculate({segmentId}) called.");
             }
 
-            if (!IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            if (!netSegment.IsValid()) {
                 if (extSegment.valid) {
                     Reset(ref extSegment);
                     extSegment.valid = false;
@@ -163,18 +139,20 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateIsOneWay(ushort segmentId) {
-            if (!IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
 
             NetManager instance = Singleton<NetManager>.instance;
 
-            NetInfo info = instance.m_segments.m_buffer[segmentId].Info;
+            NetInfo info = netSegment.Info;
 
             var hasForward = false;
             var hasBackward = false;
 
-            uint laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
+            uint laneId = netSegment.m_lanes;
             var laneIndex = 0;
             while (laneIndex < info.m_lanes.Length && laneId != 0u) {
                 bool validLane =
@@ -209,11 +187,13 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateHasBusLane(ushort segmentId) {
-            if (!IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
 
-            return CalculateHasBusLane(segmentId.ToSegment().Info);
+            return CalculateHasBusLane(netSegment.Info);
         }
 
         /// <summary>
@@ -233,11 +213,13 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateIsHighway(ushort segmentId) {
-            if (!IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
 
-            return CalculateIsHighway(segmentId.ToSegment().Info);
+            return CalculateIsHighway(netSegment.Info);
         }
 
         /// <summary>
@@ -379,7 +361,9 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug($"Extended segment data:");
 
             for (int i = 0; i < ExtSegments.Length; ++i) {
-                if (!IsSegmentValid((ushort)i)) {
+                ref NetSegment netSegment = ref ((ushort)i).ToSegment();
+
+                if (!netSegment.IsValid()) {
                     continue;
                 }
 

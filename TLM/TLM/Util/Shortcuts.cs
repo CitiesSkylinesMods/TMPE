@@ -51,6 +51,8 @@ namespace TrafficManager.Util {
 
         private static Building[] _buildingBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
 
+        private static CitizenInstance[] _citizenInstanceBuffer = Singleton<CitizenManager>.instance.m_instances.m_buffer;
+
         private static ExtSegmentEnd[] _segEndBuff => segEndMan.ExtSegmentEnds;
 
         internal static IExtSegmentEndManager segEndMan => Constants.ManagerFactory.ExtSegmentEndManager;
@@ -68,6 +70,8 @@ namespace TrafficManager.Util {
         internal static ref NetSegment ToSegment(this ushort segmentId) => ref _segBuffer[segmentId];
 
         internal static ref Building ToBuilding(this ushort buildingId) => ref _buildingBuffer[buildingId];
+
+        internal static ref CitizenInstance ToCitizenInstance(this ushort citizenInstance) => ref _citizenInstanceBuffer[citizenInstance];
 
         internal static bool IsUndergroundNode(this ushort node) => (_nodeBuffer[node].m_flags & NetNode.Flags.Underground) != NetNode.Flags.None;
 

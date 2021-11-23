@@ -12,6 +12,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// Represents the traffic light (left, forward, right) at a specific segment end
@@ -124,7 +125,9 @@ namespace TrafficManager.TrafficLight.Impl {
         }
 
         public void ToggleMode() {
-            if (!ExtSegmentManager.Instance.IsSegmentValid(SegmentId)) {
+            ref NetSegment netSegment = ref SegmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 Log.Error($"CustomSegmentLight.ToggleMode: Segment {SegmentId} is invalid.");
                 return;
             }

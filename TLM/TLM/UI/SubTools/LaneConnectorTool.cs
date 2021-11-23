@@ -163,7 +163,8 @@ namespace TrafficManager.UI.SubTools {
                 LastCachedCamera = currentCameraState;
 
                 for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                    ref NetNode netNode = ref nodeId.ToNode();
+                    if (!netNode.IsValid()) {
                         continue;
                     }
 
@@ -222,17 +223,19 @@ namespace TrafficManager.UI.SubTools {
                 float intersectionY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(netManager.m_nodes.m_buffer[nodeId].m_position);
 
                 foreach (LaneEnd laneEnd in laneEnds) {
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneEnd.LaneId)) {
+                    ref NetLane sourceLane = ref laneEnd.LaneId.ToLane();
+                    if (!sourceLane.IsValidWithSegment()) {
                         continue;
                     }
 
                     if (laneEnd != selectedLaneEnd) {
                         foreach (LaneEnd targetLaneEnd in laneEnd.ConnectedLaneEnds) {
-                            // render lane connection from laneEnd to targetLaneEnd
-                            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
+                            ref NetLane targetLane = ref targetLaneEnd.LaneId.ToLane();
+                            if (!targetLane.IsValidWithSegment()) {
                                 continue;
                             }
 
+                            // render lane connection from laneEnd to targetLaneEnd
                             Bezier3 bezier = CalculateBezierConnection(laneEnd, targetLaneEnd);
                             Vector3 height = bezier.Max();
                             DrawLaneCurve(
@@ -292,7 +295,8 @@ namespace TrafficManager.UI.SubTools {
                 // lane curves for selectedMarker will be drawn last to
                 // be on the top of other lane markers.
                 foreach (LaneEnd targetLaneEnd in this.selectedLaneEnd.ConnectedLaneEnds) {
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
+                    ref NetLane targetLane = ref targetLaneEnd.LaneId.ToLane();
+                    if (!targetLane.IsValidWithSegment()) {
                         continue;
                     }
 
@@ -1024,7 +1028,9 @@ namespace TrafficManager.UI.SubTools {
             for (ushort nodeId = forceNodeId == 0 ? (ushort)1 : forceNodeId;
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
                  ++nodeId) {
-                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                ref NetNode netNode = ref nodeId.ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 

@@ -13,6 +13,7 @@ namespace TrafficManager.Manager.Impl {
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class LaneConnectionManager
         : AbstractGeometryObservingManager,
@@ -645,7 +646,9 @@ namespace TrafficManager.Manager.Impl {
                            $"startNode? {startNode}");
             }
 
-            if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+            ref NetNode netNode = ref nodeId.ToNode();
+
+            if (!netNode.IsValid()) {
                 if (logLaneConnections) {
                     Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
                                "Node is invalid");
@@ -656,9 +659,9 @@ namespace TrafficManager.Manager.Impl {
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
-            ref NetNode node = ref nodeId.ToNode();
+            
             for (int i = 0; i < 8; ++i) {
-                ushort otherSegmentId = node.GetSegment(i);
+                ushort otherSegmentId = netNode.GetSegment(i);
                 if (otherSegmentId != 0) {
                     //TODO move the following into a function
                     ArrowDirection dir = segEndMan.GetDirection(ref segEnd, otherSegmentId);
@@ -809,11 +812,13 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneConnection conn in data) {
                 try {
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(conn.lowerLaneId)) {
+                    ref NetLane lowerLane = ref conn.lowerLaneId.ToLane();
+                    if (!lowerLane.IsValidWithSegment()) {
                         continue;
                     }
 
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(conn.higherLaneId)) {
+                    ref NetLane higherLane = ref conn.higherLaneId.ToLane();
+                    if (!higherLane.IsValidWithSegment()) {
                         continue;
                     }
 
@@ -858,7 +863,7 @@ namespace TrafficManager.Manager.Impl {
                         // ret.AddRange(
                         //     from otherHigherLaneId in connectedLaneIds
                         //     where otherHigherLaneId > i
-                        //     where Services.NetService.IsLaneValid(otherHigherLaneId)
+                        //     where otherHigherLaneId.ToLane().IsValid()
                         //     select new Configuration.LaneConnection(i, otherHigherLaneId, startNode));
                         //-------------------------------------------------------------
                         foreach (uint otherHigherLaneId in connectedLaneIds) {
@@ -866,7 +871,8 @@ namespace TrafficManager.Manager.Impl {
                                 continue;
                             }
 
-                            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(otherHigherLaneId)) {
+                            ref NetLane otherHigherLane = ref otherHigherLaneId.ToLane();
+                            if (!otherHigherLane.IsValidWithSegment()) {
                                 continue;
                             }
 

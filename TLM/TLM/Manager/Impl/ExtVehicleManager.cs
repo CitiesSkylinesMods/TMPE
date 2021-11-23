@@ -56,19 +56,6 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        /// <summary>
-        /// Check if a vehicle is valid.
-        /// This is the case if the vehicle is Created but not Deleted.
-        /// </summary>
-        /// <param name="vehicleId">The id of the vehicle to check.</param>
-        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
-        public bool IsVehicleValid(ushort vehicleId) {
-            var createdDeleted = Singleton<VehicleManager>.instance.m_vehicles.m_buffer[vehicleId].m_flags
-                & (Vehicle.Flags.Created | Vehicle.Flags.Deleted);
-
-            return createdDeleted == Vehicle.Flags.Created;
-        }
-
         public void SetJunctionTransitState(ref ExtVehicle extVehicle,
                                             VehicleJunctionTransitState transitState) {
             if (transitState != extVehicle.junctionTransitState) {

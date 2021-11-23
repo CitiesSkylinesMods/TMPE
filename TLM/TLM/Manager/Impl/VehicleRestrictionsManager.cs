@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using TrafficManager.Traffic;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class VehicleRestrictionsManager
         : AbstractGeometryObservingManager,
@@ -420,11 +421,13 @@ namespace TrafficManager.Manager.Impl {
                                              NetInfo.Lane laneInfo,
                                              uint laneId,
                                              ExtVehicleType allowedTypes) {
-            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
+            ref NetLane netLane = ref laneId.ToLane();
+            if (!netLane.IsValidWithSegment()) {
                 return false;
             }
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            if (!netSegment.IsValid()) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return false;
             }
@@ -462,11 +465,13 @@ namespace TrafficManager.Manager.Impl {
                                    uint laneId,
                                    NetInfo.Lane laneInfo,
                                    ExtVehicleType vehicleType) {
-            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
+            ref NetLane netLane = ref laneId.ToLane();
+            if (!netLane.IsValidWithSegment()) {
                 return;
             }
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            if (!netSegment.IsValid()) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return;
             }
@@ -505,11 +510,13 @@ namespace TrafficManager.Manager.Impl {
                                       uint laneId,
                                       NetInfo.Lane laneInfo,
                                       ExtVehicleType vehicleType) {
-            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
+            ref NetLane netLane = ref laneId.ToLane();
+            if (!netLane.IsValidWithSegment()) {
                 return;
             }
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            if (!netSegment.IsValid()) {
                 // TODO we do not need the segmentId given here. Lane is enough
                 return;
             }
@@ -817,7 +824,8 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneVehicleTypes laneVehicleTypes in data) {
                 try {
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneVehicleTypes.laneId))
+                    ref NetLane netLane = ref laneVehicleTypes.laneId.ToLane();
+                    if (!netLane.IsValidWithSegment())
                         continue;
 
                     ExtVehicleType baseMask = GetBaseMask(
