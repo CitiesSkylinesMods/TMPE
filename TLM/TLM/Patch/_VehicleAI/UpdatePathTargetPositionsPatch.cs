@@ -1027,13 +1027,13 @@ namespace TrafficManager.Patch._VehicleAI {
                         ushort ownerBuildingId = NetSegment.FindOwnerBuilding(nextPosition.m_segment, 363f);
 
                         if (ownerBuildingId != 0) {
-                            BuildingManager buildingMan = Singleton<BuildingManager>.instance;
-                            BuildingInfo ownerBuildingInfo = buildingMan.m_buildings.m_buffer[ownerBuildingId].Info;
+                            ref Building ownerBuilding = ref ownerBuildingId.ToBuilding();
+                            BuildingInfo ownerBuildingInfo = ownerBuilding.Info;
                             InstanceID itemId = default(InstanceID);
                             itemId.Vehicle = vehicleID;
                             ownerBuildingInfo.m_buildingAI.EnterBuildingSegment(
                                 ownerBuildingId,
-                                ref buildingMan.m_buildings.m_buffer[ownerBuildingId],
+                                ref ownerBuilding,
                                 nextPosition.m_segment,
                                 nextPosition.m_offset,
                                 itemId);

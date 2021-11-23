@@ -141,7 +141,6 @@ namespace TrafficManager.Manager.Impl {
                 // NON-STOCK CODE START
                 bool foundParkingSpace = false;
                 bool searchedParkingSpace = false;
-                Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
 
                 if (prohibitPocketCars) {
                     if (logParkingAi) {
@@ -211,13 +210,15 @@ namespace TrafficManager.Manager.Impl {
                                                $"building {driverExtInstance.parkingSpaceLocationId}");
                                 }
 
+                                ref Building parkingSpaceBuilding = ref driverExtInstance.parkingSpaceLocationId.ToBuilding();
+
                                 foundParkingSpace =
                                     AdvancedParkingManager.Instance.FindParkingSpacePropAtBuilding(
                                         vehicleInfo,
                                         homeID,
                                         0,
                                         driverExtInstance.parkingSpaceLocationId,
-                                        ref buildingsBuffer[driverExtInstance.parkingSpaceLocationId],
+                                        ref parkingSpaceBuilding,
                                         pathPos.m_segment,
                                         refPos,
                                         ref maxDist,
@@ -336,9 +337,11 @@ namespace TrafficManager.Manager.Impl {
                     }
                 } else if (prohibitPocketCars) {
                     // could not find parking space. vehicle would despawn.
+                    ref Building targetBuilding = ref targetBuildingId.ToBuilding();
+
                     if (targetBuildingId != 0
-                        && (buildingsBuffer[targetBuildingId].m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None
-                        && (refPos - buildingsBuffer[targetBuildingId].m_position).magnitude
+                        && (targetBuilding.m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None
+                        && (refPos - targetBuilding.m_position).magnitude
                         <= GlobalConfig.Instance.ParkingAI.MaxBuildingToPedestrianLaneDistance)
                     {
                         // vehicle is at target and target is an outside connection: accept despawn
@@ -625,8 +628,8 @@ namespace TrafficManager.Manager.Impl {
             bool foundStartingPos = false;
             bool skipQueue = (vehicleData.m_flags & Vehicle.Flags.Spawned) != 0;
             ExtPathType extPathType = ExtPathType.None;
-            Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
             Citizen[] citizensBuffer = Singleton<CitizenManager>.instance.m_citizens.m_buffer;
+            ref Building targetBuilding = ref targetBuildingId.ToBuilding();
 
             if (Options.parkingAI) {
                 // if (driverExtInstance != null) {
@@ -654,7 +657,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 } else if (driverExtInstance.pathMode != ExtPathMode.ParkingFailed
                            && targetBuildingId != 0
-                           && (buildingsBuffer[targetBuildingId].m_flags &
+                           && (targetBuilding.m_flags &
                                Building.Flags.IncomingOutgoing)
                            != Building.Flags.None) {
                     // target is outside connection
@@ -867,7 +870,7 @@ namespace TrafficManager.Manager.Impl {
             if (allowRandomParking && // NON-STOCK CODE
                 !movingToParkingPos &&
                 targetBuildingId != 0 &&
-                (buildingsBuffer[targetBuildingId].Info.m_class.m_service > ItemClass.Service.Office
+                (targetBuilding.Info.m_class.m_service > ItemClass.Service.Office
                  || (driverInstance.m_flags & CitizenInstance.Flags.TargetIsNode)
                  != CitizenInstance.Flags.None))
             {

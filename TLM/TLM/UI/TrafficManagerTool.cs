@@ -1848,23 +1848,22 @@ namespace TrafficManager.UI {
         // TODO: Extract into a Debug Tool GUI class
         private void DebugGuiDisplayBuildings() {
             GUIStyle _counterStyle = new GUIStyle();
-            BuildingManager buildingManager = Singleton<BuildingManager>.instance;
 
             for (int i = 1; i < BuildingManager.MAX_BUILDING_COUNT; ++i) {
-                if ((buildingManager.m_buildings.m_buffer[i].m_flags & Building.Flags.Created)
-                    == Building.Flags.None) {
+                ref Building building = ref ((ushort)i).ToBuilding();
+
+                if ((building.m_flags & Building.Flags.Created) == Building.Flags.None) {
                     continue;
                 }
 
-                Vector3 pos = buildingManager.m_buildings.m_buffer[i].m_position;
-                bool visible = GeometryUtil.WorldToScreenPoint(pos, out Vector3 screenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(building.m_position, out Vector3 screenPos);
 
                 if (!visible) {
                     continue;
                 }
 
                 Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-                Vector3 diff = pos - camPos;
+                Vector3 diff = building.m_position - camPos;
                 if (diff.magnitude > DEBUG_CLOSE_LOD) {
                     continue; // do not draw if too distant
                 }

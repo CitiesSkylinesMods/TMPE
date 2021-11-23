@@ -402,8 +402,7 @@ namespace TrafficManager.UI.MainMenu {
 
         private void ClickGoToBuilding(UIComponent component, UIMouseEventParameter eventParam) {
             ushort buildingId = Convert.ToUInt16(_goToField.text);
-            Building building =
-                Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
+            ref Building building = ref buildingId.ToBuilding();
             if ((building.m_flags & Building.Flags.Created) != 0) {
                 CSUtil.CameraControl.CameraController.Instance.GoToBuilding(buildingId);
 

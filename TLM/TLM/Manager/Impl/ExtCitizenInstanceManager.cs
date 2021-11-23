@@ -400,7 +400,6 @@ namespace TrafficManager.Manager.Impl {
             bool ignoreCost,
             bool adhocDebugLog = false) {
 
-            Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
             VehicleParked[] parkedVehiclesBuffer = Singleton<VehicleManager>.instance.m_parkedVehicles.m_buffer;
 #if DEBUG
             bool citizenDebug
@@ -569,10 +568,12 @@ namespace TrafficManager.Manager.Impl {
                         // -> Check if citizen is located at an outside connection and make them
                         // obey Parking AI restrictions
                         if (instanceData.m_sourceBuilding != 0) {
-                            ItemClass.Service sourceBuildingService
-                                = buildingsBuffer[instanceData.m_sourceBuilding].Info
-                                                                                .m_class
-                                                                                .m_service;
+                            ItemClass.Service sourceBuildingService = instanceData
+                                .m_sourceBuilding
+                                .ToBuilding()
+                                .Info
+                                .m_class
+                                .m_service;
 
                             if (startsAtOutsideConnection) {
                                 if (sourceBuildingService == ItemClass.Service.Road) {
@@ -652,8 +653,7 @@ namespace TrafficManager.Manager.Impl {
                             // -> check distance between home and parked car. if too far away:
                             // force to take the car back home
                             float distHomeToParked =
-                                (parkedVehiclesBuffer[parkedVehicleId].m_position -
-                                 buildingsBuffer[homeId].m_position).magnitude;
+                                (parkedVehiclesBuffer[parkedVehicleId].m_position - homeId.ToBuilding().m_position).magnitude;
 
                             if (distHomeToParked > parkingAiConf.MaxParkedCarDistanceToHome) {
                                 // force to take car back home
@@ -775,6 +775,7 @@ namespace TrafficManager.Manager.Impl {
             PathUnit.Position endPosA = default;
             bool calculateEndPos = true;
             bool allowRandomParking = true;
+            ref Building targetBuilding = ref instanceData.m_targetBuilding.ToBuilding();
 
             if (Options.parkingAI) {
                 // Parking AI
@@ -787,8 +788,7 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     if (instanceData.m_targetBuilding == 0 ||
-                        (buildingsBuffer[instanceData.m_targetBuilding].m_flags &
-                         Building.Flags.IncomingOutgoing) == Building.Flags.None) {
+                        (targetBuilding.m_flags & Building.Flags.IncomingOutgoing) == Building.Flags.None) {
                         // the citizen is starting their journey and the target is not an outside
                         // connection
                         // -> find a suitable parking space near the target
@@ -880,9 +880,9 @@ namespace TrafficManager.Manager.Impl {
 
                 if (allowRandomParking
                     && instanceData.m_targetBuilding != 0
-                    && buildingsBuffer[instanceData.m_targetBuilding].Info
+                    && targetBuilding.Info
                     && (
-                        buildingsBuffer[instanceData.m_targetBuilding].Info.m_class.m_service > ItemClass.Service.Office
+                        targetBuilding.Info.m_class.m_service > ItemClass.Service.Office
                         || (instanceData.m_flags & CitizenInstance.Flags.TargetIsNode) != 0
                        )
                     )
@@ -936,7 +936,7 @@ namespace TrafficManager.Manager.Impl {
                                    endPos,
                                    Options.parkingAI &&
                                    (instanceData.m_targetBuilding == 0 ||
-                                    (buildingsBuffer[instanceData.m_targetBuilding].m_flags &
+                                    (targetBuilding.m_flags &
                                      Building.Flags.IncomingOutgoing) == Building.Flags.None)
                                        ? NetInfo.LaneType.Pedestrian
                                        : laneTypes,
@@ -1445,7 +1445,6 @@ namespace TrafficManager.Manager.Impl {
                                           ref ExtCitizenInstance extInstance,
                                           Vector3 startPos)
         {
-            Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
 #if DEBUG
             CitizenInstance[] citizensBuffer = Singleton<CitizenManager>.instance.m_instances.m_buffer;
             bool citizenDebug =
@@ -1473,11 +1472,10 @@ namespace TrafficManager.Manager.Impl {
 #endif
 
             ParkingAI parkingAiConf = GlobalConfig.Instance.ParkingAI;
-            bool ret =
-                (buildingsBuffer[instanceData.m_sourceBuilding].m_flags
-                 & Building.Flags.IncomingOutgoing) != Building.Flags.None
-                && (startPos - buildingsBuffer[instanceData.m_sourceBuilding]
-                        .m_position).magnitude <= parkingAiConf.MaxBuildingToPedestrianLaneDistance;
+            ref Building sourceBuilding = ref instanceData.m_sourceBuilding.ToBuilding();
+
+            bool ret = (sourceBuilding.m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None &&
+                (startPos - sourceBuilding.m_position).magnitude <= parkingAiConf.MaxBuildingToPedestrianLaneDistance;
 
             if (logParkingAi) {
                 Log._Debug($"ExtCitizenInstanceManager.IsAtOutsideConnection({instanceId}): ret={ret}");
@@ -1513,7 +1511,7 @@ namespace TrafficManager.Manager.Impl {
         ///
         /// <returns>Returns <c>true</c> if it's an outside connection, otherwise <c>false</c>.</returns>
         internal bool IsOutsideConnection(ushort buildingId) {
-            Building building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
+            ref Building building = ref buildingId.ToBuilding();
             return (building.m_flags & Building.Flags.IncomingOutgoing) != 0;
         }
 
