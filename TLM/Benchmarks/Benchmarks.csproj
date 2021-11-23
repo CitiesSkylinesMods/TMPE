@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="GetNodeSegmentIdsEnumerablePerfTests.cs" />
     <Compile Include="GetSegmentLaneIdAndSegmentPerfTests.cs" />
+    <Compile Include="IsValidPerfTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LoopUtilPerfTests.cs" />
