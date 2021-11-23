@@ -261,7 +261,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             foreach (var lanePos in extSegmentManager.GetSortedLanes(
                 segmentId,
-                ref GetSeg(segmentId),
+                ref segmentId.ToSegment(),
                 startNode,
                 LaneArrowManager.LANE_TYPES,
                 LaneArrowManager.VEHICLE_TYPES)) {

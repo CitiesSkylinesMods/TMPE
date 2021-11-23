@@ -59,13 +59,9 @@ namespace TrafficManager.Util {
 
         internal static IExtSegmentManager segMan => Constants.ManagerFactory.ExtSegmentManager;
 
-        internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
-
         internal static ref NetNode ToNode(this ushort nodeId) => ref _nodeBuffer[nodeId];
 
         internal static ref NetLane ToLane(this uint laneId) => ref _laneBuffer[laneId];
-
-        internal static ref NetSegment GetSeg(ushort segmentId) => ref _segBuffer[segmentId];
 
         internal static ref NetSegment ToSegment(this ushort segmentId) => ref _segBuffer[segmentId];
 
@@ -84,10 +80,10 @@ namespace TrafficManager.Util {
         internal static ref ExtSegmentEnd GetSegEnd(ushort segmentId, bool startNode) =>
             ref _segEndBuff[segEndMan.GetIndex(segmentId, startNode)];
 
-        internal static ushort GetNode(this ref NetSegment segment, bool startNode) =>
+        internal static ushort GetNodeId(this ref NetSegment segment, bool startNode) =>
             startNode ? segment.m_startNode : segment.m_endNode;
 
-        internal static bool HasJunctionFlag(ushort nodeId) => HasJunctionFlag(ref GetNode(nodeId));
+        internal static bool HasJunctionFlag(ushort nodeId) => HasJunctionFlag(ref nodeId.ToNode());
 
         internal static bool HasJunctionFlag(ref NetNode node) =>
             (node.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
