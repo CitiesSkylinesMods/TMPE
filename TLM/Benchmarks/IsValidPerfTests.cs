@@ -11,7 +11,7 @@ namespace Benchmarks {
         public void IdToSegmentWithIsValidExtension() {
             for (ushort i = 0; i < MyNetManager.Instance.m_segments.m_buffer.Length; i++) {
                 ref NetSegment netSegment = ref i.ToSegment();
-                if (netSegment.IsValid()) {
+                if (!netSegment.IsValid()) {
                     continue;
                 }
             }
