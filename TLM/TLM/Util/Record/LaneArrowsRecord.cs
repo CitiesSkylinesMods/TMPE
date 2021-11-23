@@ -32,8 +32,9 @@ namespace TrafficManager.Util.Record {
 
         public static List<LaneArrowsRecord> GetLanes(ushort segmentId, bool startNode) {
             int maxLaneCount = segmentId.ToSegment().Info.m_lanes.Length;
-            var ret = new List<LaneArrowsRecord>(maxLaneCount); 
-            var lanes = netService.GetSortedLanes(
+            var ret = new List<LaneArrowsRecord>(maxLaneCount);
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            var lanes = extSegmentManager.GetSortedLanes(
                 segmentId,
                 ref segmentId.ToSegment(),
                 startNode,

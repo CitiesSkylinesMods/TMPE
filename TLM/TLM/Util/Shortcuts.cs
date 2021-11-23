@@ -7,7 +7,6 @@ namespace TrafficManager.Util {
     using ColossalFramework;
     using ColossalFramework.Math;
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -57,8 +56,6 @@ namespace TrafficManager.Util {
         internal static IExtSegmentEndManager segEndMan => Constants.ManagerFactory.ExtSegmentEndManager;
 
         internal static IExtSegmentManager segMan => Constants.ManagerFactory.ExtSegmentManager;
-
-        internal static INetService netService => Constants.ServiceFactory.NetService;
 
         internal static ref NetNode GetNode(ushort nodeId) => ref _nodeBuffer[nodeId];
 

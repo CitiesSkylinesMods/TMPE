@@ -136,6 +136,7 @@
     <Compile Include="Geometry\Impl\SegmentEndId.cs" />
     <Compile Include="Lifecycle\Patcher.cs" />
     <Compile Include="Lifecycle\TMPELifecycle.cs" />
+    <Compile Include="Manager\Impl\ClockDirection.cs" />
     <Compile Include="Manager\Impl\GameConnectionManager.cs" />
     <Compile Include="Manager\AbstractCustomManager.cs" />
     <Compile Include="Manager\AbstractFeatureManager.cs" />
@@ -144,6 +145,12 @@
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
     <Compile Include="Manager\Impl\GeometryNotifier.cs" />
+    <Compile Include="Manager\Impl\GetNodeSegmentIdsEnumerable.cs" />
+    <Compile Include="Manager\Impl\GetNodeSegmentIdsEnumerator.cs" />
+    <Compile Include="Manager\Impl\GetSegmentLaneIdsEnumerable.cs" />
+    <Compile Include="Manager\Impl\GetSegmentLaneIdsEnumerator.cs" />
+    <Compile Include="Manager\Impl\LaneIdAndIndex.cs" />
+    <Compile Include="Manager\Impl\LanePos.cs" />
     <Compile Include="Notifier.cs" />
     <Compile Include="Patch\CustomPathFindPatchAttribute.cs" />
     <Compile Include="Patch\PatchCommons.cs" />
@@ -558,14 +565,6 @@
     <ProjectReference Include="..\TMPE.API\TMPE.API.csproj">
       <Project>{c911d31c-c85d-42a8-a839-7b209a715495}</Project>
       <Name>TMPE.API</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TMPE.CitiesGameBridge\TMPE.CitiesGameBridge.csproj">
-      <Project>{3f2f7926-5d51-4880-a2b7-4594a10d7e54}</Project>
-      <Name>TMPE.CitiesGameBridge</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TMPE.GenericGameBridge\TMPE.GenericGameBridge.csproj">
-      <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
-      <Name>TMPE.GenericGameBridge</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

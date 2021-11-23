@@ -175,7 +175,7 @@ namespace TrafficManager.Manager.Impl {
                     return ArrowDirection.None;
                 }
             }
-            GenericGameBridge.Service.INetService netService = Constants.ServiceFactory.NetService;
+
             ref ExtSegmentEnd segmenEnd0 = ref ExtSegmentEnds[GetIndex(segmentId0, nodeId)];
             ArrowDirection dir = GetDirection(ref segmenEnd0, segmentId1);
             return dir;

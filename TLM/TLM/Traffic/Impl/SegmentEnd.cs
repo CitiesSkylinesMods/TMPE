@@ -5,8 +5,6 @@ namespace TrafficManager.Traffic.Impl {
     using System.Collections.Generic;
     using System.Linq;
     using System;
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -318,7 +316,8 @@ namespace TrafficManager.Traffic.Impl {
             numVehiclesMovingToSegmentId = new Dictionary<ushort, uint>[numLanes];
             numVehiclesGoingToSegmentId = new Dictionary<ushort, uint>[numLanes];
 
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(SegmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(SegmentId)) {
                 var numVehicleMoving = new Dictionary<ushort, uint>();
                 var numVehicleGoing = new Dictionary<ushort, uint>();
 
@@ -327,7 +326,6 @@ namespace TrafficManager.Traffic.Impl {
             }
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             for (int i = 0; i < 8; ++i) {
                 ushort segId = node.GetSegment(i);
                 if (segId == 0) {

@@ -1,7 +1,7 @@
-using GenericGameBridge.Service;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
+using TrafficManager.Manager.Impl;
 
 namespace TMUnitTest.Util {
     [TestClass]

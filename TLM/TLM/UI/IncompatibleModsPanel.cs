@@ -7,6 +7,9 @@ namespace TrafficManager.UI {
     using static ColossalFramework.Plugins.PluginManager;
     using System.Collections.Generic;
     using System;
+    using System.IO;
+    using System.Reflection;
+    using ColossalFramework.Plugins;
     using TrafficManager.State;
     using UnityEngine;
     using TrafficManager.Lifecycle;
@@ -20,6 +23,7 @@ namespace TrafficManager.UI {
         private UIPanel mainPanel_;
         private UICheckBox runModsCheckerOnStartup_;
         private UIComponent blurEffect_;
+        private bool modListChanged_;
 
         /// <summary>
         /// Gets or sets list of incompatible mods from
@@ -37,6 +41,7 @@ namespace TrafficManager.UI {
                 mainPanel_.OnDestroy();
             }
 
+            modListChanged_ = false;
             isVisible = true;
 
             mainPanel_ = AddUIComponent<UIPanel>();
@@ -199,6 +204,18 @@ namespace TrafficManager.UI {
             TryPopModal();
             Hide();
             Unfocus();
+            if (modListChanged_) {
+                ShowInfoAboutRestart();
+            }
+        }
+
+        private void ShowInfoAboutRestart() {
+            ExceptionPanel exceptionPanel = UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel");
+            exceptionPanel.SetMessage(
+                title: "TM:PE Game restart required",
+                message: "List of mods changed (deleted or unsubscribed).\n" +
+                         "Please restart the game to complete operation",
+                error: false);
         }
 
         /// <summary>
@@ -250,10 +267,11 @@ namespace TrafficManager.UI {
             Log.Info($"Removing incompatible mod '{mod.name}' from {mod.modPath}");
 
             success = mod.publishedFileID.AsUInt64 == LOCAL_MOD
-                          ? DeleteLocalTMPE(mod)
+                          ? DeleteLocalMod(mod)
                           : PlatformService.workshop.Unsubscribe(mod.publishedFileID);
 
             if (success) {
+                modListChanged_ = true;
                 IncompatibleMods.Remove(mod);
                 component.parent.Disable();
                 component.isVisible = false;
@@ -273,14 +291,25 @@ namespace TrafficManager.UI {
         /// </summary>
         /// <param name="mod">The <see cref="PluginInfo"/> associated with the mod that needs deleting.</param>
         /// <returns>Returns <c>true</c> if successfully deleted, otherwise <c>false</c>.</returns>
-        private bool DeleteLocalTMPE(PluginInfo mod) {
+        private bool DeleteLocalMod(PluginInfo mod) {
             try {
-                Log._Debug($"Deleting local TM:PE from {mod.modPath}");
-                // mod.Unload();
-                DirectoryUtils.DeleteDirectory(mod.modPath);
+                string modPath = mod.modPath;
+                Log._Debug($"Deleting local mod from {modPath}");
+                if (modPath.Contains($"Files{Path.DirectorySeparatorChar}Mods")) {
+                    // mods located in /Files/Mods are not monitored,
+                    // game will not unload them automatically after removing mod directory
+                    MethodInfo removeAtPath = typeof(PluginManager).GetMethod(
+                        name: "RemovePluginAtPath",
+                        bindingAttr: BindingFlags.Instance | BindingFlags.NonPublic);
+                    removeAtPath.Invoke(PluginManager.instance, new object[] { modPath });
+                }
+
+                DirectoryUtils.DeleteDirectory(modPath);
+                Log._Debug($"Successfully deleted mod from {modPath}");
                 return true;
             }
             catch (Exception e) {
+                Log.Error(e.Message);
                 return false;
             }
         }

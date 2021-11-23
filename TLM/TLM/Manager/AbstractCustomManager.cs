@@ -1,6 +1,5 @@
-﻿namespace TrafficManager.Manager {
+namespace TrafficManager.Manager {
     using CSUtil.Commons;
-    using GenericGameBridge.Factory;
     using TrafficManager.API.Manager;
 
     /// <summary>
@@ -25,12 +24,6 @@
     ///		2. OnLevelUnloading
     /// </summary>
     public abstract class AbstractCustomManager : ICustomManager {
-        public IServiceFactory Services {
-            get {
-                return Constants.ServiceFactory;
-            }
-        }
-
         /// <summary>
         /// Performs actions after game data has been loaded
         /// </summary>

@@ -1,4 +1,4 @@
-﻿namespace GenericGameBridge.Service {
+namespace TrafficManager.Manager.Impl {
     using System.Runtime.InteropServices;
 
     [StructLayout(LayoutKind.Auto)]

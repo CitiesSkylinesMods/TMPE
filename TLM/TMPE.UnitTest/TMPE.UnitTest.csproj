@@ -107,10 +107,6 @@
       <Project>{7422AE58-8B0A-401C-9404-F4A438EFFE10}</Project>
       <Name>TLM</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TMPE.GenericGameBridge\TMPE.GenericGameBridge.csproj">
-      <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
-      <Name>TMPE.GenericGameBridge</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

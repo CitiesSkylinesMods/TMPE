@@ -1,7 +1,6 @@
 namespace TrafficManager.Util {
     using ColossalFramework.Math;
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using TrafficManager.Util.Record;
     using System;
     using System.Collections.Generic;
@@ -60,8 +59,9 @@ namespace TrafficManager.Util {
                     isStraight) {
 
                 bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+                ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 IList<LanePos> laneList =
-                    netService.GetSortedLanes(
+                    extSegmentManager.GetSortedLanes(
                         segmentId,
                         ref GetSeg(segmentId),
                         startNode,
@@ -340,8 +340,10 @@ namespace TrafficManager.Util {
             ushort headNodeId,
             ushort segmentId,
             ArrowDirection dir) {
+            ExtNodeManager extNodeManager = ExtNodeManager.Instance;
+
             var segmentList =
-                netService.GetNodeSegmentIds(headNodeId, ClockDirection.CounterClockwise)
+                extNodeManager.GetNodeSegmentIds(headNodeId, ClockDirection.CounterClockwise)
                 .Where(_segmentId =>
                     IsPartofRoundabout(_segmentId, segmentId, headNodeId) &&
                     segEndMan.GetDirection(segmentId, _segmentId, headNodeId) == dir);

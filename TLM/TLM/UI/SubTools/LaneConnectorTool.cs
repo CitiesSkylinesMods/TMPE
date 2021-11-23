@@ -805,7 +805,8 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
-            return netService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            return extSegmentManager.GetSortedLanes(
                                 segmentId,
                                 ref segmentId.ToSegment(),
                                 ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!toward),

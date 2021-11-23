@@ -175,10 +175,6 @@
       <Project>{d3ade06e-f493-4819-865a-3bb44feedf01}</Project>
       <Name>CSUtil.Commons</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TMPE.GenericGameBridge\TMPE.GenericGameBridge.csproj">
-      <Project>{663b991f-32a1-46e1-a4d3-540f8ea7f386}</Project>
-      <Name>TMPE.GenericGameBridge</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

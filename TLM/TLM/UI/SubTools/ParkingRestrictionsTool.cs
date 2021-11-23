@@ -2,7 +2,6 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework;
     using static Util.SegmentLaneTraverser;
     using System.Collections.Generic;
-    using CitiesGameBridge.Service;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.UI.Textures;
@@ -14,7 +13,6 @@ namespace TrafficManager.UI.SubTools {
     using ColossalFramework.Math;
     using TrafficManager.UI.SubTools.PrioritySigns;
     using ColossalFramework.UI;
-    using GenericGameBridge.Service;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util.Extensions;
 
@@ -90,7 +88,8 @@ namespace TrafficManager.UI.SubTools {
                 return;
             }
 
-            foreach(LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(renderInfo_.SegmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(renderInfo_.SegmentId)) {
                 NetLane netLane = NetManager.instance.m_lanes.m_buffer[laneIdAndIndex.laneId];
                 NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndIndex.laneIndex];
                 bool isParking = laneInfo.m_laneType.IsFlagSet(NetInfo.LaneType.Parking);

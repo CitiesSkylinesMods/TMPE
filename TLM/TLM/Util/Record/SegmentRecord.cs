@@ -1,6 +1,4 @@
 namespace TrafficManager.Util.Record {
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -74,7 +72,8 @@ namespace TrafficManager.Util.Record {
         }
 
         public static List<uint> GetAllLanes(ushort segmentId) {
-            var lanes =  NetService.Instance.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            var lanes = extSegmentManager.GetSortedLanes(
                 segmentId,
                 ref segmentId.ToSegment(),
                 startNode: null,
