@@ -60,7 +60,7 @@ namespace TrafficManager.Manager.Impl {
 
             RoadBaseAI.GetTrafficLightState(
                 nodeId,
-                ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
+                ref netSegment,
                 currentFrameIndex - 256u,
                 out RoadBaseAI.TrafficLightState vehicleLightState,
                 out RoadBaseAI.TrafficLightState _,

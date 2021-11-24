@@ -465,10 +465,9 @@ namespace TrafficManager.UI {
                     segmentList = new List<ushort>(segmentList);
                 }
                 foreach (ushort segmentId in segmentList ?? Enumerable.Empty<ushort>()) {
-                    ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
                     NetTool.RenderOverlay(
                         cameraInfo,
-                        ref seg,
+                        ref segmentId.ToSegment(),
                         color,
                         color);
                 }
@@ -712,22 +711,22 @@ namespace TrafficManager.UI {
             if (segmentId == 0) {
                 return;
             }
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            float width = segment.Info.m_halfWidth;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            float width = netSegment.Info.m_halfWidth;
 
             bool IsMiddle(ushort nodeId) => (nodeId.ToNode().m_flags & NetNode.Flags.Middle) != 0;
 
             Bezier3 bezier;
-            bezier.a = GetNodePos(segment.m_startNode);
-            bezier.d = GetNodePos(segment.m_endNode);
+            bezier.a = GetNodePos(netSegment.m_startNode);
+            bezier.d = GetNodePos(netSegment.m_endNode);
 
             NetSegment.CalculateMiddlePoints(
                 bezier.a,
-                segment.m_startDirection,
+                netSegment.m_startDirection,
                 bezier.d,
-                segment.m_endDirection,
-                IsMiddle(segment.m_startNode),
-                IsMiddle(segment.m_endNode),
+                netSegment.m_endDirection,
+                IsMiddle(netSegment.m_startNode),
+                IsMiddle(netSegment.m_endNode),
                 out bezier.b,
                 out bezier.c);
 
@@ -765,22 +764,22 @@ namespace TrafficManager.UI {
                 return;
             }
 
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            float width = segment.Info.m_halfWidth;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            float width = netSegment.Info.m_halfWidth;
 
             bool IsMiddle(ushort nodeId) => (nodeId.ToNode().m_flags & NetNode.Flags.Middle) != 0;
 
             Bezier3 bezier;
-            bezier.a = GetNodePos(segment.m_startNode);
-            bezier.d = GetNodePos(segment.m_endNode);
+            bezier.a = GetNodePos(netSegment.m_startNode);
+            bezier.d = GetNodePos(netSegment.m_endNode);
 
             NetSegment.CalculateMiddlePoints(
                 bezier.a,
-                segment.m_startDirection,
+                netSegment.m_startDirection,
                 bezier.d,
-                segment.m_endDirection,
-                IsMiddle(segment.m_startNode),
-                IsMiddle(segment.m_endNode),
+                netSegment.m_endDirection,
+                IsMiddle(netSegment.m_startNode),
+                IsMiddle(netSegment.m_endNode),
                 out bezier.b,
                 out bezier.c);
 
@@ -1213,10 +1212,10 @@ namespace TrafficManager.UI {
                 if (HoveredNodeId <= 0 && segmentId > 0) {
                     // alternative way to get a node hit: check distance to start and end nodes
                     // of the segment
-                    ushort startNodeId = Singleton<NetManager>
-                                         .instance.m_segments.m_buffer[segmentId].m_startNode;
-                    ushort endNodeId = Singleton<NetManager>
-                                       .instance.m_segments.m_buffer[segmentId].m_endNode;
+
+                    ref NetSegment netSegment = ref segmentId.ToSegment();
+                    ushort startNodeId = netSegment.m_startNode;
+                    ushort endNodeId = netSegment.m_endNode;
 
                     float startDist = (segmentOutput.m_hitPos - startNodeId.ToNode().m_position).magnitude;
                     float endDist = (segmentOutput.m_hitPos - endNodeId.ToNode().m_position).magnitude;
@@ -1465,28 +1464,25 @@ namespace TrafficManager.UI {
             NetManager netManager = Singleton<NetManager>.instance;
             GUIStyle counterStyle = new GUIStyle();
             IExtSegmentEndManager endMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
 
-            for (int i = 1; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-                if ((segmentsBuffer[i].m_flags & NetSegment.Flags.Created) ==
-                    NetSegment.Flags.None) {
-                    // segment is unused
+            for (int segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
+                ref NetSegment netSegment = ref ((ushort)segmentId).ToSegment();
+
+                if ((netSegment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
                     continue;
                 }
 
-                ItemClass.Service service = segmentsBuffer[i].Info.GetService();
-                ItemClass.SubService subService = segmentsBuffer[i].Info.GetSubService();
+                NetInfo segmentInfo = netSegment.Info;
+
+                ItemClass.Service service = segmentInfo.GetService();
+                ItemClass.SubService subService = segmentInfo.GetSubService();
 #if !DEBUG
-                if ((netManager.m_segments.m_buffer[i].m_flags & NetSegment.Flags.Untouchable) !=
-                    NetSegment.Flags.None) {
+                if ((netSegment.m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None) {
                     continue;
                 }
 #endif
-                NetInfo segmentInfo = segmentsBuffer[i].Info;
-
-                Vector3 centerPos = segmentsBuffer[i].m_bounds.center;
+                Vector3 centerPos = netSegment.m_bounds.center;
                 bool visible = GeometryUtil.WorldToScreenPoint(centerPos, out Vector3 screenPos);
-
                 if (!visible) {
                     continue;
                 }
@@ -1503,27 +1499,27 @@ namespace TrafficManager.UI {
                 counterStyle.normal.textColor = new Color(1f, 0f, 0f);
 
                 var labelSb = new StringBuilder();
-                labelSb.AppendFormat("Segment {0}", i);
+                labelSb.AppendFormat("Segment {0}", segmentId);
 #if DEBUG
-                labelSb.AppendFormat(", flags: {0}", segmentsBuffer[i].m_flags);
+                labelSb.AppendFormat(", flags: {0}", netSegment.m_flags);
                 labelSb.AppendFormat("\nsvc: {0}, sub: {1}", service, subService);
 
                 uint startVehicles = endMan.GetRegisteredVehicleCount(
-                    ref endMan.ExtSegmentEnds[endMan.GetIndex((ushort)i, true)]);
+                    ref endMan.ExtSegmentEnds[endMan.GetIndex((ushort)segmentId, true)]);
 
                 uint endVehicles = endMan.GetRegisteredVehicleCount(
-                    ref endMan.ExtSegmentEnds[endMan.GetIndex((ushort)i, false)]);
+                    ref endMan.ExtSegmentEnds[endMan.GetIndex((ushort)segmentId, false)]);
 
                 labelSb.AppendFormat( "\nstart veh.: {0}, end veh.: {1}", startVehicles, endVehicles);
 #endif
-                labelSb.AppendFormat("\nTraffic: {0} %", segmentsBuffer[i].m_trafficDensity);
+                labelSb.AppendFormat("\nTraffic: {0} %", netSegment.m_trafficDensity);
 
 #if DEBUG
                 int fwdSegIndex = trafficMeasurementManager.GetDirIndex(
-                    (ushort)i,
+                    (ushort)segmentId,
                     NetInfo.Direction.Forward);
                 int backSegIndex = trafficMeasurementManager.GetDirIndex(
-                    (ushort)i,
+                    (ushort)segmentId,
                     NetInfo.Direction.Backward);
 
                 labelSb.Append("\n");
@@ -1584,8 +1580,8 @@ namespace TrafficManager.UI {
 #endif
                 labelSb.AppendFormat(
                     "\nstart: {0}, end: {1}",
-                    segmentsBuffer[i].m_startNode,
-                    segmentsBuffer[i].m_endNode);
+                    netSegment.m_startNode,
+                    netSegment.m_endNode);
 #endif
 
                 var labelStr = labelSb.ToString();
@@ -1596,8 +1592,8 @@ namespace TrafficManager.UI {
 
                 if (Options.showLanes) {
                     DebugGuiDisplayLanes(
-                        (ushort)i,
-                        ref segmentsBuffer[i],
+                        (ushort)segmentId,
+                        ref netSegment,
                         ref segmentInfo);
                 }
             }

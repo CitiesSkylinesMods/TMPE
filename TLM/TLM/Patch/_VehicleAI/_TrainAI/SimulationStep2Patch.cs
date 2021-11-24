@@ -208,7 +208,10 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                     PathManager pathMan = PathManager.instance;
                     if (pathMan.m_pathUnits.m_buffer[vehicleData.m_path]
                                .GetPosition(pathPosIndex >> 1, out PathUnit.Position curPathPos)) {
-                        netMan.m_segments.m_buffer[curPathPos.m_segment].AddTraffic(
+
+                        ref NetSegment currentPositionSegment = ref curPathPos.m_segment.ToSegment();
+
+                        currentPositionSegment.AddTraffic(
                             Mathf.RoundToInt(___m_info.m_generatedInfo.m_size.z * 3f),
                             GetNoiseLevel(trainAi));
 
@@ -224,9 +227,9 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                             ushort transitNodeId;
 
                             if (curPathPos.m_offset < 128) {
-                                transitNodeId = netMan.m_segments.m_buffer[curPathPos.m_segment].m_startNode;
+                                transitNodeId = currentPositionSegment.m_startNode;
                             } else {
-                                transitNodeId = netMan.m_segments.m_buffer[curPathPos.m_segment].m_endNode;
+                                transitNodeId = currentPositionSegment.m_endNode;
                             }
 
                             if (VehicleBehaviorManager.Instance.IsSpaceReservationAllowed(
@@ -371,9 +374,11 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                     if (pathMan.m_pathUnits.m_buffer[vehicleData.m_path]
                                .GetPosition(pathPosIndex >> 1, out PathUnit.Position curPathPos))
                     {
-                        netMan.m_segments.m_buffer[curPathPos.m_segment]
-                              .AddTraffic(Mathf.RoundToInt(___m_info.m_generatedInfo.m_size.z * 3f),
-                                          GetNoiseLevel(trainAi));
+                        ref NetSegment currentPositionSegment = ref curPathPos.m_segment.ToSegment();
+
+                        currentPositionSegment.AddTraffic(
+                            Mathf.RoundToInt(___m_info.m_generatedInfo.m_size.z * 3f),
+                            GetNoiseLevel(trainAi));
 
                         if ((pathPosIndex & 1) == 0
                             || lastPathOffset == 0
@@ -388,8 +393,8 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                             // NON-STOCK CODE START
                             ushort transitNodeId;
                             transitNodeId = curPathPos.m_offset < 128
-                                                ? netMan.m_segments.m_buffer[curPathPos.m_segment].m_startNode
-                                                : netMan.m_segments.m_buffer[curPathPos.m_segment].m_endNode;
+                                ? currentPositionSegment.m_startNode
+                                : currentPositionSegment.m_endNode;
 
                             if (VehicleBehaviorManager.Instance.IsSpaceReservationAllowed(
                                 transitNodeId,

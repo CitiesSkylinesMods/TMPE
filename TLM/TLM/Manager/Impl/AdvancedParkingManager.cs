@@ -1933,7 +1933,7 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     // determine nearest sidewalk position for parking position at segment
-                    if (Singleton<NetManager>.instance.m_segments.m_buffer[knownParkingSpaceLocationId]
+                    if (knownParkingSpaceLocationId.ToSegment()
                         .GetClosestLanePosition(
                             parkPos,
                             NetInfo.LaneType.Pedestrian,
@@ -2367,13 +2367,13 @@ namespace TrafficManager.Manager.Impl {
                     return true;
                 }
 
-                ushort segmentId =
-                    netManager.m_segmentGrid[(i * BuildingManager.BUILDINGGRID_RESOLUTION) + j];
+                ushort segmentId = netManager.m_segmentGrid[(i * BuildingManager.BUILDINGGRID_RESOLUTION) + j];
                 var iterations = 0;
 
                 while (segmentId != 0) {
-                    NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
-                    Vector3 segCenter = netManager.m_segments.m_buffer[segmentId].m_bounds.center;
+                    ref NetSegment netSegment = ref segmentId.ToSegment();
+                    NetInfo segmentInfo = netSegment.Info;
+                    Vector3 segCenter = netSegment.m_bounds.center;
 
                     // randomize target position to allow for opposite road-side parking
                     ParkingAI parkingAiConf = GlobalConfig.Instance.ParkingAI;
@@ -2387,7 +2387,7 @@ namespace TrafficManager.Manager.Impl {
                             parkingAiConf.ParkingSpacePositionRand) -
                         (parkingAiConf.ParkingSpacePositionRand / 2u);
 
-                    if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(
+                    if (netSegment.GetClosestLanePosition(
                         segCenter,
                         NetInfo.LaneType.Parking,
                         VehicleInfo.VehicleType.Car,
@@ -2440,7 +2440,7 @@ namespace TrafficManager.Manager.Impl {
                         } // if parking allowed
                     } // if closest lane position
 
-                    segmentId = netManager.m_segments.m_buffer[segmentId].m_nextGridSegment;
+                    segmentId = netSegment.m_nextGridSegment;
 
                     if (++iterations >= NetManager.MAX_SEGMENT_COUNT) {
                         CODebugBase<LogChannel>.Error(
@@ -2731,7 +2731,7 @@ namespace TrafficManager.Manager.Impl {
                     out _);
 
                 // calculate segment offset
-                if (Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].GetClosestLanePosition(
+                if (segmentId.ToSegment().GetClosestLanePosition(
                         unspawnPos,
                         NetInfo.LaneType.Pedestrian,
                         VehicleInfo.VehicleType.None,
@@ -2793,10 +2793,12 @@ namespace TrafficManager.Manager.Impl {
             float length = vehicleInfo.m_generatedInfo.m_size.z;
 
             NetManager netManager = Singleton<NetManager>.instance;
-            if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created)
-                != NetSegment.Flags.None)
+
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if ((netSegment.m_flags & NetSegment.Flags.Created) != NetSegment.Flags.None)
             {
-                if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(
+                if (netSegment.GetClosestLanePosition(
                     refPos,
                     NetInfo.LaneType.Parking,
                     VehicleInfo.VehicleType.Car,
@@ -2808,8 +2810,7 @@ namespace TrafficManager.Manager.Impl {
                     if (!Options.parkingRestrictionsEnabled ||
                         ParkingRestrictionsManager.Instance.IsParkingAllowed(
                             segmentId,
-                            netManager.m_segments.m_buffer[segmentId].Info
-                                      .m_lanes[laneIndex].m_finalDirection))
+                            netSegment.Info.m_lanes[laneIndex].m_finalDirection))
                     {
                         if (_findParkingSpaceRoadSideDelegate(
                             ignoreParked: ignoreParked,
@@ -2890,17 +2891,19 @@ namespace TrafficManager.Manager.Impl {
                                                                 ushort homeId,
                                                                 Vector3 refPos,
                                                                 Vector3 searchDir,
-                                                                ushort segment,
+                                                                ushort segmentId,
                                                                 float width,
                                                                 float length,
                                                                 out Vector3 parkPos,
                                                                 out Quaternion parkRot,
                                                                 out float parkOffset) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
             if (!_findParkingSpaceDelegate(isElectric: isElectric,
                                            homeId: homeId,
                                            refPos: refPos,
                                            searchDir: searchDir,
-                                           segment: segment,
+                                           segment: segmentId,
                                            width: width,
                                            length: length,
                                            parkPos: out parkPos,
@@ -2911,7 +2914,7 @@ namespace TrafficManager.Manager.Impl {
 
             // in vanilla parkOffset is always >= 0 for RoadSideParkingSpace
             if (Options.parkingRestrictionsEnabled && parkOffset >= 0) {
-                if (Singleton<NetManager>.instance.m_segments.m_buffer[segment].GetClosestLanePosition(
+                if (netSegment.GetClosestLanePosition(
                         refPos,
                         NetInfo.LaneType.Parking,
                         VehicleInfo.VehicleType.Car,
@@ -2919,9 +2922,8 @@ namespace TrafficManager.Manager.Impl {
                         out _,
                         out int laneIndex,
                         out _)) {
-                    NetInfo.Direction direction
-                        = Singleton<NetManager>.instance.m_segments.m_buffer[segment].Info.m_lanes[laneIndex].m_finalDirection;
-                    if (!ParkingRestrictionsManager.Instance.IsParkingAllowed(segment, direction)) {
+                    NetInfo.Direction direction = netSegment.Info.m_lanes[laneIndex].m_finalDirection;
+                    if (!ParkingRestrictionsManager.Instance.IsParkingAllowed(segmentId, direction)) {
                         return false;
                     }
                 }

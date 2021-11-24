@@ -1240,7 +1240,7 @@ namespace TrafficManager.Manager.Impl {
                     Configuration.SegmentNodeFlags startNodeFlags = null;
                     Configuration.SegmentNodeFlags endNodeFlags = null;
 
-                    ushort startNodeId = netManager.m_segments.m_buffer[segmentId].m_startNode;
+                    ushort startNodeId = netSegment.m_startNode;
 
                     if (startNodeId.ToNode().IsValid()) {
                         SegmentEndFlags endFlags = segmentFlags_[segmentId].startNodeFlags;
@@ -1268,7 +1268,7 @@ namespace TrafficManager.Manager.Impl {
                         }
                     }
 
-                    ushort endNodeId = netManager.m_segments.m_buffer[segmentId].m_endNode;
+                    ushort endNodeId = netSegment.m_endNode;
 
                     if (endNodeId.ToNode().IsValid()) {
                         SegmentEndFlags endFlags = segmentFlags_[segmentId].endNodeFlags;

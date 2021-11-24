@@ -2,6 +2,8 @@ namespace TrafficManager
 {
     using System;
     using TrafficManager.API.Notifier;
+    using TrafficManager.Util;
+
     public class Notifier : INotifier
     {
         public event Action EventLevelLoaded;
@@ -39,9 +41,9 @@ namespace TrafficManager
 
         public void OnSegmentNodesMofied(ushort segmentId, object sender = null, object data = null)
         {
-            var segments = NetManager.instance.m_segments.m_buffer;
-            OnNodeModified(segments[segmentId].m_startNode, sender, data);
-            OnNodeModified(segments[segmentId].m_endNode, sender, data);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            OnNodeModified(netSegment.m_startNode, sender, data);
+            OnNodeModified(netSegment.m_endNode, sender, data);
         }
     }
 }

@@ -484,15 +484,15 @@ namespace TrafficManager.Util {
                 return SetLaneArrow_Result.HighwayArrows;
             }
 
-            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            bool startNode = seg.m_startNode == nodeId;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            bool startNode = netSegment.m_startNode == nodeId;
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             //list of outgoing lanes from current segment to current node.
             IList<LanePos> laneList =
                 extSegmentManager.GetSortedLanes(
                     segmentId,
-                    ref seg,
+                    ref netSegment,
                     startNode,
                     LaneArrowManager.LANE_TYPES,
                     LaneArrowManager.VEHICLE_TYPES,

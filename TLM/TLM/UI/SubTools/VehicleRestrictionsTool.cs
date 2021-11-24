@@ -226,7 +226,7 @@ namespace TrafficManager.UI.SubTools {
                 !overlayHandleHovered) {
                 NetTool.RenderOverlay(
                     cameraInfo,
-                    ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId],
+                    ref HoveredSegmentId.ToSegment(),
                     MainTool.GetToolColor(false, false),
                     MainTool.GetToolColor(false, false));
             }
@@ -373,7 +373,7 @@ namespace TrafficManager.UI.SubTools {
             ExtVehicleType ?vehicleTypes = null) {
             NetManager netManager = Singleton<NetManager>.instance;
 
-            NetInfo selectedSegmentInfo = netManager.m_segments.m_buffer[SelectedSegmentId].Info;
+            NetInfo selectedSegmentInfo = SelectedSegmentId.ToSegment().Info;
 
             bool LaneVisitorFun(SegmentLaneVisitData data) {
                 if (data.SegVisitData.Initial) {
@@ -385,7 +385,7 @@ namespace TrafficManager.UI.SubTools {
                 }
 
                 ushort segmentId = data.SegVisitData.CurSeg.segmentId;
-                NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
+                NetInfo segmentInfo = segmentId.ToSegment().Info;
 
                 byte selectedLaneIndex = data.InitLanePos.laneIndex;
                 NetInfo.Lane selectedLaneInfo = selectedSegmentInfo.m_lanes[selectedLaneIndex];

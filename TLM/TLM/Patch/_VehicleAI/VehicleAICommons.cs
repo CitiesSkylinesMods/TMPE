@@ -2,6 +2,7 @@ namespace TrafficManager.Patch._VehicleAI {
     using Connection;
     using Manager.Impl;
     using State;
+    using TrafficManager.Util;
     using UnityEngine;
 
     public class VehicleAICommons {
@@ -17,10 +18,15 @@ namespace TrafficManager.Patch._VehicleAI {
                                                    out Vector3 pos,
                                                    out Vector3 dir,
                                                    out float maxSpeed) {
-
             _netManager.m_lanes.m_buffer[laneId].CalculatePositionAndDirection(Constants.ByteToFloat(offset), out pos, out dir);
-            NetInfo info = _netManager.m_segments.m_buffer[position.m_segment].Info;
-            CustomCalculateTargetSpeed(instance, vehicleId, ref vehicleData, position, laneId, info, out maxSpeed);
+            CustomCalculateTargetSpeed(
+                instance,
+                vehicleId,
+                ref vehicleData,
+                position,
+                laneId,
+                position.m_segment.ToSegment().Info,
+                out maxSpeed);
         }
 
         public static void CustomCalculateTargetSpeed(VehicleAI instance,

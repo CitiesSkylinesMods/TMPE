@@ -362,23 +362,20 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                         continue;
                     }
 
-                    // if ((netManager.m_segments.m_buffer[segmentId].m_flags &
-                    // NetSegment.Flags.Untouchable) != NetSegment.Flags.None) continue;
-                    Vector3 distToCamera = netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos;
+                    //if ((netSegment.m_flags & NetSegment.Flags.Untouchable) != NetSegment.Flags.None) {
+                    //    continue;
+                    //}
+                    Vector3 distToCamera = netSegment.m_bounds.center - camPos;
                     if (distToCamera.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
                         continue; // do not draw if too distant
                     }
 
-                    bool visible = GeometryUtil.WorldToScreenPoint(
-                        netManager.m_segments.m_buffer[segmentId].m_bounds.center,
-                        out Vector3 _);
-
+                    bool visible = GeometryUtil.WorldToScreenPoint(netSegment.m_bounds.center, out Vector3 _);
                     if (!visible) {
                         continue;
                     }
 
-                    if (!speedLimitManager.MayHaveCustomSpeedLimits(
-                            ref netManager.m_segments.m_buffer[segmentId])) {
+                    if (!speedLimitManager.MayHaveCustomSpeedLimits(ref netSegment)) {
                         continue;
                     }
 
@@ -400,7 +397,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 // no speed limit overlay on selected segment when in vehicle restrictions mode
                 hover |= DrawSpeedLimitHandles(
                     segmentId,
-                    ref netManager.m_segments.m_buffer[segmentId],
+                    ref segmentId.ToSegment(),
                     viewOnly,
                     ref camPos);
             }
@@ -805,7 +802,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         private bool DrawSpeedLimitHandles(ushort segmentId,
-                                           ref NetSegment segment,
+                                           ref NetSegment netSegment,
                                            bool viewOnly,
                                            ref Vector3 camPos) {
             if (viewOnly && !Options.speedLimitsOverlay && !MassEditOverlay.IsActive) {
@@ -813,7 +810,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             }
             bool ret = false;
 
-            Vector3 center = segment.m_bounds.center;
+            Vector3 center = netSegment.m_bounds.center;
             NetManager netManager = Singleton<NetManager>.instance;
             SetSpeedLimitAction speedLimitToSet = viewOnly
                                               ? SetSpeedLimitAction.NO_ACTION
@@ -831,8 +828,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     numDirections: out int numDirections,
                     vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES);
 
-                NetInfo segmentInfo = segment.Info;
-                Vector3 yu = (segment.m_endDirection - segment.m_startDirection).normalized;
+                NetInfo segmentInfo = netSegment.Info;
+                Vector3 yu = (netSegment.m_endDirection - netSegment.m_startDirection).normalized;
                 Vector3 xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
 
                 // if ((segment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None) {
@@ -844,7 +841,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
                 IList<LanePos> sortedLanes = extSegmentManager.GetSortedLanes(
                     segmentId: segmentId,
-                    segment: ref segment,
+                    segment: ref netSegment,
                     startNode: null,
                     laneTypeFilter: SpeedLimitManager.LANE_TYPES,
                     vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES);
@@ -1050,7 +1047,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                 }
                             } else {
                                 NetInfo.Direction normDir = e.Key;
-                                if ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
+                                if ((netSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
                                     normDir = NetInfo.InvertDirection(normDir);
                                 }
 
@@ -1072,16 +1069,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                                             == data.SegVisitData.ViaInitialStartNode;
 
                                         ushort otherSegmentId = data.SegVisitData.CurSeg.segmentId;
-                                        NetInfo otherSegmentInfo =
-                                            netManager.m_segments.m_buffer[otherSegmentId].Info;
+                                        ref NetSegment otherSegment = ref otherSegmentId.ToSegment();
+                                        NetInfo otherSegmentInfo = otherSegment.Info;
                                         byte laneIndex = data.CurLanePos.laneIndex;
                                         NetInfo.Lane laneInfo = otherSegmentInfo.m_lanes[laneIndex];
 
                                         NetInfo.Direction otherNormDir = laneInfo.m_finalDirection;
 
-                                        if (((netManager.m_segments.m_buffer[otherSegmentId].m_flags
-                                              & NetSegment.Flags.Invert)
-                                             != NetSegment.Flags.None) ^ reverse) {
+                                        if (((otherSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) ^ reverse) {
                                             otherNormDir = NetInfo.InvertDirection(otherNormDir);
                                         }
 

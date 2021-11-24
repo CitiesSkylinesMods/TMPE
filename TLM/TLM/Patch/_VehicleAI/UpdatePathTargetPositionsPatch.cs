@@ -131,7 +131,7 @@ namespace TrafficManager.Patch._VehicleAI {
             }
 
             // get current segment info, check for errors
-            NetInfo curSegmentInfo = netManager.m_segments.m_buffer[currentPosition.m_segment].Info;
+            NetInfo curSegmentInfo = currentPosition.m_segment.ToSegment().Info;
             if (curSegmentInfo.m_lanes.Length <= currentPosition.m_lane) {
                 Log._DebugIf(
                     logLogic,
@@ -412,7 +412,7 @@ namespace TrafficManager.Patch._VehicleAI {
                     $"lane={nextPosition.m_lane}, off={nextPosition.m_offset}]");
 
                 // check for errors
-                NetInfo nextSegmentInfo = netManager.m_segments.m_buffer[nextPosition.m_segment].Info;
+                NetInfo nextSegmentInfo = nextPosition.m_segment.ToSegment().Info;
                 if (nextSegmentInfo.m_lanes.Length <= nextPosition.m_lane) {
                     Log._DebugIf(
                         logLogic,
@@ -490,7 +490,7 @@ namespace TrafficManager.Patch._VehicleAI {
                                     out PathUnit.Position next2PathPos,
                                     out _))
                                 {
-                                    next2SegmentInfo = netManager.m_segments.m_buffer[next2PathPos.m_segment].Info;
+                                    next2SegmentInfo = next2PathPos.m_segment.ToSegment().Info;
 
                                     uint next3PathId = next2PathId;
                                     int next3PathPosIndex = next2PathPosIndex;
@@ -501,7 +501,7 @@ namespace TrafficManager.Patch._VehicleAI {
                                         out next3PathPos,
                                         out _))
                                     {
-                                        next3SegmentInfo = netManager.m_segments.m_buffer[next3PathPos.m_segment].Info;
+                                        next3SegmentInfo = next3PathPos.m_segment.ToSegment().Info;
 
                                         uint next4PathId = next3PathId;
                                         int next4PathPosIndex = next3PathPosIndex;
@@ -564,10 +564,14 @@ namespace TrafficManager.Patch._VehicleAI {
                 // check for errors
                 uint nextLaneId = PathManager.GetLaneID(nextPosition);
                 NetInfo.Lane nextLaneInfo = nextSegmentInfo.m_lanes[nextPosition.m_lane];
-                ushort curSegStartNodeId = netManager.m_segments.m_buffer[currentPosition.m_segment].m_startNode;
-                ushort curSegEndNodeId = netManager.m_segments.m_buffer[currentPosition.m_segment].m_endNode;
-                ushort nextSegStartNodeId = netManager.m_segments.m_buffer[nextPosition.m_segment].m_startNode;
-                ushort nextSegEndNodeId = netManager.m_segments.m_buffer[nextPosition.m_segment].m_endNode;
+
+                ref NetSegment currentPositionSegment = ref currentPosition.m_segment.ToSegment();
+                ushort curSegStartNodeId = currentPositionSegment.m_startNode;
+                ushort curSegEndNodeId = currentPositionSegment.m_endNode;
+
+                ref NetSegment nextPositionSegment = ref nextPosition.m_segment.ToSegment();
+                ushort nextSegStartNodeId = nextPositionSegment.m_startNode;
+                ushort nextSegEndNodeId = nextPositionSegment.m_endNode;
 
                 NetNode.Flags flags1 = curSegStartNodeId.ToNode().m_flags | curSegEndNodeId.ToNode().m_flags;
                 NetNode.Flags flags2 = nextSegStartNodeId.ToNode().m_flags | nextSegEndNodeId.ToNode().m_flags;
@@ -824,7 +828,7 @@ namespace TrafficManager.Patch._VehicleAI {
                     }
 
                     if (curMaxSpeed < 0.01f
-                        || (netManager.m_segments.m_buffer[nextPosition.m_segment].m_flags
+                        || (nextPositionSegment.m_flags 
                             & (NetSegment.Flags.Collapsed
                                | NetSegment.Flags.Flooded)) != NetSegment.Flags.None)
                     {
@@ -843,7 +847,7 @@ namespace TrafficManager.Patch._VehicleAI {
                                 $"CustomVehicle.CustomUpdatePathTargetPositions({vehicleID}): " +
                                 "Low max speed or segment flooded/collapsed. FINISH. " +
                                 $"curMaxSpeed={curMaxSpeed}, " +
-                                $"flags={netManager.m_segments.m_buffer[nextPosition.m_segment].m_flags}, " +
+                                $"flags={nextPositionSegment.m_flags}, " +
                                 $"vehicleData.m_lastPathOffset={vehicleData.m_lastPathOffset}, " +
                                 $"targetPos={targetPos}, index={index}");
                         }
@@ -894,9 +898,9 @@ namespace TrafficManager.Patch._VehicleAI {
                     if (dist > 1f) {
                         ushort nextNodeId;
                         if (nextSegOffset == 0) {
-                            nextNodeId = netManager.m_segments.m_buffer[nextPosition.m_segment].m_startNode;
+                            nextNodeId = nextPositionSegment.m_startNode;
                         } else if (nextSegOffset == 255) {
-                            nextNodeId = netManager.m_segments.m_buffer[nextPosition.m_segment].m_endNode;
+                            nextNodeId = nextPositionSegment.m_endNode;
                         } else {
                             nextNodeId = 0;
                         }
@@ -1017,9 +1021,9 @@ namespace TrafficManager.Patch._VehicleAI {
 
                 // check for arrival
                 if (index <= 0) {
-                    if ((netManager.m_segments.m_buffer[nextPosition.m_segment].m_flags
+                    if ((nextPositionSegment.m_flags
                          & NetSegment.Flags.Untouchable) != 0
-                        && (netManager.m_segments.m_buffer[currentPosition.m_segment].m_flags
+                        && (currentPositionSegment.m_flags
                             & NetSegment.Flags.Untouchable) == NetSegment.Flags.None)
                     {
                         ushort ownerBuildingId = NetSegment.FindOwnerBuilding(nextPosition.m_segment, 363f);
