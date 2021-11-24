@@ -71,7 +71,7 @@ namespace TrafficManager.Manager.Impl {
         private bool IsHeadingTowardsStartNode(uint sourceLaneId) {
             NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
             ushort segmentId = laneBuffer[sourceLaneId].m_segment;
-            NetSegment segment = segmentId.ToSegment();
+            ref NetSegment segment = ref segmentId.ToSegment();
             uint laneId = segment.m_lanes;
             bool inverted = (segment.m_flags & NetSegment.Flags.Invert) != 0;
 

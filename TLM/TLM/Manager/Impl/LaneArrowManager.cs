@@ -182,11 +182,12 @@ namespace TrafficManager.Manager.Impl {
         private static void RecalculateFlags(uint laneId) {
             NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
             ushort segmentId = laneBuffer[laneId].m_segment;
-            NetAI ai = segmentId.ToSegment().Info.m_netAI;
+            ref NetSegment segment = ref segmentId.ToSegment();
+            NetAI ai = segment.Info.m_netAI;
 #if DEBUGFLAGS
             Log._Debug($"Flags.RecalculateFlags: Recalculateing lane arrows of segment {segmentId}.");
 #endif
-            ai.UpdateLanes(segmentId, ref segmentId.ToSegment(), true);
+            ai.UpdateLanes(segmentId, ref segment, true);
         }
 
         private void OnLaneChange(uint laneId) {
