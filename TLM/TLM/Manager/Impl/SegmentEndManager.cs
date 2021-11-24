@@ -7,6 +7,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Traffic.Impl;
     using TrafficManager.Traffic;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     [Obsolete("should be removed when implementing issue #240")]
     public class SegmentEndManager
@@ -57,7 +58,9 @@ namespace TrafficManager.Manager.Impl {
                 return end;
             }
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 Log.Warning(
                     $"SegmentEndManager.GetOrAddSegmentEnd({segmentId}, {startNode}): Refusing to " +
                     "add segment end for invalid segment.");
@@ -105,7 +108,9 @@ namespace TrafficManager.Manager.Impl {
             const bool logPriority = false;
 #endif
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 if (logPriority) {
                     Log._Debug(
                         $"SegmentEndManager.UpdateSegmentEnd({segmentId}, {startNode}): Segment " +
@@ -116,7 +121,6 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            ref NetSegment netSegment = ref segmentId.ToSegment();
             ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
 
             if (TrafficPriorityManager.Instance.HasSegmentPrioritySign(segmentId, startNode)

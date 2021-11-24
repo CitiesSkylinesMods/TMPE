@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Util;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.Util.Extensions;
 
     public class LaneArrowManager
         : AbstractGeometryObservingManager,
@@ -148,11 +149,12 @@ namespace TrafficManager.Manager.Impl {
                 try {
                     Log._Debug($"Executing UpdateDedicatedTurningLanePolicy() in simulation thread ...");
                     for (ushort segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                        ref NetSegment segment = ref segmentId.ToSegment();
-                        if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId))
+                        ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                        if (!netSegment.IsValid())
                             continue;
 
-                        if (segment.Info?.GetAI() is not RoadBaseAI ai)
+                        if (netSegment.Info?.GetAI() is not RoadBaseAI ai)
                             continue;
 
                         int forward = 0, backward = 0;
@@ -162,13 +164,13 @@ namespace TrafficManager.Manager.Impl {
                             continue;
                         }
 
-                        if (segment.m_startNode.ToNode().CountSegments() <= 2 &&
-                            segment.m_endNode.ToNode().CountSegments() <= 2) {
+                        if (netSegment.m_startNode.ToNode().CountSegments() <= 2 &&
+                            netSegment.m_endNode.ToNode().CountSegments() <= 2) {
                             // no intersection.
                             continue;
                         }
 
-                        ai.UpdateLanes(segmentId, ref segment, true);
+                        ai.UpdateLanes(segmentId, ref netSegment, true);
                         NetManager.instance.UpdateSegmentRenderer(segmentId, true);
                     }
                 } catch(Exception ex) {
@@ -246,9 +248,11 @@ namespace TrafficManager.Manager.Impl {
                     Log._Debug($"Split Data: {split[0]} , {split[1]}");
 #endif
                     var laneId = Convert.ToUInt32(split[0]);
+                    ref NetLane netLane = ref laneId.ToLane();
+
                     uint flags = Convert.ToUInt32(split[1]);
 
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId))
+                    if (!netLane.IsValidWithSegment())
                         continue;
 
                     if (flags > ushort.MaxValue)
@@ -292,7 +296,9 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneArrowData laneArrowData in data) {
                 try {
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneArrowData.laneId)) {
+                    ref NetLane netLane = ref laneArrowData.laneId.ToLane();
+
+                    if (!netLane.IsValidWithSegment()) {
                         continue;
                     }
 

@@ -14,6 +14,7 @@ namespace TrafficManager.TrafficLight.Impl {
     using TrafficManager.Traffic;
     using TrafficManager.Util;
     using ColossalFramework;
+    using TrafficManager.Util.Extensions;
 
     // TODO class should be completely reworked, approx. in version 1.10
     public class TimedTrafficLightsStep
@@ -1221,7 +1222,9 @@ namespace TrafficManager.TrafficLight.Impl {
                 return false;
             }
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(targetSegmentId)) {
+            ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
+
+            if (!targetSegment.IsValid()) {
                 Log.Error(
                     $"TimedTrafficLightsStep.RelocateSegmentLights({sourceSegmentId}, {targetSegmentId}): " +
                     $"Target segment {targetSegmentId} is invalid");
@@ -1265,7 +1268,7 @@ namespace TrafficManager.TrafficLight.Impl {
             ref NetSegment netSegment = ref segmentId.ToSegment();
             ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            if (!netSegment.IsValid()) {
                 Log.Error(
                     $"TimedTrafficLightsStep.AddSegment({segmentId}, {startNode}, {makeRed}): " +
                     $"Segment {segmentId} is invalid");
@@ -1319,8 +1322,9 @@ namespace TrafficManager.TrafficLight.Impl {
                 Log._Debug($"TimedTrafficLightsStep.SetSegmentLights({segmentId}, {lights}) called.");
             }
 #endif
+            ref NetSegment netSegment = ref segmentId.ToSegment();
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            if (!netSegment.IsValid()) {
                 Log.Error($"TimedTrafficLightsStep.SetSegmentLights({segmentId}): Segment {segmentId} is invalid");
                 return false;
             }

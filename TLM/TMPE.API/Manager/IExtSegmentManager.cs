@@ -8,13 +8,6 @@ namespace TrafficManager.API.Manager {
         ExtSegment[] ExtSegments { get; }
 
         /// <summary>
-        /// Checks if the segment with the given id is valid.
-        /// </summary>
-        /// <param name="segmentId">segment id</param>
-        /// <returns><code>true</code> if the segment is valid, <code>false</code> otherwise</returns>
-        bool IsSegmentValid(ushort segmentId);
-
-        /// <summary>
         /// Performs recalcution of the segment with the given id
         /// </summary>
         /// <param name="segmentId">segment id</param>

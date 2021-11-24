@@ -12,6 +12,7 @@ namespace TrafficManager.UI.SubTools {
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu.OSD;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.Util.Extensions;
 
     public class VehicleRestrictionsTool
         : LegacySubTool,
@@ -84,7 +85,9 @@ namespace TrafficManager.UI.SubTools {
                                    ? NetManager.MAX_SEGMENT_COUNT - 1
                                    : forceSegmentId);
                  ++segmentId) {
-                if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                if (!netSegment.IsValid()) {
                     continue;
                 }
 
@@ -239,22 +242,23 @@ namespace TrafficManager.UI.SubTools {
 
         private void ShowSigns(bool viewOnly) {
             Vector3 camPos = InGameUtil.Instance.CachedCameraTransform.position;
-            NetManager netManager = Singleton<NetManager>.instance;
             bool handleHovered = false;
 
             foreach (ushort segmentId in currentRestrictedSegmentIds) {
-                if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                if (!netSegment.IsValid()) {
                     continue;
                 }
 
-                Vector3 centerPos = netManager.m_segments.m_buffer[segmentId].m_bounds.center;
+                Vector3 centerPos = netSegment.m_bounds.center;
                 bool visible = GeometryUtil.WorldToScreenPoint(centerPos, out Vector3 _);
 
                 if (!visible) {
                     continue;
                 }
 
-                if ((netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos).sqrMagnitude >
+                if ((netSegment.m_bounds.center - camPos).sqrMagnitude >
                     TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
                     continue; // do not draw if too distant
                 }
@@ -262,7 +266,7 @@ namespace TrafficManager.UI.SubTools {
                 // draw vehicle restrictions
                 if (DrawVehicleRestrictionHandles(
                     segmentId,
-                    ref netManager.m_segments.m_buffer[segmentId],
+                    ref netSegment,
                     viewOnly || segmentId != SelectedSegmentId,
                     out bool updated)) {
                     handleHovered = true;

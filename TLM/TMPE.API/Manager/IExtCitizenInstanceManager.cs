@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     using System;
     using TrafficManager.API.Traffic.Data;
     using UnityEngine;
@@ -97,13 +97,6 @@
                                    ref CitizenInstance instanceData,
                                    ref ExtCitizenInstance extInstance,
                                    Vector3 startPos);
-
-        /// <summary>
-        /// Checks whether the citizen instance with the given id is valid.
-        /// </summary>
-        /// <param name="instanceId">citzen instance id</param>
-        /// <returns><code>true</code> if it is valid, <code>false</code> otherwise</returns>
-        bool IsValid(ushort instanceId);
 
         /// <summary>
         /// Determines the citizen id for the given citizen instance id
