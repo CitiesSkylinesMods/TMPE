@@ -1450,7 +1450,7 @@ namespace TrafficManager.Manager.Impl {
                                 () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                                 $">> Failed to spawn parked vehicle for citizen {instanceData.m_citizen} " +
                                 $"(citizen instance {instanceId}). reason={parkReason}. homePos: " +
-                                $"{buildingsBuffer[homeId].m_position}");
+                                $"{homeId.ToBuilding().m_position}");
 
                             if (parkReason == ParkingError.NoSpaceFound &&
                                 currentBuildingId != 0) {

@@ -904,7 +904,7 @@ namespace TrafficManager.Manager.Impl {
                                    endPos,
                                    Options.parkingAI &&
                                    (targetBuildingId == 0 ||
-                                    (buildingsBuffer[targetBuildingId].m_flags & Building.Flags.IncomingOutgoing)
+                                    (targetBuilding.m_flags & Building.Flags.IncomingOutgoing)
                                     == Building.Flags.None)
                                        ? NetInfo.LaneType.Pedestrian
                                        : (laneTypes | NetInfo.LaneType.Pedestrian),
