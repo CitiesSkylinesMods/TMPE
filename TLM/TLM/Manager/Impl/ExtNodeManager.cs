@@ -41,7 +41,8 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection) {
-            var initialSegmentId = GetInitialSegment(ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]);
+            ref NetNode netNode = ref nodeId.ToNode();
+            var initialSegmentId = GetInitialSegment(ref netNode);
             var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
             return new GetNodeSegmentIdsEnumerable(nodeId, initialSegmentId, clockDirection, segmentBuffer);
         }

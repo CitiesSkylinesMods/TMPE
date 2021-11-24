@@ -58,10 +58,10 @@ namespace TrafficManager.Patch._VehicleAI._PassengerCarAI {
                 return false;
             }
 
+            ref Building targetBuilding = ref targetBuildingId.ToBuilding();
+
             string ret;
-            bool leavingCity =
-                (BuildingManager.instance.m_buildings.m_buffer[targetBuildingId].m_flags
-                 & Building.Flags.IncomingOutgoing) != Building.Flags.None;
+            bool leavingCity = (targetBuilding.m_flags & Building.Flags.IncomingOutgoing) != Building.Flags.None;
             if (leavingCity) {
                 target = InstanceID.Empty;
                 ret = Locale.Get("VEHICLE_STATUS_LEAVING");

@@ -89,14 +89,13 @@ namespace TrafficManager.UI.SubTools {
 
         public override void OnToolGUI(Event e) {
             Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-            NetManager netManager = Singleton<NetManager>.instance;
-            NetNode[] nodesBuffer = netManager.m_nodes.m_buffer;
 
             //--------------------------------
             // Render all visible node states
             //--------------------------------
             for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
                 var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
+                ref NetNode netNode = ref nodeId.ToNode();
 
                 // Check whether there is a traffic light and CAN be any at all
                 Texture2D overlayTex;
@@ -105,7 +104,7 @@ namespace TrafficManager.UI.SubTools {
                 } else
                 if (TrafficLightManager.Instance.HasTrafficLight(
                     nodeId,
-                    ref nodesBuffer[nodeId])) {
+                    ref netNode)) {
                     // Render traffic light icon
                     overlayTex = TrafficLightTextures.TrafficLightEnabled;
                 } else {
@@ -116,7 +115,7 @@ namespace TrafficManager.UI.SubTools {
                 MainTool.DrawGenericOverlayTexture(
                     overlayTex,
                     camPos,
-                    nodesBuffer[nodeId].m_position,
+                    netNode.m_position,
                     SIGN_SIZE,
                     SIGN_SIZE,
                     false);

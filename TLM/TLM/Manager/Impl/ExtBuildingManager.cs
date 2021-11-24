@@ -19,8 +19,8 @@ namespace TrafficManager.Manager.Impl {
 
         private ExtBuildingManager() {
             ExtBuildings = new ExtBuilding[BuildingManager.MAX_BUILDING_COUNT];
-            for (uint i = 0; i < BuildingManager.MAX_BUILDING_COUNT; ++i) {
-                ExtBuildings[i] = new ExtBuilding((ushort)i);
+            for (int buildingId = 0; buildingId < BuildingManager.MAX_BUILDING_COUNT; ++buildingId) {
+                ExtBuildings[buildingId] = new ExtBuilding((ushort)buildingId);
             }
         }
 
@@ -83,8 +83,7 @@ namespace TrafficManager.Manager.Impl {
                                              Vector3 parkPos,
                                              int minDelta = -10,
                                              int maxDelta = 10) {
-            Vector3 buildingPos = Singleton<BuildingManager>
-                                  .instance.m_buildings.m_buffer[extBuilding.buildingId].m_position;
+            Vector3 buildingPos = extBuilding.buildingId.ToBuilding().m_position;
             float distance = Mathf.Clamp(
                 (parkPos - buildingPos).magnitude,
                 0f,
