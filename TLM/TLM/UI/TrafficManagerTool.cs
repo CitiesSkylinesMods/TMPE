@@ -1841,8 +1841,8 @@ namespace TrafficManager.UI {
         private void DebugGuiDisplayBuildings() {
             GUIStyle _counterStyle = new GUIStyle();
 
-            for (int i = 1; i < BuildingManager.MAX_BUILDING_COUNT; ++i) {
-                ref Building building = ref ((ushort)i).ToBuilding();
+            for (int buildingId = 1; buildingId < BuildingManager.MAX_BUILDING_COUNT; ++buildingId) {
+                ref Building building = ref ((ushort)buildingId).ToBuilding();
 
                 if ((building.m_flags & Building.Flags.Created) == Building.Flags.None) {
                     continue;
@@ -1868,10 +1868,10 @@ namespace TrafficManager.UI {
 
                 string labelStr = string.Format(
                     "Building {0}, PDemand: {1}, IncTDem: {2}, OutTDem: {3}",
-                    i,
-                    ExtBuildingManager.Instance.ExtBuildings[i].parkingSpaceDemand,
-                    ExtBuildingManager.Instance.ExtBuildings[i].incomingPublicTransportDemand,
-                    ExtBuildingManager.Instance.ExtBuildings[i].outgoingPublicTransportDemand);
+                    buildingId,
+                    ExtBuildingManager.Instance.ExtBuildings[buildingId].parkingSpaceDemand,
+                    ExtBuildingManager.Instance.ExtBuildings[buildingId].incomingPublicTransportDemand,
+                    ExtBuildingManager.Instance.ExtBuildings[buildingId].outgoingPublicTransportDemand);
 
                 Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
                 Rect labelRect = new Rect(

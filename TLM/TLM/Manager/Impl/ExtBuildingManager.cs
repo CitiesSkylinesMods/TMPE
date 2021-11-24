@@ -19,8 +19,8 @@ namespace TrafficManager.Manager.Impl {
 
         private ExtBuildingManager() {
             ExtBuildings = new ExtBuilding[BuildingManager.MAX_BUILDING_COUNT];
-            for (uint i = 0; i < BuildingManager.MAX_BUILDING_COUNT; ++i) {
-                ExtBuildings[i] = new ExtBuilding((ushort)i);
+            for (int buildingId = 0; buildingId < BuildingManager.MAX_BUILDING_COUNT; ++buildingId) {
+                ExtBuildings[buildingId] = new ExtBuilding((ushort)buildingId);
             }
         }
 
