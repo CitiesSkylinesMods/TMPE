@@ -1271,7 +1271,7 @@ namespace TrafficManager.UI {
             }
             prev_H = HitPos.y;
 
-            if (Shortcuts.GetSeg(HoveredSegmentId).GetClosestLanePosition(
+            if (HoveredSegmentId.ToSegment().GetClosestLanePosition(
                 HitPos,
                 NetInfo.LaneType.All,
                 VehicleInfo.VehicleType.All,

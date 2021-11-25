@@ -868,11 +868,8 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        private static ref NetNode GetNode(ushort segmentId, bool startNode) {
-            ref NetSegment segment = ref GetSeg(segmentId);
-            ushort nodeId = startNode ? segment.m_startNode : segment.m_endNode;
-            return ref Shortcuts.GetNode(nodeId);
-        }
+        private static ref NetNode GetNode(ushort segmentId, bool startNode) =>
+            ref segmentId.ToSegment().GetNodeId(startNode).ToNode();
 
         #region Set<Traffic Rule>Allowed: TernaryBool 
 
@@ -1026,7 +1023,7 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            Notifier.Instance.OnNodeModified(segmentId.ToSegment().GetNode(startNode), this);
+            Notifier.Instance.OnNodeModified(segmentId.ToSegment().GetNodeId(startNode), this);
         }
 
         public override void OnLevelUnloading() {
