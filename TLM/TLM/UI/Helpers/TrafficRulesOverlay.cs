@@ -187,7 +187,7 @@ namespace TrafficManager.UI.Helpers {
 
             // NetManager netManager = Singleton<NetManager>.instance;
             Color guiColor = GUI.color;
-            // Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+            // Vector3 nodePos = node.m_position;
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
 
@@ -296,7 +296,7 @@ namespace TrafficManager.UI.Helpers {
                             if (!junctionRManager.ToggleUturnAllowed(
                                     segmentId,
                                     isStartNode)) {
-                                // TODO MainTool.ShowTooltip(Translation.GetString("..."), Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position);
+                                // TODO MainTool.ShowTooltip(Translation.GetString("..."), node.m_position);
                             } else {
                                 stateUpdated = true;
                             }

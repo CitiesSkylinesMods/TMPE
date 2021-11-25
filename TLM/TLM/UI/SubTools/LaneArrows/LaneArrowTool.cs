@@ -134,8 +134,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            // Vector3 nodePos = Singleton<NetManager>
-            //                   .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
+            // Vector3 nodePos = SelectedNodeId.ToNode().m_position;
             //
             // // Hide if node position is off-screen
             //
@@ -335,8 +334,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
 
             // Clicked on something which was hovered
-            NetNode.Flags netFlags =
-                Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
+            NetNode.Flags netFlags = HoveredNodeId.ToNode().m_flags;
 
             // Not interested in clicking anything other than a junction
             if ((netFlags & NetNode.Flags.Junction) == NetNode.Flags.None) {
@@ -467,8 +465,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            Vector3 nodePos = Singleton<NetManager>
-                              .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
+            Vector3 nodePos = SelectedNodeId.ToNode().m_position;
 
             // Cast to screen and center the window on node
             GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 screenPixelPos);
@@ -505,8 +502,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return false;
             }
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
-            NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            bool bJunction = (nodesBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
+            bool bJunction = (nodeId.ToNode().m_flags & NetNode.Flags.Junction) != 0;
 
             // Outgoing lanes toward the node is incomming lanes to the segment end.
             return bJunction && segEnd.incoming;
@@ -591,7 +587,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 && (HoveredSegmentId != SelectedSegmentId
                     || HoveredNodeId != SelectedNodeId))
             {
-                NetNode.Flags nodeFlags = netManager.m_nodes.m_buffer[HoveredNodeId].m_flags;
+                NetNode.Flags nodeFlags = HoveredNodeId.ToNode().m_flags;
 
                 if ((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId
                      || netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId)

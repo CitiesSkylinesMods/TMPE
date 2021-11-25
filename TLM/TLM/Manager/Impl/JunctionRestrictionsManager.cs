@@ -99,7 +99,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private bool MayHaveJunctionRestrictions(ushort nodeId) {
-            ref NetNode netNode = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ref NetNode netNode = ref nodeId.ToNode();
 
             Log._Debug($"JunctionRestrictionsManager.MayHaveJunctionRestrictions({nodeId}): " +
                        $"flags={netNode.m_flags}");

@@ -69,7 +69,7 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logPriority = false;
 #endif
-            ref NetNode netNode = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ref NetNode netNode = ref nodeId.ToNode();
 
             if (!netNode.m_flags.CheckFlags(
                     required: NetNode.Flags.Created | NetNode.Flags.Junction,

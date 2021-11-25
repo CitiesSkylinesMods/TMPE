@@ -172,8 +172,7 @@ namespace TrafficManager.UI.SubTools {
                     // Check the connection class
                     //---------------------------
                     // TODO refactor connection class check
-                    ItemClass connectionClass =
-                        NetManager.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
+                    ItemClass connectionClass = netNode.Info.GetConnectionClass();
 
                     if ((connectionClass == null) ||
                         !((connectionClass.m_service == ItemClass.Service.Road) ||
@@ -187,13 +186,13 @@ namespace TrafficManager.UI.SubTools {
                     //--------------------------
                     // Check the camera distance
                     //--------------------------
-                    Vector3 diff = NetManager.instance.m_nodes.m_buffer[nodeId].m_position - camPos;
+                    Vector3 diff = netNode.m_position - camPos;
 
                     if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
                         continue; // do not draw if too distant
                     }
 
-                    if (NetManager.instance.m_nodes.m_buffer[nodeId].CountSegments() < 2) {
+                    if (netNode.CountSegments() < 2) {
                         continue; // skip non-configurable nodes
                     }
 
@@ -220,7 +219,7 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                float intersectionY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(netManager.m_nodes.m_buffer[nodeId].m_position);
+                float intersectionY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(nodeId.ToNode().m_position);
 
                 foreach (LaneEnd laneEnd in laneEnds) {
                     ref NetLane sourceLane = ref laneEnd.LaneId.ToLane();
@@ -327,8 +326,7 @@ namespace TrafficManager.UI.SubTools {
             // draw bezier from source marker to mouse position in target marker selection
             if (SelectedNodeId != 0) {
                 if (GetSelectionMode() == SelectionMode.SelectTarget) {
-                    Vector3 selNodePos =
-                        NetManager.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
+                    Vector3 selNodePos = SelectedNodeId.ToNode().m_position;
 
                     // Draw a currently dragged curve
                     if (hoveredLaneEnd == null) {
@@ -360,8 +358,6 @@ namespace TrafficManager.UI.SubTools {
                             underground: true);
                     }
                 }
-
-                NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
 
                 if ((frameClearPressed > 0) && ((Time.frameCount - frameClearPressed) < 20)) {
                     // 0.33 sec
@@ -843,7 +839,8 @@ namespace TrafficManager.UI.SubTools {
                         logLaneConn,
                         () => "LaneConnectorTool: HoveredNode != 0");
 
-                    if (NetManager.instance.m_nodes.m_buffer[HoveredNodeId].CountSegments() < 2) {
+                    ref NetNode hoveredNode = ref HoveredNodeId.ToNode();
+                    if (hoveredNode.CountSegments() < 2) {
                         // this node cannot be configured (dead end)
                         Log._DebugIf(
                             logLaneConn,
@@ -862,9 +859,7 @@ namespace TrafficManager.UI.SubTools {
                             () => $"Node {HoveredNodeId} has been selected. Creating markers.");
 
                         // selected node has changed. create markers
-                        List<LaneEnd> laneEnds = GetLaneEnds(
-                            HoveredNodeId,
-                            ref Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId]);
+                        List<LaneEnd> laneEnds = GetLaneEnds(HoveredNodeId, ref hoveredNode);
 
                         if (laneEnds != null) {
                             SelectedNodeId = HoveredNodeId;
@@ -1039,9 +1034,7 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                List<LaneEnd> laneEnds = GetLaneEnds(
-                    nodeId,
-                    ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]);
+                List<LaneEnd> laneEnds = GetLaneEnds(nodeId, ref netNode);
 
                 if (laneEnds == null) {
                     continue;

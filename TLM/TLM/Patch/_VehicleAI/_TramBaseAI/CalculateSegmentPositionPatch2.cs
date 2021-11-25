@@ -92,8 +92,7 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
                             prevLaneID,
                             ref position,
                             prevSourceNodeId,
-                            ref netManager.m_nodes.m_buffer[
-                                prevSourceNodeId],
+                            ref prevSourceNodeId.ToNode(),
                             laneID,
                             ref nextPosition,
                             prevTargetNodeId,

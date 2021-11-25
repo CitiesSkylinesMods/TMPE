@@ -100,7 +100,7 @@ namespace TrafficManager.Util {
             }
 
             // issue #575: Support level crossings.
-            NetNode.Flags flags = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags;
+            NetNode.Flags flags = nodeId.ToNode().m_flags;
             if((flags & NetNode.Flags.LevelCrossing) != 0) {
                 return ErrorResult.NotSupported;
             }
@@ -219,6 +219,7 @@ namespace TrafficManager.Util {
         /// <param name="m">Determines which directions are green</param>
         private static void SetupHelper(ITimedTrafficLightsStep step, ushort nodeId, ushort segmentId, GreenDir m) {
             bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            ref NetNode netNode = ref nodeId.ToNode();
 
             //get step data for side seg
             ICustomSegmentLights liveSegmentLights = customTrafficLightsManager.GetSegmentLights(segmentId, startNode);
@@ -249,8 +250,7 @@ namespace TrafficManager.Util {
                     case GreenDir.ShortOnly: {
                             // calculate directions
                             ref ExtSegmentEnd segEnd = ref segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
-                            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
-                            segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref node, out bool bLeft, out bool bForward, out bool bRight);
+                            segEndMan.CalculateOutgoingLeftStraightRightSegments(ref segEnd, ref netNode, out bool bLeft, out bool bForward, out bool bRight);
                             bool lht = Shortcuts.LHT;
                             bool bShort = lht ? bLeft : bRight;
                             bool bLong = lht ? bRight : bLeft;
@@ -292,7 +292,7 @@ namespace TrafficManager.Util {
         }
 
         private static bool HasIncommingOneWaySegment(ushort nodeId) {
-            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ref NetNode node = ref nodeId.ToNode();
             for (int i = 0; i < 8; ++i) {
                 var segId = node.GetSegment(i);
                 if (segId != 0 && segMan.CalculateIsOneWay(segId)) {
@@ -326,7 +326,7 @@ namespace TrafficManager.Util {
         /// <returns>list of all oneway roads connected to input junction</returns>
         private static List<ushort> OneWayRoads(ushort nodeId, out int count) {
             List<ushort> segList2 = new List<ushort>();
-            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ref NetNode node = ref nodeId.ToNode();
             for (int i = 0; i < 8; ++i) {
                 var segId = node.GetSegment(i);
                 if (segMan.CalculateIsOneWay(segId)) {
