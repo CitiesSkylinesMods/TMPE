@@ -104,7 +104,7 @@ namespace TrafficManager.Manager.Impl {
                 || (netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created)
                     == NetSegment.Flags.None
                 || nodeId == 0
-                || (netManager.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Created)
+                || (nodeId.ToNode().m_flags & NetNode.Flags.Created)
                     == NetNode.Flags.None)
             {
                 return ret;

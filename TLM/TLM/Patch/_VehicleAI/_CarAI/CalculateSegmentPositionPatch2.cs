@@ -128,7 +128,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                         prevLaneID,
                         ref position,
                         nextSourceNodeId,
-                        ref netManager.m_nodes.m_buffer[nextSourceNodeId],
+                        ref nextSourceNodeId.ToNode(),
                         laneID,
                         ref nextPosition,
                         nextTargetNodeId,

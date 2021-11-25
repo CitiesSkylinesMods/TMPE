@@ -94,7 +94,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI{
         /// <param name="position"></param>
         private static void ForceTrafficLights(ushort transitNodeId, PathUnit.Position position) {
             NetManager netMan = NetManager.instance;
-            if ((netMan.m_nodes.m_buffer[transitNodeId].m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
+            if ((transitNodeId.ToNode().m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
                 return;
             }
 

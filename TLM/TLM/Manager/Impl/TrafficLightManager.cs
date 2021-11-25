@@ -136,7 +136,7 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logTrafficLights = false;
 #endif
-            ref NetNode netNode = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ref NetNode netNode = ref nodeId.ToNode();
 
             if (!flag && TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
                 reason = ToggleTrafficLightError.HasTimedLight;
@@ -148,7 +148,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (flag &&
-                (!nodeId.ToNode().IsValid()
+                (!netNode.IsValid()
                 || !netNode.m_flags.IsFlagSet(NetNode.Flags.Junction)
                 || (netNode.m_flags.IsFlagSet(NetNode.Flags.Untouchable)
                     && (!node.Info.m_class || node.Info.m_class.m_service != ItemClass.Service.Road)))) {

@@ -57,8 +57,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             if ((HoveredNodeId != 0) && (HoveredNodeId != SelectedNodeId) &&
-                ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags &
-                  (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None)) {
+                ((HoveredNodeId.ToNode().m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None)) {
                 // draw hovered node
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
             }
@@ -155,8 +154,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             if (!logJunctions &&
-                ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags &
-                  (NetNode.Flags.Junction | NetNode.Flags.Bend)) == NetNode.Flags.None)) {
+                ((HoveredNodeId.ToNode().m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) == NetNode.Flags.None)) {
                 return;
             }
 

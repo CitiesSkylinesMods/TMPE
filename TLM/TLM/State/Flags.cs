@@ -155,13 +155,13 @@ namespace TrafficManager.State {
                 return false;
             }
 
-            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ref NetNode node = ref nodeId.ToNode();
 
             if ((node.m_flags &
                  (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created)
             {
                 // Log._Debug($"Flags: Node {nodeId} may not have a traffic light (not created).
-                // flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}");
+                // flags={node.m_flags}");
                 node.m_flags &= ~NetNode.Flags.TrafficLights;
                 return false;
             }
@@ -178,14 +178,12 @@ namespace TrafficManager.State {
                 return false;
             }
 
-            ItemClass connectionClass = Singleton<NetManager>
-                                        .instance.m_nodes.m_buffer[nodeId].Info
-                                        .GetConnectionClass();
+            ItemClass connectionClass = node.Info.GetConnectionClass();
             if ((node.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None &&
                 connectionClass.m_service != ItemClass.Service.PublicTransport)
             {
                 // Log._Debug($"Flags: Node {nodeId} may not have a traffic light (no junction or
-                // not public transport). flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}
+                // not public transport). flags={node.m_flags}
                 // connectionClass={connectionClass?.m_service}");
                 node.m_flags &= ~NetNode.Flags.TrafficLights;
                 return false;
@@ -879,13 +877,12 @@ namespace TrafficManager.State {
                     }
 
                     ushort nodeId = isStartNode
-                                        ? netManager.m_segments.m_buffer[segmentId].m_startNode
-                                        : netManager.m_segments.m_buffer[segmentId].m_endNode;
+                        ? netManager.m_segments.m_buffer[segmentId].m_startNode
+                        : netManager.m_segments.m_buffer[segmentId].m_endNode;
+                    ref NetNode netNode = ref nodeId.ToNode();
 
-                    return (netManager.m_nodes.m_buffer[nodeId].m_flags &
-                            (NetNode.Flags.Created | NetNode.Flags.Deleted)) == NetNode.Flags.Created
-                           && (netManager.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction)
-                           != NetNode.Flags.None;
+                    return (netNode.m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) == NetNode.Flags.Created
+                        && (netNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
                 }
 
                 curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
