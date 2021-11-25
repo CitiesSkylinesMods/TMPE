@@ -85,8 +85,9 @@ namespace TrafficManager.Util.Record {
                 try {
                     record.Transfer(map);
                 }
-                catch {
+                catch (Exception ex) {
                     Log.Error($"could not transfer {record}");
+                    ex.LogException();
                 }
             }
         }
