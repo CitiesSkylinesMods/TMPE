@@ -63,7 +63,7 @@ namespace TrafficManager.Util {
                 IList<LanePos> laneList =
                     extSegmentManager.GetSortedLanes(
                         segmentId,
-                        ref GetSeg(segmentId),
+                        ref segmentId.ToSegment(),
                         startNode,
                         LaneArrowManager.LANE_TYPES,
                         LaneArrowManager.VEHICLE_TYPES,
@@ -73,7 +73,7 @@ namespace TrafficManager.Util {
                 // check for exits.
                 segEndMan.CalculateOutgoingLeftStraightRightSegments(
                     ref GetSegEnd(segmentId, nodeId),
-                    ref GetNode(nodeId),
+                    ref nodeId.ToNode(),
                     out bool bLeft,
                     out bool bForward,
                     out bool bRight);
@@ -175,7 +175,7 @@ namespace TrafficManager.Util {
             }
             int shortUnit = 4;
             int meterPerUnit = 8;
-            ref NetSegment seg = ref GetSeg(segmentId);
+            ref NetSegment seg = ref segmentId.ToSegment();
             ushort otherNodeId = seg.GetOtherNode(nodeId);
             if (OptionsMassEditTab.RoundAboutQuickFix_StayInLaneNearRabout &&
                 !HasJunctionFlag(otherNodeId) &&
@@ -185,7 +185,7 @@ namespace TrafficManager.Util {
         }
 
         private void FixMinor(ushort nodeId) {
-            ref NetNode node = ref GetNode(nodeId);
+            ref NetNode node = ref nodeId.ToNode();
             for (int i = 0; i < 8; ++i) {
                 //find connected segments.
                 ushort segmentId = node.GetSegment(i);

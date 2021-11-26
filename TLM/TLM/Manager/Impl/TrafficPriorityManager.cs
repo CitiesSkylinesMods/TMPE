@@ -335,7 +335,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             SegmentEndManager.Instance.UpdateSegmentEnd(segmentId, startNode);
-            Notifier.Instance.OnNodeModified(segmentId.ToSegment().GetNode(startNode), this);
+            Notifier.Instance.OnNodeModified(segmentId.ToSegment().GetNodeId(startNode), this);
         }
 
         public PriorityType GetPrioritySign(ushort segmentId, bool startNode) {

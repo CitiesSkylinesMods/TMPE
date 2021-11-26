@@ -1227,9 +1227,9 @@ namespace TrafficManager.UI.SubTools {
 
             // check track turning angles are within bounds
             ret &= isRoad || CheckSegmentsTurningAngle(
-                    sourceSegment: ref GetSeg(source.SegmentId),
+                    sourceSegment: ref source.SegmentId.ToSegment(),
                     sourceStartNode: source.StartNode,
-                    targetSegment: ref GetSeg(target.SegmentId),
+                    targetSegment: ref target.SegmentId.ToSegment(),
                     targetStartNode: target.StartNode);
 
             return ret;

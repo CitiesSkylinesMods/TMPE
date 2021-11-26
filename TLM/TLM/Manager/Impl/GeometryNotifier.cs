@@ -15,7 +15,7 @@ namespace TrafficManager.Manager.Impl {
                 } else if (subject.segment is ExtSegment segmentExt) {
                     Notifier.Instance.OnSegmentModified(segmentExt.segmentId, this);
                 }else  if (subject.replacement.newSegmentEndId is ISegmentEndId newSegmentEndId) {
-                    ushort nodeId2 = newSegmentEndId.SegmentId.ToSegment().GetNode(newSegmentEndId.StartNode);
+                    ushort nodeId2 = newSegmentEndId.SegmentId.ToSegment().GetNodeId(newSegmentEndId.StartNode);
                     Notifier.Instance.OnNodeModified(nodeId2, this);
                 }
             } catch (Exception ex) {
