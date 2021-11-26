@@ -747,14 +747,14 @@ namespace TrafficManager.UI {
             bezier.d = GetNodePos(segment.m_endNode);
 
             NetSegment.CalculateMiddlePoints(
-                bezier.a,
-                segment.m_startDirection,
-                bezier.d,
-                segment.m_endDirection,
-                IsMiddle(segment.m_startNode),
-                IsMiddle(segment.m_endNode),
-                out bezier.b,
-                out bezier.c);
+                startPos: bezier.a,
+                startDir: segment.m_startDirection,
+                endPos: bezier.d,
+                endDir: segment.m_endDirection,
+                smoothStart: IsMiddle(segment.m_startNode),
+                smoothEnd: IsMiddle(segment.m_endNode),
+                middlePos1: out bezier.b,
+                middlePos2: out bezier.c);
 
             if (bStartNode) {
                 bezier = bezier.Cut(0, cut);
@@ -764,16 +764,16 @@ namespace TrafficManager.UI {
 
             Singleton<ToolManager>.instance.m_drawCallData.m_overlayCalls++;
             Singleton<RenderManager>.instance.OverlayEffect.DrawBezier(
-                cameraInfo,
-                color,
-                bezier,
-                width * 2f,
-                bStartNode ? 0 : width,
-                bStartNode ? width : 0,
-                -1f,
-                1280f,
-                false,
-                alpha);
+                cameraInfo: cameraInfo,
+                color: color,
+                bezier: bezier,
+                size: width * 2f,
+                cutStart: bStartNode ? 0 : width,
+                cutEnd: bStartNode ? width : 0,
+                minY: -1f,
+                maxY: 1280f,
+                renderLimits: false,
+                alphaBlend: alpha);
         }
 
         /// <summary>
