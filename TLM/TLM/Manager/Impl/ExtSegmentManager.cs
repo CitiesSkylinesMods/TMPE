@@ -1,10 +1,13 @@
 namespace TrafficManager.Manager.Impl {
     using ColossalFramework;
     using CSUtil.Commons;
+    using System;
+    using System.Collections.Generic;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class ExtSegmentManager
         : AbstractCustomManager,
@@ -67,32 +70,6 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        public bool IsLaneAndItsSegmentValid(uint laneId) {
-            return IsLaneValid(laneId)
-                && IsSegmentValid(Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment);
-        }
-
-        public bool IsSegmentValid(ushort segmentId) {
-            var createdCollapsedDeleted = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags
-                    & (NetSegment.Flags.Created | NetSegment.Flags.Collapsed | NetSegment.Flags.Deleted);
-
-            return createdCollapsedDeleted == NetSegment.Flags.Created;
-        }
-
-        /// <summary>
-        /// Check if a lane id is valid.
-        /// </summary>
-        ///
-        /// <param name="laneId">The id of the lane to check.</param>
-        ///
-        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
-        public bool IsLaneValid(uint laneId) {
-            var createdDeleted = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_flags
-                & (uint)(NetLane.Flags.Created | NetLane.Flags.Deleted);
-
-            return createdDeleted == (uint)NetLane.Flags.Created;
-        }
-
         public void PublishSegmentChanges(ushort segmentId) {
             Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
             SimulationManager simulationManager = Singleton<SimulationManager>.instance;
@@ -125,7 +102,8 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($">>> ExtSegmentManager.Recalculate({segmentId}) called.");
             }
 
-            if (!IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            if (!netSegment.IsValid()) {
                 if (extSegment.valid) {
                     Reset(ref extSegment);
                     extSegment.valid = false;
@@ -161,18 +139,20 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateIsOneWay(ushort segmentId) {
-            if (!IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
 
             NetManager instance = Singleton<NetManager>.instance;
 
-            NetInfo info = instance.m_segments.m_buffer[segmentId].Info;
+            NetInfo info = netSegment.Info;
 
             var hasForward = false;
             var hasBackward = false;
 
-            uint laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
+            uint laneId = netSegment.m_lanes;
             var laneIndex = 0;
             while (laneIndex < info.m_lanes.Length && laneId != 0u) {
                 bool validLane =
@@ -207,11 +187,13 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateHasBusLane(ushort segmentId) {
-            if (!IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
 
-            return CalculateHasBusLane(segmentId.ToSegment().Info);
+            return CalculateHasBusLane(netSegment.Info);
         }
 
         /// <summary>
@@ -231,11 +213,13 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool CalculateIsHighway(ushort segmentId) {
-            if (!IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
 
-            return CalculateIsHighway(segmentId.ToSegment().Info);
+            return CalculateIsHighway(netSegment.Info);
         }
 
         /// <summary>
@@ -248,12 +232,138 @@ namespace TrafficManager.Manager.Impl {
                    && ((RoadBaseAI)segmentInfo.m_netAI).m_highwayRules;
         }
 
+        public GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId) {
+            NetManager netManager = Singleton<NetManager>.instance;
+            ref NetSegment netSegment = ref netManager.m_segments.m_buffer[segmentId];
+            uint initialLaneId = netSegment.m_lanes;
+            NetInfo netInfo = netSegment.Info;
+            NetLane[] laneBuffer = netManager.m_lanes.m_buffer;
+            if (netInfo == null) {
+                return new GetSegmentLaneIdsEnumerable(0, 0, laneBuffer);
+            }
+
+            return new GetSegmentLaneIdsEnumerable(initialLaneId, netInfo.m_lanes.Length, laneBuffer);
+        }
+
+        /// <summary>
+        /// Assembles a geometrically sorted list of lanes for the given segment.
+        /// If the <paramref name="startNode"/> parameter is set only lanes supporting traffic to flow towards the given node are added to the list, otherwise all matched lanes are added.
+        /// </summary>
+        /// <param name="segmentId">segment id</param>
+        /// <param name="segment">segment data</param>
+        /// <param name="startNode">reference node (optional)</param>
+        /// <param name="laneTypeFilter">lane type filter, lanes must match this filter mask</param>
+        /// <param name="vehicleTypeFilter">vehicle type filter, lanes must match this filter mask</param>
+        /// <param name="reverse">if true, lanes are ordered from right to left (relative to the
+        ///     segment's start node / the given node), otherwise from left to right</param>
+        /// <param name="sort">if false, no sorting takes place
+        ///     regardless of <paramref name="reverse"/></param>
+        /// <returns>sorted list of lanes for the given segment</returns>
+        public IList<LanePos> GetSortedLanes(ushort segmentId,
+                                             ref NetSegment segment,
+                                             bool? startNode,
+                                             NetInfo.LaneType? laneTypeFilter = null,
+                                             VehicleInfo.VehicleType? vehicleTypeFilter = null,
+                                             bool reverse = false,
+                                             bool sort = true) {
+            // TODO refactor together with getSegmentNumVehicleLanes, especially the vehicle type and lane type checks
+            NetManager netManager = Singleton<NetManager>.instance;
+            var laneList = new List<LanePos>();
+
+            bool inverted = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
+
+            NetInfo.Direction? filterDir = null;
+            NetInfo.Direction sortDir = NetInfo.Direction.Forward;
+
+            if (startNode != null) {
+                filterDir = (bool)startNode
+                                ? NetInfo.Direction.Backward
+                                : NetInfo.Direction.Forward;
+                filterDir = inverted
+                                ? NetInfo.InvertDirection((NetInfo.Direction)filterDir)
+                                : filterDir;
+                sortDir = NetInfo.InvertDirection((NetInfo.Direction)filterDir);
+            } else if (inverted) {
+                sortDir = NetInfo.Direction.Backward;
+            }
+
+            if (reverse) {
+                sortDir = NetInfo.InvertDirection(sortDir);
+            }
+
+            NetInfo segmentInfo = segment.Info;
+            uint curLaneId = segment.m_lanes;
+            byte laneIndex = 0;
+
+            while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
+                NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
+                if ((laneTypeFilter == null ||
+                     (laneInfo.m_laneType & laneTypeFilter) != NetInfo.LaneType.None) &&
+                    (vehicleTypeFilter == null || (laneInfo.m_vehicleType & vehicleTypeFilter) !=
+                     VehicleInfo.VehicleType.None) &&
+                    (filterDir == null ||
+                     segmentInfo.m_lanes[laneIndex].m_finalDirection == filterDir)) {
+                    laneList.Add(
+                        new LanePos(
+                            curLaneId,
+                            laneIndex,
+                            segmentInfo.m_lanes[laneIndex].m_position,
+                            laneInfo.m_vehicleType,
+                            laneInfo.m_laneType));
+                }
+
+                curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
+                ++laneIndex;
+            }
+
+            if (sort) {
+                int CompareLanePositionsFun(LanePos x, LanePos y) {
+                    bool fwd = sortDir == NetInfo.Direction.Forward;
+                    if (Math.Abs(x.position - y.position) < 1e-12) {
+                        if (x.position > 0) {
+                            // mirror type-bound lanes (e.g. for coherent disply of lane-wise speed limits)
+                            fwd = !fwd;
+                        }
+
+                        if (x.laneType == y.laneType) {
+                            if (x.vehicleType == y.vehicleType) {
+                                return 0;
+                            }
+
+                            if ((x.vehicleType < y.vehicleType) == fwd) {
+                                return -1;
+                            }
+
+                            return 1;
+                        }
+
+                        if ((x.laneType < y.laneType) == fwd) {
+                            return -1;
+                        }
+
+                        return 1;
+                    }
+
+                    if (x.position < y.position == fwd) {
+                        return -1;
+                    }
+
+                    return 1;
+                }
+
+                laneList.Sort(CompareLanePositionsFun);
+            }
+            return laneList;
+        }
+
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
             Log._Debug($"Extended segment data:");
 
             for (int i = 0; i < ExtSegments.Length; ++i) {
-                if (!IsSegmentValid((ushort)i)) {
+                ref NetSegment netSegment = ref ((ushort)i).ToSegment();
+
+                if (!netSegment.IsValid()) {
                     continue;
                 }
 

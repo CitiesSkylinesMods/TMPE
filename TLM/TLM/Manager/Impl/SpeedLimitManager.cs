@@ -16,6 +16,7 @@ namespace TrafficManager.Manager.Impl {
     using UnityEngine;
     using System.Text;
     using TrafficManager.API.Traffic;
+    using TrafficManager.Util.Extensions;
 
     public class SpeedLimitManager
         : AbstractGeometryObservingManager,
@@ -276,14 +277,14 @@ namespace TrafficManager.Manager.Impl {
             }
 
             for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
+                ref NetLane netLane = ref laneId.ToLane();
+
+                if (!netLane.IsValidWithSegment()) {
                     continue;
                 }
 
-                ushort segmentId =
-                    Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
-                NetInfo laneInfo =
-                    Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+                ushort segmentId = netLane.m_segment;
+                NetInfo laneInfo = segmentId.ToSegment().Info;
 
                 if (laneInfo.name != info.name
                     && (!childNetInfoNamesByCustomizableNetInfoName_.ContainsKey(info.name)
@@ -325,7 +326,8 @@ namespace TrafficManager.Manager.Impl {
             }
 
             for (uint laneId = 1; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
+                ref NetLane netLane = ref laneId.ToLane();
+                if (!netLane.IsValidWithSegment()) {
                     continue;
                 }
 
@@ -512,7 +514,8 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
+            ref NetLane netLane = ref laneId.ToLane();
+            if (!netLane.IsValidWithSegment()) {
                 return false;
             }
 
@@ -851,7 +854,9 @@ namespace TrafficManager.Manager.Impl {
 #endif
             foreach (Configuration.LaneSpeedLimit laneSpeedLimit in data) {
                 try {
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneSpeedLimit.laneId)) {
+                    ref NetLane netLane = ref laneSpeedLimit.laneId.ToLane();
+
+                    if (!netLane.IsValidWithSegment()) {
 #if DEBUG
                         Log._DebugIf(
                             debugSpeedLimits,

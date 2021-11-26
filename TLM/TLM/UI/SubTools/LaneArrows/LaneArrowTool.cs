@@ -3,7 +3,6 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using ColossalFramework;
     using ColossalFramework.UI;
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
@@ -14,6 +13,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using Debug = UnityEngine.Debug;
@@ -134,8 +134,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            // Vector3 nodePos = Singleton<NetManager>
-            //                   .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
+            // Vector3 nodePos = SelectedNodeId.ToNode().m_position;
             //
             // // Hide if node position is off-screen
             //
@@ -153,7 +152,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             // }
             // Calculate lanes and arrows
             NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            IList<LanePos> laneList = Constants.ServiceFactory.NetService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            IList<LanePos> laneList = extSegmentManager.GetSortedLanes(
                 SelectedSegmentId,
                 ref segmentsBuffer[SelectedSegmentId],
                 segmentsBuffer[SelectedSegmentId].m_startNode == SelectedNodeId,
@@ -257,9 +257,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
         /// </summary>
         /// <returns>true if the segemnt can be reset.</returns>
         private static bool CanReset(ushort segmentId, bool startNode) {
-            foreach (var lanePos in netService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (var lanePos in extSegmentManager.GetSortedLanes(
                 segmentId,
-                ref GetSeg(segmentId),
+                ref segmentId.ToSegment(),
                 startNode,
                 LaneArrowManager.LANE_TYPES,
                 LaneArrowManager.VEHICLE_TYPES)) {
@@ -333,8 +334,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
 
             // Clicked on something which was hovered
-            NetNode.Flags netFlags =
-                Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags;
+            NetNode.Flags netFlags = HoveredNodeId.ToNode().m_flags;
 
             // Not interested in clicking anything other than a junction
             if ((netFlags & NetNode.Flags.Junction) == NetNode.Flags.None) {
@@ -465,8 +465,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return;
             }
 
-            Vector3 nodePos = Singleton<NetManager>
-                              .instance.m_nodes.m_buffer[SelectedNodeId].m_position;
+            Vector3 nodePos = SelectedNodeId.ToNode().m_position;
 
             // Cast to screen and center the window on node
             GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 screenPixelPos);
@@ -487,9 +486,12 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             if(nodeId == 0 || segmentId == 0) {
                 return false;
             }
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            ref NetNode netNode = ref nodeId.ToNode();
+
 #if DEBUG
-            if(!ExtNodeManager.Instance.IsValid(nodeId) ||
-               !ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            if (!netNode.IsValid() ||
+               !netSegment.IsValid()) {
                 Debug.LogError("Invalid node or segment ID");
             }
 #endif
@@ -500,8 +502,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 return false;
             }
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, nodeId)];
-            NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            bool bJunction = (nodesBuffer[nodeId].m_flags & NetNode.Flags.Junction) != 0;
+            bool bJunction = (nodeId.ToNode().m_flags & NetNode.Flags.Junction) != 0;
 
             // Outgoing lanes toward the node is incomming lanes to the segment end.
             return bJunction && segEnd.incoming;
@@ -599,7 +600,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 && (HoveredSegmentId != SelectedSegmentId
                     || HoveredNodeId != SelectedNodeId))
             {
-                NetNode.Flags nodeFlags = netManager.m_nodes.m_buffer[HoveredNodeId].m_flags;
+                NetNode.Flags nodeFlags = HoveredNodeId.ToNode().m_flags;
 
                 if ((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId
                      || netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId)

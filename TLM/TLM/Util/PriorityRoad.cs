@@ -1,6 +1,5 @@
 namespace TrafficManager.Util {
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using System;
     using System.Collections.Generic;
     using TrafficManager.API.Manager;
@@ -175,8 +174,7 @@ namespace TrafficManager.Util {
         }
 
         private static bool IsStraighOneWay(ushort segmentId0, ushort segmentId1) {
-            ref NetSegment seg0 = ref GetSeg(segmentId0);
-            //ref NetSegment seg1 = ref GetSeg(segmentId1);
+            ref NetSegment seg0 = ref segmentId0.ToSegment();
             bool oneway = segMan.CalculateIsOneWay(segmentId0) &&
                           segMan.CalculateIsOneWay(segmentId1);
             if (!oneway) {
@@ -242,9 +240,9 @@ namespace TrafficManager.Util {
             void SetArrows(ushort segmentIdSrc, ushort segmentIdDst) {
                 LaneArrows arrow = ToLaneArrows(GetDirection(segmentIdSrc, segmentIdDst, nodeId));
                 ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
-                IList<LanePos> lanes = netService.GetSortedLanes(
+                IList<LanePos> lanes = extSegmentManager.GetSortedLanes(
                                 segmentIdSrc,
-                                ref GetSeg(segmentIdSrc),
+                                ref segmentIdSrc.ToSegment(),
                                 extSegmentManager.IsStartNode(segmentIdSrc, nodeId),
                                 LaneArrowManager.LANE_TYPES,
                                 LaneArrowManager.VEHICLE_TYPES,
@@ -431,7 +429,8 @@ namespace TrafficManager.Util {
         }
 
         private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
-            return netService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            return extSegmentManager.GetSortedLanes(
                                 segmentId,
                                 ref segmentId.ToSegment(),
                                 ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!toward),
@@ -485,10 +484,11 @@ namespace TrafficManager.Util {
             ref NetNode node = ref nodeId.ToNode();
             bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
             bool lht = LHT;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             //list of outgoing lanes from current segment to current node.
             IList<LanePos> laneList =
-                netService.GetSortedLanes(
+                extSegmentManager.GetSortedLanes(
                     segmentId,
                     ref seg,
                     startNode,
@@ -534,10 +534,11 @@ namespace TrafficManager.Util {
             ref NetSegment seg = ref segmentId.ToSegment();
             ref NetNode node = ref nodeId.ToNode();
             bool startNode = (bool)ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId);
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             //list of outgoing lanes from current segment to current node.
             IList<LanePos> laneList =
-                netService.GetSortedLanes(
+                extSegmentManager.GetSortedLanes(
                     segmentId,
                     ref seg,
                     startNode,
@@ -587,8 +588,8 @@ namespace TrafficManager.Util {
         /// returns a posetive value if seg1Id < seg2Id
         /// </summary>
         internal static int CompareSegments(ushort seg1Id, ushort seg2Id) {
-            ref NetSegment seg1 = ref GetSeg(seg1Id);
-            ref NetSegment seg2 = ref GetSeg(seg2Id);
+            ref NetSegment seg1 = ref seg1Id.ToSegment();
+            ref NetSegment seg2 = ref seg2Id.ToSegment();
             int diff = (int)Mathf.RoundToInt(seg2.Info.m_halfWidth - seg1.Info.m_halfWidth);
             if (diff == 0) {
                 diff = CountRoadVehicleLanes(seg2Id) - CountRoadVehicleLanes(seg1Id);

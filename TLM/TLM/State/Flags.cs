@@ -5,13 +5,12 @@ namespace TrafficManager.State {
     using CSUtil.Commons;
     using System.Collections.Generic;
     using System;
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State.ConfigData;
     using static TrafficManager.Util.Shortcuts;
+    using TrafficManager.Util.Extensions;
 
     [Obsolete]
     public class Flags {
@@ -62,8 +61,10 @@ namespace TrafficManager.State {
             Log.Info("--- LANE ARROW FLAGS ---");
             Log.Info("------------------------");
             for (uint i = 0; i < laneArrowFlags.Length; ++i) {
+                ref NetLane netLane = ref i.ToLane();
+
                 if (highwayLaneArrowFlags[i] != null || laneArrowFlags[i] != null) {
-                    Log.Info($"Lane {i}: valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(i)}");
+                    Log.Info($"Lane {i}: valid? {netLane.IsValidWithSegment()}");
                 }
 
                 if (highwayLaneArrowFlags[i] != null) {
@@ -82,20 +83,31 @@ namespace TrafficManager.State {
                 if (laneConnections[i] == null)
                     continue;
 
-                ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[i].m_segment;
-                Log.Info($"Lane {i}: valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(i)}, seg. valid? {ExtSegmentManager.Instance.IsSegmentValid(segmentId)}");
+                ref NetLane netLane = ref i.ToLane();
+
+                ushort segmentId = netLane.m_segment;
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                Log.Info($"Lane {i}: valid? {netLane.IsValidWithSegment()}, seg. valid? {netSegment.IsValid()}");
+
+                //TODO: refactor this
                 for (int x = 0; x < 2; ++x) {
                     if (laneConnections[i][x] == null)
                         continue;
 
-                    ushort nodeId = x == 0 ? Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_startNode : Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_endNode;
-                    Log.Info($"\tNode idx {x} ({nodeId}, seg. {segmentId}): valid? {ExtNodeManager.Instance.IsValid(nodeId)}");
+                    ushort nodeId = x == 0 ? netSegment.m_startNode : netSegment.m_endNode;
+                    ref NetNode netNode = ref nodeId.ToNode();
+                    Log.Info($"\tNode idx {x} ({nodeId}, seg. {segmentId}): valid? {netNode.IsValid()}");
 
                     for (int y = 0; y < laneConnections[i][x].Length; ++y) {
-                        if (laneConnections[i][x][y] == 0)
+                        uint laneIdOfConnection = laneConnections[i][x][y];
+
+                        if (laneIdOfConnection == 0)
                             continue;
 
-                        Log.Info($"\t\tEntry {y}: {laneConnections[i][x][y]} (valid? {ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneConnections[i][x][y])})");
+                        ref NetLane netLaneOfConnection = ref laneIdOfConnection.ToLane();
+
+                        Log.Info($"\t\tEntry {y}: {laneIdOfConnection} (valid? {netLaneOfConnection.IsValidWithSegment()})");
                     }
                 }
             }
@@ -108,8 +120,9 @@ namespace TrafficManager.State {
                     continue;
                 }
 
-                Log.Info($"Segment {i}: valid? {ExtSegmentManager.Instance.IsSegmentValid((ushort)i)}");
+                ref NetSegment netSegment = ref ((ushort)i).ToSegment();
 
+                Log.Info($"Segment {i}: valid? {netSegment.IsValid()}");
                 for (int x = 0; x < laneSpeedLimitArray[i].Length; ++x) {
                     if (laneSpeedLimitArray[i][x] == null)
                         continue;
@@ -121,9 +134,11 @@ namespace TrafficManager.State {
             Log.Info("--- LANE VEHICLE RESTRICTIONS ---");
             Log.Info("---------------------------------");
             for (uint i = 0; i < laneAllowedVehicleTypesArray.Length; ++i) {
+                ref NetSegment netSegment = ref ((ushort)i).ToSegment();
+
                 if (laneAllowedVehicleTypesArray[i] == null)
                     continue;
-                Log.Info($"Segment {i}: valid? {ExtSegmentManager.Instance.IsSegmentValid((ushort)i)}");
+                Log.Info($"Segment {i}: valid? {netSegment.IsValid()}");
                 for (int x = 0; x < laneAllowedVehicleTypesArray[i].Length; ++x) {
                     if (laneAllowedVehicleTypesArray[i][x] == null)
                         continue;
@@ -138,13 +153,13 @@ namespace TrafficManager.State {
                 return false;
             }
 
-            ref NetNode node = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ref NetNode node = ref nodeId.ToNode();
 
             if ((node.m_flags &
                  (NetNode.Flags.Created | NetNode.Flags.Deleted)) != NetNode.Flags.Created)
             {
                 // Log._Debug($"Flags: Node {nodeId} may not have a traffic light (not created).
-                // flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}");
+                // flags={node.m_flags}");
                 node.m_flags &= ~NetNode.Flags.TrafficLights;
                 return false;
             }
@@ -161,14 +176,12 @@ namespace TrafficManager.State {
                 return false;
             }
 
-            ItemClass connectionClass = Singleton<NetManager>
-                                        .instance.m_nodes.m_buffer[nodeId].Info
-                                        .GetConnectionClass();
+            ItemClass connectionClass = node.Info.GetConnectionClass();
             if ((node.m_flags & NetNode.Flags.Junction) == NetNode.Flags.None &&
                 connectionClass.m_service != ItemClass.Service.PublicTransport)
             {
                 // Log._Debug($"Flags: Node {nodeId} may not have a traffic light (no junction or
-                // not public transport). flags={Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags}
+                // not public transport). flags={node.m_flags}
                 // connectionClass={connectionClass?.m_service}");
                 node.m_flags &= ~NetNode.Flags.TrafficLights;
                 return false;
@@ -865,13 +878,12 @@ namespace TrafficManager.State {
                     }
 
                     ushort nodeId = isStartNode
-                                        ? netManager.m_segments.m_buffer[segmentId].m_startNode
-                                        : netManager.m_segments.m_buffer[segmentId].m_endNode;
+                        ? netManager.m_segments.m_buffer[segmentId].m_startNode
+                        : netManager.m_segments.m_buffer[segmentId].m_endNode;
+                    ref NetNode netNode = ref nodeId.ToNode();
 
-                    return (netManager.m_nodes.m_buffer[nodeId].m_flags &
-                            (NetNode.Flags.Created | NetNode.Flags.Deleted)) == NetNode.Flags.Created
-                           && (netManager.m_nodes.m_buffer[nodeId].m_flags & NetNode.Flags.Junction)
-                           != NetNode.Flags.None;
+                    return (netNode.m_flags & (NetNode.Flags.Created | NetNode.Flags.Deleted)) == NetNode.Flags.Created
+                        && (netNode.m_flags & NetNode.Flags.Junction) != NetNode.Flags.None;
                 }
 
                 curLaneId = netManager.m_lanes.m_buffer[curLaneId].m_nextLane;
@@ -904,6 +916,7 @@ namespace TrafficManager.State {
 
         internal static IDictionary<uint, ExtVehicleType> GetAllLaneAllowedVehicleTypes() {
             IDictionary<uint, ExtVehicleType> ret = new Dictionary<uint, ExtVehicleType>();
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 ref NetSegment segment = ref segmentId.ToSegment();
@@ -916,7 +929,7 @@ namespace TrafficManager.State {
                     continue;
                 }
 
-                foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                     NetInfo.Lane laneInfo = segment.Info.m_lanes[laneIdAndIndex.laneIndex];
 
                     if (laneInfo.m_vehicleType == VehicleInfo.VehicleType.None) {

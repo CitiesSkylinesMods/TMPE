@@ -5,8 +5,6 @@ namespace TrafficManager.Manager.Impl {
     using System.Collections.Generic;
     using System.Linq;
     using System;
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -15,6 +13,7 @@ namespace TrafficManager.Manager.Impl {
     using UnityEngine;
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class LaneConnectionManager
         : AbstractGeometryObservingManager,
@@ -72,7 +71,7 @@ namespace TrafficManager.Manager.Impl {
         private bool IsHeadingTowardsStartNode(uint sourceLaneId) {
             NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
             ushort segmentId = laneBuffer[sourceLaneId].m_segment;
-            NetSegment segment = GetSeg(segmentId);
+            ref NetSegment segment = ref segmentId.ToSegment();
             uint laneId = segment.m_lanes;
             bool inverted = (segment.m_flags & NetSegment.Flags.Invert) != 0;
 
@@ -118,8 +117,10 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             ref NetSegment netSegment = ref segmentId.ToSegment();
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 if (HasConnections(
                     laneIdAndIndex.laneId,
                     netSegment.m_startNode == nodeId)) {
@@ -257,8 +258,8 @@ namespace TrafficManager.Manager.Impl {
             RecalculateLaneArrows(laneId1, commonNodeId, startNode1);
             RecalculateLaneArrows(laneId2, commonNodeId, startNode2);
 
-            RoutingManager.Instance.RequestRecalculation(segmentId1, false);
-            RoutingManager.Instance.RequestRecalculation(segmentId2, false);
+            ref NetNode commonNode = ref commonNodeId.ToNode();
+            RoutingManager.Instance.RequestNodeRecalculation(ref commonNode);
 
             if (OptionsManager.Instance.MayPublishSegmentChanges()) {
                 ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
@@ -309,7 +310,8 @@ namespace TrafficManager.Manager.Impl {
                     $"{startNode}) called.");
             }
 
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 if (logLaneConnections) {
                     Log._Debug(
                         "LaneConnectionManager.RemoveLaneConnectionsFromSegment: Removing " +
@@ -644,7 +646,9 @@ namespace TrafficManager.Manager.Impl {
                            $"startNode? {startNode}");
             }
 
-            if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+            ref NetNode netNode = ref nodeId.ToNode();
+
+            if (!netNode.IsValid()) {
                 if (logLaneConnections) {
                     Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
                                "Node is invalid");
@@ -655,9 +659,9 @@ namespace TrafficManager.Manager.Impl {
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
             ExtSegmentEnd segEnd = segEndMan.ExtSegmentEnds[segEndMan.GetIndex(segmentId, startNode)];
-            ref NetNode node = ref nodeId.ToNode();
+            
             for (int i = 0; i < 8; ++i) {
-                ushort otherSegmentId = node.GetSegment(i);
+                ushort otherSegmentId = netNode.GetSegment(i);
                 if (otherSegmentId != 0) {
                     //TODO move the following into a function
                     ArrowDirection dir = segEndMan.GetDirection(ref segEnd, otherSegmentId);
@@ -808,11 +812,13 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.LaneConnection conn in data) {
                 try {
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(conn.lowerLaneId)) {
+                    ref NetLane lowerLane = ref conn.lowerLaneId.ToLane();
+                    if (!lowerLane.IsValidWithSegment()) {
                         continue;
                     }
 
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(conn.higherLaneId)) {
+                    ref NetLane higherLane = ref conn.higherLaneId.ToLane();
+                    if (!higherLane.IsValidWithSegment()) {
                         continue;
                     }
 
@@ -857,7 +863,7 @@ namespace TrafficManager.Manager.Impl {
                         // ret.AddRange(
                         //     from otherHigherLaneId in connectedLaneIds
                         //     where otherHigherLaneId > i
-                        //     where Services.NetService.IsLaneValid(otherHigherLaneId)
+                        //     where otherHigherLaneId.ToLane().IsValid()
                         //     select new Configuration.LaneConnection(i, otherHigherLaneId, startNode));
                         //-------------------------------------------------------------
                         foreach (uint otherHigherLaneId in connectedLaneIds) {
@@ -865,7 +871,8 @@ namespace TrafficManager.Manager.Impl {
                                 continue;
                             }
 
-                            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(otherHigherLaneId)) {
+                            ref NetLane otherHigherLane = ref otherHigherLaneId.ToLane();
+                            if (!otherHigherLane.IsValidWithSegment()) {
                                 continue;
                             }
 

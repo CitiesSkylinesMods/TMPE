@@ -3,8 +3,6 @@ namespace TrafficManager.Util.Record {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using static TrafficManager.Util.Shortcuts;
@@ -93,7 +91,7 @@ namespace TrafficManager.Util.Record {
                     continue;
                 }
 
-                foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+                foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                     NetInfo.Lane laneInfo = netInfo.m_lanes[laneIdAndIndex.laneIndex];
                     bool match = (laneInfo.m_laneType & LaneConnectionManager.LANE_TYPES) != 0 &&
                                  (laneInfo.m_vehicleType & LaneConnectionManager.VEHICLE_TYPES) != 0;

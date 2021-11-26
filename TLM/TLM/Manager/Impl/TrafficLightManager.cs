@@ -136,7 +136,7 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logTrafficLights = false;
 #endif
-            ref NetNode netNode = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ref NetNode netNode = ref nodeId.ToNode();
 
             if (!flag && TrafficLightSimulationManager.Instance.HasTimedSimulation(nodeId)) {
                 reason = ToggleTrafficLightError.HasTimedLight;
@@ -148,7 +148,7 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (flag &&
-                (!ExtNodeManager.Instance.IsValid(nodeId)
+                (!netNode.IsValid()
                 || !netNode.m_flags.IsFlagSet(NetNode.Flags.Junction)
                 || (netNode.m_flags.IsFlagSet(NetNode.Flags.Untouchable)
                     && (!node.Info.m_class || node.Info.m_class.m_service != ItemClass.Service.Road)))) {
@@ -242,7 +242,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool HasTrafficLight(ushort nodeId, ref NetNode node) {
-            return ExtNodeManager.Instance.IsValid(nodeId)
+            return node.IsValid()
                 && node.m_flags.IsFlagSet(NetNode.Flags.TrafficLights);
         }
 
@@ -263,7 +263,7 @@ namespace TrafficManager.Manager.Impl {
                     ushort nodeId = Convert.ToUInt16(split[0]);
                     uint flag = Convert.ToUInt16(split[1]);
 
-                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                    if (!nodeId.ToNode().IsValid()) {
                         continue;
                     }
 
@@ -289,7 +289,9 @@ namespace TrafficManager.Manager.Impl {
 
             foreach (Configuration.NodeTrafficLight nodeLight in data) {
                 try {
-                    if (!ExtNodeManager.Instance.IsValid(nodeLight.nodeId))
+                    ref NetNode netNode = ref nodeLight.nodeId.ToNode();
+
+                    if (!netNode.IsValid())
                         continue;
 
 #if DEBUGLOAD
@@ -298,7 +300,7 @@ namespace TrafficManager.Manager.Impl {
                     SetTrafficLight(
                         nodeLight.nodeId,
                         nodeLight.trafficLight,
-                        ref nodeLight.nodeId.ToNode());
+                        ref netNode);
                 } catch (Exception e) {
                     // ignore as it's probably bad save data.
                     Log.Error($"Error setting the NodeTrafficLights @ {nodeLight.nodeId}: {e}");

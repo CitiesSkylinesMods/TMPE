@@ -7,6 +7,7 @@ namespace TrafficManager.State.Asset {
     using static Util.Shortcuts;
     using TrafficManager.Util;
     using TrafficManager.Manager.Impl;
+    using TrafficManager.Util.Extensions;
 
     [Serializable]
     public class AssetData {
@@ -41,12 +42,13 @@ namespace TrafficManager.State.Asset {
         }
 
         public static IRecordable RecordAll() {
-            NetSegment[] segmentBuffer = NetManager.instance.m_segments.m_buffer;
             TrafficRulesRecord record = new TrafficRulesRecord();
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                bool valid = extSegmentManager.IsSegmentValid(segmentId) && segmentBuffer[segmentId].Info;
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                bool valid = netSegment.IsValid() && netSegment.Info;
                 if (!valid)
                     continue;
                 record.AddCompleteSegment(segmentId);
@@ -63,20 +65,21 @@ namespace TrafficManager.State.Asset {
         /// </summary>
         public static SegmentNetworkIDs [] GetPathsNetworkIDs(BuildingInfo prefab) {
             // Code based on BuildingDecorations.SavePaths()
-            Building[] buildingBuffer = BuildingManager.instance.m_buildings.m_buffer;
             List<ushort> assetSegmentIds = new List<ushort>();
             List<ushort> buildingIds = new List<ushort>(prefab.m_paths.Length);
             var ret = new List<SegmentNetworkIDs>();
             for (ushort buildingId = 1; buildingId < BuildingManager.MAX_BUILDING_COUNT; buildingId += 1) {
-                if (buildingBuffer[buildingId].m_flags != Building.Flags.None) {
-                    assetSegmentIds.AddRange(BuildingDecoration.GetBuildingSegments(ref buildingBuffer[buildingId]));
+                ref Building building = ref buildingId.ToBuilding();
+                if (building.m_flags != Building.Flags.None) {
+                    assetSegmentIds.AddRange(BuildingDecoration.GetBuildingSegments(ref building));
                     buildingIds.Add(buildingId);
                 }
             }
 
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; segmentId++) {
-                if (extSegmentManager.IsSegmentValid(segmentId)) {
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                if (netSegment.IsValid()) {
                     if (!assetSegmentIds.Contains(segmentId)) {
                         ret.Add(new SegmentNetworkIDs(segmentId));
                     }

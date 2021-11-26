@@ -4,9 +4,9 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Geometry.Impl;
-    using TrafficManager.Geometry;
     using TrafficManager.Util;
     using ColossalFramework;
+    using TrafficManager.Util.Extensions;
 
     public class ExtNodeManager
         : AbstractCustomManager,
@@ -40,6 +40,29 @@ namespace TrafficManager.Manager.Impl {
             return JunctionHasOnlyHighwayRoads(nodeId) && !LaneConnectionManager.Instance.HasNodeConnections(nodeId);
         }
 
+        public GetNodeSegmentIdsEnumerable GetNodeSegmentIds(ushort nodeId, ClockDirection clockDirection) {
+            ref NetNode netNode = ref nodeId.ToNode();
+            var initialSegmentId = GetInitialSegment(ref netNode);
+            var segmentBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            return new GetNodeSegmentIdsEnumerable(nodeId, initialSegmentId, clockDirection, segmentBuffer);
+        }
+
+        /// <summary>
+        /// Gets the initial segment.
+        /// </summary>
+        /// <param name="node">The node with the segments.</param>
+        /// <returns>First non 0 segmentId.</returns>
+        public ushort GetInitialSegment(ref NetNode node) {
+            for (int i = 0; i < 8; ++i) {
+                var segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    return segmentId;
+                }
+            }
+
+            return 0;
+        }
+
         /// <summary>
         /// Are all segments at nodeId highways?
         /// </summary>
@@ -58,21 +81,6 @@ namespace TrafficManager.Manager.Impl {
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Check if a node is valid.
-        /// This is the case if the node is Created, but not Collapsed or Deleted.
-        /// </summary>
-        ///
-        /// <param name="nodeId">The id of the node to check.</param>
-        ///
-        /// <returns>Returns <c>true</c> if valid, otherwise <c>false</c>.</returns>
-        public bool IsValid(ushort nodeId) {
-            var createdCollapsedDeleted = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_flags
-                & (NetNode.Flags.Created | NetNode.Flags.Collapsed | NetNode.Flags.Deleted);
-
-            return createdCollapsedDeleted == NetNode.Flags.Created;
         }
 
         public void AddSegment(ushort nodeId, ushort segmentId) {
@@ -111,7 +119,8 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug($"Extended node data:");
 
             for (uint i = 0; i < ExtNodes.Length; ++i) {
-                if (!IsValid((ushort)i)) {
+                ref NetNode netNode = ref ((ushort)i).ToNode();
+                if (!netNode.IsValid()) {
                     continue;
                 }
 

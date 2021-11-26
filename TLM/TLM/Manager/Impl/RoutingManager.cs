@@ -6,8 +6,6 @@ namespace TrafficManager.Manager.Impl {
     using System.Linq;
     using System.Threading;
     using System;
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -15,6 +13,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.State;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Util.Extensions;
 
     public class RoutingManager
         : AbstractGeometryObservingManager,
@@ -71,7 +70,9 @@ namespace TrafficManager.Manager.Impl {
             string buf = $"Segment routings:\n";
 
             for (var i = 0; i < SegmentRoutings.Length; ++i) {
-                if (!ExtSegmentManager.Instance.IsSegmentValid((ushort)i)) {
+                ref NetSegment netSegment = ref ((ushort)i).ToSegment();
+
+                if (!netSegment.IsValid()) {
                     continue;
                 }
 
@@ -81,7 +82,8 @@ namespace TrafficManager.Manager.Impl {
             buf += $"\nLane end backward routings:\n";
 
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
+                ref NetLane netLane = ref laneId.ToLane();
+                if (!netLane.IsValidWithSegment()) {
                     continue;
                 }
 
@@ -92,7 +94,8 @@ namespace TrafficManager.Manager.Impl {
             buf += $"\nLane end forward routings:\n";
 
             for (uint laneId = 0; laneId < NetManager.MAX_LANE_COUNT; ++laneId) {
-                if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneId)) {
+                ref NetLane netLane = ref laneId.ToLane();
+                if (!netLane.IsValidWithSegment()) {
                     continue;
                 }
 
@@ -169,24 +172,21 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (propagate) {
-                //TODO refactor into RequestRecalculation(ushort nodeId)
-
                 ref NetSegment netSegment = ref segmentId.ToSegment();
 
                 ref NetNode startNode = ref netSegment.m_startNode.ToNode();
-                for (int i = 0; i < 8; ++i) {
-                    ushort otherSegmentId = startNode.GetSegment(i);
-                    if (otherSegmentId != 0) {
-                        RequestRecalculation(otherSegmentId, false);
-                    }
-                }
+                RequestNodeRecalculation(ref startNode);
 
                 ref NetNode endNode = ref netSegment.m_endNode.ToNode();
-                for (int i = 0; i < 8; ++i) {
-                    ushort otherSegmentId = endNode.GetSegment(i);
-                    if (otherSegmentId != 0) {
-                        RequestRecalculation(otherSegmentId, false);
-                    }
+                RequestNodeRecalculation(ref endNode);
+            }
+        }
+
+        public void RequestNodeRecalculation(ref NetNode node) {
+            for (int i = 0; i < Constants.MAX_SEGMENTS_OF_NODE; ++i) {
+                ushort segmentId = node.GetSegment(i);
+                if (segmentId != 0) {
+                    RequestRecalculation(segmentId, false);
                 }
             }
         }
@@ -208,8 +208,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected void RecalculateSegment(ushort segmentId) {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
-            if (segment.Info == null) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (netSegment.Info == null) {
                 return;
             }
 
@@ -223,7 +224,7 @@ namespace TrafficManager.Manager.Impl {
                 Log._Debug($"RoutingManager.RecalculateSegment({segmentId}) called.");
             }
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            if (!netSegment.IsValid()) {
                 if (logRouting) {
                     Log._Debug($"RoutingManager.RecalculateSegment({segmentId}): " +
                                "Segment is invalid. Skipping recalculation");
@@ -233,7 +234,8 @@ namespace TrafficManager.Manager.Impl {
 
             RecalculateSegmentRoutingData(segmentId);
 
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 RecalculateLaneEndRoutingData(segmentId, laneIdAndIndex.laneIndex, laneIdAndIndex.laneId, true);
                 RecalculateLaneEndRoutingData(segmentId, laneIdAndIndex.laneIndex, laneIdAndIndex.laneId, false);
             }
@@ -267,6 +269,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="centerSegmentId">The segment in the center.</param>
         /// <param name="centerSegmentNodeId">The node of the segment in the center.</param>
         private void ResetIncomingHighwayLaneArrowsOfNode(ushort centerSegmentId, ushort centerSegmentNodeId) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             ref NetNode node = ref centerSegmentNodeId.ToNode();
 
             for (int i = 0; i < Constants.MAX_SEGMENTS_OF_NODE; ++i) {
@@ -276,7 +279,7 @@ namespace TrafficManager.Manager.Impl {
                 }
 
                 ref NetSegment neighbourSegment = ref neighbourSegmentId.ToSegment();
-                foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(neighbourSegmentId)) {
+                foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(neighbourSegmentId)) {
                     if (!IsIncomingLane(
                         neighbourSegmentId,
                         neighbourSegment.m_startNode == centerSegmentNodeId,
@@ -309,7 +312,8 @@ namespace TrafficManager.Manager.Impl {
             SegmentRoutings[segmentId].Reset();
             ResetIncomingHighwayLaneArrows(segmentId);
 
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 if (extendedLogRouting) {
                     Log._Debug($"RoutingManager.ResetRoutingData: Resetting lane {laneIdAndIndex.laneId}, " +
                                $"idx {laneIdAndIndex.laneIndex} @ seg. {segmentId}");

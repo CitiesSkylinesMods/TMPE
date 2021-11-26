@@ -4,6 +4,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class TurnOnRedManager
         : AbstractGeometryObservingManager,
@@ -24,7 +25,9 @@ namespace TrafficManager.Manager.Impl {
 
             // JunctionRestrictionsManager requires our data during loading of custom data
             for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-                if (!extSegmentManager.IsSegmentValid((ushort)i)) {
+                ref NetSegment netSegment = ref ((ushort)i).ToSegment();
+
+                if (!netSegment.IsValid()) {
                     continue;
                 }
 

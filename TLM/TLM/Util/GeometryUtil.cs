@@ -30,9 +30,9 @@ namespace TrafficManager.Util {
         internal static Vector3 CalculateSegmentCenter(ushort segmentId) {
             NetManager netManager = Singleton<NetManager>.instance;
 
-            ref var segment = ref netManager.m_segments.m_buffer[segmentId];
+            ref var segment = ref segmentId.ToSegment();
 
-            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            // NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
 
             bool IsMiddle(ushort nodeId) =>
                 (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;

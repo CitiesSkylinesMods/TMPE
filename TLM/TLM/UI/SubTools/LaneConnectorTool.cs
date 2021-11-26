@@ -163,7 +163,8 @@ namespace TrafficManager.UI.SubTools {
                 LastCachedCamera = currentCameraState;
 
                 for (ushort nodeId = 1; nodeId < NetManager.MAX_NODE_COUNT; ++nodeId) {
-                    if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                    ref NetNode netNode = ref nodeId.ToNode();
+                    if (!netNode.IsValid()) {
                         continue;
                     }
 
@@ -171,8 +172,7 @@ namespace TrafficManager.UI.SubTools {
                     // Check the connection class
                     //---------------------------
                     // TODO refactor connection class check
-                    ItemClass connectionClass =
-                        NetManager.instance.m_nodes.m_buffer[nodeId].Info.GetConnectionClass();
+                    ItemClass connectionClass = netNode.Info.GetConnectionClass();
 
                     if ((connectionClass == null) ||
                         !((connectionClass.m_service == ItemClass.Service.Road) ||
@@ -186,13 +186,13 @@ namespace TrafficManager.UI.SubTools {
                     //--------------------------
                     // Check the camera distance
                     //--------------------------
-                    Vector3 diff = NetManager.instance.m_nodes.m_buffer[nodeId].m_position - camPos;
+                    Vector3 diff = netNode.m_position - camPos;
 
                     if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
                         continue; // do not draw if too distant
                     }
 
-                    if (NetManager.instance.m_nodes.m_buffer[nodeId].CountSegments() < 2) {
+                    if (netNode.CountSegments() < 2) {
                         continue; // skip non-configurable nodes
                     }
 
@@ -219,20 +219,22 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                float intersectionY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(netManager.m_nodes.m_buffer[nodeId].m_position);
+                float intersectionY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(nodeId.ToNode().m_position);
 
                 foreach (LaneEnd laneEnd in laneEnds) {
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(laneEnd.LaneId)) {
+                    ref NetLane sourceLane = ref laneEnd.LaneId.ToLane();
+                    if (!sourceLane.IsValidWithSegment()) {
                         continue;
                     }
 
                     if (laneEnd != selectedLaneEnd) {
                         foreach (LaneEnd targetLaneEnd in laneEnd.ConnectedLaneEnds) {
-                            // render lane connection from laneEnd to targetLaneEnd
-                            if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
+                            ref NetLane targetLane = ref targetLaneEnd.LaneId.ToLane();
+                            if (!targetLane.IsValidWithSegment()) {
                                 continue;
                             }
 
+                            // render lane connection from laneEnd to targetLaneEnd
                             Bezier3 bezier = CalculateBezierConnection(laneEnd, targetLaneEnd);
                             Vector3 height = bezier.Max();
                             DrawLaneCurve(
@@ -292,7 +294,8 @@ namespace TrafficManager.UI.SubTools {
                 // lane curves for selectedMarker will be drawn last to
                 // be on the top of other lane markers.
                 foreach (LaneEnd targetLaneEnd in this.selectedLaneEnd.ConnectedLaneEnds) {
-                    if (!ExtSegmentManager.Instance.IsLaneAndItsSegmentValid(targetLaneEnd.LaneId)) {
+                    ref NetLane targetLane = ref targetLaneEnd.LaneId.ToLane();
+                    if (!targetLane.IsValidWithSegment()) {
                         continue;
                     }
 
@@ -323,8 +326,7 @@ namespace TrafficManager.UI.SubTools {
             // draw bezier from source marker to mouse position in target marker selection
             if (SelectedNodeId != 0) {
                 if (GetSelectionMode() == SelectionMode.SelectTarget) {
-                    Vector3 selNodePos =
-                        NetManager.instance.m_nodes.m_buffer[SelectedNodeId].m_position;
+                    Vector3 selNodePos = SelectedNodeId.ToNode().m_position;
 
                     // Draw a currently dragged curve
                     if (hoveredLaneEnd == null) {
@@ -356,8 +358,6 @@ namespace TrafficManager.UI.SubTools {
                             underground: true);
                     }
                 }
-
-                NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
 
                 if ((frameClearPressed > 0) && ((Time.frameCount - frameClearPressed) < 20)) {
                     // 0.33 sec
@@ -805,7 +805,8 @@ namespace TrafficManager.UI.SubTools {
         }
 
         private static int CountLanes(ushort segmentId, ushort nodeId, bool toward) {
-            return netService.GetSortedLanes(
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            return extSegmentManager.GetSortedLanes(
                                 segmentId,
                                 ref segmentId.ToSegment(),
                                 ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!toward),
@@ -838,7 +839,8 @@ namespace TrafficManager.UI.SubTools {
                         logLaneConn,
                         () => "LaneConnectorTool: HoveredNode != 0");
 
-                    if (NetManager.instance.m_nodes.m_buffer[HoveredNodeId].CountSegments() < 2) {
+                    ref NetNode hoveredNode = ref HoveredNodeId.ToNode();
+                    if (hoveredNode.CountSegments() < 2) {
                         // this node cannot be configured (dead end)
                         Log._DebugIf(
                             logLaneConn,
@@ -857,9 +859,7 @@ namespace TrafficManager.UI.SubTools {
                             () => $"Node {HoveredNodeId} has been selected. Creating markers.");
 
                         // selected node has changed. create markers
-                        List<LaneEnd> laneEnds = GetLaneEnds(
-                            HoveredNodeId,
-                            ref Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId]);
+                        List<LaneEnd> laneEnds = GetLaneEnds(HoveredNodeId, ref hoveredNode);
 
                         if (laneEnds != null) {
                             SelectedNodeId = HoveredNodeId;
@@ -1023,7 +1023,9 @@ namespace TrafficManager.UI.SubTools {
             for (ushort nodeId = forceNodeId == 0 ? (ushort)1 : forceNodeId;
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
                  ++nodeId) {
-                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                ref NetNode netNode = ref nodeId.ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 
@@ -1032,9 +1034,7 @@ namespace TrafficManager.UI.SubTools {
                     continue;
                 }
 
-                List<LaneEnd> laneEnds = GetLaneEnds(
-                    nodeId,
-                    ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId]);
+                List<LaneEnd> laneEnds = GetLaneEnds(nodeId, ref netNode);
 
                 if (laneEnds == null) {
                     continue;
@@ -1228,10 +1228,10 @@ namespace TrafficManager.UI.SubTools {
             // check track turning angles are within bounds
             ret &= isRoad || CheckSegmentsTurningAngle(
                     sourceSegmentId: source.SegmentId,
-                    sourceSegment: ref GetSeg(source.SegmentId),
+                    sourceSegment: ref source.SegmentId.ToSegment(),
                     sourceStartNode: source.StartNode,
                     targetSegmentId: target.SegmentId,
-                    targetSegment: ref GetSeg(target.SegmentId),
+                    targetSegment: ref target.SegmentId.ToSegment(),
                     targetStartNode: target.StartNode);
 
             return ret;

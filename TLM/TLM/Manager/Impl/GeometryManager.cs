@@ -11,6 +11,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.Geometry;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     public class GeometryManager
         : AbstractCustomManager,
@@ -132,7 +133,7 @@ namespace TrafficManager.Manager.Impl {
                             }
 
                             ushort nodeId = (ushort)(i << 6 | m);
-                            bool valid = ExtNodeManager.Instance.IsValid(nodeId);
+                            bool valid = nodeId.ToNode().IsValid();
 
                             if (firstPass ^ !valid) {
                                 if (!firstPass) {
@@ -184,7 +185,9 @@ namespace TrafficManager.Manager.Impl {
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                if (!extSegmentManager.IsSegmentValid((ushort)segmentId)) {
+                ref NetSegment netSegment = ref ((ushort)segmentId).ToSegment();
+
+                if (!netSegment.IsValid()) {
                     continue;
                 }
 
@@ -235,10 +238,11 @@ namespace TrafficManager.Manager.Impl {
                 updatedNodeBuckets[nodeId >> 6] |= 1uL << (nodeId & 63);
                 stateUpdated = true;
 
+                ref NetNode netNode = ref nodeId.ToNode();
+
                 if (updateSegments) {
-                    ref NetNode node = ref nodeId.ToNode();
                     for (int i = 0; i < 8; ++i) {
-                        ushort segmentId = node.GetSegment(i);
+                        ushort segmentId = netNode.GetSegment(i);
                         if (segmentId != 0) {
                             MarkAsUpdated(
                                 ref Constants.ManagerFactory.ExtSegmentManager.ExtSegments[segmentId],
@@ -247,7 +251,7 @@ namespace TrafficManager.Manager.Impl {
                     }
                 }
 
-                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                if (!netNode.IsValid()) {
                     SimulationStep(true);
                 }
             }

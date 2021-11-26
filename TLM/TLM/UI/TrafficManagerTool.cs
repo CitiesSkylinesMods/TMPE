@@ -683,8 +683,8 @@ namespace TrafficManager.UI {
         /// Gets the coordinates of the given node.
         /// </summary>
         private static Vector3 GetNodePos(ushort nodeId) {
-            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            Vector3 pos = nodeBuffer[nodeId].m_position;
+            ref NetNode netNode = ref nodeId.ToNode();
+            Vector3 pos = netNode.m_position;
             float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
             if (terrainY > pos.y) {
                 pos.y = terrainY;
@@ -715,7 +715,7 @@ namespace TrafficManager.UI {
                                    bool alpha = false,
                                    bool overrideRenderLimits = false) {
             float r = CalculateNodeRadius(nodeId);
-            Vector3 pos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+            Vector3 pos = nodeId.ToNode().m_position;
             bool renderLimits = TerrainManager.instance.SampleDetailHeightSmooth(pos) > pos.y;
             DrawOverlayCircle(cameraInfo, color, pos, r * 2, alpha, renderLimits || overrideRenderLimits);
         }
@@ -733,14 +733,13 @@ namespace TrafficManager.UI {
                        bool bStartNode,
                        Color color,
                        bool alpha = false) {
-            if( segmentId == 0) {
+            if (segmentId == 0) {
                 return;
             }
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             float width = segment.Info.m_halfWidth;
 
-            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            bool IsMiddle(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
+            bool IsMiddle(ushort nodeId) => (nodeId.ToNode().m_flags & NetNode.Flags.Middle) != 0;
 
             Bezier3 bezier;
             bezier.a = GetNodePos(segment.m_startNode);
@@ -793,8 +792,7 @@ namespace TrafficManager.UI {
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             float width = segment.Info.m_halfWidth;
 
-            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            bool IsMiddle(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
+            bool IsMiddle(ushort nodeId) => (nodeId.ToNode().m_flags & NetNode.Flags.Middle) != 0;
 
             Bezier3 bezier;
             bezier.a = GetNodePos(segment.m_startNode);
@@ -1244,11 +1242,8 @@ namespace TrafficManager.UI {
                     ushort endNodeId = Singleton<NetManager>
                                        .instance.m_segments.m_buffer[segmentId].m_endNode;
 
-                    NetNode[] nodesBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-                    float startDist = (segmentOutput.m_hitPos - nodesBuffer[startNodeId]
-                                                                .m_position).magnitude;
-                    float endDist = (segmentOutput.m_hitPos - nodesBuffer[endNodeId]
-                                                              .m_position).magnitude;
+                    float startDist = (segmentOutput.m_hitPos - startNodeId.ToNode().m_position).magnitude;
+                    float endDist = (segmentOutput.m_hitPos - endNodeId.ToNode().m_position).magnitude;
                     float detectionRadius = raycastSegment ? NODE_DETECTION_RADIUS : PRECISE_NODE_DETECTION_RADIUS;
                     if (startDist < endDist && startDist < detectionRadius) {
                         HoveredNodeId = startNodeId;
@@ -1300,7 +1295,7 @@ namespace TrafficManager.UI {
             }
             prev_H = HitPos.y;
 
-            if (Shortcuts.GetSeg(HoveredSegmentId).GetClosestLanePosition(
+            if (HoveredSegmentId.ToSegment().GetClosestLanePosition(
                 HitPos,
                 NetInfo.LaneType.All,
                 VehicleInfo.VehicleType.All,
@@ -1636,18 +1631,15 @@ namespace TrafficManager.UI {
         // TODO: Extract into a Debug Tool GUI class
         private void DebugGuiDisplayNodes() {
             var counterStyle = new GUIStyle();
-            NetManager netManager = Singleton<NetManager>.instance;
 
             for (int i = 1; i < NetManager.MAX_NODE_COUNT; ++i) {
-                if ((netManager.m_nodes.m_buffer[i].m_flags & NetNode.Flags.Created) ==
-                    NetNode.Flags.None) {
-                    // node is unused
+                ref NetNode netNode = ref ((ushort)i).ToNode();
+                if ((netNode.m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
                     continue;
                 }
 
-                Vector3 pos = netManager.m_nodes.m_buffer[i].m_position;
+                Vector3 pos = netNode.m_position;
                 bool visible = GeometryUtil.WorldToScreenPoint(pos, out Vector3 screenPos);
-
                 if (!visible) {
                     continue;
                 }
@@ -1667,8 +1659,8 @@ namespace TrafficManager.UI {
 #if DEBUG
                 labelStr += string.Format(
                     "\nflags: {0}\nlane: {1}",
-                    netManager.m_nodes.m_buffer[i].m_flags,
-                    netManager.m_nodes.m_buffer[i].m_lane);
+                    netNode.m_flags,
+                    netNode.m_lane);
 #endif
                 Vector2 dim = counterStyle.CalcSize(new GUIContent(labelStr));
                 var labelRect = new Rect(screenPos.x - (dim.x / 2f), screenPos.y, dim.x, dim.y);
@@ -1872,23 +1864,22 @@ namespace TrafficManager.UI {
         // TODO: Extract into a Debug Tool GUI class
         private void DebugGuiDisplayBuildings() {
             GUIStyle _counterStyle = new GUIStyle();
-            BuildingManager buildingManager = Singleton<BuildingManager>.instance;
 
-            for (int i = 1; i < BuildingManager.MAX_BUILDING_COUNT; ++i) {
-                if ((buildingManager.m_buildings.m_buffer[i].m_flags & Building.Flags.Created)
-                    == Building.Flags.None) {
+            for (int buildingId = 1; buildingId < BuildingManager.MAX_BUILDING_COUNT; ++buildingId) {
+                ref Building building = ref ((ushort)buildingId).ToBuilding();
+
+                if ((building.m_flags & Building.Flags.Created) == Building.Flags.None) {
                     continue;
                 }
 
-                Vector3 pos = buildingManager.m_buildings.m_buffer[i].m_position;
-                bool visible = GeometryUtil.WorldToScreenPoint(pos, out Vector3 screenPos);
+                bool visible = GeometryUtil.WorldToScreenPoint(building.m_position, out Vector3 screenPos);
 
                 if (!visible) {
                     continue;
                 }
 
                 Vector3 camPos = Singleton<SimulationManager>.instance.m_simulationView.m_position;
-                Vector3 diff = pos - camPos;
+                Vector3 diff = building.m_position - camPos;
                 if (diff.magnitude > DEBUG_CLOSE_LOD) {
                     continue; // do not draw if too distant
                 }
@@ -1901,10 +1892,10 @@ namespace TrafficManager.UI {
 
                 string labelStr = string.Format(
                     "Building {0}, PDemand: {1}, IncTDem: {2}, OutTDem: {3}",
-                    i,
-                    ExtBuildingManager.Instance.ExtBuildings[i].parkingSpaceDemand,
-                    ExtBuildingManager.Instance.ExtBuildings[i].incomingPublicTransportDemand,
-                    ExtBuildingManager.Instance.ExtBuildings[i].outgoingPublicTransportDemand);
+                    buildingId,
+                    ExtBuildingManager.Instance.ExtBuildings[buildingId].parkingSpaceDemand,
+                    ExtBuildingManager.Instance.ExtBuildings[buildingId].incomingPublicTransportDemand,
+                    ExtBuildingManager.Instance.ExtBuildings[buildingId].outgoingPublicTransportDemand);
 
                 Vector2 dim = _counterStyle.CalcSize(new GUIContent(labelStr));
                 Rect labelRect = new Rect(

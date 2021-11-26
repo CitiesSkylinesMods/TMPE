@@ -1,5 +1,4 @@
 namespace TrafficManager {
-    using GenericGameBridge.Factory;
     using JetBrains.Annotations;
     using TrafficManager.API.Manager;
     using UnityEngine;
@@ -33,16 +32,6 @@ namespace TrafficManager {
 
         public static float ByteToFloat(byte b) {
             return b * BYTE_TO_FLOAT_SCALE;
-        }
-
-        public static IServiceFactory ServiceFactory {
-            get {
-#if UNITTEST
-                return TestGameBridge.Factory.ServiceFactory.Instance;
-#else
-                return CitiesGameBridge.Factory.ServiceFactory.Instance;
-#endif
-            }
         }
 
         public static IManagerFactory ManagerFactory => Manager.Impl.ManagerFactory.Instance;

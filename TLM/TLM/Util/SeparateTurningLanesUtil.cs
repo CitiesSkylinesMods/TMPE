@@ -1,7 +1,6 @@
 namespace TrafficManager.Util {
     using ColossalFramework;
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -51,14 +50,16 @@ namespace TrafficManager.Util {
             return count;
         }
 
-        static private IList<LanePos> GetBusLanes(ushort segmentId, ushort nodeId) =>
-            netService.GetSortedLanes(
+        static private IList<LanePos> GetBusLanes(ushort segmentId, ushort nodeId) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            return extSegmentManager.GetSortedLanes(
                 segmentId,
                 ref segmentId.ToSegment(),
                 ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId),
                 NetInfo.LaneType.TransportVehicle,
                 LaneArrowManager.VEHICLE_TYPES,
                 sort: false);
+        }
 
         static private LaneArrows Arrows(this LanePos lanePos) =>
             (LaneArrows)lanePos.laneId.ToLane().m_flags & LaneArrows.LeftForwardRight;
@@ -67,32 +68,37 @@ namespace TrafficManager.Util {
         /// separates turning lanes for all segments attached to nodeId,
         /// </summary>
         public static void SeparateNode(ushort nodeId, out SetLaneArrow_Result res, bool alternativeMode = true) {
-            NetNode node = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
             if (nodeId == 0) {
                 res = SetLaneArrow_Result.Invalid;
                 return;
             }
-            if ((node.m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
+
+            ref NetNode netNode = ref nodeId.ToNode();
+            if ((netNode.m_flags & NetNode.Flags.Created) == NetNode.Flags.None) {
                 res = SetLaneArrow_Result.Invalid;
                 return;
             }
+
             if (LaneConnectionManager.Instance.HasNodeConnections(nodeId)) {
                 res = SetLaneArrow_Result.LaneConnection;
                 return;
             }
+
             if (Options.highwayRules && ExtNodeManager.JunctionHasHighwayRules(nodeId)) {
                 res = SetLaneArrow_Result.HighwayArrows;
                 return;
             }
+
             res = SetLaneArrow_Result.Success;
 
             for (int i = 0; i < 8; i++) {
-                ushort segmentId = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].GetSegment(i);
+                ushort segmentId = netNode.GetSegment(i);
                 if (segmentId == 0) {
                     continue;
                 }
                 SeparateSegmentLanes(segmentId, nodeId, out res, alternativeMode);
             }
+
             Debug.Assert(res == SetLaneArrow_Result.Success);
         }
 
@@ -214,10 +220,11 @@ namespace TrafficManager.Util {
 
             ref NetSegment seg = ref segmentId.ToSegment();
             bool startNode = seg.m_startNode == nodeId;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             //list of outgoing lanes from current segment to current node.
             IList<LanePos> laneList =
-                Constants.ServiceFactory.NetService.GetSortedLanes(
+                extSegmentManager.GetSortedLanes(
                     segmentId,
                     ref seg,
                     startNode,
@@ -305,10 +312,11 @@ namespace TrafficManager.Util {
 
             ref NetSegment seg = ref segmentId.ToSegment();
             bool startNode = seg.m_startNode == nodeId;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             //list of outgoing lanes from current segment to current node.
             IList<LanePos> laneList =
-                Constants.ServiceFactory.NetService.GetSortedLanes(
+                extSegmentManager.GetSortedLanes(
                     segmentId,
                     ref seg,
                     startNode,
@@ -478,9 +486,11 @@ namespace TrafficManager.Util {
 
             ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             bool startNode = seg.m_startNode == nodeId;
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
             //list of outgoing lanes from current segment to current node.
             IList<LanePos> laneList =
-                Constants.ServiceFactory.NetService.GetSortedLanes(
+                extSegmentManager.GetSortedLanes(
                     segmentId,
                     ref seg,
                     startNode,

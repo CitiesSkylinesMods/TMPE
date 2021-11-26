@@ -1,4 +1,4 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     using TrafficManager.API.Traffic.Data;
     using UnityEngine;
 
@@ -16,13 +16,6 @@
         /// <param name="buildingId">building id</param>
         /// <param name="data">building data</param>
         void OnBeforeSimulationStep(ushort buildingId, ref Building data);
-
-        /// <summary>
-        /// Checks if the building with the given id is valid.
-        /// </summary>
-        /// <param name="buildingId">building id</param>
-        /// <returns><code>true</code> if the building is valid, <code>false</code> otherwise</returns>
-        bool IsValid(ushort buildingId);
 
         /// <summary>
         /// Resets the given building.

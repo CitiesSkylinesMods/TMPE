@@ -1,9 +1,6 @@
-﻿namespace TrafficManager.API.Manager {
-    using GenericGameBridge.Factory;
-
+namespace TrafficManager.API.Manager {
     public interface ICustomManager {
         // TODO documentation
-        IServiceFactory Services { get; }
         void OnBeforeLoadData();
         void OnAfterLoadData();
         void OnBeforeSaveData();

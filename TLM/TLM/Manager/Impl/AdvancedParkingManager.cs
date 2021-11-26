@@ -15,6 +15,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.UI;
     using TrafficManager.Util;
     using UnityEngine;
+    using TrafficManager.Util.Extensions;
 
     public class AdvancedParkingManager
         : AbstractFeatureManager,
@@ -427,7 +428,7 @@ namespace TrafficManager.Manager.Impl {
 
             // ExtCitizenInstance driverExtInstance = ExtCitizenInstanceManager.Instance.GetExtInstance(
             // CustomPassengerCarAI.GetDriverInstance(vehicleId, ref vehicleData));
-            if (!extCitInstMan.IsValid(driverExtInstance.instanceId)) {
+            if (!driverInstance.IsValid()) {
                 // no driver
                 Log._DebugIf(
                     logParkingAi,
@@ -1396,9 +1397,8 @@ namespace TrafficManager.Manager.Impl {
                         ushort currentBuildingId = Singleton<CitizenManager>
                                                 .instance.m_citizens.m_buffer[instanceData.m_citizen]
                                                 .GetBuildingByLocation();
-                        Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
                         if (currentBuildingId != 0) {
-                            currentPos = buildingsBuffer[currentBuildingId].m_position;
+                            currentPos = currentBuildingId.ToBuilding().m_position;
                             if (logParkingAi) {
                                 Log._Debug(
                                     $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
@@ -1415,7 +1415,7 @@ namespace TrafficManager.Manager.Impl {
                                     "Taking current position from last frame position for citizen " +
                                     $"{instanceData.m_citizen} (citizen instance {instanceId}): " +
                                     $"{currentPos}. Home {homeId} pos: " +
-                                    $"{buildingsBuffer[homeId].m_position} " +
+                                    $"{homeId.ToBuilding().m_position} " +
                                     $"CurrentPathMode={extInstance.pathMode}");
                             }
                         }
@@ -1450,7 +1450,7 @@ namespace TrafficManager.Manager.Impl {
                                 () => $"AdvancedParkingManager.OnCitizenPathFindSuccess({instanceId}): " +
                                 $">> Failed to spawn parked vehicle for citizen {instanceData.m_citizen} " +
                                 $"(citizen instance {instanceId}). reason={parkReason}. homePos: " +
-                                $"{buildingsBuffer[homeId].m_position}");
+                                $"{homeId.ToBuilding().m_position}");
 
                             if (parkReason == ParkingError.NoSpaceFound &&
                                 currentBuildingId != 0) {
@@ -2519,8 +2519,8 @@ namespace TrafficManager.Manager.Impl {
 
                 ushort buildingId = Singleton<BuildingManager>.instance.m_buildingGrid[
                     (i * BuildingManager.BUILDINGGRID_RESOLUTION) + j];
+                ref Building building = ref buildingId.ToBuilding();
                 var numIterations = 0;
-                Building[] buildingsBuffer = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
                 ParkingAI parkingAiConf = GlobalConfig.Instance.ParkingAI;
 
                 while (buildingId != 0) {
@@ -2529,7 +2529,7 @@ namespace TrafficManager.Manager.Impl {
                         homeID,
                         ignoreParked,
                         buildingId,
-                        ref buildingsBuffer[buildingId],
+                        ref building,
                         segmentId,
                         refPos,
                         ref maxParkingSpaceDistance,
@@ -2550,7 +2550,7 @@ namespace TrafficManager.Manager.Impl {
                         }
                     } // if find parking prop at building
 
-                    buildingId = buildingsBuffer[buildingId].m_nextGridBuilding;
+                    buildingId = building.m_nextGridBuilding;
                     if (++numIterations >= 49152) {
                         CODebugBase<LogChannel>.Error(
                             LogChannel.Core,

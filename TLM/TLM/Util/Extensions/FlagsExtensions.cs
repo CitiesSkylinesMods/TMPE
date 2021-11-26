@@ -1,5 +1,11 @@
 namespace TrafficManager.Util.Extensions {
     internal static class FlagsExtensions {
+        internal static bool IsFlagSet(this Building.Flags value, Building.Flags flag) => (value & flag) != 0;
+
+        internal static bool IsFlagSet(this Citizen.Flags value, Citizen.Flags flag) => (value & flag) != 0;
+
+        internal static bool IsFlagSet(this CitizenInstance.Flags value, CitizenInstance.Flags flag) => (value & flag) != 0;
+
         internal static bool IsFlagSet(this NetInfo.LaneType value, NetInfo.LaneType flag) => (value & flag) != 0;
 
         internal static bool IsFlagSet(this VehicleInfo.VehicleType value, VehicleInfo.VehicleType flag) => (value & flag) != 0;
@@ -11,6 +17,12 @@ namespace TrafficManager.Util.Extensions {
         internal static bool IsFlagSet(this NetSegment.Flags value, NetSegment.Flags flag) => (value & flag) != 0;
 
         internal static bool IsFlagSet(this NetLane.Flags value, NetLane.Flags flag) => (value & flag) != 0;
+
+        internal static bool CheckFlags(this Building.Flags value, Building.Flags required, Building.Flags forbidden = 0) =>
+            (value & (required | forbidden)) == required;
+
+        internal static bool CheckFlags(this CitizenInstance.Flags value, CitizenInstance.Flags required, CitizenInstance.Flags forbidden = 0) =>
+            (value & (required | forbidden)) == required;
 
         internal static bool CheckFlags(this NetInfo.LaneType value, NetInfo.LaneType required, NetInfo.LaneType forbidden = 0) =>
             (value & (required | forbidden)) == required;

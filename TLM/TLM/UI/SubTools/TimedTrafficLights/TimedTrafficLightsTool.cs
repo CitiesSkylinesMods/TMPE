@@ -15,6 +15,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     public class TimedTrafficLightsTool
@@ -83,7 +84,9 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
                  ++nodeId)
             {
-                if (!ExtNodeManager.Instance.IsValid((ushort)nodeId)) {
+                ref NetNode netNode = ref ((ushort)nodeId).ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 
@@ -103,7 +106,9 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
             nodeSelectionLocked = false;
             foreach (ushort nodeId in currentTimedNodeIds) {
-                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                ref NetNode netNode = ref nodeId.ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 
@@ -267,12 +272,8 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     }
 
                     // compare geometry
-                    int numSourceSegments = Singleton<NetManager>
-                                            .instance.m_nodes.m_buffer[nodeIdToCopy]
-                                            .CountSegments();
-                    int numTargetSegments = Singleton<NetManager>
-                                            .instance.m_nodes.m_buffer[HoveredNodeId]
-                                            .CountSegments();
+                    int numSourceSegments = nodeIdToCopy.ToNode().CountSegments();
+                    int numTargetSegments = HoveredNodeId.ToNode().CountSegments();
 
                     if (numSourceSegments != numTargetSegments) {
                         MainTool.WarningPrompt(
@@ -1422,7 +1423,9 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
             TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
 
             foreach (ushort nodeId in currentTimedNodeIds) {
-                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                ref NetNode netNode = ref nodeId.ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 
@@ -1434,15 +1437,12 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     ITimedTrafficLights timedNode =
                         tlsMan.TrafficLightSimulations[nodeId].timedLight;
 
-                    Vector3 nodePos = Singleton<NetManager>
-                                      .instance.m_nodes.m_buffer[nodeId].m_position;
-
                     Texture2D tex = timedNode.IsStarted()
                                         ? (timedNode.IsInTestMode()
                                                ? TrafficLightTextures.ClockTest
                                                : TrafficLightTextures.ClockPlay)
                                         : TrafficLightTextures.ClockPause;
-                    MainTool.DrawGenericSquareOverlayTexture(tex, camPos, nodePos, 120f, false);
+                    MainTool.DrawGenericSquareOverlayTexture(tex, camPos, netNode.m_position, 120f, false);
                 }
             }
         }
@@ -1461,12 +1461,13 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     continue;
                 }
 
+                ref NetNode netNode = ref nodeId.ToNode();
+
                 ITimedTrafficLights timedNode = tlsMan.TrafficLightSimulations[nodeId].timedLight;
 
-                Vector3 nodePos = Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId].m_position;
+                Vector3 nodePos = netNode.m_position;
 
                 bool nodeVisible = GeometryUtil.WorldToScreenPoint(nodePos, out Vector3 _);
-
                 if (!nodeVisible) {
                     continue;
                 }
@@ -1794,7 +1795,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
                         segEndMan.CalculateOutgoingLeftStraightRightSegments(
                             ref segEnd,
-                            ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId],
+                            ref nodeId.ToNode(),
                             out bool hasOutgoingLeftSegment,
                             out bool hasOutgoingForwardSegment,
                             out bool hasOutgoingRightSegment);

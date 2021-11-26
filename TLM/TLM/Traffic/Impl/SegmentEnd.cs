@@ -5,8 +5,6 @@ namespace TrafficManager.Traffic.Impl {
     using System.Collections.Generic;
     using System.Linq;
     using System;
-    using CitiesGameBridge.Service;
-    using GenericGameBridge.Service;
     using TrafficManager.API.Manager;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.API.Traffic.Enums;
@@ -15,6 +13,7 @@ namespace TrafficManager.Traffic.Impl {
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
 
     /// <summary>
     /// A segment end describes a directional traffic segment connected to a controlled node
@@ -302,11 +301,11 @@ namespace TrafficManager.Traffic.Impl {
         // }
 
         public void Update() {
-            ref NetSegment segment = ref SegmentId.ToSegment();
-            StartNode = segment.m_startNode == NodeId;
-            numLanes = segment.Info.m_lanes.Length;
+            ref NetSegment netSegment = ref SegmentId.ToSegment();
+            StartNode = netSegment.m_startNode == NodeId;
+            numLanes = netSegment.Info.m_lanes.Length;
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(SegmentId)) {
+            if (!netSegment.IsValid()) {
                 Log.Error($"SegmentEnd.Update: Segment {SegmentId} is invalid.");
                 return;
             }
@@ -318,7 +317,8 @@ namespace TrafficManager.Traffic.Impl {
             numVehiclesMovingToSegmentId = new Dictionary<ushort, uint>[numLanes];
             numVehiclesGoingToSegmentId = new Dictionary<ushort, uint>[numLanes];
 
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(SegmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(SegmentId)) {
                 var numVehicleMoving = new Dictionary<ushort, uint>();
                 var numVehicleGoing = new Dictionary<ushort, uint>();
 
@@ -327,7 +327,6 @@ namespace TrafficManager.Traffic.Impl {
             }
 
             IExtSegmentEndManager segEndMan = Constants.ManagerFactory.ExtSegmentEndManager;
-            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             for (int i = 0; i < 8; ++i) {
                 ushort segId = node.GetSegment(i);
                 if (segId == 0) {

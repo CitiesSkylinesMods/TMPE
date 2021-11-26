@@ -6,6 +6,7 @@ namespace TrafficManager.Manager.Impl {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State.ConfigData;
     using TrafficManager.Util;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     public class ExtSegmentEndManager
@@ -143,8 +144,10 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public ArrowDirection GetDirection(ref ExtSegmentEnd sourceEnd, ushort targetSegmentId) {
-            IExtSegmentManager extSegMan = Constants.ManagerFactory.ExtSegmentManager;
-            if (!extSegMan.IsSegmentValid(sourceEnd.segmentId) || !extSegMan.IsSegmentValid(targetSegmentId)) {
+            ref NetSegment sourceEndSegment = ref sourceEnd.segmentId.ToSegment();
+            ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
+
+            if (!sourceEndSegment.IsValid() || !targetSegment.IsValid()) {
                 return ArrowDirection.None;
             }
 
@@ -154,12 +157,10 @@ namespace TrafficManager.Manager.Impl {
                 return ArrowDirection.None;
             }
 
-            ref NetSegment sourceEndSegment = ref sourceEnd.segmentId.ToSegment();
             Vector3 sourceDir = sourceEnd.startNode
                 ? sourceEndSegment.m_startDirection
                 : sourceEndSegment.m_endDirection;
 
-            ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
             Vector3 targetDir = (bool)targetStartNode
                 ? targetSegment.m_startDirection
                 : targetSegment.m_endDirection;
@@ -175,7 +176,7 @@ namespace TrafficManager.Manager.Impl {
                     return ArrowDirection.None;
                 }
             }
-            GenericGameBridge.Service.INetService netService = Constants.ServiceFactory.NetService;
+
             ref ExtSegmentEnd segmenEnd0 = ref ExtSegmentEnds[GetIndex(segmentId0, nodeId)];
             ArrowDirection dir = GetDirection(ref segmenEnd0, segmentId1);
             return dir;
@@ -251,7 +252,9 @@ namespace TrafficManager.Manager.Impl {
             ushort nodeIdBeforeRecalc = segEnd.nodeId;
             Reset(ref segEnd);
 
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 if (nodeIdBeforeRecalc != 0) {
                     Constants.ManagerFactory.ExtNodeManager.RemoveSegment(
                         nodeIdBeforeRecalc,
@@ -261,7 +264,6 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            ref NetSegment netSegment = ref segmentId.ToSegment();
             ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
             segEnd.nodeId = nodeId;
             CalculateIncomingOutgoing(segmentId, nodeId, out segEnd.incoming, out segEnd.outgoing);
@@ -287,16 +289,19 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="segmentId"></param>
         /// <param name="startNode"></param>
         public void CalculateCorners(ushort segmentId, bool startNode) {
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId))
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid())
                 return;
-            if (!segmentId.ToSegment().Info) {
+
+            if (!netSegment.Info) {
                 Log.Warning($"segment {segmentId} has null info");
                 return;
             }
 
             try {
                 ref ExtSegmentEnd segEnd = ref ExtSegmentEnds[GetIndex(segmentId, startNode)];
-                segmentId.ToSegment().CalculateCorner(
+                netSegment.CalculateCorner(
                     segmentID: segmentId,
                     heightOffset: true,
                     start: startNode,
@@ -304,7 +309,7 @@ namespace TrafficManager.Manager.Impl {
                     cornerPos: out segEnd.RightCorner,
                     cornerDirection: out segEnd.RightCornerDir,
                     smooth: out _);
-                segmentId.ToSegment().CalculateCorner(
+                netSegment.CalculateCorner(
                     segmentID: segmentId,
                     heightOffset: true,
                     start: startNode,
@@ -313,7 +318,7 @@ namespace TrafficManager.Manager.Impl {
                     cornerDirection: out segEnd.LeftCornerDir,
                     smooth: out _);
             } catch (Exception e) {
-                Log.Error($"failed calculating corner for segment:{segmentId}, info={segmentId.ToSegment().Info}\n"
+                Log.Error($"failed calculating corner for segment:{segmentId}, info={netSegment.Info}\n"
                     + e.Message);
             }
         }
@@ -481,7 +486,9 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug($"Extended segment end data:");
 
             for (uint i = 0; i < NetManager.MAX_SEGMENT_COUNT; ++i) {
-                if (!Constants.ManagerFactory.ExtSegmentManager.IsSegmentValid((ushort)i)) {
+                ref NetSegment netSegment = ref ((ushort)i).ToSegment();
+
+                if (!netSegment.IsValid()) {
                     continue;
                 }
 

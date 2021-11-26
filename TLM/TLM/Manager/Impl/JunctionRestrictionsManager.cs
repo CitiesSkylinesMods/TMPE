@@ -99,23 +99,23 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private bool MayHaveJunctionRestrictions(ushort nodeId) {
-            ref NetNode netNode = ref Singleton<NetManager>.instance.m_nodes.m_buffer[nodeId];
+            ref NetNode netNode = ref nodeId.ToNode();
 
             Log._Debug($"JunctionRestrictionsManager.MayHaveJunctionRestrictions({nodeId}): " +
                        $"flags={netNode.m_flags}");
 
             return netNode.m_flags.IsFlagSet(NetNode.Flags.Junction | NetNode.Flags.Bend)
-                && ExtNodeManager.Instance.IsValid(nodeId);
+                && netNode.IsValid();
         }
 
         public bool HasJunctionRestrictions(ushort nodeId) {
-            if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+            ref NetNode netNode = ref nodeId.ToNode();
+            if (!netNode.IsValid()) {
                 return false;
             }
 
-            ref NetNode node = ref nodeId.ToNode();
             for (int i = 0; i < 8; ++i) {
-                ushort segmentId = node.GetSegment(i);
+                ushort segmentId = netNode.GetSegment(i);
                 if (segmentId != 0) {
                     bool startNode = segmentId.ToSegment().m_startNode == nodeId;
                     bool isDefault = startNode
@@ -188,7 +188,9 @@ namespace TrafficManager.Manager.Impl {
         public void UpdateAllDefaults() {
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             for (ushort segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                if (!extSegmentManager.IsSegmentValid(segmentId)) {
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                if (!netSegment.IsValid()) {
                     continue;
                 }
 
@@ -295,7 +297,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool IsUturnAllowedConfigurable(ushort segmentId, bool startNode, ref NetNode node) {
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
 
@@ -455,7 +459,9 @@ namespace TrafficManager.Manager.Impl {
             ushort segmentId,
             bool startNode,
             ref NetNode node) {
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
 
@@ -527,7 +533,9 @@ namespace TrafficManager.Manager.Impl {
             ushort segmentId,
             bool startNode,
             ref NetNode node) {
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
 
@@ -565,7 +573,9 @@ namespace TrafficManager.Manager.Impl {
 #else
             const bool logLogic = false;
 #endif
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
 
@@ -593,7 +603,6 @@ namespace TrafficManager.Manager.Impl {
             if (Options.allowEnterBlockedJunctions) {
                 ret = true;
             } else {
-                ref NetSegment netSegment = ref segmentId.ToSegment();
                 ushort nodeId = startNode ? netSegment.m_startNode : netSegment.m_endNode;
                 int numOutgoing = 0;
                 int numIncoming = 0;
@@ -859,16 +868,15 @@ namespace TrafficManager.Manager.Impl {
             }
         }
 
-        private static ref NetNode GetNode(ushort segmentId, bool startNode) {
-            ref NetSegment segment = ref GetSeg(segmentId);
-            ushort nodeId = startNode ? segment.m_startNode : segment.m_endNode;
-            return ref Shortcuts.GetNode(nodeId);
-        }
+        private static ref NetNode GetNode(ushort segmentId, bool startNode) =>
+            ref segmentId.ToSegment().GetNodeId(startNode).ToNode();
 
         #region Set<Traffic Rule>Allowed: TernaryBool 
 
         public bool SetUturnAllowed(ushort segmentId, bool startNode, TernaryBool value) {
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
             if(GetUturnAllowed(segmentId, startNode) == value) {
@@ -902,7 +910,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool SetTurnOnRedAllowed(bool near, ushort segmentId, bool startNode, TernaryBool value) {
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
             if (GetTurnOnRedAllowed(near, segmentId, startNode) == value) {
@@ -931,7 +941,9 @@ namespace TrafficManager.Manager.Impl {
             ushort segmentId,
             bool startNode,
             TernaryBool value) {
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
             if (GetLaneChangingAllowedWhenGoingStraight(segmentId, startNode) == value) {
@@ -951,7 +963,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool SetEnteringBlockedJunctionAllowed(ushort segmentId, bool startNode, TernaryBool value) {
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
             if (GetEnteringBlockedJunctionAllowed(segmentId, startNode) == value) {
@@ -973,7 +987,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool SetPedestrianCrossingAllowed(ushort segmentId, bool startNode, TernaryBool value) {
-            if (!ExtSegmentManager.Instance.IsSegmentValid(segmentId)) {
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if (!netSegment.IsValid()) {
                 return false;
             }
             if(GetPedestrianCrossingAllowed(segmentId, startNode) == value) {
@@ -1007,7 +1023,7 @@ namespace TrafficManager.Manager.Impl {
                 }
             }
 
-            Notifier.Instance.OnNodeModified(segmentId.ToSegment().GetNode(startNode), this);
+            Notifier.Instance.OnNodeModified(segmentId.ToSegment().GetNodeId(startNode), this);
         }
 
         public override void OnLevelUnloading() {
@@ -1032,7 +1048,7 @@ namespace TrafficManager.Manager.Impl {
                 try {
                     ref NetSegment netSegment = ref segNodeConf.segmentId.ToSegment();
 
-                    if (!extSegmentManager.IsSegmentValid(segNodeConf.segmentId)) {
+                    if (!netSegment.IsValid()) {
                         continue;
                     }
 
@@ -1212,7 +1228,9 @@ namespace TrafficManager.Manager.Impl {
 
             for (uint segmentId = 0; segmentId < NetManager.MAX_SEGMENT_COUNT; segmentId++) {
                 try {
-                    if (!extSegmentManager.IsSegmentValid((ushort)segmentId)) {
+                    ref NetSegment netSegment = ref ((ushort)segmentId).ToSegment();
+
+                    if (!netSegment.IsValid()) {
                         continue;
                     }
 
@@ -1221,7 +1239,7 @@ namespace TrafficManager.Manager.Impl {
 
                     ushort startNodeId = netManager.m_segments.m_buffer[segmentId].m_startNode;
 
-                    if (ExtNodeManager.Instance.IsValid(startNodeId)) {
+                    if (startNodeId.ToNode().IsValid()) {
                         SegmentEndFlags endFlags = segmentFlags_[segmentId].startNodeFlags;
 
                         if (!endFlags.IsDefault()) {
@@ -1249,7 +1267,7 @@ namespace TrafficManager.Manager.Impl {
 
                     ushort endNodeId = netManager.m_segments.m_buffer[segmentId].m_endNode;
 
-                    if (ExtNodeManager.Instance.IsValid(endNodeId)) {
+                    if (endNodeId.ToNode().IsValid()) {
                         SegmentEndFlags endFlags = segmentFlags_[segmentId].endNodeFlags;
 
                         if (!endFlags.IsDefault()) {

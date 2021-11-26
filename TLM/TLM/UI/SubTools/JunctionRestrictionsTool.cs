@@ -12,6 +12,7 @@ namespace TrafficManager.UI.SubTools {
     using static TrafficManager.Util.Shortcuts;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu.OSD;
+    using TrafficManager.Util.Extensions;
 
     public class JunctionRestrictionsTool
         : LegacySubTool,
@@ -56,8 +57,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             if ((HoveredNodeId != 0) && (HoveredNodeId != SelectedNodeId) &&
-                ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags &
-                  (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None)) {
+                ((HoveredNodeId.ToNode().m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) != NetNode.Flags.None)) {
                 // draw hovered node
                 MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
             }
@@ -99,11 +99,12 @@ namespace TrafficManager.UI.SubTools {
                 handleClick: !cursorInPanel);
 
             foreach (ushort nodeId in currentRestrictedNodeIds) {
-                if (!ExtNodeManager.Instance.IsValid(nodeId)) {
+                ref NetNode netNode = ref nodeId.ToNode();
+                if (!netNode.IsValid()) {
                     continue;
                 }
 
-                Vector3 nodePos = netManager.m_nodes.m_buffer[nodeId].m_position;
+                Vector3 nodePos = netNode.m_position;
                 Vector3 diff = nodePos - camPos;
 
                 if (diff.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
@@ -119,7 +120,7 @@ namespace TrafficManager.UI.SubTools {
                 // draw junction restrictions
                 overlay.ViewOnly = viewOnly || (nodeId != SelectedNodeId);
                 if (overlay.DrawSignHandles(nodeId: nodeId,
-                                            node: ref netManager.m_nodes.m_buffer[nodeId],
+                                            node: ref netNode,
                                             camPos: ref camPos,
                                             stateUpdated: out bool update))
                 {
@@ -153,8 +154,7 @@ namespace TrafficManager.UI.SubTools {
             }
 
             if (!logJunctions &&
-                ((Singleton<NetManager>.instance.m_nodes.m_buffer[HoveredNodeId].m_flags &
-                  (NetNode.Flags.Junction | NetNode.Flags.Bend)) == NetNode.Flags.None)) {
+                ((HoveredNodeId.ToNode().m_flags & (NetNode.Flags.Junction | NetNode.Flags.Bend)) == NetNode.Flags.None)) {
                 return;
             }
 
@@ -211,7 +211,9 @@ namespace TrafficManager.UI.SubTools {
             for (uint nodeId = forceNodeId == 0 ? 1u : forceNodeId;
                  nodeId <= (forceNodeId == 0 ? NetManager.MAX_NODE_COUNT - 1 : forceNodeId);
                  ++nodeId) {
-                if (!ExtNodeManager.Instance.IsValid((ushort)nodeId)) {
+                ref NetNode netNode = ref ((ushort)nodeId).ToNode();
+
+                if (!netNode.IsValid()) {
                     continue;
                 }
 
