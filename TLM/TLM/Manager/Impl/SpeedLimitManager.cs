@@ -97,15 +97,17 @@ namespace TrafficManager.Manager.Impl {
         ///     if cannot be determined.</returns>
         public SpeedValue? GetCustomSpeedLimit(ushort segmentId, NetInfo.Direction finalDir) {
             // calculate the currently set mean speed limit
-            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            // NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            ref var segment = ref segmentId.ToSegment();
+
             if (segmentId == 0 ||
-                (segmentsBuffer[segmentId].m_flags & NetSegment.Flags.Created) ==
+                (segment.m_flags & NetSegment.Flags.Created) ==
                 NetSegment.Flags.None) {
                 return null;
             }
 
-            NetInfo segmentInfo = segmentsBuffer[segmentId].Info;
-            uint curLaneId = segmentsBuffer[segmentId].m_lanes;
+            NetInfo segmentInfo = segment.Info;
+            uint curLaneId = segment.m_lanes;
             var laneIndex = 0;
             uint validLanes = 0;
             SpeedValue meanSpeedLimit = default;
@@ -139,11 +141,12 @@ namespace TrafficManager.Manager.Impl {
                 laneIndex++;
             }
 
-            if (validLanes > 0) {
-                meanSpeedLimit = meanSpeedLimit.Scale(1.0f / validLanes);
+            switch (validLanes) {
+                case 0:
+                    return null;
+                case > 0:
+                    return meanSpeedLimit.Scale(1.0f / validLanes);
             }
-
-            return meanSpeedLimit;
         }
 
         /// <summary>

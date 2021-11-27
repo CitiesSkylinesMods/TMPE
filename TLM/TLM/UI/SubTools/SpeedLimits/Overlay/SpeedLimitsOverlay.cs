@@ -416,10 +416,9 @@
                 SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Backward);
 
             // If both defined, pick the average (sum scaled by 1/2) otherwise pick whichever is not null
-            SpeedValue? overrideSpeedlimit =
-                overrideSpeedlimitForward.HasValue && overrideSpeedlimitBack.HasValue
-                ? (overrideSpeedlimitForward.Value + overrideSpeedlimitBack.Value).Scale(0.5f)
-                : (overrideSpeedlimitForward.HasValue ? overrideSpeedlimitForward : overrideSpeedlimitBack);
+            SpeedValue? overrideSpeedlimit = GetAverageSpeedlimit(
+                overrideSpeedlimitForward,
+                overrideSpeedlimitBack);
 
             // Get default or default-override speed limit for road type
             NetInfo neti = segmentId.ToSegment().Info;
@@ -467,13 +466,18 @@
             // Clickable overlay (interactive signs also True):
             // Register the position of a mouse-hovered speedlimit overlay icon
             args.HoveredSegmentHandles.Add(
-                item: new OverlaySegmentSpeedlimitHandle(
-                    segmentId: segmentId,
-                    finalDirection: NetInfo.Direction.Both));
+                item: new OverlaySegmentSpeedlimitHandle(segmentId));
 
             this.segmentId_ = segmentId;
             this.finalDirection_ = NetInfo.Direction.Both;
             return true;
+        }
+
+        private SpeedValue? GetAverageSpeedlimit(SpeedValue? forward, SpeedValue? back) {
+            if (forward.HasValue && back.HasValue) {
+                return (forward.Value + back.Value).Scale(0.5f);
+            }
+            return forward ?? back;
         }
 
         /// <summary>Draw speed limit handles one per lane.</summary>

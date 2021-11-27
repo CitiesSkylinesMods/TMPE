@@ -15,13 +15,8 @@
         /// <summary>Segment id where the speedlimit sign was displayed.</summary>
         private readonly ushort segmentId_;
 
-        /// <summary>Segment side, where the speedlimit sign was.</summary>
-        private readonly NetInfo.Direction finalDirection_;
-
-        public OverlaySegmentSpeedlimitHandle(ushort segmentId,
-                                              NetInfo.Direction finalDirection) {
+        public OverlaySegmentSpeedlimitHandle(ushort segmentId) {
             this.segmentId_ = segmentId;
-            this.finalDirection_ = finalDirection;
         }
 
         /// <summary>
@@ -34,13 +29,18 @@
         public void Click(in SetSpeedLimitAction action,
                           SetSpeedLimitTarget target,
                           bool multiSegmentMode) {
-            NetManager netManager = Singleton<NetManager>.instance;
-            NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
+            NetInfo netInfo = this.segmentId_.ToSegment().Info;
 
             Apply(
                 segmentId: this.segmentId_,
-                finalDir: this.finalDirection_,
-                netInfo: segmentsBuffer[this.segmentId_].Info,
+                finalDir: NetInfo.Direction.Forward,
+                netInfo: netInfo,
+                action: action,
+                target: target);
+            Apply(
+                segmentId: this.segmentId_,
+                finalDir: NetInfo.Direction.Backward,
+                netInfo: netInfo,
                 action: action,
                 target: target);
 
@@ -56,8 +56,6 @@
         /// <param name="action">The active speed limit on the palette.</param>
         private void ClickMultiSegment(SetSpeedLimitAction action,
                                        SetSpeedLimitTarget target) {
-            NetManager netManager = Singleton<NetManager>.instance;
-
             if (new RoundaboutMassEdit().TraverseLoop(this.segmentId_, out var segmentList)) {
                 foreach (ushort segId in segmentList) {
                     SpeedLimitManager.Instance.SetSegmentSpeedLimit(segId, action);
@@ -66,45 +64,23 @@
                 return;
             }
 
-            NetInfo.Direction normDir = this.finalDirection_;
-            NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
-
-            if ((segmentsBuffer[this.segmentId_].m_flags &
-                 NetSegment.Flags.Invert) != NetSegment.Flags.None) {
-                normDir = NetInfo.InvertDirection(normDir);
-            }
-
             // Called for each lane in the traversed street
             bool ForEachSegmentFun(SegmentLaneTraverser.SegmentLaneVisitData data) {
                 if (data.SegVisitData.Initial) {
                     return true;
                 }
 
-                bool reverse = data.SegVisitData.ViaStartNode ==
-                               data.SegVisitData.ViaInitialStartNode;
-
                 ushort otherSegmentId = data.SegVisitData.CurSeg.segmentId;
-                NetInfo otherSegmentInfo = segmentsBuffer[otherSegmentId].Info;
+                NetInfo otherSegmentInfo = otherSegmentId.ToSegment().Info;
                 byte laneIndex = data.CurLanePos.laneIndex;
                 NetInfo.Lane laneInfo = otherSegmentInfo.m_lanes[laneIndex];
 
-                NetInfo.Direction otherNormDir = laneInfo.m_finalDirection;
-
-                NetSegment.Flags invertFlag = segmentsBuffer[otherSegmentId].m_flags
-                                              & NetSegment.Flags.Invert;
-
-                if ((invertFlag != NetSegment.Flags.None) ^ reverse) {
-                    otherNormDir = NetInfo.InvertDirection(otherNormDir);
-                }
-
-                if (otherNormDir == normDir) {
-                    Apply(
-                        segmentId: otherSegmentId,
-                        finalDir: laneInfo.m_finalDirection,
-                        netInfo: otherSegmentInfo,
-                        action: action,
-                        target: target);
-                }
+                Apply(
+                    segmentId: otherSegmentId,
+                    finalDir: laneInfo.m_finalDirection,
+                    netInfo: otherSegmentInfo,
+                    action: action,
+                    target: target);
 
                 return true;
             }
@@ -120,9 +96,7 @@
                 laneVisitor: ForEachSegmentFun);
         } // end Click MultiSegment
 
-        /// <summary>
-        /// Based on target value, applies speed limit to a segmet or default for that road type.
-        /// </summary>
+        /// <summary>Based on target value, applies speed limit to a segmet or default for that road type.</summary>
         /// <param name="netInfo">For defaults, will set default speed limit for that road type.</param>
         private static void Apply(ushort segmentId,
                                   NetInfo.Direction finalDir,
