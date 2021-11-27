@@ -190,7 +190,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 sizeHint: new IntVector2(512));
 
             // Merge names of all button sprites atlasBuilder
-            foreach (string prefix in new[] {"MphToggle", "EditSegments", "EditDefaults"}) {
+            foreach (string prefix in new[]
+                { "MphToggle", "EditSegments", "EditLanes", "EditDefaults" })
+            {
                 ButtonSkin skin = ButtonSkin.CreateSimple(
                                                 foregroundPrefix: prefix,
                                                 backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)

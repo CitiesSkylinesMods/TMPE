@@ -8,14 +8,14 @@
     internal partial class SpeedLimitsToolWindow {
         /// <summary>
         /// Wrapper panel around mode toggle buttons.
-        /// <see cref="SegmentLaneModeToggleButton"/>, <see cref="EditDefaultsModeButton"/>,
+        /// <see cref="SegmentModeButton"/>, <see cref="DefaultsModeButton"/>,
         /// <see cref="MphToggleButton"/>.
         /// </summary>
         internal class ModeButtonsPanel : UPanel {
             /// <summary>UI button which toggles per-segment or per-lane speed limits.</summary>
-            public UButton SegmentLaneModeToggleButton;
-
-            public UButton EditDefaultsModeButton;
+            public UButton SegmentModeButton;
+            public UButton LaneModeButton;
+            public UButton DefaultsModeButton;
 
             public MphToggleButton ToggleMphButton;
 
@@ -32,50 +32,70 @@
 
                 this.ResizeFunction(ButtonpanelResizeFn);
 
-                Vector2 buttonSize = new Vector2(50f, 50f);
+                Vector2 buttonSize = new Vector2(40f, 40f);
                 UITextureAtlas uiAtlas = window.GetUiAtlas();
 
                 //----------------
                 // Edit Segments/Lanes mode button
                 //----------------
-                this.SegmentLaneModeToggleButton = builder.Button<UButton>(
+                this.SegmentModeButton = builder.Button<UButton>(
                     parent: this,
                     text: string.Empty,
-                    tooltip: "Edit segments. Click to edit lanes.",
+                    tooltip: Translation.SpeedLimits.Get("Edit segment speed limits"),
                     size: buttonSize,
                     stack: UStackMode.Below);
-                this.SegmentLaneModeToggleButton.atlas = uiAtlas;
+                this.SegmentModeButton.atlas = uiAtlas;
 
                 // Note the atlas is loaded before this skin is created in window.GetUiAtlas()
-                this.SegmentLaneModeToggleButton.Skin =
+                this.SegmentModeButton.Skin =
                     ButtonSkin.CreateSimple(
                                   foregroundPrefix: "EditSegments",
                                   backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
                               .CanActivate(background: false)
                               .CanHover(foreground: false);
-                this.SegmentLaneModeToggleButton.ApplyButtonSkin();
+                this.SegmentModeButton.ApplyButtonSkin();
 
+                // the onclick handler is set by SpeedLimitsTool outside of this module
+
+                //----------------
+                // Edit Lanes mode button
+                //----------------
+                this.LaneModeButton = builder.Button<UButton>(
+                    parent: this,
+                    text: string.Empty,
+                    tooltip: Translation.SpeedLimits.Get("Edit lane speed limits"),
+                    size: buttonSize,
+                    stack: UStackMode.Below);
+                this.LaneModeButton.atlas = uiAtlas;
+                // Note the atlas is loaded before this skin is created in window.GetUiAtlas()
+                this.LaneModeButton.Skin = ButtonSkin
+                                           .CreateSimple(
+                                               foregroundPrefix: "EditLanes",
+                                               backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
+                                           .CanActivate(background: false)
+                                           .CanHover(foreground: false);
+                this.LaneModeButton.ApplyButtonSkin();
                 // the onclick handler is set by SpeedLimitsTool outside of this module
 
                 //----------------
                 // Edit Defaults mode button
                 //----------------
-                this.EditDefaultsModeButton = builder.Button<UButton>(
+                this.DefaultsModeButton = builder.Button<UButton>(
                     parent: this,
                     text: string.Empty,
                     tooltip: "Default speed limits per road type",
                     size: buttonSize,
                     stack: UStackMode.Below);
-                this.EditDefaultsModeButton.atlas = uiAtlas;
+                this.DefaultsModeButton.atlas = uiAtlas;
 
                 // Note the atlas is loaded before this skin is created in window.GetUiAtlas()
-                this.EditDefaultsModeButton.Skin = ButtonSkin
+                this.DefaultsModeButton.Skin = ButtonSkin
                                                    .CreateSimple(
                                                        foregroundPrefix: "EditDefaults",
                                                        backgroundPrefix: UConst.MAINMENU_ROUND_BUTTON_BG)
                                                    .CanActivate(background: false)
                                                    .CanHover(foreground: false);
-                this.EditDefaultsModeButton.ApplyButtonSkin();
+                this.DefaultsModeButton.ApplyButtonSkin();
 
                 // the onclick handler is set by SpeedLimitsTool outside of this module
 
@@ -102,6 +122,12 @@
                 this.ToggleMphButton.ApplyButtonSkin();
 
                 // the onclick handler is set by SpeedLimitsTool outside of this module
+            }
+
+            public void UpdateTextures() {
+                this.SegmentModeButton.UpdateButtonSkin();
+                this.LaneModeButton.UpdateButtonSkin();
+                this.DefaultsModeButton.UpdateButtonSkin();
             }
         }
     }

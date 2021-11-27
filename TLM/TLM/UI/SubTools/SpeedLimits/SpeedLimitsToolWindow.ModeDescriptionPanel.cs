@@ -66,13 +66,6 @@
                 //--------------------------
                 // Keyboard modifier hints
                 //--------------------------
-                if (!editDefaults) {
-                    t = showLanes
-                            ? UIUtil.ColorizeKeybind("[[Ctrl]] averaged limits.")
-                            : UIUtil.ColorizeKeybind("[[Ctrl]] see each lane.");
-                    sb.Append(Translation.SpeedLimits.Get(t));
-                }
-
                 sb.Append(" ");
                 t = UIUtil.ColorizeKeybind("[[Shift]] edit multiple.");
                 sb.Append(Translation.SpeedLimits.Get(t));

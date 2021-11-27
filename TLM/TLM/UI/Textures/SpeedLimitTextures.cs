@@ -189,6 +189,8 @@ namespace TrafficManager.UI.Textures {
             return TexturesKmph;
         }
 
+        public static Vector2 DefaultSpeedlimitsAspectRatio() => Vector2.one;
+
         /// <summary>
         /// Returns vector of one for square/circle textures, or a proportionally scaled rect of
         /// width one, for rectangular US signs.

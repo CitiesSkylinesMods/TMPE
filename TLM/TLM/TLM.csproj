@@ -370,6 +370,7 @@
       <DependentUpon>SpeedLimitsToolWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsTool.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\SpeedlimitsToolMode.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedUnit.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsToolWindow.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\SpeedLimitsToolWindow.ModeButtonsPanel.cs">
@@ -776,8 +777,8 @@
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Stop_LHT-fg-disabled.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\EditDefaults-fg-active.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\EditDefaults-fg-normal.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\EditLanes-fg-active.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\EditSegments-fg-active.png" />
-    <EmbeddedResource Include="Resources\SpeedLimits\EditSegments-fg-normal.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\MphToggle-fg-active.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\MphToggle-fg-normal.png" />
     <EmbeddedResource Include="Resources\SpeedLimits\NoOverride.png" />
@@ -819,6 +820,10 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Clear-fg-disabled.png" />
     <EmbeddedResource Include="Resources\RoadSelectionPanel\Clear-fg-normal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SpeedLimits\EditLanes-fg-normal.png" />
+    <EmbeddedResource Include="Resources\SpeedLimits\EditSegments-fg-normal.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuildMacros">

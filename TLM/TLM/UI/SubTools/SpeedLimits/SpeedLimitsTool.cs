@@ -39,21 +39,12 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             }
         }
 
-        /// <summary>
-        /// Will show and edit speed limits for each lane.
-        /// This is toggled by the tool window button. Use <see cref="GetShowLimitsPerLane" /> to
-        /// retrieve the value affected by the Ctrl button state.
-        /// </summary>
-        private bool showLimitsPerLane_;
+        private SpeedlimitsToolMode speedlimitsToolMode_ = SpeedlimitsToolMode.Segments;
 
         /// <summary>Whether limits per lane are to be shown.</summary>
         /// <returns>Gets <see cref="showLimitsPerLane_"/> but also holding Ctrl would invert it.</returns>
-        private bool GetShowLimitsPerLane() => this.showLimitsPerLane_ ^ Shortcuts.ControlIsPressed;
-
-        /// <summary>
-        /// True if user is editing road defaults. False if user is editing speed limit overrides.
-        /// </summary>
-        private bool editDefaultsMode_;
+        private bool GetShowLimitsPerLane() => this.speedlimitsToolMode_ == SpeedlimitsToolMode.Lanes;
+        //^ Shortcuts.ControlIsPressed;
 
         /// <summary>Will edit entire road between two junctions by holding Shift.</summary>
         private bool GetMultiSegmentMode() => Shortcuts.ShiftIsPressed;
@@ -109,13 +100,17 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // Click handlers for the window are located here
             // to have insight into SpeedLimits Tool internals
             //--------------------------------------------------
-            this.Window.modeButtonsPanel_.SegmentLaneModeToggleButton.SetupToggleButton(
-                onClickFun: this.OnClickSegmentLaneModeButton,
-                isActiveFun: _ => this.showLimitsPerLane_);
+            this.Window.modeButtonsPanel_.SegmentModeButton.SetupToggleButton(
+                onClickFun: this.OnClickSegmentModeButton,
+                isActiveFun: _ => this.speedlimitsToolMode_ == SpeedlimitsToolMode.Segments);
 
-            this.Window.modeButtonsPanel_.EditDefaultsModeButton.SetupToggleButton(
+            this.Window.modeButtonsPanel_.LaneModeButton.SetupToggleButton(
+                onClickFun: this.OnClickLaneModeButton,
+                isActiveFun: _ => this.speedlimitsToolMode_ == SpeedlimitsToolMode.Lanes);
+
+            this.Window.modeButtonsPanel_.DefaultsModeButton.SetupToggleButton(
                 onClickFun: this.OnClickEditDefaultsButton,
-                isActiveFun: _ => this.editDefaultsMode_);
+                isActiveFun: _ => this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults);
 
             this.Window.modeButtonsPanel_.ToggleMphButton.uOnClick = this.OnClickToggleMphButton;
             this.UpdateCursorTooltip();
@@ -124,7 +119,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private void UpdateModeInfoLabel() {
             this.Window.modeDescriptionWrapPanel_.UpdateModeInfoLabel(
                 multiSegmentMode: this.GetMultiSegmentMode(),
-                editDefaults: this.editDefaultsMode_,
+                editDefaults: this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults,
                 showLanes: this.GetShowLimitsPerLane());
             this.Window.ForceUpdateLayout(); // The info label can get tall, need to move everything
         }
@@ -138,21 +133,27 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         private void OnClickEditDefaultsButton(UIComponent component, UIMouseEventParameter evt) {
-            this.editDefaultsMode_ = !this.editDefaultsMode_;
+            this.speedlimitsToolMode_ = SpeedlimitsToolMode.Defaults;
             this.MainTool.RequestOnscreenDisplayUpdate();
-
             this.UpdateCursorTooltip();
-
             this.UpdateModeInfoLabel();
+            this.Window.modeButtonsPanel_.UpdateTextures();
         }
 
-        private void OnClickSegmentLaneModeButton(UIComponent component,
-                                                  UIMouseEventParameter evt) {
-            this.showLimitsPerLane_ = !this.showLimitsPerLane_;
+        private void OnClickSegmentModeButton(UIComponent component, UIMouseEventParameter evt) {
+            this.speedlimitsToolMode_ = SpeedlimitsToolMode.Segments;
             this.MainTool.RequestOnscreenDisplayUpdate();
-
             this.UpdateCursorTooltip();
             this.UpdateModeInfoLabel();
+            this.Window.modeButtonsPanel_.UpdateTextures();
+        }
+
+        private void OnClickLaneModeButton(UIComponent component, UIMouseEventParameter evt) {
+            this.speedlimitsToolMode_ = SpeedlimitsToolMode.Lanes;
+            this.MainTool.RequestOnscreenDisplayUpdate();
+            this.UpdateCursorTooltip();
+            this.UpdateModeInfoLabel();
+            this.Window.modeButtonsPanel_.UpdateTextures();
         }
 
         private void UpdateCursorTooltip() {
@@ -207,11 +208,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             }
 
             this.overlayDrawArgs_.Mouse = this.GetMouseForOverlay();
-            this.overlayDrawArgs_.InteractiveSigns = interactive;
+            this.overlayDrawArgs_.IsInteractive = interactive;
             this.overlayDrawArgs_.MultiSegmentMode = this.GetMultiSegmentMode();
-            this.overlayDrawArgs_.ShowLimitsPerLane = this.GetShowLimitsPerLane();
-            this.overlayDrawArgs_.ShowDefaultsMode = this.editDefaultsMode_;
-            this.overlayDrawArgs_.ShowOtherPerLaneModeTemporary = interactive && Shortcuts.AltIsPressed;
+            this.overlayDrawArgs_.ToolMode = this.speedlimitsToolMode_;
+            this.overlayDrawArgs_.ShowAltMode = interactive && Shortcuts.AltIsPressed;
         }
 
         /// <summary>Create value of null (if mouse is over some essential UI window) or return
@@ -251,7 +251,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // Go through recently rendered overlay speedlimit handles, which had mouse over them
             // Hovering multiple speed limits handles at once should set limits on multiple roads
             if (this.GetShowLimitsPerLane()) {
-                SetSpeedLimitTarget target = this.editDefaultsMode_
+                SetSpeedLimitTarget target = this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
                                                  ? SetSpeedLimitTarget.LaneDefault
                                                  : SetSpeedLimitTarget.LaneOverride;
 
@@ -264,7 +264,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 }
             } else {
                 // per segment
-                SetSpeedLimitTarget target = this.editDefaultsMode_
+                SetSpeedLimitTarget target = this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
                                                  ? SetSpeedLimitTarget.SegmentDefault
                                                  : SetSpeedLimitTarget.SegmentOverride;
 
@@ -294,21 +294,21 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             // t: "Hold [Ctrl] to see per lane limits temporarily",
             // t: "Hold [Shift] to modify entire road between two junctions",
             string toggleDefaultStr =
-                this.editDefaultsMode_
+                this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
                     ? T("SpeedLimits.Alt:See speed limits overrides temporarily")
                     : T("SpeedLimits.Alt:See default speed limits temporarily");
-            string togglePerLaneStr =
-                this.GetShowLimitsPerLane()
-                    ? T("SpeedLimits.Ctrl:See speed limits per segment temporarily")
-                    : T("SpeedLimits.Ctrl:See speed limits per lane temporarily");
+            // string togglePerLaneStr =
+            //     this.GetShowLimitsPerLane()
+            //         ? T("SpeedLimits.Ctrl:See speed limits per segment temporarily")
+            //         : T("SpeedLimits.Ctrl:See speed limits per lane temporarily");
             var items = new List<MainMenu.OSD.OsdItem> {
                 new MainMenu.OSD.ModeDescription(localizedText: T("SpeedLimits.OSD:Select")),
                 new MainMenu.OSD.HoldModifier(
                     alt: true,
                     localizedText: toggleDefaultStr),
-                new MainMenu.OSD.HoldModifier(
-                    ctrl: true,
-                    localizedText: togglePerLaneStr),
+                // new MainMenu.OSD.HoldModifier(
+                //     ctrl: true,
+                //     localizedText: togglePerLaneStr),
                 new MainMenu.OSD.HoldModifier(
                     shift: true,
                     localizedText: T("SpeedLimits.Shift:Modify road between two junctions")),

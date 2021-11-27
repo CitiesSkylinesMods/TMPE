@@ -1,4 +1,5 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework;
@@ -35,7 +36,7 @@
             public List<Rect> UiWindowRects;
 
             /// <summary>Set to true to allow bigger and clickable road signs.</summary>
-            public bool InteractiveSigns;
+            public bool IsInteractive;
 
             /// <summary>
             /// User is holding Shift to edit multiple segments.
@@ -43,20 +44,14 @@
             /// </summary>
             public bool MultiSegmentMode;
 
-            /// <summary>Set to true to show speed limits for each lane.</summary>
-            public bool ShowLimitsPerLane;
+            /// <summary>Choose what to display (hold Alt to display something else).</summary>
+            public SpeedlimitsToolMode ToolMode;
 
             /// <summary>
             /// Set this to true to additionally show the other PerLane/PerSegment mode as small
             /// icons together with the large icons.
             /// </summary>
-            public bool ShowOtherPerLaneModeTemporary;
-
-            /// <summary>
-            /// If false, overrides will be rendered as main icon, and defaults as small icon.
-            /// If true, defaults will be rendered large, and overrides small.
-            /// </summary>
-            public bool ShowDefaultsMode;
+            public bool ShowAltMode;
 
             /// <summary>Hovered SEGMENT speed limit handles (output after rendering).</summary>
             public List<OverlaySegmentSpeedlimitHandle> HoveredSegmentHandles;
@@ -67,13 +62,12 @@
             public static DrawArgs Create() {
                 return new() {
                     UiWindowRects = new List<Rect>(),
-                    InteractiveSigns = false,
+                    IsInteractive = false,
                     MultiSegmentMode = false,
-                    ShowLimitsPerLane = false,
+                    ToolMode = SpeedlimitsToolMode.Segments,
                     HoveredSegmentHandles = new List<OverlaySegmentSpeedlimitHandle>(capacity: 10),
                     HoveredLaneHandles = new List<OverlayLaneSpeedlimitHandle>(capacity: 10),
-                    ShowDefaultsMode = false,
-                    ShowOtherPerLaneModeTemporary = false,
+                    ShowAltMode = false,
                 };
             }
 
@@ -93,6 +87,13 @@
             public Vector2 signsThemeAspectRatio_;
             public IDictionary<int,Texture2D> largeSignsTextures_;
             public IDictionary<int,Texture2D> currentThemeTextures_;
+
+            /// <summary>
+            /// This is set to true if the user will see blue default signs, or the user is holding
+            /// Alt to see blue signs temporarily. Holding Alt while default signs are shown, will
+            /// show segment speeds instead.
+            /// </summary>
+            public bool drawDefaults_;
         }
 
         private struct CachedSegment {
@@ -128,7 +129,7 @@
         /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
         public void RenderHelperGraphics(RenderManager.CameraInfo cameraInfo,
                                          [NotNull] DrawArgs args) {
-            if (!args.ShowLimitsPerLane) {
+            if (args.ToolMode != SpeedlimitsToolMode.Lanes) {
                 this.RenderSegments(cameraInfo, args);
             }
         }
@@ -214,13 +215,13 @@
         /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
         private void RenderLaneOverlay(RenderManager.CameraInfo cameraInfo,
                                        uint laneId,
-                                       DrawArgs args) {
+                                       [NotNull] DrawArgs args) {
             NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
             SegmentLaneMarker marker = new SegmentLaneMarker(laneBuffer[laneId].m_bezier);
             bool pressed = Input.GetMouseButton(0);
             Color color = this.mainTool_.GetToolColor(warning: pressed, error: false);
 
-            if (args.ShowLimitsPerLane) {
+            if (args.ToolMode == SpeedlimitsToolMode.Lanes) {
                 marker.Size = 3f; // lump the lanes together.
             }
 
@@ -268,9 +269,16 @@
             DrawEnv drawEnv = new DrawEnv {
                 signsThemeAspectRatio_ = SpeedLimitTextures.GetTextureAspectRatio(),
                 currentThemeTextures_ = currentThemeTextures,
-                largeSignsTextures_ = args.ShowDefaultsMode
-                                          ? SpeedLimitTextures.RoadDefaults
-                                          : currentThemeTextures,
+                largeSignsTextures_ = args.ToolMode switch {
+                    SpeedlimitsToolMode.Segments => currentThemeTextures,
+                    SpeedlimitsToolMode.Lanes => currentThemeTextures,
+                    // Defaults can show normal textures if the user holds Alt
+                    SpeedlimitsToolMode.Defaults => args.ShowAltMode
+                                                        ? currentThemeTextures
+                                                        : SpeedLimitTextures.RoadDefaults,
+                    _ => throw new ArgumentOutOfRangeException(),
+                },
+                drawDefaults_ = (args.ToolMode == SpeedlimitsToolMode.Defaults) ^ args.ShowAltMode,
             };
 
             for (int segmentIdIndex = this.cachedVisibleSegmentIds_.Size - 1;
@@ -284,21 +292,22 @@
                     continue;
                 }
 
-                if (args.ShowLimitsPerLane && !args.ShowDefaultsMode) {
+                if (args.ToolMode == SpeedlimitsToolMode.Lanes && !drawEnv.drawDefaults_) {
                     // in defaults mode separate lanes don't make any sense, so show segments at all times
                     hover |= this.DrawSpeedLimitHandles_PerLane(
-                        cachedSeg.id_,
-                        cachedSeg.center_,
-                        camPos,
-                        drawEnv,
-                        args);
+                        segmentId: cachedSeg.id_,
+                        segCenter: cachedSeg.center_,
+                        camPos: camPos,
+                        drawEnv: drawEnv,
+                        args: args);
                 } else {
+                    // Both segment speed limits and default speed limits are displayed in the same way
                     hover |= this.DrawSpeedLimitHandles_PerSegment(
-                        cachedSeg.id_,
-                        cachedSeg.center_,
-                        camPos,
-                        drawEnv,
-                        args);
+                        segmentId: cachedSeg.id_,
+                        segCenter: cachedSeg.center_,
+                        camPos: camPos,
+                        drawEnv: drawEnv,
+                        args: args);
                 }
             }
 
@@ -368,7 +377,7 @@
                                                       [NotNull] DrawEnv drawEnv,
                                                       [NotNull] DrawArgs args) {
             // Default signs are round, mph/kmph textures can be round or rectangular
-            var colorController = new OverlayHandleColorController(args.InteractiveSigns);
+            var colorController = new OverlayHandleColorController(args.IsInteractive);
 
             //--------------------------
             // For all segments visible
@@ -397,36 +406,19 @@
             [NotNull] DrawEnv drawEnv,
             [NotNull] DrawArgs args)
         {
-            Vector2 largeRatio = args.ShowDefaultsMode ? Vector2.one : drawEnv.signsThemeAspectRatio_;
+            Vector2 largeRatio = drawEnv.drawDefaults_
+                                     ? Vector2.one
+                                     : drawEnv.signsThemeAspectRatio_;
+
+            // TODO: Replace formula in visibleScale and size to use Constants.OVERLAY_INTERACTIVE_SIGN_SIZE and OVERLAY_READONLY_SIGN_SIZE
             float visibleScale = 100.0f / (segCenter - camPos).magnitude;
-            float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE *
-                         visibleScale;
+            float size = (args.IsInteractive ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
+
             SpeedLimitsOverlaySign signRenderer = default;
 
             // Recalculate visible rect for screen position and size
-            Rect signScreenRect = signRenderer.Reset(
-                screenPos: screenPos,
-                size: size * largeRatio);
-
-            bool isHoveredHandle = args.InteractiveSigns && signRenderer.ContainsMouse(args.Mouse);
-
-            // Get speed limit override for segment
-            SpeedValue? overrideSpeedlimitForward =
-                SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Forward);
-            SpeedValue? overrideSpeedlimitBack =
-                SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Backward);
-
-            // If both defined, pick the average (sum scaled by 1/2) otherwise pick whichever is not null
-            SpeedValue? overrideSpeedlimit = GetAverageSpeedlimit(
-                overrideSpeedlimitForward,
-                overrideSpeedlimitBack);
-
-            // Get default or default-override speed limit for road type
-            NetInfo neti = segmentId.ToSegment().Info;
-            SpeedValue defaultSpeedlimit =
-                args.ShowDefaultsMode
-                    ? new SpeedValue(SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info: neti))
-                    : default;
+            Rect signScreenRect = signRenderer.Reset(screenPos, size: size * largeRatio);
+            bool isHoveredHandle = args.IsInteractive && signRenderer.ContainsMouse(args.Mouse);
 
             //-----------
             // Rendering
@@ -438,25 +430,25 @@
                 opacityMultiplier: Mathf.Sqrt(visibleScale));
 
             // Render override if interactive, or if readonly info layer and override exists
-            if (args.InteractiveSigns || overrideSpeedlimit.HasValue) {
+            if (drawEnv.drawDefaults_) {
+                NetInfo neti = segmentId.ToSegment().Info;
                 signRenderer.DrawLargeTexture(
-                    speedlimit: args.ShowDefaultsMode ? defaultSpeedlimit : overrideSpeedlimit,
-                    textureSource: drawEnv.largeSignsTextures_);
-            }
+                    speedlimit: new SpeedValue(SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info: neti)),
+                    textureSource: SpeedLimitTextures.RoadDefaults);
+            } else {
+                // Get speed limit override for segment
+                SpeedValue? overrideSpeedlimitForward =
+                    SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Forward);
+                SpeedValue? overrideSpeedlimitBack =
+                    SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Backward);
+                SpeedValue? drawSpeedlimit = GetAverageSpeedlimit(
+                    forward: overrideSpeedlimitForward,
+                    back: overrideSpeedlimitBack);
 
-            // If Alt is held, then also overlay the other (default limit in edit override mode,
-            // or override in edit defaults mode) as a small texture.
-            if (args.ShowOtherPerLaneModeTemporary) {
-                if (args.ShowDefaultsMode) {
-                    signRenderer.DrawSmallTexture(
-                        speedlimit: overrideSpeedlimit,
-                        smallSize: size * SMALL_ICON_SCALE * drawEnv.signsThemeAspectRatio_,
-                        textureSource: drawEnv.currentThemeTextures_);
-                } else {
-                    signRenderer.DrawSmallTexture(
-                        speedlimit: defaultSpeedlimit,
-                        smallSize: size * SMALL_ICON_SCALE * Vector2.one,
-                        textureSource: SpeedLimitTextures.RoadDefaults);
+                if (args.IsInteractive || drawSpeedlimit.HasValue) {
+                    signRenderer.DrawLargeTexture(
+                        speedlimit: drawSpeedlimit,
+                        textureSource: drawEnv.largeSignsTextures_);
                 }
             }
 
@@ -507,7 +499,7 @@
             NetInfo segmentInfo = segment.Info;
             Vector3 yu = (segment.m_endDirection - segment.m_startDirection).normalized;
             Vector3 xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
-            float signSize = args.InteractiveSigns
+            float signSize = args.IsInteractive
                                  ? Constants.OVERLAY_INTERACTIVE_SIGN_SIZE
                                  : Constants.OVERLAY_READONLY_SIGN_SIZE;
 
@@ -524,7 +516,7 @@
 
             bool onlyMonorailLanes = sortedLanes.Count > 0;
 
-            if (args.InteractiveSigns) {
+            if (args.IsInteractive) {
                 foreach (LanePos laneData in sortedLanes) {
                     byte laneIndex = laneData.laneIndex;
                     NetInfo.Lane laneInfo = segmentInfo.m_lanes[laneIndex];
@@ -550,12 +542,32 @@
 
             // Sign renderer logic and chosen texture for signs
             SpeedLimitsOverlaySign signRenderer = default;
-            Vector2 largeRatio = args.ShowDefaultsMode ? Vector2.one : drawEnv.signsThemeAspectRatio_;
+            // Defaults have 1:1 ratio (square textures)
+            Vector2 largeRatio = drawEnv.drawDefaults_
+                                     ? SpeedLimitTextures.DefaultSpeedlimitsAspectRatio()
+                                     : drawEnv.signsThemeAspectRatio_;
 
             // Signs are rendered in a grid starting from col 0
             float signColumn = 0f;
-            var colorController = new OverlayHandleColorController(args.InteractiveSigns);
-            SpeedValue? defaultSpeedlimit = null;
+            var colorController = new OverlayHandleColorController(args.IsInteractive);
+
+            // var defaultSpeedlimit = new SpeedValue(
+            // SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info: segmentInfo));
+            // if (drawEnv.drawDefaults_) {
+            //     float visibleScale = 100.0f / (segCenter - camPos).magnitude;
+            //     float size = (args.IsInteractive ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
+            //
+            //     bool visible = GeometryUtil.WorldToScreenPoint(segCenter, out Vector3 segCenterScreenPos);
+            //     if (visible) {
+            //         signRenderer.Reset(segCenterScreenPos, size: new Vector2(size, size));
+            //         signRenderer.DrawLargeTexture(
+            //             speedlimit: defaultSpeedlimit,
+            //             textureSource: SpeedLimitTextures.RoadDefaults);
+            //     }
+            //
+            //     colorController.RestoreGUIColor();
+            //     return false; // cannot hover defaults sign while holding Alt
+            // }
 
             //-----------------------
             // For all lanes sorted
@@ -582,11 +594,11 @@
                 }
 
                 float visibleScale = 100.0f / (worldPos - camPos).magnitude;
-                float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
+                float size = (args.IsInteractive ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
                 Rect signScreenRect = signRenderer.Reset(screenPos, size: largeRatio * size);
 
                 // Set render transparency based on mouse hover
-                bool isHoveredHandle = args.InteractiveSigns && signRenderer.ContainsMouse(args.Mouse);
+                bool isHoveredHandle = args.IsInteractive && signRenderer.ContainsMouse(args.Mouse);
 
                 // Sqrt(visibleScale) makes fade start later as distance grows
                 colorController.SetGUIColor(
@@ -606,23 +618,7 @@
                 signRenderer.DrawLargeTexture(speedlimit: largeSpeedlimit,
                                               textureSource: drawEnv.largeSignsTextures_);
 
-                // If Alt is held, then also overlay the other (default limit in edit override mode,
-                // or override in edit defaults mode) as a small texture.
-                if (args.ShowOtherPerLaneModeTemporary) {
-                    if (args.ShowDefaultsMode) {
-                        signRenderer.DrawSmallTexture(
-                            speedlimit: overrideSpeedlimit.OverrideValue,
-                            smallSize: size * SMALL_ICON_SCALE * drawEnv.signsThemeAspectRatio_,
-                            textureSource: drawEnv.currentThemeTextures_);
-                    } else {
-                        // This is rendered after the loop
-                        if (overrideSpeedlimit.DefaultValue.HasValue) {
-                            defaultSpeedlimit = overrideSpeedlimit.DefaultValue;
-                        }
-                    }
-                }
-
-                if (args.InteractiveSigns
+                if (args.IsInteractive
                     && !onlyMonorailLanes
                     && ((laneInfo.m_vehicleType & VehicleInfo.VehicleType.Monorail) != VehicleInfo.VehicleType.None))
                 {
@@ -658,21 +654,6 @@
             }
 
             colorController.RestoreGUIColor();
-
-            if (args.ShowOtherPerLaneModeTemporary
-                && !args.ShowDefaultsMode
-                && defaultSpeedlimit.HasValue) {
-                float visibleScale = 100.0f / (segCenter - camPos).magnitude;
-                float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
-                bool visible = GeometryUtil.WorldToScreenPoint(segCenter, out Vector3 segCenterScreenPos);
-                if (visible) {
-                    signRenderer.Reset(segCenterScreenPos, size: new Vector2(size, size));
-                    signRenderer.DrawLargeTexture(
-                        speedlimit: defaultSpeedlimit.Value,
-                        textureSource: SpeedLimitTextures.RoadDefaults);
-                }
-            }
-
             return ret;
         }
     }
