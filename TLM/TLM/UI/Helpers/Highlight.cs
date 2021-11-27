@@ -127,20 +127,6 @@
             // TODO: Potentially we do not need to refer to a TrafficManagerTool object
         }
 
-        /// <summary>
-        /// Gets the coordinates of the given node.
-        /// </summary>
-        private static Vector3 GetNodePos(ushort nodeId) {
-            NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            Vector3 pos = nodeBuffer[nodeId].m_position;
-            float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
-            if (terrainY > pos.y) {
-                pos.y = terrainY;
-            }
-
-            return pos;
-        }
-
         /// <returns>the average half width of all connected segments</returns>
         private static float CalculateNodeRadius(ushort nodeId) {
             float sumHalfWidth = 0;
@@ -236,8 +222,8 @@
             bool IsMiddle(ushort nodeId) => (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
 
             Bezier3 bezier;
-            bezier.a = GetNodePos(segment.m_startNode);
-            bezier.d = GetNodePos(segment.m_endNode);
+            bezier.a = segment.m_startNode.ToNode().GetPositionOnTerrain();
+            bezier.d = segment.m_endNode.ToNode().GetPositionOnTerrain();
 
             NetSegment.CalculateMiddlePoints(
                 startPos: bezier.a,
@@ -292,8 +278,8 @@
                 (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
 
             Bezier3 bezier;
-            bezier.a = GetNodePos(segment.m_startNode);
-            bezier.d = GetNodePos(segment.m_endNode);
+            bezier.a = segment.m_startNode.ToNode().GetPositionOnTerrain();
+            bezier.d = segment.m_endNode.ToNode().GetPositionOnTerrain();
 
             NetSegment.CalculateMiddlePoints(
                 startPos: bezier.a,

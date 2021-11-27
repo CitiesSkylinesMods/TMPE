@@ -26,20 +26,13 @@ namespace TrafficManager.Util {
             return screenPos.z >= 0;
         }
 
-        /// <summary>Calculates bezier center for a segment.</summary>
-        internal static Vector3 CalculateSegmentCenter(ushort segmentId) {
-            NetManager netManager = Singleton<NetManager>.instance;
-
-            ref var segment = ref segmentId.ToSegment();
-
-            // NetNode[] nodeBuffer = Singleton<NetManager>.instance.m_nodes.m_buffer;
-
-            bool IsMiddle(ushort nodeId) =>
-                (nodeBuffer[nodeId].m_flags & NetNode.Flags.Middle) != 0;
+        /// <summary>Extension method: Calculates bezier center for a segment.</summary>
+        internal static Vector3 GetCenter(this ref NetSegment segment) {
+            bool IsMiddle(ushort nodeId) => (nodeId.ToNode().m_flags & NetNode.Flags.Middle) != 0;
 
             Bezier3 bezier;
-            bezier.a = GetNodePos(segment.m_startNode);
-            bezier.d = GetNodePos(segment.m_endNode);
+            bezier.a = segment.m_startNode.ToNode().GetPositionOnTerrain();
+            bezier.d = segment.m_endNode.ToNode().GetPositionOnTerrain();
 
             NetSegment.CalculateMiddlePoints(
                 startPos: bezier.a,
@@ -50,6 +43,20 @@ namespace TrafficManager.Util {
                 smoothEnd: IsMiddle(segment.m_endNode),
                 middlePos1: out bezier.b,
                 middlePos2: out bezier.c);
+
+            // Return middle point between 0.0f and 1.0f
+            return bezier.Position(0.5f);
+        }
+
+        /// <summary>Gets the coordinates of the given node taking the terrain into account.</summary>
+        internal static Vector3 GetPositionOnTerrain(this ref NetNode node) {
+            Vector3 pos = node.m_position;
+            float terrainY = Singleton<TerrainManager>.instance.SampleDetailHeightSmooth(pos);
+            if (terrainY > pos.y) {
+                pos.y = terrainY;
+            }
+
+            return pos;
         }
 
         /// <summary>

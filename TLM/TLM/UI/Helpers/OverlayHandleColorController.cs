@@ -8,7 +8,7 @@
     /// 2. Call .SetGUIColor() with mouse hover true or false.
     /// 3. In the end call .RestoreGUIColor()
     /// </summary>
-    public struct OverlayHandleColorController {
+    public readonly struct OverlayHandleColorController {
         private readonly bool isInteractable_;
 
         /// <summary>

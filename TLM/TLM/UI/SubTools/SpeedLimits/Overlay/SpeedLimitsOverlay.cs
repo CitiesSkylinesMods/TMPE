@@ -1,9 +1,7 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits.Overlay {
     using System.Collections.Generic;
     using System.Linq;
-    using CitiesGameBridge.Service;
     using ColossalFramework;
-    using GenericGameBridge.Service;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
@@ -13,6 +11,7 @@
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using TrafficManager.Util.Caching;
+    using TrafficManager.Util.Extensions;
     using UnityEngine;
 
     /// <summary>
@@ -22,10 +21,10 @@
     public class SpeedLimitsOverlay {
         private const float SMALL_ICON_SCALE = 0.66f;
 
+        private TrafficManagerTool mainTool_;
+
         private ushort segmentId_;
         private NetInfo.Direction finalDirection_ = NetInfo.Direction.None;
-
-        private TrafficManagerTool mainTool_;
 
         /// <summary>Used to pass options to the overlay rendering.</summary>
         public class DrawArgs {
@@ -88,11 +87,24 @@
             }
         }
 
+        /// <summary>Environment for rendering multiple signs, to avoid creating same data over and over
+        /// and to carry drawing state between multiple calls without using class fields.</summary>
+        private class DrawEnv {
+            public Vector2 signsThemeAspectRatio_;
+            public IDictionary<int,Texture2D> largeSignsTextures_;
+            public IDictionary<int,Texture2D> currentThemeTextures_;
+        }
+
+        private struct CachedSegment {
+            public ushort id_;
+            public Vector3 center_;
+        }
+
         /// <summary>
         /// Stores potentially visible segment ids while the camera did not move.
         /// </summary>
         [NotNull]
-        private readonly GenericArrayCache<ushort> cachedVisibleSegmentIds_;
+        private readonly GenericArrayCache<CachedSegment> cachedVisibleSegmentIds_;
 
         /// <summary>If set to true, prompts one-time cache reset.</summary>
         private bool resetCacheFlag_ = false;
@@ -107,7 +119,7 @@
 
         public SpeedLimitsOverlay(TrafficManagerTool mainTool) {
             this.mainTool_ = mainTool;
-            this.cachedVisibleSegmentIds_ = new GenericArrayCache<ushort>(NetManager.MAX_SEGMENT_COUNT);
+            this.cachedVisibleSegmentIds_ = new GenericArrayCache<CachedSegment>(NetManager.MAX_SEGMENT_COUNT);
             this.lastCachedCamera_ = new CameraTransformValue();
         }
 
@@ -115,7 +127,7 @@
         /// <param name="cameraInfo">The camera.</param>
         /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
         public void RenderHelperGraphics(RenderManager.CameraInfo cameraInfo,
-                                         DrawArgs args) {
+                                         [NotNull] DrawArgs args) {
             if (!args.ShowLimitsPerLane) {
                 this.RenderSegments(cameraInfo, args);
             }
@@ -125,7 +137,7 @@
         /// <param name="cameraInfo">The camera.</param>
         /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
         private void RenderSegments(RenderManager.CameraInfo cameraInfo,
-                                    DrawArgs args) {
+                                    [NotNull] DrawArgs args) {
             if (!args.MultiSegmentMode) {
                 //------------------------
                 // Single segment highlight. User is NOT holding Shift.
@@ -181,7 +193,9 @@
                                               NetInfo.Direction finalDirection = NetInfo.Direction.None)
         {
             ref NetSegment netSegment = ref segmentId.ToSegment();
-            foreach (LaneIdAndIndex laneIdAndIndex in NetService.Instance.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
+
+            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 NetInfo.Lane laneInfo = netSegment.Info.m_lanes[laneIdAndIndex.laneIndex];
 
                 bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
@@ -250,24 +264,41 @@
             }
 
             bool hover = false;
+            IDictionary<int, Texture2D> currentThemeTextures = SpeedLimitTextures.GetTextureSource();
+            DrawEnv drawEnv = new DrawEnv {
+                signsThemeAspectRatio_ = SpeedLimitTextures.GetTextureAspectRatio(),
+                currentThemeTextures_ = currentThemeTextures,
+                largeSignsTextures_ = args.ShowDefaultsMode
+                                          ? SpeedLimitTextures.RoadDefaults
+                                          : currentThemeTextures,
+            };
 
             for (int segmentIdIndex = this.cachedVisibleSegmentIds_.Size - 1;
                  segmentIdIndex >= 0;
                  segmentIdIndex--) {
-                ushort segmentId = this.cachedVisibleSegmentIds_.Values[segmentIdIndex];
+                ref CachedSegment cachedSeg = ref this.cachedVisibleSegmentIds_.Values[segmentIdIndex];
 
                 // If VehicleRestrictions tool is active, skip drawing the current selected segment
                 if (this.mainTool_.GetToolMode() == ToolMode.VehicleRestrictions
-                    && segmentId == TrafficManagerTool.SelectedSegmentId) {
+                    && cachedSeg.id_ == TrafficManagerTool.SelectedSegmentId) {
                     continue;
                 }
 
-                // no speed limit overlay on selected segment when in vehicle restrictions mode
-                hover |= this.DrawSpeedLimitHandles(
-                    segmentId: segmentId,
-                    segment: ref netManager.m_segments.m_buffer[segmentId],
-                    camPos: ref camPos,
-                    args: args);
+                if (args.ShowLimitsPerLane && !args.ShowDefaultsMode) {
+                    // in defaults mode separate lanes don't make any sense, so show segments at all times
+                    hover |= this.DrawSpeedLimitHandles_PerLane(
+                        cachedSeg.id_,
+                        camPos,
+                        drawEnv,
+                        args);
+                } else {
+                    hover |= this.DrawSpeedLimitHandles_PerSegment(
+                        cachedSeg.id_,
+                        cachedSeg.center_,
+                        camPos,
+                        drawEnv,
+                        args);
+                }
             }
 
             if (!hover) {
@@ -290,52 +321,36 @@
             this.segmentCenters_.Clear();
 
             for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
-                if (!ExtSegmentManager.Instance.IsSegmentValid((ushort)segmentId)) {
+                ref var segment = ref ((ushort)segmentId).ToSegment();
+
+                if (!segment.IsValid()) {
                     continue;
                 }
 
-                // if ((netManager.m_segments.m_buffer[segmentId].m_flags &
-                // NetSegment.Flags.Untouchable) != NetSegment.Flags.None) continue;
-                Vector3 distToCamera =
-                    netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos;
+                Vector3 distToCamera = segment.m_bounds.center - camPos;
+
                 if (distToCamera.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
                     continue; // do not draw if too distant
                 }
 
                 bool visible = GeometryUtil.WorldToScreenPoint(
-                    worldPos: netManager.m_segments.m_buffer[segmentId].m_bounds.center,
+                    worldPos: segment.m_bounds.center,
                     screenPos: out Vector3 _);
 
                 if (!visible) {
                     continue;
                 }
 
-                if (!speedLimitManager.MayHaveCustomSpeedLimits(
-                        segment: ref netManager.m_segments.m_buffer[segmentId])) {
+                if (!speedLimitManager.MayHaveCustomSpeedLimits(ref segment)) {
                     continue;
                 }
 
-                this.cachedVisibleSegmentIds_.Add((ushort)segmentId);
+                this.cachedVisibleSegmentIds_.Add(
+                    new CachedSegment {
+                        id_ = (ushort)segmentId,
+                        center_ = segment.GetCenter(),
+                    });
             } // end for all segments
-        }
-
-        private bool DrawSpeedLimitHandles(ushort segmentId,
-                                           ref NetSegment segment,
-                                           ref Vector3 camPos,
-                                           DrawArgs args) {
-            // in defaults mode separate lanes don't make any sense, so show segments at all times
-            if (args.ShowLimitsPerLane && !args.ShowDefaultsMode) {
-                return this.DrawSpeedLimitHandles_PerLane(
-                    segmentId,
-                    ref segment,
-                    camPos,
-                    args);
-            }
-
-            return this.DrawSpeedLimitHandles_PerSegment(
-                segmentId,
-                camPos,
-                args);
         }
 
         /// <summary>
@@ -343,20 +358,14 @@
         /// limits on the directions don't match, extra small speed limit icons are added.
         /// </summary>
         /// <param name="segmentId">Seg id.</param>
+        /// <param name="segCenter">Bezier center for the segment to draw at.</param>
         /// <param name="camPos">Camera.</param>
         /// <param name="args">Render args.</param>
         private bool DrawSpeedLimitHandles_PerSegment(ushort segmentId,
+                                                      Vector3 segCenter,
                                                       Vector3 camPos,
+                                                      [NotNull] DrawEnv drawEnv,
                                                       [NotNull] DrawArgs args) {
-            // draw speedlimits over mean middle points of lane beziers
-            if (!this.segmentCenters_.TryGetValue(
-                key: segmentId,
-                value: out Vector3 segCenter))
-            {
-                this.segmentCenters_.Add(key: segmentId, value: segCenter);
-                segCenter = GeometryUtil.CalculateSegmentCenter(segmentId);
-            }
-
             // Default signs are round, mph/kmph textures can be round or rectangular
             var colorController = new OverlayHandleColorController(args.InteractiveSigns);
 
@@ -364,13 +373,15 @@
             // For all segments visible
             //--------------------------
             bool visible = GeometryUtil.WorldToScreenPoint(worldPos: segCenter, screenPos: out Vector3 screenPos);
+
             bool ret = visible && DrawSpeedLimitHandles_SegmentCenter(
                     segmentId,
                     segCenter,
                     camPos,
-                    args,
                     screenPos,
-                    colorController);
+                    colorController,
+                    drawEnv,
+                    args);
 
             colorController.RestoreGUIColor();
             return ret;
@@ -380,40 +391,42 @@
             ushort segmentId,
             Vector3 segCenter,
             Vector3 camPos,
-            [NotNull] DrawArgs args,
             Vector3 screenPos,
-            OverlayHandleColorController colorController)
+            OverlayHandleColorController colorController,
+            [NotNull] DrawEnv drawEnv,
+            [NotNull] DrawArgs args)
         {
-            Vector2 signsThemeAspectRatio = SpeedLimitTextures.GetTextureAspectRatio();
-            Vector2 largeRatio = args.ShowDefaultsMode ? Vector2.one : signsThemeAspectRatio;
+            Vector2 largeRatio = args.ShowDefaultsMode ? Vector2.one : drawEnv.signsThemeAspectRatio_;
             float visibleScale = 100.0f / (segCenter - camPos).magnitude;
             float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE *
                          visibleScale;
             SpeedLimitsOverlaySign signRenderer = default;
-            // Sign renderer logic and chosen texture for signs
-            IDictionary<int, Texture2D> signsThemeTextures = SpeedLimitTextures.GetTextureSource();
-            IDictionary<int, Texture2D> largeSignsTextureSource = args.ShowDefaultsMode
-                ? SpeedLimitTextures.RoadDefaults
-                : signsThemeTextures;
 
             // Recalculate visible rect for screen position and size
             Rect signScreenRect = signRenderer.Reset(
                 screenPos: screenPos,
                 size: size * largeRatio);
 
-            bool isHoveredHandle =
-                args.InteractiveSigns && signRenderer.ContainsMouse(args.Mouse);
+            bool isHoveredHandle = args.InteractiveSigns && signRenderer.ContainsMouse(args.Mouse);
 
             // Get speed limit override for segment
+            SpeedValue? overrideSpeedlimitForward =
+                SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Forward);
+            SpeedValue? overrideSpeedlimitBack =
+                SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Backward);
+
+            // If both defined, pick the average (sum scaled by 1/2) otherwise pick whichever is not null
             SpeedValue? overrideSpeedlimit =
-                SpeedLimitManager.Instance.GetCustomSpeedLimit(segmentId, finalDir: NetInfo.Direction.Both);
+                overrideSpeedlimitForward.HasValue && overrideSpeedlimitBack.HasValue
+                ? (overrideSpeedlimitForward.Value + overrideSpeedlimitBack.Value).Scale(0.5f)
+                : (overrideSpeedlimitForward.HasValue ? overrideSpeedlimitForward : overrideSpeedlimitBack);
 
             // Get default or default-override speed limit for road type
-            NetInfo neti = this.GetSegmentNetinfo(segmentId);
+            NetInfo neti = segmentId.ToSegment().Info;
             SpeedValue defaultSpeedlimit =
-                new SpeedValue(
-                    gameUnits:
-                    SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info: neti));
+                args.ShowDefaultsMode
+                    ? new SpeedValue(SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info: neti))
+                    : default;
 
             //-----------
             // Rendering
@@ -428,7 +441,7 @@
             if (args.InteractiveSigns || overrideSpeedlimit.HasValue) {
                 signRenderer.DrawLargeTexture(
                     speedlimit: args.ShowDefaultsMode ? defaultSpeedlimit : overrideSpeedlimit,
-                    textureSource: largeSignsTextureSource);
+                    textureSource: drawEnv.largeSignsTextures_);
             }
 
             // If Alt is held, then also overlay the other (default limit in edit override mode,
@@ -437,8 +450,8 @@
                 if (args.ShowDefaultsMode) {
                     signRenderer.DrawSmallTexture(
                         speedlimit: overrideSpeedlimit,
-                        smallSize: size * SMALL_ICON_SCALE * signsThemeAspectRatio,
-                        textureSource: signsThemeTextures);
+                        smallSize: size * SMALL_ICON_SCALE * drawEnv.signsThemeAspectRatio_,
+                        textureSource: drawEnv.currentThemeTextures_);
                 } else {
                     signRenderer.DrawSmallTexture(
                         speedlimit: defaultSpeedlimit,
@@ -463,26 +476,19 @@
             return true;
         }
 
-        /// <summary>
-        /// From segment ID find the Segment and from it retrieve the NetInfo. Should be fast.
-        /// </summary>
-        /// <param name="segmentId">Segment.</param>
-        /// <returns>Netinfo of that segment.</returns>
-        private NetInfo GetSegmentNetinfo(ushort segmentId) {
-            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            return segmentsBuffer[segmentId].Info;
-        }
-
         /// <summary>Draw speed limit handles one per lane.</summary>
         /// <param name="segmentId">Seg id.</param>
         /// <param name="segment">Segment reference from the game data.</param>
         /// <param name="camPos">Camera.</param>
         /// <param name="args">Render args.</param>
-        private bool DrawSpeedLimitHandles_PerLane(ushort segmentId,
-                                                   ref NetSegment segment,
-                                                   Vector3 camPos,
-                                                   DrawArgs args) {
+        private bool DrawSpeedLimitHandles_PerLane(
+            ushort segmentId,
+            Vector3 camPos,
+            [NotNull] DrawEnv drawEnv,
+            [NotNull] DrawArgs args)
+        {
             bool ret = false;
+            ref NetSegment segment = ref segmentId.ToSegment();
             Vector3 segmentCenterPos = segment.m_bounds.center;
 
             // show individual speed limit handle per lane
@@ -495,15 +501,15 @@
             NetInfo segmentInfo = segment.Info;
             Vector3 yu = (segment.m_endDirection - segment.m_startDirection).normalized;
             Vector3 xu = Vector3.Cross(yu, new Vector3(0, 1f, 0)).normalized;
-
             float signSize = args.InteractiveSigns
-                ? Constants.OVERLAY_INTERACTIVE_SIGN_SIZE
-                : Constants.OVERLAY_READONLY_SIGN_SIZE; // reserved sign size in game coordinates
+                                 ? Constants.OVERLAY_INTERACTIVE_SIGN_SIZE
+                                 : Constants.OVERLAY_READONLY_SIGN_SIZE;
 
             Vector3 drawOriginPos = segmentCenterPos -
                                     (0.5f * (((numLanes - 1) + numDirections) - 1) * signSize * xu);
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
-            IList<LanePos> sortedLanes = Constants.ServiceFactory.NetService.GetSortedLanes(
+            IList<LanePos> sortedLanes = extSegmentManager.GetSortedLanes(
                 segmentId: segmentId,
                 segment: ref segment,
                 startNode: null,
@@ -538,14 +544,8 @@
 
             // Sign renderer logic and chosen texture for signs
             SpeedLimitsOverlaySign signRenderer = default;
-            IDictionary<int, Texture2D> currentThemeTextures = SpeedLimitTextures.GetTextureSource();
 
-            Vector2 signsThemeAspectRatio = SpeedLimitTextures.GetTextureAspectRatio();
-            Vector2 largeRatio = args.ShowDefaultsMode ? Vector2.one : signsThemeAspectRatio;
-
-            IDictionary<int, Texture2D> largeSignsTextureSource = args.ShowDefaultsMode
-                ? SpeedLimitTextures.RoadDefaults
-                : currentThemeTextures;
+            Vector2 largeRatio = args.ShowDefaultsMode ? Vector2.one : drawEnv.signsThemeAspectRatio_;
 
             // Signs are rendered in a grid starting from col 0
             float signColumn = 0f;
@@ -569,7 +569,6 @@
                 }
 
                 Vector3 worldPos = grid.GetPositionForRowCol(signColumn, 0);
-
                 bool visible = GeometryUtil.WorldToScreenPoint(worldPos, out Vector3 screenPos);
 
                 if (!visible) {
@@ -599,7 +598,7 @@
                                                  : overrideSpeedlimit.DefaultValue.Value;
 
                 signRenderer.DrawLargeTexture(speedlimit: largeSpeedlimit,
-                                              textureSource: largeSignsTextureSource);
+                                              textureSource: drawEnv.largeSignsTextures_);
 
                 // If Alt is held, then also overlay the other (default limit in edit override mode,
                 // or override in edit defaults mode) as a small texture.
@@ -607,8 +606,8 @@
                     if (args.ShowDefaultsMode) {
                         signRenderer.DrawSmallTexture(
                             speedlimit: overrideSpeedlimit.OverrideValue,
-                            smallSize: size * SMALL_ICON_SCALE * signsThemeAspectRatio,
-                            textureSource: currentThemeTextures);
+                            smallSize: size * SMALL_ICON_SCALE * drawEnv.signsThemeAspectRatio_,
+                            textureSource: drawEnv.currentThemeTextures_);
                     } else {
                         signRenderer.DrawSmallTexture(
                             speedlimit: overrideSpeedlimit.DefaultValue,

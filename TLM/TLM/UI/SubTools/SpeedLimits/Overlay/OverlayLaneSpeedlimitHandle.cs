@@ -3,7 +3,6 @@
     using System.Collections.Generic;
     using ColossalFramework;
     using CSUtil.Commons;
-    using GenericGameBridge.Service;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Util;
@@ -139,8 +138,9 @@
                     ushort segmentId0,
                     int sortedLaneIndex) {
             bool invert0 = segmentId0.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+            ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
-            int count0 = Shortcuts.netService.GetSortedLanes(
+            int count0 = extSegmentManager.GetSortedLanes(
                segmentId: segmentId0,
                segment: ref segmentId0.ToSegment(),
                startNode: null,
@@ -150,7 +150,7 @@
 
             foreach (ushort segmentId in segmentList) {
                 bool invert = segmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-                IList<LanePos> lanes = Shortcuts.netService.GetSortedLanes(
+                IList<LanePos> lanes = extSegmentManager.GetSortedLanes(
                     segmentId: segmentId,
                     segment: ref segmentId.ToSegment(),
                     startNode: null,
