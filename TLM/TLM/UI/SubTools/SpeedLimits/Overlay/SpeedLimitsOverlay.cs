@@ -288,6 +288,7 @@
                     // in defaults mode separate lanes don't make any sense, so show segments at all times
                     hover |= this.DrawSpeedLimitHandles_PerLane(
                         cachedSeg.id_,
+                        cachedSeg.center_,
                         camPos,
                         drawEnv,
                         args);
@@ -482,11 +483,12 @@
 
         /// <summary>Draw speed limit handles one per lane.</summary>
         /// <param name="segmentId">Seg id.</param>
-        /// <param name="segment">Segment reference from the game data.</param>
         /// <param name="camPos">Camera.</param>
+        /// <param name="drawEnv">Temporary values used for rendering this frame.</param>
         /// <param name="args">Render args.</param>
         private bool DrawSpeedLimitHandles_PerLane(
             ushort segmentId,
+            Vector3 segCenter,
             Vector3 camPos,
             [NotNull] DrawEnv drawEnv,
             [NotNull] DrawArgs args)
@@ -548,12 +550,12 @@
 
             // Sign renderer logic and chosen texture for signs
             SpeedLimitsOverlaySign signRenderer = default;
-
             Vector2 largeRatio = args.ShowDefaultsMode ? Vector2.one : drawEnv.signsThemeAspectRatio_;
 
             // Signs are rendered in a grid starting from col 0
             float signColumn = 0f;
             var colorController = new OverlayHandleColorController(args.InteractiveSigns);
+            SpeedValue? defaultSpeedlimit = null;
 
             //-----------------------
             // For all lanes sorted
@@ -613,10 +615,10 @@
                             smallSize: size * SMALL_ICON_SCALE * drawEnv.signsThemeAspectRatio_,
                             textureSource: drawEnv.currentThemeTextures_);
                     } else {
-                        signRenderer.DrawSmallTexture(
-                            speedlimit: overrideSpeedlimit.DefaultValue,
-                            smallSize: size * SMALL_ICON_SCALE * Vector2.one,
-                            textureSource: SpeedLimitTextures.RoadDefaults);
+                        // This is rendered after the loop
+                        if (overrideSpeedlimit.DefaultValue.HasValue) {
+                            defaultSpeedlimit = overrideSpeedlimit.DefaultValue;
+                        }
                     }
                 }
 
@@ -656,6 +658,21 @@
             }
 
             colorController.RestoreGUIColor();
+
+            if (args.ShowOtherPerLaneModeTemporary
+                && !args.ShowDefaultsMode
+                && defaultSpeedlimit.HasValue) {
+                float visibleScale = 100.0f / (segCenter - camPos).magnitude;
+                float size = (args.InteractiveSigns ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
+                bool visible = GeometryUtil.WorldToScreenPoint(segCenter, out Vector3 segCenterScreenPos);
+                if (visible) {
+                    signRenderer.Reset(segCenterScreenPos, size: new Vector2(size, size));
+                    signRenderer.DrawLargeTexture(
+                        speedlimit: defaultSpeedlimit.Value,
+                        textureSource: SpeedLimitTextures.RoadDefaults);
+                }
+            }
+
             return ret;
         }
     }

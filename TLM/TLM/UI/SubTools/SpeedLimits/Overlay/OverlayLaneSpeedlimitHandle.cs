@@ -92,10 +92,7 @@
                         return true;
                     }
 
-                    ushort segmentId = data
-                                       .SegVisitData
-                                       .CurSeg
-                                       .segmentId;
+                    ushort segmentId = data.SegVisitData.CurSeg.segmentId;
 
                     // netinfo is a class, ref is not necessary
                     NetInfo segmentInfo = segmentId.ToSegment().Info;
