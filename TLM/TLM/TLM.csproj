@@ -361,7 +361,7 @@
     <Compile Include="UI\SubTools\SpeedLimits\Overlay\OverlayLaneSpeedlimitHandle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\Overlay\OverlaySegmentSpeedlimitHandle.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\Overlay\SpeedLimitsOverlay.cs" />
-    <Compile Include="UI\SubTools\SpeedLimits\Overlay\SpeedLimitsOverlaySign.cs" />
+    <Compile Include="UI\SubTools\SpeedLimits\Overlay\SignRenderer.cs" />
     <Compile Include="UI\SubTools\SpeedLimits\PaletteGenerator.cs">
       <DependentUpon>SpeedLimitsToolWindow.cs</DependentUpon>
     </Compile>

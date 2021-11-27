@@ -16,7 +16,7 @@
     // | 9 0 |
     // |   50|
     // +-----+
-    public struct SpeedLimitsOverlaySign {
+    public struct SignRenderer {
         private Vector3 screenPos_;
 
         /// <summary>The visible screen-space box of the large texture (for mouse interaction).</summary>
@@ -53,6 +53,12 @@
                 image: tex);
         }
 
+        public void DrawLargeTexture(Texture2D tex) {
+            GUI.DrawTexture(
+                position: this.screenRect_,
+                image: tex);
+        }
+
         /// <summary>
         /// Draws the small texture in the corner. Size is passed here again, because we could be
         /// drawing a combination of rectangular US sign and round default speed sign.
@@ -61,14 +67,14 @@
         /// <param name="smallSize">Size of small rect.</param>
         /// <param name="textureSource">Texture collection to use.</param>
         public void DrawSmallTexture(SpeedValue? speedlimit,
-                                     Vector2 smallSize,
                                      IDictionary<int, Texture2D> textureSource) {
             // Offset the drawing center to the bottom right quarter of the large rect
+            // The sign is drawn from the screen position (center) and must be half size of big rect
             Rect smallRect = new Rect(
                 x: this.screenPos_.x,
                 y: this.screenPos_.y,
-                width: smallSize.x,
-                height: smallSize.y);
+                width: this.screenRect_.width * 0.5f,
+                height: this.screenRect_.height * 0.5f);
 
             Texture2D tex = speedlimit.HasValue
                                 ? SpeedLimitTextures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
