@@ -12,7 +12,7 @@
     /// </summary>
     public readonly struct SetSpeedLimitAction {
         /// <summary>Defines the action on set speedlimit call, constants are used as indexes in
-        /// <see cref="Either4{T1,T2,T3,T4}"/>.</summary>
+        /// <see cref="SetSpeedLimitAction.Variant3"/>.</summary>
         public enum ActionType {
             /// <summary>The Value contains the speed to set.</summary>
             SetOverride,

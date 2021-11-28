@@ -86,51 +86,51 @@ namespace TrafficManager.UI.Textures {
             Clear = LoadDllResource("clear.png", new IntVector2(256));
         }
 
-        /// <summary>
-        /// Given the float speed, style and MPH option return a texture to render.
-        /// </summary>
-        /// <param name="spd">float speed</param>
-        /// <param name="mphStyle">Signs theme</param>
-        /// <param name="unit">Mph or km/h</param>
-        /// <returns></returns>
-        public static Texture2D GetSpeedLimitTexture(SpeedValue spd,
-                                                     MphSignStyle mphStyle,
-                                                     SpeedUnit unit) {
-            // Select the source for the textures based on unit and the theme
-            bool mph = unit == SpeedUnit.Mph;
-            IDictionary<int, Texture2D> textures = TexturesKmph;
-            if (mph) {
-                switch (mphStyle) {
-                    case MphSignStyle.SquareUS:
-                        textures = TexturesMphUS;
-                        break;
-                    case MphSignStyle.RoundUK:
-                        textures = TexturesMphUK;
-                        break;
-                    case MphSignStyle.RoundGerman:
-                        // Do nothing, this is the default above
-                        break;
-                }
-            }
-
-            // Round to nearest 5 MPH or nearest 10 km/h
-            ushort index = mph
-                               ? spd.ToMphRounded(MPH_STEP).Mph
-                               : spd.ToKmphRounded(KMPH_STEP).Kmph;
-
-            // Trim the index since 140 km/h / 90 MPH is the max sign we have
-            ushort upper = mph ? UPPER_MPH : UPPER_KMPH;
-
-            // Show unlimited if the speed cannot be represented by the available sign textures
-            if (index == 0 || index > upper) {
-                // Log._Debug($"Trimming speed={speedLimit} index={index} to {upper}");
-                return textures[0];
-            }
-
-            // Trim from below to not go below index 5 (5 kmph or 5 mph)
-            ushort trimIndex = Math.Max((ushort)5, index);
-            return textures[trimIndex];
-        }
+        // /// <summary>
+        // /// Given the float speed, style and MPH option return a texture to render.
+        // /// </summary>
+        // /// <param name="spd">float speed</param>
+        // /// <param name="mphStyle">Signs theme</param>
+        // /// <param name="unit">Mph or km/h</param>
+        // /// <returns></returns>
+        // public static Texture2D GetSpeedLimitTexture(SpeedValue spd,
+        //                                              MphSignStyle mphStyle,
+        //                                              SpeedUnit unit) {
+        //     // Select the source for the textures based on unit and the theme
+        //     bool mph = unit == SpeedUnit.Mph;
+        //     IDictionary<int, Texture2D> textures = TexturesKmph;
+        //     if (mph) {
+        //         switch (mphStyle) {
+        //             case MphSignStyle.SquareUS:
+        //                 textures = TexturesMphUS;
+        //                 break;
+        //             case MphSignStyle.RoundUK:
+        //                 textures = TexturesMphUK;
+        //                 break;
+        //             case MphSignStyle.RoundGerman:
+        //                 // Do nothing, this is the default above
+        //                 break;
+        //         }
+        //     }
+        //
+        //     // Round to nearest 5 MPH or nearest 10 km/h
+        //     ushort index = mph
+        //                        ? spd.ToMphRounded(MPH_STEP).Mph
+        //                        : spd.ToKmphRounded(KMPH_STEP).Kmph;
+        //
+        //     // Trim the index since 140 km/h / 90 MPH is the max sign we have
+        //     ushort upper = mph ? UPPER_MPH : UPPER_KMPH;
+        //
+        //     // Show unlimited if the speed cannot be represented by the available sign textures
+        //     if (index == 0 || index > upper) {
+        //         // Log._Debug($"Trimming speed={speedLimit} index={index} to {upper}");
+        //         return textures[0];
+        //     }
+        //
+        //     // Trim from below to not go below index 5 (5 kmph or 5 mph)
+        //     ushort trimIndex = Math.Max((ushort)5, index);
+        //     return textures[trimIndex];
+        // }
 
         /// <summary>
         /// Given the float speed, style and MPH option return a texture to render.
@@ -140,9 +140,7 @@ namespace TrafficManager.UI.Textures {
         public static Texture2D GetSpeedLimitTexture(SpeedValue spd,
                                                      IDictionary<int, Texture2D> textureSource) {
             // Select the source for the textures based on unit and the theme
-            var m = GlobalConfig.Instance.Main;
-            SpeedUnit unit = m.DisplaySpeedLimitsMph ? SpeedUnit.Mph : SpeedUnit.Kmph;
-            bool mph = unit == SpeedUnit.Mph;
+            bool mph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
 
             // Round to nearest 5 MPH or nearest 10 km/h
             ushort index = mph
@@ -168,14 +166,12 @@ namespace TrafficManager.UI.Textures {
         /// <summary>For current display settings get texture dictionary with the road signs.</summary>
         /// <returns>Texture source (loaded textures with keys matching speeds).</returns>
         public static IDictionary<int, Texture2D> GetTextureSource() {
-            var m = GlobalConfig.Instance.Main;
-            var unit = m.DisplaySpeedLimitsMph ? SpeedUnit.Mph : SpeedUnit.Kmph;
-
+            var configMain = GlobalConfig.Instance.Main;
             // Select the source for the textures based on unit and the theme
-            bool mph = unit == SpeedUnit.Mph;
+            bool mph = configMain.DisplaySpeedLimitsMph;
 
             if (mph) {
-                switch (m.MphRoadSignStyle) {
+                switch (configMain.MphRoadSignStyle) {
                     case MphSignStyle.SquareUS:
                         return TexturesMphUS;
                     case MphSignStyle.RoundUK:
@@ -197,14 +193,14 @@ namespace TrafficManager.UI.Textures {
         /// </summary>
         /// <returns>Scalable vector of texture aspect ratio.</returns>
         public static Vector2 GetTextureAspectRatio() {
-            var m = GlobalConfig.Instance.Main;
-            SpeedUnit unit = m.DisplaySpeedLimitsMph ? SpeedUnit.Mph : SpeedUnit.Kmph;
+            var configMain = GlobalConfig.Instance.Main;
+            SpeedUnit unit = configMain.GetDisplaySpeedUnit();
 
             // Select the source for the textures based on unit and the theme
             bool mph = unit == SpeedUnit.Mph;
 
             if (mph) {
-                switch (m.MphRoadSignStyle) {
+                switch (configMain.MphRoadSignStyle) {
                     case MphSignStyle.SquareUS:
                         return new Vector2(1.0f / 1.25f, 1.0f);
                     case MphSignStyle.RoundUK:

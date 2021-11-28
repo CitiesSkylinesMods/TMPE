@@ -42,14 +42,11 @@
         public void Click(in SetSpeedLimitAction action,
                           SetSpeedLimitTarget target,
                           bool multiSegmentMode) {
-            NetManager netManager = Singleton<NetManager>.instance;
-            NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
-
             Apply(
                 segmentId: this.segmentId_,
                 laneIndex: this.laneIndex_,
                 laneId: this.laneId_,
-                netInfo: segmentsBuffer[this.segmentId_].Info,
+                netInfo: this.segmentId_.ToSegment().Info,
                 laneInfo: this.laneInfo_,
                 action: action,
                 target: target);

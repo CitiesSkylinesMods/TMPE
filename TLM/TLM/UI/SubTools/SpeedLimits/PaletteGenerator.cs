@@ -36,9 +36,7 @@
                     break;
                 case SpeedUnit.CurrentlyConfigured:
                     // Automatically choose from the config
-                    return GlobalConfig.Instance.Main.DisplaySpeedLimitsMph
-                        ? AllSpeedLimits(SpeedUnit.Mph)
-                        : AllSpeedLimits(SpeedUnit.Kmph);
+                    return AllSpeedLimits(GlobalConfig.Instance.Main.GetDisplaySpeedUnit());
             }
 
             return result;

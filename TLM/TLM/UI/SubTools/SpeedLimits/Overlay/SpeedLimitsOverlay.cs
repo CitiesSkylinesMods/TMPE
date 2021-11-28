@@ -20,8 +20,6 @@
     /// overlay for segments/lanes.
     /// </summary>
     public class SpeedLimitsOverlay {
-        private const float SMALL_ICON_SCALE = 0.66f;
-
         private TrafficManagerTool mainTool_;
 
         private ushort segmentId_;
@@ -94,6 +92,8 @@
             /// show segment speeds instead.
             /// </summary>
             public bool drawDefaults_;
+
+            public float baseScreenSizeForSign_;
         }
 
         private struct CachedSegment {
@@ -279,6 +279,7 @@
                     _ => throw new ArgumentOutOfRangeException(),
                 },
                 drawDefaults_ = (args.ToolMode == SpeedlimitsToolMode.Defaults) ^ args.ShowAltMode,
+                baseScreenSizeForSign_ = Constants.OverlaySignVisibleSize,
             };
 
             for (int segmentIdIndex = this.cachedVisibleSegmentIds_.Size - 1;
@@ -410,7 +411,7 @@
                                      : drawEnv.signsThemeAspectRatio_;
 
             // TODO: Replace formula in visibleScale and size to use Constants.OVERLAY_INTERACTIVE_SIGN_SIZE and OVERLAY_READONLY_SIGN_SIZE
-            float visibleScale = 100.0f / (segCenter - camPos).magnitude;
+            float visibleScale = drawEnv.baseScreenSizeForSign_ / (segCenter - camPos).magnitude;
             float size = (args.IsInteractive ? 1f : 0.8f) * SPEED_LIMIT_SIGN_SIZE * visibleScale;
 
             SignRenderer signRenderer = default;
