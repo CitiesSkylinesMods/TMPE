@@ -50,20 +50,22 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
             NetManager netManager = Singleton<NetManager>.instance;
             ushort nextSourceNodeId;
             ushort nextTargetNodeId;
-            NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
+
+            ref NetSegment currentPositionSegment = ref position.m_segment.ToSegment();
 
             if (offset < position.m_offset) {
-                nextSourceNodeId = segmentsBuffer[position.m_segment].m_startNode;
-                nextTargetNodeId = segmentsBuffer[position.m_segment].m_endNode;
+                nextSourceNodeId = currentPositionSegment.m_startNode;
+                nextTargetNodeId = currentPositionSegment.m_endNode;
             } else {
-                nextSourceNodeId = segmentsBuffer[position.m_segment].m_endNode;
-                nextTargetNodeId = segmentsBuffer[position.m_segment].m_startNode;
+                nextSourceNodeId = currentPositionSegment.m_endNode;
+                nextTargetNodeId = currentPositionSegment.m_startNode;
             }
 
+            ref NetSegment previousPositionSegment = ref prevPos.m_segment.ToSegment();
             ushort curTargetNodeId;
             curTargetNodeId = prevOffset == 0
-                                  ? segmentsBuffer[prevPos.m_segment].m_startNode
-                                  : segmentsBuffer[prevPos.m_segment].m_endNode;
+                ? previousPositionSegment.m_startNode
+                : previousPositionSegment.m_endNode;
 
 #if DEBUG
             bool logCalculation = DebugSwitch.CalculateSegmentPosition.Get()
@@ -123,7 +125,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                         ref vehicleData,
                         sqrVelocity,
                         ref prevPos,
-                        ref segmentsBuffer[prevPos.m_segment],
+                        ref previousPositionSegment,
                         curTargetNodeId,
                         prevLaneID,
                         ref position,
@@ -144,7 +146,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                 // NON-STOCK CODE END
             }
 
-            NetInfo prevSegmentInfo = segmentsBuffer[position.m_segment].Info;
+            NetInfo currentPositionSegmentInfo = currentPositionSegment.Info;
             // NON-STOCK CODE START (stock code replaced)
             VehicleAICommons.CustomCalculateTargetSpeed(
                 __instance,
@@ -152,7 +154,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                 ref vehicleData,
                 position,
                 laneID,
-                prevSegmentInfo,
+                currentPositionSegmentInfo,
                 out maxSpeed);
 
             maxSpeed = Constants.ManagerFactory.VehicleBehaviorManager.CalcMaxSpeed(
@@ -160,7 +162,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                 ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleID],
                 __instance.m_info,
                 position,
-                ref segmentsBuffer[position.m_segment],
+                ref currentPositionSegment,
                 pos,
                 maxSpeed,
                 false);

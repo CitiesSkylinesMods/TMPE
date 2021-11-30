@@ -176,11 +176,10 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                 bool isRoundabout = RoundaboutMassEdit.Instance.TraverseLoop(HoveredSegmentId, out var segmentList);
                 Color color = MainTool.GetToolColor(Input.GetMouseButton(0), false);
                 if (isRoundabout) {
-                    foreach (uint segmentId in segmentList) {
-                        ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+                    foreach (ushort segmentId in segmentList) {
                         NetTool.RenderOverlay(
                             cameraInfo,
-                            ref seg,
+                            ref segmentId.ToSegment(),
                             color,
                             color);
                     } // end foreach
@@ -193,8 +192,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
                         data => {
                             NetTool.RenderOverlay(
                                 cameraInfo,
-                                ref Singleton<NetManager>.instance.m_segments.m_buffer[
-                                    data.CurSeg.segmentId],
+                                ref data.CurSeg.segmentId.ToSegment(),
                                 color,
                                 color);
                             return true;

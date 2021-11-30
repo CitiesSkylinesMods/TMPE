@@ -93,10 +93,9 @@ namespace TrafficManager.UI.SubTools {
                 //     _guiManualTrafficLightsCrosswalk(ref selectedNode);
                 //     return;
                 // }
-                NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
-                for (int i = 0; i < 8; ++i) {
-                    ushort segmentId = selectedNode.GetSegment(i);
+                for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; ++segmentIndex) {
+                    ushort segmentId = selectedNode.GetSegment(segmentIndex);
                     if (segmentId == 0) {
                         continue;
                     }
@@ -105,8 +104,7 @@ namespace TrafficManager.UI.SubTools {
                         (bool)extSegmentManager.IsStartNode(
                             segmentId,
                             SelectedNodeId);
-                    Vector3 position =
-                        CalculateNodePositionForSegment(ref selectedNode, ref segmentsBuffer[segmentId]);
+                    Vector3 position = CalculateNodePositionForSegment(ref selectedNode, ref segmentId.ToSegment());
                     ICustomSegmentLights segmentLights =
                         customTrafficLightsManager.GetSegmentLights(segmentId, startNode, false);
 

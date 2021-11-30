@@ -25,18 +25,17 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
             bool logTimedLights = DebugSwitch.TimedTrafficLights.Get()
                                  && DebugSettings.NodeId == node;
 #endif
-            NetManager netManager = NetManager.instance;
             uint currentFrameIndex = SimulationManager.instance.m_currentFrameIndex;
             uint simGroup = (uint)node >> 7;
             uint stepWaitTime = currentFrameIndex - simGroup & 255u;
+            ref NetSegment netSegment = ref segment.ToSegment();
 
             // NON-STOCK CODE START
             bool customSim = Options.timedLightsEnabled &&
                              TrafficLightSimulationManager.Instance.HasActiveSimulation(node);
 
             RoadBaseAI.TrafficLightState pedestrianLightState;
-            NetSegment[] segmentsBuffer = netManager.m_segments.m_buffer;
-            bool startNode = segmentsBuffer[segment].m_startNode == node;
+            bool startNode = netSegment.m_startNode == node;
 
             ICustomSegmentLights lights = null;
             if (customSim) {
@@ -57,7 +56,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
 
                 RoadBaseAI.GetTrafficLightState(
                     node,
-                    ref segmentsBuffer[segment],
+                    ref netSegment,
                     currentFrameIndex - simGroup,
                     out RoadBaseAI.TrafficLightState vehicleLightState,
                     out pedestrianLightState,
@@ -69,7 +68,7 @@ namespace TrafficManager.Patch._CitizenAI._HumanAI {
                     if (!pedestrians && stepWaitTime >= 196u) {
                         RoadBaseAI.SetTrafficLightState(
                             node,
-                            ref segmentsBuffer[segment],
+                            ref netSegment,
                             currentFrameIndex - simGroup,
                             vehicleLightState,
                             pedestrianLightState,

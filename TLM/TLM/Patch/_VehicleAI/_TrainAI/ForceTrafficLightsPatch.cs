@@ -38,10 +38,12 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI{
                     return false;
                 }
 
+                ref NetSegment positionSegment = ref position.m_segment.ToSegment();
+
                 // NON-STOCK CODE START
                 ushort transitNodeId = position.m_offset < 128
-                                        ? netMan.m_segments.m_buffer[position.m_segment].m_startNode
-                                        : netMan.m_segments.m_buffer[position.m_segment].m_endNode;
+                                        ? positionSegment.m_startNode
+                                        : positionSegment.m_endNode;
 
                 if (Options.timedLightsEnabled) {
                     // when a TTL is active only reserve space if it shows green
@@ -93,7 +95,6 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI{
         /// <param name="transitNodeId"></param>
         /// <param name="position"></param>
         private static void ForceTrafficLights(ushort transitNodeId, PathUnit.Position position) {
-            NetManager netMan = NetManager.instance;
             if ((transitNodeId.ToNode().m_flags & NetNode.Flags.TrafficLights) == NetNode.Flags.None) {
                 return;
             }
@@ -101,9 +102,11 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI{
             uint frame = SimulationManager.instance.m_currentFrameIndex;
             uint simGroup = (uint)transitNodeId >> 7;
             uint rand = frame - simGroup & 255u;
+            ref NetSegment positionSegment = ref position.m_segment.ToSegment();
+
             RoadBaseAI.GetTrafficLightState(
                 transitNodeId,
-                ref netMan.m_segments.m_buffer[position.m_segment],
+                ref positionSegment,
                 frame - simGroup,
                 out RoadBaseAI.TrafficLightState vehicleLightState,
                 out RoadBaseAI.TrafficLightState pedestrianLightState,
@@ -117,7 +120,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI{
             vehicles = true;
             RoadBaseAI.SetTrafficLightState(
                 transitNodeId,
-                ref netMan.m_segments.m_buffer[position.m_segment],
+                ref positionSegment,
                 frame - simGroup,
                 vehicleLightState,
                 pedestrianLightState,

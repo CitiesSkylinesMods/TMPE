@@ -334,13 +334,12 @@ namespace TrafficManager.Manager.Impl {
                 ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
                 while (segmentId != 0) {
-                    NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
+                    ref NetSegment netSegment = ref segmentId.ToSegment();
+                    NetInfo segmentInfo = netSegment.Info;
 
                     if (segmentInfo != null && segmentInfo.m_class.m_service == service &&
-                        (netManager.m_segments.m_buffer[segmentId].m_flags &
-                         (NetSegment.Flags.Collapsed | NetSegment.Flags.Flooded)) ==
-                        NetSegment.Flags.None &&
-                        (allowUnderground || !segmentInfo.m_netAI.IsUnderground()))
+                        (netSegment.m_flags & (NetSegment.Flags.Collapsed | NetSegment.Flags.Flooded)) == NetSegment.Flags.None
+                        && (allowUnderground || !segmentInfo.m_netAI.IsUnderground()))
                     {
                         bool otherPassed = true;
                         if (otherLaneType != NetInfo.LaneType.None ||
@@ -365,7 +364,7 @@ namespace TrafficManager.Manager.Impl {
                         }
 
                         if (otherPassed) {
-                            if (netManager.m_segments.m_buffer[segmentId].GetClosestLanePosition(
+                            if (netSegment.GetClosestLanePosition(
                                 position,
                                 laneType,
                                 vehicleType,
@@ -420,7 +419,7 @@ namespace TrafficManager.Manager.Impl {
                         } // if othersPassed
                     } // if
 
-                    segmentId = netManager.m_segments.m_buffer[segmentId].m_nextGridSegment;
+                    segmentId = netSegment.m_nextGridSegment;
                     if (++iterations >= NetManager.MAX_SEGMENT_COUNT) {
                         CODebugBase<LogChannel>.Error(
                             LogChannel.Core,

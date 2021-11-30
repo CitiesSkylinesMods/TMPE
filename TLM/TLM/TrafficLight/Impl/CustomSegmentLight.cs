@@ -368,9 +368,11 @@ namespace TrafficManager.TrafficLight.Impl {
 
             uint now = ((currentFrameIndex - simGroup) >> 8) & 1;
 
+            ref NetSegment netSegment = ref SegmentId.ToSegment();
+
             Constants.ManagerFactory.TrafficLightSimulationManager.SetVisualState(
                 nodeId,
-                ref instance.m_segments.m_buffer[SegmentId],
+                ref netSegment,
                 now << 8,
                 vehicleLightState,
                 pedestrianLightCopy,
@@ -379,7 +381,7 @@ namespace TrafficManager.TrafficLight.Impl {
 
             Constants.ManagerFactory.TrafficLightSimulationManager.SetVisualState(
                 nodeId,
-                ref instance.m_segments.m_buffer[SegmentId],
+                ref netSegment,
                 (1u - now) << 8,
                 vehicleLightState,
                 pedestrianLightCopy,

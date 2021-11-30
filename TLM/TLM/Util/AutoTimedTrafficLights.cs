@@ -356,10 +356,12 @@ namespace TrafficManager.Util {
             if (!AllowShortTurns) {
                 return false;
             }
+
             if (AllowCollidingShortTurns) {
                 return true;
             }
-            ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+
+            ref NetSegment netSegment = ref segmentId.ToSegment();
             bool lht = Shortcuts.LHT;
             ArrowDirection shortDir = lht ? ArrowDirection.Left : ArrowDirection.Right;
             int nShort = CountDirSegs(segmentId, nodeId, shortDir);
@@ -368,7 +370,9 @@ namespace TrafficManager.Util {
                 return false;
             }
             if (nShort == 1) {
-                ushort nextSegmentId = lht ? seg.GetLeftSegment(nodeId) : seg.GetRightSegment(nodeId);
+                ushort nextSegmentId = lht
+                    ? netSegment.GetLeftSegment(nodeId)
+                    : netSegment.GetRightSegment(nodeId);
                 return !segMan.CalculateIsOneWay(nextSegmentId);
             }
             int nForward = CountDirSegs(segmentId, nodeId, ArrowDirection.Forward);
@@ -378,7 +382,7 @@ namespace TrafficManager.Util {
             if (nForward == 1) {
                 // RHT: if there are not segments to the right GetRightSegment() returns the forward segment.
                 // LHT: if there are not segments to the left GetLeftSegment() returns the forward segment.
-                ushort nextSegmentId = lht ? seg.GetLeftSegment(nodeId) : seg.GetRightSegment(nodeId);
+                ushort nextSegmentId = lht ? netSegment.GetLeftSegment(nodeId) : netSegment.GetRightSegment(nodeId);
                 return !segMan.CalculateIsOneWay(nextSegmentId);
             }
             return false;
@@ -395,8 +399,8 @@ namespace TrafficManager.Util {
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             return extSegmentManager.GetSortedLanes(
                                 segmentId,
-                                ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId],
-                                ExtSegmentManager.Instance.IsStartNode(segmentId, nodeId) ^ (!outgoing),
+                                ref segmentId.ToSegment(),
+                                extSegmentManager.IsStartNode(segmentId, nodeId) ^ (!outgoing),
                                 LaneArrowManager.LANE_TYPES,
                                 LaneArrowManager.VEHICLE_TYPES,
                                 true).Count;

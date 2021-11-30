@@ -170,9 +170,9 @@ namespace TrafficManager.Manager.Impl {
 
         public ArrowDirection GetDirection(ushort segmentId0, ushort segmentId1, ushort nodeId = 0) {
             if (nodeId == 0) {
-                ref NetSegment seg = ref Singleton<NetManager>.instance.m_segments.m_buffer[0];
-                nodeId = seg.GetSharedNode(segmentId1);
-                if(nodeId == 0) {
+                ref NetSegment netSegment = ref ((ushort)0).ToSegment();
+                nodeId = netSegment.GetSharedNode(segmentId1);
+                if (nodeId == 0) {
                     return ArrowDirection.None;
                 }
             }
@@ -328,16 +328,18 @@ namespace TrafficManager.Manager.Impl {
                                                out bool incoming,
                                                out bool outgoing) {
             NetManager instance = Singleton<NetManager>.instance;
-            NetInfo info = instance.m_segments.m_buffer[segmentId].Info;
+
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+            NetInfo info = netSegment.Info;
 
             var dir = NetInfo.Direction.Forward;
 
-            if (instance.m_segments.m_buffer[segmentId].m_startNode == nodeId) {
+            if (netSegment.m_startNode == nodeId) {
                 dir = NetInfo.Direction.Backward;
             }
 
             NetInfo.Direction dir2 =
-                ((instance.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert) ==
+                ((netSegment.m_flags & NetSegment.Flags.Invert) ==
                  NetSegment.Flags.None)
                     ? dir
                     : NetInfo.InvertDirection(dir);
@@ -345,7 +347,7 @@ namespace TrafficManager.Manager.Impl {
             var hasForward = false;
             var hasBackward = false;
             var isOutgoingOneWay = true;
-            uint laneId = instance.m_segments.m_buffer[segmentId].m_lanes;
+            uint laneId = netSegment.m_lanes;
             var laneIndex = 0;
 
             while (laneIndex < info.m_lanes.Length && laneId != 0u) {

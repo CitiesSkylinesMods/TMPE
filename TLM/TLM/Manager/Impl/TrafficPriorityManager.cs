@@ -1455,22 +1455,19 @@ namespace TrafficManager.Manager.Impl {
                     return false;
                 }
 
-                NetManager netManager = Singleton<NetManager>.instance;
+                ref NetSegment netSegment = ref segmentId.ToSegment();
 
-                NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
+                NetInfo segmentInfo = netSegment.Info;
 
-                NetInfo.Direction dir =
-                    nodeId == netManager.m_segments.m_buffer[segmentId].m_startNode
-                        ? NetInfo.Direction.Backward
-                        : NetInfo.Direction.Forward;
-                NetInfo.Direction dir2 =
-                    ((netManager.m_segments.m_buffer[segmentId].m_flags &
-                      NetSegment.Flags.Invert) == NetSegment.Flags.None)
-                        ? dir
-                        : NetInfo.InvertDirection(dir);
+                NetInfo.Direction dir = nodeId == netSegment.m_startNode
+                    ? NetInfo.Direction.Backward
+                    : NetInfo.Direction.Forward;
+                NetInfo.Direction dir2 = ((netSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None)
+                    ? dir
+                    : NetInfo.InvertDirection(dir);
                 NetInfo.Direction dir3 = Shortcuts.LHT
-                                             ? NetInfo.InvertDirection(dir2)
-                                             : dir2;
+                    ? NetInfo.InvertDirection(dir2)
+                    : dir2;
 
                 NetInfo.Lane leftLane = segmentInfo.m_lanes[leftLaneIndex];
                 NetInfo.Lane rightLane = segmentInfo.m_lanes[rightLaneIndex];

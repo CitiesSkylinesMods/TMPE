@@ -160,7 +160,7 @@ namespace TrafficManager.Manager.Impl {
 
             NetManager netManager = Singleton<NetManager>.instance;
 
-            uint sourceLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
+            uint sourceLaneId = segmentId.ToSegment().m_lanes;
             while (sourceLaneId != 0) {
                 uint[] targetLaneIds = GetLaneConnections(sourceLaneId, startNode);
 
@@ -478,15 +478,15 @@ namespace TrafficManager.Manager.Impl {
                                       out ushort commonNodeId,
                                       out bool startNode2) {
             NetManager netManager = Singleton<NetManager>.instance;
-            ushort segmentId1 = netManager.m_lanes.m_buffer[laneId1].m_segment;
-            ushort segmentId2 = netManager.m_lanes.m_buffer[laneId2].m_segment;
+            ref NetSegment netSegment1 = ref netManager.m_lanes.m_buffer[laneId1].m_segment.ToSegment();
+            ref NetSegment netSegment2 = ref netManager.m_lanes.m_buffer[laneId2].m_segment.ToSegment();
 
-            ushort nodeId2Start = netManager.m_segments.m_buffer[segmentId2].m_startNode;
-            ushort nodeId2End = netManager.m_segments.m_buffer[segmentId2].m_endNode;
+            ushort nodeId2Start = netSegment2.m_startNode;
+            ushort nodeId2End = netSegment2.m_endNode;
 
             ushort nodeId1 = startNode1
-                                 ? netManager.m_segments.m_buffer[segmentId1].m_startNode
-                                 : netManager.m_segments.m_buffer[segmentId1].m_endNode;
+                ? netSegment1.m_startNode
+                : netSegment1.m_endNode;
 
             startNode2 = nodeId1 == nodeId2Start;
             if (!startNode2 && nodeId1 != nodeId2End) {
@@ -505,13 +505,13 @@ namespace TrafficManager.Manager.Impl {
                                       out bool incoming,
                                       out Vector3? pos) {
             NetManager netManager = Singleton<NetManager>.instance;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
 
             pos = null;
             outgoing = false;
             incoming = false;
 
-            if ((netManager.m_segments.m_buffer[segmentId].m_flags &
-                 (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
+            if ((netSegment.m_flags & (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
                 return false;
             }
 
@@ -529,16 +529,14 @@ namespace TrafficManager.Manager.Impl {
             }
 
             if (laneInfo == null) {
-                if (laneIndex < netManager.m_segments.m_buffer[segmentId].Info.m_lanes.Length) {
-                    laneInfo = netManager.m_segments.m_buffer[segmentId].Info.m_lanes[laneIndex];
+                if (laneIndex < netSegment.Info.m_lanes.Length) {
+                    laneInfo = netSegment.Info.m_lanes[laneIndex];
                 } else {
                     return false;
                 }
             }
 
-            NetInfo.Direction laneDir =
-                ((NetManager.instance.m_segments.m_buffer[segmentId].m_flags &
-                  NetSegment.Flags.Invert) == NetSegment.Flags.None)
+            NetInfo.Direction laneDir = ((netSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None)
                     ? laneInfo.m_finalDirection
                     : NetInfo.InvertDirection(laneInfo.m_finalDirection);
 
@@ -568,8 +566,10 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private uint? FindLaneId(ushort segmentId, byte laneIndex) {
-            NetInfo.Lane[] lanes = NetManager.instance.m_segments.m_buffer[segmentId].Info.m_lanes;
-            uint laneId = NetManager.instance.m_segments.m_buffer[segmentId].m_lanes;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            NetInfo.Lane[] lanes = netSegment.Info.m_lanes;
+            uint laneId = netSegment.m_lanes;
 
             for (byte i = 0; i < lanes.Length && laneId != 0; i++) {
                 if (i == laneIndex) {
@@ -724,7 +724,7 @@ namespace TrafficManager.Manager.Impl {
                     }
 
                     bool addArrow = false;
-                    uint curLaneId = netManager.m_segments.m_buffer[otherSegmentId].m_lanes;
+                    uint curLaneId = otherSegmentId.ToSegment().m_lanes;
 
                     while (curLaneId != 0) {
                         if (logLaneConnections) {

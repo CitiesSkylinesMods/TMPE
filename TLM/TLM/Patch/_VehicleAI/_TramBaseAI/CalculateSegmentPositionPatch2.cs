@@ -46,19 +46,20 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
             NetManager netManager = Singleton<NetManager>.instance;
             ushort prevSourceNodeId;
             ushort prevTargetNodeId;
-            NetSegment[] segBuffer = netManager.m_segments.m_buffer;
+            ref NetSegment currentPositionSegment = ref position.m_segment.ToSegment();
 
             if (offset < position.m_offset) {
-                prevSourceNodeId = segBuffer[position.m_segment].m_startNode;
-                prevTargetNodeId = segBuffer[position.m_segment].m_endNode;
+                prevSourceNodeId = currentPositionSegment.m_startNode;
+                prevTargetNodeId = currentPositionSegment.m_endNode;
             } else {
-                prevSourceNodeId = segBuffer[position.m_segment].m_endNode;
-                prevTargetNodeId = segBuffer[position.m_segment].m_startNode;
+                prevSourceNodeId = currentPositionSegment.m_endNode;
+                prevTargetNodeId = currentPositionSegment.m_startNode;
             }
 
+            ref NetSegment previousPositionSegment = ref prevPos.m_segment.ToSegment();
             ushort refTargetNodeId = prevOffset == 0
-                                         ? segBuffer[prevPos.m_segment].m_startNode
-                                         : segBuffer[prevPos.m_segment].m_endNode;
+                ? previousPositionSegment.m_startNode
+                : previousPositionSegment.m_endNode;
             Vehicle.Frame lastFrameData = vehicleData.GetLastFrameData();
             float sqrVelocity = lastFrameData.m_velocity.sqrMagnitude;
 
@@ -87,7 +88,7 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
                             ref vehicleData,
                             sqrVelocity,
                             ref prevPos,
-                            ref segBuffer[prevPos.m_segment],
+                            ref previousPositionSegment,
                             refTargetNodeId,
                             prevLaneID,
                             ref position,
@@ -107,14 +108,13 @@ namespace TrafficManager.Patch._VehicleAI._TramBaseAI {
                 }
             }
 
-            NetInfo info = segBuffer[position.m_segment].Info;
             VehicleAICommons.CustomCalculateTargetSpeed(
                 __instance,
                 vehicleID,
                 ref vehicleData,
                 position,
                 laneID,
-                info,
+                currentPositionSegment.Info,
                 out maxSpeed);
             // NON-STOCK CODE END
             return false;

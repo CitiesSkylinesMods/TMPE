@@ -151,12 +151,12 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             //     return; // do not draw if too distant
             // }
             // Calculate lanes and arrows
-            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            ref NetSegment selectedSegment = ref SelectedSegmentId.ToSegment();
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
             IList<LanePos> laneList = extSegmentManager.GetSortedLanes(
                 SelectedSegmentId,
-                ref segmentsBuffer[SelectedSegmentId],
-                segmentsBuffer[SelectedSegmentId].m_startNode == SelectedNodeId,
+                ref selectedSegment,
+                selectedSegment.m_startNode == SelectedNodeId,
                 LaneArrowManager.LANE_TYPES,
                 LaneArrowManager.VEHICLE_TYPES,
                 true);
@@ -342,10 +342,8 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
             }
 
             // Not interested in segments which don't start at the hovered node
-            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-
-            if (segmentsBuffer[HoveredSegmentId].m_startNode != HoveredNodeId &&
-                segmentsBuffer[HoveredSegmentId].m_endNode != HoveredNodeId) {
+            ref NetSegment hoveredSegment = ref HoveredSegmentId.ToSegment();
+            if (hoveredSegment.m_startNode != HoveredNodeId && hoveredSegment.m_endNode != HoveredNodeId) {
                 return;
             }
 
@@ -520,8 +518,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 // This code makes it easier to hover over small segments.
                 if (!HasSegmentEndLaneArrows(HoveredSegmentId, base.HoveredNodeId))
                 {
-                    ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[HoveredSegmentId];
-                    ushort otherNodeId = segment.GetOtherNode(base.HoveredNodeId);
+                    ushort otherNodeId = HoveredSegmentId.ToSegment().GetOtherNode(base.HoveredNodeId);
                     if (HasSegmentEndLaneArrows(HoveredSegmentId, otherNodeId)) {
                         return otherNodeId;
                     }
@@ -539,7 +536,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                        bool bStartNode,
                        Color color,
                        bool alpha = false) {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            ref NetSegment segment = ref segmentId.ToSegment();
 
             // if only one side of the segment has lane arrows then the length of the
             // is 1. but the highlight still looks like a sausage which is cut at one end.
@@ -588,9 +585,9 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                     || HoveredNodeId != SelectedNodeId))
             {
                 NetNode.Flags nodeFlags = HoveredNodeId.ToNode().m_flags;
+                ref NetSegment hoveredSegment = ref HoveredSegmentId.ToSegment();
 
-                if ((netManager.m_segments.m_buffer[HoveredSegmentId].m_startNode == HoveredNodeId
-                     || netManager.m_segments.m_buffer[HoveredSegmentId].m_endNode == HoveredNodeId)
+                if ((hoveredSegment.m_startNode == HoveredNodeId || hoveredSegment.m_endNode == HoveredNodeId)
                     && (nodeFlags & NetNode.Flags.Junction) != NetNode.Flags.None)
                 {
                     bool bStartNode = (bool)ExtSegmentManager.Instance.IsStartNode(HoveredSegmentId, HoveredNodeId);
