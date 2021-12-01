@@ -13,5 +13,10 @@ namespace TrafficManager.API.Manager {
         /// <param name="startNode">at start node?</param>
         /// <returns><code>true</code> if u-turn connections exist, <code>false</code> otherwise</returns>
         bool HasUturnConnections(ushort segmentId, bool startNode);
+
+        /// <summary>
+        /// Determines if there exist custom lane connections at the specified node
+        /// </summary>
+        bool HasNodeConnections(ushort nodeId);
     }
 }

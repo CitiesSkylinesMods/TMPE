@@ -134,10 +134,6 @@ namespace TrafficManager.Manager.Impl {
             return false;
        }
 
-            /// <summary>
-            /// Determines if there exist custom lane connections at the specified node
-            /// </summary>
-            /// <param name="nodeId"></param>
         public bool HasNodeConnections(ushort nodeId) {
             if (!Options.laneConnectorEnabled) {
                 return false;
