@@ -398,7 +398,7 @@ namespace TrafficManager.Manager.Impl {
 
             ushort prevSegmentId = segmentId;
             int prevLaneIndex = laneIndex;
-            uint prevLaneId = laneId; // this is variable is duplicate (prevLaneId == laneId always)
+            uint prevLaneId = laneId; // this variable is duplicate (prevLaneId == laneId always)
             ushort nextNodeId = prevEnd.nodeId; // common node
 
             NetInfo.Lane prevLaneInfo = prevSegmentInfo.m_lanes[prevLaneIndex];
