@@ -20,6 +20,23 @@ namespace TrafficManager.Manager.Impl {
           ICustomDataManager<List<Configuration.LaneConnection>>,
           ILaneConnectionManager
     {
+        #region Data
+        private struct ConnectionData {
+            public TargetConnectionData[] StartConnections;
+            public TargetConnectionData[] EndConnections;
+        }
+
+        private struct TargetConnectionData {
+            uint LaneId;
+        }
+
+        private ConnectionData []Connections;
+
+        private static AddLaneConnection
+
+        #endregion
+
+
         public const NetInfo.LaneType LANE_TYPES =
             NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle;
 
@@ -35,6 +52,11 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public static LaneConnectionManager Instance { get; }
+
+        public override void OnBeforeLoadData() {
+            base.OnBeforeLoadData();
+            Connections = new ConnectionData[NetManager.instance.m_lanes.m_size];
+        }
 
         protected override void InternalPrintDebugInfo() {
             base.InternalPrintDebugInfo();
