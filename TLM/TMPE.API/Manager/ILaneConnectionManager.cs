@@ -1,6 +1,10 @@
-﻿namespace TrafficManager.API.Manager {
+namespace TrafficManager.API.Manager {
     public interface ILaneConnectionManager {
         // TODO define me!
+
+        public NetInfo.LaneType LaneTypes { get; }
+
+        public VehicleInfo.VehicleType VehicleTypes { get; }
 
         /// <summary>
         /// Determines whether u-turn connections exist for the given segment end.

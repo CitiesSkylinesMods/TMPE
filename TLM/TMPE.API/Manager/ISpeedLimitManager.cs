@@ -4,6 +4,10 @@ namespace TrafficManager.API.Manager {
     public interface ISpeedLimitManager {
         // TODO define me!
 
+        public NetInfo.LaneType LaneTypes { get; }
+
+        public VehicleInfo.VehicleType VehicleTypes { get; }
+
         /// <summary>
         /// For use by external code.
         /// Retrieves the speed limit for the given lane without locking.

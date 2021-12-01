@@ -29,6 +29,11 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         public const VehicleInfo.VehicleType VEHICLE_TYPES = VehicleInfo.VehicleType.Car;
 
+        public NetInfo.LaneType LaneTypes => LANE_TYPES;
+
+        public VehicleInfo.VehicleType VehicleTypes => VEHICLE_TYPES;
+
+
         public const ExtVehicleType EXT_VEHICLE_TYPES =
             ExtVehicleType.RoadVehicle & ~ExtVehicleType.Emergency;
 
@@ -39,9 +44,6 @@ namespace TrafficManager.Manager.Impl {
             Log.NotImpl("InternalPrintDebugInfo for LaneArrowManager");
         }
 
-        /// <summary>
-        /// Get the final lane arrows considering both the default lane arrows and user modifications.
-        /// </summary>
         public LaneArrows GetFinalLaneArrows(uint laneId) {
             return Flags.GetFinalLaneArrowFlags(laneId, true);
         }
