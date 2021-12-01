@@ -9,5 +9,11 @@ namespace TrafficManager.Util.Extensions {
             netSegment.m_flags.CheckFlags(
                 required: NetSegment.Flags.Created,
                 forbidden: NetSegment.Flags.Collapsed | NetSegment.Flags.Deleted);
+
+        /// <returns><c>true</c> if nodeId is start node.
+        /// <c>false</c> if nodeId is end node.
+        /// Undetermined if segment does not have nodeId</returns>
+        public static bool IsStartnode(this ref NetSegment netSegment, ushort nodeId) =>
+            netSegment.m_startNode == nodeId;
     }
 }

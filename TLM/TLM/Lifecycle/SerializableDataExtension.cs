@@ -19,6 +19,8 @@ namespace TrafficManager.Lifecycle {
         private static ISerializableData SerializableData => SimulationManager.instance.m_SerializableDataWrapper;
         private static Configuration _configuration;
 
+        public static int Version => _configuration.Version;
+
         public override void OnLoadData() => Load();
         public override void OnSaveData() => Save();
 
@@ -300,7 +302,7 @@ namespace TrafficManager.Lifecycle {
 
             try {
                 Log.Info("Saving Mod Data.");
-                var configuration = new Configuration();
+                var configuration = new Configuration { Version = Configuration.CURRENT_VERSION };
 
                 //------------------
                 // Citizens
