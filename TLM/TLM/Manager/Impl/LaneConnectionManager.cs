@@ -53,7 +53,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         private bool ValidateLane(uint laneId) {
-            bool valid = laneId.ToLane().IsValid();
+            bool valid = laneId.ToLane().IsValidWithSegment();
             if(!valid)
                 connections_.RemoveConnections(laneId);
             return valid;
@@ -67,6 +67,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="sourceStartNode">(optional) check at start node of source lane?</param>
         /// <returns></returns>
         public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
+            Log._Debug($"AreLanesConnected({sourceLaneId},{targetLaneId}) called " + Environment.StackTrace);
             if (!Options.laneConnectorEnabled) {
                 return true;
             }
@@ -76,7 +77,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            return connections_.IsConnectedTo(sourceLaneId, targetLaneId, sourceStartNode);
+            return connections_.IsConnectedTo(sourceLaneId, targetLaneId, sourceStartNode).LogRet($"AreLanesConnected({sourceLaneId},{targetLaneId})->");
         }
 
         /// <summary>
@@ -363,9 +364,7 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="targetLaneId">To lane id</param>
         /// <param name="sourceStartNode">The affected node</param>
         /// <returns></returns>
-        internal bool AddLaneConnection(uint sourceLaneId,
-                                        uint targetLaneId,
-                                        bool sourceStartNode) {
+        internal bool AddLaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
             if (sourceLaneId == targetLaneId) {
                 return false;
             }
@@ -376,6 +375,8 @@ namespace TrafficManager.Manager.Impl {
             }
 
             connections_.ConnectTo(sourceLaneId, targetLaneId, sourceStartNode);
+            Assert(AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode), $"AreLanesConnected({sourceLaneId}, {targetLaneId}, {sourceStartNode})");
+            //Log._Debug($"AreLanesConnected({sourceLaneId}, {targetLaneId}, {sourceStartNode})->{AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode)}"); //delete
 
 #if DEBUG
             bool logLaneConnections = DebugSwitch.LaneConnections.Get();

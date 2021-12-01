@@ -12,10 +12,12 @@ namespace TrafficManager.Util {
         }
         public static T[] AppendOrCreate<T>(this T[] source, T item) {
             int n = source?.Length ?? 0;
-            T[] ret = new T[n + 1];
-            Array.Copy(source, ret, n);
-            ret[n] = item;
-            return ret;
+            T[] res = new T[n + 1];
+            if(n > 0) {
+                Array.Copy(source, res, n);
+            }
+            res[n] = item;
+            return res;
         }
     }
 }
