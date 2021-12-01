@@ -217,8 +217,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Create value of null (if mouse is over some essential UI window) or return
         /// mouse coords.</summary>
         private Vector2? GetMouseForOverlay() {
-            if (this.Window.containsMouse || ModUI.Instance.MainMenu.containsMouse) {
-                return null;
+            // Having the window created will check mouse for window rect
+            if (this.Window != null) {
+                if (this.Window.containsMouse || ModUI.Instance.MainMenu.containsMouse) {
+                    return null;
+                }
             }
 
             return Event.current.mousePosition;
