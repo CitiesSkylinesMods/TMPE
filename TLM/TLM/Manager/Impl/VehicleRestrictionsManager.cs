@@ -100,9 +100,13 @@ namespace TrafficManager.Manager.Impl {
             IDictionary<byte, ExtVehicleType> ret = new Dictionary<byte, ExtVehicleType>();
             NetManager netManager = Singleton<NetManager>.instance;
 
-            if (segmentId == 0
-                || (netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Created)
-                    == NetSegment.Flags.None
+            if (segmentId == 0) {
+                return ret;
+            }
+
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if ((netSegment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None
                 || nodeId == 0
                 || (nodeId.ToNode().m_flags & NetNode.Flags.Created)
                     == NetNode.Flags.None)
@@ -112,13 +116,13 @@ namespace TrafficManager.Manager.Impl {
 
             const NetInfo.Direction DIR = NetInfo.Direction.Forward;
             NetInfo.Direction dir2 =
-                ((netManager.m_segments.m_buffer[segmentId].m_flags & NetSegment.Flags.Invert)
+                ((netSegment.m_flags & NetSegment.Flags.Invert)
                     == NetSegment.Flags.None)
                     ? DIR
                     : NetInfo.InvertDirection(DIR);
 
-            NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
-            uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
+            NetInfo segmentInfo = netSegment.Info;
+            uint curLaneId = netSegment.m_lanes;
             int numLanes = segmentInfo.m_lanes.Length;
             uint laneIndex = 0;
 
@@ -131,8 +135,8 @@ namespace TrafficManager.Manager.Impl {
                     if ((laneInfo.m_vehicleType & VEHICLE_TYPES) != VehicleInfo.VehicleType.None) {
                         ushort toNodeId =
                             (laneInfo.m_finalDirection & dir2) != NetInfo.Direction.None
-                                ? netManager.m_segments.m_buffer[segmentId].m_endNode
-                                : netManager.m_segments.m_buffer[segmentId].m_startNode;
+                                ? netSegment.m_endNode
+                                : netSegment.m_startNode;
 
                         if ((laneInfo.m_finalDirection & NetInfo.Direction.Both) ==
                             NetInfo.Direction.Both || toNodeId == nodeId) {
@@ -327,15 +331,14 @@ namespace TrafficManager.Manager.Impl {
             }
 
             ushort segmentId = Singleton<NetManager>.instance.m_lanes.m_buffer[laneId].m_segment;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
 
-            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags &
-                 NetSegment.Flags.Created) == NetSegment.Flags.None) {
+            if ((netSegment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
                 return ExtVehicleType.None;
             }
 
-            NetInfo segmentInfo =
-                Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
-            uint curLaneId = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_lanes;
+            NetInfo segmentInfo = netSegment.Info;
+            uint curLaneId = netSegment.m_lanes;
             int numLanes = segmentInfo.m_lanes.Length;
             uint laneIndex = 0;
 
@@ -602,8 +605,9 @@ namespace TrafficManager.Manager.Impl {
                 return true;
             }
 
+            // ref NetSegment netSegment = ref segmentId.ToSegment();
             // if (laneInfo == null)
-            // laneInfo = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info.m_lanes[laneIndex];*/
+            // laneInfo = netSegment.Info.m_lanes[laneIndex];*/
 
             if (segmentInfo == null || laneIndex >= segmentInfo.m_lanes.Length) {
                 return true;
@@ -648,7 +652,6 @@ namespace TrafficManager.Manager.Impl {
         /// <returns></returns>
         public ExtVehicleType GetBaseMask(uint laneId, VehicleRestrictionsMode includeBusLanes) {
             NetLane[] lanesBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
 
             if (((NetLane.Flags)lanesBuffer[laneId].m_flags &
                  NetLane.Flags.Created) == NetLane.Flags.None) {
@@ -656,15 +659,14 @@ namespace TrafficManager.Manager.Impl {
             }
 
             ushort segmentId = lanesBuffer[laneId].m_segment;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
 
-            if ((segmentsBuffer[segmentId].m_flags &
-                 NetSegment.Flags.Created) == NetSegment.Flags.None) {
+            if ((netSegment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
                 return ExtVehicleType.None;
             }
 
-            NetInfo segmentInfo =
-                segmentsBuffer[segmentId].Info;
-            uint curLaneId = segmentsBuffer[segmentId].m_lanes;
+            NetInfo segmentInfo = netSegment.Info;
+            uint curLaneId = netSegment.m_lanes;
             int numLanes = segmentInfo.m_lanes.Length;
             uint laneIndex = 0;
 
@@ -791,9 +793,10 @@ namespace TrafficManager.Manager.Impl {
         public void NotifyStartEndNode(ushort segmentId) {
             // TODO this is hacky. Instead of notifying geometry observers we should add a seperate notification mechanic
             // notify observers of start node and end node (e.g. for separate traffic lights)
-            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            ushort startNodeId = segmentsBuffer[segmentId].m_startNode;
-            ushort endNodeId = segmentsBuffer[segmentId].m_endNode;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            ushort startNodeId = netSegment.m_startNode;
+            ushort endNodeId = netSegment.m_endNode;
 
             if (startNodeId != 0) {
                 Constants.ManagerFactory.GeometryManager.MarkAsUpdated(startNodeId);

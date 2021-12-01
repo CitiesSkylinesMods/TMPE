@@ -556,14 +556,12 @@ namespace TrafficManager.Custom.PathFinding {
                         }
                     }
 
-                    ushort startNodeId = netManager
-                                      .m_segments.m_buffer[candidateItem.Position.m_segment]
-                                      .m_startNode;
+                    ref NetSegment candidateItemPositionSegment = ref candidateItem.Position.m_segment.ToSegment();
+
+                    ushort startNodeId = candidateItemPositionSegment.m_startNode;
                     ref NetNode startNode = ref startNodeId.ToNode();
 
-                    ushort endNodeId = netManager
-                                    .m_segments.m_buffer[candidateItem.Position.m_segment]
-                                    .m_endNode;
+                    ushort endNodeId = candidateItemPositionSegment.m_endNode;
                     ref NetNode endNode = ref endNodeId.ToNode();
 
                     if ((candidateItem.Direction & NetInfo.Direction.Forward) !=
@@ -573,8 +571,8 @@ namespace TrafficManager.Custom.PathFinding {
                             unit,
 #endif
                             candidateItem,
-                            ref netManager.m_segments.m_buffer[candidateItem.Position.m_segment],
-                            ref netManager.m_lanes.m_buffer[candidateItem.LaneId],
+                            ref candidateItemPositionSegment,
+                            ref candidateItem.LaneId.ToLane(),
                             startNodeId,
                             ref startNode,
                             0,
@@ -588,7 +586,7 @@ namespace TrafficManager.Custom.PathFinding {
                             unit,
 #endif
                             candidateItem,
-                            ref netManager.m_segments.m_buffer[candidateItem.Position.m_segment],
+                            ref candidateItemPositionSegment,
                             ref netManager.m_lanes.m_buffer[candidateItem.LaneId],
                             endNodeId,
                             ref endNode,
@@ -639,7 +637,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 unit,
 #endif
                                 candidateItem,
-                                ref netManager.m_segments.m_buffer[candidateItem.Position.m_segment],
+                                ref candidateItemPositionSegment,
                                 ref netManager.m_lanes.m_buffer[candidateItem.LaneId],
                                 specialNodeId,
                                 ref specialNode,
@@ -1022,7 +1020,7 @@ namespace TrafficManager.Custom.PathFinding {
                         ref nextNode,
                         true,
                         nextSegmentId,
-                        ref netManager.m_segments.m_buffer[nextSegmentId],
+                        ref nextSegmentId.ToSegment(),
                         ref prevRelSimilarLaneIndex,
                         connectOffset,
                         !prevIsPedestrianLane,
@@ -1063,7 +1061,8 @@ namespace TrafficManager.Custom.PathFinding {
                             int numIter = 0;
                             while (leftSegmentId != 0 && leftSegmentId != prevSegmentId &&
                                    leftLaneId == 0) {
-                                netManager.m_segments.m_buffer[leftSegmentId].GetLeftAndRightLanes(
+                                ref NetSegment leftSegment = ref leftSegmentId.ToSegment();
+                                leftSegment.GetLeftAndRightLanes(
                                     nextNodeId,
                                     NetInfo.LaneType.Pedestrian,
                                     VehicleInfo.VehicleType.None,
@@ -1085,14 +1084,12 @@ namespace TrafficManager.Custom.PathFinding {
                                 // cross it to reach the next segment
                                 if (!junctionManager.IsPedestrianCrossingAllowed(
                                         leftSegmentId,
-                                        netManager.m_segments.m_buffer[leftSegmentId].m_startNode ==
+                                        leftSegment.m_startNode ==
                                         nextNodeId)) {
                                     break;
                                 }
 #endif
-                                leftSegmentId = netManager
-                                                .m_segments.m_buffer[leftSegmentId]
-                                                .GetLeftSegment(nextNodeId);
+                                leftSegmentId = leftSegment.GetLeftSegment(nextNodeId);
 
                                 if (++numIter == 8) {
                                     break;
@@ -1102,7 +1099,8 @@ namespace TrafficManager.Custom.PathFinding {
                             numIter = 0;
                             while (rightSegmentId != 0 && rightSegmentId != prevSegmentId &&
                                    rightLaneId == 0) {
-                                netManager.m_segments.m_buffer[rightSegmentId].GetLeftAndRightLanes(
+                                ref NetSegment rightSegment = ref rightSegmentId.ToSegment();
+                                rightSegment.GetLeftAndRightLanes(
                                     nextNodeId,
                                     NetInfo.LaneType.Pedestrian,
                                     VehicleInfo.VehicleType.None,
@@ -1124,15 +1122,12 @@ namespace TrafficManager.Custom.PathFinding {
                                 // cross it to reach the next segment
                                 if (!junctionManager.IsPedestrianCrossingAllowed(
                                         rightSegmentId,
-                                        netManager
-                                            .m_segments.m_buffer[rightSegmentId].m_startNode ==
+                                        rightSegment.m_startNode ==
                                         nextNodeId)) {
                                     break;
                                 }
 #endif
-                                rightSegmentId = netManager
-                                                 .m_segments.m_buffer[rightSegmentId]
-                                                 .GetRightSegment(nextNodeId);
+                                rightSegmentId = rightSegment.GetRightSegment(nextNodeId);
 
                                 if (++numIter == 8) {
                                     break;
@@ -1166,7 +1161,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 prevMaxSpeed,
                                 prevLaneSpeed,
                                 nextLeftSegmentId,
-                                ref netManager.m_segments.m_buffer[nextLeftSegmentId],
+                                ref nextLeftSegmentId.ToSegment(),
                                 nextNodeId,
                                 ref nextNode,
                                 leftLaneIndex,
@@ -1203,7 +1198,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 prevMaxSpeed,
                                 prevLaneSpeed,
                                 nextRightSegmentId,
-                                ref netManager.m_segments.m_buffer[nextRightSegmentId],
+                                ref nextRightSegmentId.ToSegment(),
                                 nextNodeId,
                                 ref nextNode,
                                 rightLaneIndex,
@@ -1294,7 +1289,7 @@ namespace TrafficManager.Custom.PathFinding {
                                 ref nextNode,
                                 false,
                                 nextSegmentId,
-                                ref netManager.m_segments.m_buffer[nextSegmentId],
+                                ref nextSegmentId.ToSegment(),
                                 ref prevRelSimilarLaneIndex,
                                 connectOffset,
                                 false,
@@ -1564,6 +1559,7 @@ namespace TrafficManager.Custom.PathFinding {
                         if (nextSegmentId == 0 || nextSegmentId == prevSegmentId) {
                             continue;
                         }
+
                         if (isLogEnabled) {
                             DebugLog(
                                 unitId,
@@ -1586,7 +1582,7 @@ namespace TrafficManager.Custom.PathFinding {
                             ref nextNode,
                             false,
                             nextSegmentId,
-                            ref netManager.m_segments.m_buffer[nextSegmentId],
+                            ref nextSegmentId.ToSegment(),
                             ref prevRelSimilarLaneIndex,
                             connectOffset,
                             true,
@@ -1623,7 +1619,7 @@ namespace TrafficManager.Custom.PathFinding {
                             ref nextNode,
                             false,
                             nextSegmentId,
-                            ref netManager.m_segments.m_buffer[nextSegmentId],
+                            ref nextSegmentId.ToSegment(),
                             ref prevRelSimilarLaneIndex,
                             connectOffset,
                             true,
@@ -1713,7 +1709,7 @@ namespace TrafficManager.Custom.PathFinding {
                                     ref nextNode,
                                     false,
                                     nextSegmentId,
-                                    ref netManager.m_segments.m_buffer[nextSegmentId],
+                                    ref nextSegmentId.ToSegment(),
                                     ref prevRelSimilarLaneIndex,
                                     connectOffset,
 #if ROUTING
@@ -1735,7 +1731,7 @@ namespace TrafficManager.Custom.PathFinding {
 #endif
                             }
 
-                            nextSegmentId = netManager.m_segments.m_buffer[nextSegmentId].GetRightSegment(nextNodeId);
+                            nextSegmentId = nextSegmentId.ToSegment().GetRightSegment(nextNodeId);
                         }
 #if ROUTING
                     } // NON-STOCK CODE
@@ -1994,7 +1990,7 @@ namespace TrafficManager.Custom.PathFinding {
                 nextNodeId,
                 targetDisabled,
                 nextSegmentId2,
-                ref netManager.m_segments.m_buffer[nextSegmentId2],
+                ref nextSegmentId2.ToSegment(),
                 nextNode.m_lane,
                 nextNode.m_laneOffset,
                 connectOffset);
@@ -3833,7 +3829,7 @@ namespace TrafficManager.Custom.PathFinding {
                         ref nextNode,
                         isMiddle,
                         nextSegmentId,
-                        ref netManager.m_segments.m_buffer[nextSegmentId],
+                        ref nextSegmentId.ToSegment(),
                         segmentSelectionCost,
                         laneSelectionCost,
                         laneTransitions[k],
@@ -3946,14 +3942,14 @@ namespace TrafficManager.Custom.PathFinding {
             out NetInfo.Direction direction,
             out NetInfo.LaneType laneType,
             out VehicleInfo.VehicleType vehicleType) {
-            NetManager netManager = Singleton<NetManager>.instance;
-            NetInfo info = netManager.m_segments.m_buffer[pathPos.m_segment].Info;
+            ref NetSegment netSegment = ref pathPos.m_segment.ToSegment();
+            NetInfo info = netSegment.Info;
             if (info.m_lanes.Length > pathPos.m_lane) {
                 direction = info.m_lanes[pathPos.m_lane].m_finalDirection;
                 laneType = info.m_lanes[pathPos.m_lane].m_laneType;
                 vehicleType = info.m_lanes[pathPos.m_lane].m_vehicleType;
 
-                if ((netManager.m_segments.m_buffer[pathPos.m_segment].m_flags &
+                if ((netSegment.m_flags &
                      NetSegment.Flags.Invert) != NetSegment.Flags.None) {
                     direction = NetInfo.InvertDirection(direction);
                 }
@@ -4167,12 +4163,12 @@ namespace TrafficManager.Custom.PathFinding {
         /// <returns>true if all valid segments allows ferries, otherwise false</returns>
         private static bool BelongsToFerryNetwork(ref NetNode node) {
             for (var index = 0; index < 8; ++index) {
-                var segment = node.GetSegment(index);
-                if (segment == 0) {
+                ushort netSegmentId = node.GetSegment(index);
+                if (netSegmentId == 0) {
                     continue;
                 }
 
-                var segmentInfo = NetManager.instance.m_segments.m_buffer[segment].Info;
+                var segmentInfo = netSegmentId.ToSegment().Info;
                 if (segmentInfo == null) {
                     continue;
                 }

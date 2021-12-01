@@ -1088,18 +1088,18 @@ namespace TrafficManager.UI.SubTools {
 
             bool isUnderground = nodeId.IsUndergroundNode();
 
-            for (int i = 0; i < 8; i++) {
-                ushort segmentId = node.GetSegment(i);
-
+            for (int segmentIndex = 0; segmentIndex < Constants.MAX_SEGMENTS_OF_NODE; segmentIndex++) {
+                ushort segmentId = node.GetSegment(segmentIndex);
                 if (segmentId == 0) {
                     continue;
                 }
 
-                NetSegment[] segmentsBuffer = NetManager.instance.m_segments.m_buffer;
-                bool startNode = segmentsBuffer[segmentId].m_startNode == nodeId;
-                NetInfo.Lane[] lanes = segmentsBuffer[segmentId].Info.m_lanes;
-                uint laneId = segmentsBuffer[segmentId].m_lanes;
-                float offsetT = offset / segmentId.ToSegment().m_averageLength;
+                ref NetSegment netSegment = ref segmentId.ToSegment();
+
+                bool startNode = netSegment.m_startNode == nodeId;
+                NetInfo.Lane[] lanes = netSegment.Info.m_lanes;
+                uint laneId = netSegment.m_lanes;
+                float offsetT = offset / netSegment.m_averageLength;
 
                 for (byte laneIndex = 0; (laneIndex < lanes.Length) && (laneId != 0); laneIndex++) {
                     NetInfo.Lane laneInfo = lanes[laneIndex];
@@ -1167,7 +1167,7 @@ namespace TrafficManager.UI.SubTools {
                                     VehicleType = laneInfo.m_vehicleType,
                                     InnerSimilarLaneIndex = innerSimilarLaneIndex,
                                     OuterSimilarLaneIndex = outerSimilarLaneIndex,
-                                    SegmentIndex = i,
+                                    SegmentIndex = segmentIndex,
                                     NodeMarker = nodeMarker,
                                     SegmentMarker = segmentMarker,
                                 });
@@ -1227,10 +1227,8 @@ namespace TrafficManager.UI.SubTools {
 
             // check track turning angles are within bounds
             ret &= isRoad || CheckSegmentsTurningAngle(
-                    sourceSegmentId: source.SegmentId,
                     sourceSegment: ref source.SegmentId.ToSegment(),
                     sourceStartNode: source.StartNode,
-                    targetSegmentId: target.SegmentId,
                     targetSegment: ref target.SegmentId.ToSegment(),
                     targetStartNode: target.StartNode);
 
@@ -1247,19 +1245,14 @@ namespace TrafficManager.UI.SubTools {
         /// <param name="targetSegment"></param>
         /// <param name="targetStartNode"></param>
         /// <returns></returns>
-        private static bool CheckSegmentsTurningAngle(ushort sourceSegmentId,
-                                                      ref NetSegment sourceSegment,
+        private static bool CheckSegmentsTurningAngle(ref NetSegment sourceSegment,
                                                       bool sourceStartNode,
-                                                      ushort targetSegmentId,
                                                       ref NetSegment targetSegment,
                                                       bool targetStartNode) {
-            NetManager netManager = Singleton<NetManager>.instance;
-            NetInfo sourceSegmentInfo = netManager.m_segments.m_buffer[sourceSegmentId].Info;
-            NetInfo targetSegmentInfo = netManager.m_segments.m_buffer[targetSegmentId].Info;
 
             float turningAngle = 0.01f - Mathf.Min(
-                                     sourceSegmentInfo.m_maxTurnAngleCos,
-                                     targetSegmentInfo.m_maxTurnAngleCos);
+                sourceSegment.Info.m_maxTurnAngleCos,
+                targetSegment.Info.m_maxTurnAngleCos);
 
             if (turningAngle < 1f) {
                 Vector3 sourceDirection = sourceStartNode

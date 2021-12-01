@@ -6,6 +6,7 @@ namespace TrafficManager.Util {
     using TrafficManager.U;
     using TrafficManager.UI;
     using UnityEngine;
+    using TrafficManager.Util;
 
     /// <summary>
     /// Helper functions to handle coordinates and transformations, as well as road geometry
@@ -73,9 +74,10 @@ namespace TrafficManager.Util {
         {
             outputDict.Clear();
             NetManager netManager = Singleton<NetManager>.instance;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
 
-            NetInfo segmentInfo = netManager.m_segments.m_buffer[segmentId].Info;
-            uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
+            NetInfo segmentInfo = netSegment.Info;
+            uint curLaneId = netSegment.m_lanes;
             var numCentersByDir = new Dictionary<NetInfo.Direction, int>();
             uint laneIndex = 0;
 
@@ -83,7 +85,7 @@ namespace TrafficManager.Util {
                 if ((segmentInfo.m_lanes[laneIndex].m_laneType &
                      (NetInfo.LaneType.Vehicle | NetInfo.LaneType.TransportVehicle)) ==
                     NetInfo.LaneType.None) {
-                    goto nextIter;
+                    goto nextIter; //LOL
                 }
 
                 NetInfo.Direction dir = segmentInfo.m_lanes[laneIndex].m_finalDirection;
@@ -131,29 +133,23 @@ namespace TrafficManager.Util {
                                                       VehicleInfo.VehicleType vehicleTypeFilter)
         {
             NetManager netManager = Singleton<NetManager>.instance;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
 
-            NetInfo info = netManager.m_segments.m_buffer[segmentId].Info;
-            uint curLaneId = netManager.m_segments.m_buffer[segmentId].m_lanes;
+            NetInfo info = netSegment.Info;
+            uint curLaneId = netSegment.m_lanes;
             var laneIndex = 0;
-
             NetInfo.Direction? dir2 = null;
-            // NetInfo.Direction? dir3 = null;
 
             numDirections = 0;
             HashSet<NetInfo.Direction> directions = new HashSet<NetInfo.Direction>();
 
             if (nodeId != null) {
-                NetInfo.Direction? dir = netManager.m_segments.m_buffer[segmentId].m_startNode == nodeId
-                                             ? NetInfo.Direction.Backward
-                                             : NetInfo.Direction.Forward;
-                dir2 =
-                    (netManager.m_segments.m_buffer[segmentId].m_flags &
-                     NetSegment.Flags.Invert) == NetSegment.Flags.None
-                        ? dir
-                        : NetInfo.InvertDirection((NetInfo.Direction)dir);
-
-                // dir3 = TrafficPriorityManager.IsLeftHandDrive()
-                //      ? NetInfo.InvertDirection((NetInfo.Direction)dir2) : dir2;
+                NetInfo.Direction? dir = netSegment.m_startNode == nodeId
+                    ? NetInfo.Direction.Backward
+                    : NetInfo.Direction.Forward;
+                dir2 = (netSegment.m_flags & NetSegment.Flags.Invert) == NetSegment.Flags.None
+                    ? dir
+                    : NetInfo.InvertDirection((NetInfo.Direction)dir);
             }
 
             var numLanes = 0;

@@ -176,8 +176,6 @@ namespace TrafficManager.UI.SubTools {
         private Vector3? lastCamPos;
 
         private void ShowSigns(bool viewOnly) {
-            NetManager netManager = Singleton<NetManager>.instance;
-
             var currentCamera = new CameraTransformValue(InGameUtil.Instance.CachedMainCamera);
             Transform currentCameraTransform = InGameUtil.Instance.CachedCameraTransform;
             Vector3 camPos = currentCameraTransform.position;
@@ -189,20 +187,16 @@ namespace TrafficManager.UI.SubTools {
 
                 for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                     ref NetSegment netSegment = ref ((ushort)segmentId).ToSegment();
-
                     if (!netSegment.IsValid()) {
                         continue;
                     }
 
-                    Vector3 distToCamera = netManager.m_segments.m_buffer[segmentId].m_bounds.center - camPos;
+                    Vector3 distToCamera = netSegment.m_bounds.center - camPos;
                     if (distToCamera.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
                         continue; // do not draw if too distant
                     }
 
-                    bool visible = GeometryUtil.WorldToScreenPoint(
-                        worldPos: netManager.m_segments.m_buffer[segmentId].m_bounds.center,
-                        screenPos: out Vector3 _);
-
+                    bool visible = GeometryUtil.WorldToScreenPoint(netSegment.m_bounds.center, out Vector3 _);
                     if (!visible) {
                         continue;
                     }
@@ -236,7 +230,7 @@ namespace TrafficManager.UI.SubTools {
                 var dir = DrawParkingRestrictionHandles(
                     segmentId: segmentId,
                     clicked: clicked,
-                    segment: ref netManager.m_segments.m_buffer[segmentId],
+                    segment: ref segmentId.ToSegment(),
                     viewOnly: viewOnly,
                     camPos: ref camPos);
                 if (dir != NetInfo.Direction.None) {
@@ -323,8 +317,7 @@ namespace TrafficManager.UI.SubTools {
                     {
                         NetInfo.Direction normDir = e.Key;
 
-                        if ((netManager.m_segments.m_buffer[segmentId].m_flags &
-                             NetSegment.Flags.Invert) != NetSegment.Flags.None) {
+                        if ((segmentId.ToSegment().m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None) {
                             normDir = NetInfo.InvertDirection(normDir);
                         }
 
@@ -337,13 +330,14 @@ namespace TrafficManager.UI.SubTools {
                                            data.SegVisitData.ViaInitialStartNode;
 
                             ushort otherSegmentId = data.SegVisitData.CurSeg.segmentId;
-                            NetInfo otherSegmentInfo =
-                                netManager.m_segments.m_buffer[otherSegmentId].Info;
+                            ref NetSegment otherSegment = ref otherSegmentId.ToSegment();
+
+                            NetInfo otherSegmentInfo = otherSegment.Info;
                             byte laneIndex = data.CurLanePos.laneIndex;
                             NetInfo.Lane laneInfo = otherSegmentInfo.m_lanes[laneIndex];
 
                             NetInfo.Direction otherNormDir = laneInfo.m_finalDirection;
-                            if (((netManager.m_segments.m_buffer[otherSegmentId].m_flags &
+                            if (((otherSegment.m_flags &
                                   NetSegment.Flags.Invert) != NetSegment.Flags.None) ^ reverse) {
                                 otherNormDir = NetInfo.InvertDirection(otherNormDir);
                             }

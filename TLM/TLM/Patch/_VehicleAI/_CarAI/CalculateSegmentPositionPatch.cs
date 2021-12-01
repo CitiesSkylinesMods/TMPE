@@ -45,7 +45,7 @@ namespace TrafficManager.Patch._VehicleAI._CarAI {
                 ref Constants.ManagerFactory.ExtVehicleManager.ExtVehicles[vehicleID],
                 __instance.m_info,
                 position,
-                ref NetManager.instance.m_segments.m_buffer[position.m_segment],
+                ref position.m_segment.ToSegment(),
                 pos,
                 maxSpeed,
                 false);

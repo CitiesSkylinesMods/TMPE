@@ -97,17 +97,18 @@ namespace TrafficManager.Manager.Impl {
         ///     if cannot be determined.</returns>
         public SpeedValue? GetCustomSpeedLimit(ushort segmentId, NetInfo.Direction finalDir) {
             // calculate the currently set mean speed limit
-            // NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-            ref var segment = ref segmentId.ToSegment();
-
-            if (segmentId == 0 ||
-                (segment.m_flags & NetSegment.Flags.Created) ==
-                NetSegment.Flags.None) {
+            if (segmentId == 0) {
                 return null;
             }
 
-            NetInfo segmentInfo = segment.Info;
-            uint curLaneId = segment.m_lanes;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
+
+            if ((netSegment.m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None) {
+                return null;
+            }
+
+            NetInfo segmentInfo = netSegment.Info;
+            uint curLaneId = netSegment.m_lanes;
             var laneIndex = 0;
             uint validLanes = 0;
             SpeedValue meanSpeedLimit = default;
@@ -166,18 +167,18 @@ namespace TrafficManager.Manager.Impl {
             // check default speed limit
             //----------------------------
             NetLane[] laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
-            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
             ushort segmentId = laneBuffer[laneId].m_segment;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
 
-            if (!this.MayHaveCustomSpeedLimits(ref segmentsBuffer[segmentId])) {
+            if (!this.MayHaveCustomSpeedLimits(ref netSegment)) {
                 // Don't have override, and default is not known
                 return new GetSpeedLimitResult(
                     overrideValue: null,
                     defaultValue: null);
             }
 
-            NetInfo segmentInfo = segmentsBuffer[segmentId].Info;
-            uint curLaneId = segmentsBuffer[segmentId].m_lanes;
+            NetInfo segmentInfo = netSegment.Info;
+            uint curLaneId = netSegment.m_lanes;
             int laneIndex = 0;
 
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
@@ -551,9 +552,9 @@ namespace TrafficManager.Manager.Impl {
         public bool SetSegmentSpeedLimit(ushort segmentId,
                                          NetInfo.Direction finalDir,
                                          SetSpeedLimitAction action) {
-            NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
+            ref NetSegment netSegment = ref segmentId.ToSegment();
 
-            if (!this.MayHaveCustomSpeedLimits(ref segmentsBuffer[segmentId])) {
+            if (!this.MayHaveCustomSpeedLimits(ref netSegment)) {
                 return false;
             }
 
@@ -562,7 +563,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            NetInfo segmentInfo = segmentsBuffer[segmentId].Info;
+            NetInfo segmentInfo = netSegment.Info;
 
             if (segmentInfo == null) {
                 Log._DebugOnlyWarning($"SpeedLimitManager.SetSpeedLimit: info is null!");
@@ -574,7 +575,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            uint curLaneId = segmentsBuffer[segmentId].m_lanes;
+            uint curLaneId = netSegment.m_lanes;
             int laneIndex = 0;
             NetLane[] laneBuffer = Singleton<NetManager>.instance.m_lanes.m_buffer;
 
@@ -830,11 +831,11 @@ namespace TrafficManager.Manager.Impl {
             customizableNetInfos_ = mainNetInfos;
         }
 
-        protected override void HandleInvalidSegment(ref ExtSegment seg) {
-            NetInfo segmentInfo =
-                Singleton<NetManager>.instance.m_segments.m_buffer[seg.segmentId].Info;
-            uint curLaneId = Singleton<NetManager>
-                             .instance.m_segments.m_buffer[seg.segmentId].m_lanes;
+        protected override void HandleInvalidSegment(ref ExtSegment extSegment) {
+            ref NetSegment netSegment = ref extSegment.segmentId.ToSegment();
+
+            NetInfo segmentInfo = netSegment.Info;
+            uint curLaneId = netSegment.m_lanes;
             int laneIndex = 0;
 
             while (laneIndex < segmentInfo.m_lanes.Length && curLaneId != 0u) {
@@ -873,8 +874,7 @@ namespace TrafficManager.Manager.Impl {
                                                             .m_lanes
                                                             .m_buffer[laneSpeedLimit.laneId]
                                                             .m_segment;
-                    NetInfo info = Singleton<NetManager>
-                                   .instance.m_segments.m_buffer[segmentId].Info;
+                    NetInfo info = segmentId.ToSegment().Info;
                     float customSpeedLimit = GetCustomNetInfoSpeedLimit(info);
 #if DEBUG
                     Log._DebugIf(

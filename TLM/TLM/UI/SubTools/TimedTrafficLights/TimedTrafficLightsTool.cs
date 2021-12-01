@@ -1505,15 +1505,15 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     var offset = 17f;
                     Vector3 segmentLightPos = nodePos;
 
-                    NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
-                    if (segmentsBuffer[srcSegmentId].m_startNode == nodeId) {
-                        segmentLightPos.x += segmentsBuffer[srcSegmentId].m_startDirection.x * offset;
-                        segmentLightPos.y += segmentsBuffer[srcSegmentId].m_startDirection.y;
-                        segmentLightPos.z += segmentsBuffer[srcSegmentId].m_startDirection.z * offset;
+                    ref NetSegment sourceSegment = ref srcSegmentId.ToSegment();
+                    if (sourceSegment.m_startNode == nodeId) {
+                        segmentLightPos.x += sourceSegment.m_startDirection.x * offset;
+                        segmentLightPos.y += sourceSegment.m_startDirection.y;
+                        segmentLightPos.z += sourceSegment.m_startDirection.z * offset;
                     } else {
-                        segmentLightPos.x += segmentsBuffer[srcSegmentId].m_endDirection.x * offset;
-                        segmentLightPos.y += segmentsBuffer[srcSegmentId].m_endDirection.y;
-                        segmentLightPos.z += segmentsBuffer[srcSegmentId].m_endDirection.z * offset;
+                        segmentLightPos.x += sourceSegment.m_endDirection.x * offset;
+                        segmentLightPos.y += sourceSegment.m_endDirection.y;
+                        segmentLightPos.z += sourceSegment.m_endDirection.z * offset;
                     }
 
                     bool segmentLightVisible = GeometryUtil.WorldToScreenPoint(

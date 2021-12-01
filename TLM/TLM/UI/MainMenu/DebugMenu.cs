@@ -179,9 +179,9 @@ namespace TrafficManager.UI.MainMenu {
 
         private void ClickGoToSegment(UIComponent component, UIMouseEventParameter eventParam) {
             ushort segmentId = Convert.ToUInt16(_goToField.text);
+            ref NetSegment netSegment = ref segmentId.ToSegment();
 
-            if ((Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].m_flags &
-                 NetSegment.Flags.Created) != NetSegment.Flags.None)
+            if ((netSegment.m_flags & NetSegment.Flags.Created) != NetSegment.Flags.None)
             {
                 CSUtil.CameraControl.CameraController.Instance.GoToSegment(segmentId);
             }
@@ -277,9 +277,9 @@ namespace TrafficManager.UI.MainMenu {
 
                     lastNodePos = pos;
 
-                    ushort nextSegment = TransportLine.GetNextSegment(stopNodeId);
-                    if (nextSegment != 0) {
-                        stopNodeId = NetManager.instance.m_segments.m_buffer[nextSegment].m_endNode;
+                    ushort nextSegmentId = TransportLine.GetNextSegment(stopNodeId);
+                    if (nextSegmentId != 0) {
+                        stopNodeId = nextSegmentId.ToSegment().m_endNode;
                     } else {
                         break;
                     }

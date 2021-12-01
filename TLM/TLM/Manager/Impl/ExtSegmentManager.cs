@@ -44,7 +44,7 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public ushort GetHeadNode(ushort segmentId) =>
-            GetHeadNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
+            GetHeadNode(ref segmentId.ToSegment());
 
         public ushort GetTailNode(ref NetSegment segment) {
             bool invert = (segment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
@@ -57,10 +57,10 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public ushort GetTailNode(ushort segmentId) =>
-            GetTailNode(ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId]);
+            GetTailNode(ref segmentId.ToSegment());
 
         public bool? IsStartNode(ushort segmentId, ushort nodeId) {
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            ref NetSegment segment = ref segmentId.ToSegment();
             if (segment.m_startNode == nodeId) {
                 return true;
             } else if (segment.m_endNode == nodeId) {
@@ -74,7 +74,7 @@ namespace TrafficManager.Manager.Impl {
             Log._Debug($"NetService.PublishSegmentChanges({segmentId}) called.");
             SimulationManager simulationManager = Singleton<SimulationManager>.instance;
 
-            ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
+            ref NetSegment segment = ref segmentId.ToSegment();
             uint currentBuildIndex = simulationManager.m_currentBuildIndex;
             simulationManager.m_currentBuildIndex = currentBuildIndex + 1;
             segment.m_modifiedIndex = currentBuildIndex;
@@ -129,9 +129,8 @@ namespace TrafficManager.Manager.Impl {
             extSegEndMan.Recalculate(segmentId);
 
             if (logGeometry) {
-                NetSegment[] segmentsBuffer = Singleton<NetManager>.instance.m_segments.m_buffer;
                 Log.Info(
-                    $"Recalculated ext. segment {segmentId} (flags={segmentsBuffer[segmentId].m_flags}): " +
+                    $"Recalculated ext. segment {segmentId} (flags={segmentId.ToSegment().m_flags}): " +
                     $"{extSegment}");
             }
 
@@ -234,7 +233,7 @@ namespace TrafficManager.Manager.Impl {
 
         public GetSegmentLaneIdsEnumerable GetSegmentLaneIdsAndLaneIndexes(ushort segmentId) {
             NetManager netManager = Singleton<NetManager>.instance;
-            ref NetSegment netSegment = ref netManager.m_segments.m_buffer[segmentId];
+            ref NetSegment netSegment = ref segmentId.ToSegment();
             uint initialLaneId = netSegment.m_lanes;
             NetInfo netInfo = netSegment.Info;
             NetLane[] laneBuffer = netManager.m_lanes.m_buffer;

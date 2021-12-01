@@ -50,13 +50,17 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                                   Bezier3 bezier) {
             NetManager netManager = NetManager.instance;
 
+            ref NetSegment currentPositionSegment = ref position.m_segment.ToSegment();
+
             ushort nextSourceNodeId = offset < position.m_offset
-                                          ? netManager.m_segments.m_buffer[position.m_segment].m_startNode
-                                          : netManager.m_segments.m_buffer[position.m_segment].m_endNode;
+                ? currentPositionSegment.m_startNode
+                : currentPositionSegment.m_endNode;
+
+            ref NetSegment previousPositionSegment = ref prevPos.m_segment.ToSegment();
 
             ushort refTargetNodeId = prevOffset == 0
-                                         ? netManager.m_segments.m_buffer[prevPos.m_segment].m_startNode
-                                         : netManager.m_segments.m_buffer[prevPos.m_segment].m_endNode;
+                ? previousPositionSegment.m_startNode
+                : previousPositionSegment.m_endNode;
 
 #if DEBUG
             bool logLogic = DebugSwitch.CalculateSegmentPosition.Get()
@@ -199,7 +203,7 @@ namespace TrafficManager.Patch._VehicleAI._TrainAI {
                         ref vehicleData,
                         lastFrameData.m_velocity.sqrMagnitude,
                         ref prevPos,
-                        ref netManager.m_segments.m_buffer[prevPos.m_segment],
+                        ref previousPositionSegment,
                         refTargetNodeId,
                         prevLaneID,
                         ref position,

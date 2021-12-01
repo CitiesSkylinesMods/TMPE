@@ -109,10 +109,10 @@ namespace TrafficManager.Manager.Impl {
                     out Vector3 refPos,
                     out Vector3 vector);
 
-                NetInfo info = netManager.m_segments.m_buffer[pathPos.m_segment].Info;
-                bool isSegmentInverted =
-                    (netManager.m_segments.m_buffer[pathPos.m_segment].m_flags & NetSegment.Flags.Invert)
-                    != NetSegment.Flags.None;
+                ref NetSegment netSegment = ref pathPos.m_segment.ToSegment();
+
+                NetInfo info = netSegment.Info;
+                bool isSegmentInverted = (netSegment.m_flags & NetSegment.Flags.Invert) != NetSegment.Flags.None;
                 bool isPosNegative = info.m_lanes[pathPos.m_lane].m_position < 0f;
                 Vector3 searchDir;
 
@@ -1018,7 +1018,7 @@ namespace TrafficManager.Manager.Impl {
                     sourcePos.m_segment,
                     sourcePos.m_lane,
                     targetPos.m_segment,
-                    ref Singleton<NetManager>.instance.m_segments.m_buffer[sourcePos.m_segment],
+                    ref sourcePos.m_segment.ToSegment(),
                     0,
                     out RoadBaseAI.TrafficLightState vehLightState,
                     out RoadBaseAI.TrafficLightState _);
