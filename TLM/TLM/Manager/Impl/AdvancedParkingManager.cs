@@ -2551,6 +2551,8 @@ namespace TrafficManager.Manager.Impl {
                     } // if find parking prop at building
 
                     buildingId = building.m_nextGridBuilding;
+                    building = ref buildingId.ToBuilding();
+
                     if (++numIterations >= 49152) {
                         CODebugBase<LogChannel>.Error(
                             LogChannel.Core,
