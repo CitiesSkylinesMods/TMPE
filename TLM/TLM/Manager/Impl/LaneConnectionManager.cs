@@ -124,7 +124,14 @@ namespace TrafficManager.Manager.Impl {
                 return false;
 
             var targets = connections_.GetConnections(sourceLaneId, startNode);
-            return targets != null && targets.Length > 0;
+            int n = targets?.Length ?? 0;
+            for(int i = 0; i < n; ++i) {
+                uint targetLaneId = targets[i].LaneId;
+                if(ValidateLane(targetLaneId))
+                    return true;
+
+            }
+            return false;
         }
 
         /// <summary>
@@ -132,11 +139,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         public bool HasConnections(uint laneId, ushort nodeId) {
             bool startNode = laneId.ToLane().IsStartNode(nodeId);
-            if(HasOutgoingConnections(laneId, startNode))
-                return true; // outgoing connection
-
-            //return false;
-            return HasIncommingConnections(laneId, nodeId);
+            return HasOutgoingConnections(laneId, startNode) || HasIncommingConnections(laneId, nodeId);
         }
 
         public bool HasIncommingConnections(uint targetLaneId, ushort nodeId) {
@@ -150,11 +153,6 @@ namespace TrafficManager.Manager.Impl {
                     continue;
 
                 ref NetSegment segment = ref segmentId.ToSegment();
-                if(!segment.IsValid()) {
-                    HandleInvalidSegmentImpl(segmentId);
-                    continue;
-                }
-
                 bool startNode = segment.IsStartnode(nodeId);
                 var laneInfos = segment.Info.m_lanes;
                 uint laneId = segment.m_lanes;
@@ -163,9 +161,10 @@ namespace TrafficManager.Manager.Impl {
                     if(laneId != targetLaneId) {
                         var laneInfo = laneInfos[laneIndex];
                         if(laneInfo.m_laneType.IsFlagSet(LANE_TYPES) &&
-                            laneInfo.m_vehicleType.IsFlagSet(VEHICLE_TYPES)) {
-                            if(connections_.IsConnectedTo(laneId, targetLaneId, startNode))
-                                return true; // incoming connection
+                            laneInfo.m_vehicleType.IsFlagSet(VEHICLE_TYPES) &&
+                            connections_.IsConnectedTo(laneId, targetLaneId, startNode)) {
+                            if(ValidateLane(laneId))
+                                return true;
                         }
                     }
                     laneId = lane.m_nextLane;
