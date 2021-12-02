@@ -6,6 +6,8 @@ namespace TrafficManager {
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
     using TrafficManager.Traffic;
+    using System.Runtime.Serialization;
+    using TrafficManager.Lifecycle;
 
     [Serializable]
     public class Configuration {
@@ -164,20 +166,49 @@ namespace TrafficManager {
             }
         }
 
+        /// <summary>
+        /// in legacy code connections were both ways so we stored lower/higher lane id.
+        /// </summary>
         [Serializable]
-        public class LaneConnection {
-            public uint lowerLaneId;
-            public uint higherLaneId;
-            public bool lowerStartNode;
+        public class LaneConnection : ISerializable {
+            /// <summary>
+            /// legacy: lower lane ID
+            /// </summary>
+            public uint sourceLaneId;
 
-            public LaneConnection(uint lowerLaneId, uint higherLaneId, bool lowerStartNode) {
-                if (lowerLaneId >= higherLaneId) {
+            /// <summary>
+            /// legacy: higher lane ID
+            /// </summary>
+            public uint targetLaneId;
+
+            public bool sourceStartNode;
+
+            public bool Legacy => SerializableDataExtension.Version < 2;
+
+            public LaneConnection(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
+                if (sourceLaneId >= targetLaneId) {
                     throw new ArgumentException();
                 }
 
-                this.lowerLaneId = lowerLaneId;
-                this.higherLaneId = higherLaneId;
-                this.lowerStartNode = lowerStartNode;
+                this.sourceLaneId = sourceLaneId;
+                this.targetLaneId = targetLaneId;
+                this.sourceStartNode = sourceStartNode;
+            }
+
+            //serialization
+            public void GetObjectData(SerializationInfo info, StreamingContext context) {
+                if(Legacy) {
+                    sourceLaneId = info.GetUInt32("lowerLaneId");
+                    targetLaneId = info.GetUInt32("higherLaneId");
+                    sourceStartNode = info.GetBoolean("lowerStartNode");
+                } else {
+                    info.GetObjectFields(this);
+                }
+            }
+
+            // deserialization
+            public LaneConnection(SerializationInfo info, StreamingContext context) {
+                info.SetObjectFields(this);
             }
         }
 
@@ -255,6 +286,13 @@ namespace TrafficManager {
                 lastTransportMode = 0;
             }
         }
+
+        public const int CURRENT_VERSION = 1;
+
+        /// <summary>
+        /// version at which data was saved
+        /// </summary>
+        public int Version;
 
         /// <summary>
         /// Stored ext. citizen data

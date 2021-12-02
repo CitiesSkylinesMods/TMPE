@@ -149,6 +149,7 @@
     <Compile Include="Manager\Impl\GetNodeSegmentIdsEnumerator.cs" />
     <Compile Include="Manager\Impl\GetSegmentLaneIdsEnumerable.cs" />
     <Compile Include="Manager\Impl\GetSegmentLaneIdsEnumerator.cs" />
+    <Compile Include="Manager\Impl\LaneConnectionManagerData\ConnectionData.cs" />
     <Compile Include="Manager\Impl\LaneIdAndIndex.cs" />
     <Compile Include="Manager\Impl\LanePos.cs" />
     <Compile Include="Notifier.cs" />
@@ -380,6 +381,7 @@
     <Compile Include="UI\TrafficManagerSubTool.cs" />
     <Compile Include="UI\TransportDemandViewMode.cs" />
     <Compile Include="UI\UITransportDemand.cs" />
+    <Compile Include="Util\Extensions\ArrayExtensions.cs" />
     <Compile Include="Util\AutoTimedTrafficLights.cs" />
     <Compile Include="Util\Extensions\BuildingExtensions.cs" />
     <Compile Include="Util\Extensions\CitizenExtensions.cs" />
