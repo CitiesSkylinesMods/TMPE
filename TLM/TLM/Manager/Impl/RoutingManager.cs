@@ -903,15 +903,14 @@ namespace TrafficManager.Manager.Impl {
                                             hasRightArrow);
                                     }
 
+                                    bool hasFarTurnArrow = (Shortcuts.LHT && hasRightArrow) || (Shortcuts.RHT && hasLeftArrow);
+                                    bool canTurn = !nextIsRealJunction || nextIsEndOrOneWayOut || hasFarTurnArrow;
+
                                     if (applyHighwayRules || // highway rules enabled
                                         (nextIncomingDir == ArrowDirection.Right && hasLeftArrow) || // valid incoming right
                                         (nextIncomingDir == ArrowDirection.Left && hasRightArrow) || // valid incoming left
                                         (nextIncomingDir == ArrowDirection.Forward && hasForwardArrow) || // valid incoming straight
-                                        (nextIncomingDir == ArrowDirection.Turn
-                                         && (!nextIsRealJunction
-                                             || nextIsEndOrOneWayOut
-                                             || ((Shortcuts.LHT && hasRightArrow)
-                                                 || (!Shortcuts.LHT && hasLeftArrow))))) // valid turning lane
+                                        (nextIncomingDir == ArrowDirection.Turn && canTurn)) // valid turning lane
                                     {
                                         if (extendedLogRouting) {
                                             Log._DebugFormat(
@@ -1968,7 +1967,7 @@ namespace TrafficManager.Manager.Impl {
                                     // force u-turns to happen on the innermost lane
                                     ++compatibleLaneDist;
                                     nextCompatibleTransitionDatas[nextTransitionIndex].type =
-                                        LaneEndTransitionType.Relaxed;
+                                        LaneEndTransitionType.Relaxed; // TODO : normal when u-turn allowed
 
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
