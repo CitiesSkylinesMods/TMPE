@@ -854,7 +854,7 @@ namespace TrafficManager.Manager.Impl {
                                 continue;
                             }
 #if DEBUGSAVE 
-                            Log._Debug($"Saving lane connection: lane {sourceLaneId} -> {connection}");
+                            Log._Debug($"Saving lane connection: lane {sourceLaneId} -> {target}");
 #endif
                             ret.Add(
                                 new Configuration.LaneConnection(
