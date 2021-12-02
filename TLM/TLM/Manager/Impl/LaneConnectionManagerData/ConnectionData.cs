@@ -92,19 +92,25 @@ namespace TrafficManager.Manager.Impl.LaneConnectionManagerData {
         /// <summary>removes the connection from source to target lane at the given node</summary>
         /// <param name="sourceStartNode">start node for the segment of the source lane</param>
         internal bool Disconnect(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            bool ret = false;
             ref var targets = ref GetConnections(sourceLaneId, sourceStartNode);
-            if(targets != null) {
-                for(int i = 0; i < targets.Length; ++i) {
-                    if(targets[i].LaneId == targetLaneId) {
-                        targets[i].LaneId = 0;
-                        ret = true;
-                    }
-                }
+            if(targets == null)
+                return false;
 
-                var newConnections = targets.Where(item => item.LaneId != 0).DefaultIfEmpty();
-                targets = newConnections?.ToArray();
+            bool ret = false;
+            var newConnections = new List<LaneConnectionData>(targets.Length);
+            for(int i = 0; i < targets.Length; ++i) {
+                if(targets[i].LaneId != targetLaneId) {
+                    newConnections.Add(targets[i]);
+                } else {
+                    ret = true;
+                }
             }
+
+            if(newConnections.Count == 0)
+                targets = null;
+            else
+                targets = newConnections.ToArray();
+
             return ret;
         }
 
