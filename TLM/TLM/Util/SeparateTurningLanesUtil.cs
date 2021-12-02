@@ -499,7 +499,7 @@ namespace TrafficManager.Util {
                     sort: false);
             int srcLaneCount = laneList.Count();
             for (int i = 0; i < srcLaneCount; ++i) {
-                if (LaneConnectionManager.Instance.HasConnections(laneList[i].laneId, startNode)) {
+                if (LaneConnectionManager.Instance.HasOutgoingConnections(laneList[i].laneId, startNode)) {
                     return SetLaneArrow_Result.LaneConnection;
                 }
             }

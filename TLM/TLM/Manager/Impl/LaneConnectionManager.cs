@@ -67,7 +67,6 @@ namespace TrafficManager.Manager.Impl {
         /// <param name="sourceStartNode">(optional) check at start node of source lane?</param>
         /// <returns></returns>
         public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            Log._Debug($"AreLanesConnected({sourceLaneId},{targetLaneId}) called " + Environment.StackTrace);
             if (!Options.laneConnectorEnabled) {
                 return true;
             }
@@ -100,11 +99,11 @@ namespace TrafficManager.Manager.Impl {
             throw new Exception($"Unreachable code. sourceLaneId:{sourceLaneId}, segmentId:{segmentId} ");
         }
 
-        public bool HasConnections(uint sourceLaneId) {
+        public bool HasOutgoingConnections(uint sourceLaneId) {
             if (!Options.laneConnectorEnabled) {
                 return false;
             }
-            return HasConnections(sourceLaneId, IsHeadingTowardsStartNode(sourceLaneId));
+            return HasOutgoingConnections(sourceLaneId, IsHeadingTowardsStartNode(sourceLaneId));
         }
 
         /// <summary>
@@ -112,7 +111,7 @@ namespace TrafficManager.Manager.Impl {
         /// </summary>
         /// <param name="sourceLaneId"></param>
         /// <returns></returns>
-        public bool HasConnections(uint sourceLaneId, bool startNode) {
+        public bool HasOutgoingConnections(uint sourceLaneId, bool startNode) {
             if (!Options.laneConnectorEnabled) {
                 return false;
             }
@@ -127,11 +126,51 @@ namespace TrafficManager.Manager.Impl {
         }
 
         /// <summary>
+        /// Determines if the given lane has incoming/outgoing connections
+        /// </summary>
+        public bool HasConnections(uint laneId, ushort nodeId) {
+            bool startNode = laneId.ToLane().IsStartNode(nodeId);
+            if(HasOutgoingConnections(laneId, startNode))
+                return true; // outgoing connection
+
+            //return false;
+            return HasIncommingConnections(laneId, nodeId);
+        }
+
+        public bool HasIncommingConnections(uint targetLaneId, ushort nodeId) {
+            ref NetNode node = ref nodeId.ToNode();
+            for(int segmentIndex = 0; segmentIndex < 8; ++segmentIndex) {
+                ushort segmentId = node.GetSegment(segmentIndex);
+                if(segmentId == 0)
+                    continue;
+
+                ref NetSegment segment = ref segmentId.ToSegment();
+                var laneInfos = segment.Info.m_lanes;
+                uint laneId = segment.m_lanes;
+                bool startNode = segment.IsStartnode(nodeId);
+                for(int laneIndex = 0; laneIndex < laneInfos.Length && laneId != 0; ++laneIndex) {
+                    ref NetLane lane2 = ref laneId.ToLane();
+                    if(laneId != targetLaneId) {
+                        var laneInfo = laneInfos[laneIndex];
+                        if(laneInfo.m_laneType.IsFlagSet(LANE_TYPES) &&
+                            laneInfo.m_vehicleType.IsFlagSet(VEHICLE_TYPES)) {
+                            if(connections_.IsConnectedTo(laneId, targetLaneId, startNode))
+                                return true; // incoming connection
+                        }
+                    }
+                    laneId = lane2.m_nextLane;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Determines if there exist custom lane connections at the specified segment end
         /// </summary>
         /// <param name="segmentId"></param>
         /// <param name="nodeId"></param>
-        public bool HasSegmentConnections(ushort segmentId, ushort nodeId) {
+        public bool HasSegmentOutgoingConnections(ushort segmentId, ushort nodeId) {
             if (!Options.laneConnectorEnabled) {
                 return false;
             }
@@ -145,7 +184,7 @@ namespace TrafficManager.Manager.Impl {
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
             foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
-                if (HasConnections(
+                if (HasOutgoingConnections(
                     laneIdAndIndex.laneId,
                     netSegment.m_startNode == nodeId)) {
                     return true;
@@ -168,7 +207,7 @@ namespace TrafficManager.Manager.Impl {
             for (int i = 0; i < 8; ++i) {
                 ushort segmentId = node.GetSegment(i);
                 if (segmentId != 0) {
-                    if (HasSegmentConnections(segmentId, nodeId)) {
+                    if (HasSegmentOutgoingConnections(segmentId, nodeId)) {
                         return true;
                     }
                 }
@@ -376,7 +415,6 @@ namespace TrafficManager.Manager.Impl {
 
             connections_.ConnectTo(sourceLaneId, targetLaneId, sourceStartNode);
             Assert(AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode), $"AreLanesConnected({sourceLaneId}, {targetLaneId}, {sourceStartNode})");
-            //Log._Debug($"AreLanesConnected({sourceLaneId}, {targetLaneId}, {sourceStartNode})->{AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode)}"); //delete
 
 #if DEBUG
             bool logLaneConnections = DebugSwitch.LaneConnections.Get();
@@ -546,7 +584,7 @@ namespace TrafficManager.Manager.Impl {
                 return;
             }
 
-            if (!HasConnections(laneId, startNode)) {
+            if (!HasOutgoingConnections(laneId, startNode)) {
                 if (logLaneConnections) {
                     Log._Debug($"LaneConnectionManager.RecalculateLaneArrows({laneId}, {nodeId}): " +
                                $"lane {laneId} does not have outgoing connections");

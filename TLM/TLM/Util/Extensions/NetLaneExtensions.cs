@@ -22,5 +22,8 @@ namespace TrafficManager.Util.Extensions {
 
         public static bool IsStartNode(this ref NetLane netLane, ushort nodeId) =>
             netLane.m_segment.ToSegment().IsStartnode(nodeId);
+
+        public static ushort GetNodeId(this ref NetLane netLane, bool startNode) =>
+            netLane.m_segment.ToSegment().GetNodeId(startNode);
     }
 }
