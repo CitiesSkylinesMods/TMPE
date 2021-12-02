@@ -398,8 +398,8 @@ namespace TrafficManager.Manager.Impl {
 
             ushort prevSegmentId = segmentId;
             int prevLaneIndex = laneIndex;
-            uint prevLaneId = laneId;
-            ushort nextNodeId = prevEnd.nodeId;
+            uint prevLaneId = laneId; // this variable is duplicate (prevLaneId == laneId always)
+            ushort nextNodeId = prevEnd.nodeId; // common node
 
             NetInfo.Lane prevLaneInfo = prevSegmentInfo.m_lanes[prevLaneIndex];
             if (!prevLaneInfo.CheckType(ROUTED_LANE_TYPES, ROUTED_VEHICLE_TYPES)) {
@@ -748,9 +748,9 @@ namespace TrafficManager.Manager.Impl {
                                 if (nextHasOutgoingConnections) {
                                     nextIsConnectedWithPrev =
                                         LaneConnectionManager.Instance.AreLanesConnected(
-                                            prevLaneId,
                                             nextLaneId,
-                                            startNode);
+                                            prevLaneId,
+                                            isNextStartNodeOfNextSegment);
                                 }
 
                                 if (extendedLogRouting) {
