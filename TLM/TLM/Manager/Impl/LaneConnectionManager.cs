@@ -76,7 +76,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            return connections_.IsConnectedTo(sourceLaneId, targetLaneId, sourceStartNode).LogRet($"AreLanesConnected({sourceLaneId},{targetLaneId})->");
+            return connections_.IsConnectedTo(sourceLaneId, targetLaneId, sourceStartNode);
         }
 
         /// <summary>
@@ -152,6 +152,7 @@ namespace TrafficManager.Manager.Impl {
                 ref NetSegment segment = ref segmentId.ToSegment();
                 if(!segment.IsValid()) {
                     HandleInvalidSegmentImpl(segmentId);
+                    continue;
                 }
 
                 bool startNode = segment.IsStartnode(nodeId);
