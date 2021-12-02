@@ -903,8 +903,11 @@ namespace TrafficManager.Manager.Impl {
                                             hasRightArrow);
                                     }
 
+                                    bool hasUTurnRule = JunctionRestrictionsManager.Instance.IsUturnAllowed(
+                                        nextSegmentId,
+                                        isNextStartNodeOfNextSegment);
                                     bool hasFarTurnArrow = (Shortcuts.LHT && hasRightArrow) || (Shortcuts.RHT && hasLeftArrow);
-                                    bool canTurn = !nextIsRealJunction || nextIsEndOrOneWayOut || hasFarTurnArrow;
+                                    bool canTurn = !nextIsRealJunction || nextIsEndOrOneWayOut || hasFarTurnArrow || hasUTurnRule;
 
                                     if (applyHighwayRules || // highway rules enabled
                                         (nextIncomingDir == ArrowDirection.Right && hasLeftArrow) || // valid incoming right
@@ -975,7 +978,8 @@ namespace TrafficManager.Manager.Impl {
 
                                     // routed vehicle that does not follow lane arrows (trains, trams,
                                     // metros, monorails)
-                                    transitionType = LaneEndTransitionType.Default;
+                                    // TODO [issue #1053] this causes cars to turn on mixed car/track lanes against lane arrows
+                                    transitionType = LaneEndTransitionType.Default; 
 
                                     if (numNextForcedTransitionDatas < MAX_NUM_TRANSITIONS) {
                                         nextForcedTransitionDatas[numNextForcedTransitionDatas].Set(
@@ -1967,7 +1971,7 @@ namespace TrafficManager.Manager.Impl {
                                     // force u-turns to happen on the innermost lane
                                     ++compatibleLaneDist;
                                     nextCompatibleTransitionDatas[nextTransitionIndex].type =
-                                        LaneEndTransitionType.Relaxed; // TODO : normal when u-turn allowed
+                                        LaneEndTransitionType.Relaxed;
 
                                     if (extendedLogRouting) {
                                         Log._DebugFormat(
