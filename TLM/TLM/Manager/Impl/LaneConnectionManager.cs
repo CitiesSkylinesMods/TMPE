@@ -52,6 +52,9 @@ namespace TrafficManager.Manager.Impl {
             Log.NotImpl("InternalPrintDebugInfo for LaneConnectionManager");
         }
 
+        /// <summary>
+        /// check if lane is valid. if invalid, lane connections are removed and returns false.
+        /// </summary>
         private bool ValidateLane(uint laneId) {
             bool valid = laneId.ToLane().IsValidWithSegment();
             if(!valid)
@@ -62,10 +65,7 @@ namespace TrafficManager.Manager.Impl {
         /// <summary>
         /// Checks if traffic may flow from source lane to target lane according to setup lane connections
         /// </summary>
-        /// <param name="sourceLaneId"></param>
-        /// <param name="targetLaneId"></param>
-        /// <param name="sourceStartNode">(optional) check at start node of source lane?</param>
-        /// <returns></returns>
+        /// <param name="sourceStartNode">check at start node of source lane?</param>
         public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
             if (!Options.laneConnectorEnabled) {
                 return true;
