@@ -103,6 +103,10 @@ namespace TrafficManager.Manager.Impl {
             if (!Options.laneConnectorEnabled) {
                 return false;
             }
+
+            if(!ValidateLane(sourceLaneId))
+                return false;
+
             return HasOutgoingConnections(sourceLaneId, IsHeadingTowardsStartNode(sourceLaneId));
         }
 
@@ -116,10 +120,8 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            bool valid = ValidateLane(sourceLaneId);
-            if(!valid) {
+            if(!ValidateLane(sourceLaneId))
                 return false;
-            }
 
             var targets = connections_.GetConnections(sourceLaneId, startNode);
             return targets != null && targets.Length > 0;
@@ -138,6 +140,9 @@ namespace TrafficManager.Manager.Impl {
         }
 
         public bool HasIncommingConnections(uint targetLaneId, ushort nodeId) {
+            if(!ValidateLane(targetLaneId))
+                return false;
+
             ref NetNode node = ref nodeId.ToNode();
             for(int segmentIndex = 0; segmentIndex < 8; ++segmentIndex) {
                 ushort segmentId = node.GetSegment(segmentIndex);
@@ -145,11 +150,15 @@ namespace TrafficManager.Manager.Impl {
                     continue;
 
                 ref NetSegment segment = ref segmentId.ToSegment();
+                if(!segment.IsValid()) {
+                    HandleInvalidSegmentImpl(segmentId);
+                }
+
+                bool startNode = segment.IsStartnode(nodeId);
                 var laneInfos = segment.Info.m_lanes;
                 uint laneId = segment.m_lanes;
-                bool startNode = segment.IsStartnode(nodeId);
                 for(int laneIndex = 0; laneIndex < laneInfos.Length && laneId != 0; ++laneIndex) {
-                    ref NetLane lane2 = ref laneId.ToLane();
+                    ref NetLane lane = ref laneId.ToLane();
                     if(laneId != targetLaneId) {
                         var laneInfo = laneInfos[laneIndex];
                         if(laneInfo.m_laneType.IsFlagSet(LANE_TYPES) &&
@@ -158,7 +167,7 @@ namespace TrafficManager.Manager.Impl {
                                 return true; // incoming connection
                         }
                     }
-                    laneId = lane2.m_nextLane;
+                    laneId = lane.m_nextLane;
                 }
             }
 
@@ -249,8 +258,7 @@ namespace TrafficManager.Manager.Impl {
                 return null;
             }
 
-            bool valid = ValidateLane(laneId);
-            if(!valid) {
+            if(!ValidateLane(laneId)) {
                 return null;
             }
 
@@ -272,7 +280,7 @@ namespace TrafficManager.Manager.Impl {
                            $"{sourceStartNode}) called.");
             }
 
-            bool valid = ValidateLane(sourceLaneId);
+            bool valid = ValidateLane(sourceLaneId) & ValidateLane(targetLaneId);
             if(!valid) {
                 return false;
             }
@@ -408,7 +416,7 @@ namespace TrafficManager.Manager.Impl {
                 return false;
             }
 
-            bool valid = ValidateLane(sourceLaneId);
+            bool valid = ValidateLane(sourceLaneId) & ValidateLane(targetLaneId);
             if(!valid) {
                 return false;
             }
@@ -454,18 +462,22 @@ namespace TrafficManager.Manager.Impl {
         }
 
         protected override void HandleInvalidSegment(ref ExtSegment seg) {
+            HandleInvalidSegmentImpl(seg.segmentId);
+        }
+
+        private void HandleInvalidSegmentImpl(ushort segmentId) {
 #if DEBUG
             bool logLaneConnections = DebugSwitch.LaneConnections.Get();
 #else
             const bool logLaneConnections = false;
 #endif
-            if (logLaneConnections) {
-                Log._Debug($"LaneConnectionManager.HandleInvalidSegment({seg.segmentId}): " +
+            if(logLaneConnections) {
+                Log._Debug($"LaneConnectionManager.HandleInvalidSegment({segmentId}): " +
                            "Segment has become invalid. Removing lane connections.");
             }
 
-            RemoveLaneConnectionsFromSegment(seg.segmentId, false, false);
-            RemoveLaneConnectionsFromSegment(seg.segmentId, true);
+            RemoveLaneConnectionsFromSegment(segmentId, startNode: false, recalcAndPublish: false);
+            RemoveLaneConnectionsFromSegment(segmentId, startNode: true, recalcAndPublish: true);
         }
 
         protected override void HandleValidSegment(ref ExtSegment seg) { }
