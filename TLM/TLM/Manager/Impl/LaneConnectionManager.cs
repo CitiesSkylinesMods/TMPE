@@ -153,6 +153,11 @@ namespace TrafficManager.Manager.Impl {
                     continue;
 
                 ref NetSegment segment = ref segmentId.ToSegment();
+                if(!segment.IsValid()) {
+                    HandleInvalidSegmentImpl(segmentId);
+                    // even if segment is invalid we should still remove invalid lanes so we go through.
+                }
+
                 bool startNode = segment.IsStartnode(nodeId);
                 var laneInfos = segment.Info.m_lanes;
                 uint laneId = segment.m_lanes;
