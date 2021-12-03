@@ -15,7 +15,11 @@
     public readonly struct OverlayLaneSpeedlimitHandle {
         /// <summary>Segment id where the speedlimit sign was displayed.</summary>
         private readonly ushort segmentId_;
+
         private readonly uint laneId_;
+
+        public uint LaneId => this.laneId_;
+
         private readonly byte laneIndex_;
         private readonly NetInfo.Lane laneInfo_;
         private readonly int sortedLaneIndex_;

@@ -411,17 +411,17 @@ namespace TrafficManager.UI {
             ToolMode currentMode = this.GetToolMode();
 
             // For all _other_ legacy subtools let them render something too
-            foreach (KeyValuePair<ToolMode, LegacySubTool> e in this.legacySubTools_) {
-                if (e.Key == currentMode) {
+            foreach (var legacySubtool in this.legacySubTools_) {
+                if (legacySubtool.Key == currentMode) {
                     continue;
                 }
 
-                e.Value?.RenderOverlayForOtherTools(cameraInfo);
+                legacySubtool.Value?.RenderOverlayForOtherTools(cameraInfo);
             }
 
-            foreach (var st in this.subTools_) {
-                if (st.Key != this.GetToolMode()) {
-                    st.Value.RenderGenericInfoOverlay(cameraInfo);
+            foreach (var subtool in this.subTools_) {
+                if (subtool.Key != this.GetToolMode()) {
+                    subtool.Value.RenderGenericInfoOverlay(cameraInfo);
                 }
             }
         }

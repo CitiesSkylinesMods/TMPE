@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using ColossalFramework;
+    using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
@@ -22,7 +23,7 @@
     public class SpeedLimitsOverlay {
         private TrafficManagerTool mainTool_;
 
-        private ushort segmentId_;
+        // private ushort segmentId_;
         private NetInfo.Direction finalDirection_ = NetInfo.Direction.None;
 
         /// <summary>Used to pass options to the overlay rendering.</summary>
@@ -54,8 +55,14 @@
             /// <summary>Hovered SEGMENT speed limit handles (output after rendering).</summary>
             public List<OverlaySegmentSpeedlimitHandle> HoveredSegmentHandles;
 
+            /// <summary>Previous frame data for blue overlay.</summary>
+            internal List<OverlaySegmentSpeedlimitHandle> PrevHoveredSegmentHandles = new();
+
             /// <summary>Hovered LANE speed limit handles (output after rendering).</summary>
             public List<OverlayLaneSpeedlimitHandle> HoveredLaneHandles;
+
+            /// <summary>Previous frame data for blue overlay.</summary>
+            internal List<OverlayLaneSpeedlimitHandle> PrevHoveredLaneHandles = new();
 
             public static DrawArgs Create() {
                 return new() {
@@ -63,15 +70,18 @@
                     IsInteractive = false,
                     MultiSegmentMode = false,
                     ToolMode = SpeedlimitsToolMode.Segments,
-                    HoveredSegmentHandles = new List<OverlaySegmentSpeedlimitHandle>(capacity: 10),
-                    HoveredLaneHandles = new List<OverlayLaneSpeedlimitHandle>(capacity: 10),
+                    HoveredSegmentHandles = new(),
+                    HoveredLaneHandles = new(),
                     ShowAltMode = false,
                 };
             }
 
             public void ClearHovered() {
-                this.HoveredSegmentHandles.Clear();
-                this.HoveredLaneHandles.Clear();
+                this.PrevHoveredSegmentHandles = this.HoveredSegmentHandles;
+                this.HoveredSegmentHandles = new();
+
+                this.PrevHoveredLaneHandles = this.HoveredLaneHandles;
+                this.HoveredLaneHandles = new();
             }
 
             public bool IntersectsAnyUIRect(Rect testRect) {
@@ -127,60 +137,97 @@
         /// <summary>Displays non-sign overlays, like lane highlights.</summary>
         /// <param name="cameraInfo">The camera.</param>
         /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
-        public void RenderHelperGraphics(RenderManager.CameraInfo cameraInfo,
-                                         [NotNull] DrawArgs args) {
-            if (args.ToolMode != SpeedlimitsToolMode.Lanes) {
-                this.RenderSegments(cameraInfo, args);
+        public void RenderBlueOverlays(RenderManager.CameraInfo cameraInfo,
+                                       [NotNull] DrawArgs args) {
+            // If holding ALT, we do not accept clicks, so do not highlight anything
+            if (args.ShowAltMode) {
+                return;
+            }
+
+            switch (args.ToolMode) {
+                // In segments mode, highlight the hovered segment
+                // In defaults mode, same, affects the hovered segment (but also all roads of that type)
+                case SpeedlimitsToolMode.Segments:
+                case SpeedlimitsToolMode.Defaults: {
+                    // Prevent rendering twice if two signs visually overlap and mouse hovers over both
+                    HashSet<ushort> uniqueSegmentIds = new();
+
+                    foreach (var hovered in args.PrevHoveredSegmentHandles) {
+                        uniqueSegmentIds.Add(hovered.SegmentId);
+                    }
+
+                    foreach (ushort hoveredSegmentId in uniqueSegmentIds) {
+                        this.RenderBlueOverlays_Segment(cameraInfo, hoveredSegmentId, args);
+                    }
+
+                    break;
+                }
+                case SpeedlimitsToolMode.Lanes: {
+                    HashSet<uint> uniqueLaneIds = new();
+
+                    foreach (var hovered in args.PrevHoveredLaneHandles) {
+                        uniqueLaneIds.Add(hovered.LaneId);
+                    }
+
+                    foreach (uint hoveredLaneId in uniqueLaneIds) {
+                        this.RenderBlueOverlays_Lane(cameraInfo, hoveredLaneId, args);
+                    }
+                    break;
+                }
             }
         }
 
         /// <summary>Render segment overlay (this is curves, not the signs).</summary>
         /// <param name="cameraInfo">The camera.</param>
+        /// <param name="segmentId">The segment to draw, comes from args.Hovered....</param>
         /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
-        private void RenderSegments(RenderManager.CameraInfo cameraInfo,
-                                    [NotNull] DrawArgs args) {
+        private void RenderBlueOverlays_Segment(RenderManager.CameraInfo cameraInfo,
+                                                 ushort segmentId,
+                                                 [NotNull] DrawArgs args) {
+            //------------------------
+            // Single segment highlight. User is NOT holding Shift.
+            //------------------------
             if (!args.MultiSegmentMode) {
-                //------------------------
-                // Single segment highlight. User is NOT holding Shift.
-                //------------------------
-                this.RenderSegmentSideOverlay(
+                this.RenderBlueOverlays_SegmentLanes(
                     cameraInfo: cameraInfo,
-                    segmentId: this.segmentId_,
+                    segmentId: segmentId,
                     args: args,
                     finalDirection: this.finalDirection_);
-            } else {
-                //------------------------
-                // Entire street highlight. User is holding Shift.
-                //------------------------
-                if (RoundaboutMassEdit.Instance.TraverseLoop(
-                    segmentId: this.segmentId_,
-                    segList: out var segmentList)) {
-                    foreach (ushort segmentId in segmentList) {
-                        this.RenderSegmentSideOverlay(
-                            cameraInfo: cameraInfo,
-                            segmentId: segmentId,
-                            args: args);
-                    }
-                } else {
-                    SegmentTraverser.Traverse(
-                        initialSegmentId: this.segmentId_,
-                        direction: SegmentTraverser.TraverseDirection.AnyDirection,
-                        side: SegmentTraverser.TraverseSide.AnySide,
-                        stopCrit: SegmentTraverser.SegmentStopCriterion.Junction,
-                        visitorFun: data => {
-                            NetInfo.Direction finalDirection = this.finalDirection_;
-                            if (data.IsReversed(this.segmentId_)) {
-                                finalDirection = NetInfo.InvertDirection(finalDirection);
-                            }
+                return;
+            }
 
-                            this.RenderSegmentSideOverlay(
-                                cameraInfo: cameraInfo,
-                                segmentId: data.CurSeg.segmentId,
-                                args: args,
-                                finalDirection: finalDirection);
-                            return true;
-                        });
+            //------------------------
+            // Entire street highlight. User is holding Shift.
+            //------------------------
+            if (RoundaboutMassEdit.Instance.TraverseLoop(
+                segmentId: segmentId,
+                segList: out var segmentList)) {
+                foreach (ushort continuedRoadSegmentId in segmentList) {
+                    this.RenderBlueOverlays_SegmentLanes(
+                        cameraInfo: cameraInfo,
+                        segmentId: continuedRoadSegmentId,
+                        args: args);
                 }
+            } else {
+                SegmentTraverser.Traverse(
+                    initialSegmentId: segmentId,
+                    direction: SegmentTraverser.TraverseDirection.AnyDirection,
+                    side: SegmentTraverser.TraverseSide.AnySide,
+                    stopCrit: SegmentTraverser.SegmentStopCriterion.Junction,
+                    visitorFun: data => {
+                        NetInfo.Direction finalDirection = this.finalDirection_;
+
+                        if (data.IsReversed(segmentId)) {
+                            finalDirection = NetInfo.InvertDirection(finalDirection);
+                        }
+
+                        this.RenderBlueOverlays_SegmentLanes(
+                            cameraInfo: cameraInfo,
+                            segmentId: data.CurSeg.segmentId,
+                            args: args,
+                            finalDirection: finalDirection);
+                        return true;
+                    });
             }
         }
 
@@ -188,24 +235,31 @@
         /// Renders all lane curves with the given <paramref name="finalDirection"/>
         /// if NetInfo.Direction.None, all lanes are rendered.
         /// </summary>
-        private void RenderSegmentSideOverlay(RenderManager.CameraInfo cameraInfo,
-                                              ushort segmentId,
-                                              DrawArgs args,
-                                              NetInfo.Direction finalDirection = NetInfo.Direction.None)
+        private void RenderBlueOverlays_SegmentLanes(
+            RenderManager.CameraInfo cameraInfo,
+            ushort segmentId,
+            DrawArgs args,
+            NetInfo.Direction finalDirection = NetInfo.Direction.None)
         {
             ref NetSegment netSegment = ref segmentId.ToSegment();
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
-            foreach (LaneIdAndIndex laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
+            foreach (var laneIdAndIndex in extSegmentManager.GetSegmentLaneIdsAndLaneIndexes(segmentId)) {
                 NetInfo.Lane laneInfo = netSegment.Info.m_lanes[laneIdAndIndex.laneIndex];
 
-                bool render = (laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) != 0;
-                render &= (laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) != 0;
-                render &= laneInfo.m_finalDirection == finalDirection || finalDirection == NetInfo.Direction.None;
-
-                if (render) {
-                    RenderLaneOverlay(cameraInfo, laneIdAndIndex.laneId, args);
+                if ((laneInfo.m_laneType & SpeedLimitManager.LANE_TYPES) == 0) {
+                    continue;
                 }
+
+                if ((laneInfo.m_vehicleType & SpeedLimitManager.VEHICLE_TYPES) == 0) {
+                    continue;
+                }
+
+                if (laneInfo.m_finalDirection != finalDirection && finalDirection != NetInfo.Direction.Both) {
+                    continue;
+                }
+
+                RenderBlueOverlays_Lane(cameraInfo, laneIdAndIndex.laneId, args);
             }
         }
 
@@ -213,11 +267,10 @@
         /// <param name="cameraInfo">The Camera.</param>
         /// <param name="laneId">The lane.</param>
         /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
-        private void RenderLaneOverlay(RenderManager.CameraInfo cameraInfo,
-                                       uint laneId,
-                                       [NotNull] DrawArgs args) {
-            NetLane[] laneBuffer = NetManager.instance.m_lanes.m_buffer;
-            SegmentLaneMarker marker = new SegmentLaneMarker(laneBuffer[laneId].m_bezier);
+        private void RenderBlueOverlays_Lane(RenderManager.CameraInfo cameraInfo,
+                                             uint laneId,
+                                             [NotNull] DrawArgs args) {
+            SegmentLaneMarker marker = new SegmentLaneMarker(laneId.ToLane().m_bezier);
             bool pressed = Input.GetMouseButton(0);
             Color color = this.mainTool_.GetToolColor(warning: pressed, error: false);
 
@@ -309,10 +362,6 @@
                         drawEnv: drawEnv,
                         args: args);
                 }
-            }
-
-            if (!hover) {
-                this.segmentId_ = 0;
             }
         }
 
@@ -483,7 +532,6 @@
             args.HoveredSegmentHandles.Add(
                 item: new OverlaySegmentSpeedlimitHandle(segmentId));
 
-            this.segmentId_ = segmentId;
             this.finalDirection_ = NetInfo.Direction.Both;
             return true;
         }
@@ -661,7 +709,6 @@
                             laneInfo: laneInfo,
                             sortedLaneIndex: sortedLaneIndex));
 
-                    this.segmentId_ = segmentId;
                     ret = true;
                 }
 

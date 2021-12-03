@@ -15,6 +15,8 @@
         /// <summary>Segment id where the speedlimit sign was displayed.</summary>
         private readonly ushort segmentId_;
 
+        public ushort SegmentId => this.segmentId_;
+
         public OverlaySegmentSpeedlimitHandle(ushort segmentId) {
             this.segmentId_ = segmentId;
         }

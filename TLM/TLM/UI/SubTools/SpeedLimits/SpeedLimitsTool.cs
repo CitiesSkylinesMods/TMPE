@@ -171,7 +171,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             this.CreateOverlayDrawArgs(interactive: true);
 
             // Draw hovered lanes or segments
-            this.overlay_.RenderHelperGraphics(cameraInfo: cameraInfo, args: this.overlayDrawArgs_);
+            this.overlay_.RenderBlueOverlays(cameraInfo, this.overlayDrawArgs_);
         }
 
         /// <summary>Render overlay speed limit signs in GUI mode.</summary>
