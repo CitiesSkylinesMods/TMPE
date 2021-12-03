@@ -29,6 +29,9 @@ namespace TrafficManager.Manager.Impl {
                                                              | VehicleInfo.VehicleType.Metro
                                                              | VehicleInfo.VehicleType.Monorail
                                                              | VehicleInfo.VehicleType.Trolleybus;
+        public NetInfo.LaneType LaneTypes => LANE_TYPES;
+
+        public VehicleInfo.VehicleType VehicleTypes => VEHICLE_TYPES;
 
         static LaneConnectionManager() {
             Instance = new LaneConnectionManager();
@@ -41,13 +44,6 @@ namespace TrafficManager.Manager.Impl {
             Log.NotImpl("InternalPrintDebugInfo for LaneConnectionManager");
         }
 
-        /// <summary>
-        /// Checks if traffic may flow from source lane to target lane according to setup lane connections
-        /// </summary>
-        /// <param name="sourceLaneId"></param>
-        /// <param name="targetLaneId"></param>
-        /// <param name="sourceStartNode">(optional) check at start node of source lane?</param>
-        /// <returns></returns>
         public bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
             if (!Options.laneConnectorEnabled) {
                 return true;
@@ -91,11 +87,6 @@ namespace TrafficManager.Manager.Impl {
             return HasConnections(sourceLaneId, IsHeadingTowardsStartNode(sourceLaneId));
         }
 
-        /// <summary>
-        /// Determines if the given lane has outgoing connections
-        /// </summary>
-        /// <param name="sourceLaneId"></param>
-        /// <returns></returns>
         public bool HasConnections(uint sourceLaneId, bool startNode) {
             if (!Options.laneConnectorEnabled) {
                 return false;
@@ -131,10 +122,6 @@ namespace TrafficManager.Manager.Impl {
             return false;
        }
 
-            /// <summary>
-            /// Determines if there exist custom lane connections at the specified node
-            /// </summary>
-            /// <param name="nodeId"></param>
         public bool HasNodeConnections(ushort nodeId) {
             if (!Options.laneConnectorEnabled) {
                 return false;
