@@ -251,12 +251,18 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 return; // no click in the window
             }
 
+            // ------ Holding Alt will not process any clicks on signs -------
+            if (Shortcuts.AltIsPressed) {
+                return;
+            }
+
             // Go through recently rendered overlay speedlimit handles, which had mouse over them
             // Hovering multiple speed limits handles at once should set limits on multiple roads
             if (this.GetShowLimitsPerLane()) {
-                SetSpeedLimitTarget target = this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
-                                                 ? SetSpeedLimitTarget.LaneDefault
-                                                 : SetSpeedLimitTarget.LaneOverride;
+                SetSpeedLimitTarget target =
+                    this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
+                        ? SetSpeedLimitTarget.LaneDefault
+                        : SetSpeedLimitTarget.LaneOverride;
 
                 foreach (var h in this.overlayDrawArgs_.HoveredLaneHandles) {
                     // per lane
@@ -267,9 +273,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 }
             } else {
                 // per segment
-                SetSpeedLimitTarget target = this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
-                                                 ? SetSpeedLimitTarget.SegmentDefault
-                                                 : SetSpeedLimitTarget.SegmentOverride;
+                SetSpeedLimitTarget target =
+                    this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
+                        ? SetSpeedLimitTarget.SegmentDefault
+                        : SetSpeedLimitTarget.SegmentOverride;
 
                 foreach (var h in this.overlayDrawArgs_.HoveredSegmentHandles) {
                     h.Click(
