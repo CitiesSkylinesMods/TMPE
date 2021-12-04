@@ -517,7 +517,8 @@
                 intersectsGuiWindows: args.IntersectsAnyUIRect(signScreenRect),
                 opacityMultiplier: Mathf.Sqrt(visibleScale));
 
-            NetInfo neti = segmentId.ToSegment().Info;
+            NetSegment segment = segmentId.ToSegment();
+            NetInfo neti = segment.Info;
             var defaultSpeedLimit = new SpeedValue(
                 gameUnits: SpeedLimitManager.Instance.GetCustomNetInfoSpeedLimit(info: neti));
 
@@ -551,7 +552,7 @@
                         screenPos,
                         size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
                     squareSignRenderer.DrawLargeTexture(SpeedLimitTextures.NoOverride);
-                    squareSignRenderer.DrawSmallTexture(
+                    squareSignRenderer.DrawSmallTexture_BottomRight(
                         speedlimit: defaultSpeedLimit,
                         textureSource: SpeedLimitTextures.RoadDefaults);
                 } else {
@@ -559,6 +560,10 @@
                         speedlimit: drawSpeedlimit,
                         textureSource: drawEnv.largeSignsTextures_);
                 }
+            }
+
+            if (segment.IsBothEndsUnderground()) {
+                signRenderer.DrawSmallTexture_TopLeft(RoadUI.Underground);
             }
 
             if (!isHoveredHandle) {
@@ -713,7 +718,7 @@
                         screenPos,
                         size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
                     squareSignRenderer.DrawLargeTexture(SpeedLimitTextures.NoOverride);
-                    squareSignRenderer.DrawSmallTexture(
+                    squareSignRenderer.DrawSmallTexture_BottomRight(
                         speedlimit: overrideSpeedlimit.DefaultValue,
                         textureSource: SpeedLimitTextures.RoadDefaults);
                 } else {
@@ -737,6 +742,10 @@
                         y: 1f,
                         size: SPEED_LIMIT_SIGN_SIZE,
                         screenRect: out Rect _);
+                }
+
+                if (segment.IsBothEndsUnderground()) {
+                    signRenderer.DrawSmallTexture_TopLeft(RoadUI.Underground);
                 }
 
                 if (isHoveredHandle) {

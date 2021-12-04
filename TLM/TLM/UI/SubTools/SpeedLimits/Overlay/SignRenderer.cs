@@ -59,15 +59,11 @@
                 image: tex);
         }
 
-        /// <summary>
-        /// Draws the small texture in the corner. Size is passed here again, because we could be
-        /// drawing a combination of rectangular US sign and round default speed sign.
-        /// </summary>
+        /// <summary>Draws the small texture in the Bottom-Right corner.</summary>
         /// <param name="speedlimit">Show this.</param>
-        /// <param name="smallSize">Size of small rect.</param>
         /// <param name="textureSource">Texture collection to use.</param>
-        public void DrawSmallTexture(SpeedValue? speedlimit,
-                                     IDictionary<int, Texture2D> textureSource) {
+        public void DrawSmallTexture_BottomRight(SpeedValue? speedlimit,
+                                                 IDictionary<int, Texture2D> textureSource) {
             // Offset the drawing center to the bottom right quarter of the large rect
             // The sign is drawn from the screen position (center) and must be half size of big rect
             Rect smallRect = new Rect(
@@ -79,6 +75,22 @@
             Texture2D tex = speedlimit.HasValue
                                 ? SpeedLimitTextures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
                                 : SpeedLimitTextures.NoOverride;
+
+            GUI.DrawTexture(
+                position: smallRect,
+                image: tex);
+        }
+
+        /// <summary>Draws the small texture in the Top-Left corner.</summary>
+        /// <param name="tex">Show this.</param>
+        public void DrawSmallTexture_TopLeft(Texture2D tex) {
+            // Offset the drawing center to the bottom right quarter of the large rect
+            // The sign is drawn from the screen position (center) and must be half size of big rect
+            Rect smallRect = new Rect(
+                x: this.screenRect_.x,
+                y: this.screenRect_.y,
+                width: this.screenRect_.width * 0.5f,
+                height: this.screenRect_.height * 0.5f);
 
             GUI.DrawTexture(
                 position: smallRect,

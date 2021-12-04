@@ -49,6 +49,15 @@ namespace TrafficManager.Util {
             return bezier.Position(0.5f);
         }
 
+        internal static bool IsBothEndsUnderground(this ref NetSegment segment) {
+            return segment.m_startNode.IsUndergroundNode() && segment.m_endNode.IsUndergroundNode();
+        }
+
+        [UsedImplicitly]
+        internal static bool IsEitherEndUnderground(this ref NetSegment segment) {
+            return segment.m_startNode.IsUndergroundNode() || segment.m_endNode.IsUndergroundNode();
+        }
+
         /// <summary>Gets the coordinates of the given node taking the terrain into account.</summary>
         internal static Vector3 GetPositionOnTerrain(this ref NetNode node) {
             Vector3 pos = node.m_position;

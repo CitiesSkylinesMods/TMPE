@@ -9,6 +9,10 @@ namespace TrafficManager.UI.Textures {
     public static class RoadUI {
         public static readonly IDictionary<PriorityType, Texture2D> PrioritySignTextures;
         public static readonly Texture2D SignClear;
+
+        /// <summary>Smaller Arrow-Down sign to be rendered as half-size for underground nodes.</summary>
+        public static readonly Texture2D Underground;
+
         public static readonly IDictionary<ExtVehicleType, IDictionary<bool, Texture2D>> VehicleRestrictionTextures;
         public static readonly IDictionary<ExtVehicleType, Texture2D> VehicleInfoSignTextures;
         public static readonly IDictionary<bool, Texture2D> ParkingRestrictionTextures;
@@ -26,6 +30,9 @@ namespace TrafficManager.UI.Textures {
 
             // delete priority sign
             SignClear = LoadDllResource("clear.png", new IntVector2(256));
+
+            // Arrow down for underground nodes, rendered half-size
+            Underground = LoadDllResource("Underground.png", new IntVector2(128), mip: true);
 
             VehicleRestrictionTextures =
                 new Dictionary<ExtVehicleType, IDictionary<bool, Texture2D>> {
