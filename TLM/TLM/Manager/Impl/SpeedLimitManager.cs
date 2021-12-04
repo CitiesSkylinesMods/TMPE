@@ -31,6 +31,10 @@ namespace TrafficManager.Manager.Impl {
             VehicleInfo.VehicleType.Metro | VehicleInfo.VehicleType.Train |
             VehicleInfo.VehicleType.Monorail | VehicleInfo.VehicleType.Trolleybus;
 
+        public NetInfo.LaneType LaneTypes => LANE_TYPES;
+
+        public VehicleInfo.VehicleType VehicleTypes => VEHICLE_TYPES;
+
         public static readonly SpeedLimitManager Instance = new();
 
         // For each NetInfo (by name) and lane index: custom speed limit
