@@ -124,6 +124,8 @@
         /// <summary>Stores last cached camera position in <see cref="cachedVisibleSegmentIds_"/>.</summary>
         private CameraTransformValue lastCachedCamera_;
 
+        private bool lastUndergroundMode_ = TrafficManagerTool.IsUndergroundMode;
+
         private const float SPEED_LIMIT_SIGN_SIZE = 70f;
 
         /// <summary>Cached segment centers.</summary>
@@ -337,10 +339,6 @@
                 return;
             }
 
-            // foreach (var rc in args.UiWindowRects) {
-            //     GUI.DrawTexture(rc, RoadUI.SignClear);
-            // }
-
             NetManager netManager = Singleton<NetManager>.instance;
             SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance;
 
@@ -349,9 +347,12 @@
             Vector3 camPos = currentCameraTransform.position;
 
             // TODO: Can road network change while speed limit tool is active? Disasters?
-            if (this.resetCacheFlag_ || !this.lastCachedCamera_.Equals(currentCamera)) {
+            if (this.resetCacheFlag_
+                || !this.lastCachedCamera_.Equals(currentCamera)
+                || this.lastUndergroundMode_ != TrafficManagerTool.IsUndergroundMode) {
                 this.lastCachedCamera_ = currentCamera;
                 this.resetCacheFlag_ = false;
+                this.lastUndergroundMode_ = TrafficManagerTool.IsUndergroundMode;
 
                 this.ShowSigns_RefreshVisibleSegmentsCache(
                     netManager: netManager,
@@ -425,25 +426,34 @@
             for (uint segmentId = 1; segmentId < NetManager.MAX_SEGMENT_COUNT; ++segmentId) {
                 ref var segment = ref ((ushort)segmentId).ToSegment();
 
+                // Ignore: Bad segments
                 if (!segment.IsValid()) {
+                    continue;
+                }
+
+                // Ignore: Can't have speed limits set
+                if (!speedLimitManager.MayHaveCustomSpeedLimits(ref segment)) {
+                    continue;
+                }
+
+                // Ignore: Underground segments only can be seen in underground mode
+                if (segment.IsBothEndsUnderground() != this.lastUndergroundMode_) {
                     continue;
                 }
 
                 Vector3 distToCamera = segment.m_bounds.center - camPos;
 
+                // Ignore: Too far segments
                 if (distToCamera.sqrMagnitude > TrafficManagerTool.MAX_OVERLAY_DISTANCE_SQR) {
                     continue; // do not draw if too distant
                 }
 
+                // Ignore: Not in screen segments
                 bool visible = GeometryUtil.WorldToScreenPoint(
                     worldPos: segment.m_bounds.center,
                     screenPos: out Vector3 _);
 
                 if (!visible) {
-                    continue;
-                }
-
-                if (!speedLimitManager.MayHaveCustomSpeedLimits(ref segment)) {
                     continue;
                 }
 

@@ -75,7 +75,10 @@
                 sb.Append(editDefaults
                               ? translation.ColorizeKeybind("UI.Key:Alt show overrides")
                               : translation.ColorizeKeybind("UI.Key:Alt show defaults"));
-                sb.Append(".");
+                sb.Append(".\n");
+
+                sb.Append(translation.ColorizeKeybind("UI.Key:PageUp/PageDown switch underground"));
+                sb.Append(". ");
 
                 this.ModeDescriptionLabel.text = sb.ToString();
                 UResizer.UpdateControl(this);

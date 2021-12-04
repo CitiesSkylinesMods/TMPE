@@ -201,7 +201,7 @@ namespace TrafficManager.UI.SubTools {
                 }
             }
 
-            bool isUndergroundMode = MainTool.IsUndergroundMode;
+            bool isUndergroundMode = TrafficManagerTool.IsUndergroundMode;
             for (int cacheIndex = CachedVisibleNodeIds.Size - 1; cacheIndex >= 0; cacheIndex--) {
                 var nodeId = CachedVisibleNodeIds.Values[cacheIndex];
 
@@ -1304,7 +1304,7 @@ namespace TrafficManager.UI.SubTools {
                 middlePos2: out bezier.c);
             Bounds bounds = bezier.GetBounds();
 
-            float overdrawHeight = renderLimits && MainTool.IsUndergroundMode ? 0f : 2f;
+            float overdrawHeight = renderLimits && TrafficManagerTool.IsUndergroundMode ? 0f : 2f;
             // Draw black outline
             RenderManager.instance.OverlayEffect.DrawBezier(
                 cameraInfo: cameraInfo,

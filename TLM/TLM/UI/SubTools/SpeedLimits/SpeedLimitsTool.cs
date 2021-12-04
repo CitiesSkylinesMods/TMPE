@@ -307,13 +307,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         public void UpdateOnscreenDisplayPanel() {
             // t: "Hold [Alt] to see default speed limits temporarily",
             // t: "Hold [Shift] to modify entire road between two junctions",
+            string localizedText = this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
+                                       ? T("SpeedLimits.Alt:See speed limits overrides temporarily")
+                                       : T("SpeedLimits.Alt:See default speed limits temporarily");
             var items = new List<MainMenu.OSD.OsdItem> {
                 new MainMenu.OSD.ModeDescription(localizedText: T("SpeedLimits.OSD:Select")),
                 new MainMenu.OSD.HoldModifier(
                     alt: true,
-                    localizedText: this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
-                                       ? T("SpeedLimits.Alt:See speed limits overrides temporarily")
-                                       : T("SpeedLimits.Alt:See default speed limits temporarily")),
+                    localizedText: localizedText),
                 new MainMenu.OSD.HoldModifier(
                     shift: true,
                     localizedText: T("SpeedLimits.Shift:Modify road between two junctions")),

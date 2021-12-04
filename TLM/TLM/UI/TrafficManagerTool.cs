@@ -102,7 +102,7 @@ namespace TrafficManager.UI {
 
         private static IDisposable _confDisposable;
 
-        public bool IsUndergroundMode => InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
+        public static bool IsUndergroundMode => InfoManager.instance.CurrentMode == InfoManager.InfoMode.Underground;
 
         internal static float OverlayAlpha => TransparencyToAlpha(GlobalConfig.Instance.Main.OverlayTransparency);
 
