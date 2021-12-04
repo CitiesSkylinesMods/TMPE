@@ -80,5 +80,9 @@ namespace TrafficManager.UI {
         public abstract void OnToolRightClick();
 
         public abstract void UpdateEveryFrame();
+
+        /// <summary>Called by the main tool when it is destroyed by Unity.</summary>
+        public virtual void OnDestroy() {
+        }
     }
 }

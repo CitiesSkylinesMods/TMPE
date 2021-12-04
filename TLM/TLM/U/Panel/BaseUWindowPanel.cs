@@ -15,23 +15,23 @@ namespace TrafficManager.U.Panel {
     public abstract class BaseUWindowPanel
         : UIPanel,
           ISmartSizableControl,
-          IObserver<ModUI.UIScaleNotification>,
-          IObserver<ModUI.UIOpacityNotification> {
+          IObserver<ModUI.EventPublishers.UIScaleNotification>,
+          IObserver<ModUI.EventPublishers.UIOpacityNotification> {
         private readonly UResizerConfig resizerConfig_ = new();
 
         /// <summary>On destroy this will unsubscribe from the UI Scale observable.</summary>
         [UsedImplicitly]
-        private IDisposable uiScaleUnbsubscriber_;
+        private IDisposable uiScaleUnsubscriber_;
 
         /// <summary>On destroy this will unsubscribe from the UI Transparency observable.</summary>
         [UsedImplicitly]
-        private IDisposable uiTransparencyUnbsubscriber_;
+        private IDisposable uiTransparencyUnsubscriber_;
 
         /// <summary>Call this from your form constructor to enable tracking UI Scale changes.</summary>
         public override void Start() {
             base.Start();
-            uiScaleUnbsubscriber_ = ModUI.Instance.UiScaleObservable.Subscribe(this);
-            uiTransparencyUnbsubscriber_ = ModUI.Instance.UiOpacityObservable.Subscribe(this);
+            uiScaleUnsubscriber_ = ModUI.Instance.Events.UiScale.Subscribe(this);
+            uiTransparencyUnsubscriber_ = ModUI.Instance.Events.UiOpacity.Subscribe(this);
         }
 
         public UResizerConfig GetResizerConfig() {
@@ -57,7 +57,7 @@ namespace TrafficManager.U.Panel {
         /// Called from ModUI when UI scale slider in General tab was modified.
         /// </summary>
         /// <param name="optionsEvent">New UI scale.</param>
-        public void OnUpdate(ModUI.UIScaleNotification optionsEvent) {
+        public void OnUpdate(ModUI.EventPublishers.UIScaleNotification optionsEvent) {
             UResizer.UpdateControl(this); // force window relayout
         }
 
@@ -66,7 +66,7 @@ namespace TrafficManager.U.Panel {
         /// Called from ModUI when UI scale slider in General tab was modified.
         /// </summary>
         /// <param name="optionsEvent">Event with the new UI opacity.</param>
-        public void OnUpdate(ModUI.UIOpacityNotification optionsEvent) {
+        public void OnUpdate(ModUI.EventPublishers.UIOpacityNotification optionsEvent) {
             // incoming range: 0..100 convert to 0..1f
             SetOpacity(optionsEvent.Opacity);
         }
@@ -106,8 +106,8 @@ namespace TrafficManager.U.Panel {
 
         /// <summary>Called by UnityEngine when component gets destroyed</summary>
         public override void OnDestroy() {
-            uiScaleUnbsubscriber_.Dispose();
-            uiTransparencyUnbsubscriber_.Dispose();
+            uiScaleUnsubscriber_.Dispose();
+            uiTransparencyUnsubscriber_.Dispose();
             base.OnDestroy();
         }
     }

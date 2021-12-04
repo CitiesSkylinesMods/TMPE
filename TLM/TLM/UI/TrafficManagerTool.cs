@@ -123,8 +123,11 @@ namespace TrafficManager.UI {
                 Destroy(nopeCursor_);
                 nopeCursor_ = null;
             }
-            foreach (KeyValuePair<ToolMode, LegacySubTool> e in legacySubTools_) {
-                e.Value.OnDestroy();
+            foreach (var eachLegacyTool in legacySubTools_) {
+                eachLegacyTool.Value.OnDestroy();
+            }
+            foreach (var eachTool in subTools_) {
+                eachTool.Value.OnDestroy();
             }
             legacySubTools_.Clear();
             legacySubTools_ = null;

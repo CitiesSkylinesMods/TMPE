@@ -1,6 +1,8 @@
 namespace TrafficManager.UI.SubTools.SpeedLimits {
+    using System;
     using System.Collections.Generic;
     using ColossalFramework.UI;
+    using TrafficManager.API.Util;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.U;
@@ -15,7 +17,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     /// </summary>
     public class SpeedLimitsTool
         : TrafficManagerSubTool,
-          UI.MainMenu.IOnscreenDisplayProvider {
+          UI.MainMenu.IOnscreenDisplayProvider,
+          IObserver<ModUI.EventPublishers.LanguageChangeNotification>
+    {
         private SetSpeedLimitAction selectedActionKmph_ = SetSpeedLimitAction.ResetToDefault();
 
         private SetSpeedLimitAction selectedActionMph_ = SetSpeedLimitAction.ResetToDefault();
@@ -55,6 +59,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Gets or sets the <see cref="SpeedLimitsToolWindow"/> floating on the selected node.</summary>
         private SpeedLimitsToolWindow Window { get; set; }
 
+        private IDisposable languageChangeUnsubscriber_;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SpeedLimitsTool"/> class.
         /// </summary>
@@ -62,6 +68,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         public SpeedLimitsTool(TrafficManagerTool mainTool)
             : base(mainTool) {
             this.overlay_ = new SpeedLimitsOverlay(mainTool: this.MainTool);
+            this.languageChangeUnsubscriber_ = ModUI.Instance.Events.UiLanguage.Subscribe(this);
         }
 
         private static string T(string key) => Translation.SpeedLimits.Get(key);
@@ -162,8 +169,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         public override void DeactivateTool() {
             this.Window.Hide();
-            // UnityEngine.Object.Destroy(this.Window);
-            // this.Window = null;
         }
 
         /// <summary>Render overlay segments/lanes in non-GUI mode, as overlays.</summary>
@@ -333,6 +338,17 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             // Deactivate all palette buttons and highlight one
             this.Window.UpdatePaletteButtonsOnClick();
+        }
+
+        /// <summary>Called by IObservable when observed event is fired (UI language change).</summary>
+        /// <param name="subject"></param>
+        public void OnUpdate(ModUI.EventPublishers.LanguageChangeNotification subject) {
+            this.RecreateToolWindow();
+        }
+
+        /// <summary>Called by the MainTool when it is disposed of by Unity.</summary>
+        public override void OnDestroy() {
+            this.languageChangeUnsubscriber_.Dispose();
         }
     } // end class
 }
