@@ -3,6 +3,7 @@
     using TrafficManager.State;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
+    using TrafficManager.UI.Localization;
     using UnityEngine;
 
     internal partial class SpeedLimitsToolWindow {
@@ -34,6 +35,7 @@
 
                 Vector2 buttonSize = new Vector2(40f, 40f);
                 UITextureAtlas uiAtlas = window.GetUiAtlas();
+                LookupTable translation = Translation.SpeedLimits;
 
                 //----------------
                 // Edit Segments/Lanes mode button
@@ -41,7 +43,7 @@
                 this.SegmentModeButton = builder.Button<UButton>(
                     parent: this,
                     text: string.Empty,
-                    tooltip: Translation.SpeedLimits.Get("Edit segment speed limits"),
+                    tooltip: translation.Get("Tooltip:Edit segment speed limits"),
                     size: buttonSize,
                     stack: UStackMode.Below);
                 this.SegmentModeButton.atlas = uiAtlas;
@@ -63,7 +65,7 @@
                 this.LaneModeButton = builder.Button<UButton>(
                     parent: this,
                     text: string.Empty,
-                    tooltip: Translation.SpeedLimits.Get("Edit lane speed limits"),
+                    tooltip: translation.Get("Tooltip:Edit lane speed limits"),
                     size: buttonSize,
                     stack: UStackMode.Below);
                 this.LaneModeButton.atlas = uiAtlas;
@@ -83,7 +85,7 @@
                 this.DefaultsModeButton = builder.Button<UButton>(
                     parent: this,
                     text: string.Empty,
-                    tooltip: "Default speed limits per road type",
+                    tooltip: translation.Get("Tooltip:Default speed limits per road type"),
                     size: buttonSize,
                     stack: UStackMode.Below);
                 this.DefaultsModeButton.atlas = uiAtlas;
@@ -107,8 +109,8 @@
                     parent: this,
                     text: string.Empty,
                     tooltip: displayMph
-                                 ? Translation.SpeedLimits.Get("Miles per hour")
-                                 : Translation.SpeedLimits.Get("Kilometers per hour"),
+                                 ? translation.Get("Miles per hour")
+                                 : translation.Get("Kilometers per hour"),
                     size: buttonSize,
                     stack: UStackMode.Below);
                 this.ToggleMphButton.atlas = uiAtlas;

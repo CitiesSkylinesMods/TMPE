@@ -62,8 +62,8 @@
                 case ActionType.SetOverride:
                     return this.GuardedValue.Override.FormatStr(
                         GlobalConfig.Instance.Main.DisplaySpeedLimitsMph);
-                case ActionType.Unlimited: return Translation.SpeedLimits.Get("Unlimited");
-                case ActionType.ResetToDefault: return Translation.SpeedLimits.Get("Default");
+                case ActionType.Unlimited: return Translation.SpeedLimits.Get("Palette.Text:Unlimited");
+                case ActionType.ResetToDefault: return Translation.SpeedLimits.Get("Palette.Text:Default");
                 default: return string.Empty;
             }
         }

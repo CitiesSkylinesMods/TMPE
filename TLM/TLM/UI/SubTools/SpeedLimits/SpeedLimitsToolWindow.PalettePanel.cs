@@ -110,11 +110,11 @@
                 // Choose label text under the button
                 string GetSpeedButtonHintText() {
                     if (FloatUtil.NearlyEqual(speedValue.GameUnits, 0.0f)) {
-                        return Translation.SpeedLimits.Get("Default");
+                        return Translation.SpeedLimits.Get("Palette.Text:Default");
                     }
 
                     if (speedValue.GameUnits >= SpeedValue.UNLIMITED) {
-                        return Translation.SpeedLimits.Get("Unlimited");
+                        return Translation.SpeedLimits.Get("Palette.Text:Unlimited");
                     }
 
                     return otherUnit;

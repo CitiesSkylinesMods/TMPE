@@ -8,6 +8,7 @@ namespace TrafficManager.UI.Localization {
     using System.Reflection;
     using System.Text;
     using CSUtil.Commons;
+    using TrafficManager.U;
 
     public class LookupTable {
         public LookupTable(string lookupTableName) {
@@ -18,6 +19,14 @@ namespace TrafficManager.UI.Localization {
         public string Get(string key) {
             string lang = Translation.GetCurrentLanguage();
             return Get(lang, key);
+        }
+
+        /// <summary>Get a translation string and paint [[Key]] fragments with orange.</summary>
+        /// <param name="key">Translation key.</param>
+        /// <returns>Translated and colorized string.</returns>
+        public string ColorizeKeybind(string key) {
+            string lang = Translation.GetCurrentLanguage();
+            return UIUtil.ColorizeKeybind(this.Get(lang, key));
         }
 
         public string Get(string lang, string key) {

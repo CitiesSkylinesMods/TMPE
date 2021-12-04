@@ -301,24 +301,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Called when the tool must update onscreen keyboard/mouse hints.</summary>
         public void UpdateOnscreenDisplayPanel() {
             // t: "Hold [Alt] to see default speed limits temporarily",
-            // t: "Hold [Ctrl] to see per lane limits temporarily",
             // t: "Hold [Shift] to modify entire road between two junctions",
-            string toggleDefaultStr =
-                this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
-                    ? T("SpeedLimits.Alt:See speed limits overrides temporarily")
-                    : T("SpeedLimits.Alt:See default speed limits temporarily");
-            // string togglePerLaneStr =
-            //     this.GetShowLimitsPerLane()
-            //         ? T("SpeedLimits.Ctrl:See speed limits per segment temporarily")
-            //         : T("SpeedLimits.Ctrl:See speed limits per lane temporarily");
             var items = new List<MainMenu.OSD.OsdItem> {
                 new MainMenu.OSD.ModeDescription(localizedText: T("SpeedLimits.OSD:Select")),
                 new MainMenu.OSD.HoldModifier(
                     alt: true,
-                    localizedText: toggleDefaultStr),
-                // new MainMenu.OSD.HoldModifier(
-                //     ctrl: true,
-                //     localizedText: togglePerLaneStr),
+                    localizedText: this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
+                                       ? T("SpeedLimits.Alt:See speed limits overrides temporarily")
+                                       : T("SpeedLimits.Alt:See default speed limits temporarily")),
                 new MainMenu.OSD.HoldModifier(
                     shift: true,
                     localizedText: T("SpeedLimits.Shift:Modify road between two junctions")),

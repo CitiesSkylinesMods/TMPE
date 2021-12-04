@@ -2,6 +2,7 @@
     using System.Text;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
+    using TrafficManager.UI.Localization;
     using UnityEngine;
 
     internal partial class SpeedLimitsToolWindow {
@@ -50,31 +51,31 @@
                                             bool editDefaults,
                                             bool showLanes) {
                 var sb = new StringBuilder(15); // initial capacity of stringBuilder
-                string t;
+                var translation = Translation.SpeedLimits;
 
                 //--------------------------
                 // Current editing mode
                 //--------------------------
-                t = editDefaults
-                        ? "Editing default limits per road type."
-                        : (showLanes
-                               ? "Editing speed limit overrides for segments."
-                               : "Editing lane speed limit overrides");
-                sb.Append(Translation.SpeedLimits.Get(t));
-                sb.Append("\n");
+                sb.Append(editDefaults
+                              ? translation.Get("Editing default limits per road type")
+                              : (showLanes
+                                     ? translation.Get("Editing lane speed limit overrides")
+                                     : translation.Get("Editing speed limit overrides for segments")));
+                sb.Append(".\n");
 
                 //--------------------------
                 // Keyboard modifier hints
                 //--------------------------
-                sb.Append(" ");
-                t = UIUtil.ColorizeKeybind("[[Shift]] edit multiple.");
-                sb.Append(Translation.SpeedLimits.Get(t));
-                sb.Append(" ");
+                if (!editDefaults) {
+                    // In defaults and lanes mode Shift is not working
+                    sb.Append(translation.ColorizeKeybind("UI.Key:Shift edit multiple"));
+                    sb.Append(". ");
+                }
 
-                t = editDefaults
-                        ? UIUtil.ColorizeKeybind("[[Alt]] show overrides.")
-                        : UIUtil.ColorizeKeybind("[[Alt]] show defaults.");
-                sb.Append(Translation.SpeedLimits.Get(t));
+                sb.Append(editDefaults
+                              ? translation.ColorizeKeybind("UI.Key:Alt show overrides")
+                              : translation.ColorizeKeybind("UI.Key:Alt show defaults"));
+                sb.Append(".");
 
                 this.ModeDescriptionLabel.text = sb.ToString();
                 UResizer.UpdateControl(this);
