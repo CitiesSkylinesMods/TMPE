@@ -903,15 +903,17 @@ namespace TrafficManager.Manager.Impl {
                                             hasRightArrow);
                                     }
 
+                                    bool hasUTurnRule = JunctionRestrictionsManager.Instance.IsUturnAllowed(
+                                        nextSegmentId,
+                                        isNextStartNodeOfNextSegment);
+                                    bool hasFarTurnArrow = (Shortcuts.LHT && hasRightArrow) || (Shortcuts.RHT && hasLeftArrow);
+                                    bool canTurn = !nextIsRealJunction || nextIsEndOrOneWayOut || hasFarTurnArrow || hasUTurnRule;
+
                                     if (applyHighwayRules || // highway rules enabled
                                         (nextIncomingDir == ArrowDirection.Right && hasLeftArrow) || // valid incoming right
                                         (nextIncomingDir == ArrowDirection.Left && hasRightArrow) || // valid incoming left
                                         (nextIncomingDir == ArrowDirection.Forward && hasForwardArrow) || // valid incoming straight
-                                        (nextIncomingDir == ArrowDirection.Turn
-                                         && (!nextIsRealJunction
-                                             || nextIsEndOrOneWayOut
-                                             || ((Shortcuts.LHT && hasRightArrow)
-                                                 || (!Shortcuts.LHT && hasLeftArrow))))) // valid turning lane
+                                        (nextIncomingDir == ArrowDirection.Turn && canTurn)) // valid turning lane
                                     {
                                         if (extendedLogRouting) {
                                             Log._DebugFormat(
@@ -976,7 +978,8 @@ namespace TrafficManager.Manager.Impl {
 
                                     // routed vehicle that does not follow lane arrows (trains, trams,
                                     // metros, monorails)
-                                    transitionType = LaneEndTransitionType.Default;
+                                    // TODO [issue #1053] this causes cars to turn on mixed car/track lanes against lane arrows
+                                    transitionType = LaneEndTransitionType.Default; 
 
                                     if (numNextForcedTransitionDatas < MAX_NUM_TRANSITIONS) {
                                         nextForcedTransitionDatas[numNextForcedTransitionDatas].Set(
