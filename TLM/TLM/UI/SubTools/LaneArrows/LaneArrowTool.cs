@@ -10,6 +10,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
     using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
+    using TrafficManager.UI.Helpers;
     using TrafficManager.UI.MainMenu;
     using TrafficManager.UI.MainMenu.OSD;
     using TrafficManager.Util;
@@ -546,7 +547,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 HasSegmentEndLaneArrows(segmentId, segment.m_endNode);
             float cut = con ? 1f : 0.5f;
 
-            MainTool.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
+            Highlight.DrawCutSegmentEnd(cameraInfo, segmentId, cut, bStartNode, color, alpha);
         }
 
         public override void RenderActiveToolOverlay(RenderManager.CameraInfo cameraInfo) {
@@ -581,7 +582,10 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
 
             // If CTRL is held, and hovered something: Draw hovered node
             if (SeparateNodeLanesModifierIsPressed && HoveredNodeId != 0) {
-                MainTool.DrawNodeCircle(cameraInfo, HoveredNodeId, Input.GetMouseButton(0));
+                Highlight.DrawNodeCircle(
+                    cameraInfo: cameraInfo,
+                    nodeId: HoveredNodeId,
+                    warning: Input.GetMouseButton(0));
                 return;
             }
 

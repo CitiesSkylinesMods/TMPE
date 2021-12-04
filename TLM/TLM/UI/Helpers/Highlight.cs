@@ -122,7 +122,7 @@
             DrawNodeCircle(
                 cameraInfo: cameraInfo,
                 nodeId: nodeId,
-                color: ModUI.GetTrafficManagerTool() .GetToolColor(warning, error: false),
+                color: ModUI.GetTrafficManagerTool().GetToolColor(warning, error: false),
                 alpha: alpha);
             // TODO: Potentially we do not need to refer to a TrafficManagerTool object
         }
@@ -207,14 +207,15 @@
         /// <param name="cut">The lenght of the highlight [0~1] </param>
         /// <param name="bStartNode">Determines the direction of the half sausage.</param>
         public static void DrawCutSegmentEnd(RenderManager.CameraInfo cameraInfo,
-                                      ushort segmentId,
-                                      float cut,
-                                      bool bStartNode,
-                                      Color color,
-                                      bool alpha = false) {
+                                             ushort segmentId,
+                                             float cut,
+                                             bool bStartNode,
+                                             Color color,
+                                             bool alpha = false) {
             if( segmentId == 0) {
                 return;
             }
+
             ref NetSegment segment = ref Singleton<NetManager>.instance.m_segments.m_buffer[segmentId];
             float width = segment.Info.m_halfWidth;
 

@@ -387,6 +387,7 @@
                     // in defaults mode separate lanes don't make any sense, so show segments at all times
                     hover |= this.DrawSpeedLimitHandles_PerLane(
                         segmentId: cachedSeg.id_,
+                        segmentCenterPos: cachedSeg.center_,
                         camPos: camPos,
                         drawEnv: drawEnv,
                         args: args);
@@ -582,18 +583,19 @@
 
         /// <summary>Draw speed limit handles one per lane.</summary>
         /// <param name="segmentId">Seg id.</param>
+        /// <param name="segmentCenterPos">Cached or calculated via Segment.GetCenter() center of bezier.</param>
         /// <param name="camPos">Camera.</param>
         /// <param name="drawEnv">Temporary values used for rendering this frame.</param>
         /// <param name="args">Render args.</param>
         private bool DrawSpeedLimitHandles_PerLane(
             ushort segmentId,
+            Vector3 segmentCenterPos,
             Vector3 camPos,
             [NotNull] DrawEnv drawEnv,
             [NotNull] DrawArgs args)
         {
             bool ret = false;
             ref NetSegment segment = ref segmentId.ToSegment();
-            Vector3 segmentCenterPos = segment.m_bounds.center;
 
             // show individual speed limit handle per lane
             int numLanes = GeometryUtil.GetSegmentNumVehicleLanes(
@@ -648,8 +650,10 @@
 
             // Sign renderer logic and chosen texture for signs
             SignRenderer signRenderer = default;
+
             // For non-square road sign theme, need square renderer to display no-override
             SignRenderer squareSignRenderer = default;
+
             // Defaults have 1:1 ratio (square textures)
             Vector2 largeRatio = drawEnv.drawDefaults_
                                      ? SpeedLimitTextures.DefaultSpeedlimitsAspectRatio()
