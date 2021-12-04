@@ -66,8 +66,8 @@ namespace TrafficManager.U {
         /// <returns>GUI space position.</returns>
         internal static Vector2 ScreenPointToGuiPoint(Vector2 screenPos) {
             return new(
-                x: screenPos.x * BaseResolution.x / Screen.width,
-                y: screenPos.y * BaseResolution.y / Screen.height);
+                x: screenPos.x * Screen.width / BaseResolution.x,
+                y: screenPos.y * Screen.height / BaseResolution.y);
         }
 
         internal static void Reset() {

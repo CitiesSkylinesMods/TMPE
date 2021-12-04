@@ -86,9 +86,7 @@
             }
 
             public bool IntersectsAnyUIRect(Rect testRect) {
-                // return this.UiWindowRects.Any(testRect.Overlaps);
-                // TODO: Fix UIScaler.ScreenPointToGuiPoint which is used from HelperExtensions.GetScreenRectInGuiSpace
-                return false;
+                return this.UiWindowRects.Any(testRect.Overlaps);
             }
         }
 
@@ -340,7 +338,7 @@
             }
 
             // foreach (var rc in args.UiWindowRects) {
-                // GUI.DrawTexture(rc, RoadUI.SignClear);
+            //     GUI.DrawTexture(rc, RoadUI.SignClear);
             // }
 
             NetManager netManager = Singleton<NetManager>.instance;
