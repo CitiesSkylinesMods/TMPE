@@ -9,6 +9,7 @@
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Traffic;
+    using TrafficManager.U;
     using TrafficManager.UI.Helpers;
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
@@ -85,7 +86,9 @@
             }
 
             public bool IntersectsAnyUIRect(Rect testRect) {
-                return this.UiWindowRects.Any(testRect.Overlaps);
+                // return this.UiWindowRects.Any(testRect.Overlaps);
+                // TODO: Fix UIScaler.ScreenPointToGuiPoint which is used from HelperExtensions.GetScreenRectInGuiSpace
+                return false;
             }
         }
 
@@ -336,6 +339,10 @@
                 return;
             }
 
+            // foreach (var rc in args.UiWindowRects) {
+                // GUI.DrawTexture(rc, RoadUI.SignClear);
+            // }
+
             NetManager netManager = Singleton<NetManager>.instance;
             SpeedLimitManager speedLimitManager = SpeedLimitManager.Instance;
 
@@ -553,8 +560,9 @@
                         size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
                     squareSignRenderer.DrawLargeTexture(SpeedLimitTextures.NoOverride);
                     squareSignRenderer.DrawSmallTexture_BottomRight(
-                        speedlimit: defaultSpeedLimit,
-                        textureSource: SpeedLimitTextures.RoadDefaults);
+                        SignRenderer.ChooseTexture(
+                            speedlimit: defaultSpeedLimit,
+                            textureSource: SpeedLimitTextures.RoadDefaults));
                 } else {
                     signRenderer.DrawLargeTexture(
                         speedlimit: drawSpeedlimit,
@@ -719,8 +727,9 @@
                         size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
                     squareSignRenderer.DrawLargeTexture(SpeedLimitTextures.NoOverride);
                     squareSignRenderer.DrawSmallTexture_BottomRight(
-                        speedlimit: overrideSpeedlimit.DefaultValue,
-                        textureSource: SpeedLimitTextures.RoadDefaults);
+                        SignRenderer.ChooseTexture(
+                            speedlimit: overrideSpeedlimit.DefaultValue,
+                            textureSource: SpeedLimitTextures.RoadDefaults));
                 } else {
                     signRenderer.DrawLargeTexture(
                         speedlimit: overrideSpeedlimit.OverrideValue.Value,

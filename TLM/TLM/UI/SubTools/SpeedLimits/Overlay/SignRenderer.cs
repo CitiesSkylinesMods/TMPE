@@ -59,11 +59,16 @@
                 image: tex);
         }
 
+        internal static Texture2D ChooseTexture(SpeedValue? speedlimit,
+                                                IDictionary<int, Texture2D> textureSource) {
+            return speedlimit.HasValue
+                       ? SpeedLimitTextures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
+                       : SpeedLimitTextures.NoOverride;
+        }
+
         /// <summary>Draws the small texture in the Bottom-Right corner.</summary>
-        /// <param name="speedlimit">Show this.</param>
-        /// <param name="textureSource">Texture collection to use.</param>
-        public void DrawSmallTexture_BottomRight(SpeedValue? speedlimit,
-                                                 IDictionary<int, Texture2D> textureSource) {
+        /// <param name="tex">Show this.</param>
+        public void DrawSmallTexture_BottomRight(Texture2D tex) {
             // Offset the drawing center to the bottom right quarter of the large rect
             // The sign is drawn from the screen position (center) and must be half size of big rect
             Rect smallRect = new Rect(
@@ -71,10 +76,6 @@
                 y: this.screenPos_.y,
                 width: this.screenRect_.width * 0.5f,
                 height: this.screenRect_.height * 0.5f);
-
-            Texture2D tex = speedlimit.HasValue
-                                ? SpeedLimitTextures.GetSpeedLimitTexture(speedlimit.Value, textureSource)
-                                : SpeedLimitTextures.NoOverride;
 
             GUI.DrawTexture(
                 position: smallRect,
