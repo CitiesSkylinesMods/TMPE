@@ -10,6 +10,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.SpeedLimits.Overlay;
     using TrafficManager.Util;
+    using UnifiedUI.Helpers;
     using UnityEngine;
 
     /// <summary>
@@ -342,14 +343,23 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         /// <summary>Called by IObservable when observed event is fired (UI language change).</summary>
-        /// <param name="subject"></param>
         public void OnUpdate(ModUI.EventPublishers.LanguageChangeNotification subject) {
-            this.RecreateToolWindow();
+            this.DeactivateTool();
+            this.Window.Destroy();
+            this.Window = null;
         }
 
         /// <summary>Called by the MainTool when it is disposed of by Unity.</summary>
         public override void OnDestroy() {
             this.languageChangeUnsubscriber_.Dispose();
+        }
+
+        /// <summary>
+        /// Window goes wonky on resolution change, redo the window.
+        /// This is called from this.Window's UIComponent.OnResolutionChanged
+        /// </summary>
+        public void OnResolutionChanged() {
+            this.RecreateToolWindow();
         }
     } // end class
 }

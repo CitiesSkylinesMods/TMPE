@@ -8,7 +8,6 @@ namespace TrafficManager.UI {
     using TrafficManager.API.Traffic.Enums;
     using TrafficManager.API.Util;
     using ColossalFramework;
-    using ColossalFramework.Math;
     using ColossalFramework.UI;
     using CSUtil.Commons;
     using JetBrains.Annotations;

@@ -38,6 +38,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Floating label following the mouse cursor.</summary>
         internal U.UFloatingTooltip cursorTooltip_;
 
+        private SpeedLimitsTool parentTool_;
+
         /// <summary>Called by Unity on instantiation once when the game is running.</summary>
         public override void Start() {
             base.Start();
@@ -54,6 +56,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Populate the window using UIBuilder of the window panel.</summary>
         /// <param name="builder">The root builder of this window.</param>
         public void SetupControls(UBuilder builder, SpeedLimitsTool parentTool) {
+            this.parentTool_ = parentTool;
+
             // "Speed Limits - Kilometers per Hour"
             // "Showing speed limit overrides per road segment."
             // [ Lane/Segment ] [ 10 20 30 40 50 ... 120 130 140 Max Reset]
@@ -219,6 +223,14 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             }
 
             UResizer.UpdateControl(this); // force window relayout
+        }
+
+        protected override void OnResolutionChanged(Vector2 previousResolution,
+                                                    Vector2 currentResolution) {
+            if (this.parentTool_ != null) {
+                this.parentTool_.OnResolutionChanged();
+            }
+            base.OnResolutionChanged(previousResolution, currentResolution);
         }
     }
     // end class

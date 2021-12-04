@@ -1,6 +1,7 @@
 namespace TrafficManager.U.Panel {
     using System;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
     using JetBrains.Annotations;
     using TrafficManager.API.Util;
     using TrafficManager.State;
@@ -110,5 +111,10 @@ namespace TrafficManager.U.Panel {
             uiTransparencyUnsubscriber_.Dispose();
             base.OnDestroy();
         }
+
+        // protected override void OnResolutionChanged(Vector2 previousResolution, Vector2 currentResolution) {
+        //     Log._Debug("Changed");
+        //     base.OnResolutionChanged(previousResolution, currentResolution);
+        // }
     }
 }
