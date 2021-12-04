@@ -25,13 +25,13 @@ namespace TrafficManager.State {
         private static UICheckBox _evacBussesMayIgnoreRulesToggle;
 
         public static CheckboxOption NoDoubleCrossings =
-            new CheckboxOption("NoDoubleCrossings") {
+            new CheckboxOption(nameof(NoDoubleCrossings)) {
                 Label = "VR.Option:No double crossings", // at a segment to segment transition, only the smaller segment gets crossings
                 Handler = JunctionRestrictionsUpdateHandler,
             };
 
         public static CheckboxOption DedicatedTurningLanes =
-            new CheckboxOption("DedicatedTurningLanes") {
+            new CheckboxOption(nameof(DedicatedTurningLanes)) {
                 Label = "VR.Option:Dedicated turning lanes",
                 Handler = UpdateDedicatedTurningLanePolicyHandler,
         };

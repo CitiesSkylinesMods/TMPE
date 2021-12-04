@@ -11,6 +11,7 @@ namespace TrafficManager.State {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using System;
+    using JetBrains.Annotations;
     using UI.Textures;
 
     public class Options : MonoBehaviour {
@@ -96,11 +97,16 @@ namespace TrafficManager.State {
         public static bool junctionRestrictionsEnabled = true;
         public static bool turnOnRedEnabled = true;
         public static bool laneConnectorEnabled = true;
+
+        [UsedImplicitly]
         public static bool scanForKnownIncompatibleModsEnabled = true;
+
+        [UsedImplicitly]
         public static bool ignoreDisabledModsEnabled;
 
         public static VehicleRestrictionsAggression vehicleRestrictionsAggression =
             VehicleRestrictionsAggression.Medium;
+
         public static bool RoundAboutQuickFix_DedicatedExitLanes = true;
         public static bool RoundAboutQuickFix_StayInLaneMainR = true;
         public static bool RoundAboutQuickFix_StayInLaneNearRabout = true;

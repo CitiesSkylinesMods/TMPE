@@ -162,16 +162,12 @@
 
                     break;
                 }
+
                 case SpeedlimitsToolMode.Lanes: {
-                    HashSet<uint> uniqueLaneIds = new();
-
                     foreach (var hovered in args.PrevHoveredLaneHandles) {
-                        uniqueLaneIds.Add(hovered.LaneId);
+                        this.RenderBlueOverlays_HoveredLane(cameraInfo, hovered, args);
                     }
 
-                    foreach (uint hoveredLaneId in uniqueLaneIds) {
-                        this.RenderBlueOverlays_Lane(cameraInfo, hoveredLaneId, args);
-                    }
                     break;
                 }
             }
@@ -182,8 +178,8 @@
         /// <param name="segmentId">The segment to draw, comes from args.Hovered....</param>
         /// <param name="args">The state of the parent <see cref="SpeedLimitsTool"/>.</param>
         private void RenderBlueOverlays_Segment(RenderManager.CameraInfo cameraInfo,
-                                                 ushort segmentId,
-                                                 [NotNull] DrawArgs args) {
+                                                ushort segmentId,
+                                                [NotNull] DrawArgs args) {
             //------------------------
             // Single segment highlight. User is NOT holding Shift.
             //------------------------
@@ -228,6 +224,47 @@
                             finalDirection: finalDirection);
                         return true;
                     });
+            }
+        }
+
+        /// <summary>Render lane overlay for hovered lane, and if Shift is held, highlight entire street.</summary>
+        private void RenderBlueOverlays_HoveredLane(RenderManager.CameraInfo cameraInfo,
+                                                    OverlayLaneSpeedlimitHandle hovered,
+                                                    [NotNull]
+                                                    DrawArgs args) {
+            if (!args.MultiSegmentMode) {
+                this.RenderBlueOverlays_Lane(cameraInfo, hovered.LaneId, args);
+                return;
+            }
+
+            var segmentId = hovered.LaneId.ToLane().m_segment;
+
+            if (RoundaboutMassEdit.Instance.TraverseLoop(segmentId, out var segmentList)) {
+                var lanes = hovered.FollowRoundaboutLane(
+                    segmentList: segmentList,
+                    segmentId0: segmentId,
+                    sortedLaneIndex: hovered.SortedLaneIndex);
+                foreach (var lane in lanes) {
+                    this.RenderBlueOverlays_Lane(cameraInfo, lane.laneId, args);
+                }
+            } else {
+                bool LaneVisitorFun(SegmentLaneTraverser.SegmentLaneVisitData data) {
+                    if (data.SortedLaneIndex == hovered.SortedLaneIndex) {
+                        this.RenderBlueOverlays_Lane(cameraInfo, data.CurLanePos.laneId, args);
+                    }
+
+                    return true;
+                }
+
+                SegmentLaneTraverser.Traverse(
+                    initialSegmentId: segmentId,
+                    direction: SegmentTraverser.TraverseDirection.AnyDirection,
+                    side: SegmentTraverser.TraverseSide.AnySide,
+                    laneStopCrit: SegmentLaneTraverser.LaneStopCriterion.LaneCount,
+                    segStopCrit: SegmentTraverser.SegmentStopCriterion.Junction,
+                    laneTypeFilter: SpeedLimitManager.LANE_TYPES,
+                    vehicleTypeFilter: SpeedLimitManager.VEHICLE_TYPES,
+                    laneVisitor: LaneVisitorFun);
             }
         }
 

@@ -22,7 +22,10 @@
 
         private readonly byte laneIndex_;
         private readonly NetInfo.Lane laneInfo_;
+
         private readonly int sortedLaneIndex_;
+
+        public int SortedLaneIndex => this.sortedLaneIndex_;
 
         public OverlayLaneSpeedlimitHandle(ushort segmentId,
                                            uint laneId,
@@ -131,10 +134,9 @@
         /// <param name="segmentList">input list of roundabout segments (must be oneway, and in the same direction).</param>
         /// <param name="segmentId0">The segment to match lane agaisnt.</param>
         /// <param name="sortedLaneIndex">Index.</param>
-        private IEnumerable<LanePos> FollowRoundaboutLane(
-                    List<ushort> segmentList,
-                    ushort segmentId0,
-                    int sortedLaneIndex) {
+        internal IEnumerable<LanePos> FollowRoundaboutLane(List<ushort> segmentList,
+                                                           ushort segmentId0,
+                                                           int sortedLaneIndex) {
             bool invert0 = segmentId0.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
             ExtSegmentManager extSegmentManager = ExtSegmentManager.Instance;
 
