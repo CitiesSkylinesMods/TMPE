@@ -80,6 +80,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 // Avoid multiple window rebuilds, unless Mph setting has changed while the window was closed
                 this.RecreateToolWindow();
             }
+
+            this.Window.isEnabled = true;
             this.Window.Show();
             this.overlay_.ResetCache();
 
@@ -88,7 +90,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         /// <summary>Drop tool window if it existed, and create again.</summary>
-        internal void RecreateToolWindow() {
+        private void RecreateToolWindow() {
             // Create a generic self-sizing window with padding of 4px.
             if (this.Window) {
                 this.Window.Hide();
@@ -169,7 +171,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         public override void DeactivateTool() {
-            this.Window.Hide();
+            if (this.Window != null) {
+                this.Window.Hide();
+                this.Window.isEnabled = false;
+            }
         }
 
         /// <summary>Render overlay segments/lanes in non-GUI mode, as overlays.</summary>
@@ -345,8 +350,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Called by IObservable when observed event is fired (UI language change).</summary>
         public void OnUpdate(ModUI.EventPublishers.LanguageChangeNotification subject) {
             this.DeactivateTool();
-            this.Window.Destroy();
-            this.Window = null;
+            // this.Window.Destroy();
+            // this.Window = null;
         }
 
         /// <summary>Called by the MainTool when it is disposed of by Unity.</summary>

@@ -37,9 +37,9 @@
                 // [ 10 20 30 ... 120 130 140 0(no limit) ]
                 //-----------------------------------------
                 // the Current Selected Speed is highlighted
-                List<SetSpeedLimitAction> actions =
-                    PaletteGenerator.AllSpeedLimits(SpeedUnit.CurrentlyConfigured);
+                List<SetSpeedLimitAction> actions = new();
                 actions.Add(SetSpeedLimitAction.Unlimited()); // add: Unlimited
+                actions.AddRange(PaletteGenerator.AllSpeedLimits(SpeedUnit.CurrentlyConfigured));
                 actions.Add(SetSpeedLimitAction.ResetToDefault()); // add: Default
 
                 this.PaletteButtons.Clear();
@@ -151,11 +151,11 @@
                 // Helper function to choose text for the button
                 string GetSpeedButtonText() {
                     if (speedInteger == 0) {
-                        return "X";
+                        return "✖"; // Unicode symbol U+2716 Heavy Multiplication X
                     }
 
                     if (speedValue.GameUnits >= SpeedValue.UNLIMITED) {
-                        return "MAX";
+                        return "⊘"; // Unicode symbol U+2298 Circled Division Slash
                     }
 
                     return speedInteger.ToString();

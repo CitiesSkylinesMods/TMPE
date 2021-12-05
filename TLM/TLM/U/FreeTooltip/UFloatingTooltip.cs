@@ -1,5 +1,6 @@
 ﻿namespace TrafficManager.U {
     using JetBrains.Annotations;
+    using TrafficManager.U.Autosize;
     using UnityEngine;
 
     /// <summary>
@@ -10,6 +11,9 @@
             base.Awake();
             this.backgroundSprite = "GenericPanel";
             this.color = new Color32(64, 64, 64, 240);
+            this.padding = new RectOffset(4, 4, 2, 2);
+
+            this.ContributeToBoundingBox(false);
         }
 
         public void SetTooltip([CanBeNull]

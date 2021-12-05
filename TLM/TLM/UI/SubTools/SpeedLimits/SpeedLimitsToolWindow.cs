@@ -116,6 +116,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 parent: this,
                 t: unitTitle,
                 stack: UStackMode.Below);
+            this.windowTitleLabel_.autoHeight = true;
+            this.windowTitleLabel_.autoSize = false;
+
             this.dragHandle_ = this.CreateDragHandle();
 
             // On window drag - clamp to screen and then save in the config
@@ -155,6 +158,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     window: this,
                     alwaysVisible: windowTitleLabel_);
             }
+
+            this.windowTitleLabel_.width = this.width - (2.0f * UConst.UIPADDING);
         }
 
         /// <summary>Create mode buttons panel on the left side.</summary>

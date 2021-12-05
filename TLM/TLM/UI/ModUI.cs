@@ -8,6 +8,7 @@ namespace TrafficManager.UI {
     using TrafficManager.Lifecycle;
     using JetBrains.Annotations;
     using System.Collections;
+    using TrafficManager.U;
 
     /// <summary>
     /// Globally available UI manager class which contains the main menu button and the panel.
@@ -129,7 +130,9 @@ namespace TrafficManager.UI {
                 CreateMainMenuButtonAndWindow();
 #if DEBUG
                 UIView uiView = UIView.GetAView();
+                const string DEBUG_MENU_GAMEOBJECT_NAME = "TMPE_DebugMenu";
                 DebugMenu = (DebugMenuPanel)uiView.AddUIComponent(typeof(DebugMenuPanel));
+                UIUtil.MakeUniqueAndSetName(DebugMenu.gameObject, DEBUG_MENU_GAMEOBJECT_NAME);
 #endif
 
                 ToolMode = TrafficManagerMode.None;

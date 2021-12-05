@@ -69,7 +69,7 @@
                 if (!editDefaults) {
                     // In defaults and lanes mode Shift is not working
                     sb.Append(translation.ColorizeKeybind("UI.Key:Shift edit multiple"));
-                    sb.Append(". ");
+                    sb.Append(".\n");
                 }
 
                 sb.Append(editDefaults

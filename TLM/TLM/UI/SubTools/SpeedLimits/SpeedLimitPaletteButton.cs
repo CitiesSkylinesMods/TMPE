@@ -44,6 +44,14 @@
                    || this.AssignedAction.Type == SetSpeedLimitAction.ActionType.ResetToDefault;
         }
 
+        private bool IsResetToDefault() {
+            return this.AssignedAction.Type == SetSpeedLimitAction.ActionType.ResetToDefault;
+        }
+
+        private bool IsUnlimited() {
+            return this.AssignedAction.Type == SetSpeedLimitAction.ActionType.Unlimited;
+        }
+
         /// <summary>If button active state changes, update visual to highlight it.</summary>
         public void UpdateSpeedlimitButton() {
             if (this.IsActive()) {
@@ -56,19 +64,23 @@
         /// <summary>Active button has large text and is blue.</summary>
         public void UpdateSpeedlimitButton_Active() {
             // Special values (reset and default do not become larger)
-            if (this.IsSpecialSpeedValue()) {
-                // Red for special buttons, when active
-                this.ColorizeAllStates(Color.red);
+            if (this.IsResetToDefault()) {
+                this.ColorizeAllStates(Color.red); // Red for special buttons, when active
+                this.textScale = 2.0f * UIScaler.UIScale; // Bigger
+            } else
+            if (this.IsUnlimited()) {
+                this.ColorizeAllStates(Color.red); // Red for special buttons, when active
+                this.textScale = 2.4f * UIScaler.UIScale; // Even bigger than X
             } else {
-                this.textScale = 2.0f * UIScaler.UIScale;
-
-                // Can't set width directly, but can via the resizer
-                var w = this.text.Length <= 2 ? DEFAULT_WIDTH_NARROW : DEFAULT_WIDTH;
-                this.GetResizerConfig().FixedSize.x = w * 1.5f;
-
                 // Blue for speed buttons, when active
                 this.ColorizeAllStates(new Color32(0, 128, 255, 255));
+                this.textScale = 2.0f * UIScaler.UIScale;
             }
+
+            // Can't set width directly, but can via the resizer
+            var w = this.text.Length <= 2 ? DEFAULT_WIDTH_NARROW : DEFAULT_WIDTH;
+            this.GetResizerConfig().FixedSize.x = w * 1.5f;
+
 
             if (this.AltUnitsLabel) {
                 this.AltUnitsLabel.Show();
@@ -78,7 +90,11 @@
         /// <summary>Inactive button has normal-size text and is silver-gray.</summary>
         public void UpdateSpeedlimitButton_Inactive() {
             // Special values (reset and default do not become larger)
-            if (!this.IsSpecialSpeedValue()) {
+            if (this.IsResetToDefault()) {
+                this.textScale = 1.2f * UIScaler.UIScale; // Bigger
+            } else if (this.IsUnlimited()) {
+                this.textScale = 2.0f * UIScaler.UIScale; // Even bigger than X
+            } else {
                 this.textScale = UIScaler.UIScale;
 
                 // Can't set width directly, but can via the resizer
