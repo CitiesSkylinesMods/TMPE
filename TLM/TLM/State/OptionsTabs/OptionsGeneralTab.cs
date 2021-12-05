@@ -345,7 +345,7 @@ namespace TrafficManager.State {
             if (!supportedByTheme) {
                 // Reset to German road signs theme
                 _roadSignsThemeDropdown.selectedIndex = SpeedLimitTextures.ThemeNames.FindIndex(
-                    x => x == SpeedLimitTextures.DEFAULT_GERMAN_KM_SIGNS);
+                    x => x == SpeedLimitTextures.GERMAN_KM_SIGNS);
                 Log.Info(
                     $"Display MPH changed to {newValue}, but was not supported by current theme, "
                     + "so theme was also reset to German_Kmph");

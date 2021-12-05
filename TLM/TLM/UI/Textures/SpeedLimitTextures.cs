@@ -159,9 +159,10 @@ namespace TrafficManager.UI.Textures {
             }
         }
 
-        public const string DEFAULT_GERMAN_KM_SIGNS = "Kmph_German";
+        public const string GERMAN_KM_SIGNS = "Kmph_Germany";
         private const string MPH_UK_THEME = "MPH_UK";
         private const string MPH_US_THEME = "MPH_US";
+        private const string KMPH_CANADA_THEME = "Kmph_Canada";
 
         private static RoadSignTheme LoadCurrentTheme() {
             string selectedThemeName = GlobalConfig.Instance.Main.RoadSignTheme;
@@ -170,9 +171,9 @@ namespace TrafficManager.UI.Textures {
                 return Themes[selectedThemeName].Load();
             }
 
-            GlobalConfig.Instance.Main.RoadSignTheme = DEFAULT_GERMAN_KM_SIGNS;
-            Log.Info($"Road Sign theme changed to default ({DEFAULT_GERMAN_KM_SIGNS})");
-            return Themes[DEFAULT_GERMAN_KM_SIGNS].Load();
+            GlobalConfig.Instance.Main.RoadSignTheme = GERMAN_KM_SIGNS;
+            Log.Info($"Road Sign theme changed to default ({GERMAN_KM_SIGNS})");
+            return Themes[GERMAN_KM_SIGNS].Load();
         }
 
         // TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
@@ -186,13 +187,13 @@ namespace TrafficManager.UI.Textures {
             RoadDefaults.Load();
 
             Themes.Add(
-                DEFAULT_GERMAN_KM_SIGNS, // "Kmph_German"
+                GERMAN_KM_SIGNS,
                 new RoadSignTheme(
-                    name: DEFAULT_GERMAN_KM_SIGNS,
+                    name: GERMAN_KM_SIGNS,
                     supportsKmph: true,
                     supportsMph: true,
                     size: new IntVector2(200),
-                    pathPrefix: "SpeedLimits.Kmh"));
+                    pathPrefix: "SpeedLimits.Kmph_Germany"));
             Themes.Add(
                 MPH_UK_THEME,
                 new RoadSignTheme(
@@ -200,7 +201,7 @@ namespace TrafficManager.UI.Textures {
                     supportsKmph: false,
                     supportsMph: true,
                     size: new IntVector2(200),
-                    pathPrefix: "SpeedLimits.Mph_UK"));
+                    pathPrefix: "SpeedLimits.MPH_UK"));
             Themes.Add(
                 MPH_US_THEME,
                 new RoadSignTheme(
@@ -208,7 +209,15 @@ namespace TrafficManager.UI.Textures {
                     supportsKmph: false,
                     supportsMph: true,
                     size: new IntVector2(200, 250),
-                    pathPrefix: "SpeedLimits.Mph_US"));
+                    pathPrefix: "SpeedLimits.MPH_US"));
+            Themes.Add(
+                KMPH_CANADA_THEME,
+                new RoadSignTheme(
+                    name: KMPH_CANADA_THEME,
+                    supportsKmph: true,
+                    supportsMph: false,
+                    size: new IntVector2(200, 250),
+                    pathPrefix: "SpeedLimits.Kmph_Canada"));
 
             ThemeNames = Themes.Keys.ToList();
             ThemeNames.Sort();
@@ -229,7 +238,7 @@ namespace TrafficManager.UI.Textures {
         /// Or false if the `newTheme` key isn't a valid theme name.</returns>
         public static bool OnThemeChanged(string newTheme, bool mphEnabled) {
             if (!Themes.ContainsKey(newTheme)) {
-                newTheme = DEFAULT_GERMAN_KM_SIGNS;
+                newTheme = GERMAN_KM_SIGNS;
             }
 
             if (activeTheme_ == null || activeTheme_.Name != newTheme) {
