@@ -290,7 +290,7 @@ namespace TrafficManager.State {
         }
 
         private static void OnGuiScaleChanged(float newVal) {
-            ModUI.Instance.Events.UiScaleChanged(newVal);
+            ModUI.Instance.Events.UiScaleChanged();
             SetGuiScale(newVal);
             _guiScaleSlider.tooltip
                 = string.Format(
@@ -359,6 +359,8 @@ namespace TrafficManager.State {
             mainConfig.DisplaySpeedLimitsMph = newValue;
 
             GlobalConfig.WriteConfig();
+
+            ModUI.Instance.Events.DisplayMphChanged(newValue);
         }
 
         public static void SetDisplayInMph(bool value) {
@@ -463,7 +465,7 @@ namespace TrafficManager.State {
 
             if (changed && _guiScaleSlider != null) {
                 _guiScaleSlider.value = val;
-                ModUI.Instance.Events.UiScaleChanged(val);
+                ModUI.Instance.Events.UiScaleChanged();
             }
         }
 

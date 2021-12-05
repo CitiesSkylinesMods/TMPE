@@ -7,14 +7,13 @@ namespace TrafficManager.UI {
     using UnityEngine;
     using TrafficManager.Lifecycle;
     using JetBrains.Annotations;
-    using System.Collections;
     using TrafficManager.U;
 
     /// <summary>
     /// Globally available UI manager class which contains the main menu button and the panel.
     /// Access via ThreadingExtension.ModUi.
     /// </summary>
-    public class ModUI : UICustomControl {
+    public partial class ModUI : UICustomControl {
         /// <summary>Singleton accessor.</summary>
         public static ModUI Instance { get; private set; }
 
@@ -54,68 +53,6 @@ namespace TrafficManager.UI {
         public static TrafficManagerMode ToolMode { get; set; }
 
         private bool _uiShown;
-
-        /// <summary>
-        /// 1. In observing object inherit from (for example) IObserver{UIOpacityNotification} and
-        ///    subscribe via creating a variable: IDisposable unsubscriber_;
-        /// 2. initialize the variable: unsubscriber_ = ModUI.Instance.Events.UiScale.Subscribe(this);
-        /// 3. in public override void OnDestroy() (for MonoBehaviours, and for LegacySubtools and TrafficManagerSubtools)
-        ///    add: unsubscriber_.Dispose();
-        /// </summary>
-        public class EventPublishers {
-            /// <summary>Event fired when UI scale changes in the General Options tab.</summary>
-            public struct UIScaleNotification {
-                public float NewScale;
-            }
-
-            public class UIScaleObservable : GenericObservable<UIScaleNotification> {
-            }
-
-            /// <summary>
-            /// Subscribe to this to get notifications in your UI about UI scale changes (slider in
-            /// General options tab).
-            /// </summary>
-            [NonSerialized]
-            public UIScaleObservable UiScale = new();
-
-            /// <summary>Call this to notify observing objects about UI scale change.</summary>
-            public void UiScaleChanged(float scale) {
-                this.UiScale.NotifyObservers(new UIScaleNotification { NewScale = scale });
-            }
-
-            /// <summary>Event fired when UI language is changed in options.</summary>
-            public struct LanguageChangeNotification {
-            }
-
-            public class LanguageChangeObservable : GenericObservable<LanguageChangeNotification> {
-            }
-
-            [NonSerialized]
-            public LanguageChangeObservable UiLanguage = new();
-
-            /// <summary>Call this to notify observing objects about language change.</summary>
-            public void LanguageChanged() {
-                this.UiLanguage.NotifyObservers(default);
-            }
-
-            /// <summary>Event to be sent when UI transparency slider changes in the General Options tab.</summary>
-            public struct UIOpacityNotification { public U.UOpacityValue Opacity; }
-
-            public class UIOpacityObservable : GenericObservable<UIOpacityNotification> {
-            }
-
-            /// <summary>
-            /// Subscribe to this to get notifications in your UI about UI transparency changes
-            /// (slider in General options tab).
-            /// </summary>
-            [NonSerialized]
-            public UIOpacityObservable UiOpacity = new();
-
-            /// <summary>Call this to notify observing objects about UI opacity change.</summary>
-            public void OpacityChanged(U.UOpacityValue opacity) {
-                this.UiOpacity.NotifyObservers(new UIOpacityNotification { Opacity = opacity, });
-            }
-        }
 
         /// <summary>Subscribe to UI events here.</summary>
         public EventPublishers Events = new();

@@ -317,6 +317,9 @@
       <DependentUpon>MainMenuWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\MainMenu\OSD\HoldModifier.cs" />
+    <Compile Include="UI\ModUI.EventPublishers.cs">
+      <DependentUpon>ModUI.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\RoadSelectionPanels.cs" />
     <Compile Include="UI\CustomKeyHandler.cs" />
     <Compile Include="UI\Helpers\GuideHandler.cs" />

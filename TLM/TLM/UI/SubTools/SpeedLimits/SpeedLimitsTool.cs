@@ -10,7 +10,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using TrafficManager.UI.SubTools.PrioritySigns;
     using TrafficManager.UI.SubTools.SpeedLimits.Overlay;
     using TrafficManager.Util;
-    using UnifiedUI.Helpers;
     using UnityEngine;
 
     /// <summary>
@@ -19,7 +18,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     public class SpeedLimitsTool
         : TrafficManagerSubTool,
           UI.MainMenu.IOnscreenDisplayProvider,
-          IObserver<ModUI.EventPublishers.LanguageChangeNotification>
+          IObserver<ModUI.EventPublishers.LanguageChangeNotification>,
+          IObserver<ModUI.EventPublishers.DisplayMphNotification>
     {
         private SetSpeedLimitAction selectedActionKmph_ = SetSpeedLimitAction.ResetToDefault();
 
@@ -61,6 +61,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         private SpeedLimitsToolWindow Window { get; set; }
 
         private IDisposable languageChangeUnsubscriber_;
+        private IDisposable displayMphChangeUnsubscriber_;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SpeedLimitsTool"/> class.
@@ -70,6 +71,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             : base(mainTool) {
             this.overlay_ = new SpeedLimitsOverlay(mainTool: this.MainTool);
             this.languageChangeUnsubscriber_ = ModUI.Instance.Events.UiLanguage.Subscribe(this);
+            this.displayMphChangeUnsubscriber_ = ModUI.Instance.Events.DisplayMph.Subscribe(this);
         }
 
         private static string T(string key) => Translation.SpeedLimits.Get(key);
@@ -359,13 +361,17 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>Called by IObservable when observed event is fired (UI language change).</summary>
         public void OnUpdate(ModUI.EventPublishers.LanguageChangeNotification subject) {
             this.DeactivateTool();
-            // this.Window.Destroy();
-            // this.Window = null;
+        }
+
+        /// <summary>Called by IObservable when observed event is fired (display MPH change).</summary>
+        public void OnUpdate(ModUI.EventPublishers.DisplayMphNotification subject) {
+            this.RecreateToolWindow();
         }
 
         /// <summary>Called by the MainTool when it is disposed of by Unity.</summary>
         public override void OnDestroy() {
             this.languageChangeUnsubscriber_.Dispose();
+            this.displayMphChangeUnsubscriber_.Dispose();
         }
 
         /// <summary>
