@@ -73,6 +73,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         private static string T(string key) => Translation.SpeedLimits.Get(key);
+        private static string ColorKey(string key) => Translation.SpeedLimits.ColorizeKeybind(key);
 
         public override void ActivateTool() {
             if (this.Window == null
@@ -101,7 +102,12 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             UBuilder b = new UBuilder();
             this.Window = b.CreateWindow<SpeedLimitsToolWindow>();
-            this.Window.SetPadding(UPadding.Default);
+            this.Window.SetPadding(
+                new UPadding(
+                    top: UConst.UIPADDING,
+                    right: UConst.UIPADDING,
+                    bottom: UConst.UIPADDING * 2,
+                    left: UConst.UIPADDING));
             this.Window.SetupControls(b, parentTool: this);
 
             this.UpdateModeInfoLabel();
@@ -313,17 +319,20 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         public void UpdateOnscreenDisplayPanel() {
             // t: "Hold [Alt] to see default speed limits temporarily",
             // t: "Hold [Shift] to modify entire road between two junctions",
+            // t: "[Page Up]/[Page Down] show underground",
             string localizedText = this.speedlimitsToolMode_ == SpeedlimitsToolMode.Defaults
-                                       ? T("SpeedLimits.Alt:See speed limits overrides temporarily")
-                                       : T("SpeedLimits.Alt:See default speed limits temporarily");
+                                       ? T("UI.Key:Alt show overrides")
+                                       : T("UI.Key:Alt show defaults");
             var items = new List<MainMenu.OSD.OsdItem> {
-                new MainMenu.OSD.ModeDescription(localizedText: T("SpeedLimits.OSD:Select")),
+                new MainMenu.OSD.Label(localizedText: T("SpeedLimits.OSD:Select")),
                 new MainMenu.OSD.HoldModifier(
                     alt: true,
                     localizedText: localizedText),
                 new MainMenu.OSD.HoldModifier(
                     shift: true,
-                    localizedText: T("SpeedLimits.Shift:Modify road between two junctions")),
+                    localizedText: T("UI.Key:Shift edit multiple")),
+                new MainMenu.OSD.Label(
+                    localizedText: ColorKey("UI.Key:PageUp/PageDown switch underground")),
             };
             MainMenu.OSD.OnscreenDisplay.Display(items: items);
         }

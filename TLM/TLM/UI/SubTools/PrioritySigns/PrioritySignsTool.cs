@@ -514,7 +514,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             if (SelectedNodeId == 0) {
                 // Select mode
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("Prio.OnscreenHint.Mode:Select")));
+                items.Add(new Label(localizedText: T("Prio.OnscreenHint.Mode:Select")));
                 items.Add(
                     new HardcodedMouseShortcut(
                         button: UIMouseButton.Left,
@@ -540,7 +540,7 @@ namespace TrafficManager.UI.SubTools.PrioritySigns {
             } else {
                 // Modify traffic light settings
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("Prio.OnscreenHint.Mode:Edit")));
+                items.Add(new Label(localizedText: T("Prio.OnscreenHint.Mode:Edit")));
                 // items.Add(OnscreenDisplay.RightClick_LeaveNode());
                 OnscreenDisplay.Display(items);
             }

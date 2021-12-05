@@ -1452,14 +1452,14 @@ namespace TrafficManager.UI.SubTools {
             switch (m) {
                 case SelectionMode.None: {
                     var items = new List<OsdItem>();
-                    items.Add(new ModeDescription(localizedText: T("LaneConnector.Mode:Select")));
+                    items.Add(new Label(localizedText: T("LaneConnector.Mode:Select")));
                     OnscreenDisplay.Display(items);
                     return;
                 }
                 case SelectionMode.SelectTarget:
                 case SelectionMode.SelectSource: {
                     var items = new List<OsdItem>();
-                    items.Add(new ModeDescription(
+                    items.Add(new Label(
                                   m == SelectionMode.SelectSource
                                       ? T("LaneConnector.Mode:Source")
                                       : T("LaneConnector.Mode:Target")));

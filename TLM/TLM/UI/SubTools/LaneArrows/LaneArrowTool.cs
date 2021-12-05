@@ -423,7 +423,7 @@ namespace TrafficManager.UI.SubTools.LaneArrows {
                 case State.Select: {
                     var items = new List<OsdItem>();
                     items.Add(
-                        new MainMenu.OSD.ModeDescription(
+                        new MainMenu.OSD.Label(
                             localizedText: T("LaneArrows.Mode:Select")));
                     items.Add(
                         new MainMenu.OSD.HardcodedMouseShortcut(

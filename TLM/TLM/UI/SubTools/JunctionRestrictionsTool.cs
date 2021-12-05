@@ -235,12 +235,12 @@ namespace TrafficManager.UI.SubTools {
             if (SelectedNodeId == 0) {
                 // Select mode
                 var items = new List<OsdItem>();
-                items.Add(new UI.MainMenu.OSD.ModeDescription(T("JR.OnscreenHint.Mode:Select")));
+                items.Add(new UI.MainMenu.OSD.Label(T("JR.OnscreenHint.Mode:Select")));
                 OnscreenDisplay.Display(items);
             } else {
                 // Edit mode
                 var items = new List<OsdItem>();
-                items.Add(new UI.MainMenu.OSD.ModeDescription(T("JR.OnscreenHint.Mode:Edit")));
+                items.Add(new UI.MainMenu.OSD.Label(T("JR.OnscreenHint.Mode:Edit")));
                 items.Add(
                     new UI.MainMenu.OSD.Shortcut(
                         keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,

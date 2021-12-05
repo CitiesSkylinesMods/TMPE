@@ -643,12 +643,12 @@ namespace TrafficManager.UI.SubTools {
             if (SelectedSegmentId == 0) {
                 // Select mode
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("VR.OnscreenHint.Mode:Select segment")));
+                items.Add(new Label(localizedText: T("VR.OnscreenHint.Mode:Select segment")));
                 OnscreenDisplay.Display(items);
             } else {
                 // Modify traffic light settings
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("VR.OnscreenHint.Mode:Toggle restrictions")));
+                items.Add(new Label(localizedText: T("VR.OnscreenHint.Mode:Toggle restrictions")));
                 items.Add(
                     item: new Shortcut(
                         keybindSetting: KeybindSettingsBase.RestoreDefaultsKey,
