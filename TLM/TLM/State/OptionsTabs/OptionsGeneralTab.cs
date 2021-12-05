@@ -342,10 +342,13 @@ namespace TrafficManager.State {
             bool supportedByTheme = newValue
                                         ? SpeedLimitTextures.ActiveTheme.SupportsMph
                                         : SpeedLimitTextures.ActiveTheme.SupportsKmph;
+            Main mainConfig = GlobalConfig.Instance.Main;
+
             if (!supportedByTheme) {
                 // Reset to German road signs theme
                 _roadSignsThemeDropdown.selectedIndex = SpeedLimitTextures.ThemeNames.FindIndex(
                     x => x == SpeedLimitTextures.GERMAN_KM_SIGNS);
+                mainConfig.RoadSignTheme = SpeedLimitTextures.GERMAN_KM_SIGNS;
                 Log.Info(
                     $"Display MPH changed to {newValue}, but was not supported by current theme, "
                     + "so theme was also reset to German_Kmph");
@@ -353,7 +356,7 @@ namespace TrafficManager.State {
                 Log.Info($"Display MPH changed to {newValue}");
             }
 
-            GlobalConfig.Instance.Main.DisplaySpeedLimitsMph = newValue;
+            mainConfig.DisplaySpeedLimitsMph = newValue;
 
             GlobalConfig.WriteConfig();
         }
@@ -410,8 +413,10 @@ namespace TrafficManager.State {
                     Log.Info($"Road Sign theme changed to {newTheme}. ShowMPH config value is now {invertedMph}.");
                     _displayMphToggle.isChecked = invertedMph;
                     mainConfig.DisplaySpeedLimitsMph = invertedMph;
+                    mainConfig.RoadSignTheme = newTheme;
                 }
             }
+
             GlobalConfig.WriteConfig();
         }
 
