@@ -2,6 +2,8 @@ namespace TrafficManager.UI.Textures {
     using static TextureResources;
     using System.Collections.Generic;
     using System;
+    using System.Linq;
+    using CSUtil.Commons;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
     using TrafficManager.UI.SubTools.SpeedLimits;
@@ -9,6 +11,121 @@ namespace TrafficManager.UI.Textures {
     using UnityEngine;
 
     public static class SpeedLimitTextures {
+        public class RoadSignTheme {
+            private IntVector2 TextureSize;
+
+            /// <summary>Speed limit signs from 5 to 140 km (from 5 to 90 mph) and zero for no limit.</summary>
+            public readonly Dictionary<int, Texture2D> Textures = new();
+
+            /// <summary>This list of required speed signs is used for loading.</summary>
+            private List<int> SignValues = new();
+
+            private string PathPrefix;
+
+            public bool SupportsKmph;
+
+            /// <summary>
+            /// Kmph sign sets include range for MPH, but not all pictures are good to go with Kmph or Mph setting.
+            /// For example Canadian signs have all values to show MPH, but make no sense because the sign says km/h.
+            /// </summary>
+            public bool SupportsMph;
+
+            public bool AttemptedToLoad = false;
+            public readonly string Name;
+
+            public RoadSignTheme(string name,
+                                 bool supportsMph,
+                                 bool supportsKmph,
+                                 IntVector2 size,
+                                 string pathPrefix) {
+                Log._DebugIf(
+                    this.TextureSize.x <= this.TextureSize.y,
+                    () => $"Constructing a road sign theme {pathPrefix}: Portrait oriented size not supported");
+
+                this.Name = name;
+                this.SupportsMph = supportsMph;
+                this.SupportsKmph = supportsKmph;
+                this.PathPrefix = pathPrefix;
+                this.TextureSize = size;
+
+                if (supportsKmph) {
+                    // Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no-limit sign
+                    for (var kmphValue = 0; kmphValue <= UPPER_KMPH; kmphValue += LOAD_KMPH_STEP) {
+                        this.SignValues.Add(kmphValue);
+                    }
+                } else if (supportsMph) {
+                    for (var mphValue = 0; mphValue <= UPPER_MPH; mphValue += MPH_STEP) {
+                        this.SignValues.Add(mphValue);
+                    }
+                }
+            }
+
+            public RoadSignTheme Load() {
+                if (this.AttemptedToLoad) {
+                    return this;
+                }
+
+                this.Textures.Clear();
+                this.AttemptedToLoad = true;
+
+                foreach (var speedLimit in this.SignValues) {
+                    // Log._Debug($"Loading sign texture {this.PathPrefix}.{speedLimit}.png");
+                    var resource = LoadDllResource(
+                        resourceName: $"{this.PathPrefix}.{speedLimit}.png",
+                        size: this.TextureSize,
+                        mip: true);
+                    this.Textures.Add(speedLimit, resource ? resource : SpeedLimitTextures.Clear);
+                }
+
+                return this;
+            }
+
+            public void Unload() {
+                foreach (var texture in this.Textures) {
+                    UnityEngine.Object.Destroy(texture.Value);
+                }
+
+                this.Textures.Clear();
+                this.AttemptedToLoad = false;
+            }
+
+            /// <summary>
+            /// Assumes that signs can be square or vertical rectangle, no horizontal themes.
+            /// Aspect ratio value which scales width down to have height fully fit.
+            /// </summary>
+            public Vector2 GetAspectRatio() {
+                return new(this.TextureSize.x / (float)this.TextureSize.y, 1.0f);
+            }
+
+            /// <summary>Given the speed, return a texture to render.</summary>
+            /// <param name="spd">Speed to display.</param>
+            /// <returns>Texture to display.</returns>
+            public Texture2D GetTexture(SpeedValue spd) {
+                // Round to nearest 5 MPH or nearest 5 km/h
+                bool mph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+                ushort index = mph
+                                   ? spd.ToMphRounded(MPH_STEP).Mph
+                                   : spd.ToKmphRounded(KMPH_STEP).Kmph;
+
+                // Trim the index since 140 km/h / 90 MPH is the max sign we have
+                ushort upper = mph ? UPPER_MPH : UPPER_KMPH;
+
+                try {
+                    // Show unlimited if the speed cannot be represented by the available sign textures
+                    if (index == 0 || index > upper) {
+                        return this.Textures[0];
+                    }
+
+                    // Trim from below to not go below index 5 (5 kmph or 5 mph)
+                    ushort trimIndex = Math.Max((ushort)5, index);
+                    return this.Textures[trimIndex];
+                }
+                catch (KeyNotFoundException) {
+                    return SpeedLimitTextures.NoOverride;
+                }
+            }
+        }
+
         // We have texture files for every 5 kmph but speed limits palette allows every 10. This is
         // for more precise MPH display.
         internal const ushort KMPH_STEP = 10;
@@ -20,196 +137,114 @@ namespace TrafficManager.UI.Textures {
         /// <summary>Displayed in Override view for Speed Limits tool, when there's no override.</summary>
         public static readonly Texture2D NoOverride;
 
-        /// <summary>Blue textures for road/lane default speed limits.</summary>
-        public static readonly IDictionary<int, Texture2D> RoadDefaults;
-
-        /// <summary>German style textures for KM/hour also usable for MPH.</summary>
-        public static readonly IDictionary<int, Texture2D> TexturesKmph;
-
-        /// <summary>White rectangular textures for MPH US style.</summary>
-        public static readonly IDictionary<int, Texture2D> TexturesMphUS;
-
-        /// <summary>British style speed limit textures for MPH</summary>
-        public static readonly IDictionary<int, Texture2D> TexturesMphUK;
+        /// <summary>Blue textures for road/lane default speed limits. Always loaded.</summary>
+        public static readonly RoadSignTheme RoadDefaults;
 
         public static readonly Texture2D Clear;
 
-        static SpeedLimitTextures() {
-            // TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
-            RoadDefaults = new Dictionary<int, Texture2D>();
-            TexturesKmph = new Dictionary<int, Texture2D>();
-            TexturesMphUS = new Dictionary<int, Texture2D>();
-            TexturesMphUK = new Dictionary<int, Texture2D>();
+        public static readonly Dictionary<string, RoadSignTheme> Themes = new ();
 
-            IntVector2 sizeSquare = new IntVector2(200);
-            IntVector2 sizeUS = new IntVector2(200, 250);
+        private static RoadSignTheme activeTheme_ = null;
+
+        /// <summary>Names from <see cref="Themes"/> sorted.</summary>
+        public static readonly List<string> ThemeNames;
+
+        public static RoadSignTheme ActiveTheme {
+            get {
+                if (activeTheme_ == null || !activeTheme_.AttemptedToLoad) {
+                    activeTheme_ = LoadCurrentTheme();
+                }
+
+                return activeTheme_;
+            }
+        }
+
+        public const string DEFAULT_GERMAN_KM_SIGNS = "Kmph_German";
+        private const string MPH_UK_THEME = "MPH_UK";
+        private const string MPH_US_THEME = "MPH_US";
+
+        private static RoadSignTheme LoadCurrentTheme() {
+            string selectedThemeName = GlobalConfig.Instance.Main.RoadSignTheme;
+
+            if (Themes.ContainsKey(selectedThemeName)) {
+                return Themes[selectedThemeName].Load();
+            }
+
+            GlobalConfig.Instance.Main.RoadSignTheme = DEFAULT_GERMAN_KM_SIGNS;
+            Log.Info($"Road Sign theme changed to default ({DEFAULT_GERMAN_KM_SIGNS})");
+            return Themes[DEFAULT_GERMAN_KM_SIGNS].Load();
+        }
+
+        // TODO: Split loading here into dynamic sections, static enforces everything to stay in this ctor
+        static SpeedLimitTextures() {
+            RoadDefaults = new RoadSignTheme(
+                name: "Defaults",
+                supportsKmph: true,
+                supportsMph: true,
+                size: new IntVector2(200),
+                pathPrefix: "SpeedLimits.RoadDefaults");
+            RoadDefaults.Load();
+
+            Themes.Add(
+                DEFAULT_GERMAN_KM_SIGNS, // "Kmph_German"
+                new RoadSignTheme(
+                    name: DEFAULT_GERMAN_KM_SIGNS,
+                    supportsKmph: true,
+                    supportsMph: true,
+                    size: new IntVector2(200),
+                    pathPrefix: "SpeedLimits.Kmh"));
+            Themes.Add(
+                MPH_UK_THEME,
+                new RoadSignTheme(
+                    name: MPH_UK_THEME,
+                    supportsKmph: false,
+                    supportsMph: true,
+                    size: new IntVector2(200),
+                    pathPrefix: "SpeedLimits.Mph_UK"));
+            Themes.Add(
+                MPH_US_THEME,
+                new RoadSignTheme(
+                    name: MPH_US_THEME,
+                    supportsKmph: false,
+                    supportsMph: true,
+                    size: new IntVector2(200, 250),
+                    pathPrefix: "SpeedLimits.Mph_US"));
+
+            ThemeNames = Themes.Keys.ToList();
+            ThemeNames.Sort();
 
             NoOverride = LoadDllResource(
                 resourceName: "SpeedLimits.NoOverride.png",
                 size: new IntVector2(200));
 
-            // Load shared speed limit signs for Kmph and Mph
-            // Assumes that signs from 0 to 140 with step 5 exist, 0 denotes no limit sign
-            for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
-                var resource = LoadDllResource(
-                    resourceName: $"SpeedLimits.Kmh.{speedLimit}.png",
-                    size: sizeSquare,
-                    mip: true);
-                TexturesKmph.Add(speedLimit, resource ? resource : TexturesKmph[5]);
-            }
-
-            for (var speedLimit = 0; speedLimit <= 140; speedLimit += 5) {
-                var resource = LoadDllResource(
-                    resourceName: $"SpeedLimits.RoadDefaults.{speedLimit}.png",
-                    size: sizeSquare,
-                    mip: true);
-                RoadDefaults.Add(speedLimit, resource ? resource : RoadDefaults[5]);
-            }
-
-            // Signs from 0 to 90 for MPH
-            for (var speedLimit = 0; speedLimit <= 90; speedLimit += 5) {
-                // Load US textures, they are rectangular
-                var resourceUs = LoadDllResource(
-                    resourceName: $"SpeedLimits.Mph_US.{speedLimit}.png",
-                    size: sizeUS,
-                    mip: true);
-                TexturesMphUS.Add(speedLimit, resourceUs ? resourceUs : TexturesMphUS[5]);
-
-                // Load UK textures, they are square
-                var resourceUk = LoadDllResource(
-                    resourceName: $"SpeedLimits.Mph_UK.{speedLimit}.png",
-                    size: sizeSquare,
-                    mip: true);
-                TexturesMphUK.Add(speedLimit, resourceUk ? resourceUk : TexturesMphUK[5]);
-            }
-
             Clear = LoadDllResource("clear.png", new IntVector2(256));
-        }
-
-        // /// <summary>
-        // /// Given the float speed, style and MPH option return a texture to render.
-        // /// </summary>
-        // /// <param name="spd">float speed</param>
-        // /// <param name="mphStyle">Signs theme</param>
-        // /// <param name="unit">Mph or km/h</param>
-        // /// <returns></returns>
-        // public static Texture2D GetSpeedLimitTexture(SpeedValue spd,
-        //                                              MphSignStyle mphStyle,
-        //                                              SpeedUnit unit) {
-        //     // Select the source for the textures based on unit and the theme
-        //     bool mph = unit == SpeedUnit.Mph;
-        //     IDictionary<int, Texture2D> textures = TexturesKmph;
-        //     if (mph) {
-        //         switch (mphStyle) {
-        //             case MphSignStyle.SquareUS:
-        //                 textures = TexturesMphUS;
-        //                 break;
-        //             case MphSignStyle.RoundUK:
-        //                 textures = TexturesMphUK;
-        //                 break;
-        //             case MphSignStyle.RoundGerman:
-        //                 // Do nothing, this is the default above
-        //                 break;
-        //         }
-        //     }
-        //
-        //     // Round to nearest 5 MPH or nearest 10 km/h
-        //     ushort index = mph
-        //                        ? spd.ToMphRounded(MPH_STEP).Mph
-        //                        : spd.ToKmphRounded(KMPH_STEP).Kmph;
-        //
-        //     // Trim the index since 140 km/h / 90 MPH is the max sign we have
-        //     ushort upper = mph ? UPPER_MPH : UPPER_KMPH;
-        //
-        //     // Show unlimited if the speed cannot be represented by the available sign textures
-        //     if (index == 0 || index > upper) {
-        //         // Log._Debug($"Trimming speed={speedLimit} index={index} to {upper}");
-        //         return textures[0];
-        //     }
-        //
-        //     // Trim from below to not go below index 5 (5 kmph or 5 mph)
-        //     ushort trimIndex = Math.Max((ushort)5, index);
-        //     return textures[trimIndex];
-        // }
-
-        /// <summary>
-        /// Given the float speed, style and MPH option return a texture to render.
-        /// </summary>
-        /// <param name="spd">Speed to display.</param>
-        /// <returns>Texture to display.</returns>
-        public static Texture2D GetSpeedLimitTexture(SpeedValue spd,
-                                                     IDictionary<int, Texture2D> textureSource) {
-            // Select the source for the textures based on unit and the theme
-            bool mph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-
-            // Round to nearest 5 MPH or nearest 10 km/h
-            ushort index = mph
-                               ? spd.ToMphRounded(MPH_STEP).Mph
-                               : spd.ToKmphRounded(KMPH_STEP).Kmph;
-
-            // Trim the index since 140 km/h / 90 MPH is the max sign we have
-            ushort upper = mph
-                               ? UPPER_MPH
-                               : UPPER_KMPH;
-
-            // Show unlimited if the speed cannot be represented by the available sign textures
-            if (index == 0 || index > upper) {
-                // Log._Debug($"Trimming speed={speedLimit} index={index} to {upper}");
-                return textureSource[0];
-            }
-
-            // Trim from below to not go below index 5 (5 kmph or 5 mph)
-            ushort trimIndex = Math.Max((ushort)5, index);
-            return textureSource[trimIndex];
-        }
-
-        /// <summary>For current display settings get texture dictionary with the road signs.</summary>
-        /// <returns>Texture source (loaded textures with keys matching speeds).</returns>
-        public static IDictionary<int, Texture2D> GetTextureSource() {
-            var configMain = GlobalConfig.Instance.Main;
-            // Select the source for the textures based on unit and the theme
-            bool mph = configMain.DisplaySpeedLimitsMph;
-
-            if (mph) {
-                switch (configMain.MphRoadSignStyle) {
-                    case MphSignStyle.SquareUS:
-                        return TexturesMphUS;
-                    case MphSignStyle.RoundUK:
-                        return TexturesMphUK;
-                    case MphSignStyle.RoundGerman:
-                        // Do nothing, this is the default above
-                        break;
-                }
-            }
-
-            return TexturesKmph;
         }
 
         public static Vector2 DefaultSpeedlimitsAspectRatio() => Vector2.one;
 
-        /// <summary>
-        /// Returns vector of one for square/circle textures, or a proportionally scaled rect of
-        /// width one, for rectangular US signs.
-        /// </summary>
-        /// <returns>Scalable vector of texture aspect ratio.</returns>
-        public static Vector2 GetTextureAspectRatio() {
-            var configMain = GlobalConfig.Instance.Main;
-            SpeedUnit unit = configMain.GetDisplaySpeedUnit();
+        /// <summary>Called from Options General tab and attempts to change the theme.</summary>
+        /// <param name="newTheme">New string key.</param>
+        /// <param name="mphEnabled">Whether config is set to showing MPH</param>
+        /// <returns>False if the new theme doesn't support km/h and the settings require km/h.
+        /// Or false if the `newTheme` key isn't a valid theme name.</returns>
+        public static bool OnThemeChanged(string newTheme, bool mphEnabled) {
+            if (!Themes.ContainsKey(newTheme)) {
+                newTheme = DEFAULT_GERMAN_KM_SIGNS;
+            }
 
-            // Select the source for the textures based on unit and the theme
-            bool mph = unit == SpeedUnit.Mph;
-
-            if (mph) {
-                switch (configMain.MphRoadSignStyle) {
-                    case MphSignStyle.SquareUS:
-                        return new Vector2(1.0f / 1.25f, 1.0f);
-                    case MphSignStyle.RoundUK:
-                    case MphSignStyle.RoundGerman:
-                        break;
+            if (activeTheme_ == null || activeTheme_.Name != newTheme) {
+                bool canChange = mphEnabled
+                                     ? Themes[newTheme].SupportsMph
+                                     : Themes[newTheme].SupportsKmph;
+                if (canChange) {
+                    activeTheme_?.Unload();
+                    activeTheme_ = Themes[newTheme];
+                    activeTheme_.Load();
+                    return true;
                 }
             }
 
-            return Vector2.one;
+            return false;
         }
     }
 }

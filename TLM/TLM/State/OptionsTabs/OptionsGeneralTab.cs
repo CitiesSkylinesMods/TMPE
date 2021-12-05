@@ -1,4 +1,6 @@
 namespace TrafficManager.State {
+    using System;
+    using System.Linq;
     using TrafficManager.API.Traffic.Enums;
     using ColossalFramework.UI;
     using CSUtil.Commons;
@@ -10,6 +12,8 @@ namespace TrafficManager.State {
     using TrafficManager.UI;
     using UnityEngine;
     using TrafficManager.Lifecycle;
+    using TrafficManager.State.ConfigData;
+    using TrafficManager.UI.Textures;
 
     public static class OptionsGeneralTab {
         private static UICheckBox _instantEffectsToggle;
@@ -38,8 +42,13 @@ namespace TrafficManager.State {
         private static UICheckBox _ignoreDisabledModsToggle;
 
         private static UICheckBox _displayMphToggle;
-        private static UIDropDown _roadSignsMphThemeDropdown;
-        private static int _roadSignMphStyleInt;
+
+        // [Obsolete("To be removed")]
+        // private static UIDropDown _roadSignsMphThemeDropdown;
+        // [Obsolete("To be removed")]
+        // private static int _roadSignMphStyleInt;
+
+        private static UIDropDown _roadSignsThemeDropdown;
 
         private static UICheckBox _useUUI;
 
@@ -160,23 +169,27 @@ namespace TrafficManager.State {
         }
 
         private static void SetupSpeedLimitsPanel(UIHelperBase generalGroup) {
+            Main mainConfig = GlobalConfig.Instance.Main;
+
             _displayMphToggle = generalGroup.AddCheckbox(
                                     text: Translation.SpeedLimits.Get("Checkbox:Display speed limits mph"),
-                                    defaultValue: GlobalConfig.Instance.Main.DisplaySpeedLimitsMph,
+                                    defaultValue: mainConfig.DisplaySpeedLimitsMph,
                                     eventCallback: OnDisplayMphChanged) as UICheckBox;
-            string[] mphThemeOptions = {
-                Translation.SpeedLimits.Get("General.Theme.Option:Square US"),
-                Translation.SpeedLimits.Get("General.Theme.Option:Round UK"),
-                Translation.SpeedLimits.Get("General.Theme.Option:Round German"),
-            };
-            _roadSignMphStyleInt = (int)GlobalConfig.Instance.Main.MphRoadSignStyle;
-            _roadSignsMphThemeDropdown
+
+            string FormatThemeName(string themeName) {
+                return Translation.SpeedLimits.Get($"RoadSignTheme:{themeName}");
+            }
+
+            var themeOptions = SpeedLimitTextures.ThemeNames
+                                                    .Select(FormatThemeName)
+                                                    .ToArray();
+            _roadSignsThemeDropdown
                 = generalGroup.AddDropdown(
-                      text: Translation.SpeedLimits.Get("General.Dropdown:Road signs theme mph") + ":",
-                      options: mphThemeOptions,
-                      defaultSelection: _roadSignMphStyleInt,
-                      eventCallback: OnRoadSignsMphThemeChanged) as UIDropDown;
-            _roadSignsMphThemeDropdown.width = 400;
+                      text: Translation.SpeedLimits.Get("General.Dropdown:Road signs theme") + ":",
+                      options: themeOptions,
+                      defaultSelection: SpeedLimitTextures.ThemeNames.FindIndex(x => x == mainConfig.RoadSignTheme),
+                      eventCallback: OnRoadSignsThemeChanged) as UIDropDown;
+            _roadSignsThemeDropdown.width *= 2.0f;
         }
 
         private static void OnLanguageChanged(int newLanguageIndex) {
@@ -325,8 +338,22 @@ namespace TrafficManager.State {
         }
 
         private static void OnDisplayMphChanged(bool newValue) {
-            Log._Debug($"Display MPH changed to {newValue}");
+            bool supportedByTheme = newValue
+                                        ? SpeedLimitTextures.ActiveTheme.SupportsMph
+                                        : SpeedLimitTextures.ActiveTheme.SupportsKmph;
+            if (!supportedByTheme) {
+                // Reset to German road signs theme
+                _roadSignsThemeDropdown.selectedIndex = SpeedLimitTextures.ThemeNames.FindIndex(
+                    x => x == SpeedLimitTextures.DEFAULT_GERMAN_KM_SIGNS);
+                Log.Info(
+                    $"Display MPH changed to {newValue}, but was not supported by current theme, "
+                    + "so theme was also reset to German_Kmph");
+            } else {
+                Log.Info($"Display MPH changed to {newValue}");
+            }
+
             GlobalConfig.Instance.Main.DisplaySpeedLimitsMph = newValue;
+
             GlobalConfig.WriteConfig();
         }
 
@@ -336,24 +363,55 @@ namespace TrafficManager.State {
             }
         }
 
-        private static void OnRoadSignsMphThemeChanged(int newRoadSignStyle) {
+        // private static void OnRoadSignsMphThemeChanged(int newRoadSignStyle) {
+        //     if (!Options.IsGameLoaded()) {
+        //         return;
+        //     }
+        //
+        //     // The UI order is: US, UK, German
+        //     var newStyle = MphSignStyle.RoundGerman;
+        //     switch (newRoadSignStyle) {
+        //         case 1:
+        //             newStyle = MphSignStyle.RoundUK;
+        //             break;
+        //         case 0:
+        //             newStyle = MphSignStyle.SquareUS;
+        //             break;
+        //     }
+        //
+        //     Log._Debug($"Road Sign theme changed to {newStyle}");
+        //     GlobalConfig.Instance.Main.MphRoadSignStyle = newStyle;
+        // }
+        private static void OnRoadSignsThemeChanged(int newThemeIndex) {
             if (!Options.IsGameLoaded()) {
                 return;
             }
 
-            // The UI order is: US, UK, German
-            var newStyle = MphSignStyle.RoundGerman;
-            switch (newRoadSignStyle) {
-                case 1:
-                    newStyle = MphSignStyle.RoundUK;
-                    break;
-                case 0:
-                    newStyle = MphSignStyle.SquareUS;
-                    break;
-            }
+            var newTheme = SpeedLimitTextures.ThemeNames[newThemeIndex];
 
-            Log._Debug($"Road Sign theme changed to {newStyle}");
-            GlobalConfig.Instance.Main.MphRoadSignStyle = newStyle;
+            Main mainConfig = GlobalConfig.Instance.Main;
+            if (SpeedLimitTextures.OnThemeChanged(
+                newTheme: newTheme,
+                mphEnabled: mainConfig.DisplaySpeedLimitsMph))
+            {
+                Log.Info($"Road Sign theme changed to {newTheme}");
+                mainConfig.RoadSignTheme = newTheme;
+            } else {
+                Log.Info(
+                    $"Road Sign theme was not changed to {newTheme} (doesn't support MPH={mainConfig.DisplaySpeedLimitsMph}). "
+                    + "Toggling MPH and trying once again.");
+
+                bool invertedMph = !mainConfig.DisplaySpeedLimitsMph;
+                if (SpeedLimitTextures.OnThemeChanged(
+                    newTheme: newTheme,
+                    mphEnabled: invertedMph))
+                {
+                    Log.Info($"Road Sign theme changed to {newTheme}. ShowMPH config value is now {invertedMph}.");
+                    _displayMphToggle.isChecked = invertedMph;
+                    mainConfig.DisplaySpeedLimitsMph = invertedMph;
+                }
+            }
+            GlobalConfig.WriteConfig();
         }
 
         private static void OnSimulationAccuracyChanged(int newAccuracy) {
