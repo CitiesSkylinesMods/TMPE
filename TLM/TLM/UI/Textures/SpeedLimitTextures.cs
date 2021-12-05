@@ -6,7 +6,6 @@ namespace TrafficManager.UI.Textures {
     using CSUtil.Commons;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
-    using TrafficManager.UI.SubTools.SpeedLimits;
     using TrafficManager.Util;
     using UnityEngine;
 

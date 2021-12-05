@@ -1,6 +1,5 @@
 namespace TrafficManager.Lifecycle {
     using CitiesHarmony.API;
-    using ColossalFramework;
     using ColossalFramework.Globalization;
     using ColossalFramework.UI;
     using CSUtil.Commons;
