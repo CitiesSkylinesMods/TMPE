@@ -138,13 +138,11 @@ namespace TrafficManager.UI.Helpers {
                 if (viewOnly_) {
                     // Readonly signs look grey-ish
                     guiColor = Color.Lerp(guiColor, Color.gray, 0.5f);
-                } else {
-                    if (hoveredHandle) {
-                        guiColor = Color.Lerp(
-                            a: guiColor,
-                            b: new Color(r: 1f, g: .7f, b: 0f),
-                            t: 0.5f);
-                    }
+                } else if (hoveredHandle) {
+                    guiColor = Color.Lerp(
+                        a: guiColor,
+                        b: new Color(r: 1f, g: .7f, b: 0f),
+                        t: 0.5f);
                 }
                 guiColor.a = TrafficManagerTool.GetHandleAlpha(hoveredHandle);
 
