@@ -150,17 +150,18 @@ namespace TrafficManager.State {
 
             // General: Simulation
             UIHelperBase simGroup = panelHelper.AddGroup(T("General.Group:Simulation"));
+            string[] simPrecisionOptions = new[] {
+                T("General.Dropdown.Option:Very low"),
+                T("General.Dropdown.Option:Low"),
+                T("General.Dropdown.Option:Medium"),
+                T("General.Dropdown.Option:High"),
+                T("General.Dropdown.Option:Very high"),
+            };
             _simulationAccuracyDropdown = simGroup.AddDropdown(
-                                       text: T("General.Dropdown:Simulation accuracy") + ":",
-                                       options: new[] {
-                                                          T("General.Dropdown.Option:Very low"),
-                                                          T("General.Dropdown.Option:Low"),
-                                                          T("General.Dropdown.Option:Medium"),
-                                                          T("General.Dropdown.Option:High"),
-                                                          T("General.Dropdown.Option:Very high"),
-                                                      },
-                                       defaultSelection: (int)Options.simulationAccuracy,
-                                       eventCallback: OnSimulationAccuracyChanged) as UIDropDown;
+                                              text: T("General.Dropdown:Simulation accuracy") + ":",
+                                              options: simPrecisionOptions,
+                                              defaultSelection: (int)Options.simulationAccuracy,
+                                              eventCallback: OnSimulationAccuracyChanged) as UIDropDown;
 
             _instantEffectsToggle = simGroup.AddCheckbox(
                                        text: T("General.Checkbox:Apply AI changes right away"),
