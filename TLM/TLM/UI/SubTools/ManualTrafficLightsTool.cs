@@ -1031,12 +1031,12 @@ namespace TrafficManager.UI.SubTools {
             if (SelectedNodeId == 0) {
                 // Select mode
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("ManualTL.Mode:Select")));
+                items.Add(new Label(localizedText: T("ManualTL.Mode:Select")));
                 OnscreenDisplay.Display(items);
             } else {
                 // Modify traffic light settings
                 var items = new List<OsdItem>();
-                items.Add(new ModeDescription(localizedText: T("ManualTL.Mode:Edit")));
+                items.Add(new Label(localizedText: T("ManualTL.Mode:Edit")));
                 items.Add(OnscreenDisplay.RightClick_LeaveNode());
                 OnscreenDisplay.Display(items);
             }

@@ -63,22 +63,22 @@
                                      : translation.Get("Editing speed limit overrides for segments")));
                 sb.Append(".\n");
 
-                //--------------------------
-                // Keyboard modifier hints
-                //--------------------------
-                if (!editDefaults) {
-                    // In defaults and lanes mode Shift is not working
-                    sb.Append(translation.ColorizeKeybind("UI.Key:Shift edit multiple"));
-                    sb.Append(".\n");
-                }
-
-                sb.Append(editDefaults
-                              ? translation.ColorizeKeybind("UI.Key:Alt show overrides")
-                              : translation.ColorizeKeybind("UI.Key:Alt show defaults"));
-                sb.Append(".\n");
-
-                sb.Append(translation.ColorizeKeybind("UI.Key:PageUp/PageDown switch underground"));
-                sb.Append(". ");
+                // //--------------------------
+                // // Keyboard modifier hints
+                // //--------------------------
+                // if (!editDefaults) {
+                //     // In defaults and lanes mode Shift is not working
+                //     sb.Append(translation.ColorizeKeybind("UI.Key:Shift edit multiple"));
+                //     sb.Append(".\n");
+                // }
+                //
+                // sb.Append(editDefaults
+                //               ? translation.ColorizeKeybind("UI.Key:Alt show overrides")
+                //               : translation.ColorizeKeybind("UI.Key:Alt show defaults"));
+                // sb.Append(".\n");
+                //
+                // sb.Append(translation.ColorizeKeybind("UI.Key:PageUp/PageDown switch underground"));
+                // sb.Append(". ");
 
                 this.ModeDescriptionLabel.text = sb.ToString();
                 UResizer.UpdateControl(this);

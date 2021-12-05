@@ -33,7 +33,7 @@
 
                 this.ResizeFunction(ButtonpanelResizeFn);
 
-                Vector2 buttonSize = new Vector2(40f, 40f);
+                Vector2 buttonSize = new Vector2(50f, 50f);
                 UITextureAtlas uiAtlas = window.GetUiAtlas();
                 LookupTable translation = Translation.SpeedLimits;
 
@@ -67,7 +67,7 @@
                     text: string.Empty,
                     tooltip: translation.Get("Tooltip:Edit lane speed limits"),
                     size: buttonSize,
-                    stack: UStackMode.Below);
+                    stack: UStackMode.ToTheRight);
                 this.LaneModeButton.atlas = uiAtlas;
                 // Note the atlas is loaded before this skin is created in window.GetUiAtlas()
                 this.LaneModeButton.Skin = ButtonSkin
@@ -87,7 +87,7 @@
                     text: string.Empty,
                     tooltip: translation.Get("Tooltip:Default speed limits per road type"),
                     size: buttonSize,
-                    stack: UStackMode.Below);
+                    stack: UStackMode.NewRowBelow);
                 this.DefaultsModeButton.atlas = uiAtlas;
 
                 // Note the atlas is loaded before this skin is created in window.GetUiAtlas()
@@ -112,7 +112,7 @@
                                  ? translation.Get("Miles per hour")
                                  : translation.Get("Kilometers per hour"),
                     size: buttonSize,
-                    stack: UStackMode.Below);
+                    stack: UStackMode.ToTheRight);
                 this.ToggleMphButton.atlas = uiAtlas;
 
                 // Note the atlas is loaded before this skin is created in window.GetUiAtlas()

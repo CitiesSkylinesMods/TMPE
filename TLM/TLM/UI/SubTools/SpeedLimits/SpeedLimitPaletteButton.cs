@@ -70,7 +70,7 @@
             } else
             if (this.IsUnlimited()) {
                 this.ColorizeAllStates(Color.red); // Red for special buttons, when active
-                this.textScale = 2.4f * UIScaler.UIScale; // Even bigger than X
+                this.textScale = 2.8f * UIScaler.UIScale; // Even bigger than X
             } else {
                 // Blue for speed buttons, when active
                 this.ColorizeAllStates(new Color32(0, 128, 255, 255));
@@ -91,9 +91,9 @@
         public void UpdateSpeedlimitButton_Inactive() {
             // Special values (reset and default do not become larger)
             if (this.IsResetToDefault()) {
-                this.textScale = 1.2f * UIScaler.UIScale; // Bigger
+                this.textScale = 1.6f * UIScaler.UIScale; // Bigger
             } else if (this.IsUnlimited()) {
-                this.textScale = 2.0f * UIScaler.UIScale; // Even bigger than X
+                this.textScale = 2.4f * UIScaler.UIScale; // Even bigger than X
             } else {
                 this.textScale = UIScaler.UIScale;
 
