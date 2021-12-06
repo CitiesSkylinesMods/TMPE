@@ -75,7 +75,7 @@ namespace TrafficManager.UI {
         public const float DEBUG_CLOSE_LOD = 300f;
 
         /// <summary>Square of the distance, where overlays are not rendered.</summary>
-        public const float MAX_OVERLAY_DISTANCE_SQR = 450f * 450f;
+        public const float MAX_OVERLAY_DISTANCE_SQR = 600f * 600f;
 
         private IDictionary<ToolMode, LegacySubTool> legacySubTools_;
 

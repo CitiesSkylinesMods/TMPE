@@ -192,31 +192,13 @@
                     break;
                 case SetSpeedLimitTarget.LaneDefault:
                     // TODO: The speed limit manager only supports default speed limit overrides per road type, not per lane
-                    SetDefaultSpeedLimit(segmentId, netInfo, action);
+                    OverlaySegmentSpeedlimitHandle.SetDefaultSpeedLimit(segmentId, netInfo, action);
                     break;
                 default:
                     Log.Error(
                         $"Target for LANE speed handle click is not supported {nameof(target)}");
                     throw new NotSupportedException();
             }
-        }
-
-        internal static void SetDefaultSpeedLimit(ushort segmentId, NetInfo netInfo, SetSpeedLimitAction action) {
-            if (action.Type != SetSpeedLimitAction.ActionType.SetOverride) {
-                // Do nothing
-                return;
-            }
-
-            bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
-            string overrideStr = action.GuardedValue.Override.FormatStr(showMph);
-            Log._Debug(
-                $"SpeedLimitManager: Setting default speed limit for road segment {segmentId} " +
-                $"to {overrideStr}");
-
-            // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
-            SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(
-                info: netInfo,
-                customSpeedLimit: action.GuardedValue.Override.GameUnits);
         }
     } // end struct
 } // end namespace

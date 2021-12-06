@@ -175,7 +175,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         }
 
         private void UpdateCursorTooltip() {
-            this.Window.cursorTooltip_.SetTooltip(this.SelectedAction.ToString());
+            this.Window.cursorTooltip_.SetTooltip(t: this.SelectedAction.ToString(),
+                                                  show: this.GetTooltipVisibility());
         }
 
         public override void DeactivateTool() {
@@ -209,6 +210,11 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             // Draw the clickable speed limit signs
             this.overlay_.ShowSigns_GUI(args: this.overlayDrawArgs_);
+            this.Window.cursorTooltip_.isVisible = this.GetTooltipVisibility();
+        }
+
+        private bool GetTooltipVisibility() {
+            return !this.Window.containsMouse && !ModUI.Instance.MainMenu.containsMouse;
         }
 
         /// <summary>Copies important values for rendering the overlay into its args struct.</summary>
@@ -352,7 +358,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
         /// <summary>When speed palette button clicked, touch all buttons forcing them to refresh.</summary>
         public void OnPaletteButtonClicked(SetSpeedLimitAction action) {
             this.SelectedAction = action;
-            this.Window.cursorTooltip_.SetTooltip(action.ToString());
+            this.Window.cursorTooltip_.SetTooltip(action.ToString(), show: this.GetTooltipVisibility());
 
             // Deactivate all palette buttons and highlight one
             this.Window.UpdatePaletteButtonsOnClick();

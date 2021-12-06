@@ -16,14 +16,13 @@
             this.ContributeToBoundingBox(false);
         }
 
-        public void SetTooltip([CanBeNull]
-                               string t = null) {
-            if (string.IsNullOrEmpty(t)) {
-                this.text = string.Empty;
-                this.Hide();
-            } else {
-                this.text = t;
+        public void SetTooltip([CanBeNull] string t, bool show) {
+            this.text = string.IsNullOrEmpty(t) ? string.Empty : t;
+
+            if (show) {
                 this.Show();
+            } else {
+                this.Hide();
             }
         }
 
