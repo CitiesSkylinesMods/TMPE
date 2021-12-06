@@ -2,6 +2,7 @@
     using System;
     using ColossalFramework;
     using CSUtil.Commons;
+    using TrafficManager.API.Traffic.Data;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
     using TrafficManager.Util;
@@ -110,13 +111,34 @@
                     SpeedLimitManager.Instance.SetSegmentSpeedLimit(segmentId, finalDir, action);
                     break;
                 case SetSpeedLimitTarget.SegmentDefault:
+                case SetSpeedLimitTarget.LaneDefault:
                     // SpeedLimitManager.Instance.FixCurrentSpeedLimits(netInfo);
-                    OverlayLaneSpeedlimitHandle.SetDefaultSpeedLimit(segmentId, netInfo, action);
+                    SetDefaultSpeedLimit(segmentId, netInfo, action);
                     break;
                 default:
                     Log.Error(
                         $"Target for SEGMENT speed handle click is not supported {nameof(target)}");
                     throw new NotSupportedException();
+            }
+        }
+
+        internal static void SetDefaultSpeedLimit(ushort segmentId, NetInfo netInfo, SetSpeedLimitAction action) {
+            switch (action.Type) {
+                case SetSpeedLimitAction.ActionType.SetOverride:
+                case SetSpeedLimitAction.ActionType.Unlimited:
+                    SpeedValue value = action.GuardedValue.Override;
+                    bool displayMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+                    Log.Info($"Setting speed limit for netinfo '{netInfo.name}' seg={segmentId} to={value.FormatStr(displayMph)}");
+                    SpeedLimitManager.Instance.SetCustomNetInfoSpeedLimit(
+                        info: netInfo,
+                        customSpeedLimit: value.GameUnits);
+                    break;
+                case SetSpeedLimitAction.ActionType.ResetToDefault:
+                    Log.Info($"Setting default speed limit for netinfo '{netInfo.name}' seg={segmentId}");
+                    SpeedLimitManager.Instance.ResetCustomDefaultSpeedlimit(netInfo.name);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
     } // end struct

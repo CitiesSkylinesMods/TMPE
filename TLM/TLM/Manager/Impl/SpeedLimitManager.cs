@@ -532,6 +532,12 @@ namespace TrafficManager.Manager.Impl {
             return true;
         }
 
+        public void ResetCustomDefaultSpeedlimit([NotNull] string netinfoName) {
+            if (this.customLaneSpeedLimitByNetInfoName_.ContainsKey(netinfoName)) {
+                this.customLaneSpeedLimitByNetInfoName_.Remove(netinfoName);
+            }
+        }
+
         /// <summary>Sets speed limit for all configurable lanes.</summary>
         /// <param name="action">Speed limit in game units, or null to restore defaults.</param>
         /// <returns>

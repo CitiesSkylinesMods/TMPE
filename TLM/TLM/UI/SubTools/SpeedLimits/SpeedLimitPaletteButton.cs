@@ -1,5 +1,7 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
+    using System;
     using ColossalFramework.UI;
+    using TrafficManager.API.Util;
     using TrafficManager.State;
     using TrafficManager.U;
     using UnityEngine;
@@ -10,7 +12,10 @@
     /// The palette buttons only carry the speed value, but the intent where the value goes
     /// (override for segment of default for road type) is defined by the other window buttons.
     /// </summary>
-    internal class SpeedLimitPaletteButton : UButton {
+    internal class SpeedLimitPaletteButton
+        : UButton,
+          IObserver<ModUI.EventPublishers.UIScaleNotification>
+    {
         /// <summary>Button width if it contains value less than 100 and is not selected in the palette.</summary>
         public const float DEFAULT_WIDTH = 40f;
 
@@ -31,17 +36,21 @@
         /// <summary>Label below the speed limit button displaying alternate unit.</summary>
         public ULabel AltUnitsLabel;
 
+        private IDisposable uiScaleChangeUnsubscriber_ = null;
+
+        public override void Awake() {
+            if (this.uiScaleChangeUnsubscriber_ == null) {
+                this.uiScaleChangeUnsubscriber_ = ModUI.Instance.Events.UiScale.Subscribe(this);
+            }
+            base.Awake();
+        }
+
         protected override void OnClick(UIMouseEventParameter p) {
             base.OnClick(p);
 
             // Tell the parent to update all buttons this will unmark all inactive buttons and
             // mark one which is active. The call turns back here to this.UpdateSpeedlimitButton()
             this.ParentTool.OnPaletteButtonClicked(this.AssignedAction);
-        }
-
-        private bool IsSpecialSpeedValue() {
-            return this.AssignedAction.Type == SetSpeedLimitAction.ActionType.Unlimited
-                   || this.AssignedAction.Type == SetSpeedLimitAction.ActionType.ResetToDefault;
         }
 
         private bool IsResetToDefault() {
@@ -113,6 +122,18 @@
 
         protected override bool IsActive() {
             return this.AssignedAction.NearlyEqual(this.ParentTool.SelectedAction);
+        }
+
+        public void OnUpdate(ModUI.EventPublishers.UIScaleNotification subject) {
+            this.UpdateSpeedlimitButton();
+            this.Invalidate();
+        }
+
+        public override void OnDestroy() {
+            if (this.uiScaleChangeUnsubscriber_ != null) {
+                this.uiScaleChangeUnsubscriber_.Dispose();
+            }
+            base.OnDestroy();
         }
     }
 }

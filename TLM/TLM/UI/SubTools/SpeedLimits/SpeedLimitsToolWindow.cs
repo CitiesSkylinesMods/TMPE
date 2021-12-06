@@ -116,8 +116,6 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 parent: this,
                 t: unitTitle,
                 stack: UStackMode.Below);
-            this.windowTitleLabel_.autoHeight = true;
-            this.windowTitleLabel_.autoSize = false;
 
             this.dragHandle_ = this.CreateDragHandle();
 
@@ -146,6 +144,9 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 // Drag handle is manually resized to the label width in OnAfterResizerUpdate.
                 this.dragHandle_.size = Vector2.one;
             }
+
+            // shrink title label to allow window to resize down. After resize its set back to full width
+            this.windowTitleLabel_.width = 100;
         }
 
         /// <summary>Called by UResizer for every control to be 'resized'.</summary>
@@ -158,8 +159,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                     window: this,
                     alwaysVisible: windowTitleLabel_);
             }
-
-            this.windowTitleLabel_.width = this.width - (2.0f * UConst.UIPADDING);
+            this.dragHandle_.size = new Vector2(this.width - (2 * UConst.UIPADDING), this.windowTitleLabel_.height);
         }
 
         /// <summary>Create mode buttons panel on the left side.</summary>
