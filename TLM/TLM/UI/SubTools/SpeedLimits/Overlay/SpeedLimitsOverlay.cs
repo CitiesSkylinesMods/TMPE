@@ -566,11 +566,11 @@
                     squareSignRenderer.Reset(
                         screenPos,
                         size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
-                    squareSignRenderer.DrawLargeTexture(SpeedLimitTextures.NoOverride);
-                    squareSignRenderer.DrawSmallTexture_BottomRight(
-                        SignRenderer.ChooseTexture(
-                            speedlimit: defaultSpeedLimit,
-                            textureSource: SpeedLimitTextures.RoadDefaults));
+                    Texture2D chosenTexture = SignRenderer.ChooseTexture(
+                        speedlimit: defaultSpeedLimit,
+                        textureSource: SpeedLimitTextures.RoadDefaults);
+                    squareSignRenderer.DrawLargeTexture(chosenTexture);
+                    // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
                 } else {
                     signRenderer.DrawLargeTexture(
                         speedlimit: drawSpeedlimit,
