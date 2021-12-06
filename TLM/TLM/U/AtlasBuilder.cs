@@ -54,7 +54,7 @@
 
             // If is NOT the same as UI default, means the atlas is already loaded (return cached)
             if (!System.Object.ReferenceEquals(foundAtlas, UIView.GetAView().defaultAtlas)) {
-                return foundAtlas;
+                UnityEngine.Object.Destroy(foundAtlas);
             }
 
             return TextureUtil.CreateAtlas(
