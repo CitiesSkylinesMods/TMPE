@@ -539,7 +539,7 @@
             // Render override if interactive, or if readonly info layer and override exists
             if (drawEnv.drawDefaults_) {
                 //-------------------------------------
-                // Draw default speed limit (blue sign)
+                // Draw default blue speed limit
                 //-------------------------------------
                 squareSignRenderer.Reset(
                     screenPos,
@@ -578,6 +578,9 @@
             }
 
             if (segment.IsBothEndsUnderground()) {
+                //-----------------------
+                // Draw small arrow down
+                //-----------------------
                 signRenderer.DrawSmallTexture_TopLeft(RoadUI.Underground);
             }
 
@@ -729,15 +732,21 @@
                         overrideSpeedlimit.OverrideValue.Value.Equals(
                             overrideSpeedlimit.DefaultValue.Value)))
                 {
+                    //-------------------------------------
+                    // Draw default blue speed limit
+                    //-------------------------------------
                     squareSignRenderer.Reset(
                         screenPos,
                         size: size * SpeedLimitTextures.DefaultSpeedlimitsAspectRatio());
-                    squareSignRenderer.DrawLargeTexture(SpeedLimitTextures.NoOverride);
-                    squareSignRenderer.DrawSmallTexture_BottomRight(
-                        SignRenderer.ChooseTexture(
-                            speedlimit: overrideSpeedlimit.DefaultValue,
-                            theme: SpeedLimitTextures.RoadDefaults));
+                    Texture2D chosenTexture = SignRenderer.ChooseTexture(
+                        speedlimit: overrideSpeedlimit.DefaultValue,
+                        theme: SpeedLimitTextures.RoadDefaults);
+                    squareSignRenderer.DrawLargeTexture(chosenTexture);
+                    // squareSignRenderer.DrawSmallTexture_BottomRight(chosenTexture);
                 } else {
+                    //-------------------------------------
+                    // Draw nice override
+                    //-------------------------------------
                     signRenderer.DrawLargeTexture(
                         speedlimit: overrideSpeedlimit.OverrideValue.Value,
                         theme: drawEnv.largeSignsTextures_);
@@ -761,6 +770,9 @@
                 }
 
                 if (segment.IsBothEndsUnderground()) {
+                    //-------------------------------------
+                    // Draw arrow down
+                    //-------------------------------------
                     signRenderer.DrawSmallTexture_TopLeft(RoadUI.Underground);
                 }
 
