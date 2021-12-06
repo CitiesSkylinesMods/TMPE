@@ -5,6 +5,7 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
     using TrafficManager.API.Util;
     using TrafficManager.Manager.Impl;
     using TrafficManager.State;
+    using TrafficManager.State.Keybinds;
     using TrafficManager.U;
     using TrafficManager.U.Autosize;
     using TrafficManager.UI.SubTools.PrioritySigns;
@@ -48,8 +49,8 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
         /// <summary>Whether limits per lane are to be shown.</summary>
         /// <returns>Gets <see cref="showLimitsPerLane_"/> but also holding Ctrl would invert it.</returns>
-        private bool GetShowLimitsPerLane() => this.speedlimitsToolMode_ == SpeedlimitsToolMode.Lanes;
-        //^ Shortcuts.ControlIsPressed;
+        private bool GetShowLimitsPerLane() =>
+            this.speedlimitsToolMode_ == SpeedlimitsToolMode.Lanes ^ Shortcuts.ControlIsPressed;
 
         /// <summary>Will edit entire road between two junctions by holding Shift.</summary>
         private bool GetMultiSegmentMode() => Shortcuts.ShiftIsPressed;
@@ -210,7 +211,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
 
             // Draw the clickable speed limit signs
             this.overlay_.ShowSigns_GUI(args: this.overlayDrawArgs_);
-            this.Window.cursorTooltip_.isVisible = this.GetTooltipVisibility();
+
+            if (this.Window.cursorTooltip_ != null) {
+                this.Window.cursorTooltip_.isVisible = this.GetTooltipVisibility();
+            }
         }
 
         private bool GetTooltipVisibility() {
@@ -235,7 +239,19 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             this.overlayDrawArgs_.Mouse = this.GetMouseForOverlay();
             this.overlayDrawArgs_.IsInteractive = interactive;
             this.overlayDrawArgs_.MultiSegmentMode = this.GetMultiSegmentMode();
-            this.overlayDrawArgs_.ToolMode = this.speedlimitsToolMode_;
+
+            var modeWithModifiers = this.speedlimitsToolMode_ switch {
+                SpeedlimitsToolMode.Segments => Shortcuts.ControlIsPressed
+                                                    ? SpeedlimitsToolMode.Lanes
+                                                    : SpeedlimitsToolMode.Segments,
+                SpeedlimitsToolMode.Lanes => Shortcuts.ControlIsPressed
+                                                 ? SpeedlimitsToolMode.Segments
+                                                 : SpeedlimitsToolMode.Lanes,
+                SpeedlimitsToolMode.Defaults => SpeedlimitsToolMode.Defaults,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+            this.overlayDrawArgs_.ToolMode = modeWithModifiers;
+
             this.overlayDrawArgs_.ShowAltMode = interactive && Shortcuts.AltIsPressed;
         }
 
@@ -314,12 +330,10 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
             this.overlayDrawArgs_.ClearHovered();
         }
 
-        /// <inheritdoc/>
         public override void OnToolRightClick() {
             ModUI.Instance.MainMenu.ClickToolButton(ToolMode.SpeedLimits); // deactivate
         }
 
-        /// <inheritdoc/>
         public override void UpdateEveryFrame() {
         }
 
@@ -339,8 +353,19 @@ namespace TrafficManager.UI.SubTools.SpeedLimits {
                 new MainMenu.OSD.HoldModifier(
                     shift: true,
                     localizedText: T("UI.Key:Shift edit multiple")),
+                new MainMenu.OSD.HoldModifier(
+                    ctrl: true,
+                    localizedText: T("UI.Key:Ctrl temporarily toggle between lanes and segments")),
                 new MainMenu.OSD.Label(
                     localizedText: ColorKey("UI.Key:PageUp/PageDown switch underground")),
+                new MainMenu.OSD.Label(
+                    localizedText: ColorKey("UI.Key:Unlimited; Default; Select")),
+                new MainMenu.OSD.Shortcut(
+                    keybindSetting: KeybindSettingsBase.SpeedLimitsLess,
+                    localizedText: Translation.Options.Get("Keybind.SpeedLimits:Decrease selected speed")),
+                new MainMenu.OSD.Shortcut(
+                    keybindSetting: KeybindSettingsBase.SpeedLimitsMore,
+                    localizedText: Translation.Options.Get("Keybind.SpeedLimits:Increase selected speed")),
             };
             MainMenu.OSD.OnscreenDisplay.Display(items: items);
         }

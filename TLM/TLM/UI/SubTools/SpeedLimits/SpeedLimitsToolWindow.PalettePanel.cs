@@ -1,6 +1,7 @@
 ﻿namespace TrafficManager.UI.SubTools.SpeedLimits {
     using System.Collections.Generic;
     using ColossalFramework.UI;
+    using CSUtil.Commons;
     using TrafficManager.API.Traffic.Data;
     using TrafficManager.State;
     using TrafficManager.U;
@@ -8,18 +9,24 @@
     using TrafficManager.UI.Textures;
     using TrafficManager.Util;
     using UnityEngine;
-    using Debug = System.Diagnostics.Debug;
 
     /// <summary>Code handling speed palette panel.</summary>
     internal partial class SpeedLimitsToolWindow {
         internal class PalettePanel : UPanel {
             internal readonly List<SpeedLimitPaletteButton> PaletteButtons = new();
+            private SpeedLimitsTool parentTool_;
+
+            // Button quick access to use with keyboard shortcuts
+            internal SpeedLimitPaletteButton resetToDefaultButton_;
+            internal SpeedLimitPaletteButton unlimitedButton_;
+            internal Dictionary<int, SpeedLimitPaletteButton> buttonsByNumber_;
 
             /// <summary>Create speeds palette based on the current options choices.</summary>
             /// <param name="window">Containing <see cref="SpeedLimitsToolWindow"/>.</param>
             /// <param name="builder">The UI builder to use.</param>
             /// <param name="parentTool">The tool object.</param>
             public void SetupControls(SpeedLimitsToolWindow window, UBuilder builder, SpeedLimitsTool parentTool) {
+                this.parentTool_ = parentTool;
                 this.name = GAMEOBJECT_NAME + "_PalettePanel";
                 this.position = Vector3.zero;
                 this.SetPadding(UPadding.Default);
@@ -38,10 +45,12 @@
                 //-----------------------------------------
                 // the Current Selected Speed is highlighted
                 List<SetSpeedLimitAction> actions = new();
+
                 actions.Add(SetSpeedLimitAction.Unlimited()); // add: Unlimited
                 actions.Add(SetSpeedLimitAction.ResetToDefault()); // add: Default
                 actions.AddRange(PaletteGenerator.AllSpeedLimits(SpeedUnit.CurrentlyConfigured));
 
+                this.buttonsByNumber_ = new();
                 this.PaletteButtons.Clear();
 
                 foreach (SetSpeedLimitAction action in actions) {
@@ -52,6 +61,18 @@
                         showMph: showMph,
                         actionOnClick: action);
                     this.PaletteButtons.Add(nextButton);
+
+                    // If this is a numbered button, and its a multiple of 10...
+                    if (action.Type == SetSpeedLimitAction.ActionType.SetOverride) {
+                        int number = (int)(showMph
+                                               ? action.GuardedValue.Override.GetMph()
+                                               : action.GuardedValue.Override.GetKmph());
+                        this.buttonsByNumber_.Add(number, nextButton);
+                    } else if (action.Type == SetSpeedLimitAction.ActionType.Unlimited) {
+                        this.unlimitedButton_ = nextButton;
+                    } else if (action.Type == SetSpeedLimitAction.ActionType.ResetToDefault) {
+                        this.resetToDefaultButton_ = nextButton;
+                    }
                 }
             }
 
@@ -183,6 +204,36 @@
                         SpeedLimitPaletteButton.DEFAULT_WIDTH,
                         SpeedLimitPaletteButton.DEFAULT_HEIGHT));
                 return button;
+            }
+
+            public void TryClick(int speedNumber) {
+                if (this.buttonsByNumber_.ContainsKey(speedNumber)) {
+                    this.buttonsByNumber_[speedNumber].SimulateClick();
+                }
+            }
+
+            public void TryDecreaseSpeed() {
+                if (this.parentTool_.SelectedAction.Type != SetSpeedLimitAction.ActionType.SetOverride) {
+                    return;
+                }
+                bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+                int number = (int)(showMph
+                                       ? this.parentTool_.SelectedAction.GuardedValue.Override.GetMph()
+                                       : this.parentTool_.SelectedAction.GuardedValue.Override.GetKmph());
+                int step = showMph ? SpeedLimitTextures.MPH_STEP : SpeedLimitTextures.KMPH_STEP;
+                TryClick(number - step);
+            }
+
+            public void TryIncreaseSpeed() {
+                if (this.parentTool_.SelectedAction.Type != SetSpeedLimitAction.ActionType.SetOverride) {
+                    return;
+                }
+                bool showMph = GlobalConfig.Instance.Main.DisplaySpeedLimitsMph;
+                int number = (int)(showMph
+                                       ? this.parentTool_.SelectedAction.GuardedValue.Override.GetMph()
+                                       : this.parentTool_.SelectedAction.GuardedValue.Override.GetKmph());
+                int step = showMph ? SpeedLimitTextures.MPH_STEP : SpeedLimitTextures.KMPH_STEP;
+                TryClick(number + step);
             }
         }
     }
