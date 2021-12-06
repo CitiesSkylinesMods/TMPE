@@ -54,7 +54,13 @@
 
             // If is NOT the same as UI default, means the atlas is already loaded (return cached)
             if (!System.Object.ReferenceEquals(foundAtlas, UIView.GetAView().defaultAtlas)) {
+#if DEBUG
+                // In debug build rebuild atlas, this will be slower but allows the developer to see
+                // the updated GUI textures.
                 UnityEngine.Object.Destroy(foundAtlas);
+#else
+                return foundAtlas;
+#endif
             }
 
             return TextureUtil.CreateAtlas(
